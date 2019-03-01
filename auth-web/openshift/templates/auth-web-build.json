@@ -1,0 +1,51 @@
+{
+    "kind": "List",
+    "apiVersion": "v1",
+    "metadata": {},
+    "items": [
+        {
+            "apiVersion": "build.openshift.io/v1",
+            "kind": "BuildConfig",
+            "metadata": {
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "auth-web-pipeline",
+                    "name": "auth-web-pipeline",
+                    "template": "auth-web-pipeline"
+                },
+                "name": "auth-web-pipeline"
+            },
+            "spec": {
+                "output": {},
+                "postCommit": {},
+                "resources": {},
+                "runPolicy": "Parallel",
+                "source": {
+                    "contextDir": "jenkins/auth-web",
+                    "git": {
+                        "ref": "master",
+                        "uri": "https://github.com/saravankumarpa/sbc-auth.git"
+                    },
+                    "type": "Git"
+                },
+                "strategy": {
+                    "jenkinsPipelineStrategy": {
+                        "jenkinsfilePath": "Jenkinsfile"
+                    },
+                    "type": "JenkinsPipeline"
+                },
+                "triggers": [
+                    {
+                        "github": {
+                            "secret": "AKMQmADJhVDxV7UGqo20Sb62FAR4q0Ye80sTYKIE"
+                        },
+                        "type": "GitHub"
+                    }
+                ]
+            },
+            "status": {
+                "lastVersion": 0
+            }
+        }
+    ]
+}
