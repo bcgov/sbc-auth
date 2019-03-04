@@ -1,4 +1,4 @@
-export PROJECT_NAMESPACE="l4ygcl"
+export PROJECT_NAMESPACE="1rdehl"
 export PROJECT_OS_DIR=${PROJECT_OS_DIR:-../../openshift}
 
 export GIT_URI="https://github.com/saravankumarpa/sbc-auth.git"
