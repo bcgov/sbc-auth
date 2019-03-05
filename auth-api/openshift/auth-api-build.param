@@ -3,7 +3,7 @@
 # Component: tob-api
 # Template File: templates/django/django-build.json
 #=========================================================
-NAME=web-api
+NAME=auth-api
 GIT_REPO_URL=https://github.com/saravankumarpa/sbc-auth.git
 GIT_REF=master
 SOURCE_CONTEXT_DIR=auth-api
