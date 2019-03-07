@@ -1,0 +1,120 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "auth-web",
+        "creationTimestamp": null
+    },
+    "objects": [
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "auth-web",
+                "generation": 1,
+                "creationTimestamp": null,
+                "labels": {
+                    "app": "auth-web"
+                },
+                "annotations": {
+                    "openshift.io/generated-by": "OpenShiftWebConsole"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Rolling",
+                    "rollingParams": {
+                        "updatePeriodSeconds": 1,
+                        "intervalSeconds": 1,
+                        "timeoutSeconds": 600,
+                        "maxUnavailable": "25%",
+                        "maxSurge": "25%"
+                    },
+                    "resources": {},
+                    "activeDeadlineSeconds": 21600
+                },
+                "triggers": [
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "auth-web"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "1rdehl-tools",
+                                "name": "auth-web:latest"
+                            }
+                        }
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ],
+                "replicas": 1,
+                "test": false,
+                "selector": {
+                    "app": "auth-web",
+                    "deploymentconfig": "auth-web"
+                },
+                "template": {
+                    "metadata": {
+                        "creationTimestamp": null,
+                        "labels": {
+                            "app": "auth-web",
+                            "deploymentconfig": "auth-web"
+                        },
+                        "annotations": {
+                            "openshift.io/generated-by": "OpenShiftWebConsole"
+                        }
+                    },
+                    "spec": {
+                        "containers": [
+                            {
+                                "name": "auth-web",
+                                "image": "",
+                                "args": [
+                                    "/tmp/scripts/run"
+                                ],
+                                "ports": [
+                                    {
+                                        "containerPort": 2019,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+                                "envFrom": [],
+                                "env": [],
+                                "resources": {},
+                                "volumeMounts": [
+                                    {
+                                        "name": "web-caddy-config",
+                                        "readOnly": true,
+                                        "mountPath": "/etc/Caddyfile",
+                                        "subPath": "Caddyfile"
+                                    }
+                                ],
+                                "terminationMessagePath": "/dev/termination-log",
+                                "terminationMessagePolicy": "File",
+                                "imagePullPolicy": "Always"
+                            }
+                        ],
+                        "restartPolicy": "Always",
+                        "terminationGracePeriodSeconds": 30,
+                        "dnsPolicy": "ClusterFirst",
+                        "securityContext": {},
+                        "schedulerName": "default-scheduler"
+                    }
+                }
+            },
+            "status": {
+                "latestVersion": 0,
+                "observedGeneration": 0,
+                "replicas": 0,
+                "updatedReplicas": 0,
+                "availableReplicas": 0,
+                "unavailableReplicas": 0
+            }
+        }
+    ]
+}
