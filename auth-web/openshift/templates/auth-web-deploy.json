@@ -44,7 +44,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "1rdehl-tools",
-                                "name": "auth-web:latest"
+                                "name": "auth-web-runtime:dev"
                             }
                         }
                     },
@@ -73,7 +73,6 @@
                         "containers": [
                             {
                                 "name": "auth-web",
-                                "image": "",
                                 "args": [
                                     "/tmp/scripts/run"
                                 ],
@@ -86,14 +85,6 @@
                                 "envFrom": [],
                                 "env": [],
                                 "resources": {},
-                                "volumeMounts": [
-                                    {
-                                        "name": "web-caddy-config",
-                                        "readOnly": true,
-                                        "mountPath": "/etc/Caddyfile",
-                                        "subPath": "Caddyfile"
-                                    }
-                                ],
                                 "terminationMessagePath": "/dev/termination-log",
                                 "terminationMessagePolicy": "File",
                                 "imagePullPolicy": "Always"
