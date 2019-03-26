@@ -1,0 +1,293 @@
+{
+	"info": {
+		"_postman_id": "1eb7ec9d-9b68-4b12-9ae5-82c0149c7b1e",
+		"name": "KeyCloak User Creation",
+		"description": "Endpoint samples to create an user using KeyCloak REST Admin API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create An User",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessToken",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0dmRUZFpmaEJoR0NENjRfSlZyRTNURjUzak1jeTZZUGZVaGhMYlVWWkRNIn0.eyJqdGkiOiIyN2FmYjQzMS04OWU0LTRmYjktYjNhNi02MmU2ODU2YzYxNjQiLCJleHAiOjE1NTM2Mjc2MzMsIm5iZiI6MCwiaWF0IjoxNTUzNjI3MzMzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbXktcmVhbG0iLCJhdWQiOiJteS1jbGllbnQiLCJzdWIiOiIzNDdlOTI5OC03NzFmLTRjZTMtYjhiNi1iMmRiNGE2MzNlODQiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJteS1jbGllbnQiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiJjMDU5M2Q0Zi0zYTliLTQzNWUtOWZlMi00MWRhOTk4ODUzYjQiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsibXktY2xpZW50Ijp7InJvbGVzIjpbInVtYV9wcm90ZWN0aW9uIl19LCJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sImNsaWVudEhvc3QiOiIxMjcuMC4wLjEiLCJjbGllbnRJZCI6Im15LWNsaWVudCIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1teS1jbGllbnQiLCJjbGllbnRBZGRyZXNzIjoiMTI3LjAuMC4xIiwiZW1haWwiOiJzZXJ2aWNlLWFjY291bnQtbXktY2xpZW50QHBsYWNlaG9sZGVyLm9yZyJ9.esBFjxdtzJ5essqUM_LrwIklvy3fDt65cvsc7PAVD7sfL6AMg6Ha5VKzXNlys55UDKGi26lPykM0YkwyAY43oilIIsgIgnvdFiF0gCX3pyblLEXTx2tnb3OaBorlF8AgI-EZxOn9tOtnCYwoeFGWribcWUcxJCIAJH7LXFbNNXDhu_G8ulOyE3AVlRBDzyRS7iSKazDYvIXXMsnsrUWjy8FkSUuTQd5F2CBVQN4X5-CblsH7WAI9PZbv2pcbGrxwI1lotkg9Ti0ouNmtdV8B7g198LiWdmFEGkFZW70EIKC5pFzq4xnVPYjoCFmyQLqHTvwiRgUPYt-mLGyL7zOMSQ",
+							"type": "string"
+						},
+						{
+							"key": "tokenType",
+							"value": "bearer",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0dmRUZFpmaEJoR0NENjRfSlZyRTNURjUzak1jeTZZUGZVaGhMYlVWWkRNIn0.eyJqdGkiOiI3MGI0ZWQzNi1iNWMwLTQxMjItYjlkOS0xMDg3OTNiYWJjYzgiLCJleHAiOjE1NTM2MjI4ODcsIm5iZiI6MCwiaWF0IjoxNTUzNjIyNTg3LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbXktcmVhbG0iLCJhdWQiOiJteS1jbGllbnQiLCJzdWIiOiIzNDdlOTI5OC03NzFmLTRjZTMtYjhiNi1iMmRiNGE2MzNlODQiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJteS1jbGllbnQiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiIxMjRkYTI5ZC0wYWNjLTRiZjctYWEwNy0wZTM4NWE0YTRlY2IiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsibXktY2xpZW50Ijp7InJvbGVzIjpbInVtYV9wcm90ZWN0aW9uIl19LCJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sImNsaWVudEhvc3QiOiIxMjcuMC4wLjEiLCJjbGllbnRJZCI6Im15LWNsaWVudCIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1teS1jbGllbnQiLCJjbGllbnRBZGRyZXNzIjoiMTI3LjAuMC4xIiwiZW1haWwiOiJzZXJ2aWNlLWFjY291bnQtbXktY2xpZW50QHBsYWNlaG9sZGVyLm9yZyJ9.k7yxI6VCsPJEk2YG254Qf2-L9NMHdgZ22wY7SXtcahcPSloPpG1Rc862BGhIrHClCd3F5DzeZHpFHgMVw2j6excDwdUhiad1yPKah8W8FHgguGF_I0bLjRxQoPLTD4ErzcUenbKkl2y7JEgVxX-fYIna4nPZCcQa2z9ye8qSX6xJ2hn7T3aoByAmljr5HYIiL1Ip1Ede7HYw1fGb3DzpV8qOKJmkd6E0ejpaCzjyM_vPl4OwlkWq_Pcu0ohAAnt-zRoxEA2m6cjz29a3k-VDXMiCD0J6DwAkyPLNybJoVYHdlOs2033FDrvszMaZIBMOQ9M7NG1l8nAt_mJSJGpHkQ",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"TEST1234\",\n    \"enabled\": true\n}"
+				},
+				"url": {
+					"raw": "http://{{base_url}}/auth/admin/realms/{{realm_name}}/users",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"users"
+					]
+				},
+				"description": "Create an user record using KeyCloak Rest Admin API"
+			},
+			"response": []
+		},
+		{
+			"name": "Get created user details",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessToken",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0dmRUZFpmaEJoR0NENjRfSlZyRTNURjUzak1jeTZZUGZVaGhMYlVWWkRNIn0.eyJqdGkiOiI3ZGFjMGFhYS03MWNlLTQwN2QtYWRhNS1mMDA0OTU4MTlhMGIiLCJleHAiOjE1NTM2Mjc2NzYsIm5iZiI6MCwiaWF0IjoxNTUzNjI3Mzc2LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbXktcmVhbG0iLCJhdWQiOiJteS1jbGllbnQiLCJzdWIiOiIzNDdlOTI5OC03NzFmLTRjZTMtYjhiNi1iMmRiNGE2MzNlODQiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJteS1jbGllbnQiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiIyZTI5MTU0MC1hNmJjLTQxNzAtYjZkYy05N2VjMzdlMzZlZGYiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsibXktY2xpZW50Ijp7InJvbGVzIjpbInVtYV9wcm90ZWN0aW9uIl19LCJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sImNsaWVudEhvc3QiOiIxMjcuMC4wLjEiLCJjbGllbnRJZCI6Im15LWNsaWVudCIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1teS1jbGllbnQiLCJjbGllbnRBZGRyZXNzIjoiMTI3LjAuMC4xIiwiZW1haWwiOiJzZXJ2aWNlLWFjY291bnQtbXktY2xpZW50QHBsYWNlaG9sZGVyLm9yZyJ9.Jwk5K11jWEs-2-SED7DK5EoLbISbeVOCCwXbMj2xXOI7z35qp2hhmQKwybHBuQxHaoTGGQORv6QdLMGxJCDLSkJtjGd1eiaiCs6DRZ1KfCR3knPcrL3KDuenOugqk1ypI2bn9UevAAwV4oFhCrnTik_J3thLo6q946vRWnjvcVPoIwlomA9dZO_qP0rOLDCPOz3zlSRr7J0ZmO4ttck-HufSVwIdH_Wa_xo1Q1Xlc3vndAORJeKdLys_DycEIvQPlNaKVhu2KZGJ6B3S4zyiKKQuLiMqE_8GtomJo7eTzkJiSkHqYxrqHb8IfjaHblRMFf429kJnguJaWEg687JPsQ",
+							"type": "string"
+						},
+						{
+							"key": "tokenType",
+							"value": "bearer",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0dmRUZFpmaEJoR0NENjRfSlZyRTNURjUzak1jeTZZUGZVaGhMYlVWWkRNIn0.eyJqdGkiOiJjMjBmYzVhOS01NjFkLTRjZWEtYTNmZC1kOGRlMzNkNjg0YzMiLCJleHAiOjE1NTM2MjQ5NDAsIm5iZiI6MCwiaWF0IjoxNTUzNjI0NjQwLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbXktcmVhbG0iLCJhdWQiOiJteS1jbGllbnQiLCJzdWIiOiIzNDdlOTI5OC03NzFmLTRjZTMtYjhiNi1iMmRiNGE2MzNlODQiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJteS1jbGllbnQiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiIyOGYwMjJkMy05YjAzLTRhOTAtYjA2Zi01NmEyNTk3MmFhYWEiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsibXktY2xpZW50Ijp7InJvbGVzIjpbInVtYV9wcm90ZWN0aW9uIl19LCJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sImNsaWVudEhvc3QiOiIxMjcuMC4wLjEiLCJjbGllbnRJZCI6Im15LWNsaWVudCIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1teS1jbGllbnQiLCJjbGllbnRBZGRyZXNzIjoiMTI3LjAuMC4xIiwiZW1haWwiOiJzZXJ2aWNlLWFjY291bnQtbXktY2xpZW50QHBsYWNlaG9sZGVyLm9yZyJ9.juXQ517GZIX93T_n7xFA30xM5xSwj7hXGkyNu43y57iVRJTKSLu7KQ-F3gfwsQFnJZPCbyaqy0gXM9bVD0QMqLUcZ9UbB4RK6HbHToRYzhqAwgAFbT_pjULwUWL_PWRkfWk-7MpbdKZiXcGY5cLBJHAFS3ik_bQt9B-wGCFQF0CM_QNzpU2QHMsOI8XkI6a_JbZOvZKq-B8QfWRZ4tavYAoK5EJVaZWGixgzvqVY31gYbpRV6QSjlj_NhdD6ALXwbQ3smPeD2NmXoOlrUkrSOnivGk18zOXAWLetuw_GAP0R-WP81G0GLh50T_bJDsGBryeDNA-deuuTsT3eIWb6aQ",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://{{base_url}}/auth/admin/realms/{{realm_name}}/users/f9d7be3c-e691-40c8-a5af-b49b2d81c659",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"users",
+						"f9d7be3c-e691-40c8-a5af-b49b2d81c659"
+					]
+				},
+				"description": "Get created user details from KeyCloak using Admin REST API"
+			},
+			"response": []
+		},
+		{
+			"name": "Setup temporary password",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessToken",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0dmRUZFpmaEJoR0NENjRfSlZyRTNURjUzak1jeTZZUGZVaGhMYlVWWkRNIn0.eyJqdGkiOiI3ZGFjMGFhYS03MWNlLTQwN2QtYWRhNS1mMDA0OTU4MTlhMGIiLCJleHAiOjE1NTM2Mjc2NzYsIm5iZiI6MCwiaWF0IjoxNTUzNjI3Mzc2LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbXktcmVhbG0iLCJhdWQiOiJteS1jbGllbnQiLCJzdWIiOiIzNDdlOTI5OC03NzFmLTRjZTMtYjhiNi1iMmRiNGE2MzNlODQiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJteS1jbGllbnQiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiIyZTI5MTU0MC1hNmJjLTQxNzAtYjZkYy05N2VjMzdlMzZlZGYiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsibXktY2xpZW50Ijp7InJvbGVzIjpbInVtYV9wcm90ZWN0aW9uIl19LCJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sImNsaWVudEhvc3QiOiIxMjcuMC4wLjEiLCJjbGllbnRJZCI6Im15LWNsaWVudCIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1teS1jbGllbnQiLCJjbGllbnRBZGRyZXNzIjoiMTI3LjAuMC4xIiwiZW1haWwiOiJzZXJ2aWNlLWFjY291bnQtbXktY2xpZW50QHBsYWNlaG9sZGVyLm9yZyJ9.Jwk5K11jWEs-2-SED7DK5EoLbISbeVOCCwXbMj2xXOI7z35qp2hhmQKwybHBuQxHaoTGGQORv6QdLMGxJCDLSkJtjGd1eiaiCs6DRZ1KfCR3knPcrL3KDuenOugqk1ypI2bn9UevAAwV4oFhCrnTik_J3thLo6q946vRWnjvcVPoIwlomA9dZO_qP0rOLDCPOz3zlSRr7J0ZmO4ttck-HufSVwIdH_Wa_xo1Q1Xlc3vndAORJeKdLys_DycEIvQPlNaKVhu2KZGJ6B3S4zyiKKQuLiMqE_8GtomJo7eTzkJiSkHqYxrqHb8IfjaHblRMFf429kJnguJaWEg687JPsQ",
+							"type": "string"
+						},
+						{
+							"key": "tokenType",
+							"value": "bearer",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"warning": "This is a duplicate header and will be overridden by the Authorization header generated by Postman.",
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0dmRUZFpmaEJoR0NENjRfSlZyRTNURjUzak1jeTZZUGZVaGhMYlVWWkRNIn0.eyJqdGkiOiJlMTNiZjkyNi1mYTcwLTQ2NTQtOWUwOS00OWQ3MWQxOWY3NzciLCJleHAiOjE1NTM2MjU3NDcsIm5iZiI6MCwiaWF0IjoxNTUzNjI1NDQ3LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbXktcmVhbG0iLCJhdWQiOiJteS1jbGllbnQiLCJzdWIiOiIzNDdlOTI5OC03NzFmLTRjZTMtYjhiNi1iMmRiNGE2MzNlODQiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJteS1jbGllbnQiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiI5YjM5ZTM1ZC02ZDAzLTQzOTEtOWJkOC1kOWE1YmE2YTk2NDciLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsibXktY2xpZW50Ijp7InJvbGVzIjpbInVtYV9wcm90ZWN0aW9uIl19LCJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sImNsaWVudEhvc3QiOiIxMjcuMC4wLjEiLCJjbGllbnRJZCI6Im15LWNsaWVudCIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1teS1jbGllbnQiLCJjbGllbnRBZGRyZXNzIjoiMTI3LjAuMC4xIiwiZW1haWwiOiJzZXJ2aWNlLWFjY291bnQtbXktY2xpZW50QHBsYWNlaG9sZGVyLm9yZyJ9.SxpusyisbmIU5viSfw0HmuhH0eUqdI7rtAT5Rl7HOntWKjgBcNf-MESM3mCi5Su8QDDNEwd4iHVKd7DCh_93-lO4qqSVjzmrY_Bcc-uxqHyL9fKfgBD64TYknXAtbmXBbrQMJEbMuJ5iudtgAZUGPuoFJQFMyfjiDqg8yij8_bCPQX539l5Bx05Iix_vyLJl9SNQz8f56WN1nTSvtimY2nLeE3DFhvciwWkQnXrwlibrhUtAHvC0SE1jHYO8Z2852N-xZKek1LePtH5o1-wVhpfkmD7CQO3Ua-tZJN5UvcfKhsn9PmKpBZHWtRgwfwt1ZEi2LLq-euiK8Ik1uZf_cg",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"type\": \"password\",\n    \"value\": \"12345\",\n    \"temporary\": false\n}"
+				},
+				"url": {
+					"raw": "http://{{base_url}}/auth/admin/realms/{{realm_name}}/users/f9d7be3c-e691-40c8-a5af-b49b2d81c659/reset-password",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"users",
+						"f9d7be3c-e691-40c8-a5af-b49b2d81c659",
+						"reset-password"
+					]
+				},
+				"description": "Update user details in KeyCloak using Admin REST API"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Token for realm",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "my-client",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "6120c084-7c0f-4e20-976d-9019cd7a9d44",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://{{base_url}}/auth/admin/realms/{{realm_name}}/protocol/openid-connect/token",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				},
+				"description": "Get a token for realm using client_credentials\n"
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Users from realm",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "accessToken",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0dmRUZFpmaEJoR0NENjRfSlZyRTNURjUzak1jeTZZUGZVaGhMYlVWWkRNIn0.eyJqdGkiOiIxOWI1ZTNiMS0xOWQ4LTQzNmQtYTBjZi0yNDk4MWM0NDUwNjQiLCJleHAiOjE1NTM2MjY4NDMsIm5iZiI6MCwiaWF0IjoxNTUzNjI2NTQzLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbXktcmVhbG0iLCJhdWQiOiJteS1jbGllbnQiLCJzdWIiOiIzNDdlOTI5OC03NzFmLTRjZTMtYjhiNi1iMmRiNGE2MzNlODQiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJteS1jbGllbnQiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiJmYWRjOTQ3Yy03ZmFmLTQzNGQtYmI3NS0wNzA0MGE1YjFhOTYiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsibXktY2xpZW50Ijp7InJvbGVzIjpbInVtYV9wcm90ZWN0aW9uIl19LCJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sImNsaWVudEhvc3QiOiIxMjcuMC4wLjEiLCJjbGllbnRJZCI6Im15LWNsaWVudCIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1teS1jbGllbnQiLCJjbGllbnRBZGRyZXNzIjoiMTI3LjAuMC4xIiwiZW1haWwiOiJzZXJ2aWNlLWFjY291bnQtbXktY2xpZW50QHBsYWNlaG9sZGVyLm9yZyJ9.PSACMD4AoFn0VnfomOdVj_okmzl93PuoM_McjDTmz3D-IP59eTTxHbXzyy6Y7hp31nfDqpMr0P1ikZzFfeDpXpZ4ZPzjaUtAMNPTVLaKOul4erY9LP2H1K0f4SvUvs_U7a__lsqpdPnXf3XwHb3fcTrhGOrLB_SiAGzhZUUbwbfmHsVHjlRbzRKYjoOn-CJd3H-8Yx7IVzdnRvp8xbZmpD_LrNbqAWe75rpJ9iEm9xC89tKvC1pH6gzd6aAzsKvWMT5K3Lcfy5RYFXV_OB6oUtyz7Ixl42FxEs3GIrfXrdVxm35VYVIfDS7DKY--tO76wQlyOs_PnQJfcccDGse8pw",
+							"type": "string"
+						},
+						{
+							"key": "tokenType",
+							"value": "bearer",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0dmRUZFpmaEJoR0NENjRfSlZyRTNURjUzak1jeTZZUGZVaGhMYlVWWkRNIn0.eyJqdGkiOiI3MGI0ZWQzNi1iNWMwLTQxMjItYjlkOS0xMDg3OTNiYWJjYzgiLCJleHAiOjE1NTM2MjI4ODcsIm5iZiI6MCwiaWF0IjoxNTUzNjIyNTg3LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbXktcmVhbG0iLCJhdWQiOiJteS1jbGllbnQiLCJzdWIiOiIzNDdlOTI5OC03NzFmLTRjZTMtYjhiNi1iMmRiNGE2MzNlODQiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJteS1jbGllbnQiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiIxMjRkYTI5ZC0wYWNjLTRiZjctYWEwNy0wZTM4NWE0YTRlY2IiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsibXktY2xpZW50Ijp7InJvbGVzIjpbInVtYV9wcm90ZWN0aW9uIl19LCJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sImNsaWVudEhvc3QiOiIxMjcuMC4wLjEiLCJjbGllbnRJZCI6Im15LWNsaWVudCIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1teS1jbGllbnQiLCJjbGllbnRBZGRyZXNzIjoiMTI3LjAuMC4xIiwiZW1haWwiOiJzZXJ2aWNlLWFjY291bnQtbXktY2xpZW50QHBsYWNlaG9sZGVyLm9yZyJ9.k7yxI6VCsPJEk2YG254Qf2-L9NMHdgZ22wY7SXtcahcPSloPpG1Rc862BGhIrHClCd3F5DzeZHpFHgMVw2j6excDwdUhiad1yPKah8W8FHgguGF_I0bLjRxQoPLTD4ErzcUenbKkl2y7JEgVxX-fYIna4nPZCcQa2z9ye8qSX6xJ2hn7T3aoByAmljr5HYIiL1Ip1Ede7HYw1fGb3DzpV8qOKJmkd6E0ejpaCzjyM_vPl4OwlkWq_Pcu0ohAAnt-zRoxEA2m6cjz29a3k-VDXMiCD0J6DwAkyPLNybJoVYHdlOs2033FDrvszMaZIBMOQ9M7NG1l8nAt_mJSJGpHkQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://{{base_url}}/auth/admin/realms/{{realm_name}}/users/",
+					"protocol": "http",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
