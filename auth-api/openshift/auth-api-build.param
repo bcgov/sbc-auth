@@ -1,0 +1,14 @@
+#=========================================================
+# OpenShift template parameters for:
+# Component: tob-api
+# Template File: templates/django/django-build.json
+#=========================================================
+NAME=auth-api
+GIT_REPO_URL=https://github.com/saravankumarpa/sbc-auth.git
+GIT_REF=master
+SOURCE_CONTEXT_DIR=auth-api
+SOURCE_IMAGE_KIND=DockerImage
+SOURCE_IMAGE_NAME=bcgovimages/auth-api-image
+SOURCE_IMAGE_TAG=py36-1.7-ew-0-s2i
+PIP_INDEX_URL=
+OUTPUT_IMAGE_TAG=latest
