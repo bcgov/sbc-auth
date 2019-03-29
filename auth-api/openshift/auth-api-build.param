@@ -4,7 +4,7 @@
 # Template File: templates/django/django-build.json
 #=========================================================
 NAME=auth-api
-GIT_REPO_URL=https://github.com/saravankumarpa/sbc-auth.git
+GIT_REPO_URL=https://github.com/bcgov/sbc-auth.git
 GIT_REF=master
 SOURCE_CONTEXT_DIR=auth-api
 SOURCE_IMAGE_KIND=DockerImage
