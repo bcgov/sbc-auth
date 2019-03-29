@@ -1,0 +1,5 @@
+#=========================================================
+# OpenShift template parameters for:
+# Component: auth-api
+# Template File: templates/auth-api-build.json
+#=========================================================
