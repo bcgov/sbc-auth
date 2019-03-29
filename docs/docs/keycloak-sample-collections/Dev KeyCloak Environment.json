@@ -1,0 +1,61 @@
+{
+	"id": "ea6b96aa-7d06-4dba-9fa1-d7cb3da4df17",
+	"name": "Dev KeyCloak",
+	"values": [
+		{
+			"key": "base_url",
+			"value": "sso-dev.pathfinder.gov.bc.ca",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "realm_name",
+			"value": "fcf0kpqr",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "tokenUrl",
+			"value": "https://sso-dev.pathfinder.gov.bc.ca/auth/realms/fcf0kpqr/protocol/openid-connect/token",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "clientId",
+			"value": "sbc-auth-cron-job",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "clientSecret",
+			"value": "fb1d2705-8323-467b-b67d-467d0a9a0986",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "defaultGroup",
+			"value": "basic/editor",
+			"type": "text",
+			"description": "",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2019-03-29T19:36:20.400Z",
+	"_postman_exported_using": "Postman/6.7.3"
+}
