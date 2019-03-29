@@ -1,0 +1,292 @@
+{
+	"info": {
+		"_postman_id": "fd15f7ec-146c-431f-b31a-dc64ed51b945",
+		"name": "KeyCloak User Creation - RH",
+		"description": "Endpoint samples to create an user using KeyCloak REST Admin API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cbeb8178-cd2f-447e-acac-8eb69efc0031",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0dmRUZFpmaEJoR0NENjRfSlZyRTNURjUzak1jeTZZUGZVaGhMYlVWWkRNIn0.eyJqdGkiOiI3MGI0ZWQzNi1iNWMwLTQxMjItYjlkOS0xMDg3OTNiYWJjYzgiLCJleHAiOjE1NTM2MjI4ODcsIm5iZiI6MCwiaWF0IjoxNTUzNjIyNTg3LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXV0aC9yZWFsbXMvbXktcmVhbG0iLCJhdWQiOiJteS1jbGllbnQiLCJzdWIiOiIzNDdlOTI5OC03NzFmLTRjZTMtYjhiNi1iMmRiNGE2MzNlODQiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJteS1jbGllbnQiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiIxMjRkYTI5ZC0wYWNjLTRiZjctYWEwNy0wZTM4NWE0YTRlY2IiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsibXktY2xpZW50Ijp7InJvbGVzIjpbInVtYV9wcm90ZWN0aW9uIl19LCJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbInZpZXctaWRlbnRpdHktcHJvdmlkZXJzIiwidmlldy1yZWFsbSIsIm1hbmFnZS1pZGVudGl0eS1wcm92aWRlcnMiLCJpbXBlcnNvbmF0aW9uIiwicmVhbG0tYWRtaW4iLCJjcmVhdGUtY2xpZW50IiwibWFuYWdlLXVzZXJzIiwicXVlcnktcmVhbG1zIiwidmlldy1hdXRob3JpemF0aW9uIiwicXVlcnktY2xpZW50cyIsInF1ZXJ5LXVzZXJzIiwibWFuYWdlLWV2ZW50cyIsIm1hbmFnZS1yZWFsbSIsInZpZXctZXZlbnRzIiwidmlldy11c2VycyIsInZpZXctY2xpZW50cyIsIm1hbmFnZS1hdXRob3JpemF0aW9uIiwibWFuYWdlLWNsaWVudHMiLCJxdWVyeS1ncm91cHMiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sImNsaWVudEhvc3QiOiIxMjcuMC4wLjEiLCJjbGllbnRJZCI6Im15LWNsaWVudCIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1teS1jbGllbnQiLCJjbGllbnRBZGRyZXNzIjoiMTI3LjAuMC4xIiwiZW1haWwiOiJzZXJ2aWNlLWFjY291bnQtbXktY2xpZW50QHBsYWNlaG9sZGVyLm9yZyJ9.k7yxI6VCsPJEk2YG254Qf2-L9NMHdgZ22wY7SXtcahcPSloPpG1Rc862BGhIrHClCd3F5DzeZHpFHgMVw2j6excDwdUhiad1yPKah8W8FHgguGF_I0bLjRxQoPLTD4ErzcUenbKkl2y7JEgVxX-fYIna4nPZCcQa2z9ye8qSX6xJ2hn7T3aoByAmljr5HYIiL1Ip1Ede7HYw1fGb3DzpV8qOKJmkd6E0ejpaCzjyM_vPl4OwlkWq_Pcu0ohAAnt-zRoxEA2m6cjz29a3k-VDXMiCD0J6DwAkyPLNybJoVYHdlOs2033FDrvszMaZIBMOQ9M7NG1l8nAt_mJSJGpHkQ",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"{{IncNumber}}\",\n    \"enabled\": true,\n    \"attributes\": {\n        \"incNumber\": [\n            \"{{IncNumber}}\"\n        ],\n        \"source\": [\n            \"PASSCODE\"\n        ]\n    }\n}"
+				},
+				"url": {
+					"raw": "https://{{base_url}}/auth/admin/realms/{{realm_name}}/users",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"users"
+					]
+				},
+				"description": "Create user records with the input from the csv"
+			},
+			"response": []
+		},
+		{
+			"name": "Get created user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cfabd047-d9a1-431d-86c5-b54bc921debe",
+						"exec": [
+							"pm.test(\"Set User Id \", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.environment.set(\"userId\", jsonData[0].id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{base_url}}/auth/admin/realms/{{realm_name}}/users?username={{IncNumber}}",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"users"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "{{IncNumber}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update password",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"type\": \"password\",\n    \"value\": \"{{Passcode}}\",\n    \"temporary\": false\n}"
+				},
+				"url": {
+					"raw": "https://{{base_url}}/auth/admin/realms/{{realm_name}}/users/{{userId}}/reset-password",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"users",
+						"{{userId}}",
+						"reset-password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Set group Id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "510198a3-47d6-475a-bd1c-daef0b9eb180",
+						"exec": [
+							"pm.test(\"Get group by path\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.environment.set(\"groupId\", jsonData.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{base_url}}/auth/admin/realms/{{realm_name}}/group-by-path/{{defaultGroup}}",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"group-by-path",
+						"{{defaultGroup}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Group to created user",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{base_url}}/auth/admin/realms/{{realm_name}}/users/{{userId}}/groups/{{groupId}}",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"users",
+						"{{userId}}",
+						"groups",
+						"{{groupId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessToken",
+				"value": "{{accessToken}}",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "09ab863a-9b1b-4ac8-82c9-0c1d2178cb02",
+				"type": "text/javascript",
+				"exec": [
+					"function getvar(variableName) {",
+					"    let value = pm.variables.get(variableName);",
+					"    if (!value) throw new Error(",
+					"        `Variable '${variableName}' is not defined. Do you forget to select an environment?`);",
+					"    return value;",
+					"}",
+					"",
+					"let tokenUrl = getvar('tokenUrl');",
+					"let clientId = getvar('clientId');",
+					"let clientSecret = getvar('clientSecret');",
+					"let scope = ''",
+					"",
+					"let getTokenRequest = {",
+					"    method: 'POST',",
+					"    url: tokenUrl,",
+					"    auth: {",
+					"        type: \"basic\",",
+					"        basic: [",
+					"            { key: \"username\", value: clientId },",
+					"            { key: \"password\", value: clientSecret }",
+					"        ]",
+					"    },",
+					"    body: {",
+					"        mode: 'urlencoded',",
+					"        urlencoded: [",
+					"            { key: 'grant_type', value: 'client_credentials' }",
+					"            ] ",
+					"        ",
+					"    }",
+					"};",
+					"",
+					"pm.sendRequest(getTokenRequest, (err, response) => {",
+					"    let jsonResponse = response.json(),",
+					"        newAccessToken = jsonResponse.access_token;",
+					"",
+					"    console.log({ err, jsonResponse, newAccessToken })",
+					"",
+					"    pm.environment.set('accessToken', newAccessToken);",
+					"    pm.variables.set('accessToken', newAccessToken);",
+					"});",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "20ab2fef-3029-46e0-8b81-8cbb467e56a5",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
