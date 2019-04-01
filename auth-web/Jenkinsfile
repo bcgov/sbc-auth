@@ -67,7 +67,7 @@ String getImageTagHash(String imageName, String tag = "") {
 }
 
 node {
-  if( triggerBuild(CONTEXT_DIRECTORY) ) {
+ // if( triggerBuild(CONTEXT_DIRECTORY) ) {
 
     stage("Build ${BUILD_CONFIG}") {
       script {
@@ -112,11 +112,11 @@ node {
         }
       }
     }
-  }
-  else {
+ // }
+ /* else {
     stage('No Changes') {
       echo "No changes ..."
       currentBuild.result = 'SUCCESS'
     }
-  }
+  } */
 }
