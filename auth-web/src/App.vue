@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-      <HelloWorld msg="Welcome to Master Auth App!!!"/>
+      <HelloWorld msg="Welcome to the Master Auth App!!!"/>
   </div>
 </template>
 
