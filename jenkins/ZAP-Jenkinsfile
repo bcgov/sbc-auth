@@ -30,7 +30,7 @@ def SONAR_SOURCES = './zap/wrk'
 // ------------------------------------------------------------------------------------------------
 
 // The name of the target route.  This will be used to dynamically get the URL.
-def TARGET_ROUTE = 'auth-api'
+def TARGET_ROUTE = 'auth-web'
 
 // The namespace in which the target route can be found.  This will be used to dynamically get the URL.
 def TARGET_PROJECT_NAMESPACE = '1rdehl-dev'
