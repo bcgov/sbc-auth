@@ -1,28 +1,34 @@
 <template>
-  <div id="app">
-      <HelloWorld msg="Welcome to the Master Auth App!!!"/>
-  </div>
+  <v-app class="app-container" id="app">
+    <Header/>
+    <div class="app-body">
+      <div class="app-body__inner">
+        <div class="container">
+          <main>
+            <router-view/>
+          </main>
+        </div>
+      </div>
+    </div>
+    <Footer/>
+  </v-app>
 </template>
 
-<script lang="ts">
+<script>
 import Vue from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import Header from './components/Header.vue';
+import Footer from './components/Footer.vue';
 
 export default Vue.extend({
   name: 'app',
   components: {
-    HelloWorld,
-  },
+    Header,
+    Footer
+  }
 });
 </script>
 
-<style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+<style lang="stylus">
+  @import "./assets/styl/base.styl";
+  @import "./assets/styl/layout.styl";
 </style>
