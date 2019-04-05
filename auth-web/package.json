@@ -10,7 +10,12 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "vue": "^2.6.6"
+    "vue": "^2.6.6",
+    "vue-class-component": "^6.0.0",
+    "vue-property-decorator": "^7.0.0",
+    "vue-router": "^3.0.1",
+    "vuetify": "^1.5.6",
+    "vuex": "^3.0.1"
   },
   "devDependencies": {
     "@types/chai": "^4.1.0",
@@ -22,9 +27,10 @@
     "@vue/cli-service": "^3.4.0",
     "@vue/test-utils": "^1.0.0-beta.20",
     "chai": "^4.1.2",
-    "node-sass": "^4.9.0",
-    "sass-loader": "^7.1.0",
+    "stylus": "^0.54.5",
+    "stylus-loader": "^3.0.2",
     "typescript": "^3.0.0",
+    "vue-cli-plugin-vuetify": "^0.5.0",
     "vue-template-compiler": "^2.5.21"
   }
 }
