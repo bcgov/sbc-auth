@@ -11,12 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Provides the WSGI entry point for running the application
-"""
-from auth_api import create_app
+"""Exposes all of the Services used in the API."""
 
-# Openshift s2i expects a lower case name of application
-application = create_app() # pylint: disable=invalid-name
-
-if __name__ == "__main__":
-    application.run()
+from .user import User

@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "User response schema",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": ["user"]
+        },
+        "id": {
+          "type": "number"
+        },
+        "attributes": {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string"
+            },
+            "roles": {
+              "type": "string"
+            }
+          },
+          "required": ["username"]
+        }
+      },
+      "required": ["type", "id", "attributes"]
+    }
+  },
+  "additionalProperties": false,
+  "required": ["data"]
+}

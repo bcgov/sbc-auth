@@ -11,12 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Provides the WSGI entry point for running the application
-"""
-from auth_api import create_app
+"""Centralized setup of logging for the service."""
+import logging.config
+import sys
+from os import path
 
-# Openshift s2i expects a lower case name of application
-application = create_app() # pylint: disable=invalid-name
 
-if __name__ == "__main__":
-    application.run()
+def setup_logging(conf):
+    """Create the services logger.
+
+    TODO should be reworked to load in the proper loggers and remove others
+    """
+    # log_file_path = path.join(path.abspath(path.dirname(__file__)), conf)
+
+    if conf and path.isfile(conf):
+        logging.config.fileConfig(conf)
+        print('Configure logging, from conf:{}'.format(conf), file=sys.stdout)
+    else:
+        print('Unable to configure logging, attempted conf:{}'.format(conf), file=sys.stderr)
