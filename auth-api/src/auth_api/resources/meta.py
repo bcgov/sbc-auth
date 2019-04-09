@@ -11,12 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Provides the WSGI entry point for running the application
+"""Meta information about the service.
+
+Currently this only provides API versioning information
 """
-from auth_api import create_app
+from flask import jsonify
+from flask_restplus import Namespace, Resource
 
-# Openshift s2i expects a lower case name of application
-application = create_app() # pylint: disable=invalid-name
+from auth_api.utils.run_version import get_run_version
 
-if __name__ == "__main__":
-    application.run()
+
+API = Namespace('Meta', description='Metadata')
+
+
+@API.route('/info')
+class Info(Resource):
+    """Meta information about the overall service."""
+
+    @staticmethod
+    def get():
+        """Return a JSON object with meta information about the Service."""
+        version = get_run_version()
+        return jsonify(API=f'auth_api/{version}')
