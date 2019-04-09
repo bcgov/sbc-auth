@@ -5,6 +5,7 @@
       <change beforePath="$PROJECT_DIR$/../docs/docs/keycloak-sample-collections/Passcodes.json" beforeDir="false" afterPath="$PROJECT_DIR$/../docs/docs/keycloak-sample-collections/Passcodes.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements/prod.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements/prod.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -283,12 +284,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1554749647636</updated>
-      <workItem from="1554749648968" duration="2029000" />
+      <workItem from="1554749648968" duration="2518000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="2029000" />
+    <option name="totallyTimeSpent" value="2518000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="476" y="38" width="1523" height="755" extended-state="0" />
