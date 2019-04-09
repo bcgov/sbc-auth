@@ -1,5 +1,5 @@
 <template>
-  <header class="app-header" dark fixed app>
+  <header class="app-header" fixed app>
     <div class="container">
       <router-link to="/" class="navbar-brand">
         <img class="brand-img" src="@/assets/img/gov3_bc_logo.png"

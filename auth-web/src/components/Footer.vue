@@ -1,5 +1,5 @@
 <template>
-  <footer class="app-footer" dark app>
+  <footer class="app-footer" app>
     <div class="container">
       <nav>
         <ul>
