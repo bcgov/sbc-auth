@@ -11,12 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Provides the WSGI entry point for running the application
+"""Create SQLAlchenmy and Schema managers.
+
+These will get initialized by the application using the models
 """
-from auth_api import create_app
+from flask_marshmallow import Marshmallow
+from flask_sqlalchemy import SQLAlchemy
 
-# Openshift s2i expects a lower case name of application
-application = create_app() # pylint: disable=invalid-name
 
-if __name__ == "__main__":
-    application.run()
+# by convention in the Flask community these are lower case,
+# whereas pylint wants them upper case
+ma = Marshmallow()  # pylint: disable=invalid-name
+db = SQLAlchemy()  # pylint: disable=invalid-name
