@@ -4,17 +4,23 @@ html, body
   min-height 100vh
 
 html
-  background $gray1
   font-size 16px
 
 body
   font-family 'Roboto', sans-serif
   font-size 1rem
 
-h1
-  margin-bottom 1.5rem
-  font-size 2rem
+h1, h2
   font-weight 500
+
+h1
+  font-size 2rem
+
+hr
+  margin-top 2rem
+  margin-bottom 2rem
+  border-color $gray4
+  border-style solid
 
 p
   line-height 1.5rem
@@ -22,3 +28,26 @@ p
 
 .container
   padding 1.25rem
+
+.app-container.theme--light
+  background $gray0
+
+// Vuetify Overrides
+.v-btn
+  text-transform none
+  font-weight 400
+
+.v-input__slot
+  border-style solid
+  border-width 1px !important
+  border-color $gray5
+  border-radius 0.25rem !important
+
+.v-text-field--outline >.v-input__control >.v-input__slot
+  background-color #fff !important
+
+.v-input--is-focused .v-input__slot
+  border-color $BCgovABlue4
+
+.error--text .v-input__slot
+  border-color red
