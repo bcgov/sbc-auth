@@ -1,26 +1,31 @@
 <template>
   <div class="view-container">
     <article>
-      <h1>Page Title</h1>
-      <p class="mb-0">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?</p>
+      <h1 class="mb-3">File Annual Reports Online</h1>
+      <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+      <section class="mt-4">
+        <h2 class="mb-2">Sign in to your account</h2>
+        <p style="margin-bottom: 2rem">Once you have received your <strong>Annual Report Filing Notice</strong> Letter you will be able to file start filing online. If you haven't yet received your letter, please contact BC Registries toll-free at 1-800-663-6102 (Mon-Fri, 8am-7pm).</p>
+        <PasscodeForm/>
+      </section>
     </article>
     <aside>
-      <v-card flat>
-        <header>Aside Header</header>
-        <div class="container">
-          Aside Content
-        </div>
-      </v-card>
+      <SupportInfoCard/>
     </aside>
   </div>
 </template>
 
 <script>
 import Vue from 'vue';
-import Aside from '@/components/Aside.vue';
+import PasscodeForm from '@/components/PasscodeForm.vue';
+import SupportInfoCard from '@/components/SupportInfoCard.vue';
 
 export default ({
-  name: 'Home'
+  name: 'Home',
+  components: {
+    PasscodeForm,
+    SupportInfoCard
+  }
 });
 </script>
 
@@ -37,11 +42,6 @@ export default ({
   aside
     flex 0 0 auto
     margin-top 2rem
-
-  .v-card header
-    padding 1rem 1.25rem
-    color #fff
-    background-color $BCgovBlue5
 
   @media (min-width: 960px)
     .view-container
