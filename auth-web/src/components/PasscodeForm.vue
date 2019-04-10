@@ -34,7 +34,7 @@
     </v-form>
 </template>
 
-<script>
+<script lang="ts">
     export default {
         name: 'PasscodeForm',
 
@@ -73,11 +73,16 @@
 
         },
         methods: {
+            doSomeWork() {
+
+            },
             login: () => {
                 if (this.$refs.form.validate()) {
                     console.log('Login  called -Valid');
+                    return true;
                 } else {
                     console.log('Login  called -Invalid');
+                    return false;
                 }
             }
 
