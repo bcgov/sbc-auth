@@ -25,7 +25,7 @@
         <!--
         <a href="#">Forgot your Passcode?</a>
         -->
-        <v-btn @click="login"
+        <v-btn @click="login" class="signinbtn"
           color="primary"
           depressed
           large
@@ -76,9 +76,6 @@
 
     },
     methods: {
-      doSomeWork() {
-
-      },
       login: () => {
         if (this.$refs.form.validate()) {
           console.log('Login  called -Valid');
