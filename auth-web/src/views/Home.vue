@@ -1,12 +1,19 @@
 <template>
   <div class="view-container">
     <article>
-      <h1 class="mb-3">File Annual Reports Online</h1>
+      <h1>File Annual Reports Online</h1>
       <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-      <section class="mt-4">
-        <h2 class="mb-2">Sign in to your account</h2>
-        <p style="margin-bottom: 2rem">Once you have received your <strong>Annual Report Filing Notice</strong> Letter you will be able to file start filing online. If you haven't yet received your letter, please contact BC Registries toll-free at 1-800-663-6102 (Mon-Fri, 8am-7pm).</p>
-        <PasscodeForm/>
+      <section>
+        <h2>Get Started</h2>
+        <p>Once you have received your <strong>Passcode Filing Notice Letter</strong> you will be able to file start filing online. If you haven't yet received your letter, please contact BC Registries toll-free at 1-800-663-6102 (Mon-Fri, 8am-7pm).</p>
+      </section>
+      <section>
+        <v-card>
+          <v-container class="passcode-container">
+            <h3>Sign In</h3>
+            <PasscodeForm/>
+          </v-container>
+        </v-card>
       </section>
     </article>
     <aside>
@@ -32,6 +39,20 @@ export default ({
 <style lang="stylus" scoped>
   @import "../assets/styl/theme.styl"
 
+  h1
+    margin-bottom 1rem
+    letter-spacing -0.02rem
+
+  h2
+    margin-bottom 0.75rem
+    letter-spacing -0.02rem
+
+  h3
+    margin-bottom 1.5rem
+
+  section
+    margin-top 2rem
+
   .view-container
     display flex
     flex-flow column nowrap
@@ -51,5 +72,8 @@ export default ({
       margin-top 0
       margin-left 2rem
       width 20rem
+
+    .passcode-container
+      padding 2rem
 
 </style>
