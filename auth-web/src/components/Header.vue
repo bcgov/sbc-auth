@@ -10,11 +10,14 @@
   </header>
 </template>
 
-<script>
-export default {
-  name: 'Header'
-};
+<script lang="ts">
+  import Vue from 'vue';
+
+  export default Vue.extend({
+    name: 'Header'
+  });
 </script>
+
 
 <style lang="stylus" scoped>
   @import "../assets/styl/theme.styl"
