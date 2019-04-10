@@ -25,7 +25,7 @@ describe('PasscodeForm.vue', () => {
       localVue
     });
 
-     expect(wrapper.find('.signinbtn').text().startsWith('Sign in')).toBeTruthy();
+    expect(wrapper.find('.signinbtn').text().startsWith('Sign in')).toBeTruthy();
     expect(wrapper.isVueInstance()).toBeTruthy();
 
   });
