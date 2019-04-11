@@ -24,8 +24,6 @@
 
   .app-header
     position fixed
-    display flex
-    align-items: center;
     width 100%
     color #fff
     border-bottom 3px solid $BCgovGold5
@@ -36,6 +34,6 @@
       padding-bottom 0
 
   .brand-img
-    margin-top 0.2rem
+    margin-top 0.3rem
 
 </style>
