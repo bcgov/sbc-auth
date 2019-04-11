@@ -4,8 +4,8 @@
       <h1>File Annual Reports Online</h1>
       <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
       <section>
-        <h2>Get Started</h2>
-        <p>Once you have received your <strong>Passcode Filing Notice Letter</strong> you will be able to file start filing online. If you haven't yet received your letter, please contact BC Registries toll-free at 1-800-663-6102 (Mon-Fri, 8am-7pm).</p>
+        <h2>Get Started...</h2>
+        <p>Once you have received your <strong>Passcode Notice Letter</strong> you will be able to file start filing online. If you haven't yet received your letter, please contact BC Registries toll-free at 1-800-663-6102 (Monday to Friday, 8am-7pm).</p>
       </section>
       <section>
         <v-card>
@@ -62,7 +62,7 @@ export default ({
 
   aside
     flex 0 0 auto
-    margin-top 2rem
+    margin-top 3rem
 
   @media (min-width: 960px)
     .view-container

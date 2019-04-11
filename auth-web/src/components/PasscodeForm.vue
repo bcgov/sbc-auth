@@ -23,17 +23,34 @@
       </div>
       <div class="passcode-form__form-btns">
         <!--
-        <a href="#">Forgot your Passcode?</a>
-        -->
-        <v-btn @click="login" class="signinbtn"
+        <v-btn class="recovery-btn"
           color="primary"
-          depressed
+          flat
+          large
+          @click="passCodeDialog = true"
+        >Forgotten Your Passcode?
+        </v-btn>
+        -->
+        <v-btn class="sign-in-btn" @click="login"
+          color="primary"
           large
         >Sign in
           <v-icon dark right>arrow_forward</v-icon>
         </v-btn>
       </div>
     </v-form>
+    <v-dialog
+      width="50rem"
+      v-model="passCodeDialog">
+      <v-card>
+        <v-card-title>
+          Forgotten
+        </v-card-title>
+        <v-card-text>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -43,6 +60,7 @@
 
 
     data: () => ({
+      passCodeDialog: false, // Forgotten Password Dialog
       valid: false,
       entityNumRules: [
         (v) => !!v || 'Incorporation Number is required',
@@ -100,14 +118,22 @@
 
   .passcode-form__form-btns
     margin-top 2rem
-    text-align right
-
-    .forgotten-link
-      flex 1 1 auto
+    overflow hidden
 
   .v-btn
     margin 0
 
+    .recovery-btn
+      float left
+
+    .sign-in-btn
+      float right
+
+  @media (max-width 600px)
+    .sign-in-btn
+      width 100%
+
+  @media (min-width 960px)
   .v-input
     max-width 25rem
 
