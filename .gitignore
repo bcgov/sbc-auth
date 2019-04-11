@@ -106,3 +106,9 @@ node_modules/
 
 # vscode
 .vscode/
+
+# idea
+.idea/
+
+# npm
+package-lock.json

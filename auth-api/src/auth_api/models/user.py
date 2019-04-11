@@ -16,8 +16,6 @@
 Actual user data is kept in the OIDC and IDP services, this data is
 here as a convenience for audit and db reporting.
 """
-from datetime import datetime
-
 from flask import current_app
 
 from .db import db, ma
@@ -26,16 +24,16 @@ from .db import db, ma
 class User(db.Model):
     """Used to hold the audit information for a User of this service."""
 
-    __tablename__ = 'users'
+    __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column('username', db.String(1000), index=True)
-    roles = db.Column('roles', db.String(1000), index=True)
+    username = db.Column('username', db.String(100), index=True)
+    roles = db.Column('roles', db.String(1000))
 
     @classmethod
     def find_by_jwt_token(cls, token: dict):
         """Return a User if they exist and match the provided JWT."""
-        return cls.query.filter_by(sub=token['sub']).one_or_none()
+        return cls.query.filter_by(username=token.get('preferred_username', None)).one_or_none()
 
     @classmethod
     def create_from_jwt_token(cls, token: dict):
@@ -49,8 +47,8 @@ class User(db.Model):
             # s = KeycloakUserSchema()
             # u = s.load(data=token, partial=True)
             user = User(
-                username=token.get('username', None),
-                roles=token.get('roles', None)
+                username=token.get('preferred_username', None),
+                roles=token.get('realm_access', None).get('roles', None)
             )
             current_app.logger.debug('Creating user from JWT:{}; User:{}'.format(token, user))
             db.session.add(user)
@@ -62,11 +60,6 @@ class User(db.Model):
     def find_by_username(cls, username):
         """Return the oldest User record for the provided username."""
         return cls.query.filter_by(username=username).first()
-
-    @classmethod
-    def find_by_sub(cls, sub):
-        """Return a User based on the unique sub field."""
-        return cls.query.filter_by(sub=sub).one_or_none()
 
     def save(self):
         """Store the User into the local cache."""

@@ -26,6 +26,7 @@ from flask_opentracing import FlaskTracing
 
 API = Namespace('userinfo', description='Authenication System - get User Information')
 
+# get the existing tracer and inject into flask app
 tracer = opentracing.tracer
 tracing = FlaskTracing(tracer)
 
@@ -44,12 +45,13 @@ class UserInfo(Resource):
         current_span = tracer.active_span
         try:
             token = g.jwt_oidc_token_info
-            user = User(token.get('preferred_username', None),
-                        token.get('realm_access', None).get('roles', None))
+            user = User.find_by_jwt_token(token)
+            if not user:
+                user = User.save_from_jwt_token(token)
 
-            print(user.json())
+            current_span.log_kv({'userinfo': user.asdict()})
 
-            return jsonify(user.json()), 200
+            return jsonify(user.asdict()), 200
         except Exception as err:
             current_span.set_tag(tags.ERROR, 'true')
             tb = traceback.format_exc()
