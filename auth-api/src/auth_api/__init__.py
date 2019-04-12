@@ -22,18 +22,17 @@ from flask_jwt_oidc import JwtManager
 
 import config
 
-# lower case name as used by convention in most Flask apps
-jwt = JwtManager()  # pylint: disable=invalid-name
+from flask_opentracing import FlaskTracing
+from jaeger_client import Config as JaegerConfig
 
-# from auth_api.resources import API, ops_blueprint  # , api_blueprint
-
-from auth_api.utils.run_version import get_run_version
-from auth_api.utils.logging import setup_logging
-from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT
 from auth_api.models import db, ma
-from auth_api import models
+from auth_api.utils.logging import setup_logging
+from auth_api.utils.run_version import get_run_version
 
 setup_logging(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf'))  # important to do this first
+
+# lower case name as used by convention in most Flask apps
+jwt = JwtManager()  # pylint: disable=invalid-name
 
 
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
@@ -41,11 +40,19 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     app = Flask(__name__)
     app.config.from_object(config.CONFIGURATION[run_mode])
 
+    # start tracer
+    tracer = init_tracer(__name__)
+    FlaskTracing(tracer)
+
+    from auth_api import models
+    from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT
+
     db.init_app(app)
     ma.init_app(app)
 
     app.register_blueprint(API_BLUEPRINT)
     app.register_blueprint(OPS_BLUEPRINT)
+
     setup_jwt_manager(app, jwt)
 
     @app.after_request
@@ -79,3 +86,21 @@ def register_shellcontext(app):
             'models': models}  # pragma: no cover
 
     app.shell_context_processor(shell_context)
+
+
+def init_tracer(service):
+    """ initialize tracer"""
+    config = JaegerConfig(
+        config={  # usually read from some yaml config
+            'sampler': {
+                'type': 'const',
+                'param': 1,
+            },
+            'logging': True,
+            'reporter_batch_size': 1,
+        },
+        service_name=service,
+    )
+
+    # this call also sets opentracing.tracer
+    return config.initialize_tracer()
