@@ -102,3 +102,11 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+node_modules/
+
+# vscode
+.vscode/
+
+.idea
+
+package-lock.json

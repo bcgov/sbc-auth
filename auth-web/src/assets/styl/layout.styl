@@ -1,0 +1,26 @@
+// Layout Variables
+$app-header-height = 4.375rem // 70px
+
+.app-container
+  display flex
+  flex-flow column nowrap
+  min-height 100vh
+
+.app-header
+  flex 0 0 auto
+  height $app-header-height
+
+.app-body
+  flex 1 1 auto
+  margin-top $app-header-height // Offset the height of the fixed header
+
+.app-body__inner
+  > .container:first-child
+    padding-top 2rem
+    padding-bottom 2rem
+
+.app-footer
+  flex 0 0 auto
+
+.container
+  max-width 1200px // Using PX dimensions here to jive with vuetify (RE: breakpoints)
