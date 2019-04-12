@@ -12,38 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Endpoints to start tracing."""
+import traceback
 from flask_restplus import Resource, Namespace
 
 import opentracing
 from flask_opentracing import FlaskTracing
-from opentracing.propagation import Format
-from jaeger_client import Config
 
 from auth_api.utils.trace_tags import TraceTags as tags
 
 API = Namespace('trace', description='Authentication System - Tracing')
 
-
-def init_tracer(service):
-    """ initialize tracer"""
-    config = Config(
-        config={  # usually read from some yaml config
-            'sampler': {
-                'type': 'const',
-                'param': 1,
-            },
-            'logging': True,
-            'reporter_batch_size': 1,
-        },
-        service_name=service,
-    )
-
-    # this call also sets opentracing.tracer
-    return config.initialize_tracer()
-
-
-# this call also sets opentracing.tracer
-tracer = init_tracer('auth_api')
+# get the existing tracer and inject into flask app
+tracer = opentracing.tracer
 tracing = FlaskTracing(tracer)
 
 
@@ -59,13 +39,12 @@ class Trace(Resource):
         try:
             #current_span.set_tag(tags.NR_NUMBER, request.args.get('nr'))
 
-            user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
-            current_span.set_tag(tags.USER, user.username)
+            #user = get_or_create_user_by_jwt(g.jwt_oidc_token_info)
+            #current_span.set_tag(tags.USER, user.username)
             trace_header = {}
             tracer.inject(current_span, Format.HTTP_HEADERS, trace_header)
             return jsonify(trace_header), 200
         except Exception as err:
-
             current_span.set_tag(tags.ERROR, 'true')
             tb = traceback.format_exc()
             current_span.log_kv({'event': 'error',
