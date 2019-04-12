@@ -86,7 +86,7 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     JWT_OIDC_CACHING_ENABLED = os.getenv('JWT_OIDC_CACHING_ENABLED')
     try:
         JWT_OIDC_JWKS_CACHE_TIMEOUT = int(os.getenv('JWT_OIDC_JWKS_CACHE_TIMEOUT'))
-    except ValueError:
+    except:
         JWT_OIDC_JWKS_CACHE_TIMEOUT = 300
 
     TESTING = False
