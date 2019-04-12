@@ -16,9 +16,6 @@
 This module manages the User Information.
 """
 
-from datetime import datetime
-
-from auth_api.exceptions import UserException
 from auth_api.models import User as UserModel
 
 
@@ -35,14 +32,6 @@ class User():  # pylint: disable=too-many-instance-attributes
         self.__dao = None
         self._username: str = None
         self._roles: str = None
-
-    def __init__(self, username, roles):
-        self.__dao = None
-        self.username = username
-        self.roles = roles
-
-    def json(self):
-        return {"username": self.username, "roles": self.roles}
 
     @property
     def _dao(self):
@@ -95,19 +84,43 @@ class User():  # pylint: disable=too-many-instance-attributes
         self._dao.save()
 
     @classmethod
+    def save_from_jwt_token(cls, token: dict = None):
+        if not token:
+            return None
+        user_dao = UserModel.create_from_jwt_token(token)
+
+        if not user_dao:
+            return None
+
+        user = User()
+        user._dao = user_dao  # pylint: disable=protected-access
+        return user
+
+    @classmethod
+    def find_by_jwt_token(cls, token: dict = None):
+        if not token:
+            return None
+        user_dao = UserModel.find_by_jwt_token(token)
+
+        if not user_dao:
+            return None
+
+        user = User()
+        user._dao = user_dao  # pylint: disable=protected-access
+        return user
+
+    @classmethod
     def find_by_username(cls, username: str = None):
         """Given a username, this will return an Active User or None."""
         if not username:
             return None
 
         # find locally
-        User_dao = None
-        User_dao = UserModel.find_by_username(username)
+        user_dao = UserModel.find_by_username(username)
 
-        # TODO check if timestamp is valid in Colin
-        if not User_dao:
+        if not user_dao:
             return None
 
-        b = User()
-        b._dao = User_dao  # pylint: disable=protected-access
-        return b
+        user = User()
+        user._dao = user_dao  # pylint: disable=protected-access
+        return user
