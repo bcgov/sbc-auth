@@ -1,0 +1,436 @@
+{
+	"info": {
+		"_postman_id": "2afef774-29c4-49bb-a634-c1992c7685ed",
+		"name": "passcode user importer",
+		"description": "Endpoint samples to create an user using KeyCloak REST Admin API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Refresh admin token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cbeb8178-cd2f-447e-acac-8eb69efc0031",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"adminToken\", jsonData.access_token);",
+							"pm.environment.set(\"adminRefreshToken\", jsonData.refresh_token);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "776fb4fd-4f46-4f00-91eb-fd796e49fcc8",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "grant_type=refresh_token&client_id={{clientId}}&refresh_token={{adminRefreshToken}}&client_secret={{clientSecret}}"
+				},
+				"url": {
+					"raw": "https://{{base_url}}/auth/realms/{{realm_name}}/protocol/openid-connect/token",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"{{realm_name}}",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cbeb8178-cd2f-447e-acac-8eb69efc0031",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "776fb4fd-4f46-4f00-91eb-fd796e49fcc8",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"{{corp_num}}\",\n    \"enabled\": true,\n    \"attributes\": {\n        \"corp_type\": [\n            \"{{corp_typ_cd}}\"\n        ],\n        \"source\": [\n            \"PASSCODE\"\n        ]\n    }\n}"
+				},
+				"url": {
+					"raw": "https://{{base_url}}/auth/admin/realms/{{realm_name}}/users",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"users"
+					]
+				},
+				"description": "Create user records with the input from the csv"
+			},
+			"response": []
+		},
+		{
+			"name": "Get user id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "cfabd047-d9a1-431d-86c5-b54bc921debe",
+						"exec": [
+							"pm.test(\"Set User Id \", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.environment.set(\"userId\", jsonData[0].id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{base_url}}/auth/admin/realms/{{realm_name}}/users?username={{corp_num}}",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"users"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "{{corp_num}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update password",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"type\": \"password\",\n    \"value\": \"{{temp_password}}\",\n    \"temporary\": false\n}"
+				},
+				"url": {
+					"raw": "https://{{base_url}}/auth/admin/realms/{{realm_name}}/users/{{userId}}/reset-password",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"users",
+						"{{userId}}",
+						"reset-password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get group id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "510198a3-47d6-475a-bd1c-daef0b9eb180",
+						"exec": [
+							"pm.test(\"Get group by path\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.environment.set(\"groupId\", jsonData.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{base_url}}/auth/admin/realms/{{realm_name}}/group-by-path/{{defaultGroup}}",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"group-by-path",
+						"{{defaultGroup}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Assign group to user",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{base_url}}/auth/admin/realms/{{realm_name}}/users/{{userId}}/groups/{{groupId}}",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"users",
+						"{{userId}}",
+						"groups",
+						"{{groupId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get user group",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "510198a3-47d6-475a-bd1c-daef0b9eb180",
+						"exec": [
+							"pm.test(\"Get group by path\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.environment.set(\"groupId\", jsonData.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{base_url}}/auth/admin/realms/{{realm_name}}/users/{{userId}}/groups",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"admin",
+						"realms",
+						"{{realm_name}}",
+						"users",
+						"{{userId}}",
+						"groups"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logout admin",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{adminToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "https://{{base_url}}/auth/realms/{{realm_name}}/protocol/openid-connect/userinfo",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"{{realm_name}}",
+						"protocol",
+						"openid-connect",
+						"userinfo"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessToken",
+				"value": "{{adminToken}}",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "09ab863a-9b1b-4ac8-82c9-0c1d2178cb02",
+				"type": "text/javascript",
+				"exec": [
+					"function getvar(variableName) {",
+					"    let value = pm.variables.get(variableName);",
+					"    if (!value) throw new Error(",
+					"        `Variable '${variableName}' is not defined. Do you forget to select an environment?`);",
+					"    return value;",
+					"}",
+					"",
+					"let tokenUrl = getvar('tokenUrl');",
+					"let clientId = getvar('clientId');",
+					"let clientSecret = getvar('clientSecret');",
+					"let scope = ''",
+					"",
+					"let getTokenRequest = {",
+					"    method: 'POST',",
+					"    url: tokenUrl,",
+					"    auth: {",
+					"        type: \"basic\",",
+					"        basic: [",
+					"            { key: \"username\", value: clientId },",
+					"            { key: \"password\", value: clientSecret }",
+					"        ]",
+					"    },",
+					"    body: {",
+					"        mode: 'urlencoded',",
+					"        urlencoded: [",
+					"            { key: 'grant_type', value: 'client_credentials' }",
+					"            ] ",
+					"        ",
+					"    }",
+					"};",
+					"",
+					"pm.sendRequest(getTokenRequest, (err, response) => {",
+					"    ",
+					"    let jsonResponse = response.json()",
+					"    let newAdminToken = jsonResponse.access_token",
+					"    let newRefreshToken = jsonResponse.refresh_token",
+					"",
+					"    console.log({ err, jsonResponse, newAdminToken })",
+					"",
+					"    pm.environment.set('adminToken', newAdminToken);",
+					"    pm.variables.set('adminToken', newAdminToken);",
+					"    pm.environment.set('adminRefreshToken', newRefreshToken);",
+					"    pm.variables.set('adminRefreshToken', newRefreshToken);",
+					"});",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "20ab2fef-3029-46e0-8b81-8cbb467e56a5",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

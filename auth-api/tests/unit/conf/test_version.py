@@ -11,12 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Provides the WSGI entry point for running the application
+
+"""Tests to assure the version utilities.
+
+Test-Suite to ensure that the version utilities are working as expected.
 """
-from auth_api import create_app
+from auth_api import utils
+from auth_api.version import __version__
 
-# Openshift s2i expects a lower case name of application
-application = create_app() # pylint: disable=invalid-name
 
-if __name__ == "__main__":
-    application.run()
+def test_get_version():
+    """Assert thatThe version is returned correctly."""
+    rv = utils.run_version.get_run_version()
+    assert rv == __version__
