@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Endpoints to get user information from token and database."""
+"""Endpoints to Authenticate user."""
 import traceback
 from flask import jsonify, g
 from flask_restplus import Resource, Namespace, cors
@@ -20,44 +20,41 @@ from auth_api import jwt as _jwt
 from auth_api.services import User
 from auth_api.utils.util import cors_preflight
 from auth_api.utils.trace_tags import TraceTags as tags
+from flask import request
+import requests
 
 import opentracing
 from flask_opentracing import FlaskTracing
 
-API = Namespace('userinfo', description='Authenication System - get User Information')
+API = Namespace('authenticate', description='Authenication System - Authenticate')
 
 # get the existing tracer and inject into flask app
 tracer = opentracing.tracer
 tracing = FlaskTracing(tracer)
 
 
-@cors_preflight('GET')
+@cors_preflight('POST')
 @API.route('')
-class UserInfo(Resource):
+class User(Resource):
     """Retrieve user detail information from token and database """
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @_jwt.requires_auth
     @tracing.trace()
-    def get():
+    def post():
         """Return a JSON object that includes user detail information"""
-        current_span = tracer.active_span
-        try:
-            token = g.jwt_oidc_token_info
-            user = User.find_by_jwt_token(token)
-            if not user:
-                user = User.save_from_jwt_token(token)
+        request_json = request.get_json()
+        realm_name = 'fcf0kpqr'
+        base_url = 'sso-dev.pathfinder.gov.bc.ca'
+        client_id = 'sbc-auth-web'
+        client_secret = 'aeb2b9bc-672b-4574-8bc8-e76e853c37cb'
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        url = 'https://{}/auth/realms/{}/protocol/openid-connect/token'.format(base_url, realm_name)
+        body = 'grant_type=password&client_id={}&username={}&password={}&client_secret={}'\
+            .format(client_id, request_json.get('corp_num'), request_json.get('passcode'), client_secret)
+        response = requests.post(url, data=body, headers=headers)
+        print(response)
+        return response.text
 
-            current_span.log_kv({'userinfo': user.asdict()})
-
-            return jsonify(user.asdict()), 200
-        except Exception as err:
-            current_span.set_tag(tags.ERROR, 'true')
-            tb = traceback.format_exc()
-            current_span.log_kv({'event': 'error',
-                                 'error.kind': str(type(err)),
-                                 'error.message': err.with_traceback(None),
-                                 'error.object': tb})
-            current_span.set_tag(tags.HTTP_STATUS_CODE, 500)
-            return {"error": "{}".format(err)}, 500
