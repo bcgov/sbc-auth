@@ -1,6 +1,13 @@
 <template>
     <div>
-        <v-form class="passcode-form" ref="form">
+        <v-form class="passcode-form" ref="form" lazy-validation>
+            <div >  <v-alert v-if="loginError"
+                    :value="true"
+                    color="error" dismissible="true"
+                    icon="warning"
+                    outline
+            >{{loginError}}</v-alert></div>
+
             <div class="passcode-form__row">
                 <v-text-field
                         box
@@ -38,6 +45,7 @@
                     <v-icon dark right>arrow_forward</v-icon>
                 </v-btn>
             </div>
+
         </v-form>
         <v-dialog
                 width="50rem"
@@ -59,59 +67,69 @@
 </template>
 
 <script lang="ts">
-  export default {
-    name: "PasscodeForm",
 
+import axios from 'axios'
 
-    data: () => ({
-      passCodeDialog: false, // Forgotten Password Dialog
-      valid: false,
-      entityNumRules: [
-        (v) => !!v || "Incorporation Number is required",
-        (v) => v.length <= 10 || "Passcode rules here..."
-      ],
-      entityPasscodeRules: [
-        (v) => !!v || "Passcode is required",
-        (v) => v.length <= 10 || "Passcode rules here..."
-      ]
-    }),
+export default {
+  name: 'PasscodeForm',
 
+  data: () => ({
+    passCodeDialog: false, // Forgotten Password Dialog
+    loginError: '',
+    valid: false,
+    entityNumRules: [
+      (v) => !!v || 'Incorporation Number is required',
+      (v) => v.length <= 10 || 'Passcode rules here...'
+    ],
+    entityPasscodeRules: [
+      (v) => !!v || 'Passcode is required',
+      (v) => v.length <= 10 || 'Passcode rules here...'
+    ]
+  }),
 
-    computed: {
-      entityNumber: {
-        get() {
-          return this.$store.state.entityNumber;
-        },
-        set(value) {
-          this.$store.commit("entityNumber", value);
-        }
+  computed: {
+    entityNumber: {
+      get () {
+        return this.$store.state.entityNumber
       },
-      passcode: {
-        get() {
-          return this.$store.state.passcode;
-        },
-        set(value) {
-          this.$store.commit("passcode", value);
-        }
+      set (value) {
+        this.$store.commit('entityNumber', value)
       }
-
-
     },
-    methods: {
-      login: () => {
-        if (this.$refs.form.validate()) {
-          console.log("Login  called -Valid");
-          return true;
-        } else {
-          console.log("Login  called -Invalid");
-          return false;
-        }
+    passcode: {
+      get () {
+        return this.$store.state.passcode
+      },
+      set (value) {
+        this.$store.commit('passcode', value)
       }
-
-
     }
 
-  };
+  },
+  methods: {
+    login () {
+      if (this.$refs.form.validate()) {
+        axios.post('https://auth-api-dev.pathfinder.gov.bc.ca/api/v1/authenticate', {
+          'passcode': this.$store.state.entityNumber,
+          'corp_num': this.$store.state.passcode
+        })
+          .then((response) => {
+            if (response.data.error) {
+              this.loginError = 'Login Failed.Invalid Incorporation Number or Passcode'
+            } else if (response.data.access_token) {
+              localStorage.name = response.data.access_token
+            }
+          })
+          .catch((response) => {
+            this.loginError = 'something went wrong'
+
+          })
+      }
+    }
+
+  }
+
+}
 </script>
 
 <style lang="stylus" scoped>
@@ -140,6 +158,5 @@
     @media (min-width 960px)
         .v-input
             max-width 25rem
-
 
 </style>
