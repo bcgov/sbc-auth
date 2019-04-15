@@ -5,9 +5,7 @@
         v-if="loginError"
         :value="true"
         color="error"
-        dismissible="true"
         icon="warning"
-        outline
       >{{loginError}}</v-alert>
       <div class="passcode-form__row">
         <v-text-field
@@ -133,6 +131,9 @@ export default {
   margin-top: 2rem;
   overflow: hidden;
 }
+
+.v-alert + .passcode-form__row
+  margin-top 2.25rem
 
 .v-btn {
   margin: 0;
