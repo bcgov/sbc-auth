@@ -34,7 +34,7 @@ tracing = FlaskTracing(tracer)
 
 
 @cors_preflight('POST,OPTIONS')
-@API.route('')
+@API.route('', methods=['POST', 'OPTIONS'])
 class User(Resource):
     """Retrieve user detail information from token and database """
 
@@ -56,5 +56,5 @@ class User(Resource):
             .format(client_id, request_json.get('corp_num'), request_json.get('passcode'), client_secret)
         response = requests.post(url, data=body, headers=headers)
         print(response)
-        return response.text
+        return response.textus
 
