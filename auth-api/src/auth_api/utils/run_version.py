@@ -11,12 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Provides the WSGI entry point for running the application
-"""
-from auth_api import create_app
+"""Supply version and commit hash info."""
+import os
 
-# Openshift s2i expects a lower case name of application
-application = create_app() # pylint: disable=invalid-name
+from auth_api.version import __version__
 
-if __name__ == "__main__":
-    application.run()
+
+def _get_build_openshift_commit_hash():
+    return os.getenv('OPENSHIFT_BUILD_COMMIT', None)
+
+
+def get_run_version():
+    """Return a formatted version string for this service."""
+    commit_hash = _get_build_openshift_commit_hash()
+    if commit_hash:
+        return f'{__version__}-{commit_hash}'
+    return __version__

@@ -11,12 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Provides the WSGI entry point for running the application
+
+"""Tags define for tracing.
+
+This file manage all tracing tags.
 """
-from auth_api import create_app
 
-# Openshift s2i expects a lower case name of application
-application = create_app() # pylint: disable=invalid-name
 
-if __name__ == "__main__":
-    application.run()
+class TraceTags:
+    """Manages all tags for tracing. """
+
+    ERROR = 'error'
+
+    HTTP_STATUS_CODE = 'http.status_code'
+
+    NR_NUMBER = 'nr.number'
+
+    USER = 'login.user'
+
+    DATABASE_QUERY = 'database.query'
+
+    DATABASE_QUERY_ANSWER = 'database.answer'
