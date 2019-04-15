@@ -51,72 +51,65 @@
 </template>
 
 <script lang="ts">
-import axios from "axios";
+import LoginServices from '@/services/login.services'
 
 export default {
-  name: "PasscodeForm",
+  name: 'PasscodeForm',
 
   data: () => ({
     show1: false,
     passCodeDialog: false, // Forgotten Password Dialog
-    loginError: "",
+    loginError: '',
     valid: false,
     entityNumRules: [
-      v => !!v || "Incorporation Number is required",
+      v => !!v || 'Incorporation Number is required'
     ],
     entityPasscodeRules: [
-      v => !!v || "Passcode is required",
-      v => v.length >= 9 || "Passcode must be exactly 9 digits"
+      v => !!v || 'Passcode is required',
+      v => v.length >= 9 || 'Passcode must be exactly 9 digits'
     ]
   }),
 
   computed: {
     entityNumber: {
-      get() {
-        return this.$store.state.entityNumber;
+      get () {
+        return this.$store.state.entityNumber
       },
-      set(value) {
-        this.$store.commit("entityNumber", value);
+      set (value) {
+        this.$store.commit('entityNumber', value)
       }
     },
     passcode: {
-      get() {
-        return this.$store.state.passcode;
+      get () {
+        return this.$store.state.passcode
       },
-      set(value) {
-        this.$store.commit("passcode", value);
+      set (value) {
+        this.$store.commit('passcode', value)
       }
     }
   },
   methods: {
-    login() {
+    login () {
       if (this.$refs.form.validate()) {
-        console.log('VUE_APP_ROOT_API:'+process.env.VUE_APP_ROOT_API);
+        console.log('VUE_APP_ROOT_API:' + process.env.VUE_APP_ROOT_API)
 
-        axios
-          .post(
-            "https://auth-api-dev.pathfinder.gov.bc.ca/api/v1/authenticate",
-            {
-              passcode: this.$store.state.passcode,
-              corp_num: this.$store.state.entityNumber
-            }
-          )
+        LoginServices.login(this.$store.state.entityNumber, this.$store.state.passcode)
           .then(response => {
             if (response.data.error) {
               this.loginError =
-                "Login Failed. Invalid Incorporation Number or Passcode";
+                'Login Failed. Invalid Incorporation Number or Passcode'
             } else if (response.data.access_token) {
-              localStorage.name = response.data.access_token;
-              window.location.href = "https://coops-dev.pathfinder.gov.bc.ca/";
+              localStorage.name = response.data.access_token
+              window.location.href = 'https://coops-dev.pathfinder.gov.bc.ca/'
             }
           })
           .catch(response => {
-            this.loginError = "something went wrong";
-          });
+            this.loginError = 'something went wrong'
+          })
       }
     }
   }
-};
+}
 </script>
 
 <style lang="stylus" scoped>
