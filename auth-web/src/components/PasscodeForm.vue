@@ -109,6 +109,8 @@ export default {
   methods: {
     login () {
       if (this.$refs.form.validate()) {
+        console.log('passcode' + this.$store.state.passcode)
+        console.log('corp_num' + this.$store.state.entityNumber)
 
         axios.post('https://auth-api-dev.pathfinder.gov.bc.ca/api/v1/authenticate', {
           'passcode': this.$store.state.passcode,
@@ -124,7 +126,6 @@ export default {
           })
           .catch((response) => {
             this.loginError = 'something went wrong'
-
           })
       }
     }
