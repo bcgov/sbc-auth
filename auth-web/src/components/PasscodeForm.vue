@@ -20,6 +20,9 @@
             </div>
             <div class="passcode-form__row">
                 <v-text-field
+                        :append-icon="show1 ? 'visibility' : 'visibility_off'"
+                        :type="show1 ? 'text' : 'password'"
+                        @click:append="show1 = !show1"
                         box
                         label="Enter your Passcode"
                         hint="Example: 123456789"
@@ -74,6 +77,7 @@ export default {
   name: 'PasscodeForm',
 
   data: () => ({
+    show1: false,
     passCodeDialog: false, // Forgotten Password Dialog
     loginError: '',
     valid: false,
