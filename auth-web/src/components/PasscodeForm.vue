@@ -109,6 +109,7 @@ export default {
   methods: {
     login () {
       if (this.$refs.form.validate()) {
+
         axios.post('https://auth-api-dev.pathfinder.gov.bc.ca/api/v1/authenticate', {
           'passcode': this.$store.state.entityNumber,
           'corp_num': this.$store.state.passcode
