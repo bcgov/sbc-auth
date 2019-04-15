@@ -11,7 +11,7 @@
         <v-text-field
           box
           label="Enter your Incorporation Number"
-          hint="Example: 123456789"
+          hint="Example: CP1234567"
           req
           persistent-hint
           :rules="entityNumRules"
@@ -25,9 +25,10 @@
           @click:append="show1 = !show1"
           box
           label="Enter your Passcode"
-          hint="Example: 123456789"
+          hint="Passcode must be exactly 9 digits"
           persistent-hint
           :rules="entityPasscodeRules"
+          :maxlength="9"
           v-model="passcode"
         ></v-text-field>
       </div>
@@ -62,11 +63,10 @@ export default {
     valid: false,
     entityNumRules: [
       v => !!v || "Incorporation Number is required",
-      v => v.length <= 10 || "Passcode rules here..."
     ],
     entityPasscodeRules: [
       v => !!v || "Passcode is required",
-      v => v.length <= 10 || "Passcode rules here..."
+      v => v.length >= 9 || "Passcode must be exactly 9 digits"
     ]
   }),
 
