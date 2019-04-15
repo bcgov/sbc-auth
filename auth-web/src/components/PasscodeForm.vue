@@ -91,8 +91,7 @@ export default {
   methods: {
     login() {
       if (this.$refs.form.validate()) {
-        console.log("passcode" + this.$store.state.passcode);
-        console.log("corp_num" + this.$store.state.entityNumber);
+        console.log('VUE_APP_ROOT_API:'+process.env.VUE_APP_ROOT_API);
 
         axios
           .post(
