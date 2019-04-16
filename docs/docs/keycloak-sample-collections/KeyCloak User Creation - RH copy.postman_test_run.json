@@ -1,0 +1,126 @@
+{
+	"id": "2256e566-78fc-4349-a5c0-2cd51e8f346b",
+	"name": "KeyCloak User Creation - RH copy",
+	"allTests": [],
+	"timestamp": "2019-04-01T22:04:11.011Z",
+	"collection_id": "54c0fb60-65db-40bc-bff1-a3fbcc050d8c",
+	"folder_id": 0,
+	"target_type": "collection",
+	"environment_id": "ed0c0736-6709-42d9-a5b8-fec13ace536a",
+	"data": [],
+	"delay": 0,
+	"count": 1,
+	"collection": {
+		"id": "54c0fb60-65db-40bc-bff1-a3fbcc050d8c",
+		"name": "KeyCloak User Creation - RH copy",
+		"description": "Endpoint samples to create an user using KeyCloak REST Admin API",
+		"auth": {
+			"type": "oauth2",
+			"oauth2": [
+				{
+					"key": "accessToken",
+					"value": "{{accessToken}}",
+					"type": "string"
+				},
+				{
+					"key": "addTokenTo",
+					"value": "header",
+					"type": "string"
+				}
+			]
+		},
+		"events": [
+			{
+				"listen": "prerequest",
+				"script": {
+					"id": "09ab863a-9b1b-4ac8-82c9-0c1d2178cb02",
+					"type": "text/javascript",
+					"exec": [
+						"function getvar(variableName) {",
+						"    let value = pm.variables.get(variableName);",
+						"    if (!value) throw new Error(",
+						"        `Variable '${variableName}' is not defined. Do you forget to select an environment?`);",
+						"    return value;",
+						"}",
+						"",
+						"let tokenUrl = getvar('tokenUrl');",
+						"let clientId = getvar('clientId');",
+						"let clientSecret = getvar('clientSecret');",
+						"let scope = ''",
+						"",
+						"let getTokenRequest = {",
+						"    method: 'POST',",
+						"    url: tokenUrl,",
+						"    auth: {",
+						"        type: \"basic\",",
+						"        basic: [",
+						"            { key: \"username\", value: clientId },",
+						"            { key: \"password\", value: clientSecret }",
+						"        ]",
+						"    },",
+						"    body: {",
+						"        mode: 'urlencoded',",
+						"        urlencoded: [",
+						"            { key: 'grant_type', value: 'client_credentials' }",
+						"            ] ",
+						"        ",
+						"    }",
+						"};",
+						"",
+						"pm.sendRequest(getTokenRequest, (err, response) => {",
+						"    let jsonResponse = response.json(),",
+						"        newAccessToken = jsonResponse.access_token;",
+						"",
+						"    console.log({ err, jsonResponse, newAccessToken })",
+						"",
+						"    pm.environment.set('accessToken', newAccessToken);",
+						"    pm.variables.set('accessToken', newAccessToken);",
+						"});",
+						""
+					]
+				}
+			},
+			{
+				"listen": "test",
+				"script": {
+					"id": "20ab2fef-3029-46e0-8b81-8cbb467e56a5",
+					"type": "text/javascript",
+					"exec": [
+						""
+					]
+				}
+			}
+		],
+		"variables": null,
+		"order": [
+			"e6ef859a-5d46-47c6-8082-98f310e0b3e8",
+			"f6aae54e-3792-4a48-94e3-ed2559b644d6",
+			"1b9870d2-23d4-41b6-806c-77b1e0e26ae8",
+			"f68f888a-6156-4f58-8634-b48f4f05f323",
+			"c95a9135-34a6-424c-a4b1-329a139d45f1"
+		],
+		"folders_order": [],
+		"owner": "7060287",
+		"favorite": false,
+		"type": "collection",
+		"depth": 0
+	},
+	"folder": null,
+	"environment": null,
+	"globals": [],
+	"results": [],
+	"totalPass": 0,
+	"totalFail": 0,
+	"totalTime": 0,
+	"lifecycle": "done",
+	"requests": [
+		{
+			"name": "Create User",
+			"id": "e6ef859a-5d46-47c6-8082-98f310e0b3e8",
+			"url": "https://http://127.0.0.1:8080/auth/admin/realms/registries/users",
+			"time": "2019-04-01T22:04:11.011Z",
+			"testPassFailCounts": {}
+		}
+	],
+	"synced": false
+}
