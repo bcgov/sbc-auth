@@ -33,8 +33,8 @@ tracer = opentracing.tracer
 tracing = FlaskTracing(tracer)
 
 
-@cors_preflight('POST')
-@API.route('')
+@cors_preflight('POST,OPTIONS')
+@API.route('', methods=['POST', 'OPTIONS'])
 class User(Resource):
     """Retrieve user detail information from token and database """
 
