@@ -18,7 +18,7 @@ import json
 import os
 
 class KeycloakUser:
-    def __init__(self, username, password, firstname, lastname, email, enabled, user_type, source, corp_type):
+    def __init__(self, username, password, firstname=None, lastname=None, email=None, enabled=True, user_type=None, source=None, corp_type=None):
         self.username = username
         self.password = password
         self.firstname = firstname
@@ -56,7 +56,7 @@ def add_user(keycloakuser):
                    "firstName": keycloakuser.firstname,
                    "lastName": keycloakuser.lastname,
                    "credentials": [{"value": keycloakuser.password,"type": "password"}],
-                   #"group": [keycloakuser.user_type, ],
+                   "groups": [keycloakuser.user_type],
                    "attributes": {"corp_type": keycloakuser.corp_type, "source": keycloakuser.source}})
     return response
 
