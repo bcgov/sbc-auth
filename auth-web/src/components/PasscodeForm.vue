@@ -32,10 +32,11 @@
           v-model="passcode"
         ></v-text-field>
       </div>
-      <div class="passcode-form__form-btns">
+        <div class="passcode-form__form-btns">
         <v-btn class="sign-in-btn" @click="login" color="primary" large>
-          Sign in
-          <v-icon dark right>arrow_forward</v-icon>
+          <v-progress-circular :indeterminate="true" size="20" width="2" v-if="showSpinner"></v-progress-circular>
+          <span>{{showSpinner ? 'Signing in' : 'Sign in'}}</span>
+          <v-icon dark right v-if="!showSpinner">arrow_forward</v-icon>
         </v-btn>
       </div>
     </v-form>
@@ -58,6 +59,7 @@ export default {
 
   data: () => ({
     show1: false,
+    showSpinner: false,
     passCodeDialog: false, // Forgotten Password Dialog
     loginError: '',
     valid: false,
@@ -99,8 +101,9 @@ export default {
               this.loginError =
                 'Login Failed. Invalid Incorporation Number or Passcode'
             } else if (response.data.access_token) {
+              this.showSpinner = true
+              setTimeout(() => window.location.href = 'https://coops-dev.pathfinder.gov.bc.ca/', 500)
               localStorage.name = response.data.access_token
-              window.location.href = 'https://coops-dev.pathfinder.gov.bc.ca/'
             }
           })
           .catch(response => {
@@ -138,6 +141,10 @@ export default {
     float: right;
   }
 }
+
+.v-progress-circular
+  margin-right 1rem
+  margin-left -0.5rem
 
 @media (max-width: 600px) {
   .sign-in-btn {
