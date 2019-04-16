@@ -15,9 +15,10 @@
 
 from keycloak import KeycloakAdmin
 import json
+import os
 
 class KeycloakUser:
-    def __init__(self, username, password, firstname, lastname, email, enabled, user_type, user_source, corp_type):
+    def __init__(self, username, password, firstname, lastname, email, enabled, user_type, source, corp_type):
         self.username = username
         self.password = password
         self.firstname = firstname
@@ -25,30 +26,39 @@ class KeycloakUser:
         self.email = email
         self.enabled = enabled
         self.user_type = user_type
-        self.user_source = user_source
+        self.source = source
         self.corp_type = corp_type
 
 
-keycloak_admin = KeycloakAdmin(server_url="http://localhost:8080/auth/",
-                               username='localtest',
-                               password='27f45971-0bee-44da-b5d6-34452a97b0b4',
-                               client_id='localtest',
-                               client_secret_key='27f45971-0bee-44da-b5d6-34452a97b0b4',
-                               realm_name="registries",
+keycloak_admin = KeycloakAdmin(server_url=os.getenv("KEYCLOAK_BASE_URL") + "/auth/",
+                               username=os.getenv("KEYCLOAK_ADMIN_CLIENTID"),
+                               password=os.getenv("KEYCLOAK_ADMIN_SECRET"),
+                               realm_name=os.getenv("KEYCLOAK_REALMNAME"),
+                               client_id=os.getenv("KEYCLOAK_ADMIN_CLIENTID"),
+                               client_secret_key=os.getenv("KEYCLOAK_ADMIN_SECRET"),
                                verify=True)
+
+# keycloak_admin = KeycloakAdmin(server_url="http://localhost:8080/auth/",
+#                                username='localtest',
+#                                password='27f45971-0bee-44da-b5d6-34452a97b0b4',
+#                                client_id='localtest',
+#                                client_secret_key='27f45971-0bee-44da-b5d6-34452a97b0b4',
+#                                realm_name="registries",
+#                                verify=True)
+
 
 # Add user
 def add_user(keycloakuser):
     # Add user and set password
-    new_user = keycloak_admin.create_user({"email": keycloakuser.email,
+    response = keycloak_admin.create_user({"email": keycloakuser.email,
                    "username": keycloakuser.username,
                    "enabled": keycloakuser.enabled,
                    "firstName": keycloakuser.firstname,
                    "lastName": keycloakuser.lastname,
                    "credentials": [{"value": keycloakuser.password,"type": "password"}],
-                   "group": [keycloakuser.user_type, ],
-                   "attributes": {"corp_type": keycloakuser.corp_type,"source":keycloakuser.user_source}})
-    return new_user
+                   #"group": [keycloakuser.user_type, ],
+                   "attributes": {"corp_type": keycloakuser.corp_type, "source": keycloakuser.source}})
+    return response
 
 
 # Get user from username
