@@ -25,9 +25,13 @@ import config
 from flask_opentracing import FlaskTracing
 from jaeger_client import Config as JaegerConfig
 
-from auth_api.models import db, ma
-from auth_api.utils.logging import setup_logging
+# from auth_api.resources import API, ops_blueprint  # , api_blueprint
+
 from auth_api.utils.run_version import get_run_version
+
+from auth_api.models import db, ma
+from auth_api.utils.run_version import get_run_version
+from auth_api.utils.util_logging import setup_logging
 
 setup_logging(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf'))  # important to do this first
 

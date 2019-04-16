@@ -27,7 +27,10 @@ from .trace import API as TRACE_API
 from .userinfo import API as USERINFO_API
 from .meta import API as META_API
 from .ops import API as OPS_API
+from .login import API as LOGIN_API
 from .authenticate import API as AUTHENTICATE_API
+from .adduser import API as ADDUSER_API
+from .getuser import API as GETUSER_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
@@ -65,4 +68,7 @@ API = Api(API_BLUEPRINT,
 API.add_namespace(META_API, path='/meta')
 API.add_namespace(TRACE_API, path='/trace')
 API.add_namespace(USERINFO_API, path='/userinfo')
+API.add_namespace(LOGIN_API, path='/login')
 API.add_namespace(AUTHENTICATE_API, path='/authenticate')
+API.add_namespace(ADDUSER_API, path='/adduser')
+API.add_namespace(GETUSER_API, path='/getuser')
