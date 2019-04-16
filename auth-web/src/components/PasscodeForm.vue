@@ -32,15 +32,11 @@
           v-model="passcode"
         ></v-text-field>
       </div>
-
-        <p  v-if="showSpinner"> signing into coops</p>
-
-        <v-progress-linear :indeterminate="true"  v-if="showSpinner"></v-progress-linear>
-
         <div class="passcode-form__form-btns">
         <v-btn class="sign-in-btn" @click="login" color="primary" large>
-          Sign in
-          <v-icon dark right>arrow_forward</v-icon>
+          <v-progress-circular :indeterminate="true" size="20" width="2" v-if="showSpinner"></v-progress-circular>
+          <span>{{showSpinner ? 'Signing in' : 'Sign in'}}</span>
+          <v-icon dark right v-if="!showSpinner">arrow_forward</v-icon>
         </v-btn>
       </div>
     </v-form>
@@ -145,6 +141,10 @@ export default {
     float: right;
   }
 }
+
+.v-progress-circular
+  margin-right 1rem
+  margin-left -0.5rem
 
 @media (max-width: 600px) {
   .sign-in-btn {
