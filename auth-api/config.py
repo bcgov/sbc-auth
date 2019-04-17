@@ -92,6 +92,15 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     TESTING = False
     DEBUG = False
 
+    #Keycloak auth config baseurl
+    KEYCLOAK_BASE_URL = os.getenv("KEYCLOAK_BASE_URL")
+    KEYCLOAK_REALMNAME =  os.getenv("KEYCLOAK_REALMNAME")
+
+    #Keycloak admin config
+    KEYCLOAK_ADMIN_USERNAME = os.getenv("KEYCLOAK_ADMIN_CLIENTID")
+    KEYCLOAK_ADMIN_SECRET = os.getenv("KEYCLOAK_ADMIN_SECRET")
+
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False
