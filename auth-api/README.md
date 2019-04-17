@@ -50,6 +50,10 @@ See (openshift/Readme.md)
 
 To report bugs/issues/feature requests, please file an [issue](../../issues).
 
+## Code standards 
+
+Refer code-review-checklist.md
+
 ## How to Contribute
 
 If you would like to contribute, please see our [CONTRIBUTING](./CONTRIBUTING.md) guidelines.
