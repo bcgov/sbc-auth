@@ -32,17 +32,32 @@ class adduser(Resource):
             data = request.values
         try:
             user = util_keycloak.KeycloakUser(data["username"],
-                                              data["password"],
-                                              data["firstname"],
-                                              data["lastname"],
-                                              data["email"],
-                                              data["enabled"],
-                                              data["user_type"],
-                                              data["source"],
-                                              data["corp_type"])
+                                              data["password"])
+            if "firstname" in data:
+                user.firstname = data["firstname"]
+
+            if "lastname" in data:
+                user.lastname = data["lastname"]
+
+            if "email" in data:
+                user.email = data["email"]
+
+            if "enabled" in data:
+                user.enabled = data["enabled"]
+
+            if "user_type" in data:
+                user.user_type = data["user_type"]
+
+            if "source" in data:
+                user.source = data["source"]
+
+            if "corp_type" in data:
+                user.corp_type = data["corp_type"]
+
             response = util_keycloak.add_user(user)
-            user = util_keycloak.get_user_by_username(data["username"])
-            return user, 201
+
+            new_user = util_keycloak.get_user_by_username(data["username"])
+            return new_user, 201
         except Exception as err:
             current_span.set_tag(tags.ERROR, 'true')
             tb = traceback.format_exc()
