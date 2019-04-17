@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "e8f8511c-1fab-46bb-8ab0-87d5789bc8ee",
+		"_postman_id": "824cda60-8c7b-487e-b737-6665668a130d",
 		"name": "auth-api",
 		"description": "Endpoint samples to create an user using KeyCloak REST Admin API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -363,6 +363,195 @@
 						"protocol",
 						"openid-connect",
 						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login user by userid/passwd",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"userToken\", jsonData.access_token);",
+							"pm.environment.set(\"refreshUserToken\", jsonData.refresh_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "grant_type=password&client_id={{webClientId}}&username=cp00000001&password=123456&client_secret={{webClientSecret}}"
+				},
+				"url": {
+					"raw": "https://{{base_url}}/auth/realms/{{realm_name}}/protocol/openid-connect/token",
+					"protocol": "https",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"{{realm_name}}",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login by userid/passwd-api",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"userToken\", jsonData.access_token);",
+							"pm.environment.set(\"refreshUserToken\", jsonData.refresh_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "grant_type=password&client_id={{webClientId}}&username=cp00000001&password=123456&client_secret={{webClientSecret}}"
+				},
+				"url": {
+					"raw": "{{api_url}}/api/v1/login",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user by username-api",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"userToken\", jsonData.access_token);",
+							"pm.environment.set(\"refreshUserToken\", jsonData.refresh_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "username=cp00000001"
+				},
+				"url": {
+					"raw": "{{api_url}}/api/v1/getuser",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"getuser"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add user to key cloak-api",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"userToken\", jsonData.access_token);",
+							"pm.environment.set(\"refreshUserToken\", jsonData.refresh_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"test12\",\n    \"password\": \"1111\",\n    \"firstname\": \"11\",\n    \"lastname\": \"test\",\n    \"email\": \"test11@gov.bc.ca\",\n    \"enabled\": true,\n    \"user_type\": \"basic/editor\",\n    \"corp_type\": \"CP\",\n    \"source\": \"PASSCODE\"\n}\n"
+				},
+				"url": {
+					"raw": "{{api_url}}/api/v1/adduser",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"adduser"
 					]
 				}
 			},
