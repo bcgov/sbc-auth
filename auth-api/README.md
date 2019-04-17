@@ -52,7 +52,7 @@ To report bugs/issues/feature requests, please file an [issue](../../issues).
 
 ## Code standards 
 
-Refer code-review-checklist.md
+Refer [checklist](https://github.com/bcgov/sbc-auth/wiki/API-code-review-checklist)
 
 ## How to Contribute
 
