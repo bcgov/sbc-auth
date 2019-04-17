@@ -106,12 +106,10 @@ node_modules/
 # vscode
 .vscode/
 
-.idea
+# pycharm
+.idea/
 
+# npm
 package-lock.json
-auth-api/.idea/auth-api.iml
-auth-api/.idea/misc.xml
-auth-api/.idea/auth-api.iml
-auth-api/.idea/misc.xml
-auth-api/.idea/modules.xml
-auth-api/.idea/workspace.xml
+
+
