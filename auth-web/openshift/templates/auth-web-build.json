@@ -52,6 +52,12 @@
             "name": "${NAME}:${OUTPUT_IMAGE_TAG}"
           }
         },
+        "resources": {
+          "limits": {
+            "cpu": "4",
+            "memory": "4Gi"
+          }
+        },
         "triggers": [
           {
             "type": "ConfigChange"
