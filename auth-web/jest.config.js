@@ -15,9 +15,9 @@ module.exports = {
   transformIgnorePatterns: [
     '/node_modules/'
   ],
-  "collectCoverage": true,
-  "collectCoverageFrom": ["**/*.{js,vue}", "!**/node_modules/**"],
-  "coverageReporters": ["html", "text-summary"],
+  'collectCoverage': true,
+  'collectCoverageFrom': ['**/*.{js,vue}', '!**/node_modules/**'],
+  'coverageReporters': ['html', 'text-summary'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
   },
