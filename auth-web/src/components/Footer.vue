@@ -13,16 +13,13 @@
   </footer>
 </template>
 
-
 <script lang="ts">
-  import Vue from 'vue';
+import Vue from 'vue'
 
-  export default Vue.extend({
-    name: 'Footer'
-  });
+export default Vue.extend({
+  name: 'Footer'
+})
 </script>
-
-
 
 <style lang="stylus" scoped>
   @import "../assets/styl/theme.styl"

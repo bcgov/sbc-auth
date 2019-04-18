@@ -23,9 +23,9 @@
 </template>
 
 <script>
-import Vue from 'vue';
-import PasscodeForm from '@/components/PasscodeForm.vue';
-import SupportInfoCard from '@/components/SupportInfoCard.vue';
+import Vue from 'vue'
+import PasscodeForm from '@/components/PasscodeForm.vue'
+import SupportInfoCard from '@/components/SupportInfoCard.vue'
 
 export default ({
   name: 'Home',
@@ -33,7 +33,7 @@ export default ({
     PasscodeForm,
     SupportInfoCard
   }
-});
+})
 </script>
 
 <style lang="stylus" scoped>

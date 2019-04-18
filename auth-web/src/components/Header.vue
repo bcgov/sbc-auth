@@ -11,13 +11,12 @@
 </template>
 
 <script lang="ts">
-  import Vue from 'vue';
+import Vue from 'vue'
 
-  export default Vue.extend({
-    name: 'Header'
-  });
+export default Vue.extend({
+  name: 'Header'
+})
 </script>
-
 
 <style lang="stylus" scoped>
   @import "../assets/styl/theme.styl"
