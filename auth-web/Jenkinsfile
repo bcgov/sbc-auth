@@ -47,7 +47,7 @@ boolean triggerBuild(String contextDirectory) {
 
   if ( filesChangeCnt < 1 ) {
     echo('The changes do not require a build.')
-    return false
+    return true
   }
   else {
     echo('The changes require a build.')
@@ -84,7 +84,7 @@ String getImageTagHash(String imageName, String tag = "") {
     {
         node (nodejs_label) {
             checkout scm
-            dir('coops-ui') {
+            dir('auth-web') {
                 try {
                     sh '''
                         node -v
