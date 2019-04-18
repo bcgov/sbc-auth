@@ -66,6 +66,20 @@ String getImageTagHash(String imageName, String tag = "") {
   return istag.out.tokenize('@')[1].trim()
 }
 
+def nodejs_label = "jenkins-nodejs-${UUID.randomUUID().toString()}"
+    podTemplate(label: nodejs_label, name: nodejs_label, serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+        containerTemplate(
+            name: 'jnlp',
+            image: '172.50.0.2:5000/openshift/jenkins-slave-nodejs:8',
+            resourceRequestCpu: '500m',
+            resourceLimitCpu: '1000m',
+            resourceRequestMemory: '1Gi',
+            resourceLimitMemory: '2Gi',
+            workingDir: '/tmp',
+            command: '',
+            args: '${computer.jnlpmac} ${computer.name}'
+        )
+    ])
 
         node (nodejs_label) {
             checkout scm
