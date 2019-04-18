@@ -83,7 +83,7 @@ export default {
     },
     passcode: {
       get () {
-        return this.$store.state.passcode
+        return this.$store.state.passcode;;
       },
       set (value) {
         this.$store.commit('passcode', value)
