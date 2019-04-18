@@ -66,7 +66,10 @@ String getImageTagHash(String imageName, String tag = "") {
   return istag.out.tokenize('@')[1].trim()
 }
 
-def nodejs_label = "jenkins-nodejs-${UUID.randomUUID().toString()}"
+def run_pipeline = true
+
+if( run_pipeline ) {
+    def nodejs_label = "jenkins-nodejs-${UUID.randomUUID().toString()}"
     podTemplate(label: nodejs_label, name: nodejs_label, serviceAccount: 'jenkins', cloud: 'openshift', containers: [
         containerTemplate(
             name: 'jnlp',
@@ -126,9 +129,9 @@ def nodejs_label = "jenkins-nodejs-${UUID.randomUUID().toString()}"
         }
 
 
-node {
- // if( triggerBuild(CONTEXT_DIRECTORY) ) {
 
+
+node {
     stage("Build ${BUILD_CONFIG}") {
       script {
         openshift.withCluster() {
