@@ -184,11 +184,5 @@ node {
         }
       }
     }
- // }
- /* else {
-    stage('No Changes') {
-      echo "No changes ..."
-      currentBuild.result = 'SUCCESS'
-    }
-  } */
+}
 }
