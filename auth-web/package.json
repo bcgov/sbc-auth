@@ -8,6 +8,7 @@
     "build": "vue-cli-service build --mode development",
     "lint": "vue-cli-service lint",
     "lint:nofix": "vue-cli-service lint --no-fix",
+    "lint:fix": "vue-cli-service lint --fix",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit"
   },

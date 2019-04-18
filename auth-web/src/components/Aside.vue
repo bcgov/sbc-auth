@@ -10,7 +10,7 @@
 <script>
 export default {
   name: 'Aside'
-};
+}
 </script>
 
 <style lang="stylus" scoped>

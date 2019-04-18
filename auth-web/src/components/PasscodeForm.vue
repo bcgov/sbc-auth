@@ -102,7 +102,9 @@ export default {
                 'Login Failed. Invalid Incorporation Number or Passcode'
             } else if (response.data.access_token) {
               this.showSpinner = true
-              setTimeout(() => window.location.href = 'https://coops-dev.pathfinder.gov.bc.ca/', 500)
+              setTimeout(() => {
+                window.location.href = 'https://coops-dev.pathfinder.gov.bc.ca/'
+              }, 500)
               localStorage.name = response.data.access_token
             }
           })

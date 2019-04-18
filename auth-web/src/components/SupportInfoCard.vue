@@ -10,7 +10,7 @@
 <script>
 export default {
   name: 'SupportInfoCard'
-};
+}
 </script>
 
 <style lang="stylus" scoped>
