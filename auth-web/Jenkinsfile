@@ -1,4 +1,4 @@
-// Edit your app's name below 
+// Edit your app's name below
 def APP_NAME = 'auth-web'
 
 // Edit your environment TAG names below
@@ -44,7 +44,7 @@ boolean triggerBuild(String contextDirectory) {
       }
     }
   }
-  
+
   if ( filesChangeCnt < 1 ) {
     echo('The changes do not require a build.')
     return false
@@ -52,7 +52,7 @@ boolean triggerBuild(String contextDirectory) {
   else {
     echo('The changes require a build.')
     return true
-  } 
+  }
 }
 
 // Get an image's hash tag
@@ -65,6 +65,52 @@ String getImageTagHash(String imageName, String tag = "") {
   def istag = openshift.raw("get istag ${imageName}:${tag} -o template --template='{{.image.dockerImageReference}}'")
   return istag.out.tokenize('@')[1].trim()
 }
+
+  {
+        node (nodejs_label) {
+            checkout scm
+            dir('auth-web') {
+                try {
+                    sh '''
+                        node -v
+                        npm install
+                    '''
+                    stage("Run Jest tests") {
+                        def testResults = sh(script: "npm run test:unit", returnStatus: true)
+
+                        echo "Unit tests ran, returned ${testResults}"
+                        if (testResults > 0) {
+                            try {
+                                timeout(time: 1, unit: 'DAYS') {
+                                    input message: "Unit tests failed. Continue?", id: "1"
+                                }
+                            } catch (Exception e) {
+                                error('Abort')
+                            }
+                        }
+                    }
+                    stage("Check code quality (lint)") {
+                        def lintResults = sh(script: "npm run lint:nofix", returnStatus: true)
+
+                        echo "Linter ran, returned ${lintResults}"
+                        if (lintResults > 0) {
+                            try {
+                                timeout(time: 1, unit: 'DAYS') {
+                                    input message: "Linter failed. Continue?", id: "2"
+                                }
+                            } catch (Exception e) {
+                                error('Abort')
+                            }
+                        }
+                    }
+
+                } catch (Exception e) {
+                    error('Failure')
+                }
+
+            }
+        }
+    }
 
 node {
  // if( triggerBuild(CONTEXT_DIRECTORY) ) {
@@ -94,7 +140,7 @@ node {
               build.untilEach {
                 return it.object().status.phase == "Running"
               }
-              build.logs('-f') 
+              build.logs('-f')
             }
           }
         } catch (e) {
