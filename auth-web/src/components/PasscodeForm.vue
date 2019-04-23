@@ -99,7 +99,7 @@ export default {
           .then(response => {
             if (response.data.error) {
               this.loginError =
-                'Login Failed. Invalid Incorporation Number or Passcode'
+                      this.$t('loginFailedMessage')
             } else if (response.data.access_token) {
               this.showSpinner = true
               setTimeout(() => {
