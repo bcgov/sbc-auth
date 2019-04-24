@@ -103,7 +103,7 @@ export default {
             } else if (response.data.access_token) {
               this.showSpinner = true
               setTimeout(() => {
-                window.location.href = 'https://coops-dev.pathfinder.gov.bc.ca/'
+                window.location.href = process.env.VUE_APP_COPS_REDIRECT_URL
               }, 500)
               localStorage.name = response.data.access_token
             }
