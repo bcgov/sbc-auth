@@ -91,6 +91,9 @@ export default {
     }
   },
   methods: {
+    isValidForm () :boolean {
+      return this.$refs.form.validate()
+    },
     login () {
       if (this.$refs.form.validate()) {
         console.log('VUE_APP_ROOT_API:' + process.env.VUE_APP_ROOT_API)
