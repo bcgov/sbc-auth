@@ -4,8 +4,11 @@ import { mount, createLocalVue } from '@vue/test-utils'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import VueRouter from 'vue-router'
+import LoginServices from '../../src/services/login.services'
+
 Vue.use(Vuetify)
 Vue.use(VueRouter)
+
 describe('PasscodeForm.vue', () => {
   let cmp
 
@@ -70,5 +73,30 @@ describe('PasscodeForm.vue', () => {
 
     expect(cmp.vm.entityNumber).toBe('somenumber')
     expect(cmp.vm.passcode).toBe('somevalue')
+  })
+
+  it('login button click invokes login method', () => {
+    const stub = jest.fn()
+    cmp.setMethods({ login: stub })
+    cmp.update()
+    cmp.find('.sign-in-btn').trigger('click')
+    expect(cmp.vm.login).toBeCalled()
+  })
+
+  it('login button click invokes isValidForm method', () => {
+    const stub = jest.fn()
+    cmp.setMethods({ isValidForm: stub })
+    cmp.update()
+    cmp.find('.sign-in-btn').trigger('click')
+    expect(cmp.vm.isValidForm).toBeCalled()
+  })
+
+  it('login button click invokes valid form', () => {
+    const stub = jest.fn()
+    stub.mockReturnValueOnce(true)
+    cmp.setMethods({ isValidForm: stub })
+    cmp.update()
+    cmp.find('.sign-in-btn').trigger('click')
+    expect(cmp.vm.isValidForm).toBeTruthy()
   })
 })
