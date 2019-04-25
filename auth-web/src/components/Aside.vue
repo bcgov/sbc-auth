@@ -2,8 +2,6 @@
   <v-card flat>
     <header>Need Assistance?</header>
     <div class="container">
-
-      {{ $t('helpText') }}
     </div>
   </v-card>
 </template>
