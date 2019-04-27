@@ -6,6 +6,6 @@
 NAME=auth-api
 # GITHUB_WEBHOOK_SECRET=[a-zA-Z0-9]{40}
 SOURCE_REPOSITORY_URL=https://github.com/bcgov/sbc-auth.git
-SOURCE_REPOSITORY_REF=master
+SOURCE_REPOSITORY_REF=development
 CONTEXT_DIR=auth-api
 JENKINSFILE_PATH=Jenkinsfile
