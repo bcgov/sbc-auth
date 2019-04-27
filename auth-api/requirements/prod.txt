@@ -13,3 +13,7 @@ marshmallow
 marshmallow-sqlalchemy
 jsonschema
 requests
+python-keycloak
+opentracing
+jaeger-client
+flask_opentracing
