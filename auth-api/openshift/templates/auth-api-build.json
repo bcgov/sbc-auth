@@ -80,7 +80,7 @@
       "displayName": "Git Reference",
       "description": "The git reference or branch.",
       "required": true,
-      "value": "master"
+      "value": "development"
     },
     {
       "name": "SOURCE_CONTEXT_DIR",
