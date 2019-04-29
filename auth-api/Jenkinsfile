@@ -154,7 +154,10 @@ if( run_pipeline ) {
         resourceLimitMemory: '4Gi',
         workingDir: '/tmp',
         command: '',
-        args: '${computer.jnlpmac} ${computer.name}'
+        args: '${computer.jnlpmac} ${computer.name}',
+        envVars: [
+            secretEnvVar(key: 'DATABASE_TEST_URL', secretName: 'apitest-secrets', secretKey: 'DATABASE_TEST_URL')
+        ]
       )
     ]
   ){
@@ -167,15 +170,20 @@ if( run_pipeline ) {
 
       stage('Run pytest') {
         echo "Running pytest ..."
+        sh '''
+          #!/bin/bash
+          echo DATABASE_URL=$DATABASE_URL
+        '''
         dir('auth-api') {
           try {
             sh '''
-                  python --version
-                  pip install pip --upgrade
-                  pip install -r requirements/dev.txt
-                  pip install -r requirements/editable.txt
-                  export PYTHONPATH=src
-                  pytest 
+                env
+                pip install pip setuptools wheel --upgrade
+                pip install python-dotenv==0.10.1
+                pip install click==7.0
+                pip install -r requirements/dev.txt
+                pip install -r requirements/editable.txt
+                python setup.py test
             '''
           } catch (Exception e) {
               echo "EXCEPTION: ${e}"
