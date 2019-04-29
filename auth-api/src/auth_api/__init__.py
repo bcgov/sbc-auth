@@ -27,8 +27,6 @@ from jaeger_client import Config as JaegerConfig
 
 # from auth_api.resources import API, ops_blueprint  # , api_blueprint
 
-from auth_api.utils.run_version import get_run_version
-
 from auth_api import models
 from auth_api.models import db, ma
 from auth_api.utils.run_version import get_run_version
@@ -62,7 +60,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     @app.after_request
     def add_version(response):  # pylint: disable=unused-variable
         version = get_run_version()
-        response.headers['API'] = 'auth_api/{version}'
+        response.headers['API'] = f'auth_api/{version}'
         return response
 
     register_shellcontext(app)
@@ -94,7 +92,7 @@ def register_shellcontext(app):
 
 def init_tracer(service):
     """ initialize tracer"""
-    config = JaegerConfig(
+    jConfig = JaegerConfig(
         config={  # usually read from some yaml config
             'sampler': {
                 'type': 'const',
@@ -107,4 +105,4 @@ def init_tracer(service):
     )
 
     # this call also sets opentracing.tracer
-    return config.initialize_tracer()
+    return jConfig.initialize_tracer()
