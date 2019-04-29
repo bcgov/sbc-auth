@@ -52,6 +52,7 @@ ADD_USER_REQUEST_SAME_EMAIL = {
    "source": "PASSCODE"
 }
 
+
 def test_user_add_user_happy(client):
     """Assert that the endpoint returns 201."""
     rv = client.post('/api/v1/user', data=json.dumps(ADD_USER_REQUEST), content_type='application/json')
@@ -65,6 +66,7 @@ def test_user_add_user_sad(client):
     rv = client.post('/api/v1/user', data=json.dumps(ADD_USER_REQUEST_SAME_EMAIL), content_type='application/json')
     assert rv.status_code == 500
     rv = client.delete('/api/v1/user', data=json.dumps(USER_REQUEST), content_type='application/json')
+
 
 def test_user_get_user_happy(client):
     """Assert that the endpoint returns 200."""

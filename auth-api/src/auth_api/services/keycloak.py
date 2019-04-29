@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""utils for keycloak administration"""
+"""Utils for keycloak administration"""
 
 from keycloak import KeycloakAdmin
 from keycloak import KeycloakOpenID
@@ -37,8 +37,8 @@ keycloak_admin = KeycloakAdmin(server_url=os.getenv("KEYCLOAK_BASE_URL") + "/aut
 # Configure client
 keycloak_openid = KeycloakOpenID(server_url=os.getenv("KEYCLOAK_BASE_URL") + "/auth/",
                                  realm_name=os.getenv("KEYCLOAK_REALMNAME"),
-                                 client_id=os.getenv("JWT_OIDC_AUDIENCE"),
-                                 client_secret_key=os.getenv("JWT_OIDC_CLIENT_SECRET"),
+                                 client_id=os.getenv("KEYCLOAK_AUTH_AUDIENCE"),
+                                 client_secret_key=os.getenv("KEYCLOAK_AUTH_CLIENT_SECRET"),
                                  verify=True)
 
 
@@ -48,9 +48,11 @@ class KeycloakService:
 
     # Add user to Keycloak
     def add_user(self, user_request):
+        """Add user to Keycloak"""
+
         # New user default to enabled.
         enabled = user_request.get("enabled")
-        if enabled == None:
+        if enabled is None:
             enabled = True
 
         # Add user and set password
@@ -65,6 +67,8 @@ class KeycloakService:
                            "attributes": {"corp_type": user_request.get("corp_type"), "source": user_request.get("source")}})
 
             user_id = keycloak_admin.get_user_id(user_request.get("username"))
+
+            # Set user groups
             if user_request.get("user_type"):
                 for user_type in user_request.get("user_type"):
                     group = keycloak_admin.get_group_by_path(user_type, True)
@@ -77,8 +81,8 @@ class KeycloakService:
         except Exception as err:
             raise err
 
-    # Get user from Keycloak by username
     def get_user_by_username(self, username):
+        """ Get user from Keycloak by username"""
         try:
             # Get user id
             user_id_keycloak = keycloak_admin.get_user_id(username)
@@ -88,8 +92,8 @@ class KeycloakService:
         except Exception as err:
             raise err
 
-    # Delete user from Keycloak by username
     def delete_user_by_username(self, username):
+        """Delete user from Keycloak by username"""
         try:
             user_id_keycloak = keycloak_admin.get_user_id(username)
             # Get User
@@ -98,11 +102,10 @@ class KeycloakService:
         except Exception as err:
             raise err
 
-    # Get user access token by username and password
     def get_token(self, username, password):
+        """Get user access token by username and password"""
         return keycloak_openid.token(username, password)
 
-
-    # Refresh user token
     def refresh_token(self, refresh_token):
+        """Refresh user token"""
         return keycloak_openid.refresh_token(refresh_token, ["refresh_token"])
