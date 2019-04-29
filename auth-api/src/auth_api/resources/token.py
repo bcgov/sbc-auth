@@ -1,3 +1,18 @@
+# Copyright © 2019 Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the 'License');
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an 'AS IS' BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Endpoints to get token from Keycloak """
+
 import traceback
 from flask import jsonify, request
 from flask_restplus import Resource, Namespace
@@ -12,7 +27,7 @@ from jose import jwt
 from auth_api.utils.util import cors_preflight
 
 
-API = Namespace('token', description='Authenication System - Passcode login')
+API = Namespace('token', description='Authentication System - Passcode login')
 KEYCLOAK_SERVICE = KeycloakService()
 
 
@@ -22,10 +37,13 @@ tracing = FlaskTracing(tracer)
 
 @cors_preflight('POST,OPTIONS')
 @API.route('', methods=['POST', 'OPTIONS'])
-class token(Resource):
+class Token(Resource):
+    """Get token from Keycloak by username and password, or refresh token, return token"""
     @staticmethod
     @tracing.trace()
     def post():
+        """Get token or refresh token, return token"""
+
         current_span = tracer.active_span
         data = request.get_json()
         if not data:
