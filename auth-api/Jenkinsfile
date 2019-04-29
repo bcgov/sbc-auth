@@ -169,7 +169,7 @@ if( run_pipeline ) {
       }
 
       stage('Run pytest') {
-        echo "Running pytest ..."
+        echo "Running pytest ... TODO"
         sh '''
           #!/bin/bash
           echo DATABASE_TEST_URL=$DATABASE_TEST_URL
@@ -177,13 +177,7 @@ if( run_pipeline ) {
         dir('auth-api') {
           try {
             sh '''
-                env
-                pip install pip setuptools wheel --upgrade
-                pip install python-dotenv==0.10.1
-                pip install click==7.0
-                pip install -r requirements/dev.txt
-                pip install -r requirements/editable.txt
-                python setup.py test
+                
             '''
           } catch (Exception e) {
               echo "EXCEPTION: ${e}"
