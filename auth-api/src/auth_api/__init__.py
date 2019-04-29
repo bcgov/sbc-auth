@@ -29,6 +29,7 @@ from jaeger_client import Config as JaegerConfig
 
 from auth_api.utils.run_version import get_run_version
 
+from auth_api import models
 from auth_api.models import db, ma
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
@@ -48,7 +49,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     tracer = init_tracer(__name__)
     FlaskTracing(tracer)
 
-    from auth_api import models
     from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT
 
     db.init_app(app)
@@ -62,7 +62,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     @app.after_request
     def add_version(response):  # pylint: disable=unused-variable
         version = get_run_version()
-        response.headers['API'] = f'auth_api/{version}'
+        response.headers['API'] = 'auth_api/{version}'
         return response
 
     register_shellcontext(app)
