@@ -83,7 +83,7 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
                 sess.execute(text('DROP SEQUENCE public.%s ;' % seq))
                 print('DROP SEQUENCE public.%s ' % seq)
             except Exception as err:  # pylint: disable=broad-except
-                print(f'Error: {err}')
+                print('Error: {err}')
         sess.commit()
 
         # ############################################
