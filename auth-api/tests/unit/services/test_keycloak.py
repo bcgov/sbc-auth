@@ -51,14 +51,16 @@ ADD_USER_REQUEST_SAME_EMAIL = {
 
 keycloak_service = KeycloakService()
 
-# add user happy path
+
 def test_keycloak_add_user_happy(session):
+    """add user happy path"""
     user = keycloak_service.add_user(ADD_USER_REQUEST)
     assert user.get('username') == 'test11'
     keycloak_service.delete_user_by_username(ADD_USER_REQUEST.get("username"))
 
 
 def test_keycloak_add_user_sad(session):
+    """add user sad path"""
     user = keycloak_service.add_user(ADD_USER_REQUEST)
     response = None
     try:
@@ -70,6 +72,7 @@ def test_keycloak_add_user_sad(session):
 
 
 def test_keycloak_get_user_by_username_happy(session):
+    """get user by username happy path"""
     user = keycloak_service.add_user(ADD_USER_REQUEST)
     user = keycloak_service.get_user_by_username(ADD_USER_REQUEST.get("username"))
     assert user.get('username') == 'test11'
@@ -77,6 +80,7 @@ def test_keycloak_get_user_by_username_happy(session):
 
 
 def test_keycloak_get_user_by_username_sad(session):
+    """get user by username sad path"""
     user = None
     try:
         user = keycloak_service.get_user_by_username(ADD_USER_REQUEST.get("username"))
@@ -86,6 +90,7 @@ def test_keycloak_get_user_by_username_sad(session):
 
 
 def test_keycloak_get_token_happy(session):
+    """get token by username and password happy path"""
     user = keycloak_service.add_user(ADD_USER_REQUEST)
     response = keycloak_service.get_token(ADD_USER_REQUEST.get("username"), ADD_USER_REQUEST.get("password"))
     assert response.get('access_token') is not None
@@ -93,6 +98,7 @@ def test_keycloak_get_token_happy(session):
 
 
 def test_keycloak_get_token_sad(session):
+    """get token by username and password sad path"""
     user = None
     try:
         user = keycloak_service.get_token(ADD_USER_REQUEST.get("username"), ADD_USER_REQUEST.get("password"))
@@ -102,6 +108,7 @@ def test_keycloak_get_token_sad(session):
 
 
 def test_keycloak_refresh_token_happy(session):
+    """Refresh token happy path"""
     user = keycloak_service.add_user(ADD_USER_REQUEST)
     response = keycloak_service.get_token(ADD_USER_REQUEST.get("username"), ADD_USER_REQUEST.get("password"))
     refresh_token = response.get('refresh_token')
@@ -111,6 +118,7 @@ def test_keycloak_refresh_token_happy(session):
 
 
 def test_keycloak_refresh_token_sad(session):
+    """Refresh token sad path"""
     user = keycloak_service.add_user(ADD_USER_REQUEST)
     response = keycloak_service.get_token(ADD_USER_REQUEST.get("username"), ADD_USER_REQUEST.get("password"))
     refresh_token = response.get('access_token')
@@ -124,6 +132,7 @@ def test_keycloak_refresh_token_sad(session):
 
 
 def test_keycloak_delete_user_by_username_happy(session):
+    """Delete user by username happy path"""
     user = keycloak_service.add_user(ADD_USER_REQUEST)
     response = keycloak_service.delete_user_by_username(ADD_USER_REQUEST.get("username"))
     assert response is not None
@@ -131,6 +140,7 @@ def test_keycloak_delete_user_by_username_happy(session):
 
 
 def test_keycloak_delete_user_by_username_sad(session):
+    """Delete user by username sad path"""
     user = keycloak_service.add_user(ADD_USER_REQUEST)
     response = None
     try:
