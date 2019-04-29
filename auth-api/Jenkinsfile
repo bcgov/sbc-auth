@@ -172,7 +172,7 @@ if( run_pipeline ) {
         echo "Running pytest ..."
         sh '''
           #!/bin/bash
-          echo DATABASE_URL=$DATABASE_URL
+          echo DATABASE_TEST_URL=$DATABASE_TEST_URL
         '''
         dir('auth-api') {
           try {
@@ -259,5 +259,23 @@ if( run_pipeline ) {
       }
     }
   }
+
+  node {
+    // Sleep to ensure that the deployment has started when we begin the verification stage
+    sleep 5
+
+    stage("Deploy ${TAG_NAMES[1]}") {
+      input "Deploy to test?"
+        
+      script {
+        openshift.withCluster() {
+          openshift.withProject() {
+            echo "Tagging ${IMAGESTREAM_NAME} for deployment to ${TAG_NAMES[1]} ..."
+            openshift.tag("${IMAGESTREAM_NAME}:${TAG_NAMES[0]}", "${IMAGESTREAM_NAME}:${TAG_NAMES[1]}")
+          }
+        }
+      }
+    }
+  } 
 }
 
