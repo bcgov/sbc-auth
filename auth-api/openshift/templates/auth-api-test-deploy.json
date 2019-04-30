@@ -329,7 +329,7 @@
                   }
                 ],
                 "args": [
-                  "--collector.host-port=jaeger-collector.d7eovc-dev.svc:14267"
+                  "--collector.host-port=jaeger-collector.d7eovc-test.svc:14267"
                 ]
               }
             ],
@@ -464,7 +464,7 @@
       "displayName": "Environment TAG name",
       "description": "The TAG name for this environment, e.g., dev, test, prod",
       "required": true,
-      "value": "dev"
+      "value": "test"
     },
     {
       "name": "CPU_REQUEST",

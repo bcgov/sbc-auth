@@ -65,4 +65,3 @@ class Token(Resource):
                                  'error.object': trace_back})
             current_span.set_tag(tags.HTTP_STATUS_CODE, 500)
             return json.dumps({"error": "{}".format(err)}), 500\
-

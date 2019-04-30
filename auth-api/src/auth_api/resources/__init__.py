@@ -67,3 +67,4 @@ API.add_namespace(META_API, path='/meta')
 API.add_namespace(USERINFO_API, path='/users/info')
 API.add_namespace(TOKEN_API, path='/token')
 API.add_namespace(USER_API, path='/admin/users')
+
