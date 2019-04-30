@@ -258,7 +258,7 @@ if( run_pipeline ) {
       }
     }
 
-    stage("Deploy ${BUILD_CONFIG}-${TAG_NAMES[1]") {
+    stage("Deploy ${BUILD_CONFIG}-${TAG_NAMES[1]}") {
       script {
         openshift.withCluster() {
           openshift.withProject(NAMESPACES[1]) {
