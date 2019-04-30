@@ -14,25 +14,25 @@
 """Endpoints to get token from Keycloak """
 
 import traceback
-from flask import jsonify, request
-from flask_restplus import Resource, Namespace
-from auth_api.services.keycloak import KeycloakService
-from auth_api.services import User
 import opentracing
+import json
+
+from flask import request
+from flask_restplus import Resource, Namespace, cors
 from flask_opentracing import FlaskTracing
-from ..utils.trace_tags import TraceTags as tags
-from flask import current_app
-import os
-from jose import jwt
+
+from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
+
+from ..utils.trace_tags import TraceTags as tags
 
 
 API = Namespace('token', description='Authentication System - Passcode login')
 KEYCLOAK_SERVICE = KeycloakService()
 
 
-tracer = opentracing.tracer
-tracing = FlaskTracing(tracer)
+TRACER = opentracing.tracer
+TRACING = FlaskTracing(TRACER)
 
 
 @cors_preflight('POST,OPTIONS')
@@ -40,11 +40,12 @@ tracing = FlaskTracing(tracer)
 class Token(Resource):
     """Get token from Keycloak by username and password, or refresh token, return token"""
     @staticmethod
-    @tracing.trace()
+    @cors.crossdomain(origin='*')
+    @TRACING.trace()
     def post():
         """Get token or refresh token, return token"""
 
-        current_span = tracer.active_span
+        current_span = TRACER.active_span
         data = request.get_json()
         if not data:
             data = request.values
@@ -54,16 +55,14 @@ class Token(Resource):
             else:
                 response = KEYCLOAK_SERVICE.get_token(data.get('username'), data.get('password'))
 
-            return response, 200
+            return json.dumps(response), 200
         except Exception as err:
             current_span.set_tag(tags.ERROR, 'true')
-            tb = traceback.format_exc()
+            trace_back = traceback.format_exc()
             current_span.log_kv({'event': 'error',
                                  'error.kind': str(type(err)),
                                  'error.message': err.with_traceback(None),
-                                 'error.object': tb})
+                                 'error.object': trace_back})
             current_span.set_tag(tags.HTTP_STATUS_CODE, 500)
-            return {"error": "{}".format(err)}, 500\
-
-
+            return json.dumps({"error": "{}".format(err)}), 500\
 
