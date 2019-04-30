@@ -16,33 +16,33 @@ from flask import jsonify, g
 from flask_restplus import Resource, Namespace, cors
 from flask_jwt_oidc import AuthError
 
+import opentracing
+from flask_opentracing import FlaskTracing
+
 from auth_api import jwt as _jwt
 from auth_api.services import User
 from auth_api.utils.util import cors_preflight
 from auth_api.utils.tracing import ExceptionTracing
 
-import opentracing
-from flask_opentracing import FlaskTracing
 
-
-API = Namespace('userinfo', description='Authenication System - get User Information')
+API = Namespace('users/info', description='Authentication System - get User Information')
 
 # get the existing tracer and inject into flask app
-tracer = opentracing.tracer
-tracing = FlaskTracing(tracer)
-exceptionTracing = ExceptionTracing(tracer)
+TRACER = opentracing.tracer
+TRACING = FlaskTracing(TRACER)
+EXCEPTION_TRACING = ExceptionTracing(TRACER)
 
 
 @API.errorhandler(AuthError)
-@exceptionTracing.trace()
-def handle_auth_error(ex):
-    raise Exception(jsonify(ex), ex.status_code)
+@EXCEPTION_TRACING.trace()
+def handle_auth_error(exception):
+    raise Exception(jsonify(exception), exception.status_code)
 
 
 @API.errorhandler(Exception)
-@exceptionTracing.trace()
-def handle_error(ex):
-    raise Exception(jsonify(ex), ex.status_code)
+@EXCEPTION_TRACING.trace()
+def handle_error(exception):
+    raise Exception(jsonify(exception), exception.status_code)
 
 
 @cors_preflight('GET')
@@ -53,10 +53,10 @@ class UserInfo(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @_jwt.requires_auth
-    @tracing.trace()
+    @TRACING.trace()
     def get():
         """Return a JSON object that includes user detail information"""
-        current_span = tracer.active_span
+        current_span = TRACER.active_span
         token = g.jwt_oidc_token_info
         user = User.find_by_jwt_token(token)
         if not user:
