@@ -1,29 +1,14 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import login from './modules/login'
 
 Vue.use(Vuex)
 
+const debug = process.env.NODE_ENV !== 'production'
+
 export default new Vuex.Store({
-
-  strict: process.env.NODE_ENV !== 'production',
-
-  state: {
-    entityNumber: '',
-    passcode: ''
-
+  modules: {
+    login
   },
-  getters: {
-    entityNumber: (state) => state.entityNumber,
-    passcode: (state) => state.passcode
-  },
-  mutations: {
-    entityNumber (state, entityNumber) {
-      state.entityNumber = entityNumber
-    },
-
-    passcode (state, passcode) {
-      state.passcode = passcode
-    }
-  },
-  actions: {}
+  strict: debug
 })
