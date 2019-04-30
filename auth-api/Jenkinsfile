@@ -258,23 +258,6 @@ if( run_pipeline ) {
         }
       }
     }
-
-    stage("Deploy ${BUILD_CONFIG}-${TAG_NAMES[1]}") {
-      script {
-        openshift.withCluster() {
-          openshift.withProject("${NAMESPACES[1]}") {
-
-            echo "Deploying ${IMAGESTREAM_NAME} to ${BUILD_CONFIG}-${TAG_NAMES[1]} ..."
-
-            def rc = openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[1]}).rollout()
-            rc.untilEach(1){
-              return it.object().status.phase == "Running"
-            }
-            build.logs('-f')  
-          }
-        }
-      } 
-    } 
   }
 
   node {
@@ -289,23 +272,6 @@ if( run_pipeline ) {
           }
         }
       }
-
-      stage("Deploy ${BUILD_CONFIG}-${TAG_NAMES[2]}") {
-        script {
-          openshift.withCluster() {
-            openshift.withProject("${NAMESPACES[2]}") {
-
-              echo "Deploying ${IMAGESTREAM_NAME} to ${BUILD_CONFIG}-${TAG_NAMES[2]} ..."
-
-              def rc = openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[2]}).rollout()
-              rc.untilEach(1){
-                return it.object().status.phase == "Running"
-              }
-              build.logs('-f')  
-            }
-          }
-        } 
-      } 
     }
   } 
 }
