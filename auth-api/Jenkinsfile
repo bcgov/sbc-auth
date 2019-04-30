@@ -232,10 +232,11 @@ if( run_pipeline ) {
           openshift.withProject(NAMESPACES[0]) {
 
             echo "Building ${BUILD_CONFIG} ..."
-            def builds = openshift.selector("bc", "${BUILD_CONFIG}").related('builds')
-            builds.untilEach(1) {
-              return (it.object().status.phase == "Complete")
+            def build = openshift.selector("bc", "${BUILD_CONFIG}").startBuild()
+            build.untilEach {
+              return it.object().status.phase == "Running"
             }
+            build.logs('-f')  
           }
         }
       }
@@ -265,9 +266,13 @@ if( run_pipeline ) {
 
             echo "Deploying ${IMAGESTREAM_NAME} to ${BUILD_CONFIG}-${TAG_NAMES[1]} ..."
 
-            def rm = openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[1]}).rollout()
-            openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[1]}).related('pods').untilEach(1) {
-              return (it.object().status.phase == "Running")
+            openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[1]}).rollout()
+            def rc = openshift.selector('rc', "${BUILD_CONFIG}-${TAG_NAMES[1]}")
+            timeout (time: 10, unit: 'MINUTES') {
+              rc.untilEach(1){
+                def rcMap = it.object()
+                return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
+              }
             }
           }
         }
@@ -295,9 +300,13 @@ if( run_pipeline ) {
 
               echo "Deploying ${IMAGESTREAM_NAME} to ${BUILD_CONFIG}-${TAG_NAMES[2]} ..."
 
-              def rm = openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[2]}).rollout()
-              openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[2]}).related('pods').untilEach(1) {
-                return (it.object().status.phase == "Running")
+              openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[2]}).rollout()
+              def rc = openshift.selector('rc', "${BUILD_CONFIG}-${TAG_NAMES[2]}")
+              timeout (time: 10, unit: 'MINUTES') {
+                rc.untilEach(1){
+                  def rcMap = it.object()
+                  return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
+                }
               }
             }
           }
