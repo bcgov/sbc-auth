@@ -15,10 +15,11 @@
 
 import traceback
 from flask import jsonify, request
-from flask_restplus import Resource, Namespace
+from flask_restplus import Resource, Namespace, cors
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services import User
 import opentracing
+import json
 from flask_opentracing import FlaskTracing
 from ..utils.trace_tags import TraceTags as tags
 from flask import current_app
@@ -55,7 +56,7 @@ class Token(Resource):
             else:
                 response = KEYCLOAK_SERVICE.get_token(data.get('username'), data.get('password'))
 
-            return response, 200
+            return json.dumps(response), 200
         except Exception as err:
             current_span.set_tag(tags.ERROR, 'true')
             tb = traceback.format_exc()
