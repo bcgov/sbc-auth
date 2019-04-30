@@ -70,4 +70,3 @@ API.add_namespace(USERINFO_API, path='/userinfo')
 API.add_namespace(TOKEN_API, path='/token')
 API.add_namespace(AUTHENTICATE_API, path='/authenticate')
 API.add_namespace(USER_API, path='/user')
-

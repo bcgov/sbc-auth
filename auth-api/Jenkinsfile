@@ -2,7 +2,7 @@
 def APP_NAME = 'auth-api'
 
 // Edit your environment TAG names below
-def TAG_NAMES = ['dev', 'test', 'prod']
+def TAG_NAMES = ['latest', 'dev', 'test', 'prod']
 
 // You shouldn't have to edit these if you're following the conventions
 def BUILD_CONFIG = APP_NAME
@@ -12,6 +12,9 @@ def IMAGESTREAM_NAME = APP_NAME
 
 // You'll need to change this to point to your application component's folder within your repository
 def CONTEXT_DIRECTORY = 'auth-api'
+
+// Edit your namespaces names below
+def NAMESPACES = ['1rdehl-tools', '1rdehl-dev', '1rdehl-test', '1rdehl-prod']
 
 // ================================================================================================
 // SonarQube Scanner Settings
@@ -188,7 +191,7 @@ if( run_pipeline ) {
       stage('SonarQube Analysis') {
         echo "Performing static SonarQube code analysis ..."
 
-        SONARQUBE_URL = getUrlForRoute(SONAR_ROUTE_NAME, SONAR_ROUTE_NAMESPACE).trim()
+        SONARQUBE_URL = getUrlForRoute(SONAR_ROUTE_NAME, NAMESPACES[0]).trim()
         SONARQUBE_PWD = getSonarQubePwd().trim()
         echo "URL: ${SONARQUBE_URL}"
         echo "PWD: ${SONARQUBE_PWD}"
@@ -226,49 +229,80 @@ if( run_pipeline ) {
     stage("Build ${BUILD_CONFIG}") {
       script {
         openshift.withCluster() {
-          openshift.withProject() {
+          openshift.withProject(NAMESPACES[0]) {
 
             echo "Building ${BUILD_CONFIG} ..."
-            def build = openshift.selector("bc", "${BUILD_CONFIG}")
-            build.startBuild().logs("-f")
+            def builds = openshift.selector("bc", "${BUILD_CONFIG}").related('builds')
+            builds.untilEach(1) {
+              return (it.object().status.phase == "Complete")
+            }
           }
         }
       }
     }
 
-    stage("Deploy ${TAG_NAMES[0]}") {
+    stage("Tag ${BUILD_CONFIG}-${TAG_NAMES[1]}") {
       script {
         openshift.withCluster() {
-          openshift.withProject() {
+          openshift.withProject(NAMESPACES[0]) {
 
-            echo "Tagging ${IMAGESTREAM_NAME} for deployment to ${TAG_NAMES[0]} ..."
+            echo "Tagging ${IMAGESTREAM_NAME} for deployment to ${TAG_NAMES[1]} ..."
 
             // Don't tag with BUILD_ID so the pruner can do it's job; it won't delete tagged images.
             // Tag the images for deployment based on the image's hash
             def IMAGE_HASH = getImageTagHash("${IMAGESTREAM_NAME}")
             echo "IMAGE_HASH: ${IMAGE_HASH}"
-            openshift.tag("${IMAGESTREAM_NAME}@${IMAGE_HASH}", "${IMAGESTREAM_NAME}:${TAG_NAMES[0]}")
+            openshift.tag("${IMAGESTREAM_NAME}@${IMAGE_HASH}", "${IMAGESTREAM_NAME}:${TAG_NAMES[1]}")
           }
         }
       }
     }
+
+    stage("Deploy ${BUILD_CONFIG}-${TAG_NAMES[1]") {
+      script {
+        openshift.withCluster() {
+          openshift.withProject(NAMESPACES[1]) {
+
+            echo "Deploying ${IMAGESTREAM_NAME} to ${BUILD_CONFIG}-${TAG_NAMES[1]} ..."
+
+            def rm = openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[1]).rollout()
+            openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[1]).related('pods').untilEach(1) {
+              return (it.object().status.phase == "Running")
+            }
+          }
+        }
+      } 
+    } 
   }
 
   node {
-    // Sleep to ensure that the deployment has started when we begin the verification stage
-    sleep 5
-
-    stage("Deploy ${TAG_NAMES[1]}") {
+    stage("Tag ${BUILD_CONFIG}-${TAG_NAMES[2]}") {
       input "Deploy to test?"
         
       script {
         openshift.withCluster() {
           openshift.withProject() {
-            echo "Tagging ${IMAGESTREAM_NAME} for deployment to ${TAG_NAMES[1]} ..."
-            openshift.tag("${IMAGESTREAM_NAME}:${TAG_NAMES[0]}", "${IMAGESTREAM_NAME}:${TAG_NAMES[1]}")
+            echo "Tagging ${IMAGESTREAM_NAME} for deployment to ${TAG_NAMES[2]} ..."
+            openshift.tag("${IMAGESTREAM_NAME}:${TAG_NAMES[1]}", "${IMAGESTREAM_NAME}:${TAG_NAMES[2]}")
           }
         }
       }
+
+      stage("Deploy ${BUILD_CONFIG}-${TAG_NAMES[2]") {
+        script {
+          openshift.withCluster() {
+            openshift.withProject(NAMESPACES[2]) {
+
+              echo "Deploying ${IMAGESTREAM_NAME} to ${BUILD_CONFIG}-${TAG_NAMES[2]} ..."
+
+              def rm = openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[2]).rollout()
+              openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[2]).related('pods').untilEach(1) {
+                return (it.object().status.phase == "Running")
+              }
+            }
+          }
+        } 
+      } 
     }
   } 
 }
