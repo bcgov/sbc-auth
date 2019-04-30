@@ -265,7 +265,7 @@ if( run_pipeline ) {
 
             echo "Deploying ${IMAGESTREAM_NAME} to ${BUILD_CONFIG}-${TAG_NAMES[1]} ..."
 
-            def rm = openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[1]).rollout()
+            def rm = openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[1]}).rollout()
             openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[1]).related('pods').untilEach(1) {
               return (it.object().status.phase == "Running")
             }
@@ -288,14 +288,14 @@ if( run_pipeline ) {
         }
       }
 
-      stage("Deploy ${BUILD_CONFIG}-${TAG_NAMES[2]") {
+      stage("Deploy ${BUILD_CONFIG}-${TAG_NAMES[2]}") {
         script {
           openshift.withCluster() {
             openshift.withProject(NAMESPACES[2]) {
 
               echo "Deploying ${IMAGESTREAM_NAME} to ${BUILD_CONFIG}-${TAG_NAMES[2]} ..."
 
-              def rm = openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[2]).rollout()
+              def rm = openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[2]}).rollout()
               openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[2]).related('pods').untilEach(1) {
                 return (it.object().status.phase == "Running")
               }
