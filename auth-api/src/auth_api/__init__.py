@@ -26,7 +26,6 @@ from jaeger_client import Config as JaegerConfig
 import config
 from auth_api import models
 
-
 from auth_api.models import db, ma
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
@@ -105,3 +104,4 @@ def init_tracer(service):
 
     # this call also sets opentracing.tracer
     return jaeger_config.initialize_tracer()
+
