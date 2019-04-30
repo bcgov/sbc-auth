@@ -106,18 +106,18 @@ export default {
   computed: {
     entityNumber: {
       get () {
-        return this.$store.state.entityNumber
+        return this.$store.state.login.entityNumber
       },
       set (value) {
-        this.$store.commit('entityNumber', value)
+        this.$store.commit('login/entityNumber', value)
       }
     },
     passcode: {
       get () {
-        return this.$store.state.passcode
+        return this.$store.state.login.passcode
       },
       set (value) {
-        this.$store.commit('passcode', value)
+        this.$store.commit('login/passcode', value)
       }
     }
   },
@@ -129,7 +129,7 @@ export default {
       if (this.$refs.form.validate()) {
         console.log('VUE_APP_ROOT_API:' + process.env.VUE_APP_COPS_REDIRECT_URL)
 
-        LoginServices.login(this.$store.state.entityNumber, this.$store.state.passcode)
+        LoginServices.login(this.$store.state.login.entityNumber, this.$store.state.login.passcode)
           .then(response => {
             if (response.data.error) {
               this.loginError =
