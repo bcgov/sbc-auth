@@ -266,14 +266,11 @@ if( run_pipeline ) {
 
             echo "Deploying ${IMAGESTREAM_NAME} to ${BUILD_CONFIG}-${TAG_NAMES[1]} ..."
 
-            openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[1]}).rollout()
-            def rc = openshift.selector('rc', "${BUILD_CONFIG}-${TAG_NAMES[1]}")
-            timeout (time: 10, unit: 'MINUTES') {
-              rc.untilEach(1){
-                def rcMap = it.object()
-                return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
-              }
+            def rc = openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[1]}).rollout()
+            rc.untilEach(1){
+              return it.object().status.phase == "Running"
             }
+            build.logs('-f')  
           }
         }
       } 
@@ -300,14 +297,11 @@ if( run_pipeline ) {
 
               echo "Deploying ${IMAGESTREAM_NAME} to ${BUILD_CONFIG}-${TAG_NAMES[2]} ..."
 
-              openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[2]}).rollout()
-              def rc = openshift.selector('rc', "${BUILD_CONFIG}-${TAG_NAMES[2]}")
-              timeout (time: 10, unit: 'MINUTES') {
-                rc.untilEach(1){
-                  def rcMap = it.object()
-                  return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
-                }
+              def rc = openshift.selector("dc", ${BUILD_CONFIG}-${TAG_NAMES[2]}).rollout()
+              rc.untilEach(1){
+                return it.object().status.phase == "Running"
               }
+              build.logs('-f')  
             }
           }
         } 
