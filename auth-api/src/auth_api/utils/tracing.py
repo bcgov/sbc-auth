@@ -54,11 +54,11 @@ class ExceptionTracing(opentracing.Tracer):
             def wrapper(*args, **kwargs):
                 self._before_exception_fn(*args)
                 try:
-                    r = f(*args, **kwargs)
+                    result = f(*args, **kwargs)
                 except Exception:
                     raise
 
-                return r
+                return result
 
             wrapper.__name__ = f.__name__
             return wrapper
