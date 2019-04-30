@@ -40,6 +40,7 @@ tracing = FlaskTracing(tracer)
 class Token(Resource):
     """Get token from Keycloak by username and password, or refresh token, return token"""
     @staticmethod
+    @cors.crossdomain(origin='*')
     @tracing.trace()
     def post():
         """Get token or refresh token, return token"""
@@ -64,6 +65,3 @@ class Token(Resource):
                                  'error.object': tb})
             current_span.set_tag(tags.HTTP_STATUS_CODE, 500)
             return {"error": "{}".format(err)}, 500\
-
-
-
