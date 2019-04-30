@@ -191,7 +191,7 @@ if( run_pipeline ) {
       stage('SonarQube Analysis') {
         echo "Performing static SonarQube code analysis ..."
 
-        SONARQUBE_URL = getUrlForRoute(SONAR_ROUTE_NAME, NAMESPACES[0]).trim()
+        SONARQUBE_URL = getUrlForRoute(SONAR_ROUTE_NAME, ${NAMESPACES[0]}).trim()
         SONARQUBE_PWD = getSonarQubePwd().trim()
         echo "URL: ${SONARQUBE_URL}"
         echo "PWD: ${SONARQUBE_PWD}"
@@ -229,7 +229,7 @@ if( run_pipeline ) {
     stage("Build ${BUILD_CONFIG}") {
       script {
         openshift.withCluster() {
-          openshift.withProject(NAMESPACES[0]) {
+          openshift.withProject("${NAMESPACES[0]}") {
 
             echo "Building ${BUILD_CONFIG} ..."
             def build = openshift.selector("bc", "${BUILD_CONFIG}").startBuild()
@@ -245,7 +245,7 @@ if( run_pipeline ) {
     stage("Tag ${BUILD_CONFIG}-${TAG_NAMES[1]}") {
       script {
         openshift.withCluster() {
-          openshift.withProject(NAMESPACES[0]) {
+          openshift.withProject("${NAMESPACES[0]}") {
 
             echo "Tagging ${IMAGESTREAM_NAME} for deployment to ${TAG_NAMES[1]} ..."
 
@@ -262,7 +262,7 @@ if( run_pipeline ) {
     stage("Deploy ${BUILD_CONFIG}-${TAG_NAMES[1]}") {
       script {
         openshift.withCluster() {
-          openshift.withProject(NAMESPACES[1]) {
+          openshift.withProject("${NAMESPACES[1]}") {
 
             echo "Deploying ${IMAGESTREAM_NAME} to ${BUILD_CONFIG}-${TAG_NAMES[1]} ..."
 
@@ -283,7 +283,7 @@ if( run_pipeline ) {
         
       script {
         openshift.withCluster() {
-          openshift.withProject() {
+          openshift.withProject("${NAMESPACES[0]}") {
             echo "Tagging ${IMAGESTREAM_NAME} for deployment to ${TAG_NAMES[2]} ..."
             openshift.tag("${IMAGESTREAM_NAME}:${TAG_NAMES[1]}", "${IMAGESTREAM_NAME}:${TAG_NAMES[2]}")
           }
@@ -293,7 +293,7 @@ if( run_pipeline ) {
       stage("Deploy ${BUILD_CONFIG}-${TAG_NAMES[2]}") {
         script {
           openshift.withCluster() {
-            openshift.withProject(NAMESPACES[2]) {
+            openshift.withProject("${NAMESPACES[2]}") {
 
               echo "Deploying ${IMAGESTREAM_NAME} to ${BUILD_CONFIG}-${TAG_NAMES[2]} ..."
 
