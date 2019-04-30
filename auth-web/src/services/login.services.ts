@@ -1,8 +1,8 @@
 import Axios from 'axios'
-const AUTHENTICATION_RESOURCE_NAME = '/authenticate'
+const AUTHENTICATION_RESOURCE_NAME = '/token'
 
 export default {
   login (entityNumber, passCode) {
-    return Axios.post(AUTHENTICATION_RESOURCE_NAME, { passcode: passCode, corp_num: entityNumber })
+    return Axios.post(AUTHENTICATION_RESOURCE_NAME, { username: entityNumber, password: passCode })
   }
 }
