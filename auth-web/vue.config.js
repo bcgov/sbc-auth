@@ -1,4 +1,5 @@
 module.exports = {
+  publicPath: 'auth-app',
   configureWebpack: {
     devtool: 'source-map'
   },
