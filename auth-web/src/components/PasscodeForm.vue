@@ -126,8 +126,8 @@ export default {
       return this.$refs.form.validate()
     },
     login () {
-      if (this.$refs.form.validate()) {
-        console.log('VUE_APP_ROOT_API:' + process.env.VUE_APP_COPS_REDIRECT_URL)
+      if (this.isValidForm()) {
+        console.log('VUE_APP_ROOT_API:' + process.env.VUE_APP_ROOT_API)
 
         LoginServices.login(this.$store.state.login.entityNumber, this.$store.state.login.passcode)
           .then(response => {
@@ -139,7 +139,7 @@ export default {
               /* this.frame = this.$refs.iframeContent.contentWindow
               this.frame.postMessage(response.data.access_token, process.env.VUE_APP_COPS_REDIRECT_URL) */
               IframeServices.emit(this.$refs.iframeContent.contentWindow, response.data.access_token)
-              localStorage.name = response.data.access_token
+              sessionStorage.name = response.data.access_token
               setTimeout(() => {
                 window.location.href = process.env.VUE_APP_COPS_REDIRECT_URL
               }, 500)
