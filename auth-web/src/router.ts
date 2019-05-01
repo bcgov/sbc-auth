@@ -12,6 +12,12 @@ export default new Router({
       path: '/',
       name: 'home',
       component: Home
+    },
+    {
+      // just handle it better when its getting deployed to prod
+      path: '*',
+      name: 'home',
+      component: Home
     }
   ]
 })
