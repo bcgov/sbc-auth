@@ -104,4 +104,3 @@ def init_tracer(service):
 
     # this call also sets opentracing.tracer
     return jaeger_config.initialize_tracer()
-
