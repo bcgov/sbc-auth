@@ -13,9 +13,10 @@
 # limitations under the License.
 """Endpoints to get token from Keycloak """
 
+import json
+
 import traceback
 import opentracing
-import json
 
 from flask import request
 from flask_restplus import Resource, Namespace, cors
@@ -65,3 +66,4 @@ class Token(Resource):
                                  'error.object': trace_back})
             current_span.set_tag(tags.HTTP_STATUS_CODE, 500)
             return json.dumps({"error": "{}".format(err)}), 500\
+
