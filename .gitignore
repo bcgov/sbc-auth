@@ -10,7 +10,6 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -106,7 +105,11 @@ node_modules/
 
 # vscode
 .vscode/
+*.code-workspace
 
-.idea
+# pycharm
+.idea/
 
+# npm
 package-lock.json
+

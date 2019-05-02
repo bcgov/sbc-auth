@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "e8f8511c-1fab-46bb-8ab0-87d5789bc8ee",
+		"_postman_id": "824cda60-8c7b-487e-b737-6665668a130d",
 		"name": "auth-api",
 		"description": "Endpoint samples to create an user using KeyCloak REST Admin API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -578,6 +578,234 @@
 						"protocol",
 						"openid-connect",
 						"userinfo"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add user to keycloak-api",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n   \"username\":\"test11\",\r\n   \"password\":\"1111\",\r\n   \"firstname\":\"111\",\r\n   \"lastname\":\"test\",\r\n   \"email\":\"test11@gov.bc.ca\",\r\n   \"enabled\":true,\r\n   \"user_type\":[  \r\n      \"/test\",\r\n      \"/basic/editor\"\r\n   ],\r\n   \"corp_type\":\"CP\",\r\n   \"source\":\"PASSCODE\"\r\n}"
+				},
+				"url": {
+					"raw": "{{api_url}}/api/v1/admin/users",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"admin",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user by username-api",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"userId\", jsonData.id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "username=test11"
+				},
+				"url": {
+					"raw": "{{api_url}}/api/v1/admin/users",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"admin",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login by userid/passwd-api",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"userToken\", jsonData.access_token);",
+							"pm.environment.set(\"refreshUserToken\", jsonData.refresh_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "username=test11&password=1111"
+				},
+				"url": {
+					"raw": "{{api_url}}/api/v1/token",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Refresh token-api",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"userToken\", jsonData.access_token);",
+							"pm.environment.set(\"refreshUserToken\", jsonData.refresh_token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "refresh_token={{refreshUserToken}}"
+				},
+				"url": {
+					"raw": "{{api_url}}/api/v1/token",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete user by username-api",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "username=test11"
+				},
+				"url": {
+					"raw": "{{api_url}}/api/v1/admin/users",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"admin",
+						"users"
 					]
 				}
 			},

@@ -85,6 +85,7 @@ class User():  # pylint: disable=too-many-instance-attributes
 
     @classmethod
     def save_from_jwt_token(cls, token: dict = None):
+        """Save user to database."""
         if not token:
             return None
         user_dao = UserModel.create_from_jwt_token(token)
@@ -98,6 +99,7 @@ class User():  # pylint: disable=too-many-instance-attributes
 
     @classmethod
     def find_by_jwt_token(cls, token: dict = None):
+        """Find user from database by user token."""
         if not token:
             return None
         user_dao = UserModel.find_by_jwt_token(token)

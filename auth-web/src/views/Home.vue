@@ -1,35 +1,40 @@
 <template>
   <div class="view-container">
     <article>
-      <h1>Page Title</h1>
-      <p class="mb-0">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?</p>
+      <h1>File BC Co-operative <span>Annual Reports</span></h1>
+      <p class="intro-text">Sign in to start filing your BC Co-operative Annual Report. You will need to provide your <em>Incorporation Number</em> and your <em>Passcode</em> in the letter you received in the mail.</p>
+      <v-card class="sign-in-card">
+        <v-container>
+          <h2>Sign In</h2>
+          <PasscodeForm/>
+        </v-container>
+      </v-card>
     </article>
     <aside>
-      <v-card flat>
-        <header>Aside Header</header>
-        <div class="container">
-          Aside Content
-        </div>
-      </v-card>
+      <SupportInfoCard/>
     </aside>
   </div>
 </template>
 
 <script>
-import Vue from 'vue';
-import Aside from '@/components/Aside.vue';
+import Vue from 'vue'
+import PasscodeForm from '@/components/PasscodeForm.vue'
+import SupportInfoCard from '@/components/SupportInfoCard.vue'
 
 export default ({
-  name: 'Home'
-});
+  name: 'Home',
+  components: {
+    PasscodeForm,
+    SupportInfoCard
+  }
+})
 </script>
 
 <style lang="stylus" scoped>
   @import "../assets/styl/theme.styl"
 
-  .view-container
-    display flex
-    flex-flow column nowrap
+  h1, h2
+    margin-bottom 1.5rem
 
   article
     flex 1 1 auto
@@ -38,18 +43,49 @@ export default ({
     flex 0 0 auto
     margin-top 2rem
 
-  .v-card header
-    padding 1rem 1.25rem
-    color #fff
-    background-color $BCgovBlue5
+  .intro-text
+    margin-bottom 2rem
+    letter-spacing -0.01rem
+    font-size 1rem
+    font-weight 300
+
+    em
+      font-style normal
+      font-weight 400
+
+  .view-container
+    display flex
+    flex-flow column nowrap
+
+  .sign-in-card .container
+    padding 1.5rem
+
+  @media (max-width 480px)
+    h1 span
+      display block
+
+  @media (min-width 768px)
+    h1
+      margin-bottom 2rem
+
+    .intro-text
+      margin-bottom 3rem
+      font-size 1.125rem
 
   @media (min-width: 960px)
-    .view-container
-        flex-flow row nowrap
+    article
+      padding-top 0.8rem
+      padding-bottom 0.8rem
 
     aside
       margin-top 0
       margin-left 2rem
       width 20rem
+
+    .sign-in-card .container
+      padding 2rem
+
+    .view-container
+      flex-flow row nowrap
 
 </style>

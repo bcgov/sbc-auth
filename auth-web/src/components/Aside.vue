@@ -1,8 +1,7 @@
 <template>
-  <v-card>
-    <header>Aside Header</header>
+  <v-card flat>
+    <header>Need Assistance?</header>
     <div class="container">
-      Aside Content
     </div>
   </v-card>
 </template>
@@ -10,7 +9,7 @@
 <script>
 export default {
   name: 'Aside'
-};
+}
 </script>
 
 <style lang="stylus" scoped>

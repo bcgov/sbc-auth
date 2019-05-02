@@ -1,0 +1,7 @@
+affiliation
+action_log
+users
+user_type
+affiliation_status
+affiliation_business
+action

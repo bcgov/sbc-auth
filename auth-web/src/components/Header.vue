@@ -1,5 +1,5 @@
 <template>
-  <header class="app-header" dark fixed app>
+  <header class="app-header" fixed app>
     <div class="container">
       <router-link to="/" class="navbar-brand">
         <img class="brand-img" src="@/assets/img/gov3_bc_logo.png"
@@ -10,10 +10,12 @@
   </header>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue'
+
+export default Vue.extend({
   name: 'Header'
-};
+})
 </script>
 
 <style lang="stylus" scoped>
@@ -21,8 +23,6 @@ export default {
 
   .app-header
     position fixed
-    display flex
-    align-items: center;
     width 100%
     color #fff
     border-bottom 3px solid $BCgovGold5
@@ -33,6 +33,6 @@ export default {
       padding-bottom 0
 
   .brand-img
-    margin-top 0.2rem
+    margin-top 0.3rem
 
 </style>

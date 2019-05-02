@@ -46,7 +46,7 @@ def get_named_config(config_name: str = 'production'):
     elif config_name == 'development':
         config = DevConfig()
     else:
-        raise KeyError(f"Unknown configuration '{config_name}'")
+        raise KeyError("Unknown configuration '{config_name}'")
     return config
 
 
@@ -92,6 +92,14 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     TESTING = False
     DEBUG = False
 
+    # Keycloak auth config baseurl
+    KEYCLOAK_BASE_URL = os.getenv("KEYCLOAK_BASE_URL")
+    KEYCLOAK_REALMNAME = os.getenv("KEYCLOAK_REALMNAME")
+
+    # Keycloak admin config
+    KEYCLOAK_ADMIN_USERNAME = os.getenv("KEYCLOAK_ADMIN_CLIENTID")
+    KEYCLOAK_ADMIN_SECRET = os.getenv("KEYCLOAK_ADMIN_SECRET")
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False
@@ -110,13 +118,13 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     DB_NAME = os.getenv('DATABASE_TEST_NAME', '')
     DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
-    SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_TEST_URL', 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
         user=DB_USER,
         password=DB_PASSWORD,
         host=DB_HOST,
         port=int(DB_PORT),
         name=DB_NAME,
-    )
+    ))
 
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use

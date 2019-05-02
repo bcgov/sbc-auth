@@ -1,4 +1,4 @@
-// Edit your app's name below 
+// Edit your app's name below
 def APP_NAME = 'auth-web'
 
 // Edit your environment TAG names below
@@ -44,15 +44,15 @@ boolean triggerBuild(String contextDirectory) {
       }
     }
   }
-  
+
   if ( filesChangeCnt < 1 ) {
     echo('The changes do not require a build.')
-    return false
+    return true
   }
   else {
     echo('The changes require a build.')
     return true
-  } 
+  }
 }
 
 // Get an image's hash tag
@@ -66,8 +66,70 @@ String getImageTagHash(String imageName, String tag = "") {
   return istag.out.tokenize('@')[1].trim()
 }
 
+ // create NodeJS pod to run verification steps
+    def nodejs_label = "jenkins-nodejs-${UUID.randomUUID().toString()}"
+    podTemplate(label: nodejs_label, name: nodejs_label, serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+        containerTemplate(
+            name: 'jnlp',
+            image: '172.50.0.2:5000/openshift/jenkins-slave-nodejs:8',
+            resourceRequestCpu: '500m',
+            resourceLimitCpu: '1000m',
+            resourceRequestMemory: '1Gi',
+            resourceLimitMemory: '2Gi',
+            workingDir: '/tmp',
+            command: '',
+            args: '${computer.jnlpmac} ${computer.name}'
+        )
+    ])
+    {
+        node (nodejs_label) {
+            checkout scm
+            dir('auth-web') {
+                try {
+                    sh '''
+                        node -v
+                        npm install
+                    '''
+                    stage("Run Jest tests") {
+                        def testResults = sh(script: "npm run test:unit", returnStatus: true)
+
+                        echo "Unit tests ran, returned ${testResults}"
+                        if (testResults > 0) {
+                            try {
+                                timeout(time: 1, unit: 'DAYS') {
+                                    input message: "Unit tests failed. Continue?", id: "1"
+                                }
+                            } catch (Exception e) {
+                                error('Abort')
+                            }
+                        }
+                    }
+                    stage("Check code quality (lint)") {
+                        def lintResults = sh(script: "npm run lint:nofix", returnStatus: true)
+
+                        echo "Linter ran, returned ${lintResults}"
+                        if (lintResults > 0) {
+                            try {
+                                timeout(time: 1, unit: 'DAYS') {
+                                    input message: "Linter failed. Continue?", id: "2"
+                                }
+                            } catch (Exception e) {
+                                error('Abort')
+                            }
+                        }
+                    }
+
+                } catch (Exception e) {
+                    error('Failure')
+                }
+
+            }
+        }
+    }
+
+
 node {
- // if( triggerBuild(CONTEXT_DIRECTORY) ) {
+  if( triggerBuild(CONTEXT_DIRECTORY) ) {
 
     stage("Build ${BUILD_CONFIG}") {
       script {
@@ -82,28 +144,27 @@ node {
       }
     }
 
- // Build the runtime image, if you are not using an off the shelf one.
-    stage("Build ${RUNTIME_BUILD_CONFIG}") {
-      script {
-        try{
-          openshift.withCluster() {
-            openshift.withProject() {
+    // Build the runtime image, if you are not using an off the shelf one.
+       stage("Build ${RUNTIME_BUILD_CONFIG}") {
+         script {
+           try{
+             openshift.withCluster() {
+               openshift.withProject() {
 
-              echo "Building the ${RUNTIME_BUILD_CONFIG} image ..."
-              def build = openshift.selector("bc", "${RUNTIME_BUILD_CONFIG}").startBuild()
-              build.untilEach {
-                return it.object().status.phase == "Running"
-              }
-              build.logs('-f') 
-            }
-          }
-        } catch (e) {
-          echo("BUILD ${RUNTIME_BUILD_CONFIG} ABORTED " +  e.toString())
-          error('Stopping early…')
-        }
-      }
-    }
-
+                 echo "Building the ${RUNTIME_BUILD_CONFIG} image ..."
+                 def build = openshift.selector("bc", "${RUNTIME_BUILD_CONFIG}").startBuild()
+                 build.untilEach {
+                   return it.object().status.phase == "Running"
+                 }
+                 build.logs('-f')
+               }
+             }
+           } catch (e) {
+             echo("BUILD ${RUNTIME_BUILD_CONFIG} ABORTED " +  e.toString())
+             error('Stopping early…')
+           }
+         }
+       }
 
     stage("Deploy ${TAG_NAMES[0]}") {
       script {
@@ -121,11 +182,11 @@ node {
         }
       }
     }
- // }
- /* else {
+  }
+  else {
     stage('No Changes') {
       echo "No changes ..."
       currentBuild.result = 'SUCCESS'
     }
-  } */
+  }
 }
