@@ -20,14 +20,11 @@ import os
 from flask import Flask
 from flask_jwt_oidc import JwtManager
 
-import config
-
 from flask_opentracing import FlaskTracing
 from jaeger_client import Config as JaegerConfig
 
-# from auth_api.resources import API, ops_blueprint  # , api_blueprint
-
-from auth_api.utils.run_version import get_run_version
+import config
+from auth_api import models
 
 from auth_api.models import db, ma
 from auth_api.utils.run_version import get_run_version
@@ -48,7 +45,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     tracer = init_tracer(__name__)
     FlaskTracing(tracer)
 
-    from auth_api import models
     from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT
 
     db.init_app(app)
@@ -94,7 +90,7 @@ def register_shellcontext(app):
 
 def init_tracer(service):
     """ initialize tracer"""
-    config = JaegerConfig(
+    jaeger_config = JaegerConfig(
         config={  # usually read from some yaml config
             'sampler': {
                 'type': 'const',
@@ -107,4 +103,4 @@ def init_tracer(service):
     )
 
     # this call also sets opentracing.tracer
-    return config.initialize_tracer()
+    return jaeger_config.initialize_tracer()
