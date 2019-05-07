@@ -14,20 +14,25 @@
 """Endpoints to to manage user."""
 
 import traceback
+import opentracing
+
 from flask import request
 from flask_restplus import Resource, Namespace
-from auth_api.services.keycloak import KeycloakService
-import opentracing
 from flask_opentracing import FlaskTracing
-from ..utils.trace_tags import TraceTags as tags
+
+from auth_api import status as http_status
+
+from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
 
+from auth_api.utils.trace_tags import TraceTags as tags
 
-API = Namespace('user', description='Keycloak Admin - user')
+
+API = Namespace('admin/users', description='Keycloak Admin - user')
 KEYCLOAK_SERVICE = KeycloakService()
 
-tracer = opentracing.tracer
-tracing = FlaskTracing(tracer)
+TRACER = opentracing.tracer
+TRACING = FlaskTracing(TRACER)
 
 
 @cors_preflight('GET, POST, DELETE, OPTIONS')
@@ -36,71 +41,71 @@ class User(Resource):
     """End point resource to manage users."""
 
     @staticmethod
-    @tracing.trace()
+    @TRACING.trace()
     def post():
         """Add user, return a new/existing user."""
 
-        current_span = tracer.active_span
+        current_span = TRACER.active_span
         data = request.get_json()
         if not data:
             data = request.values
         try:
             response = KEYCLOAK_SERVICE.add_user(data)
 
-            return response, 201
+            return response, http_status.HTTP_201_CREATED
         except Exception as err:
             current_span.set_tag(tags.ERROR, 'true')
-            tb = traceback.format_exc()
+            trace_back = traceback.format_exc()
             current_span.log_kv({'event': 'error',
                                  'error.kind': str(type(err)),
                                  'error.message': err.with_traceback(None),
-                                 'error.object': tb})
-            current_span.set_tag(tags.HTTP_STATUS_CODE, 500)
-            return {"error": "{}".format(err)}, 500\
+                                 'error.object': trace_back})
+            current_span.set_tag(tags.HTTP_STATUS_CODE, http_status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return {"error": "{}".format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR\
 
 
     @staticmethod
-    @tracing.trace()
+    @TRACING.trace()
     def get():
         """Get user by username and return a user"""
 
-        current_span = tracer.active_span
+        current_span = TRACER.active_span
         data = request.get_json()
         if not data:
             data = request.values
         try:
             user = KEYCLOAK_SERVICE.get_user_by_username(data.get("username"))
-            return user, 200
+            return user, http_status.HTTP_200_OK
         except Exception as err:
             current_span.set_tag(tags.ERROR, 'true')
-            tb = traceback.format_exc()
+            trace_back = traceback.format_exc()
             current_span.log_kv({'event': 'error',
                                  'error.kind': str(type(err)),
                                  'error.message': err.with_traceback(None),
-                                 'error.object': tb})
-            current_span.set_tag(tags.HTTP_STATUS_CODE, 500)
-            return {"error": "{}".format(err)}, 500\
+                                 'error.object': trace_back})
+            current_span.set_tag(tags.HTTP_STATUS_CODE, http_status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return {"error": "{}".format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR\
 
 
     @staticmethod
-    @tracing.trace()
+    @TRACING.trace()
     def delete():
         """Delete user by username"""
 
-        current_span = tracer.active_span
+        current_span = TRACER.active_span
         data = request.get_json()
         if not data:
             data = request.values
         try:
             response = KEYCLOAK_SERVICE.delete_user_by_username(data.get("username"))
-            return response, 204
+            return response, http_status.HTTP_204_NO_CONTENT
         except Exception as err:
             current_span.set_tag(tags.ERROR, 'true')
-            tb = traceback.format_exc()
+            trace_back = traceback.format_exc()
             current_span.log_kv({'event': 'error',
                                  'error.kind': str(type(err)),
                                  'error.message': err.with_traceback(None),
-                                 'error.object': tb})
-            current_span.set_tag(tags.HTTP_STATUS_CODE, 500)
-            return {"error": "{}".format(err)}, 500\
+                                 'error.object': trace_back})
+            current_span.set_tag(tags.HTTP_STATUS_CODE, http_status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return {"error": "{}".format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR\
 

@@ -615,14 +615,15 @@
 					"raw": "{  \r\n   \"username\":\"test11\",\r\n   \"password\":\"1111\",\r\n   \"firstname\":\"111\",\r\n   \"lastname\":\"test\",\r\n   \"email\":\"test11@gov.bc.ca\",\r\n   \"enabled\":true,\r\n   \"user_type\":[  \r\n      \"/test\",\r\n      \"/basic/editor\"\r\n   ],\r\n   \"corp_type\":\"CP\",\r\n   \"source\":\"PASSCODE\"\r\n}"
 				},
 				"url": {
-					"raw": "{{api_url}}/api/v1/user",
+					"raw": "{{api_url}}/api/v1/admin/users",
 					"host": [
 						"{{api_url}}"
 					],
 					"path": [
 						"api",
 						"v1",
-						"user"
+						"admin",
+						"users"
 					]
 				}
 			},
@@ -662,14 +663,15 @@
 					"raw": "username=test11"
 				},
 				"url": {
-					"raw": "{{api_url}}/api/v1/user",
+					"raw": "{{api_url}}/api/v1/admin/users",
 					"host": [
 						"{{api_url}}"
 					],
 					"path": [
 						"api",
 						"v1",
-						"user"
+						"admin",
+						"users"
 					]
 				}
 			},
@@ -795,14 +797,15 @@
 					"raw": "username=test11"
 				},
 				"url": {
-					"raw": "{{api_url}}/api/v1/user",
+					"raw": "{{api_url}}/api/v1/admin/users",
 					"host": [
 						"{{api_url}}"
 					],
 					"path": [
 						"api",
 						"v1",
-						"user"
+						"admin",
+						"users"
 					]
 				}
 			},

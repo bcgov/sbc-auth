@@ -46,7 +46,7 @@ def get_named_config(config_name: str = 'production'):
     elif config_name == 'development':
         config = DevConfig()
     else:
-        raise KeyError(f"Unknown configuration '{config_name}'")
+        raise KeyError("Unknown configuration '{config_name}'")
     return config
 
 
