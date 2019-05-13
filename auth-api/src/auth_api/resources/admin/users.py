@@ -17,6 +17,8 @@ from flask import request
 from flask_restplus import Resource, Namespace
 
 from auth_api import tracing as _tracing
+from auth_api import status as http_status
+
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
 
@@ -37,10 +39,13 @@ class User(Resource):
         data = request.get_json()
         if not data:
             data = request.values
+        try:
+            response = KEYCLOAK_SERVICE.add_user(data)
 
-        response = KEYCLOAK_SERVICE.add_user(data)
+            return response, http_status.HTTP_201_CREATED
+        except Exception as err:
+            return {"error": "{}".format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
 
-        return response, 201
 
     @staticmethod
     @_tracing.trace()
@@ -50,8 +55,12 @@ class User(Resource):
         data = request.get_json()
         if not data:
             data = request.values
-        user = KEYCLOAK_SERVICE.get_user_by_username(data.get('username'))
-        return user, 200
+        try:
+            user = KEYCLOAK_SERVICE.get_user_by_username(data.get("username"))
+            return user, http_status.HTTP_200_OK
+        except Exception as err:
+            return {"error": "{}".format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
+
 
     @staticmethod
     @_tracing.trace()
@@ -61,5 +70,8 @@ class User(Resource):
         data = request.get_json()
         if not data:
             data = request.values
-        response = KEYCLOAK_SERVICE.delete_user_by_username(data.get('username'))
-        return response, 204
+        try:
+            response = KEYCLOAK_SERVICE.delete_user_by_username(data.get("username"))
+            return response, http_status.HTTP_204_NO_CONTENT
+        except Exception as err:
+            return {"error": "{}".format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR

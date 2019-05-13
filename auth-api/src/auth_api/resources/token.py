@@ -19,6 +19,7 @@ from flask import request
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import tracing as _tracing
+from auth_api import status as http_status
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
 
@@ -53,4 +54,4 @@ class Token(Resource):
             scope.span.set_tag(TraceTags.USER, data.get('username'))
             _tracing.inject_tracing_header(response, _tracing.tracer)
 
-        return json.dumps(response), 200
+		return json.dumps(response), http_status.HTTP_200_OK
