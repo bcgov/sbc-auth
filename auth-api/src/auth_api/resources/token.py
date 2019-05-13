@@ -22,6 +22,8 @@ from flask import request
 from flask_restplus import Resource, Namespace, cors
 from flask_opentracing import FlaskTracing
 
+from auth_api import status as http_status
+
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
 
@@ -56,7 +58,7 @@ class Token(Resource):
             else:
                 response = KEYCLOAK_SERVICE.get_token(data.get('username'), data.get('password'))
 
-            return json.dumps(response), 200
+            return json.dumps(response), http_status.HTTP_200_OK
         except Exception as err:
             current_span.set_tag(tags.ERROR, 'true')
             trace_back = traceback.format_exc()
@@ -64,6 +66,6 @@ class Token(Resource):
                                  'error.kind': str(type(err)),
                                  'error.message': err.with_traceback(None),
                                  'error.object': trace_back})
-            current_span.set_tag(tags.HTTP_STATUS_CODE, 500)
-            return json.dumps({"error": "{}".format(err)}), 500\
+            current_span.set_tag(tags.HTTP_STATUS_CODE, http_status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return json.dumps({"error": "{}".format(err)}), http_status.HTTP_500_INTERNAL_SERVER_ERROR\
 
