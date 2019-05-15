@@ -54,4 +54,4 @@ class Token(Resource):
             scope.span.set_tag(TraceTags.USER, data.get('username'))
             _tracing.inject_tracing_header(response, _tracing.tracer)
 
-		return json.dumps(response), http_status.HTTP_200_OK
+        return json.dumps(response), http_status.HTTP_200_OK
