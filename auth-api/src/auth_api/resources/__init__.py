@@ -30,40 +30,37 @@ from .ops import API as OPS_API
 from .token import API as TOKEN_API
 
 
-
-__all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
+__all__ = ("API_BLUEPRINT", "OPS_BLUEPRINT")
 
 # This will add the Authorize button to the swagger docs
 # TODO oauth2 & openid may not yet be supported by restplus <- check on this
-AUTHORIZATIONS = {
-    'apikey': {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': 'Authorization'
-    }
-}
+AUTHORIZATIONS = {"apikey": {"type": "apiKey", "in": "header", "name": "Authorization"}}
 
-OPS_BLUEPRINT = Blueprint('API_OPS', __name__, url_prefix='/ops')
+OPS_BLUEPRINT = Blueprint("API_OPS", __name__, url_prefix="/ops")
 
-API_OPS = Api(OPS_BLUEPRINT,
-              title='Service OPS API',
-              version='1.0',
-              description='The Core API for the Authentication System',
-              security=['apikey'],
-              authorizations=AUTHORIZATIONS)
+API_OPS = Api(
+    OPS_BLUEPRINT,
+    title="Service OPS API",
+    version="1.0",
+    description="The Core API for the Authentication System",
+    security=["apikey"],
+    authorizations=AUTHORIZATIONS,
+)
 
-API_OPS.add_namespace(OPS_API, path='/')
+API_OPS.add_namespace(OPS_API, path="/")
 
-API_BLUEPRINT = Blueprint('API', __name__, url_prefix='/api/v1')
+API_BLUEPRINT = Blueprint("API", __name__, url_prefix="/api/v1")
 
-API = Api(API_BLUEPRINT,
-          title='Authentication API',
-          version='1.0',
-          description='The Core API for the Authentication System',
-          security=['apikey'],
-          authorizations=AUTHORIZATIONS)
+API = Api(
+    API_BLUEPRINT,
+    title="Authentication API",
+    version="1.0",
+    description="The Core API for the Authentication System",
+    security=["apikey"],
+    authorizations=AUTHORIZATIONS,
+)
 
-API.add_namespace(META_API, path='/meta')
-API.add_namespace(USERINFO_API, path='/users/info')
-API.add_namespace(TOKEN_API, path='/token')
-API.add_namespace(USER_API, path='/admin/users')
+API.add_namespace(META_API, path="/meta")
+API.add_namespace(USERINFO_API, path="/users/info")
+API.add_namespace(TOKEN_API, path="/token")
+API.add_namespace(USER_API, path="/admin/users")
