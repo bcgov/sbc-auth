@@ -56,6 +56,9 @@ setup(
     long_description=read('README.md'),
     zip_safe=False,
     install_requires=REQUIREMENTS,
-    setup_requires=["pytest-runner", ],
-    tests_require=["pytest", ],
+    dependency_links=[
+        "git+https://github.com/pwei1018/sbc-common-components.git#egg=sbc-common-components&subdirectory=python"
+    ],
+    setup_requires=["pytest-runner"],
+    tests_require=["pytest"],
 )

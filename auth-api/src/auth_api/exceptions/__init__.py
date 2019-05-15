@@ -12,8 +12,9 @@ import functools
 class UserException(Exception):
     """Exception that adds error code and error name, that can be used for i18n support."""
 
-    def __init__(self, error, status_code, *args, **kwargs):
+    def __init__(self, error, status_code, trace_back, *args, **kwargs):
         """Return a valid UserException."""
         super(UserException, self).__init__(*args, **kwargs)
         self.error = error
         self.status_code = status_code
+        self.trace_back = trace_back
