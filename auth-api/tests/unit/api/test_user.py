@@ -18,7 +18,8 @@ Test-Suite to ensure that the /user endpoint is working as expected.
 """
 
 import json
-
+from auth_api import status as HTTPStatus
+from auth_api.exceptions.errors import Error
 
 ADD_USER_REQUEST = {
    'username': 'test11',
@@ -58,17 +59,17 @@ ADD_USER_REQUEST_SAME_EMAIL = {
 def test_user_add_user(client):
     """Assert that the endpoint returns 201."""
     rv = client.post('/api/v1/admin/users', data=json.dumps(ADD_USER_REQUEST), content_type='application/json')
-    assert rv.status_code == 201
+    assert rv.status_code == HTTPStatus.HTTP_201_CREATED
     rv = client.delete('/api/v1/admin/users', data=json.dumps(USER_REQUEST), content_type='application/json')
 
 
 def test_user_add_user_duplicate_email(client):
-    """Assert that the endpoint returns 500."""
+    """Assert that the endpoint returns data conflict."""
     rv = client.post('/api/v1/admin/users', data=json.dumps(ADD_USER_REQUEST), content_type='application/json')
     rv = client.post('/api/v1/admin/users',
                      data=json.dumps(ADD_USER_REQUEST_SAME_EMAIL),
                      content_type='application/json')
-    assert rv.status_code == 500
+    assert rv.status_code == Error.DATA_CONFLICT.status
     rv = client.delete('/api/v1/admin/users', data=json.dumps(USER_REQUEST), content_type='application/json')
 
 
@@ -76,24 +77,24 @@ def test_user_get_user(client):
     """Assert that the endpoint returns 200."""
     rv = client.post('/api/v1/admin/users', data=json.dumps(ADD_USER_REQUEST), content_type='application/json')
     rv = client.get('/api/v1/admin/users', data=json.dumps(USER_REQUEST), content_type='application/json')
-    assert rv.status_code == 200
+    assert rv.status_code == HTTPStatus.HTTP_200_OK
     rv = client.delete('/api/v1/admin/users', data=json.dumps(USER_REQUEST), content_type='application/json')
 
 
 def test_user_get_user_not_exist(client):
-    """Assert that the endpoint returns 500."""
+    """Assert that the endpoint returns data not found."""
     rv = client.get('/api/v1/admin/users', data=json.dumps(USER_REQUEST), content_type='application/json')
-    assert rv.status_code == 500
+    assert rv.status_code == Error.DATA_NOT_FOUND.status
 
 
 def test_user_delete_user(client):
     """Assert that the endpoint returns 204."""
     rv = client.post('/api/v1/admin/users', data=json.dumps(ADD_USER_REQUEST), content_type='application/json')
     rv = client.delete('/api/v1/admin/users', data=json.dumps(USER_REQUEST), content_type='application/json')
-    assert rv.status_code == 204
+    assert rv.status_code == HTTPStatus.HTTP_204_NO_CONTENT
 
 
 def test_user_delete_user_not_exist(client):
-    """Assert that the endpoint returns 204."""
+    """Assert that the endpoint returns data not found."""
     rv = client.delete('/api/v1/admin/users', data=json.dumps(USER_REQUEST), content_type='application/json')
-    assert rv.status_code == 500
+    assert rv.status_code == Error.DATA_NOT_FOUND.status
