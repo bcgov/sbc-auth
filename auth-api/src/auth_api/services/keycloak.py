@@ -80,6 +80,7 @@ class KeycloakService:
             if err.response_code == 409:
                 raise BusinessException(Error.DATA_CONFLICT, err)
             else:
+
                 raise BusinessException(Error.UNDEFINED_ERROR, err)
 
 
@@ -90,6 +91,7 @@ class KeycloakService:
             user_id_keycloak = KEYCLOAK_ADMIN.get_user_id(username)
         except Exception as err:
             raise BusinessException(Error.UNDEFINED_ERROR, err)
+
         # Get User
         if user_id_keycloak is not None:
             try:
@@ -108,6 +110,7 @@ class KeycloakService:
             user_id_keycloak = KEYCLOAK_ADMIN.get_user_id(username)
         except Exception as err:
             raise BusinessException(Error.UNDEFINED_ERROR, err)
+
         # Delete User
         if user_id_keycloak is not None:
             try:
@@ -115,6 +118,7 @@ class KeycloakService:
                 return response
             except Exception as err:
                 raise BusinessException(Error.UNDEFINED_ERROR, err)
+
         else:
             raise BusinessException(Error.DATA_NOT_FOUND)
 
