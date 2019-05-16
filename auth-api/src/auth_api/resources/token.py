@@ -29,6 +29,8 @@ from auth_api.utils.util import cors_preflight
 
 from ..utils.trace_tags import TraceTags as tags
 
+from auth_api.exceptions import BusinessException
+
 
 API = Namespace('token', description='Authentication System - Passcode login')
 KEYCLOAK_SERVICE = KeycloakService()
@@ -53,19 +55,12 @@ class Token(Resource):
         if not data:
             data = request.values
         try:
-            if data.get('refresh_token'):
+            if 'refresh_token' in data:
                 response = KEYCLOAK_SERVICE.refresh_token(data.get('refresh_token'))
             else:
                 response = KEYCLOAK_SERVICE.get_token(data.get('username'), data.get('password'))
 
             return json.dumps(response), http_status.HTTP_200_OK
-        except Exception as err:
-            current_span.set_tag(tags.ERROR, 'true')
-            trace_back = traceback.format_exc()
-            current_span.log_kv({'event': 'error',
-                                 'error.kind': str(type(err)),
-                                 'error.message': err.with_traceback(None),
-                                 'error.object': trace_back})
-            current_span.set_tag(tags.HTTP_STATUS_CODE, http_status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return json.dumps({"error": "{}".format(err)}), http_status.HTTP_500_INTERNAL_SERVER_ERROR\
+        except BusinessException as err:
+            return json.dumps({'error': '{}'.format(err.code), 'message':'{}'.format(err.message), 'detail':'{}'.format(err.detail)}), err.status\
 
