@@ -13,7 +13,9 @@ from auth_api.exceptions.errors import Error
 class BusinessException(Exception):
     """Exception that adds error code and error name, that can be used for i18n support."""
 
+
     def __init__(self, error: Error, exception: Exception = None, *args, **kwargs):
+
         """Return a valid BusinessException."""
         super(BusinessException, self).__init__(*args, **kwargs)
         self.message = error.message

@@ -19,6 +19,8 @@ from flask_restplus import Resource, Namespace
 from auth_api import tracing as _tracing
 from auth_api import status as http_status
 
+from auth_api import status as http_status
+
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
 from auth_api.exceptions import BusinessException
