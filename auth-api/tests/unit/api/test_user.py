@@ -62,6 +62,7 @@ def test_user_add_user(client):
     """Assert that the endpoint returns 201."""
     rv = client.post('/api/v1/admin/users', data=json.dumps(ADD_USER_REQUEST), content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+
     rv = client.delete('/api/v1/admin/users', data=json.dumps(USER_REQUEST), content_type='application/json')
 
 
@@ -79,7 +80,9 @@ def test_user_get_user(client):
     """Assert that the endpoint returns 200."""
     rv = client.post('/api/v1/admin/users', data=json.dumps(ADD_USER_REQUEST), content_type='application/json')
     rv = client.get('/api/v1/admin/users', data=json.dumps(USER_REQUEST), content_type='application/json')
+
     assert rv.status_code == http_status.HTTP_200_OK
+
     rv = client.delete('/api/v1/admin/users', data=json.dumps(USER_REQUEST), content_type='application/json')
 
 
@@ -94,6 +97,7 @@ def test_user_delete_user(client):
     rv = client.post('/api/v1/admin/users', data=json.dumps(ADD_USER_REQUEST), content_type='application/json')
     rv = client.delete('/api/v1/admin/users', data=json.dumps(USER_REQUEST), content_type='application/json')
     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
 
 
 def test_user_delete_user_not_exist(client):

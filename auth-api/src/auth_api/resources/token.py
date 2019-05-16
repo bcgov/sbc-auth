@@ -27,6 +27,8 @@ from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
 from auth_api.exceptions import BusinessException
 
+from auth_api.exceptions import BusinessException
+
 
 API = Namespace('token', description='Authentication System - Passcode login')
 KEYCLOAK_SERVICE = KeycloakService()
