@@ -22,6 +22,10 @@ from auth_api import status as http_status
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
 
+from auth_api.utils.trace_tags import TraceTags as tags
+
+from auth_api.exceptions import BusinessException
+
 API = Namespace('admin/users', description='Keycloak Admin - user')
 KEYCLOAK_SERVICE = KeycloakService()
 
@@ -43,8 +47,9 @@ class User(Resource):
             response = KEYCLOAK_SERVICE.add_user(data)
 
             return response, http_status.HTTP_201_CREATED
-        except Exception as err:
-            return {'error': '{}'.format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
+        except BusinessException as err:
+            return {'error': '{}'.format(err.code), 'message': '{}'.format(err.message), 'detail':'{}'.format(err.detail)}, err.status \
+
 
     @staticmethod
     @_tracing.trace()
@@ -57,8 +62,9 @@ class User(Resource):
         try:
             user = KEYCLOAK_SERVICE.get_user_by_username(data.get('username'))
             return user, http_status.HTTP_200_OK
-        except Exception as err:
-            return {'error': '{}'.format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
+        except BusinessException as err:
+            return {'error': '{}'.format(err.code), 'message': '{}'.format(err.message), 'detail':'{}'.format(err.detail)}, err.status\
+
 
     @staticmethod
     @_tracing.trace()
@@ -71,5 +77,5 @@ class User(Resource):
         try:
             response = KEYCLOAK_SERVICE.delete_user_by_username(data.get('username'))
             return response, http_status.HTTP_204_NO_CONTENT
-        except Exception as err:
-            return {'error': '{}'.format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
+        except BusinessException as err:
+            return {'error': '{}'.format(err.code), 'message': '{}'.format(err.message), 'detail':'{}'.format(err.detail)}, err.status\
