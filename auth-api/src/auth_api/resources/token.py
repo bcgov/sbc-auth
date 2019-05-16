@@ -43,6 +43,7 @@ class Token(Resource):
     @_tracing.trace()
     def post():
         """Get token or refresh token, return token"""
+
         data = request.get_json()
         if not data:
             data = request.values
@@ -60,4 +61,3 @@ class Token(Resource):
             return json.dumps(response), http_status.HTTP_200_OK
         except BusinessException as err:
             return json.dumps({'error': '{}'.format(err.code), 'message':'{}'.format(err.message), 'detail':'{}'.format(err.detail)}), err.status\
-        

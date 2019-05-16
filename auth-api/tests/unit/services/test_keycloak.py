@@ -17,8 +17,8 @@
 Test-Suite to ensure that the Business Service is working as expected.
 """
 
-from auth_api.services.keycloak import KeycloakService
 from auth_api.exceptions.errors import Error
+from auth_api.services.keycloak import KeycloakService
 
 
 ADD_USER_REQUEST = {
@@ -63,7 +63,7 @@ def test_keycloak_add_user(session):
 
 
 def test_keycloak_add_user_duplicate_email(session):
-    """Add user with duplicate email. Assert response is None."""
+    """Add user with duplicate email. Assert response is None, error code is data conflict."""
     keycloak_service.add_user(ADD_USER_REQUEST)
     response = None
     try:
@@ -85,7 +85,7 @@ def test_keycloak_get_user_by_username(session):
 
 
 def test_keycloak_get_user_by_username_not_exist(session):
-    """Get user by a username not exists in Keycloak. Assert user is None."""
+    """Get user by a username not exists in Keycloak. Assert user is None, error code is data not found."""
     user = None
     try:
         user = keycloak_service.get_user_by_username(ADD_USER_REQUEST.get('username'))
@@ -104,7 +104,7 @@ def test_keycloak_get_token(session):
 
 
 def test_keycloak_get_token_user_not_exist(session):
-    """Get token by invalid username and password. Assert response is None."""
+    """Get token by invalid username and password. Assert response is None, error is invalid user credentials."""
     response = None
     try:
         response = keycloak_service.get_token(ADD_USER_REQUEST.get('username'), ADD_USER_REQUEST.get('password'))
@@ -119,16 +119,13 @@ def test_keycloak_refresh_token(session):
     keycloak_service.add_user(ADD_USER_REQUEST)
     response = keycloak_service.get_token(ADD_USER_REQUEST.get('username'), ADD_USER_REQUEST.get('password'))
     refresh_token = response.get('refresh_token')
-    try:
-        response = keycloak_service.refresh_token(refresh_token)
-    except Exception as err:
-        pass
+    response = keycloak_service.refresh_token(refresh_token)
     assert response.get('access_token') is not None
     keycloak_service.delete_user_by_username(ADD_USER_REQUEST.get('username'))
 
 
 def test_keycloak_refresh_token_wrong_refresh_token(session):
-    """Refresh token by invalid refresh token. Assert response is None."""
+    """Refresh token by invalid refresh token. Assert response is None, error code is invalid refresh token."""
     keycloak_service.add_user(ADD_USER_REQUEST)
     response = keycloak_service.get_token(ADD_USER_REQUEST.get('username'), ADD_USER_REQUEST.get('password'))
     refresh_token = response.get('access_token')
@@ -150,7 +147,7 @@ def test_keycloak_delete_user_by_username(session):
 
 
 def test_keycloak_delete_user_by_username_user_not_exist(session):
-    """Delete user by invalid username. Assert response is None."""
+    """Delete user by invalid username. Assert response is None, error code data not found."""
     response = None
     try:
         response = keycloak_service.delete_user_by_username(ADD_USER_REQUEST_SAME_EMAIL.get('username'))
