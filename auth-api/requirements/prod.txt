@@ -15,4 +15,4 @@ jsonschema
 requests
 python-keycloak
 
-git+https://github.com/pwei1018/sbc-common-components.git#egg=sbc-common-components-1.0.0&subdirectory=python
+-e git+https://github.com/pwei1018/sbc-common-components.git#egg=sbc-common-components-1.0.0&subdirectory=python
