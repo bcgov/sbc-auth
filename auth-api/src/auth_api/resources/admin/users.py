@@ -44,8 +44,7 @@ class User(Resource):
 
             return response, http_status.HTTP_201_CREATED
         except Exception as err:
-            return {"error": "{}".format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
-
+            return {'error': '{}'.format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
 
     @staticmethod
     @_tracing.trace()
@@ -56,11 +55,10 @@ class User(Resource):
         if not data:
             data = request.values
         try:
-            user = KEYCLOAK_SERVICE.get_user_by_username(data.get("username"))
+            user = KEYCLOAK_SERVICE.get_user_by_username(data.get('username'))
             return user, http_status.HTTP_200_OK
         except Exception as err:
-            return {"error": "{}".format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
-
+            return {'error': '{}'.format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
 
     @staticmethod
     @_tracing.trace()
@@ -71,7 +69,7 @@ class User(Resource):
         if not data:
             data = request.values
         try:
-            response = KEYCLOAK_SERVICE.delete_user_by_username(data.get("username"))
+            response = KEYCLOAK_SERVICE.delete_user_by_username(data.get('username'))
             return response, http_status.HTTP_204_NO_CONTENT
         except Exception as err:
-            return {"error": "{}".format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
+            return {'error': '{}'.format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
