@@ -15,13 +15,11 @@
 
 import json
 
-import opentracing
-
 from flask import request
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
-
+from auth_api import tracing as _tracing
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
 from auth_api.exceptions import BusinessException
@@ -54,6 +52,7 @@ class Token(Resource):
                 response = KEYCLOAK_SERVICE.refresh_token(data.get('refresh_token'))
             else:
                 response = KEYCLOAK_SERVICE.get_token(data.get('username'), data.get('password'))
+
             current_span = _tracing.tracer.active_span
 
             with _tracing.tracer.start_active_span('passcode_login', child_of=current_span) as scope:
