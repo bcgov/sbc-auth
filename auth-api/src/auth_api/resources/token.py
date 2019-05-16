@@ -24,7 +24,6 @@ from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
 
 from sbc_common_components.tracing.trace_tags import TraceTags
-from ..utils.trace_tags import TraceTags as tags
 
 from auth_api.exceptions import BusinessException
 
