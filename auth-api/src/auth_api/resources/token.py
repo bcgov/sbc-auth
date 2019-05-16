@@ -15,7 +15,6 @@
 
 import json
 
-import traceback
 import opentracing
 
 from flask import request
@@ -26,8 +25,7 @@ from auth_api import status as http_status
 
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
-
-from ..utils.trace_tags import TraceTags as tags
+from auth_api.exceptions import BusinessException
 
 from auth_api.exceptions import BusinessException
 
@@ -50,7 +48,6 @@ class Token(Resource):
     def post():
         """Get token or refresh token, return token"""
 
-        current_span = TRACER.active_span
         data = request.get_json()
         if not data:
             data = request.values
