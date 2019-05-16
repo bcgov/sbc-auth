@@ -24,6 +24,10 @@ from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
 
 from sbc_common_components.tracing.trace_tags import TraceTags
+from ..utils.trace_tags import TraceTags as tags
+
+from auth_api.exceptions import BusinessException
+
 
 API = Namespace('token', description='Authentication System - Passcode login')
 KEYCLOAK_SERVICE = KeycloakService()
@@ -42,16 +46,18 @@ class Token(Resource):
         data = request.get_json()
         if not data:
             data = request.values
+        try:
+            if 'refresh_token' in data:
+                response = KEYCLOAK_SERVICE.refresh_token(data.get('refresh_token'))
+            else:
+                response = KEYCLOAK_SERVICE.get_token(data.get('username'), data.get('password'))
+            current_span = _tracing.tracer.active_span
 
-        if data.get('refresh_token'):
-            response = KEYCLOAK_SERVICE.refresh_token(data.get('refresh_token'))
-        else:
-            response = KEYCLOAK_SERVICE.get_token(data.get('username'), data.get('password'))
+            with _tracing.tracer.start_active_span('passcode_login', child_of=current_span) as scope:
+                scope.span.set_tag(TraceTags.USER, data.get('username'))
+                _tracing.inject_tracing_header(response, _tracing.tracer)
 
-        current_span = _tracing.tracer.active_span
-
-        with _tracing.tracer.start_active_span('passcode_login', child_of=current_span) as scope:
-            scope.span.set_tag(TraceTags.USER, data.get('username'))
-            _tracing.inject_tracing_header(response, _tracing.tracer)
-
-        return json.dumps(response), http_status.HTTP_200_OK
+            return json.dumps(response), http_status.HTTP_200_OK
+        except BusinessException as err:
+            return json.dumps({'error': '{}'.format(err.code), 'message':'{}'.format(err.message), 'detail':'{}'.format(err.detail)}), err.status\
+        
