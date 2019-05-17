@@ -19,7 +19,6 @@ Test-Suite to ensure that the Business Service is working as expected.
 
 from auth_api.exceptions.errors import Error
 from auth_api.services.keycloak import KeycloakService
-from auth_api.exceptions.errors import Error
 
 
 ADD_USER_REQUEST = {
@@ -120,10 +119,8 @@ def test_keycloak_refresh_token(session):
     keycloak_service.add_user(ADD_USER_REQUEST)
     response = keycloak_service.get_token(ADD_USER_REQUEST.get('username'), ADD_USER_REQUEST.get('password'))
     refresh_token = response.get('refresh_token')
-    try:
-        response = keycloak_service.refresh_token(refresh_token)
-    except Exception as err:
-        pass
+    response = keycloak_service.refresh_token(refresh_token)
+
     assert response.get('access_token') is not None
     keycloak_service.delete_user_by_username(ADD_USER_REQUEST.get('username'))
 

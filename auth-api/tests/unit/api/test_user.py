@@ -71,7 +71,7 @@ def test_user_add_user_duplicate_email(client):
     rv = client.post('/api/v1/admin/users',
                      data=json.dumps(ADD_USER_REQUEST_SAME_EMAIL),
                      content_type='application/json')
-    assert rv.status_code == Error.DATA_CONFLICT.status
+    assert rv.status_code == Error.DATA_CONFLICT.status_code
     rv = client.delete('/api/v1/admin/users', data=json.dumps(USER_REQUEST), content_type='application/json')
 
 
@@ -86,7 +86,7 @@ def test_user_get_user(client):
 def test_user_get_user_not_exist(client):
     """Assert that the endpoint returns data not found."""
     rv = client.get('/api/v1/admin/users', data=json.dumps(USER_REQUEST), content_type='application/json')
-    assert rv.status_code == Error.DATA_NOT_FOUND.status
+    assert rv.status_code == Error.DATA_NOT_FOUND.status_code
 
 
 def test_user_delete_user(client):
@@ -99,4 +99,4 @@ def test_user_delete_user(client):
 def test_user_delete_user_not_exist(client):
     """Assert that the endpoint returns data not found."""
     rv = client.delete('/api/v1/admin/users', data=json.dumps(USER_REQUEST), content_type='application/json')
-    assert rv.status_code == Error.DATA_NOT_FOUND.status
+    assert rv.status_code == Error.DATA_NOT_FOUND.status_code

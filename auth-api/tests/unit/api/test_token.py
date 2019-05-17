@@ -51,6 +51,6 @@ def test_token_get_token_user_not_exist(client):
     rv = client.post('/api/v1/admin/users', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
     # Get Token
     rv = client.post('/api/v1/token', data=json.dumps(TOKEN_REQUEST_WRONG_PASSWORD), content_type='application/json')
-    assert rv.status_code == Error.INVALID_USER_CREDENTIALS.status
+    assert rv.status_code == Error.INVALID_USER_CREDENTIALS.status_code
     # Delete user
     rv = client.delete('/api/v1/admin/users', data=json.dumps(TOKEN_REQUEST), content_type='application/json')

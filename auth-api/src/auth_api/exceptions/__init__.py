@@ -19,14 +19,14 @@ from sbc_common_components.tracing.exception_tracing import ExceptionTracing
 class BusinessException(Exception):
     """Exception that adds error code and error name, that can be used for i18n support."""
 
-
     def __init__(self, error: Error, exception: Exception = None, *args, **kwargs):
-
         """Return a valid BusinessException."""
         super(BusinessException, self).__init__(*args, **kwargs)
+
         self.message = error.message
+        self.error = error.message
         self.code = error.name
-        self.status = error.status
+        self.status_code = error.status_code
         self.detail = exception
 
         # to do: log/tracing exception
@@ -35,7 +35,6 @@ class BusinessException(Exception):
 
 class UserException(Exception):
     """Exception that adds error code and error name, that can be used for i18n support."""
-
     def __init__(self, error, status_code, trace_back, *args, **kwargs):
         """Return a valid UserException."""
         super(UserException, self).__init__(*args, **kwargs)
@@ -56,23 +55,19 @@ def catch_custom_exception(func):
 
             ExceptionTracing.trace(e, trace_back)
 
-            raise UserException(e.with_traceback(None), 403, trace_back)
+            raise UserException(e.with_traceback(None), e.status_code, trace_back)
 
     return decorated_function
 
 
-def handle_auth_error(exception):
-    """TODO just a demo function"""
-    return jsonify(exception), exception.status_code
+def catch_business_exception(func):
+    """catch and raise exception."""
 
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            raise BusinessException(Error.UNDEFINED_ERROR, e)
 
-def handle_db_exception(error):
-    """TODO just a demo function"""
-    return {'message': str(error.error)}, error.status_code
-
-
-def handle_exception(exception):
-    """TODO just a demo function"""
-    return {'message': str(exception.error)}, exception.status_code
-
-
+    return decorated_function
