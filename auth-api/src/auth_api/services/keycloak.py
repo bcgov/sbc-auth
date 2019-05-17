@@ -17,6 +17,7 @@ import os
 
 from keycloak import KeycloakAdmin
 from keycloak import KeycloakOpenID
+from keycloak.exceptions import KeycloakGetError
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -76,12 +77,11 @@ class KeycloakService:
             user = self.get_user_by_username(user_request.get('username'))
 
             return user
-        except Exception as err:
+        except KeycloakGetError as err:
             if err.response_code == 409:
                 raise BusinessException(Error.DATA_CONFLICT, err)
-            else:
+        except Exception as err:
                 raise BusinessException(Error.UNDEFINED_ERROR, err)
-
 
     def get_user_by_username(self, username):
         """ Get user from Keycloak by username"""
@@ -100,7 +100,6 @@ class KeycloakService:
         else:
             raise BusinessException(Error.DATA_NOT_FOUND)
 
-
     def delete_user_by_username(self, username):
         """Delete user from Keycloak by username"""
         try:
@@ -118,7 +117,6 @@ class KeycloakService:
         else:
             raise BusinessException(Error.DATA_NOT_FOUND)
 
-
     def get_token(self, username, password):
         """Get user access token by username and password"""
         try:
@@ -126,7 +124,6 @@ class KeycloakService:
             return response
         except Exception as err:
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, err)
-
 
     def refresh_token(self, refresh_token):
         """Refresh user token"""

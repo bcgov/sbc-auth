@@ -27,12 +27,12 @@ class Error(Enum):
     DATA_ALREADY_EXISTS = 'The data you want to insert already exists.', http_status.HTTP_400_BAD_REQUEST
     INVALID_USER_CREDENTIALS = 'Invalid user credentials.', http_status.HTTP_401_UNAUTHORIZED
     INVALID_REFRESH_TOKEN = 'Invalid refresh token.', http_status.HTTP_400_BAD_REQUEST
-    UNDEFINED_ERROR = 'Undefined error.', http_status.HTTP_500_INTERNAL_SERVER_ERROR
+    UNDEFINED_ERROR = 'Undefined error.', http_status.HTTP_400_BAD_REQUEST
     DATA_CONFLICT = 'New data conflict with existing data.', http_status.HTTP_409_CONFLICT
 
-    def __new__(cls, message, status):
+    def __new__(cls, message, status_code):
         """Attributes for the enum."""
         obj = object.__new__(cls)
         obj.message = message
-        obj.status = status
+        obj.status_code = status_code
         return obj

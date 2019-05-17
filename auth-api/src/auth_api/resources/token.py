@@ -22,10 +22,9 @@ from auth_api import status as http_status
 from auth_api import tracing as _tracing
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
+from auth_api.exceptions import BusinessException
 
 from sbc_common_components.tracing.trace_tags import TraceTags
-
-from auth_api.exceptions import BusinessException
 
 
 API = Namespace('token', description='Authentication System - Passcode login')
@@ -60,4 +59,5 @@ class Token(Resource):
 
             return json.dumps(response), http_status.HTTP_200_OK
         except BusinessException as err:
-            return json.dumps({'error': '{}'.format(err.code), 'message':'{}'.format(err.message), 'detail':'{}'.format(err.detail)}), err.status\
+            return json.dumps({'error': '{}'.format(err.code), 'message': '{}'.format(err.error),
+                               'detail': '{}'.format(err.detail)}), err.status_code
