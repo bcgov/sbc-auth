@@ -15,19 +15,20 @@
 
 Standardize error message to display user friendly messages.
 """
+
 from enum import Enum
-from auth_api import status as HTTPStatus
+from auth_api import status as http_status
 
 
 class Error(Enum):
     """Error Codes."""
-    INVALID_INPUT = 'Invalid input, please check.', HTTPStatus.HTTP_400_BAD_REQUEST
-    DATA_NOT_FOUND = 'No matching record found.', HTTPStatus.HTTP_400_BAD_REQUEST
-    DATA_ALREADY_EXISTS = 'The data you want to insert already exists.', HTTPStatus.HTTP_400_BAD_REQUEST
-    INVALID_USER_CREDENTIALS = 'Invalid user credentials.', HTTPStatus.HTTP_401_UNAUTHORIZED
-    INVALID_REFRESH_TOKEN = 'Invalid refresh token.', HTTPStatus.HTTP_400_BAD_REQUEST
-    UNDEFINED_ERROR = 'Undefined error.', HTTPStatus.HTTP_500_INTERNAL_SERVER_ERROR
-    DATA_CONFLICT = 'New data conflict with existing data.', HTTPStatus.HTTP_409_CONFLICT
+    INVALID_INPUT = 'Invalid input, please check.', http_status.HTTP_400_BAD_REQUEST
+    DATA_NOT_FOUND = 'No matching record found.', http_status.HTTP_400_BAD_REQUEST
+    DATA_ALREADY_EXISTS = 'The data you want to insert already exists.', http_status.HTTP_400_BAD_REQUEST
+    INVALID_USER_CREDENTIALS = 'Invalid user credentials.', http_status.HTTP_401_UNAUTHORIZED
+    INVALID_REFRESH_TOKEN = 'Invalid refresh token.', http_status.HTTP_400_BAD_REQUEST
+    UNDEFINED_ERROR = 'Undefined error.', http_status.HTTP_500_INTERNAL_SERVER_ERROR
+    DATA_CONFLICT = 'New data conflict with existing data.', http_status.HTTP_409_CONFLICT
 
     def __new__(cls, message, status):
         """Attributes for the enum."""
