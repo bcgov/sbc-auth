@@ -12,23 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Endpoints to get user information from token and database."""
-import traceback
-from functools import wraps
 
 from flask import g, jsonify
-from flask_jwt_oidc import AuthError
-from flask_restplus import Namespace, Resource, cors
 
-from sbc_common_components.tracing.exception_tracing import ExceptionTracing
+from flask_restplus import Namespace, Resource, cors
+from flask_jwt_oidc import AuthError
 
 from auth_api import jwt as _jwt
 from auth_api import tracing as _tracing
-from auth_api.exceptions import UserException
 from auth_api.services import User
 from auth_api.utils.util import cors_preflight
+from auth_api.exceptions import catch_custom_exception
+from auth_api.exceptions import UserException
 
 API = Namespace('users/info', description='Authentication System - get User Information')
-
 
 @API.errorhandler(AuthError)
 def handle_auth_error(exception):
@@ -47,22 +44,6 @@ def handle_exception(exception):
     """TODO just a demo function"""
     return {'message': str(exception.error)}, exception.status_code
 
-
-def catch_custom_exception(func):
-    """TODO just a demo function"""
-
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            trace_back = traceback.format_exc()
-
-            ExceptionTracing.trace(e, trace_back)
-
-            raise UserException(e.with_traceback(None), 403, trace_back)
-
-    return decorated_function
 
 
 @cors_preflight('GET')
