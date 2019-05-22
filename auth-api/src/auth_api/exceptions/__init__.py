@@ -29,7 +29,7 @@ class BusinessException(Exception):
         self.status_code = error.status_code
         self.detail = exception
 
-        # to do: log/tracing exception
+        # log/tracing exception
         ExceptionTracing.trace(self, traceback.format_exc())
 
 
@@ -52,9 +52,7 @@ def catch_custom_exception(func):
             return func(*args, **kwargs)
         except Exception as e:
             trace_back = traceback.format_exc()
-
             ExceptionTracing.trace(e, trace_back)
-
             raise UserException(e.with_traceback(None), e.status_code, trace_back)
 
     return decorated_function
