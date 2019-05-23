@@ -22,6 +22,7 @@ from flask_jwt_oidc import JwtManager
 
 
 import config
+from config import _Config
 from auth_api import models
 from auth_api.models import db, ma
 from auth_api.utils.run_version import get_run_version
@@ -29,7 +30,7 @@ from auth_api.utils.util_logging import setup_logging
 from sbc_common_components.tracing.api_tracer import ApiTracer
 from sbc_common_components.tracing.api_tracing import ApiTracing
 
-setup_logging(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'logging.conf'))  # important to do this first
+setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first
 
 # lower case name as used by convention in most Flask apps
 jwt = JwtManager()  # pylint: disable=invalid-name
