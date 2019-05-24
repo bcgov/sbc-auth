@@ -17,6 +17,10 @@ import os
 
 from keycloak import KeycloakAdmin
 from keycloak import KeycloakOpenID
+from keycloak.exceptions import KeycloakGetError
+
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 
 
 KEYCLOAK_ADMIN = KeycloakAdmin(server_url=os.getenv('KEYCLOAK_BASE_URL') + '/auth/',
@@ -73,34 +77,58 @@ class KeycloakService:
             user = self.get_user_by_username(user_request.get('username'))
 
             return user
+        except KeycloakGetError as err:
+            if err.response_code == 409:
+                raise BusinessException(Error.DATA_CONFLICT, err)
         except Exception as err:
-            raise err
+                raise BusinessException(Error.UNDEFINED_ERROR, err)
 
     def get_user_by_username(self, username):
         """ Get user from Keycloak by username"""
         try:
             # Get user id
             user_id_keycloak = KEYCLOAK_ADMIN.get_user_id(username)
-            # Get User
-            user = KEYCLOAK_ADMIN.get_user(user_id_keycloak)
-            return user
         except Exception as err:
-            raise err
+            raise BusinessException(Error.UNDEFINED_ERROR, err)
+        # Get User
+        if user_id_keycloak is not None:
+            try:
+                user = KEYCLOAK_ADMIN.get_user(user_id_keycloak)
+                return user
+            except Exception as err:
+                raise BusinessException(Error.UNDEFINED_ERROR, err)
+        else:
+            raise BusinessException(Error.DATA_NOT_FOUND)
 
     def delete_user_by_username(self, username):
         """Delete user from Keycloak by username"""
         try:
+            # Get user id
             user_id_keycloak = KEYCLOAK_ADMIN.get_user_id(username)
-            # Get User
-            response = KEYCLOAK_ADMIN.delete_user(user_id_keycloak)
-            return response
         except Exception as err:
-            raise err
+            raise BusinessException(Error.UNDEFINED_ERROR, err)
+        # Delete User
+        if user_id_keycloak is not None:
+            try:
+                response = KEYCLOAK_ADMIN.delete_user(user_id_keycloak)
+                return response
+            except Exception as err:
+                raise BusinessException(Error.UNDEFINED_ERROR, err)
+        else:
+            raise BusinessException(Error.DATA_NOT_FOUND)
 
     def get_token(self, username, password):
         """Get user access token by username and password"""
-        return KEYCLOAK_OPENID.token(username, password)
+        try:
+            response = KEYCLOAK_OPENID.token(username, password)
+            return response
+        except Exception as err:
+            raise BusinessException(Error.INVALID_USER_CREDENTIALS, err)
 
     def refresh_token(self, refresh_token):
         """Refresh user token"""
-        return KEYCLOAK_OPENID.refresh_token(refresh_token, ['refresh_token'])
+        try:
+            response = KEYCLOAK_OPENID.refresh_token(refresh_token, ['refresh_token'])
+            return response
+        except Exception as err:
+            raise BusinessException(Error.INVALID_REFRESH_TOKEN, err)
