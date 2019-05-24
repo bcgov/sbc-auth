@@ -13,17 +13,42 @@
 # limitations under the License.
 """Endpoints to to manage user."""
 
-from flask import request
+from flask import request, jsonify
 from flask_restplus import Resource, Namespace
+from flask_jwt_oidc import AuthError
 
 from auth_api import tracing as _tracing
+from auth_api import jwt as _jwt
 from auth_api import status as http_status
 
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions import catch_business_exception
+from auth_api.utils.roles import Role
 
 API = Namespace('admin/users', description='Keycloak Admin - user')
 KEYCLOAK_SERVICE = KeycloakService()
+
+
+@API.errorhandler(AuthError)
+def handle_auth_error(exception):
+    """TODO just a demo function"""
+    return jsonify(exception), exception.status_code
+
+
+@API.errorhandler(BusinessException)
+def handle_db_exception(error):
+    """TODO just a demo function"""
+    return {'error': '{}'.format(error.code), 'message': '{}'.format(error.error),
+            'detail': '{}'.format(error.detail)}, error.status_code
+
+
+@API.errorhandler(Exception)
+def handle_exception(exception):
+    """TODO just a demo function"""
+    return {'error': '{}'.format(exception.code), 'message': '{}'.format(exception.error),
+            'detail': '{}'.format(exception.detail)}, exception.status_code
 
 
 @cors_preflight('GET, POST, DELETE, OPTIONS')
@@ -33,6 +58,9 @@ class User(Resource):
 
     @staticmethod
     @_tracing.trace()
+    @catch_business_exception
+    #@_jwt.has_one_of_roles([Role.ADMIN.value])
+    #@_jwt.requires_auth
     def post():
         """Add user, return a new/existing user."""
 
@@ -43,8 +71,9 @@ class User(Resource):
             response = KEYCLOAK_SERVICE.add_user(data)
 
             return response, http_status.HTTP_201_CREATED
-        except Exception as err:
-            return {'error': '{}'.format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
+        except BusinessException as err:
+            return {'error': '{}'.format(err.code), 'message': '{}'.format(err.error),
+                    'detail': '{}'.format(err.detail)}, err.status_code
 
     @staticmethod
     @_tracing.trace()
@@ -57,8 +86,9 @@ class User(Resource):
         try:
             user = KEYCLOAK_SERVICE.get_user_by_username(data.get('username'))
             return user, http_status.HTTP_200_OK
-        except Exception as err:
-            return {'error': '{}'.format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
+        except BusinessException as err:
+            return {'error': '{}'.format(err.code), 'message': '{}'.format(err.error),
+                    'detail': '{}'.format(err.detail)}, err.status_code
 
     @staticmethod
     @_tracing.trace()
@@ -71,5 +101,6 @@ class User(Resource):
         try:
             response = KEYCLOAK_SERVICE.delete_user_by_username(data.get('username'))
             return response, http_status.HTTP_204_NO_CONTENT
-        except Exception as err:
-            return {'error': '{}'.format(err)}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
+        except BusinessException as err:
+            return {'error': '{}'.format(err.code), 'message': '{}'.format(err.error),
+                    'detail': '{}'.format(err.detail)}, err.status_code
