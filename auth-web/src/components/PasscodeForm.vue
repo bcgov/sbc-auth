@@ -10,7 +10,7 @@
             icon="warning"
           >{{loginError}}
           </v-alert>
-        </div>
+      </div>
       </v-expand-transition>
       <div class="passcode-form__row">
         <v-text-field
@@ -140,6 +140,8 @@ export default {
               this.frame.postMessage(response.data.access_token, process.env.VUE_APP_COPS_REDIRECT_URL) */
               IframeServices.emit(this.$refs.iframeContent.contentWindow, response.data.access_token)
               sessionStorage.name = response.data.access_token
+              sessionStorage.token = response.data.access_token
+              sessionStorage.traceid = response.data['registries-trace-id']
               setTimeout(() => {
                 window.location.href = process.env.VUE_APP_COPS_REDIRECT_URL
               }, 500)
