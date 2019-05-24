@@ -128,6 +128,8 @@ export default {
     login () {
       if (this.isValidForm()) {
         console.log('VUE_APP_ROOT_API:' + process.env.VUE_APP_ROOT_API)
+        console.log('VUE_APP_TEST_VAR_WEBAPP:' + process.env.TEST_VAR_WEBAPP)
+        console.log('VUE_APP_VUE_APP_TEST_VAR:' + process.env.VUE_APP_TEST_VAR)
 
         LoginServices.login(this.$store.state.login.entityNumber, this.$store.state.login.passcode)
           .then(response => {
