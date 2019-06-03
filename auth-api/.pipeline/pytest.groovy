@@ -175,17 +175,18 @@ if( run_pipeline ) {
         echo "Running pytest ... "
         sh '''
           #!/bin/bash
+          python --h
           echo $DATABASE_TEST_URL
         '''
         dir('auth-api') {
           try {
             sh '''
-                export PYTHONPATH=./src/
                 python -m venv venv
                 source venv/bin/activate
                 pip install pytest
                 pip install -r requirements.txt
                 pip install -r requirements/dev.txt
+                export PYTHONPATH=./src/
                 pytest
             '''
           } catch (Exception e) {
