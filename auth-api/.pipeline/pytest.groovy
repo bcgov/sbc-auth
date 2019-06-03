@@ -175,7 +175,7 @@ if( run_pipeline ) {
         echo "Running pytest ... "
         sh '''
           #!/bin/bash
-          python --h
+          python -h
           echo $DATABASE_TEST_URL
         '''
         dir('auth-api') {
