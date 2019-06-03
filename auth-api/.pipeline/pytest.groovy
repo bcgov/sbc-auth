@@ -180,9 +180,11 @@ if( run_pipeline ) {
         dir('auth-api') {
           try {
             sh '''
-                pip3.7 install pytest
-                pip3.7 install -r requirements.txt
-                pip3.7 install -r requirements/dev.txt
+                python -m venv venv
+                source venv/bin/activate
+                pip install pytest
+                pip install -r requirements.txt
+                pip install -r requirements/dev.txt
                 pytest
             '''
           } catch (Exception e) {
