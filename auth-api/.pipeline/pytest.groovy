@@ -175,13 +175,12 @@ if( run_pipeline ) {
         echo "Running pytest ... "
         sh '''
           #!/bin/bash
-          export PYTHONPATH=./src/
-          echo PYTHONPATH
           echo $DATABASE_TEST_URL
         '''
         dir('auth-api') {
           try {
             sh '''
+                export PYTHONPATH=./src/
                 python -m venv venv
                 source venv/bin/activate
                 pip install pytest
