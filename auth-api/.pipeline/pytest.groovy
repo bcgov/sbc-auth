@@ -198,7 +198,7 @@ if( run_pipeline ) {
 
             '''
             cobertura coberturaReportFile: 'coverage.xml'
-            def pyLint = scanForIssues tool: pyLint()
+            def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
             publishIssues issues: [pyLint]
           } catch (Exception e) {
               echo "EXCEPTION: ${e}"
