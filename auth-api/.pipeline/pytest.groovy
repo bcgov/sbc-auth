@@ -194,9 +194,12 @@ if( run_pipeline ) {
                 export PYTHONPATH=./src/
                 coverage run -m pytest
                 python -m coverage xml
+                pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
 
             '''
             cobertura coberturaReportFile: 'coverage.xml'
+            def pyLint = scanForIssues tool: pyLint()
+            publishIssues issues: [pyLint]
           } catch (Exception e) {
               echo "EXCEPTION: ${e}"
           }
