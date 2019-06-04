@@ -188,11 +188,14 @@ if( run_pipeline ) {
             sh '''
                 python -m venv venv
                 source venv/bin/activate
-                pip install pytest
+                pip install flake8 pylint pytest coverage
                 pip install -r requirements.txt
                 pip install -r requirements/dev.txt
                 export PYTHONPATH=./src/
-                pytest
+                flake8 src/auth-api tests
+                pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api
+                coverage run -m pytest
+                coverage report
             '''
           } catch (Exception e) {
               echo "EXCEPTION: ${e}"
