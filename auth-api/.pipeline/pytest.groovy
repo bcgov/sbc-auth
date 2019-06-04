@@ -192,11 +192,13 @@ if( run_pipeline ) {
                 pip install -r requirements.txt
                 pip install -r requirements/dev.txt
                 export PYTHONPATH=./src/
+                pytest --junitxml=pytest.xml
                 coverage run -m pytest
                 python -m coverage xml
                 pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
 
             '''
+            junit 'pytest.xml'
             cobertura coberturaReportFile: 'coverage.xml'
             def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
             publishIssues issues: [pyLint]
