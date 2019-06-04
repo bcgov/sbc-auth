@@ -192,11 +192,11 @@ if( run_pipeline ) {
                 pip install -r requirements.txt
                 pip install -r requirements/dev.txt
                 export PYTHONPATH=./src/
-                flake8 src/auth-api tests
-                pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api
                 coverage run -m pytest
-                coverage report
+                python -m coverage xml
+
             '''
+            cobertura coberturaReportFile: 'coverage.xml'
           } catch (Exception e) {
               echo "EXCEPTION: ${e}"
           }
