@@ -2,5 +2,7 @@
   "message": "hello i18n !!",
   "loginFailedMessage": "Incorrect Incorporation Number or Passcode",
   "techSupportPhone": "250 952-0568",
-  "techSupportEmail": "SBC_ITOperationsSupport@gov.bc.ca"
+  "techSupportEmail": "SBC_ITOperationsSupport@gov.bc.ca",
+  "payFailedMessage": "Payment Failed for technical reasons.Please revisit the site",
+  "payNoParams": "Incorrect configuration"
 }
