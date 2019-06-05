@@ -1,4 +1,4 @@
-import PasscodeForm from '@/components/PasscodeForm.vue'
+import PasscodeForm from '@/components/auth/PasscodeForm.vue'
 import Vuex from 'vuex'
 import { mount, createLocalVue } from '@vue/test-utils'
 import Vue from 'vue'
@@ -94,7 +94,6 @@ describe('PasscodeForm.vue', () => {
   it('login button click invokes login method', () => {
     const stub = jest.fn()
     cmp.setMethods({ login: stub })
-    cmp.update()
     cmp.find('.sign-in-btn').trigger('click')
     expect(cmp.vm.login).toBeCalled()
   })
@@ -102,7 +101,6 @@ describe('PasscodeForm.vue', () => {
   it('login button click invokes isValidForm method', () => {
     const stub = jest.fn()
     cmp.setMethods({ isValidForm: stub })
-    cmp.update()
     cmp.find('.sign-in-btn').trigger('click')
     expect(cmp.vm.isValidForm).toBeCalled()
   })
@@ -112,7 +110,6 @@ describe('PasscodeForm.vue', () => {
     const stub = jest.fn()
     stub.mockReturnValueOnce(true)
     cmp.setMethods({ isValidForm: stub })
-    cmp.update()
     cmp.find('.sign-in-btn').trigger('click')
     expect(cmp.vm.isValidForm).toBeTruthy()
     expect(axios.post).toBeCalledTimes(1)
@@ -122,7 +119,6 @@ describe('PasscodeForm.vue', () => {
     const stub = jest.fn()
     stub.mockReturnValueOnce(false)
     cmp.setMethods({ isValidForm: stub })
-    cmp.update()
     cmp.find('.sign-in-btn').trigger('click')
     expect(cmp.vm.isValidForm).toBeTruthy()
   })

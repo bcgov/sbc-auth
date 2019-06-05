@@ -7,7 +7,8 @@ import Axios from 'axios'
 import i18n from './plugins/i18n'
 
 Vue.config.productionTip = false
-Axios.defaults.baseURL = process.env.VUE_APP_ROOT_API
+// mutliple base urls now
+// Axios.defaults.baseURL = process.env.VUE_APP_ROOT_API
 
 new Vue({
   router,
