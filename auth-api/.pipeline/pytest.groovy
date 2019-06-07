@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 // Edit your app's name below
 def APP_NAME = 'auth-api'
 
