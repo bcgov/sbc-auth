@@ -4,7 +4,7 @@
             <v-container fill-height>
                 <v-layout row justify-center align-center>
                     <v-progress-circular color="primary" :size="50" indeterminate v-if="!errorMessage"></v-progress-circular>
-                    <div class="loading-msg" v-if="!errorMessage">Preparing your payments</div>
+                    <div class="loading-msg" v-if="!errorMessage"> {{ $t('paymentDoneMsg') }}</div>
                     <div class="loading-msg" v-if="errorMessage">{{errorMessage}}</div>
                 </v-layout>
             </v-container>

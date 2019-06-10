@@ -14,13 +14,14 @@ jest.mock('../../src/services/payment.services')
 describe('PaymentReturnForm.vue', () => {
   it('renders page and service gets invoked', () => {
     PaymentServices.updateTransaction = jest.fn().mockResolvedValue({})
-
+    const $t = () => 'Preparing your payments'
     const wrapper = shallowMount(PaymentReturnForm, {
       propsData: {
         paymentId: 'somepaymentId',
         transactionId: 'sometransactionId',
         receiptNum: 'somereceiptNum'
-      }
+      },
+      mocks: { $t }
     })
 
     expect(PaymentServices.updateTransaction).toBeCalledWith('somepaymentId', 'sometransactionId', 'somereceiptNum')
@@ -40,7 +41,7 @@ describe('PaymentReturnForm.vue', () => {
 
   it('renders page with error message when service fails', () => {
     let feeresponse = {}
-    const $t = () => 'Payment Failed'
+    const $t = () => 'Preparing your payments'
     PaymentServices.updateTransaction = jest.fn().mockRejectedValue({})
 
     const wrapper = mount(PaymentReturnForm, {
