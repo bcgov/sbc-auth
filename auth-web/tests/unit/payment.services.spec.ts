@@ -21,7 +21,7 @@ describe('create a transaction', () => {
   })
 
   it('should call Axios.post ', () => {
-    expect(Axios.post).toHaveBeenCalledWith(`${process.env.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions?redirect_uri=www.redirecturl.com`, {}, { 'headers': { 'Authorization': 'Bearer null' } })
+    expect(Axios.post).toHaveBeenCalledWith(`${process.env.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions?redirect_uri=www.redirecturl.com`, {})
     expect(Axios.post).toBeCalledTimes(1)
   })
 })
@@ -37,13 +37,12 @@ describe('update a transaction', () => {
 
   it('should call Axios.put wihtout receipt number ', () => {
     PaymentServices.updateTransaction('paymentId', 'transactionId')
-    expect(Axios.put).toHaveBeenCalledWith(`${process.env.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions/transactionId`, { 'params': '' }, { 'headers': { 'Authorization': 'Bearer null' } })
+    expect(Axios.put).toHaveBeenCalledWith(`${process.env.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions/transactionId`, { 'params': '' })
   })
 
   it('should call Axios.put  with receipt number', () => {
     PaymentServices.updateTransaction('paymentId', 'transactionId', 'receiptno')
     var param = { 'receipt_number': 'receiptno' }
-    expect(Axios.put).toHaveBeenCalledWith(`${process.env.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions/transactionId`, { 'params': { 'receipt_number': 'receiptno' } }, { 'headers': { 'Authorization': 'Bearer null' } })
+    expect(Axios.put).toHaveBeenCalledWith(`${process.env.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions/transactionId`, { 'params': { 'receipt_number': 'receiptno' } })
   })
 })
-

@@ -4,5 +4,7 @@
   "techSupportPhone": "250 952-0568",
   "techSupportEmail": "SBC_ITOperationsSupport@gov.bc.ca",
   "payFailedMessage": "Payment Failed for technical reasons.Please revisit the site",
-  "payNoParams": "Incorrect configuration"
+  "payNoParams": "Incorrect configuration",
+  "paymentPrepareMsg": "Preparing your payments",
+  "paymentDoneMsg": "Completing the payment"
 }

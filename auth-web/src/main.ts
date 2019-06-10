@@ -5,10 +5,15 @@ import router from './router'
 import store from './store'
 import Axios from 'axios'
 import i18n from './plugins/i18n'
-
-Vue.config.productionTip = false
 // mutliple base urls now
 // Axios.defaults.baseURL = process.env.VUE_APP_ROOT_API
+
+// importing the helper
+import interceptorsSetup from '@/util/interceptors'
+
+Vue.config.productionTip = false
+
+interceptorsSetup()
 
 new Vue({
   router,
