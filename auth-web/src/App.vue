@@ -7,15 +7,15 @@
 </template>
 
 <script>
-  import Vue from 'vue'
-  import SbcLayout from 'sbc-common-components/src/components/SbcLayout.vue'
+import Vue from 'vue'
+import SbcLayout from 'sbc-common-components/src/components/SbcLayout.vue'
 
-  export default Vue.extend({
-    name: 'app',
-    components: {
-      SbcLayout
-    }
-  })
+export default Vue.extend({
+  name: 'app',
+  components: {
+    SbcLayout
+  }
+})
 </script>
 
 <style lang="stylus">
