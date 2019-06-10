@@ -4,7 +4,6 @@ const PAYMENT_RESOURCE_NAME = '/payments'
 export default {
 
   createTransaction (paymentId:String, redirectUrl:String) {
-
     var url = `${process.env.VUE_APP_PAY_ROOT_API}/payments/${paymentId}/transactions?redirect_uri=${redirectUrl}`
     return Axios.post(url, {})
   },
