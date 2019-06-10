@@ -14,7 +14,6 @@ jest.mock('axios', () => ({
   post: jest.fn(() => Promise.resolve({ data: { access_token: 'abcd' } }))
 }))
 
-
 describe('PasscodeForm.vue', () => {
   let cmp
 
@@ -106,7 +105,6 @@ describe('PasscodeForm.vue', () => {
   })
 
   it('login button valid form  call  axios', () => {
-
     const stub = jest.fn()
     stub.mockReturnValueOnce(true)
     cmp.setMethods({ isValidForm: stub })

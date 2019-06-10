@@ -139,7 +139,7 @@ export default {
               IframeServices.emit(this.$refs.iframeContent.contentWindow, response.data.access_token)
               sessionStorage.KEYCLOAK_TOKEN = response.data.access_token
               setTimeout(() => {
-              //  window.location.href = process.env.VUE_APP_COPS_REDIRECT_URL
+                window.location.href = process.env.VUE_APP_COPS_REDIRECT_URL
               }, 500)
             }
           })
