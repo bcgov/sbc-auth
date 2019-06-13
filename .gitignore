@@ -105,11 +105,12 @@ node_modules/
 
 # vscode
 .vscode/
+*.code-workspace
+.history/
 
 # pycharm
 .idea/
 
 # npm
 package-lock.json
-
 

@@ -56,6 +56,6 @@ setup(
     long_description=read('README.md'),
     zip_safe=False,
     install_requires=REQUIREMENTS,
-    setup_requires=["pytest-runner", ],
-    tests_require=["pytest", ],
+    setup_requires=["pytest-runner"],
+    tests_require=["pytest"],
 )

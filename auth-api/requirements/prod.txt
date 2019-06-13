@@ -13,3 +13,5 @@ marshmallow
 marshmallow-sqlalchemy
 jsonschema
 requests
+python-keycloak
+

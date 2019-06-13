@@ -16,7 +16,12 @@
 
 Test-Suite to ensure that the /token endpoint is working as expected.
 """
+
 import json
+
+from auth_api import status as http_status
+from auth_api.exceptions.errors import Error
+
 
 TOKEN_REQUEST = {
     'username': 'test11',
@@ -29,25 +34,23 @@ TOKEN_REQUEST_WRONG_PASSWORD = {
 }
 
 
-def test_token_get_token_happy(client):
+def test_token_get_token(client):
     """Assert that the endpoint returns 200."""
     # Add user
-    rv = client.post('/api/v1/user', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
+    rv = client.post('/api/v1/admin/users', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
     # Get Token
     rv = client.post('/api/v1/token', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
-    assert rv.status_code == 200
+    assert rv.status_code == http_status.HTTP_200_OK
     # Delete user
-    rv = client.delete('/api/v1/user', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
+    rv = client.delete('/api/v1/admin/users', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
 
 
-
-
-def test_token_get_token_sad(client):
-    """Assert that the endpoint returns 500."""
+def test_token_get_token_user_not_exist(client):
+    """Assert that the endpoint returns invalid user credentials."""
     # Add user
-    rv = client.post('/api/v1/user', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
+    rv = client.post('/api/v1/admin/users', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
     # Get Token
     rv = client.post('/api/v1/token', data=json.dumps(TOKEN_REQUEST_WRONG_PASSWORD), content_type='application/json')
-    assert rv.status_code == 500
+    assert rv.status_code == Error.INVALID_USER_CREDENTIALS.status_code
     # Delete user
-    rv = client.delete('/api/v1/user', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
+    rv = client.delete('/api/v1/admin/users', data=json.dumps(TOKEN_REQUEST), content_type='application/json')

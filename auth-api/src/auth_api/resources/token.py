@@ -13,57 +13,51 @@
 # limitations under the License.
 """Endpoints to get token from Keycloak """
 
-import traceback
-from flask import jsonify, request
-from flask_restplus import Resource, Namespace
+import json
+
+from flask import request
+from flask_restplus import Namespace, Resource, cors
+
+from auth_api import status as http_status
+from auth_api import tracing as _tracing
 from auth_api.services.keycloak import KeycloakService
-from auth_api.services import User
-import opentracing
-from flask_opentracing import FlaskTracing
-from ..utils.trace_tags import TraceTags as tags
-from flask import current_app
-import os
-from jose import jwt
 from auth_api.utils.util import cors_preflight
+from auth_api.exceptions import BusinessException
+
+from sbc_common_components.tracing.trace_tags import TraceTags
 
 
 API = Namespace('token', description='Authentication System - Passcode login')
 KEYCLOAK_SERVICE = KeycloakService()
 
 
-tracer = opentracing.tracer
-tracing = FlaskTracing(tracer)
-
-
 @cors_preflight('POST,OPTIONS')
 @API.route('', methods=['POST', 'OPTIONS'])
 class Token(Resource):
     """Get token from Keycloak by username and password, or refresh token, return token"""
+
     @staticmethod
-    @tracing.trace()
+    @cors.crossdomain(origin='*')
+    @_tracing.trace()
     def post():
         """Get token or refresh token, return token"""
 
-        current_span = tracer.active_span
         data = request.get_json()
         if not data:
             data = request.values
         try:
-            if data.get('refresh_token'):
+            if 'refresh_token' in data:
                 response = KEYCLOAK_SERVICE.refresh_token(data.get('refresh_token'))
             else:
                 response = KEYCLOAK_SERVICE.get_token(data.get('username'), data.get('password'))
 
-            return response, 200
-        except Exception as err:
-            current_span.set_tag(tags.ERROR, 'true')
-            tb = traceback.format_exc()
-            current_span.log_kv({'event': 'error',
-                                 'error.kind': str(type(err)),
-                                 'error.message': err.with_traceback(None),
-                                 'error.object': tb})
-            current_span.set_tag(tags.HTTP_STATUS_CODE, 500)
-            return {"error": "{}".format(err)}, 500\
+            current_span = _tracing.tracer.active_span
 
+            with _tracing.tracer.start_active_span('passcode_login', child_of=current_span) as scope:
+                scope.span.set_tag(TraceTags.USER, data.get('username'))
+                _tracing.inject_tracing_header(response, _tracing.tracer)
 
-
+            return json.dumps(response), http_status.HTTP_200_OK
+        except BusinessException as err:
+            return json.dumps({'error': '{}'.format(err.code), 'message': '{}'.format(err.error),
+                               'detail': '{}'.format(err.detail)}), err.status_code
