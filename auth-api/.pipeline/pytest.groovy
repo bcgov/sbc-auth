@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 // Edit your app's name below
 def APP_NAME = 'auth-api'
 
@@ -150,7 +152,7 @@ if( run_pipeline ) {
     containers: [
       containerTemplate(
         name: 'jnlp',
-        image: 'image: 'docker-registry.default.svc:5000/1rdehl-tools/jenkins-slave-python3:3.7.3,
+        image: 'docker-registry.default.svc:5000/1rdehl-tools/jenkins-slave-python3:3.7.3',
         resourceRequestCpu: '1000m',
         resourceLimitCpu: '2000m',
         resourceRequestMemory: '2Gi',
@@ -159,7 +161,13 @@ if( run_pipeline ) {
         command: '',
         args: '${computer.jnlpmac} ${computer.name}',
         envVars: [
-            secretEnvVar(key: 'DATABASE_TEST_URL', secretName: 'apitest-secrets', secretKey: 'DATABASE_TEST_URL')
+            secretEnvVar(key: 'DATABASE_TEST_URL', secretName: 'apitest-secrets', secretKey: 'DATABASE_TEST_URL'),
+            secretEnvVar(key: 'KEYCLOAK_BASE_URL', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_BASE_URL'),
+            secretEnvVar(key: 'KEYCLOAK_REALMNAME', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_REALMNAME'),
+            secretEnvVar(key: 'KEYCLOAK_ADMIN_CLIENTID', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_ADMIN_CLIENTID'),
+            secretEnvVar(key: 'KEYCLOAK_ADMIN_SECRET', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_ADMIN_SECRET'),
+            secretEnvVar(key: 'KEYCLOAK_AUTH_AUDIENCE', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_AUTH_AUDIENCE'),
+            secretEnvVar(key: 'KEYCLOAK_AUTH_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_AUTH_CLIENT_SECRET')
         ]
       )
     ]
@@ -172,133 +180,32 @@ if( run_pipeline ) {
       }
 
       stage('Run pytest') {
-        echo "Running pytest ... TODO"
+        echo "Running pytest ... "
         sh '''
           #!/bin/bash
-          echo DATABASE_TEST_URL=$DATABASE_TEST_URL
+          echo $DATABASE_TEST_URL
         '''
         dir('auth-api') {
           try {
             sh '''
+                python -m venv venv
+                source venv/bin/activate
+                pip install flake8 pylint pytest coverage
+                pip install -r requirements.txt
+                pip install -r requirements/dev.txt
+                export PYTHONPATH=./src/
+                pytest --junitxml=pytest.xml
+                coverage run -m pytest
+                python -m coverage xml
+                pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
 
             '''
+            junit 'pytest.xml'
+            cobertura coberturaReportFile: 'coverage.xml'
+            def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
+            publishIssues issues: [pyLint]
           } catch (Exception e) {
               echo "EXCEPTION: ${e}"
-          }
-        }
-      }
-
-      stage('SonarQube Analysis') {
-        echo "Performing static SonarQube code analysis ..."
-
-        SONARQUBE_URL = getUrlForRoute(SONAR_ROUTE_NAME, NAMESPACES[0]).trim()
-        SONARQUBE_PWD = getSonarQubePwd().trim()
-        echo "URL: ${SONARQUBE_URL}"
-        echo "PWD: ${SONARQUBE_PWD}"
-
-        // The `sonar-runner` MUST exist in your project and contain a Gradle environment consisting of:
-        // - Gradle wrapper script(s)
-        // - A simple `build.gradle` file that includes the SonarQube plug-in.
-        //
-        // An example can be found here:
-        // - https://github.com/BCDevOps/sonarqube
-        dir('sonar-runner') {
-          // ======================================================================================================
-          // Set your SonarQube scanner properties at this level, not at the Gradle Build level.
-          // The only thing that should be defined at the Gradle Build level is a minimal set of generic defaults.
-          //
-          // For more information on available properties visit:
-          // - https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner+for+Gradle
-          // ======================================================================================================
-          sh (
-            returnStdout: true,
-            script: "./gradlew sonarqube --stacktrace --info \
-              -Dsonar.verbose=true \
-              -Dsonar.host.url=${SONARQUBE_URL} \
-              -Dsonar.projectName='${SONAR_PROJECT_NAME}' \
-              -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-              -Dsonar.projectBaseDir=${SONAR_PROJECT_BASE_DIR} \
-              -Dsonar.sources=${SONAR_SOURCES}"
-          )
-        }
-      }
-    }
-  }
-
-  node {
-    stage("Build ${BUILD_CONFIG}") {
-      script {
-        openshift.withCluster() {
-          openshift.withProject("${NAMESPACES[0]}") {
-
-            echo "Building ${BUILD_CONFIG} ..."
-            def build = openshift.selector("bc", "${BUILD_CONFIG}").startBuild()
-            build.untilEach {
-              return it.object().status.phase == "Running"
-            }
-            build.logs('-f')
-          }
-        }
-      }
-    }
-
-    stage("Tag ${BUILD_CONFIG}-${TAG_NAMES[1]}") {
-      script {
-        openshift.withCluster() {
-          openshift.withProject("${NAMESPACES[0]}") {
-
-            echo "Tagging ${IMAGESTREAM_NAME} for deployment to ${TAG_NAMES[1]} ..."
-
-            // Don't tag with BUILD_ID so the pruner can do it's job; it won't delete tagged images.
-            // Tag the images for deployment based on the image's hash
-            def IMAGE_HASH = getImageTagHash("${IMAGESTREAM_NAME}")
-            echo "IMAGE_HASH: ${IMAGE_HASH}"
-            openshift.tag("${IMAGESTREAM_NAME}@${IMAGE_HASH}", "${IMAGESTREAM_NAME}:${TAG_NAMES[1]}")
-          }
-        }
-      }
-    }
-
-    stage("Deploy ${BUILD_CONFIG}-${TAG_NAMES[1]}") {
-      script {
-        openshift.withCluster() {
-          openshift.withProject("${NAMESPACES[0]}") {
-
-            echo "Deploy ${IMAGESTREAM_NAME} for deployment to ${TAG_NAMES[1]} ..."
-
-            sh "echo Wait for service to be up"
-            timeout (time: 180, unit: 'SECONDS'){
-              openshift.withCluster() {
-                openshift.withProject("${NAMESPACES[0]}") {
-                  openshift.selector("dc", "${BUILD_CONFIG}-${TAG_NAMES[1]}").rollout().latest()
-                  def latestDeploymentVersion = openshift.selector('dc',"${BUILD_CONFIG}-${TAG_NAMES[1]}").object().status.latestVersion
-                  def rc = openshift.selector('rc', "${BUILD_CONFIG}-${TAG_NAMES[1]}-${latestDeploymentVersion}")
-                  timeout (time: 10, unit: 'MINUTES') {
-                    rc.untilEach(1){
-                      def rcMap = it.object()
-                      return (rcMap.status.replicas.equals(rcMap.status.readyReplicas))
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  node {
-    stage("Tag ${BUILD_CONFIG}-${TAG_NAMES[2]}") {
-      timeout (time: 180, unit: 'DAYS'){
-        input "Deploy to test?"
-      }
-
-      script {
-        openshift.withCluster() {
-          openshift.withProject("${NAMESPACES[0]}") {
-            echo "Tagging ${IMAGESTREAM_NAME} for deployment to ${TAG_NAMES[2]} ..."
-            openshift.tag("${IMAGESTREAM_NAME}:${TAG_NAMES[1]}", "${IMAGESTREAM_NAME}:${TAG_NAMES[2]}")
           }
         }
       }
