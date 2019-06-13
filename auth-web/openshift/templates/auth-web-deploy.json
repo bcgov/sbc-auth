@@ -70,6 +70,15 @@
                         }
                     },
                     "spec": {
+                        "volumes": [
+                            {
+                                "name": "web-caddy-config",
+                                "configMap": {
+                                    "name": "web-caddy-config",
+                                    "defaultMode": 420
+                                }
+                            }
+                        ],
                         "containers": [
                             {
                                 "name": "auth-web",
@@ -80,6 +89,14 @@
                                     {
                                         "containerPort": 2019,
                                         "protocol": "TCP"
+                                    }
+                                ],
+                                "volumeMounts": [
+                                    {
+                                        "name": "web-caddy-config",
+                                        "readOnly": true,
+                                        "mountPath": "/etc/Caddyfile",
+                                        "subPath": "Caddyfile"
                                     }
                                 ],
                                 "envFrom": [],

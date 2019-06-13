@@ -127,8 +127,6 @@ export default {
     },
     login () {
       if (this.isValidForm()) {
-        console.log('VUE_APP_ROOT_API:' + process.env.VUE_APP_ROOT_API)
-
         LoginServices.login(this.$store.state.login.entityNumber, this.$store.state.login.passcode)
           .then(response => {
             if (response.data.error) {
@@ -139,7 +137,7 @@ export default {
               /* this.frame = this.$refs.iframeContent.contentWindow
               this.frame.postMessage(response.data.access_token, process.env.VUE_APP_COPS_REDIRECT_URL) */
               IframeServices.emit(this.$refs.iframeContent.contentWindow, response.data.access_token)
-              sessionStorage.name = response.data.access_token
+              sessionStorage.KEYCLOAK_TOKEN = response.data.access_token
               setTimeout(() => {
                 window.location.href = process.env.VUE_APP_COPS_REDIRECT_URL
               }, 500)
@@ -155,7 +153,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '../assets/styl/theme.styl';
+@import '../../assets/styl/theme.styl';
 
 .passcode-form__row
   margin-top 1rem

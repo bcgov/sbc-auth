@@ -13,36 +13,35 @@
 # limitations under the License.
 """Utils for keycloak administration"""
 
-from keycloak import KeycloakAdmin
-from keycloak import KeycloakOpenID
-import json
 import os
 
-keycloak_admin = KeycloakAdmin(server_url=os.getenv("KEYCLOAK_BASE_URL") + "/auth/",
-                               username=os.getenv("KEYCLOAK_ADMIN_CLIENTID"),
-                               password=os.getenv("KEYCLOAK_ADMIN_SECRET"),
-                               realm_name=os.getenv("KEYCLOAK_REALMNAME"),
-                               client_id=os.getenv("KEYCLOAK_ADMIN_CLIENTID"),
-                               client_secret_key=os.getenv("KEYCLOAK_ADMIN_SECRET"),
+from keycloak import KeycloakAdmin
+from keycloak import KeycloakOpenID
+from keycloak.exceptions import KeycloakGetError
+
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
+
+
+KEYCLOAK_ADMIN = KeycloakAdmin(server_url=os.getenv('KEYCLOAK_BASE_URL') + '/auth/',
+                               username=os.getenv('KEYCLOAK_ADMIN_CLIENTID'),
+                               password=os.getenv('KEYCLOAK_ADMIN_SECRET'),
+                               realm_name=os.getenv('KEYCLOAK_REALMNAME'),
+                               client_id=os.getenv('KEYCLOAK_ADMIN_CLIENTID'),
+                               client_secret_key=os.getenv('KEYCLOAK_ADMIN_SECRET'),
                                verify=True)
 
-# keycloak_admin = KeycloakAdmin(server_url="http://localhost:8080/auth/",
-#                                username='localtest',
-#                                password='27f45971-0bee-44da-b5d6-34452a97b0b4',
-#                                client_id='localtest',
-#                                client_secret_key='27f45971-0bee-44da-b5d6-34452a97b0b4',
-#                                realm_name="registries",
-#                                verify=True)
 
 # Configure client
-keycloak_openid = KeycloakOpenID(server_url=os.getenv("KEYCLOAK_BASE_URL") + "/auth/",
-                                 realm_name=os.getenv("KEYCLOAK_REALMNAME"),
-                                 client_id=os.getenv("KEYCLOAK_AUTH_AUDIENCE"),
-                                 client_secret_key=os.getenv("KEYCLOAK_AUTH_CLIENT_SECRET"),
+KEYCLOAK_OPENID = KeycloakOpenID(server_url=os.getenv('KEYCLOAK_BASE_URL') + '/auth/',
+                                 realm_name=os.getenv('KEYCLOAK_REALMNAME'),
+                                 client_id=os.getenv('KEYCLOAK_AUTH_AUDIENCE'),
+                                 client_secret_key=os.getenv('KEYCLOAK_AUTH_CLIENT_SECRET'),
                                  verify=True)
 
 
 class KeycloakService:
+    """For Keycloak services."""
     def __init__(self):
         super()
 
@@ -51,61 +50,85 @@ class KeycloakService:
         """Add user to Keycloak"""
 
         # New user default to enabled.
-        enabled = user_request.get("enabled")
+        enabled = user_request.get('enabled')
         if enabled is None:
             enabled = True
 
         # Add user and set password
         try:
-            response = keycloak_admin.create_user({"email": user_request.get("email"),
-                           "username": user_request.get("username"),
-                           "enabled": enabled,
-                           "firstName": user_request.get("firstname"),
-                           "lastName": user_request.get("lastname"),
-                           "credentials": [{"value": user_request.get("password"), "type": "password"}],
-                           "groups": user_request.get("user_type"),
-                           "attributes": {"corp_type": user_request.get("corp_type"), "source": user_request.get("source")}})
+            KEYCLOAK_ADMIN.create_user({'email': user_request.get('email'),
+                                        'username': user_request.get('username'),
+                                        'enabled': enabled,
+                                        'firstName': user_request.get('firstname'),
+                                        'lastName': user_request.get('lastname'),
+                                        'credentials': [{'value': user_request.get('password'), 'type': 'password'}],
+                                        'groups': user_request.get('user_type'),
+                                        'attributes': {'corp_type': user_request.get('corp_type'), 'source': user_request.get('source')}})
 
-            user_id = keycloak_admin.get_user_id(user_request.get("username"))
+            user_id = KEYCLOAK_ADMIN.get_user_id(user_request.get('username'))
 
             # Set user groups
-            if user_request.get("user_type"):
-                for user_type in user_request.get("user_type"):
-                    group = keycloak_admin.get_group_by_path(user_type, True)
+            if user_request.get('user_type'):
+                for user_type in user_request.get('user_type'):
+                    group = KEYCLOAK_ADMIN.get_group_by_path(user_type, True)
                     if group:
-                        keycloak_admin.group_user_add(user_id, group["id"])
+                        KEYCLOAK_ADMIN.group_user_add(user_id, group['id'])
 
-            user = self.get_user_by_username(user_request.get("username"))
+            user = self.get_user_by_username(user_request.get('username'))
 
             return user
+        except KeycloakGetError as err:
+            if err.response_code == 409:
+                raise BusinessException(Error.DATA_CONFLICT, err)
         except Exception as err:
-            raise err
+                raise BusinessException(Error.UNDEFINED_ERROR, err)
 
     def get_user_by_username(self, username):
         """ Get user from Keycloak by username"""
         try:
             # Get user id
-            user_id_keycloak = keycloak_admin.get_user_id(username)
-            # Get User
-            user = keycloak_admin.get_user(user_id_keycloak)
-            return user
+            user_id_keycloak = KEYCLOAK_ADMIN.get_user_id(username)
         except Exception as err:
-            raise err
+            raise BusinessException(Error.UNDEFINED_ERROR, err)
+        # Get User
+        if user_id_keycloak is not None:
+            try:
+                user = KEYCLOAK_ADMIN.get_user(user_id_keycloak)
+                return user
+            except Exception as err:
+                raise BusinessException(Error.UNDEFINED_ERROR, err)
+        else:
+            raise BusinessException(Error.DATA_NOT_FOUND)
 
     def delete_user_by_username(self, username):
         """Delete user from Keycloak by username"""
         try:
-            user_id_keycloak = keycloak_admin.get_user_id(username)
-            # Get User
-            response = keycloak_admin.delete_user(user_id_keycloak)
-            return response
+            # Get user id
+            user_id_keycloak = KEYCLOAK_ADMIN.get_user_id(username)
         except Exception as err:
-            raise err
+            raise BusinessException(Error.UNDEFINED_ERROR, err)
+        # Delete User
+        if user_id_keycloak is not None:
+            try:
+                response = KEYCLOAK_ADMIN.delete_user(user_id_keycloak)
+                return response
+            except Exception as err:
+                raise BusinessException(Error.UNDEFINED_ERROR, err)
+        else:
+            raise BusinessException(Error.DATA_NOT_FOUND)
 
     def get_token(self, username, password):
         """Get user access token by username and password"""
-        return keycloak_openid.token(username, password)
+        try:
+            response = KEYCLOAK_OPENID.token(username, password)
+            return response
+        except Exception as err:
+            raise BusinessException(Error.INVALID_USER_CREDENTIALS, err)
 
     def refresh_token(self, refresh_token):
         """Refresh user token"""
-        return keycloak_openid.refresh_token(refresh_token, ["refresh_token"])
+        try:
+            response = KEYCLOAK_OPENID.refresh_token(refresh_token, ['refresh_token'])
+            return response
+        except Exception as err:
+            raise BusinessException(Error.INVALID_REFRESH_TOKEN, err)
