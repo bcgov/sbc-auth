@@ -27,8 +27,7 @@ RUN ln -s /usr/local/bin/pip3.7 /usr/bin/pip \
     && rm /usr/bin/python \
     && ln -s /usr/local/bin/python3.7 /usr/bin/python \
     && python --version \
-    && pip install --upgrade pip setuptools \
-    && pip install flake8 pylint pytest coverage
+    && pip install --upgrade pip setuptools
 
 # switch to non-root for openshift usage
 RUN chown 1001:0 /home/jenkins
