@@ -152,7 +152,7 @@ if( run_pipeline ) {
     containers: [
       containerTemplate(
         name: 'jnlp',
-        image: 'docker-registry.default.svc:5000/1rdehl-tools/jenkins-slave-python3:3.7.3',
+        image: 'docker-registry.default.svc:5000/1rdehl-tools/jenkins-slave-python3:latest',
         resourceRequestCpu: '1000m',
         resourceLimitCpu: '2000m',
         resourceRequestMemory: '2Gi',
@@ -183,14 +183,12 @@ if( run_pipeline ) {
         echo "Running pytest ... "
         sh '''
           #!/bin/bash
-          echo $DATABASE_TEST_URL
+          env
         '''
         dir('auth-api') {
           try {
             sh '''
-                python -m venv venv
-                source venv/bin/activate
-                pip install flake8 pylint pytest coverage
+                source /opt/app-root/bin/activate
                 pip install -r requirements.txt
                 pip install -r requirements/dev.txt
                 export PYTHONPATH=./src/
