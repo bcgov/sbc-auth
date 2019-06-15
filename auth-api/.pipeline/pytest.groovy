@@ -1,6 +1,18 @@
 #!/usr/bin/env groovy
 
-@Library('devops-library') _
+import bcgov.GitHubHelper
+
+// Notify stage status and pass to Jenkins-GitHub library
+void notifyStageStatus (String name, String status) {
+    GitHubHelper.createCommitStatus(
+        this,
+        GitHubHelper.getPullRequestLastCommitId(this),
+        status,
+        "${env.BUILD_URL}",
+        "",
+        "Stage: ${name}"
+    )
+}
 
 
 // Edit your app's name below
@@ -182,36 +194,48 @@ if( run_pipeline ) {
   ){
     node(pod_label) {
 
-      stage('Checkout Source') {
-        echo "Checking out source code ..."
-        checkout scm
-      }
+      dir('checking') {
 
-      stage('Run pytest') {
-        echo "Running pytest ... "
-        sh '''
-          #!/bin/bash
-          env
-        '''
-        dir('auth-api') {
+        stage('Checkout Source') {
+          echo "Checking out source code ..."
+          checkout scm
+        }
+
+        stage('Build Environment') {
+          echo "Build environment ..."
+          sh '''
+            #!/bin/bash
+            env
+            pip list
+            which pip
+            which python
+            source /opt/app-root/bin/activate
+            pip install -r requirements.txt
+            pip install -r requirements/dev.txt
+            export PYTHONPATH=./src/
+          '''
+        }
+
+        stage('linter Check') {
+          echo "Running pylint ... "
+          sh '''
+            pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
+          '''
+          def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
+          publishIssues issues: [pyLint]
+        }
+
+        stage('Run pytest & coverage') {
+          echo "Running pytest ... "
           try {
             sh '''
-                source /opt/app-root/bin/activate
-                pip install -r requirements.txt
-                pip install -r requirements/dev.txt
-                export PYTHONPATH=./src/
-                pytest --junitxml=pytest.xml
-                coverage run -m pytest
-                python -m coverage xml
-                pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
-
+              pytest
             '''
-            junit 'pytest.xml'
-            cobertura coberturaReportFile: 'coverage.xml'
-            def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
-            publishIssues issues: [pyLint]
           } catch (Exception e) {
-              echo "EXCEPTION: ${e}"
+                echo "EXCEPTION: ${e}"
+          } finally {
+              junit 'pytest.xml'
+              cobertura coberturaReportFile: 'coverage.xml'
           }
         }
       }

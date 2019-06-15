@@ -31,7 +31,7 @@ RUN INSTALL_PKGS="gcc make openssl-devel wget bzip2-devel libffi-devel" \
     && pip3.7 install virtualenv \
     && virtualenv /opt/app-root \
     && source /opt/app-root/bin/activate \
-    && pip install flake8 pylint pytest coverage
+    && pip install flake8 pylint pytest coverage pytest-cov
 
 RUN chown -R 1001:0 /opt/app-root && \
     chmod -R og+rwx /opt/app-root
