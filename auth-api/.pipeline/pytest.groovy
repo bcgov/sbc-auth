@@ -235,7 +235,25 @@ if( run_pipeline ) {
                 echo "EXCEPTION: ${e}"
           } finally {
               junit 'pytest.xml'
-              cobertura coberturaReportFile: 'coverage.xml'
+              //cobertura coberturaReportFile: 'coverage.xml'
+
+              archive "coverage.xml"
+
+              cobertura(
+                  coberturaReportFile: "coverage.xml",
+                  onlyStable: false,
+                  failNoReports: true,
+                  failUnhealthy: false,
+                  failUnstable: false,
+                  autoUpdateHealth: true,
+                  autoUpdateStability: true,
+                  zoomCoverageChart: true,
+                  maxNumberOfBuilds: 0,
+                  lineCoverageTargets: '80, 80, 80',
+                  conditionalCoverageTargets: '80, 80, 80',
+                  classCoverageTargets: '80, 80, 80',
+                  fileCoverageTargets: '80, 80, 80',
+              )
           }
         }
       }
