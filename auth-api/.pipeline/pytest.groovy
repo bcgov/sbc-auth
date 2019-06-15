@@ -1,20 +1,5 @@
 #!/usr/bin/env groovy
 
-import bcgov.GitHubHelper
-
-// Notify stage status and pass to Jenkins-GitHub library
-void notifyStageStatus (String name, String status) {
-    GitHubHelper.createCommitStatus(
-        this,
-        GitHubHelper.getPullRequestLastCommitId(this),
-        status,
-        "${env.BUILD_URL}",
-        "",
-        "Stage: ${name}"
-    )
-}
-
-
 // Edit your app's name below
 def APP_NAME = 'auth-api'
 
