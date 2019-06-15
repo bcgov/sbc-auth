@@ -127,11 +127,6 @@ def run_pipeline = true
 
 // build wasn't triggered by changes so check with user
 if( !triggerBuild(CONTEXT_DIRECTORY) ) {
-  stage('testing lib') {
-    def TIMESTAMP = getTimeStamp();
-    echo "${TIMESTAMP}"
-  }
-
   stage('No changes. Run pipeline?') {
       try {
         timeout(time: 1, unit: 'DAYS') {
