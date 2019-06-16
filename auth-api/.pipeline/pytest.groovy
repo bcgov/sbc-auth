@@ -187,13 +187,13 @@ if( run_pipeline ) {
           source /opt/app-root/bin/activate
           pip install -r requirements.txt
           pip install -r requirements/dev.txt
-          export PYTHONPATH=./src/
         '''
         stage('pylint') {
           echo "pylint checking..."
           try{
             sh '''
               source /opt/app-root/bin/activate
+              export PYTHONPATH=./src/
               pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
             '''
           } catch (Exception e) {
@@ -209,6 +209,7 @@ if( run_pipeline ) {
           try{
             sh '''
               source /opt/app-root/bin/activate
+              export PYTHONPATH=./src/
               pytest
             '''
           } catch (Exception e) {
