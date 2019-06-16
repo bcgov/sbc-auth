@@ -184,8 +184,8 @@ if( run_pipeline ) {
         sh '''
           #!/bin/bash
           env
-          ls -l /opt/app-root/bin/
-          source /opt/app-root/bin/activate
+          python -m venv venv
+          pip install flake8 pylint pytest coverage pytest-cov
           pip install -r requirements.txt
           pip install -r requirements/dev.txt
           export PYTHONPATH=./src/
@@ -194,7 +194,7 @@ if( run_pipeline ) {
           echo "pylint checking..."
           try{
             sh '''
-              /opt/app-root/bin/pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
+              pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
             '''
           } catch (Exception e) {
             echo "EXCEPTION: ${e}"
@@ -208,7 +208,7 @@ if( run_pipeline ) {
           echo "testing..."
           try{
             sh '''
-              /opt/app-root/bin/pytest
+              pytest
             '''
           } catch (Exception e) {
             echo "EXCEPTION: ${e}"
