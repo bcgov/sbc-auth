@@ -151,15 +151,15 @@ if( run_pipeline ) {
     cloud: 'openshift',
     containers: [
       containerTemplate(
-        name: 'jnlp',
+        name: 'python37',
         image: 'docker-registry.default.svc:5000/1rdehl-tools/jenkins-slave-python3:latest',
         resourceRequestCpu: '1000m',
         resourceLimitCpu: '2000m',
         resourceRequestMemory: '2Gi',
         resourceLimitMemory: '4Gi',
-        workingDir: '/tmp',
+        workingDir: '/opt/app-root',
         command: '',
-        args: '${computer.jnlpmac} ${computer.name}',
+        args: '',
         envVars: [
             secretEnvVar(key: 'DATABASE_TEST_URL', secretName: 'apitest-secrets', secretKey: 'DATABASE_TEST_URL'),
             secretEnvVar(key: 'KEYCLOAK_BASE_URL', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_BASE_URL'),
@@ -174,7 +174,7 @@ if( run_pipeline ) {
   ){
     node(pod_label) {
 
-      dir('checking') {
+      container('python37') {
         sh '''
           #!/bin/bash
           env
