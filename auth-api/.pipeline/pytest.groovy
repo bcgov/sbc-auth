@@ -185,10 +185,10 @@ if( run_pipeline ) {
           #!/bin/bash
           env
           ls -l /opt/app-root/bin/
-          export PYTHONPATH=./src/
           source /opt/app-root/bin/activate
           pip install -r requirements.txt
           pip install -r requirements/dev.txt
+          export PYTHONPATH=./src/
         '''
         stage('pylint') {
           echo "pylint checking..."
