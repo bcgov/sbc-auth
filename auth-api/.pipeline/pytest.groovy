@@ -184,7 +184,7 @@ if( run_pipeline ) {
         sh '''
           #!/bin/bash
           env
-          python -m venv venv
+          virtualenv venv
           pip install flake8 pylint pytest coverage pytest-cov
           pip install -r requirements.txt
           pip install -r requirements/dev.txt
