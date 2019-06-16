@@ -175,6 +175,15 @@ if( run_pipeline ) {
     node(pod_label) {
 
       dir('checking') {
+        sh '''
+          #!/bin/bash
+          env
+          source /opt/app-root/bin/activate
+          pip list
+          which pip
+          which python
+          ls -l /opt/app-root/bin/
+        '''
 
         stage('Checkout Source') {
           echo "Checking out source code ..."
@@ -186,27 +195,29 @@ if( run_pipeline ) {
             echo "Checking..."
             try{
               sh '''
-                #!/bin/bash
-                env
-                source /opt/app-root/bin/activate
-                pip list
-                which pip
-                which python
-                ls -l /opt/app-root/bin/
                 pip install -r requirements.txt
                 pip install -r requirements/dev.txt
                 export PYTHONPATH=./src/
 
                 pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
-
-                pytest
               '''
             } catch (Exception e) {
                   echo "EXCEPTION: ${e}"
             } finally {
               def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
               publishIssues issues: [pyLint]
+            }
+          }
 
+          stage('pytest') {
+            echo "pytest..."
+            try{
+              sh '''
+                pytest
+              '''
+            } catch (Exception e) {
+              echo "EXCEPTION: ${e}"
+            } finally {
               junit 'pytest.xml'
               //cobertura coberturaReportFile: 'coverage.xml'
 
