@@ -184,22 +184,23 @@ if( run_pipeline ) {
         dir('auth-api') {
           stage('Checking') {
             echo "Checking..."
-            sh '''
-              #!/bin/bash
-              env
-              source /opt/app-root/bin/activate
-              pip list
-              which pip
-              which python
-              ls -l /opt/app-root/bin/
-              pip install -r requirements.txt
-              pip install -r requirements/dev.txt
-              export PYTHONPATH=./src/
+            try{
+              sh '''
+                #!/bin/bash
+                env
+                source /opt/app-root/bin/activate
+                pip list
+                which pip
+                which python
+                ls -l /opt/app-root/bin/
+                pip install -r requirements.txt
+                pip install -r requirements/dev.txt
+                export PYTHONPATH=./src/
 
-              pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
+                pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
 
-              pytest
-            '''
+                pytest
+              '''
             } catch (Exception e) {
                   echo "EXCEPTION: ${e}"
             } finally {
