@@ -200,11 +200,18 @@ if( run_pipeline ) {
 
           stage('linter Check') {
             echo "Running pylint ... "
+            try {
             sh '''
+              which pip
+              which python
               pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
             '''
-            def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
-            publishIssues issues: [pyLint]
+            } catch (Exception e) {
+                  echo "EXCEPTION: ${e}"
+            } finally {
+              def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
+              publishIssues issues: [pyLint]
+            }
           }
 
           stage('Run pytest & coverage') {
