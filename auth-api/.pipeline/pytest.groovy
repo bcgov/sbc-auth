@@ -151,15 +151,15 @@ if( run_pipeline ) {
     cloud: 'openshift',
     containers: [
       containerTemplate(
-        name: 'python37',
+        name: 'jnlp',
         image: 'docker-registry.default.svc:5000/1rdehl-tools/jenkins-slave-python3:latest',
         resourceRequestCpu: '1000m',
         resourceLimitCpu: '2000m',
         resourceRequestMemory: '2Gi',
         resourceLimitMemory: '4Gi',
-        workingDir: '/opt/app-root',
+        workingDir: '/tmp',
         command: '',
-        args: '',
+        args: '${computer.jnlpmac} ${computer.name}',
         envVars: [
             secretEnvVar(key: 'DATABASE_TEST_URL', secretName: 'apitest-secrets', secretKey: 'DATABASE_TEST_URL'),
             secretEnvVar(key: 'KEYCLOAK_BASE_URL', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_BASE_URL'),
@@ -167,21 +167,18 @@ if( run_pipeline ) {
             secretEnvVar(key: 'KEYCLOAK_ADMIN_CLIENTID', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_ADMIN_CLIENTID'),
             secretEnvVar(key: 'KEYCLOAK_ADMIN_SECRET', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_ADMIN_SECRET'),
             secretEnvVar(key: 'KEYCLOAK_AUTH_AUDIENCE', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_AUTH_AUDIENCE'),
-            secretEnvVar(key: 'KEYCLOAK_AUTH_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_AUTH_CLIENT_SECRET')
+            secretEnvVar(key: 'KEYCLOAK_AUTH_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_AUTH_CLIENT_SECRET'),
+            secretEnvVar(key: 'GITHUB_TOKEN', secretName: 'apitest-secrets', secretKey: 'GITHUB_TOKEN')
         ]
       )
     ]
   ){
     node(pod_label) {
 
-      container('python37') {
+      dir('checking') {
         sh '''
           #!/bin/bash
           env
-          source /opt/app-root/bin/activate
-          pip list
-          which pip
-          which python
           ls -l /opt/app-root/bin/
         '''
 
@@ -191,14 +188,16 @@ if( run_pipeline ) {
         }
 
         dir('auth-api') {
-          stage('Checking') {
-            echo "Checking..."
+          sh '''
+            export PYTHONPATH=./src/
+            source /opt/app-root/bin/activate
+            pip install -r requirements.txt
+            pip install -r requirements/dev.txt
+          '''
+          stage('pylint') {
+            echo "pylint checking..."
             try{
               sh '''
-                pip install -r requirements.txt
-                pip install -r requirements/dev.txt
-                export PYTHONPATH=./src/
-
                 pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
               '''
             } catch (Exception e) {
@@ -209,8 +208,8 @@ if( run_pipeline ) {
             }
           }
 
-          stage('pytest') {
-            echo "pytest..."
+          stage('Unit test & Coverage') {
+            echo "testing..."
             try{
               sh '''
                 pytest
@@ -221,7 +220,7 @@ if( run_pipeline ) {
               junit 'pytest.xml'
               //cobertura coberturaReportFile: 'coverage.xml'
 
-              archive "coverage.xml"
+              //archive "coverage.xml"
 
               cobertura(
                 coberturaReportFile: "coverage.xml",
