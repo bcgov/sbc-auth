@@ -184,9 +184,7 @@ if( run_pipeline ) {
         sh '''
           #!/bin/bash
           env
-          python3.7 -m venv venv
-          source venv/bin/activate
-          pip install flake8 pylint pytest coverage pytest-cov
+          source /opt/app-root/bin/activate
           pip install -r requirements.txt
           pip install -r requirements/dev.txt
           export PYTHONPATH=./src/
@@ -195,6 +193,7 @@ if( run_pipeline ) {
           echo "pylint checking..."
           try{
             sh '''
+              source /opt/app-root/bin/activate
               pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
             '''
           } catch (Exception e) {
@@ -209,6 +208,7 @@ if( run_pipeline ) {
           echo "testing..."
           try{
             sh '''
+              source /opt/app-root/bin/activate
               pytest
             '''
           } catch (Exception e) {
