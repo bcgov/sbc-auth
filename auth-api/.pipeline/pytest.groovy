@@ -184,7 +184,7 @@ if( run_pipeline ) {
         sh '''
           #!/bin/bash
           env
-          python -m venv venv
+          python3.7 -m venv venv
           source venv/bin/activate
           pip install flake8 pylint pytest coverage pytest-cov
           pip install -r requirements.txt
