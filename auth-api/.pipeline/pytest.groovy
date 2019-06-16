@@ -182,8 +182,8 @@ if( run_pipeline ) {
         }
 
         dir('auth-api') {
-          stage('Build Environment') {
-            echo "Build environment ..."
+          stage('Checking') {
+            echo "Checking..."
             sh '''
               #!/bin/bash
               env
@@ -195,54 +195,37 @@ if( run_pipeline ) {
               pip install -r requirements.txt
               pip install -r requirements/dev.txt
               export PYTHONPATH=./src/
-            '''
-          }
 
-          stage('linter Check') {
-            echo "Running pylint ... "
-            try {
-            sh '''
-              which pip
-              which python
               pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
+
+              pytest
             '''
             } catch (Exception e) {
                   echo "EXCEPTION: ${e}"
             } finally {
               def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
               publishIssues issues: [pyLint]
-            }
-          }
 
-          stage('Run pytest & coverage') {
-            echo "Running pytest ... "
-            try {
-              sh '''
-                pytest
-              '''
-            } catch (Exception e) {
-                  echo "EXCEPTION: ${e}"
-            } finally {
-                junit 'pytest.xml'
-                //cobertura coberturaReportFile: 'coverage.xml'
+              junit 'pytest.xml'
+              //cobertura coberturaReportFile: 'coverage.xml'
 
-                archive "coverage.xml"
+              archive "coverage.xml"
 
-                cobertura(
-                    coberturaReportFile: "coverage.xml",
-                    onlyStable: false,
-                    failNoReports: true,
-                    failUnhealthy: false,
-                    failUnstable: false,
-                    autoUpdateHealth: true,
-                    autoUpdateStability: true,
-                    zoomCoverageChart: true,
-                    maxNumberOfBuilds: 0,
-                    lineCoverageTargets: '80, 80, 80',
-                    conditionalCoverageTargets: '80, 80, 80',
-                    classCoverageTargets: '80, 80, 80',
-                    fileCoverageTargets: '80, 80, 80',
-                )
+              cobertura(
+                coberturaReportFile: "coverage.xml",
+                onlyStable: false,
+                failNoReports: true,
+                failUnhealthy: false,
+                failUnstable: false,
+                autoUpdateHealth: true,
+                autoUpdateStability: true,
+                zoomCoverageChart: true,
+                maxNumberOfBuilds: 0,
+                lineCoverageTargets: '80, 80, 80',
+                conditionalCoverageTargets: '80, 80, 80',
+                classCoverageTargets: '80, 80, 80',
+                fileCoverageTargets: '80, 80, 80',
+              )
             }
           }
         }
