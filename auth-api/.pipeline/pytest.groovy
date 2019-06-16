@@ -194,10 +194,10 @@ if( run_pipeline ) {
           echo "pylint checking..."
           try{
             sh '''
-              pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
+              /opt/app-root/bin/pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
             '''
           } catch (Exception e) {
-                echo "EXCEPTION: ${e}"
+            echo "EXCEPTION: ${e}"
           } finally {
             def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
             publishIssues issues: [pyLint]
@@ -208,7 +208,7 @@ if( run_pipeline ) {
           echo "testing..."
           try{
             sh '''
-              pytest
+              /opt/app-root/bin/pytest
             '''
           } catch (Exception e) {
             echo "EXCEPTION: ${e}"
