@@ -187,10 +187,11 @@ if( run_pipeline ) {
             sh '''
               #!/bin/bash
               env
+              source /opt/app-root/bin/activate
               pip list
               which pip
               which python
-              source /opt/app-root/bin/activate
+              ls -l /opt/app-root/bin/
               pip install -r requirements.txt
               pip install -r requirements/dev.txt
               export PYTHONPATH=./src/
