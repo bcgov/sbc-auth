@@ -175,69 +175,64 @@ if( run_pipeline ) {
   ){
     node(pod_label) {
 
-      dir('checking') {
+      stage('Checkout Source') {
+        echo "Checking out source code ..."
+        checkout scm
+      }
+
+      dir('auth-api') {
         sh '''
           #!/bin/bash
           env
           ls -l /opt/app-root/bin/
+          export PYTHONPATH=./src/
+          source /opt/app-root/bin/activate
+          pip install -r requirements.txt
+          pip install -r requirements/dev.txt
         '''
-
-        stage('Checkout Source') {
-          echo "Checking out source code ..."
-          checkout scm
+        stage('pylint') {
+          echo "pylint checking..."
+          try{
+            sh '''
+              pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
+            '''
+          } catch (Exception e) {
+                echo "EXCEPTION: ${e}"
+          } finally {
+            def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
+            publishIssues issues: [pyLint]
+          }
         }
 
-        dir('auth-api') {
-          sh '''
-            export PYTHONPATH=./src/
-            source /opt/app-root/bin/activate
-            pip install -r requirements.txt
-            pip install -r requirements/dev.txt
-          '''
-          stage('pylint') {
-            echo "pylint checking..."
-            try{
-              sh '''
-                pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
-              '''
-            } catch (Exception e) {
-                  echo "EXCEPTION: ${e}"
-            } finally {
-              def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
-              publishIssues issues: [pyLint]
-            }
-          }
+        stage('Unit test & Coverage') {
+          echo "testing..."
+          try{
+            sh '''
+              pytest
+            '''
+          } catch (Exception e) {
+            echo "EXCEPTION: ${e}"
+          } finally {
+            junit 'pytest.xml'
+            //cobertura coberturaReportFile: 'coverage.xml'
 
-          stage('Unit test & Coverage') {
-            echo "testing..."
-            try{
-              sh '''
-                pytest
-              '''
-            } catch (Exception e) {
-              echo "EXCEPTION: ${e}"
-            } finally {
-              junit 'pytest.xml'
-              //cobertura coberturaReportFile: 'coverage.xml'
+            //archive "coverage.xml"
 
-              //archive "coverage.xml"
-
-              cobertura(
-                coberturaReportFile: "coverage.xml",
-                onlyStable: false,
-                failNoReports: true,
-                failUnhealthy: false,
-                failUnstable: false,
-                autoUpdateHealth: true,
-                autoUpdateStability: true,
-                zoomCoverageChart: true,
-                maxNumberOfBuilds: 0,
-                lineCoverageTargets: '80, 80, 80',
-                conditionalCoverageTargets: '80, 80, 80',
-                classCoverageTargets: '80, 80, 80',
-                fileCoverageTargets: '80, 80, 80',
-              )
-            }
+            cobertura(
+              coberturaReportFile: "coverage.xml",
+              onlyStable: false,
+              failNoReports: true,
+              failUnhealthy: false,
+              failUnstable: false,
+              autoUpdateHealth: true,
+              autoUpdateStability: true,
+              zoomCoverageChart: true,
+              maxNumberOfBuilds: 0,
+              lineCoverageTargets: '80, 80, 80',
+              conditionalCoverageTargets: '80, 80, 80',
+              classCoverageTargets: '80, 80, 80',
+              fileCoverageTargets: '80, 80, 80',
+            )
           }
         }
       }
