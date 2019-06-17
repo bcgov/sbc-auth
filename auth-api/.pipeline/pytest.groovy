@@ -55,6 +55,7 @@ def pullrequestStatus(token, state, targetUrl, context, description, pullRequest
         context: context,
         description: description
     ])
+    echo payload
     def encodedReq = URLEncoder.encode(payload, "UTF-8")
     sh("curl -s -H 'Authorization: token ${token} '" +
             "--data \'payload=${encodedReq}\' ${pullRequestUrl}")
@@ -225,7 +226,7 @@ if( run_pipeline ) {
             publishIssues issues: [pyLint]
 
             pullrequestStatus("${env.GITHUB_TOKEN}",
-                              "error",
+                              "success",
                               "${env.BUILD_URL}" + "/pylint/",
                               'continuous-integration/pylint',
                               'Linter(pylint) check succeeded!',
@@ -246,6 +247,15 @@ if( run_pipeline ) {
             echo "EXCEPTION: ${e}"
           } finally {
             junit 'pytest.xml'
+
+            pullrequestStatus("${env.GITHUB_TOKEN}",
+                              "success",
+                              "${env.BUILD_URL}" + "/testReport/",
+                              'continuous-integration/pytest',
+                              'Unit testes succeeded!',
+                              'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+
+
             //cobertura coberturaReportFile: 'coverage.xml'
 
             //archive "coverage.xml"
@@ -265,6 +275,14 @@ if( run_pipeline ) {
               classCoverageTargets: '80, 80, 80',
               fileCoverageTargets: '80, 80, 80',
             )
+
+            pullrequestStatus("${env.GITHUB_TOKEN}",
+                  "success",
+                  "${env.BUILD_URL}" + "/cobertura/",
+                  'continuous-integration/coverage',
+                  'Coverage succeeded!',
+                  'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+
           }
         }
       }
