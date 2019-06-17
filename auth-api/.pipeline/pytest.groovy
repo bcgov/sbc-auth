@@ -205,7 +205,7 @@ if( run_pipeline ) {
             sh'''
               curl -s -H "Authorization: token $GITHUB_TOKEN" \
                    -X POST -d '{"state": "success",  \
-                                "target_url": "$BUILD_URL+'/pylint/'",
+                                "target_url": \$BUILD_URL+"/pylint/",
                                 "description": "Linter(pylint) check succeeded!",
                                 "context": "continuous-integration/pylint"}' \
                   "https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511"
