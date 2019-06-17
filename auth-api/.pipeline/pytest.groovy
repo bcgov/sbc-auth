@@ -151,15 +151,15 @@ if( run_pipeline ) {
     cloud: 'openshift',
     containers: [
       containerTemplate(
-        name: 'jnlp',
+        name: 'python37',
         image: 'docker-registry.default.svc:5000/1rdehl-tools/jenkins-slave-python3:latest',
-        resourceRequestCpu: '1000m',
-        resourceLimitCpu: '2000m',
-        resourceRequestMemory: '2Gi',
-        resourceLimitMemory: '4Gi',
+        resourceRequestCpu: '100m',
+        resourceLimitCpu: '1000m',
+        resourceRequestMemory: '1Gi',
+        resourceLimitMemory: '2Gi',
         workingDir: '/tmp',
         command: '',
-        args: '${computer.jnlpmac} ${computer.name}',
+        //args: '${computer.jnlpmac} ${computer.name}',
         envVars: [
             secretEnvVar(key: 'DATABASE_TEST_URL', secretName: 'apitest-secrets', secretKey: 'DATABASE_TEST_URL'),
             secretEnvVar(key: 'KEYCLOAK_BASE_URL', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_BASE_URL'),
@@ -201,6 +201,16 @@ if( run_pipeline ) {
           } finally {
             def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
             publishIssues issues: [pyLint]
+
+            sh'''
+              curl -s -H "Authorization: token $GITHUB_TOKEN" \
+                   -X POST -d '{"state": "success",  \
+                                "target_url": "$BUILD_URL+'/pylint/'",
+                                "description": "Linter(pylint) check succeeded!",
+                                "context": "continuous-integration/pylint"}' \
+                  "https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511"
+            '''
+
           }
         }
 
