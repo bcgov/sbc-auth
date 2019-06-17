@@ -215,7 +215,7 @@ if( run_pipeline ) {
             echo "EXCEPTION: ${e}"
             pullrequestStatus("${env.GITHUB_TOKEN}",
                               "error",
-                              "${env.BUILD_URL}" + "/pylint/"",
+                              "${env.BUILD_URL}" + "/pylint/",
                               'continuous-integration/pylint',
                               'Linter(pylint) check succeeded!',
                               'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
@@ -226,7 +226,7 @@ if( run_pipeline ) {
 
             pullrequestStatus("${env.GITHUB_TOKEN}",
                               "error",
-                              "${env.BUILD_URL}" + "/pylint/"",
+                              "${env.BUILD_URL}" + "/pylint/",
                               'continuous-integration/pylint',
                               'Linter(pylint) check succeeded!',
                               'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
