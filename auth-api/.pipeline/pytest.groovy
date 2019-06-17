@@ -45,6 +45,21 @@ def SONAR_PROJECT_BASE_DIR = '../auth-api'
 def SONAR_SOURCES = './'
 // ================================================================================================
 
+// define groovy functions
+import groovy.json.JsonOutput
+
+// set a status to github pull request
+def pullrequestStatus(token, state, targetUrl, context, description, pullRequestUrl) {
+    def payload = JsonOutput.toJson([state: state,
+        targetUrl: targetUrl,
+        context: context,
+        description: description
+    ])
+    def encodedReq = URLEncoder.encode(payload, "UTF-8")
+    sh("curl -s -H 'Authorization: token ${token}'" +
+            "--data \'payload=${encodedReq }\' ${pullRequestUrl}")
+}
+
 // Gets the URL associated to a named route.
 // If you are attempting to access a route outside the local namespace (the namespace in which this script is running)
 // The Jenkins service account from the local namespace will need 'view' access to the remote namespace.
@@ -202,15 +217,12 @@ if( run_pipeline ) {
             def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
             publishIssues issues: [pyLint]
 
-            sh'''
-              curl -s -H "Authorization: token $GITHUB_TOKEN" \
-                   -X POST -d '{"state": "success",  \
-                                "target_url": $BUILD_URL+"/pylint/",
-                                "description": "Linter(pylint) check succeeded!",
-                                "context": "continuous-integration/pylint"}' \
-                  "https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511"
-            '''
-
+            pullrequestStatus(${env.GITHUB_TOKEN},
+                              'success',
+                              ${env.BUILD_URL} + '/pylint/',
+                              'continuous-integration/pylint',
+                              'Linter(pylint) check succeeded!',
+                              'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
           }
         }
 
