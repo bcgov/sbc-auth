@@ -55,10 +55,10 @@ def pullrequestStatus(token, state, targetUrl, context, description, pullRequest
         context: context,
         description: description
     ])
-    echo payload
+    echo "${payload}"
     def encodedReq = URLEncoder.encode(payload, "UTF-8")
     sh("curl -s -H 'Authorization: token ${token} '" +
-            "--data \'payload=${encodedReq}\' ${pullRequestUrl}")
+       "-X POST --data \'payload=${encodedReq}\' ${pullRequestUrl}")
 }
 
 // Gets the URL associated to a named route.
