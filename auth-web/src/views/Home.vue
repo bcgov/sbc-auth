@@ -18,7 +18,7 @@
 
 <script>
 import Vue from 'vue'
-import PasscodeForm from '@/components/PasscodeForm.vue'
+import PasscodeForm from '@/components/auth/PasscodeForm.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 
 export default ({

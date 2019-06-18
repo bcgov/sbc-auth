@@ -1,29 +1,19 @@
 <template>
   <v-app class="app-container" id="app">
-    <Header/>
-    <div class="app-body">
-      <div class="app-body__inner">
-        <div class="container">
-          <main>
-            <router-view/>
-          </main>
-        </div>
-      </div>
-    </div>
-    <Footer/>
+    <sbc-layout>
+      <router-view/>
+    </sbc-layout>
   </v-app>
 </template>
 
 <script>
 import Vue from 'vue'
-import Header from './components/Header.vue'
-import Footer from './components/Footer.vue'
+import SbcLayout from 'sbc-common-components/src/components/SbcLayout.vue'
 
 export default Vue.extend({
   name: 'app',
   components: {
-    Header,
-    Footer
+    SbcLayout
   }
 })
 </script>
