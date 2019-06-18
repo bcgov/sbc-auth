@@ -17,7 +17,6 @@ Actual user data is kept in the OIDC and IDP services, this data is
 here as a convenience for audit and db reporting.
 """
 from flask import current_app
-
 from .db import db, ma
 
 
@@ -47,8 +46,7 @@ class User(db.Model):
             # s = KeycloakUserSchema()
             # u = s.load(data=token, partial=True)
             user = User(
-                username=token.get('preferred_username', None),
-                roles=token.get('realm_access', None).get('roles', None)
+                username=token.get('preferred_username', None), roles=token.get('realm_access', None).get('roles', None)
             )
             current_app.logger.debug('Creating user from JWT:{}; User:{}'.format(token, user))
             db.session.add(user)

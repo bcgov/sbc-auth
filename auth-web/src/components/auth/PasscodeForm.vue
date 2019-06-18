@@ -1,5 +1,6 @@
 <template>
   <div class="passcode-form">
+    <iframe :src="VUE_APP_COPS_REDIRECT_URL" ref="iframeContent" style="display: none"></iframe>
     <v-form ref="form" lazy-validation>
       <v-expand-transition>
         <div class="passcode-form__alert-container" v-show="loginError">
@@ -81,7 +82,7 @@
 
 <script lang="ts">
 import LoginServices from '@/services/login.services'
-
+import IframeServices from '@/services/iframe.services'
 export default {
   name: 'PasscodeForm',
 
@@ -91,6 +92,8 @@ export default {
     noPasscodeDialog: false,
     loginError: '',
     valid: false,
+    // cudnt find a better way to expose env variables in template
+    VUE_APP_COPS_REDIRECT_URL: process.env.VUE_APP_COPS_REDIRECT_URL,
     entityNumRules: [
       v => !!v || 'Incorporation Number is required'
     ],
@@ -103,18 +106,18 @@ export default {
   computed: {
     entityNumber: {
       get () {
-        return this.$store.state.entityNumber
+        return this.$store.state.login.entityNumber
       },
       set (value) {
-        this.$store.commit('entityNumber', value)
+        this.$store.commit('login/entityNumber', value)
       }
     },
     passcode: {
       get () {
-        return this.$store.state.passcode
+        return this.$store.state.login.passcode
       },
       set (value) {
-        this.$store.commit('passcode', value)
+        this.$store.commit('login/passcode', value)
       }
     }
   },
@@ -123,20 +126,21 @@ export default {
       return this.$refs.form.validate()
     },
     login () {
-      if (this.$refs.form.validate()) {
-        console.log('VUE_APP_ROOT_API:' + process.env.VUE_APP_ROOT_API)
-
-        LoginServices.login(this.$store.state.entityNumber, this.$store.state.passcode)
+      if (this.isValidForm()) {
+        LoginServices.login(this.$store.state.login.entityNumber, this.$store.state.login.passcode)
           .then(response => {
             if (response.data.error) {
               this.loginError =
                       this.$t('loginFailedMessage')
             } else if (response.data.access_token) {
               this.showSpinner = true
+              /* this.frame = this.$refs.iframeContent.contentWindow
+              this.frame.postMessage(response.data.access_token, process.env.VUE_APP_COPS_REDIRECT_URL) */
+              IframeServices.emit(this.$refs.iframeContent.contentWindow, response.data.access_token)
+              sessionStorage.KEYCLOAK_TOKEN = response.data.access_token
               setTimeout(() => {
                 window.location.href = process.env.VUE_APP_COPS_REDIRECT_URL
               }, 500)
-              localStorage.name = response.data.access_token
             }
           })
           .catch(response => {
@@ -149,7 +153,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '../assets/styl/theme.styl';
+@import '../../assets/styl/theme.styl';
 
 .passcode-form__row
   margin-top 1rem
