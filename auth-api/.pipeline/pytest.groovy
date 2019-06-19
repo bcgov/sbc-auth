@@ -51,12 +51,11 @@ import groovy.json.JsonOutput
 // set a status to github pull request
 def pullrequestStatus(token, state, targetUrl, context, description, pullRequestUrl) {
     def payload = JsonOutput.toJson([state: state,
-        targetUrl: targetUrl,
+        target_url: targetUrl,
         context: context,
         description: description
     ])
-    echo "${pullRequestUrl}"
-    echo "${payload}"
+
     //def encodedReq = URLEncoder.encode(payload, "UTF-8")
      sh("curl -s -H \"Authorization: token ${token}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${payload}\' \"${pullRequestUrl}\"")
 }
@@ -199,8 +198,6 @@ if( run_pipeline ) {
       dir('auth-api') {
         sh '''
           #!/bin/bash
-          echo GITHUB_TOKEN = $GITHUB_TOKEN
-          env
           source /opt/app-root/bin/activate
           pip install -r requirements.txt
           pip install -r requirements/dev.txt
@@ -246,6 +243,13 @@ if( run_pipeline ) {
             '''
           } catch (Exception e) {
             echo "EXCEPTION: ${e}"
+             pullrequestStatus("${env.GITHUB_TOKEN}",
+                              "error",
+                              "${env.BUILD_URL}" + "pytest/",
+                              'continuous-integration/pytest',
+                              'Unit testes failed!',
+                              'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+
           } finally {
             junit 'pytest.xml'
 
@@ -277,12 +281,21 @@ if( run_pipeline ) {
               fileCoverageTargets: '80, 80, 80',
             )
 
-            pullrequestStatus("${env.GITHUB_TOKEN}",
-                  "success",
-                  "${env.BUILD_URL}" + "cobertura/",
-                  'continuous-integration/coverage',
-                  'Coverage succeeded!',
-                  'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+            if currentBuild.result == 'SUCCESS' {
+              pullrequestStatus("${env.GITHUB_TOKEN}",
+                    "success",
+                    "${env.BUILD_URL}" + "cobertura/",
+                    'continuous-integration/coverage',
+                    'Coverage succeeded!',
+                    'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+            } else {
+              pullrequestStatus("${env.GITHUB_TOKEN}",
+                                  "error",
+                                  "${env.BUILD_URL}" + "cobertura/",
+                                  'continuous-integration/coverage',
+                                  'Coverage failed!',
+                                  'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+            }
 
           }
         }
