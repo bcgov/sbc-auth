@@ -10,16 +10,12 @@ status_code - where possible use HTTP Error Codes
 import traceback
 from functools import wraps
 from flask import g, jsonify
-
-from auth_api.exceptions.errors import Error
-
 from sbc_common_components.tracing.exception_tracing import ExceptionTracing
-
+from auth_api.exceptions.errors import Error
 
 class BusinessException(Exception):
     """Exception that adds error code and error name, that can be used for i18n support."""
-
-    def __init__(self, error: Error, exception: Exception = None, *args, **kwargs):
+    def __init__(self, error, exception, *args, **kwargs):
         """Return a valid BusinessException."""
         super(BusinessException, self).__init__(*args, **kwargs)
 
@@ -50,7 +46,7 @@ def catch_custom_exception(func):
     def decorated_function(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except Exception as e:
+        except BusinessException as e:
             trace_back = traceback.format_exc()
             ExceptionTracing.trace(e, trace_back)
             raise UserException(e.with_traceback(None), e.status_code, trace_back)
