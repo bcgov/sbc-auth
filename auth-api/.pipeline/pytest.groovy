@@ -177,7 +177,7 @@ if( run_pipeline ) {
       }
 
       def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
-      def allPRs = sh(returnStdout: true, script: "origin 'pull/*/head'")
+      def allPRs = sh(returnStdout: true, script: "git ls-remote origin 'pull/*/head'")
       List result = allPRs.split( '\n' ).findAll { it.contains(gitCommitSHA) && it.contains("refs/pull") }
       if (result.size() ==1 ){
           def str = result[0]
