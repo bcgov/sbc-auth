@@ -134,6 +134,8 @@ if( !triggerBuild(CONTEXT_DIRECTORY) ) {
   }
 }
 
+echo sh(returnStdout: true, script: 'env')
+
 if( run_pipeline ) {
 
   // create api pod to run verification steps
