@@ -136,212 +136,229 @@ if( !triggerBuild(CONTEXT_DIRECTORY) ) {
 
 if( run_pipeline ) {
 
-  // create api pod to run verification steps
-  def pod_label = "api-pod-${UUID.randomUUID().toString()}"
+  node() {
 
-  // The jenkins-python3nodejs template has been purpose built for supporting SonarQube scanning.
-  podTemplate(
-    label: pod_label,
-    name: 'jenkins-slave-python3',
-    serviceAccount: 'jenkins',
-    cloud: 'openshift',
-    containers: [
-      containerTemplate(
-        name: 'python37',
-        image: 'docker-registry.default.svc:5000/1rdehl-tools/jenkins-slave-python3:latest',
-        resourceRequestCpu: '100m',
-        resourceLimitCpu: '1000m',
-        resourceRequestMemory: '1Gi',
-        resourceLimitMemory: '2Gi',
-        workingDir: '/tmp',
-        command: '',
-        //args: '${computer.jnlpmac} ${computer.name}',
-        envVars: [
-            secretEnvVar(key: 'DATABASE_TEST_URL', secretName: 'apitest-secrets', secretKey: 'DATABASE_TEST_URL'),
-            secretEnvVar(key: 'KEYCLOAK_BASE_URL', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_BASE_URL'),
-            secretEnvVar(key: 'KEYCLOAK_REALMNAME', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_REALMNAME'),
-            secretEnvVar(key: 'KEYCLOAK_ADMIN_CLIENTID', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_ADMIN_CLIENTID'),
-            secretEnvVar(key: 'KEYCLOAK_ADMIN_SECRET', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_ADMIN_SECRET'),
-            secretEnvVar(key: 'KEYCLOAK_AUTH_AUDIENCE', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_AUTH_AUDIENCE'),
-            secretEnvVar(key: 'KEYCLOAK_AUTH_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_AUTH_CLIENT_SECRET'),
-            secretEnvVar(key: 'GITHUB_TOKEN', secretName: 'apitest-secrets', secretKey: 'GITHUB_TOKEN')
-        ]
-      )
-    ]
-  ){
-    node(pod_label) {
+    stage('Checkout Source') {
+      echo "Checking out source code ..."
+      checkout scm
+    }
 
-      stage('Checkout Source') {
-        echo "Checking out source code ..."
-        checkout scm
-      }
+    def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
+    def allPRs = sh(returnStdout: true, script: "git ls-remote origin 'pull/*/head'")
+    List result = allPRs.split( '\n' ).findAll { it.contains(gitCommitSHA) && it.contains("refs/pull") }
+    if (result.size() ==1 ){
+        def str = result[0]
+        def prId = str.substring(str.indexOf("pull")+5,str.lastIndexOf("head")-1)
+        echo "Pull request id: ${prId}"
+    }
 
-      def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
-      def allPRs = sh(returnStdout: true, script: "git ls-remote origin 'pull/*/head'")
-      List result = allPRs.split( '\n' ).findAll { it.contains(gitCommitSHA) && it.contains("refs/pull") }
-      if (result.size() ==1 ){
-          def str = result[0]
-          def prId = str.substring(str.indexOf("pull")+5,str.lastIndexOf("head")-1)
-          echo "Pull request id: ${prId}"
-      }
+    // create api pod to run verification steps
+    def pod_label = "api-pod-${UUID.randomUUID().toString()}"
 
-      dir('auth-api') {
-        sh '''
-          #!/bin/bash
-          source /opt/app-root/bin/activate
-          pip install -r requirements.txt
-          pip install -r requirements/dev.txt
-        '''
-        stage('pylint') {
-          echo "pylint checking..."
-          try{
-            sh '''
-              source /opt/app-root/bin/activate
-              export PYTHONPATH=./src/
-              pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
-            '''
-          } catch (Exception e) {
-            echo "EXCEPTION: ${e}"
-            pullrequestStatus("${env.GITHUB_TOKEN}",
-                              "error",
-                              "${env.BUILD_URL}" + "pylint/",
-                              'continuous-integration/pylint',
-                              'Linter(pylint) check succeeded!',
-                              'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
-            currentBuild.result = "FAILURE"
+    // The jenkins-python3nodejs template has been purpose built for supporting SonarQube scanning.
+    podTemplate(
+      label: pod_label,
+      name: 'jenkins-slave-python3',
+      serviceAccount: 'jenkins',
+      cloud: 'openshift',
+      containers: [
+        containerTemplate(
+          name: 'python37',
+          image: 'docker-registry.default.svc:5000/1rdehl-tools/jenkins-slave-python3:latest',
+          resourceRequestCpu: '100m',
+          resourceLimitCpu: '1000m',
+          resourceRequestMemory: '1Gi',
+          resourceLimitMemory: '2Gi',
+          workingDir: '/tmp',
+          command: '',
+          //args: '${computer.jnlpmac} ${computer.name}',
+          envVars: [
+              secretEnvVar(key: 'DATABASE_TEST_URL', secretName: 'apitest-secrets', secretKey: 'DATABASE_TEST_URL'),
+              secretEnvVar(key: 'KEYCLOAK_BASE_URL', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_BASE_URL'),
+              secretEnvVar(key: 'KEYCLOAK_REALMNAME', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_REALMNAME'),
+              secretEnvVar(key: 'KEYCLOAK_ADMIN_CLIENTID', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_ADMIN_CLIENTID'),
+              secretEnvVar(key: 'KEYCLOAK_ADMIN_SECRET', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_ADMIN_SECRET'),
+              secretEnvVar(key: 'KEYCLOAK_AUTH_AUDIENCE', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_AUTH_AUDIENCE'),
+              secretEnvVar(key: 'KEYCLOAK_AUTH_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_AUTH_CLIENT_SECRET'),
+              secretEnvVar(key: 'GITHUB_TOKEN', secretName: 'apitest-secrets', secretKey: 'GITHUB_TOKEN')
+          ]
+        )
+      ]
+    ){
+      node(pod_label) {
 
-          } finally {
-            def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
-            publishIssues issues: [pyLint]
+        stage('Checkout Source') {
+          echo "Checking out source code ..."
+          checkout scm
+        }
 
-            if (currentBuild.result != "FAILURE") {
+        def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
+        def allPRs = sh(returnStdout: true, script: "git ls-remote origin 'pull/*/head'")
+        List result = allPRs.split( '\n' ).findAll { it.contains(gitCommitSHA) && it.contains("refs/pull") }
+        if (result.size() ==1 ){
+            def str = result[0]
+            def prId = str.substring(str.indexOf("pull")+5,str.lastIndexOf("head")-1)
+            echo "Pull request id: ${prId}"
+        }
+
+        dir('auth-api') {
+          sh '''
+            #!/bin/bash
+            source /opt/app-root/bin/activate
+            pip install -r requirements.txt
+            pip install -r requirements/dev.txt
+          '''
+          stage('pylint') {
+            echo "pylint checking..."
+            try{
+              sh '''
+                source /opt/app-root/bin/activate
+                export PYTHONPATH=./src/
+                pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
+              '''
+            } catch (Exception e) {
+              echo "EXCEPTION: ${e}"
               pullrequestStatus("${env.GITHUB_TOKEN}",
-                                "success",
+                                "error",
                                 "${env.BUILD_URL}" + "pylint/",
                                 'continuous-integration/pylint',
                                 'Linter(pylint) check succeeded!',
                                 'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
-            }
+              currentBuild.result = "FAILURE"
 
+            } finally {
+              def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
+              publishIssues issues: [pyLint]
+
+              if (currentBuild.result != "FAILURE") {
+                pullrequestStatus("${env.GITHUB_TOKEN}",
+                                  "success",
+                                  "${env.BUILD_URL}" + "pylint/",
+                                  'continuous-integration/pylint',
+                                  'Linter(pylint) check succeeded!',
+                                  'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+              }
+
+            }
+          }
+
+          stage('Unit test & Coverage') {
+            echo "testing..."
+            try{
+              sh '''
+                source /opt/app-root/bin/activate
+                export PYTHONPATH=./src/
+                pytest
+              '''
+            } catch (Exception e) {
+              echo "EXCEPTION: ${e}"
+              pullrequestStatus("${env.GITHUB_TOKEN}",
+                              "error",
+                              "${env.BUILD_URL}" + "pytest/",
+                              'continuous-integration/pytest',
+                              'Unit testes failed!',
+                              'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+              currentBuild.result = "FAILURE"
+            } finally {
+              junit 'pytest.xml'
+
+              if (currentBuild.result != "FAILURE") {
+                pullrequestStatus("${env.GITHUB_TOKEN}",
+                                  "success",
+                                  "${env.BUILD_URL}" + "testReport/",
+                                  'continuous-integration/pytest',
+                                  'Unit testes succeeded!',
+                                  'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+
+              }
+
+              cobertura(
+                coberturaReportFile: "coverage.xml",
+                onlyStable: false,
+                failNoReports: true,
+                failUnhealthy: false,
+                failUnstable: false,
+                autoUpdateHealth: true,
+                autoUpdateStability: true,
+                zoomCoverageChart: true,
+                maxNumberOfBuilds: 0,
+                lineCoverageTargets: '80, 80, 80',
+                conditionalCoverageTargets: '80, 80, 80',
+                classCoverageTargets: '80, 80, 80',
+                fileCoverageTargets: '80, 80, 80',
+              )
+
+              if (currentBuild.result == 'SUCCESS') {
+                pullrequestStatus("${env.GITHUB_TOKEN}",
+                      "success",
+                      "${env.BUILD_URL}" + "cobertura/",
+                      'continuous-integration/coverage',
+                      'Coverage succeeded!',
+                      'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+              } else {
+                pullrequestStatus("${env.GITHUB_TOKEN}",
+                                    "error",
+                                    "${env.BUILD_URL}" + "cobertura/",
+                                    'continuous-integration/coverage',
+                                    'Coverage failed!',
+                                    'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+              }
+
+            }
           }
         }
 
-        stage('Unit test & Coverage') {
-          echo "testing..."
-          try{
-            sh '''
-              source /opt/app-root/bin/activate
-              export PYTHONPATH=./src/
-              pytest
-            '''
+        stage('SonarQube Analysis') {
+          echo "Performing static SonarQube code analysis ..."
+
+          SONARQUBE_URL = getUrlForRoute(SONAR_ROUTE_NAME, SONAR_ROUTE_NAMESPACE).trim()
+          SONARQUBE_PWD = getSonarQubePwd().trim()
+          echo "URL: ${SONARQUBE_URL}"
+          echo "PWD: ${SONARQUBE_PWD}"
+
+          try {
+            // The `sonar-runner` MUST exist in your project and contain a Gradle environment consisting of:
+            // - Gradle wrapper script(s)
+            // - A simple `build.gradle` file that includes the SonarQube plug-in.
+            //
+            // An example can be found here:
+            // - https://github.com/BCDevOps/sonarqube
+            dir('sonar-runner') {
+              // ======================================================================================================
+              // Set your SonarQube scanner properties at this level, not at the Gradle Build level.
+              // The only thing that should be defined at the Gradle Build level is a minimal set of generic defaults.
+              //
+              // For more information on available properties visit:
+              // - https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner+for+Gradle
+              // ======================================================================================================
+              sh (
+                returnStdout: true,
+                script: "./gradlew sonarqube --stacktrace --info \
+                  -Dsonar.verbose=true \
+                  -Dsonar.host.url=${SONARQUBE_URL} \
+                  -Dsonar.projectName='${SONAR_PROJECT_NAME}' \
+                  -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                  -Dsonar.projectBaseDir=${SONAR_PROJECT_BASE_DIR} \
+                  -Dsonar.sources=${SONAR_SOURCES}"
+              )
+            }
           } catch (Exception e) {
             echo "EXCEPTION: ${e}"
             pullrequestStatus("${env.GITHUB_TOKEN}",
                             "error",
-                            "${env.BUILD_URL}" + "pytest/",
-                            'continuous-integration/pytest',
-                            'Unit testes failed!',
+                            "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
+                            'continuous-integration/sonarqube',
+                            'Sonarqube scan failed!',
                             'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
             currentBuild.result = "FAILURE"
           } finally {
-            junit 'pytest.xml'
-
-            if (currentBuild.result != "FAILURE") {
-              pullrequestStatus("${env.GITHUB_TOKEN}",
-                                "success",
-                                "${env.BUILD_URL}" + "testReport/",
-                                'continuous-integration/pytest',
-                                'Unit testes succeeded!',
-                                'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
-
-            }
-
-            cobertura(
-              coberturaReportFile: "coverage.xml",
-              onlyStable: false,
-              failNoReports: true,
-              failUnhealthy: false,
-              failUnstable: false,
-              autoUpdateHealth: true,
-              autoUpdateStability: true,
-              zoomCoverageChart: true,
-              maxNumberOfBuilds: 0,
-              lineCoverageTargets: '80, 80, 80',
-              conditionalCoverageTargets: '80, 80, 80',
-              classCoverageTargets: '80, 80, 80',
-              fileCoverageTargets: '80, 80, 80',
-            )
-
-            if (currentBuild.result == 'SUCCESS') {
-              pullrequestStatus("${env.GITHUB_TOKEN}",
-                    "success",
-                    "${env.BUILD_URL}" + "cobertura/",
-                    'continuous-integration/coverage',
-                    'Coverage succeeded!',
-                    'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
-            } else {
-              pullrequestStatus("${env.GITHUB_TOKEN}",
-                                  "error",
-                                  "${env.BUILD_URL}" + "cobertura/",
-                                  'continuous-integration/coverage',
-                                  'Coverage failed!',
-                                  'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
-            }
-
+            pullrequestStatus("${env.GITHUB_TOKEN}",
+                      "success",
+                      "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
+                      'continuous-integration/sonarqube',
+                      'Sonarqube scan succeeded!',
+                      'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
           }
-        }
-      }
-
-      stage('SonarQube Analysis') {
-        echo "Performing static SonarQube code analysis ..."
-
-        SONARQUBE_URL = getUrlForRoute(SONAR_ROUTE_NAME, SONAR_ROUTE_NAMESPACE).trim()
-        SONARQUBE_PWD = getSonarQubePwd().trim()
-        echo "URL: ${SONARQUBE_URL}"
-        echo "PWD: ${SONARQUBE_PWD}"
-
-        try {
-          // The `sonar-runner` MUST exist in your project and contain a Gradle environment consisting of:
-          // - Gradle wrapper script(s)
-          // - A simple `build.gradle` file that includes the SonarQube plug-in.
-          //
-          // An example can be found here:
-          // - https://github.com/BCDevOps/sonarqube
-          dir('sonar-runner') {
-            // ======================================================================================================
-            // Set your SonarQube scanner properties at this level, not at the Gradle Build level.
-            // The only thing that should be defined at the Gradle Build level is a minimal set of generic defaults.
-            //
-            // For more information on available properties visit:
-            // - https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner+for+Gradle
-            // ======================================================================================================
-            sh (
-              returnStdout: true,
-              script: "./gradlew sonarqube --stacktrace --info \
-                -Dsonar.verbose=true \
-                -Dsonar.host.url=${SONARQUBE_URL} \
-                -Dsonar.projectName='${SONAR_PROJECT_NAME}' \
-                -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                -Dsonar.projectBaseDir=${SONAR_PROJECT_BASE_DIR} \
-                -Dsonar.sources=${SONAR_SOURCES}"
-            )
-          }
-        } catch (Exception e) {
-          echo "EXCEPTION: ${e}"
-          pullrequestStatus("${env.GITHUB_TOKEN}",
-                          "error",
-                          "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
-                          'continuous-integration/sonarqube',
-                          'Sonarqube scan failed!',
-                          'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
-          currentBuild.result = "FAILURE"
-        } finally {
-          pullrequestStatus("${env.GITHUB_TOKEN}",
-                    "success",
-                    "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
-                    'continuous-integration/sonarqube',
-                    'Sonarqube scan succeeded!',
-                    'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
         }
       }
     }
