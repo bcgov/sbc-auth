@@ -1,28 +1,25 @@
 <template>
-  <div id="app">
-      <HelloWorld msg="Welcome to Auth App"/>
-  </div>
+  <v-app class="app-container" id="app">
+    <sbc-layout>
+      <router-view/>
+    </sbc-layout>
+  </v-app>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+<script>
+  import Vue from 'vue'
+  import SbcLayout from 'sbc-common-components/src/components/SbcLayout.vue'
 
-export default Vue.extend({
-  name: 'app',
-  components: {
-    HelloWorld,
-  },
-});
+  export default Vue.extend({
+    name: 'app',
+    components: {
+      SbcLayout
+    }
+  })
 </script>
 
-<style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+<style lang="stylus">
+  @import "./assets/styl/base.styl";
+  @import "./assets/styl/layout.styl";
+  @import "./assets/styl/overrides.styl";
 </style>

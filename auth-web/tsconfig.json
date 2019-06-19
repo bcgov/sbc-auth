@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "strict": true,
+    "strict": false,
     "jsx": "preserve",
     "importHelpers": true,
     "moduleResolution": "node",
@@ -12,8 +12,7 @@
     "baseUrl": ".",
     "types": [
       "webpack-env",
-      "mocha",
-      "chai"
+      "jest"
     ],
     "paths": {
       "@/*": [
