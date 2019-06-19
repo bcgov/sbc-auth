@@ -22,6 +22,7 @@ import json
 from auth_api import status as http_status
 from auth_api.exceptions.errors import Error
 
+
 ADD_USER_REQUEST = {
     'username': 'test11',
     'password': '1111',
