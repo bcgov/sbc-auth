@@ -133,12 +133,9 @@ if( !triggerBuild(CONTEXT_DIRECTORY) ) {
   }
 }
 
-sh '''
-  #!/bin/bash
-  echo env
-'''
+echo $env.CHANGE_ID
 
-if( run_pipeline  && env.CHANGE_ID ) {
+if( run_pipeline  && $env.CHANGE_ID ) {
 
   // create api pod to run verification steps
   def pod_label = "api-pod-${UUID.randomUUID().toString()}"
