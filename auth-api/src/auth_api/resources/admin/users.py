@@ -18,14 +18,12 @@ from flask_restplus import Resource, Namespace
 from flask_jwt_oidc import AuthError
 
 from auth_api import tracing as _tracing
-from auth_api import jwt as _jwt
 from auth_api import status as http_status
 
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions import catch_business_exception
-from auth_api.utils.roles import Role
 
 API = Namespace('admin/users', description='Keycloak Admin - user')
 KEYCLOAK_SERVICE = KeycloakService()
@@ -59,8 +57,6 @@ class User(Resource):
     @staticmethod
     @_tracing.trace()
     @catch_business_exception
-    #@_jwt.has_one_of_roles([Role.ADMIN.value])
-    #@_jwt.requires_auth
     def post():
         """Add user, return a new/existing user."""
 

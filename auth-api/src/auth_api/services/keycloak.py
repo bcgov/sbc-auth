@@ -81,9 +81,10 @@ class KeycloakService:
             if err.response_code == 409:
                 raise BusinessException(Error.DATA_CONFLICT, err)
         except Exception as err:
-                raise BusinessException(Error.UNDEFINED_ERROR, err)
+            raise BusinessException(Error.UNDEFINED_ERROR, err)
 
-    def get_user_by_username(self, username):
+    @staticmethod
+    def get_user_by_username(username):
         """ Get user from Keycloak by username"""
         try:
             # Get user id
@@ -100,7 +101,8 @@ class KeycloakService:
         else:
             raise BusinessException(Error.DATA_NOT_FOUND)
 
-    def delete_user_by_username(self, username):
+    @staticmethod
+    def delete_user_by_username(username):
         """Delete user from Keycloak by username"""
         try:
             # Get user id
@@ -117,7 +119,8 @@ class KeycloakService:
         else:
             raise BusinessException(Error.DATA_NOT_FOUND)
 
-    def get_token(self, username, password):
+    @staticmethod
+    def get_token(username, password):
         """Get user access token by username and password"""
         try:
             response = KEYCLOAK_OPENID.token(username, password)
@@ -125,10 +128,20 @@ class KeycloakService:
         except Exception as err:
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, err)
 
-    def refresh_token(self, refresh_token):
+    @staticmethod
+    def refresh_token(refresh_token):
         """Refresh user token"""
         try:
             response = KEYCLOAK_OPENID.refresh_token(refresh_token, ['refresh_token'])
+            return response
+        except Exception as err:
+            raise BusinessException(Error.INVALID_REFRESH_TOKEN, err)
+
+    @staticmethod
+    def logout(refresh_token):
+        """Get user access token by username and password"""
+        try:
+            response = KEYCLOAK_OPENID.logout(refresh_token)
             return response
         except Exception as err:
             raise BusinessException(Error.INVALID_REFRESH_TOKEN, err)
