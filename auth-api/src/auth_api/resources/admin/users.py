@@ -57,8 +57,6 @@ class User(Resource):
     @staticmethod
     @_tracing.trace()
     @catch_business_exception
-    #@_jwt.has_one_of_roles([Role.ADMIN.value])
-    #@_jwt.requires_auth
     def post():
         """Add user, return a new/existing user."""
 
