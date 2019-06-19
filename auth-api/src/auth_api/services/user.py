@@ -15,9 +15,8 @@
 
 This module manages the User Information.
 """
-from auth_api.models import User as UserModel
 from sbc_common_components.tracing.service_tracing import ServiceTracing
-
+from auth_api.models import User as UserModel
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
 class User:  # pylint: disable=too-many-instance-attributes
