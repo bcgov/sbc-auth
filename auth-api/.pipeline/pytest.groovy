@@ -55,12 +55,12 @@ def pullrequestStatus(token, state, targetUrl, context, description, pullRequest
         context: context,
         description: description
     ])
-    echo "${token}"
+    echo "${env.GITHUB_TOKEN}"
     echo "${pullRequestUrl}"
     echo "${payload}"
     //def encodedReq = URLEncoder.encode(payload, "UTF-8")
      withCredentials([[$class: 'StringBinding', credentialsId: 'GITHUB_TOKEN', secretKeyVariable: 'GITHUB_TOKEN']]) {
-       sh("curl -s -H \"Authorization: token ${env.GITHUB_TOKEN}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${payload}\' ${pullRequestUrl}")
+       sh("curl -s -H \"Authorization: token ${GITHUB_TOKEN}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${payload}\' ${pullRequestUrl}")
      }
 }
 
