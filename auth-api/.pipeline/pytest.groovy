@@ -196,7 +196,7 @@ if( run_pipeline ) {
   ){
     node(pod_label) {
 
-      GITHUB_TOKEN = sh (
+      GITHUB_TOKEN_1 = sh (
                 script: """oc get secret/apitest-secrets -o template --template="{{.data.GITHUB_TOKEN}}" | base64 --decode""",
                     returnStdout: true).trim()
 
