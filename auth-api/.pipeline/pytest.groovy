@@ -281,7 +281,7 @@ if( run_pipeline ) {
               fileCoverageTargets: '80, 80, 80',
             )
 
-            if currentBuild.result == 'SUCCESS' {
+            if (currentBuild.result == 'SUCCESS') {
               pullrequestStatus("${env.GITHUB_TOKEN}",
                     "success",
                     "${env.BUILD_URL}" + "cobertura/",
