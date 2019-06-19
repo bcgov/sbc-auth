@@ -134,7 +134,9 @@ if( !triggerBuild(CONTEXT_DIRECTORY) ) {
   }
 }
 
-echo sh(returnStdout: true, script: 'env')
+node() {
+  echo sh(returnStdout: true, script: 'env')
+}
 
 if( run_pipeline ) {
 
