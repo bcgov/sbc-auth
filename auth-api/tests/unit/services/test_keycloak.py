@@ -19,6 +19,7 @@ Test-Suite to ensure that the Business Service is working as expected.
 
 from auth_api.exceptions.errors import Error
 from auth_api.services.keycloak import KeycloakService
+from auth_api.exceptions import BusinessException
 
 
 ADD_USER_REQUEST = {
@@ -68,7 +69,7 @@ def test_keycloak_add_user_duplicate_email(session):
     response = None
     try:
         response = keycloak_service.add_user(ADD_USER_REQUEST_SAME_EMAIL)
-    except Exception as err:
+    except BusinessException as err:
         assert err.code == Error.DATA_CONFLICT.name
         pass
 
@@ -89,7 +90,7 @@ def test_keycloak_get_user_by_username_not_exist(session):
     user = None
     try:
         user = keycloak_service.get_user_by_username(ADD_USER_REQUEST.get('username'))
-    except Exception as err:
+    except BusinessException as err:
         assert err.code == Error.DATA_NOT_FOUND.name
         pass
     assert user is None
@@ -108,7 +109,7 @@ def test_keycloak_get_token_user_not_exist(session):
     response = None
     try:
         response = keycloak_service.get_token(ADD_USER_REQUEST.get('username'), ADD_USER_REQUEST.get('password'))
-    except Exception as err:
+    except BusinessException as err:
         assert err.code == Error.INVALID_USER_CREDENTIALS.name
         pass
     assert response is None
@@ -133,7 +134,7 @@ def test_keycloak_refresh_token_wrong_refresh_token(session):
     response = None
     try:
         response = keycloak_service.refresh_token(refresh_token)
-    except Exception as err:
+    except BusinessException as err:
         assert err.code == Error.INVALID_REFRESH_TOKEN.name
         pass
     assert response is None
@@ -152,7 +153,34 @@ def test_keycloak_delete_user_by_username_user_not_exist(session):
     response = None
     try:
         response = keycloak_service.delete_user_by_username(ADD_USER_REQUEST_SAME_EMAIL.get('username'))
-    except Exception as err:
+    except BusinessException as err:
         assert err.code == Error.DATA_NOT_FOUND.name
         pass
     assert response is None
+
+
+def test_keycloak_logout(session):
+    """Logout. Assert response status code is included in response."""
+    keycloak_service.add_user(ADD_USER_REQUEST)
+    response = keycloak_service.get_token(ADD_USER_REQUEST.get('username'), ADD_USER_REQUEST.get('password'))
+    refresh_token = response.get('refresh_token')
+    response = None
+    response = keycloak_service.logout(refresh_token)
+
+    assert response is not None
+    keycloak_service.delete_user_by_username(ADD_USER_REQUEST.get('username'))
+
+
+def test_keycloak_logout_wrong_refresh_token(session):
+    """Logout by invalid refresh token. Assert response is None, error code is invalid refresh token."""
+    keycloak_service.add_user(ADD_USER_REQUEST)
+    response = keycloak_service.get_token(ADD_USER_REQUEST.get('username'), ADD_USER_REQUEST.get('password'))
+    refresh_token = response.get('access_token')
+    response = None
+    try:
+        response = keycloak_service.logout(refresh_token)
+    except BusinessException as err:
+        assert err.code == Error.INVALID_REFRESH_TOKEN.name
+        pass
+    assert response is None
+    keycloak_service.delete_user_by_username(ADD_USER_REQUEST.get('username'))
