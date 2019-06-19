@@ -99,7 +99,7 @@ class KeycloakService:
             except Exception as err:
                 raise BusinessException(Error.UNDEFINED_ERROR, err)
         else:
-            raise BusinessException(Error.DATA_NOT_FOUND, err)
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
 
     @staticmethod
     def delete_user_by_username(username):
@@ -117,7 +117,7 @@ class KeycloakService:
             except Exception as err:
                 raise BusinessException(Error.UNDEFINED_ERROR, err)
         else:
-            raise BusinessException(Error.DATA_NOT_FOUND, err)
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
 
     @staticmethod
     def get_token(username, password):
