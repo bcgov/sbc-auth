@@ -59,7 +59,9 @@ def pullrequestStatus(token, state, targetUrl, context, description, pullRequest
     echo "${pullRequestUrl}"
     echo "${payload}"
     //def encodedReq = URLEncoder.encode(payload, "UTF-8")
-    sh("curl -s -H \"Authorization: token ${token}\" -X POST -d \'${payload}\' \"${pullRequestUrl}\"")
+     withCredentials([[$class: 'StringBinding', credentialsId: 'token', variable: 'token']]) {
+       sh("curl -s -H \"Authorization: token ${token}\" -X POST -d \'${payload}\' \"${pullRequestUrl}\"")
+     }
 }
 
 // Gets the URL associated to a named route.
@@ -217,7 +219,7 @@ if( run_pipeline ) {
             echo "EXCEPTION: ${e}"
             pullrequestStatus("${env.GITHUB_TOKEN}",
                               "error",
-                              "${env.BUILD_URL}" + "/pylint/",
+                              "${env.BUILD_URL}" + "pylint/",
                               'continuous-integration/pylint',
                               'Linter(pylint) check succeeded!',
                               'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
@@ -228,7 +230,7 @@ if( run_pipeline ) {
 
             pullrequestStatus("${env.GITHUB_TOKEN}",
                               "success",
-                              "${env.BUILD_URL}" + "/pylint/",
+                              "${env.BUILD_URL}" + "pylint/",
                               'continuous-integration/pylint',
                               'Linter(pylint) check succeeded!',
                               'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
@@ -251,7 +253,7 @@ if( run_pipeline ) {
 
             pullrequestStatus("${env.GITHUB_TOKEN}",
                               "success",
-                              "${env.BUILD_URL}" + "/testReport/",
+                              "${env.BUILD_URL}" + "testReport/",
                               'continuous-integration/pytest',
                               'Unit testes succeeded!',
                               'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
@@ -279,7 +281,7 @@ if( run_pipeline ) {
 
             pullrequestStatus("${env.GITHUB_TOKEN}",
                   "success",
-                  "${env.BUILD_URL}" + "/cobertura/",
+                  "${env.BUILD_URL}" + "cobertura/",
                   'continuous-integration/coverage',
                   'Coverage succeeded!',
                   'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
