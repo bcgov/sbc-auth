@@ -3,20 +3,8 @@
 // Edit your app's name below
 def APP_NAME = 'auth-api'
 
-// Edit your environment TAG names below
-def TAG_NAMES = ['latest', 'dev', 'test', 'prod']
-
-// You shouldn't have to edit these if you're following the conventions
-def BUILD_CONFIG = APP_NAME
-
-//EDIT LINE BELOW (Change `IMAGESTREAM_NAME` so it matches the name of your *output*/deployable image stream.)
-def IMAGESTREAM_NAME = APP_NAME
-
 // You'll need to change this to point to your application component's folder within your repository
 def CONTEXT_DIRECTORY = 'auth-api'
-
-// Edit your namespaces names below
-def NAMESPACES = ['1rdehl-tools', '1rdehl-dev', '1rdehl-test', '1rdehl-prod']
 
 // ================================================================================================
 // SonarQube Scanner Settings
@@ -50,6 +38,8 @@ import groovy.json.JsonOutput
 
 // set a status to github pull request
 def pullrequestStatus(token, state, targetUrl, context, description, pullRequestUrl) {
+  //only set the status for pull request
+  if (env.CHANGE_ID) {
     def payload = JsonOutput.toJson([state: state,
         target_url: targetUrl,
         context: context,
@@ -57,7 +47,8 @@ def pullrequestStatus(token, state, targetUrl, context, description, pullRequest
     ])
 
     //def encodedReq = URLEncoder.encode(payload, "UTF-8")
-     sh("curl -s -H \"Authorization: token ${token}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${payload}\' \"${pullRequestUrl}\"")
+    sh("curl -s -H \"Authorization: token ${token}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${payload}\' \"${pullRequestUrl}\"")
+  }
 }
 
 // Gets the URL associated to a named route.
@@ -122,17 +113,6 @@ boolean triggerBuild(String contextDirectory) {
     echo('The changes require a build.')
     return true
   }
-}
-
-// Get an image's hash tag
-String getImageTagHash(String imageName, String tag = "") {
-
-  if(!tag?.trim()) {
-    tag = "latest"
-  }
-
-  def istag = openshift.raw("get istag ${imageName}:${tag} -o template --template='{{.image.dockerImageReference}}'")
-  return istag.out.tokenize('@')[1].trim()
 }
 
 // define job properties - keep 10 builds only
@@ -218,17 +198,20 @@ if( run_pipeline ) {
                               'continuous-integration/pylint',
                               'Linter(pylint) check succeeded!',
                               'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+            currentBuild.result = "FAILURE"
 
           } finally {
             def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
             publishIssues issues: [pyLint]
 
-            pullrequestStatus("${env.GITHUB_TOKEN}",
-                              "success",
-                              "${env.BUILD_URL}" + "pylint/",
-                              'continuous-integration/pylint',
-                              'Linter(pylint) check succeeded!',
-                              'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+            if (currentBuild.result != "FAILURE") {
+              pullrequestStatus("${env.GITHUB_TOKEN}",
+                                "success",
+                                "${env.BUILD_URL}" + "pylint/",
+                                'continuous-integration/pylint',
+                                'Linter(pylint) check succeeded!',
+                                'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+            }
 
           }
         }
@@ -243,27 +226,25 @@ if( run_pipeline ) {
             '''
           } catch (Exception e) {
             echo "EXCEPTION: ${e}"
-             pullrequestStatus("${env.GITHUB_TOKEN}",
-                              "error",
-                              "${env.BUILD_URL}" + "pytest/",
-                              'continuous-integration/pytest',
-                              'Unit testes failed!',
-                              'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
-
+            pullrequestStatus("${env.GITHUB_TOKEN}",
+                            "error",
+                            "${env.BUILD_URL}" + "pytest/",
+                            'continuous-integration/pytest',
+                            'Unit testes failed!',
+                            'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+            currentBuild.result = "FAILURE"
           } finally {
             junit 'pytest.xml'
 
-            pullrequestStatus("${env.GITHUB_TOKEN}",
-                              "success",
-                              "${env.BUILD_URL}" + "testReport/",
-                              'continuous-integration/pytest',
-                              'Unit testes succeeded!',
-                              'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+            if (currentBuild.result != "FAILURE") {
+              pullrequestStatus("${env.GITHUB_TOKEN}",
+                                "success",
+                                "${env.BUILD_URL}" + "testReport/",
+                                'continuous-integration/pytest',
+                                'Unit testes succeeded!',
+                                'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
 
-
-            //cobertura coberturaReportFile: 'coverage.xml'
-
-            //archive "coverage.xml"
+            }
 
             cobertura(
               coberturaReportFile: "coverage.xml",
@@ -297,6 +278,59 @@ if( run_pipeline ) {
                                   'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
             }
 
+          }
+        }
+
+        stage('SonarQube Analysis') {
+          echo "Performing static SonarQube code analysis ..."
+
+          SONARQUBE_URL = getUrlForRoute(SONAR_ROUTE_NAME, SONAR_ROUTE_NAMESPACE).trim()
+          SONARQUBE_PWD = getSonarQubePwd().trim()
+          echo "URL: ${SONARQUBE_URL}"
+          echo "PWD: ${SONARQUBE_PWD}"
+
+          try {
+          // The `sonar-runner` MUST exist in your project and contain a Gradle environment consisting of:
+          // - Gradle wrapper script(s)
+          // - A simple `build.gradle` file that includes the SonarQube plug-in.
+          //
+          // An example can be found here:
+          // - https://github.com/BCDevOps/sonarqube
+          dir('sonar-runner') {
+            // ======================================================================================================
+            // Set your SonarQube scanner properties at this level, not at the Gradle Build level.
+            // The only thing that should be defined at the Gradle Build level is a minimal set of generic defaults.
+            //
+            // For more information on available properties visit:
+            // - https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner+for+Gradle
+            // ======================================================================================================
+            sh (
+              returnStdout: true,
+              script: "./gradlew sonarqube --stacktrace --info \
+                -Dsonar.verbose=true \
+                -Dsonar.host.url=${SONARQUBE_URL} \
+                -Dsonar.projectName='${SONAR_PROJECT_NAME}' \
+                -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                -Dsonar.projectBaseDir=${SONAR_PROJECT_BASE_DIR} \
+                -Dsonar.sources=${SONAR_SOURCES}"
+            )
+          }
+          } catch (Exception e) {
+            echo "EXCEPTION: ${e}"
+            pullrequestStatus("${env.GITHUB_TOKEN}",
+                            "error",
+                            "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
+                            'continuous-integration/sonarqube',
+                            'Sonarqube scan failed!',
+                            'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+            currentBuild.result = "FAILURE"
+          } finally {
+            pullrequestStatus("${env.GITHUB_TOKEN}",
+                      "success",
+                      "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
+                      'continuous-integration/sonarqube',
+                      'Sonarqube scan succeeded!',
+                      'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
           }
         }
       }
