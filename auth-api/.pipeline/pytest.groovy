@@ -133,9 +133,7 @@ if( !triggerBuild(CONTEXT_DIRECTORY) ) {
   }
 }
 
-echo ${env.CHANGE_ID}
-
-if( run_pipeline  && ${env.CHANGE_ID} ) {
+if( run_pipeline ) {
 
   // create api pod to run verification steps
   def pod_label = "api-pod-${UUID.randomUUID().toString()}"
@@ -171,6 +169,7 @@ if( run_pipeline  && ${env.CHANGE_ID} ) {
     ]
   ){
     node(pod_label) {
+      echo env.CHANGE_ID
 
       stage('Checkout Source') {
         echo "Checking out source code ..."
