@@ -22,20 +22,19 @@ import json
 from auth_api import status as http_status
 from auth_api.exceptions.errors import Error
 
-
 ADD_USER_REQUEST = {
-   'username': 'test11',
-   'password': '1111',
-   'firstname': '111',
-   'lastname': 'test',
-   'email': 'test11@gov.bc.ca',
-   'enabled': True,
-   'user_type': [
-       '/test',
-       '/basic/editor'
-   ],
-   'corp_type': 'CP',
-   'source': 'PASSCODE'
+    'username': 'test11',
+    'password': '1111',
+    'firstname': '111',
+    'lastname': 'test',
+    'email': 'test11@gov.bc.ca',
+    'enabled': True,
+    'user_type': [
+        '/test',
+        '/basic/editor'
+    ],
+    'corp_type': 'CP',
+    'source': 'PASSCODE'
 }
 
 USER_REQUEST = {
@@ -43,18 +42,18 @@ USER_REQUEST = {
 }
 
 ADD_USER_REQUEST_SAME_EMAIL = {
-   'username': 'test12',
-   'password': '1111',
-   'firstname': '112',
-   'lastname': 'test',
-   'email': 'test11@gov.bc.ca',
-   'enabled': True,
-   'user_type': [
-       '/test',
-       '/basic/editor'
-   ],
-   'corp_type': 'CP',
-   'source': 'PASSCODE'
+    'username': 'test12',
+    'password': '1111',
+    'firstname': '112',
+    'lastname': 'test',
+    'email': 'test11@gov.bc.ca',
+    'enabled': True,
+    'user_type': [
+        '/test',
+        '/basic/editor'
+    ],
+    'corp_type': 'CP',
+    'source': 'PASSCODE'
 }
 
 
