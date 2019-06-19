@@ -136,3 +136,12 @@ class KeycloakService:
             return response
         except Exception as err:
             raise BusinessException(Error.INVALID_REFRESH_TOKEN, err)
+
+    @staticmethod
+    def logout(refresh_token):
+        """Get user access token by username and password"""
+        try:
+            response = KEYCLOAK_OPENID.logout(refresh_token)
+            return response
+        except Exception as err:
+            raise BusinessException(Error.INVALID_REFRESH_TOKEN, err)
