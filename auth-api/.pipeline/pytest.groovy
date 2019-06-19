@@ -133,6 +133,11 @@ if( !triggerBuild(CONTEXT_DIRECTORY) ) {
   }
 }
 
+sh '''
+  #!/bin/bash
+  echo env
+'''
+
 if( run_pipeline  && env.CHANGE_ID ) {
 
   // create api pod to run verification steps
