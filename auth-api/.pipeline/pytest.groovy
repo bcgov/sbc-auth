@@ -133,7 +133,7 @@ if( !triggerBuild(CONTEXT_DIRECTORY) ) {
   }
 }
 
-if( run_pipeline ) {
+if( run_pipeline  && env.CHANGE_ID ) {
 
   // create api pod to run verification steps
   def pod_label = "api-pod-${UUID.randomUUID().toString()}"
@@ -280,58 +280,58 @@ if( run_pipeline ) {
 
           }
         }
+      }
 
-        stage('SonarQube Analysis') {
-          echo "Performing static SonarQube code analysis ..."
+      stage('SonarQube Analysis') {
+        echo "Performing static SonarQube code analysis ..."
 
-          SONARQUBE_URL = getUrlForRoute(SONAR_ROUTE_NAME, SONAR_ROUTE_NAMESPACE).trim()
-          SONARQUBE_PWD = getSonarQubePwd().trim()
-          echo "URL: ${SONARQUBE_URL}"
-          echo "PWD: ${SONARQUBE_PWD}"
+        SONARQUBE_URL = getUrlForRoute(SONAR_ROUTE_NAME, SONAR_ROUTE_NAMESPACE).trim()
+        SONARQUBE_PWD = getSonarQubePwd().trim()
+        echo "URL: ${SONARQUBE_URL}"
+        echo "PWD: ${SONARQUBE_PWD}"
 
-          try {
-          // The `sonar-runner` MUST exist in your project and contain a Gradle environment consisting of:
-          // - Gradle wrapper script(s)
-          // - A simple `build.gradle` file that includes the SonarQube plug-in.
+        try {
+        // The `sonar-runner` MUST exist in your project and contain a Gradle environment consisting of:
+        // - Gradle wrapper script(s)
+        // - A simple `build.gradle` file that includes the SonarQube plug-in.
+        //
+        // An example can be found here:
+        // - https://github.com/BCDevOps/sonarqube
+        dir('sonar-runner') {
+          // ======================================================================================================
+          // Set your SonarQube scanner properties at this level, not at the Gradle Build level.
+          // The only thing that should be defined at the Gradle Build level is a minimal set of generic defaults.
           //
-          // An example can be found here:
-          // - https://github.com/BCDevOps/sonarqube
-          dir('sonar-runner') {
-            // ======================================================================================================
-            // Set your SonarQube scanner properties at this level, not at the Gradle Build level.
-            // The only thing that should be defined at the Gradle Build level is a minimal set of generic defaults.
-            //
-            // For more information on available properties visit:
-            // - https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner+for+Gradle
-            // ======================================================================================================
-            sh (
-              returnStdout: true,
-              script: "./gradlew sonarqube --stacktrace --info \
-                -Dsonar.verbose=true \
-                -Dsonar.host.url=${SONARQUBE_URL} \
-                -Dsonar.projectName='${SONAR_PROJECT_NAME}' \
-                -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                -Dsonar.projectBaseDir=${SONAR_PROJECT_BASE_DIR} \
-                -Dsonar.sources=${SONAR_SOURCES}"
-            )
-          }
-          } catch (Exception e) {
-            echo "EXCEPTION: ${e}"
-            pullrequestStatus("${env.GITHUB_TOKEN}",
-                            "error",
-                            "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
-                            'continuous-integration/sonarqube',
-                            'Sonarqube scan failed!',
-                            'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
-            currentBuild.result = "FAILURE"
-          } finally {
-            pullrequestStatus("${env.GITHUB_TOKEN}",
-                      "success",
-                      "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
-                      'continuous-integration/sonarqube',
-                      'Sonarqube scan succeeded!',
-                      'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
-          }
+          // For more information on available properties visit:
+          // - https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner+for+Gradle
+          // ======================================================================================================
+          sh (
+            returnStdout: true,
+            script: "./gradlew sonarqube --stacktrace --info \
+              -Dsonar.verbose=true \
+              -Dsonar.host.url=${SONARQUBE_URL} \
+              -Dsonar.projectName='${SONAR_PROJECT_NAME}' \
+              -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+              -Dsonar.projectBaseDir=${SONAR_PROJECT_BASE_DIR} \
+              -Dsonar.sources=${SONAR_SOURCES}"
+          )
+        }
+        } catch (Exception e) {
+          echo "EXCEPTION: ${e}"
+          pullrequestStatus("${env.GITHUB_TOKEN}",
+                          "error",
+                          "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
+                          'continuous-integration/sonarqube',
+                          'Sonarqube scan failed!',
+                          'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+          currentBuild.result = "FAILURE"
+        } finally {
+          pullrequestStatus("${env.GITHUB_TOKEN}",
+                    "success",
+                    "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
+                    'continuous-integration/sonarqube',
+                    'Sonarqube scan succeeded!',
+                    'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
         }
       }
     }
