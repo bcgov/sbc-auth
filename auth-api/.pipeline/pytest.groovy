@@ -115,6 +115,15 @@ boolean triggerBuild(String contextDirectory) {
   }
 }
 
+def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
+def allPRs = sh(returnStdout: true, script: "origin ‘pull/*/head’")
+List result = allPRs.split( '\n' ).findAll { it.contains(gitCommitSHA) && it.contains("refs/pull") }
+if (result.size() ==1 ){
+    def str = result[0]
+    def prId = str.substring(str.indexOf("pull")+5,str.lastIndexOf("head")-1)
+    echo "Pull request id: ${prId}"
+}
+
 // define job properties - keep 10 builds only
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]])
 
@@ -292,31 +301,31 @@ if( run_pipeline ) {
         echo "PWD: ${SONARQUBE_PWD}"
 
         try {
-        // The `sonar-runner` MUST exist in your project and contain a Gradle environment consisting of:
-        // - Gradle wrapper script(s)
-        // - A simple `build.gradle` file that includes the SonarQube plug-in.
-        //
-        // An example can be found here:
-        // - https://github.com/BCDevOps/sonarqube
-        dir('sonar-runner') {
-          // ======================================================================================================
-          // Set your SonarQube scanner properties at this level, not at the Gradle Build level.
-          // The only thing that should be defined at the Gradle Build level is a minimal set of generic defaults.
+          // The `sonar-runner` MUST exist in your project and contain a Gradle environment consisting of:
+          // - Gradle wrapper script(s)
+          // - A simple `build.gradle` file that includes the SonarQube plug-in.
           //
-          // For more information on available properties visit:
-          // - https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner+for+Gradle
-          // ======================================================================================================
-          sh (
-            returnStdout: true,
-            script: "./gradlew sonarqube --stacktrace --info \
-              -Dsonar.verbose=true \
-              -Dsonar.host.url=${SONARQUBE_URL} \
-              -Dsonar.projectName='${SONAR_PROJECT_NAME}' \
-              -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-              -Dsonar.projectBaseDir=${SONAR_PROJECT_BASE_DIR} \
-              -Dsonar.sources=${SONAR_SOURCES}"
-          )
-        }
+          // An example can be found here:
+          // - https://github.com/BCDevOps/sonarqube
+          dir('sonar-runner') {
+            // ======================================================================================================
+            // Set your SonarQube scanner properties at this level, not at the Gradle Build level.
+            // The only thing that should be defined at the Gradle Build level is a minimal set of generic defaults.
+            //
+            // For more information on available properties visit:
+            // - https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner+for+Gradle
+            // ======================================================================================================
+            sh (
+              returnStdout: true,
+              script: "./gradlew sonarqube --stacktrace --info \
+                -Dsonar.verbose=true \
+                -Dsonar.host.url=${SONARQUBE_URL} \
+                -Dsonar.projectName='${SONAR_PROJECT_NAME}' \
+                -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                -Dsonar.projectBaseDir=${SONAR_PROJECT_BASE_DIR} \
+                -Dsonar.sources=${SONAR_SOURCES}"
+            )
+          }
         } catch (Exception e) {
           echo "EXCEPTION: ${e}"
           pullrequestStatus("${env.GITHUB_TOKEN}",
