@@ -174,7 +174,7 @@ if( run_pipeline ) {
       stage('Checkout Source') {
         echo "Checking out source code ..."
         checkout scm
-        echo environment
+        echo sh(returnStdout: true, script: 'env')
       }
 
       def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
