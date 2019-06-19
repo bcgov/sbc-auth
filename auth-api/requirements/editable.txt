@@ -1,4 +1,0 @@
-# We want something like: jaeger-client>=3.8,<4
-# But Scope Manager support not officially released in Jaeger at the time of writing.
-# This is using branch 'feature/opentracing-2.0-support' in @yurishkuro's fork.
--e git://github.com/pwei1018/jaeger-client-python.git@186f14e14758273ed108508c0d388a4f4de5c75b#egg=jaeger-client

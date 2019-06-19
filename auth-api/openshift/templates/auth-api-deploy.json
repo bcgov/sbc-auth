@@ -355,7 +355,7 @@
       "data": {
         "DATABASE_HOST": "postgresql",
         "DATABASE_NAME": "${DATABASE_NAME}",
-        "DB_PORT": "5432"
+        "DATABASE_PORT": "5432"
       }
     },
     {

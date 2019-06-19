@@ -1,13 +1,13 @@
 # Copyright © 2019 Province of British Columbia
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
+# distributed under the License is distributed on an 'AS IS' BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
@@ -23,51 +23,44 @@ That are used to expose operational health information about the service, and me
 from flask import Blueprint
 from flask_restplus import Api
 
-from .trace import API as TRACE_API
-from .userinfo import API as USERINFO_API
+from auth_api.resources.admin.users import API as USER_API
+from .usersinfo import API as USERINFO_API
 from .meta import API as META_API
 from .ops import API as OPS_API
 from .token import API as TOKEN_API
-from .authenticate import API as AUTHENTICATE_API
-from .user import API as USER_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
 
 # This will add the Authorize button to the swagger docs
 # TODO oauth2 & openid may not yet be supported by restplus <- check on this
-AUTHORIZATIONS = {
-    'apikey': {
-        'type': 'apiKey',
-        'in': 'header',
-        'name': 'Authorization'
-    }
-}
+AUTHORIZATIONS = {'apikey': {'type': 'apiKey', 'in': 'header', 'name': 'Authorization'}}
 
 OPS_BLUEPRINT = Blueprint('API_OPS', __name__, url_prefix='/ops')
 
-API_OPS = Api(OPS_BLUEPRINT,
-              title='Service OPS API',
-              version='1.0',
-              description='The Core API for the Authentication System',
-              security=['apikey'],
-              authorizations=AUTHORIZATIONS)
+API_OPS = Api(
+    OPS_BLUEPRINT,
+    title='Service OPS API',
+    version='1.0',
+    description='The Core API for the Authentication System',
+    security=['apikey'],
+    authorizations=AUTHORIZATIONS,
+)
 
 API_OPS.add_namespace(OPS_API, path='/')
 
 API_BLUEPRINT = Blueprint('API', __name__, url_prefix='/api/v1')
 
-API = Api(API_BLUEPRINT,
-          title='Authentication API',
-          version='1.0',
-          description='The Core API for the Authentication System',
-          security=['apikey'],
-          authorizations=AUTHORIZATIONS)
+API = Api(
+    API_BLUEPRINT,
+    title='Authentication API',
+    version='1.0',
+    description='The Core API for the Authentication System',
+    security=['apikey'],
+    authorizations=AUTHORIZATIONS,
+)
 
 API.add_namespace(META_API, path='/meta')
-API.add_namespace(TRACE_API, path='/trace')
-API.add_namespace(USERINFO_API, path='/userinfo')
+API.add_namespace(USERINFO_API, path='/users/info')
 API.add_namespace(TOKEN_API, path='/token')
-API.add_namespace(AUTHENTICATE_API, path='/authenticate')
-API.add_namespace(USER_API, path='/user')
-
+API.add_namespace(USER_API, path='/admin/users')

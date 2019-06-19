@@ -43,10 +43,10 @@ def test_user_find_by_jwt_token(session):
     session.commit()
 
     token = {'preferred_username': 'CP1234567',
-             "realm_access": {"roles": [
-                 "edit",
-                 "uma_authorization",
-                 "basic"
+             'realm_access': {'roles': [
+                 'edit',
+                 'uma_authorization',
+                 'basic'
              ]}}
     u = User.find_by_jwt_token(token)
 
@@ -56,10 +56,10 @@ def test_user_find_by_jwt_token(session):
 def test_create_from_jwt_token(session):
     """Assert User is created from the JWT fields."""
     token = {'preferred_username': 'CP1234567',
-             "realm_access": {"roles": [
-                 "edit",
-                 "uma_authorization",
-                 "basic"
+             'realm_access': {'roles': [
+                 'edit',
+                 'uma_authorization',
+                 'basic'
              ]}}
     u = User.create_from_jwt_token(token)
     assert u.id is not None

@@ -16,9 +16,6 @@
 
 Test-Suite to ensure that the Business Service is working as expected.
 """
-from datetime import datetime
-
-import pytest
 
 from auth_api import services
 

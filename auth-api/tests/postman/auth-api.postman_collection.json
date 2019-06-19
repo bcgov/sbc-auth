@@ -418,75 +418,6 @@
 			"response": []
 		},
 		{
-			"name": "Get user info",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "0f28387b-085a-457e-8b66-f05626602b59",
-						"exec": [
-							"pm.test(\"Response time is less than 5000ms\", function () {",
-							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
-							"});",
-							"",
-							"pm.test(\"response is ok\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"pm.test(\"response should be okay to process\", function () { ",
-							"    pm.response.to.not.be.error; ",
-							"    //pm.response.to.have.jsonBody(\"\"); ",
-							"    pm.response.to.not.have.jsonBody(\"error\"); ",
-							"});",
-							"",
-							"pm.test(\"response must be valid and have a body\", function () {",
-							"     // assert that the status code is 200",
-							"     pm.response.to.be.ok; // info, success, redirection, clientError,  serverError, are other variants",
-							"     // assert that the response has a valid JSON body",
-							"     pm.response.to.be.withBody;",
-							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
-							"});",
-							"",
-							"pm.test(\"Verify payload\",  () => {",
-							"    pm.expect(pm.response.text()).to.include(\"roles\");",
-							"    pm.expect(pm.response.text()).to.include(\"username\");",
-							"    pm.expect(pm.response.text()).to.not.include(\"auth-api\");",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "GET",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{userToken}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{api_url}}/api/v1/userinfo",
-					"host": [
-						"{{api_url}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"userinfo"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Logout user",
 			"request": {
 				"auth": {
@@ -591,7 +522,30 @@
 					"script": {
 						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
 						"exec": [
-							""
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"",
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    //pm.response.to.have.jsonBody(\"\"); ",
+							"    pm.response.to.not.have.jsonBody(\"error\"); ",
+							"});",
+							"",
+							"pm.test(\"response must be valid and have a body\", function () {",
+							"     // assert that the response has a valid JSON body",
+							"     pm.response.to.be.withBody;",
+							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+							"});",
+							"",
+							"pm.test(\"Verify payload\",  () => {",
+							"    pm.expect(pm.response.text()).to.include(\"id\");",
+							"    pm.expect(pm.response.text()).to.include(\"username\");",
+							"});"
 						],
 						"type": "text/javascript"
 					}
@@ -615,14 +569,15 @@
 					"raw": "{  \r\n   \"username\":\"test11\",\r\n   \"password\":\"1111\",\r\n   \"firstname\":\"111\",\r\n   \"lastname\":\"test\",\r\n   \"email\":\"test11@gov.bc.ca\",\r\n   \"enabled\":true,\r\n   \"user_type\":[  \r\n      \"/test\",\r\n      \"/basic/editor\"\r\n   ],\r\n   \"corp_type\":\"CP\",\r\n   \"source\":\"PASSCODE\"\r\n}"
 				},
 				"url": {
-					"raw": "{{api_url}}/api/v1/user",
+					"raw": "{{api_url}}/api/v1/admin/users",
 					"host": [
 						"{{api_url}}"
 					],
 					"path": [
 						"api",
 						"v1",
-						"user"
+						"admin",
+						"users"
 					]
 				}
 			},
@@ -637,7 +592,32 @@
 						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
 						"exec": [
 							"var jsonData = pm.response.json();",
-							"pm.environment.set(\"userId\", jsonData.id);"
+							"pm.environment.set(\"userId\", jsonData.id);",
+							"",
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"",
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    //pm.response.to.have.jsonBody(\"\"); ",
+							"    pm.response.to.not.have.jsonBody(\"error\"); ",
+							"});",
+							"",
+							"pm.test(\"response must be valid and have a body\", function () {",
+							"     // assert that the response has a valid JSON body",
+							"     pm.response.to.be.withBody;",
+							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+							"});",
+							"",
+							"pm.test(\"Verify payload\",  () => {",
+							"    pm.expect(pm.response.text()).to.include(\"id\");",
+							"    pm.expect(pm.response.text()).to.include(\"username\");",
+							"});"
 						],
 						"type": "text/javascript"
 					}
@@ -662,14 +642,15 @@
 					"raw": "username=test11"
 				},
 				"url": {
-					"raw": "{{api_url}}/api/v1/user",
+					"raw": "{{api_url}}/api/v1/admin/users",
 					"host": [
 						"{{api_url}}"
 					],
 					"path": [
 						"api",
 						"v1",
-						"user"
+						"admin",
+						"users"
 					]
 				}
 			},
@@ -685,7 +666,31 @@
 						"exec": [
 							"var jsonData = pm.response.json();",
 							"pm.environment.set(\"userToken\", jsonData.access_token);",
-							"pm.environment.set(\"refreshUserToken\", jsonData.refresh_token);"
+							"pm.environment.set(\"refreshUserToken\", jsonData.refresh_token);",
+							"",
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"",
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    //pm.response.to.have.jsonBody(\"\"); ",
+							"    pm.response.to.not.have.jsonBody(\"error\"); ",
+							"});",
+							"",
+							"pm.test(\"response must be valid and have a body\", function () {",
+							"     // assert that the response has a valid JSON body",
+							"     pm.response.to.be.withBody;",
+							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+							"});",
+							"",
+							"pm.test(\"Verify payload\",  () => {",
+							"    pm.expect(pm.response.text()).to.include(\"access_token\");",
+							"});"
 						],
 						"type": "text/javascript"
 					}
@@ -730,7 +735,31 @@
 						"exec": [
 							"var jsonData = pm.response.json();",
 							"pm.environment.set(\"userToken\", jsonData.access_token);",
-							"pm.environment.set(\"refreshUserToken\", jsonData.refresh_token);"
+							"pm.environment.set(\"refreshUserToken\", jsonData.refresh_token);",
+							"",
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"",
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    //pm.response.to.have.jsonBody(\"\"); ",
+							"    pm.response.to.not.have.jsonBody(\"error\"); ",
+							"});",
+							"",
+							"pm.test(\"response must be valid and have a body\", function () {",
+							"     // assert that the response has a valid JSON body",
+							"     pm.response.to.be.withBody;",
+							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+							"});",
+							"",
+							"pm.test(\"Verify payload\",  () => {",
+							"    pm.expect(pm.response.text()).to.include(\"access_token\");",
+							"});"
 						],
 						"type": "text/javascript"
 					}
@@ -766,6 +795,76 @@
 			"response": []
 		},
 		{
+			"name": "Get user info-api",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0f28387b-085a-457e-8b66-f05626602b59",
+						"exec": [
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"",
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    //pm.response.to.have.jsonBody(\"\"); ",
+							"    pm.response.to.not.have.jsonBody(\"error\"); ",
+							"});",
+							"",
+							"pm.test(\"response must be valid and have a body\", function () {",
+							"     // assert that the status code is 200",
+							"     pm.response.to.be.ok; // info, success, redirection, clientError,  serverError, are other variants",
+							"     // assert that the response has a valid JSON body",
+							"     pm.response.to.be.withBody;",
+							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+							"});",
+							"",
+							"pm.test(\"Verify payload\",  () => {",
+							"    pm.expect(pm.response.text()).to.include(\"roles\");",
+							"    pm.expect(pm.response.text()).to.include(\"username\");",
+							"    pm.expect(pm.response.text()).to.not.include(\"auth-api\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{userToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{api_url}}/api/v1/users/info",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "delete user by username-api",
 			"event": [
 				{
@@ -773,6 +872,13 @@
 					"script": {
 						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
 						"exec": [
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"",
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});",
 							""
 						],
 						"type": "text/javascript"
@@ -795,14 +901,15 @@
 					"raw": "username=test11"
 				},
 				"url": {
-					"raw": "{{api_url}}/api/v1/user",
+					"raw": "{{api_url}}/api/v1/admin/users",
 					"host": [
 						"{{api_url}}"
 					],
 					"path": [
 						"api",
 						"v1",
-						"user"
+						"admin",
+						"users"
 					]
 				}
 			},
