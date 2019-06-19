@@ -186,21 +186,6 @@ if( run_pipeline ) {
       ]
     ){
       node(pod_label) {
-
-        stage('Checkout Source') {
-          echo "Checking out source code ..."
-          checkout scm
-        }
-
-        def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
-        def allPRs = sh(returnStdout: true, script: "git ls-remote origin 'pull/*/head'")
-        List result = allPRs.split( '\n' ).findAll { it.contains(gitCommitSHA) && it.contains("refs/pull") }
-        if (result.size() ==1 ){
-            def str = result[0]
-            def prId = str.substring(str.indexOf("pull")+5,str.lastIndexOf("head")-1)
-            echo "Pull request id: ${prId}"
-        }
-
         dir('auth-api') {
           sh '''
             #!/bin/bash
