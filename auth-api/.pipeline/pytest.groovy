@@ -115,14 +115,6 @@ boolean triggerBuild(String contextDirectory) {
   }
 }
 
-def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
-def allPRs = sh(returnStdout: true, script: "origin ‘pull/*/head’")
-List result = allPRs.split( '\n' ).findAll { it.contains(gitCommitSHA) && it.contains("refs/pull") }
-if (result.size() ==1 ){
-    def str = result[0]
-    def prId = str.substring(str.indexOf("pull")+5,str.lastIndexOf("head")-1)
-    echo "Pull request id: ${prId}"
-}
 
 // define job properties - keep 10 builds only
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]])
@@ -178,7 +170,15 @@ if( run_pipeline ) {
     ]
   ){
     node(pod_label) {
-      echo env.CHANGE_ID
+
+      def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
+      def allPRs = sh(returnStdout: true, script: "origin ‘pull/*/head’")
+      List result = allPRs.split( '\n' ).findAll { it.contains(gitCommitSHA) && it.contains("refs/pull") }
+      if (result.size() ==1 ){
+          def str = result[0]
+          def prId = str.substring(str.indexOf("pull")+5,str.lastIndexOf("head")-1)
+          echo "Pull request id: ${prId}"
+      }
 
       stage('Checkout Source') {
         echo "Checking out source code ..."
