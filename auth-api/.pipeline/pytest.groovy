@@ -55,6 +55,8 @@ def pullrequestStatus(token, state, targetUrl, context, description, pullRequest
         context: context,
         description: description
     ])
+    echo "${token}"
+    echo "${GITHUB_TOKEN}"
     echo "${env.GITHUB_TOKEN}"
     echo "${pullRequestUrl}"
     echo "${payload}"
@@ -194,6 +196,10 @@ if( run_pipeline ) {
   ){
     node(pod_label) {
 
+      GITHUB_TOKEN = sh (
+                script: """oc get secret/apitest-secrets -o template --template="{{.data.GITHUB_TOKEN}}" | base64 --decode""",
+                    returnStdout: true).trim()
+
       stage('Checkout Source') {
         echo "Checking out source code ..."
         checkout scm
@@ -217,7 +223,7 @@ if( run_pipeline ) {
             '''
           } catch (Exception e) {
             echo "EXCEPTION: ${e}"
-            pullrequestStatus("${env.GITHUB_TOKEN}",
+            pullrequestStatus("${GITHUB_TOKEN_1}",
                               "error",
                               "${env.BUILD_URL}" + "pylint/",
                               'continuous-integration/pylint',
@@ -228,7 +234,7 @@ if( run_pipeline ) {
             def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
             publishIssues issues: [pyLint]
 
-            pullrequestStatus("${env.GITHUB_TOKEN}",
+            pullrequestStatus("${GITHUB_TOKEN_1}",
                               "success",
                               "${env.BUILD_URL}" + "pylint/",
                               'continuous-integration/pylint',
@@ -251,7 +257,7 @@ if( run_pipeline ) {
           } finally {
             junit 'pytest.xml'
 
-            pullrequestStatus("${env.GITHUB_TOKEN}",
+            pullrequestStatus("${GITHUB_TOKEN_1}",
                               "success",
                               "${env.BUILD_URL}" + "testReport/",
                               'continuous-integration/pytest',
@@ -279,7 +285,7 @@ if( run_pipeline ) {
               fileCoverageTargets: '80, 80, 80',
             )
 
-            pullrequestStatus("${env.GITHUB_TOKEN}",
+            pullrequestStatus("${GITHUB_TOKEN_1}",
                   "success",
                   "${env.BUILD_URL}" + "cobertura/",
                   'continuous-integration/coverage',
