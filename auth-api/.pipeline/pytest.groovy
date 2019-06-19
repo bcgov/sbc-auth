@@ -57,12 +57,12 @@ def pullrequestStatus(token, state, targetUrl, context, description, pullRequest
     ])
     echo "${token}"
     echo "${GITHUB_TOKEN_1}"
-    echo "${env.GITHUB_TOKEN}"
+    echo "${GITHUB_TOKEN}"
     echo "${pullRequestUrl}"
     echo "${payload}"
     //def encodedReq = URLEncoder.encode(payload, "UTF-8")
-     withCredentials([[$class: 'StringBinding', credentialsId: 'GITHUB_TOKEN_1', secretKeyVariable: 'GITHUB_TOKEN_1']]) {
-       sh("curl -s -H \"Authorization: token ${GITHUB_TOKEN_1}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${payload}\' ${pullRequestUrl}")
+     withCredentials([[$class: 'StringBinding', credentialsId: 'GITHUB_TOKEN', secretKeyVariable: 'GITHUB_TOKEN']]) {
+       sh("curl -s -H \"Authorization: token ${GITHUB_TOKEN}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${payload}\' ${pullRequestUrl}")
      }
 }
 
@@ -199,6 +199,7 @@ if( run_pipeline ) {
       GITHUB_TOKEN_1 = sh (
                 script: """oc get secret/apitest-secrets -o template --template="{{.data.GITHUB_TOKEN}}" | base64 --decode""",
                     returnStdout: true).trim()
+      echo GITHUB_TOKEN_1
 
       stage('Checkout Source') {
         echo "Checking out source code ..."
@@ -213,6 +214,8 @@ if( run_pipeline ) {
           pip install -r requirements.txt
           pip install -r requirements/dev.txt
         '''
+        echo GITHUB_TOKEN = $GITHUB_TOKEN
+
         stage('pylint') {
           echo "pylint checking..."
           try{
@@ -223,7 +226,7 @@ if( run_pipeline ) {
             '''
           } catch (Exception e) {
             echo "EXCEPTION: ${e}"
-            pullrequestStatus("${GITHUB_TOKEN_1}",
+            pullrequestStatus("${GITHUB_TOKEN}",
                               "error",
                               "${env.BUILD_URL}" + "pylint/",
                               'continuous-integration/pylint',
@@ -234,7 +237,7 @@ if( run_pipeline ) {
             def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
             publishIssues issues: [pyLint]
 
-            pullrequestStatus("${GITHUB_TOKEN_1}",
+            pullrequestStatus("${GITHUB_TOKEN}",
                               "success",
                               "${env.BUILD_URL}" + "pylint/",
                               'continuous-integration/pylint',
@@ -257,7 +260,7 @@ if( run_pipeline ) {
           } finally {
             junit 'pytest.xml'
 
-            pullrequestStatus("${GITHUB_TOKEN_1}",
+            pullrequestStatus("${GITHUB_TOKEN}",
                               "success",
                               "${env.BUILD_URL}" + "testReport/",
                               'continuous-integration/pytest',
@@ -285,7 +288,7 @@ if( run_pipeline ) {
               fileCoverageTargets: '80, 80, 80',
             )
 
-            pullrequestStatus("${GITHUB_TOKEN_1}",
+            pullrequestStatus("${GITHUB_TOKEN}",
                   "success",
                   "${env.BUILD_URL}" + "cobertura/",
                   'continuous-integration/coverage',
