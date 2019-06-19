@@ -212,7 +212,7 @@ if( run_pipeline ) {
                               "${env.BUILD_URL}" + "pylint/",
                               'continuous-integration/pylint',
                               'Linter(pylint) check succeeded!',
-                              'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+                              'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
             currentBuild.result = "FAILURE"
 
           } finally {
@@ -225,7 +225,7 @@ if( run_pipeline ) {
                                 "${env.BUILD_URL}" + "pylint/",
                                 'continuous-integration/pylint',
                                 'Linter(pylint) check succeeded!',
-                                'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+                                'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
             }
 
           }
@@ -246,7 +246,7 @@ if( run_pipeline ) {
                             "${env.BUILD_URL}" + "pytest/",
                             'continuous-integration/pytest',
                             'Unit testes failed!',
-                            'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+                            'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
             currentBuild.result = "FAILURE"
           } finally {
             junit 'pytest.xml'
@@ -257,7 +257,7 @@ if( run_pipeline ) {
                                 "${env.BUILD_URL}" + "testReport/",
                                 'continuous-integration/pytest',
                                 'Unit testes succeeded!',
-                                'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+                                'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
 
             }
 
@@ -283,14 +283,14 @@ if( run_pipeline ) {
                     "${env.BUILD_URL}" + "cobertura/",
                     'continuous-integration/coverage',
                     'Coverage succeeded!',
-                    'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+                    'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
             } else {
               pullrequestStatus("${env.GITHUB_TOKEN}",
                                   "error",
                                   "${env.BUILD_URL}" + "cobertura/",
                                   'continuous-integration/coverage',
                                   'Coverage failed!',
-                                  'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+                                  'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
             }
 
           }
@@ -338,7 +338,7 @@ if( run_pipeline ) {
                           "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
                           'continuous-integration/sonarqube',
                           'Sonarqube scan failed!',
-                          'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+                          'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
           currentBuild.result = "FAILURE"
         } finally {
           pullrequestStatus("${env.GITHUB_TOKEN}",
@@ -346,7 +346,7 @@ if( run_pipeline ) {
                     "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
                     'continuous-integration/sonarqube',
                     'Sonarqube scan succeeded!',
-                    'https://api.github.com/repos/pwei1018/devops-platform-workshops-labs/statuses/28005fcaa9ede2d7768c86dfdc1e296e62a6c511')
+                    'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
         }
       }
     }
