@@ -155,26 +155,26 @@ def test_keycloak_delete_user_by_username_user_not_exist():
 
 def test_keycloak_logout(session):
     """Logout. Assert response status code is included in response."""
-    keycloak_service.add_user(ADD_USER_REQUEST)
-    response = keycloak_service.get_token(ADD_USER_REQUEST.get('username'), ADD_USER_REQUEST.get('password'))
+    KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
+    response = KEYCLOAK_SERVICE.get_token(ADD_USER_REQUEST.get('username'), ADD_USER_REQUEST.get('password'))
     refresh_token = response.get('refresh_token')
     response = None
-    response = keycloak_service.logout(refresh_token)
+    response = KEYCLOAK_SERVICE.logout(refresh_token)
 
     assert response is not None
-    keycloak_service.delete_user_by_username(ADD_USER_REQUEST.get('username'))
+    KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
 
 
 def test_keycloak_logout_wrong_refresh_token(session):
     """Logout by invalid refresh token. Assert response is None, error code is invalid refresh token."""
-    keycloak_service.add_user(ADD_USER_REQUEST)
-    response = keycloak_service.get_token(ADD_USER_REQUEST.get('username'), ADD_USER_REQUEST.get('password'))
+    KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
+    response = KEYCLOAK_SERVICE.get_token(ADD_USER_REQUEST.get('username'), ADD_USER_REQUEST.get('password'))
     refresh_token = response.get('access_token')
     response = None
     try:
-        response = keycloak_service.logout(refresh_token)
+        response = KEYCLOAK_SERVICE.logout(refresh_token)
     except BusinessException as err:
         assert err.code == Error.INVALID_REFRESH_TOKEN.name
         pass
     assert response is None
-    keycloak_service.delete_user_by_username(ADD_USER_REQUEST.get('username'))
+    KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
