@@ -21,15 +21,15 @@ from flask import Flask
 from sbc_common_components.tracing.api_tracer import ApiTracer
 from sbc_common_components.tracing.api_tracing import ApiTracing
 
-import config
 from auth_api import models
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.models import db, ma
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
+from config import CONFIGURATION, _Config
 
 
-setup_logging(os.path.join(config._Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first
+setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first
 
 JWT = JWTWrapper.get_instance()
 
@@ -37,7 +37,7 @@ JWT = JWTWrapper.get_instance()
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
-    app.config.from_object(config.CONFIGURATION[run_mode])
+    app.config.from_object(CONFIGURATION[run_mode])
 
     from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT
 
