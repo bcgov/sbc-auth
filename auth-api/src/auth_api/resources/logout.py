@@ -57,7 +57,7 @@ def handle_exception(exception):
 @cors_preflight('POST,OPTIONS')
 @API.route('', methods=['POST', 'OPTIONS'])
 class Logout(Resource):
-    """Retrieve user detail information from token and database """
+    """Logout user from keycloak by refresh token. """
 
     @staticmethod
     @_tracing.trace()
