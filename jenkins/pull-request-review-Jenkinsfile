@@ -150,7 +150,7 @@ if( run_pipeline ) {
       containerTemplate(
         name: 'python37',
         image: 'docker-registry.default.svc:5000/1rdehl-tools/jenkins-slave-python3:latest',
-        resourceRequestCpu: '1000m',
+        resourceRequestCpu: '500m',
         resourceLimitCpu: '2000m',
         resourceRequestMemory: '2Gi',
         resourceLimitMemory: '4Gi',
