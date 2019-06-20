@@ -184,8 +184,10 @@ if( run_pipeline ) {
       if (result.size() ==1 ){
           def str = result[0]
           def prId = str.substring(str.indexOf("pull")+5,str.lastIndexOf("head")-1)
-          echo "Pull request id: ${prId}"
       }
+
+      echo "Last commit sha1: ${gitCommitSHA}"
+      echo "Pull request id: ${prId}"
 
       dir('auth-api') {
         sh '''
