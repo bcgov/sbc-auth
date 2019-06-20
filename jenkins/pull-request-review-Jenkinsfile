@@ -18,15 +18,15 @@ def SONAR_ROUTE_NAME = 'sonarqube'
 def SONAR_ROUTE_NAMESPACE = '1rdehl-tools'
 
 // The name of your SonarQube project
-def SONAR_PROJECT_NAME = 'BC Registries Auth API'
+def SONAR_PROJECT_NAME = 'BC Registries Auth'
 
 // The project key of your SonarQube project
-def SONAR_PROJECT_KEY = 'BCRegistriesAuthAPI'
+def SONAR_PROJECT_KEY = 'BCRegistriesAuth'
 
 // The base directory of your project.
 // This is relative to the location of the `sonar-runner` directory within your project.
 // More accurately this is relative to the Gradle build script(s) that manage the SonarQube Scanning
-def SONAR_PROJECT_BASE_DIR = '../auth-api'
+def SONAR_PROJECT_BASE_DIR = '../'
 
 // The source code directory you want to scan.
 // This is relative to the project base directory.
@@ -38,17 +38,14 @@ import groovy.json.JsonOutput
 
 // set a status to github pull request
 def pullrequestStatus(token, state, targetUrl, context, description, pullRequestUrl) {
-  //only set the status for pull request
-  if (env.CHANGE_ID) {
-    def payload = JsonOutput.toJson([state: state,
-        target_url: targetUrl,
-        context: context,
-        description: description
-    ])
+  def payload = JsonOutput.toJson([state: state,
+      target_url: targetUrl,
+      context: context,
+      description: description
+  ])
 
-    //def encodedReq = URLEncoder.encode(payload, "UTF-8")
-    sh("curl -s -H \"Authorization: token ${token}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${payload}\' \"${pullRequestUrl}\"")
-  }
+  //def encodedReq = URLEncoder.encode(payload, "UTF-8")
+  sh("curl -s -H \"Authorization: token ${token}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${payload}\' \"${pullRequestUrl}\"")
 }
 
 // Gets the URL associated to a named route.
