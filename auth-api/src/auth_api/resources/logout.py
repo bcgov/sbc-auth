@@ -63,7 +63,7 @@ class Logout(Resource):
     @_tracing.trace()
     @catch_custom_exception
     def post():
-        """Return a JSON object that includes user detail information"""
+        """Return a JSON object that includes user detail information."""
         data = request.get_json()
         if not data:
             data = request.values
