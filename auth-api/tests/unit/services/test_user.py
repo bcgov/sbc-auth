@@ -40,7 +40,7 @@ def test_as_dict():
                              'roles': '{edit,uma_authorization,basic}'}
 
 
-def test_user_saved_from_new(session): #pylint: disable=unused-argument
+def test_user_saved_from_new(session):  # pylint: disable=unused-argument
     """Assert that the business is saved to the cache."""
     username = 'CP1234567'
     user = services.User()
@@ -53,7 +53,7 @@ def test_user_saved_from_new(session): #pylint: disable=unused-argument
     assert user is not None
 
 
-def test_user_retrieved_from_cache(session): #pylint: disable=unused-argument
+def test_user_retrieved_from_cache(session):  # pylint: disable=unused-argument
     """Assert that the business is saved to the cache."""
     username = 'CP1234567'
     factory_user_model(username=username,
@@ -70,7 +70,7 @@ def test_user_retrieved_from_cache(session): #pylint: disable=unused-argument
     assert user.roles == alt_roles
 
 
-def test_user_find_by_username(session): #pylint: disable=unused-argument
+def test_user_find_by_username(session):  # pylint: disable=unused-argument
     """Assert that the business can be found by name."""
     username = 'CP1234567'
     user = services.User()
@@ -83,7 +83,7 @@ def test_user_find_by_username(session): #pylint: disable=unused-argument
     assert user is not None
 
 
-def test_user_find_by_username_no_model_object(session): #pylint: disable=unused-argument
+def test_user_find_by_username_no_model_object(session):  # pylint: disable=unused-argument
     """Assert that the business can't be found with no model."""
     username = 'CP1234567'
 
@@ -92,7 +92,7 @@ def test_user_find_by_username_no_model_object(session): #pylint: disable=unused
     assert user is None
 
 
-def test_user_find_by_username_missing_username(session): #pylint: disable=unused-argument
+def test_user_find_by_username_missing_username(session):  # pylint: disable=unused-argument
     """Assert that the business can be found by name."""
     username = 'CP1234567'
     user = services.User()

@@ -14,50 +14,51 @@
 """Endpoints to get user information from token and database."""
 
 from flask import g, jsonify
-
-from flask_restplus import Namespace, Resource, cors
 from flask_jwt_oidc import AuthError
+from flask_restplus import Namespace, Resource, cors
 
-from auth_api import jwt as _jwt
-from auth_api import tracing as _tracing
+from auth_api.exceptions import UserException, catch_custom_exception
+from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.services import User
+from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
-from auth_api.exceptions import catch_custom_exception
-from auth_api.exceptions import UserException
+
 
 API = Namespace('users/info', description='Authentication System - get User Information')
+TRACER = Tracer.get_instance()
+JWT = JWTWrapper.get_instance()
+
 
 @API.errorhandler(AuthError)
 def handle_auth_error(exception):
-    """TODO just a demo function"""
+    """TODO just a demo function."""
     return jsonify(exception), exception.status_code
 
 
 @API.errorhandler(UserException)
 def handle_db_exception(error):
-    """TODO just a demo function"""
+    """TODO just a demo function."""
     return {'message': str(error.error)}, error.status_code
 
 
 @API.errorhandler(Exception)
 def handle_exception(exception):
-    """TODO just a demo function"""
+    """TODO just a demo function."""
     return {'message': str(exception.error)}, exception.status_code
-
 
 
 @cors_preflight('GET')
 @API.route('')
 class UserInfo(Resource):
-    """Retrieve user detail information from token and database """
+    """Retrieve user detail information from token and database."""
 
     @staticmethod
     @cors.crossdomain(origin='*')
-    @_tracing.trace()
+    @TRACER.trace()
     @catch_custom_exception
-    @_jwt.requires_auth
+    @JWT.requires_auth
     def get():
-        """Return a JSON object that includes user detail information"""
+        """Return a JSON object that includes user detail information."""
         token = g.jwt_oidc_token_info
         user = User.find_by_jwt_token(token)
         if not user:
