@@ -184,7 +184,7 @@ if( run_pipeline ) {
       def prId
       if (result.size() ==1 ){
           def str = result[0]
-          def prId = str.substring(str.indexOf("pull")+5,str.lastIndexOf("head")-1)
+          prId = str.substring(str.indexOf("pull")+5,str.lastIndexOf("head")-1)
       }
 
       echo "Last commit sha1: ${gitCommitSHA}"
