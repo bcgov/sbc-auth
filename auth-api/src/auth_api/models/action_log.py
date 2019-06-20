@@ -11,8 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a action log record.
-"""
+"""This manages a action log record."""
 
 from sqlalchemy import Column, Date, ForeignKey, Integer, String, text
 from sqlalchemy.orm import relationship
@@ -22,6 +21,7 @@ from .db import db, ma
 
 class ActionLog(db.Model):
     """Used to hold the action type information for a User of this service."""
+
     __tablename__ = 'action_log'
 
     log_id = Column(Integer, primary_key=True, server_default=text("nextval('log_id_seq'::regclass)"))

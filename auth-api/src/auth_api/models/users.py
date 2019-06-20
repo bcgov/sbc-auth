@@ -11,8 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a User record.
-"""
+"""This manages a User record."""
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, text
 from sqlalchemy.orm import relationship
@@ -22,6 +21,7 @@ from .db import db, ma
 
 class Users(db.Model):
     """Used to hold the audit information for a User of this service."""
+
     __tablename__ = 'users'
 
     user_id = Column(Integer, primary_key=True, server_default=text("nextval('users_id_seq'::regclass)"))
@@ -53,6 +53,7 @@ class Users(db.Model):
         """Cannot delete User records."""
         return self
         # need to intercept the ORM and stop Users from being deleted
+
 
 class UserSchema(ma.ModelSchema):
     """Used to manage the default mapping between JSON and Domain model."""
