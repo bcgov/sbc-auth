@@ -174,8 +174,8 @@ if( run_pipeline ) {
 
       stage('Checkout Source') {
         echo "Checking out source code ..."
-        //checkout scm
-        git branch: "${BRANCH_NAME}", url: "https://github.com/pwei1018/sbc-auth"
+        checkout([$class: 'GitSCM',
+                branches: [[name: "/pull/3/head"]])
         echo sh(returnStdout: true, script: 'env')
       }
 
