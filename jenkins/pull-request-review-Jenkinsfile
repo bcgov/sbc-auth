@@ -1,8 +1,5 @@
 #!/usr/bin/env groovy
 
-// GITHUB API
-def GITHUB_API_ENDPOINT = 'https://api.github.com/repos/pwei1018/sbc-auth'
-
 // Edit your app's name below
 def APP_NAME = 'auth-api'
 
@@ -177,7 +174,8 @@ if( run_pipeline ) {
 
       stage('Checkout Source') {
         echo "Checking out source code ..."
-        checkout scm
+        //checkout scm
+        git branch: "${BRANCH_NAME}", url: "https://github.com/pwei1018/sbc-auth"
         echo sh(returnStdout: true, script: 'env')
       }
 
@@ -213,9 +211,9 @@ if( run_pipeline ) {
             pullrequestStatus("${env.GITHUB_TOKEN}",
                               "error",
                               "${env.BUILD_URL}" + "pylint/",
-                              "continuous-integration/pylint",
-                              "Linter(pylint) check succeeded!",
-                              "${GITHUB_API_ENDPOINT}" + "/statuses/" +"${gitCommitSHA}")
+                              'continuous-integration/pylint',
+                              'Linter(pylint) check succeeded!',
+                              'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
             currentBuild.result = "FAILURE"
 
           } finally {
