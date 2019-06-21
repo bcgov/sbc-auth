@@ -175,7 +175,8 @@ if( run_pipeline ) {
       stage('Checkout Source') {
         echo "Checking out source code ..."
         checkout([$class: 'GitSCM',
-                branches: [[name: "/pull/3/head"]]])
+                  branches: [[name: ${BRANCH_NAME}]],
+                  userRemoteConfigs: [[refspec: "+refs/pull/*/head:refs/remotes/origin/pr/*"]]])
         echo sh(returnStdout: true, script: 'env')
       }
 
