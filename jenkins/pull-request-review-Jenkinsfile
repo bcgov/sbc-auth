@@ -177,7 +177,7 @@ if( run_pipeline ) {
         checkout changelog: false,
                  poll: false,
                  scm: [$class: 'GitSCM',
-                       branches: [[name: "${env.BRANCH_NAME"]],
+                       branches: [[name: "${env.BRANCH_NAME}"]],
                        doGenerateSubmoduleConfigurations: false,
                        extensions: [],
                        submoduleCfg: [],
