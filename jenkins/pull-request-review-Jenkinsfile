@@ -174,22 +174,19 @@ if( run_pipeline ) {
 
       stage('Checkout Source') {
         echo "Checking out source code ..."
-        //checkout scm
-        git branch: "${BRANCH_NAME}", url: "https://github.com/pwei1018/sbc-auth"
+        checkout changelog: false,
+                 poll: false,
+                 scm: [$class: 'GitSCM',
+                       branches: [[name: "FETCH_HEAD"]],
+                       doGenerateSubmoduleConfigurations: false,
+                       extensions: [],
+                       submoduleCfg: [],
+                       userRemoteConfigs: [[refspec: "+refs/pull/*:refs/remotes/origin/pull/* +refs/pull/*/head:refs/remotes/origin/pr/*",url: "https://github.com/pwei1018/sbc-auth"]]]
         echo sh(returnStdout: true, script: 'env')
       }
 
       def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
-      def allPRs = sh(returnStdout: true, script: "git ls-remote origin 'pull/*/head'")
-      List result = allPRs.split( '\n' ).findAll { it.contains(gitCommitSHA) && it.contains("refs/pull") }
-      def prId
-      if (result.size() ==1 ){
-          def str = result[0]
-          prId = str.substring(str.indexOf("pull")+5,str.lastIndexOf("head")-1)
-      }
-
       echo "Last commit sha1: ${gitCommitSHA}"
-      echo "Pull request id: ${prId}"
 
       dir('auth-api') {
         sh '''
