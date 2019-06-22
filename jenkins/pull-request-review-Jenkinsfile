@@ -176,7 +176,8 @@ if( run_pipeline ) {
         echo "Checking out source code ..."
         checkout([$class: 'GitSCM',
                   branches: [[name: "${BRANCH_NAME}"]],
-                  userRemoteConfigs: [[refspec: "+refs/pull/*/head:refs/remotes/origin/pr/*"]]])
+                  userRemoteConfigs: [[refspec: "+refs/pull/*/head:refs/remotes/origin/pr/*"],
+                                       url: "https://${env.GITHUB_TOKEN}@github.com/pwei1018/sbc-auth.git}"]])
         echo sh(returnStdout: true, script: 'env')
       }
 
