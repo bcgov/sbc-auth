@@ -171,23 +171,33 @@ if( run_pipeline ) {
     ]
   ){
     node(pod_label) {
-      sh'''
-        pwd
-      '''
-      
-      dir('/var/lib/jenkins/jobs/pull-request-review/branches/pull-3-head.4ldtek/workspace@script/auth-api') {
-        def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
-        def allPRs = sh(returnStdout: true, script: "git ls-remote origin 'pull/*/head'")
-        List result = allPRs.split( '\n' ).findAll { it.contains(gitCommitSHA) && it.contains("refs/pull") }
-        def prId
-        if (result.size() ==1 ){
-            def str = result[0]
-            prId = str.substring(str.indexOf("pull")+5,str.lastIndexOf("head")-1)
-        }
 
-        echo "Last commit sha1: ${gitCommitSHA}"
-        echo "Pull request id: ${prId}"
+      stage('Checkout Source') {
+        echo "Checking out source code ..."
+        checkout changelog: false,
+                 poll: false,
+                 scm: [$class: 'GitSCM',
+                       branches: [[name: "pull/3/head"]],
+                       doGenerateSubmoduleConfigurations: false,
+                       extensions: [],
+                       submoduleCfg: [],
+                       userRemoteConfigs: [[refspec: "+refs/pull/*/head:refs/remotes/origin/pr/*",url: "https://${env.GITHUB_TOKEN}@github.com/pwei1018/sbc-auth.git"]]]
+        echo sh(returnStdout: true, script: 'env')
+      }
 
+      def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
+      def allPRs = sh(returnStdout: true, script: "git ls-remote origin 'pull/*/head'")
+      List result = allPRs.split( '\n' ).findAll { it.contains(gitCommitSHA) && it.contains("refs/pull") }
+      def prId
+      if (result.size() ==1 ){
+          def str = result[0]
+          prId = str.substring(str.indexOf("pull")+5,str.lastIndexOf("head")-1)
+      }
+
+      echo "Last commit sha1: ${gitCommitSHA}"
+      echo "Pull request id: ${prId}"
+
+      dir('auth-api') {
         sh '''
           #!/bin/bash
           source /opt/app-root/bin/activate
