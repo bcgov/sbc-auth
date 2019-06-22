@@ -177,7 +177,7 @@ if( run_pipeline ) {
         checkout changelog: false,
                  poll: false,
                  scm: [$class: 'GitSCM',
-                       branches: [[name: "pull/3/head"]],
+                       branches: [[name: "${env.BRANCH_NAME"]],
                        doGenerateSubmoduleConfigurations: false,
                        extensions: [],
                        submoduleCfg: [],
@@ -186,16 +186,7 @@ if( run_pipeline ) {
       }
 
       def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
-      def allPRs = sh(returnStdout: true, script: "git ls-remote origin 'pull/*/head'")
-      List result = allPRs.split( '\n' ).findAll { it.contains(gitCommitSHA) && it.contains("refs/pull") }
-      def prId
-      if (result.size() ==1 ){
-          def str = result[0]
-          prId = str.substring(str.indexOf("pull")+5,str.lastIndexOf("head")-1)
-      }
-
       echo "Last commit sha1: ${gitCommitSHA}"
-      echo "Pull request id: ${prId}"
 
       dir('auth-api') {
         sh '''
