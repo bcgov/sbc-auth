@@ -113,7 +113,7 @@ def triggerBuild(String contextDirectory) {
       for (int k = 0; k < files.size(); k++) {
         def file = files[k]
         def filePath = file.path
-        //echo ">> ${file.path}"
+        echo ">> ${file.path}"
         if (filePath.contains(contextDirectory)) {
           filesChangeCnt++
           //k = files.size()
@@ -160,14 +160,16 @@ def triggerBuild(String contextDirectory) {
   return [filesChange,frontendChange,backendChange]
 }
 
+def buildResult = triggerBuild(CONTEXT_DIRECTORY)
 
+echo "build result: ${buildResult}"
 // define job properties - keep 10 builds only
 properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]])
 
 def run_pipeline = true
 
 // build wasn't triggered by changes so check with user
-if( !triggerBuild(CONTEXT_DIRECTORY)[0] ) {
+if( !buildResult[0][0] ) {
   stage('No changes. Run pipeline?') {
       try {
         timeout(time: 1, unit: 'DAYS') {
