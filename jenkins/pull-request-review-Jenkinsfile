@@ -119,8 +119,8 @@ def triggerBuild(String contextDirectory) {
           //k = files.size()
           //j = entries.length
         }
-        echo ">> ${file.name}"
-        def matcher = (file.name =~ /.*\.(.*)$/)
+        echo ">> ${file.getName()}"
+        def matcher = (file.getName() =~ /.*\.(.*)$/)
 
         if(matcher.matches()) {
           def extension = matcher[0][1]
