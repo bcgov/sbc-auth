@@ -98,7 +98,7 @@ String getSonarQubePwd() {
 }
 
 @NonCPS
-def triggerBuild(String contextDirectory) {
+def triggerBuild(String contextDirectory, String[] frontendTypes, String[] backendTypes) {
   // Determine if code has changed within the source context directory.
   def changeLogSets = currentBuild.changeSets
   def filesChangeCnt = 0
@@ -125,10 +125,10 @@ def triggerBuild(String contextDirectory) {
         if(matcher.matches()) {
           def extension = matcher[0][1]
 
-          if(extension in FRONTEND_FILE_TYPES) {
+          if(extension in frontendTypes) {
             frontendChangeCnt++
           }
-          if(extension in BACKEND_FILE_TYPES) {
+          if(extension in backendTypes) {
             backendChangeCnt++
           }
         }
@@ -160,7 +160,7 @@ def triggerBuild(String contextDirectory) {
   return [filesChange,frontendChange,backendChange]
 }
 
-def buildResult = triggerBuild(CONTEXT_DIRECTORY)
+def buildResult = triggerBuild(CONTEXT_DIRECTORY, FRONTEND_FILE_TYPES, BACKEND_FILE_TYPES)
 
 echo "build result: ${buildResult}"
 // define job properties - keep 10 builds only
