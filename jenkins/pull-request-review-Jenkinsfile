@@ -237,7 +237,7 @@ if( run_pipeline ) {
           //echo sh(returnStdout: true, script: 'env')
         }
 
-        def LAST_COMMIT_SHA = sh(returnStdout: false, script: 'git rev-parse  HEAD').trim()
+        def LAST_COMMIT_SHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
         echo "Last commit sha1: ${LAST_COMMIT_SHA}"
 
         dir('auth-api') {
@@ -405,7 +405,7 @@ if( run_pipeline ) {
 
   // trigger fronend review pipeline
   if (buildResult[1]) {
-    
+
   }
 }
 
