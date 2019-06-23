@@ -6,6 +6,10 @@ def APP_NAME = 'auth-api'
 // You'll need to change this to point to your application component's folder within your repository
 def CONTEXT_DIRECTORY = '/'
 
+def REPO_URL='https://github.com/pwei1018/sbc-auth.git'
+
+def GITHUB_API_URL='https://api.github.com/repos/pwei1018/sbc-auth'
+
 // ================================================================================================
 // SonarQube Scanner Settings
 // ------------------------------------------------------------------------------------------------
@@ -87,12 +91,14 @@ boolean triggerBuild(String contextDirectory) {
     def entries = changeLogSets[i].items
     for (int j = 0; j < entries.length; j++) {
       def entry = entries[j]
-      //echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
+      echo "${entry}"
+      echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
       def files = new ArrayList(entry.affectedFiles)
       for (int k = 0; k < files.size(); k++) {
         def file = files[k]
+        echo "${file}"
         def filePath = file.path
-        //echo ">> ${file.path}"
+        echo ">> ${file.path}"
         if (filePath.contains(contextDirectory)) {
           filesChangeCnt = 1
           k = files.size()
@@ -181,12 +187,12 @@ if( run_pipeline ) {
                        doGenerateSubmoduleConfigurations: false,
                        extensions: [],
                        submoduleCfg: [],
-                       userRemoteConfigs: [[refspec: "+refs/pull/*:refs/remotes/origin/pull/* +refs/pull/*/head:refs/remotes/origin/pr/*",url: "https://github.com/pwei1018/sbc-auth"]]]
+                       userRemoteConfigs: [[refspec: "+refs/pull/*:refs/remotes/origin/pull/* +refs/pull/*/head:refs/remotes/origin/pr/*", url: "${REPO_URL}"]]]
         echo sh(returnStdout: true, script: 'env')
       }
 
-      def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
-      echo "Last commit sha1: ${gitCommitSHA}"
+      def LAST_COMMIT_SHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
+      echo "Last commit sha1: ${LAST_COMMIT_SHA}"
 
       dir('auth-api') {
         sh '''
@@ -210,7 +216,7 @@ if( run_pipeline ) {
                               "${env.BUILD_URL}" + "pylint/",
                               'continuous-integration/pylint',
                               'Linter(pylint) check succeeded!',
-                              'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
+                              'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
             currentBuild.result = "FAILURE"
 
           } finally {
@@ -223,7 +229,7 @@ if( run_pipeline ) {
                                 "${env.BUILD_URL}" + "pylint/",
                                 'continuous-integration/pylint',
                                 'Linter(pylint) check succeeded!',
-                                'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
+                                'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
             }
 
           }
@@ -244,7 +250,7 @@ if( run_pipeline ) {
                             "${env.BUILD_URL}" + "pytest/",
                             'continuous-integration/pytest',
                             'Unit testes failed!',
-                            'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
+                            'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
             currentBuild.result = "FAILURE"
           } finally {
             junit 'pytest.xml'
@@ -255,7 +261,7 @@ if( run_pipeline ) {
                                 "${env.BUILD_URL}" + "testReport/",
                                 'continuous-integration/pytest',
                                 'Unit testes succeeded!',
-                                'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
+                                'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
 
             }
 
@@ -281,14 +287,14 @@ if( run_pipeline ) {
                     "${env.BUILD_URL}" + "cobertura/",
                     'continuous-integration/coverage',
                     'Coverage succeeded!',
-                    'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
+                    'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
             } else {
               pullrequestStatus("${env.GITHUB_TOKEN}",
                                   "error",
                                   "${env.BUILD_URL}" + "cobertura/",
                                   'continuous-integration/coverage',
                                   'Coverage failed!',
-                                  'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
+                                  'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
             }
 
           }
@@ -336,7 +342,7 @@ if( run_pipeline ) {
                           "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
                           'continuous-integration/sonarqube',
                           'Sonarqube scan failed!',
-                          'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
+                          'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
           currentBuild.result = "FAILURE"
         } finally {
           pullrequestStatus("${env.GITHUB_TOKEN}",
@@ -344,7 +350,7 @@ if( run_pipeline ) {
                     "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
                     'continuous-integration/sonarqube',
                     'Sonarqube scan succeeded!',
-                    'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${gitCommitSHA}")
+                    'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
         }
       }
     }
