@@ -98,7 +98,7 @@ String getSonarQubePwd() {
 }
 
 @NonCPS
-def triggerBuild(String contextDirectory, String[] frontendTypes, String[] backendTypes) {
+def triggerBuild(contextDirectory, frontendTypes, backendTypes) {
   // Determine if code has changed within the source context directory.
   def changeLogSets = currentBuild.changeSets
   def filesChangeCnt = 0
