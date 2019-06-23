@@ -125,10 +125,10 @@ def triggerBuild(String contextDirectory) {
         if(matcher.matches()) {
           def extension = matcher[0][1]
 
-          if(extension in "${FRONTEND_FILE_TYPES}") {
+          if(extension in FRONTEND_FILE_TYPES) {
             frontendChangeCnt++
           }
-          if(extension in "${BACKEND_FILE_TYPES}") {
+          if(extension in BACKEND_FILE_TYPES) {
             backendChangeCnt++
           }
         }
