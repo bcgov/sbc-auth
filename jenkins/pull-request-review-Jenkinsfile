@@ -10,6 +10,12 @@ def REPO_URL='https://github.com/pwei1018/sbc-auth.git'
 
 def GITHUB_API_URL='https://api.github.com/repos/pwei1018/sbc-auth'
 
+def FRONTEND_DIRS = ['auth_web']
+def FRONTEND_FILE_TYPES = ['html', 'vue', 'ts', 'js']
+
+def BACKEND_DIRS = ['auth_api']
+def BACKEND_FILE_TYPES = ['py']
+
 // ================================================================================================
 // SonarQube Scanner Settings
 // ------------------------------------------------------------------------------------------------
@@ -48,8 +54,17 @@ def pullrequestStatus(token, state, targetUrl, context, description, pullRequest
       description: description
   ])
 
-  //def encodedReq = URLEncoder.encode(payload, "UTF-8")
-  sh("curl -s -H \"Authorization: token ${token}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${payload}\' \"${pullRequestUrl}\"")
+  def encodedReq = URLEncoder.encode(payload, "UTF-8")
+  sh(returnStdout: false, script: "curl -s -H \"Authorization: token ${token}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${encodedReq}\' \"${pullRequestUrl}\"")
+}
+
+// post a comment to github pull request
+def pullrequestComment(token, pullRequestNumber, comments) {
+  def payload = JsonOutput.toJson([body: comments])
+  def pullRequestUrl = "${GITHUB_API_URL}" + "/issues/${pullRequestNumber}/comments"
+
+  def encodedReq = URLEncoder.encode(payload, "UTF-8")
+  sh(returnStdout: false, script: "curl -s -H \"Authorization: token ${token}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${encodedReq}\' \"${pullRequestUrl}\"")
 }
 
 // Gets the URL associated to a named route.
@@ -83,39 +98,66 @@ String getSonarQubePwd() {
 }
 
 @NonCPS
-boolean triggerBuild(String contextDirectory) {
+def triggerBuild(String contextDirectory) {
   // Determine if code has changed within the source context directory.
   def changeLogSets = currentBuild.changeSets
   def filesChangeCnt = 0
+  def frontendChangeCnt = 0
+  def backendChangeCnt = 0
   for (int i = 0; i < changeLogSets.size(); i++) {
     def entries = changeLogSets[i].items
     for (int j = 0; j < entries.length; j++) {
       def entry = entries[j]
-      echo "${entry}"
-      echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
+      //echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
       def files = new ArrayList(entry.affectedFiles)
       for (int k = 0; k < files.size(); k++) {
         def file = files[k]
-        echo "${file}"
         def filePath = file.path
-        echo ">> ${file.path}"
+        //echo ">> ${file.path}"
         if (filePath.contains(contextDirectory)) {
-          filesChangeCnt = 1
-          k = files.size()
-          j = entries.length
+          filesChangeCnt++
+          //k = files.size()
+          //j = entries.length
+        }
+        echo ">> ${file.name}"
+        def matcher = (file.name =~ /.*\.(.*)$/)
+
+        if(matcher.matches()) {
+          def extension = matcher[0][1]
+
+          if(extension in "${FRONTEND_FILE_TYPES}") {
+            frontendChangeCnt++
+          }
+          if(extension in "${BACKEND_FILE_TYPES}") {
+            backendChangeCnt++
+          }
         }
       }
     }
   }
 
+  def filesChange = false
+  def frontendChange = false
+  def backendChange = false
+
   if ( filesChangeCnt < 1 ) {
     echo('The changes do not require a build.')
-    return false
   }
   else {
     echo('The changes require a build.')
-    return true
+    filesChange = true
   }
+
+
+  if ( frontendChangeCnt > 0 ) {
+    frontendChange = true
+  }
+
+  if ( backendChangeCnt > 0 ) {
+    backendChange = true
+  }
+
+  return [filesChange,frontendChange,backendChange]
 }
 
 
@@ -125,7 +167,7 @@ properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', 
 def run_pipeline = true
 
 // build wasn't triggered by changes so check with user
-if( !triggerBuild(CONTEXT_DIRECTORY) ) {
+if( !triggerBuild(CONTEXT_DIRECTORY)[0] ) {
   stage('No changes. Run pipeline?') {
       try {
         timeout(time: 1, unit: 'DAYS') {
@@ -188,10 +230,10 @@ if( run_pipeline ) {
                        extensions: [],
                        submoduleCfg: [],
                        userRemoteConfigs: [[refspec: "+refs/pull/*:refs/remotes/origin/pull/* +refs/pull/*/head:refs/remotes/origin/pr/*", url: "${REPO_URL}"]]]
-        echo sh(returnStdout: true, script: 'env')
+        //echo sh(returnStdout: true, script: 'env')
       }
 
-      def LAST_COMMIT_SHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
+      def LAST_COMMIT_SHA = sh(returnStdout: false, script: 'git rev-parse  HEAD').trim()
       echo "Last commit sha1: ${LAST_COMMIT_SHA}"
 
       dir('auth-api') {
