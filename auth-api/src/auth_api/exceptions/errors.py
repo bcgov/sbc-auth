@@ -22,6 +22,7 @@ from auth_api import status as http_status
 
 class Error(Enum):
     """Error Codes."""
+
     INVALID_INPUT = 'Invalid input, please check.', http_status.HTTP_400_BAD_REQUEST
     DATA_NOT_FOUND = 'No matching record found.', http_status.HTTP_400_BAD_REQUEST
     DATA_ALREADY_EXISTS = 'The data you want to insert already exists.', http_status.HTTP_400_BAD_REQUEST

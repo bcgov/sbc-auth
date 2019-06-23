@@ -8,6 +8,8 @@ export default {
   },
   redirect (framewindow: Window, paybcurl: string) {
     console.log('PayBC Url in Iframe ' + paybcurl)
+
+
     framewindow.postMessage(paybcurl, paybcurl)
   }
 }
