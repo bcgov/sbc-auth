@@ -291,7 +291,7 @@ if( run_pipeline ) {
                 }
 
                 stage('Unit tests(Pytest) & Coverage') {
-                  echo "testing..."
+                  echo "Unit testing..."
                   try{
                     sh '''
                       source /opt/app-root/bin/activate
