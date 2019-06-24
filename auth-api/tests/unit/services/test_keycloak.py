@@ -17,6 +17,7 @@
 Test-Suite to ensure that the Business Service is working as expected.
 """
 
+from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.services.keycloak import KeycloakService
 from auth_api.exceptions import BusinessException

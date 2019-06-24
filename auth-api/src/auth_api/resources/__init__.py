@@ -24,10 +24,11 @@ from flask import Blueprint
 from .apihelper import Api
 
 from auth_api.resources.admin.users import API as USER_API
-from .usersinfo import API as USERINFO_API
+
 from .meta import API as META_API
 from .ops import API as OPS_API
 from .token import API as TOKEN_API
+from .usersinfo import API as USERINFO_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')

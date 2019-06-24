@@ -13,38 +13,37 @@
 # limitations under the License.
 """Endpoints to to manage user."""
 
-from flask import request, jsonify
-from flask_restplus import Resource, Namespace
+from flask import jsonify, request
 from flask_jwt_oidc import AuthError
+from flask_restplus import Namespace, Resource
 
-from auth_api import tracing as _tracing
 from auth_api import status as http_status
-
+from auth_api.exceptions import BusinessException, catch_business_exception
 from auth_api.services.keycloak import KeycloakService
+from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
-from auth_api.exceptions import BusinessException
-from auth_api.exceptions import catch_business_exception
 
 API = Namespace('admin/users', description='Keycloak Admin - user')
 KEYCLOAK_SERVICE = KeycloakService()
+TRACER = Tracer.get_instance()
 
 
 @API.errorhandler(AuthError)
 def handle_auth_error(exception):
-    """TODO just a demo function"""
+    """TODO just a demo function."""
     return jsonify(exception), exception.status_code
 
 
 @API.errorhandler(BusinessException)
 def handle_db_exception(error):
-    """TODO just a demo function"""
+    """TODO just a demo function."""
     return {'error': '{}'.format(error.code), 'message': '{}'.format(error.error),
             'detail': '{}'.format(error.detail)}, error.status_code
 
 
 @API.errorhandler(Exception)
 def handle_exception(exception):
-    """TODO just a demo function"""
+    """TODO just a demo function."""
     return {'error': '{}'.format(exception.code), 'message': '{}'.format(exception.error),
             'detail': '{}'.format(exception.detail)}, exception.status_code
 
@@ -55,13 +54,10 @@ class User(Resource):
     """End point resource to manage users."""
 
     @staticmethod
-    @_tracing.trace()
+    @TRACER.trace()
     @catch_business_exception
-    #@_jwt.has_one_of_roles([Role.ADMIN.value])
-    #@_jwt.requires_auth
     def post():
         """Add user, return a new/existing user."""
-
         data = request.get_json()
         if not data:
             data = request.values
@@ -74,10 +70,9 @@ class User(Resource):
                     'detail': '{}'.format(err.detail)}, err.status_code
 
     @staticmethod
-    @_tracing.trace()
+    @TRACER.trace()
     def get():
-        """Get user by username and return a user"""
-
+        """Get user by username and return a user."""
         data = request.get_json()
         if not data:
             data = request.values
@@ -89,10 +84,9 @@ class User(Resource):
                     'detail': '{}'.format(err.detail)}, err.status_code
 
     @staticmethod
-    @_tracing.trace()
+    @TRACER.trace()
     def delete():
-        """Delete user by username"""
-
+        """Delete user by username."""
         data = request.get_json()
         if not data:
             data = request.values
