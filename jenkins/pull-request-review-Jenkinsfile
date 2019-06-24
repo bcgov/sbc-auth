@@ -189,6 +189,7 @@ if( run_pipeline ) {
   // The jenkins-python3nodejs template has been purpose built for supporting SonarQube scanning.
   podTemplate(
     label: pod_label,
+    serviceAccount: 'jenkins',
     cloud: 'openshift',
     containers: [
       containerTemplate(
@@ -260,7 +261,7 @@ if( run_pipeline ) {
                                   "${env.BUILD_URL}" + "pylint/",
                                   'continuous-integration/pylint',
                                   'Linter(pylint) check succeeded!',
-                                  'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
+                                  "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
                 currentBuild.result = "FAILURE"
 
               } finally {
@@ -273,13 +274,13 @@ if( run_pipeline ) {
                                     "${env.BUILD_URL}" + "pylint/",
                                     'continuous-integration/pylint',
                                     'Linter(pylint) check succeeded!',
-                                    'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
+                                    "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
                 }
 
               }
             }
 
-            stage('Unit test & Coverage') {
+            stage('Unit tests(Pytest) & Coverage') {
               echo "testing..."
               try{
                 sh '''
@@ -294,7 +295,7 @@ if( run_pipeline ) {
                                 "${env.BUILD_URL}" + "pytest/",
                                 'continuous-integration/pytest',
                                 'Unit tests failed!',
-                                'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
+                                "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
                 currentBuild.result = "FAILURE"
               } finally {
                 junit 'pytest.xml'
@@ -305,7 +306,7 @@ if( run_pipeline ) {
                                     "${env.BUILD_URL}" + "testReport/",
                                     'continuous-integration/pytest',
                                     'Unit tests succeeded!',
-                                    'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
+                                    "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
 
                 }
 
@@ -331,14 +332,14 @@ if( run_pipeline ) {
                         "${env.BUILD_URL}" + "cobertura/",
                         'continuous-integration/coverage',
                         'Coverage succeeded!',
-                        'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
+                        "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
                 } else {
                   pullrequestStatus("${env.GITHUB_TOKEN}",
                                       "error",
                                       "${env.BUILD_URL}" + "cobertura/",
                                       'continuous-integration/coverage',
                                       'Coverage failed!',
-                                      'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
+                                      "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
                 }
 
               }
@@ -366,14 +367,14 @@ if( run_pipeline ) {
                                 "${env.BUILD_URL}" + "jest/",
                                 'continuous-integration/jest',
                                 'Jest tests failed!',
-                                'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
+                                "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
                 } else {
                   pullrequestStatus("${env.GITHUB_TOKEN}",
                                 "success",
                                 "${env.BUILD_URL}" + "jest/",
                                 'continuous-integration/jest',
                                 'Jest tests failed!',
-                                'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
+                                "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
                 }
               }
 
@@ -406,6 +407,8 @@ if( run_pipeline ) {
         echo "URL: ${SONARQUBE_URL}"
         echo "PWD: ${SONARQUBE_PWD}"
 
+        def stage_status = 'PENDING'
+        def stage_description = ''
         try {
           // The `sonar-runner` MUST exist in your project and contain a Gradle environment consisting of:
           // - Gradle wrapper script(s)
@@ -432,22 +435,21 @@ if( run_pipeline ) {
                 -Dsonar.sources=${SONAR_SOURCES}"
             )
           }
+
+          stage_status = 'SUCCESS'
+          stage_description = 'Sonarqube scan succeeded!'
         } catch (Exception e) {
           echo "EXCEPTION: ${e}"
-          pullrequestStatus("${env.GITHUB_TOKEN}",
-                          "error",
-                          "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
-                          'continuous-integration/sonarqube',
-                          'Sonarqube scan failed!',
-                          'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
+          stage_status = 'ERROR'
+          stage_description = 'Sonarqube scan failed!'
           currentBuild.result = "FAILURE"
         } finally {
           pullrequestStatus("${env.GITHUB_TOKEN}",
-                    "success",
+                    stage_status,
                     "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
                     'continuous-integration/sonarqube',
-                    'Sonarqube scan succeeded!',
-                    'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
+                    stage_description,
+                    "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
         }
       }
     }
