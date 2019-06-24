@@ -54,8 +54,8 @@ def pullrequestStatus(token, state, targetUrl, context, description, pullRequest
       description: description
   ])
 
-  def encodedReq = URLEncoder.encode(payload, "UTF-8")
-  sh(returnStdout: false, script: "curl -s -H \"Authorization: token ${token}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${encodedReq}\' \"${pullRequestUrl}\"")
+  //def encodedReq = URLEncoder.encode(payload, "UTF-8")
+  sh(returnStdout: false, script: "curl -s -H \"Authorization: token ${token}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${payload}\' \"${pullRequestUrl}\"")
 }
 
 // post a comment to github pull request
@@ -63,8 +63,8 @@ def pullrequestComment(token, pullRequestNumber, comments) {
   def payload = JsonOutput.toJson([body: comments])
   def pullRequestUrl = "${GITHUB_API_URL}" + "/issues/${pullRequestNumber}/comments"
 
-  def encodedReq = URLEncoder.encode(payload, "UTF-8")
-  sh(returnStdout: false, script: "curl -s -H \"Authorization: token ${token}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${encodedReq}\' \"${pullRequestUrl}\"")
+  //def encodedReq = URLEncoder.encode(payload, "UTF-8")
+  sh(returnStdout: false, script: "curl -s -H \"Authorization: token ${token}\" -H \"Accept: application/json\" -H \"Content-type: application/json\" -X POST -d \'${payload}\' \"${pullRequestUrl}\"")
 }
 
 // Gets the URL associated to a named route.
@@ -187,6 +187,23 @@ if( !buildResult[0] ) {
 
 if( run_pipeline ) {
 
+  node() {
+    stage('Checkout Source') {
+      echo "Checking out source code ..."
+      checkout changelog: false,
+              poll: false,
+              scm: [$class: 'GitSCM',
+                    branches: [[name: "${env.BRANCH_NAME}"]],
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [],
+                    submoduleCfg: [],
+                    userRemoteConfigs: [[refspec: "+refs/pull/*:refs/remotes/origin/pull/* +refs/pull/*/head:refs/remotes/origin/pr/*", url: "${REPO_URL}"]]]
+      //echo sh(returnStdout: true, script: 'env')
+  }
+
+  def LAST_COMMIT_SHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
+  echo "Last commit sha1: ${LAST_COMMIT_SHA}"
+
   // trigger backend review pipeline
   if (buildResult[2]) {
     // create api pod to run verification steps
@@ -224,37 +241,19 @@ if( run_pipeline ) {
     ){
       node(pod_label) {
 
-        stage('Checkout Source') {
-          echo "Checking out source code ..."
-          checkout changelog: false,
-                  poll: false,
-                  scm: [$class: 'GitSCM',
-                        branches: [[name: "${env.BRANCH_NAME}"]],
-                        doGenerateSubmoduleConfigurations: false,
-                        extensions: [],
-                        submoduleCfg: [],
-                        userRemoteConfigs: [[refspec: "+refs/pull/*:refs/remotes/origin/pull/* +refs/pull/*/head:refs/remotes/origin/pr/*", url: "${REPO_URL}"]]]
-          //echo sh(returnStdout: true, script: 'env')
-        }
-
-        def LAST_COMMIT_SHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
-        echo "Last commit sha1: ${LAST_COMMIT_SHA}"
-
         dir('auth-api') {
           sh '''
             #!/bin/bash
             source /opt/app-root/bin/activate
             pip install -r requirements.txt
             pip install -r requirements/dev.txt
+            export PYTHONPATH=./src/
           '''
           stage('pylint') {
             echo "pylint checking..."
             try{
-              sh '''
-                source /opt/app-root/bin/activate
-                export PYTHONPATH=./src/
-                pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
-              '''
+              def lintResults = sh(script: "pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log", returnStatus: true)
+              echo lintResults
             } catch (Exception e) {
               echo "EXCEPTION: ${e}"
               pullrequestStatus("${env.GITHUB_TOKEN}",
@@ -295,7 +294,7 @@ if( run_pipeline ) {
                               "error",
                               "${env.BUILD_URL}" + "pytest/",
                               'continuous-integration/pytest',
-                              'Unit testes failed!',
+                              'Unit tests failed!',
                               'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
               currentBuild.result = "FAILURE"
             } finally {
@@ -306,7 +305,7 @@ if( run_pipeline ) {
                                   "success",
                                   "${env.BUILD_URL}" + "testReport/",
                                   'continuous-integration/pytest',
-                                  'Unit testes succeeded!',
+                                  'Unit tests succeeded!',
                                   'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
 
               }
@@ -405,6 +404,73 @@ if( run_pipeline ) {
 
   // trigger fronend review pipeline
   if (buildResult[1]) {
+    // create NodeJS pod to run verification steps
+    def nodejs_label = "jenkins-nodejs-${UUID.randomUUID().toString()}"
+    podTemplate(label: nodejs_label, name: nodejs_label, serviceAccount: 'jenkins', cloud: 'openshift', containers: [
+      containerTemplate(
+        name: 'jnlp',
+        image: '172.50.0.2:5000/openshift/jenkins-slave-nodejs:8',
+        resourceRequestCpu: '500m',
+        resourceLimitCpu: '1000m',
+        resourceRequestMemory: '1Gi',
+        resourceLimitMemory: '2Gi',
+        workingDir: '/tmp',
+        command: '',
+        args: '${computer.jnlpmac} ${computer.name}'
+        envVars: [
+              secretEnvVar(key: 'GITHUB_TOKEN', secretName: 'apitest-secrets', secretKey: 'GITHUB_TOKEN')
+        ]
+      )
+    ])
+    {
+      node (nodejs_label) {
+        dir('auth-web') {
+          try {
+            sh '''
+                node -v
+                npm install
+            '''
+            stage("Run Jest tests") {
+              def testResults = sh(script: "npm run test:unit", returnStatus: true)
+
+              echo "Unit tests ran, returned ${testResults}"
+              if (testResults > 0) {
+                pullrequestStatus("${env.GITHUB_TOKEN}",
+                              "error",
+                              "${env.BUILD_URL}" + "jest/",
+                              'continuous-integration/jest',
+                              'Jest tests failed!',
+                              'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
+              } else {
+                pullrequestStatus("${env.GITHUB_TOKEN}",
+                              "success",
+                              "${env.BUILD_URL}" + "jest/",
+                              'continuous-integration/jest',
+                              'Jest tests failed!',
+                              'https://api.github.com/repos/pwei1018/sbc-auth/statuses/'+"${LAST_COMMIT_SHA}")
+              }
+            }
+
+            stage("Check code quality (lint)") {
+              def lintResults = sh(script: "npm run lint:nofix", returnStatus: true)
+
+              echo "Linter ran, returned ${lintResults}"
+              if (lintResults > 0) {
+                  try {
+                      timeout(time: 1, unit: 'DAYS') {
+                          input message: "Linter failed. Continue?", id: "2"
+                      }
+                  } catch (Exception e) {
+                      error('Abort')
+                  }
+              }
+            }
+          } catch (Exception e) {
+            error('Failure')
+          }
+        }
+      }
+    }
 
   }
 }
