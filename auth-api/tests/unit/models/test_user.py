@@ -53,7 +53,7 @@ def test_user_find_by_jwt_token(session):
     assert u.id is not None
 
 
-def test_create_from_jwt_token(session): #pylint: disable=unused-argument
+def test_create_from_jwt_token(session):  # pylint: disable=unused-argument
     """Assert User is created from the JWT fields."""
     token = {'preferred_username': 'CP1234567',
              'realm_access': {'roles': [
@@ -65,7 +65,7 @@ def test_create_from_jwt_token(session): #pylint: disable=unused-argument
     assert u.id is not None
 
 
-def test_create_from_jwt_token_no_token(session): #pylint: disable=unused-argument
+def test_create_from_jwt_token_no_token(session):  # pylint: disable=unused-argument
     """Assert User is not created from an empty token."""
     token = None
     u = User.create_from_jwt_token(token)
@@ -83,7 +83,7 @@ def test_find_by_username(session):
     assert u.id is not None
 
 
-def test_user_save(session): #pylint: disable=unused-argument
+def test_user_save(session):  # pylint: disable=unused-argument
     """Assert User record is saved."""
     user = User(username='CP1234567', roles='{edit, uma_authorization, staff}')
     user.save()
@@ -91,7 +91,7 @@ def test_user_save(session): #pylint: disable=unused-argument
     assert user.id is not None
 
 
-def test_user_delete(session): #pylint: disable=unused-argument
+def test_user_delete(session):  # pylint: disable=unused-argument
     """Assert the User record is deleted."""
     user = User(username='CP1234567', roles='{edit, uma_authorization, staff}')
     user.save()
