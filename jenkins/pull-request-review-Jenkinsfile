@@ -186,18 +186,19 @@ if( !buildResult[0] ) {
 //}
 
 if( run_pipeline ) {
-
-  stage('Checkout Source') {
-    echo "Checking out source code ..."
-    checkout changelog: false,
-            poll: false,
-            scm: [$class: 'GitSCM',
-                  branches: [[name: "${env.BRANCH_NAME}"]],
-                  doGenerateSubmoduleConfigurations: false,
-                  extensions: [],
-                  submoduleCfg: [],
-                  userRemoteConfigs: [[refspec: "+refs/pull/*:refs/remotes/origin/pull/* +refs/pull/*/head:refs/remotes/origin/pr/*", url: "${REPO_URL}"]]]
-    //echo sh(returnStdout: true, script: 'env')
+  node {
+    stage('Checkout Source') {
+      echo "Checking out source code ..."
+      checkout changelog: false,
+              poll: false,
+              scm: [$class: 'GitSCM',
+                    branches: [[name: "${env.BRANCH_NAME}"]],
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [],
+                    submoduleCfg: [],
+                    userRemoteConfigs: [[refspec: "+refs/pull/*:refs/remotes/origin/pull/* +refs/pull/*/head:refs/remotes/origin/pr/*", url: "${REPO_URL}"]]]
+      //echo sh(returnStdout: true, script: 'env')
+    }
   }
 
   def LAST_COMMIT_SHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
