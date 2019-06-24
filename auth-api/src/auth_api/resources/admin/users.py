@@ -23,6 +23,7 @@ from auth_api.services.keycloak import KeycloakService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
 
+
 API = Namespace('admin/users', description='Keycloak Admin - user')
 KEYCLOAK_SERVICE = KeycloakService()
 TRACER = Tracer.get_instance()
