@@ -416,9 +416,9 @@ if( run_pipeline ) {
         resourceLimitMemory: '2Gi',
         workingDir: '/tmp',
         command: '',
-        args: '${computer.jnlpmac} ${computer.name}'
+        args: '${computer.jnlpmac} ${computer.name}',
         envVars: [
-              secretEnvVar(key: 'GITHUB_TOKEN', secretName: 'apitest-secrets', secretKey: 'GITHUB_TOKEN')
+          secretEnvVar(key: 'GITHUB_TOKEN', secretName: 'apitest-secrets', secretKey: 'GITHUB_TOKEN')
         ]
       )
     ])
