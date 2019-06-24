@@ -239,8 +239,8 @@ if( run_pipeline ) {
             //echo sh(returnStdout: true, script: 'env')
           }
 
-          def LAST_COMMIT_SHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
-          echo "Last commit sha1: ${LAST_COMMIT_SHA}"
+          def gitCommitSHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
+          echo "Last commit sha1: ${gitCommitSHA}"
 
           dir('auth-api') {
             sh '''
@@ -248,103 +248,112 @@ if( run_pipeline ) {
               source /opt/app-root/bin/activate
               pip install -r requirements.txt
               pip install -r requirements/dev.txt
-              export PYTHONPATH=./src/
             '''
             stage('pylint') {
               echo "pylint checking..."
               try{
-                def lintResults = sh(script: "pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log", returnStatus: true)
-                echo lintResults
-              } catch (Exception e) {
-                echo "EXCEPTION: ${e}"
-                pullrequestStatus("${env.GITHUB_TOKEN}",
-                                  "error",
-                                  "${env.BUILD_URL}" + "pylint/",
-                                  'continuous-integration/pylint',
-                                  'Linter(pylint) check succeeded!',
-                                  "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
-                currentBuild.result = "FAILURE"
-
-              } finally {
-                def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
-                publishIssues issues: [pyLint]
-
-                if (currentBuild.result != "FAILURE") {
-                  pullrequestStatus("${env.GITHUB_TOKEN}",
-                                    "success",
-                                    "${env.BUILD_URL}" + "pylint/",
-                                    'continuous-integration/pylint',
-                                    'Linter(pylint) check succeeded!',
-                                    "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
-                }
-
-              }
-            }
-
-            stage('Unit tests(Pytest) & Coverage') {
-              echo "testing..."
-              try{
                 sh '''
+                  #!/bin/bash
                   source /opt/app-root/bin/activate
+                  pip install -r requirements.txt
+                  pip install -r requirements/dev.txt
                   export PYTHONPATH=./src/
-                  pytest
                 '''
-              } catch (Exception e) {
-                echo "EXCEPTION: ${e}"
-                pullrequestStatus("${env.GITHUB_TOKEN}",
-                                "error",
-                                "${env.BUILD_URL}" + "pytest/",
-                                'continuous-integration/pytest',
-                                'Unit tests failed!',
-                                "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
-                currentBuild.result = "FAILURE"
-              } finally {
-                junit 'pytest.xml'
+                stage('pylint') {
+                  echo "pylint checking..."
+                  try{
+                    def lintResults = sh(script: "pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log", returnStatus: true)
+                    echo lintResults
+                  } catch (Exception e) {
+                    echo "EXCEPTION: ${e}"
+                    pullrequestStatus("${env.GITHUB_TOKEN}",
+                                      "error",
+                                      "${env.BUILD_URL}" + "pylint/",
+                                      'continuous-integration/pylint',
+                                      'Linter(pylint) check succeeded!',
+                                      "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
+                    currentBuild.result = "FAILURE"
 
-                if (currentBuild.result != "FAILURE") {
-                  pullrequestStatus("${env.GITHUB_TOKEN}",
-                                    "success",
-                                    "${env.BUILD_URL}" + "testReport/",
-                                    'continuous-integration/pytest',
-                                    'Unit tests succeeded!',
-                                    "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
+                  } finally {
+                    def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
+                    publishIssues issues: [pyLint]
 
+                    if (currentBuild.result != "FAILURE") {
+                      pullrequestStatus("${env.GITHUB_TOKEN}",
+                                        "success",
+                                        "${env.BUILD_URL}" + "pylint/",
+                                        'continuous-integration/pylint',
+                                        'Linter(pylint) check succeeded!',
+                                        "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
+                    }
+
+                  }
                 }
 
-                cobertura(
-                  coberturaReportFile: "coverage.xml",
-                  onlyStable: false,
-                  failNoReports: true,
-                  failUnhealthy: false,
-                  failUnstable: false,
-                  autoUpdateHealth: true,
-                  autoUpdateStability: true,
-                  zoomCoverageChart: true,
-                  maxNumberOfBuilds: 0,
-                  lineCoverageTargets: '80, 80, 80',
-                  conditionalCoverageTargets: '80, 80, 80',
-                  classCoverageTargets: '80, 80, 80',
-                  fileCoverageTargets: '80, 80, 80',
-                )
+                stage('Unit tests(Pytest) & Coverage') {
+                  echo "testing..."
+                  try{
+                    sh '''
+                      source /opt/app-root/bin/activate
+                      export PYTHONPATH=./src/
+                      pytest
+                    '''
+                  } catch (Exception e) {
+                    echo "EXCEPTION: ${e}"
+                    pullrequestStatus("${env.GITHUB_TOKEN}",
+                                    "error",
+                                    "${env.BUILD_URL}" + "pytest/",
+                                    'continuous-integration/pytest',
+                                    'Unit tests failed!',
+                                    "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
+                    currentBuild.result = "FAILURE"
+                  } finally {
+                    junit 'pytest.xml'
 
-                if (currentBuild.result == 'SUCCESS') {
-                  pullrequestStatus("${env.GITHUB_TOKEN}",
-                        "success",
-                        "${env.BUILD_URL}" + "cobertura/",
-                        'continuous-integration/coverage',
-                        'Coverage succeeded!',
-                        "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
-                } else {
-                  pullrequestStatus("${env.GITHUB_TOKEN}",
-                                      "error",
-                                      "${env.BUILD_URL}" + "cobertura/",
-                                      'continuous-integration/coverage',
-                                      'Coverage failed!',
-                                      "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
+                    if (currentBuild.result != "FAILURE") {
+                      pullrequestStatus("${env.GITHUB_TOKEN}",
+                                        "success",
+                                        "${env.BUILD_URL}" + "testReport/",
+                                        'continuous-integration/pytest',
+                                        'Unit tests succeeded!',
+                                        "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
+
+                    }
+
+                    cobertura(
+                      coberturaReportFile: "coverage.xml",
+                      onlyStable: false,
+                      failNoReports: true,
+                      failUnhealthy: false,
+                      failUnstable: false,
+                      autoUpdateHealth: true,
+                      autoUpdateStability: true,
+                      zoomCoverageChart: true,
+                      maxNumberOfBuilds: 0,
+                      lineCoverageTargets: '80, 80, 80',
+                      conditionalCoverageTargets: '80, 80, 80',
+                      classCoverageTargets: '80, 80, 80',
+                      fileCoverageTargets: '80, 80, 80',
+                    )
+
+                    if (currentBuild.result == 'SUCCESS') {
+                      pullrequestStatus("${env.GITHUB_TOKEN}",
+                            "success",
+                            "${env.BUILD_URL}" + "cobertura/",
+                            'continuous-integration/coverage',
+                            'Coverage succeeded!',
+                            "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
+                    } else {
+                      pullrequestStatus("${env.GITHUB_TOKEN}",
+                                          "error",
+                                          "${env.BUILD_URL}" + "cobertura/",
+                                          'continuous-integration/coverage',
+                                          'Coverage failed!',
+                                          "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
+                    }
+                  }
                 }
               }
-            }
-          }
         }
       }
 
