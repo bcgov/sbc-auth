@@ -189,6 +189,7 @@ if( run_pipeline ) {
   // The jenkins-python3nodejs template has been purpose built for supporting SonarQube scanning.
   podTemplate(
     label: pod_label,
+    name: pod_label,
     serviceAccount: 'jenkins',
     cloud: 'openshift',
     containers: [
@@ -222,26 +223,26 @@ if( run_pipeline ) {
     ]
   ){
     node(pod_label) {
-      stage('Checkout Source') {
-        echo "Checking out source code ..."
-        checkout changelog: false,
-                poll: false,
-                scm: [$class: 'GitSCM',
-                    branches: [[name: "${env.BRANCH_NAME}"]],
-                    doGenerateSubmoduleConfigurations: false,
-                    extensions: [],
-                    submoduleCfg: [],
-                    userRemoteConfigs: [[refspec: "+refs/pull/*:refs/remotes/origin/pull/* +refs/pull/*/head:refs/remotes/origin/pr/*", url: "${REPO_URL}"]]]
-        //echo sh(returnStdout: true, script: 'env')
-      }
-
-      def LAST_COMMIT_SHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
-      echo "Last commit sha1: ${LAST_COMMIT_SHA}"
-
       // trigger backend review pipeline
       if (buildResult[2]) {
-        dir('auth-api') {
-          container('python37') {
+        container('python37') {
+          stage('Checkout Source') {
+            echo "Checking out source code ..."
+            checkout changelog: false,
+                    poll: false,
+                    scm: [$class: 'GitSCM',
+                        branches: [[name: "${env.BRANCH_NAME}"]],
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: [],
+                        submoduleCfg: [],
+                        userRemoteConfigs: [[refspec: "+refs/pull/*:refs/remotes/origin/pull/* +refs/pull/*/head:refs/remotes/origin/pr/*", url: "${REPO_URL}"]]]
+            //echo sh(returnStdout: true, script: 'env')
+          }
+
+          def LAST_COMMIT_SHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
+          echo "Last commit sha1: ${LAST_COMMIT_SHA}"
+
+          dir('auth-api') {
             sh '''
               #!/bin/bash
               source /opt/app-root/bin/activate
@@ -341,7 +342,6 @@ if( run_pipeline ) {
                                       'Coverage failed!',
                                       "${GITHUB_API_URL}" + '/' + "${LAST_COMMIT_SHA}")
                 }
-
               }
             }
           }
