@@ -32,6 +32,11 @@ class UserType(db.Model):
         """Return the oldest User type record for the provided user_type_code."""
         return cls.query.filter_by(user_type_code=code).first()
 
+    @classmethod
+    def find_by_name(cls, name):
+        """Return the oldest User type record for the provided user_type_code."""
+        return cls.query.filter_by(user_type_desc=name).first()
+
     def save(self):
         """Store the User type into the local cache."""
         db.session.add(self)
