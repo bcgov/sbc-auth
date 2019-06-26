@@ -11,8 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a action record.
-"""
+"""This manages a action record."""
 
 from sqlalchemy import Column, String
 
@@ -21,6 +20,7 @@ from .db import db, ma
 
 class Action(db.Model):
     """Used to hold the action type information for a User of this service."""
+
     __tablename__ = 'action'
 
     action_code = Column(String(50), primary_key=True)

@@ -11,8 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a User Type record.
-"""
+"""This manages a User Type record."""
 
 from sqlalchemy import Column, String
 
@@ -21,6 +20,7 @@ from .db import db, ma
 
 class UserType(db.Model):
     """Used to hold the user type information for a User of this service."""
+
     __tablename__ = 'user_type'
 
     user_type_code = Column(String(20), primary_key=True)

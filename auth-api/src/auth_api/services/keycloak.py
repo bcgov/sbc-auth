@@ -11,12 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Utils for keycloak administration"""
+"""Utils for keycloak administration."""
 
 import os
 
-from keycloak import KeycloakAdmin
-from keycloak import KeycloakOpenID
+from keycloak import KeycloakAdmin, KeycloakOpenID
 from keycloak.exceptions import KeycloakGetError
 
 from auth_api.exceptions import BusinessException
@@ -42,13 +41,14 @@ KEYCLOAK_OPENID = KeycloakOpenID(server_url=os.getenv('KEYCLOAK_BASE_URL') + '/a
 
 class KeycloakService:
     """For Keycloak services."""
+
     def __init__(self):
+        """Constructor."""
         super()
 
     # Add user to Keycloak
     def add_user(self, user_request):
-        """Add user to Keycloak"""
-
+        """Add user to Keycloak."""
         # New user default to enabled.
         enabled = user_request.get('enabled')
         if enabled is None:
@@ -56,14 +56,17 @@ class KeycloakService:
 
         # Add user and set password
         try:
-            KEYCLOAK_ADMIN.create_user({'email': user_request.get('email'),
-                                        'username': user_request.get('username'),
-                                        'enabled': enabled,
-                                        'firstName': user_request.get('firstname'),
-                                        'lastName': user_request.get('lastname'),
-                                        'credentials': [{'value': user_request.get('password'), 'type': 'password'}],
-                                        'groups': user_request.get('user_type'),
-                                        'attributes': {'corp_type': user_request.get('corp_type'), 'source': user_request.get('source')}})
+            KEYCLOAK_ADMIN.create_user(
+                {
+                    'email': user_request.get('email'),
+                    'username': user_request.get('username'),
+                    'enabled': enabled,
+                    'firstName': user_request.get('firstname'),
+                    'lastName': user_request.get('lastname'),
+                    'credentials': [{'value': user_request.get('password'), 'type': 'password'}],
+                    'groups': user_request.get('user_type'),
+                    'attributes': {'corp_type': user_request.get('corp_type'), 'source': user_request.get('source')}
+                })
 
             user_id = KEYCLOAK_ADMIN.get_user_id(user_request.get('username'))
 
@@ -85,7 +88,7 @@ class KeycloakService:
 
     @staticmethod
     def get_user_by_username(username):
-        """ Get user from Keycloak by username"""
+        """Get user from Keycloak by username."""
         try:
             # Get user id
             user_id_keycloak = KEYCLOAK_ADMIN.get_user_id(username)
@@ -99,11 +102,11 @@ class KeycloakService:
             except Exception as err:
                 raise BusinessException(Error.UNDEFINED_ERROR, err)
         else:
-            raise BusinessException(Error.DATA_NOT_FOUND)
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
 
     @staticmethod
     def delete_user_by_username(username):
-        """Delete user from Keycloak by username"""
+        """Delete user from Keycloak by username."""
         try:
             # Get user id
             user_id_keycloak = KEYCLOAK_ADMIN.get_user_id(username)
@@ -117,11 +120,11 @@ class KeycloakService:
             except Exception as err:
                 raise BusinessException(Error.UNDEFINED_ERROR, err)
         else:
-            raise BusinessException(Error.DATA_NOT_FOUND)
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
 
     @staticmethod
     def get_token(username, password):
-        """Get user access token by username and password"""
+        """Get user access token by username and password."""
         try:
             response = KEYCLOAK_OPENID.token(username, password)
             return response
@@ -130,7 +133,7 @@ class KeycloakService:
 
     @staticmethod
     def refresh_token(refresh_token):
-        """Refresh user token"""
+        """Refresh user token."""
         try:
             response = KEYCLOAK_OPENID.refresh_token(refresh_token, ['refresh_token'])
             return response
