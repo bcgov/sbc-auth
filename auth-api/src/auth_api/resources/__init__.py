@@ -28,6 +28,7 @@ from .apihelper import Api
 from .meta import API as META_API
 from .ops import API as OPS_API
 from .token import API as TOKEN_API
+from .logout import API as LOGOUT_API
 from .usersinfo import API as USERINFO_API
 
 
@@ -65,3 +66,4 @@ API.add_namespace(META_API, path='/meta')
 API.add_namespace(USERINFO_API, path='/users/info')
 API.add_namespace(TOKEN_API, path='/token')
 API.add_namespace(USER_API, path='/admin/users')
+API.add_namespace(LOGOUT_API, path='/logout')
