@@ -22,7 +22,7 @@ from flask_restplus import Namespace, Resource
 from flask_jwt_oidc import AuthError
 
 from auth_api import status as http_status
-from auth_api import tracing as _tracing
+from auth_api.tracer import Tracer
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.util import cors_preflight
 from auth_api.exceptions import catch_custom_exception
@@ -32,6 +32,7 @@ from auth_api.exceptions.errors import Error
 
 API = Namespace('logout', description='Authentication System - Logout User')
 KEYCLOAK_SERVICE = KeycloakService()
+TRACER = Tracer.get_instance()
 
 
 @API.errorhandler(AuthError)
@@ -60,7 +61,7 @@ class Logout(Resource):
     """Logout user from keycloak by refresh token. """
 
     @staticmethod
-    @_tracing.trace()
+    @TRACER.trace()
     @catch_custom_exception
     def post():
         """Return a JSON object that includes user detail information."""
