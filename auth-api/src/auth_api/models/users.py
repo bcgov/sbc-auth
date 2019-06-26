@@ -23,6 +23,7 @@ from .db import db, ma
 
 class Users(db.Model):
     """Used to hold the audit information for a User of this service."""
+
     __tablename__ = 'users'
 
     user_id = Column(Integer, primary_key=True, server_default=text("nextval('users_id_seq'::regclass)"))
@@ -87,6 +88,7 @@ class Users(db.Model):
             db.session.commit()
             return user
         return None
+
 
 
 class UserSchema(ma.ModelSchema):

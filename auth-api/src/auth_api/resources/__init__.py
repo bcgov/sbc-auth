@@ -23,13 +23,13 @@ That are used to expose operational health information about the service, and me
 from flask import Blueprint
 
 from auth_api.resources.admin.users import API as USER_API
-from .usersinfo import API as USERINFO_API
+
+from .apihelper import Api
 from .meta import API as META_API
 from .ops import API as OPS_API
 from .token import API as TOKEN_API
 from .logout import API as LOGOUT_API
-
-from .apihelper import Api
+from .usersinfo import API as USERINFO_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
