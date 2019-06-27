@@ -8,7 +8,7 @@ def REPO_OWNER = 'bcgov'
 def REPO_URL='https://github.com/' + REPO_OWNER + '/' + APP_NAME
 def GITHUB_API_URL='https://api.github.com/repos/' + REPO_OWNER + '/' + APP_NAME
 
-def ROCKETCHAT_CHANNEL='#registries-auth'
+def ROCKETCHAT_CHANNEL='#registries-bot'
 def ROCKETCHAT_DEVELOPER_CHANNEL='#relationship-developers'
 
 def CONTEXT_DIRECTORY = '/'
@@ -261,7 +261,7 @@ if( run_pipeline ) {
               #!/bin/bash
               source /opt/app-root/bin/activate
               export PYTHONPATH=./src/
-              pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --output-format=parseable > pylint.log
+              pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
             '''
             stage_status = 'success'
             stage_description = 'Linter(pylint) check successed!'
@@ -518,6 +518,7 @@ if( run_pipeline ) {
     //  }
     //}
 
+    ROCKETCHAT_TOKEN = sh (script: """oc get secret/apitests -o template --template="{{.data.ROCKETCHAT_TOKEN}}" | base64 --decode""", returnStdout: true).trim()
     rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "@here Pull Request (${env.BRANCH_NAME}) Review done!! Please code review if you are available. " + "${REPO_URL}" + "/pull/" + "${env.CHANGE_ID}" )
   }
 
