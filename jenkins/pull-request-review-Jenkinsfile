@@ -93,7 +93,6 @@ def changed_files() {
   Set changes = []
   build = currentBuild
   while(build != null) {
-    changes += "In ${build.id}:\n"
     for (changeLog in build.changeSets) {
       for(entry in changeLog.items) {
         for(file in entry.affectedFiles) {
@@ -109,13 +108,14 @@ def changed_files() {
 @NonCPS
 def changed_author() {
   Set author = []
-  def changeLogSets = currentBuild.changeSets
-  for (int i = 0; i < changeLogSets.size(); i++) {
-    def entries = changeLogSets[i].items
-    for (int j = 0; j < entries.length; j++) {
-      def entry = entries[j]
-      author.add("${entry.author}")
+  build = currentBuild
+  while(build != null) {
+    for (changeLog in build.changeSets) {
+      for(entry in changeLog.items) {
+        author.add("${entry.author}")
+      }
     }
+    build = build.previousBuild
   }
   return author
 }
