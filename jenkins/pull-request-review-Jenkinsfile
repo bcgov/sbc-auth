@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
-import groovy.json.JsonOutput
 import java.util.Date
 import java.text.SimpleDateFormat
+import groovy.json.*
 
 def APP_NAME = 'sbc-auth'
 def REPO_OWNER = 'bcgov'
@@ -89,35 +89,22 @@ String getSonarQubePwd() {
 }
 
 @NonCPS
-def changed_files() {
-  Set changes = []
-  build = currentBuild
-  while(build != null) {
-    for (changeLog in build.changeSets) {
-      for(entry in changeLog.items) {
-        for(file in entry.affectedFiles) {
-          changes.add("${file.path}")
-        }
-      }
-    }
-    build = build.previousBuild
-  }
-  return changes
-}
+def get_last_commit_details() {
+  def lastCommitEntry
 
-@NonCPS
-def changed_author() {
-  Set author = []
   build = currentBuild
-  while(build != null) {
-    for (changeLog in build.changeSets) {
-      for(entry in changeLog.items) {
-        author.add("${entry.author}")
-      }
+  for (changeLog in build.changeSets) {
+    for(entry in changeLog.items) {
+      lastCommitEntry = entry
+
+      break
     }
-    build = build.previousBuild
   }
-  return author
+  entryJson = new JsonBuilder( lastCommitEntry ).toPrettyString()
+
+  echo entryJson
+
+  return entryJson
 }
 
 @NonCPS
@@ -183,11 +170,7 @@ def triggerBuild(contextDirectory, frontendTypes, backendTypes) {
   return [filesChange,frontendChange,backendChange]
 }
 
-def changedFiles = changed_files()
-echo "changed files: ${changedFiles}"
-
-def changedAuthors = changed_author()
-echo "changed author: ${changedAuthors}"
+def lastCommit = get_last_commit_details()
 
 def buildResult = triggerBuild(CONTEXT_DIRECTORY, FRONTEND_FILE_TYPES, BACKEND_FILE_TYPES)
 
