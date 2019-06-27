@@ -10,6 +10,9 @@ def GITHUB_API_URL='https://api.github.com/repos/' + REPO_OWNER + '/' + APP_NAME
 
 def ROCKETCHAT_CHANNEL='#registries-bot'
 def ROCKETCHAT_DEVELOPER_CHANNEL='#relationship-developers'
+def ROCKETCHAT_USER = [
+  'patrick.wei': ['patrick.wei@gov.bc.ca']
+]
 
 def CONTEXT_DIRECTORY = '/'
 def FRONTEND_DIRS = ['auth_web']
@@ -87,20 +90,35 @@ String getSonarQubePwd() {
 
 @NonCPS
 def changed_files() {
-  def changes = "Changes:\n"
+  Set changes = []
   build = currentBuild
   while(build != null) {
     changes += "In ${build.id}:\n"
     for (changeLog in build.changeSets) {
       for(entry in changeLog.items) {
         for(file in entry.affectedFiles) {
-          changes += "* ${file.path}\n"
+          changes.add("${file.path}")
         }
       }
     }
     build = build.previousBuild
   }
   return changes
+}
+
+@NonCPS
+def changed_author() {
+  Set author = []
+  def changeSet = currentBuild.rawBuild.changeSets
+  for (int i = 0; i < changeSet.size(); i++) {
+   def entries = changeSet[i].items;
+   for (int i = 0; i < changeSet.size(); i++) {
+      def entries = changeSet[i].items;
+      def entry = entries[0]
+      author.add("${entry.author}")
+    }
+ }
+  return author
 }
 
 @NonCPS
@@ -168,6 +186,9 @@ def triggerBuild(contextDirectory, frontendTypes, backendTypes) {
 
 def changedFiles = changed_files()
 echo "changed files: ${changedFiles}"
+
+def changedAuthors = changed_author()
+echo "changed author: ${changedAuthors}"
 
 def buildResult = triggerBuild(CONTEXT_DIRECTORY, FRONTEND_FILE_TYPES, BACKEND_FILE_TYPES)
 
@@ -507,19 +528,21 @@ if( run_pipeline ) {
     }
   }
 
-  stage("Quality Gate") {
-    // TODO
-    // timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
-    // def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
-    //  if (qg.status != 'OK') {
-    //    error "Pipeline aborted due to quality gate failure: ${qg.status}"
-    //  } else {
-    //    rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "@here Pull Request (${env.BRANCH_NAME}) Review done!! Please code review if you are available. " + "${REPO_URL}" + "/pull/" + "${env.CHANGE_ID}" )
-    //  }
-    //}
-
-    ROCKETCHAT_TOKEN = sh (script: """oc get secret/apitests -o template --template="{{.data.ROCKETCHAT_TOKEN}}" | base64 --decode""", returnStdout: true).trim()
-    rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "@here Pull Request (${env.BRANCH_NAME}) Review done!! Please code review if you are available. " + "${REPO_URL}" + "/pull/" + "${env.CHANGE_ID}" )
+  node{
+    stage("Quality Gate") {
+      // TODO
+      // timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
+      // def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
+      //  if (qg.status != 'OK') {
+      //    error "Pipeline aborted due to quality gate failure: ${qg.status}"
+      //  } else {
+      //    rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "@here Pull Request (${env.BRANCH_NAME}) Review done!! Please code review if you are available. " + "${REPO_URL}" + "/pull/" + "${env.CHANGE_ID}" )
+      //  }
+      //}
+      echo currentBuild.result
+      ROCKETCHAT_TOKEN = sh (script: """oc get secret/apitests -o template --template="{{.data.ROCKETCHAT_TOKEN}}" | base64 --decode""", returnStdout: true).trim()
+      rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "@here Pull Request (${env.BRANCH_NAME}) Review done!! Please code review if you are available. " + "${REPO_URL}" + "/pull/" + "${env.CHANGE_ID}" )
+    }
   }
 
 }
