@@ -522,7 +522,7 @@ if( run_pipeline ) {
       //  }
       //}
       echo currentBuild.result
-      ROCKETCHAT_TOKEN = sh (script: """oc get secret/apitests -o template --template="{{.data.ROCKETCHAT_TOKEN}}" | base64 --decode""", returnStdout: true).trim()
+      ROCKETCHAT_TOKEN = sh (script: """oc get secret/apitest-secrets -o template --template="{{.data.ROCKETCHAT_TOKEN}}" | base64 --decode""", returnStdout: true).trim()
       rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "@here Pull Request (${env.BRANCH_NAME}) Review done!! Please code review if you are available. " + "${REPO_URL}" + "/pull/" + "${env.CHANGE_ID}" )
     }
   }
