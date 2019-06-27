@@ -37,12 +37,11 @@ describe('update a transaction', () => {
 
   it('should call Axios.put wihtout receipt number ', () => {
     PaymentServices.updateTransaction('paymentId', 'transactionId')
-    expect(Axios.put).toHaveBeenCalledWith(`${process.env.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions/transactionId`, { 'params': '' })
+    expect(Axios.put).toHaveBeenCalledWith(`${process.env.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions/transactionId?receipt_number=undefined`)
   })
 
   it('should call Axios.put  with receipt number', () => {
     PaymentServices.updateTransaction('paymentId', 'transactionId', 'receiptno')
-    var param = { 'receipt_number': 'receiptno' }
-    expect(Axios.put).toHaveBeenCalledWith(`${process.env.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions/transactionId`, { 'params': { 'receipt_number': 'receiptno' } })
+    expect(Axios.put).toHaveBeenCalledWith(`${process.env.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions/transactionId?receipt_number=receiptno`)
   })
 })
