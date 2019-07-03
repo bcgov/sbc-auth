@@ -11,7 +11,7 @@ Vue.use(Vuetify)
 Vue.use(VueRouter)
 
 jest.mock('axios', () => ({
-  post: jest.fn(() => Promise.resolve({ data: { access_token: 'abcd' } }))
+  post: jest.fn(() => Promise.resolve({ data: { access_token: 'abcd', refresh_token: 'efgh', registries_trace_id: '12345abcde' } }))
 }))
 
 describe('PasscodeForm.vue', () => {

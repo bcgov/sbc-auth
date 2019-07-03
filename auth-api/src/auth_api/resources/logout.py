@@ -18,7 +18,7 @@ import json
 from flask import request
 from flask import jsonify
 
-from flask_restplus import Namespace, Resource
+from flask_restplus import Namespace, Resource, cors
 from flask_jwt_oidc import AuthError
 
 from auth_api import status as http_status
@@ -62,6 +62,7 @@ class Logout(Resource):
 
     @staticmethod
     @TRACER.trace()
+    @cors.crossdomain(origin='*')
     @catch_custom_exception
     def post():
         """Return a JSON object that includes user detail information."""
@@ -74,7 +75,7 @@ class Logout(Resource):
             else:
                 raise BusinessException(Error.INVALID_REFRESH_TOKEN)
 
-            return response, http_status.HTTP_204_NO_CONTENT
+            return json.dumps(response), http_status.HTTP_204_NO_CONTENT
         except BusinessException as err:
             return json.dumps({'error': '{}'.format(err.code), 'message': '{}'.format(err.error),
                                'detail': '{}'.format(err.detail)}), err.status_code
