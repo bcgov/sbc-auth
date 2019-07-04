@@ -15,19 +15,16 @@
 
 import json
 
-from flask import request
-from flask import jsonify
-
-from flask_restplus import Namespace, Resource, cors
+from flask import jsonify, request
 from flask_jwt_oidc import AuthError
+from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
-from auth_api.tracer import Tracer
-from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.util import cors_preflight
-from auth_api.exceptions import catch_custom_exception
-from auth_api.exceptions import BusinessException
+from auth_api.exceptions import BusinessException, catch_custom_exception
 from auth_api.exceptions.errors import Error
+from auth_api.services.keycloak import KeycloakService
+from auth_api.tracer import Tracer
+from auth_api.utils.util import cors_preflight
 
 
 API = Namespace('logout', description='Authentication System - Logout User')
@@ -37,20 +34,20 @@ TRACER = Tracer.get_instance()
 
 @API.errorhandler(AuthError)
 def handle_auth_error(exception):
-    """TODO just a demo function"""
+    """TODO just a demo function."""
     return jsonify(exception), exception.status_code
 
 
 @API.errorhandler(BusinessException)
 def handle_db_exception(error):
-    """TODO just a demo function"""
+    """TODO just a demo function."""
     return {'error': '{}'.format(error.code), 'message': '{}'.format(error.error),
             'detail': '{}'.format(error.detail)}, error.status_code
 
 
 @API.errorhandler(Exception)
 def handle_exception(exception):
-    """TODO just a demo function"""
+    """TODO just a demo function."""
     return {'error': '{}'.format(exception.code), 'message': '{}'.format(exception.error),
             'detail': '{}'.format(exception.detail)}, exception.status_code
 
@@ -58,7 +55,7 @@ def handle_exception(exception):
 @cors_preflight('POST,OPTIONS')
 @API.route('', methods=['POST', 'OPTIONS'])
 class Logout(Resource):
-    """Logout user from keycloak by refresh token. """
+    """Logout user from keycloak by refresh token."""
 
     @staticmethod
     @TRACER.trace()

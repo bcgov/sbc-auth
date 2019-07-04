@@ -10,10 +10,8 @@ status_code - where possible use HTTP Error Codes
 import traceback
 from functools import wraps
 
-from flask import g, jsonify
-from sbc_common_components.tracing.exception_tracing import ExceptionTracing
-
 from auth_api.exceptions.errors import Error
+from sbc_common_components.tracing.exception_tracing import ExceptionTracing
 
 
 class BusinessException(Exception):
