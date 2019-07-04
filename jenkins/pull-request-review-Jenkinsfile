@@ -393,7 +393,7 @@ if( run_pipeline ) {
         } else {
           stage_status = 'error'
           stage_description = 'Quality check failed!'
-          rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) Review quality check failed!! " + "${sonarqubeUrl}" + "/dashboard?id=" + "${sonarProjectKey}")
+          rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) Review quality check failed!! " + "${sonarqubeUrl}" + "/dashboard?id=" + "${sonarProjectKey}")
         }
 
         pullrequestStatus("${env.GITHUB_TOKEN}",
