@@ -7,7 +7,6 @@ export default function setup () {
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    debugger
     if (tracingID) {
       config.headers['registries-tracing-id'] = tracingID
     }
