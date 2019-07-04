@@ -73,7 +73,7 @@ class Logout(Resource):
             if 'refresh_token' in data:
                 response = KEYCLOAK_SERVICE.logout(data.get('refresh_token'))
             else:
-                raise BusinessException(Error.INVALID_REFRESH_TOKEN)
+                raise BusinessException(Error.INVALID_REFRESH_TOKEN, None)
 
             return json.dumps(response), http_status.HTTP_204_NO_CONTENT
         except BusinessException as err:
