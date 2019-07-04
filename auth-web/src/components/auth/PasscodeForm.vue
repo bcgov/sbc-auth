@@ -136,8 +136,15 @@ export default {
               this.showSpinner = true
               /* this.frame = this.$refs.iframeContent.contentWindow
               this.frame.postMessage(response.data.access_token, process.env.VUE_APP_COPS_REDIRECT_URL) */
-              IframeServices.emit(this.$refs.iframeContent.contentWindow, response.data.access_token)
+              const msg = JSON.stringify(
+                { 'access_token': response.data.access_token,
+                  'refresh_token': response.data.refresh_token,
+                  'registries_trace_id': response.data['registries-trace-id'] }
+              )
+              IframeServices.emit(this.$refs.iframeContent.contentWindow, msg)
               sessionStorage.KEYCLOAK_TOKEN = response.data.access_token
+              sessionStorage.KEYCLOAK_REFRESH_TOKEN = response.data.refresh_token
+              sessionStorage.REGISTRIES_TRACE_ID = response.data['registries-trace-id']
               setTimeout(() => {
                 window.location.href = process.env.VUE_APP_COPS_REDIRECT_URL
               }, 500)

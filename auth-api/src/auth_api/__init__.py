@@ -18,8 +18,6 @@ This module is the API for the Legal Entity system.
 import os
 
 from flask import Flask
-from sbc_common_components.tracing.api_tracer import ApiTracer
-from sbc_common_components.tracing.api_tracing import ApiTracing
 
 from auth_api import models
 from auth_api.jwt_wrapper import JWTWrapper
