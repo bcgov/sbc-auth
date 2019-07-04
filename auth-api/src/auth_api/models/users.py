@@ -11,10 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a User record.
-"""
-from flask import current_app
+"""This manages a User record."""
 
+from flask import current_app
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, text
 from sqlalchemy.orm import relationship
 
@@ -65,7 +64,7 @@ class Users(db.Model):
     def create_from_jwt_token(cls, token: dict):
         """Create a user record from the provided JWT token.
 
-        Use the values found in the vaild JWT for the realm
+        Use the values found in the valid JWT for the realm
         to populate the User audit data
         """
         if token:
@@ -88,7 +87,6 @@ class Users(db.Model):
             db.session.commit()
             return user
         return None
-
 
 
 class UserSchema(ma.ModelSchema):
