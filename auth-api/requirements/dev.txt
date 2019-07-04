@@ -6,6 +6,7 @@ pytest<4.1
 pytest-mock
 requests
 pyhamcrest
+pytest-cov
 
 # Lint and code style
 flake8
