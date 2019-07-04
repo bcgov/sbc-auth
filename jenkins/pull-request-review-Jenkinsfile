@@ -26,6 +26,21 @@ def SONAR_PROJECT_NAME = 'BC Registries Auth'
 def SONAR_PROJECT_KEY = 'BCRegistriesAuth'
 def SONAR_PROJECT_BASE_DIR = '../'
 def SONAR_SOURCES = './'
+
+def SONAR_PROJECT_BACKEND_NAME = 'BC Registries Auth API'
+def SONAR_PROJECT_BACKEND_KEY = 'BCRegistriesAuthAPI'
+def SONAR_PROJECT_BACKEND_BASE_DIR = '../auth-api'
+def SONAR_BACKEND_SOURCES = 'src'
+def SONAR_BACKEND_TESTS = 'tests'
+
+def API_LINTER_REPORT = 'api-linter'
+def API_UNITTEST_REPORT = 'api-unittest'
+def API_COVERAGE_REPORT = 'api-coverage'
+
+def UI_LINTER_REPORT = 'frontend-linter'
+def UI_UNITTEST_REPORT = 'frontend-jest'
+def UI_COVERAGE_REPORT = 'frontend-coverage'
+
 // ================================================================================================
 
 // define groovy functions
@@ -56,6 +71,11 @@ def rocketChatNotificaiton(token, channel, comments) {
 
   sh(returnStdout: true,
      script: "curl -X POST -H 'Content-Type: application/json' --data \'${payload}\' ${rocketChatUrl}")
+}
+
+@NonCPS
+def jsonParse(def json) {
+    new groovy.json.JsonSlurperClassic().parseText(json)
 }
 
 // Gets the URL associated to a named route.
@@ -194,9 +214,6 @@ if( !buildResult[0] ) {
 }
 
 if( run_pipeline ) {
-  def stage_status = 'PENDING'
-  def stage_description = ''
-
   // create auth pod to run verification steps
   def pod_label = "auth-pod-${UUID.randomUUID().toString()}"
 
@@ -208,7 +225,7 @@ if( run_pipeline ) {
     containers: [
       containerTemplate(
         name: 'jnlp',
-        image: 'docker-registry.default.svc:5000/1rdehl-tools/jenkins-slave-python3:latest',
+        image: 'docker-registry.default.svc:5000/1rdehl-tools/jenkins-slave-python3-nodejs10:latest',
         resourceRequestCpu: '1000m',
         resourceLimitCpu: '2000m',
         resourceRequestMemory: '2Gi',
@@ -232,6 +249,13 @@ if( run_pipeline ) {
   ){
     node(pod_label) {
       def date = new Date()
+
+      def stage_status = 'PENDING'
+      def stage_description = ''
+
+      def sonarqubeUrl = getUrlForRoute(SONAR_ROUTE_NAME, SONAR_ROUTE_NAMESPACE).trim()
+      def sonarProjectName = "${SONAR_PROJECT_BACKEND_NAME} - ${env.BRANCH_NAME}"
+      def sonarProjectKey = "${SONAR_PROJECT_BACKEND_KEY}-${env.BRANCH_NAME}"
 
       pullrequestComment("${GITHUB_TOKEN}", "${GITHUB_API_URL}" + "/issues/${env.CHANGE_ID}/comments", 'Pull Request Review Pipeline on ' + date.format('yyyy-MM-dd HH:mm:ss',TimeZone.getTimeZone('PST')))
 
@@ -257,6 +281,26 @@ if( run_pipeline ) {
           pip install -r requirements/dev.txt
           export PYTHONPATH=./src/
         '''
+
+        stage('flake8') {
+          echo "flake8 checking..."
+          try{
+            sh '''
+              #!/bin/bash
+              source /opt/app-root/bin/activate
+              export PYTHONPATH=./src/
+              flake8 src/auth_api tests --output-file=flake8.txt --exit-zero
+            '''
+          } catch (Exception e) {
+            echo "EXCEPTION: ${e}"
+          } finally {
+            def flake8 = scanForIssues tool: flake8(pattern: 'flake8.txt')
+            publishIssues issues: [flake8]
+
+            pullrequestComment("${GITHUB_TOKEN}", "${GITHUB_API_URL}" + "/issues/${env.CHANGE_ID}/comments", "Flake8 : " + "${env.BUILD_URL}" + "flake8/")
+          }
+        }
+
         stage('pylint') {
           echo "pylint checking..."
           try{
@@ -264,29 +308,15 @@ if( run_pipeline ) {
               #!/bin/bash
               source /opt/app-root/bin/activate
               export PYTHONPATH=./src/
-              pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint.log
+              pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint-report.txt
             '''
-            stage_status = 'success'
-            stage_description = 'Linter(pylint) check successed!'
           } catch (Exception e) {
             echo "EXCEPTION: ${e}"
-            currentBuild.result = "FAILURE"
-            stage_status = 'error'
-            stage_description = 'Linter(pylint) check failed!'
-            rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) Review pylint check failed!! " + "${env.BUILD_URL}" + "pylint/")
-
           } finally {
-            //TODO Send result to sonarqube
-            def pyLint = scanForIssues tool: pyLint(pattern: 'pylint.log')
+            stash name: API_LINTER_REPORT, includes: 'pylint-report.txt'
+
+            def pyLint = scanForIssues tool: pyLint(pattern: 'pylint-report.txt')
             publishIssues issues: [pyLint]
-
-            pullrequestStatus("${env.GITHUB_TOKEN}",
-                              stage_status,
-                              "${env.BUILD_URL}" + "pylint/",
-                              'continuous-integration/pylint',
-                              stage_description,
-                              "${GITHUB_API_URL}" + '/statuses/' + "${LAST_COMMIT_SHA}")
-
           }
         }
 
@@ -299,234 +329,82 @@ if( run_pipeline ) {
               export PYTHONPATH=./src/
               pytest
             '''
-            stage_status = 'success'
-            stage_description = 'Unit tests successed!'
           } catch (Exception e) {
             echo "EXCEPTION: ${e}"
-            stage_status = 'error'
-            stage_description = 'Unit tests failed!'
-            currentBuild.result = "FAILURE"
-
-            rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) Review pytest failed!! " + "${env.BUILD_URL}" + "testReport/")
           } finally {
-            //TODO Send result to sonarqube
+            stash name: API_UNITTEST_REPORT, includes: 'pytest.xml'
+            stash name: API_COVERAGE_REPORT, includes: 'coverage.xml'
+
             junit 'pytest.xml'
 
-            pullrequestStatus("${env.GITHUB_TOKEN}",
-                              stage_status,
-                              "${env.BUILD_URL}" + "testReport/",
-                              'continuous-integration/pytest',
-                              stage_description,
-                              "${GITHUB_API_URL}" + '/statuses/' + "${LAST_COMMIT_SHA}")
-
-            //TODO Send result to sonarqube
-            cobertura(
-              coberturaReportFile: "coverage.xml",
-              onlyStable: false,
-              failNoReports: true,
-              failUnhealthy: false,
-              failUnstable: false,
-              autoUpdateHealth: true,
-              autoUpdateStability: true,
-              zoomCoverageChart: true,
-              maxNumberOfBuilds: 0,
-              lineCoverageTargets: '50, 50, 50',
-              conditionalCoverageTargets: '50, 50, 50',
-              classCoverageTargets: '50, 50, 50',
-              fileCoverageTargets: '50, 50, 50',
-            )
-
-            if (currentBuild.result == 'SUCCESS') {
-              pullrequestStatus("${env.GITHUB_TOKEN}",
-                                "success",
-                                "${env.BUILD_URL}" + "cobertura/",
-                                'continuous-integration/coverage',
-                                'Coverage succeeded!',
-                                "${GITHUB_API_URL}" + '/statuses/' + "${LAST_COMMIT_SHA}")
-            } else {
-              rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) Review coverage check failed!! " + "${env.BUILD_URL}" + "cobertura/")
-
-              pullrequestStatus("${env.GITHUB_TOKEN}",
-                                "error",
-                                "${env.BUILD_URL}" + "cobertura/",
-                                'continuous-integration/coverage',
-                                'Coverage failed!',
-                                "${GITHUB_API_URL}" + '/statuses/' + "${LAST_COMMIT_SHA}")
-            }
-
+            cobertura coberturaReportFile: 'coverage.xml'
           }
         }
       }
       //}
 
-      stage('SonarQube Analysis') {
+      stage('SonarQube Analysis - API') {
         echo "Performing static SonarQube code analysis ..."
 
-        SONARQUBE_URL = getUrlForRoute(SONAR_ROUTE_NAME, SONAR_ROUTE_NAMESPACE).trim()
-        SONARQUBE_PWD = getSonarQubePwd().trim()
-        echo "URL: ${SONARQUBE_URL}"
-        echo "PWD: ${SONARQUBE_PWD}"
+        echo "URL: ${sonarqubeUrl}"
 
         try {
-          // The `sonar-runner` MUST exist in your project and contain a Gradle environment consisting of:
-          // - Gradle wrapper script(s)
-          // - A simple `build.gradle` file that includes the SonarQube plug-in.
-          //
-          // An example can be found here:
-          // - https://github.com/BCDevOps/sonarqube
           dir('sonar-runner') {
-            // ======================================================================================================
-            // Set your SonarQube scanner properties at this level, not at the Gradle Build level.
-            // The only thing that should be defined at the Gradle Build level is a minimal set of generic defaults.
-            //
-            // For more information on available properties visit:
-            // - https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner+for+Gradle
-            // ======================================================================================================
+            unstash API_LINTER_REPORT
+            unstash API_UNITTEST_REPORT
+            unstash API_COVERAGE_REPORT
+
             sh (
               returnStdout: true,
-              script: "./gradlew sonarqube --stacktrace --info \
+              script: "./gradlew sonarqube --full-stacktrace \
                 -Dsonar.verbose=true \
-                -Dsonar.host.url=${SONARQUBE_URL} \
-                -Dsonar.projectName='${SONAR_PROJECT_NAME}' \
-                -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                -Dsonar.projectBaseDir=${SONAR_PROJECT_BASE_DIR} \
-                -Dsonar.sources=${SONAR_SOURCES} \
-                -Dsonar.python.pylint.reportPath=${SONAR_PROJECT_BASE_DIR}/auth-api/pylint.log \
-                -Dsonar.python.xunit.reportPath=${SONAR_PROJECT_BASE_DIR}/auth-api/pytest.xml \
-                -Dsonar.python.coverage.reportPaths=${SONAR_PROJECT_BASE_DIR}/auth-api/coverage.xml"
+                -Dsonar.host.url=${sonarqubeUrl} \
+                -Dsonar.projectName='${sonarProjectName}' \
+                -Dsonar.projectKey=${sonarProjectKey} \
+                -Dsonar.projectBaseDir=${SONAR_PROJECT_BACKEND_BASE_DIR} \
+                -Dsonar.sources=${SONAR_BACKEND_SOURCES} \
+                -Dsonar.tests=${SONAR_BACKEND_TESTS} \
+                -Dsonar.python.xunit.reportPath=pytest.xml \
+                -Dsonar.python.coverage.reportPaths=coverage.xml \
+                -Dsonar.python.pylint.reportPath=pylint-report.txt "
             )
           }
 
-          stage_status = 'success'
-          stage_description = 'Sonarqube scan succeeded!'
         } catch (Exception e) {
           echo "EXCEPTION: ${e}"
+        }
+      }
+
+      stage("Quality Gate - API") {
+        def qualityJson = sh(returnStdout: true,
+                             script: "curl \"${sonarqubeUrl}/api/qualitygates/project_status?projectKey=${sonarProjectKey}\"")
+        echo qualityJson
+
+        def quality = jsonParse(qualityJson)
+
+        if (quality["projectStatus"]["status"] == 'OK' || quality["projectStatus"]["status"] == 'WARN') {
+
+          if (quality["projectStatus"]["status"] == 'WARN') {
+            rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) quality check get Warning status!! Please check it out. " + "${sonarqubeUrl}" + "/dashboard?id=" + "${sonarProjectKey}" )
+          }
+          stage_status = 'success'
+          stage_description = 'Quality check succeeded!'
+          rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) Review done!! Please code review if you are available. " + "${REPO_URL}" + "/pull/" + "${env.CHANGE_ID}" )
+        } else {
           stage_status = 'error'
-          stage_description = 'Sonarqube scan failed!'
-          currentBuild.result = "FAILURE"
-          rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) Review Sonarqube scan failed!! " + "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}")
-        } finally {
-          pullrequestStatus("${env.GITHUB_TOKEN}",
-                    stage_status,
-                    "${SONARQUBE_URL}" + "/dashboard?id=" + "${SONAR_PROJECT_KEY}",
-                    'continuous-integration/sonarqube',
-                    stage_description,
-                    "${GITHUB_API_URL}" + '/statuses/' + "${LAST_COMMIT_SHA}")
+          stage_description = 'Quality check failed!'
+          rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) Review quality check failed!! " + "${sonarqubeUrl}" + "/dashboard?id=" + "${sonarProjectKey}")
         }
+
+        pullrequestStatus("${env.GITHUB_TOKEN}",
+                          stage_status,
+                          "${sonarqubeUrl}" + "/dashboard?id=" + "${sonarProjectKey}",
+                          'continuous-integration/QualityCheck',
+                          stage_description,
+                          "${GITHUB_API_URL}" + '/statuses/' + "${LAST_COMMIT_SHA}")
       }
     }
   }
-
-  // trigger fronend review pipeline
-  //if (buildResult[1]) {
-  // create NodeJS pod to run verification steps
-  def nodejs_label = "jenkins-nodejs-${UUID.randomUUID().toString()}"
-  podTemplate(
-    label: nodejs_label,
-    name: nodejs_label,
-    serviceAccount: 'jenkins',
-    cloud: 'openshift',
-    containers: [
-      containerTemplate(
-        name: 'jnlp',
-        image: '172.50.0.2:5000/openshift/jenkins-slave-nodejs:8',
-        resourceRequestCpu: '500m',
-        resourceLimitCpu: '2000m',
-        resourceRequestMemory: '2Gi',
-        resourceLimitMemory: '4Gi',
-        workingDir: '/tmp',
-        command: '',
-        args: '${computer.jnlpmac} ${computer.name}',
-        envVars: [
-          secretEnvVar(key: 'GITHUB_TOKEN', secretName: 'apitest-secrets', secretKey: 'GITHUB_TOKEN'),
-          secretEnvVar(key: 'ROCKETCHAT_TOKEN', secretName: 'apitest-secrets', secretKey: 'ROCKETCHAT_TOKEN')
-        ])
-    ])
-  {
-    node (nodejs_label) {
-      stage('Checkout Source') {
-        echo "Checking out source code from pull request ..."
-        //echo sh(returnStdout: true, script: 'env')
-        checkout scm
-      }
-
-      def LAST_COMMIT_SHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
-      echo "Last commit sha1: ${LAST_COMMIT_SHA}"
-
-      dir('auth-web') {
-        try {
-          sh '''
-              node -v
-              npm install
-          '''
-          stage("Run Jest tests") {
-            def testResults = sh(script: "npm run test:unit", returnStatus: true)
-
-            echo "Unit tests ran, returned ${testResults}"
-            if (testResults > 0) {
-              stage_status = 'error'
-              stage_description = 'Unit tests(jest) failed!'
-              currentBuild.result = "FAILURE"
-
-              rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) Review jest test failed!! " + "${env.BUILD_URL}")
-            } else {
-              stage_status = 'success'
-              stage_description = 'Unit tests(jest) succeeded!'
-            }
-
-            pullrequestStatus("${env.GITHUB_TOKEN}",
-                    stage_status,
-                    "",
-                    'continuous-integration/jest',
-                    stage_description,
-                    "${GITHUB_API_URL}" + '/statuses/' + "${LAST_COMMIT_SHA}")
-          }
-          stage("Check code quality (lint)") {
-            def lintResults = sh(script: "npm run lint:nofix", returnStatus: true)
-
-            echo "Linter ran, returned ${lintResults}"
-            if (lintResults > 0) {
-              stage_status = 'error'
-              stage_description = 'linter(vue) check failed!'
-              currentBuild.result = "FAILURE"
-              rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) Review linter(vue) check failed!! " + "${env.BUILD_URL}")
-            } else {
-              stage_status = 'success'
-              stage_description = 'linter(vue) check succeeded!'
-            }
-
-            pullrequestStatus("${env.GITHUB_TOKEN}",
-                    stage_status,
-                    "",
-                    'continuous-integration/linter(vue)',
-                    stage_description,
-                    "${GITHUB_API_URL}" + '/statuses/' + "${LAST_COMMIT_SHA}")
-          }
-
-        } catch (Exception e) {
-          error('Failure')
-        }
-      }
-    }
-  }
-
-  node{
-    stage("Quality Gate") {
-      // TODO
-      // timeout(time: 1, unit: 'HOURS') { // Just in case something goes wrong, pipeline will be killed after a timeout
-      // def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
-      //  if (qg.status != 'OK') {
-      //    error "Pipeline aborted due to quality gate failure: ${qg.status}"
-      //  } else {
-      //    rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "@here Pull Request (${env.BRANCH_NAME}) Review done!! Please code review if you are available. " + "${REPO_URL}" + "/pull/" + "${env.CHANGE_ID}" )
-      //  }
-      //}
-      echo currentBuild.result
-      ROCKETCHAT_TOKEN = sh (script: """oc get secret/apitest-secrets -o template --template="{{.data.ROCKETCHAT_TOKEN}}" | base64 --decode""", returnStdout: true).trim()
-      rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) Review done!! Please code review if you are available. " + "${REPO_URL}" + "/pull/" + "${env.CHANGE_ID}" )
-    }
-  }
-
 }
 
 

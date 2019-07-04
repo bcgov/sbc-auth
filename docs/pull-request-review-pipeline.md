@@ -50,15 +50,25 @@
 
 ## Jenkins
 
-1. Update all the plugins
-2. Install Cobertura Plugin, SonarQube Scanner for Jenkins and Warnings Next Generation Plugin
-3. Create "Multibranch Pipeline" under openshift project folder
+1. Approve (Manage Jenkins -> In-process Script Approval) the following groovy packages permission for pipeline:
+
+    ```text
+        method groovy.json.JsonBuilder toPrettyString
+        method groovy.json.JsonSlurperClassic parseText java.lang.String
+        new groovy.json.JsonBuilder java.lang.Object
+        new groovy.json.JsonSlurperClassic
+        staticMethod org.codehaus.groovy.runtime.ScriptBytecodeAdapter unaryPlus java.lang.Object
+    ```
+
+2. Update all the plugins
+3. Install Cobertura Plugin, SonarQube Scanner for Jenkins and Warnings Next Generation Plugin
+4. Create "Multibranch Pipeline" under openshift project folder
 ![Create Pipeline](img/create_pipeline.png)
-4. Configure "Branch Sources"
+5. Configure "Branch Sources"
 ![Branch Sources](img/branch_sources.png)
-5. Configure "Build Configuration"
+6. Configure "Build Configuration"
 ![Build Configuration](img/build_configuration.png)
-6. Save and "Scan Repository Now"
-7. Explore "Pull Requests" tab for existing Pull Requests
+7. Save and "Scan Repository Now"
+8. Explore "Pull Requests" tab for existing Pull Requests
 ![Pull Request Tab](img/pull_request_tab.png)
-8. Done
+9. Done
