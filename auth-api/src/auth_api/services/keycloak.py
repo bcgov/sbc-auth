@@ -142,7 +142,7 @@ class KeycloakService:
 
     @staticmethod
     def logout(refresh_token):
-        """Logout user by refresh-token"""
+        """Logout user by refresh-token."""
         try:
             response = KEYCLOAK_OPENID.logout(refresh_token)
             return response

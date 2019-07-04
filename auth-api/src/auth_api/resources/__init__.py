@@ -20,15 +20,16 @@ All services have 2 defaults sets of endpoints:
  - meta
 That are used to expose operational health information about the service, and meta information.
 """
+
 from flask import Blueprint
 
 from auth_api.resources.admin.users import API as USER_API
 
 from .apihelper import Api
+from .logout import API as LOGOUT_API
 from .meta import API as META_API
 from .ops import API as OPS_API
 from .token import API as TOKEN_API
-from .logout import API as LOGOUT_API
 from .usersinfo import API as USERINFO_API
 
 

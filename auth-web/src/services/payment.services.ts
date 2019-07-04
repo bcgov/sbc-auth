@@ -10,9 +10,7 @@ export default {
 
   updateTransaction (paymentId:String, transactionId:String, receiptNum?:String) {
     const token = sessionStorage.getItem('KEYCLOAK_TOKEN')
-    var url = `${process.env.VUE_APP_PAY_ROOT_API}/payments/${paymentId}/transactions/${transactionId}`
-    var queryParam = receiptNum ? { receipt_number: receiptNum } : ''
-    return Axios.put(url, { params: queryParam
-    })
+    const url = `${process.env.VUE_APP_PAY_ROOT_API}/payments/${paymentId}/transactions/${transactionId}?receipt_number=${receiptNum}`
+    return Axios.put(url)
   }
 }
