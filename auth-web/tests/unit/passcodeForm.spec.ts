@@ -16,7 +16,13 @@ jest.mock('axios', () => ({
 
 describe('PasscodeForm.vue', () => {
   let cmp
+  var ob = {
+    'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
+    'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
+    'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
+  }
 
+  sessionStorage.__STORE__['API_CONFIG'] = JSON.stringify(ob)
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
