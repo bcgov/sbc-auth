@@ -115,11 +115,11 @@
                                 "env": [
                                     {
                                         "name": "AUTH_API_URL",
-                                        "value": "https://auth-api-dev.pathfinder.gov.bc.ca/api/v1"
+                                        "value": "https://auth-api-test.pathfinder.gov.bc.ca/api/v1"
                                     },
                                     {
                                         "name": "PAY_API_URL",
-                                        "value": "https://pay-api-dev.pathfinder.gov.bc.ca/api/v1"
+                                        "value": "https://pay-api-test.pathfinder.gov.bc.ca/api/v1"
 
                                     }
                                 ],
