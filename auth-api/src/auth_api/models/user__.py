@@ -11,16 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""This exports all of the models and schemas used by the application."""
-
-from sqlalchemy import event
-from sqlalchemy.engine import Engine
-
-from sbc_common_components.tracing.db_tracing import DBTracing
+"""This manages a User record in the Auth service."""
 
 from .db import db, ma
-from .user import User, UserSchema
 
+class User(db.Model):
+    """This is a SQLAlchemy User model."""
 
-event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)
+    __tablename__ = 'user'
+
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column('first_name', db.String(200), index=True)
+    last_name = db.Column('last_name', db.String(200), index=True)
+    

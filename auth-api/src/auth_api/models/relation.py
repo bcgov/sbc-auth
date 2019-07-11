@@ -11,16 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""This manages a Relation record, where a Relation associates a User Role with an Entity."""
 
-"""This exports all of the models and schemas used by the application."""
-
-from sqlalchemy import event
-from sqlalchemy.engine import Engine
-
-from sbc_common_components.tracing.db_tracing import DBTracing
+from flask import current_app
+from sqlalchemy.dialects.postgresql import UUID
 
 from .db import db, ma
-from .user import User, UserSchema
 
+class Relation(db.Model):
+    """Model for a Relation record.  Associates User Roles to Entities."""
 
-event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)
+    __tablename__ = "relation"
