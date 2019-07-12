@@ -10,14 +10,23 @@ import i18n from './plugins/i18n'
 
 // importing the helper
 import interceptorsSetup from '@/util/interceptors'
-
+import ConfigHelper from '@/util/config-helper'
 Vue.config.productionTip = false
-
 interceptorsSetup()
 
-new Vue({
-  router,
-  store,
-  i18n,
-  render: (h) => h(App)
-}).$mount('#app')
+/**
+ * The server side configs are necessary for app to work , since they are reference in templates and all
+ *  Two ways , either reload Vue after we get the settings or load vue after we get the configs..going for second
+ */
+ConfigHelper.saveConfigToSessionStorage().then((data) => {
+  renderVue()
+}
+)
+function renderVue () {
+  new Vue({
+    router,
+    store,
+    i18n,
+    render: (h) => h(App)
+  }).$mount('#app')
+}
