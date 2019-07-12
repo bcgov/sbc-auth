@@ -83,6 +83,8 @@
 <script lang="ts">
 import LoginServices from '@/services/login.services'
 import IframeServices from '@/services/iframe.services'
+import ConfigHelper from '@/util/config-helper'
+
 export default {
   name: 'PasscodeForm',
 
@@ -93,7 +95,7 @@ export default {
     loginError: '',
     valid: false,
     // cudnt find a better way to expose env variables in template
-    VUE_APP_COPS_REDIRECT_URL: process.env.VUE_APP_COPS_REDIRECT_URL,
+    VUE_APP_COPS_REDIRECT_URL: ConfigHelper.getValue('VUE_APP_COPS_REDIRECT_URL'),
     entityNumRules: [
       v => !!v || 'Incorporation Number is required'
     ],
@@ -134,8 +136,6 @@ export default {
                       this.$t('loginFailedMessage')
             } else if (response.data.access_token) {
               this.showSpinner = true
-              /* this.frame = this.$refs.iframeContent.contentWindow
-              this.frame.postMessage(response.data.access_token, process.env.VUE_APP_COPS_REDIRECT_URL) */
               const msg = JSON.stringify(
                 { 'access_token': response.data.access_token,
                   'refresh_token': response.data.refresh_token,
@@ -146,7 +146,7 @@ export default {
               sessionStorage.KEYCLOAK_REFRESH_TOKEN = response.data.refresh_token
               sessionStorage.REGISTRIES_TRACE_ID = response.data['registries-trace-id']
               setTimeout(() => {
-                window.location.href = process.env.VUE_APP_COPS_REDIRECT_URL
+                window.location.href = this.VUE_APP_COPS_REDIRECT_URL
               }, 500)
             }
           })
