@@ -20,18 +20,14 @@ export default {
  * this will run everytime when vue is being loaded..so do the call only when session storage doesnt have the values
  */
   saveConfigToSessionStorage () {
-    console.log('sessionStorage.getItem(\'API_CONFIG\')'+sessionStorage.getItem('API_CONFIG'))
     if (sessionStorage.getItem('API_CONFIG')) {
       return Promise.resolve()
     } else {
-      console.log('going fetchConfig')
       return this.fetchConfig()
     }
   },
 
   getValue (key: String) {
-    // @ts-ignore
-    console.log('received request' + key + 'returned:' + JSON.parse(sessionStorage.getItem('API_CONFIG'))[key])
     // @ts-ignore
     return JSON.parse(sessionStorage.getItem('API_CONFIG'))[key]
   }

@@ -1,5 +1,4 @@
 import Axios from 'axios'
-import ConfigHeloper from '../../src/util/config-helper'
 import ConfigHelper from '@/util/config-helper'
 
 var mockob = {
@@ -16,8 +15,6 @@ jest.mock('axios', () => ({
   virtual: true
 })
 
-
-
 describe('ConfigHeloper tests', () => {
   let url = '/static/config/configuration.json'
   it('does not Call Axios config when no session storage is present', () => {
@@ -27,7 +24,6 @@ describe('ConfigHeloper tests', () => {
   })
 })
 
-
 describe('ConfigHeloper tests', () => {
   let url = '/static/config/configuration.json'
   it('Call Axios config when no session storage is present', () => {
@@ -36,5 +32,4 @@ describe('ConfigHeloper tests', () => {
     expect(Axios.get).toBeCalledTimes(1)
     expect(Axios.get).toBeCalledWith(url)
   })
-
 })
