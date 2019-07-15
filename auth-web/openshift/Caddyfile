@@ -1,0 +1,20 @@
+0.0.0.0:2015
+
+root /var/www/html
+
+log stdout
+
+errors stdout
+
+rewrite {
+    if {path} not_has /api
+    to {path} /
+}
+
+proxy /auth/api {$AUTH_API_URL} {
+    without /auth/api
+}
+
+proxy /pay/api {$PAY_API_URL} {
+    without /pay/api
+}

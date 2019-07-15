@@ -29,8 +29,6 @@ export default {
     }
   },
   mounted () {
-    console.log('%c PaymentForm-Data Recieved on Mount as %s', 'color: blue ;font-size : 12px', this.receiptNum)
-
     if (this.paymentId && this.transactionId) {
       PaymentServices.updateTransaction(this.paymentId, this.transactionId, this.receiptNum)
         .then(response => {
