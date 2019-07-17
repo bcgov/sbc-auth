@@ -1,8 +1,8 @@
 import Axios from 'axios'
-const AUTHENTICATION_RESOURCE_NAME = '/auth/api/token'
+import ConfigHelper from '../util/config-helper'
 
 export default {
   login (entityNumber, passCode) {
-    return Axios.post(AUTHENTICATION_RESOURCE_NAME, { username: entityNumber, password: passCode })
+    return Axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/token`, { username: entityNumber, password: passCode })
   }
 }
