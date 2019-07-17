@@ -7,14 +7,8 @@ log stdout
 errors stdout
 
 rewrite {
-    if {path} not_has /api
+    regexp .*
     to {path} /
 }
 
-proxy /auth/api {$AUTH_API_URL} {
-    without /auth/api
-}
 
-proxy /pay/api {$PAY_API_URL} {
-    without /pay/api
-}
