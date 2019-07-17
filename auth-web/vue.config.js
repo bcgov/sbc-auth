@@ -3,6 +3,7 @@ module.exports = {
     devtool: 'source-map'
   },
   devServer: {
+    // not used
     proxy: {
       '/auth/api/*': {
         target: 'https://auth-api-dev.pathfinder.gov.bc.ca/api/v1', // if your local server is running , use that here
