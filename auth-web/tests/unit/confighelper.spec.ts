@@ -2,10 +2,11 @@ import Axios from 'axios'
 import ConfigHelper from '@/util/config-helper'
 
 var mockob = {
-  'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
   'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
-  'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
+  'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
+  'VUE_APP_AUTH_ROOT_API': 'https://auth-api-dev.pathfinder.gov.bc.ca/api/v1'
 }
+
 jest.mock('axios', () => ({
   get: jest.fn(() => Promise.resolve({ data: { mockob } })),
   all: jest.fn(),
