@@ -3,7 +3,7 @@
   "apiVersion": "v1",
   "metadata": {
     "annotations": {
-      "description": "Build template for a auth-api server.",
+      "description": "Build template for a auth-api service.",
       "tags": "flask",
       "iconClass": "icon-python"
     },

@@ -2,7 +2,7 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "AUTH-project-pipeline-template"
+    "name": "${NAME}-pipeline"
   },
   "objects": [
     {
