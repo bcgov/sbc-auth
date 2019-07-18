@@ -6,7 +6,7 @@
       "description": "Deployment template for a postgresql server with persistent storage.",
       "tags": "${NAME}-${TAG_NAME}"
     },
-    "name": "${NAME}-persistent-template"
+    "name": "${NAME}-deploy"
   },
   "objects": [
     {
@@ -55,9 +55,7 @@
         "template": {
           "metadata": {
             "labels": {
-              "app": "${NAME}-${TAG_NAME}",
-              "app-group": "${APP_GROUP}",
-              "template": "${NAME}-deploy"
+              "name": "${NAME}-${TAG_NAME}"
             }
           },
           "spec": {

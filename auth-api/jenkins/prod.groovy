@@ -80,18 +80,18 @@ node {
                             def new_version = openshift.selector('dc', "${APP_NAME}-${DESTINATION_TAG}").object().status.latestVersion
                             if (new_version == old_version) {
                                 echo "New deployment was not triggered."
-                                build_ok = false
-                            }
-                            def pod_selector = openshift.selector('pod', [ app:"${APP_NAME}-${DESTINATION_TAG}" ])
-                            pod_selector.untilEach {
-                                deployment = it.objects()[0].metadata.labels.deployment
-                                echo deployment
-                                if (deployment == "${APP_NAME}-${DESTINATION_TAG}-${new_version}" && it.objects()[0].status.phase == 'Running' && it.objects()[0].status.containerStatuses[0].ready) {
-                                    return true
-                                } else {
-                                    echo "Pod for new deployment not ready"
-                                    sleep 5
-                                    return false
+                            } else {
+                                def pod_selector = openshift.selector('pod', [ app:"${APP_NAME}-${DESTINATION_TAG}" ])
+                                pod_selector.untilEach {
+                                    deployment = it.objects()[0].metadata.labels.deployment
+                                    echo deployment
+                                    if (deployment == "${APP_NAME}-${DESTINATION_TAG}-${new_version}" && it.objects()[0].status.phase == 'Running' && it.objects()[0].status.containerStatuses[0].ready) {
+                                        return true
+                                    } else {
+                                        echo "Pod for new deployment not ready"
+                                        sleep 5
+                                        return false
+                                    }
                                 }
                             }
                         }
