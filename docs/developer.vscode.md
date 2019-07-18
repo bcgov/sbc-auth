@@ -29,11 +29,10 @@
     venv/Scripts/activate
     python -m pip install --upgrade pip setuptools
 
-    pip install flake8 pylint pytest coverage
-    pip install -Ur requirements/prod.txt
-    pip freeze | sort > requirements.txt
-    pip install -Ur requirements/dev.txt
-    pip install -Ur requirements/editable.txt
+    pip install flake8 pylint pytest coverage pytest-cov
+    pip install -r requirements/prod.txt
+    pip install -r requirements/dev.txt
+    pip install -r requirements/repo-libraries.txt
     ```
 
     Mac or Linux:

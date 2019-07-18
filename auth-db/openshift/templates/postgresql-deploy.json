@@ -4,20 +4,21 @@
   "metadata": {
     "annotations": {
       "description": "Deployment template for a postgresql server with persistent storage.",
-      "tags": "${NAME}"
+      "tags": "${NAME}-${TAG_NAME}"
     },
-    "name": "${NAME}-persistent-template"
+    "name": "${NAME}-deploy"
   },
   "objects": [
     {
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${NAME}",
+        "name": "${NAME}-${TAG_NAME}",
         "generation": 1,
         "labels": {
-          "app": "${NAME}-persistent",
-          "template": "${NAME}-persistent-template"
+          "app": "${NAME}-${TAG_NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-deploy"
         }
       },
       "spec": {
@@ -34,7 +35,7 @@
             "type": "ImageChange",
             "imageChangeParams": {
               "automatic": true,
-              "containerNames": ["${NAME}"],
+              "containerNames": ["${NAME}-${TAG_NAME}"],
               "from": {
                 "kind": "ImageStreamTag",
                 "namespace": "openshift",
@@ -49,12 +50,12 @@
         "replicas": 1,
         "test": false,
         "selector": {
-          "name": "${NAME}"
+          "name": "${NAME}-${TAG_NAME}"
         },
         "template": {
           "metadata": {
             "labels": {
-              "name": "${NAME}"
+              "name": "${NAME}-${TAG_NAME}"
             }
           },
           "spec": {
@@ -62,14 +63,14 @@
               {
                 "name": "${NAME}-data",
                 "persistentVolumeClaim": {
-                  "claimName": "${NAME}"
+                  "claimName": "${NAME}-${TAG_NAME}"
                 }
               }
             ],
             "containers": [
               {
-                "name": "${NAME}",
-                "image": "registry.access.redhat.com/rhscl/postgresql-10-rhel7@sha256:155cf81a3d3a8bbcab3a1f61b177cab75a4105306146d172ef8fb29488cf58b4docker-registry.default.svc:5000/openshift/postgresql@sha256:094097e33f6d3cd498194ad7dc7bdb32f3d62b6a56ad8ae425770cd4050ad611",
+                "name": "${NAME}-${TAG_NAME}",
+                "image": " ",
                 "ports": [
                   {
                     "containerPort": 5432,
@@ -80,8 +81,8 @@
                   {
                     "name": "POSTGRESQL_USER",
                     "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${NAME}-${TAG_NAME}",
+                      "configMapKeyRef": {
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_USER"
                       }
                     }
@@ -90,7 +91,7 @@
                     "name": "POSTGRESQL_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "${NAME}-${TAG_NAME}",
+                        "name": "${NAME}-${TAG_NAME}-secret",
                         "key": "DATABASE_PASSWORD"
                       }
                     }
@@ -98,8 +99,8 @@
                   {
                     "name": "POSTGRESQL_DATABASE",
                     "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${NAME}-${TAG_NAME}",
+                      "configMapKeyRef": {
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_NAME"
                       }
                     }
@@ -108,7 +109,7 @@
                     "name": "POSTGRESQL_ADMIN_DATABASE",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "${NAME}-${TAG_NAME}",
+                        "name": "${NAME}-${TAG_NAME}-secret",
                         "key": "DATABASE_ADMIN_PASSWORD"
                       }
                     }
@@ -172,14 +173,14 @@
       "kind": "PersistentVolumeClaim",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${NAME}",
+        "name": "${NAME}-${TAG_NAME}",
         "labels": {
-          "app": "${NAME}-persistent",
-          "template": "${NAME}-persistent-template"
+          "app": "${NAME}-${TAG_NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-deploy"
         }
       },
       "spec": {
-        "storageClassName": "${PERSISTENT_VOLUME_CLASS}",
         "accessModes": ["ReadWriteOnce"],
         "resources": {
           "requests": {
@@ -189,22 +190,42 @@
       }
     },
     {
-      "kind": "Secret",
+      "kind": "ConfigMap",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${NAME}",
+        "name": "${NAME}-${TAG_NAME}-config",
         "labels": {
-          "app": "${NAME}-persistent",
-          "template": "${NAME}-persistent-template"
-        },
-        "annotations": {
-          "template.openshift.io/expose-password": "{.data['database-password']}",
-          "template.openshift.io/expose-username": "{.data['database-user']}"
+          "app": "${NAME}-${TAG_NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-deploy"
         }
       },
       "data": {
-        "database-password": "${POSTGRESQL_PASSWORD}",
-        "database-user": "${POSTGRESQL_USER}"
+        "DATABASE_HOST": "${DATABASE_HOST}-${TAG_NAME}",
+        "DATABASE_NAME": "${DATABASE_NAME}",
+        "DATABASE_USER": "${DATABASE_USER}",
+        "DATABASE_PORT": "${DATABASE_PORT}",
+        "DATABASE_TEST_HOST": "${DATABASE_HOST}-${TAG_NAME}",
+        "DATABASE_TEST_NAME": "${DATABASE_TEST_NAME}",
+        "DATABASE_TEST_PORT": "${DATABASE_PORT}",
+        "DATABASE_TEST_USER": "${DATABASE_TEST_USER}"
+      }
+    },
+    {
+      "kind": "Secret",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${NAME}-${TAG_NAME}-secret",
+        "labels": {
+          "app": "${NAME}-${TAG_NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-deploy"
+        }
+      },
+      "stringData": {
+        "DATABASE_PASSWORD": "${POSTGRESQL_PASSWORD}",
+        "DATABASE_ADMIN_PASSWORD": "${POSTGRESQL_ADMIN_PASSWORD}",
+        "DATABASE_TEST_PASSWORD": "${POSTGRESQL_TEST_PASSWORD}"
       },
       "type": "Opaque"
     },
@@ -212,10 +233,11 @@
       "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${NAME}",
+        "name": "${NAME}-${TAG_NAME}",
         "labels": {
-          "app": "${NAME}-persistent",
-          "template": "${NAME}-persistent-template"
+          "app": "${NAME}-${TAG_NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-deploy"
         },
         "annotations": {
           "template.openshift.io/expose-uri": "postgres://{.spec.clusterIP}:{.spec.ports[?(.name==\"postgresql\")].port}"
@@ -224,14 +246,14 @@
       "spec": {
         "ports": [
           {
-            "name": "postgresql",
+            "name": "${NAME}-${TAG_NAME}",
             "protocol": "TCP",
             "port": 5432,
             "targetPort": 5432
           }
         ],
         "selector": {
-          "name": "${NAME}"
+          "name": "${NAME}-${TAG_NAME}"
         },
         "type": "ClusterIP",
         "sessionAffinity": "None"
@@ -245,6 +267,13 @@
       "description": "The name assigned to all of the OpenShift resources associated to the PostgreSQL instance.",
       "required": true,
       "value": "postgresql"
+    },
+    {
+      "name": "APP_GROUP",
+      "displayName": "App Group",
+      "description": "The name assigned to all of the deployments in this project.",
+      "required": true,
+      "value": "sbc-auth"
     },
     {
       "name": "TAG_NAME",
@@ -275,28 +304,77 @@
       "value": "gluster-file-db"
     },
     {
-      "name": "POSTGRESQL_DATABASE_NAME",
-      "displayName": "PostgreSQL Database Name",
-      "description": "The name of the PostgreSQL database.",
-      "required": true,
-      "generate": "expression",
-      "from": "[a-zA-Z_][a-zA-Z0-9_]{10}"
-    },
-    {
-      "name": "POSTGRESQL_USER",
-      "displayName": "PostgreSQL Connection Username",
-      "description": "Username for PostgreSQL user that will be used for accessing the database.  Needs to be basee64 encoded/",
-      "required": true,
-      "generate": "expression",
-      "from": "[a-zA-Z_][a-zA-Z0-9_]{10}"
-    },
-    {
       "name": "POSTGRESQL_PASSWORD",
       "displayName": "PostgreSQL Connection Password",
       "description": "Password for the PostgreSQL connection user.  Needs to be basee64 encoded/",
       "required": true,
       "generate": "expression",
-      "from": "[a-zA-Z0-9_~!@#$%^&*()-=<>,.?;:|]{16}"
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "POSTGRESQL_ADMIN_PASSWORD",
+      "displayName": "PostgreSQL Connection Admin Password",
+      "description": "Password for the PostgreSQL connection user.  Needs to be basee64 encoded/",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "POSTGRESQL_TEST_PASSWORD",
+      "displayName": "PostgreSQL Connection test Password",
+      "description": "Password for the PostgreSQL connection user.  Needs to be basee64 encoded/",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "DATABASE_NAME",
+      "displayName": "Database Name",
+      "description": "A valid database name used by the service.",
+      "required": true,
+      "value": "auth-db"
+    },
+    {
+      "name": "DATABASE_USER",
+      "displayName": "Database User",
+      "description": "A valid database user used by the service.",
+      "required": true,
+      "value": "auth"
+    },
+    {
+      "name": "DATABASE_HOST",
+      "displayName": "Database host name",
+      "description": "A valid database host name used by the service.",
+      "required": true,
+      "value": "postgresql"
+    },
+    {
+      "name": "DATABASE_PORT",
+      "displayName": "Database host port",
+      "description": "A valid database host port used by the service.",
+      "required": true,
+      "value": "5432"
+    },
+    {
+      "name": "DATABASE_TEST_NAME",
+      "displayName": "Database Name for unit testing",
+      "description": "A valid database name for unit testing used by the service.",
+      "required": true,
+      "value": "auth-db"
+    },
+    {
+      "name": "DATABASE_TEST_HOST",
+      "displayName": "Database host name for unit testing",
+      "description": "A valid database host name  for unit testing used by the service.",
+      "required": true,
+      "value": "postgresql"
+    },
+    {
+      "name": "DATABASE_TEST_USER",
+      "displayName": "Database schema name for unit testing",
+      "description": "A valid database schema name for unit testing used by the service.",
+      "required": true,
+      "value": "auth-testdb"
     }
   ]
 }

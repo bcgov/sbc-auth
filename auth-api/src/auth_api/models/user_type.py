@@ -11,8 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a User Type record.
-"""
+"""This manages a User Type record."""
 
 from sqlalchemy import Column, String
 
@@ -21,6 +20,7 @@ from .db import db, ma
 
 class UserType(db.Model):
     """Used to hold the user type information for a User of this service."""
+
     __tablename__ = 'user_type'
 
     user_type_code = Column(String(20), primary_key=True)
@@ -31,6 +31,11 @@ class UserType(db.Model):
     def find_by_code(cls, code):
         """Return the oldest User type record for the provided user_type_code."""
         return cls.query.filter_by(user_type_code=code).first()
+
+    @classmethod
+    def find_by_name(cls, name):
+        """Return the oldest User type record for the provided user_type_code."""
+        return cls.query.filter_by(user_type_desc=name).first()
 
     def save(self):
         """Store the User type into the local cache."""

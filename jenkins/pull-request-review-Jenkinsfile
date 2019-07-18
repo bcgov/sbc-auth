@@ -1,0 +1,410 @@
+#!/usr/bin/env groovy
+import java.util.Date
+import java.text.SimpleDateFormat
+import groovy.json.*
+
+def APP_NAME = 'sbc-auth'
+def REPO_OWNER = 'bcgov'
+def REPO_URL='https://github.com/' + REPO_OWNER + '/' + APP_NAME
+def GITHUB_API_URL='https://api.github.com/repos/' + REPO_OWNER + '/' + APP_NAME
+
+def ROCKETCHAT_CHANNEL='#registries-bot'
+def ROCKETCHAT_DEVELOPER_CHANNEL='#relationship-developers'
+def ROCKETCHAT_USER = [
+  'patrick.wei': ['patrick.wei@gov.bc.ca']
+]
+
+def CONTEXT_DIRECTORY = '/'
+def FRONTEND_DIRS = ['auth_web']
+def FRONTEND_FILE_TYPES = ['html', 'vue', 'ts', 'js']
+def BACKEND_DIRS = ['auth_api']
+def BACKEND_FILE_TYPES = ['py']
+
+def SONAR_ROUTE_NAME = 'sonarqube'
+def SONAR_ROUTE_NAMESPACE = '1rdehl-tools'
+def SONAR_PROJECT_NAME = 'BC Registries Auth'
+def SONAR_PROJECT_KEY = 'BCRegistriesAuth'
+def SONAR_PROJECT_BASE_DIR = '../'
+def SONAR_SOURCES = './'
+
+def SONAR_PROJECT_BACKEND_NAME = 'BC Registries Auth API'
+def SONAR_PROJECT_BACKEND_KEY = 'BCRegistriesAuthAPI'
+def SONAR_PROJECT_BACKEND_BASE_DIR = '../auth-api'
+def SONAR_BACKEND_SOURCES = 'src'
+def SONAR_BACKEND_TESTS = 'tests'
+
+def API_LINTER_REPORT = 'api-linter'
+def API_UNITTEST_REPORT = 'api-unittest'
+def API_COVERAGE_REPORT = 'api-coverage'
+
+def UI_LINTER_REPORT = 'frontend-linter'
+def UI_UNITTEST_REPORT = 'frontend-jest'
+def UI_COVERAGE_REPORT = 'frontend-coverage'
+
+// ================================================================================================
+
+// define groovy functions
+// set a status to github pull request
+def pullrequestStatus(token, state, targetUrl, context, description, pullRequestUrl) {
+  def payload = JsonOutput.toJson([state: state,
+      target_url: targetUrl,
+      context: context,
+      description: description
+  ])
+
+  sh(returnStdout: true,
+     script: "curl -s -H \"Authorization: token ${token}\" -H \"Content-type: application/json\" -X POST -d \'${payload}\' \"${pullRequestUrl}\"")
+}
+
+// post a comment to github pull request
+def pullrequestComment(token, pullRequestUrl, comments) {
+  def payload = JsonOutput.toJson([body: comments])
+
+  sh(returnStdout: true,
+     script: "curl -s -H \"Authorization: token ${token}\" -H \"Content-type: application/json\" -X POST -d \'${payload}\' \"${pullRequestUrl}\"")
+}
+
+// post a notification to rocketchat
+def rocketChatNotificaiton(token, channel, comments) {
+  def payload = JsonOutput.toJson([text: comments, channel: channel])
+  def rocketChatUrl = "https://chat.pathfinder.gov.bc.ca/hooks/" + "${token}"
+
+  sh(returnStdout: true,
+     script: "curl -X POST -H 'Content-Type: application/json' --data \'${payload}\' ${rocketChatUrl}")
+}
+
+@NonCPS
+def jsonParse(def json) {
+    new groovy.json.JsonSlurperClassic().parseText(json)
+}
+
+// Gets the URL associated to a named route.
+// If you are attempting to access a route outside the local namespace (the namespace in which this script is running)
+// The Jenkins service account from the local namespace will need 'view' access to the remote namespace.
+@NonCPS
+String getUrlForRoute(String routeName, String projectNameSpace = '') {
+
+  def nameSpaceFlag = ''
+  if(projectNameSpace?.trim()) {
+    nameSpaceFlag = "-n ${projectNameSpace}"
+  }
+
+  def url = sh (
+    script: "oc get routes ${nameSpaceFlag} -o wide --no-headers | awk \'/${routeName}/{ print match(\$0,/edge/) ?  \"https://\"\$2 : \"http://\"\$2 }\'",
+    returnStdout: true
+  ).trim()
+
+  return url
+}
+
+// TODO the oc command is wrong, it won't get the password
+@NonCPS
+String getSonarQubePwd() {
+  sonarQubePwd = sh (
+    script: 'oc env dc/sonarqube --list | awk  -F  "=" \'/SONARQUBE_ADMINPW/{print $2}\'',
+    returnStdout: true
+  ).trim()
+
+  return sonarQubePwd
+}
+
+@NonCPS
+def get_last_commit_details() {
+  def lastCommitEntry
+
+  build = currentBuild
+  for (changeLog in build.changeSets) {
+    for(entry in changeLog.items) {
+      lastCommitEntry = entry
+
+      break
+    }
+  }
+  entryJson = new JsonBuilder( lastCommitEntry ).toPrettyString()
+
+  echo entryJson
+
+  return entryJson
+}
+
+@NonCPS
+def triggerBuild(contextDirectory, frontendTypes, backendTypes) {
+  // Determine if code has changed within the source context directory.
+  def changeLogSets = currentBuild.changeSets
+  def filesChangeCnt = 0
+  def frontendChangeCnt = 0
+  def backendChangeCnt = 0
+  for (int i = 0; i < changeLogSets.size(); i++) {
+    def entries = changeLogSets[i].items
+    for (int j = 0; j < entries.length; j++) {
+      def entry = entries[j]
+      //echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
+      def files = new ArrayList(entry.affectedFiles)
+      for (int k = 0; k < files.size(); k++) {
+        def file = files[k]
+        def filePath = file.path
+        echo ">> ${file.path}"
+        if (filePath.contains(contextDirectory)) {
+          filesChangeCnt++
+          //k = files.size()
+          //j = entries.length
+        }
+
+        def matcher = (file.path =~ /.*\.(.*)$/)
+
+        if(matcher.matches()) {
+          def extension = matcher[0][1]
+
+          if(extension in frontendTypes) {
+            frontendChangeCnt++
+          }
+          if(extension in backendTypes) {
+            backendChangeCnt++
+          }
+        }
+      }
+    }
+  }
+
+  def filesChange = false
+  def frontendChange = false
+  def backendChange = false
+
+  if ( filesChangeCnt < 1 ) {
+    echo('The changes do not require a build.')
+  }
+  else {
+    echo('The changes require a build.')
+    filesChange = true
+  }
+
+
+  if ( frontendChangeCnt > 0 ) {
+    frontendChange = true
+  }
+
+  if ( backendChangeCnt > 0 ) {
+    backendChange = true
+  }
+
+  return [filesChange,frontendChange,backendChange]
+}
+
+def lastCommit = get_last_commit_details()
+
+def buildResult = triggerBuild(CONTEXT_DIRECTORY, FRONTEND_FILE_TYPES, BACKEND_FILE_TYPES)
+
+echo "build result: ${buildResult}"
+// define job properties - keep 10 builds only
+properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10']]])
+
+def run_pipeline = true
+
+// build wasn't triggered by changes so check with user
+if( !buildResult[0] ) {
+  stage('No changes. Run pipeline?') {
+      try {
+        timeout(time: 30, unit: 'MINUTES') {
+            input message: "Run pipeline?", id: "1234"//, submitter: 'admin'
+        }
+      } catch (Exception e) {
+        run_pipeline = false;
+      }
+  }
+}
+
+if( run_pipeline ) {
+  // create auth pod to run verification steps
+  def pod_label = "auth-pod-${UUID.randomUUID().toString()}"
+
+  // The jenkins-python3nodejs template has been purpose built for supporting SonarQube scanning.
+  podTemplate(
+    label: pod_label,
+    serviceAccount: 'jenkins',
+    cloud: 'openshift',
+    containers: [
+      containerTemplate(
+        name: 'jnlp',
+        image: 'docker-registry.default.svc:5000/1rdehl-tools/jenkins-slave-python3-nodejs10:latest',
+        resourceRequestCpu: '1000m',
+        resourceLimitCpu: '2000m',
+        resourceRequestMemory: '2Gi',
+        resourceLimitMemory: '4Gi',
+        workingDir: '/tmp',
+        command: '',
+        args: '${computer.jnlpmac} ${computer.name}',
+        envVars: [
+            secretEnvVar(key: 'DATABASE_TEST_URL', secretName: 'apitest-secrets', secretKey: 'DATABASE_TEST_URL'),
+            secretEnvVar(key: 'KEYCLOAK_BASE_URL', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_BASE_URL'),
+            secretEnvVar(key: 'KEYCLOAK_REALMNAME', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_REALMNAME'),
+            secretEnvVar(key: 'KEYCLOAK_ADMIN_CLIENTID', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_ADMIN_CLIENTID'),
+            secretEnvVar(key: 'KEYCLOAK_ADMIN_SECRET', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_ADMIN_SECRET'),
+            secretEnvVar(key: 'KEYCLOAK_AUTH_AUDIENCE', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_AUTH_AUDIENCE'),
+            secretEnvVar(key: 'KEYCLOAK_AUTH_CLIENT_SECRET', secretName: 'apitest-secrets', secretKey: 'KEYCLOAK_AUTH_CLIENT_SECRET'),
+            secretEnvVar(key: 'GITHUB_TOKEN', secretName: 'apitest-secrets', secretKey: 'GITHUB_TOKEN'),
+            secretEnvVar(key: 'ROCKETCHAT_TOKEN', secretName: 'apitest-secrets', secretKey: 'ROCKETCHAT_TOKEN')
+        ]
+      )
+    ]
+  ){
+    node(pod_label) {
+      def date = new Date()
+
+      def stage_status = 'PENDING'
+      def stage_description = ''
+
+      def sonarqubeUrl = getUrlForRoute(SONAR_ROUTE_NAME, SONAR_ROUTE_NAMESPACE).trim()
+      def sonarProjectName = "${SONAR_PROJECT_BACKEND_NAME} - ${env.BRANCH_NAME}"
+      def sonarProjectKey = "${SONAR_PROJECT_BACKEND_KEY}-${env.BRANCH_NAME}"
+
+      pullrequestComment("${GITHUB_TOKEN}", "${GITHUB_API_URL}" + "/issues/${env.CHANGE_ID}/comments", 'Pull Request Review Pipeline on ' + date.format('yyyy-MM-dd HH:mm:ss',TimeZone.getTimeZone('PST')))
+
+      rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) Review start on " + date.format('yyyy-MM-dd HH:mm:ss',TimeZone.getTimeZone('PST')))
+
+      stage('Checkout Source') {
+        echo "Checking out source code from pull request ..."
+        //echo sh(returnStdout: true, script: 'env')
+        checkout scm
+      }
+
+
+      def LAST_COMMIT_SHA = sh(returnStdout: true, script: 'git rev-parse  HEAD').trim()
+      echo "Last commit sha1: ${LAST_COMMIT_SHA}"
+
+      // trigger backend review pipeline
+      //if (buildResult[2]) {
+      dir('auth-api') {
+        sh '''
+          #!/bin/bash
+          source /opt/app-root/bin/activate
+          pip install -r requirements.txt
+          pip install -r requirements/dev.txt
+          export PYTHONPATH=./src/
+        '''
+
+        stage('flake8') {
+          echo "flake8 checking..."
+          try{
+            sh '''
+              #!/bin/bash
+              source /opt/app-root/bin/activate
+              export PYTHONPATH=./src/
+              flake8 src/auth_api tests --output-file=flake8.txt --exit-zero
+            '''
+          } catch (Exception e) {
+            echo "EXCEPTION: ${e}"
+          } finally {
+            def flake8 = scanForIssues tool: flake8(pattern: 'flake8.txt')
+            publishIssues issues: [flake8]
+
+            pullrequestComment("${GITHUB_TOKEN}", "${GITHUB_API_URL}" + "/issues/${env.CHANGE_ID}/comments", "Flake8 : " + "${env.BUILD_URL}" + "flake8/")
+          }
+        }
+
+        stage('pylint') {
+          echo "pylint checking..."
+          try{
+            sh '''
+              #!/bin/bash
+              source /opt/app-root/bin/activate
+              export PYTHONPATH=./src/
+              pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api --exit-zero --output-format=parseable > pylint-report.txt
+            '''
+          } catch (Exception e) {
+            echo "EXCEPTION: ${e}"
+          } finally {
+            stash name: API_LINTER_REPORT, includes: 'pylint-report.txt'
+
+            def pyLint = scanForIssues tool: pyLint(pattern: 'pylint-report.txt')
+            publishIssues issues: [pyLint]
+          }
+        }
+
+        stage('Unit tests(pytest) & Coverage') {
+          echo "testing..."
+          try{
+            sh '''
+              #!/bin/bash
+              source /opt/app-root/bin/activate
+              export PYTHONPATH=./src/
+              pytest
+            '''
+          } catch (Exception e) {
+            echo "EXCEPTION: ${e}"
+          } finally {
+            stash name: API_UNITTEST_REPORT, includes: 'pytest.xml'
+            stash name: API_COVERAGE_REPORT, includes: 'coverage.xml'
+
+            junit 'pytest.xml'
+
+            cobertura coberturaReportFile: 'coverage.xml'
+          }
+        }
+      }
+      //}
+
+      stage('SonarQube Analysis - API') {
+        echo "Performing static SonarQube code analysis ..."
+
+        echo "URL: ${sonarqubeUrl}"
+
+        try {
+          dir('sonar-runner') {
+            unstash API_LINTER_REPORT
+            unstash API_UNITTEST_REPORT
+            unstash API_COVERAGE_REPORT
+
+            sh (
+              returnStdout: true,
+              script: "./gradlew sonarqube --full-stacktrace \
+                -Dsonar.verbose=true \
+                -Dsonar.host.url=${sonarqubeUrl} \
+                -Dsonar.projectName='${sonarProjectName}' \
+                -Dsonar.projectKey=${sonarProjectKey} \
+                -Dsonar.projectBaseDir=${SONAR_PROJECT_BACKEND_BASE_DIR} \
+                -Dsonar.sources=${SONAR_BACKEND_SOURCES} \
+                -Dsonar.tests=${SONAR_BACKEND_TESTS} \
+                -Dsonar.python.xunit.reportPath=pytest.xml \
+                -Dsonar.python.coverage.reportPaths=coverage.xml \
+                -Dsonar.python.pylint.reportPath=pylint-report.txt "
+            )
+          }
+
+        } catch (Exception e) {
+          echo "EXCEPTION: ${e}"
+        }
+      }
+
+      stage("Quality Gate - API") {
+        def qualityJson = sh(returnStdout: true,
+                             script: "curl \"${sonarqubeUrl}/api/qualitygates/project_status?projectKey=${sonarProjectKey}\"")
+        echo qualityJson
+
+        def quality = jsonParse(qualityJson)
+
+        if (quality["projectStatus"]["status"] == 'OK' || quality["projectStatus"]["status"] == 'WARN') {
+
+          if (quality["projectStatus"]["status"] == 'WARN') {
+            rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) quality check get Warning status!! Please check it out. " + "${sonarqubeUrl}" + "/dashboard?id=" + "${sonarProjectKey}" )
+          }
+          stage_status = 'success'
+          stage_description = 'Quality check succeeded!'
+          rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) Review done!! Please code review if you are available. " + "${REPO_URL}" + "/pull/" + "${env.CHANGE_ID}" )
+        } else {
+          stage_status = 'error'
+          stage_description = 'Quality check failed!'
+          rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "Pull Request (${env.BRANCH_NAME}) Review quality check failed!! " + "${sonarqubeUrl}" + "/dashboard?id=" + "${sonarProjectKey}")
+        }
+
+        pullrequestStatus("${env.GITHUB_TOKEN}",
+                          stage_status,
+                          "${sonarqubeUrl}" + "/dashboard?id=" + "${sonarProjectKey}",
+                          'continuous-integration/QualityCheck',
+                          stage_description,
+                          "${GITHUB_API_URL}" + '/statuses/' + "${LAST_COMMIT_SHA}")
+      }
+    }
+  }
+}
+
+

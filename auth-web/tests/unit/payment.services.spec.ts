@@ -5,13 +5,21 @@ jest.mock('axios', () => ({
   get: jest.fn(),
   all: jest.fn(),
   post: jest.fn(),
-  put: jest.fn()
+  put: jest.fn(),
+  patch: jest.fn()
 }), {
   virtual: true
 })
+var mockob = {
+  'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
+  'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
+  'VUE_APP_AUTH_ROOT_API': 'https://auth-api-dev.pathfinder.gov.bc.ca/api/v1'
+}
+
 describe('create a transaction', () => {
   const results = []
   beforeAll(() => {
+    sessionStorage.__STORE__['API_CONFIG'] = JSON.stringify(mockob)
     // @ts-ignore
     Axios.get.mockClear()
     // @ts-ignore
@@ -21,28 +29,17 @@ describe('create a transaction', () => {
   })
 
   it('should call Axios.post ', () => {
-    expect(Axios.post).toHaveBeenCalledWith(`${process.env.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions?redirect_uri=www.redirecturl.com`, {})
+    expect(Axios.post).toHaveBeenCalledWith(`${mockob.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions?redirect_uri=www.redirecturl.com`, {})
     expect(Axios.post).toBeCalledTimes(1)
-  })
-})
-
-describe('update a transaction', () => {
-  const results = []
-  beforeAll(() => {
-    // @ts-ignore
-    Axios.get.mockClear()
-    // @ts-ignore
-    Axios.all.mockResolvedValue(results)
   })
 
   it('should call Axios.put wihtout receipt number ', () => {
     PaymentServices.updateTransaction('paymentId', 'transactionId')
-    expect(Axios.put).toHaveBeenCalledWith(`${process.env.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions/transactionId`, { 'params': '' })
+    expect(Axios.patch).toHaveBeenCalledWith(`${mockob.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions/transactionId?receipt_number=undefined`)
   })
 
   it('should call Axios.put  with receipt number', () => {
     PaymentServices.updateTransaction('paymentId', 'transactionId', 'receiptno')
-    var param = { 'receipt_number': 'receiptno' }
-    expect(Axios.put).toHaveBeenCalledWith(`${process.env.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions/transactionId`, { 'params': { 'receipt_number': 'receiptno' } })
+    expect(Axios.patch).toHaveBeenCalledWith(`${mockob.VUE_APP_PAY_ROOT_API}/payments/paymentId/transactions/transactionId?receipt_number=receiptno`)
   })
 })

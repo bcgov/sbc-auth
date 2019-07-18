@@ -29,8 +29,6 @@ export default {
   },
 
   mounted () {
-    console.log('%c PaymentForm-Data Recieved on Mount as %s', 'color: blue ;font-size : 12px', this.paymentId, this.redirectUrl)
-
     if (this.paymentId && this.redirectUrl) {
       PaymentServices.createTransaction(this.paymentId, encodeURIComponent(this.redirectUrl))
         .then(response => {

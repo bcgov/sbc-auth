@@ -11,9 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a affiliation business record.
-
-"""
+"""This manages a affiliation business record."""
 
 from sqlalchemy import Column, Integer, String, text
 
@@ -22,6 +20,7 @@ from .db import db, ma
 
 class AffiliationBusiness(db.Model):
     """Used to hold the business information."""
+
     __tablename__ = 'affiliation_business'
 
     business_id = Column(Integer, primary_key=True, server_default=text("nextval('business_id_seq'::regclass)"))
