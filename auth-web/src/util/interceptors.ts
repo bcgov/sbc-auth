@@ -8,7 +8,7 @@ export default function setup () {
       config.headers.Authorization = `Bearer ${token}`
     }
     if (tracingID) {
-      config.headers['registries-tracing-id'] = tracingID
+      config.headers['registries-trace-id'] = tracingID
     }
     return config
   }, function (err) {
