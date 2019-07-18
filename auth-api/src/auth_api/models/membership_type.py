@@ -21,10 +21,10 @@ from sqlalchemy import Column, String
 from .db import db, ma
 
 
-class MembershipType(db.Model):
+class MembershipType(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the Membership Type model for the Auth service."""
 
-    __tablename__ = "membership_type"
+    __tablename__ = 'membership_type'
 
     code = Column(String(15), primary_key=True)
     desc = Column(String(100))
@@ -33,7 +33,7 @@ class MembershipType(db.Model):
 class MembershipTypeSchema(ma.ModelSchema):
     """Used to manage the default schema between JSON and MembershipType model."""
 
-    class Meta:
+    class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the MembershipType fields to a default schema."""
 
         model = MembershipType

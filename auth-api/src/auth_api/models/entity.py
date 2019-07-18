@@ -16,24 +16,27 @@
 The class and schema are both present in this module.
 """
 
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, String
 
 from .db import db, ma
 
 
-class Entity(db.Model):
+class Entity(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the Entity model for the Auth service."""
 
-    __tablename__ = "entity"
+    __tablename__ = 'entity'
 
     id = Column(Integer, primary_key=True)
-    entity_id = Column(Integer, unique=True, nullable=False)
+    coop_entity_id = Column(Integer, unique=True, nullable=False)
+    business_phone = Column(String(15), nullable=True)
+    business_extension = (Column(String(10), nullable=True),)
+    business_email = Column(String(50), nullable=True)
 
 
 class EntitySchema(ma.ModelSchema):
     """Used to manage the default mapping between JSON and the Entity model."""
 
-    class Meta:
+    class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the Entity fields to a default schema."""
 
         model = Entity

@@ -13,26 +13,27 @@
 # limitations under the License.
 """This manages an Org Type record in the Auth service.
 
-This is a mapping between org type codes and descriptions for Org objects."""
+This is a mapping between org type codes and descriptions for Org objects.
+"""
 
 from sqlalchemy import Column, String
 
 from .db import db, ma
 
 
-class OrgType(db.Model):
+class OrgType(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Org Type record."""
 
-    __tablename__ = "org_type"
+    __tablename__ = 'org_type'
 
-    code = Column(String(15), primary_key=True)
+    code = Column(String(15), primary_key=True, unique=True)
     desc = Column(String(100))
 
 
 class OrgTypeSchema(ma.ModelSchema):
     """This is the Schema for an Org Type record."""
 
-    class Meta:
+    class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the Org Type fields to a default schema."""
 
         model = OrgType

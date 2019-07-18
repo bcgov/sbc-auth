@@ -20,26 +20,28 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 
 from .db import db, ma
 
-class Org(db.Model):
+
+class Org(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """Model for an Org record.  Associates User (via User Roles) to Entities."""
 
-    __tablename__ = "org"
+    __tablename__ = 'org'
 
     id = Column(Integer, primary_key=True)
     created = Column(DateTime)
     created_by = Column(ForeignKey('user.id'), nullable=False)
     last_modified = Column(DateTime)
     last_modified_by = Column(ForeignKey('user.id'), nullable=False)
-    org_type_code = Column(ForeignKey('org_type.org_type_code'), nullable=False)
-    org_status_code = Column(ForeignKey('org_status.org_status_code'), nullable=False)
-    org_name = Column(String(250), index=True)
-    org_address = Column(String(250), index=True)
-    org_preferred_pay_code = Column(ForeignKey('preferred_pay_types.type_id'), nullable=False)
+    type_code = Column(ForeignKey('org_type.code'), nullable=False)
+    status_code = Column(ForeignKey('org_status.code'), nullable=False)
+    name = Column(String(250), index=True)
+    address = Column(String(250), index=True)
+    preferred_payment = Column(ForeignKey('payment_type.code'), nullable=False)
+
 
 class OrgSchema(ma.ModelSchema):
     """Used to manage the default mapping between JSON and Org model."""
 
-    class Meta:
+    class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the Org fields to a default schema."""
 
         model = Org

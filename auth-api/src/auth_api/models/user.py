@@ -17,9 +17,8 @@ A User stores basic information from a KeyCloak user (including the KeyCloak GUI
 """
 
 from flask import current_app
-
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy.dialects.postgresql import UUID
 
 from .db import db, ma
 
@@ -27,15 +26,15 @@ from .db import db, ma
 class User(db.Model):
     """This is the model for a User."""
 
-    __tablename__ = "user"
+    __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
-    username = Column("username", String(100), index=True)
-    firstname = Column("first_name", String(200), index=True)
-    lastname = Column("last_name", String(200), index=True)
-    email = Column("email", String(200), index=True)
+    username = Column('username', String(100), index=True)
+    firstname = Column('first_name', String(200), index=True)
+    lastname = Column('last_name', String(200), index=True)
+    email = Column('email', String(200), index=True)
     keycloak_guid = Column(
-        "keycloak_guid", UUID(as_uuid=True), unique=True, nullable=False
+        'keycloak_guid', UUID(as_uuid=True), unique=True, nullable=False
     )
     created = Column(DateTime)
     modified = Column(DateTime)
@@ -49,7 +48,7 @@ class User(db.Model):
     def find_by_jwt_token(cls, token: dict):
         """Return if they exist and match the provided JWT."""
         return cls.query.filter_by(
-            username=token.get("preferred_username", None)
+            username=token.get('preferred_username', None)
         ).one_or_none()
 
     @classmethod
@@ -57,15 +56,15 @@ class User(db.Model):
         """Create a User from the provided JWT."""
         if token:
             user = User(
-                username=token.get("preferred_username", None),
-                roles=token.get("realm_access", None).get("roles", None),
-                firstname=token.get("firstname", None),
-                lastname=token.get("lastname", None),
-                email=token.get("email", None),
-                keycloak_guid=token.get("sub", None),
+                username=token.get('preferred_username', None),
+                roles=token.get('realm_access', None).get('roles', None),
+                firstname=token.get('firstname', None),
+                lastname=token.get('lastname', None),
+                email=token.get('email', None),
+                keycloak_guid=token.get('sub', None),
             )
             current_app.logger.debug(
-                "Creating user from JWT:{}; User:{}".format(token, user)
+                'Creating user from JWT:{}; User:{}'.format(token, user)
             )
             db.session.add(user)
             db.session.commit()
@@ -76,7 +75,7 @@ class User(db.Model):
         return cls.query.filter_by(username=username).first()
 
     def save(self):
-        """Saves the User model."""
+        """Save the User model."""
         db.session.add(self)
         db.session.commit()
 
@@ -88,7 +87,7 @@ class User(db.Model):
 class UserSchema(ma.ModelSchema):
     """This is the Schema for a User model."""
 
-    class Meta:
+    class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the User fields to a default schema."""
 
         model = User

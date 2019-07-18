@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages an Org Status record in the Auth service.
+"""This manage a Payment Type mode. in the Auth service.
 
-This is a mapping between status codes and descriptions for Org objects.
+Payment types are used to store the preferred payment type on the Org model.
 """
 
 from sqlalchemy import Column, String
@@ -21,21 +21,19 @@ from sqlalchemy import Column, String
 from .db import db, ma
 
 
-class OrgStatus(
-    db.Model
-):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
-    """This is the model for an Org Status record."""
+class PaymentType(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+    """This is the model for a Payment Type."""
 
-    __tablename__ = 'org_status'
+    __tablename__ = 'payment_type'
 
-    code = Column(String(15), primary_key=True)
+    code = Column(String(15), primary_key=True, unique=True)
     desc = Column(String(100))
 
 
-class OrgStatusSchema(ma.ModelSchema):
-    """This is the Schema for an Org Status record."""
+class PaymentTypeSchema(ma.ModelSchema):
+    """This is the schema for a Payment Type model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Org Status fields to a default schema."""
+        """Maps all of the Payment Type fields to a default schema."""
 
-        model = OrgStatus
+        model = PaymentType
