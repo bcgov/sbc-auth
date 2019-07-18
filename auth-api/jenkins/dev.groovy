@@ -115,8 +115,11 @@ if( run_pipeline ) {
                     openshift.withProject("${NAMESPACE_BUILD}") {
                         try {
                             echo "Building ${APP_NAME} ..."
-                            def build = openshift.selector("bc", "${APP_NAME}")
-                            build.startBuild("--wait=true").logs("-f")
+                            def build = openshift.selector("bc", "${APP_NAME}").startBuild()
+                            build.untilEach {
+                                return it.object().status.phase == "Running"
+                            }
+                            build.logs('-f')
                         } catch (Exception e) {
                             echo e.getMessage()
                             build_ok = false
@@ -164,18 +167,18 @@ if( run_pipeline ) {
                                 def new_version = openshift.selector('dc', "${APP_NAME}-${DESTINATION_TAG}").object().status.latestVersion
                                 if (new_version == old_version) {
                                     echo "New deployment was not triggered."
-                                } else {
-                                    def pod_selector = openshift.selector('pod', [ app:"${APP_NAME}-${DESTINATION_TAG}" ])
-                                    pod_selector.untilEach {
-                                        deployment = it.objects()[0].metadata.labels.deployment
-                                        echo deployment
-                                        if (deployment == "${APP_NAME}-${DESTINATION_TAG}-${new_version}" && it.objects()[0].status.phase == 'Running' && it.objects()[0].status.containerStatuses[0].ready) {
-                                            return true
-                                        } else {
-                                            echo "Pod for new deployment not ready"
-                                            sleep 5
-                                            return false
-                                        }
+                                }
+
+                                def pod_selector = openshift.selector('pod', [ app:"${APP_NAME}-${DESTINATION_TAG}" ])
+                                pod_selector.untilEach {
+                                    deployment = it.objects()[0].metadata.labels.deployment
+                                    echo deployment
+                                    if (deployment == "${APP_NAME}-${DESTINATION_TAG}-${new_version}" && it.objects()[0].status.phase == 'Running' && it.objects()[0].status.containerStatuses[0].ready) {
+                                        return true
+                                    } else {
+                                        echo "Pod for new deployment not ready"
+                                        sleep 5
+                                        return false
                                     }
                                 }
                             } catch (Exception e) {

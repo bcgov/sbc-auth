@@ -6,14 +6,14 @@
       "description": "Pre deployment template for a auth api service. This template may not include real value of secrets; you need to manually replace the value in Openshift.",
       "tags": "${NAME}-${TAG_NAME}"
     },
-    "name": "${NAME}-${TAG_NAME}-pre-deploy-template"
+    "name": "${NAME}-pre-deploy"
   },
   "objects": [
     {
       "kind": "Secret",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${NAME}-${TAG_NAME}-secret",
+        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
         "labels": {
           "app": "${NAME}-${TAG_NAME}",
           "app-group": "${APP_GROUP}",
@@ -43,7 +43,7 @@
       "displayName": "Name",
       "description": "The name assigned to all of the OpenShift resources associated to the server instance.",
       "required": true,
-      "value": "keycloak"
+      "value": "auth-api"
     },
     {
       "name": "APP_GROUP",
@@ -58,6 +58,13 @@
       "description": "The TAG name for this environment, e.g., dev, test, prod",
       "required": true,
       "value": "dev"
+    },
+    {
+      "name": "KEYCLOAK_NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the OpenShift resources associated to the server instance.",
+      "required": true,
+      "value": "keycloak"
     },
     {
       "name": "JWT_OIDC_ALGORITHMS",

@@ -6,7 +6,7 @@
       "description": "Deployment template for a auth api service.",
       "tags": "${NAME}-${TAG_NAME}"
     },
-    "name": "${NAME}-${TAG_NAME}-deploy-template"
+    "name": "${NAME}-${TAG_NAME}-deploy"
   },
   "objects": [
     {
@@ -38,7 +38,7 @@
                     "name": "DATABASE_ADMIN_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-secret",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-secret",
                         "key": "DATABASE_ADMIN_PASSWORD"
                       }
                     }
@@ -47,7 +47,7 @@
                     "name": "DATABASE_USERNAME",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-config",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_USER"
                       }
                     }
@@ -56,7 +56,7 @@
                     "name": "DATABASE_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-secret",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-secret",
                         "key": "DATABASE_PASSWORD"
                       }
                     }
@@ -65,7 +65,7 @@
                     "name": "DATABASE_NAME",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-config",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_NAME"
                       }
                     }
@@ -74,7 +74,7 @@
                     "name": "DATABASE_HOST",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-config",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_HOST"
                       }
                     }
@@ -83,7 +83,7 @@
                     "name": "DATABASE_PORT",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-config",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_PORT"
                       }
                     }
@@ -142,7 +142,7 @@
                     "name": "DATABASE_USERNAME",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-config",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_USER"
                       }
                     }
@@ -151,7 +151,7 @@
                     "name": "DATABASE_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-secret",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-secret",
                         "key": "DATABASE_PASSWORD"
                       }
                     }
@@ -160,7 +160,7 @@
                     "name": "DATABASE_NAME",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-config",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_NAME"
                       }
                     }
@@ -169,7 +169,7 @@
                     "name": "DATABASE_HOST",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-config",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_HOST"
                       }
                     }
@@ -178,7 +178,7 @@
                     "name": "DATABASE_PORT",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-config",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_PORT"
                       }
                     }
@@ -187,7 +187,7 @@
                     "name": "DATABASE_TEST_USERNAME",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-config",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_TEST_USER"
                       }
                     }
@@ -196,7 +196,7 @@
                     "name": "DATABASE_TEST_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-secret",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-secret",
                         "key": "DATABASE_TEST_PASSWORD"
                       }
                     }
@@ -205,7 +205,7 @@
                     "name": "DATABASE_TEST_NAME",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-config",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_TEST_NAME"
                       }
                     }
@@ -214,7 +214,7 @@
                     "name": "DATABASE_TEST_HOST",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-config",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_TEST_HOST"
                       }
                     }
@@ -223,7 +223,7 @@
                     "name": "DATABASE_TEST_PORT",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_APP}-${TAG_NAME}-config",
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_TEST_PORT"
                       }
                     }
@@ -232,7 +232,7 @@
                     "name": "JWT_OIDC_ALGORITHMS",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "keycloak-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "JWT_OIDC_ALGORITHMS"
                       }
                     }
@@ -241,7 +241,7 @@
                     "name": "JWT_OIDC_AUDIENCE",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "keycloak-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "JWT_OIDC_AUDIENCE"
                       }
                     }
@@ -250,7 +250,7 @@
                     "name": "JWT_OIDC_CLIENT_SECRET",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "keycloak-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "JWT_OIDC_CLIENT_SECRET"
                       }
                     }
@@ -259,7 +259,7 @@
                     "name": "JWT_OIDC_WELL_KNOWN_CONFIG",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "keycloak-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "JWT_OIDC_WELL_KNOWN_CONFIG"
                       }
                     }
@@ -268,7 +268,7 @@
                     "name": "JWT_OIDC_JWKS_CACHE_TIMEOUT",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "keycloak-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "JWT_OIDC_JWKS_CACHE_TIMEOUT"
                       }
                     }
@@ -277,7 +277,7 @@
                     "name": "KEYCLOAK_BASE_URL",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "keycloak-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "KEYCLOAK_BASE_URL"
                       }
                     }
@@ -286,7 +286,7 @@
                     "name": "KEYCLOAK_REALMNAME",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "keycloak-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "KEYCLOAK_REALMNAME"
                       }
                     }
@@ -295,7 +295,7 @@
                     "name": "KEYCLOAK_ADMIN_CLIENTID",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "keycloak-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "KEYCLOAK_ADMIN_CLIENTID"
                       }
                     }
@@ -304,7 +304,7 @@
                     "name": "KEYCLOAK_ADMIN_SECRET",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "keycloak-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "KEYCLOAK_ADMIN_SECRET"
                       }
                     }
@@ -313,7 +313,7 @@
                     "name": "KEYCLOAK_AUTH_AUDIENCE",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "keycloak-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "KEYCLOAK_AUTH_AUDIENCE"
                       }
                     }
@@ -322,7 +322,7 @@
                     "name": "KEYCLOAK_AUTH_CLIENT_SECRET",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "keycloak-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "KEYCLOAK_AUTH_CLIENT_SECRET"
                       }
                     }
@@ -501,11 +501,18 @@
       "value": "dev"
     },
     {
-      "name": "DATABASE_APP",
+      "name": "DATABASE_NAME",
       "displayName": "Database App Name",
       "description": "A valid database app name used by the service.",
       "required": true,
       "value": "postgresql"
+    },
+    {
+      "name": "KEYCLOAK_NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the OpenShift resources associated to the server instance.",
+      "required": true,
+      "value": "keycloak"
     },
     {
       "name": "CPU_REQUEST",
