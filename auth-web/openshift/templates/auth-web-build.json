@@ -7,7 +7,7 @@
       "tags": "Vue.js",
       "iconClass": "icon-python"
     },
-    "name": "${NAME}-build-template"
+    "name": "${NAME}-build"
   },
   "objects": [
     {
