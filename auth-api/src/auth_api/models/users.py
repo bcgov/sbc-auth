@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a User record.
-"""
+"""This manages a User record."""
 
+from flask import current_app
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, text
 from sqlalchemy.orm import relationship
 
@@ -22,6 +22,7 @@ from .db import db, ma
 
 class Users(db.Model):
     """Used to hold the audit information for a User of this service."""
+
     __tablename__ = 'users'
 
     user_id = Column(Integer, primary_key=True, server_default=text("nextval('users_id_seq'::regclass)"))
@@ -53,6 +54,40 @@ class Users(db.Model):
         """Cannot delete User records."""
         return self
         # need to intercept the ORM and stop Users from being deleted
+
+    @classmethod
+    def find_by_jwt_token(cls, token: dict):
+        """Return a User if they exist and match the provided JWT."""
+        return cls.query.filter_by(username=token.get('preferred_username', None)).one_or_none()
+
+    @classmethod
+    def create_from_jwt_token(cls, token: dict):
+        """Create a user record from the provided JWT token.
+
+        Use the values found in the valid JWT for the realm
+        to populate the User audit data
+        """
+        if token:
+            # TODO: schema doesn't parse from token need to figure that out ... LATER!
+            # s = KeycloakUserSchema()
+            # u = s.load(data=token, partial=True)
+            user = Users(
+                username=token.get('preferred_username', None),
+                firstname=token.get('given_name', None),
+                lastname=token.get('family_name', None),
+                display_name=token.get('name', None),
+                email=token.get('email', None),
+                user_source=token.get('preferred_username', None),
+                # user_type_code=token.get('realm_access', None).get('roles', None),
+                sub=token.get('sub', None),
+                iss=token.get('iss', None)
+            )
+            current_app.logger.debug('Creating user from JWT:{}; User:{}'.format(token, user))
+            db.session.add(user)
+            db.session.commit()
+            return user
+        return None
+
 
 class UserSchema(ma.ModelSchema):
     """Used to manage the default mapping between JSON and Domain model."""

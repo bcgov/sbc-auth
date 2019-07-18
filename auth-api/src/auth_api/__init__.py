@@ -18,34 +18,24 @@ This module is the API for the Legal Entity system.
 import os
 
 from flask import Flask
-from flask_jwt_oidc import JwtManager
 
-
-import config
-from config import _Config
 from auth_api import models
+from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.models import db, ma
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
-from sbc_common_components.tracing.api_tracer import ApiTracer
-from sbc_common_components.tracing.api_tracing import ApiTracing
+from config import CONFIGURATION, _Config
+
 
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first
 
-# lower case name as used by convention in most Flask apps
-jwt = JwtManager()  # pylint: disable=invalid-name
-tracing = None  # pylint: disable=invalid-name
+JWT = JWTWrapper.get_instance()
 
 
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
-    app.config.from_object(config.CONFIGURATION[run_mode])
-
-    # initialize tracer
-    api_tracer = ApiTracer()
-    global tracing  # pylint: disable=global-statement,invalid-name
-    tracing = ApiTracing(api_tracer.tracer)
+    app.config.from_object(CONFIGURATION[run_mode])
 
     from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT
 
@@ -55,7 +45,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     app.register_blueprint(API_BLUEPRINT)
     app.register_blueprint(OPS_BLUEPRINT)
 
-    setup_jwt_manager(app, jwt)
+    setup_jwt_manager(app, JWT)
 
     @app.after_request
     def add_version(response):  # pylint: disable=unused-variable
@@ -70,7 +60,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
 def setup_jwt_manager(app, jwt_manager):
     """Use flask app to configure the JWTManager to work for a particular Realm."""
-
     def get_roles(a_dict):
         return a_dict['realm_access']['roles']  # pragma: no cover
 
@@ -81,9 +70,8 @@ def setup_jwt_manager(app, jwt_manager):
 
 def register_shellcontext(app):
     """Register shell context objects."""
-
     def shell_context():
         """Shell context objects."""
-        return {'app': app, 'jwt': jwt, 'db': db, 'models': models}  # pragma: no cover
+        return {'app': app, 'jwt': JWT, 'db': db, 'models': models}  # pragma: no cover
 
     app.shell_context_processor(shell_context)

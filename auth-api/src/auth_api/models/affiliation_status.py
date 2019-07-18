@@ -11,8 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a affiliation status record.
-"""
+"""This manages a affiliation status record."""
 
 from sqlalchemy import Column, String
 
@@ -21,6 +20,7 @@ from .db import db, ma
 
 class AffiliationStatus(db.Model):
     """Used to hold the affiliation status information."""
+
     __tablename__ = 'affiliation_status'
 
     affiliation_status_code = Column(String(20), primary_key=True)

@@ -11,8 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a affiliation record.
-"""
+"""This manages a affiliation record."""
 
 from sqlalchemy import Column, Date, ForeignKey, Integer, text
 from sqlalchemy.orm import relationship
@@ -22,6 +21,7 @@ from .db import db, ma
 
 class Affiliation(db.Model):
     """Used to hold the affiliation information."""
+
     __tablename__ = 'affiliation'
 
     affiliation_id = Column(Integer, primary_key=True, server_default=text("nextval('affiliation_id_seq'::regclass)"))
@@ -50,6 +50,7 @@ class Affiliation(db.Model):
         db.session.commit()
 
     def delete(self):
+        """Delete affiliation."""
         db.session.delete(self)
         db.session.commit()
 
