@@ -11,14 +11,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a Relation record, where a Relation associates a User Role with an Entity."""
+"""This manages a Membership Type record.
 
-from flask import current_app
-from sqlalchemy.dialects.postgresql import UUID
+It defines the available types of membership Users have with Orgs.
+"""
+
+from sqlalchemy import Column, String
 
 from .db import db, ma
 
-class Relation(db.Model):
-    """Model for a Relation record.  Associates User Roles to Entities."""
 
-    __tablename__ = "relation"
+class MembershipType(db.Model):
+    """This is the Membership Type model for the Auth service."""
+
+    __tablename__ = "membership_type"
+
+    code = Column(String(15), primary_key=True)
+    desc = Column(String(100))
+
+
+class MembershipTypeSchema(ma.ModelSchema):
+    """Used to manage the default schema between JSON and MembershipType model."""
+
+    class Meta:
+        """Maps all of the MembershipType fields to a default schema."""
+
+        model = MembershipType
