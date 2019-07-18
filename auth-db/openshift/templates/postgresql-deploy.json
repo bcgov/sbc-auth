@@ -181,6 +181,7 @@
         }
       },
       "spec": {
+        "storageClassName": "${PERSISTENT_VOLUME_CLASS}",
         "accessModes": ["ReadWriteOnce"],
         "resources": {
           "requests": {
@@ -360,7 +361,7 @@
       "displayName": "Database Name for unit testing",
       "description": "A valid database name for unit testing used by the service.",
       "required": true,
-      "value": "auth-db"
+      "value": "auth-testdb"
     },
     {
       "name": "DATABASE_TEST_HOST",
@@ -374,7 +375,7 @@
       "displayName": "Database schema name for unit testing",
       "description": "A valid database schema name for unit testing used by the service.",
       "required": true,
-      "value": "auth-testdb"
+      "value": "tester"
     }
   ]
 }
