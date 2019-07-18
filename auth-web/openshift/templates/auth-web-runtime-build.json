@@ -2,8 +2,7 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "${NAME}",
-    "creationTimestamp": null
+    "name": "${NAME}-build"
   },
   "objects": [
     {
@@ -13,7 +12,9 @@
         "name": "${NAME}",
         "creationTimestamp": null,
         "labels": {
-          "app": "${NAME}"
+          "app": "${NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-build"
         }
       },
       "spec": {
