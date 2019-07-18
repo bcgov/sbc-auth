@@ -1,0 +1,62 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "${NAME}-${TAG_NAME}"
+  },
+  "objects": [
+    {
+      "kind": "ConfigMap",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "web-caddy-config",
+        "labels": {
+          "app": "${NAME}-${TAG_NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-pre-deploy"
+        }
+      },
+      "data": {
+        "Caddyfile": "0.0.0.0:2015\n\nroot /var/www/html\n\nlog stdout\n\nerrors stdout\n\nrewrite {\n    regexp .*\n    to {path} /\n}"
+      }
+    },
+    {
+      "kind": "ConfigMap",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "web-ui-configuration",
+        "labels": {
+          "app": "${NAME}-${TAG_NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-pre-deploy"
+        }
+      },
+      "data": {
+        "configuration.json": "{\n  \"VUE_APP_COPS_REDIRECT_URL\": \"https://coops-${TAG_NAME}.pathfinder.gov.bc.ca/\",\n  \"VUE_APP_PAY_ROOT_API\": \"https://pay-api-${TAG_NAME}.pathfinder.gov.bc.ca/api/v1\",\n  \"VUE_APP_AUTH_ROOT_API\": \"https://auth-api-${TAG_NAME}.pathfinder.gov.bc.ca/api/v1\"\n}\n"
+      }
+    }
+  ],
+  "parameters": [
+    {
+      "name": "NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the OpenShift resources associated to the server instance.",
+      "required": true,
+      "value": "auth-web"
+    },
+    {
+      "name": "APP_GROUP",
+      "displayName": "App Group",
+      "description": "The name assigned to all of the deployments in this project.",
+      "required": true,
+      "value": "sbc-auth"
+    },
+    {
+      "name": "TAG_NAME",
+      "displayName": "Environment TAG name",
+      "description": "The TAG name for this environment, e.g., dev, test, prod",
+      "required": true,
+      "value": "dev"
+    }
+  ]
+}
