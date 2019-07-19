@@ -16,6 +16,7 @@
 A User stores basic information from a KeyCloak user (including the KeyCloak GUID).
 """
 
+import datetime
 from flask import current_app
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
@@ -38,6 +39,7 @@ class User(db.Model):
     )
     created = Column(DateTime)
     modified = Column(DateTime)
+    roles = Column('roles', String(1000))
 
     @classmethod
     def find_by_keycloak_guid(cls, keycloak_guid):
@@ -57,11 +59,12 @@ class User(db.Model):
         if token:
             user = User(
                 username=token.get('preferred_username', None),
-                roles=token.get('realm_access', None).get('roles', None),
                 firstname=token.get('firstname', None),
                 lastname=token.get('lastname', None),
                 email=token.get('email', None),
                 keycloak_guid=token.get('sub', None),
+                created=datetime.datetime.now(),
+                roles=token.get('roles', None)
             )
             current_app.logger.debug(
                 'Creating user from JWT:{}; User:{}'.format(token, user)
