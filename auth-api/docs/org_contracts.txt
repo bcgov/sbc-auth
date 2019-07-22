@@ -1,0 +1,48 @@
+Org Resource
+
+/orgs
+	POST
+	Description: Create a new org
+	Permissions: Any Premium user, OR used internally when a Basic User is created
+	Org info is specified in request body
+	Note 1: Org is created internally for Basic User, Manually for Premium User
+	Note 2: Org has a status of pending until approved (see API contract for approval below)
+
+/orgs?org_name={search_text}
+	GET
+	Description: Search for an org by name and return it
+	Permissions: Any
+
+/orgs/{org_id}
+	GET
+	Description: Return a specific org
+	Permissions: Must be a member of that org
+
+	DELETE
+	Description: Delete a specific org
+	Permissions: Must be the owner of that org
+
+	PUT
+	Description: Update a specific org
+	Permissions: Must be an admin of that org
+	Org info is specified in request body
+
+	PATCH
+	Description: Update a specific org's status
+
+/orgs/{org_id}/members/invite/{user_email}
+	POST
+	Description: Invite the user specified by user_email to the org specified by org_id
+	Permissions: Must be an admin of org specified by org_id
+
+/orgs/{org_id}/members/request
+	POST
+	Description: Request to join the org specified by org_id.  Generates a notification to admin(s) of the org.
+	Permissions: Any 
+
+/orgs/{org_id}/members/confirm/{user_email}
+	POST
+	Description: Confirm membership of the user specified by user_email to org specified by org_id.
+	Permissions: Must be an admin of the org or the request body must contain code sent out with original invite.
+
+

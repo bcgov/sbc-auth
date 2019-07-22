@@ -1,0 +1,23 @@
+Entity Resource
+
+Note: This resource is used to shadow a LEAR Entity in the sbc-auth application.  We only store entity data that is required for affiliating entities to organizations.
+
+/entities
+	GET
+	Description: Returns a list of entities that the current user is affiliated with (via their Org membership)
+	Permissions: Any
+
+	PUT
+	Description: Used to update entity information (e.g. business contact info)
+
+	POST (Internal Only)
+	Description: Create a new Entity from the request body
+	Note: The implementation of this endpoint would likely GET an entity from LEAR and store the relevant data in AUTH
+	Permissions: Must be an admin of an org and have provided a valid passcode for that entity
+
+/entities/{entity_id}
+	GET (Internal Only)
+	Description: Get an Entity specified by the entity_id
+	Permissions: Must be an admin of an org that has been affiliated with the given entity
+
+	
