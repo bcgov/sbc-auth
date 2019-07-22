@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages an Affiliation record in the Auth service.
+"""This model manages a Membership item in the Auth Service.
 
-An Affiliation is between an Org and an Entity.
+The Membership object connects User models to one or more Org models.
 """
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer
@@ -21,25 +21,24 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer
 from .db import db, ma
 
 
-class Affiliation(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
-    """This is the model for an Affiliation."""
+class Membership(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+    """Model for a Membership model.  Associates Users and Orgs."""
 
-    __tablename__ = 'affiliation'
+    __tablename__ = 'membership'
 
     id = Column(Integer, primary_key=True)
-    entity = Column(ForeignKey('entity.id'), nullable=False)
-    org = Column(ForeignKey('org.id'), nullable=False)
     created = Column(DateTime)
-    created_by = Column(ForeignKey('user.id'), nullable=False)
+    user = Column(ForeignKey('user.id'), nullable=False)
+    org = Column(ForeignKey('org.id'), nullable=False)
+    membership_type = Column(
+        ForeignKey('membership_type.code'), nullable=False
+    )
 
 
-class AffiliationSchema(ma.ModelSchema):
-    """This is the Schema for an Affiliation model.
-
-    It is used to managed the default mapping between the JSON and model.
-    """
+class MembershipSchema(ma.ModelSchema):
+    """Used to manage the default mapping betweeen JSON and Membership model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Affiliation fields to a default schema."""
+        """Maps all of the Membership fields to a default schema."""
 
-        model = Affiliation
+        model = Membership

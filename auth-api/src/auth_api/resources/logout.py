@@ -31,6 +31,7 @@ API = Namespace('logout', description='Authentication System - Logout User')
 KEYCLOAK_SERVICE = KeycloakService()
 TRACER = Tracer.get_instance()
 
+
 @API.errorhandler(AuthError)
 def handle_auth_error(exception):
     """TODO just a demo function."""
