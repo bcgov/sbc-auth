@@ -34,7 +34,8 @@ class Org(db.Model):  # pylint: disable=too-few-public-methods # Temporarily dis
     type_code = Column(ForeignKey('org_type.code'), nullable=False)
     status_code = Column(ForeignKey('org_status.code'), nullable=False)
     name = Column(String(250), index=True)
-    address = Column(String(250), index=True)
+    contact1 = Column(ForeignKey('contact.id'))
+    contact2 = Column(ForeignKey('contact.id'))
     preferred_payment = Column(ForeignKey('payment_type.code'), nullable=False)
 
 

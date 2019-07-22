@@ -20,6 +20,7 @@ from sqlalchemy.engine import Engine
 
 from .affiliation import Affiliation, AffiliationSchema
 from .db import db, ma
+from .contact import Contact, ContactSchema
 from .entity import Entity, EntitySchema
 from .membership import Membership, MembershipSchema
 from .membership_type import MembershipType, MembershipTypeSchema

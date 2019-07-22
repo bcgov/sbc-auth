@@ -16,7 +16,7 @@
 The class and schema are both present in this module.
 """
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer
 
 from .db import db, ma
 
@@ -27,10 +27,9 @@ class Entity(db.Model):  # pylint: disable=too-few-public-methods # Temporarily 
     __tablename__ = 'entity'
 
     id = Column(Integer, primary_key=True)
-    coop_entity_id = Column(Integer, unique=True, nullable=False)
-    business_phone = Column(String(15), nullable=True)
-    business_extension = (Column(String(10), nullable=True),)
-    business_email = Column(String(50), nullable=True)
+    business_identifier = Column(Integer, unique=True, nullable=False)
+    contact1 = Column(ForeignKey('contact.id'))
+    contact2 = Column(ForeignKey('contact.id'))
 
 
 class EntitySchema(ma.ModelSchema):
