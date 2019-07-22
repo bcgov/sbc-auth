@@ -2,18 +2,24 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "${NAME}-${TAG_NAME}"
+    "name": "${NAME}-${TAG_NAME}",
+    "creationTimestamp": null
   },
   "objects": [
     {
-      "kind": "ConfigMap",
+      "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "web-caddy-config",
+        "name": "${NAME}-${TAG_NAME}",
+        "generation": 1,
+        "creationTimestamp": null,
         "labels": {
           "app": "${NAME}-${TAG_NAME}",
           "app-group": "${APP_GROUP}",
-          "template": "${NAME}-pre-deploy"
+          "template": "${NAME}-deploy"
+        },
+        "annotations": {
+          "openshift.io/generated-by": "OpenShiftWebConsole"
         }
       },
       "spec": {
@@ -140,18 +146,76 @@
       }
     },
     {
-      "kind": "ConfigMap",
+      "kind": "Service",
       "apiVersion": "v1",
       "metadata": {
-        "name": "web-ui-configuration",
+        "name": "${NAME}-${TAG_NAME}",
+        "creationTimestamp": null,
         "labels": {
           "app": "${NAME}-${TAG_NAME}",
           "app-group": "${APP_GROUP}",
-          "template": "${NAME}-pre-deploy"
+          "template": "${NAME}-deploy"
         }
       },
-      "data": {
-        "configuration.json": "{\n  \"VUE_APP_COPS_REDIRECT_URL\": \"https://coops-${TAG_NAME}.pathfinder.gov.bc.ca/\",\n  \"VUE_APP_PAY_ROOT_API\": \"https://pay-api-${TAG_NAME}.pathfinder.gov.bc.ca/api/v1\",\n  \"VUE_APP_AUTH_ROOT_API\": \"https://auth-api-${TAG_NAME}.pathfinder.gov.bc.ca/api/v1\"\n}\n"
+      "spec": {
+        "ports": [
+          {
+            "name": "2015-tcp",
+            "protocol": "TCP",
+            "port": 2015,
+            "targetPort": 2015
+          }
+        ],
+        "selector": {
+          "deploymentconfig": "${NAME}-${TAG_NAME}"
+        },
+        "type": "ClusterIP",
+        "sessionAffinity": "None"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    },
+    {
+      "kind": "Route",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${NAME}-${TAG_NAME}",
+        "labels": {
+          "app": "${NAME}-${TAG_NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-deploy"
+        }
+      },
+      "spec": {
+        "host": "${NAME}-${TAG_NAME}.pathfinder.gov.bc.ca",
+        "to": {
+          "kind": "Service",
+          "name": "${NAME}-${TAG_NAME}",
+          "weight": 100
+        },
+        "port": {
+          "targetPort": "2015-tcp"
+        },
+        "tls": {
+          "termination": "edge"
+        },
+        "wildcardPolicy": "None"
+      },
+      "status": {
+        "ingress": [
+          {
+            "host": "${NAME}-${TAG_NAME}.pathfinder.gov.bc.ca",
+            "routerName": "router",
+            "conditions": [
+              {
+                "type": "Admitted",
+                "status": "True"
+              }
+            ],
+            "wildcardPolicy": "None"
+          }
+        ]
       }
     }
   ],
@@ -164,11 +228,25 @@
       "value": "auth-web"
     },
     {
+      "name": "NAME_RUNTIME",
+      "displayName": "Name of Runtime",
+      "description": "The name assigned to all of the OpenShift resources associated to the server instance.",
+      "required": true,
+      "value": "auth-web-runtime"
+    },
+    {
       "name": "APP_GROUP",
       "displayName": "App Group",
       "description": "The name assigned to all of the deployments in this project.",
       "required": true,
       "value": "sbc-auth"
+    },
+    {
+      "name": "IMAGE_NAMESPACE",
+      "displayName": "Image Namespace",
+      "required": true,
+      "description": "The namespace of the OpenShift project containing the imagestream for the application.",
+      "value": "1rdehl-tools"
     },
     {
       "name": "TAG_NAME",
