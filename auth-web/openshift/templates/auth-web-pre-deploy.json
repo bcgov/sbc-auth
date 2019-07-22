@@ -9,7 +9,7 @@
       "kind": "ConfigMap",
       "apiVersion": "v1",
       "metadata": {
-        "name": "web-caddy-config",
+        "name": "${NAME}-${TAG_NAME}-caddy-config",
         "labels": {
           "app": "${NAME}-${TAG_NAME}",
           "app-group": "${APP_GROUP}",
@@ -24,7 +24,7 @@
       "kind": "ConfigMap",
       "apiVersion": "v1",
       "metadata": {
-        "name": "web-ui-configuration",
+        "name": "${NAME}-${TAG_NAME}-ui-configuration",
         "labels": {
           "app": "${NAME}-${TAG_NAME}",
           "app-group": "${APP_GROUP}",
