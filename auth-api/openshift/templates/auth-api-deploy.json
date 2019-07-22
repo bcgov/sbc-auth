@@ -137,20 +137,203 @@
                     "protocol": "TCP"
                   }
                 ],
-                "envFrom": [
+                "env": [
                   {
-                    "configMapRef": {
-                      "name": "${DATABASE_NAME}-${TAG_NAME}-config"
+                    "name": "DATABASE_USERNAME",
+                    "valueFrom": {
+                      "configMapKeyRef": {
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
+                        "key": "DATABASE_USER"
+                      }
                     }
                   },
                   {
-                    "secretRef": {
-                      "name": "${DATABASE_NAME}-${TAG_NAME}-secret"
+                    "name": "DATABASE_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-secret",
+                        "key": "DATABASE_PASSWORD"
+                      }
                     }
                   },
                   {
-                    "secretRef": {
-                      "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret"
+                    "name": "DATABASE_NAME",
+                    "valueFrom": {
+                      "configMapKeyRef": {
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
+                        "key": "DATABASE_NAME"
+                      }
+                    }
+                  },
+                  {
+                    "name": "DATABASE_HOST",
+                    "valueFrom": {
+                      "configMapKeyRef": {
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
+                        "key": "DATABASE_HOST"
+                      }
+                    }
+                  },
+                  {
+                    "name": "DATABASE_PORT",
+                    "valueFrom": {
+                      "configMapKeyRef": {
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
+                        "key": "DATABASE_PORT"
+                      }
+                    }
+                  },
+                  {
+                    "name": "DATABASE_TEST_USERNAME",
+                    "valueFrom": {
+                      "configMapKeyRef": {
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
+                        "key": "DATABASE_TEST_USER"
+                      }
+                    }
+                  },
+                  {
+                    "name": "DATABASE_TEST_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-secret",
+                        "key": "DATABASE_TEST_PASSWORD"
+                      }
+                    }
+                  },
+                  {
+                    "name": "DATABASE_TEST_NAME",
+                    "valueFrom": {
+                      "configMapKeyRef": {
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
+                        "key": "DATABASE_TEST_NAME"
+                      }
+                    }
+                  },
+                  {
+                    "name": "DATABASE_TEST_HOST",
+                    "valueFrom": {
+                      "configMapKeyRef": {
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
+                        "key": "DATABASE_TEST_HOST"
+                      }
+                    }
+                  },
+                  {
+                    "name": "DATABASE_TEST_PORT",
+                    "valueFrom": {
+                      "configMapKeyRef": {
+                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
+                        "key": "DATABASE_TEST_PORT"
+                      }
+                    }
+                  },
+                  {
+                    "name": "JWT_OIDC_ALGORITHMS",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "JWT_OIDC_ALGORITHMS"
+                      }
+                    }
+                  },
+                  {
+                    "name": "JWT_OIDC_AUDIENCE",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "JWT_OIDC_AUDIENCE"
+                      }
+                    }
+                  },
+                  {
+                    "name": "JWT_OIDC_CLIENT_SECRET",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "JWT_OIDC_CLIENT_SECRET"
+                      }
+                    }
+                  },
+                  {
+                    "name": "JWT_OIDC_WELL_KNOWN_CONFIG",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "JWT_OIDC_WELL_KNOWN_CONFIG"
+                      }
+                    }
+                  },
+                  {
+                    "name": "JWT_OIDC_JWKS_CACHE_TIMEOUT",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "JWT_OIDC_JWKS_CACHE_TIMEOUT"
+                      }
+                    }
+                  },
+                  {
+                    "name": "KEYCLOAK_BASE_URL",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "KEYCLOAK_BASE_URL"
+                      }
+                    }
+                  },
+                  {
+                    "name": "KEYCLOAK_REALMNAME",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "KEYCLOAK_REALMNAME"
+                      }
+                    }
+                  },
+                  {
+                    "name": "KEYCLOAK_ADMIN_CLIENTID",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "KEYCLOAK_ADMIN_CLIENTID"
+                      }
+                    }
+                  },
+                  {
+                    "name": "KEYCLOAK_ADMIN_SECRET",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "KEYCLOAK_ADMIN_SECRET"
+                      }
+                    }
+                  },
+                  {
+                    "name": "KEYCLOAK_AUTH_AUDIENCE",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "KEYCLOAK_AUTH_AUDIENCE"
+                      }
+                    }
+                  },
+                  {
+                    "name": "KEYCLOAK_AUTH_CLIENT_SECRET",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "KEYCLOAK_AUTH_CLIENT_SECRET"
+                      }
+                    }
+                  },
+                  {
+                    "name": "POD_TESTING",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${NAME}-${TAG_NAME}-config",
+                        "key": "POD_TESTING"
+                      }
                     }
                   }
                 ],
