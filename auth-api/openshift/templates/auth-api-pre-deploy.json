@@ -10,6 +10,21 @@
   },
   "objects": [
     {
+      "kind": "ConfigMap",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${NAME}-${TAG_NAME}-config",
+        "labels": {
+          "app": "${NAME}-${TAG_NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-pre-deploy"
+        }
+      },
+      "data": {
+        "POD_TESTING": "true"
+      }
+    },
+    {
       "kind": "Secret",
       "apiVersion": "v1",
       "metadata": {

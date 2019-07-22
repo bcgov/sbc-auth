@@ -85,14 +85,14 @@
               {
                 "name": "web-caddy-config",
                 "configMap": {
-                  "name": "web-caddy-config",
+                  "name": "${NAME}-${TAG_NAME}-caddy-config",
                   "defaultMode": 420
                 }
               },
               {
                 "name": "web-ui-configuration",
                 "configMap": {
-                  "name": "web-ui-configuration",
+                  "name": "${NAME}-${TAG_NAME}-ui-configuration",
                   "defaultMode": 420
                 }
               }

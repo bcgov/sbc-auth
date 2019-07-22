@@ -121,7 +121,7 @@
       "displayName": "Strategy Image Name",
       "required": true,
       "description": "The name of the strategy image.",
-      "value": "bcgov-s2i-cadd"
+      "value": "bcgov-s2i-caddy"
     },
     {
       "name": "STRATEGY_IMAGE_NAME_SPACE",

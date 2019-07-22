@@ -110,7 +110,7 @@
       "displayName": "Source Image Name Space",
       "required": true,
       "description": "The name space of the  source image.",
-      "value": "1rdehl-tools"
+      "value": "d7eovc-tools"
     },
     {
       "name": "SOURCE_IMAGE_NAME",
