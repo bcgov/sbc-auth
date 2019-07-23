@@ -1,0 +1,470 @@
+---
+openapi: 3.0.0
+info:
+  title: SBC Auth API Reference
+  description: SBC Auth API reference documentation
+  version: 1.0.0
+paths:  
+  /api/v1/admin/users/:
+    post:
+      tags:
+      - Users
+      summary: Create User
+      description: >-
+        Add user to keycloak by API
+      operationId: Users_POST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'   
+            examples:               
+              user_info1:
+                value: '{"username":"test11", "password":"1111", "firstname":"111aaa", "lastname":"test", "email":"test11@gov.bc.ca", "enabled":true, "user_type":["/test", "/basic/editor" ], "corp_type":"CP", "source":"PASSCODE"}'  
+              user_info_duplicated_email:
+                value: '{"username":"test12", "password":"1111", "firstname":"111aaa", "lastname":"test", "email":"test11@gov.bc.ca", "enabled":true, "user_type":["/test", "/basic/editor" ], "corp_type":"CP", "source":"PASSCODE"}'                  
+        required: true
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResp'
+              examples:
+                user_info1:
+                  value: '{"id": "69268bb2-16dc-4e21-9ea4-50feabb5b3b3", "createdTimestamp": 1563553946779, "username": "test11", "enabled": true, "totp": false, "emailVerified": false, "firstName": "111", "lastName": "test", "email": "test11@gov.bc.ca", "attributes": {"corp_type": ["CP"], "source": ["PASSCODE"]}, "disableableCredentialTypes": ["password"], "requiredActions": [], "federatedIdentities": [], "notBefore": 0, "access": {"manageGroupMembership": true, "view": true, "mapRoles": true, "impersonate": false, "manage": true}}'                                  
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse' 
+        '409':
+          description: DataConflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataIssueResponse'   
+              examples:                
+                user_info_duplicated_email:
+                  value: '{"error": "DATA_CONFLICT", "message": "New data conflict with existing data.", "detail": "409: b''{\"errorMessage\":\"User exists with same email\"}''"}'                              
+  /api/v1/admin/users/{username}/:  
+    get:
+      tags:
+        - Users
+      summary: Get User
+      description: Retrieve User record.
+      operationId: Users_GET
+      parameters:
+      - name: username
+        in: path
+        description: User Name.
+        required: true
+        schema:
+          type: string        
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResp'
+              examples:
+                user_info_cp0002098:
+                  value: '{"id": "e42caba8-e39e-46ec-bafe-0c3b6b9b9f3a", "createdTimestamp": 1562872492843, "username": "cp0002098","enabled": true, "totp": false,"emailVerified": false, "firstName": "CP0002098","lastName": "test","email": "cp0002098@gov.bc.ca","attributes": { "corp_type": ["CP"],"source": ["PASSCODE"]},"disableableCredentialTypes": ["password"],"requiredActions": [],"federatedIdentities": [],"notBefore": 0,"access": {"manageGroupMembership": true,"view": true,"mapRoles": true,"impersonate": false,"manage": true}}'
+                user_info_cp0002103:
+                  value: '{"id": "e4a9a204-506a-4b2c-8042-ff0c6850c4b3", "createdTimestamp": 1562871170563, "username": "cp0002103","enabled": true, "totp": false,"emailVerified": false, "firstName": "CP0002103","lastName": "test","email": "cp0002103@gov.bc.ca","attributes": { "corp_type": ["CP"],"source": ["PASSCODE"]},"disableableCredentialTypes": ["password"],"requiredActions": [],"federatedIdentities": [],"notBefore": 0,"access": {"manageGroupMembership": true,"view": true,"mapRoles": true,"impersonate": false,"manage": true}}'
+                user_info_cp0002106:
+                  value: '{"id": "4bf7deb0-0b43-41d3-8c55-f3cc6345e30f", "createdTimestamp": 1563384666392, "username": "cp0002106","enabled": true, "totp": false,"emailVerified": false, "firstName": "CP0002106","lastName": "test","email": "cp0002106@gov.bc.ca","attributes": { "corp_type": ["CP"],"source": ["PASSCODE"]},"disableableCredentialTypes": ["password"],"requiredActions": [],"federatedIdentities": [],"notBefore": 0,"access": {"manageGroupMembership": true,"view": true,"mapRoles": true,"impersonate": false,"manage": true}}'
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataIssueResponse'
+              examples:
+                user_info_data_not_found: 
+                  value: '{"error": "DATA_NOT_FOUND", "message": "No matching record found.", "detail": "None"}'  
+    parameters:
+    - name: username
+      in: path     
+      required: true
+      schema:
+        format: string
+        type: string
+      examples:
+        user_info_cp0002098:
+          value: cp0002098
+        user_info_cp0002103:  
+          value: cp0002103
+        user_info_cp0002106:  
+          value: cp0002106  
+        user_info_data_not_found:  
+          value: cp000  
+  /api/v1/token:      
+    post:
+      tags:
+      - Login Token
+      summary: Create Login Token
+      description: >-
+        Add login token by API
+      operationId: Login_POST
+      parameters:
+        - name: username
+          in: query     
+          required: true
+          schema:
+            type: string
+          examples:
+            valid_user_credentials:
+              value: test11
+            invalid_user_credentials:
+              value: test1  
+        - name: password
+          in: query     
+          required: true
+          schema:
+            type: string  
+          examples:
+            valid_user_credentials:
+              value: 1111 
+            invalid_user_credentials:
+              value: 1111 
+        - name: refresh_token
+          in: query     
+          required: true
+          schema:
+            type: string
+          examples:
+            valid_refresh_token:
+              value: eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiIwMjYxYWQ0My0xYjAwLTQzNjEtODQyYy1kYjdlMTkyMGM5NTEiLCJleHAiOjE1NjA2NDA4NDcsIm5iZiI6MCwiaWF0IjoxNTYwNTU0NDQ3LCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOiJzYmMtYXV0aC13ZWIiLCJzdWIiOiI5NmI4ZjdhMi0zYTYxLTRkOTAtYmM0ZS00MDJkYjE4YzRiNzYiLCJ0eXAiOiJSZWZyZXNoIiwiYXpwIjoic2JjLWF1dGgtd2ViIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiZTdmMTA4MzYtNDVjMS00NmUwLWFjOTQtZWQ4MjMwMmI4NWQyIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImVkaXQiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImJhc2ljIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fX0.FSxnxfqkvzGmCIaLSUxGj5F6Qc5pz0_BYAGb1oJUzBs6ZNaK8lI8XYq8uIcD41ZB8ybgg63ZzIhG7dJamGkBnyKkfU1x0t3u7CGs7FFk3Ze_TxiHNarK7LxRKCYVUDSRlarDPOb0MqGqpp6sLQY6phRg2i1luxBfeElEI3NJKkjm2azNK783YpfIT-qCeBkLeHiRJ6P0BtNZdhGxJ2voRiZNN9IREDh75rXedo4089h_MayovipzUASIZwvlQj-5VJClB9rtx7hbaoDZ_eGz21kxE2pmqVNSqkpyF4fPCWVkiGncbbRBhDtMSvnV0GIg4RZ07Q7p6g7UcVlNGDsLWg                 
+            invalid_refresh_token:
+              value: Invalid-Token-eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiIwMjYxYWQ0My0xYjAwLTQzNjEtODQyYy1kYjdlMTkyMGM5NTEiLCJleHAiOjE1NjA2NDA4NDcsIm5iZiI6MCwiaWF0IjoxNTYwNTU0NDQ3LCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOiJzYmMtYXV0aC13ZWIiLCJzdWIiOiI5NmI4ZjdhMi0zYTYxLTRkOTAtYmM0ZS00MDJkYjE4YzRiNzYiLCJ0eXAiOiJSZWZyZXNoIiwiYXpwIjoic2JjLWF1dGgtd2ViIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiZTdmMTA4MzYtNDVjMS00NmUwLWFjOTQtZWQ4MjMwMmI4NWQyIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImVkaXQiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImJhc2ljIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fX0.FSxnxfqkvzGmCIaLSUxGj5F6Qc5pz0_BYAGb1oJUzBs6ZNaK8lI8XYq8uIcD41ZB8ybgg63ZzIhG7dJamGkBnyKkfU1x0t3u7CGs7FFk3Ze_TxiHNarK7LxRKCYVUDSRlarDPOb0MqGqpp6sLQY6phRg2i1luxBfeElEI3NJKkjm2azNK783YpfIT-qCeBkLeHiRJ6P0BtNZdhGxJ2voRiZNN9IREDh75rXedo4089h_MayovipzUASIZwvlQj-5VJClB9rtx7hbaoDZ_eGz21kxE2pmqVNSqkpyF4fPCWVkiGncbbRBhDtMSvnV0GIg4RZ07Q7p6g7UcVlNGDsLWg                   
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'              
+        required: true
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+              examples:
+                valid_user_credentials:
+                  value: '{ "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiI2OWRhM2FlMi1mOWNhLTQ3NmEtYTc3Yi0yMjQ4NGZiNzQxNTEiLCJleHAiOjE1NjM2NjA2NDUsIm5iZiI6MCwiaWF0IjoxNTYzNTc0MjQ1LCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOiJzYmMtYXV0aC13ZWIiLCJzdWIiOiI2OTI2OGJiMi0xNmRjLTRlMjEtOWVhNC01MGZlYWJiNWIzYjMiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJzYmMtYXV0aC13ZWIiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiJhZmIxNTI3NS0xMTIzLTRmZTUtYmQzYi1mMThkMmY4YjJmNjEiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly8xOTIuMTY4LjAuMTM6ODA4MC8iLCIxOTIuMTY4LjAuMTMiLCIqIiwiaHR0cDovLzE5Mi4xNjguMC4xMzo4MDgwIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJlZGl0IiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sIm5hbWUiOiIxMTEgdGVzdCIsInByZWZlcnJlZF91c2VybmFtZSI6InRlc3QxMSIsImdpdmVuX25hbWUiOiIxMTEiLCJmYW1pbHlfbmFtZSI6InRlc3QiLCJlbWFpbCI6InRlc3QxMUBnb3YuYmMuY2EifQ.JpJmOdM6WPIgi3AjZ4Lf0RbYbkEID8hS9GlV8VD1HBNTj2JtMaABe1L1u__x0avQonu9scUnunMNAV82N-3uSw_Z6U9nPnLeywI197TBMh2-k91HLiPKlN14TLRT0tnk9NiGA_rnuEi5HBPv_OHql36Jstr-E2XS93EJ8COPOBX32y-NM_viGjaNksdur6s830ulVO5D_HXs52wzCvdGj7FfxI9vHHSIeQIgLrHTAlrbwmvI6j1BLZE1tF2CvNUDYYETRoBrOFHPCJqGbEboIF4bfnO26DM-9058x5Wm7WzzOm7iuHgBsCR2JyjQnNIoACV_-NPU1NCkqz_cO5B9Vw",    
+                            "expires_in": 86400,
+                            "refresh_expires_in": 86400,
+                            "refresh_token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiI4MDUwMDc5My02ZjI1LTRhNGYtYTE3MC00NDMxOTQyMTZlZmUiLCJleHAiOjE1NjM2NjA2NDUsIm5iZiI6MCwiaWF0IjoxNTYzNTc0MjQ1LCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOiJzYmMtYXV0aC13ZWIiLCJzdWIiOiI2OTI2OGJiMi0xNmRjLTRlMjEtOWVhNC01MGZlYWJiNWIzYjMiLCJ0eXAiOiJSZWZyZXNoIiwiYXpwIjoic2JjLWF1dGgtd2ViIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiYWZiMTUyNzUtMTEyMy00ZmU1LWJkM2ItZjE4ZDJmOGIyZjYxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImVkaXQiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImJhc2ljIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fX0.Yr-IbIFwsh3XWZG0LphrwdQmF6zWPWmRbQI_uuYhCA8jYDs4Guc0yZLRQHx4IZuzscxGMNx0N69VXgPxRloTrj1cmj12VKTiL7J_HmHgdyuaOwl0vWOxzm40ePkf2hkecgeLtqoeOzn7OtthgMAAo4XMBG6YTjtg5jWDjCXT77CnxGpHI8PfSwUruZuDXR4LoGMhSfsb-Ab0wMe46xXt8xk_m9E4rlm_mRJh_nlzPzssWTFMOmSYvJPah3mmpWZb84mkeWx4iS5aklgSz_tgU4j_WIBz4ydMWKB2igGQonyAkzwKhEKLFqTmoQpb0dtvOP2yPrGy6vjwrb37uTRi9w",
+                            "token_type": "bearer",
+                            "not-before-policy": 1562910731,
+                            "session_state": "afb15275-1123-4fe5-bd3b-f18d2f8b2f61",
+                            "registries-trace-id": "68c9468bf9cfd489:720ff63edaef91dc:68c9468bf9cfd489:1"}' 
+                valid_refresh_token:
+                  value: '{ "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiI5NWQ4MGRhMC0wYWZiLTRmZDYtOWRjYi0xZTQxZWJkZjNlMTEiLCJleHAiOjE1NjM2ODc5MzEsIm5iZiI6MCwiaWF0IjoxNTYzNjAxNTUzLCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOiJzYmMtYXV0aC13ZWIiLCJzdWIiOiJlZjFiNzE1YS1lODFkLTQ5ZmItOGI3My0wMmE2ZTViMGMxZDAiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJzYmMtYXV0aC13ZWIiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiI0Y2VjMzlkZS00M2E5LTQ1NTctYTEyNy1hYjVmODdlMWRmYTUiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly8xOTIuMTY4LjAuMTM6ODA4MC8iLCIxOTIuMTY4LjAuMTMiLCIqIiwiaHR0cDovLzE5Mi4xNjguMC4xMzo4MDgwIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJlZGl0IiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sIm5hbWUiOiIxMTEgdGVzdCIsInByZWZlcnJlZF91c2VybmFtZSI6InRlc3QxMSIsImdpdmVuX25hbWUiOiIxMTEiLCJmYW1pbHlfbmFtZSI6InRlc3QiLCJlbWFpbCI6InRlc3QxMUBnb3YuYmMuY2EifQ.UO6P4Qe92ZHULFXDg-84cV_kPBdT-j_WBjEqfD0BQ8AkXSbpoTFHnXSi29o4f0pQ6Oz5p2Smj84VaQGoybCx2yAgUO2gsqpYo6q4cqsD5bzqLYSFOhtSNJ2hvDaR2pT8Iw0BzUqmwXWw2f7R30Nmu6W9fxnb5-zdVcnUqDKYbwnyvvXDEKwvaah6EQPvwq5YDYZKm7t096uNAE1km_XI4lkJW29MqW91uUD2DZ4D9h31qi_v2weBnd6leqTwJXp0JmC_ptorcRZ7zblxZcqJOM30ZuYsNBTMyX-TpLn1v-n2F7v_N9c4KVc91cXqnq5eXFdaX6SfSEDbmb15L7kwJw",    
+                            "expires_in": 86378,
+                            "refresh_expires_in": 86378,
+                            "refresh_token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiI4NTFiNGNlNy1mN2NjLTQzOGUtYmRmMS0xNWVjM2FlYWE5NjUiLCJleHAiOjE1NjM2ODc5MzEsIm5iZiI6MCwiaWF0IjoxNTYzNjAxNTUzLCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOiJzYmMtYXV0aC13ZWIiLCJzdWIiOiJlZjFiNzE1YS1lODFkLTQ5ZmItOGI3My0wMmE2ZTViMGMxZDAiLCJ0eXAiOiJSZWZyZXNoIiwiYXpwIjoic2JjLWF1dGgtd2ViIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiNGNlYzM5ZGUtNDNhOS00NTU3LWExMjctYWI1Zjg3ZTFkZmE1IiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImVkaXQiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImJhc2ljIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fX0.caGcKqQoA6YYlIzhkdHxU1Mz1gH3ZUFh9ztfl-6iLtkJGzdaQNERUD11_yMMXh86vpi7DENQOIYhKxSaJOPUq7Ek2B6x0BwJXhSgKEXooaUzttRB_A8Ivb8-fseupxToNplVYPe3CDpDx5mwyZqHmN2lERIivXZbafv8fqElQnVT_vtyuyNQZmMV3zVHZItnObX1KR9-mRf_zbIycyLY6OSdYjQyMAp7UP7GNw2Ae2llgnNavzkVtbMugMr_mVxCHnEq4LUVg8T4bRdfX3a9rfudTUeKeyGAnSQVTVdfZqVND1pFafnbU5QNgN43j_-bfl-Km13FLFO_hijKFK6eVA",
+                            "token_type": "bearer",
+                            "not-before-policy": 1562910731,
+                            "session_state": "4cec39de-43a9-4557-a127-ab5f87e1dfa5",
+                            "registries-trace-id": "8ffcb3dfe375d895:cf7b2f559d25b628:8ffcb3dfe375d895:1"}'                
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataIssueResponse'
+              examples:
+                invalid_refresh_token: 
+                  value: '{"error": "INVALID_REFRESH_TOKEN", "message": "Invalid refresh token.", "detail": "400: b''{\"error\":\"invalid_grant\",\"error_description\":\"Invalid refresh token\"}''"}'                     
+        '401':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataIssueResponse'
+              examples:
+                invalid_user_credentials: 
+                  value: '{"error": "INVALID_USER_CREDENTIALS", "message": "Invalid user credentials.", "detail": "401: b''{\"error\":\"invalid_grant\",\"error_description\":\"Invalid user credentials\"}''"}'                     
+  /api/v1/logout:      
+    post:
+      tags:
+      - Logout Token
+      summary: Logout Token
+      description: >-
+        Logout token by API
+      operationId: Logout_POST
+      parameters:        
+        - name: refresh_token
+          in: query     
+          required: true
+          schema:
+            type: string
+          examples:
+            valid_refresh_token:
+              value: eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiIwMjYxYWQ0My0xYjAwLTQzNjEtODQyYy1kYjdlMTkyMGM5NTEiLCJleHAiOjE1NjA2NDA4NDcsIm5iZiI6MCwiaWF0IjoxNTYwNTU0NDQ3LCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOiJzYmMtYXV0aC13ZWIiLCJzdWIiOiI5NmI4ZjdhMi0zYTYxLTRkOTAtYmM0ZS00MDJkYjE4YzRiNzYiLCJ0eXAiOiJSZWZyZXNoIiwiYXpwIjoic2JjLWF1dGgtd2ViIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiZTdmMTA4MzYtNDVjMS00NmUwLWFjOTQtZWQ4MjMwMmI4NWQyIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImVkaXQiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImJhc2ljIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fX0.FSxnxfqkvzGmCIaLSUxGj5F6Qc5pz0_BYAGb1oJUzBs6ZNaK8lI8XYq8uIcD41ZB8ybgg63ZzIhG7dJamGkBnyKkfU1x0t3u7CGs7FFk3Ze_TxiHNarK7LxRKCYVUDSRlarDPOb0MqGqpp6sLQY6phRg2i1luxBfeElEI3NJKkjm2azNK783YpfIT-qCeBkLeHiRJ6P0BtNZdhGxJ2voRiZNN9IREDh75rXedo4089h_MayovipzUASIZwvlQj-5VJClB9rtx7hbaoDZ_eGz21kxE2pmqVNSqkpyF4fPCWVkiGncbbRBhDtMSvnV0GIg4RZ07Q7p6g7UcVlNGDsLWg                 
+            invalid_refresh_token:
+              value: Invalid-Token-eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiIwMjYxYWQ0My0xYjAwLTQzNjEtODQyYy1kYjdlMTkyMGM5NTEiLCJleHAiOjE1NjA2NDA4NDcsIm5iZiI6MCwiaWF0IjoxNTYwNTU0NDQ3LCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOiJzYmMtYXV0aC13ZWIiLCJzdWIiOiI5NmI4ZjdhMi0zYTYxLTRkOTAtYmM0ZS00MDJkYjE4YzRiNzYiLCJ0eXAiOiJSZWZyZXNoIiwiYXpwIjoic2JjLWF1dGgtd2ViIiwiYXV0aF90aW1lIjowLCJzZXNzaW9uX3N0YXRlIjoiZTdmMTA4MzYtNDVjMS00NmUwLWFjOTQtZWQ4MjMwMmI4NWQyIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImVkaXQiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImJhc2ljIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fX0.FSxnxfqkvzGmCIaLSUxGj5F6Qc5pz0_BYAGb1oJUzBs6ZNaK8lI8XYq8uIcD41ZB8ybgg63ZzIhG7dJamGkBnyKkfU1x0t3u7CGs7FFk3Ze_TxiHNarK7LxRKCYVUDSRlarDPOb0MqGqpp6sLQY6phRg2i1luxBfeElEI3NJKkjm2azNK783YpfIT-qCeBkLeHiRJ6P0BtNZdhGxJ2voRiZNN9IREDh75rXedo4089h_MayovipzUASIZwvlQj-5VJClB9rtx7hbaoDZ_eGz21kxE2pmqVNSqkpyF4fPCWVkiGncbbRBhDtMSvnV0GIg4RZ07Q7p6g7UcVlNGDsLWg                   
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'              
+        required: true
+      responses:
+        '204':
+          description: NO CONTENT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+              examples:                
+                valid_refresh_token:
+                  value: ''                
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataIssueResponse'
+              examples:
+                invalid_refresh_token: 
+                  value: '{"error": "INVALID_REFRESH_TOKEN", "message": "Invalid refresh token.", "detail": "400: b''{\"error\":\"invalid_grant\",\"error_description\":\"Invalid refresh token\"}''"}'                             
+  /api/v1/users/info:  
+    get:
+      tags:
+        - User info
+      summary: Get User Info
+      description: Retrieve User Information.
+      operationId: UserInfo_GET 
+      parameters:        
+        - name: Authorization
+          in: header     
+          required: true
+          schema:
+            type: string
+          examples:
+            user_info:
+              value: Bearer "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiI0MTI3NThiNS02MGMxLTQ4MmQtOWE2ZS1lMTlmYTQzYTQxMTUiLCJleHAiOjE1NjA2NDA4NDcsIm5iZiI6MCwiaWF0IjoxNTYwNTU0NDQ3LCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOiJzYmMtYXV0aC13ZWIiLCJzdWIiOiI5NmI4ZjdhMi0zYTYxLTRkOTAtYmM0ZS00MDJkYjE4YzRiNzYiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJzYmMtYXV0aC13ZWIiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiJlN2YxMDgzNi00NWMxLTQ2ZTAtYWM5NC1lZDgyMzAyYjg1ZDIiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly8xOTIuMTY4LjAuMTM6ODA4MC8iLCIxOTIuMTY4LjAuMTMiLCIqIiwiaHR0cDovLzE5Mi4xNjguMC4xMzo4MDgwIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJlZGl0IiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sIm5hbWUiOiIxMTEgdGVzdCIsInByZWZlcnJlZF91c2VybmFtZSI6InRlc3QxMTEiLCJnaXZlbl9uYW1lIjoiMTExIiwiZmFtaWx5X25hbWUiOiJ0ZXN0IiwiZW1haWwiOiJ0ZXN0MTFAZ292LmJjLmNhIn0.aeNtPrNFcmvmu5X1bystFQfdFh5NY1ZeTx67K7a4R_Pi4yx0THTplSknIHdnzor4DufrcfMn2WexS4Bi6bhr6IBsN9ELupkuzgoGZ__Uzk8zPeCTXfekJqAihTcTpVlcH_hvtFWadQ7QimYqDgOvkVjAHH9-ap5a0MPa1kbPlyyMo07Yy_W7_X1vONlezIhg1KR7_0JDANADwLObgMbaNKjMQS0szSFKXSdqDM6uCmYZWLFr-lFgJ0ARIUj-XLOx0MC34YMemINFRaudP24uHdpk-8rjOY1N3ozs82PY2WqSeSGPZDO-KEZ2IcpU-CTx_zOC_lbMszY1NuUoPJ-luA"
+            user_info_unauthorized:
+              value: Bearer "InvalidHeadereyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiI0MTI3NThiNS02MGMxLTQ4MmQtOWE2ZS1lMTlmYTQzYTQxMTUiLCJleHAiOjE1NjA2NDA4NDcsIm5iZiI6MCwiaWF0IjoxNTYwNTU0NDQ3LCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOiJzYmMtYXV0aC13ZWIiLCJzdWIiOiI5NmI4ZjdhMi0zYTYxLTRkOTAtYmM0ZS00MDJkYjE4YzRiNzYiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJzYmMtYXV0aC13ZWIiLCJhdXRoX3RpbWUiOjAsInNlc3Npb25fc3RhdGUiOiJlN2YxMDgzNi00NWMxLTQ2ZTAtYWM5NC1lZDgyMzAyYjg1ZDIiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly8xOTIuMTY4LjAuMTM6ODA4MC8iLCIxOTIuMTY4LjAuMTMiLCIqIiwiaHR0cDovLzE5Mi4xNjguMC4xMzo4MDgwIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJlZGl0IiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sIm5hbWUiOiIxMTEgdGVzdCIsInByZWZlcnJlZF91c2VybmFtZSI6InRlc3QxMTEiLCJnaXZlbl9uYW1lIjoiMTExIiwiZmFtaWx5X25hbWUiOiJ0ZXN0IiwiZW1haWwiOiJ0ZXN0MTFAZ292LmJjLmNhIn0.aeNtPrNFcmvmu5X1bystFQfdFh5NY1ZeTx67K7a4R_Pi4yx0THTplSknIHdnzor4DufrcfMn2WexS4Bi6bhr6IBsN9ELupkuzgoGZ__Uzk8zPeCTXfekJqAihTcTpVlcH_hvtFWadQ7QimYqDgOvkVjAHH9-ap5a0MPa1kbPlyyMo07Yy_W7_X1vONlezIhg1KR7_0JDANADwLObgMbaNKjMQS0szSFKXSdqDM6uCmYZWLFr-lFgJ0ARIUj-XLOx0MC34YMemINFRaudP24uHdpk-8rjOY1N3ozs82PY2WqSeSGPZDO-KEZ2IcpU-CTx_zOC_lbMszY1NuUoPJ-luA"  
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfoResp'
+              examples:
+                user_info:
+                  value: '{"roles": "{edit,uma_authorization,basic}", "username": "test11" }'                
+        '401':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataIssueResponse'
+              examples:
+                user_info_unauthorized: 
+                  value: '{"code": "invalid_header", "description": "Invalid header. Use an RS256 signed JWT Access Token"}'      
+  /api/v1/admin/users:      
+    delete:
+      tags:
+      - Delete User
+      summary: Delete User by username
+      description: >-
+        Delete User by API
+      operationId: DeleteUser_POST
+      parameters:        
+        - name: username
+          in: query     
+          required: true
+          schema:
+            type: string
+          examples:
+            existing_username:
+              value: test11
+            non_existing_username:
+              value: test22
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'              
+        required: true
+      responses:
+        '204':
+          description: NO CONTENT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+              examples:                
+                existing_username:
+                  value: ''                
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataIssueResponse'
+              examples:
+                non_existing_username: 
+                  value: '{"error": "DATA_NOT_FOUND", "message": "No matching record found.", "detail": "None"}' 
+components:
+  schemas:
+    DataIssueResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Identifier representing the type of error that occurred.
+        message:
+          type: string
+          description: Description of the error.
+        detail: 
+          type: string         
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Identifier representing the type of error that occurred.
+        message:
+          type: string
+          description: Description of the error.
+      description: Contains details of an error that was encountered.
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          description: User Name.
+        password:
+          type: string
+          description: Password for user.
+        firstname:
+          type: string
+          description: First Name.
+        lastname:
+          type: string
+          description: Last Name.  
+        email:
+          type: string
+          description: Email Address.    
+        enabled:
+          type: boolean
+          description: Enable Flag.             
+        user_type:
+          type: array
+          items:
+            type: string
+        corp_type:
+          type: string
+          description: Corparatio Type.  
+        temp_password:
+          type: string
+          description: Temporary Password.
+        source:
+          type: string
+          description: The Source.  
+    UserResp:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID.
+        createdTimestamp:
+          type: integer
+          description: Time Stamp for creation.
+        username:
+          type: string
+          description: User Name.
+        enabled:
+          type: boolean
+          description: Enable Flag.          
+        totp:
+          type: boolean
+          description: to tp.  
+        emailVerified:
+          type: boolean
+          description: Email Verified.            
+        firstName:
+          type: string
+          description: First Name. 
+        lastName:
+          type: string
+          description: Last Name.  
+        email:
+          type: string
+          description: Email.  
+        attributes:
+          type: object
+          properties:
+            corp_type:
+              type: array
+              items:
+                type: string
+            source:
+              type: array  
+              items:
+                type: string
+        disableableCredentialTypes:
+          type: array  
+          items:
+            type: string  
+        requiredActions:
+          type: array  
+          items:
+            type: string 
+        federatedIdentities:
+          type: array  
+          items:
+            type: string                 
+        notBefore:
+          type: integer          
+        access:
+          type: object
+          properties:
+            manageGroupMembership:
+              type: boolean              
+            view:
+              type: boolean  
+            mapRoles:
+              type: boolean              
+            impersonate:
+              type: boolean  
+            manage:
+              type: boolean     
+    Token:
+      type: object
+      properties:
+        access_token:
+          type: string          
+        refresh_expires_in:
+          type: integer          
+        refresh_token:
+          type: string
+        token_type:
+          type: string          
+        not-before-policy:
+          type: integer          
+        session_state:
+          type: string  
+        registries-trace-id:
+          type: string   
+    UserInfoResp:
+      type: object
+      properties:
+        roles:
+          type: array
+          items:
+            type: string 
+        username:
+          type: string
+          description: User Name.        
