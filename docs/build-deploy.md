@@ -22,7 +22,7 @@ oc get all,templates,configmap,secret,pvc -l template=auth-api-deploy
 oc delete all,templates,configmap,secret,(pvc Danger!!) -l app=auth-api
 ```
 
-### Create or update Secret ([Openshift Document](https://docs.openshift.com/container-platform/3.11/dev_guide/builds/build_inputs.html#using-secrets-during-build))
+### Create or update Secret(Configmap) ([Openshift Document](https://docs.openshift.com/container-platform/3.11/dev_guide/builds/build_inputs.html#using-secrets-during-build))
 
 **Warning**: Don't put the real secret inside the template file.
 
@@ -32,10 +32,17 @@ oc delete all,templates,configmap,secret,(pvc Danger!!) -l app=auth-api
 oc create secret generic my-secret \
       --from-literal=username=pwei123 \
       --from-literal=password=1234 \
-      --from-literal=address='1234 abc st.' \
       --type=kubernetes.io/basic-auth \
-      --dry-run -o yaml \
-   | oc replace -f -
+      --dry-run -o json \
+   | oc apply -f -
+```
+
+> Add a new item to existing secret
+
+```sh
+oc get secret my-secret --export=true -o json \
+   | jq ". * $(oc create secret generic my-secret --from-literal=POD_TESTING=true --type=kubernetes.io/basic-auth --dry-run -o json)" \
+   | oc apply -f -
 ```
 
 ## API(s)
