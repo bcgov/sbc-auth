@@ -333,14 +333,14 @@
       "displayName": "Database Name",
       "description": "A valid database name used by the service.",
       "required": true,
-      "value": "auth-db"
+      "value": "auth"
     },
     {
       "name": "DATABASE_USER",
       "displayName": "Database User",
       "description": "A valid database user used by the service.",
       "required": true,
-      "value": "auth"
+      "value": "authuser"
     },
     {
       "name": "DATABASE_HOST",
@@ -361,7 +361,7 @@
       "displayName": "Database Name for unit testing",
       "description": "A valid database name for unit testing used by the service.",
       "required": true,
-      "value": "auth-testdb"
+      "value": "auth_testdb"
     },
     {
       "name": "DATABASE_TEST_HOST",
