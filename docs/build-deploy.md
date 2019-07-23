@@ -24,6 +24,8 @@ oc delete all,templates,configmap,secret,(pvc Danger!!) -l app=auth-api
 
 ### Create or update Secret ([Openshift Document](https://docs.openshift.com/container-platform/3.11/dev_guide/builds/build_inputs.html#using-secrets-during-build))
 
+**Warning**: Don't put the real secret inside the template file.
+
 > Create or update openshift template first and run the following command:
 
 ```sh
