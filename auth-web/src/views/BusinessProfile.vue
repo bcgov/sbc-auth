@@ -16,17 +16,24 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import Vue from 'vue'
-import BusinessContactForm from '@/components/auth/BusinessContactForm'
-import SupportInfoCard from '@/components/SupportInfoCard'
+import { Component } from 'vue-property-decorator'
+import { getModule } from 'vuex-module-decorators'
+import BusinessModule from '@/store/modules/business'
+import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
+import SupportInfoCard from '@/components/SupportInfoCard.vue'
 
-export default {
-  name: 'BusinessProfile',
+@Component({
   components: {
     BusinessContactForm,
     SupportInfoCard
   }
+})
+export default class BusinessProfile extends Vue {
+  private businessStore = getModule(BusinessModule)
+  // TODO: Set businessType from current business in store
+  private businessType = 'Co-op'
 }
 </script>
 
@@ -82,6 +89,6 @@ export default {
       margin-left 2rem
       width 20rem
 
-  .view-container
-      flex-flow row nowrap
+    .view-container
+        flex-flow row nowrap
 </style>

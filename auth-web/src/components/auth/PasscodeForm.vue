@@ -20,14 +20,14 @@
           req
           persistent-hint
           :rules="entityNumRules"
-          v-model="entityNumber"
+          v-model="businessNumber"
         ></v-text-field>
       </div>
       <div class="passcode-form__row">
         <v-text-field
-          :append-icon="show1 ? 'visibility' : 'visibility_off'"
-          :type="show1 ? 'text' : 'password'"
-          @click:append="show1 = !show1"
+          :append-icon="showPasscode ? 'visibility' : 'visibility_off'"
+          :type="showPasscode ? 'text' : 'password'"
+          @click:append="showPasscode = !showPasscode"
           box
           label="Enter your Passcode"
           hint="Passcode must be exactly 9 digits"
@@ -81,79 +81,79 @@
 </template>
 
 <script lang="ts">
-import LoginServices from '@/services/login.services'
-import IframeServices from '@/services/iframe.services'
-import ConfigHelper from '@/util/config-helper'
+import Vue from 'vue'
+import { Component, Prop } from 'vue-property-decorator'
+import { getModule } from 'vuex-module-decorators'
+import BusinessModule from '../../store/modules/business'
+import configHelper from '../../util/config-helper'
+import iframeServices from '../../services/iframe.services'
 
-export default {
-  name: 'PasscodeForm',
+@Component
+export default class PasscodeForm extends Vue {
+  showPasscode = false
+  showSpinner = false
+  noPasscodeDialog = false
+  loginError = ''
+  valid = false
+  VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
+  entityNumRules = [
+    v => !!v || 'Incorporation Number is required'
+  ]
+  entityPasscodeRules = [
+    v => !!v || 'Passcode is required',
+    v => v.length >= 9 || 'Passcode must be exactly 9 digits'
+  ]
+  businessStore = getModule(BusinessModule)
 
-  data: () => ({
-    show1: false,
-    showSpinner: false,
-    noPasscodeDialog: false,
-    loginError: '',
-    valid: false,
-    // cudnt find a better way to expose env variables in template
-    VUE_APP_COPS_REDIRECT_URL: ConfigHelper.getValue('VUE_APP_COPS_REDIRECT_URL'),
-    entityNumRules: [
-      v => !!v || 'Incorporation Number is required'
-    ],
-    entityPasscodeRules: [
-      v => !!v || 'Passcode is required',
-      v => v.length >= 9 || 'Passcode must be exactly 9 digits'
-    ]
-  }),
+  businessNumber: string = ''
+  passcode: string = ''
 
-  computed: {
-    entityNumber: {
-      get () {
-        return this.$store.state.login.entityNumber
-      },
-      set (value) {
-        this.$store.commit('login/entityNumber', value)
-      }
-    },
-    passcode: {
-      get () {
-        return this.$store.state.login.passcode
-      },
-      set (value) {
-        this.$store.commit('login/passcode', value)
-      }
-    }
-  },
-  methods: {
-    isValidForm () :boolean {
-      return this.$refs.form.validate()
-    },
-    login () {
-      if (this.isValidForm()) {
-        LoginServices.login(this.$store.state.login.entityNumber, this.$store.state.login.passcode)
-          .then(response => {
-            if (response.data.error) {
-              this.loginError =
-                      this.$t('loginFailedMessage')
-            } else if (response.data.access_token) {
-              this.showSpinner = true
-              const msg = JSON.stringify(
-                { 'access_token': response.data.access_token,
-                  'refresh_token': response.data.refresh_token,
-                  'registries_trace_id': response.data['registries-trace-id'] }
-              )
-              IframeServices.emit(this.$refs.iframeContent.contentWindow, msg)
-              sessionStorage.KEYCLOAK_TOKEN = response.data.access_token
-              sessionStorage.KEYCLOAK_REFRESH_TOKEN = response.data.refresh_token
-              sessionStorage.REGISTRIES_TRACE_ID = response.data['registries-trace-id']
-              setTimeout(() => {
-                window.location.href = this.VUE_APP_COPS_REDIRECT_URL
-              }, 500)
+  private isFormValid (): boolean {
+    return (this.$refs.form as Vue & { validate: () => boolean }).validate()
+  }
+
+  private getIFrameContent (): Window {
+    return (this.$refs.iframeContent as Vue & { contentWindow: Window }).contentWindow
+  }
+
+  login () {
+    if (this.isFormValid()) {
+      this.showSpinner = true
+      this.businessStore.login({ businessNumber: this.businessNumber, passCode: this.passcode })
+        .then(response => {
+          // set token and store in storage
+          // TODO: Once iframe token emit is no longer needed,
+          // this should be moved to the login Vuex action
+          const msg = JSON.stringify(
+            { 'access_token': response.data.access_token,
+              'refresh_token': response.data.refresh_token,
+              'registries_trace_id': response.data['registries-trace-id']
             }
-          })
-          .catch(response => {
-            this.loginError = this.$t('loginFailedMessage')
-          })
-      }
+          )
+          iframeServices.emit(this.getIFrameContent(), msg)
+          sessionStorage.KEYCLOAK_TOKEN = response.data.access_token
+          sessionStorage.KEYCLOAK_REFRESH_TOKEN = response.data.refresh_token
+          sessionStorage.REGISTRIES_TRACE_ID = response.data['registries-trace-id']
+
+          // attempt to load business
+          this.businessStore.loadBusiness(this.businessNumber)
+            .then(() => {
+              if (this.businessStore.currentBusiness.contact1) {
+                // transition to co-ops UI
+                setTimeout(() => {
+                  window.location.href = this.VUE_APP_COPS_REDIRECT_URL
+                }, 500)
+              } else {
+                // transition to business contact ui
+                setTimeout(() => {
+                  this.$router.push('/businessprofile')
+                }, 500)
+              }
+            })
+        })
+        .catch(response => {
+          this.loginError = response.response.data.message
+        })
     }
   }
 }
