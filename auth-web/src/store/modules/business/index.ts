@@ -20,7 +20,6 @@ export default class BusinessModule extends VuexModule {
   currentBusiness: Business = {
     businessNumber: ''
   }
-  passCode = ''
 
   @Mutation
   public setCurrentBusiness (business: Business) {
