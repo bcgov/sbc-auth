@@ -26,6 +26,7 @@ from flask import Blueprint
 from auth_api.resources.admin.users import API as USER_API
 
 from .apihelper import Api
+from .entity import API as ENTITY_API
 from .logout import API as LOGOUT_API
 from .meta import API as META_API
 from .ops import API as OPS_API
@@ -68,3 +69,4 @@ API.add_namespace(USERINFO_API, path='/users/info')
 API.add_namespace(TOKEN_API, path='/token')
 API.add_namespace(USER_API, path='/admin/users')
 API.add_namespace(LOGOUT_API, path='/logout')
+API.add_namespace(ENTITY_API, path='/entities')

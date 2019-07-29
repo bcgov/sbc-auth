@@ -16,7 +16,7 @@
 The class and schema are both present in this module.
 """
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import Column, ForeignKey, Integer, String
 
 from .db import db, ma
 
@@ -27,9 +27,14 @@ class Entity(db.Model):  # pylint: disable=too-few-public-methods # Temporarily 
     __tablename__ = 'entity'
 
     id = Column(Integer, primary_key=True)
-    business_identifier = Column(Integer, unique=True, nullable=False)
+    business_identifier = Column('business_identifier', String(75), unique=True, nullable=False)
     contact1 = Column(ForeignKey('contact.id'))
     contact2 = Column(ForeignKey('contact.id'))
+
+    @classmethod
+    def find_by_business_identifier(cls, business_identifier):
+        """Returns the first entity with the provided business identifier."""
+        return cls.query.filter_by(business_identifier=business_identifier).first()
 
 
 class EntitySchema(ma.ModelSchema):
