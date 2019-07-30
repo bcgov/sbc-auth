@@ -17,6 +17,7 @@ A User stores basic information from a KeyCloak user (including the KeyCloak GUI
 """
 
 import datetime
+
 from flask import current_app
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.dialects.postgresql import UUID

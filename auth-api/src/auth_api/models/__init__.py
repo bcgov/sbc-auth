@@ -19,8 +19,8 @@ from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
 from .affiliation import Affiliation, AffiliationSchema
-from .db import db, ma
 from .contact import Contact, ContactSchema
+from .db import db, ma
 from .entity import Entity, EntitySchema
 from .membership import Membership, MembershipSchema
 from .membership_type import MembershipType, MembershipTypeSchema

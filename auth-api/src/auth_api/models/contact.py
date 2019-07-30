@@ -18,8 +18,9 @@ physical addresses, emails, and phone numbers.
 """
 
 from sqlalchemy import Column, Integer, String
-from .db import db, ma
 
+from .base_schema import BaseSchema
+from .db import db
 
 
 class Contact(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
@@ -39,7 +40,8 @@ class Contact(db.Model):  # pylint: disable=too-few-public-methods # Temporarily
     phone_extension = Column('phone_extension', String(10))
     email = Column('email', String(100))
 
-class ContactSchema(ma.ModelSchema):
+
+class ContactSchema(BaseSchema):  # pylint: disable=too-many-ancestors
     """This is the schema for the Contact model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
