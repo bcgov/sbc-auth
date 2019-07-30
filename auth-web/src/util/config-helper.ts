@@ -3,7 +3,7 @@ import Axios from 'axios'
 /**
  * the configs are used since process.env doesnt play well when we hae only one build config and multiple deployments..so going for this
  */
-let url = '/config/configuration.json'
+let url = `/${process.env.VUE_APP_PATH}/config/configuration.json`
 export default {
   fetchConfig () {
     return Axios
