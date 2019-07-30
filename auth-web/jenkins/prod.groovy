@@ -25,6 +25,7 @@ import groovy.json.*
 def APP_NAME = 'auth-web'
 def SOURCE_TAG = 'test'
 def DESTINATION_TAG = 'prod'
+def TOOLS_TAG = 'tools'
 
 def NAMESPACE_APP = '1rdehl'
 def NAMESPACE_BUILD = "${NAMESPACE_APP}"  + '-' + "${TOOLS_TAG}"
