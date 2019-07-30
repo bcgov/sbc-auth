@@ -59,7 +59,7 @@ node {
                 openshift.withCluster() {
                     openshift.withProject("${NAMESPACE_BUILD}") {
                         echo "Tagging ${APP_NAME} for deployment to ${DESTINATION_TAG} ..."
-                        openshift.tag("${APP_NAME}@${SOURCE_TAG}", "${APP_NAME}:${DESTINATION_TAG}")
+                        openshift.tag("${APP_NAME}:${SOURCE_TAG}", "${APP_NAME}:${DESTINATION_TAG}")
                     }
                 }
             }
