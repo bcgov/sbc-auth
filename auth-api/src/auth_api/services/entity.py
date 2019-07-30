@@ -49,8 +49,8 @@ class Entity:
         None fields are not included in the dictionary.
         """
         entity_schema = EntitySchema()
-        dict_obj = entity_schema.dump(self._model)
-        return dict_obj
+        obj = entity_schema.dump(self._model, many=False).data
+        return obj
 
     @classmethod
     def find_by_business_identifier(cls, business_identifier: str = None):

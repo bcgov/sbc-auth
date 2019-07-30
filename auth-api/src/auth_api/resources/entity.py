@@ -15,6 +15,8 @@
 
 from flask_restplus import Namespace, Resource
 
+from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.utils.roles import Role
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.services.entity import Entity as EntityService
@@ -24,6 +26,7 @@ from auth_api.utils.util import cors_preflight
 
 API = Namespace('entities', description='Entities')
 TRACER = Tracer.get_instance()
+_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('GET, POST, PUT')
@@ -32,6 +35,7 @@ class EntityResource(Resource):
     """Resource for managing entities."""
 
     @staticmethod
+    @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
     @TRACER.trace()
     def get(business_identifier):
         """Get an existing entity by it's business number."""
