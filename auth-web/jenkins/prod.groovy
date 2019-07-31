@@ -23,8 +23,10 @@ import groovy.json.*
 
 // define constants - values sent in as env vars from whatever calls this pipeline
 def APP_NAME = 'auth-web'
+def APP_RUNTIME_NAME = "${APP_NAME}-runtime"
 def SOURCE_TAG = 'test'
 def DESTINATION_TAG = 'prod'
+def TOOLS_TAG = 'tools'
 
 def NAMESPACE_APP = '1rdehl'
 def NAMESPACE_BUILD = "${NAMESPACE_APP}"  + '-' + "${TOOLS_TAG}"
@@ -58,7 +60,7 @@ node {
                 openshift.withCluster() {
                     openshift.withProject("${NAMESPACE_BUILD}") {
                         echo "Tagging ${APP_NAME} for deployment to ${DESTINATION_TAG} ..."
-                        openshift.tag("${APP_NAME}@${SOURCE_TAG}", "${APP_NAME}:${DESTINATION_TAG}")
+						openshift.tag("${APP_RUNTIME_NAME}:${SOURCE_TAG}", "${APP_RUNTIME_NAME}:${DESTINATION_TAG}")                        
                     }
                 }
             }
