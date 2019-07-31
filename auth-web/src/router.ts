@@ -24,6 +24,6 @@ const routes = [
 
 export default new Router({
   mode: 'history',
-  base: process.env.VUE_APP_PATH,
+  base: 'auth',
   routes
 })
