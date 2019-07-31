@@ -17,13 +17,13 @@ from flask import request
 from flask_restplus import Namespace, Resource
 from sqlalchemy import exc
 
-from auth_api.jwt_wrapper import JWTWrapper
-from auth_api.schemas import utils as schema_utils
-from auth_api.utils.roles import Role
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
+from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.schemas import utils as schema_utils
 from auth_api.services.entity import Entity as EntityService
 from auth_api.tracer import Tracer
+from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
 
 
@@ -64,8 +64,9 @@ class EntityResource(Resource):
             response, status = EntityService.create_entity(request_json).as_dict(), http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-        except exc.IntegrityError as exception:
-            response, status = {'message': 'Business with specified identifier already exists.'}, http_status.HTTP_409_CONFLICT
+        except exc.IntegrityError:
+            response, status = {'message': 'Business with specified identifier already exists.'}, \
+                http_status.HTTP_409_CONFLICT
         return response, status
 
     @staticmethod
@@ -79,7 +80,8 @@ class EntityResource(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            response, status = EntityService.update_entity(business_identifier, request_json).as_dict(), http_status.HTTP_200_OK
+            response, status = EntityService.update_entity(business_identifier, request_json).as_dict(), \
+                http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

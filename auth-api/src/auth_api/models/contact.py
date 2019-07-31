@@ -24,7 +24,7 @@ from .base_schema import BaseSchema
 from .db import db
 
 
-class Contact(db.Model, BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class Contact(db.Model, BaseModel):  # pylint: disable=too-few-public-methods
     """This class manages contact information for orgs and entities."""
 
     __tablename__ = 'contact'

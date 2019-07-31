@@ -17,8 +17,8 @@ Test suite to ensure that the Entity service routines are working as expected.
 """
 
 from auth_api.models.contact import Contact as ContactModel
-from auth_api.services.entity import Entity as EntityService
 from auth_api.models.entity import Entity as EntityModel
+from auth_api.services.entity import Entity as EntityService
 
 
 def test_as_dict():
@@ -36,6 +36,7 @@ def test_as_dict():
         }
     }
 
+
 def test_create_entity(app):
     """Assert that an Entity can be created."""
     entity_info = {
@@ -51,6 +52,7 @@ def test_create_entity(app):
         entity = EntityService.create_entity(entity_info)
 
         assert entity is not None
+
 
 def test_update_entity(app):
     """Assert that an Entity can be updated."""

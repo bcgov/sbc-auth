@@ -29,6 +29,7 @@ def test_entity(session):
     session.commit()
     assert entity.id is not None
 
+
 def test_entity_find_by_business_id(session):
     """Assert that an Entity can be retrieved via business identifier."""
     entity = EntityModel(business_identifier='CP1234567')

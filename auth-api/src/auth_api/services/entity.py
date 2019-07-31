@@ -13,14 +13,15 @@
 # limitations under the License.
 """Service for managing Entity data."""
 
-from typing import Dict, Any
+from typing import Any, Dict
+
 from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models.contact import Contact as ContactModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.models.entity import EntitySchema
-from auth_api.models.contact import Contact as ContactModel
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -151,4 +152,3 @@ class Entity:
         entity = entity.flush()
         entity.commit()
         return Entity(entity)
-        
