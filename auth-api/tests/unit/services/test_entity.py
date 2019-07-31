@@ -37,7 +37,7 @@ def test_as_dict():
     }
 
 
-def test_create_entity(app):
+def test_create_entity(app, session):  # pylint:disable=unused-argument
     """Assert that an Entity can be created."""
     entity_info = {
         'business_identifier': 'CP1234567',
@@ -54,7 +54,7 @@ def test_create_entity(app):
         assert entity is not None
 
 
-def test_update_entity(app):
+def test_update_entity(app, session):  # pylint:disable=unused-argument
     """Assert that an Entity can be updated."""
     entity_info = {
         'business_identifier': 'CP1234567',
