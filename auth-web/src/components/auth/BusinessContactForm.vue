@@ -130,10 +130,17 @@ export default class BusinessContactForm extends Vue {
 
   save () {
     if (this.isFormValid()) {
-      // TODO: Change this to transition to entity dashboard once complete
-      setTimeout(() => {
-        window.location.href = this.VUE_APP_COPS_REDIRECT_URL
-      }, 500)
+      this.businessStore.updateContact({
+        emailAddress: this.emailAddress,
+        phoneNumber: this.phoneNumber,
+        extension: this.extension
+      })
+        .then(response => {
+          // TODO: Change this to transition to entity dashboard once complete
+          setTimeout(() => {
+            window.location.href = this.VUE_APP_COPS_REDIRECT_URL
+          }, 500)
+        })
     }
   }
 

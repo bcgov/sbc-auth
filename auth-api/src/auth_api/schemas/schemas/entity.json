@@ -5,11 +5,11 @@
     "type": "object",
     "title": "Entity",
     "required": [
-      "business_identifier"
+      "businessIdentifier"
     ],
     "properties": {
       "business_identifier": {
-        "$id": "#/properties/business_identifier",
+        "$id": "#/properties/businessIdentifier",
         "type": "string",
         "title": "Business Identifier",
         "default": "",

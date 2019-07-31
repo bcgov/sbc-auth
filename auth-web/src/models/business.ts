@@ -1,7 +1,7 @@
 import { Contact } from './contact';
 
 export interface Business {
-    businessNumber: string;
+    businessIdentifier: string;
     contact1?: Contact
     contact2?: Contact
 }

@@ -9,13 +9,13 @@ interface BusinessService {
 }
 
 export default {
-  async getBusiness (businessNumber: string): Promise<AxiosResponse<Business>> {
-    return Axios.get(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/entities/${businessNumber}`)
+  async getBusiness (businessIdentifier: string): Promise<AxiosResponse<Business>> {
+    return Axios.get(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/entities/${businessIdentifier}`)
   },
   async createBusiness (business: Business): Promise<AxiosResponse<Business>> {
-    return Axios.post(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/entities`, { business })
+    return Axios.post(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/entities`, business)
   },
   async updateBusiness (business: Business): Promise<AxiosResponse<Business>> {
-    return Axios.put(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/entities/${business.businessNumber}`, { business })
+    return Axios.put(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/entities/${business.businessIdentifier}`, business)
   }
 } as BusinessService

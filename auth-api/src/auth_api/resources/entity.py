@@ -14,7 +14,7 @@
 """API endpoints for managing an entity (business) resource."""
 
 from flask import request
-from flask_restplus import Namespace, Resource
+from flask_restplus import Namespace, Resource, cors
 from sqlalchemy import exc
 
 from auth_api import status as http_status
@@ -31,28 +31,14 @@ API = Namespace('entities', description='Entities')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
 
-
-@cors_preflight('GET, POST, PUT')
-@API.route('', methods=['POST'])
-@API.route('/<string:business_identifier>', methods=['GET', 'PUT'])
-class EntityResource(Resource):
+@cors_preflight('POST')
+@API.route('', methods=['POST', 'OPTIONS'])
+class EntityResources(Resource):
     """Resource for managing entities."""
-
     @staticmethod
     @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
     @TRACER.trace()
-    def get(business_identifier):
-        """Get an existing entity by it's business number."""
-        try:
-            response, status = EntityService.find_by_business_identifier(business_identifier).as_dict(), \
-                http_status.HTTP_200_OK
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-        return response, status
-
-    @staticmethod
-    @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
-    @TRACER.trace()
+    @cors.crossdomain(origin='*')
     def post():
         """Post a new Entity using the request body."""
         request_json = request.get_json()
@@ -69,9 +55,28 @@ class EntityResource(Resource):
                 http_status.HTTP_409_CONFLICT
         return response, status
 
+@cors_preflight(['GET', 'PUT', 'OPTIONS'])
+@API.route('/<string:business_identifier>', methods=['GET', 'PUT', 'OPTIONS'])
+class EntityResource(Resource):
+    """Resource for managing entities."""
+
     @staticmethod
     @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
     @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    def get(business_identifier):
+        """Get an existing entity by it's business number."""
+        try:
+            response, status = EntityService.find_by_business_identifier(business_identifier).as_dict(), \
+                http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
     def put(business_identifier):
         """Update an existing Entity using the request body."""
         request_json = request.get_json()

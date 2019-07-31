@@ -18,7 +18,7 @@ interface LoginPayload {
 })
 export default class BusinessModule extends VuexModule {
   currentBusiness: Business = {
-    businessNumber: ''
+    businessIdentifier: ''
   }
 
   @Mutation
@@ -35,16 +35,17 @@ export default class BusinessModule extends VuexModule {
   public async loadBusiness (businessNumber: string) {
     businessServices.getBusiness(businessNumber)
       .then(response => {
-        if (response.status === 200 && response.data) {
+        if (response.data) {
           this.context.commit('setCurrentBusiness', response.data)
-        } else {
-          businessServices.createBusiness({ businessNumber })
-            .then(createResponse => {
-              if ((createResponse.status === 200 || createResponse.status === 201) && createResponse.data) {
-                this.context.commit('setCurrentBusiness', response.data)
-              }
-            })
         }
+      })
+      .catch(() => {
+        businessServices.createBusiness({ businessIdentifier: businessNumber })
+          .then(createResponse => {
+            if ((createResponse.status === 200 || createResponse.status === 201) && createResponse.data) {
+              this.context.commit('setCurrentBusiness', createResponse.data)
+            }
+          })
       })
   }
 

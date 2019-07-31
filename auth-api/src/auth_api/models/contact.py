@@ -17,6 +17,7 @@ Orgs, and Entities can have multiple contacts, consisting of mailing addresses,
 physical addresses, emails, and phone numbers.
 """
 
+from marshmallow import fields
 from sqlalchemy import Column, Integer, String
 
 from .base_model import BaseModel
@@ -49,3 +50,7 @@ class ContactSchema(BaseSchema):  # pylint: disable=too-many-ancestors
         """Maps all of the User fields to a default schema."""
 
         model = Contact
+
+    email = fields.String(data_key='emailAddress')
+    phone = fields.String(data_key='phoneNumber')
+    phone_extension = fields.String(data_key='extension')

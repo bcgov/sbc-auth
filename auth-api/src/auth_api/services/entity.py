@@ -72,7 +72,7 @@ class Entity:
         None fields are not included in the dictionary.
         """
         entity_schema = EntitySchema()
-        obj = entity_schema.dump(self._model, many=False).data
+        obj = entity_schema.dump(self._model, many=False)
         return obj
 
     @classmethod
@@ -96,8 +96,10 @@ class Entity:
             return None
 
         contact_model = ContactModel()
-        for key, value in contact.items():
-            setattr(contact_model, key, value)
+        # TODO: This needs to be done in a better way and include other contact fields (post MVP)
+        contact_model.email = contact.get('emailAddress', None)
+        contact_model.phone = contact.get('phoneNumber', None)
+        contact_model.phone_extension = contact.get('extension', None)
         contact_model = contact_model.flush()
         return contact_model
 
@@ -107,9 +109,10 @@ class Entity:
         if contact is None or contact_info is None:
             return None
 
-        for key, value in contact_info.items():
-            if key != 'id':
-                setattr(contact, key, value)
+        # TODO: This needs to be done in a better way and include other contact fields (post MVP)
+        contact.email = contact_info.get('emailAddress', None)
+        contact.phone = contact_info.get('phoneNumber', None)
+        contact.phone_extension = contact_info.get('extension', None)
         contact = contact.flush()
         return contact
 
@@ -117,7 +120,7 @@ class Entity:
     def create_entity(entity_info: Dict[str, Any]):
         """Create an Entity."""
         entity = EntityModel()
-        entity.business_identifier = entity_info.get('business_identifier', None)
+        entity.business_identifier = entity_info.get('businessIdentifier', None)
         entity.contact1 = entity_info.get('contact1', None)
         entity.contact2 = entity_info.get('contact2', None)
 
@@ -132,7 +135,7 @@ class Entity:
     @staticmethod
     def update_entity(business_identifier, entity_info: Dict[str, Any]):
         """Update an Entity."""
-        business_identifier = entity_info.get('business_identifier', None)
+        business_identifier = entity_info.get('businessIdentifier', None)
         contact1 = entity_info.get('contact1', None)
         contact2 = entity_info.get('contact2', None)
 

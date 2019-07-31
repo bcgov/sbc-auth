@@ -52,6 +52,6 @@ class EntitySchema(BaseSchema):  # pylint: disable=too-many-ancestors
 
         model = Entity
 
-    business_identifier = fields.String()
+    business_identifier = fields.String(data_key='businessIdentifier')
     contact1 = fields.Nested(ContactSchema)
     contact2 = fields.Nested(ContactSchema)
