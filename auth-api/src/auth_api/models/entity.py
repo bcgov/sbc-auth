@@ -19,12 +19,13 @@ The class and schema are both present in this module.
 from marshmallow import fields
 from sqlalchemy import Column, ForeignKey, Integer, String
 
+from .base_model import BaseModel
 from .base_schema import BaseSchema
 from .contact import ContactSchema
 from .db import db
 
 
-class Entity(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class Entity(db.Model, BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the Entity model for the Auth service."""
 
     __tablename__ = 'entity'
