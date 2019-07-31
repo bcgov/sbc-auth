@@ -3,7 +3,7 @@ import Axios from 'axios'
 /**
  * the configs are used since process.env doesnt play well when we hae only one build config and multiple deployments..so going for this
  */
-const url = `/${process.env.VUE_APP_PATH}/config/configuration.json`
+const url = `/auth/config/configuration.json`
 const SESSION_STORAGE_KEY = 'AUTH_API_CONFIG'
 export default {
   fetchConfig () {
