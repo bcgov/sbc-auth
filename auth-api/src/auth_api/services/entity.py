@@ -44,6 +44,26 @@ class Entity:
         """Set the business identifier for this Entity."""
         self._model.business_identifier = value
 
+    @property
+    def contact1(self):
+        """Return the first contact for this Entity."""
+        return self._model.contact1
+
+    @contact1.setter
+    def contact1(self, value: str):
+        """Set the first contact for this Entity."""
+        self._model.contact1 = value
+
+    @property
+    def contact2(self):
+        """Return the second contact for this Entity."""
+        return self._model.contact2
+
+    @contact2.setter
+    def contact2(self, value: str):
+        """Set the second contact for this Entity."""
+        self._model.contact2 = value
+
     @ServiceTracing.disable_tracing
     def as_dict(self):
         """Return the entity as a python dictionary.
@@ -118,12 +138,12 @@ class Entity:
         entity = EntityModel.find_by_business_identifier(business_identifier)
 
         # update contact info, or create if not already set
-        if entity.contact1:
+        if entity.contact1 is not None:
             entity.contact1 = Entity.__update_contact(entity.contact1, contact1)
         else:
             entity.contact1 = Entity.__save_contact(contact1)
 
-        if entity.contact2:
+        if entity.contact2 is not None:
             entity.contact2 = Entity.__update_contact(entity.contact2, contact2)
         else:
             entity.contact2 = Entity.__save_contact(contact2)

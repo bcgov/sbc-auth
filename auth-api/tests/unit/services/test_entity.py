@@ -35,4 +35,40 @@ def test_as_dict():
             'email': 'abc123@mail.com'
         }
     }
-    
+
+def test_create_entity(app):
+    """Assert that an Entity can be created."""
+    entity_info = {
+        'business_identifier': 'CP1234567',
+        'contact1': {
+            'phone': '111-222-3333',
+            'phone_extension': '123',
+            'email': 'abc123@mail.com'
+        }
+    }
+
+    with app.app_context():
+        entity = EntityService.create_entity(entity_info)
+
+        assert entity is not None
+
+def test_update_entity(app):
+    """Assert that an Entity can be updated."""
+    entity_info = {
+        'business_identifier': 'CP1234567',
+        'contact1': {
+            'phone': '111-222-3333',
+            'phone_extension': '123',
+            'email': 'abc123@mail.com'
+        }
+    }
+
+    with app.app_context():
+        entity = EntityService.create_entity(entity_info)
+        entity_info['contact2'] = {
+            'street': '123 Roundabout Way'
+        }
+        entity = EntityService.update_entity('CP1234567', entity_info)
+
+        assert entity.contact2 is not None
+        assert entity.contact2.street == '123 Roundabout Way'
