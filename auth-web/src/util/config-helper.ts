@@ -7,6 +7,7 @@ const url = `/${process.env.VUE_APP_PATH}/config/configuration.json`
 const SESSION_STORAGE_KEY = 'AUTH_API_CONFIG'
 export default {
   fetchConfig () {
+    console.log('New code:'+url)
     return Axios
       .get(url)
       .then(response => {
