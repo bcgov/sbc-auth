@@ -1,7 +1,7 @@
 <template>
   <div class="view-container">
     <article>
-      <h1>File BC Co-operative <span>Annual Reports</span></h1>
+      <h3>File BC Co-operative <span>Annual Reports</span></h3>
       <p class="intro-text">Sign in to start filing your BC Co-operative Annual Report. You will need to provide your <em>Incorporation Number</em> and your <em>Passcode</em> in the letter you received in the mail.</p>
       <v-card class="sign-in-card">
         <v-container>
