@@ -18,7 +18,7 @@ physical addresses, emails, and phone numbers.
 """
 
 from marshmallow import fields
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String
 
 from .base_model import BaseModel
 from .base_schema import BaseSchema
@@ -41,6 +41,12 @@ class Contact(db.Model, BaseModel):  # pylint: disable=too-few-public-methods
     phone = Column('phone', String(15))
     phone_extension = Column('phone_extension', String(10))
     email = Column('email', String(100))
+    entity_id = Column(Integer, ForeignKey('entity.id'))
+
+    @classmethod
+    def find_by_entity_id(cls, entity_id):
+        """Return the first contact with the provided entity id."""
+        return cls.query.filter_by(entity_id=entity_id).first()
 
 
 class ContactSchema(BaseSchema):  # pylint: disable=too-many-ancestors

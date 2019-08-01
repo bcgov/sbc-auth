@@ -31,10 +31,12 @@ API = Namespace('entities', description='Entities')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
 
+
 @cors_preflight('POST')
 @API.route('', methods=['POST', 'OPTIONS'])
 class EntityResources(Resource):
     """Resource for managing entities."""
+
     @staticmethod
     @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
     @TRACER.trace()
@@ -55,6 +57,7 @@ class EntityResources(Resource):
                 http_status.HTTP_409_CONFLICT
         return response, status
 
+
 @cors_preflight(['GET', 'PUT', 'OPTIONS'])
 @API.route('/<string:business_identifier>', methods=['GET', 'PUT', 'OPTIONS'])
 class EntityResource(Resource):
@@ -73,19 +76,40 @@ class EntityResource(Resource):
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
 
+
+@cors_preflight(['POST', 'PUT', 'OPTIONS'])
+@API.route('/<string:business_identifier>/contact', methods=['POST', 'PUT', 'OPTIONS'])
+class ContactResource(Resource):
+    """Resource for managing entity contacts."""
+
     @staticmethod
     @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
-    @TRACER.trace()
     @cors.crossdomain(origin='*')
-    def put(business_identifier):
-        """Update an existing Entity using the request body."""
+    def post(business_identifier):
+        """Add a new contact for the Entity identified by the provided id."""
         request_json = request.get_json()
-        valid_format, errors = schema_utils.validate(request_json, 'entity')
+        valid_format, errors = schema_utils.validate(request_json, 'contact')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            response, status = EntityService.update_entity(business_identifier, request_json).as_dict(), \
+            response, status = EntityService.add_contact(business_identifier, request_json).as_dict(), \
+                http_status.HTTP_201_CREATED
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+    @cors.crossdomain(origin='*')
+    def put(business_identifier):
+        """Update the business contact for the Entity identified by the provided id."""
+        request_json = request.get_json()
+        valid_format, errors = schema_utils.validate(request_json, 'contact')
+        if not valid_format:
+            return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+        try:
+            response, status = EntityService.update_contact(business_identifier, request_json).as_dict(), \
                 http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

@@ -17,20 +17,6 @@
           "CP1234567"
         ],
         "pattern": "^(.*)$"
-      },
-      "contact_id1": {
-        "oneOf": [
-            {
-              "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/contact"
-            }
-          ]
-      },
-      "contact_id2": {
-        "oneOf": [
-            {
-              "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/contact"
-            }
-          ]
       }
     }
   }

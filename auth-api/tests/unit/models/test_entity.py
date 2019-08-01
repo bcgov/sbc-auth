@@ -16,15 +16,12 @@
 Test suite to ensure that the Entity model routines are working as expected.
 """
 
-from auth_api.models import Contact as ContactModel
 from auth_api.models import Entity as EntityModel
 
 
 def test_entity(session):
     """Assert that an Entity can be stored in the service."""
-    contact = ContactModel(email='abc123@email.com', phone='3334445555', phone_extension='123')
-    entity = EntityModel(business_identifier='CP1234567', contact1=contact)
-    session.add(contact)
+    entity = EntityModel(business_identifier='CP1234567')
     session.add(entity)
     session.commit()
     assert entity.id is not None

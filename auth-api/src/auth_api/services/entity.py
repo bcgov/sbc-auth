@@ -90,68 +90,52 @@ class Entity:
         return entity
 
     @staticmethod
-    def __save_contact(contact):
-        """Create and persist contact information in database."""
-        if contact is None:
-            return None
-
-        contact_model = ContactModel()
-        # TODO: This needs to be done in a better way and include other contact fields (post MVP)
-        contact_model.email = contact.get('emailAddress', None)
-        contact_model.phone = contact.get('phoneNumber', None)
-        contact_model.phone_extension = contact.get('extension', None)
-        contact_model = contact_model.flush()
-        return contact_model
-
-    @staticmethod
-    def __update_contact(contact, contact_info):
-        """Update and persist contact information in the database."""
-        if contact is None or contact_info is None:
-            return None
-
-        # TODO: This needs to be done in a better way and include other contact fields (post MVP)
-        contact.email = contact_info.get('emailAddress', None)
-        contact.phone = contact_info.get('phoneNumber', None)
-        contact.phone_extension = contact_info.get('extension', None)
-        contact = contact.flush()
-        return contact
-
-    @staticmethod
     def create_entity(entity_info: Dict[str, Any]):
         """Create an Entity."""
         entity = EntityModel()
         entity.business_identifier = entity_info.get('businessIdentifier', None)
-        entity.contact1 = entity_info.get('contact1', None)
-        entity.contact2 = entity_info.get('contact2', None)
-
-        # persist contact info
-        entity.contact1 = Entity.__save_contact(entity.contact1)
-        entity.contact2 = Entity.__save_contact(entity.contact2)
-
         entity = entity.flush()
         entity.commit()
         return Entity(entity)
 
     @staticmethod
-    def update_entity(business_identifier, entity_info: Dict[str, Any]):
-        """Update an Entity."""
-        business_identifier = entity_info.get('businessIdentifier', None)
-        contact1 = entity_info.get('contact1', None)
-        contact2 = entity_info.get('contact2', None)
+    def add_contact(business_identifier, contact_info: Dict[str, Any]):
+        """Add a business contact to the specified Entity."""
+        entity = EntityModel.find_by_business_identifier(business_identifier)
+        if entity is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        contact = ContactModel()
+        contact.entity_id = entity.id
+        contact.email = contact_info.get('emailAddress', None)
+        contact.phone = contact_info.get('phoneNumber', None)
+        contact.phone_extension = contact_info.get('extension', None)
+        contact = contact.flush()
+        contact.commit()
+
+        return Entity(entity)
+
+    @staticmethod
+    def update_contact(business_identifier, contact_info: Dict[str, Any]):
+        """Update a business contact for the specified Entity."""
+        entity = EntityModel.find_by_business_identifier(business_identifier)
+        if entity is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        contact = ContactModel.find_by_entity_id(entity.id)
+        contact.email = contact_info.get('emailAddress', contact.email)
+        contact.phone = contact_info.get('phoneNumber', contact.phone)
+        contact.phone_extension = contact_info.get('extension', contact.phone_extension)
+        contact = contact.flush()
+        contact.commit()
 
         entity = EntityModel.find_by_business_identifier(business_identifier)
-
-        # update contact info, or create if not already set
-        if entity.contact1 is not None:
-            entity.contact1 = Entity.__update_contact(entity.contact1, contact1)
-        else:
-            entity.contact1 = Entity.__save_contact(contact1)
-
-        if entity.contact2 is not None:
-            entity.contact2 = Entity.__update_contact(entity.contact2, contact2)
-        else:
-            entity.contact2 = Entity.__save_contact(contact2)
-
-        entity = entity.flush()
-        entity.commit()
         return Entity(entity)
+
+    @staticmethod
+    def get_contact_for_business(business_identifier):
+        """Get the contact for a business identified by the given id."""
+        entity = EntityModel.find_by_business_identifier(business_identifier)
+        if entity is None:
+            return None
+        contact = ContactModel.find_by_entity_id(entity.id)
+        return contact

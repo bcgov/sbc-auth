@@ -17,10 +17,14 @@ Test suite to ensure that the Contact model routines are working as expected.
 """
 
 from auth_api.models import Contact as ContactModel
+from auth_api.models import Entity as EntityModel
 
 
 def test_contact(session):
     """Assert that a Contact can be stored in the service."""
+    entity = EntityModel(business_identifier='CP1234567')
+    session.add(entity)
+
     contact = ContactModel(
         street='123 Roundabout Lane',
         street_additional='Unit 1',
@@ -31,9 +35,25 @@ def test_contact(session):
         delivery_instructions='Ring buzzer 123',
         phone='111-222-3333',
         phone_extension='123',
-        email='abc123@mail.com'
+        email='abc123@mail.com',
+        entity_id=entity.id
     )
 
     session.add(contact)
     session.commit()
     assert contact.id is not None
+
+def test_find_by_entity_id(session):
+    """Assert that a Contact can be retrieved via the entity id."""
+    entity = EntityModel(business_identifier='CP1234567')
+    session.add(entity)
+
+    contact = ContactModel(
+        entity_id=entity.id
+    )
+
+    session.add(contact)
+
+    result_contact = ContactModel.find_by_entity_id(entity_id=entity.id)
+
+    assert result_contact is not None

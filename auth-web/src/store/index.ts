@@ -9,7 +9,7 @@ Vue.use(Vuex)
 const debug = process.env.NODE_ENV !== 'production'
 
 const vuexPersist = new VuexPersistence({
-  key: 'vuex',
+  key: 'AUTH_WEB',
   storage: sessionStorage
 })
 

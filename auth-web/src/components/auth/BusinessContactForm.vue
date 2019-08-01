@@ -80,6 +80,7 @@ import { getModule } from 'vuex-module-decorators'
 import BusinessModule from '../../store/modules/business'
 import configHelper from '../../util/config-helper'
 import { mask } from 'vue-the-mask'
+import { Contact } from '../../models/contact'
 
 @Component({
   directives: {
@@ -104,11 +105,11 @@ export default class BusinessContactForm extends Vue {
   ]
 
   private phoneRules = [
-    v => (v.length === 0 || v.length === 14) || 'Phone number is invalid'
+    v => !v || (v.length === 0 || v.length === 14) || 'Phone number is invalid'
   ]
 
   private extensionRules = [
-    v => (v.length >= 0 || v.length <= 3) || 'Extension is invalid'
+    v => !v || (v.length >= 0 || v.length <= 3) || 'Extension is invalid'
   ]
 
   private emailMustMatch (): string {
@@ -120,8 +121,9 @@ export default class BusinessContactForm extends Vue {
   }
 
   mounted () {
-    const contact = this.businessStore.currentBusiness.contact1
-    if (contact) {
+    if (this.businessStore.currentBusiness.contacts && this.businessStore.currentBusiness.contacts.length > 0) {
+      // TODO: For now grab first contact as the business contact.  Post MVP, we should check the contact type, grab the correct one.
+      const contact = this.businessStore.currentBusiness.contacts[0]
       this.emailAddress = this.confirmedEmailAddress = contact.emailAddress
       this.phoneNumber = contact.phoneNumber
       this.extension = contact.extension
@@ -130,21 +132,32 @@ export default class BusinessContactForm extends Vue {
 
   save () {
     if (this.isFormValid()) {
-      this.businessStore.updateContact({
+      let result: Promise<void>
+      const contact: Contact = {
         emailAddress: this.emailAddress,
         phoneNumber: this.phoneNumber,
         extension: this.extension
+      }
+
+      if (!this.businessStore.currentBusiness.contacts || this.businessStore.currentBusiness.contacts.length === 0) {
+        result = this.businessStore.addContact(contact)
+      } else {
+        result = this.businessStore.updateContact(contact)
+      }
+
+      result.then(response => {
+        // TODO: Change this to transition to entity dashboard once complete
+        setTimeout(() => {
+          window.location.href = this.VUE_APP_COPS_REDIRECT_URL
+        }, 500)
       })
-        .then(response => {
-          // TODO: Change this to transition to entity dashboard once complete
-          setTimeout(() => {
-            window.location.href = this.VUE_APP_COPS_REDIRECT_URL
-          }, 500)
-        })
     }
   }
 
   skip () {
+    // Mark store as having skipped contact entry for this session
+    this.businessStore.skippedContactEntry = true
+
     // Go directly to co-op UI without saving
     setTimeout(() => {
       window.location.href = this.VUE_APP_COPS_REDIRECT_URL

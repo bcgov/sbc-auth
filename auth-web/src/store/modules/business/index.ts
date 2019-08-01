@@ -17,6 +17,8 @@ export default class BusinessModule extends VuexModule {
     businessIdentifier: ''
   }
 
+  skippedContactEntry = false
+
   @Mutation
   public setCurrentBusiness (business: Business) {
     this.currentBusiness = business
@@ -29,7 +31,7 @@ export default class BusinessModule extends VuexModule {
 
   @Action
   public async loadBusiness (businessNumber: string) {
-    businessServices.getBusiness(businessNumber)
+    return businessServices.getBusiness(businessNumber)
       .then(response => {
         if (response.data) {
           this.context.commit('setCurrentBusiness', response.data)
@@ -46,12 +48,21 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
+  public async addContact (contact: Contact) {
+    return businessServices.addContact(this.currentBusiness, contact)
+      .then(response => {
+        if ((response.status === 200 || response.status === 201) && response.data) {
+          this.context.commit('setCurrentBusiness', response.data)
+        }
+      })
+  }
+
+  @Action({ rawError: true })
   public async updateContact (contact: Contact) {
-    const business = { ...this.currentBusiness, contact1: contact }
-    return businessServices.updateBusiness(business)
-      .then(updateResponse => {
-        if ((updateResponse.status === 200 || updateResponse.status === 201) && updateResponse.data) {
-          this.context.commit('setCurrentBusiness', updateResponse.data)
+    return businessServices.updateContact(this.currentBusiness, contact)
+      .then(response => {
+        if ((response.status === 200 || response.status === 201) && response.data) {
+          this.context.commit('setCurrentBusiness', response.data)
         }
       })
   }

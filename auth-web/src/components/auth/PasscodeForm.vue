@@ -138,13 +138,14 @@ export default class PasscodeForm extends Vue {
           // attempt to load business
           this.businessStore.loadBusiness(this.businessNumber)
             .then(() => {
-              if (this.businessStore.currentBusiness.contact1) {
-                // transition to co-ops UI
+              if ((this.businessStore.currentBusiness.contacts &&
+                  this.businessStore.currentBusiness.contacts.length > 0) || this.businessStore.skippedContactEntry) {
+                // transition to co-ops UI as we already have a contact set (or user has opted to skip already in this session)
                 setTimeout(() => {
                   window.location.href = this.VUE_APP_COPS_REDIRECT_URL
                 }, 500)
               } else {
-                // transition to business contact ui
+                // transition to business contact UI
                 setTimeout(() => {
                   this.$router.push('/businessprofile')
                 }, 500)

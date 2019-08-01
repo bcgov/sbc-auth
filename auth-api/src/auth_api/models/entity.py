@@ -17,7 +17,7 @@ The class and schema are both present in this module.
 """
 
 from marshmallow import fields
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, Integer, String
 
 from .base_model import BaseModel
 from .base_schema import BaseSchema
@@ -32,11 +32,7 @@ class Entity(db.Model, BaseModel):  # pylint: disable=too-few-public-methods # T
 
     id = Column(Integer, primary_key=True)
     business_identifier = Column('business_identifier', String(75), unique=True, nullable=False)
-    contact1_id = Column(ForeignKey('contact.id'))
-    contact2_id = Column(ForeignKey('contact.id'))
-
-    contact1 = db.relationship('Contact', foreign_keys=[contact1_id])
-    contact2 = db.relationship('Contact', foreign_keys=[contact2_id])
+    contacts = db.relationship('Contact')
 
     @classmethod
     def find_by_business_identifier(cls, business_identifier):
@@ -53,5 +49,4 @@ class EntitySchema(BaseSchema):  # pylint: disable=too-many-ancestors
         model = Entity
 
     business_identifier = fields.String(data_key='businessIdentifier')
-    contact1 = fields.Nested(ContactSchema)
-    contact2 = fields.Nested(ContactSchema)
+    contacts = fields.Nested(ContactSchema, many=True)

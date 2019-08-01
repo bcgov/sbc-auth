@@ -16,36 +16,23 @@
 Test suite to ensure that the Entity service routines are working as expected.
 """
 
-from auth_api.models.contact import Contact as ContactModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.services.entity import Entity as EntityService
 
 
 def test_as_dict():
     """Assert that the Entity is exported correctly as a dictionary."""
-    contact_model = ContactModel(phone='111-222-3333', phone_extension='123', email='abc123@mail.com')
-    entity_model = EntityModel(business_identifier='CP1234567', contact1=contact_model)
+    entity_model = EntityModel(business_identifier='CP1234567')
     entity = EntityService(entity_model)
 
     assert entity.as_dict() == {
-        'business_identifier': 'CP1234567',
-        'contact1': {
-            'phone': '111-222-3333',
-            'phone_extension': '123',
-            'email': 'abc123@mail.com'
-        }
+        'businessIdentifier': 'CP1234567'
     }
-
 
 def test_create_entity(app, session):  # pylint:disable=unused-argument
     """Assert that an Entity can be created."""
     entity_info = {
-        'businessIdentifier': 'CP1234567',
-        'contact1': {
-            'phone': '111-222-3333',
-            'phone_extension': '123',
-            'email': 'abc123@mail.com'
-        }
+        'businessIdentifier': 'CP1234567'
     }
 
     with app.app_context():
@@ -53,24 +40,45 @@ def test_create_entity(app, session):  # pylint:disable=unused-argument
 
         assert entity is not None
 
-
-def test_update_entity(app, session):  # pylint:disable=unused-argument
-    """Assert that an Entity can be updated."""
+def test_add_contact(app, session):  # pylint:disable=unused-argument
+    """Assert that a contact can be added to an Entity."""
     entity_info = {
-        'businessIdentifier': 'CP1234567',
-        'contact1': {
-            'phone': '111-222-3333',
-            'phone_extension': '123',
-            'email': 'abc123@mail.com'
-        }
+        'businessIdentifier': 'CP1234567'
     }
 
     with app.app_context():
         entity = EntityService.create_entity(entity_info)
-        entity_info['contact2'] = {
-            'street': '123 Roundabout Way'
+        contact_info = {
+            'emailAddress': 'foo@bar.com'
         }
-        entity = EntityService.update_entity('CP1234567', entity_info)
+        updated_entity = EntityService.add_contact(entity.business_identifier, contact_info)
 
-        assert entity.contact2 is not None
-        assert entity.contact2.street == '123 Roundabout Way'
+        assert updated_entity is not None
+        
+        contact = EntityService.get_contact_for_business(updated_entity.business_identifier)
+
+        assert contact is not None
+        assert contact.email == 'foo@bar.com'
+
+def test_update_contact(app, session):  # pylint:disable=unused-argument
+    """Assert that a contact for an entity can be updated."""
+    entity_info = {
+        'businessIdentifier': 'CP1234567'
+    }
+
+    with app.app_context():
+        entity = EntityService.create_entity(entity_info)
+        contact_info = {
+            'emailAddress': 'foo@bar.com'
+        }
+        EntityService.add_contact(entity.business_identifier, contact_info)
+
+        contact_info['phoneNumber'] = '(555)-555-5555'
+        updated_entity = EntityService.update_contact(entity.business_identifier, contact_info)
+
+        assert updated_entity
+
+        updated_contact = EntityService.get_contact_for_business(updated_entity.business_identifier)
+
+        assert updated_contact is not None
+        assert updated_contact.phone == '(555)-555-5555'
