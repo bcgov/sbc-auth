@@ -152,7 +152,7 @@ oc get secret my-secret --export=true -o json \
 
    ```sh
    cd */sbc-auth/auth-web/openshift/templates
-   oc process -f auth-web-pre-deploy \
+   oc process -f auth-web-pre-deploy.json \
        -p NAME=auth-web \
        -p TAG_NAME=dev \
     | oc apply -f -
