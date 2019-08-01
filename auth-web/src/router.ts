@@ -24,6 +24,6 @@ const routes = [
 
 export default new Router({
   mode: 'history',
-  base: 'auth',
+  base: process.env.BASE_URL,
   routes
 })
