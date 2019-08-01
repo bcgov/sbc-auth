@@ -88,7 +88,7 @@ import { mask } from 'vue-the-mask'
 })
 export default class BusinessContactForm extends Vue {
   private VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
-  private businessStore = getModule(BusinessModule)
+  private businessStore = getModule(BusinessModule, this.$store)
   private emailAddress = ''
   private confirmedEmailAddress = ''
   private phoneNumber = ''
@@ -112,7 +112,7 @@ export default class BusinessContactForm extends Vue {
   ]
 
   private emailMustMatch (): string {
-    return (this.emailAddress === this.confirmedEmailAddress) ? '' : 'Emails addresses must match'
+    return (this.emailAddress === this.confirmedEmailAddress) ? '' : 'Email addresses must match'
   }
 
   private isFormValid (): boolean {

@@ -31,7 +31,7 @@ import SupportInfoCard from '@/components/SupportInfoCard.vue'
   }
 })
 export default class BusinessProfile extends Vue {
-  private businessStore = getModule(BusinessModule)
+  private businessStore = getModule(BusinessModule, this.$store)
   // TODO: Set businessType from current business in store
   private businessType = 'Co-op'
 }

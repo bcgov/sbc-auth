@@ -103,7 +103,7 @@ export default class PasscodeForm extends Vue {
     v => !!v || 'Passcode is required',
     v => v.length >= 9 || 'Passcode must be exactly 9 digits'
   ]
-  businessStore = getModule(BusinessModule)
+  businessStore = getModule(BusinessModule, this.$store)
 
   businessNumber: string = ''
   passcode: string = ''

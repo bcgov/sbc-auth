@@ -1,6 +1,5 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import loginServices from '@/services/login.services'
-import store from '@/store'
 import { Business } from '@/models/business'
 import { Contact } from '@/models/contact'
 import businessServices from '@/services/business.services'
@@ -11,10 +10,7 @@ interface LoginPayload {
 }
 
 @Module({
-  dynamic: true,
-  store,
-  name: 'business',
-  namespaced: true
+  name: 'business'
 })
 export default class BusinessModule extends VuexModule {
   currentBusiness: Business = {
@@ -53,5 +49,10 @@ export default class BusinessModule extends VuexModule {
   public async updateContact (contact: Contact) {
     const business = { ...this.currentBusiness, contact1: contact }
     return businessServices.updateBusiness(business)
+      .then(updateResponse => {
+        if ((updateResponse.status === 200 || updateResponse.status === 201) && updateResponse.data) {
+          this.context.commit('setCurrentBusiness', updateResponse.data)
+        }
+      })
   }
 }
