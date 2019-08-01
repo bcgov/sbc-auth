@@ -45,26 +45,6 @@ class Entity:
         """Set the business identifier for this Entity."""
         self._model.business_identifier = value
 
-    @property
-    def contact1(self):
-        """Return the first contact for this Entity."""
-        return self._model.contact1
-
-    @contact1.setter
-    def contact1(self, value: str):
-        """Set the first contact for this Entity."""
-        self._model.contact1 = value
-
-    @property
-    def contact2(self):
-        """Return the second contact for this Entity."""
-        return self._model.contact2
-
-    @contact2.setter
-    def contact2(self, value: str):
-        """Set the second contact for this Entity."""
-        self._model.contact2 = value
-
     @ServiceTracing.disable_tracing
     def as_dict(self):
         """Return the entity as a python dictionary.
