@@ -117,7 +117,7 @@
                   {
                     "name": "web-ui-configuration",
                     "readOnly": true,
-                    "mountPath": "/var/www/html/config"
+                    "mountPath": "/var/www/html/${WEB_APP_CONTEXT_PATH}/config"
                   }
                 ],
                 "envFrom": [],
@@ -289,6 +289,13 @@
       "description": "The number of replicas to run in this environment.",
       "required": true,
       "value": "1"
+    },
+    {
+      "name": "WEB_APP_CONTEXT_PATH",
+      "displayName": "WEB_APP_CONTEXT_PATH",
+      "description": "The path at which web application is deployed.Context root for the web applicaton",
+      "required": true,
+      "value": "auth"
     }
   ]
 }

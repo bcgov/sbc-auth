@@ -19,7 +19,7 @@ var mockob = {
 describe('create a transaction', () => {
   const results = []
   beforeAll(() => {
-    sessionStorage.__STORE__['API_CONFIG'] = JSON.stringify(mockob)
+    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)
     // @ts-ignore
     Axios.get.mockClear()
     // @ts-ignore

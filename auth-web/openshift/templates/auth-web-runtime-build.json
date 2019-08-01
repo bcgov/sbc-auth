@@ -30,7 +30,7 @@
         "runPolicy": "Serial",
         "source": {
           "type": "Dockerfile",
-          "dockerfile": "FROM bcgov-s2i-caddy\nCOPY dist /var/www/html/",
+          "dockerfile": "FROM bcgov-s2i-caddy\nRUN mkdir /var/www/html/${WEB_APP_CONTEXT_PATH} \nCOPY dist /var/www/html/${WEB_APP_CONTEXT_PATH}",
           "images": [
             {
               "from": {
@@ -185,6 +185,13 @@
       "description": "The resources Memory limit (in Mi, Gi, etc) for this build.",
       "required": true,
       "value": "2Gi"
+    },
+    {
+      "name": "WEB_APP_CONTEXT_PATH",
+      "displayName": "WEB_APP_CONTEXT_PATH",
+      "description": "The path at which web application is deployed.Context root for the web applicaton",
+      "required": true,
+      "value": "auth"
     }
   ]
 }
