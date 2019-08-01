@@ -6,9 +6,8 @@ log stdout
 
 errors stdout
 
-rewrite {
+rewrite /auth {
     regexp .*
-    to {path} /
+    to {path} /auth/
 }
-
 

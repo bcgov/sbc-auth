@@ -17,7 +17,7 @@
         }
       },
       "data": {
-        "Caddyfile": "0.0.0.0:2015\n\nroot /var/www/html\n\nlog stdout\n\nerrors stdout\n\nrewrite {\n    regexp .*\n    to {path} /\n}"
+        "Caddyfile": "0.0.0.0:2015\n\nroot /var/www/html\n\nlog stdout\n\nerrors stdout\n\nrewrite /auth {\n    regexp .*\n    to {path} /auth/\n}\n\n\n"
       }
     },
     {
