@@ -22,7 +22,7 @@ describe('PasscodeForm.vue', () => {
     'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
   }
 
-  sessionStorage.__STORE__['API_CONFIG'] = JSON.stringify(ob)
+  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(ob)
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
