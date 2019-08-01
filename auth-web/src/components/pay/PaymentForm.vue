@@ -29,7 +29,6 @@ export default {
   },
 
   mounted () {
-    console.log('-------' + this.paymentId + this.redirectUrl)
     if (this.paymentId && this.redirectUrl) {
       PaymentServices.createTransaction(this.paymentId, encodeURIComponent(this.redirectUrl))
         .then(response => {
