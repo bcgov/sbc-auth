@@ -156,7 +156,7 @@ export default class BusinessContactForm extends Vue {
 
   skip () {
     // Mark store as having skipped contact entry for this session
-    this.businessStore.skippedContactEntry = true
+    this.businessStore.setSkippedContactEntry(true)
 
     // Go directly to co-op UI without saving
     setTimeout(() => {
