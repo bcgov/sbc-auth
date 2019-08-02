@@ -35,6 +35,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         self.__dao = None
         self._username: str = None
         self._roles: str = None
+        self._keycloak_guid: str = None
 
     @property
     def _dao(self):
@@ -69,6 +70,17 @@ class User:  # pylint: disable=too-many-instance-attributes
         """Set the User roles."""
         self._roles = value
         self._dao.roles = value
+
+    @property
+    def keycloak_guid(self):
+        """Return the keycloak GUID."""
+        return self._keycloak_guid
+
+    @keycloak_guid.setter
+    def keycloak_guid(self, value: str):
+        """Set the keycloak GUID."""
+        self._keycloak_guid = value
+        self._dao.keycloak_guid = value
 
     @ServiceTracing.disable_tracing
     def asdict(self):

@@ -16,26 +16,37 @@
 The class and schema are both present in this module.
 """
 
-from sqlalchemy import Column, ForeignKey, Integer
+from marshmallow import fields
+from sqlalchemy import Column, Integer, String
 
-from .db import db, ma
+from .base_model import BaseModel
+from .base_schema import BaseSchema
+from .contact import ContactSchema
+from .db import db
 
 
-class Entity(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class Entity(db.Model, BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the Entity model for the Auth service."""
 
     __tablename__ = 'entity'
 
     id = Column(Integer, primary_key=True)
-    business_identifier = Column(Integer, unique=True, nullable=False)
-    contact1 = Column(ForeignKey('contact.id'))
-    contact2 = Column(ForeignKey('contact.id'))
+    business_identifier = Column('business_identifier', String(75), unique=True, nullable=False)
+    contacts = db.relationship('Contact')
+
+    @classmethod
+    def find_by_business_identifier(cls, business_identifier):
+        """Return the first entity with the provided business identifier."""
+        return cls.query.filter_by(business_identifier=business_identifier).first()
 
 
-class EntitySchema(ma.ModelSchema):
+class EntitySchema(BaseSchema):  # pylint: disable=too-many-ancestors
     """Used to manage the default mapping between JSON and the Entity model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the Entity fields to a default schema."""
 
         model = Entity
+
+    business_identifier = fields.String(data_key='businessIdentifier')
+    contacts = fields.Nested(ContactSchema, many=True)
