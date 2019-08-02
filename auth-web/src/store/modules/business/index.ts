@@ -24,6 +24,11 @@ export default class BusinessModule extends VuexModule {
     this.currentBusiness = business
   }
 
+  @Mutation
+  public setSkippedContactEntry (skippedStatus: boolean) {
+    this.skippedContactEntry = skippedStatus
+  }
+
   @Action({ rawError: true })
   public async login (payload: LoginPayload) {
     return loginServices.login(payload.businessNumber, payload.passCode)

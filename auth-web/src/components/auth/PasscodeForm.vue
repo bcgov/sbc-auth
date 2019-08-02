@@ -116,21 +116,39 @@ export default class PasscodeForm extends Vue {
     return (this.$refs.iframeContent as Vue & { contentWindow: Window }).contentWindow
   }
 
+  private redirectToNext (): void {
+    if ((this.businessStore.currentBusiness.contacts &&
+         this.businessStore.currentBusiness.contacts.length > 0) || this.businessStore.skippedContactEntry) {
+      // transition to co-ops UI as we already have a contact set (or user has opted to skip already in this session)
+      setTimeout(() => {
+        window.location.href = this.VUE_APP_COPS_REDIRECT_URL
+      }, 500)
+    } else {
+      // transition to business contact UI
+      setTimeout(() => {
+        this.$router.push('/businessprofile')
+      }, 500)
+    }
+  }
+
+  mounted () {
+    if (sessionStorage.getItem('KEYCLOAK_TOKEN')) {
+      this.redirectToNext()
+    }
+  }
+
   login () {
     if (this.isFormValid()) {
       this.showSpinner = true
       this.businessStore.login({ businessNumber: this.businessNumber, passCode: this.passcode })
         .then(response => {
           // set token and store in storage
-          // TODO: Once iframe token emit is no longer needed,
-          // this should be moved to the login Vuex action
           const msg = JSON.stringify(
             { 'access_token': response.data.access_token,
               'refresh_token': response.data.refresh_token,
               'registries_trace_id': response.data['registries-trace-id']
             }
           )
-          iframeServices.emit(this.getIFrameContent(), msg)
           sessionStorage.KEYCLOAK_TOKEN = response.data.access_token
           sessionStorage.KEYCLOAK_REFRESH_TOKEN = response.data.refresh_token
           sessionStorage.REGISTRIES_TRACE_ID = response.data['registries-trace-id']
@@ -138,18 +156,7 @@ export default class PasscodeForm extends Vue {
           // attempt to load business
           this.businessStore.loadBusiness(this.businessNumber)
             .then(() => {
-              if ((this.businessStore.currentBusiness.contacts &&
-                  this.businessStore.currentBusiness.contacts.length > 0) || this.businessStore.skippedContactEntry) {
-                // transition to co-ops UI as we already have a contact set (or user has opted to skip already in this session)
-                setTimeout(() => {
-                  window.location.href = this.VUE_APP_COPS_REDIRECT_URL
-                }, 500)
-              } else {
-                // transition to business contact UI
-                setTimeout(() => {
-                  this.$router.push('/businessprofile')
-                }, 500)
-              }
+              this.redirectToNext()
             })
         })
         .catch(response => {
