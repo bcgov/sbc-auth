@@ -1,6 +1,5 @@
 <template>
   <div class="passcode-form">
-    <iframe :src="VUE_APP_COPS_REDIRECT_URL" ref="iframeContent" style="display: none"></iframe>
     <v-form ref="form" lazy-validation>
       <v-expand-transition>
         <div class="passcode-form__alert-container" v-show="loginError">
