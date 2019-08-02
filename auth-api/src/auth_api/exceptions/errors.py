@@ -25,7 +25,7 @@ class Error(Enum):
     """Error Codes."""
 
     INVALID_INPUT = 'Invalid input, please check.', http_status.HTTP_400_BAD_REQUEST
-    DATA_NOT_FOUND = 'No matching record found.', http_status.HTTP_400_BAD_REQUEST
+    DATA_NOT_FOUND = 'No matching record found.', http_status.HTTP_404_NOT_FOUND
     DATA_ALREADY_EXISTS = 'The data you want to insert already exists.', http_status.HTTP_400_BAD_REQUEST
     INVALID_USER_CREDENTIALS = 'Invalid user credentials.', http_status.HTTP_401_UNAUTHORIZED
     INVALID_REFRESH_TOKEN = 'Invalid refresh token.', http_status.HTTP_400_BAD_REQUEST

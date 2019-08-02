@@ -6,5 +6,6 @@
   "payFailedMessage": "Payment Failed for technical reasons.Please revisit the site",
   "payNoParams": "Incorrect configuration",
   "paymentPrepareMsg": "Preparing your payments",
-  "paymentDoneMsg": "Completing the payment"
+  "paymentDoneMsg": "Completing the payment",
+  "businessContactCopy": "It looks like we are missing some contact information for your {businessType}. You will need to supply us with a few additional details before you can get started..."
 }

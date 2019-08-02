@@ -21,9 +21,7 @@ from sqlalchemy import Column, String
 from .db import db, ma
 
 
-class OrgStatus(
-    db.Model
-):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class OrgStatus(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Org Status record."""
 
     __tablename__ = 'org_status'
