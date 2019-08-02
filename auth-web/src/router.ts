@@ -18,14 +18,31 @@ function mapReturnPayVars (route) {
 
 const routes = [
   { path: '/', component: Home },
-  { path: '/businessprofile', component: BusinessProfile },
-  { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true },
-  { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars },
+  { path: '/businessprofile', component: BusinessProfile, meta: { requiresAuth: true } },
+  { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: true } },
+  { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true } },
   { path: '*', component: PageNotFound }
 ]
 
-export default new Router({
+const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
 })
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (sessionStorage.getItem('KEYCLOAK_TOKEN')) {
+      next()
+    } else {
+      next({
+        path: '/',
+        query: { redirect: to.fullPath }
+      })
+    }
+  } else {
+    next()
+  }
+})
+
+export default router
