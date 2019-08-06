@@ -160,6 +160,7 @@ export default class PasscodeForm extends Vue {
         })
         .catch(response => {
           this.loginError = response.response.data.message
+          this.showSpinner = false
         })
     }
   }
