@@ -6,6 +6,7 @@ pytest<4.1
 pytest-mock
 requests
 pyhamcrest
+pytest-cov
 
 # Lint and code style
 flake8
@@ -19,3 +20,7 @@ autopep8
 coverage
 pylint
 pylint-flask
+pydocstyle<4
+
+-e git://github.com/pwei1018/jaeger-client-python.git@186f14e14758273ed108508c0d388a4f4de5c75b#egg=jaeger-client
+-e git+https://github.com/pwei1018/sbc-common-components.git#egg=sbc-common-components-1.0.0&subdirectory=python

@@ -1,0 +1,157 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata": {
+    "annotations": {
+      "description": "Pre deployment template for a auth api service. This template may not include real value of secrets; you need to manually replace the value in Openshift.",
+      "tags": "${NAME}-${TAG_NAME}"
+    },
+    "name": "${NAME}-pre-deploy"
+  },
+  "objects": [
+    {
+      "kind": "ConfigMap",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${NAME}-${TAG_NAME}-config",
+        "labels": {
+          "app": "${NAME}-${TAG_NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-pre-deploy"
+        }
+      },
+      "data": {
+        "POD_TESTING": "true"
+      }
+    },
+    {
+      "kind": "Secret",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+        "labels": {
+          "app": "${NAME}-${TAG_NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-pre-deploy"
+        }
+      },
+      "stringData": {
+        "JWT_OIDC_ALGORITHMS": "${JWT_OIDC_ALGORITHMS}",
+        "JWT_OIDC_AUDIENCE": "${JWT_OIDC_AUDIENCE}",
+        "JWT_OIDC_CLIENT_SECRET": "${JWT_OIDC_CLIENT_SECRET}",
+        "JWT_OIDC_ISSUER": "${JWT_OIDC_ISSUER}",
+        "JWT_OIDC_JWKS_CACHE_TIMEOUT": "${JWT_OIDC_JWKS_CACHE_TIMEOUT}",
+        "JWT_OIDC_WELL_KNOWN_CONFIG": "${JWT_OIDC_WELL_KNOWN_CONFIG}",
+        "KEYCLOAK_ADMIN_CLIENTID": "${KEYCLOAK_ADMIN_CLIENTID}",
+        "KEYCLOAK_ADMIN_SECRET": "${KEYCLOAK_ADMIN_SECRET}",
+        "KEYCLOAK_AUTH_AUDIENCE": "${KEYCLOAK_AUTH_AUDIENCE}",
+        "KEYCLOAK_AUTH_CLIENT_SECRET": "${KEYCLOAK_AUTH_CLIENT_SECRET}",
+        "KEYCLOAK_BASE_URL": "${KEYCLOAK_BASE_URL}",
+        "KEYCLOAK_REALMNAME": "${KEYCLOAK_REALMNAME}"
+      },
+      "type": "Opaque"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the OpenShift resources associated to the server instance.",
+      "required": true,
+      "value": "auth-api"
+    },
+    {
+      "name": "APP_GROUP",
+      "displayName": "App Group",
+      "description": "The name assigned to all of the deployments in this project.",
+      "required": true,
+      "value": "sbc-auth"
+    },
+    {
+      "name": "TAG_NAME",
+      "displayName": "Environment TAG name",
+      "description": "The TAG name for this environment, e.g., dev, test, prod",
+      "required": true,
+      "value": "dev"
+    },
+    {
+      "name": "KEYCLOAK_NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the OpenShift resources associated to the server instance.",
+      "required": true,
+      "value": "keycloak"
+    },
+    {
+      "name": "JWT_OIDC_ALGORITHMS",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "JWT_OIDC_AUDIENCE",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "JWT_OIDC_CLIENT_SECRET",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "JWT_OIDC_ISSUER",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "JWT_OIDC_JWKS_CACHE_TIMEOUT",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "JWT_OIDC_WELL_KNOWN_CONFIG",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "KEYCLOAK_ADMIN_CLIENTID",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "KEYCLOAK_ADMIN_SECRET",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "KEYCLOAK_AUTH_AUDIENCE",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "KEYCLOAK_AUTH_CLIENT_SECRET",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "KEYCLOAK_BASE_URL",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "KEYCLOAK_REALMNAME",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    }
+  ]
+}

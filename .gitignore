@@ -45,6 +45,7 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+pytest.xml
 
 # Translations
 *.mo
@@ -113,4 +114,7 @@ node_modules/
 
 # npm
 package-lock.json
+
+# Mac OS
+.DS_Store
 

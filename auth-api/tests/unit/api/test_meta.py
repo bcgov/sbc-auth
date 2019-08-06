@@ -16,8 +16,10 @@
 
 Test-Suite to ensure that the /meta endpoint is working as expected.
 """
+from tests import skip_in_pod
 
 
+@skip_in_pod
 def test_meta_no_commit_hash(client):
     """Assert that the endpoint returns just the services __version__."""
     from auth_api.version import __version__

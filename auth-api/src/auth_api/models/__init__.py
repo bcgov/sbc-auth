@@ -13,12 +13,21 @@
 # limitations under the License.
 
 """This exports all of the models and schemas used by the application."""
+
+from sbc_common_components.tracing.db_tracing import DBTracing
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
-from sbc_common_components.tracing.db_tracing import DBTracing
-
+from .affiliation import Affiliation, AffiliationSchema
+from .contact import Contact, ContactSchema
 from .db import db, ma
+from .entity import Entity, EntitySchema
+from .membership import Membership, MembershipSchema
+from .membership_type import MembershipType, MembershipTypeSchema
+from .org import Org, OrgSchema
+from .org_status import OrgStatus, OrgStatusSchema
+from .org_type import OrgType, OrgTypeSchema
+from .payment_type import PaymentType, PaymentTypeSchema
 from .user import User, UserSchema
 
 
