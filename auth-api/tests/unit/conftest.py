@@ -18,8 +18,11 @@ from sqlalchemy import event, text
 from sqlalchemy.schema import DropConstraint, MetaData
 
 from auth_api import create_app
-from auth_api import jwt as _jwt
+from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.models import db as _db
+
+
+_JWT = JWTWrapper.get_instance()
 
 
 @pytest.fixture(scope='session')
@@ -47,7 +50,7 @@ def client(app):  # pylint: disable=redefined-outer-name
 @pytest.fixture(scope='session')
 def jwt():
     """Return a session-wide jwt manager."""
-    return _jwt
+    return _JWT
 
 
 @pytest.fixture(scope='session')

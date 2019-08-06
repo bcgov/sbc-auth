@@ -7,7 +7,7 @@
       "tags": "Vue.js",
       "iconClass": "icon-python"
     },
-    "name": "${NAME}-build-template"
+    "name": "${NAME}-build"
   },
   "objects": [
     {
@@ -23,7 +23,9 @@
       "metadata": {
         "name": "${NAME}",
         "labels": {
-          "app": "${NAME}"
+          "app": "${NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-build"
         }
       },
       "spec": {
@@ -53,9 +55,13 @@
           }
         },
         "resources": {
+          "requests": {
+            "cpu": "${CPU_REQUEST}",
+            "memory": "${MEMORY_REQUEST}"
+          },
           "limits": {
-            "cpu": "4",
-            "memory": "4Gi"
+            "cpu": "${CPU_LIMIT}",
+            "memory": "${MEMORY_LIMIT}"
           }
         },
         "triggers": [
@@ -75,6 +81,13 @@
       "value": "auth-web"
     },
     {
+      "name": "APP_GROUP",
+      "displayName": "App Group",
+      "description": "The name assigned to all of the deployments in this project.",
+      "required": true,
+      "value": "sbc-auth"
+    },
+    {
       "name": "GIT_REPO_URL",
       "displayName": "Git Repo URL",
       "description": "The URL to your GIT repo, don't use the this default unless your just experimenting.",
@@ -86,7 +99,7 @@
       "displayName": "Git Reference",
       "description": "The git reference or branch.",
       "required": true,
-      "value": "master"
+      "value": "development"
     },
     {
       "name": "SOURCE_CONTEXT_DIR",
@@ -129,6 +142,34 @@
       "description": "The tag given to the built image.",
       "required": true,
       "value": "latest"
+    },
+    {
+      "name": "CPU_REQUEST",
+      "displayName": "Resources CPU Request",
+      "description": "The resources CPU request (in cores) for this build.",
+      "required": true,
+      "value": "100m"
+    },
+    {
+      "name": "CPU_LIMIT",
+      "displayName": "Resources CPU Limit",
+      "description": "The resources CPU limit (in cores) for this build.",
+      "required": true,
+      "value": "2"
+    },
+    {
+      "name": "MEMORY_REQUEST",
+      "displayName": "Resources Memory Request",
+      "description": "The resources Memory request (in Mi, Gi, etc) for this build.",
+      "required": true,
+      "value": "100Mi"
+    },
+    {
+      "name": "MEMORY_LIMIT",
+      "displayName": "Resources Memory Limit",
+      "description": "The resources Memory limit (in Mi, Gi, etc) for this build.",
+      "required": true,
+      "value": "2Gi"
     }
   ]
 }

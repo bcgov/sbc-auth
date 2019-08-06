@@ -86,7 +86,6 @@ git remote -v
   flake8 src/auth-api tests
   pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api
   pytest
-  coverage run -m pytest
   coverage report
   start chrome htmlcov/index.html
   ```

@@ -11,53 +11,35 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a affiliation record.
+"""This manages an Affiliation record in the Auth service.
+
+An Affiliation is between an Org and an Entity.
 """
 
-from sqlalchemy import Column, Date, ForeignKey, Integer, text
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, DateTime, ForeignKey, Integer
 
 from .db import db, ma
 
 
-class Affiliation(db.Model):
-    """Used to hold the affiliation information."""
+class Affiliation(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+    """This is the model for an Affiliation."""
+
     __tablename__ = 'affiliation'
 
-    affiliation_id = Column(Integer, primary_key=True, server_default=text("nextval('affiliation_id_seq'::regclass)"))
-    affiliation_status_code = Column(ForeignKey('affiliation_status.status_code'), nullable=False)
-    business_id = Column(ForeignKey('affiliation_business.business_id'), nullable=False)
-    user_id = Column(ForeignKey('users.user_id'), nullable=False)
-    effective_start_date = Column(Date, nullable=False)
-    effective_end_date = Column(Date)
-    created_by_userid = Column(Integer)
-    creation_date = Column(Date)
-    modified_by_userid = Column(Integer)
-    last_access_date = Column(Date)
-
-    affiliation_statu = relationship('AffiliationStatu')
-    business = relationship('AffiliationBusines')
-    user = relationship('User')
-
-    @classmethod
-    def find_by_user_id(cls, user_id):
-        """Return the oldest affiliation record for the provided userid."""
-        return cls.query.filter_by(userid=user_id).first()
-
-    def save(self):
-        """Store affiliation  into the local cache."""
-        db.session.add(self)
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
+    id = Column(Integer, primary_key=True)
+    entity = Column(ForeignKey('entity.id'), nullable=False)
+    org = Column(ForeignKey('org.id'), nullable=False)
+    created = Column(DateTime)
+    created_by = Column(ForeignKey('user.id'), nullable=False)
 
 
-class UserSchema(ma.ModelSchema):
-    """Used to manage the default mapping between JSON and Domain model."""
+class AffiliationSchema(ma.ModelSchema):
+    """This is the Schema for an Affiliation model.
+
+    It is used to managed the default mapping between the JSON and model.
+    """
 
     class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Domain fields to a default schema."""
+        """Maps all of the Affiliation fields to a default schema."""
 
         model = Affiliation

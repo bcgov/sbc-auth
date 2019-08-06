@@ -4,47 +4,33 @@ import { mount, createLocalVue } from '@vue/test-utils'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import VueRouter from 'vue-router'
-import LoginServices from '../../src/services/login.services'
-import axios from 'axios'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
 jest.mock('axios', () => ({
-  post: jest.fn(() => Promise.resolve({ data: { access_token: 'abcd' } }))
+  post: jest.fn(() => Promise.resolve({ data: { access_token: 'abcd', refresh_token: 'efgh', registries_trace_id: '12345abcde' } }))
 }))
 
 describe('PasscodeForm.vue', () => {
   let cmp
+  var ob = {
+    'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
+    'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
+    'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
+  }
 
+  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(ob)
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
     const store = new Vuex.Store({
-      modules: {
-        login: {
-          state: {
-            entityNumber: '',
-            passcode: ''
-          },
-          getters: {
-            entityNumber: (state) => state.login.entityNumber,
-            passcode: (state) => state.login.passcode
-          },
-          mutations: {
-            entityNumber (state, entityNumber) {
-              state.login.entityNumber = entityNumber
-            },
-
-            passcode (state, passcode) {
-              state.login.passcode = passcode
-            }
-          }
-        }
-      }
+      strict: true
     })
+
     const $t = () => {}
+
     cmp = mount(PasscodeForm, {
       store,
       localVue,
@@ -60,36 +46,11 @@ describe('PasscodeForm.vue', () => {
     expect(cmp.isVueInstance()).toBeTruthy()
   })
 
-  it('passcode and entity number is empty', () => {
-    expect(cmp.vm.entityNumber).toBe('')
+  it('passcode and business number is empty', () => {
+    expect(cmp.vm.businessNumber).toBe('')
     expect(cmp.vm.passcode).toBe('')
   })
 
-  it('passcode and entity number is the values in store', () => {
-    const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const store = new Vuex.Store({
-      modules: {
-        login: {
-          state: {
-            entityNumber: 'somenumber',
-            passcode: 'somevalue'
-          }
-        }
-      } })
-    const $t = () => {}
-    cmp = mount(PasscodeForm, {
-      store,
-      localVue,
-      mocks: { $t }
-    })
-
-    cmp.vm.$refs.form.validate()
-
-    expect(cmp.vm.entityNumber).toBe('somenumber')
-    expect(cmp.vm.passcode).toBe('somevalue')
-  })
   it('login button click invokes login method', () => {
     const stub = jest.fn()
     cmp.setMethods({ login: stub })
@@ -97,27 +58,10 @@ describe('PasscodeForm.vue', () => {
     expect(cmp.vm.login).toBeCalled()
   })
 
-  it('login button click invokes isValidForm method', () => {
+  it('login button click invokes isFormValid method', () => {
     const stub = jest.fn()
-    cmp.setMethods({ isValidForm: stub })
+    cmp.setMethods({ isFormValid: stub })
     cmp.find('.sign-in-btn').trigger('click')
-    expect(cmp.vm.isValidForm).toBeCalled()
-  })
-
-  it('login button valid form  call  axios', () => {
-    const stub = jest.fn()
-    stub.mockReturnValueOnce(true)
-    cmp.setMethods({ isValidForm: stub })
-    cmp.find('.sign-in-btn').trigger('click')
-    expect(cmp.vm.isValidForm).toBeTruthy()
-    expect(axios.post).toBeCalledTimes(1)
-  })
-
-  it('login button invalid form  never call  axios', () => {
-    const stub = jest.fn()
-    stub.mockReturnValueOnce(false)
-    cmp.setMethods({ isValidForm: stub })
-    cmp.find('.sign-in-btn').trigger('click')
-    expect(cmp.vm.isValidForm).toBeTruthy()
+    expect(cmp.vm.isFormValid).toBeCalled()
   })
 })

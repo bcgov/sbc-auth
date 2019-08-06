@@ -1,0 +1,34 @@
+User Resource
+
+/users
+	POST
+	Description: Uses Bearer token from request header to create a new user.  
+	Returns 201 on success, 409 if user already exists.
+
+/users?name={text}&email={text}
+	GET
+	Description: Admin function for retrieving list of users.  Request query parameters used to narrow search.
+	Returns array of users in response that match search query
+	Permissions: Application admin
+
+/users/{user_id}
+	GET
+	Description: Uses Bearer token from request header to retrieve corresponding user in response
+	Returns 200.  User as JSON response
+
+	PUT/PATCH
+	Description: Admin function for updating a specific user.  Request body contains new user data.
+	Permissions: Application admin
+
+	DELETE
+	Description: Admin function for deleting a specific user.  Request query parameters used to specify user
+	Permissions: Application admin
+
+/users/{user_id}/orgs
+	GET
+	Description: Returns a list of orgs that the current user is a member of
+
+/users/{user_id}/entities
+	GET
+	Description Returns a list of entities that the current user is authorized to manage
+

@@ -1,0 +1,23 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/entity",
+    "type": "object",
+    "title": "Entity",
+    "required": [
+      "businessIdentifier"
+    ],
+    "properties": {
+      "business_identifier": {
+        "$id": "#/properties/businessIdentifier",
+        "type": "string",
+        "title": "Business Identifier",
+        "default": "",
+        "examples": [
+          "CP1234567"
+        ],
+        "pattern": "^(.*)$"
+      }
+    }
+  }
+  
