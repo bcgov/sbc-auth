@@ -18,7 +18,11 @@ This module manages the User Information.
 
 from sbc_common_components.tracing.service_tracing import ServiceTracing
 
-from auth_api.models import User as UserModel
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
+from auth_api.models.contact import Contact as ContactModel
+from auth_api.models.user import User as UserModel
+from auth_api.models.user import UserSchema
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -30,114 +34,82 @@ class User:  # pylint: disable=too-many-instance-attributes
     submitting changes back to all storage systems as needed.
     """
 
-    def __init__(self):
+    def __init__(self, model):
         """Return a User Service object."""
-        self.__dao = None
-        self._username: str = None
-        self._roles: str = None
-        self._keycloak_guid: str = None
-
-    @property
-    def _dao(self):
-        if not self.__dao:
-            self.__dao = UserModel()
-        return self.__dao
-
-    @_dao.setter
-    def _dao(self, value):
-        self.__dao = value
-        self.username = self._dao.username
-        self.roles = self._dao.roles
-
-    @property
-    def username(self):
-        """Return the User username."""
-        return self._username
-
-    @username.setter
-    def username(self, value: str):
-        """Set the User username."""
-        self._username = value
-        self._dao.username = value
-
-    @property
-    def roles(self):
-        """Return the User roles."""
-        return self._roles
-
-    @roles.setter
-    def roles(self, value: str):
-        """Set the User roles."""
-        self._roles = value
-        self._dao.roles = value
-
-    @property
-    def keycloak_guid(self):
-        """Return the keycloak GUID."""
-        return self._keycloak_guid
-
-    @keycloak_guid.setter
-    def keycloak_guid(self, value: str):
-        """Set the keycloak GUID."""
-        self._keycloak_guid = value
-        self._dao.keycloak_guid = value
+        self._model = model
 
     @ServiceTracing.disable_tracing
-    def asdict(self):
+    def as_dict(self):
         """Return the User as a python dict.
 
         None fields are not included in the dict.
         """
-        d = {'username': self.username}
-        if self.roles:
-            d['roles'] = self.roles
-        return d
-
-    def save(self):
-        """Save the User information to the local cache."""
-        self._dao.save()
+        user_schema = UserSchema()
+        obj = user_schema.dump(self._model, many=False)
+        return obj
 
     @classmethod
     def save_from_jwt_token(cls, token: dict = None):
-        """Save user to database."""
-        if not token:
-            return None
-        user_dao = UserModel.create_from_jwt_token(token)
-
-        if not user_dao:
-            return None
-
-        user = User()
-        user._dao = user_dao  # pylint: disable=protected-access
-        return user
-
-    @classmethod
-    def find_by_jwt_token(cls, token: dict = None):
-        """Find user from database by user token."""
+        """Save user to database (create/update)."""
         if not token:
             return None
 
-        user_dao = UserModel.find_by_jwt_token(token)
+        existing_user = UserModel.find_by_jwt_token(token)
+        if existing_user is None:
+            user_model = UserModel.create_from_jwt_token(token)
+        else:
+            user_model = UserModel.update_from_jwt_token(token)
 
-        if not user_dao:
+        if not user_model:
             return None
 
-        user = User()
-        user._dao = user_dao  # pylint: disable=protected-access
+        user = User(user_model)
         return user
 
-    @classmethod
-    def find_by_username(cls, username: str = None):
-        """Given a username, this will return an Active User or None."""
-        if not username:
-            return None
+    @staticmethod
+    def add_contact(username, contact_info: dict):
+        """Add contact information for an existing user."""
+        user = UserModel.find_by_username(username)
+        if user is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        # find locally
-        user_dao = UserModel.find_by_username(username)
+        contact = ContactModel()
+        contact.user_id = user.id
+        contact.email = contact_info.get('emailAddress', None)
+        contact.phone = contact_info.get('phoneNumber', None)
+        contact.phone_extension = contact_info.get('extension', None)
+        contact = contact.flush()
+        contact.commit()
 
-        if not user_dao:
-            return None
+        return User(user)
 
-        user = User()
-        user._dao = user_dao  # pylint: disable=protected-access
-        return user
+    # @classmethod
+    # def find_by_jwt_token(cls, token: dict = None):
+    #     """Find user from database by user token."""
+    #     if not token:
+    #         return None
+
+    #     user_dao = UserModel.find_by_jwt_token(token)
+
+    #     if not user_dao:
+    #         return None
+
+    #     user = User()
+    #     user._dao = user_dao  # pylint: disable=protected-access
+    #     return user
+
+    # @classmethod
+    # def find_by_username(cls, username: str = None):
+    #     """Given a username, this will return an Active User or None."""
+    #     if not username:
+    #         return None
+
+    #     # find locally
+    #     user_dao = UserModel.find_by_username(username)
+
+    #     if not user_dao:
+    #         return None
+
+    #     user = User()
+    #     user._dao = user_dao  # pylint: disable=protected-access
+    #     return user

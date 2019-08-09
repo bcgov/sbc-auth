@@ -22,10 +22,11 @@ from flask import current_app
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 
-from .db import db, ma
+from .base_model import BaseModel
+from .db import ma
 
 
-class User(db.Model):
+class User(BaseModel):
     """This is the model for a User."""
 
     __tablename__ = 'user'
@@ -42,17 +43,18 @@ class User(db.Model):
     modified = Column(DateTime)
     roles = Column('roles', String(1000))
 
-    @classmethod
-    def find_by_keycloak_guid(cls, keycloak_guid):
-        """Return the first user with the provided KeyCloak GUID."""
-        return cls.query.filter_by(keycloak_guid=keycloak_guid).first()
+    # @classmethod
+    # def find_by_keycloak_guid(cls, keycloak_guid):
+    #     """Return the first user with the provided KeyCloak GUID."""
+    #     return cls.query.filter_by(keycloak_guid=keycloak_guid).first()
 
     @classmethod
     def find_by_jwt_token(cls, token: dict):
-        """Return if they exist and match the provided JWT."""
+        """Find an existing user by the keycloak GUID in the provided token."""
         return cls.query.filter_by(
-            username=token.get('preferred_username', None)
+            keycloak_guid=token.get('sub', None)
         ).one_or_none()
+
 
     @classmethod
     def create_from_jwt_token(cls, token: dict):
@@ -70,20 +72,34 @@ class User(db.Model):
             current_app.logger.debug(
                 'Creating user from JWT:{}; User:{}'.format(token, user)
             )
-            db.session.add(user)
-            db.session.commit()
+            user.save()
             return user
+        return None
+
+    @classmethod
+    def update_from_jwt_token(cls, token: dict):
+        """Update a User from the provided JWT."""
+        if token:
+            user = User.find_by_jwt_token(token)
+            if user:
+                user.username = token.get('preferred_username', user.username)
+                user.firstname = token.get('firstname', user.firstname)
+                user.lastname = token.get('lastname', user.lastname)
+                user.email = token.get('email', user.email)
+                user.modified = datetime.datetime.now()
+                user.roles = token.get('roles', user.roles)
+
+                current_app.logger.debug(
+                    'Updating user from JWT:{}; User:{}'.format(token, user)
+                )
+                cls.commit()
+                return user
         return None
 
     @classmethod
     def find_by_username(cls, username):
         """Return the first User for the provided username."""
         return cls.query.filter_by(username=username).first()
-
-    def save(self):
-        """Save the User model."""
-        db.session.add(self)
-        db.session.commit()
 
     def delete(self):
         """Users cannot be deleted so intercept the ORM by just returning."""
@@ -96,4 +112,4 @@ class UserSchema(ma.ModelSchema):
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the User fields to a default schema."""
 
-        model = User
+        # model = User
