@@ -13,11 +13,12 @@
 # limitations under the License.
 """Super class to handle all operations related to base model."""
 
+# from .db import BASE as Base, SESSION as session
 from .db import db
 
-
-class BaseModel:
+class BaseModel(db.Model):
     """This class manages all of the base model functions."""
+    __abstract__ = True
 
     @staticmethod
     def commit():

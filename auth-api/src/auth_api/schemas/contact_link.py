@@ -11,19 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Create SQLAlchenmy and Schema managers.
+"""Manager for contact link schema and export."""
 
-These will get initialized by the application using the models
-"""
-from flask_marshmallow import Marshmallow
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session, sessionmaker
+from marshmallow import fields
 
-# by convention in the Flask community these are lower case,
-# whereas pylint wants them upper case
-ma = Marshmallow()  # pylint: disable=invalid-name
-db = SQLAlchemy()  # pylint: disable=invalid-name
+from auth_api.models import ContactLink as ContactLinkModel
+from .base_schema import BaseSchema
+from .contact import ContactSchema
 
-BASE = declarative_base()
-SESSION = scoped_session(sessionmaker())
+class ContactLinkSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the Contact link model."""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps all of the User fields to a default schema."""
+
+        model = ContactLinkModel
+
+    contact = fields.Nested(ContactSchema, many=False)

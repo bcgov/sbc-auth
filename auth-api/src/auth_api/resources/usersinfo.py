@@ -47,21 +47,21 @@ def handle_exception(exception):
     return {'message': str(exception.error)}, exception.status_code
 
 
-@cors_preflight('GET')
-@API.route('')
-class UserInfo(Resource):
-    """Retrieve user detail information from token and database."""
+# @cors_preflight('GET')
+# @API.route('')
+# class UserInfo(Resource):
+#     """Retrieve user detail information from token and database."""
 
-    @staticmethod
-    @cors.crossdomain(origin='*')
-    @TRACER.trace()
-    @catch_custom_exception
-    @JWT.requires_auth
-    def get():
-        """Return a JSON object that includes user detail information."""
-        token = g.jwt_oidc_token_info
-        user = User.find_by_jwt_token(token)
-        if not user:
-            user = User.save_from_jwt_token(token)
+#     @staticmethod
+#     @cors.crossdomain(origin='*')
+#     @TRACER.trace()
+#     @catch_custom_exception
+#     @JWT.requires_auth
+#     def get():
+#         """Return a JSON object that includes user detail information."""
+#         token = g.jwt_oidc_token_info
+#         user = User.find_by_jwt_token(token)
+#         if not user:
+#             user = User.save_from_jwt_token(token)
 
-        return jsonify(user.asdict()), 200
+#         return jsonify(user.asdict()), 200

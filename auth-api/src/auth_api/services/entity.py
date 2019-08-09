@@ -19,9 +19,10 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.models.contact import Contact as ContactModel
+from auth_api.models import Contact as ContactModel
+from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
-from auth_api.models.entity import EntitySchema
+from auth_api.schemas import EntitySchema
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -86,12 +87,17 @@ class Entity:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         contact = ContactModel()
-        contact.entity_id = entity.id
         contact.email = contact_info.get('emailAddress', None)
         contact.phone = contact_info.get('phoneNumber', None)
         contact.phone_extension = contact_info.get('extension', None)
         contact = contact.flush()
         contact.commit()
+
+        contact_link = ContactLinkModel()
+        contact_link.entity_id = entity.id
+        contact_link.contact_id = contact.id
+        contact_link = contact_link.flush()
+        contact_link.commit()
 
         return Entity(entity)
 
@@ -101,13 +107,24 @@ class Entity:
         entity = EntityModel.find_by_business_identifier(business_identifier)
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        contact = ContactModel.find_by_entity_id(entity.id)
+
+        # find the contact link object for this entity
+        contact_link = ContactLinkModel.find_by_entity_id(entity.id)
+        if contact_link is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # now find the contact for the link
+        contact = contact_link.contact
+        if contact is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
         contact.email = contact_info.get('emailAddress', contact.email)
         contact.phone = contact_info.get('phoneNumber', contact.phone)
         contact.phone_extension = contact_info.get('extension', contact.phone_extension)
         contact = contact.flush()
         contact.commit()
 
+        # return the entity with updated contact
         entity = EntityModel.find_by_business_identifier(business_identifier)
         return Entity(entity)
 
@@ -117,5 +134,7 @@ class Entity:
         entity = EntityModel.find_by_business_identifier(business_identifier)
         if entity is None:
             return None
-        contact = ContactModel.find_by_entity_id(entity.id)
-        return contact
+        contact_link = ContactLinkModel.find_by_entity_id(entity.id)
+        if contact_link is None:
+            return None
+        return contact_link.contact

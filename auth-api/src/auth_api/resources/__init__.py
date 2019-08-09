@@ -23,7 +23,7 @@ That are used to expose operational health information about the service, and me
 
 from flask import Blueprint
 
-from auth_api.resources.admin.users import API as USER_API
+from auth_api.resources.admin.user import API as USER_API
 
 from .apihelper import Api
 from .entity import API as ENTITY_API
@@ -67,6 +67,6 @@ API = Api(
 API.add_namespace(META_API, path='/meta')
 API.add_namespace(USERINFO_API, path='/users/info')
 API.add_namespace(TOKEN_API, path='/token')
-API.add_namespace(USER_API, path='/admin/users')
+API.add_namespace(USER_API, path='/users')
 API.add_namespace(LOGOUT_API, path='/logout')
 API.add_namespace(ENTITY_API, path='/entities')
