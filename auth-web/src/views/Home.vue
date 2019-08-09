@@ -1,18 +1,16 @@
 <template>
   <div class="view-container">
     <article>
-      <h1>File BC Co-operative <span>Annual Reports</span></h1>
-      <p class="intro-text">Sign in to start filing your BC Co-operative Annual Report. You will need to provide your <em>Incorporation Number</em> and your <em>Passcode</em> in the letter you received in the mail.</p>
-      <v-card class="sign-in-card">
-        <v-container>
-          <h2>Sign In</h2>
-          <PasscodeForm/>
-        </v-container>
-      </v-card>
+      <p class="intro-text"><span><h1>Quick and easy access to BC Government and partner services for legal, business, government and professionals.</h1></span></p>
+  
+        <v-btn class="sign-in-btn" @click="login" color="primary" large to="/createaccount">
+          <span>Create an Account</span>
+        </v-btn>
+        <v-btn class="sign-in-btn" @click="login" color="primary" large>
+          <span>Learn More</span>
+        </v-btn>
     </article>
-    <aside>
-      <SupportInfoCard/>
-    </aside>
+    
   </div>
 </template>
 

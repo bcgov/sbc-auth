@@ -32,5 +32,17 @@ export default {
   getValue (key: String) {
     // @ts-ignore
     return JSON.parse(sessionStorage.getItem(SESSION_STORAGE_KEY))[key]
+  },
+
+  addToSession(key:string, value:any){
+    sessionStorage.setItem(key, value)
+  },
+
+  getFromSession(key:string):string{
+    return sessionStorage.getItem(key)
+  },
+
+  removeFromSession(key:string){
+    sessionStorage.removeItem(key)
   }
 }
