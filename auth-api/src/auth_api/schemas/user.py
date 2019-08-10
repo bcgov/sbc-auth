@@ -11,20 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a Membership Type record.
+"""Manager for user schema and export."""
 
-It defines the available types of membership Users have with Orgs.
-"""
+from marshmallow import fields
 
-from sqlalchemy import Column, String
+from auth_api.models import User as UserModel
+from .base_schema import BaseSchema
+from .contact_link import ContactLinkSchema
 
-from .db import db
+class UserSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the User model."""
 
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps all of the User fields to a default schema."""
 
-class MembershipType(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
-    """This is the Membership Type model for the Auth service."""
+        model = UserModel
+        exclude = ('id',)
 
-    __tablename__ = 'membership_type'
-
-    code = Column(String(15), primary_key=True)
-    desc = Column(String(100))
+    contacts = fields.Nested(ContactLinkSchema, many=True)

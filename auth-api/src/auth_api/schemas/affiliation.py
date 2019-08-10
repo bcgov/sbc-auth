@@ -11,20 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a Membership Type record.
+"""Manager for affiliation schema and export."""
 
-It defines the available types of membership Users have with Orgs.
-"""
+from auth_api.models import Affiliation as AffiliationModel
+from .base_schema import BaseSchema
 
-from sqlalchemy import Column, String
+class AffiliationSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the Affiliation model."""
 
-from .db import db
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps all of the Affiliation fields to a default schema."""
 
-
-class MembershipType(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
-    """This is the Membership Type model for the Auth service."""
-
-    __tablename__ = 'membership_type'
-
-    code = Column(String(15), primary_key=True)
-    desc = Column(String(100))
+        model = AffiliationModel

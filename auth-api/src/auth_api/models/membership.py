@@ -18,7 +18,7 @@ The Membership object connects User models to one or more Org models.
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer
 
-from .db import db, ma
+from .db import db
 
 
 class Membership(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
@@ -33,12 +33,3 @@ class Membership(db.Model):  # pylint: disable=too-few-public-methods # Temporar
     membership_type = Column(
         ForeignKey('membership_type.code'), nullable=False
     )
-
-
-class MembershipSchema(ma.ModelSchema):
-    """Used to manage the default mapping betweeen JSON and Membership model."""
-
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Membership fields to a default schema."""
-
-        model = Membership

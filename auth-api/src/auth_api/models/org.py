@@ -17,8 +17,9 @@ Basic users will have an internal Org that is not created explicitly, but implic
 """
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 
-from .db import db, ma
+from .db import db
 
 
 class Org(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
@@ -38,11 +39,4 @@ class Org(db.Model):  # pylint: disable=too-few-public-methods # Temporarily dis
     contact2 = Column(ForeignKey('contact.id'))
     preferred_payment = Column(ForeignKey('payment_type.code'), nullable=False)
 
-
-class OrgSchema(ma.ModelSchema):
-    """Used to manage the default mapping between JSON and Org model."""
-
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Org fields to a default schema."""
-
-        model = Org
+    contacts = relationship('ContactLink', back_populates='org')

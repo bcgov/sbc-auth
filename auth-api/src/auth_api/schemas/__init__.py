@@ -15,3 +15,4 @@
 
 from .contact import ContactSchema
 from .entity import EntitySchema
+from .user import UserSchema

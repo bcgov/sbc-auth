@@ -18,7 +18,7 @@ This is a mapping between status codes and descriptions for Org objects.
 
 from sqlalchemy import Column, String
 
-from .db import db, ma
+from .db import db
 
 
 class OrgStatus(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
@@ -28,12 +28,3 @@ class OrgStatus(db.Model):  # pylint: disable=too-few-public-methods # Temporari
 
     code = Column(String(15), primary_key=True)
     desc = Column(String(100))
-
-
-class OrgStatusSchema(ma.ModelSchema):
-    """This is the Schema for an Org Status record."""
-
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Org Status fields to a default schema."""
-
-        model = OrgStatus
