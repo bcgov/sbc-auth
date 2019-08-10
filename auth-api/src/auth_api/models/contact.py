@@ -18,7 +18,6 @@ physical addresses, emails, and phone numbers.
 """
 
 from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
 
@@ -41,5 +40,3 @@ class Contact(BaseModel):  # pylint: disable=too-few-public-methods
     email = Column('email', String(100))
     # MVP contact has been migrated over to the contact linking table (revised data model)
     entity_id = Column(Integer, ForeignKey('entity.id'))
-
-    entities = relationship('ContactLink', back_populates='contact')

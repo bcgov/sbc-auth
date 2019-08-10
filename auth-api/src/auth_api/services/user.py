@@ -20,9 +20,10 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.models.contact import Contact as ContactModel
-from auth_api.models.user import User as UserModel
-from auth_api.models.user import UserSchema
+from auth_api.models import Contact as ContactModel
+from auth_api.models import ContactLink as ContactLinkModel
+from auth_api.models import User as UserModel
+from auth_api.schemas import UserSchema
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -67,36 +68,68 @@ class User:  # pylint: disable=too-many-instance-attributes
         return user
 
     @staticmethod
-    def add_contact(username, contact_info: dict):
-        """Add contact information for an existing user."""
-        user = UserModel.find_by_username(username)
+    def add_contact(token, contact_info: dict):
+        """Add or update contact information for an existing user."""
+        user = UserModel.find_by_jwt_token(token)
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         contact = ContactModel()
-        contact.user_id = user.id
         contact.email = contact_info.get('emailAddress', None)
         contact.phone = contact_info.get('phoneNumber', None)
         contact.phone_extension = contact_info.get('extension', None)
         contact = contact.flush()
         contact.commit()
 
+        contact_link = ContactLinkModel()
+        contact_link.user_id = user.id
+        contact_link.contact_id = contact.id
+        contact_link = contact_link.flush()
+        contact_link.commit()
+
         return User(user)
 
-    # @classmethod
-    # def find_by_jwt_token(cls, token: dict = None):
-    #     """Find user from database by user token."""
-    #     if not token:
-    #         return None
+    @staticmethod
+    def update_contact(token, contact_info: dict):
+        """Update a contact for an existing user."""
+        user = UserModel.find_by_jwt_token(token)
+        if user is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-    #     user_dao = UserModel.find_by_jwt_token(token)
+        # find the contact link for this user
+        contact_link = ContactLinkModel.find_by_user_id(user.id)
 
-    #     if not user_dao:
-    #         return None
+        # now find the contact for the link
+        contact = contact_link.contact
+        if contact is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-    #     user = User()
-    #     user._dao = user_dao  # pylint: disable=protected-access
-    #     return user
+        contact.email = contact_info.get('emailAddress', contact.email)
+        contact.phone = contact_info.get('phoneNumber', contact.phone)
+        contact.phone_extension = contact_info.get('extension', contact.phone_extension)
+        contact = contact.flush()
+        contact.commit()
+
+        # return the user with the updated contact
+        return User(user)
+
+    @staticmethod
+    def find_users(first_name, last_name, email):
+        """Returns a list of users matching either the given username or the given email."""
+        return UserModel.find_users(first_name=first_name, last_name=last_name, email=email)
+
+    @classmethod
+    def find_by_jwt_token(cls, token: dict = None):
+        """Find user from database by user token."""
+        if not token:
+            return None
+
+        user = UserModel.find_by_jwt_token(token)
+
+        if not user:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        return User(user)
 
     # @classmethod
     # def find_by_username(cls, username: str = None):

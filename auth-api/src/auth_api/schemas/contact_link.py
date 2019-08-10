@@ -26,5 +26,6 @@ class ContactLinkSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-
         """Maps all of the User fields to a default schema."""
 
         model = ContactLinkModel
+        exclude = ('id', 'user', 'entity', 'org')
 
     contact = fields.Nested(ContactSchema, many=False)

@@ -34,10 +34,17 @@ class ContactLink(BaseModel):  # pylint: disable=too-few-public-methods
     user_id = Column(Integer, ForeignKey('user.id'))
     org_id = Column(Integer, ForeignKey('org.id'))
 
-    contact = relationship('Contact', back_populates='entities')
+    contact = relationship('Contact')
     entity = relationship('Entity', back_populates='contacts')
+    user = relationship('User', back_populates='contacts')
+    org = relationship('Org', back_populates='contacts')
 
     @classmethod
     def find_by_entity_id(cls, entity_id):
         """Return the first contact link with the provided entity id."""
         return cls.query.filter_by(entity_id=entity_id).first()
+
+    @classmethod
+    def find_by_user_id(cls, user_id):
+        """Return the first contact link with the provided user id."""
+        return cls.query.filter_by(user_id=user_id).first()

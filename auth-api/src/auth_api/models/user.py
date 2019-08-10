@@ -19,11 +19,11 @@ A User stores basic information from a KeyCloak user (including the KeyCloak GUI
 import datetime
 
 from flask import current_app
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Column, DateTime, Integer, String, or_
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
-from .db import ma
 
 
 class User(BaseModel):
@@ -42,6 +42,8 @@ class User(BaseModel):
     created = Column(DateTime)
     modified = Column(DateTime)
     roles = Column('roles', String(1000))
+
+    contacts = relationship('ContactLink', back_populates='user')
 
     # @classmethod
     # def find_by_keycloak_guid(cls, keycloak_guid):
@@ -97,19 +99,13 @@ class User(BaseModel):
         return None
 
     @classmethod
-    def find_by_username(cls, username):
-        """Return the first User for the provided username."""
-        return cls.query.filter_by(username=username).first()
+    def find_users(cls, first_name, last_name, email):
+        """Returns a set of users with either the given username or the given email."""
+        # TODO: This needs to be improved for scalability.  Paging large datasets etc.
+        if first_name == '' and last_name == '' and email == '':
+            return cls.query.all()
+        return cls.query.filter(or_(cls.firstname == first_name, cls.lastname == last_name, cls.email == email)).all()
 
     def delete(self):
         """Users cannot be deleted so intercept the ORM by just returning."""
         return self
-
-
-class UserSchema(ma.ModelSchema):
-    """This is the Schema for a User model."""
-
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the User fields to a default schema."""
-
-        # model = User
