@@ -37,6 +37,11 @@ class BaseModel(db.Model):
         db.session.commit()
         return self
 
+    def delete(self):
+        """Delete and commit."""
+        db.session.delete(self)
+        db.session.commit()
+
     @staticmethod
     def rollback():
         """RollBack."""
