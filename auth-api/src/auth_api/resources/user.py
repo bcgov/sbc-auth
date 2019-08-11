@@ -81,6 +81,28 @@ class Users(Resource):
 
 
 @cors_preflight('GET')
+@API.route('/<string:username>', methods=['GET'])
+class UserStaff(Resource):
+    """Resource for managing an individual user for a STAFF user."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.has_one_of_roles([Role.STAFF.value])
+    def get(username):
+        """Return the user profile associated with the provided username."""
+        try:
+            user = UserService.find_by_username(username)
+            if user is None:
+                response, status = {'message': 'User {} does not exist.'.format(username)}, http_status.HTTP_404_NOT_FOUND
+            else:
+                response, status = user.as_dict(), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+
+@cors_preflight('GET')
 @API.route('/@me', methods=['GET'])
 class User(Resource):
     """Resource for managing an individual user."""
@@ -102,8 +124,8 @@ class User(Resource):
         return response, status
 
 
-@cors_preflight('POST, PUT')
-@API.route('/contacts', methods=['POST', 'PUT'])
+@cors_preflight('DELETE, POST, PUT')
+@API.route('/contacts', methods=['DELETE', 'POST', 'PUT'])
 class UserContacts(Resource):
     """Resource for managing user contacts."""
 
@@ -136,10 +158,28 @@ class UserContacts(Resource):
         token = g.jwt_oidc_token_info
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'contact')
+        if not token:
+            return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
         try:
             response, status = UserService.update_contact(token, request_json).as_dict(), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def delete():
+        """Deletes the contact info for the user associated with the JWT in the authorization header."""
+        token = g.jwt_oidc_token_info
+        if not token:
+            return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
+
+        try:
+            response, status = UserService.delete_contact(token).as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

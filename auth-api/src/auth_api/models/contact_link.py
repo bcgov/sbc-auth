@@ -23,6 +23,7 @@ from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
 
+
 class ContactLink(BaseModel):  # pylint: disable=too-few-public-methods
     """This class manages linkages between contacts and other data entities."""
 
@@ -48,3 +49,7 @@ class ContactLink(BaseModel):  # pylint: disable=too-few-public-methods
     def find_by_user_id(cls, user_id):
         """Return the first contact link with the provided user id."""
         return cls.query.filter_by(user_id=user_id).first()
+
+    def has_links(self):
+        """Checks whether there are any remaining links for this contact."""
+        return self.user_id or self.org_id or self.entity_id

@@ -74,6 +74,11 @@ class User:  # pylint: disable=too-many-instance-attributes
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
+        # check for existing contact (we only want one contact per user)
+        contact_link = ContactLinkModel.find_by_user_id(user.id)
+        if contact_link is not None:
+            raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+
         contact = ContactModel()
         contact.email = contact_info.get('emailAddress', None)
         contact.phone = contact_info.get('phoneNumber', None)
@@ -114,6 +119,26 @@ class User:  # pylint: disable=too-many-instance-attributes
         return User(user)
 
     @staticmethod
+    def delete_contact(token):
+        """Delete the contact for an existing user."""
+        user = UserModel.find_by_jwt_token(token)
+        if not user or not user.contacts:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # unlink the user from its contact
+        contact_link = ContactLinkModel.find_by_user_id(user.id)
+        contact_link.user_id = None
+        contact_link = contact_link.flush()
+
+        # clean up any orphaned contacts and links
+        if not contact_link.has_links():
+            contact = contact_link.contact
+            contact_link.delete()
+            contact.delete()
+
+        return User(user)
+
+    @staticmethod
     def find_users(first_name, last_name, email):
         """Returns a list of users matching either the given username or the given email."""
         return UserModel.find_users(first_name=first_name, last_name=last_name, email=email)
@@ -131,18 +156,16 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         return User(user)
 
-    # @classmethod
-    # def find_by_username(cls, username: str = None):
-    #     """Given a username, this will return an Active User or None."""
-    #     if not username:
-    #         return None
+    @classmethod
+    def find_by_username(cls, username: str = None):
+        """Find user by provided username."""
+        if not username:
+            return None
 
-    #     # find locally
-    #     user_dao = UserModel.find_by_username(username)
+        # find locally
+        user_model = UserModel.find_by_username(username)
 
-    #     if not user_dao:
-    #         return None
+        if not user_model:
+            return None
 
-    #     user = User()
-    #     user._dao = user_dao  # pylint: disable=protected-access
-    #     return user
+        return User(user_model)

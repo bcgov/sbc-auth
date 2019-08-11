@@ -45,10 +45,10 @@ class User(BaseModel):
 
     contacts = relationship('ContactLink', back_populates='user')
 
-    # @classmethod
-    # def find_by_keycloak_guid(cls, keycloak_guid):
-    #     """Return the first user with the provided KeyCloak GUID."""
-    #     return cls.query.filter_by(keycloak_guid=keycloak_guid).first()
+    @classmethod
+    def find_by_username(cls, username):
+        """Return the first user with the provided KeyCloak GUID."""
+        return cls.query.filter_by(username=username).first()
 
     @classmethod
     def find_by_jwt_token(cls, token: dict):
