@@ -36,16 +36,6 @@ class Entity:
         """Return an Entity Service."""
         self._model = model
 
-    @property
-    def business_identifier(self):
-        """Return the business identifier for this Entity."""
-        return self._model.business_identifier
-
-    @business_identifier.setter
-    def business_identifier(self, value: str):
-        """Set the business identifier for this Entity."""
-        self._model.business_identifier = value
-
     @ServiceTracing.disable_tracing
     def as_dict(self):
         """Return the entity as a python dictionary.
@@ -65,7 +55,7 @@ class Entity:
         entity_model = EntityModel.find_by_business_identifier(business_identifier)
 
         if not entity_model:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
+            return None
 
         entity = Entity(entity_model)
         return entity
@@ -85,6 +75,11 @@ class Entity:
         entity = EntityModel.find_by_business_identifier(business_identifier)
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # check for existing contact (we only want one contact per user)
+        contact_link = ContactLinkModel.find_by_entity_id(entity.id)
+        if contact_link is not None:
+            raise BusinessException(Error.DATA_CONFLICT, None)
 
         contact = ContactModel()
         contact.email = contact_info.get('emailAddress', None)

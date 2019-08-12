@@ -105,10 +105,10 @@ class User:  # pylint: disable=too-many-instance-attributes
         contact_link = ContactLinkModel.find_by_user_id(user.id)
 
         # now find the contact for the link
-        contact = contact_link.contact
-        if contact is None:
+        if contact_link is None or contact_link.contact is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
+        contact = contact_link.contact
         contact.email = contact_info.get('emailAddress', contact.email)
         contact.phone = contact_info.get('phoneNumber', contact.phone)
         contact.phone_extension = contact_info.get('extension', contact.phone_extension)
@@ -139,7 +139,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         return User(user)
 
     @staticmethod
-    def find_users(first_name, last_name, email):
+    def find_users(first_name='', last_name='', email=''):
         """Returns a list of users matching either the given username or the given email."""
         return UserModel.find_users(first_name=first_name, last_name=last_name, email=email)
 
