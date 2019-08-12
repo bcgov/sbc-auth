@@ -31,7 +31,9 @@ jobs:
       run: |
         cd auth-api
         pip install flake8
-        flake8 src/auth_api tests        
+        flake8 src/auth_api tests    
+        if: failure
+          
     - name: Test with pytest
       run: |
         cd auth-api
