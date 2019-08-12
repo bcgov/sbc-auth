@@ -36,6 +36,21 @@ class Entity:
         """Return an Entity Service."""
         self._model = model
 
+    @property
+    def business_identifier(self):
+        """Return the business identifier for this Entity."""
+        return self._model.business_identifier
+
+    @property
+    def pass_code(self):
+        """Return the business identifier for this Entity."""
+        return self._model.pass_code
+
+    @business_identifier.setter
+    def business_identifier(self, value: str):
+        """Set the business identifier for this Entity."""
+        self._model.business_identifier = value
+
     @ServiceTracing.disable_tracing
     def as_dict(self):
         """Return the entity as a python dictionary.
@@ -133,3 +148,13 @@ class Entity:
         if contact_link is None:
             return None
         return contact_link.contact
+
+    @staticmethod
+    def validate_pass_code(business_identifier, pass_code):
+        """Get the contact for a business identified by the given id."""
+        entity = EntityModel.find_by_business_identifier(business_identifier)
+        if entity is None:
+            return None
+        if pass_code == entity.pass_code:
+            return True
+        return False
