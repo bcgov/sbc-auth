@@ -116,27 +116,3 @@ class ContactResource(Resource):
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
-
-
-@cors_preflight(['POST', 'OPTIONS'])
-@API.route('/<string:business_identifier>/validation', methods=['POST', 'OPTIONS'])
-class ContactResource(Resource):
-    """Resource for entity pass_code validation."""
-
-    @staticmethod
-    @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
-    @cors.crossdomain(origin='*')
-    def post(business_identifier):
-        """Validate pass_code."""
-        data = request.get_json()
-        if not data:
-            data = request.values
-        if 'pass_code' not in data:
-            return {'message': 'pass_code needed.'}, http_status.HTTP_400_BAD_REQUEST
-
-        try:
-            response, status = str(EntityService.validate_pass_code(business_identifier, data.get('pass_code'))), \
-                http_status.HTTP_200_OK
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-        return response, status
