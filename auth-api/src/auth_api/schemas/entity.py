@@ -16,8 +16,10 @@
 from marshmallow import fields
 
 from auth_api.models import Entity as EntityModel
+
 from .base_schema import BaseSchema
 from .contact_link import ContactLinkSchema
+
 
 class EntitySchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """Used to manage the default mapping between JSON and the Entity model."""

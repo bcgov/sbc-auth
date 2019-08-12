@@ -57,7 +57,6 @@ class User(BaseModel):
             keycloak_guid=token.get('sub', None)
         ).one_or_none()
 
-
     @classmethod
     def create_from_jwt_token(cls, token: dict):
         """Create a User from the provided JWT."""
@@ -100,7 +99,7 @@ class User(BaseModel):
 
     @classmethod
     def find_users(cls, first_name, last_name, email):
-        """Returns a set of users with either the given username or the given email."""
+        """Return a set of users with either the given username or the given email."""
         # TODO: This needs to be improved for scalability.  Paging large datasets etc.
         if first_name == '' and last_name == '' and email == '':
             return cls.query.all()

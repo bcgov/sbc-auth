@@ -14,7 +14,9 @@
 """Manager for affiliation schema and export."""
 
 from auth_api.models import Affiliation as AffiliationModel
+
 from .base_schema import BaseSchema
+
 
 class AffiliationSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the Affiliation model."""

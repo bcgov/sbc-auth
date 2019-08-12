@@ -20,8 +20,9 @@ import pytest
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.services import User as UserService
 from auth_api.models import User as UserModel
+from auth_api.services import User as UserService
+
 
 TEST_TOKEN = {
         'preferred_username': 'testuser',
@@ -47,6 +48,7 @@ TEST_UPDATED_CONTACT_INFO = {
     'extension': '123'
 }
 
+
 def factory_user_model(username,
                        firstname=None,
                        lastname=None,
@@ -60,6 +62,7 @@ def factory_user_model(username,
                      keycloak_guid=keycloak_guid)
     user.save()
     return user
+
 
 def test_as_dict(session):  # pylint: disable=unused-argument
     """Assert that a user is rendered correctly as a dictionary."""
@@ -219,6 +222,7 @@ def test_find_users(session):  # pylint: disable=unused-argument
     users = UserService.find_users(last_name='User')
     assert users is not None
     assert len(users) == 2
+
 
 def test_user_find_by_token(session):  # pylint: disable=unused-argument
     """Assert that a user can be found by token."""

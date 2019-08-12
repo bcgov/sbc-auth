@@ -14,7 +14,9 @@
 """Manager for org type schema and export."""
 
 from auth_api.models import OrgType as OrgTypeModel
+
 from .base_schema import BaseSchema
+
 
 class OrgTypeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the OrgType model."""

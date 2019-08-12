@@ -14,7 +14,9 @@
 """Manager for membership type schema and export."""
 
 from auth_api.models import MembershipType as MembershipTypeModel
+
 from .base_schema import BaseSchema
+
 
 class MembershipTypeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the MembershipType model."""

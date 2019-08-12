@@ -14,10 +14,10 @@
 
 """This exports all of the models and schemas used by the application."""
 
+from sbc_common_components.tracing.db_tracing import DBTracing
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
-from sbc_common_components.tracing.db_tracing import DBTracing
 from .affiliation import Affiliation
 from .contact import Contact
 from .contact_link import ContactLink
@@ -30,5 +30,6 @@ from .org_status import OrgStatus
 from .org_type import OrgType
 from .payment_type import PaymentType
 from .user import User
+
 
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)

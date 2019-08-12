@@ -16,8 +16,10 @@
 # from .db import BASE as Base, SESSION as session
 from .db import db
 
+
 class BaseModel(db.Model):
     """This class manages all of the base model functions."""
+
     __abstract__ = True
 
     @staticmethod

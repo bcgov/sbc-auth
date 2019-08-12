@@ -14,7 +14,9 @@
 """Manager for org status schema and export."""
 
 from auth_api.models import OrgStatus as OrgStatusModel
+
 from .base_schema import BaseSchema
+
 
 class OrgStatusSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the OrgStatus model."""

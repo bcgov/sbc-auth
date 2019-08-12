@@ -20,6 +20,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
+
 # by convention in the Flask community these are lower case,
 # whereas pylint wants them upper case
 ma = Marshmallow()  # pylint: disable=invalid-name

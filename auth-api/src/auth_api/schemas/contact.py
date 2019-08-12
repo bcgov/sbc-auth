@@ -16,7 +16,9 @@
 from marshmallow import fields
 
 from auth_api.models import Contact as ContactModel
+
 from .base_schema import BaseSchema
+
 
 class ContactSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the Contact model."""

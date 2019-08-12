@@ -16,8 +16,10 @@
 from marshmallow import fields
 
 from auth_api.models import User as UserModel
+
 from .base_schema import BaseSchema
 from .contact_link import ContactLinkSchema
+
 
 class UserSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the User model."""

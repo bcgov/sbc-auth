@@ -17,6 +17,7 @@ Test suite to ensure that the Entity service routines are working as expected.
 """
 
 import pytest
+
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models.entity import Entity as EntityModel
@@ -30,6 +31,7 @@ TEST_CONTACT_INFO = {
 TEST_UPDATED_CONTACT_INFO = {
     'emailAddress': 'bar@foo.com'
 }
+
 
 def factory_entity_model(business_identifier):
     """Return a valid entity object with the provided fields."""
@@ -58,7 +60,7 @@ def test_create_entity(session):  # pylint:disable=unused-argument
     assert dictionary['businessIdentifier'] == 'CP1234567'
 
 
-def test_entity_find_by_business_id(session): # pylint:disable=unused-argument
+def test_entity_find_by_business_id(session):  # pylint:disable=unused-argument
     """Assert that an Entity can be retrieved by business identifier."""
     factory_entity_model(business_identifier='CP1234567')
     entity = EntityService.find_by_business_identifier('CP1234567')
@@ -119,8 +121,7 @@ def test_update_contact(session):  # pylint:disable=unused-argument
     assert dictionary['contacts'][0]['contact']['emailAddress'] == \
         TEST_CONTACT_INFO['emailAddress']
 
-    updated_entity = EntityService.update_contact(entity.as_dict()['businessIdentifier'], \
-        TEST_UPDATED_CONTACT_INFO)
+    updated_entity = EntityService.update_contact(entity.as_dict()['businessIdentifier'], TEST_UPDATED_CONTACT_INFO)
 
     dictionary = None
     dictionary = updated_entity.as_dict()
