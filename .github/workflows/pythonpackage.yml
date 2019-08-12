@@ -5,10 +5,6 @@ on:
     branches:    # Array of patterns that match refs/heads
     - development     # Push events on master branch
     - post-mvp # Push events to branches matching refs/heads/releases/*
-  pull_request:  # Specify a second event with pattern matching
-    paths:
-    - auth-api/*
-    - *.py
 
 jobs:
   build:
@@ -16,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
+      fail-fast: false
       matrix:
         python-version: [3.7]
 
