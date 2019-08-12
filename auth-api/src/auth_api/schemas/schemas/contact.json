@@ -75,7 +75,7 @@
         ],
         "pattern": "^(.*)$"
       },
-      "phone": {
+      "phoneNumber": {
         "$id": "#/properties/phone",
         "type": "string",
         "title": "Phone",
@@ -85,7 +85,7 @@
         ],
         "pattern": "^(.*)$"
       },
-      "phone_extension": {
+      "extension": {
         "$id": "#/properties/phone_extension",
         "type": "string",
         "title": "Phone Extension",
@@ -95,7 +95,7 @@
         ],
         "pattern": "^(.*)$"
       },
-      "email": {
+      "emailAddress": {
         "$id": "#/properties/email",
         "type": "string",
         "title": "Email",
@@ -103,7 +103,7 @@
         "examples": [
           "abc123@mail.com"
         ],
-        "pattern": "^(.*)$"
+        "pattern": "^[a-z0-9]+(\\.[_a-z0-9]+)*@[a-z0-9-]+(\\.[a-z0-9-]+)*(\\.[a-z]{2,15})$"
       }
     }
   }

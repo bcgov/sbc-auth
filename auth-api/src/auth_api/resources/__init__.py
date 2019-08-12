@@ -30,7 +30,6 @@ from .meta import API as META_API
 from .ops import API as OPS_API
 from .token import API as TOKEN_API
 from .user import API as USER_API
-from .usersinfo import API as USERINFO_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
@@ -64,7 +63,6 @@ API = Api(
 )
 
 API.add_namespace(META_API, path='/meta')
-API.add_namespace(USERINFO_API, path='/users/info')
 API.add_namespace(TOKEN_API, path='/token')
 API.add_namespace(USER_API, path='/users')
 API.add_namespace(LOGOUT_API, path='/logout')

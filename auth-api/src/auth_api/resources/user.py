@@ -15,7 +15,6 @@
 
 from flask import g, jsonify, request
 from flask_restplus import Namespace, Resource, cors
-from sqlalchemy import exc
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
@@ -32,7 +31,7 @@ TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
 
 
-@cors_preflight('GET, POST, PATCH, DELETE')
+@cors_preflight('GET, POST')
 @API.route('', methods=['GET', 'POST'])
 class Users(Resource):
     """Resource for managing users."""
@@ -47,6 +46,7 @@ class Users(Resource):
         If the user already exists, update the name.
         """
         token = g.jwt_oidc_token_info
+
         if not token:
             return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
 
@@ -54,8 +54,6 @@ class Users(Resource):
             response, status = UserService.save_from_jwt_token(token).as_dict(), http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-        except exc.IntegrityError:
-            response, status = {'message': 'That user already exists'}, http_status.HTTP_409_CONFLICT
         return response, status
 
     @staticmethod
@@ -68,15 +66,12 @@ class Users(Resource):
         search_first_name = request.args.get('firstname', '')
         search_last_name = request.args.get('lastname', '')
 
-        try:
-            users = UserService.find_users(first_name=search_first_name, last_name=search_last_name, email=search_email)
-            collection = []
-            for user in users:
-                collection.append(UserService(user).as_dict())
-            response = jsonify(collection)
-            status = http_status.HTTP_200_OK
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        users = UserService.find_users(first_name=search_first_name, last_name=search_last_name, email=search_email)
+        collection = []
+        for user in users:
+            collection.append(UserService(user).as_dict())
+        response = jsonify(collection)
+        status = http_status.HTTP_200_OK
         return response, status
 
 
@@ -91,14 +86,11 @@ class UserStaff(Resource):
     @_JWT.has_one_of_roles([Role.STAFF.value])
     def get(username):
         """Return the user profile associated with the provided username."""
-        try:
-            user = UserService.find_by_username(username)
-            if user is None:
-                response, status = {'message': 'User {} does not exist.'.format(username)}, http_status.HTTP_404_NOT_FOUND
-            else:
-                response, status = user.as_dict(), http_status.HTTP_200_OK
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        user = UserService.find_by_username(username)
+        if user is None:
+            response, status = {'message': 'User {} does not exist.'.format(username)}, http_status.HTTP_404_NOT_FOUND
+        else:
+            response, status = user.as_dict(), http_status.HTTP_200_OK
         return response, status
 
 
