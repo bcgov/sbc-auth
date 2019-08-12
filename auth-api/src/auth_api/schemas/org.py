@@ -16,8 +16,10 @@
 from marshmallow import fields
 
 from auth_api.models import Org as OrgModel
+
 from .base_schema import BaseSchema
 from .contact_link import ContactLinkSchema
+
 
 class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the Org model."""

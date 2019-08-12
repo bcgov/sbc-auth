@@ -25,75 +25,75 @@ from auth_api.exceptions.errors import Error
 
 
 TEST_JWT_CLAIMS = {
-    "iss": os.getenv('JWT_OIDC_ISSUER'),
-    "sub": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
-    "firstname": "Test",
-    "lastname": "User",
-    "preferred_username": "testuser"
+    'iss': os.getenv('JWT_OIDC_ISSUER'),
+    'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+    'firstname': 'Test',
+    'lastname': 'User',
+    'preferred_username': 'testuser'
 }
 
 TEST_JWT_CLAIMS_2 = {
-    "iss": os.getenv('JWT_OIDC_ISSUER'),
-    "sub": "f7a4a1d3-73a8-4cbc-a40f-bb1145302065",
-    "firstname": "Test",
-    "lastname": "User 2",
-    "preferred_username": "testuser2"
+    'iss': os.getenv('JWT_OIDC_ISSUER'),
+    'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302065',
+    'firstname': 'Test',
+    'lastname': 'User 2',
+    'preferred_username': 'testuser2'
 }
 
 TEST_JWT_INVALID_CLAIMS = {
-    "iss": "foobar",
-    "sub": "barfoo",
-    "firstname": "Trouble",
-    "lastname": "Maker",
-    "preferred_username": "troublemaker"
+    'iss': 'foobar',
+    'sub': 'barfoo',
+    'firstname': 'Trouble',
+    'lastname': 'Maker',
+    'preferred_username': 'troublemaker'
 }
 
 TEST_STAFF_JWT_CLAIMS = {
-    "iss": os.getenv('JWT_OIDC_ISSUER'),
-    "sub": "f7a4a1d3-73a8-4cbc-a40f-bb1145302066",
-    "firstname": "Test_Staff",
-    "lastname": "User",
-    "preferred_username": "testuser",
-    "realm_access": {
-        "roles": [
-            "staff"
+    'iss': os.getenv('JWT_OIDC_ISSUER'),
+    'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302066',
+    'firstname': 'Test_Staff',
+    'lastname': 'User',
+    'preferred_username': 'testuser',
+    'realm_access': {
+        'roles': [
+            'staff'
         ]
     }
 }
 
 UPDATED_TEST_JWT_CLAIMS = {
-    "iss": os.getenv('JWT_OIDC_ISSUER'),
-    "sub": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
-    "firstname": "Updated_Test",
-    "lastname": "User",
-    "username": "testuser"
+    'iss': os.getenv('JWT_OIDC_ISSUER'),
+    'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+    'firstname': 'Updated_Test',
+    'lastname': 'User',
+    'username': 'testuser'
 }
 
 TEST_JWT_HEADER = {
-    "alg": os.getenv('JWT_OIDC_ALGORITHMS'),
-    "typ": "JWT",
-    "kid": os.getenv('JWT_OIDC_AUDIENCE')
+    'alg': os.getenv('JWT_OIDC_ALGORITHMS'),
+    'typ': 'JWT',
+    'kid': os.getenv('JWT_OIDC_AUDIENCE')
 }
 
 TEST_CONTACT = {
-    "emailAddress": "foo@bar.com",
-    "phoneNumber": "(555) 555-5555",
-    "extension": "123"
+    'emailAddress': 'foo@bar.com',
+    'phoneNumber': '(555) 555-5555',
+    'extension': '123'
 }
 
 UPDATED_TEST_CONTACT = {
-    "emailAddress": "bar@foo.com",
-    "phoneNumber": "(555) 555-5555",
-    "extension": "123"
+    'emailAddress': 'bar@foo.com',
+    'phoneNumber': '(555) 555-5555',
+    'extension': '123'
 }
 
 INVALID_TEST_CONTACT = {
-    "emailAddress": "bar"
+    'emailAddress': 'bar'
 }
 
 
 def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert that a user can be POSTed"""
+    """Assert that a user can be POSTed."""
     token = jwt.create_jwt(claims=TEST_JWT_CLAIMS, header=TEST_JWT_HEADER)
     headers = {'Authorization': 'Bearer ' + token}
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -143,7 +143,8 @@ def test_staff_get_user(client, jwt, session):  # pylint:disable=unused-argument
     # GET the test user as a staff user
     token = jwt.create_jwt(claims=TEST_STAFF_JWT_CLAIMS, header=TEST_JWT_HEADER)
     headers = {'Authorization': 'Bearer ' + token}
-    rv = client.get('/api/v1/users/{}'.format(TEST_JWT_CLAIMS['preferred_username']), headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/users/{}'.format(TEST_JWT_CLAIMS['preferred_username']),
+                    headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     user = json.loads(rv.data)
     assert user['firstname'] == 'Test'
@@ -180,7 +181,8 @@ def test_staff_search_users(client, jwt, session):  # pylint:disable=unused-argu
     assert len(users) == 2
 
     # Search on users with a search parameter
-    rv = client.get('/api/v1/users?lastname={}'.format(TEST_JWT_CLAIMS_2['lastname']), headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/users?lastname={}'.format(TEST_JWT_CLAIMS_2['lastname']),
+                    headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     users = json.loads(rv.data)
     assert len(users) == 1
@@ -221,7 +223,8 @@ def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     # POST a contact to test user
-    rv = client.post('/api/v1/users/contacts', data=json.dumps(TEST_CONTACT), headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/users/contacts', data=json.dumps(TEST_CONTACT),
+                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     user = json.loads(rv.data)
     assert len(user['contacts']) == 1
@@ -230,7 +233,8 @@ def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
 
 def test_add_contact_no_token_returns_401(client, session):  # pylint:disable=unused-argument
     """Assert that adding a contact without providing a token returns a 401."""
-    rv = client.post('/api/v1/users/contacts', data=json.dumps(TEST_CONTACT), headers=None, content_type='application/json')
+    rv = client.post('/api/v1/users/contacts', data=json.dumps(TEST_CONTACT),
+                     headers=None, content_type='application/json')
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
@@ -241,7 +245,8 @@ def test_add_contact_invalid_format_returns_400(client, jwt, session):  # pylint
     headers = {'Authorization': 'Bearer ' + token}
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
-    rv = client.post('/api/v1/users/contacts', data=json.dumps(INVALID_TEST_CONTACT), headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/users/contacts', data=json.dumps(INVALID_TEST_CONTACT),
+                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
@@ -253,10 +258,12 @@ def test_add_contact_duplicate_returns_400(client, jwt, session):  # pylint:disa
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     # POST a contact to test user
-    rv = client.post('/api/v1/users/contacts', data=json.dumps(TEST_CONTACT), headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/users/contacts', data=json.dumps(TEST_CONTACT),
+                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
-    rv = client.post('/api/v1/users/contacts', data=json.dumps(UPDATED_TEST_CONTACT), headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/users/contacts', data=json.dumps(UPDATED_TEST_CONTACT),
+                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
@@ -268,11 +275,13 @@ def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     # POST a contact to test user
-    rv = client.post('/api/v1/users/contacts', data=json.dumps(TEST_CONTACT), headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/users/contacts', data=json.dumps(TEST_CONTACT),
+                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
     # PUT a contact on the same user
-    rv = client.put('/api/v1/users/contacts', data=json.dumps(UPDATED_TEST_CONTACT), headers=headers, content_type='application/json')
+    rv = client.put('/api/v1/users/contacts', data=json.dumps(UPDATED_TEST_CONTACT),
+                    headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     user = json.loads(rv.data)
     assert len(user['contacts']) == 1
@@ -281,7 +290,8 @@ def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
 
 def test_update_contact_no_token_returns_401(client, session):  # pylint:disable=unused-argument
     """Assert that updating a contact without providing a token returns a 401."""
-    rv = client.put('/api/v1/users/contacts', data=json.dumps(UPDATED_TEST_CONTACT), headers=None, content_type='application/json')
+    rv = client.put('/api/v1/users/contacts', data=json.dumps(UPDATED_TEST_CONTACT),
+                    headers=None, content_type='application/json')
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
@@ -292,7 +302,8 @@ def test_update_contact_invalid_format_returns_400(client, jwt, session):  # pyl
     headers = {'Authorization': 'Bearer ' + token}
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
-    rv = client.put('/api/v1/users/contacts', data=json.dumps(INVALID_TEST_CONTACT), headers=headers, content_type='application/json')
+    rv = client.put('/api/v1/users/contacts', data=json.dumps(INVALID_TEST_CONTACT),
+                    headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
@@ -304,7 +315,8 @@ def test_update_contact_missing_contact_returns_404(client, jwt, session):  # py
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     # PUT a contact to test user
-    rv = client.put('/api/v1/users/contacts', data=json.dumps(TEST_CONTACT), headers=headers, content_type='application/json')
+    rv = client.put('/api/v1/users/contacts', data=json.dumps(TEST_CONTACT),
+                    headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
@@ -316,7 +328,8 @@ def test_delete_contact(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     # POST a contact to test user
-    rv = client.post('/api/v1/users/contacts', data=json.dumps(TEST_CONTACT), headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/users/contacts', data=json.dumps(TEST_CONTACT),
+                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
     # PUT a contact on the same user

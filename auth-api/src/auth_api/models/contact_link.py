@@ -51,5 +51,5 @@ class ContactLink(BaseModel):  # pylint: disable=too-few-public-methods
         return cls.query.filter_by(user_id=user_id).first()
 
     def has_links(self):
-        """Checks whether there are any remaining links for this contact."""
+        """Check whether there are any remaining links for this contact."""
         return self.user_id or self.org_id or self.entity_id

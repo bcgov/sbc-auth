@@ -14,7 +14,9 @@
 """Manager for payment type schema and export."""
 
 from auth_api.models import PaymentType as PaymentTypeModel
+
 from .base_schema import BaseSchema
+
 
 class PaymentTypeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the PaymentType model."""

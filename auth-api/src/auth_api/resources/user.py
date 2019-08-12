@@ -61,7 +61,7 @@ class Users(Resource):
     @cors.crossdomain(origin='*')
     @_JWT.has_one_of_roles([Role.STAFF.value])
     def get():
-        """Returns a set of users based on search query parameters (staff only)."""
+        """Return a set of users based on search query parameters (staff only)."""
         search_email = request.args.get('email', '')
         search_first_name = request.args.get('firstname', '')
         search_last_name = request.args.get('lastname', '')
@@ -104,7 +104,7 @@ class User(Resource):
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
     def get():
-        """Returns the user profile associated with the JWT in the authorization header."""
+        """Return the user profile associated with the JWT in the authorization header."""
         token = g.jwt_oidc_token_info
         if not token:
             return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
@@ -146,7 +146,7 @@ class UserContacts(Resource):
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
     def put():
-        """Updates an existing contact for the user associated with the JWT in the authorization header."""
+        """Update an existing contact for the user associated with the JWT in the authorization header."""
         token = g.jwt_oidc_token_info
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'contact')
@@ -165,7 +165,7 @@ class UserContacts(Resource):
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
     def delete():
-        """Deletes the contact info for the user associated with the JWT in the authorization header."""
+        """Delete the contact info for the user associated with the JWT in the authorization header."""
         token = g.jwt_oidc_token_info
         if not token:
             return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED

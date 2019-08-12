@@ -140,7 +140,7 @@ class User:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def find_users(first_name='', last_name='', email=''):
-        """Returns a list of users matching either the given username or the given email."""
+        """Return a list of users matching either the given username or the given email."""
         return UserModel.find_users(first_name=first_name, last_name=last_name, email=email)
 
     @classmethod
