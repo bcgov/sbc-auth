@@ -18,7 +18,7 @@ This is a mapping between org type codes and descriptions for Org objects.
 
 from sqlalchemy import Column, String
 
-from .db import db, ma
+from .db import db
 
 
 class OrgType(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
@@ -28,12 +28,3 @@ class OrgType(db.Model):  # pylint: disable=too-few-public-methods # Temporarily
 
     code = Column(String(15), primary_key=True, unique=True)
     desc = Column(String(100))
-
-
-class OrgTypeSchema(ma.ModelSchema):
-    """This is the Schema for an Org Type record."""
-
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Org Type fields to a default schema."""
-
-        model = OrgType

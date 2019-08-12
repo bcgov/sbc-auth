@@ -18,7 +18,7 @@ Payment types are used to store the preferred payment type on the Org model.
 
 from sqlalchemy import Column, String
 
-from .db import db, ma
+from .db import db
 
 
 class PaymentType(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
@@ -28,12 +28,3 @@ class PaymentType(db.Model):  # pylint: disable=too-few-public-methods # Tempora
 
     code = Column(String(15), primary_key=True, unique=True)
     desc = Column(String(100))
-
-
-class PaymentTypeSchema(ma.ModelSchema):
-    """This is the schema for a Payment Type model."""
-
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Payment Type fields to a default schema."""
-
-        model = PaymentType

@@ -46,12 +46,17 @@ def test_user_find_by_jwt_token(session):
     session.add(user)
     session.commit()
 
-    token = {'preferred_username': 'CP1234567',
-             'realm_access': {'roles': [
+    token = {
+        'preferred_username': 'CP1234567',
+        'sub': '1b20db59-19a0-4727-affe-c6f64309fd04',
+        'realm_access': {
+            'roles': [
                  'edit',
                  'uma_authorization',
                  'basic'
-             ]}}
+             ]
+        }
+    }
     u = User.find_by_jwt_token(token)
 
     assert u.id is not None

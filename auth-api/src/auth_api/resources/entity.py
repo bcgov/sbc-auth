@@ -33,7 +33,7 @@ _JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('POST')
-@API.route('', methods=['POST', 'OPTIONS'])
+@API.route('', methods=['POST'])
 class EntityResources(Resource):
     """Resource for managing entities."""
 
@@ -50,16 +50,14 @@ class EntityResources(Resource):
 
         try:
             response, status = EntityService.create_entity(request_json).as_dict(), http_status.HTTP_201_CREATED
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         except exc.IntegrityError:
             response, status = {'message': 'Business with specified identifier already exists.'}, \
                 http_status.HTTP_409_CONFLICT
         return response, status
 
 
-@cors_preflight(['GET', 'PUT', 'OPTIONS'])
-@API.route('/<string:business_identifier>', methods=['GET', 'PUT', 'OPTIONS'])
+@cors_preflight('GET')
+@API.route('/<string:business_identifier>', methods=['GET'])
 class EntityResource(Resource):
     """Resource for managing entities."""
 
@@ -70,15 +68,19 @@ class EntityResource(Resource):
     def get(business_identifier):
         """Get an existing entity by it's business number."""
         try:
-            response, status = EntityService.find_by_business_identifier(business_identifier).as_dict(), \
-                http_status.HTTP_200_OK
+            entity = EntityService.find_by_business_identifier(business_identifier)
+            if entity is not None:
+                response, status = entity.as_dict(), http_status.HTTP_200_OK
+            else:
+                response, status = {'message': 'A business for {} was not found.'.format(business_identifier)}, \
+                    http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
 
 
 @cors_preflight(['POST', 'PUT', 'OPTIONS'])
-@API.route('/<string:business_identifier>/contact', methods=['POST', 'PUT', 'OPTIONS'])
+@API.route('/<string:business_identifier>/contacts', methods=['POST', 'PUT', 'OPTIONS'])
 class ContactResource(Resource):
     """Resource for managing entity contacts."""
 
