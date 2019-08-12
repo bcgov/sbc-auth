@@ -25,7 +25,7 @@ class JWTWrapper:  # pylint: disable=too-few-public-methods
 
     @staticmethod
     def get_instance():
-        """Retrieve singleton JwtManager."""
+        """Retrieve singleton JwtManager. test"""
         if JWTWrapper.__instance is None:
             JWTWrapper()
         return JWTWrapper.__instance
