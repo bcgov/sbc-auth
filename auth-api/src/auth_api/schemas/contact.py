@@ -11,29 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for the Contact model.
+"""Manager for contact schema and export."""
 
-Test suite to ensure that the Contact model routines are working as expected.
-"""
+from marshmallow import fields
 
 from auth_api.models import Contact as ContactModel
 
+from .base_schema import BaseSchema
 
-def test_contact(session):
-    """Assert that a Contact can be stored in the database."""
-    contact = ContactModel(
-        street='123 Roundabout Lane',
-        street_additional='Unit 1',
-        city='Victoria',
-        region='British Columbia',
-        country='CA',
-        postal_code='V1A 1A1',
-        delivery_instructions='Ring buzzer 123',
-        phone='111-222-3333',
-        phone_extension='123',
-        email='abc123@mail.com'
-    )
 
-    session.add(contact)
-    session.commit()
-    assert contact.id is not None
+class ContactSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the Contact model."""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps all of the User fields to a default schema."""
+
+        model = ContactModel
+        exclude = ('id', )
+
+    email = fields.String(data_key='emailAddress')
+    phone = fields.String(data_key='phoneNumber')
+    phone_extension = fields.String(data_key='extension')

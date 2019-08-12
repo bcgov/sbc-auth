@@ -15,7 +15,7 @@
 
 from marshmallow import post_dump
 
-from .db import ma
+from auth_api.models import ma
 
 
 class BaseSchema(ma.ModelSchema):

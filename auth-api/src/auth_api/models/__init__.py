@@ -18,17 +18,18 @@ from sbc_common_components.tracing.db_tracing import DBTracing
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
-from .affiliation import Affiliation, AffiliationSchema
-from .contact import Contact, ContactSchema
+from .affiliation import Affiliation
+from .contact import Contact
+from .contact_link import ContactLink
 from .db import db, ma
-from .entity import Entity, EntitySchema
-from .membership import Membership, MembershipSchema
-from .membership_type import MembershipType, MembershipTypeSchema
-from .org import Org, OrgSchema
-from .org_status import OrgStatus, OrgStatusSchema
-from .org_type import OrgType, OrgTypeSchema
-from .payment_type import PaymentType, PaymentTypeSchema
-from .user import User, UserSchema
+from .entity import Entity
+from .membership import Membership
+from .membership_type import MembershipType
+from .org import Org
+from .org_status import OrgStatus
+from .org_type import OrgType
+from .payment_type import PaymentType
+from .user import User
 
 
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)

@@ -11,8 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Manager for payment type schema and export."""
 
-"""Tests to assure the userinfo end-point.
+from auth_api.models import PaymentType as PaymentTypeModel
 
-Test-Suite to ensure that the /userinfo endpoint is working as expected.
-"""
+from .base_schema import BaseSchema
+
+
+class PaymentTypeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the PaymentType model."""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps all of the PaymentType fields to a default schema."""
+
+        model = PaymentTypeModel

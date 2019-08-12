@@ -18,7 +18,12 @@ This module manages the User Information.
 
 from sbc_common_components.tracing.service_tracing import ServiceTracing
 
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
+from auth_api.models import Contact as ContactModel
+from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import User as UserModel
+from auth_api.schemas import UserSchema
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -30,86 +35,113 @@ class User:  # pylint: disable=too-many-instance-attributes
     submitting changes back to all storage systems as needed.
     """
 
-    def __init__(self):
+    def __init__(self, model):
         """Return a User Service object."""
-        self.__dao = None
-        self._username: str = None
-        self._roles: str = None
-        self._keycloak_guid: str = None
-
-    @property
-    def _dao(self):
-        if not self.__dao:
-            self.__dao = UserModel()
-        return self.__dao
-
-    @_dao.setter
-    def _dao(self, value):
-        self.__dao = value
-        self.username = self._dao.username
-        self.roles = self._dao.roles
-
-    @property
-    def username(self):
-        """Return the User username."""
-        return self._username
-
-    @username.setter
-    def username(self, value: str):
-        """Set the User username."""
-        self._username = value
-        self._dao.username = value
-
-    @property
-    def roles(self):
-        """Return the User roles."""
-        return self._roles
-
-    @roles.setter
-    def roles(self, value: str):
-        """Set the User roles."""
-        self._roles = value
-        self._dao.roles = value
-
-    @property
-    def keycloak_guid(self):
-        """Return the keycloak GUID."""
-        return self._keycloak_guid
-
-    @keycloak_guid.setter
-    def keycloak_guid(self, value: str):
-        """Set the keycloak GUID."""
-        self._keycloak_guid = value
-        self._dao.keycloak_guid = value
+        self._model = model
 
     @ServiceTracing.disable_tracing
-    def asdict(self):
+    def as_dict(self):
         """Return the User as a python dict.
 
         None fields are not included in the dict.
         """
-        d = {'username': self.username}
-        if self.roles:
-            d['roles'] = self.roles
-        return d
-
-    def save(self):
-        """Save the User information to the local cache."""
-        self._dao.save()
+        user_schema = UserSchema()
+        obj = user_schema.dump(self._model, many=False)
+        return obj
 
     @classmethod
     def save_from_jwt_token(cls, token: dict = None):
-        """Save user to database."""
+        """Save user to database (create/update)."""
         if not token:
             return None
-        user_dao = UserModel.create_from_jwt_token(token)
 
-        if not user_dao:
+        existing_user = UserModel.find_by_jwt_token(token)
+        if existing_user is None:
+            user_model = UserModel.create_from_jwt_token(token)
+        else:
+            user_model = UserModel.update_from_jwt_token(token)
+
+        if not user_model:
             return None
 
-        user = User()
-        user._dao = user_dao  # pylint: disable=protected-access
+        user = User(user_model)
         return user
+
+    @staticmethod
+    def add_contact(token, contact_info: dict):
+        """Add or update contact information for an existing user."""
+        user = UserModel.find_by_jwt_token(token)
+        if user is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # check for existing contact (we only want one contact per user)
+        contact_link = ContactLinkModel.find_by_user_id(user.id)
+        if contact_link is not None:
+            raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+
+        contact = ContactModel()
+        contact.email = contact_info.get('emailAddress', None)
+        contact.phone = contact_info.get('phoneNumber', None)
+        contact.phone_extension = contact_info.get('extension', None)
+        contact = contact.flush()
+        contact.commit()
+
+        contact_link = ContactLinkModel()
+        contact_link.user_id = user.id
+        contact_link.contact_id = contact.id
+        contact_link = contact_link.flush()
+        contact_link.commit()
+
+        return User(user)
+
+    @staticmethod
+    def update_contact(token, contact_info: dict):
+        """Update a contact for an existing user."""
+        user = UserModel.find_by_jwt_token(token)
+        if user is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # find the contact link for this user
+        contact_link = ContactLinkModel.find_by_user_id(user.id)
+
+        # now find the contact for the link
+        if contact_link is None or contact_link.contact is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        contact = contact_link.contact
+        contact.email = contact_info.get('emailAddress', contact.email)
+        contact.phone = contact_info.get('phoneNumber', contact.phone)
+        contact.phone_extension = contact_info.get('extension', contact.phone_extension)
+        contact = contact.flush()
+        contact.commit()
+
+        # return the user with the updated contact
+        return User(user)
+
+    @staticmethod
+    def delete_contact(token):
+        """Delete the contact for an existing user."""
+        user = UserModel.find_by_jwt_token(token)
+        if not user or not user.contacts:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # unlink the user from its contact
+        contact_link = ContactLinkModel.find_by_user_id(user.id)
+        contact_link.user_id = None
+        contact_link = contact_link.flush()
+
+        # clean up any orphaned contacts and links
+        if not contact_link.has_links():
+            contact = contact_link.contact
+            contact_link.delete()
+            contact.delete()
+
+        return User(user)
+
+    @staticmethod
+    def find_users(first_name='', last_name='', email=''):
+        """Return a list of users matching either the given username or the given email."""
+        return UserModel.find_users(first_name=first_name, last_name=last_name, email=email)
 
     @classmethod
     def find_by_jwt_token(cls, token: dict = None):
@@ -117,27 +149,23 @@ class User:  # pylint: disable=too-many-instance-attributes
         if not token:
             return None
 
-        user_dao = UserModel.find_by_jwt_token(token)
+        user = UserModel.find_by_jwt_token(token)
 
-        if not user_dao:
-            return None
+        if not user:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        user = User()
-        user._dao = user_dao  # pylint: disable=protected-access
-        return user
+        return User(user)
 
     @classmethod
     def find_by_username(cls, username: str = None):
-        """Given a username, this will return an Active User or None."""
+        """Find user by provided username."""
         if not username:
             return None
 
         # find locally
-        user_dao = UserModel.find_by_username(username)
+        user_model = UserModel.find_by_username(username)
 
-        if not user_dao:
+        if not user_model:
             return None
 
-        user = User()
-        user._dao = user_dao  # pylint: disable=protected-access
-        return user
+        return User(user_model)

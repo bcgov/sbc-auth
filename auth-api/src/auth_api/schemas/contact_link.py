@@ -11,8 +11,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Schema package."""
+"""Manager for contact link schema and export."""
 
+from marshmallow import fields
+
+from auth_api.models import ContactLink as ContactLinkModel
+
+from .base_schema import BaseSchema
 from .contact import ContactSchema
-from .entity import EntitySchema
-from .user import UserSchema
+
+
+class ContactLinkSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the Contact link model."""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps all of the User fields to a default schema."""
+
+        model = ContactLinkModel
+        exclude = ('id', 'user', 'entity', 'org')
+
+    contact = fields.Nested(ContactSchema, many=False)
