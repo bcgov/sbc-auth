@@ -169,6 +169,7 @@ def test_get_contact_by_business_identifier_no_contact(session):  # pylint:disab
     contact = EntityService.get_contact_for_business('CP1234567')
     assert contact is None
 
+
 def entity_factory(business_identifier, pass_code):
     """Factory."""
     return EntityModel(business_identifier=business_identifier, pass_code=pass_code)

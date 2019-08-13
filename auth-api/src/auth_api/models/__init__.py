@@ -17,6 +17,8 @@
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 
+from sbc_common_components.tracing.db_tracing import DBTracing
+
 from .affiliation import Affiliation
 from .contact import Contact
 from .contact_link import ContactLink
