@@ -37,11 +37,11 @@ class BaseModel(db.Model):
 
     @declared_attr
     def created_by(cls):  # pylint:disable=no-self-argument
-        return relationship('User', foreign_keys=[cls.created_by_id])
+        return relationship('User', foreign_keys=[cls.created_by_id], uselist=False)
 
     @declared_attr
     def modified_by(cls):  # pylint:disable=no-self-argument
-        return relationship('User', foreign_keys=[cls.modified_by_id])
+        return relationship('User', foreign_keys=[cls.modified_by_id], uselist=False)
 
     @staticmethod
     def get_current_user():
