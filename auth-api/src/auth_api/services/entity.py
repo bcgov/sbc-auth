@@ -41,15 +41,20 @@ class Entity:
         """Return the business identifier for this Entity."""
         return self._model.business_identifier
 
+    @business_identifier.setter
+    def business_identifier(self, value: str):
+        """Set the business identifier for this Entity."""
+        self._model.business_identifier = value
+
     @property
     def pass_code(self):
         """Return the business identifier for this Entity."""
         return self._model.pass_code
 
-    @business_identifier.setter
-    def business_identifier(self, value: str):
+    @pass_code.setter
+    def pass_code(self, value: str):
         """Set the business identifier for this Entity."""
-        self._model.business_identifier = value
+        self._model.pass_code = value
 
     @ServiceTracing.disable_tracing
     def as_dict(self):
