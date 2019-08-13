@@ -13,7 +13,12 @@
 # limitations under the License.
 """Super class to handle all operations related to base model."""
 
-# from .db import BASE as Base, SESSION as session
+import datetime
+from flask import g
+from sqlalchemy import Column, DateTime, ForeignKey
+from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import relationship
+
 from .db import db
 
 
@@ -21,6 +26,32 @@ class BaseModel(db.Model):
     """This class manages all of the base model functions."""
 
     __abstract__ = True
+
+    @declared_attr
+    def created_by_id(cls):  # pylint:disable=no-self-argument
+        return Column(ForeignKey('user.id'), default=cls.get_current_user)
+
+    @declared_attr
+    def modified_by_id(cls):  # pylint:disable=no-self-argument
+        return Column(ForeignKey('user.id'), onupdate=cls.get_current_user)
+
+    @declared_attr
+    def created_by(cls):  # pylint:disable=no-self-argument
+        return relationship('User', foreign_keys=[cls.created_by_id])
+
+    @declared_attr
+    def modified_by(cls):  # pylint:disable=no-self-argument
+        return relationship('User', foreign_keys=[cls.modified_by_id])
+
+    @staticmethod
+    def get_current_user():
+        from .user import User as UserModel
+        token = g.jwt_oidc_token_info
+        user = UserModel.find_by_jwt_token(token)
+        return user.id
+
+    created = Column(DateTime, default=datetime.datetime.now)
+    modified = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
     @staticmethod
     def commit():

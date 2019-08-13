@@ -35,10 +35,10 @@ class ContactLink(BaseModel):  # pylint: disable=too-few-public-methods
     user_id = Column(Integer, ForeignKey('user.id'))
     org_id = Column(Integer, ForeignKey('org.id'))
 
-    contact = relationship('Contact')
-    entity = relationship('Entity', back_populates='contacts')
-    user = relationship('User', back_populates='contacts')
-    org = relationship('Org', back_populates='contacts')
+    contact = relationship('Contact', foreign_keys=[contact_id])
+    entity = relationship('Entity', back_populates='contacts', foreign_keys=[entity_id])
+    user = relationship('User', back_populates='contacts', foreign_keys=[user_id])
+    org = relationship('Org', back_populates='contacts', foreign_keys=[org_id])
 
     @classmethod
     def find_by_entity_id(cls, entity_id):

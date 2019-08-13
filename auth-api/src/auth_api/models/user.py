@@ -19,7 +19,7 @@ A User stores basic information from a KeyCloak user (including the KeyCloak GUI
 import datetime
 
 from flask import current_app
-from sqlalchemy import Column, DateTime, Integer, String, or_
+from sqlalchemy import Column, Integer, String, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -39,11 +39,9 @@ class User(BaseModel):
     keycloak_guid = Column(
         'keycloak_guid', UUID(as_uuid=True), unique=True, nullable=False
     )
-    created = Column(DateTime)
-    modified = Column(DateTime)
     roles = Column('roles', String(1000))
 
-    contacts = relationship('ContactLink', back_populates='user')
+    contacts = relationship('ContactLink', back_populates='user', primaryjoin='User.id == ContactLink.user_id')
 
     @classmethod
     def find_by_username(cls, username):

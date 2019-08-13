@@ -16,27 +16,37 @@
 Basic users will have an internal Org that is not created explicitly, but implicitly upon User account creation.
 """
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from flask import current_app
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .db import db
+from .base_model import BaseModel
 
 
-class Org(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
-    """Model for an Org record.  Associates User (via User Roles) to Entities."""
+class Org(BaseModel):  # pylint: disable=too-few-public-methods
+    """Model for an Org record."""
 
     __tablename__ = 'org'
 
     id = Column(Integer, primary_key=True)
-    created = Column(DateTime)
-    created_by = Column(ForeignKey('user.id'), nullable=False)
-    last_modified = Column(DateTime)
-    last_modified_by = Column(ForeignKey('user.id'), nullable=False)
     type_code = Column(ForeignKey('org_type.code'), nullable=False)
     status_code = Column(ForeignKey('org_status.code'), nullable=False)
     name = Column(String(250), index=True)
-    contact1 = Column(ForeignKey('contact.id'))
-    contact2 = Column(ForeignKey('contact.id'))
-    preferred_payment = Column(ForeignKey('payment_type.code'), nullable=False)
+    preferred_payment_code = Column(ForeignKey('payment_type.code'), nullable=False)
 
     contacts = relationship('ContactLink', back_populates='org')
+    org_type = relationship('OrgType')
+    org_status = relationship('OrgStatus')
+    preferred_payment = relationship('PaymentType')
+
+    @classmethod
+    def create_from_dict(cls, org_info: dict):
+        """Create a new Org from the provided dictionary."""
+        if org_info:
+            org = Org(**org_info)
+            current_app.logger.debug(
+                'Creating org from dictionary {}'.format(org_info)
+            )
+            org.save()
+            return org
+        return None

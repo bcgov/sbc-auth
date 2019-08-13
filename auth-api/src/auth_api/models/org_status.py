@@ -18,10 +18,10 @@ This is a mapping between status codes and descriptions for Org objects.
 
 from sqlalchemy import Column, String
 
-from .db import db
+from .base_model import BaseModel
 
 
-class OrgStatus(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class OrgStatus(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Org Status record."""
 
     __tablename__ = 'org_status'

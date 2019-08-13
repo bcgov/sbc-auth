@@ -13,13 +13,16 @@
 # limitations under the License.
 """Super class to handle all operations related to base schema."""
 
-from marshmallow import post_dump
+from marshmallow import fields, post_dump
 
 from auth_api.models import ma
 
 
 class BaseSchema(ma.ModelSchema):
     """Base Schema."""
+
+    created_by = fields.Function(lambda user: '{} {}'.format(user.firstname, user.lastname))
+    modified_by = fields.Function(lambda user: '{} {}'.format(user.firstname, user.lastname))
 
     @post_dump(pass_many=True)
     def _remove_empty(self, data, many):  # pylint: disable=no-self-use
