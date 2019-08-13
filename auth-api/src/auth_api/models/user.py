@@ -47,7 +47,7 @@ class User(BaseModel):
 
     @classmethod
     def find_by_username(cls, username):
-        """Return the first user with the provided KeyCloak GUID."""
+        """Return the first user with the provided username."""
         return cls.query.filter_by(username=username).first()
 
     @classmethod
