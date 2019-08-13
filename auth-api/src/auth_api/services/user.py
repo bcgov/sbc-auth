@@ -59,7 +59,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         if existing_user is None:
             user_model = UserModel.create_from_jwt_token(token)
         else:
-            user_model = UserModel.update_from_jwt_token(token)
+            user_model = UserModel.update_from_jwt_token(token, existing_user)
 
         if not user_model:
             return None
