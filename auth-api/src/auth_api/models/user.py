@@ -47,7 +47,7 @@ class User(BaseModel):
 
     @classmethod
     def find_by_username(cls, username):
-        """Return the first user with the provided KeyCloak GUID."""
+        """Return the first user with the provided username."""
         return cls.query.filter_by(username=username).first()
 
     @classmethod
@@ -78,10 +78,9 @@ class User(BaseModel):
         return None
 
     @classmethod
-    def update_from_jwt_token(cls, token: dict):
+    def update_from_jwt_token(cls, token: dict, user):
         """Update a User from the provided JWT."""
         if token:
-            user = User.find_by_jwt_token(token)
             if user:
                 user.username = token.get('preferred_username', user.username)
                 user.firstname = token.get('firstname', user.firstname)
