@@ -1,5 +1,5 @@
 <template>
-  <v-btn :color=color @click="login">
+  <v-btn :color=color @click="login" class=".signin-button">
     <span>{{label}}</span>
   </v-btn>
 </template>
@@ -14,19 +14,18 @@ import UserModule from '../../store/modules/user'
 export default class IdpLogin extends Vue {
   private userStore = getModule(UserModule, this.$store)
 
-  @Prop({default: 'Sign In'})
+  @Prop({ default: 'Sign In' })
   label: string
 
-  @Prop({default: 'bcsc'})
+  @Prop({ default: 'bcsc' })
   hint: string
 
-  @Prop({default: 'primary'})
+  @Prop({ default: 'primary' })
   color: string
-  
+
   login () {
     this.userStore.login(this.hint)
   }
-  
 }
 </script>
 

@@ -34,15 +34,15 @@ export default {
     return JSON.parse(sessionStorage.getItem(SESSION_STORAGE_KEY))[key]
   },
 
-  addToSession(key:string, value:any){
+  addToSession (key:string, value:any) {
     sessionStorage.setItem(key, value)
   },
 
-  getFromSession(key:string):string{
+  getFromSession (key:string):string {
     return sessionStorage.getItem(key)
   },
 
-  removeFromSession(key:string){
+  removeFromSession (key:string) {
     sessionStorage.removeItem(key)
   }
 }

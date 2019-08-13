@@ -1,5 +1,5 @@
-import BusinessModule from '@/store/modules/business'
-import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
+import UserModule from '@/store/modules/user'
+import IdpLogin from '@/components/auth/IdpLogin.vue'
 import Vuex from 'vuex'
 import { mount, createLocalVue, Wrapper } from '@vue/test-utils'
 import Vue from 'vue'
@@ -10,15 +10,14 @@ import VuexPersistence from 'vuex-persist'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
-describe('BusinessContactForm.vue', () => {
-  let wrapper: Wrapper<BusinessContactForm>
-  const config = {
+describe('IdpLogin.vue', () => {
+  let wrapper: Wrapper<IdpLogin>
+  const keyCloakConfig = {
     'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
     'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
     'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
@@ -31,12 +30,12 @@ describe('BusinessContactForm.vue', () => {
     const store = new Vuex.Store({
       strict: false,
       modules: {
-        business: BusinessModule
+        user: UserModule
       },
       plugins: [vuexPersist.plugin]
     })
 
-    wrapper = mount(BusinessContactForm, {
+    wrapper = mount(IdpLogin, {
       store,
       localVue
     })
@@ -50,23 +49,6 @@ describe('BusinessContactForm.vue', () => {
   })
 
   it('business contact form has save and skip buttons', () => {
-    expect(wrapper.find('.save-continue-button')).toBeTruthy()
-    expect(wrapper.find('.skip-button')).toBeTruthy()
-  })
-
-  it('email data is empty', () => {
-    expect(wrapper.vm.$data.emailAddress).toBe('')
-  })
-
-  it('confirm email data is empty', () => {
-    expect(wrapper.vm.$data.confirmedEmailAddress).toBe('')
-  })
-
-  it('confirm phone data is empty', () => {
-    expect(wrapper.vm.$data.phoneNumber).toBe('')
-  })
-
-  it('confirm extension data to be empty', () => {
-    expect(wrapper.vm.$data.extension).toBe('')
+    expect(wrapper.find('.signin-button')).toBeTruthy()
   })
 })

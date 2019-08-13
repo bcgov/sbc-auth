@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
+import AuthHome from './views/AuthHome.vue'
 import BusinessProfile from './views/BusinessProfile.vue'
 import PaymentForm from './components/pay/PaymentForm.vue'
 import PaymentReturnForm from './components/pay/PaymentReturnForm.vue'
@@ -18,7 +19,8 @@ function mapReturnPayVars (route) {
 }
 
 const routes = [
-  { path: '/', component: Home },
+  { path: '/', component: AuthHome },
+  { path: '/home', component: Home },
   { path: '/businessprofile', component: BusinessProfile, meta: { requiresAuth: true } },
   { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: true } },
   { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true } },

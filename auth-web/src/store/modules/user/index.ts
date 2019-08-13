@@ -7,11 +7,10 @@ import { UserInfo } from '@/models/userInfo'
   name: 'user'
 })
 export default class UserModule extends VuexModule {
-  
   currentUser: UserInfo
 
-  userProfile: any 
-  
+  userProfile: any
+
   @Mutation
   public setUserProfile (userProfile: any) {
     this.userProfile = userProfile
@@ -24,9 +23,9 @@ export default class UserModule extends VuexModule {
 
   @Action({ rawError: true })
   public async initializeSession () {
-    //Set values to session storage
+    // Set values to session storage
     keycloakService.initSessionStorage()
-    //Load User Info
+    // Load User Info
     this.currentUser = keycloakService.getUserInfo()
   }
 
@@ -36,17 +35,14 @@ export default class UserModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async getUserProfile (keycloakGuid: string) {
-    return userServices.getUserProfile(keycloakGuid)
+  public async getUserProfile (identifier: string) {
+    return userServices.getUserProfile(identifier)
       .then(response => {
-        console.log(response.status)
         if ((response.status === 200 || response.status === 201) && response.data) {
           this.context.commit('setUserProfile', response.data)
         }
       }).catch(error => {
-        console.error('Error in get user profile', error)
         this.context.commit('setUserProfile', null)
       })
   }
-
 }
