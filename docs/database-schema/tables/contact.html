@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>affiliation - postgres Database</title>
+  <title>contact - postgres Database</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <link rel="icon" type="image/png" sizes="16x16" href="../favicon.png">
@@ -76,7 +76,7 @@
   <div class="content-wrapper">
           <!-- Content Header (Page header) -->
       <section class="content-header">
-        <h1>affiliation</h1></br>
+        <h1>contact</h1></br>
 		      </section>
       <!-- Main content -->
       <section class="content">
@@ -111,9 +111,50 @@
 				</thead>
 				<tbody>
 				<tr>
-				 <td><span id="created">created</span></td>
-				 <td>timestamp</td>
-				 <td>29,6</td>
+				 <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i><span id="id">id</span></td>
+				 <td>serial</td>
+				 <td>10</td>
+				 <td title=''></td>
+				 <td title='Automatically updated by the database'>√</td>
+				 <td>nextval(&#39;contact_id_seq&#39;::regclass)</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				   <tr>
+					<td title="contact_link.contact_id references contact.id via contact_link_contact_id_fkey">
+						<a href='contact_link.html'>contact_link</a><span class='relatedKey'>.contact_id</span>
+					</td>
+					<td class="constraint detail">
+						contact_link_contact_id_fkey <span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>R</span>
+					</td>
+				   </tr>
+				   <tr>
+					<td title="org.contact1 references contact.id via org_contact1_fkey">
+						<a href='org.html'>org</a><span class='relatedKey'>.contact1</span>
+					</td>
+					<td class="constraint detail">
+						org_contact1_fkey <span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>R</span>
+					</td>
+				   </tr>
+				   <tr>
+					<td title="org.contact2 references contact.id via org_contact2_fkey">
+						<a href='org.html'>org</a><span class='relatedKey'>.contact2</span>
+					</td>
+					<td class="constraint detail">
+						org_contact2_fkey <span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>R</span>
+					</td>
+				   </tr>
+				  </table>				 
+				 </td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>					 
+				 </td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i><span id="street">street</span></td>
+				 <td>varchar</td>
+				 <td>250</td>
 				 <td title='nullable'>√</td>
 				 <td title=''></td>
 				 <td>null</td>
@@ -128,10 +169,10 @@
 				 <td></td>
 				</tr>
 				<tr>
-				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i><span id="created_by">created_by</span></td>
-				 <td>int4</td>
-				 <td>10</td>
-				 <td title=''></td>
+				 <td><span id="street_additional">street_additional</span></td>
+				 <td>varchar</td>
+				 <td>250</td>
+				 <td title='nullable'>√</td>
 				 <td title=''></td>
 				 <td>null</td>
 				 <td>
@@ -140,23 +181,151 @@
 				 </td>
 				 <td>
 				  <table border='0' cellspacing='0' cellpadding='0'>
-				   <tr>
-					<td title="affiliation.created_by references user.id via affiliation_created_by_fkey">
-						<a href='user.html'>user</a><span class='relatedKey'>.id</span>
-					</td>
-					<td class="constraint detail">
-						affiliation_created_by_fkey <span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>R</span>
-					</td>
-				   </tr>
 				  </table>					 
 				 </td>
 				 <td></td>
 				</tr>
 				<tr>
-				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i><span id="entity">entity</span></td>
+				 <td><span id="city">city</span></td>
+				 <td>varchar</td>
+				 <td>100</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>				 
+				 </td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>					 
+				 </td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td><span id="region">region</span></td>
+				 <td>varchar</td>
+				 <td>100</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>				 
+				 </td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>					 
+				 </td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td><span id="country">country</span></td>
+				 <td>varchar</td>
+				 <td>2</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>				 
+				 </td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>					 
+				 </td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td><span id="postal_code">postal_code</span></td>
+				 <td>varchar</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>				 
+				 </td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>					 
+				 </td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td><span id="delivery_instructions">delivery_instructions</span></td>
+				 <td>varchar</td>
+				 <td>4096</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>				 
+				 </td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>					 
+				 </td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td><span id="phone">phone</span></td>
+				 <td>varchar</td>
+				 <td>15</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>				 
+				 </td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>					 
+				 </td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td><span id="phone_extension">phone_extension</span></td>
+				 <td>varchar</td>
+				 <td>10</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>				 
+				 </td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>					 
+				 </td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td><span id="email">email</span></td>
+				 <td>varchar</td>
+				 <td>100</td>
+				 <td title='nullable'>√</td>
+				 <td title=''></td>
+				 <td>null</td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>				 
+				 </td>
+				 <td>
+				  <table border='0' cellspacing='0' cellpadding='0'>
+				  </table>					 
+				 </td>
+				 <td></td>
+				</tr>
+				<tr>
+				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i><span id="entity_id">entity_id</span></td>
 				 <td>int4</td>
 				 <td>10</td>
-				 <td title=''></td>
+				 <td title='nullable'>√</td>
 				 <td title=''></td>
 				 <td>null</td>
 				 <td>
@@ -166,53 +335,11 @@
 				 <td>
 				  <table border='0' cellspacing='0' cellpadding='0'>
 				   <tr>
-					<td title="affiliation.entity references entity.id via affiliation_entity_fkey">
+					<td title="contact.entity_id references entity.id via contact_entity_id_fkey">
 						<a href='entity.html'>entity</a><span class='relatedKey'>.id</span>
 					</td>
 					<td class="constraint detail">
-						affiliation_entity_fkey <span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>R</span>
-					</td>
-				   </tr>
-				  </table>					 
-				 </td>
-				 <td></td>
-				</tr>
-				<tr>
-				 <td><span id="id">id</span></td>
-				 <td>int4</td>
-				 <td>10</td>
-				 <td title=''></td>
-				 <td title=''></td>
-				 <td>null</td>
-				 <td>
-				  <table border='0' cellspacing='0' cellpadding='0'>
-				  </table>				 
-				 </td>
-				 <td>
-				  <table border='0' cellspacing='0' cellpadding='0'>
-				  </table>					 
-				 </td>
-				 <td></td>
-				</tr>
-				<tr>
-				 <td class='foreignKey' title='Foreign Key'><i class='icon ion-key iconkey' style='padding-left: 5px;'></i><span id="org">org</span></td>
-				 <td>int4</td>
-				 <td>10</td>
-				 <td title=''></td>
-				 <td title=''></td>
-				 <td>null</td>
-				 <td>
-				  <table border='0' cellspacing='0' cellpadding='0'>
-				  </table>				 
-				 </td>
-				 <td>
-				  <table border='0' cellspacing='0' cellpadding='0'>
-				   <tr>
-					<td title="affiliation.org references org.id via affiliation_org_fkey">
-						<a href='org.html'>org</a><span class='relatedKey'>.id</span>
-					</td>
-					<td class="constraint detail">
-						affiliation_org_fkey <span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>R</span>
+						contact_entity_id_fkey <span title='Restrict delete:&#10;Parent cannot be deleted if children exist'>R</span>
 					</td>
 				   </tr>
 				  </table>					 
@@ -221,8 +348,47 @@
 				</tr>
 								</tbody>
 				</table>
-				<p title='5 columns'>Table contained <span id="recordNumber">0</span> rows<p/>
+				<p title='12 columns'>Table contained <span id="recordNumber">1</span> rows<p/>
 			</div>
+		</div>
+		<div class="box box-primary">		
+			<div class="box-header with-border">
+              <i class="fa fa-sitemap"></i>
+
+              <h3 id="Indexes" class="box-title">Indexes</h3>
+
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+              </div>
+            </div>	
+			<div class="box-body">
+				<table id="indexes_table" class="table table-bordered table-striped dataTable" role="grid">
+				<thead>
+				 <tr>
+				  <th>Constraint Name</th>
+				  <th>Type</th>
+				  <th>Sort</th>
+				  <th>Column(s)</th>
+				 </tr>
+				</thead>
+				<tbody>
+				 <tr>
+				  <td class='primaryKey' title='Primary Key'><i class='icon ion-key iconkey'></i> contact_pkey</td>
+				  <td>Primary key</td>
+				  <td><span title='Ascending'>Asc</span></td>
+				  <td>id</td>
+				 </tr>				 
+				 <tr>
+				  <td title='Indexed'>ix_contact_street</td>
+				  <td>Performance</td>
+				  <td><span title='Ascending'>Asc</span></td>
+				  <td>street</td>
+				 </tr>				 
+				</tbody>
+				</table>   			  
+			</div><!-- /.box-body -->
 		</div>
 				<div class="box box-primary">		
 			<div class="box-header with-border">
@@ -247,29 +413,29 @@
             <div class="tab-content no-padding">            
 				<div class="chart tab-pane active" id="oneDegreeImg-chart" style="position: relative; overflow-x:auto;">					
 					<map id="oneDegreeRelationshipsDiagram" name="oneDegreeRelationshipsDiagram">
-<area shape="rect" id="node1" href="affiliation.html" title="affiliation" alt="" coords="447,5,699,221">
-<area shape="rect" id="node2" href="user.html" title="user" alt="" coords="5,260,164,524">
-<area shape="rect" id="node3" href="entity.html" title="entity" alt="" coords="208,67,403,213">
-<area shape="rect" id="node4" href="org.html" title="org" alt="" coords="209,231,402,583">
+<area shape="rect" id="node1" href="contact.html" title="contact" alt="" coords="244,241,556,663">
+<area shape="rect" id="node2" href="entity.html" title="entity" alt="" coords="5,316,200,463">
+<area shape="rect" id="node3" href="contact_link.html" title="contact_link" alt="" coords="837,5,1003,216">
+<area shape="rect" id="node4" href="org.html" title="org" alt="" coords="600,140,793,492">
 </map>
 
-					<a name='diagram'><img id='oneDegreeImg' src='../diagrams/affiliation.1degree.png' usemap='#oneDegreeRelationshipsDiagram' class='diagram' border='0' alt='' align='left'></a>							
+					<a name='diagram'><img id='oneDegreeImg' src='../diagrams/contact.1degree.png' usemap='#oneDegreeRelationshipsDiagram' class='diagram' border='0' alt='' align='left'></a>							
 				</div>
 				<div class="chart tab-pane " id="twodegreesDegreeImg-chart" style="position: relative; overflow-x:auto;">					
 					<map id="twoDegreesRelationshipsDiagram" name="twoDegreesRelationshipsDiagram">
-<area shape="rect" id="node1" href="affiliation.html" title="affiliation" alt="" coords="703,44,955,260">
-<area shape="rect" id="node2" href="user.html" title="user" alt="" coords="253,76,412,340">
-<area shape="rect" id="node3" href="entity.html" title="entity" alt="" coords="5,671,200,817">
-<area shape="rect" id="node4" href="org.html" title="org" alt="" coords="465,324,659,676">
-<area shape="rect" id="node5" href="contact.html" title="contact" alt="" coords="266,673,399,761">
-<area shape="rect" id="node8" href="payment_type.html" title="payment_type" alt="" coords="244,568,421,656">
-<area shape="rect" id="node9" href="org_status.html" title="org_status" alt="" coords="255,463,411,551">
-<area shape="rect" id="node10" href="org_type.html" title="org_type" alt="" coords="261,357,404,445">
-<area shape="rect" id="node6" href="contact_link.html" title="contact_link" alt="" coords="746,537,911,625">
-<area shape="rect" id="node7" href="membership.html" title="membership" alt="" coords="745,311,913,399">
+<area shape="rect" id="node1" href="affiliation.html" title="affiliation" alt="" coords="849,56,994,144">
+<area shape="rect" id="node2" href="user.html" title="user" alt="" coords="339,93,461,181">
+<area shape="rect" id="node3" href="entity.html" title="entity" alt="" coords="5,840,200,987">
+<area shape="rect" id="node4" href="org.html" title="org" alt="" coords="600,201,793,553">
+<area shape="rect" id="node5" href="contact.html" title="contact" alt="" coords="244,515,556,936">
+<area shape="rect" id="node8" href="payment_type.html" title="payment_type" alt="" coords="311,409,489,497">
+<area shape="rect" id="node9" href="org_status.html" title="org_status" alt="" coords="322,304,478,392">
+<area shape="rect" id="node10" href="org_type.html" title="org_type" alt="" coords="329,199,471,287">
+<area shape="rect" id="node6" href="contact_link.html" title="contact_link" alt="" coords="839,395,1004,605">
+<area shape="rect" id="node7" href="membership.html" title="membership" alt="" coords="837,183,1005,271">
 </map>
 
-					<a name='diagram'><img id='twodegreesDegreeImg' src='../diagrams/affiliation.2degrees.png' usemap='#twoDegreesRelationshipsDiagram' class='diagram' border='0' alt='' align='left'></a>							
+					<a name='diagram'><img id='twodegreesDegreeImg' src='../diagrams/contact.2degrees.png' usemap='#twoDegreesRelationshipsDiagram' class='diagram' border='0' alt='' align='left'></a>							
 				</div>
 			  			</div>
 			</div>
