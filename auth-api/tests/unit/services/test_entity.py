@@ -168,3 +168,27 @@ def test_get_contact_by_business_identifier_no_contact(session):  # pylint:disab
     factory_entity_model(business_identifier='CP1234567')
     contact = EntityService.get_contact_for_business('CP1234567')
     assert contact is None
+
+
+def entity_factory(business_identifier, pass_code):
+    """Factory."""
+    return EntityModel(business_identifier=business_identifier, pass_code=pass_code)
+
+
+def test_validate_pass_code(app, session):  # pylint:disable=unused-argument
+    """Assert that a contact for an entity can be updated."""
+    entity_info = {
+        'businessIdentifier': 'CP12345678',
+        'pass_code': '12345678'
+    }
+
+    entity_factory(entity_info.get('businessIdentifier'), entity_info.get('pass_code')).save()
+
+    validated = EntityService.validate_pass_code(entity_info.get('businessIdentifier'), entity_info.get('pass_code'))
+    assert validated is True
+
+    validated = EntityService.validate_pass_code(entity_info.get('businessIdentifier'), '1234')
+    assert validated is False
+
+    validated = EntityService.validate_pass_code('businessIdentifier_abcde', '1234')
+    assert validated is False
