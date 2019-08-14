@@ -6,11 +6,17 @@ const kc: Keycloak.KeycloakInstance = null
 
 export default {
 
-  init () {
+  init (idpHint : string) {
     this.cleanupSession()
     let token = configHelper.getFromSession('KEYCLOAK_TOKEN')
     this.kc = Keycloak(`/${process.env.VUE_APP_PATH}/config/keycloak.json`)
-    return this.kc.init({ token: token, onLoad: 'check-sso' })
+    let kcLogin = this.kc.login
+    this.kc.login = (options) => {
+      options.idpHint = idpHint
+      kcLogin(options)
+    }
+
+    return this.kc.init({ token: token, onLoad: 'login-required' })
   },
 
   initSessionStorage () {

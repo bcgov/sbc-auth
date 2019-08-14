@@ -9,6 +9,9 @@
         </p>
 
         <IdpLogin v-bind:label="'Sign in with my BC Services Card'" v-bind:hint="'bcsc'"/>
+        <v-btn color='primary' to="/signin/bcsc" class=".signin-button">
+          <span>Sign in with my BC Services Card</span>
+        </v-btn>
         <p>
           <span><a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/get-a-card"
           target="_blank">I don't have BC Services Card</a></span>
@@ -26,7 +29,6 @@
 
 <script lang="ts">
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
-import IdpLogin from '@/components/auth/IdpLogin.vue'
 import { Vue, Component } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
 
@@ -34,27 +36,11 @@ import UserModule from '../store/modules/user'
 
 @Component({
   components: {
-    SupportInfoCard,
-    IdpLogin
+    SupportInfoCard
   }
 })
 export default class CreateAccount extends Vue {
-  private userStore = getModule(UserModule, this.$store)
 
-  mounted () {
-    this.userStore.initKeycloak().then((kcInit) => {
-      kcInit.success((authenticated) => {
-        if (authenticated === true) {
-          this.userStore.initializeSession().then(() => {
-            this.userStore.getUserProfile('@me').then(() => {
-              // If profile exists redirect to dashboard, else to user profile page
-              this.$router.push(this.userStore.userProfile ? '/dashboard' : '/userprofile')
-            })
-          })
-        }
-      })
-    })
-  }
 }
 </script>
 

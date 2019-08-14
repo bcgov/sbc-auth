@@ -1,5 +1,5 @@
 import UserModule from '@/store/modules/user'
-import IdpLogin from '@/components/auth/IdpLogin.vue'
+import Signin from '@/components/auth/Signin.vue'
 import Vuex from 'vuex'
 import { mount, createLocalVue, Wrapper } from '@vue/test-utils'
 import Vue from 'vue'
@@ -10,8 +10,8 @@ import VuexPersistence from 'vuex-persist'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
-describe('IdpLogin.vue', () => {
-  let wrapper: Wrapper<IdpLogin>
+describe('Signin.vue', () => {
+  let wrapper: Wrapper<Signin>
   const keyCloakConfig = {
     'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
     'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
@@ -35,7 +35,7 @@ describe('IdpLogin.vue', () => {
       plugins: [vuexPersist.plugin]
     })
 
-    wrapper = mount(IdpLogin, {
+    wrapper = mount(Signin, {
       store,
       localVue
     })
@@ -48,7 +48,4 @@ describe('IdpLogin.vue', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
-  it('business contact form has save and skip buttons', () => {
-    expect(wrapper.find('.signin-button')).toBeTruthy()
-  })
 })

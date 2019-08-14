@@ -17,8 +17,8 @@ export default class UserModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async initKeycloak () {
-    return keycloakService.init()
+  public async initKeycloak (idpHint:string) {
+    return keycloakService.init(idpHint)
   }
 
   @Action({ rawError: true })

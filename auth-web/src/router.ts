@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Home from './views/Home.vue'
 import AuthHome from './views/AuthHome.vue'
 import BusinessProfile from './views/BusinessProfile.vue'
+import Signin from './components/auth/Signin.vue'
 import PaymentForm from './components/pay/PaymentForm.vue'
 import PaymentReturnForm from './components/pay/PaymentReturnForm.vue'
 import PageNotFound from './views/PageNotFound.vue'
@@ -22,6 +23,8 @@ const routes = [
   { path: '/', component: AuthHome },
   { path: '/home', component: Home },
   { path: '/businessprofile', component: BusinessProfile, meta: { requiresAuth: true } },
+  { path: '/signin/:idpHint', component: Signin, props: true, meta: { requiresAuth: false } },
+  { path: '/signin/:idpHint/:redirectUrl', component: Signin, props: true, meta: { requiresAuth: false } },
   { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: true } },
   { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true } },
   { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
