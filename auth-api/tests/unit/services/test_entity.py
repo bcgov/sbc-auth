@@ -191,4 +191,4 @@ def test_validate_pass_code(app, session):  # pylint:disable=unused-argument
     assert validated is False
 
     validated = EntityService.validate_pass_code('businessIdentifier_abcde', '1234')
-    assert validated is None
+    assert validated is False

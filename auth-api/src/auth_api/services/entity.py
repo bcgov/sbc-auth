@@ -139,7 +139,7 @@ class Entity:
         """Get the contact for a business identified by the given id."""
         entity = EntityModel.find_by_business_identifier(business_identifier)
         if entity is None:
-            return None
+            return False
         if pass_code == entity.pass_code:
             return True
         return False
