@@ -181,15 +181,14 @@ def test_validate_pass_code(app, session):  # pylint:disable=unused-argument
         'businessIdentifier': 'CP12345678',
         'pass_code': '12345678'
     }
-    with app.app_context():
-        entity_factory(entity_info.get('businessIdentifier'), entity_info.get('pass_code')).save()
 
-        validated = EntityService.validate_pass_code(entity_info.get('businessIdentifier'),
-                                                     entity_info.get('pass_code'))
-        assert validated is True
+    entity_factory(entity_info.get('businessIdentifier'), entity_info.get('pass_code')).save()
 
-        validated = EntityService.validate_pass_code(entity_info.get('businessIdentifier'), '1234')
-        assert validated is False
+    validated = EntityService.validate_pass_code(entity_info.get('businessIdentifier'), entity_info.get('pass_code'))
+    assert validated is True
 
-        validated = EntityService.validate_pass_code('businessIdentifier_abcde', '1234')
-        assert validated is None
+    validated = EntityService.validate_pass_code(entity_info.get('businessIdentifier'), '1234')
+    assert validated is False
+
+    validated = EntityService.validate_pass_code('businessIdentifier_abcde', '1234')
+    assert validated is None
