@@ -15,8 +15,13 @@
 
 from sbc_common_components.tracing.service_tracing import ServiceTracing
 
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
+from auth_api.models import Contact as ContactModel
+from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import OrgSchema
+from auth_api.utils.util import camelback2snake
 
 class Org:
     """Manages all aspects of Org data.
@@ -45,3 +50,62 @@ class Org:
         org = org.flush()
         org.commit()
         return Org(org)
+
+    def update_org(self, org_info):
+        """Update the passed organization with the new info."""
+        self._model.update_org_from_dict(org_info)
+        return self
+
+    @staticmethod
+    def find_by_org_id(org_id):
+        """Find and return an existing organization with the provided id."""
+        if org_id is None:
+            return None
+
+        org_model = OrgModel.find_by_org_id(org_id)
+        if not org_model:
+            return None
+
+        return Org(org_model)
+
+    def add_contact(self, contact_info):
+        """Create a new contact for this org."""
+        # check for existing contact (only one contact per org for now)
+        contact_link = ContactLinkModel.find_by_org_id(self._model.id)
+        if contact_link is not None:
+            raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+
+        contact = ContactModel(**camelback2snake(contact_info))
+        contact.commit()
+
+        contact_link = ContactLinkModel()
+        contact_link.contact = contact
+        contact_link.org = self._model
+        contact_link.commit()
+
+        return self
+
+    def update_contact(self, contact_info):
+        """Update the existing contact for this org."""
+        contact_link = ContactLinkModel.find_by_org_id(self._model.id)
+        if contact_link is None or contact_link.contact is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        contact = contact_link.contact
+        contact.update_from_dict(**camelback2snake(contact_info))
+        contact.commit()
+
+        return self
+
+    def delete_contact(self):
+        """Delete the contact for this org."""
+        contact_link = ContactLinkModel.find_by_org_id(self._model.id)
+        del contact_link.org
+        contact_link.commit()
+
+        if not contact_link.has_links():
+            contact = contact_link.contact
+            contact_link.delete()
+            contact.delete()
+
+        return self

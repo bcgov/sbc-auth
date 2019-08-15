@@ -50,6 +50,11 @@ class ContactLink(BaseModel):  # pylint: disable=too-few-public-methods
         """Return the first contact link with the provided user id."""
         return cls.query.filter_by(user_id=user_id).first()
 
+    @classmethod
+    def find_by_org_id(cls, org_id):
+        """Return the first contact link with the provided org id."""
+        return cls.query.filter_by(org_id=org_id).first()
+
     def has_links(self):
         """Check whether there are any remaining links for this contact."""
         return self.user_id or self.org_id or self.entity_id

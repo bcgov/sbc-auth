@@ -21,6 +21,9 @@ from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
+from .org_type import OrgType
+from .org_status import OrgStatus
+from .payment_type import PaymentType
 
 
 class Org(BaseModel):  # pylint: disable=too-few-public-methods
@@ -47,6 +50,20 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
             current_app.logger.debug(
                 'Creating org from dictionary {}'.format(org_info)
             )
+            org.org_type = OrgType.get_default_type()
+            org.org_status = OrgStatus.get_default_status()
+            org.preferred_payment = PaymentType.get_default_payment_type()
             org.save()
             return org
         return None
+
+    @classmethod
+    def find_by_org_id(cls, org_id):
+        """Find an Org instance that matches the provided id."""
+        return cls.query.filter_by(id=org_id).first()
+
+    def update_org_from_dict(self, org_info: dict):
+        """Update this org with the provided dictionary."""
+        # Update from provided dictionary, but specify additional fields not to update.
+        self.update_from_dict(**org_info, _exclude=('status_code', 'type_code', 'preferred_payment_code'))
+        self.save()

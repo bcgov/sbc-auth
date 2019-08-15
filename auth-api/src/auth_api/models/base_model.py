@@ -29,11 +29,11 @@ class BaseModel(db.Model):
 
     @declared_attr
     def created_by_id(cls):  # pylint:disable=no-self-argument
-        return Column(ForeignKey('user.id'), default=cls.get_current_user)
+        return Column(ForeignKey('user.id'), default=cls._get_current_user)
 
     @declared_attr
     def modified_by_id(cls):  # pylint:disable=no-self-argument
-        return Column(ForeignKey('user.id'), onupdate=cls.get_current_user)
+        return Column(ForeignKey('user.id'), onupdate=cls._get_current_user)
 
     @declared_attr
     def created_by(cls):  # pylint:disable=no-self-argument
@@ -44,7 +44,7 @@ class BaseModel(db.Model):
         return relationship('User', foreign_keys=[cls.modified_by_id], uselist=False)
 
     @staticmethod
-    def get_current_user():
+    def _get_current_user():
         from .user import User as UserModel
         token = g.jwt_oidc_token_info
         user = UserModel.find_by_jwt_token(token)
@@ -52,6 +52,36 @@ class BaseModel(db.Model):
 
     created = Column(DateTime, default=datetime.datetime.now)
     modified = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+
+    def update_from_dict(self, **kwargs):
+        """Updates this model from a given dictionary.
+
+        Will not update readonly, private fields, or relationship fields.
+        """
+        readonly = ['id', 'created', 'modified', 'created_by_id', 'modified_by_id']
+        columns = self.__table__.columns.keys()
+        relationships = self.__mapper__.relationships.keys()
+
+        _excluded_fields = kwargs.pop('_exclude', ())
+
+        changes = {}
+
+        for key in columns:
+            # don't update private/protected
+            if key.startswith('_'):
+                continue
+
+            # only update if allowed, exists, and is not a relationship
+            allowed = key not in readonly and key not in _excluded_fields
+            exists = key in kwargs
+            is_relationship = key in relationships
+            if allowed and exists and not is_relationship:
+                val = getattr(self, key)
+                if val != kwargs[key]:
+                    changes[key] = {'old': val, 'new': kwargs[key]}
+                    setattr(self, key, kwargs[key])
+
+        return changes
 
     @staticmethod
     def commit():

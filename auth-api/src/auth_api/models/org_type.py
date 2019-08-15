@@ -16,27 +16,21 @@
 This is a mapping between org type codes and descriptions for Org objects.
 """
 
-import enum
-from sqlalchemy import Column, String
+from sqlalchemy import Boolean, Column, String
 
 from .base_model import BaseModel
 
 
-class OrgTypeEnum(enum.Enum):
-    """This is a listing of the available org types."""
-    IMPL = 'An implicit organization for internal use only'
-    EXPL = 'An explicit, named organization'
-
-
-class OrgType(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class OrgType(BaseModel):  # pylint: disable=too-few-public-methods
     """This is the model for an Org Type record."""
 
     __tablename__ = 'org_type'
 
     code = Column(String(15), primary_key=True, unique=True)
     desc = Column(String(100))
+    default = Column(Boolean(), default=False, nullable=False)
 
-    @staticmethod
-    def get_default_type():
+    @classmethod
+    def get_default_type(cls):
         """Return the default type code for an Org."""
-        return OrgType(code=OrgTypeEnum.IMPL, desc=OrgTypeEnum.IMPL.value)
+        return cls.query.filter_by(default=True).first()

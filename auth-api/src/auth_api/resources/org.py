@@ -52,3 +52,103 @@ class Orgs(Resource):
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
+
+@cors_preflight('GET, PUT')
+@API.route('/<string:org_id>', methods=['GET', 'PUT'])
+class Org(Resource):
+    """Resource for managing a single org."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def get(org_id):
+        """Get the org specified by the provided id."""
+        org = OrgService.find_by_org_id(org_id)
+        if org is None:
+            response, status = {'message': 'The requested organization could not be found.'}, http_status.HTTP_404_NOT_FOUND
+        else:
+            response, status = org.as_dict(), http_status.HTTP_200_OK
+        return response, status
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def put(org_id):
+        """Update the org specified by the provided id with the request body."""
+        org = OrgService.find_by_org_id(org_id)
+        request_json = request.get_json()
+        valid_format, errors = schema_utils.validate(request_json, 'org')
+        if not valid_format:
+            return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+
+        try:
+            response, status = org.update_org(request_json).as_dict(), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+
+@cors_preflight('DELETE, POST, PUT')
+@API.route('/<string:org_id>/contacts', methods=['DELETE', 'POST', 'PUT'])
+class OrgContacts(Resource):
+    """Resource for managing org contacts."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def post(org_id):
+        """Create a new contact for the specified org."""
+        request_json = request.get_json()
+        valid_format, errors = schema_utils.validate(request_json, 'contact')
+        if not valid_format:
+            return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+
+        try:
+            org = OrgService.find_by_org_id(org_id)
+            if org:
+                response, status = org.add_contact(request_json).as_dict(), http_status.HTTP_201_CREATED
+            else:
+                response, status = {'message': 'The requested organization could not be found.'}, http_status.HTTP_404_NOT_FOUND
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def put(org_id):
+        """Update an existing contact for the specified org."""
+        request_json = request.get_json()
+        valid_format, errors = schema_utils.validate(request_json, 'contact')
+        if not valid_format:
+            return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+        try:
+            org = OrgService.find_by_org_id(org_id)
+            if org:
+                response, status = org.update_contact(request_json).as_dict(), http_status.HTTP_200_OK
+            else:
+                response, status = {'message': 'The requested organization could not be found.'}, http_status.HTTP_404_NOT_FOUND
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def delete(org_id):
+        """Delete the contact info for the specified org."""
+
+        try:
+            org = OrgService.find_by_org_id(org_id)
+            if org:
+                response, status = org.delete_contact().as_dict(), http_status.HTTP_200_OK
+            else:
+                response, status = {'message': 'The requested organization could not be found.'}, http_status.HTTP_404_NOT_FOUND
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status

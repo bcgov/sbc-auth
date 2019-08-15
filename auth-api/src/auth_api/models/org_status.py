@@ -16,7 +16,7 @@
 This is a mapping between status codes and descriptions for Org objects.
 """
 
-from sqlalchemy import Column, String
+from sqlalchemy import Boolean, Column, String
 
 from .base_model import BaseModel
 
@@ -28,3 +28,9 @@ class OrgStatus(BaseModel):  # pylint: disable=too-few-public-methods # Temporar
 
     code = Column(String(15), primary_key=True)
     desc = Column(String(100))
+    default = Column(Boolean(), default=False, nullable=False)
+
+    @classmethod
+    def get_default_status(cls):
+        """Return the default status code for an Org."""
+        return cls.query.filter_by(default=True).first()
