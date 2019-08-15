@@ -1,15 +1,13 @@
 <template>
     <div id="app">
-        <v-app>
-            <v-container fill-height>
+            <v-container >
                 <v-layout row justify-center align-center>
                     <v-progress-circular color="primary" :size="50" indeterminate v-if="!errorMessage"></v-progress-circular>
                     <div class="loading-msg" v-if="!errorMessage"> {{ $t('paymentPrepareMsg') }}</div>
                     <div class="loading-msg" v-if="errorMessage && !showErrorModal">{{errorMessage}}</div>
-                    <sbc-system-error v-on:continue-event="goToReturnUrl()" :showModal=showErrorModal title="Payment Failed" primaryButtonTitle="Continue to Filing" :description="errorHeading" ></sbc-system-error>
+                    <sbc-system-error v-on:continue-event="goToReturnUrl()" v-if="showErrorModal && errorMessage" title="Payment Failed" primaryButtonTitle="Continue to Filing" :description="errorMessage" ></sbc-system-error>
                 </v-layout>
             </v-container>
-        </v-app>
     </div>
 </template>
 
@@ -28,7 +26,7 @@ export default class PaymentForm extends Vue {
     @Prop() paymentId: string
     @Prop() redirectUrl: string
     errorMessage:string = ''
-    showErrorModal:boolean
+    showErrorModal:boolean = false
     returnUrl:string
 
     mounted () {
@@ -42,11 +40,10 @@ export default class PaymentForm extends Vue {
           this.goToReturnUrl()
         })
         .catch(response => {
-          if (response.data.code === 'PAY006') { // Transaction is already completed
+          this.errorMessage = this.$t('payFailedMessage').toString()
+          if (response.data && response.data.code === 'PAY006') { // Transaction is already completed.Show as a modal.
             this.showErrorModal = true
-            this.errorMessage = this.$t('payFailedMessage').toString()
           } else {
-            this.errorMessage = this.$t('payFailedMessage').toString()
             this.showErrorModal = false
           }
         })

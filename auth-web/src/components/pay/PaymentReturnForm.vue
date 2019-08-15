@@ -3,9 +3,9 @@
         <v-container>
             <v-layout row justify-center align-center>
                 <v-progress-circular color="primary" :size="50" indeterminate v-if="!errorMessage"></v-progress-circular>
-                <div class="loading-msg" v-if="!showErrorText && !showErrorModal"> {{ $t('paymentDoneMsg') }}</div>
-                <div class="loading-msg" v-if="showErrorText">{{errorMessage}}</div>
-                <sbc-system-error v-on:continue-event="goToReturnUrl()" :showModal=showErrorModal title="Payment Failed" primaryButtonTitle="Continue to Filing" :description="errorHeading" ></sbc-system-error>
+                <div class="loading-msg" v-if="!errorMessage"> {{ $t('paymentDoneMsg') }}</div>
+                <div class="loading-msg" v-if="errorMessage && !showErrorModal">{{errorMessage}}</div>
+                <sbc-system-error  v-on:continue-event="goToReturnUrl()" v-if="showErrorModal && errorMessage" title="Payment Failed" primaryButtonTitle="Continue to Filing" :description="errorMessage" ></sbc-system-error>
             </v-layout>
         </v-container>
     </div>
@@ -26,11 +26,9 @@ export default class PaymentReturnForm extends Vue {
         @Prop() paymentId: string
         @Prop() transactionId: string
         @Prop() receiptNum: string
-        errorHeading:string = 'Payment failed due to technical reasons.Please contact below number for more details.'
         returnUrl:string
         errorMessage:string = ''
         // show modal when paybc is down..otherwise [all unhandled technical error , show plain text error message..]
-        showErrorText:boolean = false
         showErrorModal:boolean = false
 
         mounted () {
@@ -43,7 +41,7 @@ export default class PaymentReturnForm extends Vue {
               this.returnUrl = response.data.client_system_url
               if (response.data.pay_system_reason_code && response.data.pay_system_reason_code === 'SERVICE_UNAVAILABLE') {
                 // PayBC down time..Show the custom modal
-                this.errorMessage = this.$t('payFailedMessage').toString()
+                this.errorMessage = this.$t('payFailedMessagePayBcDown').toString()
                 this.showErrorModal = true
               } else {
                 // all good..go back
@@ -52,8 +50,8 @@ export default class PaymentReturnForm extends Vue {
             })
             .catch(response => {
               // technical error..need not to show the modal
+              this.showErrorModal = false
               this.errorMessage = this.$t('payFailedMessage').toString()
-              this.showErrorText = true
             })
         }
         goToReturnUrl () {
