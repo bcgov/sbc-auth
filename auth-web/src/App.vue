@@ -1,26 +1,50 @@
 <template>
   <v-app class="app-container" id="app">
-    <pay-system-alert></pay-system-alert>
-    <sbc-layout>
+    <div class="header-group" ref="headerGroup">
+      <pay-system-alert></pay-system-alert>
+      <sbc-header></sbc-header>
+    </div>
+    <div class="app-body" v-bind:style="appBodyOffset">
       <router-view/>
-    </sbc-layout>
+    </div>
+    <sbc-footer></sbc-footer>
   </v-app>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import SbcLayout from 'sbc-common-components/src/components/SbcLayout.vue'
+import Vue from 'vue'
+import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
+import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import PaySystemAlert from '@/components/pay/PaySystemAlert.vue'
 
-  @Component({
-    components: {
-      SbcLayout,
-      PaySystemAlert
-    }
-  })
+export default Vue.extend({
+  name: 'app',
+  components: {
+    SbcHeader,
+    SbcFooter,
+    PaySystemAlert
+  },
 
-export default class App extends Vue {
-}
+  data: function () {
+    return {
+      appBodyOffset: { },
+      lines: ['one', 'two', 'three']
+    }
+  },
+
+  methods: {
+    matchHeight () {
+      var heightString = this.$refs.headerGroup.clientHeight + 'px'
+      Vue.set(this.appBodyOffset, 'margin-top', heightString)
+    }
+  },
+
+  mounted () {
+    this.matchHeight()
+    window.addEventListener('resize', this.matchHeight)
+  }
+})
+
 </script>
 
 <style lang="stylus">
