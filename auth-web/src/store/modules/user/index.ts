@@ -34,15 +34,13 @@ export default class UserModule extends VuexModule {
     keycloakService.login(idpHint)
   }
 
-  @Action({ rawError: true })
+  @Action({ commit: 'setUserProfile' })
   public async getUserProfile (identifier: string) {
     return userServices.getUserProfile(identifier)
       .then(response => {
-        if ((response.status === 200 || response.status === 201) && response.data) {
-          this.context.commit('setUserProfile', response.data)
-        }
+        return response.data ? response.data:null
       }).catch(error => {
-        this.context.commit('setUserProfile', null)
+        return null
       })
   }
 }

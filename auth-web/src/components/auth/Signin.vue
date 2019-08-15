@@ -1,7 +1,3 @@
-<template>
-
-</template>
-
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
@@ -26,20 +22,14 @@ export default class Signin extends Vue {
             // If a redirect url is given, redirect to that page else continue to dashboard or userprofile
             if (this.redirectUrl) {
               if (commonUtils.isUrl(this.redirectUrl)) {
-                setTimeout(() => {
-                  window.location.href = decodeURIComponent(this.redirectUrl)
-                }, 500)
+                window.location.href = decodeURIComponent(this.redirectUrl)
               } else {
-                setTimeout(() => {
-                  this.$router.push('/' + this.redirectUrl)
-                }, 500)
+                this.$router.push('/' + this.redirectUrl)
               }
             } else {
               this.userStore.getUserProfile('@me').then(() => {
                 // If profile exists redirect to dashboard, else to user profile page
-                setTimeout(() => {
-                  this.$router.push(this.userStore.userProfile ? '/dashboard' : '/userprofile')
-                }, 500)
+                this.$router.push(this.userStore.userProfile ? '/dashboard' : '/userprofile')
               })
             }
           })
