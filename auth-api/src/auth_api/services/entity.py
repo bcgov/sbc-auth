@@ -133,3 +133,13 @@ class Entity:
         if contact_link is None:
             return None
         return contact_link.contact
+
+    @staticmethod
+    def validate_pass_code(business_identifier, pass_code):
+        """Get the contact for a business identified by the given id."""
+        entity = EntityModel.find_by_business_identifier(business_identifier)
+        if entity is None:
+            return False
+        if pass_code == entity.pass_code:
+            return True
+        return False

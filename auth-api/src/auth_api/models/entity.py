@@ -29,7 +29,7 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods
 
     id = Column(Integer, primary_key=True)
     business_identifier = Column('business_identifier', String(75), unique=True, nullable=False)
-
+    pass_code = Column('pass_code', String(75), unique=False, nullable=True)
     contacts = relationship('ContactLink', back_populates='entity')
 
     @classmethod

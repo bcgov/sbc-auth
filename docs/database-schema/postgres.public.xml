@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<database name="postgres" schema="public" type="PostgreSQL - 11.2 (Debian 11.2-1.pgdg90+1)">
+   <tables>
+      <table name="affiliation" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="6" id="0" name="created" nullable="true" remarks="" size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="1" name="created_by" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="affiliation_created_by_fkey" implied="false" onDeleteCascade="false" schema="public" table="user"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="entity" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="affiliation_entity_fkey" implied="false" onDeleteCascade="false" schema="public" table="entity"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="3" name="id" nullable="false" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="4" name="org" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="affiliation_org_fkey" implied="false" onDeleteCascade="false" schema="public" table="org"/>
+         </column>
+      </table>
+      <table name="alembic_version" numRows="1" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="version_num" nullable="false" remarks="" size="32" type="varchar"/>
+         <primaryKey column="version_num" sequenceNumberInPK="1"/>
+         <index name="alembic_version_pkc" unique="true">
+            <column ascending="true" name="version_num"/>
+         </index>
+      </table>
+      <table name="contact" numRows="1" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('contact_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="contact_id" foreignKey="contact_link_contact_id_fkey" implied="false" onDeleteCascade="false" schema="public" table="contact_link"/>
+            <child column="contact1" foreignKey="org_contact1_fkey" implied="false" onDeleteCascade="false" schema="public" table="org"/>
+            <child column="contact2" foreignKey="org_contact2_fkey" implied="false" onDeleteCascade="false" schema="public" table="org"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="street" nullable="true" remarks="" size="250" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="street_additional" nullable="true" remarks="" size="250" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="city" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="region" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="country" nullable="true" remarks="" size="2" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="postal_code" nullable="true" remarks="" size="10" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="delivery_instructions" nullable="true" remarks="" size="4096" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="phone" nullable="true" remarks="" size="15" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="9" name="phone_extension" nullable="true" remarks="" size="10" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="10" name="email" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="11" name="entity_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="contact_entity_id_fkey" implied="false" onDeleteCascade="false" schema="public" table="entity"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="contact_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="ix_contact_street" unique="false">
+            <column ascending="true" name="street"/>
+         </index>
+      </table>
+      <table name="contact_link" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('contact_link_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="contact_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="contact_link_contact_id_fkey" implied="false" onDeleteCascade="false" schema="public" table="contact"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="entity_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="contact_link_entity_id_fkey" implied="false" onDeleteCascade="false" schema="public" table="entity"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="3" name="user_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="contact_link_user_id_fkey" implied="false" onDeleteCascade="false" schema="public" table="user"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="4" name="org_id" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="contact_link_org_id_fkey" implied="false" onDeleteCascade="false" schema="public" table="org"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="contact_link_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="entity" numRows="1" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('entity_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="entity" foreignKey="affiliation_entity_fkey" implied="false" onDeleteCascade="false" schema="public" table="affiliation"/>
+            <child column="entity_id" foreignKey="contact_entity_id_fkey" implied="false" onDeleteCascade="false" schema="public" table="contact"/>
+            <child column="entity_id" foreignKey="contact_link_entity_id_fkey" implied="false" onDeleteCascade="false" schema="public" table="contact_link"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="business_identifier" nullable="false" remarks="" size="75" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="pass_code" nullable="true" remarks="" size="75" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="entity_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="entity_business_identifier_key" unique="true">
+            <column ascending="true" name="business_identifier"/>
+         </index>
+      </table>
+      <table name="membership" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('membership_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="6" id="1" name="created" nullable="true" remarks="" size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="2" name="user" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="membership_user_fkey" implied="false" onDeleteCascade="false" schema="public" table="user"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="3" name="org" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="membership_org_fkey" implied="false" onDeleteCascade="false" schema="public" table="org"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="4" name="membership_type" nullable="false" remarks="" size="15" type="varchar">
+            <parent column="code" foreignKey="membership_membership_type_fkey" implied="false" onDeleteCascade="false" schema="public" table="membership_type"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="membership_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+      </table>
+      <table name="membership_type" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="code" nullable="false" remarks="" size="15" type="varchar">
+            <child column="membership_type" foreignKey="membership_membership_type_fkey" implied="false" onDeleteCascade="false" schema="public" table="membership"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="desc" nullable="true" remarks="" size="100" type="varchar"/>
+         <primaryKey column="code" sequenceNumberInPK="1"/>
+         <index name="membership_type_pkey" unique="true">
+            <column ascending="true" name="code"/>
+         </index>
+      </table>
+      <table name="org" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('org_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="org" foreignKey="affiliation_org_fkey" implied="false" onDeleteCascade="false" schema="public" table="affiliation"/>
+            <child column="org_id" foreignKey="contact_link_org_id_fkey" implied="false" onDeleteCascade="false" schema="public" table="contact_link"/>
+            <child column="org" foreignKey="membership_org_fkey" implied="false" onDeleteCascade="false" schema="public" table="membership"/>
+         </column>
+         <column autoUpdated="false" digits="6" id="1" name="created" nullable="true" remarks="" size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="2" name="created_by" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="org_created_by_fkey" implied="false" onDeleteCascade="false" schema="public" table="user"/>
+         </column>
+         <column autoUpdated="false" digits="6" id="3" name="last_modified" nullable="true" remarks="" size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="4" name="last_modified_by" nullable="false" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="org_last_modified_by_fkey" implied="false" onDeleteCascade="false" schema="public" table="user"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="5" name="type_code" nullable="false" remarks="" size="15" type="varchar">
+            <parent column="code" foreignKey="org_type_code_fkey" implied="false" onDeleteCascade="false" schema="public" table="org_type"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="6" name="status_code" nullable="false" remarks="" size="15" type="varchar">
+            <parent column="code" foreignKey="org_status_code_fkey" implied="false" onDeleteCascade="false" schema="public" table="org_status"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="7" name="name" nullable="true" remarks="" size="250" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="preferred_payment" nullable="false" remarks="" size="15" type="varchar">
+            <parent column="code" foreignKey="org_preferred_payment_fkey" implied="false" onDeleteCascade="false" schema="public" table="payment_type"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="9" name="contact1" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="org_contact1_fkey" implied="false" onDeleteCascade="false" schema="public" table="contact"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="10" name="contact2" nullable="true" remarks="" size="10" type="int4">
+            <parent column="id" foreignKey="org_contact2_fkey" implied="false" onDeleteCascade="false" schema="public" table="contact"/>
+         </column>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="org_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="ix_org_name" unique="false">
+            <column ascending="true" name="name"/>
+         </index>
+      </table>
+      <table name="org_status" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="code" nullable="false" remarks="" size="15" type="varchar">
+            <child column="status_code" foreignKey="org_status_code_fkey" implied="false" onDeleteCascade="false" schema="public" table="org"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="desc" nullable="true" remarks="" size="100" type="varchar"/>
+         <primaryKey column="code" sequenceNumberInPK="1"/>
+         <index name="org_status_pkey" unique="true">
+            <column ascending="true" name="code"/>
+         </index>
+      </table>
+      <table name="org_type" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="code" nullable="false" remarks="" size="15" type="varchar">
+            <child column="type_code" foreignKey="org_type_code_fkey" implied="false" onDeleteCascade="false" schema="public" table="org"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="desc" nullable="true" remarks="" size="100" type="varchar"/>
+         <primaryKey column="code" sequenceNumberInPK="1"/>
+         <index name="org_type_pkey" unique="true">
+            <column ascending="true" name="code"/>
+         </index>
+         <index name="org_type_code_key" unique="true">
+            <column ascending="true" name="code"/>
+         </index>
+      </table>
+      <table name="payment_type" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="code" nullable="false" remarks="" size="15" type="varchar">
+            <child column="preferred_payment" foreignKey="org_preferred_payment_fkey" implied="false" onDeleteCascade="false" schema="public" table="org"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="desc" nullable="true" remarks="" size="100" type="varchar"/>
+         <primaryKey column="code" sequenceNumberInPK="1"/>
+         <index name="payment_type_pkey" unique="true">
+            <column ascending="true" name="code"/>
+         </index>
+         <index name="payment_type_code_key" unique="true">
+            <column ascending="true" name="code"/>
+         </index>
+      </table>
+      <table name="user" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('user_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial">
+            <child column="created_by" foreignKey="affiliation_created_by_fkey" implied="false" onDeleteCascade="false" schema="public" table="affiliation"/>
+            <child column="user_id" foreignKey="contact_link_user_id_fkey" implied="false" onDeleteCascade="false" schema="public" table="contact_link"/>
+            <child column="user" foreignKey="membership_user_fkey" implied="false" onDeleteCascade="false" schema="public" table="membership"/>
+            <child column="created_by" foreignKey="org_created_by_fkey" implied="false" onDeleteCascade="false" schema="public" table="org"/>
+            <child column="last_modified_by" foreignKey="org_last_modified_by_fkey" implied="false" onDeleteCascade="false" schema="public" table="org"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="username" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="6" id="2" name="created" nullable="true" remarks="" size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="3" name="email" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="first_name" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="keycloak_guid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" digits="0" id="6" name="last_name" nullable="true" remarks="" size="200" type="varchar"/>
+         <column autoUpdated="false" digits="6" id="7" name="modified" nullable="true" remarks="" size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="8" name="roles" nullable="true" remarks="" size="1000" type="varchar"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="user_pkey" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="ix_user_email" unique="false">
+            <column ascending="true" name="email"/>
+         </index>
+         <index name="ix_user_first_name" unique="false">
+            <column ascending="true" name="first_name"/>
+         </index>
+         <index name="ix_user_last_name" unique="false">
+            <column ascending="true" name="last_name"/>
+         </index>
+         <index name="ix_user_username" unique="false">
+            <column ascending="true" name="username"/>
+         </index>
+         <index name="user_keycloak_guid_key" unique="true">
+            <column ascending="true" name="keycloak_guid"/>
+         </index>
+      </table>
+   </tables>
+</database>
