@@ -21,4 +21,4 @@ def upgrade():
 
 
 def downgrade():
-    pass
+    op.drop_constraint('pk_affiliation', 'affiliation')
