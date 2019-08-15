@@ -16,10 +16,13 @@
 The class and schema are both present in this module.
 """
 
+from flask import current_app
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
+from auth_api.utils.util import camelback2snake
 from .base_model import BaseModel
+
 
 
 class Entity(BaseModel):  # pylint: disable=too-few-public-methods
@@ -36,3 +39,15 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods
     def find_by_business_identifier(cls, business_identifier):
         """Return the first entity with the provided business identifier."""
         return cls.query.filter_by(business_identifier=business_identifier).first()
+
+    @classmethod
+    def create_from_dict(cls, entity_info: dict):
+        """Create a new Entity from the provided dictionary."""
+        if entity_info:
+            entity = Entity(**camelback2snake(entity_info))
+            current_app.logger.debug(
+                'Creating entity from dictionary {}'.format(entity_info)
+            )
+            entity.save()
+            return entity
+        return None

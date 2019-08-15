@@ -76,19 +76,19 @@ TEST_JWT_HEADER = {
 }
 
 TEST_CONTACT = {
-    'emailAddress': 'foo@bar.com',
-    'phoneNumber': '(555) 555-5555',
-    'extension': '123'
+    'email': 'foo@bar.com',
+    'phone': '(555) 555-5555',
+    'phoneExtension': '123'
 }
 
 UPDATED_TEST_CONTACT = {
-    'emailAddress': 'bar@foo.com',
-    'phoneNumber': '(555) 555-5555',
-    'extension': '123'
+    'email': 'bar@foo.com',
+    'phone': '(555) 555-5555',
+    'phoneExtension': '123'
 }
 
 INVALID_TEST_CONTACT = {
-    'emailAddress': 'bar'
+    'email': 'bar'
 }
 
 
@@ -228,7 +228,7 @@ def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
     assert rv.status_code == http_status.HTTP_201_CREATED
     user = json.loads(rv.data)
     assert len(user['contacts']) == 1
-    assert user['contacts'][0]['contact']['emailAddress'] == 'foo@bar.com'
+    assert user['contacts'][0]['contact']['email'] == 'foo@bar.com'
 
 
 def test_add_contact_no_token_returns_401(client, session):  # pylint:disable=unused-argument
@@ -285,7 +285,7 @@ def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
     assert rv.status_code == http_status.HTTP_200_OK
     user = json.loads(rv.data)
     assert len(user['contacts']) == 1
-    assert user['contacts'][0]['contact']['emailAddress'] == 'bar@foo.com'
+    assert user['contacts'][0]['contact']['email'] == 'bar@foo.com'
 
 
 def test_update_contact_no_token_returns_401(client, session):  # pylint:disable=unused-argument

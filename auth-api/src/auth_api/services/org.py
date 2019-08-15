@@ -100,6 +100,9 @@ class Org:
     def delete_contact(self):
         """Delete the contact for this org."""
         contact_link = ContactLinkModel.find_by_org_id(self._model.id)
+        if contact_link is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
         del contact_link.org
         contact_link.commit()
 

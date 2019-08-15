@@ -9,7 +9,7 @@
       "businessIdentifier"
     ],
     "properties": {
-      "business_identifier": {
+      "businessIdentifier": {
         "$id": "#/properties/businessIdentifier",
         "type": "string",
         "title": "Business Identifier",

@@ -32,19 +32,19 @@ TEST_INVALID_ENTITY_INFO = {
 }
 
 TEST_CONTACT_INFO = {
-    'emailAddress': 'foo@bar.com',
-    'phoneNumber': '(555) 555-5555',
-    'extension': '123'
+    'email': 'foo@bar.com',
+    'phone': '(555) 555-5555',
+    'phoneExtension': '123'
 }
 
 TEST_UPDATED_CONTACT_INFO = {
-    'emailAddress': 'bar@foo.com',
-    'phoneNumber': '(555) 555-5555',
-    'extension': '123'
+    'email': 'bar@foo.com',
+    'phone': '(555) 555-5555',
+    'phoneExtension': '123'
 }
 
 TEST_INVALID_CONTACT_INFO = {
-    'emailAddress': 'bar'
+    'email': 'bar'
 }
 
 TEST_JWT_CLAIMS = {
@@ -145,7 +145,7 @@ def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['emailAddress'] == TEST_CONTACT_INFO['emailAddress']
+    assert dictionary['contacts'][0]['contact']['email'] == TEST_CONTACT_INFO['email']
 
 
 def test_add_contact_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
@@ -166,8 +166,8 @@ def test_add_contact_no_entity_returns_404(client, jwt, session):  # pylint:disa
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
-def test_add_contact_duplicate_returns_409(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert that adding a duplicate contact to an Entity returns 409."""
+def test_add_contact_duplicate_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that adding a duplicate contact to an Entity returns 400."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
     client.post('/api/v1/entities', data=json.dumps(TEST_ENTITY_INFO),
                 headers=headers, content_type='application/json')
@@ -175,7 +175,7 @@ def test_add_contact_duplicate_returns_409(client, jwt, session):  # pylint:disa
                 headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
     rv = client.post('/api/v1/entities/{}/contacts'.format(TEST_ENTITY_INFO['businessIdentifier']),
                      headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
-    assert rv.status_code == http_status.HTTP_409_CONFLICT
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
 def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
@@ -193,7 +193,7 @@ def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
     assert rv.status_code == http_status.HTTP_200_OK
     dictionary = json.loads(rv.data)
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['emailAddress'] == TEST_UPDATED_CONTACT_INFO['emailAddress']
+    assert dictionary['contacts'][0]['contact']['email'] == TEST_UPDATED_CONTACT_INFO['email']
 
 
 def test_update_contact_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument

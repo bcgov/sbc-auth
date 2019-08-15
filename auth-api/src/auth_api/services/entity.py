@@ -13,8 +13,6 @@
 # limitations under the License.
 """Service for managing Entity data."""
 
-from typing import Any, Dict
-
 from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from auth_api.exceptions import BusinessException
@@ -23,6 +21,7 @@ from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
+from auth_api.utils.util import camelback2snake
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -61,85 +60,67 @@ class Entity:
         return entity
 
     @staticmethod
-    def create_entity(entity_info: Dict[str, Any]):
+    def create_entity(entity_info: dict):
         """Create an Entity."""
-        entity = EntityModel()
-        entity.business_identifier = entity_info.get('businessIdentifier', None)
-        entity = entity.flush()
+        entity = EntityModel.create_from_dict(entity_info)
         entity.commit()
         return Entity(entity)
 
-    @staticmethod
-    def add_contact(business_identifier, contact_info: Dict[str, Any]):
-        """Add a business contact to the specified Entity."""
-        entity = EntityModel.find_by_business_identifier(business_identifier)
-        if entity is None:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
-
+    def add_contact(self, contact_info: dict):
+        """Add a business contact to this entity."""
         # check for existing contact (we only want one contact per user)
-        contact_link = ContactLinkModel.find_by_entity_id(entity.id)
+        contact_link = ContactLinkModel.find_by_entity_id(self._model.id)
         if contact_link is not None:
-            raise BusinessException(Error.DATA_CONFLICT, None)
+            raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
-        contact = ContactModel()
-        contact.email = contact_info.get('emailAddress', None)
-        contact.phone = contact_info.get('phoneNumber', None)
-        contact.phone_extension = contact_info.get('extension', None)
-        contact = contact.flush()
+        contact = ContactModel(**camelback2snake(contact_info))
         contact.commit()
 
         contact_link = ContactLinkModel()
-        contact_link.entity_id = entity.id
-        contact_link.contact_id = contact.id
-        contact_link = contact_link.flush()
+        contact_link.contact = contact
+        contact_link.entity = self._model
         contact_link.commit()
 
-        return Entity(entity)
+        return self
 
-    @staticmethod
-    def update_contact(business_identifier, contact_info: Dict[str, Any]):
-        """Update a business contact for the specified Entity."""
-        entity = EntityModel.find_by_business_identifier(business_identifier)
-        if entity is None:
+    def update_contact(self, contact_info: dict):
+        """Update a business contact for this entity."""
+        # find the contact link object for this entity
+        contact_link = ContactLinkModel.find_by_entity_id(self._model.id)
+        if contact_link is None or contact_link.contact is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        # find the contact link object for this entity
-        contact_link = ContactLinkModel.find_by_entity_id(entity.id)
+        contact = contact_link.contact
+        contact.update_from_dict(**camelback2snake(contact_info))
+        contact.commit()
+
+        return self
+
+    def delete_contact(self):
+        """Delete a business contact for this entity."""
+        contact_link = ContactLinkModel.find_by_entity_id(self._model.id)
         if contact_link is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        # now find the contact for the link
-        contact = contact_link.contact
-        if contact is None:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        del contact_link.entity
+        contact_link.commit()
 
-        contact.email = contact_info.get('emailAddress', contact.email)
-        contact.phone = contact_info.get('phoneNumber', contact.phone)
-        contact.phone_extension = contact_info.get('extension', contact.phone_extension)
-        contact = contact.flush()
-        contact.commit()
+        if not contact_link.has_links():
+            contact = contact_link.contact
+            contact_link.delete()
+            contact.delete()
 
-        # return the entity with updated contact
-        entity = EntityModel.find_by_business_identifier(business_identifier)
-        return Entity(entity)
+        return self
 
-    @staticmethod
-    def get_contact_for_business(business_identifier):
-        """Get the contact for a business identified by the given id."""
-        entity = EntityModel.find_by_business_identifier(business_identifier)
-        if entity is None:
-            return None
-        contact_link = ContactLinkModel.find_by_entity_id(entity.id)
+    def get_contact(self):
+        """Get the contact for this business."""
+        contact_link = ContactLinkModel.find_by_entity_id(self._model.id)
         if contact_link is None:
             return None
         return contact_link.contact
 
-    @staticmethod
-    def validate_pass_code(business_identifier, pass_code):
-        """Get the contact for a business identified by the given id."""
-        entity = EntityModel.find_by_business_identifier(business_identifier)
-        if entity is None:
-            return False
-        if pass_code == entity.pass_code:
+    def validate_pass_code(self, pass_code):
+        """Get the contact for the given entity."""
+        if pass_code == self._model.pass_code:
             return True
         return False

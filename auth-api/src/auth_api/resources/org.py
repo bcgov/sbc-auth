@@ -142,7 +142,6 @@ class OrgContacts(Resource):
     @_JWT.requires_auth
     def delete(org_id):
         """Delete the contact info for the specified org."""
-
         try:
             org = OrgService.find_by_org_id(org_id)
             if org:

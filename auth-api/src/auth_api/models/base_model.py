@@ -45,10 +45,15 @@ class BaseModel(db.Model):
 
     @staticmethod
     def _get_current_user():
-        from .user import User as UserModel
-        token = g.jwt_oidc_token_info
-        user = UserModel.find_by_jwt_token(token)
-        return user.id
+        try:
+            from .user import User as UserModel
+            token = g.jwt_oidc_token_info
+            user = UserModel.find_by_jwt_token(token)
+            if not user:
+                return None
+            return user.id
+        except:  # pylint:disable=bare-except # A lot of exceptions can be thrown here, mostly when unit testing.
+            return None
 
     created = Column(DateTime, default=datetime.datetime.now)
     modified = Column(DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)

@@ -79,8 +79,8 @@ class EntityResource(Resource):
         return response, status
 
 
-@cors_preflight(['POST', 'PUT', 'OPTIONS'])
-@API.route('/<string:business_identifier>/contacts', methods=['POST', 'PUT', 'OPTIONS'])
+@cors_preflight('DELETE, POST, PUT')
+@API.route('/<string:business_identifier>/contacts', methods=['DELETE', 'POST', 'PUT'])
 class ContactResource(Resource):
     """Resource for managing entity contacts."""
 
@@ -95,8 +95,12 @@ class ContactResource(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            response, status = EntityService.add_contact(business_identifier, request_json).as_dict(), \
+            entity = EntityService.find_by_business_identifier(business_identifier)
+            if entity:
+                response, status = entity.add_contact(request_json).as_dict(), \
                 http_status.HTTP_201_CREATED
+            else:
+                response, status = {'message': 'The requested business could not be found.'}, http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -110,9 +114,29 @@ class ContactResource(Resource):
         valid_format, errors = schema_utils.validate(request_json, 'contact')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+
         try:
-            response, status = EntityService.update_contact(business_identifier, request_json).as_dict(), \
+            entity = EntityService.find_by_business_identifier(business_identifier)
+            if entity:
+                response, status = entity.update_contact(request_json).as_dict(), \
                 http_status.HTTP_200_OK
+            else:
+                response, status = {'message': 'The requested business could not be found.'}, http_status.HTTP_404_NOT_FOUND
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+    @cors.crossdomain(origin='*')
+    def delete(business_identifier):
+        """Delete the business contact for the Entity identified by the provided id."""
+        try:
+            entity = EntityService.find_by_business_identifier(business_identifier)
+            if entity:
+                response, status = entity.delete_contact().as_dict(), http_status.HTTP_200_OK
+            else:
+                response, status = {'message': 'The requested business could not be found.'}, http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
