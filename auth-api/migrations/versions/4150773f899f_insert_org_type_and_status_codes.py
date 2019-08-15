@@ -1,7 +1,7 @@
 """Insert org type and status codes
 
 Revision ID: 4150773f899f
-Revises: b2dda0178918
+Revises: 27718cfe1ef6
 Create Date: 2019-08-14 11:43:42.765706
 
 """
@@ -12,7 +12,7 @@ from sqlalchemy.sql import column, table
 
 # revision identifiers, used by Alembic.
 revision = '4150773f899f'
-down_revision = 'b2dda0178918'
+down_revision = '27718cfe1ef6'
 branch_labels = None
 depends_on = None
 
@@ -64,9 +64,6 @@ def upgrade():
 
 
 def downgrade():
-    op.execute('DELETE FROM org_type WHERE code = \'IMPLICIT\';')
-    op.execute('DELETE FROM org_type WHERE code = \'EXPLICIT\';')
-    op.execute('DELETE FROM org_status WHERE code = \'ACTIVE\';')
-    op.execute('DELETE FROM org_status WHERE code = \'PENDING\';')
-    op.execute('DELETE FROM org_status WHERE code = \'INACTIVE\';')
-    op.execute('DELETE FROM payment_type WHERE code = \'CC\';')
+    op.execute('TRUNCATE TABLE org_type CASCADE;')
+    op.execute('TRUNCATE TABLE org_status CASCADE;')
+    op.execute('TRUNCATE TABLE payment_type CASCADE;')
