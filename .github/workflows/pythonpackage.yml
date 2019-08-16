@@ -1,0 +1,41 @@
+name: Python package
+
+on:
+  push:
+    branches:    # Array of patterns that match refs/heads
+    - development     # Push events on master branch
+    - post-mvp # Push events to branches matching refs/heads/releases/*
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      fail-fast: false
+      matrix:
+        python-version: [3.7]
+
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        cd auth-api
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Flake8
+      run: |
+        cd auth-api
+        pip install flake8
+        flake8 src/auth_api tests    
+        if: failure
+          
+    - name: Test with pytest
+      run: |
+        cd auth-api
+        pip install pytest
+        pytest
