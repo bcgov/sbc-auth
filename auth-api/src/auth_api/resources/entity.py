@@ -98,9 +98,10 @@ class ContactResource(Resource):
             entity = EntityService.find_by_business_identifier(business_identifier)
             if entity:
                 response, status = entity.add_contact(request_json).as_dict(), \
-                http_status.HTTP_201_CREATED
+                    http_status.HTTP_201_CREATED
             else:
-                response, status = {'message': 'The requested business could not be found.'}, http_status.HTTP_404_NOT_FOUND
+                response, status = {'message': 'The requested business could not be found.'}, \
+                    http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -119,9 +120,10 @@ class ContactResource(Resource):
             entity = EntityService.find_by_business_identifier(business_identifier)
             if entity:
                 response, status = entity.update_contact(request_json).as_dict(), \
-                http_status.HTTP_200_OK
+                    http_status.HTTP_200_OK
             else:
-                response, status = {'message': 'The requested business could not be found.'}, http_status.HTTP_404_NOT_FOUND
+                response, status = {'message': 'The requested business could not be found.'}, \
+                    http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -136,7 +138,8 @@ class ContactResource(Resource):
             if entity:
                 response, status = entity.delete_contact().as_dict(), http_status.HTTP_200_OK
             else:
-                response, status = {'message': 'The requested business could not be found.'}, http_status.HTTP_404_NOT_FOUND
+                response, status = {'message': 'The requested business could not be found.'}, \
+                    http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

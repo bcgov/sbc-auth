@@ -17,13 +17,13 @@ Test suite to ensure that the Org model routines are working as expected.
 """
 
 from auth_api.models import Org as OrgModel
-from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import OrgStatus as OrgStatusModel
+from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
 
 
 def factory_org_model(name, session):
-    """Factory that produces a templated org model."""
+    """Produce a templated org model."""
     org_type = OrgTypeModel(code='TEST', desc='Test')
     session.add(org_type)
     session.commit()
@@ -44,9 +44,9 @@ def factory_org_model(name, session):
 
     return org
 
+
 def test_org(session):
     """Assert that an Org can be stored in the service."""
-    
     org = factory_org_model(name='My Test Org', session=session)
     session.add(org)
     session.commit()

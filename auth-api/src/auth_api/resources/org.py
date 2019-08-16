@@ -24,9 +24,11 @@ from auth_api.services import Org as OrgService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
 
+
 API = Namespace('orgs', description='Endpoints for organization management')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
+
 
 @cors_preflight('GET, POST')
 @API.route('', methods=['GET', 'POST'])
@@ -53,6 +55,7 @@ class Orgs(Resource):
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
 
+
 @cors_preflight('GET, PUT')
 @API.route('/<string:org_id>', methods=['GET', 'PUT'])
 class Org(Resource):
@@ -66,7 +69,8 @@ class Org(Resource):
         """Get the org specified by the provided id."""
         org = OrgService.find_by_org_id(org_id)
         if org is None:
-            response, status = {'message': 'The requested organization could not be found.'}, http_status.HTTP_404_NOT_FOUND
+            response, status = {'message': 'The requested organization could not be found.'}, \
+                http_status.HTTP_404_NOT_FOUND
         else:
             response, status = org.as_dict(), http_status.HTTP_200_OK
         return response, status
@@ -111,7 +115,8 @@ class OrgContacts(Resource):
             if org:
                 response, status = org.add_contact(request_json).as_dict(), http_status.HTTP_201_CREATED
             else:
-                response, status = {'message': 'The requested organization could not be found.'}, http_status.HTTP_404_NOT_FOUND
+                response, status = {'message': 'The requested organization could not be found.'}, \
+                    http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -131,7 +136,8 @@ class OrgContacts(Resource):
             if org:
                 response, status = org.update_contact(request_json).as_dict(), http_status.HTTP_200_OK
             else:
-                response, status = {'message': 'The requested organization could not be found.'}, http_status.HTTP_404_NOT_FOUND
+                response, status = {'message': 'The requested organization could not be found.'}, \
+                    http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -147,7 +153,8 @@ class OrgContacts(Resource):
             if org:
                 response, status = org.delete_contact().as_dict(), http_status.HTTP_200_OK
             else:
-                response, status = {'message': 'The requested organization could not be found.'}, http_status.HTTP_404_NOT_FOUND
+                response, status = {'message': 'The requested organization could not be found.'}, \
+                    http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

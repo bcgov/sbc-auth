@@ -23,6 +23,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.schemas import OrgSchema
 from auth_api.utils.util import camelback2snake
 
+
 class Org:
     """Manages all aspects of Org data.
 

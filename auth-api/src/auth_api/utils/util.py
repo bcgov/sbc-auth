@@ -19,6 +19,7 @@ A simple decorator to add the options method to a Request Class.
 
 import re
 
+
 def cors_preflight(methods):
     """Render an option method on the class."""
     def wrapper(f):
@@ -32,8 +33,9 @@ def cors_preflight(methods):
         return f
     return wrapper
 
+
 def camelback2snake(camel_dict: dict):
-    """Converts the passed dictionary's keys from camelBack case to snake_case."""
+    """Convert the passed dictionary's keys from camelBack case to snake_case."""
     converted_obj = {}
     for key in camel_dict.keys():
         converted_key = re.sub(r'[A-Z]', lambda x: '_' + x.group(0).lower(), key)
@@ -42,7 +44,7 @@ def camelback2snake(camel_dict: dict):
 
 
 def snake2camelback(snake_dict: dict):
-    """Converts the passed dictionary's keys from snake_case to camelBack case."""
+    """Convert the passed dictionary's keys from snake_case to camelBack case."""
     converted_obj = {}
     for key in snake_dict.keys():
         converted_key = re.sub(r'_([a-z])', lambda x: x.group(1).upper(), key)

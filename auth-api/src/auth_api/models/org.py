@@ -21,8 +21,8 @@ from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
-from .org_type import OrgType
 from .org_status import OrgStatus
+from .org_type import OrgType
 from .payment_type import PaymentType
 
 

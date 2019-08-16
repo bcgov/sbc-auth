@@ -21,8 +21,8 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.util import camelback2snake
-from .base_model import BaseModel
 
+from .base_model import BaseModel
 
 
 class Entity(BaseModel):  # pylint: disable=too-few-public-methods

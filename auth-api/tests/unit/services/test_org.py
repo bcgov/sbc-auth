@@ -21,8 +21,8 @@ import pytest
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Org as OrgModel
-from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import OrgStatus as OrgStatusModel
+from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.services import Org as OrgService
 
@@ -45,7 +45,7 @@ TEST_UPDATED_CONTACT_INFO = {
 
 
 def factory_org_service(session, name):
-    """Factory that produces a templated org service."""
+    """Produce a templated org service."""
     org_type = OrgTypeModel(code='TEST', desc='Test')
     session.add(org_type)
     session.commit()
