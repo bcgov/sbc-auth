@@ -13,7 +13,7 @@ module.exports = {
     '^.+\\.tsx?$': 'ts-jest'
   },
   transformIgnorePatterns: [
-    '/node_modules/'
+    '/node_modules/(?!sbc-common-components/.*)'
   ],
   'collectCoverage': true,
   'collectCoverageFrom': ['**/*.{js,vue}', '!**/node_modules/**'],
