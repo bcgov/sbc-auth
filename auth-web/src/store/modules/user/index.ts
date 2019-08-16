@@ -7,6 +7,7 @@ import { UserInfo } from '@/models/userInfo'
   name: 'user'
 })
 export default class UserModule extends VuexModule {
+  
   currentUser: UserInfo
 
   userProfile: any
@@ -16,17 +17,22 @@ export default class UserModule extends VuexModule {
     this.userProfile = userProfile
   }
 
+  @Mutation
+  public setCurrentUser (currentUser: UserInfo) {
+    this.currentUser = currentUser
+  }
+
   @Action({ rawError: true })
   public async initKeycloak (idpHint:string) {
     return keycloakService.init(idpHint)
   }
 
-  @Action({ rawError: true })
+  @Action({ commit: 'setCurrentUser' })
   public async initializeSession () {
     // Set values to session storage
     keycloakService.initSessionStorage()
     // Load User Info
-    this.currentUser = keycloakService.getUserInfo()
+    return keycloakService.getUserInfo()
   }
 
   @Action({ rawError: true })
@@ -41,6 +47,14 @@ export default class UserModule extends VuexModule {
         return response.data ? response.data:null
       }).catch(error => {
         return null
+      })
+  }
+  
+  @Action({ commit: 'setUserProfile' })
+  public async createUserProfile () {
+    return userServices.createUserProfile()
+      .then(response => {
+        return response.data
       })
   }
 }
