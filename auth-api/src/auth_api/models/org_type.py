@@ -16,15 +16,21 @@
 This is a mapping between org type codes and descriptions for Org objects.
 """
 
-from sqlalchemy import Column, String
+from sqlalchemy import Boolean, Column, String
 
-from .db import db
+from .base_model import BaseModel
 
 
-class OrgType(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class OrgType(BaseModel):  # pylint: disable=too-few-public-methods
     """This is the model for an Org Type record."""
 
     __tablename__ = 'org_type'
 
     code = Column(String(15), primary_key=True, unique=True)
     desc = Column(String(100))
+    default = Column(Boolean(), default=False, nullable=False)
+
+    @classmethod
+    def get_default_type(cls):
+        """Return the default type code for an Org."""
+        return cls.query.filter_by(default=True).first()

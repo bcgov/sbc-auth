@@ -24,6 +24,7 @@ from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import UserSchema
+from auth_api.utils.util import camelback2snake
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -79,17 +80,12 @@ class User:  # pylint: disable=too-many-instance-attributes
         if contact_link is not None:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
-        contact = ContactModel()
-        contact.email = contact_info.get('emailAddress', None)
-        contact.phone = contact_info.get('phoneNumber', None)
-        contact.phone_extension = contact_info.get('extension', None)
-        contact = contact.flush()
+        contact = ContactModel(**camelback2snake(contact_info))
         contact.commit()
 
         contact_link = ContactLinkModel()
-        contact_link.user_id = user.id
-        contact_link.contact_id = contact.id
-        contact_link = contact_link.flush()
+        contact_link.user = user
+        contact_link.contact = contact
         contact_link.commit()
 
         return User(user)
@@ -109,9 +105,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         contact = contact_link.contact
-        contact.email = contact_info.get('emailAddress', contact.email)
-        contact.phone = contact_info.get('phoneNumber', contact.phone)
-        contact.phone_extension = contact_info.get('extension', contact.phone_extension)
+        contact.update_from_dict(**camelback2snake(contact_info))
         contact = contact.flush()
         contact.commit()
 
@@ -127,8 +121,8 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         # unlink the user from its contact
         contact_link = ContactLinkModel.find_by_user_id(user.id)
-        contact_link.user_id = None
-        contact_link = contact_link.flush()
+        del contact_link.user
+        contact_link.commit()
 
         # clean up any orphaned contacts and links
         if not contact_link.has_links():
