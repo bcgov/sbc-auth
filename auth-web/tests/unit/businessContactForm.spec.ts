@@ -1,9 +1,11 @@
+import BusinessModule from '@/store/modules/business'
 import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
 import Vuex from 'vuex'
 import { mount, createLocalVue, Wrapper } from '@vue/test-utils'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import VueRouter from 'vue-router'
+import VuexPersistence from 'vuex-persist'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -16,13 +18,22 @@ describe('BusinessContactForm.vue', () => {
     'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
   }
 
-  sessionStorage.__STORE__['API_CONFIG'] = JSON.stringify(config)
+  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
+    const vuexPersist = new VuexPersistence({
+      key: 'AUTH_WEB',
+      storage: sessionStorage
+    })
+
     const store = new Vuex.Store({
-      strict: true
+      strict: false,
+      modules: {
+        business: BusinessModule
+      },
+      plugins: [vuexPersist.plugin]
     })
 
     wrapper = mount(BusinessContactForm, {
@@ -47,15 +58,15 @@ describe('BusinessContactForm.vue', () => {
     expect(wrapper.vm.$data.emailAddress).toBe('')
   })
 
-  it ('confirm email data is empty', () => {
+  it('confirm email data is empty', () => {
     expect(wrapper.vm.$data.confirmedEmailAddress).toBe('')
   })
 
-  it ('confirm phone data is empty', () => {
+  it('confirm phone data is empty', () => {
     expect(wrapper.vm.$data.phoneNumber).toBe('')
   })
 
-  it ('confirm extension data to be empty', () => {
+  it('confirm extension data to be empty', () => {
     expect(wrapper.vm.$data.extension).toBe('')
   })
 })
