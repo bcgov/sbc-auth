@@ -28,6 +28,5 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
         """Maps all of the Org fields to a default schema."""
 
         model = OrgModel
-        exclude = ('id',)
 
     contacts = fields.Nested(ContactLinkSchema, many=True)

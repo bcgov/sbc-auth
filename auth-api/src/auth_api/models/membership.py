@@ -16,18 +16,17 @@
 The Membership object connects User models to one or more Org models.
 """
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer
+from sqlalchemy import Column, ForeignKey, Integer
 
-from .db import db
+from .base_model import BaseModel
 
 
-class Membership(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """Model for a Membership model.  Associates Users and Orgs."""
 
     __tablename__ = 'membership'
 
     id = Column(Integer, primary_key=True)
-    created = Column(DateTime)
     user = Column(ForeignKey('user.id'), nullable=False)
     org = Column(ForeignKey('org.id'), nullable=False)
     membership_type = Column(

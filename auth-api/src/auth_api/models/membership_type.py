@@ -18,10 +18,10 @@ It defines the available types of membership Users have with Orgs.
 
 from sqlalchemy import Column, String
 
-from .db import db
+from .base_model import BaseModel
 
 
-class MembershipType(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class MembershipType(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the Membership Type model for the Auth service."""
 
     __tablename__ = 'membership_type'

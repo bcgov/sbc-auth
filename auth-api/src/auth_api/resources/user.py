@@ -31,7 +31,7 @@ TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
 
 
-@cors_preflight('GET, POST')
+@cors_preflight('GET,POST,OPTIONS')
 @API.route('', methods=['GET', 'POST'])
 class Users(Resource):
     """Resource for managing users."""
@@ -75,7 +75,7 @@ class Users(Resource):
         return response, status
 
 
-@cors_preflight('GET')
+@cors_preflight('GET,OPTIONS')
 @API.route('/<string:username>', methods=['GET'])
 class UserStaff(Resource):
     """Resource for managing an individual user for a STAFF user."""
@@ -94,7 +94,7 @@ class UserStaff(Resource):
         return response, status
 
 
-@cors_preflight('GET')
+@cors_preflight('GET,OPTIONS')
 @API.route('/@me', methods=['GET'])
 class User(Resource):
     """Resource for managing an individual user."""
@@ -116,7 +116,7 @@ class User(Resource):
         return response, status
 
 
-@cors_preflight('DELETE, POST, PUT')
+@cors_preflight('DELETE, POST, PUT, OPTIONS')
 @API.route('/contacts', methods=['DELETE', 'POST', 'PUT'])
 class UserContacts(Resource):
     """Resource for managing user contacts."""
