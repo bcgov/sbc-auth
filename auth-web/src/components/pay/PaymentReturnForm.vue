@@ -5,7 +5,7 @@
                 <v-progress-circular color="primary" :size="50" indeterminate v-if="!errorMessage"></v-progress-circular>
                 <div class="loading-msg" v-if="!errorMessage"> {{ $t('paymentDoneMsg') }}</div>
                 <div class="loading-msg" v-if="errorMessage && !showErrorModal">{{errorMessage}}</div>
-                <sbc-system-error  v-on:continue-event="goToReturnUrl()" v-if="showErrorModal && errorMessage" title="Payment Failed" primaryButtonTitle="Continue to Filing" :description="errorMessage" ></sbc-system-error>
+                <sbc-system-error  v-on:continue-event="goToUrl(returnUrl)" v-if="showErrorModal && errorMessage" title="Payment Failed" primaryButtonTitle="Continue to Filing" :description="errorMessage" ></sbc-system-error>
             </v-layout>
         </v-container>
     </div>
@@ -45,7 +45,7 @@ export default class PaymentReturnForm extends Vue {
                 this.showErrorModal = true
               } else {
                 // all good..go back
-                this.goToReturnUrl()
+                this.goToUrl(this.returnUrl)
               }
             })
             .catch(response => {
@@ -54,8 +54,8 @@ export default class PaymentReturnForm extends Vue {
               this.errorMessage = this.$t('payFailedMessage').toString()
             })
         }
-        goToReturnUrl () {
-          window.location.href = this.returnUrl
+        goToUrl (url:string) {
+          window.location.href = url
         }
 }
 </script>
