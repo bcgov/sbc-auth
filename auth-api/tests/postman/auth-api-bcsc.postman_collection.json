@@ -237,7 +237,7 @@
 							"});",
 							"",
 							"pm.test(\"response is ok\", function () {",
-							"    pm.response.to.have.status(200);",
+							"    pm.response.to.have.status(201);",
 							"});",
 							"",
 							"pm.test(\"response should be okay to process\", function () { ",
@@ -253,7 +253,7 @@
 							"});",
 							"",
 							"pm.test(\"Verify payload\",  () => {",
-							"    pm.expect(pm.response.text()).to.include(\"businessIdentifier\");",
+							"    pm.expect(pm.response.text()).to.include(\"username\");",
 							"    pm.expect(pm.response.text()).to.include(\"contacts\");",
 							"});"
 						],
@@ -283,7 +283,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{  \r\n   \"emailAddress\": \"{{sample_email}}\",\r\n   \"phoneNumber\": \"{{sample_phone}}\",\r\n   \"extension\": \"{{sample_extension}}\"\r\n}"
+					"raw": "{  \r\n   \"email\": \"{{sample_email}}\",\r\n   \"phone\": \"{{sample_phone}}\",\r\n   \"phoneExtension\": \"{{sample_extension}}\"\r\n}"
 				},
 				"url": {
 					"raw": "{{api_url}}/api/v1/users/contacts",
@@ -359,7 +359,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{  \r\n   \"emailAddress\": \"{{sample_updated_email}}\",\r\n   \"phoneNumber\": \"{{sample_phone}}\",\r\n   \"extension\": \"{{sample_extension}}\"\r\n}"
+					"raw": "{  \r\n   \"email\": \"{{sample_updated_email}}\",\r\n   \"phone\": \"{{sample_phone}}\",\r\n   \"phoneExtension\": \"{{sample_extension}}\"\r\n}"
 				},
 				"url": {
 					"raw": "{{api_url}}/api/v1/users/contacts",
@@ -377,7 +377,7 @@
 			"response": []
 		},
 		{
-			"name": "Update contact on user profile (me) Copy",
+			"name": "Delete contact on user profile (me)",
 			"event": [
 				{
 					"listen": "test",
@@ -664,7 +664,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{  \r\n   \"emailAddress\": \"{{sample_email}}\",\r\n   \"phoneNumber\": \"{{sample_phone}}\",\r\n   \"extension\": \"{{sample_extension}}\"\r\n}"
+					"raw": "{  \r\n   \"email\": \"{{sample_email}}\",\r\n   \"phone\": \"{{sample_phone}}\",\r\n   \"phoneExtension\": \"{{sample_extension}}\"\r\n}"
 				},
 				"url": {
 					"raw": "{{api_url}}/api/v1/entities/{{business_identifier}}/contacts",
@@ -741,7 +741,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{  \r\n   \"emailAddress\": \"{{sample_updated_email}}\",\r\n   \"phoneNumber\": \"{{sample_phone}}\",\r\n   \"extension\": \"{{sample_extension}}\"\r\n}"
+					"raw": "{  \r\n   \"email\": \"{{sample_updated_email}}\",\r\n   \"phone\": \"{{sample_phone}}\",\r\n   \"phoneExtension\": \"{{sample_extension}}\"\r\n}"
 				},
 				"url": {
 					"raw": "{{api_url}}/api/v1/entities/{{business_identifier}}/contacts",
@@ -753,6 +753,481 @@
 						"v1",
 						"entities",
 						"{{business_identifier}}",
+						"contacts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete contact for entity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"",
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    //pm.response.to.have.jsonBody(\"\"); ",
+							"    pm.response.to.not.have.jsonBody(\"error\"); ",
+							"});",
+							"",
+							"pm.test(\"response must be valid and have a body\", function () {",
+							"     // assert that the response has a valid JSON body",
+							"     pm.response.to.be.withBody;",
+							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+							"});",
+							"",
+							"pm.test(\"Verify payload\",  () => {",
+							"    pm.expect(pm.response.text()).to.include(\"businessIdentifier\");",
+							"    pm.expect(pm.response.text()).to.include(\"contacts\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{userToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{api_url}}/api/v1/entities/{{business_identifier}}/contacts",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"entities",
+						"{{business_identifier}}",
+						"contacts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create an org",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "58bd542c-3498-4e98-8d28-9fe2eb62ea3b",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"org_identifier\", jsonData.id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{userToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"{{test_org_name}}\"\n}"
+				},
+				"url": {
+					"raw": "http://{{api_url}}/api/v1/orgs",
+					"protocol": "http",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orgs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a specific org",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"userId\", jsonData.id);",
+							"",
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"",
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    //pm.response.to.have.jsonBody(\"\"); ",
+							"    pm.response.to.not.have.jsonBody(\"error\"); ",
+							"});",
+							"",
+							"pm.test(\"response must be valid and have a body\", function () {",
+							"     // assert that the response has a valid JSON body",
+							"     pm.response.to.be.withBody;",
+							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+							"});",
+							"",
+							"pm.test(\"Verify payload\",  () => {",
+							"    pm.expect(pm.response.text()).to.include(\"businessIdentifier\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{userToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orgs",
+						"{{org_identifier}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update a specific org",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{userToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"{{test_org_name_updated}}\"\n}"
+				},
+				"url": {
+					"raw": "http://{{api_url}}/api/v1/orgs/{{org_identifier}}",
+					"protocol": "http",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orgs",
+						"{{org_identifier}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add contact to org",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"",
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    //pm.response.to.have.jsonBody(\"\"); ",
+							"    pm.response.to.not.have.jsonBody(\"error\"); ",
+							"});",
+							"",
+							"pm.test(\"response must be valid and have a body\", function () {",
+							"     // assert that the response has a valid JSON body",
+							"     pm.response.to.be.withBody;",
+							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+							"});",
+							"",
+							"pm.test(\"Verify payload\",  () => {",
+							"    pm.expect(pm.response.text()).to.include(\"username\");",
+							"    pm.expect(pm.response.text()).to.include(\"contacts\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{userToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n   \"email\": \"{{sample_email}}\",\r\n   \"phone\": \"{{sample_phone}}\",\r\n   \"phoneExtension\": \"{{sample_extension}}\"\r\n}"
+				},
+				"url": {
+					"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}/contacts",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orgs",
+						"{{org_identifier}}",
+						"contacts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update contact for org",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"",
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    //pm.response.to.have.jsonBody(\"\"); ",
+							"    pm.response.to.not.have.jsonBody(\"error\"); ",
+							"});",
+							"",
+							"pm.test(\"response must be valid and have a body\", function () {",
+							"     // assert that the response has a valid JSON body",
+							"     pm.response.to.be.withBody;",
+							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+							"});",
+							"",
+							"pm.test(\"Verify payload\",  () => {",
+							"    pm.expect(pm.response.text()).to.include(\"username\");",
+							"    pm.expect(pm.response.text()).to.include(\"contacts\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{userToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n   \"email\": \"{{sample_updated_email}}\",\r\n   \"phone\": \"{{sample_phone}}\",\r\n   \"phoneExtension\": \"{{sample_extension}}\"\r\n}"
+				},
+				"url": {
+					"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}/contacts",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orgs",
+						"{{org_identifier}}",
+						"contacts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete contact for org",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"",
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    //pm.response.to.have.jsonBody(\"\"); ",
+							"    pm.response.to.not.have.jsonBody(\"error\"); ",
+							"});",
+							"",
+							"pm.test(\"response must be valid and have a body\", function () {",
+							"     // assert that the response has a valid JSON body",
+							"     pm.response.to.be.withBody;",
+							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+							"});",
+							"",
+							"pm.test(\"Verify payload\",  () => {",
+							"    pm.expect(pm.response.text()).to.include(\"username\");",
+							"    pm.expect(pm.response.text()).to.include(\"contacts\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{userToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}/contacts",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orgs",
+						"{{org_identifier}}",
 						"contacts"
 					]
 				}

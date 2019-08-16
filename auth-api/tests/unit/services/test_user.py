@@ -37,15 +37,15 @@ TEST_TOKEN = {
     }
 
 TEST_CONTACT_INFO = {
-    'emailAddress': 'foo@bar.com',
-    'phoneNumber': '(555) 555-5555',
-    'extension': '123'
+    'email': 'foo@bar.com',
+    'phone': '(555) 555-5555',
+    'phoneExtension': '123'
 }
 
 TEST_UPDATED_CONTACT_INFO = {
-    'emailAddress': 'bar@foo.com',
-    'phoneNumber': '(555) 555-5555',
-    'extension': '123'
+    'email': 'bar@foo.com',
+    'phone': '(555) 555-5555',
+    'phoneExtension': '123'
 }
 
 
@@ -104,9 +104,9 @@ def test_add_contact_to_user(session):  # pylint: disable=unused-argument
     dictionary = user.as_dict()
     assert dictionary['contacts']
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['emailAddress'] == TEST_CONTACT_INFO['emailAddress']
-    assert dictionary['contacts'][0]['contact']['phoneNumber'] == TEST_CONTACT_INFO['phoneNumber']
-    assert dictionary['contacts'][0]['contact']['extension'] == TEST_CONTACT_INFO['extension']
+    assert dictionary['contacts'][0]['contact']['email'] == TEST_CONTACT_INFO['email']
+    assert dictionary['contacts'][0]['contact']['phone'] == TEST_CONTACT_INFO['phone']
+    assert dictionary['contacts'][0]['contact']['phoneExtension'] == TEST_CONTACT_INFO['phoneExtension']
 
 
 def test_add_contact_user_no_user(session):  # pylint: disable=unused-argument
@@ -146,7 +146,7 @@ def test_update_contact_for_user(session):  # pylint: disable=unused-argument
 
     assert updated_user is not None
     dictionary = updated_user.as_dict()
-    assert dictionary['contacts'][0]['contact']['emailAddress'] == TEST_UPDATED_CONTACT_INFO['emailAddress']
+    assert dictionary['contacts'][0]['contact']['email'] == TEST_UPDATED_CONTACT_INFO['email']
 
 
 def test_update_contact_for_user_no_user(session):  # pylint: disable=unused-argument

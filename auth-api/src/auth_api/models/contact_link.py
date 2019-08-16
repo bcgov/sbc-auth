@@ -35,10 +35,10 @@ class ContactLink(BaseModel):  # pylint: disable=too-few-public-methods
     user_id = Column(Integer, ForeignKey('user.id'))
     org_id = Column(Integer, ForeignKey('org.id'))
 
-    contact = relationship('Contact')
-    entity = relationship('Entity', back_populates='contacts')
-    user = relationship('User', back_populates='contacts')
-    org = relationship('Org', back_populates='contacts')
+    contact = relationship('Contact', foreign_keys=[contact_id])
+    entity = relationship('Entity', back_populates='contacts', foreign_keys=[entity_id])
+    user = relationship('User', back_populates='contacts', foreign_keys=[user_id])
+    org = relationship('Org', back_populates='contacts', foreign_keys=[org_id])
 
     @classmethod
     def find_by_entity_id(cls, entity_id):
@@ -49,6 +49,11 @@ class ContactLink(BaseModel):  # pylint: disable=too-few-public-methods
     def find_by_user_id(cls, user_id):
         """Return the first contact link with the provided user id."""
         return cls.query.filter_by(user_id=user_id).first()
+
+    @classmethod
+    def find_by_org_id(cls, org_id):
+        """Return the first contact link with the provided org id."""
+        return cls.query.filter_by(org_id=org_id).first()
 
     def has_links(self):
         """Check whether there are any remaining links for this contact."""

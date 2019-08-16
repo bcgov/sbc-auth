@@ -29,6 +29,6 @@ class ContactSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-
         model = ContactModel
         exclude = ('id', )
 
-    email = fields.String(data_key='emailAddress')
-    phone = fields.String(data_key='phoneNumber')
-    phone_extension = fields.String(data_key='extension')
+    email = fields.String(data_key='email')
+    phone = fields.String(data_key='phone')
+    phone_extension = fields.String(data_key='phoneExtension')
