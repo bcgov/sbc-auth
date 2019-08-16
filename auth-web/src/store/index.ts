@@ -4,6 +4,7 @@ import VuexPersistence from 'vuex-persist'
 import { RootState } from './types'
 import BusinessModule from './modules/business'
 import PaymentModule from '@/store/modules/payment'
+import UserModule from '@/store/modules/user'
 
 Vue.use(Vuex)
 
@@ -18,7 +19,8 @@ const storeOptions: StoreOptions<RootState> = {
   strict: debug,
   modules: {
     business: BusinessModule,
-    paymentmodule: PaymentModule
+    paymentmodule: PaymentModule,
+    user: UserModule
   },
   plugins: [vuexPersist.plugin]
 }
