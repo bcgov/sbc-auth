@@ -8,7 +8,10 @@ import PaymentForm from './components/pay/PaymentForm.vue'
 import PaymentReturnForm from './components/pay/PaymentReturnForm.vue'
 import PageNotFound from './views/PageNotFound.vue'
 import CreateAccount from './views/CreateAccount.vue'
+<<<<<<< HEAD
 import UserProfile from './views/UserProfile.vue'
+=======
+>>>>>>> 0bf492981fada7e1c895140dcebe2ebae034db34
 
 Vue.use(Router)
 
@@ -26,7 +29,10 @@ const routes = [
   { path: '/businessprofile', component: BusinessProfile, meta: { requiresAuth: true } },
   { path: '/signin/:idpHint', component: Signin, props: true, meta: { requiresAuth: false } },
   { path: '/signin/:idpHint/:redirectUrl', component: Signin, props: true, meta: { requiresAuth: false } },
+<<<<<<< HEAD
   { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
+=======
+>>>>>>> 0bf492981fada7e1c895140dcebe2ebae034db34
   { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: true } },
   { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true } },
   { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },

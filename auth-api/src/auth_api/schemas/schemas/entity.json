@@ -4,11 +4,12 @@
     "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/entity",
     "type": "object",
     "title": "Entity",
+    "additionalProperties": false,
     "required": [
       "businessIdentifier"
     ],
     "properties": {
-      "business_identifier": {
+      "businessIdentifier": {
         "$id": "#/properties/businessIdentifier",
         "type": "string",
         "title": "Business Identifier",

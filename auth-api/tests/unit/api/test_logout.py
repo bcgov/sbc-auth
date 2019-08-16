@@ -17,41 +17,41 @@
 Test-Suite to ensure that the /token endpoint is working as expected.
 """
 
-import json
+# import json
 
-from auth_api import status as http_status
-from auth_api.exceptions.errors import Error
-
-
-TOKEN_REQUEST = {
-    'username': 'test11',
-    'password': '1111'
-}
+# from auth_api import status as http_status
+# from auth_api.exceptions.errors import Error
 
 
-def test_logout(client):
-    """Assert that the endpoint returns 200."""
-    # Add user
-    rv = client.post('/api/v1/admin/users', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
-    # Get refresh token
-    rv = client.post('/api/v1/token', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
-    refresh_token = {'refresh_token': json.loads(rv.data.decode('utf-8')).get('refresh_token')}
-    # Logout
-    rv = client.post('/api/v1/logout', data=json.dumps(refresh_token), content_type='application/json')
-    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
-    # Delete user
-    rv = client.delete('/api/v1/admin/users', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
+# TOKEN_REQUEST = {
+#     'username': 'test11',
+#     'password': '1111'
+# }
 
 
-def test_logout_invalid_token(client):
-    """Assert that the endpoint returns bad request."""
-    # Add user
-    rv = client.post('/api/v1/admin/users', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
-    # Get refresh token
-    rv = client.post('/api/v1/token', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
-    refresh_token = {'refresh_token': json.loads(rv.data.decode('utf-8')).get('access_token')}
-    # Logout
-    rv = client.post('/api/v1/logout', data=json.dumps(refresh_token), content_type='application/json')
-    assert rv.status_code == Error.INVALID_REFRESH_TOKEN.status_code
-    # Delete user
-    rv = client.delete('/api/v1/admin/users', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
+# def test_logout(client):
+#     """Assert that the endpoint returns 200."""
+#     # Add user
+#     rv = client.post('/api/v1/admin/users', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
+#     # Get refresh token
+#     rv = client.post('/api/v1/token', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
+#     refresh_token = {'refresh_token': json.loads(rv.data.decode('utf-8')).get('refresh_token')}
+#     # Logout
+#     rv = client.post('/api/v1/logout', data=json.dumps(refresh_token), content_type='application/json')
+#     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+#     # Delete user
+#     rv = client.delete('/api/v1/admin/users', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
+
+
+# def test_logout_invalid_token(client):
+#     """Assert that the endpoint returns bad request."""
+#     # Add user
+#     rv = client.post('/api/v1/admin/users', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
+#     # Get refresh token
+#     rv = client.post('/api/v1/token', data=json.dumps(TOKEN_REQUEST), content_type='application/json')
+#     refresh_token = {'refresh_token': json.loads(rv.data.decode('utf-8')).get('access_token')}
+#     # Logout
+#     rv = client.post('/api/v1/logout', data=json.dumps(refresh_token), content_type='application/json')
+#     assert rv.status_code == Error.INVALID_REFRESH_TOKEN.status_code
+#     # Delete user
+#     rv = client.delete('/api/v1/admin/users', data=json.dumps(TOKEN_REQUEST), content_type='application/json')

@@ -1,5 +1,6 @@
 import Axios, { AxiosPromise, AxiosResponse } from 'axios'
 import configHelper from '@/util/config-helper'
+<<<<<<< HEAD
 import { User } from '../models/user'
 
 interface UserService {
@@ -16,4 +17,15 @@ export default {
     return Axios.post(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/users`, {})
   },
   
+=======
+
+interface UserService {
+  getUserProfile: (identifier: string) => Promise<AxiosResponse<any>>
+}
+
+export default {
+  async getUserProfile (identifier: string): Promise<AxiosResponse<any>> {
+    return Axios.get(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/users/${identifier}`)
+  }
+>>>>>>> 0bf492981fada7e1c895140dcebe2ebae034db34
 } as UserService

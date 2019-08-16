@@ -7,7 +7,10 @@ import { UserInfo } from '@/models/userInfo'
   name: 'user'
 })
 export default class UserModule extends VuexModule {
+<<<<<<< HEAD
   
+=======
+>>>>>>> 0bf492981fada7e1c895140dcebe2ebae034db34
   currentUser: UserInfo
 
   userProfile: any
@@ -17,22 +20,33 @@ export default class UserModule extends VuexModule {
     this.userProfile = userProfile
   }
 
+<<<<<<< HEAD
   @Mutation
   public setCurrentUser (currentUser: UserInfo) {
     this.currentUser = currentUser
   }
 
+=======
+>>>>>>> 0bf492981fada7e1c895140dcebe2ebae034db34
   @Action({ rawError: true })
   public async initKeycloak (idpHint:string) {
     return keycloakService.init(idpHint)
   }
 
+<<<<<<< HEAD
   @Action({ commit: 'setCurrentUser' })
+=======
+  @Action({ rawError: true })
+>>>>>>> 0bf492981fada7e1c895140dcebe2ebae034db34
   public async initializeSession () {
     // Set values to session storage
     keycloakService.initSessionStorage()
     // Load User Info
+<<<<<<< HEAD
     return keycloakService.getUserInfo()
+=======
+    this.currentUser = keycloakService.getUserInfo()
+>>>>>>> 0bf492981fada7e1c895140dcebe2ebae034db34
   }
 
   @Action({ rawError: true })
@@ -49,6 +63,7 @@ export default class UserModule extends VuexModule {
         return null
       })
   }
+<<<<<<< HEAD
   
   @Action({ commit: 'setUserProfile' })
   public async createUserProfile () {
@@ -57,4 +72,6 @@ export default class UserModule extends VuexModule {
         return response.data
       })
   }
+=======
+>>>>>>> 0bf492981fada7e1c895140dcebe2ebae034db34
 }

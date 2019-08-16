@@ -17,15 +17,12 @@ Orgs, and Entities can have multiple contacts, consisting of mailing addresses,
 physical addresses, emails, and phone numbers.
 """
 
-from marshmallow import fields
 from sqlalchemy import Column, ForeignKey, Integer, String
 
 from .base_model import BaseModel
-from .base_schema import BaseSchema
-from .db import db
 
 
-class Contact(db.Model, BaseModel):  # pylint: disable=too-few-public-methods
+class Contact(BaseModel):  # pylint: disable=too-few-public-methods
     """This class manages contact information for orgs and entities."""
 
     __tablename__ = 'contact'
@@ -41,22 +38,5 @@ class Contact(db.Model, BaseModel):  # pylint: disable=too-few-public-methods
     phone = Column('phone', String(15))
     phone_extension = Column('phone_extension', String(10))
     email = Column('email', String(100))
+    # MVP contact has been migrated over to the contact linking table (revised data model)
     entity_id = Column(Integer, ForeignKey('entity.id'))
-
-    @classmethod
-    def find_by_entity_id(cls, entity_id):
-        """Return the first contact with the provided entity id."""
-        return cls.query.filter_by(entity_id=entity_id).first()
-
-
-class ContactSchema(BaseSchema):  # pylint: disable=too-many-ancestors
-    """This is the schema for the Contact model."""
-
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the User fields to a default schema."""
-
-        model = Contact
-
-    email = fields.String(data_key='emailAddress')
-    phone = fields.String(data_key='phoneNumber')
-    phone_extension = fields.String(data_key='extension')

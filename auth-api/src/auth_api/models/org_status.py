@@ -16,24 +16,21 @@
 This is a mapping between status codes and descriptions for Org objects.
 """
 
-from sqlalchemy import Column, String
+from sqlalchemy import Boolean, Column, String
 
-from .db import db, ma
+from .base_model import BaseModel
 
 
-class OrgStatus(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class OrgStatus(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Org Status record."""
 
     __tablename__ = 'org_status'
 
     code = Column(String(15), primary_key=True)
     desc = Column(String(100))
+    default = Column(Boolean(), default=False, nullable=False)
 
-
-class OrgStatusSchema(ma.ModelSchema):
-    """This is the Schema for an Org Status record."""
-
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Org Status fields to a default schema."""
-
-        model = OrgStatus
+    @classmethod
+    def get_default_status(cls):
+        """Return the default status code for an Org."""
+        return cls.query.filter_by(default=True).first()

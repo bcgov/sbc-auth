@@ -12,4 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Exposes all of the Services used in the API."""
+from .org import Org
 from .user import User

@@ -1,0 +1,24 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/org",
+    "type": "object",
+    "title": "Org",
+    "additionalProperties": false,
+    "required": [
+      "name"
+    ],
+    "properties": {
+      "name": {
+        "$id": "#/properties/name",
+        "type": "string",
+        "title": "Organization Name",
+        "default": "",
+        "examples": [
+          "Foobar Inc."
+        ],
+        "pattern": "^(.*)$"
+      }
+    }
+  }
+  
