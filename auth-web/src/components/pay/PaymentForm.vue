@@ -1,46 +1,56 @@
 <template>
     <div id="app">
-        <v-app>
-            <v-container fill-height>
+            <v-container >
                 <v-layout row justify-center align-center>
                     <v-progress-circular color="primary" :size="50" indeterminate v-if="!errorMessage"></v-progress-circular>
                     <div class="loading-msg" v-if="!errorMessage"> {{ $t('paymentPrepareMsg') }}</div>
-                    <div class="loading-msg" v-if="errorMessage">{{errorMessage}}</div>
+                    <div class="loading-msg" v-if="errorMessage && !showErrorModal">{{errorMessage}}</div>
+                    <sbc-system-error v-on:continue-event="goToUrl(returnUrl)" v-if="showErrorModal && errorMessage" title="Payment Failed" primaryButtonTitle="Continue to Filing" :description="errorMessage" ></sbc-system-error>
                 </v-layout>
             </v-container>
-        </v-app>
     </div>
 </template>
 
 <script lang="ts">
 
+import { Vue, Component, Prop } from 'vue-property-decorator'
 import PaymentServices from '@/services/payment.services'
-export default {
-  name: 'PaymentForm',
+import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
 
-  props: {
-    paymentId: String,
-    redirectUrl: String
-  },
-  data () {
-    return {
-      errorMessage: ''
-    }
-  },
+@Component({
+  components: {
+    SbcSystemError
+  }
+})
+export default class PaymentForm extends Vue {
+    @Prop() paymentId: string
+    @Prop() redirectUrl: string
+    errorMessage:string = ''
+    showErrorModal:boolean = false
+    returnUrl:string
 
-  mounted () {
-    if (this.paymentId && this.redirectUrl) {
+    mounted () {
+      if (!this.paymentId || !this.redirectUrl) {
+        this.errorMessage = this.$t('payNoParams').toString()
+        return
+      }
       PaymentServices.createTransaction(this.paymentId, encodeURIComponent(this.redirectUrl))
         .then(response => {
-          window.location.href = response.data.pay_system_url
+          this.returnUrl = response.data.pay_system_url
+          this.goToUrl(this.returnUrl)
         })
         .catch(response => {
-          this.errorMessage = this.$t('payFailedMessage')
+          this.errorMessage = this.$t('payFailedMessage').toString()
+          if (response.data && response.data.code === 'PAY006') { // Transaction is already completed.Show as a modal.
+            this.showErrorModal = true
+          } else {
+            this.showErrorModal = false
+          }
         })
-    } else {
-      this.errorMessage = this.$t('payNoParams')
     }
-  }
+    goToUrl (url:string) {
+      window.location.href = url
+    }
 }
 </script>
 
