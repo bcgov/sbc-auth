@@ -30,7 +30,7 @@ TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
 
 
-@cors_preflight('GET, POST')
+@cors_preflight('GET,POST,OPTIONS')
 @API.route('', methods=['GET', 'POST'])
 class Orgs(Resource):
     """Resource for managing orgs."""
@@ -56,7 +56,7 @@ class Orgs(Resource):
         return response, status
 
 
-@cors_preflight('GET, PUT')
+@cors_preflight('GET,PUT,OPTIONS')
 @API.route('/<string:org_id>', methods=['GET', 'PUT'])
 class Org(Resource):
     """Resource for managing a single org."""
@@ -94,7 +94,7 @@ class Org(Resource):
         return response, status
 
 
-@cors_preflight('DELETE, POST, PUT')
+@cors_preflight('DELETE,POST,PUT,OPTIONS')
 @API.route('/<string:org_id>/contacts', methods=['DELETE', 'POST', 'PUT'])
 class OrgContacts(Resource):
     """Resource for managing org contacts."""
