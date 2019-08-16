@@ -28,13 +28,8 @@ export default {
   getUserInfo () : UserInfo {
     let token = this.kc.tokenParsed
     return {
-<<<<<<< HEAD
       lastName: token.lastname,
       firstName: token.firstname,
-=======
-      familyName: token.family_name,
-      givenName: token.given_name,
->>>>>>> 0bf492981fada7e1c895140dcebe2ebae034db34
       email: token.email,
       roles: token.realm_access.roles,
       keycloakGuid: token.jti,
