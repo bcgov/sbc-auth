@@ -6,17 +6,19 @@ $app-header-height = 70px // 70px
   flex-flow column nowrap
   min-height 100vh
 
+.header-group
+  position fixed
+  width 100%
+  z-index 2
+
 .app-header
-  flex 0 0 auto
-  height $app-header-height
   z-index 2
 
 .app-body
   flex 1 1 auto
-  margin-top $app-header-height // Offset the height of the fixed header
 
 @media (min-width 1264px)
-  .app-body__inner
+  .app-body
     > .container:first-child
       padding-top 3rem
       padding-bottom 3rem
