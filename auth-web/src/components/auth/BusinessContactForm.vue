@@ -62,7 +62,7 @@
     <div class="business-contact-form_row">
       <v-layout wrap>
         <v-spacer></v-spacer>
-        <v-btn class=".save-continue-button" @click="save" color="primary" large>
+        <v-btn class=".save-continue-button" @click="save" :disabled='!isFormValid()' color="primary" large>
           <span>Save and Continue</span>
         </v-btn>
         <v-btn class=".skip-button mr-0" @click="skip" color="secondary" large>
@@ -117,7 +117,12 @@ export default class BusinessContactForm extends Vue {
   }
 
   private isFormValid (): boolean {
-    return (this.$refs.form as Vue & { validate: () => boolean }).validate()
+    if (!this.$refs || !this.$refs.form) {
+      return false
+    }
+
+    return (this.$refs.form as Vue & { validate: () => boolean }).validate() &&
+      this.emailAddress === this.confirmedEmailAddress
   }
 
   mounted () {
