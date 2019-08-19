@@ -27,12 +27,13 @@ export default Vue.extend({
 
   data: function () {
     return {
-      appBodyOffset: { },
-      lines: ['one', 'two', 'three']
+      // The amount to offset the app body so that it is positioned correctly (below the header)
+      appBodyOffset: { }
     }
   },
 
   methods: {
+    // Set the top margin of the app body to match the height of the header group
     matchHeight () {
       var heightString = this.$refs.headerGroup.clientHeight + 'px'
       Vue.set(this.appBodyOffset, 'margin-top', heightString)
@@ -40,6 +41,7 @@ export default Vue.extend({
   },
 
   mounted () {
+    // When the window is resized, reset the top margin of the app body
     this.matchHeight()
     window.addEventListener('resize', this.matchHeight)
   }
