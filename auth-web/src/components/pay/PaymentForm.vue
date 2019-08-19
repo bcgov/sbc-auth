@@ -39,17 +39,17 @@ export default class PaymentForm extends Vue {
           this.returnUrl = response.data.pay_system_url
           this.goToUrl(this.returnUrl)
         })
-        .catch(response => {
+        .catch(error => {
           this.errorMessage = this.$t('payFailedMessage').toString()
-          if (response.data && response.data.code === 'PAY006') { // Transaction is already completed.Show as a modal.
-            this.showErrorModal = true
+          if (error.response.data && error.response.data.code === 'PAY006') { // Transaction is already completed.Show as a modal.
+            this.goToUrl(this.redirectUrl)
           } else {
-            this.showErrorModal = false
+            this.showErrorModal = true
           }
         })
     }
     goToUrl (url:string) {
-      window.location.href = url
+      window.location.href = url ? url : this.redirectUrl
     }
 }
 </script>
