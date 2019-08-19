@@ -1,7 +1,9 @@
 <template>
-  <div class="view-container">
-   Page not Found
-  </div>
+  <v-container>
+    <div class="view-container">
+    Page not Found
+    </div>
+  </v-container>
 </template>
 
 <script>
