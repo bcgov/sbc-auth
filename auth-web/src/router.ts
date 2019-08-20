@@ -9,6 +9,7 @@ import PaymentReturnForm from './components/pay/PaymentReturnForm.vue'
 import PageNotFound from './views/PageNotFound.vue'
 import CreateAccount from './views/CreateAccount.vue'
 import UserProfile from './views/UserProfile.vue'
+import Dashboard from './components/auth/Dashboard.vue'
 
 Vue.use(Router)
 
@@ -30,6 +31,7 @@ const routes = [
   { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: true } },
   { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true } },
   { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
+  { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } },
   { path: '*', component: PageNotFound }
 ]
 

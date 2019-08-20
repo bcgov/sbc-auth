@@ -124,9 +124,9 @@ export default class BusinessContactForm extends Vue {
     if (this.businessStore.currentBusiness.contacts && this.businessStore.currentBusiness.contacts.length > 0) {
       // TODO: For now grab first contact as the business contact.  Post MVP, we should check the contact type, grab the correct one.
       const contact = this.businessStore.currentBusiness.contacts[0]
-      this.emailAddress = this.confirmedEmailAddress = contact.emailAddress
-      this.phoneNumber = contact.phoneNumber
-      this.extension = contact.extension
+      this.emailAddress = this.confirmedEmailAddress = contact.email
+      this.phoneNumber = contact.phone
+      this.extension = contact.phoneExtension
     }
   }
 
@@ -134,9 +134,9 @@ export default class BusinessContactForm extends Vue {
     if (this.isFormValid()) {
       let result: Promise<void>
       const contact: Contact = {
-        emailAddress: this.emailAddress,
-        phoneNumber: this.phoneNumber,
-        extension: this.extension
+        email: this.emailAddress,
+        phone: this.phoneNumber,
+        phoneExtension: this.extension
       }
 
       if (!this.businessStore.currentBusiness.contacts || this.businessStore.currentBusiness.contacts.length === 0) {

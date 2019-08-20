@@ -7,89 +7,93 @@
             :value="true"
             color="error"
             icon="warning"
-          >{{formError}}
+          >
+          {{formError}}
           </v-alert>
         </div>
       </v-expand-transition>
-    <div class="form_row">
+      <div class="form_row">
+        <v-layout wrap>
+          <v-flex xs6 class="mr-5">
+            <v-text-field
+              box
+              label="First Name"
+              req
+              persistent-hint
+              readonly
+              v-model="firstName"
+            >
+            </v-text-field>
+          </v-flex>
+          <v-flex xs5>
+            <v-text-field
+              box
+              label="Last Name"
+              req
+              persistent-hint
+              readonly
+              v-model="lastName"
+            >
+            </v-text-field>
+          </v-flex>
+        </v-layout>
+      </div>
+      <div class="form_row">
         <v-text-field
           box
-          label="First Name"
+          label="Email Address"
           req
           persistent-hint
-          readonly
-          v-model="firstName"
+          :rules="emailRules"
+          v-model="emailAddress"
         >
         </v-text-field>
-    </div>
-    <div class="form_row">
+      </div>
+      <div class="form_row">
         <v-text-field
           box
-          label="Last Name"
+          label="Confirm Email Address"
           req
           persistent-hint
-          readonly
-          v-model="lastName"
+          :error-messages="emailMustMatch()"
+          v-model="confirmedEmailAddress"
         >
         </v-text-field>
-      </v-col>
-    </div>
-    <div class="form_row">
-      <v-text-field
-        box
-        label="Email Address"
-        req
-        persistent-hint
-        :rules="emailRules"
-        v-model="emailAddress"
-      >
-      </v-text-field>
-    </div>
-    <div class="form_row">
-      <v-text-field
-        box
-        label="Confirm Email Address"
-        req
-        persistent-hint
-        :error-messages="emailMustMatch()"
-        v-model="confirmedEmailAddress"
-      >
-      </v-text-field>
-    </div>
-    <div class="form_row">
-      <v-layout wrap>
-        <v-flex xs6 class="mr-5">
-          <v-text-field
-            box
-            label="Phone e.g. (555)-555-5555"
-            persistent-hint
-            type="tel"
-            v-mask="['(###)-###-####']"
-            v-model="phoneNumber"
-            :rules="phoneRules"
-          >
-          </v-text-field>
-        </v-flex>
-        <v-flex xs3>
-          <v-text-field
-            box label="Extension"
-            persistent-hint
-            :rules="extensionRules"
-            v-mask="'###'"
-            v-model="extension"
-          >
-          </v-text-field>
-        </v-flex>
-      </v-layout>
-    </div>
-    <div class="form_row">
-      <v-layout wrap>
-        <v-spacer></v-spacer>
-        <v-btn class=".save-continue-button" @click="save" color="primary" large>
-          <span>Next</span>
-        </v-btn>
-      </v-layout>
-    </div>
+      </div>
+      <div class="form_row">
+        <v-layout wrap>
+          <v-flex xs6 class="mr-5">
+            <v-text-field
+              box
+              label="Phone e.g. (555)-555-5555"
+              persistent-hint
+              type="tel"
+              v-mask="['(###)-###-####']"
+              v-model="phoneNumber"
+              :rules="phoneRules"
+            >
+            </v-text-field>
+          </v-flex>
+          <v-flex xs3>
+            <v-text-field
+              box label="Extension"
+              persistent-hint
+              :rules="extensionRules"
+              v-mask="'###'"
+              v-model="extension"
+            >
+            </v-text-field>
+          </v-flex>
+        </v-layout>
+      </div>
+      <div class="form_row">
+        <v-layout wrap>
+          <v-spacer></v-spacer>
+          <v-btn class=".save-continue-button" @click="save" color="primary" large :disabled='!isFormValid()'>
+            <span>Next</span>
+          </v-btn>
+        </v-layout>
+      </div>
     </v-form>
   </div>
 </template>
@@ -100,7 +104,8 @@ import { getModule } from 'vuex-module-decorators'
 import UserModule from '../../store/modules/user'
 import configHelper from '../../util/config-helper'
 import { mask } from 'vue-the-mask'
-import { Contact } from '../../models/contact'
+import { User } from '../../models/user'
+import { UserContact } from '../../models/usercontact'
 
 @Component({
   directives: {
@@ -138,22 +143,32 @@ export default class UserProfileForm extends Vue {
   }
 
   private isFormValid (): boolean {
-    return (this.$refs.form as Vue & { validate: () => boolean }).validate()
+    return (this.$refs.form as Vue & { validate: () => boolean }).validate() &&
+      this.confirmedEmailAddress === this.emailAddress
   }
 
   mounted () {
-    console.log(this.userStore.currentUser)
-    if (this.userStore.currentUser) {
-      this.firstName = this.userStore.currentUser.firstName
-      this.lastName = this.userStore.currentUser.lastName
-    }
+    this.userStore.getUserProfile('@me').then((userProfile:User) => {
+      this.firstName = userProfile.firstname
+      this.lastName = userProfile.lastname
+      if (userProfile.contacts && userProfile.contacts[0]) {
+        this.emailAddress = this.confirmedEmailAddress = userProfile.contacts[0].contact.email
+        this.phoneNumber = userProfile.contacts[0].contact.phone
+        this.extension = userProfile.contacts[0].contact.phoneExtension
+      }
+    })
   }
 
   save () {
+    if (this.isFormValid()) {
+      this.userStore.createUserContact({
+        email: this.emailAddress,
+        phone: this.phoneNumber,
+        phoneExtension: this.extension
+      }).then((contact) => {
+        this.$router.push('/dashboard')
+      })
+    }
   }
 }
 </script>
-
-<style lang="stylus" scoped>
-  @import '../../assets/styl/theme.styl';
-</style>

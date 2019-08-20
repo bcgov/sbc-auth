@@ -47,5 +47,4 @@ describe('Signin.vue', () => {
   it('is a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
-
 })
