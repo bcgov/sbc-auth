@@ -60,6 +60,18 @@ class Entity:
         return entity
 
     @staticmethod
+    def find_by_entity_id(entity_id):
+        """Find and return an existing Entity with the provided id."""
+        if entity_id is None:
+            return None
+
+        entity_model = EntityModel.find_by_entity_id(entity_id)
+        if not entity_model:
+            return None
+
+        return Entity(entity_model)
+
+    @staticmethod
     def create_entity(entity_info: dict):
         """Create an Entity."""
         entity = EntityModel.create_from_dict(entity_info)

@@ -67,6 +67,8 @@ TEST_JWT_HEADER = {
 }
 
 
+
+
 def factory_auth_header(jwt, claims):
     """Produce JWT tokens for use in tests."""
     return {'Authorization': 'Bearer ' + jwt.create_jwt(claims=claims, header=TEST_JWT_HEADER)}

@@ -31,6 +31,7 @@ from .ops import API as OPS_API
 from .org import API as ORG_API
 from .token import API as TOKEN_API
 from .user import API as USER_API
+from .affiliation import API as AFFILIATION_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
@@ -69,3 +70,5 @@ API.add_namespace(USER_API, path='/users')
 API.add_namespace(LOGOUT_API, path='/logout')
 API.add_namespace(ENTITY_API, path='/entities')
 API.add_namespace(ORG_API, path='/orgs')
+API.add_namespace(AFFILIATION_API, path='/orgs/<string:org_id>/affiliations')
+

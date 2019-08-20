@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests to assure the user end-point.
+"""Tests to assure the affiliation end-point.
 
-Test-Suite to ensure that the /user endpoint is working as expected.
+Test-Suite to ensure that the /affiliation endpoint is working as expected.
 """
 
 import json
@@ -29,8 +29,6 @@ from auth_api.models.org_type import OrgType as OrgTypeModel
 from auth_api.models.org_status import OrgStatus as OrgStatusModel
 from auth_api.models.payment_type import PaymentType as PaymentTypeModel
 from auth_api.models.org import Org as OrgModel
-from auth_api.models.user import User as UserModel
-import datetime
 
 
 token_header = {
@@ -119,20 +117,6 @@ def factory_org_model(name, session):
     return org
 
 
-def factory_user_model():
-    user = UserModel(
-        username='testuser',
-        firstname='Test',
-        lastname='User',
-        email='testuser@abc.com',
-        keycloak_guid='15099883-3c3f-4b4c-a124-a1824d6cba84',
-        created=datetime.datetime.now(),
-        roles='basic'
-    )
-    user = user.save()
-    return user
-
-
 def factory_affiliation_model(entity_id, org_id):
     affiliation = AffiliationModel(entity=entity_id, org=org_id)
     affiliation.save()
@@ -148,8 +132,6 @@ def test_add_affiliation(session, client, jwt):
     }
 
     org = factory_org_model(name='My Test Affiliation', session=session)
-
-    factory_user_model()
 
     token = jwt.create_jwt(get_claims(), token_header)
     # print("######################## token {}", token)

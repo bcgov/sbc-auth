@@ -51,3 +51,8 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods
             entity.save()
             return entity
         return None
+
+    @classmethod
+    def find_by_entity_id(cls, entity_id):
+        """Find an Entity instance that matches the provided id."""
+        return cls.query.filter_by(id=entity_id).first()

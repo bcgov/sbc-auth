@@ -13,8 +13,9 @@
 # limitations under the License.
 """Manager for affiliation schema and export."""
 
+from marshmallow import fields
 from auth_api.models import Affiliation as AffiliationModel
-
+from .entity import EntitySchema
 from .base_schema import BaseSchema
 
 
@@ -25,3 +26,5 @@ class AffiliationSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-
         """Maps all of the Affiliation fields to a default schema."""
 
         model = AffiliationModel
+
+    entityInfo = fields.Nested(EntitySchema, many=False)

@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for the Entity service.
+"""Tests for the Affiliation service.
 
-Test suite to ensure that the Entity service routines are working as expected.
+Test suite to ensure that the Affiliation service routines are working as expected.
 """
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.models.org_type import OrgType as OrgTypeModel
