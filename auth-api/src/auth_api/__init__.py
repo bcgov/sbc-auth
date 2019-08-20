@@ -18,6 +18,7 @@ This module is the API for the Legal Entity system.
 import os
 
 from flask import Flask
+from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
 
 from auth_api import models
 from auth_api.jwt_wrapper import JWTWrapper
@@ -46,6 +47,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     app.register_blueprint(OPS_BLUEPRINT)
 
     setup_jwt_manager(app, JWT)
+
+    ExceptionHandler(app)
 
     @app.after_request
     def add_version(response):  # pylint: disable=unused-variable
