@@ -16,37 +16,38 @@
 The class and schema are both present in this module.
 """
 
-from marshmallow import fields
+from flask import current_app
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
+
+from auth_api.utils.util import camelback2snake
 
 from .base_model import BaseModel
-from .base_schema import BaseSchema
-from .contact import ContactSchema
-from .db import db
 
 
-class Entity(db.Model, BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class Entity(BaseModel):  # pylint: disable=too-few-public-methods
     """This is the Entity model for the Auth service."""
 
     __tablename__ = 'entity'
 
     id = Column(Integer, primary_key=True)
     business_identifier = Column('business_identifier', String(75), unique=True, nullable=False)
-    contacts = db.relationship('Contact')
+    pass_code = Column('pass_code', String(75), unique=False, nullable=True)
+    contacts = relationship('ContactLink', back_populates='entity')
 
     @classmethod
     def find_by_business_identifier(cls, business_identifier):
         """Return the first entity with the provided business identifier."""
         return cls.query.filter_by(business_identifier=business_identifier).first()
 
-
-class EntitySchema(BaseSchema):  # pylint: disable=too-many-ancestors
-    """Used to manage the default mapping between JSON and the Entity model."""
-
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Entity fields to a default schema."""
-
-        model = Entity
-
-    business_identifier = fields.String(data_key='businessIdentifier')
-    contacts = fields.Nested(ContactSchema, many=True)
+    @classmethod
+    def create_from_dict(cls, entity_info: dict):
+        """Create a new Entity from the provided dictionary."""
+        if entity_info:
+            entity = Entity(**camelback2snake(entity_info))
+            current_app.logger.debug(
+                'Creating entity from dictionary {}'.format(entity_info)
+            )
+            entity.save()
+            return entity
+        return None

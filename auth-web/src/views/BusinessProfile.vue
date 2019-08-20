@@ -1,19 +1,21 @@
 <template>
-  <div class="view-container">
-    <article>
-      <h1>Update Business Profile</h1>
-      <p class="intro-text">{{ $t('businessContactCopy', { businessType })}}</p>
-      <v-card class="profile-card">
-        <v-container>
-          <h2>Business Contact</h2>
-          <BusinessContactForm/>
-        </v-container>
-      </v-card>
-    </article>
-    <aside>
-      <SupportInfoCard/>
-    </aside>
-  </div>
+  <v-container>
+    <div class="view-container">
+      <article>
+        <h1>Update Business Profile</h1>
+        <p class="intro-text">It looks like we are missing some contact information for your {{businessType}}. You will need to supply us with a few additional details before you can get started...</p>
+        <v-card class="profile-card">
+          <v-container>
+            <h2>Business Contact</h2>
+            <BusinessContactForm/>
+          </v-container>
+        </v-card>
+      </article>
+      <aside>
+        <SupportInfoCard/>
+      </aside>
+    </div>
+  </v-container>
 </template>
 
 <script lang="ts">

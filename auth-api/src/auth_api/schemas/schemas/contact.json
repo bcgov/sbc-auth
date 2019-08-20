@@ -4,6 +4,7 @@
     "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/contact",
     "type": "object",
     "title": "Contact",
+    "additionalProperties": false,
     "properties": {
       "street": {
         "$id": "#/properties/street",
@@ -15,7 +16,7 @@
         ],
         "pattern": "^(.*)$"
       },
-      "street_additional": {
+      "streetAdditional": {
         "$id": "#/properties/street_additional",
         "type": "string",
         "title": "Street Additional",
@@ -55,7 +56,7 @@
         ],
         "pattern": "^(.*)$"
       },
-      "postal_code": {
+      "postalCode": {
         "$id": "#/properties/postal_code",
         "type": "string",
         "title": "Postal Code",
@@ -65,7 +66,7 @@
         ],
         "pattern": "^(.*)$"
       },
-      "delivery_instructions": {
+      "deliveryInstructions": {
         "$id": "#/properties/delivery_instructions",
         "type": "string",
         "title": "Delivery Instructions",
@@ -85,7 +86,7 @@
         ],
         "pattern": "^(.*)$"
       },
-      "phone_extension": {
+      "phoneExtension": {
         "$id": "#/properties/phone_extension",
         "type": "string",
         "title": "Phone Extension",
@@ -103,7 +104,7 @@
         "examples": [
           "abc123@mail.com"
         ],
-        "pattern": "^(.*)$"
+        "pattern": "^[a-z0-9]+(\\.[_a-z0-9]+)*@[a-z0-9-]+(\\.[a-z0-9-]+)*(\\.[a-z]{2,15})$"
       }
     }
   }

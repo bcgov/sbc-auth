@@ -12,3 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Schema package."""
+
+from .contact import ContactSchema
+from .entity import EntitySchema
+from .org import OrgSchema
+from .user import UserSchema

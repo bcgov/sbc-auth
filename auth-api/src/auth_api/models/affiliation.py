@@ -16,12 +16,12 @@
 An Affiliation is between an Org and an Entity.
 """
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer
+from sqlalchemy import Column, ForeignKey, Integer
 
-from .db import db, ma
+from .base_model import BaseModel
 
 
-class Affiliation(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class Affiliation(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Affiliation."""
 
     __tablename__ = 'affiliation'
@@ -29,17 +29,3 @@ class Affiliation(db.Model):  # pylint: disable=too-few-public-methods # Tempora
     id = Column(Integer, primary_key=True)
     entity = Column(ForeignKey('entity.id'), nullable=False)
     org = Column(ForeignKey('org.id'), nullable=False)
-    created = Column(DateTime)
-    created_by = Column(ForeignKey('user.id'), nullable=False)
-
-
-class AffiliationSchema(ma.ModelSchema):
-    """This is the Schema for an Affiliation model.
-
-    It is used to managed the default mapping between the JSON and model.
-    """
-
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Affiliation fields to a default schema."""
-
-        model = Affiliation
