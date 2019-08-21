@@ -143,7 +143,7 @@ export default class UserProfileForm extends Vue {
   }
 
   private isFormValid (): boolean {
-    return (this.$refs.form as Vue & { validate: () => boolean }).validate() &&
+    return (!this.$refs || !this.$refs.form) ? false : (this.$refs.form as Vue & { validate: () => boolean }).validate() &&
       this.confirmedEmailAddress === this.emailAddress
   }
 
