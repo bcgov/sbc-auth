@@ -3,10 +3,10 @@
     <article>
       <p class="intro-text"><span><h1>Quick and easy access to BC Government and partner services for legal, business, government and professionals.</h1></span></p>
 
-        <v-btn class="sign-in-btn" @click="login" color="primary" large to="/createaccount">
+        <v-btn class="sign-in-btn" color="primary" large to="/createaccount">
           <span>Create an Account</span>
         </v-btn>
-        <v-btn class="sign-in-btn" @click="login" color="primary" large>
+        <v-btn class="sign-in-btn" color="primary" large>
           <span>Learn More</span>
         </v-btn>
     </article>
