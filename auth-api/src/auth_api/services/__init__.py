@@ -14,3 +14,5 @@
 """Exposes all of the Services used in the API."""
 from .org import Org
 from .user import User
+from .entity import Entity
+from .affiliation import Affiliation

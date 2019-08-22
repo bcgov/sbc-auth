@@ -1,0 +1,22 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/affiliation",
+    "type": "object",
+    "title": "Affiliation",
+    "required": [
+      "entity"
+    ],
+    "properties": {
+      "entity": {
+        "$id": "#/properties/entity",
+        "type": "integer",
+        "title": "entity",
+        "default": "",
+        "examples": [
+          "12345"
+        ]
+      }
+    }
+  }
+  

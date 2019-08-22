@@ -16,8 +16,8 @@
 An Affiliation is between an Org and an Entity.
 """
 
-from sqlalchemy import Column, ForeignKey, Integer
-
+from sqlalchemy import Column, ForeignKey, Integer, DateTime
+from sqlalchemy.orm import relationship
 from .base_model import BaseModel
 
 
@@ -26,6 +26,23 @@ class Affiliation(BaseModel):  # pylint: disable=too-few-public-methods # Tempor
 
     __tablename__ = 'affiliation'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     entity = Column(ForeignKey('entity.id'), nullable=False)
     org = Column(ForeignKey('org.id'), nullable=False)
+
+    entityInfo = relationship('Entity')
+
+    @classmethod
+    def find_affiliation_by_ids(cls, org_id: int, affiliation_id: int):
+        """Return the first Affiliation with the provided ids."""
+        return cls.query.filter_by(org=org_id).filter_by(id=affiliation_id).first()
+
+    @classmethod
+    def find_by_affiliation_id(cls, affiliation_id: int):
+        """Return the affiliation with the provided ids."""
+        return cls.query.filter_by(id=affiliation_id).first()
+
+    @classmethod
+    def find_affiliations_by_org_id(cls, org_id: int):
+        """Return the affiliations with the provided id."""
+        return cls.query.filter_by(org=org_id).all()

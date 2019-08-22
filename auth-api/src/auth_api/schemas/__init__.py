@@ -13,7 +13,11 @@
 # limitations under the License.
 """Schema package."""
 
+
 from .contact import ContactSchema
 from .entity import EntitySchema
 from .org import OrgSchema
 from .user import UserSchema
+from .affiliation import AffiliationSchema
+
+
