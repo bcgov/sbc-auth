@@ -65,9 +65,6 @@
         <v-btn class=".save-continue-button" @click="save" :disabled='!isFormValid()' color="primary" large>
           <span>Save and Continue</span>
         </v-btn>
-        <v-btn class=".skip-button mr-0" @click="skip" color="secondary" large>
-          <span>Skip</span>
-        </v-btn>
       </v-layout>
     </div>
     </v-form>
