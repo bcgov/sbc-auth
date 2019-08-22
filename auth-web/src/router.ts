@@ -8,6 +8,7 @@ import PaymentForm from './components/pay/PaymentForm.vue'
 import PaymentReturnForm from './components/pay/PaymentReturnForm.vue'
 import PageNotFound from './views/PageNotFound.vue'
 import CreateAccount from './views/CreateAccount.vue'
+import Template from './views/management/Template.vue'
 
 Vue.use(Router)
 
@@ -23,6 +24,7 @@ const routes = [
   { path: '/', component: AuthHome },
   { path: '/home', component: Home },
   { path: '/businessprofile', component: BusinessProfile, meta: { requiresAuth: true } },
+  { path: '/main', component: Template, meta: { requiresAuth: false } },
   { path: '/signin/:idpHint', component: Signin, props: true, meta: { requiresAuth: false } },
   { path: '/signin/:idpHint/:redirectUrl', component: Signin, props: true, meta: { requiresAuth: false } },
   { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: true } },
