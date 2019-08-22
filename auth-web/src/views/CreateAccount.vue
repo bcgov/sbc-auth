@@ -8,7 +8,6 @@
           target="_blank">BC Services Card</a></span>
         </p>
 
-        <IdpLogin v-bind:label="'Sign in with my BC Services Card'" v-bind:hint="'bcsc'"/>
         <v-btn color='primary' to="/signin/bcsc" class=".signin-button">
           <span>Sign in with my BC Services Card</span>
         </v-btn>

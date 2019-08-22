@@ -1,6 +1,6 @@
 export interface UserInfo {
-    familyName: string;
-    givenName: string;
+    lastName: string;
+    firstName: string;
     keycloakGuid: string;
     userName: string;
     roles: [];
