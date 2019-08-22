@@ -3,7 +3,7 @@
  */
 
 export interface PaySystemStatus {
-    current_status: boolean,
-    next_schedule_date: Date,
-    next_schedule_time: Date
+    currentStatus: boolean,
+    nextScheduleDate: Date,
+    nextScheduleTime: Date
 }
