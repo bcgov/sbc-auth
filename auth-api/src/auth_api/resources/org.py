@@ -13,15 +13,17 @@
 # limitations under the License.
 """API endpoints for managing an Org resource."""
 
-from flask import request
+from flask import jsonify, request
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import utils as schema_utils
+from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Org as OrgService
 from auth_api.tracer import Tracer
+from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
 
 
@@ -158,3 +160,63 @@ class OrgContacts(Resource):
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
+
+
+    @cors_preflight('GET,POST,OPTIONS')
+    @API.route('/<string:org_id>/affiliations', methods=['GET', 'POST', 'OPTIONS'])
+    class OrgAffiliations(Resource):
+        """Resource for managing affiliations for an org."""
+
+        @staticmethod
+        @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+        @TRACER.trace()
+        @cors.crossdomain(origin='*')
+        def post(org_id):
+            """Post a new Affiliation for an org using the request body."""
+            request_json = request.get_json()
+            valid_format, errors = schema_utils.validate(request_json, 'affiliation')
+            if not valid_format:
+                return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+
+            try:
+                response, status = AffiliationService.create_affiliation(org_id, request_json.get('businessIdentifier')).as_dict(), http_status.HTTP_201_CREATED
+
+            except BusinessException as exception:
+                response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
+            return response, status
+
+        @staticmethod
+        @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+        @TRACER.trace()
+        @cors.crossdomain(origin='*')
+        def get(org_id):
+            """Get all affiliated entities for the given org."""
+            try:
+                response, status = jsonify(AffiliationService.find_affiliated_entities_by_org_id(org_id)), http_status.HTTP_200_OK
+
+            except BusinessException as exception:
+                response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
+            return response, status
+
+
+    @cors_preflight('DELETE,OPTIONS')
+    @API.route('/<string:org_id>/affiliations/<string:business_identifier>', methods=['DELETE', 'OPTIONS'])
+    class OrgAffiliation(Resource):
+        """Resource for managing a single affiliation between an org and an entity."""
+
+        @staticmethod
+        @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+        @TRACER.trace()
+        @cors.crossdomain(origin='*')
+        def delete(org_id, business_identifier):
+            """Delete an affiliation between an org and an entity."""
+            try:
+                AffiliationService.delete_affiliation(org_id, business_identifier)
+                response, status = {}, http_status.HTTP_200_OK
+
+            except BusinessException as exception:
+                response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
+            return response, status
