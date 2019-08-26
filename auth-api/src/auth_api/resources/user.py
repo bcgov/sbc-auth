@@ -175,3 +175,29 @@ class UserContacts(Resource):
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
+
+
+@cors_preflight('GET,OPTIONS')
+@API.route('/orgs', methods=['GET', 'OPTIONS'])
+class UserOrgs(Resource):
+    """Resource for retrieving list or orgs associated with a user."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def get():
+        """Get a list of orgs that the current user is associated with."""
+        token = g.jwt_oidc_token_info
+        if not token:
+            return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
+
+        try:
+            user = UserService.find_by_jwt_token(token)
+            if not user:
+                response, status = {'message': 'User not found.'}, http_status.HTTP_404_NOT_FOUND
+            else:
+                response, status = jsonify(user.get_orgs()), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status

@@ -13,6 +13,8 @@
 # limitations under the License.
 """Manager for membership schema and export."""
 
+from marshmallow import fields
+
 from auth_api.models import Membership as MembershipModel
 
 from .base_schema import BaseSchema
@@ -25,3 +27,7 @@ class MembershipSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-f
         """Maps all of the Membership fields to a default schema."""
 
         model = MembershipModel
+        fields = ('membership_type_code', 'user', 'org')
+
+    user = fields.Nested('UserSchema', only=('firstname', 'lastname', 'username'))
+    org = fields.Nested('OrgSchema', only=('id', 'name',))

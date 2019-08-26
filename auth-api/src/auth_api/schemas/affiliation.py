@@ -14,8 +14,9 @@
 """Manager for affiliation schema and export."""
 
 from marshmallow import fields
+
 from auth_api.models import Affiliation as AffiliationModel
-from .entity import EntitySchema
+
 from .base_schema import BaseSchema
 
 
@@ -27,4 +28,5 @@ class AffiliationSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-
 
         model = AffiliationModel
 
-    entityInfo = fields.Nested(EntitySchema, many=False)
+    entity = fields.Nested('EntitySchema', many=False)
+    org = fields.Nested('OrgSchema', many=False)

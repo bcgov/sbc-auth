@@ -18,6 +18,7 @@ An Affiliation is between an Org and an Entity.
 
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
+
 from .base_model import BaseModel
 
 
