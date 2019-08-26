@@ -30,3 +30,4 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
 
     contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
     members = fields.Pluck('MembershipSchema', 'user', many=True)
+    affiliated_entities = fields.Pluck('AffiliationSchema', 'entity', many=True)

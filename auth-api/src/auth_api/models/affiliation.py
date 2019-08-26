@@ -31,8 +31,8 @@ class Affiliation(BaseModel):  # pylint: disable=too-few-public-methods # Tempor
     entity_id = Column(ForeignKey('entity.id'), nullable=False)
     org_id = Column(ForeignKey('org.id'), nullable=False)
 
-    entity = relationship('Entity')
-    org = relationship('Org')
+    entity = relationship('Entity', foreign_keys=[entity_id])
+    org = relationship('Org', back_populates='affiliated_entities', foreign_keys=[org_id])
 
     @classmethod
     def find_affiliation_by_org_and_entity_ids(cls, org_id, entity_id):
