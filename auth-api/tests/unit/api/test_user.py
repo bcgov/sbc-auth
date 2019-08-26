@@ -372,7 +372,7 @@ def test_get_orgs_for_user(client, jwt, session):  # pylint:disable=unused-argum
 
     assert rv.status_code == http_status.HTTP_200_OK
 
-    orgs = json.loads(rv.data)
-    assert orgs
-    assert len(orgs) == 1
-    assert orgs[0]['name'] == TEST_ORG_INFO['name']
+    response = json.loads(rv.data)
+    assert response['orgs']
+    assert len(response['orgs']) == 1
+    assert response['orgs'][0]['name'] == TEST_ORG_INFO['name']

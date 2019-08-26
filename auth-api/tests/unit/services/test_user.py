@@ -315,7 +315,7 @@ def test_get_orgs(session):  # pylint:disable=unused-argument
 
     OrgService.create_org(TEST_ORG_INFO, user_id=user.identifier)
 
-    orgs = user.get_orgs()
-    assert orgs
-    assert len(orgs) == 1
-    assert orgs[0]['name'] == TEST_ORG_INFO['name']
+    response = user.get_orgs()
+    assert response['orgs']
+    assert len(response['orgs']) == 1
+    assert response['orgs'][0]['name'] == TEST_ORG_INFO['name']

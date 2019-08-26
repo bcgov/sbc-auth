@@ -171,4 +171,4 @@ class User:  # pylint: disable=too-many-instance-attributes
 
     def get_orgs(self):
         """Return the orgs associated with this user."""
-        return self.as_dict()['orgs']
+        return {'orgs': self.as_dict()['orgs']}
