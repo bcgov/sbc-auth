@@ -513,7 +513,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{  \r\n   \"businessIdentifier\": \"{{business_identifier}}\"\r\n}"
+					"raw": "{  \r\n   \"businessIdentifier\": \"{{business_identifier}}\",\r\n   \"name\": \"{{business_name}}\",\r\n   \"businessNumber\": \"{{business_number}}\",\r\n   \"passCode\": \"{{entity_passcode}}\"\r\n}"
 				},
 				"url": {
 					"raw": "{{api_url}}/api/v1/entities",
@@ -1278,7 +1278,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n   \"businessIdentifier\": \"{{business_identifier}}\"\r\n}"
+					"raw": "{\r\n   \"businessIdentifier\": \"{{business_identifier}}\",\r\n   \"passCode\": \"{{entity_passcode}}\"\r\n}"
 				},
 				"url": {
 					"raw": "http://{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations",
