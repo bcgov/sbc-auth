@@ -78,17 +78,17 @@ export default class PaymentReturnForm extends Vue {
         line-height: 2rem;
         letter-spacing: -0.01rem;
         font-size: 2rem;
-        font-weight: 500;
+        font-weight: 700;
     #AR-step-1-header, #AR-step-2-header, #AR-step-3-header, #AR-step-4-header
         margin-bottom: 0.25rem;
         margin-top: 3rem;
         font-size: 1.125rem;
-        font-weight: 500;
+        font-weight: 700;
     .title-container
         margin-bottom: 0.5rem;
     .agm-date
         margin-left: 0.25rem;
-        font-weight: 300;
+        font-weight: 400;
     // Save & Filing Buttons
     #buttons-container
         padding-top: 2rem;
