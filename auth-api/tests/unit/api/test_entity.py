@@ -24,7 +24,9 @@ from auth_api import status as http_status
 
 
 TEST_ENTITY_INFO = {
-    'businessIdentifier': 'CP1234567'
+    'businessIdentifier': 'CP1234567',
+    'businessNumber': '791861073BC0001',
+    'name': 'Foobar, Inc.'
 }
 
 TEST_INVALID_ENTITY_INFO = {

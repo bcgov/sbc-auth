@@ -26,9 +26,13 @@ from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 
 
-def factory_entity_service(business_identifier='CP1234567'):
+def factory_entity_service(business_identifier='CP1234567', business_number='791861073BC0001', name='Foobar, Inc.'):
     """Produce a templated entity model."""
-    entity = EntityModel.create_from_dict({'business_identifier': business_identifier})
+    entity = EntityModel.create_from_dict({
+        'business_identifier': business_identifier,
+        'business_number': business_number,
+        'name': name
+    })
     entity.save()
     entity_service = EntityService(entity)
     return entity_service
