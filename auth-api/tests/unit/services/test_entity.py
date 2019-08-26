@@ -86,7 +86,7 @@ def test_add_contact(session):  # pylint:disable=unused-argument
     dictionary = entity.as_dict()
     assert dictionary['contacts']
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['email'] == TEST_CONTACT_INFO['email']
+    assert dictionary['contacts'][0]['email'] == TEST_CONTACT_INFO['email']
 
 
 def test_add_contact_duplicate(session):  # pylint:disable=unused-argument
@@ -108,7 +108,7 @@ def test_update_contact(session):  # pylint:disable=unused-argument
 
     dictionary = entity.as_dict()
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['email'] == \
+    assert dictionary['contacts'][0]['email'] == \
         TEST_CONTACT_INFO['email']
 
     entity.update_contact(TEST_UPDATED_CONTACT_INFO)
@@ -116,7 +116,7 @@ def test_update_contact(session):  # pylint:disable=unused-argument
     dictionary = None
     dictionary = entity.as_dict()
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['email'] == \
+    assert dictionary['contacts'][0]['email'] == \
         TEST_UPDATED_CONTACT_INFO['email']
 
 
