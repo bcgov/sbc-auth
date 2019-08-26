@@ -30,4 +30,5 @@ class EntitySchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-p
         exlude = ('id',)
 
     business_identifier = fields.String(data_key='businessIdentifier')
+    business_number = fields.String(data_key='businessNumber')
     contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
