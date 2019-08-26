@@ -20,8 +20,8 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.schemas import AffiliationSchema
-from auth_api.services.org import Org as OrgService
 from auth_api.services.entity import Entity as EntityService
+from auth_api.services.org import Org as OrgService
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -34,6 +34,11 @@ class Affiliation:
     def __init__(self, model):
         """Return an Affiliation Service."""
         self._model = model
+
+    @property
+    def identifier(self):
+        """Return the unique identifier for this model."""
+        return self._model.id
 
     @ServiceTracing.disable_tracing
     def as_dict(self):
@@ -71,7 +76,6 @@ class Affiliation:
     @staticmethod
     def create_affiliation(org_id, business_identifier):
         """Create an Affiliation."""
-
         # Validate if org_id is valid by calling Org Service.
         org = OrgService.find_by_org_id(org_id)
         if org is None:
