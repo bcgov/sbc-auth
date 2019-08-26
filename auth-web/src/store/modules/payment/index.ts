@@ -8,9 +8,9 @@ import { AxiosResponse } from 'axios'
 })
 export default class PaymentModule extends VuexModule {
     paySystemStatus: PaySystemStatus = {
-      current_status: true,
-      next_schedule_date: null,
-      next_schedule_time: null
+      currentStatus: true,
+      nextScheduleDate: null,
+      nextScheduleTime: null
 
     }
 
