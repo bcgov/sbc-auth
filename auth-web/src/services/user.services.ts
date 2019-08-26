@@ -3,11 +3,13 @@ import configHelper from '@/util/config-helper'
 import { User } from '../models/user'
 import { UserContact } from '../models/usercontact'
 import { Contact } from '../models/contact'
+import { Organization } from '@/models/Organization'
 
 interface UserService {
   getUserProfile: (identifier: string) => Promise<AxiosResponse<User>>
   createUserProfile: () => Promise<AxiosResponse<User>>
   createContact: (contact:Contact) => Promise<AxiosResponse<Contact>>
+  getOrganizations: () => Promise<AxiosResponse<any>>
 }
 
 export default {
@@ -19,6 +21,8 @@ export default {
   },
   async createContact (contact:Contact): Promise<AxiosResponse<Contact>> {
     return Axios.post(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/users/contacts`, contact)
+  },
+  async getOrganizations (): Promise<AxiosResponse<Organization>> {
+    return Axios.get(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/users/orgs`)
   }
-
 } as UserService

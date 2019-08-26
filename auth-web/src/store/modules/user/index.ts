@@ -5,6 +5,7 @@ import { UserInfo } from '@/models/userInfo'
 import { User } from '@/models/user'
 import { UserContact } from '@/models/usercontact'
 import { Contact } from '@/models/contact'
+import { Organization } from '@/models/Organization'
 
 @Module({
   name: 'user'
@@ -15,6 +16,13 @@ export default class UserModule extends VuexModule {
   userProfile: User
 
   userContact: UserContact
+
+  organizations: Organization[] = []
+
+  @Mutation
+  public setOrganizations (organizations: Organization[]) {
+    this.organizations = organizations
+  }
 
   @Mutation
   public setUserProfile (userProfile: User) {
@@ -70,6 +78,14 @@ export default class UserModule extends VuexModule {
     return userServices.createContact(contact)
       .then(response => {
         return response.data
+      })
+  }
+
+  @Action({ commit: 'setOrganizations' })
+  public async getOrganizations () {
+    return userServices.getOrganizations()
+      .then(response => {
+        return response.data && response.data.orgs ? response.data.orgs : []
       })
   }
 }
