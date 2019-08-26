@@ -40,6 +40,11 @@ class User:  # pylint: disable=too-many-instance-attributes
         """Return a User Service object."""
         self._model = model
 
+    @property
+    def identifier(self):
+        """Return the identifier for this user."""
+        return self._model.id
+
     @ServiceTracing.disable_tracing
     def as_dict(self):
         """Return the User as a python dict.
@@ -163,3 +168,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             return None
 
         return User(user_model)
+
+    def get_orgs(self):
+        """Return the orgs associated with this user."""
+        return self.as_dict()['orgs']

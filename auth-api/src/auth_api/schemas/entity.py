@@ -18,7 +18,6 @@ from marshmallow import fields
 from auth_api.models import Entity as EntityModel
 
 from .base_schema import BaseSchema
-from .contact_link import ContactLinkSchema
 
 
 class EntitySchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
@@ -31,4 +30,5 @@ class EntitySchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-p
         exlude = ('id',)
 
     business_identifier = fields.String(data_key='businessIdentifier')
-    contacts = fields.Nested(ContactLinkSchema, many=True)
+    business_number = fields.String(data_key='businessNumber')
+    contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)

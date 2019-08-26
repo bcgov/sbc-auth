@@ -18,7 +18,6 @@ from marshmallow import fields
 from auth_api.models import User as UserModel
 
 from .base_schema import BaseSchema
-from .contact_link import ContactLinkSchema
 
 
 class UserSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
@@ -30,4 +29,5 @@ class UserSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-pub
         model = UserModel
         exclude = ('id',)
 
-    contacts = fields.Nested(ContactLinkSchema, many=True)
+    contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
+    orgs = fields.Pluck('MembershipSchema', 'org', many=True)

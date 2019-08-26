@@ -67,8 +67,6 @@ TEST_JWT_HEADER = {
 }
 
 
-
-
 def factory_auth_header(jwt, claims):
     """Produce JWT tokens for use in tests."""
     return {'Authorization': 'Bearer ' + jwt.create_jwt(claims=claims, header=TEST_JWT_HEADER)}
@@ -77,6 +75,7 @@ def factory_auth_header(jwt, claims):
 def test_add_org(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
@@ -93,6 +92,7 @@ def test_add_org_invalid_returns_400(client, jwt, session):  # pylint:disable=un
 def test_get_org(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an org can be retrieved via GET."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
@@ -108,6 +108,7 @@ def test_get_org(client, jwt, session):  # pylint:disable=unused-argument
 def test_get_org_no_auth_returns_401(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an org cannot be retrieved without an authorization header."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
@@ -120,6 +121,7 @@ def test_get_org_no_auth_returns_401(client, jwt, session):  # pylint:disable=un
 def test_get_org_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that attempting to retrieve a non-existent org returns a 404."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.get('/api/v1/orgs/{}'.format(999),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
@@ -128,6 +130,7 @@ def test_get_org_no_org_returns_404(client, jwt, session):  # pylint:disable=unu
 def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an org."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
@@ -138,12 +141,13 @@ def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['email'] == TEST_CONTACT_INFO['email']
+    assert dictionary['contacts'][0]['email'] == TEST_CONTACT_INFO['email']
 
 
 def test_add_contact_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that adding an invalidly formatted contact returns a 400."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
@@ -165,6 +169,7 @@ def test_add_contact_no_org_returns_404(client, jwt, session):  # pylint:disable
 def test_add_contact_duplicate_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that adding a duplicate contact to an org returns 400."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
@@ -180,6 +185,7 @@ def test_add_contact_duplicate_returns_400(client, jwt, session):  # pylint:disa
 def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a contact can be updated on an org."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
@@ -195,12 +201,13 @@ def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
     assert rv.status_code == http_status.HTTP_200_OK
     dictionary = json.loads(rv.data)
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['email'] == TEST_UPDATED_CONTACT_INFO['email']
+    assert dictionary['contacts'][0]['email'] == TEST_UPDATED_CONTACT_INFO['email']
 
 
 def test_update_contact_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that updating with an invalidly formatted contact returns a 400."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
@@ -224,6 +231,7 @@ def test_update_contact_no_org_returns_404(client, jwt, session):  # pylint:disa
 def test_update_contact_missing_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that updating a non-existant contact returns 404."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
