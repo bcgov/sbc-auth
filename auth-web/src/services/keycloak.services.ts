@@ -10,7 +10,7 @@ export default {
   init (idpHint : string) {
     this.cleanupSession()
     let token = configHelper.getFromSession(SessionStorageKeys.KeyCloakToken)
-    this.kc = Keycloak(`/${process.env.VUE_APP_PATH}/config/keycloak.json`)
+    this.kc = Keycloak(`/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`)
     let kcLogin = this.kc.login
     this.kc.login = (options) => {
       options.idpHint = idpHint
