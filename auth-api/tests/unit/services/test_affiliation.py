@@ -15,21 +15,20 @@
 
 Test suite to ensure that the Affiliation service routines are working as expected.
 """
-from auth_api.models.entity import Entity as EntityModel
-from auth_api.models.org_type import OrgType as OrgTypeModel
-from auth_api.models.org_status import OrgStatus as OrgStatusModel
-from auth_api.models.payment_type import PaymentType as PaymentTypeModel
-from auth_api.models.org import Org as OrgModel
 from auth_api.models.affiliation import Affiliation as AffiliationModel
-from auth_api.exceptions import BusinessException
-import pytest
-from auth_api.services import Org as OrgService
-from auth_api.services import Entity as EntityService
+from auth_api.models.entity import Entity as EntityModel
+from auth_api.models.org import Org as OrgModel
+from auth_api.models.org_status import OrgStatus as OrgStatusModel
+from auth_api.models.org_type import OrgType as OrgTypeModel
+from auth_api.models.payment_type import PaymentType as PaymentTypeModel
 from auth_api.services import Affiliation as AffiliationService
+from auth_api.services import Entity as EntityService
+from auth_api.services import Org as OrgService
 
 
-def factory_entity_service():
-    entity = EntityModel(business_identifier='CP1234567')
+def factory_entity_service(business_identifier='CP1234567'):
+    """Produce a templated entity model."""
+    entity = EntityModel.create_from_dict({'business_identifier': business_identifier})
     entity.save()
     entity_service = EntityService(entity)
     return entity_service
@@ -58,6 +57,7 @@ def factory_org_service(name):
 
 
 def factory_affiliation_service(entity_id, org_id):
+    """Produce a templated affiliation service."""
     affiliation = AffiliationModel(entity=entity_id, org=org_id)
     affiliation.save()
     affiliation_service = AffiliationService(affiliation)
@@ -68,121 +68,57 @@ def test_create_affiliation(session):  # pylint:disable=unused-argument
     """Assert that an Affiliation can be created."""
     entity_service = factory_entity_service()
     entity_dictionary = entity_service.as_dict()
-    entity_id = entity_dictionary['id']
+    business_identifier = entity_dictionary['businessIdentifier']
 
     org_service = factory_org_service(name='My Test Org')
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary['id']
 
-    affiliation_info = {
-        'entity': entity_id
-    }
-
-    affiliation_dictionary = AffiliationService.create_affiliation(org_id, affiliation_info)
-    assert affiliation_dictionary
-    assert affiliation_dictionary['entityInfo']['businessIdentifier'] == 'CP1234567'
+    affiliation = AffiliationService.create_affiliation(org_id, business_identifier)
+    assert affiliation
+    assert affiliation.as_dict()['entity']['id'] == entity_dictionary['id']
+    assert affiliation.as_dict()['org']['id'] == org_dictionary['id']
 
 
-def test_update_affiliation(session):  # pylint:disable=unused-argument
+def test_find_affiliated_entities_by_org_id(session):  # pylint:disable=unused-argument
     """Assert that an Affiliation can be created."""
+    entity_service1 = factory_entity_service(business_identifier='CP555')
+    entity_dictionary1 = entity_service1.as_dict()
+    business_identifier1 = entity_dictionary1['businessIdentifier']
+
+    entity_service2 = factory_entity_service(business_identifier='CP556')
+    entity_dictionary2 = entity_service2.as_dict()
+    business_identifier2 = entity_dictionary2['businessIdentifier']
+
+    org_service = factory_org_service(name='My Test Org')
+    org_dictionary = org_service.as_dict()
+    org_id = org_dictionary['id']
+
+    # create first row in affiliation table
+    AffiliationService.create_affiliation(org_id, business_identifier1)
+    # create second row in affiliation table
+    AffiliationService.create_affiliation(org_id, business_identifier2)
+
+    affiliated_entities = AffiliationService.find_affiliated_entities_by_org_id(org_id)
+
+    assert affiliated_entities
+    assert len(affiliated_entities) == 2
+    assert affiliated_entities[0]['id'] == entity_dictionary1['id']
+
+
+def test_delete_affiliation(session):  # pylint:disable=unused-argument
+    """Assert that an affiliation can be deleted."""
     entity_service = factory_entity_service()
     entity_dictionary = entity_service.as_dict()
-    entity_id = entity_dictionary['id']
+    business_identifier = entity_dictionary['businessIdentifier']
 
     org_service = factory_org_service(name='My Test Org')
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary['id']
 
-    affiliation_info = {
-        'entity': entity_id
-    }
+    affiliation = AffiliationService.create_affiliation(org_id, business_identifier)
 
-    affiliation_dictionary = AffiliationService.create_affiliation(org_id, affiliation_info)
-    assert affiliation_dictionary
-    assert affiliation_dictionary['entityInfo']['businessIdentifier'] == 'CP1234567'
+    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier)
 
-    entity2 = EntityModel(business_identifier='CP7654321')
-    entity2.save()
-    entity2_service = EntityService(entity2)
-    entity2_dictionary = entity2_service.as_dict()
-    entity2_id = entity2_dictionary['id']
-
-    affiliation_info2 = {
-        'entity': entity2_id
-    }
-
-    affiliation_service2 = AffiliationService.update_affiliation(org_id, affiliation_dictionary['id'], affiliation_info2)
-    assert affiliation_service2
-    affiliation_dictionary2 = affiliation_service2.as_dict()
-    assert affiliation_dictionary2['entityInfo']['businessIdentifier'] == 'CP7654321'
-
-
-def test_find_affiliation_by_ids(session):  # pylint:disable=unused-argument
-    """Assert that an Affiliation can be created."""
-    entity_service = factory_entity_service()
-    entity_dictionary = entity_service.as_dict()
-    entity_id = entity_dictionary['id']
-
-    org_service = factory_org_service(name='My Test Org')
-    org_dictionary = org_service.as_dict()
-    org_id = org_dictionary['id']
-
-    affiliation_service = factory_affiliation_service(entity_id, org_id)
-    assert affiliation_service
-    affiliation_dictionary = affiliation_service.as_dict()
-    assert affiliation_dictionary['entityInfo']['businessIdentifier'] == 'CP1234567'
-    affiliation_id = affiliation_dictionary['id']
-
-    affiliation_dictionary2 = AffiliationService.find_affiliation_by_ids(org_id, affiliation_id)
-    assert affiliation_dictionary2
-    assert affiliation_dictionary2['entityInfo']['businessIdentifier'] == 'CP1234567'
-
-
-def test_find_affiliation_by_invalid_ids(session):  # pylint:disable=unused-argument
-    """Assert that an Affiliation can be created."""
-    with pytest.raises(BusinessException) as excinfo:
-        AffiliationService.find_affiliation_by_ids(123, 456)
-    assert excinfo.type == BusinessException
-
-
-def test_find_affiliations_by_org_id(session):  # pylint:disable=unused-argument
-    """Assert that an Affiliation can be created."""
-    entity_service = factory_entity_service()
-    entity_dictionary = entity_service.as_dict()
-    entity_id = entity_dictionary['id']
-
-    org_service = factory_org_service(name='My Test Org')
-    org_dictionary = org_service.as_dict()
-    org_id = org_dictionary['id']
-
-    affiliation_info = {
-        'entity': entity_id
-    }
-
-    #create first row in affiliation table
-    affiliation_service = AffiliationService.create_affiliation(org_id, affiliation_info)
-    #create second row in affiliation table
-    affiliation_service = AffiliationService.create_affiliation(org_id, affiliation_info)
-
-    affiliation_dictionary = AffiliationService.find_affiliations_by_org_id(org_id)
-
-    assert affiliation_dictionary
-    assert len(affiliation_dictionary['items']) == 2
-    assert affiliation_dictionary['items'][1]['entityInfo']['businessIdentifier'] == 'CP1234567'
-
-
-def test_find_affiliations_by_invalid_org_id_in_org(session):  # pylint:disable=unused-argument
-    """Assert that an Affiliation can be created."""
-    with pytest.raises(BusinessException) as excinfo:
-        AffiliationService.find_affiliations_by_org_id(123456)
-    assert excinfo.type == BusinessException
-
-def test_find_affiliations_by_invalid_org_id_in_affiliation(session):  # pylint:disable=unused-argument
-    """Assert that an Affiliation can be created."""
-    org_service = factory_org_service(name='My Test Org')
-    org_dictionary = org_service.as_dict()
-    org_id = org_dictionary['id']
-
-    # no org_id in affiliation table.
-    affiliation_dictionary = AffiliationService.find_affiliations_by_org_id(org_id)
-    assert len(affiliation_dictionary['items']) == 0
+    found_affiliation = AffiliationModel.query.filter_by(id=affiliation.identifier).first()
+    assert found_affiliation is None
