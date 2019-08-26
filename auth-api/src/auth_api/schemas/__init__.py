@@ -14,10 +14,10 @@
 """Schema package."""
 
 
+from .affiliation import AffiliationSchema
 from .contact import ContactSchema
+from .contact_link import ContactLinkSchema
 from .entity import EntitySchema
+from .membership import MembershipSchema
 from .org import OrgSchema
 from .user import UserSchema
-from .affiliation import AffiliationSchema
-
-

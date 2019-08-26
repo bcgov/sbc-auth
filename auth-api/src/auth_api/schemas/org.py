@@ -18,7 +18,6 @@ from marshmallow import fields
 from auth_api.models import Org as OrgModel
 
 from .base_schema import BaseSchema
-from .contact_link import ContactLinkSchema
 
 
 class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
@@ -29,4 +28,6 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
 
         model = OrgModel
 
-    contacts = fields.Nested(ContactLinkSchema, many=True)
+    contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
+    members = fields.Pluck('MembershipSchema', 'user', many=True)
+    affiliated_entities = fields.Pluck('AffiliationSchema', 'entity', many=True)

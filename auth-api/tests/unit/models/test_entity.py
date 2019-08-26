@@ -21,7 +21,7 @@ from auth_api.models import Entity as EntityModel
 
 def test_entity(session):
     """Assert that an Entity can be stored in the service."""
-    entity = EntityModel(business_identifier='CP1234567')
+    entity = EntityModel(business_identifier='CP1234567', business_number='791861073BC0001', name='Foobar, Inc.')
     session.add(entity)
     session.commit()
     assert entity.id is not None
@@ -29,7 +29,7 @@ def test_entity(session):
 
 def test_entity_find_by_business_id(session):
     """Assert that an Entity can be retrieved via business identifier."""
-    entity = EntityModel(business_identifier='CP1234567')
+    entity = EntityModel(business_identifier='CP1234567', business_number='791861073BC0001', name='Foobar, Inc.')
     session.add(entity)
     session.commit()
 
