@@ -340,7 +340,7 @@ def test_delete_contact(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.delete('/api/v1/users/contacts', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     user = json.loads(rv.data)
-    assert user.get('contacts') is None
+    assert user.get('contacts') == []
 
 
 def test_delete_contact_no_token_returns_401(client, session):  # pylint:disable=unused-argument, invalid-name

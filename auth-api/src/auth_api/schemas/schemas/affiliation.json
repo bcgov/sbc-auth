@@ -17,6 +17,16 @@
           "CP1234567"
         ],
         "pattern": "^(.*)$"
+      },
+      "passCode": {
+        "$id": "#/properties/passCode",
+        "type": "string",
+        "title": "Passcode",
+        "default": "",
+        "examples": [
+          "12345"
+        ],
+        "pattern": "^(.*)$"
       }
     }
   }

@@ -187,7 +187,7 @@ class OrgContacts(Resource):
 
             try:
                 response, status = AffiliationService \
-                    .create_affiliation(org_id, request_json.get('businessIdentifier')).as_dict(), \
+                    .create_affiliation(org_id, request_json.get('businessIdentifier'), request_json.get('passCode')).as_dict(), \
                     http_status.HTTP_201_CREATED
 
             except BusinessException as exception:
