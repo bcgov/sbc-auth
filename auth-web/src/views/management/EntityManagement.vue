@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2>Manage Businesses</h2>
-    <AffiliatedEntityList />
+    <AffiliatedEntityList @add-business="showAddBusinessModal()"/>
   </div>
 </template>
 
@@ -12,5 +12,9 @@ import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
 @Component({
   components: { AffiliatedEntityList }
 })
-export default class EntityManagement extends Vue {}
+export default class EntityManagement extends Vue {
+  showAddBusinessModal(){    
+    //Todo: Show the add business popup once it is merged.
+  }
+}
 </script>
