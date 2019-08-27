@@ -43,6 +43,7 @@ def test_contact(session):
     session.commit()
     assert contact.id is not None
 
+
 def test_find_by_entity_id(session):
     """Assert that a Contact can be retrieved via the entity id."""
     entity = EntityModel(business_identifier='CP1234567')
