@@ -29,6 +29,7 @@ def test_as_dict():
         'businessIdentifier': 'CP1234567'
     }
 
+
 def test_create_entity(app, session):  # pylint:disable=unused-argument
     """Assert that an Entity can be created."""
     entity_info = {
@@ -39,6 +40,7 @@ def test_create_entity(app, session):  # pylint:disable=unused-argument
         entity = EntityService.create_entity(entity_info)
 
         assert entity is not None
+
 
 def test_add_contact(app, session):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an Entity."""
@@ -54,11 +56,12 @@ def test_add_contact(app, session):  # pylint:disable=unused-argument
         updated_entity = EntityService.add_contact(entity.business_identifier, contact_info)
 
         assert updated_entity is not None
-        
+
         contact = EntityService.get_contact_for_business(updated_entity.business_identifier)
 
         assert contact is not None
         assert contact.email == 'foo@bar.com'
+
 
 def test_update_contact(app, session):  # pylint:disable=unused-argument
     """Assert that a contact for an entity can be updated."""
