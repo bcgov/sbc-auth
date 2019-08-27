@@ -6,7 +6,9 @@
     "title": "Entity",
     "additionalProperties": false,
     "required": [
-      "businessIdentifier"
+      "businessIdentifier",
+      "businessNumber",
+      "name"
     ],
     "properties": {
       "businessIdentifier": {
@@ -16,6 +18,36 @@
         "default": "",
         "examples": [
           "CP1234567"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "businessNumber": {
+        "$id": "#/properties/businessNumber",
+        "type": "string",
+        "title": "Business Number",
+        "default": "",
+        "examples": [
+          "791861073BC0001"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "name": {
+        "$id": "#/properties/name",
+        "type": "string",
+        "title": "Business Name",
+        "default": "",
+        "examples": [
+          "Foobar, Inc."
+        ],
+        "pattern": "^(.*)$"
+      },
+      "passCode": {
+        "$id": "#/properties/passCode",
+        "type": "string",
+        "title": "Passcode",
+        "default": "",
+        "examples": [
+          "12345"
         ],
         "pattern": "^(.*)$"
       }

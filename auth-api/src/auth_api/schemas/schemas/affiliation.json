@@ -5,17 +5,28 @@
     "type": "object",
     "title": "Affiliation",
     "required": [
-      "entity"
+      "businessIdentifier"
     ],
     "properties": {
-      "entity": {
-        "$id": "#/properties/entity",
-        "type": "integer",
-        "title": "entity",
+      "businessIdentifier": {
+        "$id": "#/properties/businessIdentifier",
+        "type": "string",
+        "title": "Business Identifier",
+        "default": "",
+        "examples": [
+          "CP1234567"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "passCode": {
+        "$id": "#/properties/passCode",
+        "type": "string",
+        "title": "Passcode",
         "default": "",
         "examples": [
           "12345"
-        ]
+        ],
+        "pattern": "^(.*)$"
       }
     }
   }

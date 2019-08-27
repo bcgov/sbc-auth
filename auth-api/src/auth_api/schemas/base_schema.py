@@ -33,10 +33,10 @@ class BaseSchema(ma.ModelSchema):
         if not many:
             return {
                 key: value for key, value in data.items()
-                if value
+                if value is not None
             }
         for item in data:
             for key in list(item):
-                if not item[key]:
+                if item[key] is None:
                     item.pop(key)
         return data

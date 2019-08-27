@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "8dad2e21-109a-45c9-bf55-8b4dd1dcb16c",
+		"_postman_id": "6c870592-a59a-432f-93fe-a3f6c4f00f75",
 		"name": "auth-api-bcsc",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -91,7 +91,7 @@
 					"oauth2": [
 						{
 							"key": "accessToken",
-							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiI2OGJjZDA2Ny1hMTBlLTQ2ZGQtODJjYy0wOTMyNDQ5NmZkN2QiLCJleHAiOjE1NjYzMzMwOTcsIm5iZiI6MCwiaWF0IjoxNTY2MjUxMzk4LCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOlsic2JjLWF1dGgtd2ViIiwiYWNjb3VudCJdLCJzdWIiOiIzODM4Nzk3MS03ZDc2LTQ4NTMtODUyMC02Yzc4YmM0MTEzOWMiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJzYmMtYXV0aC13ZWIiLCJhdXRoX3RpbWUiOjE1NjYyNDY2OTcsInNlc3Npb25fc3RhdGUiOiJiNGE3NDNjMi05MGY2LTRmNmEtOTIyMy0zNDdlNmYwZDg4NTIiLCJhY3IiOiIwIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly8xOTIuMTY4LjAuMTM6ODA4MC8iLCIxOTIuMTY4LjAuMTMiLCIqIiwiaHR0cDovLzE5Mi4xNjguMC4xMzo4MDgwIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInN0YWZmIiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIiwiZmlyc3RuYW1lIjoiQkNSRUdURVNUIEZlbGVjaWEiLCJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInN0YWZmIiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdLCJuYW1lIjoiQkNSRUdURVNUIEZlbGVjaWEgVEVOIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZjNiYWQ0NzYtMjEwNi00Y2ZiLWEzYWItYTUwYzY2Mjg5YzlhQGJjc2MiLCJsYXN0bmFtZSI6IlRFTiIsInVzZXJuYW1lIjoiZjNiYWQ0NzYtMjEwNi00Y2ZiLWEzYWItYTUwYzY2Mjg5YzlhQGJjc2MifQ.LX54qCMTtCbXwSkRLDKIy9_-Xfk_dw8tzpFUcAzILK539VrEeDygEgbapyUjZAxeSAK2HqyQgz6-mydL789YoZiXdRTE1XF-Oi8nNczeGuRffhjE6q98t7mF3RDh5SvFXN9089losDQS0Blc1fcwMKqrp8LZyCALvw9PS-xZBzkXxu1AvN3DPYxVJ9sD4cBgXafR28_kjV0GVJqUVsysGEjsq1UPp7BQ-jFwDIwiPKwoxPgRNKPVGF7ZDXp5CSGUFmwounMjZemw7Am0uu0wY8cnESPO0CNWJ-LQo57twaWqmU7XcwIonocbeWYWieAPVCugriJkugGHms5Z48pQLQ",
+							"value": "",
 							"type": "string"
 						},
 						{
@@ -127,296 +127,6 @@
 						"api",
 						"v1",
 						"users"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create an affiliation",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
-						"exec": [
-							"var auth_token = pm.request.getHeaders()['Authorization'];",
-							"auth_token = auth_token.replace('Bearer ', '');",
-							"postman.setEnvironmentVariable('userToken', auth_token);",
-							"",
-							"var jsonData = pm.response.json();",
-							"pm.environment.set(\"username\", jsonData.username);"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "oauth2",
-					"oauth2": [
-						{
-							"key": "accessToken",
-							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiI4ZTllNDIyNC01MDIyLTQ3MGQtYWIwMC0yMjA2ZGRiMTJjODMiLCJleHAiOjE1NjYzMzMwOTcsIm5iZiI6MCwiaWF0IjoxNTY2MjcxODY5LCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOlsic2JjLWF1dGgtd2ViIiwiYWNjb3VudCJdLCJzdWIiOiIzODM4Nzk3MS03ZDc2LTQ4NTMtODUyMC02Yzc4YmM0MTEzOWMiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJzYmMtYXV0aC13ZWIiLCJhdXRoX3RpbWUiOjE1NjYyNDY2OTcsInNlc3Npb25fc3RhdGUiOiJiNGE3NDNjMi05MGY2LTRmNmEtOTIyMy0zNDdlNmYwZDg4NTIiLCJhY3IiOiIwIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly8xOTIuMTY4LjAuMTM6ODA4MC8iLCIxOTIuMTY4LjAuMTMiLCIqIiwiaHR0cDovLzE5Mi4xNjguMC4xMzo4MDgwIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInN0YWZmIiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIiwiZmlyc3RuYW1lIjoiQkNSRUdURVNUIEZlbGVjaWEiLCJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInN0YWZmIiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdLCJuYW1lIjoiQkNSRUdURVNUIEZlbGVjaWEgVEVOIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZjNiYWQ0NzYtMjEwNi00Y2ZiLWEzYWItYTUwYzY2Mjg5YzlhQGJjc2MiLCJsYXN0bmFtZSI6IlRFTiIsInVzZXJuYW1lIjoiZjNiYWQ0NzYtMjEwNi00Y2ZiLWEzYWItYTUwYzY2Mjg5YzlhQGJjc2MifQ.Gm5RdpwDtymKU9OpcHSsShvW-qnuxrxxtUXremUHI4yaH-62RHGY0bR41tI_nPho5fi536TJ4uWNjTQEbUJkZaTqg7a2_htQAjZ-T2eyIxE5IKy-9zCnM9smAenggOXNW8mgUDENC7RgwDvaBqB2viE-VPiAN5E8XApQSqUtwYgXAV0fXJIJMLYRe_wEvEZj6sUu7rrqYuASH2Xmgp_Zd7QA99w17T9xzyKZ7_smtShgCQdvGeYNvLK8BgBRjY3YQanGAMwDwkyXSMc4dmilCHxUGXYL6a1OfVUmr9HiTYDW-SPFPX9ex3IiN1iIJHZpqxFY5LgvZ1rT3ruZK2tawQ",
-							"type": "string"
-						},
-						{
-							"key": "tokenType",
-							"value": "bearer",
-							"type": "string"
-						},
-						{
-							"key": "addTokenTo",
-							"value": "header",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n   \"entity\": {{entity_identifier}}\r\n}"
-				},
-				"url": {
-					"raw": "http://{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations",
-					"protocol": "http",
-					"host": [
-						"{{api_url}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"orgs",
-						"{{org_identifier}}",
-						"affiliations"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Update an affiliation API",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
-						"exec": [
-							"pm.test(\"Response time is less than 5000ms\", function () {",
-							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
-							"});",
-							"",
-							"pm.test(\"response is ok\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"pm.test(\"response should be okay to process\", function () { ",
-							"    pm.response.to.not.be.error; ",
-							"    //pm.response.to.have.jsonBody(\"\"); ",
-							"    pm.response.to.not.have.jsonBody(\"error\"); ",
-							"});",
-							"",
-							"pm.test(\"response must be valid and have a body\", function () {",
-							"     // assert that the response has a valid JSON body",
-							"     pm.response.to.be.withBody;",
-							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
-							"});",
-							"",
-							"pm.test(\"Verify payload\",  () => {",
-							"    pm.expect(pm.response.text()).to.include(\"entityInfo\");",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{userToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "PUT",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n   \"entity\": {{entity_identifier}}\r\n}"
-				},
-				"url": {
-					"raw": "http://{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations/{{affiliation_identifier}}",
-					"protocol": "http",
-					"host": [
-						"{{api_url}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"orgs",
-						"{{org_identifier}}",
-						"affiliations",
-						"{{affiliation_identifier}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get affiliations",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
-						"exec": [
-							"var auth_token = pm.request.getHeaders()['Authorization'];",
-							"auth_token = auth_token.replace('Bearer ', '');",
-							"postman.setEnvironmentVariable('userToken', auth_token);",
-							"",
-							"var jsonData = pm.response.json();",
-							"pm.environment.set(\"username\", jsonData.username);"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"auth": {
-					"type": "oauth2",
-					"oauth2": [
-						{
-							"key": "accessToken",
-							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiI4ZTllNDIyNC01MDIyLTQ3MGQtYWIwMC0yMjA2ZGRiMTJjODMiLCJleHAiOjE1NjYzMzMwOTcsIm5iZiI6MCwiaWF0IjoxNTY2MjcxODY5LCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOlsic2JjLWF1dGgtd2ViIiwiYWNjb3VudCJdLCJzdWIiOiIzODM4Nzk3MS03ZDc2LTQ4NTMtODUyMC02Yzc4YmM0MTEzOWMiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJzYmMtYXV0aC13ZWIiLCJhdXRoX3RpbWUiOjE1NjYyNDY2OTcsInNlc3Npb25fc3RhdGUiOiJiNGE3NDNjMi05MGY2LTRmNmEtOTIyMy0zNDdlNmYwZDg4NTIiLCJhY3IiOiIwIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly8xOTIuMTY4LjAuMTM6ODA4MC8iLCIxOTIuMTY4LjAuMTMiLCIqIiwiaHR0cDovLzE5Mi4xNjguMC4xMzo4MDgwIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInN0YWZmIiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIiwiZmlyc3RuYW1lIjoiQkNSRUdURVNUIEZlbGVjaWEiLCJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInN0YWZmIiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdLCJuYW1lIjoiQkNSRUdURVNUIEZlbGVjaWEgVEVOIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZjNiYWQ0NzYtMjEwNi00Y2ZiLWEzYWItYTUwYzY2Mjg5YzlhQGJjc2MiLCJsYXN0bmFtZSI6IlRFTiIsInVzZXJuYW1lIjoiZjNiYWQ0NzYtMjEwNi00Y2ZiLWEzYWItYTUwYzY2Mjg5YzlhQGJjc2MifQ.Gm5RdpwDtymKU9OpcHSsShvW-qnuxrxxtUXremUHI4yaH-62RHGY0bR41tI_nPho5fi536TJ4uWNjTQEbUJkZaTqg7a2_htQAjZ-T2eyIxE5IKy-9zCnM9smAenggOXNW8mgUDENC7RgwDvaBqB2viE-VPiAN5E8XApQSqUtwYgXAV0fXJIJMLYRe_wEvEZj6sUu7rrqYuASH2Xmgp_Zd7QA99w17T9xzyKZ7_smtShgCQdvGeYNvLK8BgBRjY3YQanGAMwDwkyXSMc4dmilCHxUGXYL6a1OfVUmr9HiTYDW-SPFPX9ex3IiN1iIJHZpqxFY5LgvZ1rT3ruZK2tawQ",
-							"type": "string"
-						},
-						{
-							"key": "tokenType",
-							"value": "bearer",
-							"type": "string"
-						},
-						{
-							"key": "addTokenTo",
-							"value": "header",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/x-www-form-urlencoded"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations",
-					"protocol": "http",
-					"host": [
-						"{{api_url}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"orgs",
-						"{{org_identifier}}",
-						"affiliations"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get an affiliation by affiliation id",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
-						"exec": [
-							"var auth_token = pm.request.getHeaders()['Authorization'];",
-							"auth_token = auth_token.replace('Bearer ', '');",
-							"postman.setEnvironmentVariable('userToken', auth_token);",
-							"",
-							"var jsonData = pm.response.json();",
-							"pm.environment.set(\"username\", jsonData.username);"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"auth": {
-					"type": "oauth2",
-					"oauth2": [
-						{
-							"key": "accessToken",
-							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiI4ZTllNDIyNC01MDIyLTQ3MGQtYWIwMC0yMjA2ZGRiMTJjODMiLCJleHAiOjE1NjYzMzMwOTcsIm5iZiI6MCwiaWF0IjoxNTY2MjcxODY5LCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOlsic2JjLWF1dGgtd2ViIiwiYWNjb3VudCJdLCJzdWIiOiIzODM4Nzk3MS03ZDc2LTQ4NTMtODUyMC02Yzc4YmM0MTEzOWMiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJzYmMtYXV0aC13ZWIiLCJhdXRoX3RpbWUiOjE1NjYyNDY2OTcsInNlc3Npb25fc3RhdGUiOiJiNGE3NDNjMi05MGY2LTRmNmEtOTIyMy0zNDdlNmYwZDg4NTIiLCJhY3IiOiIwIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly8xOTIuMTY4LjAuMTM6ODA4MC8iLCIxOTIuMTY4LjAuMTMiLCIqIiwiaHR0cDovLzE5Mi4xNjguMC4xMzo4MDgwIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInN0YWZmIiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIiwiZmlyc3RuYW1lIjoiQkNSRUdURVNUIEZlbGVjaWEiLCJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInN0YWZmIiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdLCJuYW1lIjoiQkNSRUdURVNUIEZlbGVjaWEgVEVOIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZjNiYWQ0NzYtMjEwNi00Y2ZiLWEzYWItYTUwYzY2Mjg5YzlhQGJjc2MiLCJsYXN0bmFtZSI6IlRFTiIsInVzZXJuYW1lIjoiZjNiYWQ0NzYtMjEwNi00Y2ZiLWEzYWItYTUwYzY2Mjg5YzlhQGJjc2MifQ.Gm5RdpwDtymKU9OpcHSsShvW-qnuxrxxtUXremUHI4yaH-62RHGY0bR41tI_nPho5fi536TJ4uWNjTQEbUJkZaTqg7a2_htQAjZ-T2eyIxE5IKy-9zCnM9smAenggOXNW8mgUDENC7RgwDvaBqB2viE-VPiAN5E8XApQSqUtwYgXAV0fXJIJMLYRe_wEvEZj6sUu7rrqYuASH2Xmgp_Zd7QA99w17T9xzyKZ7_smtShgCQdvGeYNvLK8BgBRjY3YQanGAMwDwkyXSMc4dmilCHxUGXYL6a1OfVUmr9HiTYDW-SPFPX9ex3IiN1iIJHZpqxFY5LgvZ1rT3ruZK2tawQ",
-							"type": "string"
-						},
-						{
-							"key": "tokenType",
-							"value": "bearer",
-							"type": "string"
-						},
-						{
-							"key": "addTokenTo",
-							"value": "header",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/x-www-form-urlencoded"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations",
-					"protocol": "http",
-					"host": [
-						"{{api_url}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"orgs",
-						"{{org_identifier}}",
-						"affiliations"
 					]
 				}
 			},
@@ -787,7 +497,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiJiYTBiNjcwMS02YzdmLTQ4ZmMtOGNkNC1hMDQ0NDUzNmYxOTkiLCJleHAiOjE1NjYzMzMwOTcsIm5iZiI6MCwiaWF0IjoxNTY2MjUyMDg4LCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOlsic2JjLWF1dGgtd2ViIiwiYWNjb3VudCJdLCJzdWIiOiIzODM4Nzk3MS03ZDc2LTQ4NTMtODUyMC02Yzc4YmM0MTEzOWMiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJzYmMtYXV0aC13ZWIiLCJhdXRoX3RpbWUiOjE1NjYyNDY2OTcsInNlc3Npb25fc3RhdGUiOiJiNGE3NDNjMi05MGY2LTRmNmEtOTIyMy0zNDdlNmYwZDg4NTIiLCJhY3IiOiIwIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly8xOTIuMTY4LjAuMTM6ODA4MC8iLCIxOTIuMTY4LjAuMTMiLCIqIiwiaHR0cDovLzE5Mi4xNjguMC4xMzo4MDgwIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInN0YWZmIiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIiwiZmlyc3RuYW1lIjoiQkNSRUdURVNUIEZlbGVjaWEiLCJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInN0YWZmIiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdLCJuYW1lIjoiQkNSRUdURVNUIEZlbGVjaWEgVEVOIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZjNiYWQ0NzYtMjEwNi00Y2ZiLWEzYWItYTUwYzY2Mjg5YzlhQGJjc2MiLCJsYXN0bmFtZSI6IlRFTiIsInVzZXJuYW1lIjoiZjNiYWQ0NzYtMjEwNi00Y2ZiLWEzYWItYTUwYzY2Mjg5YzlhQGJjc2MifQ.ZkERfoY-XS_7gB3LKEjbsTdhzpbpkk89RQKWAlT06DDV0ReVycMeDMgl06qhNW5GeoPr1Tpd41rLCE1_I1_kPIW2R1Z9qQmPxwJq7jvCZdD89cA3RyDtrEkPgTLtTInLBl4qKZuciMc21BH659sQyseE--RaXmSpzRyC3kTMcNbtX9IQ8rLekPmxM6io77h2-XiH8k2iwjuo5l3Ypwkx1anXWj82ecPIUzzlUzEwgEyCe4XW86yzt6SBu7Xd5anv9gGzj_KXPSAJuKeQ2Q0zHPzts6nkErtxCNUGFu4REGn7h1Aan8NhWtjv7PgRIQZlKntLmi8d4KoEeNs0Z_6BKw",
+							"value": "{{userToken}}",
 							"type": "string"
 						}
 					]
@@ -803,7 +513,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{  \r\n   \"businessIdentifier\": \"CP0001245\"\r\n}"
+					"raw": "{  \r\n   \"businessIdentifier\": \"{{business_identifier}}\",\r\n   \"name\": \"{{business_name}}\",\r\n   \"businessNumber\": \"{{business_number}}\",\r\n   \"passCode\": \"{{entity_passcode}}\"\r\n}"
 				},
 				"url": {
 					"raw": "{{api_url}}/api/v1/entities",
@@ -867,7 +577,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJUbWdtZUk0MnVsdUZ0N3FQbmUtcTEzdDUwa0JDbjF3bHF6dHN0UGdUM1dFIn0.eyJqdGkiOiJiYTBiNjcwMS02YzdmLTQ4ZmMtOGNkNC1hMDQ0NDUzNmYxOTkiLCJleHAiOjE1NjYzMzMwOTcsIm5iZiI6MCwiaWF0IjoxNTY2MjUyMDg4LCJpc3MiOiJodHRwczovL3Nzby1kZXYucGF0aGZpbmRlci5nb3YuYmMuY2EvYXV0aC9yZWFsbXMvZmNmMGtwcXIiLCJhdWQiOlsic2JjLWF1dGgtd2ViIiwiYWNjb3VudCJdLCJzdWIiOiIzODM4Nzk3MS03ZDc2LTQ4NTMtODUyMC02Yzc4YmM0MTEzOWMiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJzYmMtYXV0aC13ZWIiLCJhdXRoX3RpbWUiOjE1NjYyNDY2OTcsInNlc3Npb25fc3RhdGUiOiJiNGE3NDNjMi05MGY2LTRmNmEtOTIyMy0zNDdlNmYwZDg4NTIiLCJhY3IiOiIwIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly8xOTIuMTY4LjAuMTM6ODA4MC8iLCIxOTIuMTY4LjAuMTMiLCIqIiwiaHR0cDovLzE5Mi4xNjguMC4xMzo4MDgwIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInN0YWZmIiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIiwiZmlyc3RuYW1lIjoiQkNSRUdURVNUIEZlbGVjaWEiLCJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInN0YWZmIiwidW1hX2F1dGhvcml6YXRpb24iLCJiYXNpYyJdLCJuYW1lIjoiQkNSRUdURVNUIEZlbGVjaWEgVEVOIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZjNiYWQ0NzYtMjEwNi00Y2ZiLWEzYWItYTUwYzY2Mjg5YzlhQGJjc2MiLCJsYXN0bmFtZSI6IlRFTiIsInVzZXJuYW1lIjoiZjNiYWQ0NzYtMjEwNi00Y2ZiLWEzYWItYTUwYzY2Mjg5YzlhQGJjc2MifQ.ZkERfoY-XS_7gB3LKEjbsTdhzpbpkk89RQKWAlT06DDV0ReVycMeDMgl06qhNW5GeoPr1Tpd41rLCE1_I1_kPIW2R1Z9qQmPxwJq7jvCZdD89cA3RyDtrEkPgTLtTInLBl4qKZuciMc21BH659sQyseE--RaXmSpzRyC3kTMcNbtX9IQ8rLekPmxM6io77h2-XiH8k2iwjuo5l3Ypwkx1anXWj82ecPIUzzlUzEwgEyCe4XW86yzt6SBu7Xd5anv9gGzj_KXPSAJuKeQ2Q0zHPzts6nkErtxCNUGFu4REGn7h1Aan8NhWtjv7PgRIQZlKntLmi8d4KoEeNs0Z_6BKw",
+							"value": "{{userToken}}",
 							"type": "string"
 						}
 					]
@@ -1120,333 +830,6 @@
 						"entities",
 						"{{business_identifier}}",
 						"contacts"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Add an affiliation API",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
-						"exec": [
-							"pm.test(\"Response time is less than 5000ms\", function () {",
-							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
-							"});",
-							"",
-							"pm.test(\"response is ok\", function () {",
-							"    pm.response.to.have.status(201);",
-							"});",
-							"",
-							"pm.test(\"response should be okay to process\", function () { ",
-							"    pm.response.to.not.be.error; ",
-							"    //pm.response.to.have.jsonBody(\"\"); ",
-							"    pm.response.to.not.have.jsonBody(\"error\"); ",
-							"});",
-							"",
-							"pm.test(\"response must be valid and have a body\", function () {",
-							"     // assert that the response has a valid JSON body",
-							"     pm.response.to.be.withBody;",
-							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
-							"});",
-							"",
-							"pm.test(\"Verify payload\",  () => {",
-							"    pm.expect(pm.response.text()).to.include(\"entityInfo\");",
-							"});",
-							"",
-							"var jsonData = pm.response.json();",
-							"pm.environment.set(\"affiliation_identifier\", jsonData.id);"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{userToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{  \r\n   \"entity\": {{entity_identifier}}\r\n}"
-				},
-				"url": {
-					"raw": "http://{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations",
-					"protocol": "http",
-					"host": [
-						"{{api_url}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"orgs",
-						"{{org_identifier}}",
-						"affiliations"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Update affiliation API",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
-						"exec": [
-							"pm.test(\"Response time is less than 5000ms\", function () {",
-							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
-							"});",
-							"",
-							"pm.test(\"response is ok\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
-							"pm.test(\"response should be okay to process\", function () { ",
-							"    pm.response.to.not.be.error; ",
-							"    //pm.response.to.have.jsonBody(\"\"); ",
-							"    pm.response.to.not.have.jsonBody(\"error\"); ",
-							"});",
-							"",
-							"pm.test(\"response must be valid and have a body\", function () {",
-							"     // assert that the response has a valid JSON body",
-							"     pm.response.to.be.withBody;",
-							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
-							"});",
-							"",
-							"pm.test(\"Verify payload\",  () => {",
-							"    pm.expect(pm.response.text()).to.include(\"entityInfo\");",
-							"});",
-							"",
-							"var jsonData = pm.response.json();",
-							"pm.environment.set(\"affiliation_identifier\", jsonData.id);"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{userToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "PUT",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n   \"entity\": {{entity_identifier}}\r\n}"
-				},
-				"url": {
-					"raw": "http://{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations/{{affiliation_identifier}}",
-					"protocol": "http",
-					"host": [
-						"{{api_url}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"orgs",
-						"{{org_identifier}}",
-						"affiliations",
-						"{{affiliation_identifier}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get affiliations API",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
-						"exec": [
-							"pm.test(\"Response time is less than 5000ms\", function () {",
-							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
-							"});",
-							"",
-							"pm.test(\"response is ok\", function () {",
-							"    pm.response.to.have.status(201);",
-							"});",
-							"",
-							"pm.test(\"response should be okay to process\", function () { ",
-							"    pm.response.to.not.be.error; ",
-							"    //pm.response.to.have.jsonBody(\"\"); ",
-							"    pm.response.to.not.have.jsonBody(\"error\"); ",
-							"});",
-							"",
-							"pm.test(\"response must be valid and have a body\", function () {",
-							"     // assert that the response has a valid JSON body",
-							"     pm.response.to.be.withBody;",
-							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
-							"});",
-							"",
-							"pm.test(\"Verify payload\",  () => {",
-							"    pm.expect(pm.response.text()).to.include(\"entityInfo\");",
-							"});",
-							"",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{userToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations",
-					"protocol": "http",
-					"host": [
-						"{{api_url}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"orgs",
-						"{{org_identifier}}",
-						"affiliations"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get an affiliation by affiliation id API",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
-						"exec": [
-							"pm.test(\"Response time is less than 5000ms\", function () {",
-							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
-							"});",
-							"",
-							"pm.test(\"response is ok\", function () {",
-							"    pm.response.to.have.status(201);",
-							"});",
-							"",
-							"pm.test(\"response should be okay to process\", function () { ",
-							"    pm.response.to.not.be.error; ",
-							"    //pm.response.to.have.jsonBody(\"\"); ",
-							"    pm.response.to.not.have.jsonBody(\"error\"); ",
-							"});",
-							"",
-							"pm.test(\"response must be valid and have a body\", function () {",
-							"     // assert that the response has a valid JSON body",
-							"     pm.response.to.be.withBody;",
-							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
-							"});",
-							"",
-							"pm.test(\"Verify payload\",  () => {",
-							"    pm.expect(pm.response.text()).to.include(\"entityInfo\");",
-							"});",
-							"",
-							"var jsonData = pm.response.json();",
-							"pm.environment.set(\"affiliation_identifier\", jsonData.id);"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{userToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "http://{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations/{{affiliation_identifier}}",
-					"protocol": "http",
-					"host": [
-						"{{api_url}}"
-					],
-					"path": [
-						"api",
-						"v1",
-						"orgs",
-						"{{org_identifier}}",
-						"affiliations",
-						"{{affiliation_identifier}}"
 					]
 				}
 			},
@@ -1849,6 +1232,251 @@
 						"orgs",
 						"{{org_identifier}}",
 						"contacts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create an affiliation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"var auth_token = pm.request.getHeaders()['Authorization'];",
+							"auth_token = auth_token.replace('Bearer ', '');",
+							"postman.setEnvironmentVariable('userToken', auth_token);",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"username\", jsonData.username);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{userToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"businessIdentifier\": \"{{business_identifier}}\",\r\n   \"passCode\": \"{{entity_passcode}}\"\r\n}"
+				},
+				"url": {
+					"raw": "http://{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations",
+					"protocol": "http",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orgs",
+						"{{org_identifier}}",
+						"affiliations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete an affiliation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"var auth_token = pm.request.getHeaders()['Authorization'];",
+							"auth_token = auth_token.replace('Bearer ', '');",
+							"postman.setEnvironmentVariable('userToken', auth_token);",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"username\", jsonData.username);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{userToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations/{{business_identifier}}",
+					"protocol": "http",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orgs",
+						"{{org_identifier}}",
+						"affiliations",
+						"{{business_identifier}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get entities affiliated with an org",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"var auth_token = pm.request.getHeaders()['Authorization'];",
+							"auth_token = auth_token.replace('Bearer ', '');",
+							"postman.setEnvironmentVariable('userToken', auth_token);",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"username\", jsonData.username);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{userToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations",
+					"protocol": "http",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orgs",
+						"{{org_identifier}}",
+						"affiliations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get orgs for user (me)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"",
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    //pm.response.to.have.jsonBody(\"\"); ",
+							"    pm.response.to.not.have.jsonBody(\"error\"); ",
+							"});",
+							"",
+							"pm.test(\"response must be valid and have a body\", function () {",
+							"     // assert that the response has a valid JSON body",
+							"     pm.response.to.be.withBody;",
+							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+							"});",
+							"",
+							"pm.test(\"Verify payload\",  () => {",
+							"    pm.expect(pm.response.text()).to.include(\"username\");",
+							"    pm.expect(pm.response.text()).to.include(\"contacts\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{userToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{api_url}}/api/v1/users/orgs",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"orgs"
 					]
 				}
 			},

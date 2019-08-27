@@ -13,7 +13,6 @@
 # limitations under the License.
 """Service for managing Affiliation data."""
 
-from typing import Any, Dict
 from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing
 
@@ -21,8 +20,8 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.schemas import AffiliationSchema
-from auth_api.services.org import Org as OrgService
 from auth_api.services.entity import Entity as EntityService
+from auth_api.services.org import Org as OrgService
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -37,44 +36,14 @@ class Affiliation:
         self._model = model
 
     @property
-    def id(self):
-        """Return the id for this Affiliation."""
+    def identifier(self):
+        """Return the unique identifier for this model."""
         return self._model.id
-
-    @id.setter
-    def id(self, value: int):
-        """Set the id for this Affiliation."""
-        self._model.id = value
-
-    @property
-    def created_by(self):
-        """Return the create_by for this Affiliation."""
-        return self._model.created_by
-
-    @created_by.setter
-    def created_by(self, value: int):
-        """Set the create_by for this Affiliation."""
-        self._model.created_by = value
 
     @property
     def entity(self):
-        """Return the entity for this Affiliation."""
-        return self._model.entity
-
-    @entity.setter
-    def entity(self, value: int):
-        """Set the entity for this Affiliation."""
-        self._model.entity = value
-
-    @property
-    def org(self):
-        """Return the org for this Affiliation."""
-        return self._model.org
-
-    @org.setter
-    def org(self, value: int):
-        """Set the org for this Affiliation."""
-        self._model.org = value
+        """Return the entity for this affiliation as a service."""
+        return EntityService(self._model.entity)
 
     @ServiceTracing.disable_tracing
     def as_dict(self):
@@ -87,80 +56,92 @@ class Affiliation:
         return obj
 
     @staticmethod
-    def find_affiliation_by_ids(org_id, affiliation_id):
-        """Given an org_id and affiliation_id, this will return the corresponding affiliation or None."""
-        if not org_id or not affiliation_id:
-            return None
-
-        affiliation_model = AffiliationModel.find_affiliation_by_ids(org_id, affiliation_id)
-
-        if not affiliation_model:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
-
-        return Affiliation(affiliation_model).as_dict()
-
-    @staticmethod
-    def find_affiliations_by_org_id(org_id):
-        """Given an org_id, this will return the corresponding affiliations or None."""
+    def find_affiliated_entities_by_org_id(org_id):
+        """Given an org_id, this will return the entities affiliated with it."""
         current_app.logger.debug('<find_affiliations_by_org_id for org_id {}'.format(org_id))
         if not org_id:
-            return None
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         org = OrgService.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        data = {'items': []}
-        affiliation_models = AffiliationModel.find_affiliations_by_org_id(int(org_id))
+        data = []
+        affiliation_models = AffiliationModel.find_affiliations_by_org_id(org_id)
         if affiliation_models is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         for affiliation_model in affiliation_models:
             if affiliation_model:
-                data['items'].append(Affiliation(affiliation_model).as_dict())
+                data.append(EntityService(affiliation_model.entity).as_dict())
         current_app.logger.debug('>find_affiliations_by_org_id')
 
         return data
 
     @staticmethod
-    def create_affiliation(org_id, entity_info: Dict[str, Any]):
+    def create_affiliation(org_id, business_identifier, pass_code=None):
         """Create an Affiliation."""
-
         # Validate if org_id is valid by calling Org Service.
         org = OrgService.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        entity = EntityService.find_by_entity_id(entity_info.get('entity'))
+        entity = EntityService.find_by_business_identifier(business_identifier)
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        affiliation = AffiliationModel()
-        affiliation.entity = entity.as_dict()['id']
-        affiliation.org = org_id
+        entity_id = entity.identifier
 
+        authorized = True
+
+        # Authorized if the entity has been claimed
+        if entity.as_dict()['passCodeClaimed']:
+            authorized = False
+
+        # If a passcode was provided...
+        if pass_code:
+            # ... and the entity has a passcode on it, check that they match
+            if entity.pass_code != pass_code:
+                authorized = False
+        # If a passcode was not provided...
+        else:
+            # ... check that the entity does not have a passcode protecting it
+            if entity.pass_code:
+                authorized = False
+
+        if not authorized:
+            # If org being affiliated was IMPLICIT, remove it since the affiliation was not valid
+            if org.as_dict()['org_type'] == 'IMPLICIT':
+                org.delete_org()
+            raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
+
+        # Ensure this affiliation does not already exist
+        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id)
+        if affiliation is not None:
+            raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+
+        affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id)
         affiliation.save()
-        affiliation = Affiliation(affiliation)
+        entity.set_pass_code_claimed(True)
 
-        return affiliation.as_dict()
+        return Affiliation(affiliation)
 
     @staticmethod
-    def update_affiliation(org_id, affiliation_id, entity_info: Dict[str, Any]):
-        """Update an Affiliation."""
-        affiliation = AffiliationModel.find_by_affiliation_id(int(affiliation_id))
-        if affiliation is None:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
-
-        org = OrgService.find_by_org_id(int(org_id))
+    def delete_affiliation(org_id, business_identifier):
+        """Delete the affiliation for the provided org id and business id."""
+        org = OrgService.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        entity = EntityService.find_by_entity_id(int(entity_info.get('entity')))
+        entity = EntityService.find_by_business_identifier(business_identifier)
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        affiliation.entity = int(entity_info.get('entity'))
-        affiliation.org = int(org_id)
-        affiliation.save()
-        affiliation = Affiliation(affiliation)
-        return affiliation
+        entity_id = entity.identifier
+
+        affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id=org_id, entity_id=entity_id)
+        if affiliation is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        affiliation.delete()
+        entity.set_pass_code_claimed(False)

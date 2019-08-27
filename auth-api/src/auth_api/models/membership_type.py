@@ -16,7 +16,7 @@
 It defines the available types of membership Users have with Orgs.
 """
 
-from sqlalchemy import Column, String
+from sqlalchemy import Boolean, Column, String
 
 from .base_model import BaseModel
 
@@ -28,3 +28,9 @@ class MembershipType(BaseModel):  # pylint: disable=too-few-public-methods # Tem
 
     code = Column(String(15), primary_key=True)
     desc = Column(String(100))
+    default = Column(Boolean(), default=False, nullable=False)
+
+    @classmethod
+    def get_default_type(cls):
+        """Return the default type code for Membership."""
+        return cls.query.filter_by(default=True).first()

@@ -42,6 +42,7 @@ class User(BaseModel):
     roles = Column('roles', String(1000))
 
     contacts = relationship('ContactLink', back_populates='user', primaryjoin='User.id == ContactLink.user_id')
+    orgs = relationship('Membership', back_populates='user', primaryjoin='User.id == Membership.user_id')
 
     @classmethod
     def find_by_username(cls, username):

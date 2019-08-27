@@ -33,9 +33,14 @@ TEST_UPDATED_CONTACT_INFO = {
 }
 
 
-def factory_entity_model(business_identifier, pass_code=None):
+def factory_entity_model(business_identifier='CP1234567',
+                         business_number='791861073BC0001',
+                         name='Foobar, Inc.', pass_code=None):
     """Return a valid entity object with the provided fields."""
-    entity = EntityModel(business_identifier=business_identifier, pass_code=pass_code)
+    entity = EntityModel(business_identifier=business_identifier,
+                         business_number=business_number,
+                         name=name,
+                         pass_code=pass_code)
     entity.save()
     return entity
 
@@ -52,7 +57,9 @@ def test_as_dict(session):  # pylint:disable=unused-argument
 def test_create_entity(session):  # pylint:disable=unused-argument
     """Assert that an Entity can be created from a dictionary."""
     entity = EntityService.create_entity({
-        'businessIdentifier': 'CP1234567'
+        'businessIdentifier': 'CP1234567',
+        'businessNumber': '791861073BC0001',
+        'name': 'Foobar, Inc.'
     })
 
     assert entity is not None
@@ -86,7 +93,7 @@ def test_add_contact(session):  # pylint:disable=unused-argument
     dictionary = entity.as_dict()
     assert dictionary['contacts']
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['email'] == TEST_CONTACT_INFO['email']
+    assert dictionary['contacts'][0]['email'] == TEST_CONTACT_INFO['email']
 
 
 def test_add_contact_duplicate(session):  # pylint:disable=unused-argument
@@ -108,7 +115,7 @@ def test_update_contact(session):  # pylint:disable=unused-argument
 
     dictionary = entity.as_dict()
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['email'] == \
+    assert dictionary['contacts'][0]['email'] == \
         TEST_CONTACT_INFO['email']
 
     entity.update_contact(TEST_UPDATED_CONTACT_INFO)
@@ -116,7 +123,7 @@ def test_update_contact(session):  # pylint:disable=unused-argument
     dictionary = None
     dictionary = entity.as_dict()
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['email'] == \
+    assert dictionary['contacts'][0]['email'] == \
         TEST_UPDATED_CONTACT_INFO['email']
 
 
