@@ -33,9 +33,14 @@ TEST_UPDATED_CONTACT_INFO = {
 }
 
 
-def factory_entity_model(business_identifier='CP1234567', business_number='791861073BC0001', name='Foobar, Inc.', pass_code=None):
+def factory_entity_model(business_identifier='CP1234567',
+                         business_number='791861073BC0001',
+                         name='Foobar, Inc.', pass_code=None):
     """Return a valid entity object with the provided fields."""
-    entity = EntityModel(business_identifier=business_identifier, business_number=business_number, name=name, pass_code=pass_code)
+    entity = EntityModel(business_identifier=business_identifier,
+                         business_number=business_number,
+                         name=name,
+                         pass_code=pass_code)
     entity.save()
     return entity
 
