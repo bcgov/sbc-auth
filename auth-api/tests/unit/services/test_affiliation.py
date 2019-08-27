@@ -80,7 +80,7 @@ def test_create_affiliation(session):  # pylint:disable=unused-argument
 
     affiliation = AffiliationService.create_affiliation(org_id, business_identifier)
     assert affiliation
-    assert affiliation.as_dict()['entity']['id'] == entity_dictionary['id']
+    assert affiliation.entity.identifier == entity_service.identifier
     assert affiliation.as_dict()['org']['id'] == org_dictionary['id']
 
 
@@ -107,7 +107,7 @@ def test_find_affiliated_entities_by_org_id(session):  # pylint:disable=unused-a
 
     assert affiliated_entities
     assert len(affiliated_entities) == 2
-    assert affiliated_entities[0]['id'] == entity_dictionary1['id']
+    assert affiliated_entities[0]['businessIdentifier'] == entity_dictionary1['businessIdentifier']
 
 
 def test_delete_affiliation(session):  # pylint:disable=unused-argument

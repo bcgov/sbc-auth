@@ -40,6 +40,16 @@
           "Foobar, Inc."
         ],
         "pattern": "^(.*)$"
+      },
+      "passCode": {
+        "$id": "#/properties/passCode",
+        "type": "string",
+        "title": "Passcode",
+        "default": "",
+        "examples": [
+          "12345"
+        ],
+        "pattern": "^(.*)$"
       }
     }
   }
