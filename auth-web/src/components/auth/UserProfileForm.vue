@@ -105,7 +105,6 @@ import UserModule from '../../store/modules/user'
 import configHelper from '../../util/config-helper'
 import { mask } from 'vue-the-mask'
 import { User } from '../../models/user'
-import { UserContact } from '../../models/usercontact'
 
 @Component({
   directives: {
@@ -152,9 +151,9 @@ export default class UserProfileForm extends Vue {
       this.firstName = userProfile.firstname
       this.lastName = userProfile.lastname
       if (userProfile.contacts && userProfile.contacts[0]) {
-        this.emailAddress = this.confirmedEmailAddress = userProfile.contacts[0].contact.email
-        this.phoneNumber = userProfile.contacts[0].contact.phone
-        this.extension = userProfile.contacts[0].contact.phoneExtension
+        this.emailAddress = this.confirmedEmailAddress = userProfile.contacts[0].email
+        this.phoneNumber = userProfile.contacts[0].phone
+        this.extension = userProfile.contacts[0].phoneExtension
       }
     })
   }

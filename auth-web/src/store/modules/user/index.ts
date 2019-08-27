@@ -3,7 +3,6 @@ import keycloakService from '@/services/keycloak.services'
 import userServices from '@/services/user.services'
 import { UserInfo } from '@/models/userInfo'
 import { User } from '@/models/user'
-import { UserContact } from '@/models/usercontact'
 import { Contact } from '@/models/contact'
 
 @Module({
@@ -14,7 +13,7 @@ export default class UserModule extends VuexModule {
 
   userProfile: User
 
-  userContact: UserContact
+  userContact: Contact
 
   @Mutation
   public setUserProfile (userProfile: User) {
@@ -27,7 +26,7 @@ export default class UserModule extends VuexModule {
   }
 
   @Mutation
-  public setUserContact (userContact: UserContact) {
+  public setUserContact (userContact: Contact) {
     this.userContact = userContact
   }
 
@@ -42,11 +41,6 @@ export default class UserModule extends VuexModule {
     keycloakService.initSessionStorage()
     // Load User Info
     return keycloakService.getUserInfo()
-  }
-
-  @Action({ rawError: true })
-  public login (idpHint:string) {
-    keycloakService.login(idpHint)
   }
 
   @Action({ commit: 'setUserProfile' })
