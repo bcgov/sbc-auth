@@ -62,6 +62,10 @@ class Org:
         self._model.update_org_from_dict(org_info)
         return self
 
+    def delete_org(self):
+        """Delete this org."""
+        self._model.delete()
+
     @staticmethod
     def find_by_org_id(org_id):
         """Find and return an existing organization with the provided id."""

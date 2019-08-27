@@ -35,6 +35,21 @@ class Entity:
         """Return an Entity Service."""
         self._model = model
 
+    @property
+    def identifier(self):
+        """Return the unique identifier for this entity."""
+        return self._model.id
+
+    @property
+    def pass_code(self):
+        """Return the pass_code for this entity."""
+        return self._model.pass_code
+
+    def set_pass_code_claimed(self, pass_code_claimed):
+        """Set the pass_code_claimed status."""
+        self._model.pass_code_claimed = pass_code_claimed
+        self._model.save()
+
     @ServiceTracing.disable_tracing
     def as_dict(self):
         """Return the entity as a python dictionary.
