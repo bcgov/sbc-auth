@@ -20,7 +20,12 @@ import pytest
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models import Org as OrgModel
+from auth_api.models import OrgStatus as OrgStatusModel
+from auth_api.models import OrgType as OrgTypeModel
+from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.models import User as UserModel
+from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 
 
@@ -48,6 +53,10 @@ TEST_UPDATED_CONTACT_INFO = {
     'phoneExtension': '123'
 }
 
+TEST_ORG_INFO = {
+    'name': 'My Test Org'
+}
+
 
 def factory_user_model(username,
                        firstname=None,
@@ -62,6 +71,31 @@ def factory_user_model(username,
                      keycloak_guid=keycloak_guid)
     user.save()
     return user
+
+
+def factory_org_service(session, name):
+    """Produce a templated org service."""
+    org_type = OrgTypeModel(code='TEST', desc='Test')
+    session.add(org_type)
+    session.commit()
+
+    org_status = OrgStatusModel(code='TEST', desc='Test')
+    session.add(org_status)
+    session.commit()
+
+    preferred_payment = PaymentTypeModel(code='TEST', desc='Test')
+    session.add(preferred_payment)
+    session.commit()
+
+    org_model = OrgModel(name=name)
+    org_model.org_type = org_type
+    org_model.org_status = org_status
+    org_model.preferred_payment = preferred_payment
+    org_model.save()
+
+    org = OrgService(org_model)
+
+    return org
 
 
 def test_as_dict(session):  # pylint: disable=unused-argument
@@ -104,9 +138,9 @@ def test_add_contact_to_user(session):  # pylint: disable=unused-argument
     dictionary = user.as_dict()
     assert dictionary['contacts']
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['email'] == TEST_CONTACT_INFO['email']
-    assert dictionary['contacts'][0]['contact']['phone'] == TEST_CONTACT_INFO['phone']
-    assert dictionary['contacts'][0]['contact']['phoneExtension'] == TEST_CONTACT_INFO['phoneExtension']
+    assert dictionary['contacts'][0]['email'] == TEST_CONTACT_INFO['email']
+    assert dictionary['contacts'][0]['phone'] == TEST_CONTACT_INFO['phone']
+    assert dictionary['contacts'][0]['phoneExtension'] == TEST_CONTACT_INFO['phoneExtension']
 
 
 def test_add_contact_user_no_user(session):  # pylint: disable=unused-argument
@@ -146,7 +180,7 @@ def test_update_contact_for_user(session):  # pylint: disable=unused-argument
 
     assert updated_user is not None
     dictionary = updated_user.as_dict()
-    assert dictionary['contacts'][0]['contact']['email'] == TEST_UPDATED_CONTACT_INFO['email']
+    assert dictionary['contacts'][0]['email'] == TEST_UPDATED_CONTACT_INFO['email']
 
 
 def test_update_contact_for_user_no_user(session):  # pylint: disable=unused-argument
@@ -184,7 +218,7 @@ def test_delete_contact_for_user(session):  # pylint: disable=unused-argument
 
     assert updated_user is not None
     dictionary = updated_user.as_dict()
-    assert dictionary.get('contacts') is None
+    assert dictionary.get('contacts') == []
 
 
 def test_delete_contact_for_user_no_user(session):  # pylint: disable=unused-argument
@@ -270,3 +304,18 @@ def test_user_find_by_username_missing_username(session):  # pylint: disable=unu
     user = UserService.find_by_username('foo')
 
     assert user is None
+
+
+def test_get_orgs(session):  # pylint:disable=unused-argument
+    """Assert that orgs for a user can be retrieved."""
+    user_model = factory_user_model(username='testuser',
+                                    roles='{edit,uma_authorization,basic}',
+                                    keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
+    user = UserService(user_model)
+
+    OrgService.create_org(TEST_ORG_INFO, user_id=user.identifier)
+
+    response = user.get_orgs()
+    assert response['orgs']
+    assert len(response['orgs']) == 1
+    assert response['orgs'][0]['name'] == TEST_ORG_INFO['name']

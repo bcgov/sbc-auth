@@ -19,6 +19,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
+from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import OrgSchema
 from auth_api.utils.util import camelback2snake
@@ -45,17 +46,25 @@ class Org:
         return obj
 
     @staticmethod
-    def create_org(org_info: dict):
+    def create_org(org_info: dict, user_id):
         """Create a new organization."""
         org = OrgModel.create_from_dict(org_info=org_info)
-        org = org.flush()
-        org.commit()
+        org.save()
+
+        # create the membership record for this user
+        membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='OWNER')
+        membership.save()
+
         return Org(org)
 
     def update_org(self, org_info):
         """Update the passed organization with the new info."""
         self._model.update_org_from_dict(org_info)
         return self
+
+    def delete_org(self):
+        """Delete this org."""
+        self._model.delete()
 
     @staticmethod
     def find_by_org_id(org_id):

@@ -98,7 +98,7 @@
               }, {
                 "name": "keycloak-configuration",
                 "configMap": {
-                  "name": "${NAME}-${TAG_NAME}-configuration",
+                  "name": "${NAME}-${TAG_NAME}-keycloak-config",
                   "defaultMode": 420
                 }
               }
@@ -128,7 +128,7 @@
                   {
                     "name": "keycloak-configuration",
                     "readOnly": true,
-                    "mountPath": "/var/www/html/${WEB_APP_CONTEXT_PATH}/config"
+                    "mountPath": "/var/www/html/${WEB_APP_CONTEXT_PATH}/config/kc"
                   }
                 ],
                 "envFrom": [],

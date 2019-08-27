@@ -15,16 +15,17 @@
 
 Test suite to ensure that the Affiliation model routines are working as expected.
 """
+from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
-from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import OrgStatus as OrgStatusModel
+from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
-from auth_api.models import Affiliation as AffiliationModel
 
 
 def factory_entity_model():
-    entity = EntityModel(business_identifier='CP1234567')
+    """Produce a templated entity model."""
+    entity = EntityModel(business_identifier='CP1234567', business_number='791861073BC0001', name='Foobar, Inc.')
     entity.save()
     return entity
 
@@ -50,12 +51,13 @@ def factory_org_model(name):
 
 
 def factory_affiliation_model(entity_id, org_id):
-    affiliation = AffiliationModel(entity=entity_id, org=org_id)
+    """Produce a templated affiliation model."""
+    affiliation = AffiliationModel(entity_id=entity_id, org_id=org_id)
     affiliation.save()
     return affiliation
 
 
-def test_affiliation(session):
+def test_affiliation(session):  # pylint:disable=unused-argument
     """Assert that a Affiliation can be stored in the service."""
     entity = factory_entity_model()
     org = factory_org_model(name='My Test Org')
@@ -66,7 +68,7 @@ def test_affiliation(session):
     assert affiliation.id is not None
 
 
-def test_find_affiliation_by_ids(session):
+def test_find_affiliation_by_ids(session):  # pylint:disable=unused-argument
     """Assert that a affiliation can be retrieved via the org id and affiliation id."""
     entity = factory_entity_model()
     org = factory_org_model(name='My Test Org')
@@ -76,22 +78,21 @@ def test_find_affiliation_by_ids(session):
     assert result_affiliation is not None
 
 
-def test_find_by_affiliation_id(session):
+def test_find_affiliations_by_org_id(session):  # pylint:disable=unused-argument
     """Assert that a affiliation can be retrieved via affiliation id."""
     entity = factory_entity_model()
     org = factory_org_model(name='My Test Org')
     affiliation = factory_affiliation_model(entity.id, org.id)
 
-    result_affiliation = affiliation.find_by_affiliation_id(affiliation_id=affiliation.id)
+    result_affiliation = affiliation.find_affiliations_by_org_id(org_id=org.id)
     assert result_affiliation is not None
 
 
-def test_find_affiliations_by_org_id(session):
+def test_find_affiliation_by_org_and_entity_ids(session):  # pylint:disable=unused-argument
     """Assert that affiliations can be retrieved via the org id."""
     entity = factory_entity_model()
     org = factory_org_model(name='My Test Org')
     affiliation = factory_affiliation_model(entity.id, org.id)
 
-    result_affiliations = affiliation.find_affiliations_by_org_id(org_id=org.id)
+    result_affiliations = affiliation.find_affiliation_by_org_and_entity_ids(org_id=org.id, entity_id=entity.id)
     assert result_affiliations is not None
-

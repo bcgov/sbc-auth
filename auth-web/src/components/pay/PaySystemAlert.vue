@@ -21,7 +21,7 @@ export default class PaySystemAlert extends Vue {
       this.paymentStore.fetchPaySystemStatus()
     }
     get isPaySystemDown () {
-      return !this.paymentStore.paySystemStatus.current_status
+      return !this.paymentStore.paySystemStatus.currentStatus
     }
     get alertMessage () {
       // TODO once the server side sends when the system is back up , calculate it..

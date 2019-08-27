@@ -18,7 +18,6 @@ from marshmallow import fields
 from auth_api.models import Entity as EntityModel
 
 from .base_schema import BaseSchema
-from .contact_link import ContactLinkSchema
 
 
 class EntitySchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
@@ -28,7 +27,9 @@ class EntitySchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-p
         """Maps all of the Entity fields to a default schema."""
 
         model = EntityModel
-        exlude = ('id',)
+        exclude = ('id', 'pass_code')
 
     business_identifier = fields.String(data_key='businessIdentifier')
-    contacts = fields.Nested(ContactLinkSchema, many=True)
+    business_number = fields.String(data_key='businessNumber')
+    pass_code_claimed = fields.Boolean(data_key='passCodeClaimed')
+    contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)

@@ -24,6 +24,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
+from auth_api.models import User as UserModel
 from auth_api.services import Org as OrgService
 
 
@@ -42,6 +43,21 @@ TEST_CONTACT_INFO = {
 TEST_UPDATED_CONTACT_INFO = {
     'email': 'bar@foo.com'
 }
+
+
+def factory_user_model(username,
+                       firstname=None,
+                       lastname=None,
+                       roles=None,
+                       keycloak_guid=None):
+    """Return a valid user object stamped with the supplied designation."""
+    user = UserModel(username=username,
+                     firstname=firstname,
+                     lastname=lastname,
+                     roles=roles,
+                     keycloak_guid=keycloak_guid)
+    user.save()
+    return user
 
 
 def factory_org_service(session, name):
@@ -80,7 +96,10 @@ def test_as_dict(session):  # pylint:disable=unused-argument
 
 def test_create_org(session):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
-    org = OrgService.create_org(TEST_ORG_INFO)
+    user = factory_user_model(username='testuser',
+                              roles='{edit,uma_authorization,basic}',
+                              keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
+    org = OrgService.create_org(TEST_ORG_INFO, user_id=user.id)
     assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TEST_ORG_INFO['name']
@@ -121,7 +140,7 @@ def test_add_contact(session):  # pylint:disable=unused-argument
     dictionary = org.as_dict()
     assert dictionary['contacts']
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['email'] == TEST_CONTACT_INFO['email']
+    assert dictionary['contacts'][0]['email'] == TEST_CONTACT_INFO['email']
 
 
 def test_add_contact_duplicate(session):  # pylint:disable=unused-argument
@@ -141,14 +160,14 @@ def test_update_contact(session):  # pylint:disable=unused-argument
 
     dictionary = org.as_dict()
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['email'] == \
+    assert dictionary['contacts'][0]['email'] == \
         TEST_CONTACT_INFO['email']
 
     org.update_contact(TEST_UPDATED_CONTACT_INFO)
 
     dictionary = org.as_dict()
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['contact']['email'] == \
+    assert dictionary['contacts'][0]['email'] == \
         TEST_UPDATED_CONTACT_INFO['email']
 
 
