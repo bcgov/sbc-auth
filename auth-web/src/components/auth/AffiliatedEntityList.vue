@@ -4,7 +4,7 @@
       <v-card>
         <v-card-text>
           <p class="business-list-empty-message">{{ $t('businessListEmptyMessage')}}</p>
-          <p>{{ $t('businessListActionMessage')}}</p>
+          <p><a @click="addBusiness()">{{ $t('businessListActionMessage')}}</a></p>
         </v-card-text>
       </v-card>
     </div>
@@ -33,10 +33,11 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { Component } from 'vue-property-decorator'
+import { Component, Emit } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
 import UserModule from '../../store/modules/user'
 import configHelper from '../../util/config-helper'
+import { AffiliatedEntity } from '../../models/Organization'
 
 @Component
 export default class AffiliatedEntityList extends Vue {
@@ -48,7 +49,7 @@ export default class AffiliatedEntityList extends Vue {
   }
 
   get affiliatedEntities () {
-    let affiliatedEntities = []
+    let affiliatedEntities:AffiliatedEntity[] = []
     this.userStore.organizations.forEach(organization => {
       if (organization.affiliatedEntities) {
         organization.affiliatedEntities.forEach(entity => {
@@ -57,6 +58,10 @@ export default class AffiliatedEntityList extends Vue {
       }
     })
     return affiliatedEntities
+  }
+
+  @Emit()
+  addBusiness() {    
   }
 
   redirectToNext (incorporationNumber: String) {

@@ -1,6 +1,15 @@
-import { AffiliatedEntity } from './AffiliatedEntity'
+export interface Organizations
+{
+  orgs : Organization []
+}
 
 export interface Organization {
   name: string;
   affiliatedEntities: AffiliatedEntity[];
+}
+
+export interface AffiliatedEntity {
+  businessIdentifier: string;
+  businessNumber: string;
+  name: string;
 }
