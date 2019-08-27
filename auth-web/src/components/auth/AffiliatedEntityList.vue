@@ -61,7 +61,7 @@ export default class AffiliatedEntityList extends Vue {
   }
 
   @Emit()
-  addBusiness() {    
+  addBusiness () {
   }
 
   redirectToNext (incorporationNumber: String) {

@@ -13,8 +13,8 @@ import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
   components: { AffiliatedEntityList }
 })
 export default class EntityManagement extends Vue {
-  showAddBusinessModal(){    
-    //Todo: Show the add business popup once it is merged.
+  showAddBusinessModal () {
+    // Todo: Show the add business popup once it is merged.
   }
 }
 </script>
