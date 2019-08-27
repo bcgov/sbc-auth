@@ -41,8 +41,9 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     org_type = relationship('OrgType')
     org_status = relationship('OrgStatus')
     preferred_payment = relationship('PaymentType')
-    members = relationship('Membership', back_populates='org')
-    affiliated_entities = relationship('Affiliation', back_populates='org', primaryjoin="and_(Org.id == Affiliation.org_id, Org.type_code == 'IMPLICIT')")
+    members = relationship('Membership', back_populates='org', cascade='all,delete')
+    affiliated_entities = relationship('Affiliation', back_populates='org',
+                                       primaryjoin="and_(Org.id == Affiliation.org_id, Org.type_code == 'IMPLICIT')")
 
     @classmethod
     def create_from_dict(cls, org_info: dict):

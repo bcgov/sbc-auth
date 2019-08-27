@@ -40,6 +40,11 @@ class Affiliation:
         """Return the unique identifier for this model."""
         return self._model.id
 
+    @property
+    def entity(self):
+        """Return the entity for this affiliation as a service."""
+        return EntityService(self._model.entity)
+
     @ServiceTracing.disable_tracing
     def as_dict(self):
         """Return the affiliation as a python dictionary.
@@ -74,7 +79,7 @@ class Affiliation:
         return data
 
     @staticmethod
-    def create_affiliation(org_id, business_identifier):
+    def create_affiliation(org_id, business_identifier, pass_code=None):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
         org = OrgService.find_by_org_id(org_id)
@@ -85,7 +90,30 @@ class Affiliation:
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        entity_id = entity.as_dict()['id']
+        entity_id = entity.identifier
+
+        authorized = True
+
+        # Authorized if the entity has been claimed
+        if entity.as_dict()['passCodeClaimed']:
+            authorized = False
+
+        # If a passcode was provided...
+        if pass_code:
+            # ... and the entity has a passcode on it, check that they match
+            if entity.pass_code != pass_code:
+                authorized = False
+        # If a passcode was not provided...
+        else:
+            # ... check that the entity does not have a passcode protecting it
+            if entity.pass_code:
+                authorized = False
+
+        if not authorized:
+            # If org being affiliated was IMPLICIT, remove it since the affiliation was not valid
+            if org.as_dict()['org_type'] == 'IMPLICIT':
+                org.delete_org()
+            raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
 
         # Ensure this affiliation does not already exist
         affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id)
@@ -94,6 +122,7 @@ class Affiliation:
 
         affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id)
         affiliation.save()
+        entity.set_pass_code_claimed(True)
 
         return Affiliation(affiliation)
 
@@ -108,10 +137,11 @@ class Affiliation:
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        entity_id = entity.as_dict()['id']
+        entity_id = entity.identifier
 
         affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id=org_id, entity_id=entity_id)
         if affiliation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         affiliation.delete()
+        entity.set_pass_code_claimed(False)

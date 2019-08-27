@@ -1,7 +1,6 @@
 import Axios, { AxiosPromise, AxiosResponse } from 'axios'
 import configHelper from '@/util/config-helper'
 import { User } from '../models/user'
-import { UserContact } from '../models/usercontact'
 import { Contact } from '../models/contact'
 import { Organizations } from '@/models/Organization'
 

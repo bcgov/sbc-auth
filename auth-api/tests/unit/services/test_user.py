@@ -218,7 +218,7 @@ def test_delete_contact_for_user(session):  # pylint: disable=unused-argument
 
     assert updated_user is not None
     dictionary = updated_user.as_dict()
-    assert dictionary.get('contacts') is None
+    assert dictionary.get('contacts') == []
 
 
 def test_delete_contact_for_user_no_user(session):  # pylint: disable=unused-argument
