@@ -23,7 +23,7 @@ export default Vue.extend({
     SbcHeader,
     SbcFooter,
     PaySystemAlert
-  },
+  }
 })
 
 </script>
