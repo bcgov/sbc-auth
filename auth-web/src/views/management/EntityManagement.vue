@@ -1,20 +1,10 @@
 <template>
-  <div>
-    <h2>Manage Businesses</h2>
-    <AffiliatedEntityList @add-business="showAddBusinessModal()"/>
-  </div>
+    <h1>Entity Management</h1>
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
-import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
-
-@Component({
-  components: { AffiliatedEntityList }
+import Vue from 'vue'
+export default Vue.extend({
+  name: 'EntityManagement'
 })
-export default class EntityManagement extends Vue {
-  showAddBusinessModal () {
-    // Todo: Show the add business popup once it is merged.
-  }
-}
 </script>

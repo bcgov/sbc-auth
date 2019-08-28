@@ -1,22 +1,22 @@
 import Keycloak from 'keycloak-js'
 import configHelper from '../util/config-helper'
 import { UserInfo } from '../models/userInfo'
-import { SessionStorageKeys } from '../util/constants'
+import { SessionStorageKeys, AppConstants } from '../util/constants'
 
 const kc: Keycloak.KeycloakInstance = null
+const keyCloakConfig = `/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`
 
 export default {
 
   init (idpHint : string) {
     this.cleanupSession()
     let token = configHelper.getFromSession(SessionStorageKeys.KeyCloakToken)
-    this.kc = Keycloak(`/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`)
+    this.kc = Keycloak(keyCloakConfig)
     let kcLogin = this.kc.login
     this.kc.login = (options) => {
       options.idpHint = idpHint
       kcLogin(options)
     }
-
     return this.kc.init({ token: token, onLoad: 'login-required' })
   },
 
@@ -37,8 +37,20 @@ export default {
     }
   },
 
-  login (idpHint:string) {
-    this.kc.login({ idpHint: idpHint })
+  logout (redirectUrl: string) {
+    let token = configHelper.getFromSession(SessionStorageKeys.KeyCloakToken)
+    if (token) {
+      this.kc = Keycloak(keyCloakConfig)
+      this.kc.init({ token: token, onLoad: 'check-sso' }).success(authenticated => {
+        if (authenticated) {
+          configHelper.clearSession()
+          if (!redirectUrl) {
+            redirectUrl = window.location.origin + AppConstants.RootPath
+          }
+          this.kc.logout({ redirectUri: redirectUrl })
+        }
+      })
+    }
   },
 
   cleanupSession () {

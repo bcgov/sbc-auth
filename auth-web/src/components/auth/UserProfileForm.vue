@@ -171,3 +171,7 @@ export default class UserProfileForm extends Vue {
   }
 }
 </script>
+<style lang="stylus" scoped>
+@import '../../assets/styl/theme.styl';
+
+</style>
