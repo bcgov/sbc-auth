@@ -34,6 +34,6 @@ describe('initialize keycloak', () => {
 
   it('should clear session storage ', () => {
     expect(sessionStorage.getItem('KEYCLOAK_TOKEN')).toEqual(null)
-    expect(sessionStorage.getItem('KEYCLOAK_REFRESH')).toEqual(null)
+    expect(sessionStorage.getItem('KEYCLOAK_REFRESH_TOKEN')).toEqual(null)
   })
 })
