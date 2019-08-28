@@ -142,12 +142,6 @@ export default class PasscodeForm extends Vue {
       this.businessStore.login({ businessNumber: this.businessNumber, passCode: this.passcode })
         .then(response => {
           // set token and store in storage
-          const msg = JSON.stringify(
-            { 'access_token': response.data.access_token,
-              'refresh_token': response.data.refresh_token,
-              'registries_trace_id': response.data['registries-trace-id']
-            }
-          )
           sessionStorage.KEYCLOAK_TOKEN = response.data.access_token
           sessionStorage.KEYCLOAK_REFRESH_TOKEN = response.data.refresh_token
           sessionStorage.REGISTRIES_TRACE_ID = response.data['registries-trace-id']

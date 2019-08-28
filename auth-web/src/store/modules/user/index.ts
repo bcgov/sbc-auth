@@ -66,4 +66,9 @@ export default class UserModule extends VuexModule {
         return response.data
       })
   }
+
+  @Action({ rawError: true })
+  public logout (redirectUrl: string) {
+    keycloakService.logout(redirectUrl)
+  }
 }
