@@ -46,5 +46,9 @@ export default {
 
   removeFromSession (key:string) {
     sessionStorage.removeItem(key)
+  },
+
+  clearSession () {
+    sessionStorage.clear()
   }
 }
