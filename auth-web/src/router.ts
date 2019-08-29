@@ -11,6 +11,8 @@ import CreateAccount from './views/CreateAccount.vue'
 import Template from './views/management/Template.vue'
 import UserProfile from './views/UserProfile.vue'
 import Dashboard from './components/auth/Dashboard.vue'
+import Signout from './components/auth/Signout.vue'
+import AddBusinessForm from './components/auth/AddBusinessForm.vue'
 
 Vue.use(Router)
 
@@ -34,6 +36,7 @@ const routes = [
   { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true } },
   { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
   { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } },
+  { path: '/addbusiness', component: AddBusinessForm },
   { path: '*', component: PageNotFound }
 ]
 
