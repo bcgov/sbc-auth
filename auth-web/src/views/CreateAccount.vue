@@ -1,29 +1,31 @@
 <template>
-  <div class="view-container">
-    <article>
-      <h1>Create Account</h1>
-        <p>Before you can create an account with BC Registries & Online Services,
-          you'll need to sign-in to our application with an existing
-          <span><a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card"
-          target="_blank">BC Services Card</a></span>
-        </p>
+  <v-container>
+    <div class="view-container">
+      <article>
+        <h1>Create Account</h1>
+          <p>Before you can create an account with BC Registries & Online Services,
+            you'll need to sign-in to our application with an existing
+            <span><a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card"
+            target="_blank">BC Services Card</a></span>
+          </p>
 
-        <v-btn color='primary' to="/signin/bcsc" class=".signin-button">
-          <span>Sign in with my BC Services Card</span>
-        </v-btn>
-        <p>
-          <span><a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/get-a-card"
-          target="_blank">I don't have BC Services Card</a></span>
-        </p>
-        <h2>Why do I need to sign in with my BC Services Card?</h2>
-        <p>
-          <span>A BC Services Card provides secure access to provincial government services and access to online services and features with BC Registries. </span>
-        </p>
-    </article>
-    <aside>
-      <SupportInfoCard/>
-    </aside>
-  </div>
+          <v-btn color='primary' to="/signin/bcsc" class=".signin-button">
+            <span>Sign in with my BC Services Card</span>
+          </v-btn>
+          <p>
+            <span><a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/get-a-card"
+            target="_blank">I don't have BC Services Card</a></span>
+          </p>
+          <h2>Why do I need to sign in with my BC Services Card?</h2>
+          <p>
+            <span>A BC Services Card provides secure access to provincial government services and access to online services and features with BC Registries. </span>
+          </p>
+      </article>
+      <aside>
+        <SupportInfoCard/>
+      </aside>
+    </div>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -42,63 +44,3 @@ export default class CreateAccount extends Vue {
 
 }
 </script>
-
-<style lang="stylus" scoped>
-  @import "../assets/styl/theme.styl"
-
-  h1, h2
-    margin-bottom 1.5rem
-
-  article
-    flex 1 1 auto
-
-  aside
-    flex 0 0 auto
-    margin-top 2rem
-
-  .intro-text
-    margin-bottom 2rem
-    letter-spacing -0.01rem
-    font-size 1rem
-    font-weight 300
-
-    em
-      font-style normal
-      font-weight 400
-
-  .view-container
-    display flex
-    flex-flow column nowrap
-
-  .sign-in-card .container
-    padding 1.5rem
-
-  @media (max-width 480px)
-    h1 span
-      display block
-
-  @media (min-width 768px)
-    h1
-      margin-bottom 2rem
-
-    .intro-text
-      margin-bottom 3rem
-      font-size 1.125rem
-
-  @media (min-width: 960px)
-    article
-      padding-top 0.8rem
-      padding-bottom 0.8rem
-
-    aside
-      margin-top 0
-      margin-left 2rem
-      width 20rem
-
-    .sign-in-card .container
-      padding 2rem
-
-    .view-container
-      flex-flow row nowrap
-
-</style>
