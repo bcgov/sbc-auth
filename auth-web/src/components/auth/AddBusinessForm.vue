@@ -37,45 +37,12 @@
         ></v-text-field>
       </div>
       <div class="passcode-form__row passcode-form__form-btns">
-        <v-btn class="recovery-btn" color="primary" flat large @click.stop="noPasscodeDialog = true">
-          Don't have a Passcode?
-        </v-btn>
-        <v-btn class="sign-in-btn" @click="login" color="primary" large>
-          <v-progress-circular :indeterminate="true" size="20" width="2" v-if="showSpinner"></v-progress-circular>
-          <span>{{showSpinner ? 'Signing in' : 'Sign In'}}</span>
-          <v-icon dark right v-if="!showSpinner">arrow_forward</v-icon>
+        <v-btn class="sign-in-btn" @click="addBusiness" color="primary" large>
+          <span>{{'Add Business'}}</span>
         </v-btn>
       </div>
     </v-form>
-    <v-dialog width="50rem" v-model="noPasscodeDialog">
-      <v-card>
-        <v-card-title>Don't have a Passcode?</v-card-title>
-        <v-divider></v-divider>
-        <v-card-text>
-          If you have not received, or have lost your Passcode, please contact us at:
-          <ul class="contact-list">
-            <li class="contact-list__row">
-              <v-icon color="primary">phone</v-icon>
-              <span class="contact-info__value">{{ $t('techSupportPhone') }}</span>
-            </li>
-            <li class="contact-list__row">
-              <v-icon color="primary">email</v-icon>
-              <span class="contact-info__value"><a v-bind:href="'mailto:' + $t('techSupportEmail')">{{ $t('techSupportEmail') }}</a></span>
-            </li>
-          </ul>
-        </v-card-text>
-        <v-divider></v-divider>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="primary"
-            flat
-            @click="noPasscodeDialog = false"
-          >Close
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+
   </div>
 </template>
 
@@ -88,7 +55,7 @@ import configHelper from '../../util/config-helper'
 import iframeServices from '../../services/iframe.services'
 
 @Component
-export default class PasscodeForm extends Vue {
+export default class AddBusinessForm extends Vue {
   showPasscode = false
   showSpinner = false
   noPasscodeDialog = false
@@ -116,46 +83,20 @@ export default class PasscodeForm extends Vue {
   }
 
   private redirectToNext (): void {
-    if ((this.businessStore.currentBusiness.contacts &&
-         this.businessStore.currentBusiness.contacts.length > 0) || this.businessStore.skippedContactEntry) {
-      // transition to co-ops UI as we already have a contact set (or user has opted to skip already in this session)
-      setTimeout(() => {
-        window.location.href = this.VUE_APP_COPS_REDIRECT_URL
-      }, 500)
-    } else {
-      // transition to business contact UI
-      setTimeout(() => {
-        this.$router.push('/businessprofile')
-      }, 500)
-    }
+    // transition to business contact UI
+    setTimeout(() => {
+      this.$router.push('/main')
+    }, 500)
   }
 
-  mounted () {
-    if (sessionStorage.getItem('KEYCLOAK_TOKEN')) {
-      this.redirectToNext()
-    }
-  }
-
-  login () {
+  addBusiness () {
     if (this.isFormValid()) {
       this.showSpinner = true
-      this.businessStore.login({ businessNumber: this.businessNumber, passCode: this.passcode })
-        .then(response => {
-          // set token and store in storage
-          sessionStorage.KEYCLOAK_TOKEN = response.data.access_token
-          sessionStorage.KEYCLOAK_REFRESH_TOKEN = response.data.refresh_token
-          sessionStorage.REGISTRIES_TRACE_ID = response.data['registries-trace-id']
-
-          // attempt to load business
-          this.businessStore.loadBusiness(this.businessNumber)
-            .then(() => {
-              this.redirectToNext()
-            })
-        })
-        .catch(response => {
-          this.loginError = response.response.data.message
-          this.showSpinner = false
-        })
+      // attempt to add business
+      this.businessStore.addBusiness({ businessNumber: this.businessNumber, passCode: this.passcode })
+      .then(() => {
+          this.redirectToNext()
+        })      
     }
   }
 }

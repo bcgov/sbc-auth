@@ -33,7 +33,7 @@ _JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('POST,OPTIONS')
-@API.route('', methods=['POST'])
+@API.route('', methods=['POST', 'OPTIONS'])
 class EntityResources(Resource):
     """Resource for managing entities."""
 
@@ -57,7 +57,7 @@ class EntityResources(Resource):
 
 
 @cors_preflight('GET,OPTIONS')
-@API.route('/<string:business_identifier>', methods=['GET'])
+@API.route('/<string:business_identifier>', methods=['GET', 'OPTIONS'])
 class EntityResource(Resource):
     """Resource for managing entities."""
 
@@ -80,7 +80,7 @@ class EntityResource(Resource):
 
 
 @cors_preflight('DELETE,POST,PUT,OPTIONS')
-@API.route('/<string:business_identifier>/contacts', methods=['DELETE', 'POST', 'PUT'])
+@API.route('/<string:business_identifier>/contacts', methods=['DELETE', 'POST', 'PUT', 'OPTIONS'])
 class ContactResource(Resource):
     """Resource for managing entity contacts."""
 

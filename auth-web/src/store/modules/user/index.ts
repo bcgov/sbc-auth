@@ -4,6 +4,7 @@ import userServices from '@/services/user.services'
 import { UserInfo } from '@/models/userInfo'
 import { User } from '@/models/user'
 import { Contact } from '@/models/contact'
+import { Organization } from '@/models/Organization'
 
 @Module({
   name: 'user'
@@ -14,6 +15,13 @@ export default class UserModule extends VuexModule {
   userProfile: User
 
   userContact: Contact
+
+  organizations: Organization[] = []
+
+  @Mutation
+  public setOrganizations (organizations: Organization[]) {
+    this.organizations = organizations
+  }
 
   @Mutation
   public setUserProfile (userProfile: User) {
@@ -65,5 +73,18 @@ export default class UserModule extends VuexModule {
       .then(response => {
         return response.data
       })
+  }
+
+  @Action({ commit: 'setOrganizations' })
+  public async getOrganizations () {
+    return userServices.getOrganizations()
+      .then(response => {
+        return response.data && response.data.orgs ? response.data.orgs : []
+      })
+  }
+
+  @Action({ rawError: true })
+  public logout (redirectUrl: string) {
+    keycloakService.logout(redirectUrl)
   }
 }
