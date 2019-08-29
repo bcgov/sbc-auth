@@ -3,7 +3,8 @@
     <div class="view-container">
       <article>
         <h1>Update Business Profile</h1>
-        <p class="intro-text">It looks like we are missing some contact information for your {{businessType}}. You will need to supply us with a few additional details before you can get started...</p>
+        <p class="intro-text" v-show="!editing">It looks like we are missing some contact information for your {{businessType}}. You will need to supply us with a few additional details before you can get started...</p>
+        <p class="intro-text" v-show="editing">Please update the contact information for your {{businessType}} below.</p>
         <v-card class="profile-card">
           <v-container>
             <h2>Business Contact</h2>
@@ -35,7 +36,17 @@ import SupportInfoCard from '@/components/SupportInfoCard.vue'
 export default class BusinessProfile extends Vue {
   private businessStore = getModule(BusinessModule, this.$store)
   // TODO: Set businessType from current business in store
-  private businessType = 'Co-op'
+  private businessType = 'Cooperative'
+  editing = false
+  
+  mounted () {
+    // Check if there is already contact info so that we display the appropriate copy
+    if (this.businessStore.currentBusiness &&
+        this.businessStore.currentBusiness.contacts &&
+        this.businessStore.currentBusiness.contacts.length > 0) {
+          this.editing = true
+        }
+  }
 }
 </script>
 
