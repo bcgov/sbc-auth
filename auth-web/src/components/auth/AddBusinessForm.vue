@@ -57,10 +57,7 @@ import iframeServices from '../../services/iframe.services'
 @Component
 export default class AddBusinessForm extends Vue {
   showPasscode = false
-  showSpinner = false
-  noPasscodeDialog = false
   loginError = ''
-  valid = false
   VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   entityNumRules = [
     v => !!v || 'Incorporation Number is required'
@@ -91,12 +88,18 @@ export default class AddBusinessForm extends Vue {
 
   addBusiness () {
     if (this.isFormValid()) {
-      this.showSpinner = true
-      // attempt to add business
-      this.businessStore.addBusiness({ businessNumber: this.businessNumber, passCode: this.passcode })
-      .then(() => {
-          this.redirectToNext()
-        })      
+      // still need to call login as we need to verify if businessNumber and passCode are correct.
+      this.businessStore.login({ businessNumber: this.businessNumber, passCode: this.passcode })
+        .then(response => {
+          // attempt to add business
+          this.businessStore.addBusiness({ businessNumber: this.businessNumber, passCode: this.passcode })
+            .then(() => {
+              this.redirectToNext()
+            })
+        })
+        .catch(response => {
+          this.loginError = response.response.data.message
+        })
     }
   }
 }

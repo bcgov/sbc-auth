@@ -1,3 +1,3 @@
 export interface Org {
-    name: string;   
+    name: string;
 }

@@ -1,4 +1,4 @@
 export interface Affiliation {
-    businessIdentifier: string;      
-    passCode: string; 
+    businessIdentifier: string;
+    passCode: string;
 }

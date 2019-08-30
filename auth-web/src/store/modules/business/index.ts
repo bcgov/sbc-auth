@@ -3,9 +3,8 @@ import loginServices from '@/services/login.services'
 import { Business } from '@/models/business'
 import { Contact } from '@/models/contact'
 import businessServices from '@/services/business.services'
-import { Entity } from '@/models/entity'
+import { Affiliation } from '@/models/affiliation'
 import { Org } from '@/models/org'
-import Axios, { AxiosPromise, AxiosResponse } from 'axios'
 
 interface LoginPayload {
   businessNumber: string
@@ -60,58 +59,23 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async addBusiness (businessIdentifier: string, passCode: string) { 
-    console.log('###########The businessIdentifier is: ' + businessIdentifier)      
-    let orgFound: boolean = false
-    let orgIdentifier: string = ''
-
-    const entity: Entity = {
-      businessIdentifier: businessIdentifier,
-      name: '',
-      businessNumber: '',
-      passCode: passCode
+  public async addBusiness (payload: LoginPayload) {
+    const affiliation: Affiliation = {
+      businessIdentifier: payload.businessNumber,
+      passCode: payload.passCode
     }
-   
-    businessServices.getOrgs().then(response => { console.log('########### getOrgs response123: ' + response); }).catch(error => { console.log(' ########### getOrgs response456: ' + error); });
-    console.log('###########222The businessIdentifier is: ' + businessIdentifier)    
 
-    // businessServices.createOrg ({ name: businessIdentifier }).then(response => { console.log('########### createOrgresponse123: ' + response.data); }).catch(error => { console.log('########### createOrg response456: ' + error); });     
-         
-    // businessServices.createAffiliation (orgIdentifier, entity)
-    
-    //  businessServices.getOrgs()
-    //   .then(response => {
-    //     if (response.data) {   
-    //       console.log('###########The respon response.data is: ' + response.data)  
-            
-    //       response.data.orgs.forEach(element => {
-    //         console.log('###########The element.id is: ' + element.id)    
-    //         console.log('###########The element.name is: ' + element.name) 
-    //         if (element.name === businessIdentifier) {
-    //           orgFound = true
-    //           orgIdentifier = element.id
-    //         }
-    //       })
-    //     }
-    //   }).catch(function (error) { console.log('########### response: ' + error); });
-
-    //   if (orgFound === false) {
-    //     businessServices.createOrg ({ name: businessIdentifier })       
-    //       .then(createResponse => {
-    //         if ((createResponse.status === 200 || createResponse.status === 201) && createResponse.data) {
-    //           for (var id in createResponse.data) {
-    //             orgIdentifier = createResponse.data[id]
-    //           } 
-    //         }
-    //       }).catch(function (error) { console.log('########### response: ' + error); });        
-    //   } 
-
-    //   businessServices.createAffiliation (orgIdentifier, entity)
-    //   .then(createResponse => {
-    //     if ((createResponse.status === 200 || createResponse.status === 201) && createResponse.data) {
-    //       this.context.commit('setCurrentBusiness', createResponse.data) 
-    //     }
-    //   }).catch(function (error) { console.log('########### response: ' + error); });      
+    return businessServices.createOrg({ name: payload.businessNumber })
+      .then(createResponse => {
+        if ((createResponse.status === 200 || createResponse.status === 201) && createResponse.data) {
+          businessServices.createAffiliation(createResponse.data['id'], affiliation)
+            .then(createResponse => {
+              if ((createResponse.status === 200 || createResponse.status === 201) && createResponse.data) {
+                this.context.commit('setCurrentBusiness', createResponse.data)
+              }
+            })
+        }
+      })
   }
 
   @Action({ rawError: true })
