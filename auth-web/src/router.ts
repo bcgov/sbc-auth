@@ -38,7 +38,7 @@ const routes = [
   { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true } },
   { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
   { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } },
-  { path: '/addbusiness', component: AddBusinessForm },
+  { path: '/addbusiness', component: AddBusinessForm, meta: { requiresAuth: true } },
   { path: '*', component: PageNotFound }
 ]
 
