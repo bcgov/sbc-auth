@@ -3,9 +3,8 @@ import 'regenerator-runtime/runtime' // to use transpiled generator functions
 import Vue from 'vue'
 import './plugins/vuetify'
 import App from './App.vue'
-import router from './router'
+import router, { getRoutes } from './router'
 import store from './store'
-import Axios from 'axios'
 import i18n from './plugins/i18n'
 // mutliple base urls now
 // Axios.defaults.baseURL = process.env.VUE_APP_ROOT_API
@@ -31,4 +30,6 @@ function renderVue () {
     i18n,
     render: (h) => h(App)
   }).$mount('#app')
+
+  router.addRoutes(getRoutes(ConfigHelper.getValue('VUE_APP_FLAVOR')))
 }
