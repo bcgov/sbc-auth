@@ -145,6 +145,7 @@ export default class PasscodeForm extends Vue {
           sessionStorage.KEYCLOAK_TOKEN = response.data.access_token
           sessionStorage.KEYCLOAK_REFRESH_TOKEN = response.data.refresh_token
           sessionStorage.REGISTRIES_TRACE_ID = response.data['registries-trace-id']
+          sessionStorage.LOGIN_TYPE = 'passcode'
 
           // attempt to load business
           this.businessStore.loadBusiness(this.businessNumber)
