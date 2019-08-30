@@ -23,27 +23,6 @@ export default Vue.extend({
     SbcHeader,
     SbcFooter,
     PaySystemAlert
-  },
-
-  data: function () {
-    return {
-      // The amount to offset the app body so that it is positioned correctly (below the header)
-      appBodyOffset: { }
-    }
-  },
-
-  methods: {
-    // Set the top margin of the app body to match the height of the header group
-    matchHeight () {
-      var heightString = this.$refs.headerGroup.clientHeight + 'px'
-      Vue.set(this.appBodyOffset, 'margin-top', heightString)
-    }
-  },
-
-  mounted () {
-    // When the window is resized, reset the top margin of the app body
-    this.matchHeight()
-    window.addEventListener('resize', this.matchHeight)
   }
 })
 
@@ -60,7 +39,9 @@ export default Vue.extend({
     min-height 100vh
 
   .header-group
-    position fixed
+    position sticky;
+    position -webkit-sticky; /* For Safari support */
+    top 0;
     width 100%
     z-index 2
 
