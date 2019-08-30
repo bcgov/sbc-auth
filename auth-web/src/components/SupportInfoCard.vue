@@ -33,7 +33,7 @@ export default {
     padding 1.5rem
     padding-bottom 0
     font-size 1.5em
-    font-weight 500
+    font-weight 700
 
   .container
     padding-top 1.125rem
@@ -49,7 +49,7 @@ export default {
   .contact-list
     margin-top 1.5rem
     padding 0
-    font-weight 500
+    font-weight 700
     list-style-type none
 
   .contact-list__row
