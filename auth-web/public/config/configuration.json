@@ -1,5 +1,5 @@
 {
   "VUE_APP_COPS_REDIRECT_URL": "http://localhost:8081",
   "VUE_APP_PAY_ROOT_API": "https://pay-api-dev.pathfinder.gov.bc.ca/api/v1",
-  "VUE_APP_AUTH_ROOT_API": "http://localhost:5000/api/v1"
+  "VUE_APP_AUTH_ROOT_API": "https://auth-api-post-dev.pathfinder.gov.bc.ca/api/v1"
 }
