@@ -5,6 +5,9 @@ import { UserInfo } from '@/models/userInfo'
 import { User } from '@/models/user'
 import { Contact } from '@/models/contact'
 import { Organization } from '@/models/Organization'
+import AuthService from 'sbc-common-components/src/services/auth.services'
+import ConfigHelper from '@/util/config-helper'
+import { AppConstants } from '@/util/constants'
 
 @Module({
   name: 'user'
@@ -85,6 +88,17 @@ export default class UserModule extends VuexModule {
 
   @Action({ rawError: true })
   public logout (redirectUrl: string) {
-    keycloakService.logout(redirectUrl)
+    const loginType = ConfigHelper.getFromSession('LOGIN_TYPE')
+    const authApiURL = ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')
+    if (loginType && loginType === 'passcode') {
+      AuthService.logout(sessionStorage.getItem('KEYCLOAK_REFRESH_TOKEN'), authApiURL).then(response => {
+        if (response.status === 204) {
+          ConfigHelper.clearSession()
+          window.location.assign(window.location.origin + AppConstants.RootPath)
+        }
+      })
+    } else {
+      keycloakService.logout(redirectUrl)
+    }
   }
 }
