@@ -2,12 +2,12 @@
   <div class="passcode-form">
     <v-form ref="form" lazy-validation>
       <v-expand-transition>
-        <div class="passcode-form__alert-container" v-show="loginError">
+        <div class="passcode-form__alert-container" v-show="validationError">
           <v-alert
             :value="true"
             color="error"
             icon="warning"
-          >{{loginError}}
+          >{{validationError}}
           </v-alert>
         </div>
       </v-expand-transition>
@@ -52,12 +52,11 @@ import { Component, Prop } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
 import BusinessModule from '../../store/modules/business'
 import configHelper from '../../util/config-helper'
-import iframeServices from '../../services/iframe.services'
 
 @Component
 export default class AddBusinessForm extends Vue {
   showPasscode = false
-  loginError = ''
+  validationError = ''
   VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   entityNumRules = [
     v => !!v || 'Incorporation Number is required'
@@ -75,15 +74,9 @@ export default class AddBusinessForm extends Vue {
     return (this.$refs.form as Vue & { validate: () => boolean }).validate()
   }
 
-  private getIFrameContent (): Window {
-    return (this.$refs.iframeContent as Vue & { contentWindow: Window }).contentWindow
-  }
-
   private redirectToNext (): void {
     // transition to business contact UI
-    setTimeout(() => {
-      this.$router.push('/main')
-    }, 500)
+    this.$router.push('/main')
   }
 
   addBusiness () {
@@ -98,7 +91,7 @@ export default class AddBusinessForm extends Vue {
             })
         })
         .catch(response => {
-          this.loginError = response.response.data.message
+          this.validationError = response.response.data.message
         })
     }
   }
