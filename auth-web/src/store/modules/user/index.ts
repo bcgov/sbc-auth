@@ -89,7 +89,7 @@ export default class UserModule extends VuexModule {
   @Action({ rawError: true })
   public logout (redirectUrl: string) {
     const loginType = ConfigHelper.getFromSession('LOGIN_TYPE')
-    const authApiURL = ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')
+    const authApiURL = ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API') + '/'
     if (loginType && loginType === 'passcode') {
       AuthService.logout(sessionStorage.getItem('KEYCLOAK_REFRESH_TOKEN'), authApiURL).then(response => {
         if (response.status === 204) {

@@ -13,7 +13,7 @@ import ConfigHelper from '@/util/config-helper'
 @Component
 export default class Signin extends Vue {
   private userStore = getModule(UserModule, this.$store)
-  private appFlavor:String = ConfigHelper.getValue('VUE_APP_FLAVOR')
+  private appFlavor:string = ConfigHelper.getValue('VUE_APP_FLAVOR')
 
   @Prop({ default: 'bcsc' })
   idpHint: string
