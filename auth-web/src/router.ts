@@ -13,6 +13,7 @@ import UserProfile from './views/UserProfile.vue'
 import Dashboard from './components/auth/Dashboard.vue'
 import Signout from './components/auth/Signout.vue'
 import AddBusinessForm from './components/auth/AddBusinessForm.vue'
+import configHelper from './util/config-helper'
 
 Vue.use(Router)
 
@@ -24,28 +25,41 @@ function mapReturnPayVars (route) {
   }
 }
 
-const routes = [
-  { path: '/', component: AuthHome },
-  { path: '/home', component: Home },
-  { path: '/businessprofile', component: BusinessProfile, meta: { requiresAuth: true } },
-  { path: '/main', component: Template, meta: { requiresAuth: false } },
-  { path: '/signin/:idpHint', component: Signin, props: true, meta: { requiresAuth: false } },
-  { path: '/signin/:idpHint/:redirectUrl', component: Signin, props: true, meta: { requiresAuth: false } },
-  { path: '/signout', component: Signout, props: true, meta: { requiresAuth: true } },
-  { path: '/signout/:redirectUrl', component: Signout, props: true, meta: { requiresAuth: true } },
-  { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
-  { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: true } },
-  { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true } },
-  { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
-  { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } },
-  { path: '/addbusiness', component: AddBusinessForm, meta: { requiresAuth: true } },
-  { path: '*', component: PageNotFound }
-]
+export function getRoutes (appFlavor:String) {
+  let varRoutes
+
+  if (appFlavor === 'mvp') {
+    varRoutes = [{ path: '/', component: Home }]
+  } else {
+    varRoutes = [
+      { path: '/', component: AuthHome },
+      { path: '/home', component: Home },
+      { path: '/main', component: Template, meta: { requiresAuth: false } },
+      { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
+      { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
+      { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } }
+    ]
+  }
+
+  let routes = [
+    { path: '/signin/:idpHint', component: Signin, props: true, meta: { requiresAuth: false } },
+    { path: '/signin/:idpHint/:redirectUrl', component: Signin, props: true, meta: { requiresAuth: false } },
+    { path: '/signout', component: Signout, props: true, meta: { requiresAuth: true } },
+    { path: '/signout/:redirectUrl', component: Signout, props: true, meta: { requiresAuth: true } },
+    { path: '/businessprofile', component: BusinessProfile, meta: { requiresAuth: true } },
+    { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: true } },
+    { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true } },
+    { path: '/addbusiness', component: AddBusinessForm, meta: { requiresAuth: true } },
+    { path: '*', component: PageNotFound }
+  ]
+
+  routes = [...varRoutes, ...routes]
+  return routes
+}
 
 const router = new Router({
   mode: 'history',
-  base: process.env.BASE_URL,
-  routes
+  base: process.env.BASE_URL
 })
 
 router.beforeEach((to, from, next) => {
