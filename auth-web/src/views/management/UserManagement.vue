@@ -1,5 +1,8 @@
 <template>
-    <h1>User Management</h1>
+  <div>
+    <h2>Team Management</h2>
+    <h3>Coming soon!</h3>
+  </div>
 </template>
 
 <script lang="ts">

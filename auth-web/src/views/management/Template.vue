@@ -27,13 +27,13 @@ export default class Dashboard extends Vue {
 
   private menu = [
     {
-      title: 'Entity Management',
-      icon: 'question_answer',
+      title: 'Manage Businesses',
+      icon: 'business',
       activate: () => { this.setSelectedComponent(EntityManagement) }
     },
     {
-      title: 'User Management',
-      icon: 'dashboard',
+      title: 'Manage Teams',
+      icon: 'group',
       activate: () => { this.setSelectedComponent(UserManagement) }
     }
   ]
