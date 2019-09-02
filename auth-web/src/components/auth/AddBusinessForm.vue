@@ -37,8 +37,11 @@
         ></v-text-field>
       </div>
       <div class="passcode-form__row passcode-form__form-btns">
+        <v-btn class="cancel-btn" @click="cancel" color="secondary" large>
+          <span>Cancel</span>
+        </v-btn>
         <v-btn class="sign-in-btn" @click="addBusiness" color="primary" large>
-          <span>{{'Add Business'}}</span>
+          <span>Add Business</span>
         </v-btn>
       </div>
     </v-form>
@@ -48,13 +51,16 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Emit } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
 import BusinessModule from '../../store/modules/business'
 import configHelper from '../../util/config-helper'
 
 @Component
 export default class AddBusinessForm extends Vue {
+  $refs: {
+    form: HTMLFormElement
+  }
   showPasscode = false
   validationError = ''
   VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
@@ -71,7 +77,7 @@ export default class AddBusinessForm extends Vue {
   passcode: string = ''
 
   private isFormValid (): boolean {
-    return (this.$refs.form as Vue & { validate: () => boolean }).validate()
+    return this.$refs.form.validate()
   }
 
   private redirectToNext (): void {
@@ -79,21 +85,34 @@ export default class AddBusinessForm extends Vue {
     this.$router.push('/main')
   }
 
-  addBusiness () {
+  async addBusiness () {
     if (this.isFormValid()) {
-      // still need to call login as we need to verify if businessNumber and passCode are correct.
-      this.businessStore.login({ businessNumber: this.businessNumber, passCode: this.passcode })
-        .then(response => {
-          // attempt to add business
-          this.businessStore.addBusiness({ businessNumber: this.businessNumber, passCode: this.passcode })
-            .then(() => {
-              this.redirectToNext()
-            })
-        })
-        .catch(response => {
-          this.validationError = response.response.data.message
-        })
+      try {
+        // still need to call login as we need to verify if businessNumber and passCode are correct.
+        const loginResponse = await this.businessStore.login({ businessNumber: this.businessNumber, passCode: this.passcode })
+
+        // attempt to add business
+        await this.businessStore.addBusiness({ businessNumber: this.businessNumber, passCode: this.passcode })
+
+        // emit event to let parent know business added
+        this.$emit('add-success')
+      } catch (exception) {
+        if (exception.response && exception.response.status === 401) {
+          this.$emit('add-failed-invalid-code')
+        }
+      } finally {
+        this.resetForm()
+      }
     }
+  }
+
+  @Emit()
+  cancel () {}
+
+  resetForm () {
+    this.businessNumber = ''
+    this.passcode = ''
+    this.$refs.form.resetValidation()
   }
 }
 </script>
@@ -103,6 +122,7 @@ export default class AddBusinessForm extends Vue {
 
 .passcode-form__row
   margin-top 1rem
+  justify-content: space-between
 
 .passcode-form__form-btns
   margin-top 2rem

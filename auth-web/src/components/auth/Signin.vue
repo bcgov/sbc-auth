@@ -56,7 +56,7 @@ export default class Signin extends Vue {
     } else {
       this.userStore.getUserProfile('@me').then((userProfile:User) => {
         // If contact exists redirect to dashboard, else to user profile page
-        this.$router.push(userProfile.contacts && userProfile.contacts.length > 0 ? '/dashboard' : '/userprofile')
+        this.$router.push(userProfile.contacts && userProfile.contacts.length > 0 ? '/main' : '/userprofile')
       })
     }
   }

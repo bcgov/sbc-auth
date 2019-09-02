@@ -34,10 +34,9 @@ export function getRoutes (appFlavor:String) {
     varRoutes = [
       { path: '/', component: AuthHome },
       { path: '/home', component: Home },
-      { path: '/main', component: Template, meta: { requiresAuth: false } },
+      { path: '/main', component: Template, meta: { requiresAuth: true } },
       { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
-      { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
-      { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } }
+      { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } }
     ]
   }
 
@@ -49,7 +48,6 @@ export function getRoutes (appFlavor:String) {
     { path: '/businessprofile', component: BusinessProfile, meta: { requiresAuth: true } },
     { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: true } },
     { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true } },
-    { path: '/addbusiness', component: AddBusinessForm, meta: { requiresAuth: true } },
     { path: '*', component: PageNotFound }
   ]
 
