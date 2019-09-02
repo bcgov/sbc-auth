@@ -21,8 +21,8 @@ from sbc_common_components.tracing.trace_tags import TraceTags
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
-from auth_api.services.keycloak import KeycloakService
 from auth_api.services import Entity as EntityService
+from auth_api.services.keycloak import KeycloakService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
 
