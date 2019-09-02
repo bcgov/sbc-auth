@@ -5,9 +5,7 @@ import { Contact } from '@/models/contact'
 import businessServices from '@/services/business.services'
 import { Affiliation } from '@/models/affiliation'
 import { Org } from '@/models/org'
-import { RemoveBusinessPayload } from '@/models/Organization';
-import { getModule } from 'vuex-module-decorators'
-import UserModule from '@/store/modules/user'
+import { RemoveBusinessPayload } from '@/models/Organization'
 
 interface LoginPayload {
   businessNumber: string
