@@ -34,7 +34,7 @@ _JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('GET,POST,OPTIONS')
-@API.route('', methods=['GET', 'POST'])
+@API.route('', methods=['GET', 'POST', 'OPTIONS'])
 class Orgs(Resource):
     """Resource for managing orgs."""
 

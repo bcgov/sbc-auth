@@ -12,6 +12,7 @@ import Template from './views/management/Template.vue'
 import UserProfile from './views/UserProfile.vue'
 import Dashboard from './components/auth/Dashboard.vue'
 import Signout from './components/auth/Signout.vue'
+import AddBusinessForm from './components/auth/AddBusinessForm.vue'
 import configHelper from './util/config-helper'
 
 Vue.use(Router)
@@ -33,10 +34,9 @@ export function getRoutes (appFlavor:String) {
     varRoutes = [
       { path: '/', component: AuthHome },
       { path: '/home', component: Home },
-      { path: '/main', component: Template, meta: { requiresAuth: false } },
+      { path: '/main', component: Template, meta: { requiresAuth: true } },
       { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
-      { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
-      { path: '/dashboard', component: Dashboard, meta: { requiresAuth: true } }
+      { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } }
     ]
   }
 
