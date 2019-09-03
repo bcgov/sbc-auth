@@ -11,9 +11,7 @@
         :key="i"
         @click="item.activate()"
       >
-        <v-list-title-action>
-          <v-icon>{{ item.icon }}</v-icon>
-        </v-list-title-action>
+        <v-icon>{{ item.icon }}</v-icon>&nbsp;&nbsp;
         <v-list-tile-title v-text="item.title"></v-list-tile-title>
       </v-list-tile>
     </v-list>

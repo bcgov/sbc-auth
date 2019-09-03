@@ -3,6 +3,9 @@ import loginServices from '@/services/login.services'
 import { Business } from '@/models/business'
 import { Contact } from '@/models/contact'
 import businessServices from '@/services/business.services'
+import { Affiliation } from '@/models/affiliation'
+import { Org } from '@/models/org'
+import { RemoveBusinessPayload } from '@/models/Organization'
 
 interface LoginPayload {
   businessNumber: string
@@ -15,6 +18,10 @@ interface LoginPayload {
 export default class BusinessModule extends VuexModule {
   currentBusiness: Business = {
     businessIdentifier: ''
+  }
+
+  currentOrg: Org = {
+    name: ''
   }
 
   skippedContactEntry = false
@@ -50,6 +57,33 @@ export default class BusinessModule extends VuexModule {
             }
           })
       })
+  }
+
+  @Action({ rawError: true })
+  public async addBusiness (payload: LoginPayload) {
+    const affiliation: Affiliation = {
+      businessIdentifier: payload.businessNumber,
+      passCode: payload.passCode
+    }
+
+    // Create an implicit org for the current user and the requested business
+    const createBusinessResponse = await businessServices.createOrg({ name: payload.businessNumber })
+
+    // Create an affiliation between implicit org and requested business
+    await businessServices.createAffiliation(createBusinessResponse.data['id'], affiliation)
+
+    // Update store
+    this.context.dispatch('getOrganizations', null, { root: true })
+  }
+
+  @Action({ rawError: true })
+  public async removeBusiness (payload: RemoveBusinessPayload) {
+    // Remove an affiliation between the given entity and org
+    const removeAffiliationResponse = await businessServices.removeAffiliation(payload.orgIdentifier, payload.incorporationNumber)
+    if (removeAffiliationResponse.status === 200) {
+      // Update store
+      this.context.dispatch('getOrganizations', null, { root: true })
+    }
   }
 
   @Action({ rawError: true })

@@ -165,7 +165,7 @@ export default class UserProfileForm extends Vue {
         phone: this.phoneNumber,
         phoneExtension: this.extension
       }).then((contact) => {
-        this.$router.push('/dashboard')
+        this.$router.push('/main')
       })
     }
   }
