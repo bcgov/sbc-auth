@@ -3,12 +3,12 @@
 // Buttons
 .v-btn {
   text-transform: none;
-}
 
 // Position progress indicator in the button
-.v-progress-circular {
-  margin-right: 1rem;
-  margin-left: -0.5rem;
+  .v-progress-circular {
+    margin-right: 1rem;
+    margin-left: -0.5rem;
+  }
 }
 
 [class^="v-text-field"] .v-label--active {
