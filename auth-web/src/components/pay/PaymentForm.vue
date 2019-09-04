@@ -36,7 +36,7 @@ export default class PaymentForm extends Vue {
       }
       PaymentServices.createTransaction(this.paymentId, encodeURIComponent(this.redirectUrl))
         .then(response => {
-          this.returnUrl = response.data.pay_system_url
+          this.returnUrl = response.data.paySystemUrl
           this.goToUrl(this.returnUrl)
         })
         .catch(error => {
