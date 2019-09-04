@@ -54,6 +54,6 @@ export default class PaymentForm extends Vue {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 
 </style>

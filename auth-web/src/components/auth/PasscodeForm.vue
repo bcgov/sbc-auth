@@ -13,7 +13,7 @@
       </v-expand-transition>
       <div class="passcode-form__row">
         <v-text-field
-          box
+          filled
           label="Enter your Incorporation Number"
           hint="Example: CP1234567"
           req
@@ -27,7 +27,7 @@
           :append-icon="showPasscode ? 'visibility' : 'visibility_off'"
           :type="showPasscode ? 'text' : 'password'"
           @click:append="showPasscode = !showPasscode"
-          box
+          filled
           label="Enter your Passcode"
           hint="Passcode must be exactly 9 digits"
           persistent-hint
@@ -37,7 +37,7 @@
         ></v-text-field>
       </div>
       <div class="passcode-form__row passcode-form__form-btns">
-        <v-btn class="recovery-btn" color="primary" flat large @click.stop="noPasscodeDialog = true">
+        <v-btn class="recovery-btn" color="primary" text large @click.stop="noPasscodeDialog = true">
           Don't have a Passcode?
         </v-btn>
         <v-btn class="sign-in-btn" @click="login" color="primary" large>
@@ -69,7 +69,7 @@
           <v-spacer></v-spacer>
           <v-btn
             color="primary"
-            flat
+            text
             @click="noPasscodeDialog = false"
           >Close
           </v-btn>
@@ -162,87 +162,107 @@ export default class PasscodeForm extends Vue {
 }
 </script>
 
-<style lang="stylus" scoped>
-@import '../../assets/styl/theme.styl';
+<style lang="scss" scoped>
+@import '../../assets/scss/theme.scss';
 
-.passcode-form__row
-  margin-top 1rem
+.passcode-form__row{
+  margin-top: 1rem;
+}
 
-.passcode-form__form-btns
-  margin-top 2rem
-  display flex
+.passcode-form__form-btns{
+  margin-top: 2rem;
+  display: flex;
+}
 
-.v-btn
-  margin 0
+.v-btn{
+  margin: 0;
+}
 
-.v-btn.recovery-btn
-  margin-right auto
-  padding-right 0.7rem
-  padding-left 0.7rem
-  text-decoration underline
-  font-size 1rem
+.v-btn.recovery-btn{
+  margin-right: auto;
+  padding-right: 0.7rem;
+  padding-left: 0.7rem;
+  text-decoration: underline;
+  font-size: 1rem;
+}
 
-.v-btn.sign-in-btn
-  font-weight 700
+.v-btn.sign-in-btn{
+  font-weight: 700;
+}
 
-.v-input
-  max-width 25rem
+.v-input{
+  max-width: 25rem;
+}
 
-.passcode-form__alert-container
-  margin-bottom 2rem
+.passcode-form__alert-container{
+  margin-bottom: 2rem;
+}
 
-.v-alert
-  margin 0
+.v-alert{
+  margin: 0;
+}
 
-@media (max-width 600px)
-  .passcode-form__form-btns
-    flex-flow column nowrap
+@media (max-width: 600px){
+  .passcode-form__form-btns{
+    flex-flow: column nowrap;
+  }
 
-  .v-btn.recovery-btn
-    order 1
-    margin-top 0.5rem
-    margin-left auto
+  .v-btn.recovery-btn{
+    order: 1;
+    margin-top: 0.5rem;
+    margin-left: auto;
+  }
 
-  .v-btn.sign-in-btn
-    width 100%
+  .v-btn.sign-in-btn{
+    width: 100%;
+  }
+}
 
-@media (min-width 960px)
-  .v-btn.recovery-btn
-    font-size 0.875rem
+@media (min-width: 960px){
+  .v-btn.recovery-btn{
+    font-size: 0.875rem;
+  }
+}
 
 // Contact List
-.contact-list
-  margin-top 1.5rem
-  padding 0
-  font-weight 500
-  list-style-type none
+.contact-list{
+  margin-top: 1.5rem;
+  padding: 0;
+  font-weight: 500;
+  list-style-type: none;
+}
 
-.contact-list__row
-  overflow hidden
-  white-space nowrap
-  text-overflow ellipsis
+.contact-list__row{
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 
-.contact-list__row .v-icon
-    vertical-align middle
-    margin-top -0.2rem
-    margin-right 1.25rem
+.contact-list__row .v-icon{
+    vertical-align: middle;
+    margin-top: -0.2rem;
+    margin-right: 1.25rem;
+}
 
-.contact-list__row + .contact-list__row
-  margin-top 0.5rem
+.contact-list__row + .contact-list__row{
+  margin-top: 0.5rem;
+}
 
 // Passcode Dialog
-.v-dialog
-  margin 2rem
+.v-dialog{
+  margin: 2rem;
+}
 
-.v-card__title
-  padding 1.25rem 1.5rem
-  color $BCgovFontColorInverted
-  background $BCgovBlue5
-  font-size 1.5em
-  font-weight 400
+.v-card__title{
+  padding: 1.25rem 1.5rem;
+  color: $BCgovFontColorInverted;
+  background: $BCgovBlue5;
+  font-size: 1.5em;
+  font-weight: 400;
+}
 
-.v-card__text
-  padding 1.5rem
-  font-weight 300
-
+.v-card__text{
+  padding: 1.5rem;
+  font-weight: 300;
+}
 </style>

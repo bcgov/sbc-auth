@@ -1,7 +1,7 @@
 import 'core-js/stable' // to polyfill ECMAScript features
 import 'regenerator-runtime/runtime' // to use transpiled generator functions
 import Vue from 'vue'
-import './plugins/vuetify'
+import vuetify from './plugins/vuetify'
 import App from './App.vue'
 import router, { getRoutes } from './router'
 import store from './store'
@@ -27,6 +27,7 @@ function renderVue () {
   new Vue({
     router,
     store,
+    vuetify,
     i18n,
     render: (h) => h(App)
   }).$mount('#app')
