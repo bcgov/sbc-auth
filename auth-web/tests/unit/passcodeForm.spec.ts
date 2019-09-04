@@ -17,7 +17,8 @@ describe('PasscodeForm.vue', () => {
   var ob = {
     'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
     'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
-    'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
+    'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
+    'VUE_APP_FLAVOR':'mvp'
   }
 
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(ob)
@@ -31,9 +32,12 @@ describe('PasscodeForm.vue', () => {
 
     const $t = () => {}
 
+    let vuetify = new Vuetify({});
+
     cmp = mount(PasscodeForm, {
       store,
       localVue,
+      vuetify,
       mocks: { $t }
     })
 
