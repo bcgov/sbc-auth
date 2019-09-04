@@ -38,8 +38,8 @@ export default class PaymentReturnForm extends Vue {
           }
           PaymentServices.updateTransaction(this.paymentId, this.transactionId, this.receiptNum)
             .then(response => {
-              this.returnUrl = response.data.client_system_url
-              if (response.data.pay_system_reason_code && response.data.pay_system_reason_code === 'SERVICE_UNAVAILABLE') {
+              this.returnUrl = response.data.clientSystemUrl
+              if (response.data.paySystemReasonCode && response.data.paySystemReasonCode === 'SERVICE_UNAVAILABLE') {
                 // PayBC down time..Show the custom modal
                 this.errorMessage = this.$t('payFailedMessagePayBcDown').toString()
                 this.showErrorModal = true
