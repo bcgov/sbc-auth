@@ -94,80 +94,82 @@ export default class AffiliatedEntityList extends Vue {
 }
 </script>
 
-<style lang="stylus" scoped>
+<style lang="scss" scoped>
+ @import '../../assets/scss/theme.scss';
+
 .org-details {
-  padding: 0
-  list-style-type: none
-  margin-right: 1.5rem
-  margin-bottom: 1.5rem
+  padding: 0;
+  list-style-type: none;
+  margin-right: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .entity-details {
-  padding: 0
+  padding: 0;
   list-style-type: none
 }
 
 .list-item {
-  flex-direction: row
-  align-items: center
-  background: #ffffff
+  flex-direction: row;
+  align-items: center;
+  background: #ffffff;
 }
 
 .card-layout {
-  padding: 1.5rem
+  padding: 1.5rem;
 }
 
 h2 {
-  margin-bottom: 1.5rem
+  margin-bottom: 1.5rem;
 }
 
 p {
-  text-align: center
+  text-align: center;
 }
 
 .business-list-empty-message {
-  font-weight: 500
+  font-weight: 500;
 }
 
 .list-item_entity-number {
-  font-weight: 500
-  display: flex
-  justify-content: space-between
-  padding-bottom: 0px !important
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0px !important;
 }
 
 a {
-  color: black
+  color: black;
 }
 
 .meta-container {
-  overflow: hidden
-  color: $gray6
-  font-size: 0.875rem
+  overflow: hidden;
+  color: $gray6;
+  font-size: 0.875rem;
 }
 
 dd, dt {
-  float: left
+  float: left;
 }
 
 dt {
-  position: relative
+  position: relative;
 }
 
 dd {
-  margin-left: 0.5rem
+  margin-left: 0.5rem;
 
   + dt {
     &:before {
-      content: '•'
-      display: inline-block
-      margin-right: 0.75rem
-      margin-left: 0.75rem
+      content: '•';
+      display: inline-block;
+      margin-right: 0.75rem;
+      margin-left: 0.75rem;
     }
   }
 }
 
 .empty-business-panel {
-  margin-right: 1.5rem
+  margin-right: 1.5rem;
 }
 </style>
