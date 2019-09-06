@@ -52,7 +52,7 @@ export default class BusinessProfile extends Vue {
 
 <style lang="scss" scoped>
 
-  .profile-card .container{
+  .profile-card .container {
       padding: 1.5rem;
   }
 
