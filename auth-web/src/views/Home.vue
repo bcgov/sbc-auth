@@ -34,12 +34,12 @@ export default ({
 
 <style lang="scss" scoped>
 
-  .sign-in-card .container{
+  .sign-in-card .container {
     padding: 1.5rem;
   }
 
-  @media (min-width: 960px){
-    .sign-in-card .container{
+  @media (min-width: 960px) {
+    .sign-in-card .container {
       padding: 2rem;
     }
   }

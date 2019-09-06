@@ -33,25 +33,27 @@ export default Vue.extend({
   @import "./assets/scss/layout.scss";
   @import "./assets/scss/overrides.scss";
 
-  .app-container{
+  .app-container {
     display: flex;
     flex-flow: column nowrap;
     min-height: 100vh
   }
 
-  .header-group{
-    position: fixed;
+  .header-group {
+    position: sticky;
+    position: -webkit-sticky; /* For Safari support */
+    top: 0;
     width: 100%;
     z-index: 2;
   }
 
-  .app-body{
+  .app-body {
     flex: 1 1 auto
   }
 
-  @media (min-width: 1264px){
+  @media (min-width: 1264px) {
     .app-body
-      > .container:first-child{
+      > .container:first-child {
         padding-top: 3rem;
         padding-bottom: 3rem
       }
