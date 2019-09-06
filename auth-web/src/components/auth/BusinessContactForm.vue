@@ -62,6 +62,9 @@
     <div class="business-contact-form_row">
       <v-layout wrap>
         <v-spacer></v-spacer>
+        <v-btn v-show="editing" class=".cancel-button" @click="cancel" color="secondary" large>
+          <span>Cancel</span>
+        </v-btn>
         <v-btn class=".save-continue-button" @click="save" :disabled='!isFormValid()' color="primary" large>
           <span>Save and Continue</span>
         </v-btn>
@@ -92,6 +95,7 @@ export default class BusinessContactForm extends Vue {
   private phoneNumber = ''
   private extension = ''
   private formError = ''
+  private editing = false
 
   private emailRules = [
     v => !!v || 'Email address is required',
@@ -154,6 +158,10 @@ export default class BusinessContactForm extends Vue {
         }, 500)
       })
     }
+  }
+
+  cancel () {
+    window.location.href = this.VUE_APP_COPS_REDIRECT_URL
   }
 
   skip () {
