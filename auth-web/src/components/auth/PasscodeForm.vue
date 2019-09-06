@@ -214,7 +214,7 @@ export default class PasscodeForm extends Vue {
 .contact-list
   margin-top 1.5rem
   padding 0
-  font-weight 500
+  font-weight 700
   list-style-type none
 
 .contact-list__row
@@ -243,6 +243,6 @@ export default class PasscodeForm extends Vue {
 
 .v-card__text
   padding 1.5rem
-  font-weight 300
+  font-weight 400
 
 </style>
