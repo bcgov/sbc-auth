@@ -13,7 +13,7 @@
 # limitations under the License.
 """API endpoints for managing an entity (business) resource."""
 
-from flask import request
+from flask import g, request
 from flask_restplus import Namespace, Resource, cors
 from sqlalchemy import exc
 
@@ -21,11 +21,11 @@ from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import utils as schema_utils
+from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
-
 
 API = Namespace('entities', description='Entities')
 TRACER = Tracer.get_instance()
@@ -52,7 +52,7 @@ class EntityResources(Resource):
             response, status = EntityService.create_entity(request_json).as_dict(), http_status.HTTP_201_CREATED
         except exc.IntegrityError:
             response, status = {'message': 'Business with specified identifier already exists.'}, \
-                http_status.HTTP_409_CONFLICT
+                               http_status.HTTP_409_CONFLICT
         return response, status
 
 
@@ -73,7 +73,7 @@ class EntityResource(Resource):
                 response, status = entity.as_dict(), http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'A business for {} was not found.'.format(business_identifier)}, \
-                    http_status.HTTP_404_NOT_FOUND
+                                   http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -98,10 +98,10 @@ class ContactResource(Resource):
             entity = EntityService.find_by_business_identifier(business_identifier)
             if entity:
                 response, status = entity.add_contact(request_json).as_dict(), \
-                    http_status.HTTP_201_CREATED
+                                   http_status.HTTP_201_CREATED
             else:
                 response, status = {'message': 'The requested business could not be found.'}, \
-                    http_status.HTTP_404_NOT_FOUND
+                                   http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -120,10 +120,10 @@ class ContactResource(Resource):
             entity = EntityService.find_by_business_identifier(business_identifier)
             if entity:
                 response, status = entity.update_contact(request_json).as_dict(), \
-                    http_status.HTTP_200_OK
+                                   http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested business could not be found.'}, \
-                    http_status.HTTP_404_NOT_FOUND
+                                   http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -139,7 +139,22 @@ class ContactResource(Resource):
                 response, status = entity.delete_contact().as_dict(), http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested business could not be found.'}, \
-                    http_status.HTTP_404_NOT_FOUND
+                                   http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
+
+
+@cors_preflight('GET,OPTIONS')
+@API.route('/<string:business_identifier>/authorizations', methods=['GET', 'OPTIONS'])
+class AuthorizationResource(Resource):
+    """Resource for managing entity authorizations."""
+
+    @staticmethod
+    @_JWT.requires_auth
+    @cors.crossdomain(origin='*')
+    def get(business_identifier):
+        """Return authorization for the user for the passed business identifier."""
+        authorisations = AuthorizationService.get_user_authorizations_for_entity(g.jwt_oidc_token_info,
+                                                                                 business_identifier)
+        return authorisations, http_status.HTTP_200_OK

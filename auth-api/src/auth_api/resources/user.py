@@ -24,7 +24,7 @@ from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
-
+from auth_api.services.authorization import Authorization as AuthorizationService
 
 API = Namespace('users', description='Endpoints for user profile management')
 TRACER = Tracer.get_instance()
@@ -205,23 +205,14 @@ class UserOrgs(Resource):
 
 @cors_preflight('GET,OPTIONS')
 @API.route('/authorizations', methods=['GET', 'OPTIONS'])
-class UserAuthorizations(Resource):
-    """Resource for retrieving the authorizations for the user."""
+class AuthorizationResource(Resource):
+    """Resource for managing entity authorizations."""
 
     @staticmethod
-    @TRACER.trace()
-    @cors.crossdomain(origin='*')
     @_JWT.requires_auth
+    @cors.crossdomain(origin='*')
     def get():
-        """Get the list of authorizations (entities and role) the user is authorized to."""
-        token = g.jwt_oidc_token_info
+        """Add a new contact for the Entity identified by the provided id."""
+        sub = g.jwt_oidc_token_info.get('sub', None)
+        return AuthorizationService.get_user_authorizations(sub), http_status.HTTP_200_OK
 
-        try:
-            user = UserService.find_by_jwt_token(token)
-            if not user:
-                response, status = {'message': 'User not found.'}, http_status.HTTP_404_NOT_FOUND
-            else:
-                response, status = jsonify(user.get_orgs()), http_status.HTTP_200_OK
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-        return response, status
