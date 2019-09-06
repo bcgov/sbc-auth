@@ -51,7 +51,7 @@ def test_find_invalid_user_authorization_by_business_number(session):  # pylint:
 
 
 def test_find_all_user_authorizations(session):  # pylint:disable=unused-argument
-    """Test with invalid user id and assert that auth is None."""
+    """Test find all user authoirzations."""
     user = factory_user_model()
     org = factory_org_model('TEST')
     membership = factory_membership_model(user.id, org.id)

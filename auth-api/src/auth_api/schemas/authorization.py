@@ -18,10 +18,10 @@ from auth_api.models.views.authorization import Authorization as AuthorizationMo
 
 
 class AuthorizationSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
-    """This is the schema for the Org model."""
+    """This is the schema for the Authorization model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Org fields to a default schema."""
+        """Maps all of the Authorization fields to a default schema."""
 
         model = AuthorizationModel
         exclude = ['entity_name', 'keycloak_guid']

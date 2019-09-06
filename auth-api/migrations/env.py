@@ -94,7 +94,7 @@ def run_migrations_online():
 def include_object(object, name, type_, reflected, compare_to):
     """Decide whether the schema needs to be included in migration.
 
-    If the model has args with value schema as skip_migrate that model will be excluded from migration.
+    If the model is in the SKIPPED_MIGRATIONS config value skip the version creation on migration.
     """
 
     if type_ == 'table' and name in current_app.config.get('SKIPPED_MIGRATIONS'):

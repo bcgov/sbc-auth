@@ -11,15 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for the Affiliation service.
+"""Tests for the Authorization service.
 
-Test suite to ensure that the Affiliation service routines are working as expected.
+Test suite to ensure that the Authorization service routines are working as expected.
 """
-import uuid
-
-from tests.utilities.factory_utils import *
 
 from auth_api.services.authorization import Authorization
+from tests.utilities.factory_utils import *
 
 
 def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-argument

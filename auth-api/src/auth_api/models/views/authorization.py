@@ -25,7 +25,7 @@ from auth_api.models.db import db
 
 
 class Authorization(db.Model):
-    """This is the model for an Affiliation."""
+    """This is the model the authorizations_view."""
 
     __tablename__ = 'authorizations_view'
 
