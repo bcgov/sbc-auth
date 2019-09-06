@@ -6,16 +6,13 @@
     :mini-variant="mini()"
   >
     <v-list>
-      <v-list-tile
+      <v-list-item
         v-for="(item, i) in menu"
         :key="i"
-        @click="item.activate()"
-      >
-        <v-list-title-action>
-          <v-icon>{{ item.icon }}</v-icon>
-        </v-list-title-action>
-        <v-list-tile-title v-text="item.title"></v-list-tile-title>
-      </v-list-tile>
+        @click="item.activate()">
+        <v-icon>{{ item.icon }}</v-icon>&nbsp;&nbsp;
+        <v-list-item-title v-text="item.title"></v-list-item-title>
+      </v-list-item>
     </v-list>
   </v-navigation-drawer>
 </template>
@@ -42,8 +39,8 @@ export default class ManagementMenu extends Vue {
 }
 </script>
 
-<style lang="stylus">
+<style lang="scss">
   .v-navigation-drawer {
-    background-color : transparent !important
+    background-color : transparent !important;
   }
 </style>

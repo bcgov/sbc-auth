@@ -13,7 +13,7 @@
       </v-expand-transition>
     <div class="business-contact-form_row">
       <v-text-field
-        box
+        filled
         label="Email Address"
         req
         persistent-hint
@@ -24,7 +24,7 @@
     </div>
     <div class="business-contact-form_row">
       <v-text-field
-        box
+        filled
         label="Confirm Email Address"
         req
         persistent-hint
@@ -37,7 +37,7 @@
       <v-layout wrap>
         <v-flex xs6 class="mr-5">
           <v-text-field
-            box
+            filled
             label="Phone e.g. (555)-555-5555"
             persistent-hint
             type="tel"
@@ -49,7 +49,7 @@
         </v-flex>
         <v-flex xs3>
           <v-text-field
-            box label="Extension"
+            filled label="Extension"
             persistent-hint
             :rules="extensionRules"
             v-mask="'###'"
@@ -62,6 +62,9 @@
     <div class="business-contact-form_row">
       <v-layout wrap>
         <v-spacer></v-spacer>
+        <v-btn v-show="editing" class=".cancel-button" @click="cancel" color="secondary" large>
+          <span>Cancel</span>
+        </v-btn>
         <v-btn class=".save-continue-button" @click="save" :disabled='!isFormValid()' color="primary" large>
           <span>Save and Continue</span>
         </v-btn>
@@ -92,6 +95,7 @@ export default class BusinessContactForm extends Vue {
   private phoneNumber = ''
   private extension = ''
   private formError = ''
+  private editing = false
 
   private emailRules = [
     v => !!v || 'Email address is required',
@@ -156,6 +160,10 @@ export default class BusinessContactForm extends Vue {
     }
   }
 
+  cancel () {
+    window.location.href = this.VUE_APP_COPS_REDIRECT_URL
+  }
+
   skip () {
     // Mark store as having skipped contact entry for this session
     this.businessStore.setSkippedContactEntry(true)
@@ -168,18 +176,22 @@ export default class BusinessContactForm extends Vue {
 }
 </script>
 
-<style lang="stylus" scoped>
-  @import '../../assets/styl/theme.styl';
+<style lang="scss" scoped>
+  @import '../../assets/scss/theme.scss';
 
-  .business-contact-form_row
-    margin-top 1rem
+  .business-contact-form_row{
+    margin-top: 1rem;
+  }
 
-  .business-contact-form_alert-container
-    margin-bottom 2rem
+  .business-contact-form_alert-container{
+    margin-bottom: 2rem;
+  }
 
-  .v-alert
-    margin 0
+  .v-alert{
+    margin: 0;
+  }
 
-  .v-btn
-    font-weight: 700
+  .v-btn{
+    font-weight: 700;
+  }
 </style>

@@ -1,0 +1,21 @@
+// Vuetify Overrides
+.v-application {
+  font-family: 'BCSans', sans-serif  // override the default Vuetify font
+} 
+
+// Buttons
+.v-btn {
+  letter-spacing: 0.03rem;
+  text-transform: none;
+  font-weight: 400;
+
+// Position progress indicator in the button
+  .v-progress-circular {
+    margin-right: 1rem;
+    margin-left: -0.5rem;
+  }
+}
+
+[class^="v-text-field"] .v-label--active {
+  transform: translateY(-8px) scale(0.75);
+}

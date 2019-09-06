@@ -12,11 +12,12 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped>
-  @import "../assets/styl/theme.styl"
+<style lang="scss" scoped>
+  @import "../assets/scss/theme.scss";
 
-  header
-    padding 1.25rem
-    color #fff
-    background $BCgovBlue5
+  header {
+    padding: 1.25rem;
+    color: #fff;
+    background: $BCgovBlue5;
+  }
 </style>

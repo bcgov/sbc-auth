@@ -16,7 +16,7 @@
         <v-layout wrap>
           <v-flex xs6 class="mr-5">
             <v-text-field
-              box
+              filled
               label="First Name"
               req
               persistent-hint
@@ -27,7 +27,7 @@
           </v-flex>
           <v-flex xs5>
             <v-text-field
-              box
+              filled
               label="Last Name"
               req
               persistent-hint
@@ -40,7 +40,7 @@
       </div>
       <div class="form_row">
         <v-text-field
-          box
+          filled
           label="Email Address"
           req
           persistent-hint
@@ -51,7 +51,7 @@
       </div>
       <div class="form_row">
         <v-text-field
-          box
+          filled
           label="Confirm Email Address"
           req
           persistent-hint
@@ -64,7 +64,7 @@
         <v-layout wrap>
           <v-flex xs6 class="mr-5">
             <v-text-field
-              box
+              filled
               label="Phone e.g. (555)-555-5555"
               persistent-hint
               type="tel"
@@ -76,7 +76,7 @@
           </v-flex>
           <v-flex xs3>
             <v-text-field
-              box label="Extension"
+              filled label="Extension"
               persistent-hint
               :rules="extensionRules"
               v-mask="'###'"
@@ -165,13 +165,13 @@ export default class UserProfileForm extends Vue {
         phone: this.phoneNumber,
         phoneExtension: this.extension
       }).then((contact) => {
-        this.$router.push('/dashboard')
+        this.$router.push('/main')
       })
     }
   }
 }
 </script>
-<style lang="stylus" scoped>
-@import '../../assets/styl/theme.styl';
+<style lang="scss" scoped>
+@import '../../assets/scss/theme.scss';
 
 </style>

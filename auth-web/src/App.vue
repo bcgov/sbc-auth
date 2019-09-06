@@ -23,53 +23,39 @@ export default Vue.extend({
     SbcHeader,
     SbcFooter,
     PaySystemAlert
-  },
-
-  data: function () {
-    return {
-      // The amount to offset the app body so that it is positioned correctly (below the header)
-      appBodyOffset: { }
-    }
-  },
-
-  methods: {
-    // Set the top margin of the app body to match the height of the header group
-    matchHeight () {
-      var heightString = this.$refs.headerGroup.clientHeight + 'px'
-      Vue.set(this.appBodyOffset, 'margin-top', heightString)
-    }
-  },
-
-  mounted () {
-    // When the window is resized, reset the top margin of the app body
-    this.matchHeight()
-    window.addEventListener('resize', this.matchHeight)
   }
 })
 
 </script>
 
-<style lang="stylus">
-  @import "./assets/styl/base.styl";
-  @import "./assets/styl/layout.styl";
-  @import "./assets/styl/overrides.styl";
+<style lang="scss">
+  @import "./assets/scss/base.scss";
+  @import "./assets/scss/layout.scss";
+  @import "./assets/scss/overrides.scss";
 
-  .app-container
-    display flex
-    flex-flow column nowrap
-    min-height 100vh
+  .app-container {
+    display: flex;
+    flex-flow: column nowrap;
+    min-height: 100vh
+  }
 
-  .header-group
-    position fixed
-    width 100%
-    z-index 2
+  .header-group {
+    position: sticky;
+    position: -webkit-sticky; /* For Safari support */
+    top: 0;
+    width: 100%;
+    z-index: 2;
+  }
 
-  .app-body
-    flex 1 1 auto
+  .app-body {
+    flex: 1 1 auto
+  }
 
-  @media (min-width 1264px)
+  @media (min-width: 1264px) {
     .app-body
-      > .container:first-child
-        padding-top 3rem
-        padding-bottom 3rem
+      > .container:first-child {
+        padding-top: 3rem;
+        padding-bottom: 3rem
+      }
+  }
 </style>

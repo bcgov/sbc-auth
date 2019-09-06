@@ -32,13 +32,15 @@ export default ({
 })
 </script>
 
-<style lang="stylus" scoped>
+<style lang="scss" scoped>
 
-  .sign-in-card .container
-    padding 1.5rem
+  .sign-in-card .container {
+    padding: 1.5rem;
+  }
 
-  @media (min-width: 960px)
-    .sign-in-card .container
-      padding 2rem
-
+  @media (min-width: 960px) {
+    .sign-in-card .container {
+      padding: 2rem;
+    }
+  }
 </style>

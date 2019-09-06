@@ -13,3 +13,8 @@ export interface AffiliatedEntity {
   businessNumber: string;
   name: string;
 }
+
+export interface RemoveBusinessPayload {
+  orgIdentifier: string
+  incorporationNumber: string
+}

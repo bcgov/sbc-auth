@@ -11,21 +11,30 @@
     <ul class="org-details" v-if="affiliatedEntities.length > 0">
       <li
         class="list-item"
-        v-for="entity in affiliatedEntities"
-        v-bind:key="entity.businessIdentifier">
-        <v-card>
-          <v-card-text class="card-layout">
-            <div class="list-item_entity-number">
-              <a @click="redirectToNext(entity.businessIdentifier)">{{entity.name}}</a>
-            </div>
-            <dl class="meta-container">
-              <dt>Business No:</dt>
-              <dd class="list-item_business-number">{{ entity.businessNumber}}</dd>
-              <dt>Incorporation No:</dt>
-              <dd class="list-item_incorp-number">{{ entity.businessIdentifier}}</dd>
-            </dl>
-          </v-card-text>
-        </v-card>
+        v-for="org in organizations"
+        v-bind:key="org.id"
+      >
+        <ul class="entity-details">
+          <li
+            class="list-item"
+            v-for="entity in org.affiliatedEntities"
+            v-bind:key="entity.businessIdentifier">
+            <v-card class="mb-3">
+              <v-card-title class="list-item_entity-number">
+                <a @click="redirectToNext(entity.businessIdentifier)">{{entity.name}}</a>
+                <v-icon @click="removeBusiness(org.id, entity.businessIdentifier)">close</v-icon>
+              </v-card-title>
+              <v-card-text class="card-layout">
+                <dl class="meta-container">
+                  <dt>Business No:</dt>
+                  <dd class="list-item_business-number">{{ entity.businessNumber }}</dd>
+                  <dt>Incorporation No:</dt>
+                  <dd class="list-item_incorp-number">{{ entity.businessIdentifier }}</dd>
+                </dl>
+              </v-card-text>
+            </v-card>
+          </li>
+        </ul>
       </li>
     </ul>
   </div>
@@ -37,19 +46,19 @@ import { Component, Emit } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
 import UserModule from '../../store/modules/user'
 import configHelper from '../../util/config-helper'
-import { AffiliatedEntity } from '../../models/Organization'
+import { AffiliatedEntity, Organization, RemoveBusinessPayload } from '../../models/Organization'
 
 @Component
 export default class AffiliatedEntityList extends Vue {
   private VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   private userStore = getModule(UserModule, this.$store)
 
-  mounted () {
-    this.userStore.getOrganizations()
+  get organizations () {
+    return this.userStore.organizations
   }
 
   get affiliatedEntities () {
-    let affiliatedEntities:AffiliatedEntity[] = []
+    let affiliatedEntities: AffiliatedEntity[] = []
     this.userStore.organizations.forEach(organization => {
       if (organization.affiliatedEntities) {
         organization.affiliatedEntities.forEach(entity => {
@@ -60,8 +69,19 @@ export default class AffiliatedEntityList extends Vue {
     return affiliatedEntities
   }
 
+  mounted () {
+    this.userStore.getOrganizations()
+  }
+
   @Emit()
-  addBusiness () {
+  addBusiness () {}
+
+  @Emit()
+  removeBusiness (orgId: string, incorporationNumber: string): RemoveBusinessPayload {
+    return {
+      orgIdentifier: orgId,
+      incorporationNumber: incorporationNumber
+    }
   }
 
   redirectToNext (incorporationNumber: String) {
@@ -74,72 +94,82 @@ export default class AffiliatedEntityList extends Vue {
 }
 </script>
 
-<style lang="stylus" scoped>
+<style lang="scss" scoped>
+ @import '../../assets/scss/theme.scss';
+
 .org-details {
-  padding: 0
+  padding: 0;
+  list-style-type: none;
+  margin-right: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.entity-details {
+  padding: 0;
   list-style-type: none
-  margin-right: 1.5rem
-  margin-bottom: 1.5rem
 }
 
 .list-item {
-  flex-direction: row
-  align-items: center
-  background: #ffffff
+  flex-direction: row;
+  align-items: center;
+  background: #ffffff;
 }
 
 .card-layout {
-  padding: 1.5rem
+  padding: 1.5rem;
 }
 
 h2 {
-  margin-bottom: 1.5rem
+  margin-bottom: 1.5rem;
 }
 
 p {
-  text-align: center
+  text-align: center;
 }
 
 .business-list-empty-message {
-  font-weight: 500
+  font-weight: 500;
 }
 
 .list-item_entity-number {
-  font-weight: 500
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0px !important;
 }
 
 a {
-  color: black
+  color: black;
 }
 
 .meta-container {
-  overflow: hidden
-  color: $gray6
-  font-size: 0.875rem
+  overflow: hidden;
+  color: $gray6;
+  font-size: 0.875rem;
 }
 
 dd, dt {
-  float: left
+  float: left;
 }
 
 dt {
-  position: relative
+  position: relative;
 }
 
 dd {
-  margin-left: 0.5rem
+  margin-left: 0.5rem;
 
   + dt {
     &:before {
-      content: '•'
-      display: inline-block
-      margin-right: 0.75rem
-      margin-left: 0.75rem
+      content: '•';
+      display: inline-block;
+      margin-right: 0.75rem;
+      margin-left: 0.75rem;
     }
   }
 }
 
 .empty-business-panel {
-  margin-right: 1.5rem
+  margin-right: 1.5rem;
 }
 </style>

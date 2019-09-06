@@ -1,0 +1,70 @@
+// Layout style rules shared across the app
+.container {
+  max-width: 1200px;
+  padding: 1.5rem;
+}
+
+h1,h2 {
+  margin-bottom: 1.5rem;
+}
+
+article {
+  flex: 1 1 auto;
+}
+
+aside {
+  flex: 0 0 auto;
+  margin-top: 2rem;
+}
+
+.intro-text {
+  margin-bottom: 2rem;
+  letter-spacing: -0.01rem;
+  font-size: 1rem;
+  font-weight: 300;
+
+  em {
+    font-style: normal;
+    font-weight: 700;
+  }
+}
+
+.view-container {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+// Layout styling for different device sizes
+@media (max-width: 480px) {
+  h1 span {
+    display: block;
+  }
+}
+
+@media (min-width: 768px) {
+  h1 {
+    margin-bottom: 2rem;
+  }
+
+  .intro-text {
+    margin-bottom: 3rem;
+    font-size: 1.125rem;
+  }
+}
+
+@media (min-width: 960px) {
+  article {
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+  }
+
+  aside {
+    margin-top: 0;
+    margin-left: 2rem;
+    width: 20rem;
+  }
+
+  .view-container {
+    flex-flow: row nowrap;
+  }
+}
