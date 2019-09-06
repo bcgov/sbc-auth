@@ -50,9 +50,10 @@ export default class BusinessProfile extends Vue {
 }
 </script>
 
-<style lang="stylus" scoped>
+<style lang="scss" scoped>
 
-  .profile-card .container
-      padding 1.5rem
+  .profile-card .container{
+      padding: 1.5rem;
+  }
 
 </style>

@@ -48,7 +48,7 @@ export default class Dashboard extends Vue {
 }
 </script>
 
-<style lang="stylus">
+<style lang="scss">
 
 .content {
   width: 80%
