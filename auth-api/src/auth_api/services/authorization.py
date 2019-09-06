@@ -63,5 +63,7 @@ class Authorization:
 
         None fields are not included in the dictionary.
         """
+        if not exclude:
+            exclude = []
         auth_schema = AuthorizationSchema(exclude=exclude)
         return auth_schema.dump(self._model, many=False)
