@@ -25,10 +25,10 @@ export default {
     return Axios.post(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/entities`, business)
   },
   async addContact (business: Business, contact: Contact): Promise<AxiosResponse<Business>> {
-    return Axios.post(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/entities/${business.businessIdentifier}/contact`, contact)
+    return Axios.post(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/entities/${business.businessIdentifier}/contacts`, contact)
   },
   async updateContact (business: Business, contact: Contact): Promise<AxiosResponse<Business>> {
-    return Axios.put(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/entities/${business.businessIdentifier}/contact`, contact)
+    return Axios.put(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/entities/${business.businessIdentifier}/contacts`, contact)
   },
   async getOrgs (): Promise<AxiosResponse<any>> {
     return Axios.get(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/users/orgs`)
