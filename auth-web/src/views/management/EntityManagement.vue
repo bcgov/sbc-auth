@@ -122,9 +122,9 @@ export default class EntityManagement extends Vue {
 }
 </script>
 
-<style lang="stylus">
+<style lang="scss">
   .header {
-    display: flex
+    display: flex;
     justify-content: space-between
   }
 
