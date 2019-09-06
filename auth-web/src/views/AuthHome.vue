@@ -17,7 +17,7 @@
 
 <style lang="scss" scoped>
 
-  .right-button{
+  .right-button {
     margin-left: 1.5rem;
   }
 
