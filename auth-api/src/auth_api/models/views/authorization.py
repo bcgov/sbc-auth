@@ -17,6 +17,7 @@ Authorization view wraps details on the entities and membership through orgs and
 """
 
 import uuid
+
 from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -34,7 +35,7 @@ class Authorization(db.Model):
     keycloak_guid = Column(UUID)
 
     @classmethod
-    def find_user_authorization_by_business_number(cls, keycloak_guid: uuid, business_identifier:str):
+    def find_user_authorization_by_business_number(cls, keycloak_guid: uuid, business_identifier: str):
         """Return authorization view object."""
         return cls.query.filter_by(keycloak_guid=keycloak_guid, business_identifier=business_identifier).one_or_none()
 

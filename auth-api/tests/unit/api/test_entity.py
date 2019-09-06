@@ -17,12 +17,13 @@
 Test-Suite to ensure that the /entities endpoint is working as expected.
 """
 
+import copy
 import json
 import os
 
-from auth_api import status as http_status
 from tests.utilities.factory_utils import *
-import copy
+
+from auth_api import status as http_status
 
 
 TEST_ENTITY_INFO = {
@@ -284,5 +285,3 @@ def test_authorizations_for_affiliated_users_returns_200(client, jwt, session): 
 
     assert rv.status_code == http_status.HTTP_200_OK
     assert rv.json.get('role') == 'OWNER'
-
-

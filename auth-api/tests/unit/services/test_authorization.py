@@ -17,8 +17,9 @@ Test suite to ensure that the Affiliation service routines are working as expect
 """
 import uuid
 
-from auth_api.services.authorization import Authorization
 from tests.utilities.factory_utils import *
+
+from auth_api.services.authorization import Authorization
 
 
 def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-argument

@@ -58,7 +58,7 @@ class Authorization:
                 authorizations_response['authorizations'].append(Authorization(auth).as_dict())
         return authorizations_response
 
-    def as_dict(self, exclude: [] = []):
+    def as_dict(self, exclude: [] = None):
         """Return the authorization as a python dictionary.
 
         None fields are not included in the dictionary.

@@ -25,4 +25,3 @@ class AuthorizationSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
 
         model = AuthorizationModel
         exclude = ['entity_name', 'keycloak_guid']
-

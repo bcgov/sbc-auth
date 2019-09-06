@@ -15,8 +15,9 @@
 
 Test suite to ensure that the Authorizations view routines are working as expected.
 """
-from auth_api.models.views.authorization import Authorization
 from tests.utilities.factory_utils import *
+
+from auth_api.models.views.authorization import Authorization
 
 
 def test_find_user_authorization_by_business_number(session):  # pylint:disable=unused-argument
