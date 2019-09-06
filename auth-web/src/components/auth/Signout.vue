@@ -22,7 +22,7 @@ export default class Signout extends Vue {
 }
 </script>
 
-<style lang="stylus" scoped>
-@import '../../assets/styl/theme.styl';
+<style lang="scss" scoped>
+@import '../../assets/scss/theme.scss';
 
 </style>
