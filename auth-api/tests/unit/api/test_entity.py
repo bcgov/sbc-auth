@@ -17,8 +17,11 @@
 Test-Suite to ensure that the /entities endpoint is working as expected.
 """
 
+import copy
 import json
 import os
+
+from tests.utilities.factory_utils import *
 
 from auth_api import status as http_status
 
@@ -226,3 +229,59 @@ def test_update_contact_missing_returns_404(client, jwt, session):  # pylint:dis
     rv = client.put('/api/v1/entities/{}/contacts'.format(TEST_ENTITY_INFO['businessIdentifier']),
                     headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+
+
+def test_authorizations_passcode_returns_200(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert authorizations for passcode user returns 200."""
+    claims = copy.deepcopy(TEST_JWT_CLAIMS)
+    claims['username'] = inc_number = 'CP123456789'
+    claims['loginSource'] = 'PASSCODE'
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.get(f'/api/v1/entities/{inc_number}/authorizations',
+                headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('role') == 'OWNER'
+
+    # Test with invalid number
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.get('/api/v1/entities/INVALID/authorizations',
+                    headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('role', None) is None
+
+
+def test_authorizations_for_staff_returns_200(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert authorizations for staff user returns 200."""
+    claims = copy.deepcopy(TEST_JWT_CLAIMS)
+    claims['username'] = inc_number = 'tester'
+    claims['loginSource'] = ''
+    claims['realm_access']['roles'].append('staff')
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.get(f'/api/v1/entities/{inc_number}/authorizations',
+                    headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('role') == 'STAFF'
+
+
+def test_authorizations_for_affiliated_users_returns_200(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert authorizations for affiliated users returns 200."""
+    user = factory_user_model()
+    org = factory_org_model('TEST')
+    factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+
+    claims = copy.deepcopy(TEST_JWT_CLAIMS)
+    claims['sub'] = str(user.keycloak_guid)
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.get(f'/api/v1/entities/{entity.business_identifier}/authorizations',
+                    headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('role') == 'OWNER'

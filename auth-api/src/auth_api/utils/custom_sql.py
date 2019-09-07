@@ -11,19 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""This manages custom object definition.
 
-"""Tests to assure the version utilities.
-
-Test-Suite to ensure that the version utilities are working as expected.
+This can be used to define any view/materialized view/stored procedure/function etc.
 """
-from tests import skip_in_pod
-
-from auth_api import utils
-from auth_api.version import __version__
 
 
-@skip_in_pod
-def test_get_version():
-    """Assert thatThe version is returned correctly."""
-    rv = utils.run_version.get_run_version()
-    assert rv == __version__
+class CustomSql:  # pylint:disable=too-few-public-methods
+    """This is the object for custom Sql definition."""
+
+    def __init__(self, name, sql):
+        self.name = name
+        self.sql = sql
