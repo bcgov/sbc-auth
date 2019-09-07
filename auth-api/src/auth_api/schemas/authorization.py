@@ -11,19 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Manager for authorization schema and export."""
 
-"""Tests to assure the version utilities.
-
-Test-Suite to ensure that the version utilities are working as expected.
-"""
-from tests import skip_in_pod
-
-from auth_api import utils
-from auth_api.version import __version__
+from auth_api.models import ma
+from auth_api.models.views.authorization import Authorization as AuthorizationModel
 
 
-@skip_in_pod
-def test_get_version():
-    """Assert thatThe version is returned correctly."""
-    rv = utils.run_version.get_run_version()
-    assert rv == __version__
+class AuthorizationSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the Authorization model."""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps all of the Authorization fields to a default schema."""
+
+        model = AuthorizationModel
+        exclude = ['entity_name', 'keycloak_guid']

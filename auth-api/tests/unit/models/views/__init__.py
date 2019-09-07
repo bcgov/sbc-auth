@@ -12,18 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests to assure the version utilities.
-
-Test-Suite to ensure that the version utilities are working as expected.
-"""
-from tests import skip_in_pod
-
-from auth_api import utils
-from auth_api.version import __version__
-
-
-@skip_in_pod
-def test_get_version():
-    """Assert thatThe version is returned correctly."""
-    rv = utils.run_version.get_run_version()
-    assert rv == __version__
+"""The Test-Suite used to ensure that the View objects are working correctly."""
