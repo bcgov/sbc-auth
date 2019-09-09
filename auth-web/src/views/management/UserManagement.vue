@@ -1,13 +1,42 @@
 <template>
   <div>
-    <h2>Team Management</h2>
-    <h3>Coming soon!</h3>
+    <h2>Manage Users</h2>
+    <v-data-table
+      :headers="headers"
+      :items="users"
+      :items-per-page="5"
+      class="elevation-1"
+    >
+    </v-data-table>
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-export default Vue.extend({
-  name: 'UserManagement'
-})
+import { Component, Vue } from 'vue-property-decorator'
+
+@Component({})
+export default class UserManagement extends Vue {
+  headers = [
+    {
+      text: 'User',
+      align: 'left',
+      sortable: true,
+      value: 'fullname'
+    },
+    {
+      text: 'Roles',
+      align: 'left',
+      sortable: true,
+      value: 'roles'
+    },
+    {
+      text: 'Status',
+      align: 'left',
+      sortable: true,
+      value: 'status'
+    }
+  ]
+
+  users = []
+}
 </script>
