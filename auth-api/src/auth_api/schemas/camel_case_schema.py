@@ -11,9 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all of the Services used in the API."""
-from .affiliation import Affiliation
-from .entity import Entity
-from .org import Org
-from .user import User
-from .invitation import Invitation
+"""Utility class to convert snake case to camel case."""
+from .base_schema import BaseSchema
+
+
+def camelcase(key_name):
+    parts = iter(key_name.split("_"))
+    return next(parts) + "".join(i.title() for i in parts)
+
+
+class CamelCaseSchema(BaseSchema):
+    """Schema that uses camel-case for its external representation
+    and snake-case for its internal representation.
+    """
+
+    def on_bind_field(self, field_name, field_obj):
+        field_obj.data_key = camelcase(field_obj.data_key or field_name)

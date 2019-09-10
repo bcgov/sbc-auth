@@ -11,9 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all of the Services used in the API."""
-from .affiliation import Affiliation
-from .entity import Entity
-from .org import Org
-from .user import User
-from .invitation import Invitation
+"""Manager for invitation status schema and export."""
+
+from auth_api.models import InvitationStatus as InvitationStatusModel
+
+from .camel_case_schema import CamelCaseSchema
+
+
+class InvitationStatusSchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the Invitation Status model."""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps all of the Invitation Status fields to a default schema."""
+
+        model = InvitationStatusModel
