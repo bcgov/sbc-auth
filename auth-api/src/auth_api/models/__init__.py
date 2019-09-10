@@ -30,6 +30,9 @@ from .org_status import OrgStatus
 from .org_type import OrgType
 from .payment_type import PaymentType
 from .user import User
+from .invitation import Invitation
+from .invite_status import InvitationStatus
+from .invitation_membership import InvitationMembership
 
 
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)
