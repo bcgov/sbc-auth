@@ -15,6 +15,7 @@ interface BusinessService {
   createOrg: (org: Org) => Promise<AxiosResponse<Org>>
   createAffiliation: (orgIdentifier: string, affiliation: Affiliation) => Promise<AxiosResponse<Affiliation>>
   removeAffiliation: (orgIdentifier: string, incorporationNumber: string) => Promise<AxiosResponse<void>>
+  staffSearch: (businessNumber: string) => Promise<AxiosResponse<any>>
 }
 
 export default {
@@ -41,5 +42,8 @@ export default {
   },
   async removeAffiliation (orgIdentifier: string, incorporationNumber: string): Promise<AxiosResponse<void>> {
     return Axios.delete(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/affiliations/${incorporationNumber}`)
+  },
+  async staffSearch (businessIdentifier: string): Promise<AxiosResponse<any>> {
+    return Axios.get(`${configHelper.getValue('VUE_APP_LEGAL_ROOT_API')}/businesses/${businessIdentifier}`)
   }
 } as BusinessService

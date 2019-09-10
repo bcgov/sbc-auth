@@ -54,10 +54,14 @@ export default class Signin extends Vue {
         this.$router.push('/' + this.redirectUrl)
       }
     } else {
-      this.userStore.getUserProfile('@me').then((userProfile:User) => {
-        // If contact exists redirect to dashboard, else to user profile page
-        this.$router.push(userProfile.contacts && userProfile.contacts.length > 0 ? '/main' : '/userprofile')
-      })
+      if (this.idpHint === 'idir') {
+        this.$router.push('/staffsearch')
+      } else {
+        this.userStore.getUserProfile('@me').then((userProfile:User) => {
+          // If contact exists redirect to dashboard, else to user profile page
+          this.$router.push(userProfile.contacts && userProfile.contacts.length > 0 ? '/main' : '/userprofile')
+        })
+      }
     }
   }
 

@@ -10,10 +10,8 @@ import PageNotFound from './views/PageNotFound.vue'
 import CreateAccount from './views/CreateAccount.vue'
 import Template from './views/management/Template.vue'
 import UserProfile from './views/UserProfile.vue'
-import Dashboard from './components/auth/Dashboard.vue'
 import Signout from './components/auth/Signout.vue'
-import AddBusinessForm from './components/auth/AddBusinessForm.vue'
-import configHelper from './util/config-helper'
+import StaffSearchForm from './components/auth/StaffSearchForm.vue'
 
 Vue.use(Router)
 
@@ -48,6 +46,7 @@ export function getRoutes (appFlavor:String) {
     { path: '/businessprofile', component: BusinessProfile, meta: { requiresAuth: true } },
     { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: true } },
     { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true } },
+    { path: '/staffsearch', component: StaffSearchForm, props: true, meta: { requiresAuth: true } },
     { path: '*', component: PageNotFound }
   ]
 
