@@ -1,10 +1,10 @@
 <template>
-  <v-app class="app-container" id="app">
+  <v-app id="app">
     <div class="header-group" ref="headerGroup">
       <pay-system-alert></pay-system-alert>
       <sbc-header></sbc-header>
     </div>
-    <div class="app-body" v-bind:style="appBodyOffset">
+    <div class="app-body">
       <router-view/>
     </div>
     <sbc-footer></sbc-footer>
