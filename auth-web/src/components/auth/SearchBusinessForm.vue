@@ -21,7 +21,7 @@
 
                   <div class="search-for__row">
                     <v-text-field
-                      box
+                      filled
                       label="Incorporation Number"
                       hint="e.g. BC1234567"
                       req

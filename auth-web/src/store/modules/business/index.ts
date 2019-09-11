@@ -84,7 +84,7 @@ export default class BusinessModule extends VuexModule {
     return businessServices.searchBusiness(businessNumber)
       .then(response => {
         if (response.status === 200) {
-          configHelper.addToSession(SessionStorageKeys.CorpNumKey, businessNumber)
+          configHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessNumber)
         }
       })
   }
