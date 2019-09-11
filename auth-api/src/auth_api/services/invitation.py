@@ -73,3 +73,8 @@ class Invitation:
         if invitation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         invitation.delete()
+
+    def update_invitation(self, invitation):
+        """Updates the specified invitation with new data."""
+        self._model.update_invitation(invitation)
+        return self
