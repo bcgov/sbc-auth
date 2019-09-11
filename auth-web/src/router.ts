@@ -11,7 +11,7 @@ import CreateAccount from './views/CreateAccount.vue'
 import Template from './views/management/Template.vue'
 import UserProfile from './views/UserProfile.vue'
 import Signout from './components/auth/Signout.vue'
-import StaffSearchForm from './components/auth/StaffSearchForm.vue'
+import SearchBusinessForm from './components/auth/SearchBusinessForm.vue'
 
 Vue.use(Router)
 
@@ -46,7 +46,7 @@ export function getRoutes (appFlavor:String) {
     { path: '/businessprofile', component: BusinessProfile, meta: { requiresAuth: true } },
     { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: true } },
     { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true } },
-    { path: '/staffsearch', component: StaffSearchForm, props: true, meta: { requiresAuth: true } },
+    { path: '/searchbusiness', component: SearchBusinessForm, props: true, meta: { requiresAuth: true } },
     { path: '*', component: PageNotFound }
   ]
 

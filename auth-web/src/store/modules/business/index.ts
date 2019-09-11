@@ -78,9 +78,10 @@ export default class BusinessModule extends VuexModule {
     this.context.dispatch('getOrganizations', null, { root: true })
   }
 
+  // Following searchBusiness will search data from legal-api.
   @Action({ rawError: true })
-  public async staffSearch (businessNumber: string) {
-    return businessServices.staffSearch(businessNumber)
+  public async searchBusiness (businessNumber: string) {
+    return businessServices.searchBusiness(businessNumber)
       .then(response => {
         if (response.status === 200) {
           configHelper.addToSession(SessionStorageKeys.CorpNumKey, businessNumber)
