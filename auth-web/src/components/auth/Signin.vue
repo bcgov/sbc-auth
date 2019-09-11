@@ -55,7 +55,7 @@ export default class Signin extends Vue {
       }
     } else {
       if (this.idpHint === 'idir') {
-        this.$router.push('/staffsearch')
+        this.$router.push('/searchbusiness')
       } else {
         this.userStore.getUserProfile('@me').then((userProfile:User) => {
           // If contact exists redirect to dashboard, else to user profile page
