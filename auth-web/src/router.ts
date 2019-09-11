@@ -32,8 +32,8 @@ export function getRoutes (appFlavor:String) {
     varRoutes = [{ path: '/', component: Home }]
   } else {
     varRoutes = [
-      { path: '/', component: AuthHome },
-      { path: '/home', component: Home },
+      { path: '/', component: Home },
+      { path: '/home', component: AuthHome },
       { path: '/main', component: Template, meta: { requiresAuth: true } },
       { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
       { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } }
