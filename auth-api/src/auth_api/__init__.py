@@ -26,6 +26,7 @@ from auth_api.models import db, ma
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
 from config import CONFIGURATION, _Config
+from auth_api.extensions import mail
 
 
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first
@@ -35,13 +36,14 @@ JWT = JWTWrapper.get_instance()
 
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     """Return a configured Flask App using the Factory method."""
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='templates')
     app.config.from_object(CONFIGURATION[run_mode])
 
     from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT
 
     db.init_app(app)
     ma.init_app(app)
+    mail.init_app(app)
 
     app.register_blueprint(API_BLUEPRINT)
     app.register_blueprint(OPS_BLUEPRINT)

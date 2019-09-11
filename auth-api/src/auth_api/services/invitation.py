@@ -19,6 +19,9 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel
 from auth_api.schemas import InvitationSchema
+from .notification import Notification
+from flask import render_template
+from config import get_named_config
 
 
 class Invitation:
@@ -39,10 +42,11 @@ class Invitation:
         return obj
 
     @staticmethod
-    def send_invitation(invitation_info: dict, user_id):
+    def create_invitation(invitation_info: dict, user_id):
         """Creates a new invitation."""
         invitation = InvitationModel.create_from_dict(invitation_info, user_id)
         invitation.save()
+        Invitation.send_invitation(invitation)
         return Invitation(invitation)
 
     @staticmethod
@@ -73,6 +77,15 @@ class Invitation:
         if invitation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         invitation.delete()
+
+    @staticmethod
+    def send_invitation(invitation:InvitationModel):
+        config = get_named_config()
+        subject = "Business Invitation"
+        sender = config.MAIL_FROM_ID
+        recipient = invitation.recipient_email
+        Notification.send_email(subject, sender, recipient,
+                                render_template("business_invitation_email.html", invitation=invitation))
 
     def update_invitation(self, invitation):
         """Updates the specified invitation with new data."""

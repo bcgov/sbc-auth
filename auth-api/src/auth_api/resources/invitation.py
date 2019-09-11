@@ -54,7 +54,7 @@ class Invitations(Resource):
                 response, status = {'message': 'Not authorized to perform this action'}, \
                     http_status.HTTP_401_UNAUTHORIZED
             else:
-                response, status = InvitationService.send_invitation(request_json, user.identifier).as_dict(), \
+                response, status = InvitationService.create_invitation(request_json, user.identifier).as_dict(), \
                     http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
