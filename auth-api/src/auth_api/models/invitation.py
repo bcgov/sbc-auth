@@ -70,6 +70,7 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     def update_invitation(self, invitation_info: dict):
         """Update this invitation with the new data."""
         if invitation_info:
-            self.accepted_date = invitation_info['acceptedDate']
+            if 'acceptedDate' in invitation_info:
+                self.accepted_date = invitation_info['acceptedDate']
             self.invitation_status_code = invitation_info['status']
             self.save()
