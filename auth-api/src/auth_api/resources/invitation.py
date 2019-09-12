@@ -20,8 +20,8 @@ from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import utils as schema_utils
-from auth_api.services import User as UserService
 from auth_api.services import Invitation as InvitationService
+from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
 
@@ -41,8 +41,7 @@ class Invitations(Resource):
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
     def post():
-        """Sends a new invitation using the details in request and saves the invitation.
-        """
+        """Send a new invitation using the details in request and saves the invitation."""
         token = g.jwt_oidc_token_info
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'invitation')
@@ -132,5 +131,3 @@ class Invitation(Resource):
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
-
-
