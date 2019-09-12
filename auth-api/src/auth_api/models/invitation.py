@@ -11,16 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This model manages a Invitation item in the Auth Service.
-"""
+"""This model manages a Invitation item in the Auth Service."""
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
+from .base_model import BaseModel
 from .invitation_membership import InvitationMembership
 from .invite_status import InvitationStatus
-
-from .base_model import BaseModel
 
 
 class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
@@ -61,12 +59,12 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
 
     @classmethod
     def find_invitations_by_user(cls, user_id):
-        """Finds all invitation sent by the given user."""
+        """Find all invitation sent by the given user."""
         return cls.query.filter_by(sender_id=user_id).all()
 
     @classmethod
     def find_invitation_by_id(cls, invitation_id):
-        """Find an invitation record that matches the provided id."""
+        """Find an invitation record that matches the id."""
         return cls.query.filter_by(id=invitation_id).first()
 
     def update_invitation(self, invitation_info: dict):
@@ -75,5 +73,3 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
             self.accepted_date = invitation_info['acceptedDate']
             self.invitation_status_code = invitation_info['status']
             self.save()
-
-

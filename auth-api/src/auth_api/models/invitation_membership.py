@@ -22,7 +22,7 @@ from sqlalchemy.orm import relationship
 from .base_model import BaseModel
 
 
-class InvitationMembership(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class InvitationMembership(BaseModel):  # pylint: disable=too-few-public-methods
     """Model for Invitation Membership.  Associates Invitation, Orgs and Membership type."""
 
     __tablename__ = 'invitation_membership'

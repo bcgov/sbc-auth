@@ -18,8 +18,8 @@ from .affiliation import AffiliationSchema
 from .contact import ContactSchema
 from .contact_link import ContactLinkSchema
 from .entity import EntitySchema
+from .invitation import InvitationSchema
+from .invitation_membership import InvitationMembershipSchema
 from .membership import MembershipSchema
 from .org import OrgSchema
 from .user import UserSchema
-from .invitation import InvitationSchema
-from .invitation_membership import InvitationMembershipSchema

@@ -13,15 +13,16 @@
 # limitations under the License.
 """Service for managing Invitation data."""
 
+from flask import render_template
 from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel
 from auth_api.schemas import InvitationSchema
-from .notification import Notification
-from flask import render_template
 from config import get_named_config
+
+from .notification import Notification
 
 
 class Invitation:
@@ -43,7 +44,7 @@ class Invitation:
 
     @staticmethod
     def create_invitation(invitation_info: dict, user_id):
-        """Creates a new invitation."""
+        """Create a new invitation."""
         invitation = InvitationModel.create_from_dict(invitation_info, user_id)
         invitation.save()
         Invitation.send_invitation(invitation)
@@ -51,7 +52,7 @@ class Invitation:
 
     @staticmethod
     def get_invitations(user_id):
-        """Gets invitations sent by a user."""
+        """Get invitations sent by a user."""
         collection = []
         invitations = InvitationModel.find_invitations_by_user(user_id)
         for invitation in invitations:
@@ -60,7 +61,7 @@ class Invitation:
 
     @staticmethod
     def find_invitation_by_id(invitation_id):
-        """Finds and returns an existing invitation with the provided id."""
+        """Find an existing invitation with the provided id."""
         if invitation_id is None:
             return None
 
@@ -72,22 +73,23 @@ class Invitation:
 
     @staticmethod
     def delete_invitation(invitation_id):
-        """Deletes the specified invitation."""
+        """Delete the specified invitation."""
         invitation = InvitationModel.find_invitation_by_id(invitation_id)
         if invitation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         invitation.delete()
 
     @staticmethod
-    def send_invitation(invitation:InvitationModel):
+    def send_invitation(invitation: InvitationModel):
+        """Send the email notification."""
         config = get_named_config()
-        subject = "Business Invitation"
+        subject = 'Business Invitation'
         sender = config.MAIL_FROM_ID
         recipient = invitation.recipient_email
         Notification.send_email(subject, sender, recipient,
-                                render_template("business_invitation_email.html", invitation=invitation))
+                                render_template('business_invitation_email.html', invitation=invitation))
 
     def update_invitation(self, invitation):
-        """Updates the specified invitation with new data."""
+        """Update the specified invitation with new data."""
         self._model.update_invitation(invitation)
         return self

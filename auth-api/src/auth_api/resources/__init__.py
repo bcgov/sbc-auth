@@ -26,13 +26,13 @@ from sbc_common_components.exception_handling.exception_handler import Exception
 
 from .apihelper import Api
 from .entity import API as ENTITY_API
+from .invitation import API as INVITATION_API
 from .logout import API as LOGOUT_API
 from .meta import API as META_API
 from .ops import API as OPS_API
 from .org import API as ORG_API
 from .token import API as TOKEN_API
 from .user import API as USER_API
-from .invitation import API as INVITATION_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
