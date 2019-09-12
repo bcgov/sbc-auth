@@ -36,7 +36,7 @@ class Authorization:
         """Get User authorizations for the entity."""
         auth_response = {}
         if token_info.get('loginSource', None) == 'PASSCODE':
-            if token_info.get('username', None) == business_identifier:
+            if token_info.get('username', None).upper() == business_identifier.upper():
                 auth_response = {'role': 'OWNER'}
         elif 'staff' in token_info.get('realm_access', []).get('roles', []):
             auth_response = {'role': 'STAFF'}
