@@ -13,6 +13,8 @@
 # limitations under the License.
 """Manager for authorization schema and export."""
 
+from marshmallow import fields
+
 from auth_api.models import ma
 from auth_api.models.views.authorization import Authorization as AuthorizationModel
 
@@ -25,3 +27,6 @@ class AuthorizationSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
 
         model = AuthorizationModel
         exclude = ['entity_name', 'keycloak_guid', 'org_id', 'org_type']
+
+    org_membership = fields.String(data_key='orgMembership')
+    business_identifier = fields.String(data_key='businessIdentifier')

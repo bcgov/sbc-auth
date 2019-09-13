@@ -130,13 +130,13 @@ def test_get_org_no_auth_returns_401(client, jwt, session):  # pylint:disable=un
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
-def test_get_org_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
+def test_get_org_no_org_returns_403(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that attempting to retrieve a non-existent org returns a 404."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.get('/api/v1/orgs/{}'.format(999),
                     headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+    assert rv.status_code == http_status.HTTP_403_FORBIDDEN  # TODO
 
 
 def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
@@ -175,7 +175,7 @@ def test_add_contact_no_org_returns_404(client, jwt, session):  # pylint:disable
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
     rv = client.post('/api/v1/orgs/{}/contacts'.format(99),
                      headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
-    assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+    assert rv.status_code == http_status.HTTP_403_FORBIDDEN  # TODO
 
 
 def test_add_contact_duplicate_returns_400(client, jwt, session):  # pylint:disable=unused-argument
@@ -237,7 +237,7 @@ def test_update_contact_no_org_returns_404(client, jwt, session):  # pylint:disa
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
     rv = client.put('/api/v1/orgs/{}/contacts'.format(99),
                     headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
-    assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+    assert rv.status_code == http_status.HTTP_403_FORBIDDEN  # TODO
 
 
 def test_update_contact_missing_returns_404(client, jwt, session):  # pylint:disable=unused-argument

@@ -18,7 +18,7 @@ Authorization view wraps details on the entities and membership through orgs and
 
 import uuid
 
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 
 from auth_api.models.db import db
@@ -29,11 +29,11 @@ class Authorization(db.Model):
 
     __tablename__ = 'authorizations_view'
 
-    business_identifier = Column(String, primary_key=True)
+    business_identifier = Column(String)
     entity_name = Column(String)
-    role = Column(String)
-    keycloak_guid = Column(UUID)
-    org_id = Column(Integer)
+    org_membership = Column(String)
+    keycloak_guid = Column(UUID, primary_key=True)
+    org_id = Column(Integer, primary_key=True)
     org_type = Column(String)
 
     @classmethod

@@ -24,9 +24,8 @@ from auth_api.schemas import utils as schema_utils
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.tracer import Tracer
-from auth_api.utils.roles import Role
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, Role
 from auth_api.utils.util import cors_preflight
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES
 
 
 API = Namespace('entities', description='Entities')
@@ -67,10 +66,11 @@ class EntityResource(Resource):
     @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    def get(business_identifier): #AUTH-NEEDED
+    def get(business_identifier):  # AUTH-NEEDED
         """Get an existing entity by it's business number."""
         try:
-            entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info, allowed_roles=ALL_ALLOWED_ROLES)
+            entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
+                                                               allowed_roles=ALL_ALLOWED_ROLES)
             if entity is not None:
                 response, status = entity.as_dict(), http_status.HTTP_200_OK
             else:
@@ -89,7 +89,7 @@ class ContactResource(Resource):
     @staticmethod
     @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
     @cors.crossdomain(origin='*')
-    def post(business_identifier): #AUTH-NEEDED
+    def post(business_identifier):  # AUTH-NEEDED
         """Add a new contact for the Entity identified by the provided id."""
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'contact')
@@ -97,7 +97,8 @@ class ContactResource(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info, allowed_roles=CLIENT_AUTH_ROLES)
+            entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
+                                                               allowed_roles=CLIENT_AUTH_ROLES)
             if entity:
                 response, status = entity.add_contact(request_json).as_dict(), \
                                    http_status.HTTP_201_CREATED
@@ -111,7 +112,7 @@ class ContactResource(Resource):
     @staticmethod
     @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
     @cors.crossdomain(origin='*')
-    def put(business_identifier): #AUTH-NEEDED
+    def put(business_identifier):  # AUTH-NEEDED
         """Update the business contact for the Entity identified by the provided id."""
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'contact')
@@ -119,7 +120,8 @@ class ContactResource(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info, allowed_roles=CLIENT_AUTH_ROLES)
+            entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
+                                                               allowed_roles=CLIENT_AUTH_ROLES)
             if entity:
                 response, status = entity.update_contact(request_json).as_dict(), \
                                    http_status.HTTP_200_OK
@@ -133,10 +135,11 @@ class ContactResource(Resource):
     @staticmethod
     @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
     @cors.crossdomain(origin='*')
-    def delete(business_identifier): #AUTH-NEEDED
+    def delete(business_identifier):  # AUTH-NEEDED
         """Delete the business contact for the Entity identified by the provided id."""
         try:
-            entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info, allowed_roles=CLIENT_AUTH_ROLES)
+            entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
+                                                               allowed_roles=CLIENT_AUTH_ROLES)
             if entity:
                 response, status = entity.delete_contact().as_dict(), http_status.HTTP_200_OK
             else:

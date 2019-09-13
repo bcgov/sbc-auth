@@ -15,9 +15,11 @@
 
 Test suite to ensure that the Authorizations view routines are working as expected.
 """
-from tests.utilities.factory_utils import *
+import uuid
 
 from auth_api.models.views.authorization import Authorization
+from tests.utilities.factory_utils import factory_user_model, factory_org_model, factory_membership_model, \
+    factory_entity_model, factory_affiliation_model
 
 
 def test_find_user_authorization_by_business_number(session):  # pylint:disable=unused-argument
@@ -31,7 +33,7 @@ def test_find_user_authorization_by_business_number(session):  # pylint:disable=
                                                                              entity.business_identifier)
 
     assert authorization is not None
-    assert authorization.role == membership.membership_type_code
+    assert authorization.org_membership == membership.membership_type_code
 
 
 def test_find_invalid_user_authorization_by_business_number(session):  # pylint:disable=unused-argument
@@ -59,7 +61,7 @@ def test_find_all_user_authorizations(session):  # pylint:disable=unused-argumen
     factory_affiliation_model(entity.id, org.id)
     authorizations = Authorization.find_all_authorizations_for_user(str(user.keycloak_guid))
     assert authorizations is not None
-    assert authorizations[0].role == membership.membership_type_code
+    assert authorizations[0].org_membership == membership.membership_type_code
     assert authorizations[0].business_identifier == entity.business_identifier
 
 
@@ -71,4 +73,4 @@ def test_find_all_user_authorizations_for_empty(session):  # pylint:disable=unus
 
     authorizations = Authorization.find_all_authorizations_for_user(str(user.keycloak_guid))
     assert authorizations is not None
-    assert len(authorizations) == 0
+    assert authorizations[0].business_identifier is None

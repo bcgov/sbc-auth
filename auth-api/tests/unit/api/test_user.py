@@ -20,11 +20,12 @@ Test-Suite to ensure that the /users endpoint is working as expected.
 import copy
 import json
 import os
-
-from tests.utilities.factory_utils import *
+import uuid
 
 from auth_api import status as http_status
 from auth_api.exceptions.errors import Error
+from tests.utilities.factory_utils import factory_user_model, factory_org_model, factory_membership_model, \
+    factory_entity_model, factory_affiliation_model
 
 
 TEST_JWT_CLAIMS = {
@@ -383,7 +384,6 @@ def test_get_orgs_for_user(client, jwt, session):  # pylint:disable=unused-argum
 
 def test_user_authorizations_returns_200(client, jwt, session):  # pylint:disable=unused-argument
     """Assert authorizations for users returns 200."""
-
     user = factory_user_model()
     org = factory_org_model('TEST')
     factory_membership_model(user.id, org.id)
@@ -398,7 +398,7 @@ def test_user_authorizations_returns_200(client, jwt, session):  # pylint:disabl
     rv = client.get('/api/v1/users/authorizations', headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.json.get('authorizations')[0].get('role') == 'OWNER'
+    assert rv.json.get('authorizations')[0].get('orgMembership') == 'OWNER'
 
     # Test with invalid user
     claims['sub'] = str(uuid.uuid4())

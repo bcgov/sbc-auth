@@ -13,8 +13,11 @@
 # limitations under the License.
 """Service for managing Organization data."""
 
+from typing import Dict, Tuple
+
 from sbc_common_components.tracing.service_tracing import ServiceTracing
 
+import auth_api.services.authorization as auth
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -23,9 +26,6 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import OrgSchema
 from auth_api.utils.util import camelback2snake
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES
-from .authorization import check_auth
-from typing import Dict, Tuple
 
 
 class Org:
@@ -70,13 +70,13 @@ class Org:
         self._model.delete()
 
     @staticmethod
-    def find_by_org_id(org_id, token_info: Dict, allowed_roles: Tuple = None):
+    def find_by_org_id(org_id, token_info: Dict = None, allowed_roles: Tuple = None):
         """Find and return an existing organization with the provided id."""
         if org_id is None:
             return None
 
         # Check authorization for the user
-        check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
+        auth.check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
 
         org_model = OrgModel.find_by_org_id(org_id)
         if not org_model:

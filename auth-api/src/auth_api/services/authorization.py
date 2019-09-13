@@ -17,14 +17,16 @@ This module is to handle authorization related queries.
 """
 from typing import Dict
 
+from flask import abort
+
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.schemas.authorization import AuthorizationSchema
-from flask import abort
-from auth_api.utils.roles import STAFF, OWNER
+from auth_api.utils.roles import OWNER, STAFF
 
 
 class Authorization:
     """This module is to handle authorization related queries.
+
     The authorization model as such doesn't exist, so this is a class where we can map all the relationship to query
     user authorizations.
     """
@@ -39,14 +41,25 @@ class Authorization:
         auth_response = {}
         if token_info.get('loginSource', None) == 'PASSCODE':
             if token_info.get('username', None).upper() == business_identifier.upper():
-                auth_response = {'role': OWNER}
-        elif 'staff' in token_info.get('realm_access', []).get('roles', []):
-            auth_response = {'role': STAFF}
+                auth_response = {
+                    'orgMembership': OWNER,
+                    'roles': ['edit', 'view']
+                }
+        elif 'staff' in token_info.get('realm_access').get('roles'):
+            auth_response = {
+                'roles': ['edit', 'view']
+            }
+        elif 'staff' in token_info.get('realm_access').get('roles'):
+            auth_response = {
+                'roles': ['edit', 'view']
+            }
         else:
             keycloak_guid = token_info.get('sub', None)
             auth = AuthorizationView.find_user_authorization_by_business_number(keycloak_guid, business_identifier)
             if auth:
                 auth_response = Authorization(auth).as_dict(exclude=['business_identifier'])
+                auth_response['roles'] = ['edit', 'view']
+
         return auth_response
 
     @staticmethod
@@ -73,18 +86,16 @@ class Authorization:
 
 def check_auth(token_info: Dict, **kwargs):
     """Check if user is authorized to perform action on the service."""
-    if 'staff' in token_info.get('realm_access', []).get('roles', []):
-        auth = {'role': STAFF}
-    elif kwargs.get('business_identifier', None):
-        auth = Authorization.get_user_authorizations_for_entity(token_info, kwargs.get('business_identifier'))
-    elif kwargs.get('org_id', None):
-        auth_record = AuthorizationView.find_user_authorization_by_org_id(token_info.get('sub', None),
-                                                                          kwargs.get('org_id'))
-        auth = Authorization(auth_record).as_dict() if auth_record else None
-
-    print('003456789087654356789087654356789')
-    print(auth.get('role', None))
-    _check_for_roles(auth.get('role', None) if auth else None, kwargs)
+    if 'staff' in token_info.get('realm_access').get('roles'):
+        _check_for_roles(STAFF, kwargs)
+    else:
+        if kwargs.get('business_identifier', None):
+            auth = Authorization.get_user_authorizations_for_entity(token_info, kwargs.get('business_identifier'))
+        elif kwargs.get('org_id', None):
+            auth_record = AuthorizationView.find_user_authorization_by_org_id(token_info.get('sub', None),
+                                                                              kwargs.get('org_id'))
+            auth = Authorization(auth_record).as_dict() if auth_record else None
+        _check_for_roles(auth.get('orgMembership', None) if auth else None, kwargs)
 
 
 def _check_for_roles(role: str, kwargs):
@@ -96,7 +107,7 @@ def _check_for_roles(role: str, kwargs):
         if kwargs.get('disabled_roles', None):
             is_authorized = role not in kwargs.get('disabled_roles')
         if kwargs.get('equals_role', None):
-            is_authorized = role == kwargs.get('equals_role')
+            is_authorized = (role == kwargs.get('equals_role'))
 
     if not is_authorized:
         abort(403)
