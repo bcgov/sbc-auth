@@ -31,7 +31,7 @@ class Authorization(db.Model):
 
     business_identifier = Column(String, primary_key=True)
     entity_name = Column(String)
-    role = Column(String)
+    org_membership = Column(String)
     keycloak_guid = Column(UUID)
 
     @classmethod
