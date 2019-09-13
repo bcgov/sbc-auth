@@ -242,7 +242,7 @@ def test_authorizations_passcode_returns_200(client, jwt, session):  # pylint:di
                 headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.json.get('role') == 'OWNER'
+    assert rv.json.get('orgMembership') == 'OWNER'
 
     # Test with invalid number
     headers = factory_auth_header(jwt=jwt, claims=claims)
@@ -265,7 +265,7 @@ def test_authorizations_for_staff_returns_200(client, jwt, session):  # pylint:d
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.json.get('role') == 'STAFF'
+    assert rv.json.get('orgMembership', None) is None
 
 
 def test_authorizations_for_affiliated_users_returns_200(client, jwt, session):  # pylint:disable=unused-argument
@@ -284,4 +284,4 @@ def test_authorizations_for_affiliated_users_returns_200(client, jwt, session): 
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.json.get('role') == 'OWNER'
+    assert rv.json.get('orgMembership') == 'OWNER'
