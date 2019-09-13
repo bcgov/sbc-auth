@@ -398,7 +398,7 @@ def test_user_authorizations_returns_200(client, jwt, session):  # pylint:disabl
     rv = client.get('/api/v1/users/authorizations', headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.json.get('authorizations')[0].get('role') == 'OWNER'
+    assert rv.json.get('authorizations')[0].get('orgMembership') == 'OWNER'
 
     # Test with invalid user
     claims['sub'] = str(uuid.uuid4())
