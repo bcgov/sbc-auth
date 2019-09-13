@@ -19,6 +19,8 @@ from typing import Dict
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.schemas.authorization import AuthorizationSchema
+from flask import abort
+from auth_api.utils.roles import STAFF, OWNER
 
 
 class Authorization:
@@ -37,9 +39,9 @@ class Authorization:
         auth_response = {}
         if token_info.get('loginSource', None) == 'PASSCODE':
             if token_info.get('username', None).upper() == business_identifier.upper():
-                auth_response = {'role': 'OWNER'}
+                auth_response = {'role': OWNER}
         elif 'staff' in token_info.get('realm_access', []).get('roles', []):
-            auth_response = {'role': 'STAFF'}
+            auth_response = {'role': STAFF}
         else:
             keycloak_guid = token_info.get('sub', None)
             auth = AuthorizationView.find_user_authorization_by_business_number(keycloak_guid, business_identifier)
@@ -67,3 +69,34 @@ class Authorization:
             exclude = []
         auth_schema = AuthorizationSchema(exclude=exclude)
         return auth_schema.dump(self._model, many=False)
+
+
+def check_auth(token_info: Dict, **kwargs):
+    """Check if user is authorized to perform action on the service."""
+    if 'staff' in token_info.get('realm_access', []).get('roles', []):
+        auth = {'role': STAFF}
+    elif kwargs.get('business_identifier', None):
+        auth = Authorization.get_user_authorizations_for_entity(token_info, kwargs.get('business_identifier'))
+    elif kwargs.get('org_id', None):
+        auth_record = AuthorizationView.find_user_authorization_by_org_id(token_info.get('sub', None),
+                                                                          kwargs.get('org_id'))
+        auth = Authorization(auth_record).as_dict() if auth_record else None
+
+    print('003456789087654356789087654356789')
+    print(auth.get('role', None))
+    _check_for_roles(auth.get('role', None) if auth else None, kwargs)
+
+
+def _check_for_roles(role: str, kwargs):
+    is_authorized: bool = False
+    # If role is found
+    if role:
+        if kwargs.get('one_of_roles', None):
+            is_authorized = role in kwargs.get('one_of_roles')
+        if kwargs.get('disabled_roles', None):
+            is_authorized = role not in kwargs.get('disabled_roles')
+        if kwargs.get('equals_role', None):
+            is_authorized = role == kwargs.get('equals_role')
+
+    if not is_authorized:
+        abort(403)

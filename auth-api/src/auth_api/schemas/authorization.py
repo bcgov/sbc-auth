@@ -24,4 +24,4 @@ class AuthorizationSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
         """Maps all of the Authorization fields to a default schema."""
 
         model = AuthorizationModel
-        exclude = ['entity_name', 'keycloak_guid']
+        exclude = ['entity_name', 'keycloak_guid', 'org_id', 'org_type']

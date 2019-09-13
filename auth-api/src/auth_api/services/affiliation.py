@@ -22,6 +22,9 @@ from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
+from typing import Dict
+from auth_api.services.authorization import check_auth
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -56,13 +59,13 @@ class Affiliation:
         return obj
 
     @staticmethod
-    def find_affiliated_entities_by_org_id(org_id):
+    def find_affiliated_entities_by_org_id(org_id, token_info:Dict):
         """Given an org_id, this will return the entities affiliated with it."""
         current_app.logger.debug('<find_affiliations_by_org_id for org_id {}'.format(org_id))
         if not org_id:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        org = OrgService.find_by_org_id(org_id)
+        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=ALL_ALLOWED_ROLES)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -79,10 +82,10 @@ class Affiliation:
         return data
 
     @staticmethod
-    def create_affiliation(org_id, business_identifier, pass_code=None):
+    def create_affiliation(org_id, business_identifier, pass_code=None, token_info:Dict=None):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
-        org = OrgService.find_by_org_id(org_id)
+        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=CLIENT_ADMIN_ROLES)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -127,9 +130,9 @@ class Affiliation:
         return Affiliation(affiliation)
 
     @staticmethod
-    def delete_affiliation(org_id, business_identifier):
+    def delete_affiliation(org_id, business_identifier, token_info:Dict):
         """Delete the affiliation for the provided org id and business id."""
-        org = OrgService.find_by_org_id(org_id)
+        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 

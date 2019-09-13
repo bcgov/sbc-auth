@@ -59,6 +59,18 @@ TEST_JWT_CLAIMS = {
         ]
     }
 }
+TEST_STAFF_JWT_CLAIMS = {
+    'iss': os.getenv('JWT_OIDC_ISSUER'),
+    'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+    'firstname': 'Test',
+    'lastname': 'User',
+    'preferred_username': 'testuser',
+    'realm_access': {
+        'roles': [
+            'staff'
+        ]
+    }
+}
 
 TEST_JWT_HEADER = {
     'alg': os.getenv('JWT_OIDC_ALGORITHMS'),

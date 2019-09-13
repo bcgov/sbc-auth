@@ -22,6 +22,9 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
 from auth_api.utils.util import camelback2snake
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES
+from .authorization import check_auth
+from typing import Dict, Tuple
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -61,11 +64,11 @@ class Entity:
         return obj
 
     @classmethod
-    def find_by_business_identifier(cls, business_identifier: str = None):
+    def find_by_business_identifier(cls, business_identifier: str = None, token_info:Dict=None, allowed_roles:Tuple=None):
         """Given a business identifier, this will return the corresponding entity or None."""
         if not business_identifier:
             return None
-
+        check_auth(token_info, one_of_roles=allowed_roles, business_identifier=business_identifier)
         entity_model = EntityModel.find_by_business_identifier(business_identifier)
 
         if not entity_model:
