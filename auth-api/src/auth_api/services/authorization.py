@@ -37,14 +37,21 @@ class Authorization:
         auth_response = {}
         if token_info.get('loginSource', None) == 'PASSCODE':
             if token_info.get('username', None).upper() == business_identifier.upper():
-                auth_response = {'role': 'OWNER'}
+                auth_response = {
+                    'orgMembership': 'OWNER',
+                    'roles': ['edit', 'view']
+                }
         elif 'staff' in token_info.get('realm_access', []).get('roles', []):
-            auth_response = {'role': 'STAFF'}
+            auth_response = {
+                'roles': ['edit', 'view']
+            }
         else:
             keycloak_guid = token_info.get('sub', None)
             auth = AuthorizationView.find_user_authorization_by_business_number(keycloak_guid, business_identifier)
             if auth:
                 auth_response = Authorization(auth).as_dict(exclude=['business_identifier'])
+                auth_response['roles'] = ['edit', 'view']
+
         return auth_response
 
     @staticmethod
