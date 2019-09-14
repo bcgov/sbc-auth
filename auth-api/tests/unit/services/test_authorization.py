@@ -34,14 +34,14 @@ def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-a
             'roles': ['basic']
         }}, entity.business_identifier)
     assert authorization is not None
-    assert authorization.get('role', None) == membership.membership_type_code
+    assert authorization.get('orgMembership', None) == membership.membership_type_code
 
     # Test with invalid user
     authorization = Authorization.get_user_authorizations_for_entity({'sub': str(uuid.uuid4()), 'realm_access': {
         'roles': ['basic']
     }}, entity.business_identifier)
     assert authorization is not None
-    assert authorization.get('role', None) is None
+    assert authorization.get('orgMembership', None) is None
 
     # Test for passcode users
     authorization = Authorization.get_user_authorizations_for_entity(
@@ -51,7 +51,7 @@ def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-a
         entity.business_identifier)
 
     assert authorization is not None
-    assert authorization.get('role', None) == 'OWNER'
+    assert authorization.get('orgMembership', None) == 'OWNER'
 
     # Test for passcode users with invalid username
     authorization = Authorization.get_user_authorizations_for_entity(
@@ -61,7 +61,7 @@ def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-a
         entity.business_identifier)
 
     assert authorization is not None
-    assert authorization.get('role', None) is None
+    assert authorization.get('orgMembership', None) is None
 
     # Test for staff users
     authorization = Authorization.get_user_authorizations_for_entity(
@@ -69,7 +69,7 @@ def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-a
         entity.business_identifier)
 
     assert authorization is not None
-    assert authorization.get('role', None) == 'STAFF'
+    assert authorization.get('orgMembership', None) is None
 
 
 def test_get_user_authorizations(session):  # pylint:disable=unused-argument
@@ -82,7 +82,7 @@ def test_get_user_authorizations(session):  # pylint:disable=unused-argument
 
     authorization = Authorization.get_user_authorizations(str(user.keycloak_guid))
     assert authorization is not None
-    assert authorization['authorizations'][0].get('role', None) == membership.membership_type_code
+    assert authorization['authorizations'][0].get('orgMembership', None) == membership.membership_type_code
 
     # Test with invalid user
     authorization = Authorization.get_user_authorizations(str(uuid.uuid4()))

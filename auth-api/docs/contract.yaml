@@ -82,13 +82,36 @@ paths:
                 $ref: '#/components/schemas/Authorization'
               examples:
                 owner:
-                  value: '{ "role": "OWNER" }'
+                  value: '{
+                            "orgMembership": "OWNER",
+                            "roles": [
+                              "view",
+                              "edit"
+                            ]
+                          }'
                 admin:
-                  value: '{ "role": "ADMIN" }'
+                  value: '{
+                          "orgMembership": "ADMIN",
+                          "roles": [
+                            "view",
+                            "edit"
+                          ]
+                        }'
                 member:
-                  value: '{ "role": "MEMBER" }'
+                  value: '{
+                            "orgMembership": "MEMBER",
+                            "roles": [
+                              "view",
+                              "edit"
+                            ]
+                          }'
                 staff:
-                  value: '{ "role": "STAFF" }'
+                  value: '{
+                            "roles": [
+                              "view",
+                              "edit"
+                            ]
+                          }'
                 unauthorized:
                   value: '{}'
         default:
@@ -133,30 +156,48 @@ components:
       title: Authorization
       type: object
       description: Authorization Model
-      properties:
-        role:
-          type: string
-      required:
-        - role
       x-tags:
         - authorization
       x-examples:
         owner:
           role: OWNER
           value:
-            role: OWNER
+            orgMembership: OWNER
+            roles:
+              - view
+              - edit
         admin:
           role: ADMIN
           value:
-            role: ADMIN
+            orgMembership: ADMIN
+            roles:
+              - view
+              - edit
         member:
           role: MEMBER
           value:
-            role: MEMBER
+            orgMembership: MEMBER
+            roles:
+              - view
+              - edit
         staff:
           role: STAFF
           value:
-            role: STAFF
+            roles:
+              - view
+              - edit
+      properties:
+        roles:
+          type: array
+          items: {}
+        orgMembership:
+          type: string
+          enum:
+            - MEMBER
+            - ADMIN
+            - OWNER
+      required:
+        - roles
   securitySchemes:
     API Key:
       name: API Key
