@@ -1,0 +1,208 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Auth API
+  license:
+    name: Apache 2.0
+  description: Auth API Specs
+  contact:
+    name: BC Registries
+paths:
+  '/entities/{businessIdentifier}/authorizations':
+    get:
+      summary: Get authorizations for the entity
+      operationId: getAuthorizations
+      tags:
+        - authorization
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+              examples:
+                owner:
+                  value: 'application:prod'
+                admin:
+                  value: 'application:prod'
+                member:
+                  value: 'application:prod'
+                staff:
+                  value: 'application:prod'
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+              examples:
+                owner:
+                  value: '*'
+                admin:
+                  value: '*'
+                member:
+                  value: '*'
+                staff:
+                  value: '*'
+                unauthorized:
+                  value: '*'
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+              examples:
+                owner:
+                  value: 'GET, OPTIONS'
+                admin:
+                  value: 'GET, OPTIONS'
+                member:
+                  value: 'GET, OPTIONS'
+                staff:
+                  value: 'GET, OPTIONS'
+                unauthorized:
+                  value: 'GET, OPTIONS'
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+              examples:
+                owner:
+                  value: 'Content-Type, api_key, Authorization'
+                admin:
+                  value: 'Content-Type, api_key, Authorization'
+                member:
+                  value: 'Content-Type, api_key, Authorization'
+                staff:
+                  value: 'Content-Type, api_key, Authorization'
+                unauthorized:
+                  value: 'Content-Type, api_key, Authorization'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Authorization'
+              examples:
+                owner:
+                  value: '{
+                            "orgMembership": "OWNER",
+                            "roles": [
+                              "view",
+                              "edit"
+                            ]
+                          }'
+                admin:
+                  value: '{
+                          "orgMembership": "ADMIN",
+                          "roles": [
+                            "view",
+                            "edit"
+                          ]
+                        }'
+                member:
+                  value: '{
+                            "orgMembership": "MEMBER",
+                            "roles": [
+                              "view",
+                              "edit"
+                            ]
+                          }'
+                staff:
+                  value: '{
+                            "roles": [
+                              "view",
+                              "edit"
+                            ]
+                          }'
+                unauthorized:
+                  value: '{}'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      description: Get authorizations endpoint for the entity by business indentifier
+    parameters:
+      - schema:
+          type: string
+        name: businessIdentifier
+        in: path
+        required: true
+        description: Corp Num/Incorporation Number of the entity
+        examples:
+          owner:
+            value: CP0001234
+          admin:
+            value: CP0001235
+          member:
+            value: CP0001236
+          staff:
+            value: CP0001237
+          unauthorized:
+            value: CP0000000
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Identifier representing the type of error that occurred.
+        message:
+          type: string
+          description: Description of the error.
+      description: Contains details of an error that was encountered.
+      x-examples: {}
+    Authorization:
+      title: Authorization
+      type: object
+      description: Authorization Model
+      x-tags:
+        - authorization
+      x-examples:
+        owner:
+          role: OWNER
+          value:
+            orgMembership: OWNER
+            roles:
+              - view
+              - edit
+        admin:
+          role: ADMIN
+          value:
+            orgMembership: ADMIN
+            roles:
+              - view
+              - edit
+        member:
+          role: MEMBER
+          value:
+            orgMembership: MEMBER
+            roles:
+              - view
+              - edit
+        staff:
+          role: STAFF
+          value:
+            roles:
+              - view
+              - edit
+      properties:
+        roles:
+          type: array
+          items: {}
+        orgMembership:
+          type: string
+          enum:
+            - MEMBER
+            - ADMIN
+            - OWNER
+      required:
+        - roles
+  securitySchemes:
+    API Key:
+      name: API Key
+      type: apiKey
+      in: query
+servers:
+  - description: Microcks URL
+    url: 'https://mock-lear-tools.pathfinder.gov.bc.ca/rest/Auth+API/1.0.0'

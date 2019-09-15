@@ -60,6 +60,10 @@ p {
   font-weight: 300;
 }
 
+.v-application {
+  font-family: 'BCSans', Verdana, Arial, sans-serif;  // BC Government Font
+} 
+
 .app-container.theme--light {
   background: $gray0;
 }

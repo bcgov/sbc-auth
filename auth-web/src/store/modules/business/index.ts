@@ -6,6 +6,8 @@ import businessServices from '@/services/business.services'
 import { Affiliation } from '@/models/affiliation'
 import { Org } from '@/models/org'
 import { RemoveBusinessPayload } from '@/models/Organization'
+import configHelper from '@/util/config-helper'
+import { SessionStorageKeys } from '@/util/constants'
 
 interface LoginPayload {
   businessNumber: string
@@ -74,6 +76,17 @@ export default class BusinessModule extends VuexModule {
 
     // Update store
     this.context.dispatch('getOrganizations', null, { root: true })
+  }
+
+  // Following searchBusiness will search data from legal-api.
+  @Action({ rawError: true })
+  public async searchBusiness (businessNumber: string) {
+    return businessServices.searchBusiness(businessNumber)
+      .then(response => {
+        if (response.status === 200) {
+          configHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessNumber)
+        }
+      })
   }
 
   @Action({ rawError: true })
