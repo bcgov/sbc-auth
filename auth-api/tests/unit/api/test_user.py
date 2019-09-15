@@ -17,8 +17,11 @@
 Test-Suite to ensure that the /users endpoint is working as expected.
 """
 
+import copy
 import json
 import os
+
+from tests.utilities.factory_utils import *
 
 from auth_api import status as http_status
 from auth_api.exceptions.errors import Error
@@ -376,3 +379,33 @@ def test_get_orgs_for_user(client, jwt, session):  # pylint:disable=unused-argum
     assert response['orgs']
     assert len(response['orgs']) == 1
     assert response['orgs'][0]['name'] == TEST_ORG_INFO['name']
+
+
+def test_user_authorizations_returns_200(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert authorizations for users returns 200."""
+
+    user = factory_user_model()
+    org = factory_org_model('TEST')
+    factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+
+    claims = copy.deepcopy(TEST_JWT_CLAIMS)
+    claims['sub'] = str(user.keycloak_guid)
+
+    token = jwt.create_jwt(header=TEST_JWT_HEADER, claims=claims)
+    headers = {'Authorization': f'Bearer {token}'}
+    rv = client.get('/api/v1/users/authorizations', headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('authorizations')[0].get('orgMembership') == 'OWNER'
+
+    # Test with invalid user
+    claims['sub'] = str(uuid.uuid4())
+    token = jwt.create_jwt(header=TEST_JWT_HEADER, claims=claims)
+    headers = {'Authorization': f'Bearer {token}'}
+
+    rv = client.get('/api/v1/users/authorizations', headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert len(rv.json.get('authorizations')) == 0

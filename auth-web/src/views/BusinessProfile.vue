@@ -38,14 +38,14 @@ export default class BusinessProfile extends Vue {
   // TODO: Set businessType from current business in store
   private businessType = 'Cooperative'
   editing = false
-  
+
   mounted () {
     // Check if there is already contact info so that we display the appropriate copy
     if (this.businessStore.currentBusiness &&
-        this.businessStore.currentBusiness.contacts &&
-        this.businessStore.currentBusiness.contacts.length > 0) {
-          this.editing = true
-        }
+      this.businessStore.currentBusiness.contacts &&
+      this.businessStore.currentBusiness.contacts.length > 0) {
+      this.editing = true
+    }
   }
 }
 </script>

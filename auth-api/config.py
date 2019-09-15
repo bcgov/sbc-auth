@@ -100,6 +100,9 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     KEYCLOAK_ADMIN_USERNAME = os.getenv("KEYCLOAK_ADMIN_CLIENTID")
     KEYCLOAK_ADMIN_SECRET = os.getenv("KEYCLOAK_ADMIN_SECRET")
 
+    # Config to skip migrations when alembic migrate is used
+    SKIPPED_MIGRATIONS = ['authorizations_view']
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False

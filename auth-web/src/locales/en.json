@@ -10,5 +10,6 @@
   "paymentDoneMsg": "Completing the payment",
   "businessContactCopy": "It looks like we are missing some contact information for your {businessType}. You will need to supply us with a few additional details before you can get started...",
   "businessListEmptyMessage":"You have not added any businesses",
-  "businessListActionMessage":"Click Here to add a business by incorporation number and passcode"
+  "businessListActionMessage":"Click Here to add a business by incorporation number and passcode",
+  "noResultMsg": "The Incorporation Number you entered does not correspond to a Co-operative in the system. Please try again."
 }

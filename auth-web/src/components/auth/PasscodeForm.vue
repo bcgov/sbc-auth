@@ -86,6 +86,7 @@ import { getModule } from 'vuex-module-decorators'
 import BusinessModule from '../../store/modules/business'
 import configHelper from '../../util/config-helper'
 import iframeServices from '../../services/iframe.services'
+import { SessionStorageKeys } from '@/util/constants'
 
 @Component
 export default class PasscodeForm extends Vue {
@@ -142,10 +143,11 @@ export default class PasscodeForm extends Vue {
       this.businessStore.login({ businessNumber: this.businessNumber, passCode: this.passcode })
         .then(response => {
           // set token and store in storage
-          sessionStorage.KEYCLOAK_TOKEN = response.data.access_token
-          sessionStorage.KEYCLOAK_REFRESH_TOKEN = response.data.refresh_token
+          configHelper.addToSession(SessionStorageKeys.KeyCloakToken, response.data.access_token)
+          configHelper.addToSession(SessionStorageKeys.KeyCloakRefreshToken, response.data.refresh_token)
           sessionStorage.REGISTRIES_TRACE_ID = response.data['registries-trace-id']
           sessionStorage.LOGIN_TYPE = 'passcode'
+          configHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, this.businessNumber)
 
           // attempt to load business
           this.businessStore.loadBusiness(this.businessNumber)

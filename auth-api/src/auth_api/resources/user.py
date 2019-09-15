@@ -20,6 +20,7 @@ from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import utils as schema_utils
+from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
@@ -201,3 +202,17 @@ class UserOrgs(Resource):
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
+
+
+@cors_preflight('GET,OPTIONS')
+@API.route('/authorizations', methods=['GET', 'OPTIONS'])
+class AuthorizationResource(Resource):
+    """Resource for managing entity authorizations."""
+
+    @staticmethod
+    @_JWT.requires_auth
+    @cors.crossdomain(origin='*')
+    def get():
+        """Add a new contact for the Entity identified by the provided id."""
+        sub = g.jwt_oidc_token_info.get('sub', None)
+        return AuthorizationService.get_user_authorizations(sub), http_status.HTTP_200_OK
