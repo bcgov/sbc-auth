@@ -70,10 +70,8 @@ def test_add_invitation(client, jwt, session):  # pylint:disable=unused-argument
             }
         ]
     }
-    print(new_invitation)
     rv = client.post('/api/v1/invitations', data=json.dumps(new_invitation),
                      headers=headers, content_type='application/json')
-    print(json.loads(rv.data))
     assert rv.status_code == http_status.HTTP_201_CREATED
 
 
@@ -88,7 +86,6 @@ def test_add_invitation_invalid(client, jwt, session):  # pylint:disable=unused-
     new_invitation = {
         'recipientEmail': 'test@abc.com'
     }
-    print(new_invitation)
     rv = client.post('/api/v1/invitations', data=json.dumps(new_invitation),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
@@ -118,6 +115,7 @@ def test_get_invitations_by_user(client, jwt, session):  # pylint:disable=unused
     invitation_dict = json.loads(rv.data)
     assert rv.status_code == http_status.HTTP_200_OK
     assert invitation_dict['invitations']
+    assert len(invitation_dict['invitations']) == 1
 
 
 def test_get_invitations_by_id(client, jwt, session):  # pylint:disable=unused-argument
@@ -170,6 +168,10 @@ def test_delete_invitation(client, jwt, session):  # pylint:disable=unused-argum
     invitation_id = invitation_dictionary['id']
     rv = client.delete('/api/v1/invitations/{}'.format(invitation_id), headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    rv = client.get('/api/v1/invitations/{}'.format(invitation_id), headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+    dictionary = json.loads(rv.data)
+    assert dictionary['message'] == 'The requested invitation could not be found.'
 
 
 def test_update_invitation(client, jwt, session):  # pylint:disable=unused-argument
@@ -201,3 +203,5 @@ def test_update_invitation(client, jwt, session):  # pylint:disable=unused-argum
     rv = client.put('/api/v1/invitations/{}'.format(invitation_id),
                     data=json.dumps(updated_invitation), headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['status'] == updated_invitation['status']
