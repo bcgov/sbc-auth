@@ -47,7 +47,13 @@
         "KEYCLOAK_AUTH_AUDIENCE": "${KEYCLOAK_AUTH_AUDIENCE}",
         "KEYCLOAK_AUTH_CLIENT_SECRET": "${KEYCLOAK_AUTH_CLIENT_SECRET}",
         "KEYCLOAK_BASE_URL": "${KEYCLOAK_BASE_URL}",
-        "KEYCLOAK_REALMNAME": "${KEYCLOAK_REALMNAME}"
+        "KEYCLOAK_REALMNAME": "${KEYCLOAK_REALMNAME}",
+        "MAIL_SERVER": "${MAIL_SERVER}",
+        "MAIL_PORT": "${MAIL_PORT}",
+        "MAIL_USE_TLS": "${MAIL_USE_TLS}",
+        "MAIL_USE_SSL": "${MAIL_USE_SSL}",
+        "MAIL_USERNAME": "${MAIL_USERNAME}",
+        "MAIL_PASSWORD": "${MAIL_PASSWORD}"
       },
       "type": "Opaque"
     }
@@ -149,6 +155,42 @@
     },
     {
       "name": "KEYCLOAK_REALMNAME",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "MAIL_SERVER",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "MAIL_PORT",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "MAIL_USE_TLS",
+      "displayName": "Name",
+      "required": true,
+      "value": "False"
+    },
+    {
+      "name": "MAIL_USE_SSL",
+      "displayName": "Name",
+      "required": true,
+      "value": "True"
+    },
+    {
+      "name": "MAIL_USERNAME",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "MAIL_PASSWORD",
       "required": true,
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
