@@ -39,7 +39,7 @@ class EntityResources(Resource):
     """Resource for managing entities."""
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+    @_JWT.has_one_of_roles([Role.EDITOR.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def post():
@@ -63,10 +63,10 @@ class EntityResource(Resource):
     """Resource for managing entities."""
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+    @_JWT.requires_auth
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    def get(business_identifier):  # AUTH-NEEDED
+    def get(business_identifier):
         """Get an existing entity by it's business number."""
         try:
             entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
@@ -87,9 +87,9 @@ class ContactResource(Resource):
     """Resource for managing entity contacts."""
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+    @_JWT.requires_auth
     @cors.crossdomain(origin='*')
-    def post(business_identifier):  # AUTH-NEEDED
+    def post(business_identifier):
         """Add a new contact for the Entity identified by the provided id."""
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'contact')
@@ -110,9 +110,9 @@ class ContactResource(Resource):
         return response, status
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+    @_JWT.requires_auth
     @cors.crossdomain(origin='*')
-    def put(business_identifier):  # AUTH-NEEDED
+    def put(business_identifier):
         """Update the business contact for the Entity identified by the provided id."""
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'contact')
@@ -133,9 +133,9 @@ class ContactResource(Resource):
         return response, status
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+    @_JWT.requires_auth
     @cors.crossdomain(origin='*')
-    def delete(business_identifier):  # AUTH-NEEDED
+    def delete(business_identifier):
         """Delete the business contact for the Entity identified by the provided id."""
         try:
             entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,

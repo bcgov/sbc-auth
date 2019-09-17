@@ -41,7 +41,7 @@ class Orgs(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.EDITOR.value])
     def post():
         """Post a new org using the request body.
 
@@ -75,7 +75,7 @@ class Org(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
-    def get(org_id):  # AUTH-NEEDED
+    def get(org_id):
         """Get the org specified by the provided id."""
         org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=ALL_ALLOWED_ROLES)
         if org is None:
@@ -89,7 +89,7 @@ class Org(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
-    def put(org_id):  # AUTH-NEEDED
+    def put(org_id):
         """Update the org specified by the provided id with the request body."""
         org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=CLIENT_ADMIN_ROLES)
         request_json = request.get_json()
@@ -113,7 +113,7 @@ class OrgContacts(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
-    def post(org_id):  # AUTH-NEEDED
+    def post(org_id):
         """Create a new contact for the specified org."""
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'contact')
@@ -135,7 +135,7 @@ class OrgContacts(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
-    def put(org_id):  # AUTH-NEEDED
+    def put(org_id):
         """Update an existing contact for the specified org."""
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'contact')
@@ -156,7 +156,7 @@ class OrgContacts(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
-    def delete(org_id):  # AUTH-NEEDED
+    def delete(org_id):
         """Delete the contact info for the specified org."""
         try:
             org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=CLIENT_ADMIN_ROLES)
@@ -175,10 +175,10 @@ class OrgContacts(Resource):
         """Resource for managing affiliations for an org."""
 
         @staticmethod
-        @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+        @_JWT.requires_auth
         @TRACER.trace()
         @cors.crossdomain(origin='*')
-        def post(org_id):  # AUTH-NEEDED
+        def post(org_id):
             """Post a new Affiliation for an org using the request body."""
             request_json = request.get_json()
             valid_format, errors = schema_utils.validate(request_json, 'affiliation')
@@ -196,10 +196,10 @@ class OrgContacts(Resource):
             return response, status
 
         @staticmethod
-        @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+        @_JWT.requires_auth
         @TRACER.trace()
         @cors.crossdomain(origin='*')
-        def get(org_id):  # AUTH-NEEDED
+        def get(org_id):
             """Get all affiliated entities for the given org."""
             try:
                 response, status = jsonify(
@@ -217,10 +217,10 @@ class OrgContacts(Resource):
         """Resource for managing a single affiliation between an org and an entity."""
 
         @staticmethod
-        @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+        @_JWT.requires_auth
         @TRACER.trace()
         @cors.crossdomain(origin='*')
-        def delete(org_id, business_identifier):  # AUTH-NEEDED
+        def delete(org_id, business_identifier):
             """Delete an affiliation between an org and an entity."""
             try:
                 AffiliationService.delete_affiliation(org_id, business_identifier, g.jwt_oidc_token_info)
