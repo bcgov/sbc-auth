@@ -389,6 +389,15 @@
                         "key": "MAIL_PASSWORD"
                       }
                     }
+                  },
+                  {
+                    "name": "MAIL_FROM_ID",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "MAIL_FROM_ID"
+                      }
+                    }
                   }
                 ],
                 "resources": {

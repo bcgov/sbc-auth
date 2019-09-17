@@ -53,7 +53,8 @@
         "MAIL_USE_TLS": "${MAIL_USE_TLS}",
         "MAIL_USE_SSL": "${MAIL_USE_SSL}",
         "MAIL_USERNAME": "${MAIL_USERNAME}",
-        "MAIL_PASSWORD": "${MAIL_PASSWORD}"
+        "MAIL_PASSWORD": "${MAIL_PASSWORD}",
+        "MAIL_FROM_ID": "${MAIL_FROM_ID}"
       },
       "type": "Opaque"
     }
@@ -191,6 +192,12 @@
     },
     {
       "name": "MAIL_PASSWORD",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "MAIL_FROM_ID",
       "required": true,
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
