@@ -69,11 +69,12 @@ class Entity:
         """Given a business identifier, this will return the corresponding entity or None."""
         if not business_identifier:
             return None
-        auth.check_auth(token_info, one_of_roles=allowed_roles, business_identifier=business_identifier)
         entity_model = EntityModel.find_by_business_identifier(business_identifier)
 
         if not entity_model:
             return None
+
+        auth.check_auth(token_info, one_of_roles=allowed_roles, business_identifier=business_identifier)
 
         entity = Entity(entity_model)
         return entity

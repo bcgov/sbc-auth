@@ -16,7 +16,6 @@
 This module is to handle authorization related queries.
 """
 from typing import Dict
-
 from flask import abort
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
@@ -89,12 +88,15 @@ def check_auth(token_info: Dict, **kwargs):
     if 'staff' in token_info.get('realm_access').get('roles'):
         _check_for_roles(STAFF, kwargs)
     else:
-        if kwargs.get('business_identifier', None):
-            auth = Authorization.get_user_authorizations_for_entity(token_info, kwargs.get('business_identifier'))
-        elif kwargs.get('org_id', None):
+        business_identifier = kwargs.get('business_identifier', None)
+        org_identifier = kwargs.get('org_id', None)
+        if business_identifier:
+            auth = Authorization.get_user_authorizations_for_entity(token_info, business_identifier)
+        elif org_identifier:
             auth_record = AuthorizationView.find_user_authorization_by_org_id(token_info.get('sub', None),
-                                                                              kwargs.get('org_id'))
+                                                                              org_identifier)
             auth = Authorization(auth_record).as_dict() if auth_record else None
+
         _check_for_roles(auth.get('orgMembership', None) if auth else None, kwargs)
 
 

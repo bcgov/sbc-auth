@@ -44,8 +44,6 @@ class Authorization(db.Model):
     @classmethod
     def find_user_authorization_by_org_id(cls, keycloak_guid: uuid, org_id: int):
         """Return authorization view object."""
-        print(keycloak_guid)
-        print(org_id)
         return cls.query.filter_by(keycloak_guid=keycloak_guid, org_id=org_id).one_or_none()
 
     @classmethod
