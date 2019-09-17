@@ -22,6 +22,7 @@ import json
 import os
 
 from tests.utilities.factory_utils import *
+from tests import skip_in_pod
 
 from auth_api import status as http_status
 from auth_api.exceptions.errors import Error
@@ -112,6 +113,7 @@ def test_add_user_no_token_returns_401(client, session):  # pylint:disable=unuse
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
+@skip_in_pod
 def test_add_user_invalid_token_returns_401(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that POSTing a user with an invalid token returns a 401."""
     token = jwt.create_jwt(claims=TEST_JWT_INVALID_CLAIMS, header=TEST_JWT_HEADER)
