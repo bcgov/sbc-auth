@@ -340,7 +340,7 @@
                     "name": "MAIL_SERVER",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "${EMAIL_NAME}-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "MAIL_SERVER"
                       }
                     }
@@ -349,7 +349,7 @@
                     "name": "MAIL_PORT",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "${EMAIL_NAME}-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "MAIL_PORT"
                       }
                     }
@@ -358,7 +358,7 @@
                     "name": "MAIL_USE_TLS",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "${EMAIL_NAME}-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "MAIL_USE_TLS"
                       }
                     }
@@ -367,7 +367,7 @@
                     "name": "MAIL_USE_SSL",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "${EMAIL_NAME}-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "MAIL_USE_SSL"
                       }
                     }
@@ -376,7 +376,7 @@
                     "name": "MAIL_USERNAME",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "${EMAIL_NAME}-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "MAIL_USERNAME"
                       }
                     }
@@ -385,7 +385,7 @@
                     "name": "MAIL_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "${EMAIL_NAME}-${TAG_NAME}-secret",
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
                         "key": "MAIL_PASSWORD"
                       }
                     }
@@ -576,13 +576,6 @@
       "description": "The name assigned to all of the OpenShift resources associated to the server instance.",
       "required": true,
       "value": "keycloak"
-    },
-    {
-      "name": "EMAIL_NAME",
-      "displayName": "Name",
-      "description": "A valid mail server used by the service.",
-      "required": true,
-      "value": "email"
     },
     {
       "name": "CPU_REQUEST",
