@@ -44,7 +44,6 @@ TEST_JWT_CLAIMS_2 = {
 }
 
 TEST_JWT_INVALID_CLAIMS = {
-    'iss': 'foobar',
     'sub': 'barfoo',
     'firstname': 'Trouble',
     'lastname': 'Maker',
