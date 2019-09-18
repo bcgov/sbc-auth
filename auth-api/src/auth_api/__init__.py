@@ -21,6 +21,7 @@ from flask import Flask
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
 
 from auth_api import models
+from auth_api.extensions import mail
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.models import db, ma
 from auth_api.utils.run_version import get_run_version
@@ -35,13 +36,14 @@ JWT = JWTWrapper.get_instance()
 
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     """Return a configured Flask App using the Factory method."""
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='templates')
     app.config.from_object(CONFIGURATION[run_mode])
 
     from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT
 
     db.init_app(app)
     ma.init_app(app)
+    mail.init_app(app)
 
     app.register_blueprint(API_BLUEPRINT)
     app.register_blueprint(OPS_BLUEPRINT)
