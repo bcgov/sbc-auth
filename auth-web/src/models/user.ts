@@ -6,3 +6,8 @@ export interface User {
     username: string;
     contacts: Contact[]
 }
+
+export interface SuccessEmitPayload {
+    isResend: boolean,
+    invitationCount: number
+  }
