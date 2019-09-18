@@ -26,6 +26,7 @@ from sbc_common_components.exception_handling.exception_handler import Exception
 
 from .apihelper import Api
 from .entity import API as ENTITY_API
+from .invitation import API as INVITATION_API
 from .logout import API as LOGOUT_API
 from .meta import API as META_API
 from .ops import API as OPS_API
@@ -72,3 +73,4 @@ API.add_namespace(USER_API, path='/users')
 API.add_namespace(LOGOUT_API, path='/logout')
 API.add_namespace(ENTITY_API, path='/entities')
 API.add_namespace(ORG_API, path='/orgs')
+API.add_namespace(INVITATION_API, path='/invitations')

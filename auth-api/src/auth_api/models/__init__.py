@@ -23,6 +23,9 @@ from .contact import Contact
 from .contact_link import ContactLink
 from .db import db, ma
 from .entity import Entity
+from .invitation import Invitation
+from .invitation_membership import InvitationMembership
+from .invite_status import InvitationStatus
 from .membership import Membership
 from .membership_type import MembershipType
 from .org import Org
