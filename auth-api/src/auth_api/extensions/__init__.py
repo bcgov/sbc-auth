@@ -11,9 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all of the Services used in the API."""
-from .affiliation import Affiliation
-from .entity import Entity
-from .invitation import Invitation
-from .org import Org
-from .user import User
+
+"""This exports all of extensions used by the application."""
+
+from .mail import mail

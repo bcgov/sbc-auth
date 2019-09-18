@@ -1,6 +1,7 @@
 gunicorn
 Flask
 Flask-Migrate
+Flask-Mail
 Flask-Script
 Flask-Moment
 Flask-SQLAlchemy
