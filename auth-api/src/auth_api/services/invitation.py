@@ -13,9 +13,9 @@
 # limitations under the License.
 """Service for managing Invitation data."""
 
-from flask import render_template
 from sbc_common_components.tracing.service_tracing import ServiceTracing
 
+from jinja2 import Environment, FileSystemLoader
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel
@@ -23,6 +23,8 @@ from auth_api.schemas import InvitationSchema
 from config import get_named_config
 
 from .notification import Notification
+
+ENV = Environment(loader=FileSystemLoader('.'))
 
 
 class Invitation:
@@ -86,8 +88,9 @@ class Invitation:
         subject = 'Business Invitation'
         sender = config.MAIL_FROM_ID
         recipient = invitation.recipient_email
+        template = ENV.get_template('email_templates/business_invitation_email.html')
         Notification.send_email(subject, sender, recipient,
-                                render_template('business_invitation_email.html', invitation=invitation))
+                                template.render(invitation=invitation))
 
     def update_invitation(self, invitation):
         """Update the specified invitation with new data."""
