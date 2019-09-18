@@ -103,6 +103,15 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     # Config to skip migrations when alembic migrate is used
     SKIPPED_MIGRATIONS = ['authorizations_view']
 
+    # email server
+    MAIL_SERVER = os.getenv('MAIL_SERVER')
+    MAIL_PORT = os.getenv('MAIL_PORT')
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    MAIL_FROM_ID = os.getenv('MAIL_FROM_ID')
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False
