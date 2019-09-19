@@ -1,0 +1,2 @@
+-e git://github.com/pwei1018/jaeger-client-python.git@186f14e14758273ed108508c0d388a4f4de5c75b#egg=jaeger-client
+-e git+https://github.com/bcgov/sbc-common-components.git@48f454595b5b2a7d3f2f86ec9b8e944bef2bcfb2#egg=sbc-common-components-1.0.0&subdirectory=python
