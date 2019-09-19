@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Invitation data."""
+
 import urllib
 
 from datetime import datetime
@@ -116,8 +117,9 @@ class Invitation:
     def validate_token(token):
         """Check whether the passed token is valid."""
         serializer = URLSafeTimedSerializer(CONFIG.EMAIL_TOKEN_SECRET_KEY)
+        token_valid_for = int(CONFIG.TOKEN_EXPIRY_PERIOD) if CONFIG.TOKEN_EXPIRY_PERIOD else 3600*24*7
         try:
-            invitation_id = serializer.loads(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT, max_age=3600)
+            invitation_id = serializer.loads(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT, max_age=token_valid_for)
         except:
             raise BusinessException(Error.EXPIRED_INVITATION, None)
         return invitation_id
@@ -126,8 +128,6 @@ class Invitation:
     def accept_invitation(invitation_id, user_id):
         """Add user, role and org from the invitation to membership."""
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
-        print(invitation.invitation_status_code)
-        print(invitation.status.code)
         if invitation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         if invitation.invitation_status_code == 'ACCEPTED':
