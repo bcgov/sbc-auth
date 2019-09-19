@@ -112,6 +112,11 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_FROM_ID = os.getenv('MAIL_FROM_ID')
 
+    # mail token  configuration
+    AUTH_WEB_TOKEN_CONFIRM_URL = os.getenv('AUTH_WEB_TOKEN_CONFIRM_URL')
+    EMAIL_SECURITY_PASSWORD_SALT = os.getenv('EMAIL_SECURITY_PASSWORD_SALT')
+    EMAIL_TOKEN_SECRET_KEY = os.getenv('EMAIL_TOKEN_SECRET_KEY')
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False

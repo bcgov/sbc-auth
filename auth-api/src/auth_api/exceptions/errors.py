@@ -31,6 +31,8 @@ class Error(Enum):
     INVALID_REFRESH_TOKEN = 'Invalid refresh token.', http_status.HTTP_400_BAD_REQUEST
     UNDEFINED_ERROR = 'Undefined error.', http_status.HTTP_400_BAD_REQUEST
     DATA_CONFLICT = 'New data conflict with existing data.', http_status.HTTP_409_CONFLICT
+    ACTIONED_INVITATION = 'The invitation has already been accepted.', http_status.HTTP_400_BAD_REQUEST
+    EXPIRED_INVITATION = 'The invitation has expired.', http_status.HTTP_400_BAD_REQUEST
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""
