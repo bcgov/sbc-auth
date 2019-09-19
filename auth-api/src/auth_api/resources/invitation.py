@@ -144,12 +144,11 @@ class InvitationValidator(Resource):
     @cors.crossdomain(origin='*')
     def get(token):
         """Check whether the passed token is valid."""
-        valid_token = InvitationService.validate_token(token)
-        if valid_token:
+        try:
+            InvitationService.validate_token(token)
             response, status = {}, http_status.HTTP_200_OK
-        else:
-            response, status = {'message': 'The invitation is no longer valid.'}, \
-                http_status.HTTP_404_NOT_FOUND
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
 
 
