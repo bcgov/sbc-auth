@@ -53,7 +53,8 @@ class Invitations(Resource):
                 response, status = {'message': 'Not authorized to perform this action'}, \
                     http_status.HTTP_401_UNAUTHORIZED
             else:
-                response, status = InvitationService.create_invitation(request_json, user.identifier).as_dict(), \
+                response, status = InvitationService.create_invitation(request_json, user.identifier,
+                                                                       user.as_dict()).as_dict(), \
                     http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -128,6 +129,52 @@ class Invitation(Resource):
         try:
             InvitationService.delete_invitation(invitation_id)
             response, status = {}, http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+
+@cors_preflight('GET,OPTIONS')
+@API.route('/validate/<string:token>', methods=['GET', 'OPTIONS'])
+class InvitationValidator(Resource):
+    """Check whether a token is valid."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    def get(token):
+        """Check whether the passed token is valid."""
+        valid_token = InvitationService.validate_token(token)
+        if valid_token:
+            response, status = {}, http_status.HTTP_200_OK
+        else:
+            response, status = {'message': 'The invitation is no longer valid.'}, \
+                http_status.HTTP_404_NOT_FOUND
+        return response, status
+
+
+@cors_preflight('PUT,OPTIONS')
+@API.route('/confirm/<string:confirmation_token>', methods=['PUT', 'OPTIONS'])
+class InvitationAction(Resource):
+    """Resource for managing the acceptance of an invitation."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def put(confirmation_token):
+        """Check whether the passed token is valid and add user, role and org from invitation to membership."""
+
+        token = g.jwt_oidc_token_info
+        try:
+            user = UserService.find_by_jwt_token(token)
+            if user is None:
+                response, status = {'message': 'Not authorized to perform this action'}, \
+                                   http_status.HTTP_401_UNAUTHORIZED
+            else:
+                invitation_id = InvitationService.validate_token(confirmation_token)
+                response, status = InvitationService.accept_invitation(invitation_id, user.identifier).as_dict(), \
+                                   http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
