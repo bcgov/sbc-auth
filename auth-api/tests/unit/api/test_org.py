@@ -55,7 +55,19 @@ TEST_JWT_CLAIMS = {
     'preferred_username': 'testuser',
     'realm_access': {
         'roles': [
-            'basic'
+            'editor'
+        ]
+    }
+}
+TEST_STAFF_JWT_CLAIMS = {
+    'iss': os.getenv('JWT_OIDC_ISSUER'),
+    'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+    'firstname': 'Test',
+    'lastname': 'User',
+    'preferred_username': 'testuser',
+    'realm_access': {
+        'roles': [
+            'staff'
         ]
     }
 }

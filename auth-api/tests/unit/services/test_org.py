@@ -115,7 +115,7 @@ def test_update_org(session):  # pylint:disable=unused-argument
     assert dictionary['name'] == TEST_UPDATED_ORG_INFO['name']
 
 
-def test_find_org_by_id(session):  # pylint:disable=unused-argument
+def test_find_org_by_id(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an org can be retrieved by its id."""
     org = factory_org_service(session, **TEST_ORG_INFO)
     dictionary = org.as_dict()
@@ -127,7 +127,7 @@ def test_find_org_by_id(session):  # pylint:disable=unused-argument
     assert dictionary['name'] == TEST_ORG_INFO['name']
 
 
-def test_find_org_by_id_no_org(session):  # pylint:disable=unused-argument
+def test_find_org_by_id_no_org(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an org which does not exist cannot be retrieved."""
     org = OrgService.find_by_org_id(99)
     assert org is None
@@ -160,15 +160,13 @@ def test_update_contact(session):  # pylint:disable=unused-argument
 
     dictionary = org.as_dict()
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['email'] == \
-        TEST_CONTACT_INFO['email']
+    assert dictionary['contacts'][0]['email'] == TEST_CONTACT_INFO['email']
 
     org.update_contact(TEST_UPDATED_CONTACT_INFO)
 
     dictionary = org.as_dict()
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['email'] == \
-        TEST_UPDATED_CONTACT_INFO['email']
+    assert dictionary['contacts'][0]['email'] == TEST_UPDATED_CONTACT_INFO['email']
 
 
 def test_update_contact_no_contact(session):  # pylint:disable=unused-argument

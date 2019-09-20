@@ -67,7 +67,7 @@ def test_create_entity(session):  # pylint:disable=unused-argument
     assert dictionary['businessIdentifier'] == 'CP1234567'
 
 
-def test_entity_find_by_business_id(session):  # pylint:disable=unused-argument
+def test_entity_find_by_business_id(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an Entity can be retrieved by business identifier."""
     factory_entity_model(business_identifier='CP1234567')
     entity = EntityService.find_by_business_identifier('CP1234567')
@@ -77,7 +77,7 @@ def test_entity_find_by_business_id(session):  # pylint:disable=unused-argument
     assert dictionary['businessIdentifier'] == 'CP1234567'
 
 
-def test_entity_find_by_business_id_no_model(session):  # pylint:disable=unused-argument
+def test_entity_find_by_business_id_no_model(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an Entity which does not exist cannot be retrieved."""
     entity = EntityService.find_by_business_identifier('CP1234567')
 
