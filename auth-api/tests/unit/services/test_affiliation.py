@@ -68,7 +68,7 @@ def factory_affiliation_service(entity_id, org_id):
     return affiliation_service
 
 
-def test_create_affiliation(session):  # pylint:disable=unused-argument
+def test_create_affiliation(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an Affiliation can be created."""
     entity_service = factory_entity_service()
     entity_dictionary = entity_service.as_dict()
@@ -78,13 +78,13 @@ def test_create_affiliation(session):  # pylint:disable=unused-argument
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary['id']
 
-    affiliation = AffiliationService.create_affiliation(org_id, business_identifier)
+    affiliation = AffiliationService.create_affiliation(org_id, business_identifier, {})
     assert affiliation
     assert affiliation.entity.identifier == entity_service.identifier
     assert affiliation.as_dict()['org']['id'] == org_dictionary['id']
 
 
-def test_find_affiliated_entities_by_org_id(session):  # pylint:disable=unused-argument
+def test_find_affiliated_entities_by_org_id(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an Affiliation can be created."""
     entity_service1 = factory_entity_service(business_identifier='CP555')
     entity_dictionary1 = entity_service1.as_dict()
@@ -110,7 +110,7 @@ def test_find_affiliated_entities_by_org_id(session):  # pylint:disable=unused-a
     assert affiliated_entities[0]['businessIdentifier'] == entity_dictionary1['businessIdentifier']
 
 
-def test_delete_affiliation(session):  # pylint:disable=unused-argument
+def test_delete_affiliation(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an affiliation can be deleted."""
     entity_service = factory_entity_service()
     entity_dictionary = entity_service.as_dict()

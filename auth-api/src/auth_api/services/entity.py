@@ -13,8 +13,11 @@
 # limitations under the License.
 """Service for managing Entity data."""
 
+from typing import Dict, Tuple
+
 from sbc_common_components.tracing.service_tracing import ServiceTracing
 
+import auth_api.services.authorization as auth
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -61,15 +64,17 @@ class Entity:
         return obj
 
     @classmethod
-    def find_by_business_identifier(cls, business_identifier: str = None):
+    def find_by_business_identifier(cls, business_identifier: str = None, token_info: Dict = None,
+                                    allowed_roles: Tuple = None):
         """Given a business identifier, this will return the corresponding entity or None."""
         if not business_identifier:
             return None
-
         entity_model = EntityModel.find_by_business_identifier(business_identifier)
 
         if not entity_model:
             return None
+
+        auth.check_auth(token_info, one_of_roles=allowed_roles, business_identifier=business_identifier)
 
         entity = Entity(entity_model)
         return entity
