@@ -36,7 +36,7 @@ TEST_JWT_CLAIMS = {
     'preferred_username': 'testuser',
     'realm_access': {
         'roles': [
-            'basic'
+            'edit'
         ]
     }
 }
@@ -82,8 +82,7 @@ def test_add_invitation_invalid(client, jwt, session):  # pylint:disable=unused-
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
                      headers=headers, content_type='application/json')
-    dictionary = json.loads(rv.data)
-    org_id = dictionary['id']
+
     new_invitation = {
         'recipientEmail': 'test@abc.com'
     }

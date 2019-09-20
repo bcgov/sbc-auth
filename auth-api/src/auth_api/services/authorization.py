@@ -17,12 +17,16 @@ This module is to handle authorization related queries.
 """
 from typing import Dict
 
+from flask import abort
+
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.schemas.authorization import AuthorizationSchema
+from auth_api.utils.roles import OWNER, STAFF
 
 
 class Authorization:
     """This module is to handle authorization related queries.
+
     The authorization model as such doesn't exist, so this is a class where we can map all the relationship to query
     user authorizations.
     """
@@ -38,10 +42,14 @@ class Authorization:
         if token_info.get('loginSource', None) == 'PASSCODE':
             if token_info.get('username', None).upper() == business_identifier.upper():
                 auth_response = {
-                    'orgMembership': 'OWNER',
+                    'orgMembership': OWNER,
                     'roles': ['edit', 'view']
                 }
-        elif 'staff' in token_info.get('realm_access', []).get('roles', []):
+        elif 'staff' in token_info.get('realm_access').get('roles'):
+            auth_response = {
+                'roles': ['edit', 'view']
+            }
+        elif 'staff' in token_info.get('realm_access').get('roles'):
             auth_response = {
                 'roles': ['edit', 'view']
             }
@@ -74,3 +82,35 @@ class Authorization:
             exclude = []
         auth_schema = AuthorizationSchema(exclude=exclude)
         return auth_schema.dump(self._model, many=False)
+
+
+def check_auth(token_info: Dict, **kwargs):
+    """Check if user is authorized to perform action on the service."""
+    if 'staff' in token_info.get('realm_access').get('roles'):
+        _check_for_roles(STAFF, kwargs)
+    else:
+        business_identifier = kwargs.get('business_identifier', None)
+        org_identifier = kwargs.get('org_id', None)
+        if business_identifier:
+            auth = Authorization.get_user_authorizations_for_entity(token_info, business_identifier)
+        elif org_identifier:
+            auth_record = AuthorizationView.find_user_authorization_by_org_id(token_info.get('sub', None),
+                                                                              org_identifier)
+            auth = Authorization(auth_record).as_dict() if auth_record else None
+
+        _check_for_roles(auth.get('orgMembership', None) if auth else None, kwargs)
+
+
+def _check_for_roles(role: str, kwargs):
+    is_authorized: bool = False
+    # If role is found
+    if role:
+        if kwargs.get('one_of_roles', None):
+            is_authorized = role in kwargs.get('one_of_roles')
+        if kwargs.get('disabled_roles', None):
+            is_authorized = role not in kwargs.get('disabled_roles')
+        if kwargs.get('equals_role', None):
+            is_authorized = (role == kwargs.get('equals_role'))
+
+    if not is_authorized:
+        abort(403)

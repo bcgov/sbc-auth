@@ -118,8 +118,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://{{api_url}}/api/v1/users",
-					"protocol": "http",
+					"raw": "{{api_url}}/api/v1/users",
 					"host": [
 						"{{api_url}}"
 					],
@@ -157,6 +156,35 @@
 						"api",
 						"v1",
 						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search on orgs (Staff Only)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{adminToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api_url}}/api/v1/orgs",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orgs"
 					]
 				}
 			},
@@ -875,8 +903,7 @@
 					"raw": "{\n\t\"name\": \"{{test_org_name}}\"\n}"
 				},
 				"url": {
-					"raw": "http://{{api_url}}/api/v1/orgs",
-					"protocol": "http",
+					"raw": "{{api_url}}/api/v1/orgs",
 					"host": [
 						"{{api_url}}"
 					],
@@ -1232,6 +1259,87 @@
 						"orgs",
 						"{{org_identifier}}",
 						"contacts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get members for org",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"userId\", jsonData.id);",
+							"",
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"",
+							"pm.test(\"response is ok\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    //pm.response.to.have.jsonBody(\"\"); ",
+							"    pm.response.to.not.have.jsonBody(\"error\"); ",
+							"});",
+							"",
+							"pm.test(\"response must be valid and have a body\", function () {",
+							"     // assert that the response has a valid JSON body",
+							"     pm.response.to.be.withBody;",
+							"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+							"});",
+							"",
+							"pm.test(\"Verify payload\",  () => {",
+							"    pm.expect(pm.response.text()).to.include(\"membershipTypeCode\");",
+							"    pm.expect(pm.response.text()).to.include(\"user\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{userToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}/members",
+					"host": [
+						"{{api_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"orgs",
+						"{{org_identifier}}",
+						"members"
 					]
 				}
 			},
