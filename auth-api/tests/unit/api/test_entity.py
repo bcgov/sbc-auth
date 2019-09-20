@@ -22,8 +22,8 @@ import json
 import os
 
 from auth_api import status as http_status
-from tests.utilities.factory_utils import factory_user_model, factory_org_model, factory_membership_model, \
-    factory_entity_model, factory_affiliation_model
+from tests.utilities.factory_utils import (
+    factory_affiliation_model, factory_entity_model, factory_membership_model, factory_org_model, factory_user_model)
 
 
 TEST_ENTITY_INFO = {
@@ -60,7 +60,7 @@ TEST_JWT_CLAIMS = {
     'preferred_username': 'testuser',
     'realm_access': {
         'roles': [
-            'editor'
+            'edit'
         ]
     }
 }
@@ -87,7 +87,7 @@ TEST_PASSCODE_JWT_CLAIMS = {
     'username': 'CP1234567',
     'realm_access': {
         'roles': [
-            'editor'
+            'edit'
         ]
     },
     'loginSource': 'PASSCODE'

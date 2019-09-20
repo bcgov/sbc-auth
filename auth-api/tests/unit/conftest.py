@@ -68,7 +68,7 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     """
     with app.app_context():
         # clear all custom views
-        views_sql = """select table_name from INFORMATION_SCHEMA.views 
+        views_sql = """select table_name from INFORMATION_SCHEMA.views
                        WHERE table_schema = ANY (current_schemas(false))
                     """
         sess = _db.session()

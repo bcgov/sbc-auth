@@ -30,4 +30,5 @@ class MembershipSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-f
         fields = ('membership_type_code', 'user', 'org')
 
     user = fields.Nested('UserSchema', only=('firstname', 'lastname', 'username'))
-    org = fields.Nested('OrgSchema', only=('id', 'name', 'affiliated_entities'))
+    org = fields.Nested('OrgSchema', only=('id', 'name', 'affiliated_entities', 'org_type'))
+    membership_type_code = fields.Str(data_key='membershipTypeCode')

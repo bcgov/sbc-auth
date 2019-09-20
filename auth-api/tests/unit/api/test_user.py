@@ -21,11 +21,12 @@ import copy
 import json
 import os
 
-from tests.utilities.factory_utils import *
-from tests import skip_in_pod
-
 from auth_api import status as http_status
 from auth_api.exceptions.errors import Error
+from tests import skip_in_pod
+from tests.utilities.factory_utils import (
+    factory_affiliation_model, factory_entity_model, factory_membership_model, factory_org_model, factory_user_model,
+    uuid)
 
 
 TEST_JWT_CLAIMS = {
@@ -33,7 +34,12 @@ TEST_JWT_CLAIMS = {
     'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
     'firstname': 'Test',
     'lastname': 'User',
-    'preferred_username': 'testuser'
+    'preferred_username': 'testuser',
+    'realm_access': {
+        'roles': [
+            'edit'
+        ]
+    }
 }
 
 TEST_JWT_CLAIMS_2 = {
@@ -384,7 +390,6 @@ def test_get_orgs_for_user(client, jwt, session):  # pylint:disable=unused-argum
 
 def test_user_authorizations_returns_200(client, jwt, session):  # pylint:disable=unused-argument
     """Assert authorizations for users returns 200."""
-
     user = factory_user_model()
     org = factory_org_model('TEST')
     factory_membership_model(user.id, org.id)

@@ -24,7 +24,7 @@ from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, Role
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, Role, STAFF
 from auth_api.utils.util import cors_preflight
 
 
@@ -229,5 +229,30 @@ class OrgContacts(Resource):
             except BusinessException as exception:
                 response, status = {'code': exception.code, 'message': exception.message}, \
                                    exception.status_code
+
+            return response, status
+
+    @cors_preflight('GET,OPTIONS')
+    @API.route('/<string:org_id>/members', methods=['GET', 'OPTIONS'])
+    class OrgMembers(Resource):
+        """Resource for managing a set of members for a single organization."""
+
+        @staticmethod
+        @_JWT.requires_auth
+        @TRACER.trace()
+        @cors.crossdomain(origin='*')
+        def get(org_id):
+            """Retrieve the set of members for the given org."""
+            try:
+                org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+                if org:
+                    response, status = jsonify(org.get_members()), \
+                        http_status.HTTP_200_OK
+                else:
+                    response, status = {'message': 'The requested organization could not be found.'}, \
+                        http_status.HTTP_404_NOT_FOUND
+
+            except BusinessException as exception:
+                response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 
             return response, status
