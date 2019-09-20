@@ -102,7 +102,7 @@ def test_invitation_find_by_user(session):  # pylint:disable=unused-argument
 
 def test_update_invitation(session):  # pylint:disable=unused-argument
     """Assert that an Invitation can be updated."""
-    invitation = factory_invitation_model( session=session)
+    invitation = factory_invitation_model(session=session)
     session.add(invitation)
     session.commit()
 
@@ -112,4 +112,3 @@ def test_update_invitation(session):  # pylint:disable=unused-argument
     invitation.update_invitation(update_invitation)
     assert invitation
     assert invitation.invitation_status_code == update_invitation['status']
-

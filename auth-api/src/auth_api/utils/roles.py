@@ -22,5 +22,16 @@ class Role(Enum):
     PREMIUM = 'premium'
     STAFF = 'staff'
     VIEWER = 'viewer'
-    EDITOR = 'editor'
+    EDITOR = 'edit'
     ADMIN = 'admin'
+
+
+# Membership types
+STAFF = 'STAFF'
+ADMIN = 'ADMIN'
+OWNER = 'OWNER'
+MEMBER = 'MEMBER'
+
+CLIENT_ADMIN_ROLES = (ADMIN, OWNER)
+CLIENT_AUTH_ROLES = (*CLIENT_ADMIN_ROLES, MEMBER)
+ALL_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF)

@@ -13,8 +13,11 @@
 # limitations under the License.
 """Service for managing Organization data."""
 
+from typing import Dict, Tuple
+
 from sbc_common_components.tracing.service_tracing import ServiceTracing
 
+import auth_api.services.authorization as auth
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -67,7 +70,7 @@ class Org:
         self._model.delete()
 
     @staticmethod
-    def find_by_org_id(org_id):
+    def find_by_org_id(org_id, token_info: Dict = None, allowed_roles: Tuple = None):
         """Find and return an existing organization with the provided id."""
         if org_id is None:
             return None
@@ -75,6 +78,9 @@ class Org:
         org_model = OrgModel.find_by_org_id(org_id)
         if not org_model:
             return None
+
+        # Check authorization for the user
+        auth.check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
 
         return Org(org_model)
 
@@ -122,3 +128,7 @@ class Org:
             contact.delete()
 
         return self
+
+    def get_members(self):
+        """Return the set of members for this org."""
+        return {'members': self.as_dict()['members']}

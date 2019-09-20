@@ -13,15 +13,14 @@
 # limitations under the License.
 """Service for managing Invitation data."""
 
+
 import urllib
 
 from datetime import datetime
-
-from sbc_common_components.tracing.service_tracing import ServiceTracing
-
 from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 
+from sbc_common_components.tracing.service_tracing import ServiceTracing
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel

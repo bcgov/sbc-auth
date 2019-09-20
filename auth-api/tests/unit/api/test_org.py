@@ -55,7 +55,19 @@ TEST_JWT_CLAIMS = {
     'preferred_username': 'testuser',
     'realm_access': {
         'roles': [
-            'basic'
+            'edit'
+        ]
+    }
+}
+TEST_STAFF_JWT_CLAIMS = {
+    'iss': os.getenv('JWT_OIDC_ISSUER'),
+    'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+    'firstname': 'Test',
+    'lastname': 'User',
+    'preferred_username': 'testuser',
+    'realm_access': {
+        'roles': [
+            'staff'
         ]
     }
 }
@@ -240,3 +252,22 @@ def test_update_contact_missing_returns_404(client, jwt, session):  # pylint:dis
     rv = client.put('/api/v1/orgs/{}/contacts'.format(org_id),
                     headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+
+
+def test_get_members(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a list of members for an org can be retrieved."""
+    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.get('/api/v1/orgs/{}/members'.format(org_id),
+                    headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['members']
+    assert len(dictionary['members']) == 1
+    assert dictionary['members'][0]['membershipTypeCode'] == 'OWNER'
