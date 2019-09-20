@@ -16,6 +16,7 @@
 This module is to handle authorization related queries.
 """
 from typing import Dict
+
 from flask import abort
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView

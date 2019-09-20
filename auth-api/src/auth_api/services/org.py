@@ -128,3 +128,7 @@ class Org:
             contact.delete()
 
         return self
+
+    def get_members(self):
+        """Return the set of members for this org."""
+        return {'members': self.as_dict()['members']}
