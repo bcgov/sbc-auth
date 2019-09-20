@@ -60,7 +60,7 @@ TEST_JWT_CLAIMS = {
     'preferred_username': 'testuser',
     'realm_access': {
         'roles': [
-            'editor'
+            'edit'
         ]
     }
 }
@@ -87,7 +87,7 @@ TEST_PASSCODE_JWT_CLAIMS = {
     'username': 'CP1234567',
     'realm_access': {
         'roles': [
-            'editor'
+            'edit'
         ]
     },
     'loginSource': 'PASSCODE'

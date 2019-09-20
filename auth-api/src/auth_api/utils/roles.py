@@ -22,7 +22,7 @@ class Role(Enum):
     PREMIUM = 'premium'
     STAFF = 'staff'
     VIEWER = 'viewer'
-    EDITOR = 'editor'
+    EDITOR = 'edit'
     ADMIN = 'admin'
 
 
