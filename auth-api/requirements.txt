@@ -1,4 +1,5 @@
 Click==7.0
+Flask-Mail==0.9.1
 Flask-Migrate==2.5.2
 Flask-Moment==0.9.0
 Flask-SQLAlchemy==2.4.0
@@ -12,6 +13,7 @@ Werkzeug==0.15.6
 alembic==1.1.0
 aniso8601==8.0.0
 attrs==19.1.0
+blinker==1.4
 certifi==2019.9.11
 chardet==3.0.4
 ecdsa==0.13.2

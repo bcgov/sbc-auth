@@ -21,6 +21,7 @@ from flask import Flask
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
 
 from auth_api import models
+from auth_api.extensions import mail
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.models import db, ma
 from auth_api.utils.run_version import get_run_version
@@ -42,6 +43,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
     db.init_app(app)
     ma.init_app(app)
+    mail.init_app(app)
 
     app.register_blueprint(API_BLUEPRINT)
     app.register_blueprint(OPS_BLUEPRINT)
