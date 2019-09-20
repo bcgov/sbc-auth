@@ -35,7 +35,7 @@ TEST_JWT_CLAIMS = {
     'preferred_username': 'testuser',
     'realm_access': {
         'roles': [
-            'editor'
+            'edit'
         ]
     }
 }
