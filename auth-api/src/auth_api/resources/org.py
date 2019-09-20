@@ -230,3 +230,29 @@ class OrgContacts(Resource):
                     exception.status_code
 
             return response, status
+
+    @cors_preflight('GET,OPTIONS')
+    @API.route('/<string:org_id>/members', methods=['GET', 'OPTIONS'])
+    class OrgMembers(Resource):
+        """Resource for managing a set of members for a single organization."""
+
+        @staticmethod
+        @_JWT.has_one_of_roles([Role.BASIC.value, Role.PREMIUM.value])
+        @TRACER.trace()
+        @cors.crossdomain(origin='*')
+        def get(org_id):
+            """Retrieve the set of members for the given org."""
+
+            try:
+                org = OrgService.find_by_org_id(org_id)
+                if org:
+                    response, status = jsonify(org.get_members()), \
+                        http_status.HTTP_200_OK
+                else:
+                    response, status = {'message': 'The requested organization could not be found.'}, \
+                        http_status.HTTP_404_NOT_FOUND
+
+            except BusinessException as exception:
+                response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
+            return response, status
