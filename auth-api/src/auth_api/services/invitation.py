@@ -92,7 +92,8 @@ class Invitation:
     @staticmethod
     def send_invitation(invitation: InvitationModel, user):
         """Send the email notification."""
-        subject = 'Business Invitation'
+        subject = '[BC Registries & Online Services] {} {} has invited you to join a team'.format(user['firstname'],
+                                                                                                  user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
         confirmation_token = Invitation.generate_confirmation_token(invitation.id)

@@ -1,6 +1,63 @@
-<p><b>You have been invited to join a team at BC Registries & Online Services</b></p>
-<p><b>{{user.firstname}} {{user.lastname}}</b> has invited you to join a BC Registries & Online Services team.</p>
-<p>Log in with your BC Services Card to accept this invitation.</p>
-<p><a href={{url}}>Click here to accept the invitation</a> </p>
-<p>Regards,</p>
-<p>BC Registries & Online Services</p>
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#parentTable {
+    background: rgb(250,250,250);
+    height:100%; width:100%;
+    margin:0px;
+    padding:0px;
+    text-align: center;
+    vertical-align:top
+}
+
+#childTable {
+    color: #707070;
+    border: 1px solid #d5d5d5;
+    border-collapse: collapse;
+    border-spacing: 0px;
+    background: #fff;
+    margin-bottom: 5rem;
+    margin-top: 5rem
+}
+
+#acceptBtn {
+    background-color: #31b0d5;
+    border-color: #269abc;
+    height:2rem; width:10rem;
+    border-radius: 5px;
+    color:#fff;
+    border:none
+}
+</style>
+</head>
+<body>
+<table id="parentTable">
+    <tr>
+        <td>
+            <table width="620rem"  cellspacing="0" cellpadding="5" align="center" id="childTable">
+                <tr>
+                    <td align="center">
+                        <h1><b>
+                            <p>&#9432;</p>
+                            <p>You have been invited<br/>to join a team at BC Registries<br/>& Online Services</p>
+                        </b></h1>
+                        <div style="font-size:1.05rem">
+                            <p>
+                                <b>{{user.firstname}} {{user.lastname}}</b> has invited you  to join a BC Registries & Online
+                                Services team. Log in with your BC Services Card to accept this invitation.
+                            </p>
+                        </div>
+                        <p style="margin-bottom:3rem; margin-top:3rem">
+                            <a href={{url}}>
+                                <button id="acceptBtn"><b>Accept Invite</b></button>
+                            </a>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
