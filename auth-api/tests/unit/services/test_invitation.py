@@ -16,13 +16,12 @@
 Test suite to ensure that the Invitation service routines are working as expected.
 """
 
-import pytest
+from unittest.mock import patch
 
 from auth_api.models import User as UserModel
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 from auth_api.services import notification as NotificationService
-from unittest.mock import patch
 
 
 TEST_ORG_INFO = {
@@ -72,7 +71,7 @@ def test_as_dict(session):  # pylint:disable=unused-argument
 
 
 def test_create_invitation(session):  # pylint:disable=unused-argument
-    """Assert that an Org can be created."""
+    """Assert that an Invitation can be created."""
     with patch.object(NotificationService.Notification, 'send_email', return_value=None) as mock_notify:
         user = factory_user_model(username='testuser',
                                   roles='{edit,uma_authorization,basic}',
@@ -96,7 +95,8 @@ def test_create_invitation(session):  # pylint:disable=unused-argument
         mock_notify.assert_called()
 
 
-def test_get_invitations(session):
+def test_get_invitations(session):  # pylint:disable=unused-argument
+    """Assert that invitations can be 
     user = factory_user_model(username='testuser',
                               roles='{edit,uma_authorization,basic}',
                               keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
@@ -118,7 +118,7 @@ def test_get_invitations(session):
     assert invitation_dictionary['recipientEmail'] == invitation_info['recipientEmail']
 
 
-def test_find_invitation_by_id(session):
+def test_find_invitation_by_id(session):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided id."""
     user = factory_user_model(username='testuser',
                               roles='{edit,uma_authorization,basic}',
@@ -141,7 +141,7 @@ def test_find_invitation_by_id(session):
     assert invitation['recipientEmail'] == invitation_info['recipientEmail']
 
 
-def test_delete_invitation(session):
+def test_delete_invitation(session):  # pylint:disable=unused-argument
     """Delete the specified invitation."""
     user = factory_user_model(username='testuser',
                               roles='{edit,uma_authorization,basic}',
@@ -164,7 +164,7 @@ def test_delete_invitation(session):
     assert invitation is None
 
 
-def test_update_invitation(session):
+def test_update_invitation(session):  # pylint:disable=unused-argument
     """Update the specified invitation with new data."""
     user = factory_user_model(username='testuser',
                               roles='{edit,uma_authorization,basic}',

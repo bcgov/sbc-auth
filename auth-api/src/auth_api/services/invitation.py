@@ -13,9 +13,9 @@
 # limitations under the License.
 """Service for managing Invitation data."""
 
+from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing
 
-from jinja2 import Environment, FileSystemLoader
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel
@@ -23,6 +23,7 @@ from auth_api.schemas import InvitationSchema
 from config import get_named_config
 
 from .notification import Notification
+
 
 ENV = Environment(loader=FileSystemLoader('.'))
 

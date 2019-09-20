@@ -23,6 +23,7 @@ from auth_api.schemas.authorization import AuthorizationSchema
 
 class Authorization:
     """This module is to handle authorization related queries.
+
     The authorization model as such doesn't exist, so this is a class where we can map all the relationship to query
     user authorizations.
     """
