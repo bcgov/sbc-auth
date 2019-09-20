@@ -68,9 +68,8 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     """
     with app.app_context():
         # clear all custom views
-        views_sql = """select table_name from INFORMATION_SCHEMA.views
-                    WHERE table_schema = ANY (current_schemas(false))
-
+        views_sql = """select table_name from INFORMATION_SCHEMA.views 
+                       WHERE table_schema = ANY (current_schemas(false))
                     """
         sess = _db.session()
         for view in [name for (name,) in sess.execute(text(views_sql))]:
@@ -152,3 +151,9 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         # This instruction rollsback any commit that were executed in the tests.
         txn.rollback()
         conn.close()
+
+
+@pytest.fixture()
+def auth_mock(monkeypatch):
+    """Mock check_auth."""
+    monkeypatch.setattr('auth_api.services.authorization.check_auth', lambda *args, **kwargs: None)

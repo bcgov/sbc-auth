@@ -85,7 +85,6 @@ oc get secret my-secret --export=true -o json \
    oc process -f auth-api-pre-deploy.json \
        -p NAME=auth-api \
        -p TAG_NAME=dev \
-       -P JAEGER_COLLECTOR=--collector.host-port=jaeger-collector.d7eovc-dev.svc:14267 \
     | oc apply -f -
    ```
 
@@ -99,6 +98,7 @@ oc get secret my-secret --export=true -o json \
         -p NAME=auth-api \
         -p TAG_NAME=dev \
         -p REPLICAS=1 \
+        -p JAEGER_COLLECTOR=--collector.host-port=jaeger-collector.d7eovc-dev.svc:14267 \
     | oc apply -f -
    ```
 
