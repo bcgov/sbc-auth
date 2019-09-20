@@ -18,8 +18,8 @@ Test suite to ensure that the Authorizations view routines are working as expect
 import uuid
 
 from auth_api.models.views.authorization import Authorization
-from tests.utilities.factory_utils import factory_user_model, factory_org_model, factory_membership_model, \
-    factory_entity_model, factory_affiliation_model
+from tests.utilities.factory_utils import (
+    factory_affiliation_model, factory_entity_model, factory_membership_model, factory_org_model, factory_user_model)
 
 
 def test_find_user_authorization_by_business_number(session):  # pylint:disable=unused-argument

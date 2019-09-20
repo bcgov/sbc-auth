@@ -34,7 +34,12 @@ TEST_JWT_CLAIMS = {
     'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
     'firstname': 'Test',
     'lastname': 'User',
-    'preferred_username': 'testuser'
+    'preferred_username': 'testuser',
+    'realm_access': {
+        'roles': [
+            'editor'
+        ]
+    }
 }
 
 TEST_JWT_CLAIMS_2 = {
