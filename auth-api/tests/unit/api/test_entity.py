@@ -21,9 +21,9 @@ import copy
 import json
 import os
 
-from tests.utilities.factory_utils import *
-
 from auth_api import status as http_status
+from tests.utilities.factory_utils import (
+    factory_affiliation_model, factory_entity_model, factory_membership_model, factory_org_model, factory_user_model)
 
 
 TEST_ENTITY_INFO = {
@@ -239,7 +239,7 @@ def test_authorizations_passcode_returns_200(client, jwt, session):  # pylint:di
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
     rv = client.get(f'/api/v1/entities/{inc_number}/authorizations',
-                headers=headers, content_type='application/json')
+                    headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
     assert rv.json.get('orgMembership') == 'OWNER'

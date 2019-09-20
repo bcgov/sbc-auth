@@ -242,7 +242,6 @@ class OrgContacts(Resource):
         @cors.crossdomain(origin='*')
         def get(org_id):
             """Retrieve the set of members for the given org."""
-
             try:
                 org = OrgService.find_by_org_id(org_id)
                 if org:

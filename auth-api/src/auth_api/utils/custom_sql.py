@@ -21,5 +21,6 @@ class CustomSql:  # pylint:disable=too-few-public-methods
     """This is the object for custom Sql definition."""
 
     def __init__(self, name, sql):
+        """Initialize custom SQL."""
         self.name = name
         self.sql = sql
