@@ -20,8 +20,8 @@ from unittest.mock import patch
 
 from auth_api.models import User as UserModel
 from auth_api.services import Invitation as InvitationService
+from auth_api.services import Notification as NotificationService
 from auth_api.services import Org as OrgService
-from auth_api.services import notification as NotificationService
 
 
 TEST_ORG_INFO = {
@@ -31,6 +31,7 @@ TEST_ORG_INFO = {
 TEST_UPDATED_INVITATION_INFO = {
     'status': 'ACCEPTED'
 }
+
 
 def factory_user_model(username,
                        firstname=None,
@@ -72,7 +73,7 @@ def test_as_dict(session):  # pylint:disable=unused-argument
 
 def test_create_invitation(session):  # pylint:disable=unused-argument
     """Assert that an Invitation can be created."""
-    with patch.object(NotificationService.Notification, 'send_email', return_value=None) as mock_notify:
+    with patch.object(NotificationService, 'send_email', return_value=None) as mock_notify:
         user = factory_user_model(username='testuser',
                                   roles='{edit,uma_authorization,basic}',
                                   keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
@@ -96,7 +97,7 @@ def test_create_invitation(session):  # pylint:disable=unused-argument
 
 
 def test_get_invitations(session):  # pylint:disable=unused-argument
-    """Assert that invitations can be 
+    """Assert that invitations can be retrieved."""
     user = factory_user_model(username='testuser',
                               roles='{edit,uma_authorization,basic}',
                               keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
@@ -184,10 +185,10 @@ def test_update_invitation(session):  # pylint:disable=unused-argument
     new_invitation = InvitationService.create_invitation(invitation_info, user.id)
     new_invitation_dict = new_invitation.as_dict()
     updated_invitation_info = {
-            "id": new_invitation_dict['id'],
-            "sentDate": "2019-09-09T00:00:00+00:00",
-            "status": "ACCEPTED",
-            "acceptedDate": "2019-09-11T00:00:00+00:00"
+        'id': new_invitation_dict['id'],
+        'sentDate': '2019-09-09T00:00:00+00:00',
+        'status': 'ACCEPTED',
+        'acceptedDate': '2019-09-11T00:00:00+00:00'
     }
     updated_invitation = new_invitation.update_invitation(updated_invitation_info).as_dict()
     assert updated_invitation['status'] == updated_invitation_info['status']
