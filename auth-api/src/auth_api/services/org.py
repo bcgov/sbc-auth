@@ -26,6 +26,7 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import OrgSchema
 from auth_api.utils.util import camelback2snake
+from .invitation import Invitation as InvitationService
 
 
 class Org:
@@ -132,3 +133,7 @@ class Org:
     def get_members(self):
         """Return the set of members for this org."""
         return {'members': self.as_dict()['members']}
+
+    def get_invitations(self):
+        """Return the unresolved (pending or failed) invitations for this org."""
+        return {'invitations': InvitationService.get_invitations_by_org_id(self._model.id)}

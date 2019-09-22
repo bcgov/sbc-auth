@@ -28,7 +28,7 @@
       },
       "sentDate": {
         "type": "string",
-        "format": "date",
+        "format": "datetime",
         "title": "The date invitation is sent."
       },
        "membership": {
