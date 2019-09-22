@@ -112,3 +112,15 @@ def test_update_invitation(session):  # pylint:disable=unused-argument
     invitation.update_invitation(update_invitation)
     assert invitation
     assert invitation.invitation_status_code == update_invitation['status']
+
+
+def test_find_invitations_by_org(session):  # pylint:disable=unused-argument
+    """Assert that Invitations for a specified org can be retrieved."""
+    invitation = factory_invitation_model(session=session)
+    session.add(invitation)
+    session.commit()
+
+    found_invitations = InvitationModel.find_invitations_by_org(invitation.membership[0].org_id)
+    assert found_invitations
+    assert len(found_invitations) == 1
+    assert found_invitations[0].membership[0].org_id == invitation.membership[0].org_id

@@ -64,7 +64,7 @@ class Invitations(Resource):
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
     def get():
-        """Return a set of users based on search query parameters (staff only)."""
+        """Return a set of invitations sent by the user specified by the token."""
         token = g.jwt_oidc_token_info
         try:
             user = UserService.find_by_jwt_token(token)
@@ -106,7 +106,7 @@ class Invitation(Resource):
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
     def put(invitation_id):
-        """Get the invitation specified by the provided id."""
+        """Update the invitation specified by the provided id."""
         invitation = InvitationService.find_invitation_by_id(invitation_id)
         if invitation is None:
             response, status = {'message': 'The requested invitation could not be found.'}, \

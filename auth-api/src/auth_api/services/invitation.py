@@ -63,6 +63,15 @@ class Invitation:
         return collection
 
     @staticmethod
+    def get_invitations_by_org_id(org_id):
+        """Get invitations for an org."""
+        collection = []
+        invitations = InvitationModel.find_invitations_by_org(org_id)
+        for invitation in invitations:
+            collection.append(Invitation(invitation).as_dict())
+        return collection
+
+    @staticmethod
     def find_invitation_by_id(invitation_id):
         """Find an existing invitation with the provided id."""
         if invitation_id is None:

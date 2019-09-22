@@ -25,6 +25,7 @@ from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.models import User as UserModel
+from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 
 
@@ -176,3 +177,42 @@ def test_update_contact_no_contact(session):  # pylint:disable=unused-argument
     with pytest.raises(BusinessException) as exception:
         org.update_contact(TEST_UPDATED_CONTACT_INFO)
     assert exception.value.code == Error.DATA_NOT_FOUND.name
+
+
+def test_get_members(session):  # pylint:disable=unused-argument
+    """Assert that members for an org can be retrieved."""
+    user = factory_user_model(username='testuser',
+                              roles='{edit,uma_authorization,basic}',
+                              keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
+    org = OrgService.create_org(TEST_ORG_INFO, user.id)
+
+    response = org.get_members()
+    assert response
+    assert len(response['members']) == 1
+    assert response['members'][0]['membershipTypeCode'] == 'OWNER'
+
+
+def test_get_invitations(session):  # pylint:disable=unused-argument
+    """Assert that invitations for an org can be retrieved."""
+    user = factory_user_model(username='testuser',
+                              roles='{edit,uma_authorization,basic}',
+                              keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
+    org = OrgService.create_org(TEST_ORG_INFO, user.id)
+
+    invitation_info = {
+        'recipientEmail': 'abc.test@gmail.com',
+        'sentDate': '2019-09-09',
+        'membership': [
+            {
+                'membershipType': 'MEMBER',
+                'orgId':  org.as_dict()['id']
+            }
+        ]
+    }
+
+    invitation = InvitationService.create_invitation(invitation_info, user.id)
+
+    response = org.get_invitations()
+    assert response
+    assert len(response['invitations']) == 1
+    assert response['invitations'][0]['recipientEmail'] == invitation.as_dict()['recipientEmail']
