@@ -260,7 +260,7 @@ class OrgContacts(Resource):
 
     @cors_preflight('GET,OPTIONS')
     @API.route('/<string:org_id>/invitations', methods=['GET', 'OPTIONS'])
-    class OrgMembers(Resource):
+    class OrgInvitations(Resource):
         """Resource for managing a set of invitations for a single organization."""
 
         @staticmethod
