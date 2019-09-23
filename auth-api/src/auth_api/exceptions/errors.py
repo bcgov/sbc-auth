@@ -33,6 +33,7 @@ class Error(Enum):
     DATA_CONFLICT = 'New data conflict with existing data.', http_status.HTTP_409_CONFLICT
     ACTIONED_INVITATION = 'The invitation has already been accepted.', http_status.HTTP_400_BAD_REQUEST
     EXPIRED_INVITATION = 'The invitation has expired.', http_status.HTTP_400_BAD_REQUEST
+    FAILED_INVITATION = 'Failed to dispatch the invitation', http_status.HTTP_500_INTERNAL_SERVER_ERROR
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""
