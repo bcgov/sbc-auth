@@ -2,8 +2,7 @@ import { Business } from '@/models/business'
 import Axios, { AxiosPromise, AxiosResponse } from 'axios'
 import configHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
-import { Org } from '@/models/org'
-import { Entity } from '@/models/entity'
+import { Organization } from '@/models/Organization'
 import { Affiliation } from '@/models/affiliation'
 
 interface BusinessService {
@@ -12,7 +11,7 @@ interface BusinessService {
   addContact: (business: Business, contact: Contact) => Promise<AxiosResponse<Business>>
   updateContact: (business: Business, coontact: Contact) => Promise<AxiosResponse<Business>>
   getOrgs: () => Promise<AxiosResponse<any>>
-  createOrg: (org: Org) => Promise<AxiosResponse<Org>>
+  createOrg: (org: Organization) => Promise<AxiosResponse<Organization>>
   createAffiliation: (orgIdentifier: string, affiliation: Affiliation) => Promise<AxiosResponse<Affiliation>>
   removeAffiliation: (orgIdentifier: string, incorporationNumber: string) => Promise<AxiosResponse<void>>
   // Following searchBusiness will search data from legal-api.
@@ -35,7 +34,7 @@ export default {
   async getOrgs (): Promise<AxiosResponse<any>> {
     return Axios.get(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/users/orgs`)
   },
-  async createOrg (org: Org): Promise<AxiosResponse<Org>> {
+  async createOrg (org: Organization): Promise<AxiosResponse<Organization>> {
     return Axios.post(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs`, org)
   },
   async createAffiliation (orgIdentifier: string, affiliation: Affiliation): Promise<AxiosResponse<any>> {

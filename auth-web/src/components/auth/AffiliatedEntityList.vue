@@ -47,19 +47,25 @@ import { getModule } from 'vuex-module-decorators'
 import UserModule from '../../store/modules/user'
 import configHelper from '../../util/config-helper'
 import { AffiliatedEntity, Organization, RemoveBusinessPayload } from '../../models/Organization'
+import { mapGetters, mapState, mapActions } from 'vuex'
 
-@Component
+@Component({
+  computed: {
+    ...mapState('user', ['organizations'])
+  },
+  methods: {
+    ...mapActions('user', ['getOrganizations'])
+  }
+})
 export default class AffiliatedEntityList extends Vue {
   private VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   private userStore = getModule(UserModule, this.$store)
-
-  get organizations () {
-    return this.userStore.organizations
-  }
+  readonly organizations!: Organization[]
+  readonly getOrganizations!: () => Organization[]
 
   get affiliatedEntities () {
     let affiliatedEntities: AffiliatedEntity[] = []
-    this.userStore.organizations.forEach(organization => {
+    this.organizations.forEach(organization => {
       if (organization.affiliatedEntities) {
         organization.affiliatedEntities.forEach(entity => {
           affiliatedEntities.push(entity)
@@ -70,7 +76,7 @@ export default class AffiliatedEntityList extends Vue {
   }
 
   mounted () {
-    this.userStore.getOrganizations()
+    this.getOrganizations()
   }
 
   @Emit()
