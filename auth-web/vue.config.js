@@ -3,7 +3,7 @@ module.exports = {
     devtool: 'source-map'
   },
   publicPath: process.env.VUE_APP_PATH,
-  transpileDependencies: ['vuex-persist','vuetify'],
+  transpileDependencies: ['vuex-persist', 'vuetify'],
   devServer: {
     // not used
     proxy: {
