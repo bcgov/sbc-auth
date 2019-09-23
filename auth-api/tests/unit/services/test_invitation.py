@@ -228,5 +228,5 @@ def test_accept_invitation(session):
             new_invitation = InvitationService.create_invitation(invitation_info, User(user))
             new_invitation_dict = new_invitation.as_dict()
             InvitationService.accept_invitation(new_invitation_dict['id'], user.id)
-            org_dict = OrgService.find_by_org_id(org_dictionary['id'],allowed_roles={'basic'}).as_dict()
+            org_dict = OrgService.find_by_org_id(org_dictionary['id'], allowed_roles={'basic'}).as_dict()
             assert len(org_dict['members']) == 2  # Member count will be 2 only if the invite accept is successful.

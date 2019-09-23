@@ -230,7 +230,7 @@ def test_validate_token(client, jwt, session):  # pylint:disable=unused-argument
     invitation_dictionary = json.loads(rv.data)
     invitation_id = invitation_dictionary['id']
     invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
-    rv = client.get('/api/v1/invitations/validate/{}'.format(invitation_id_token),
+    rv = client.get('/api/v1/invitations/tokens/{}'.format(invitation_id_token),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
 
@@ -258,7 +258,7 @@ def test_accept_invitation(client, jwt, session):  # pylint:disable=unused-argum
     invitation_dictionary = json.loads(rv.data)
     invitation_id = invitation_dictionary['id']
     invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
-    rv = client.put('/api/v1/invitations/confirm/{}'.format(invitation_id_token),
+    rv = client.put('/api/v1/invitations/tokens/{}'.format(invitation_id_token),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     rv = client.get('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
