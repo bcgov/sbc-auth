@@ -53,8 +53,7 @@ class Invitations(Resource):
                 response, status = {'message': 'Not authorized to perform this action'}, \
                     http_status.HTTP_401_UNAUTHORIZED
             else:
-                response, status = InvitationService.create_invitation(request_json, user.identifier,
-                                                                       user.as_dict()).as_dict(), \
+                response, status = InvitationService.create_invitation(request_json, user).as_dict(), \
                     http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -73,7 +72,8 @@ class Invitations(Resource):
                 response, status = {'message': 'Not authorized to perform this action'}, \
                     http_status.HTTP_401_UNAUTHORIZED
             else:
-                invitations = InvitationService.get_invitations(user.identifier)
+                invitation_status = request.args.get('status').upper() if request.args.get('status') else 'ALL'
+                invitations = InvitationService.get_invitations(user.identifier, invitation_status)
                 if not invitations:
                     response, status = {'message': 'No invitations found.'}, http_status.HTTP_404_NOT_FOUND
                 else:
@@ -135,7 +135,7 @@ class Invitation(Resource):
 
 
 @cors_preflight('GET,OPTIONS')
-@API.route('/validate/<string:token>', methods=['GET', 'OPTIONS'])
+@API.route('/tokens/<string:token>', methods=['GET', 'OPTIONS'])
 class InvitationValidator(Resource):
     """Check whether a token is valid."""
 
@@ -153,7 +153,7 @@ class InvitationValidator(Resource):
 
 
 @cors_preflight('PUT,OPTIONS')
-@API.route('/confirm/<string:confirmation_token>', methods=['PUT', 'OPTIONS'])
+@API.route('/tokens/<string:confirmation_token>', methods=['PUT', 'OPTIONS'])
 class InvitationAction(Resource):
     """Resource for managing the acceptance of an invitation."""
 

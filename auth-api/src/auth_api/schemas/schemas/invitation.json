@@ -26,12 +26,7 @@
         "type": "string",
         "title": "The recipient email id."
       },
-      "sentDate": {
-        "type": "string",
-        "format": "date",
-        "title": "The date invitation is sent."
-      },
-       "membership": {
+      "membership": {
             "type": "array",
             "items": {
                 "$ref": "#/definitions/invitationMembership"
@@ -40,7 +35,6 @@
     },
     "required": [
       "recipientEmail",
-      "sentDate",
       "membership"
     ]
 }

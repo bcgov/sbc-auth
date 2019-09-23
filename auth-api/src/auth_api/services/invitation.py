@@ -52,18 +52,23 @@ class Invitation:
         return obj
 
     @staticmethod
-    def create_invitation(invitation_info: dict, user_id, user):
+    def create_invitation(invitation_info: dict, user):
         """Create a new invitation."""
-        invitation = InvitationModel.create_from_dict(invitation_info, user_id)
+        invitation = InvitationModel.create_from_dict(invitation_info, user.identifier)
         invitation.save()
-        Invitation.send_invitation(invitation, user)
+        Invitation.send_invitation(invitation, user.as_dict())
         return Invitation(invitation)
 
     @staticmethod
-    def get_invitations(user_id):
+    def get_invitations(user_id, status):
         """Get invitations sent by a user."""
         collection = []
-        invitations = InvitationModel.find_invitations_by_user(user_id)
+        if status == 'ALL':
+            invitations = InvitationModel.find_invitations_by_user(user_id)
+        elif status == 'PENDING':
+            invitations = InvitationModel.find_pending_invitations_by_user(user_id)
+        else:
+            invitations = InvitationModel.find_invitations_by_status(user_id, status)
         for invitation in invitations:
             collection.append(Invitation(invitation).as_dict())
         return collection
@@ -99,8 +104,13 @@ class Invitation:
         token_json = {'token': confirmation_token}
         token_confirm_url = CONFIG.AUTH_WEB_TOKEN_CONFIRM_URL + '?' + urllib.parse.urlencode(token_json)
         template = ENV.get_template('email_templates/business_invitation_email.html')
-        Notification.send_email(subject, sender, recipient,
-                                template.render(invitation=invitation, url=token_confirm_url, user=user))
+        try:
+            Notification.send_email(subject, sender, recipient, template.render(invitation=invitation,
+                                                                                url=token_confirm_url, user=user))
+        except:
+            invitation.invitation_status_code = 'FAILED'
+            invitation.save()
+            raise BusinessException(Error.FAILED_INVITATION, None)
 
     def update_invitation(self, invitation):
         """Update the specified invitation with new data."""
@@ -117,7 +127,7 @@ class Invitation:
     def validate_token(token):
         """Check whether the passed token is valid."""
         serializer = URLSafeTimedSerializer(CONFIG.EMAIL_TOKEN_SECRET_KEY)
-        token_valid_for = int(CONFIG.TOKEN_EXPIRY_PERIOD) if CONFIG.TOKEN_EXPIRY_PERIOD else 3600*24*7
+        token_valid_for = int(CONFIG.TOKEN_EXPIRY_PERIOD)*3600*24 if CONFIG.TOKEN_EXPIRY_PERIOD else 3600*24*7
         try:
             invitation_id = serializer.loads(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT, max_age=token_valid_for)
         except:
