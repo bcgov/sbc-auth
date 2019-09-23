@@ -21,11 +21,12 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import utils as schema_utils
 from auth_api.services.authorization import Authorization as AuthorizationService
+from auth_api.services.keycloak import KeycloakService
 from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
-from auth_api.services.keycloak import KeycloakService
+
 
 API = Namespace('users', description='Endpoints for user profile management')
 TRACER = Tracer.get_instance()

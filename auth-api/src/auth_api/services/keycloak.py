@@ -14,16 +14,17 @@
 """Utils for keycloak administration."""
 
 import os
+from typing import Dict
 
 import requests
 from keycloak import KeycloakAdmin, KeycloakOpenID
 from keycloak.exceptions import KeycloakGetError
-from typing import Dict
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.utils.constants import GROUP_PUBLIC_USERS, BCSC, PASSCODE
+from auth_api.utils.constants import BCSC, GROUP_PUBLIC_USERS, PASSCODE
 from auth_api.utils.roles import Role
+
 
 KEYCLOAK_ADMIN = KeycloakAdmin(server_url=os.getenv('KEYCLOAK_BASE_URL') + '/auth/',
                                username=os.getenv('KEYCLOAK_ADMIN_CLIENTID'),
