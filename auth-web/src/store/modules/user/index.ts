@@ -4,22 +4,25 @@ import userServices from '@/services/user.services'
 import { UserInfo } from '@/models/userInfo'
 import { User } from '@/models/user'
 import { Contact } from '@/models/contact'
-import { Organization } from '@/models/Organization'
+import { Organization, Members, Member } from '@/models/Organization'
 import AuthService from 'sbc-common-components/src/services/auth.services'
 import ConfigHelper from '@/util/config-helper'
 import { AppConstants } from '@/util/constants'
+import OrgService from '@/services/org.services'
+import _ from 'lodash'
+import { Invitation } from '@/models/Invitation'
 
 @Module({
-  name: 'user'
+  name: 'user',
+  namespaced: true
 })
 export default class UserModule extends VuexModule {
   currentUser: UserInfo
-
   userProfile: User
-
   userContact: Contact
-
-  organizations: Organization[] = []
+  organizations: Organization[]
+  activeBasicMembers: Member[]
+  pendingBasicMembers: Invitation[]
 
   @Mutation
   public setOrganizations (organizations: Organization[]) {
@@ -39,6 +42,16 @@ export default class UserModule extends VuexModule {
   @Mutation
   public setUserContact (userContact: Contact) {
     this.userContact = userContact
+  }
+
+  @Mutation
+  public setActiveBasicMembers (members: Member[]) {
+    this.activeBasicMembers = members
+  }
+
+  @Mutation
+  public setPendingBasicMembers (invitations: Invitation[]) {
+    this.pendingBasicMembers = invitations
   }
 
   @Action({ rawError: true })
@@ -80,10 +93,8 @@ export default class UserModule extends VuexModule {
 
   @Action({ commit: 'setOrganizations' })
   public async getOrganizations () {
-    return userServices.getOrganizations()
-      .then(response => {
-        return response.data && response.data.orgs ? response.data.orgs : []
-      })
+    const response = await userServices.getOrganizations()
+    return response.data && response.data.orgs ? response.data.orgs : []
   }
 
   @Action({ rawError: true })
@@ -100,5 +111,41 @@ export default class UserModule extends VuexModule {
     } else {
       keycloakService.logout(redirectUrl)
     }
+  }
+
+  // This returns a flattened list of users belong to the current users
+  // set of implicit orgs (duplicates removed)
+  @Action({ commit: 'setActiveBasicMembers' })
+  public async getActiveBasicMembers (): Promise<Member[]> {
+    let members: Member[] = []
+    const orgs = this.context.state['organizations']
+    for (let i = 0; i < orgs.length; i++) {
+      const organization = orgs[i]
+      if (organization.orgType === 'IMPLICIT') {
+        const response = await OrgService.getOrgMembers(organization.id)
+        if (response.status === 200 && response.data) {
+          members = members.concat(response.data.members)
+        }
+      }
+    }
+    // Remove duplicates (this is done for IMPLICIT ORGS only since members will have access to entire dashboard)
+    members = _.uniqWith(members, (memberA, memberB) => memberA.user.username === memberB.user.username)
+    return members
+  }
+
+  @Action({ commit: 'setPendingBasicMembers' })
+  public async getPendingBasicMembers (): Promise<Invitation[]> {
+    let invitations: Invitation[] = []
+    const orgs = this.context.state['organizations']
+    for (let i = 0; i < orgs.length; i++) {
+      const organization = orgs[i]
+      if (organization.orgType === 'IMPLICIT') {
+        const response = await OrgService.getOrgInvitations(organization.id)
+        if (response.status === 200 && response.data) {
+          invitations = invitations.concat(response.data.invitations)
+        }
+      }
+    }
+    return invitations
   }
 }

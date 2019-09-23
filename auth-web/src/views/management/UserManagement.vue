@@ -19,7 +19,7 @@
         <v-tab-item>
           <v-data-table
                 :headers="headersActive"
-                :items="activeUsers"
+                :items="activeUserListing"
                 :items-per-page="5"
                 class="elevation-1"
               >
@@ -28,7 +28,7 @@
         <v-tab-item>
           <v-data-table
                 :headers="headersPending"
-                :items="pendingUsers"
+                :items="pendingUserListing"
                 :items-per-page="5"
                 class="elevation-1"
               >
@@ -40,8 +40,7 @@
     <!-- Invite Users Modal -->
     <v-dialog v-model="isInviteUsersModalVisible" persistent max-width="550px">
       <InviteUsersForm
-        @invite-success="showInviteSuccessModal($event)"
-        @invite-error="showErrorModal()"
+        @invites-complete="showInviteSummaryModal()"
         @cancel="cancelModal()"
       >
       </InviteUsersForm>
@@ -51,8 +50,8 @@
       <v-card>
           <v-card-text class="text-center">
             <v-icon class="outlined my-5" x-large color="black">check</v-icon>
-            <p class="title my-5" v-show="!isResend">Invited {{ invitationsSent }} Team Members</p>
-            <p class="title my-5" v-show="isResend">{{ invitationsSent }} invitations resent</p>
+            <p class="title my-5" v-show="!resending">Invited {{ sentInvitations.length }} Team Members</p>
+            <p class="title my-5" v-show="resending">{{ sentInvitations.length }} invitations resent</p>
             <p class="my-5">Your team invitations were sent successfully.</p>
             <v-btn class="my-5" @click="okCloseModal()" color="primary" large>
               Okay
@@ -66,11 +65,34 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
-import { SuccessEmitPayload } from '@/models/user'
+import { mapState, mapGetters, mapActions } from 'vuex'
+import { Organization, Member } from '@/models/Organization'
+import { Invitation } from '@/models/Invitation'
+import moment from 'moment'
+
+interface ActiveUserRecord {
+  name: string
+  role: string
+  lastActive: string
+}
+
+interface PendingUserRecord {
+  email: string
+  invitationSent: string
+  invitationExpires?: string
+}
 
 @Component({
   components: {
     InviteUsersForm
+  },
+  computed: {
+    ...mapState('org', ['currentOrg', 'resending', 'sentInvitations']),
+    ...mapState('user', ['activeBasicMembers', 'pendingBasicMembers']),
+    ...mapGetters('user', ['organizations'])
+  },
+  methods: {
+    ...mapActions('user', ['getOrganizations', 'getActiveBasicMembers', 'getPendingBasicMembers'])
   }
 })
 export default class UserManagement extends Vue {
@@ -78,27 +100,35 @@ export default class UserManagement extends Vue {
   isInviteUsersModalVisible = false
   isInviteSuccessModalVisible = false
   isInviteErrorModalVisible = false
-  isResend = false
-  invitationsSent = 0
+
+  readonly organizations!: Organization[]
+  readonly currentOrg!: Organization
+  readonly resending!: boolean
+  readonly sentInvitations!: Invitation[]
+  readonly activeBasicMembers!: Member[]
+  readonly pendingBasicMembers!: Invitation[]
+  readonly getOrganizations!: () => Organization[]
+  readonly getActiveBasicMembers!: () => Member[]
+  readonly getPendingBasicMembers!: () => Invitation[]
 
   headersActive = [
     {
       text: 'User',
       align: 'left',
       sortable: true,
-      value: 'fullname'
+      value: 'name'
     },
     {
       text: 'Roles',
       align: 'left',
       sortable: true,
-      value: 'roles'
+      value: 'role'
     },
     {
-      text: 'Status',
+      text: 'Last Active',
       align: 'left',
       sortable: true,
-      value: 'status'
+      value: 'lastActive'
     }
   ]
 
@@ -107,7 +137,7 @@ export default class UserManagement extends Vue {
       text: 'User',
       align: 'left',
       sortable: true,
-      value: 'fullname'
+      value: 'email'
     },
     {
       text: 'Invitation Sent',
@@ -123,11 +153,29 @@ export default class UserManagement extends Vue {
     }
   ]
 
-  activeUsers = []
-  pendingUsers = []
+  get activeUserListing (): ActiveUserRecord[] {
+    return this.activeBasicMembers.map(member => {
+      return {
+        name: `${member.user.firstname} ${member.user.lastname}`,
+        role: member.membershipTypeCode,
+        lastActive: moment(member.user.modified).format('l')
+      }
+    })
+  }
 
-  mount () {
-    
+  get pendingUserListing (): PendingUserRecord[] {
+    return this.pendingBasicMembers.map(invitation => {
+      return {
+        email: invitation.recipientEmail,
+        invitationSent: moment(invitation.sentDate).format('lll')
+      }
+    })
+  }
+
+  mounted () {
+    this.getOrganizations()
+    this.getActiveBasicMembers()
+    this.getPendingBasicMembers()
   }
 
   showInviteUsersModal () {
@@ -138,16 +186,10 @@ export default class UserManagement extends Vue {
     this.isInviteUsersModalVisible = false
   }
 
-  showInviteSuccessModal (eventPayload: SuccessEmitPayload) {
-    this.isResend = eventPayload.isResend
-    this.invitationsSent = eventPayload.invitationCount
+  showInviteSummaryModal () {
     this.isInviteUsersModalVisible = false
     this.isInviteSuccessModalVisible = true
-  }
-
-  showInviteErrorModal () {
-    this.isInviteSuccessModalVisible = false
-    this.isInviteErrorModalVisible = true
+    this.getPendingBasicMembers()
   }
 
   okCloseModal () {

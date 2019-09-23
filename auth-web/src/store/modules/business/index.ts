@@ -4,7 +4,7 @@ import { Business } from '@/models/business'
 import { Contact } from '@/models/contact'
 import businessServices from '@/services/business.services'
 import { Affiliation } from '@/models/affiliation'
-import { Org } from '@/models/org'
+
 import { RemoveBusinessPayload } from '@/models/Organization'
 import configHelper from '@/util/config-helper'
 import { SessionStorageKeys } from '@/util/constants'
@@ -15,15 +15,12 @@ interface LoginPayload {
 }
 
 @Module({
-  name: 'business'
+  name: 'business',
+  namespaced: true
 })
 export default class BusinessModule extends VuexModule {
   currentBusiness: Business = {
     businessIdentifier: ''
-  }
-
-  currentOrg: Org = {
-    name: ''
   }
 
   skippedContactEntry = false
@@ -69,7 +66,10 @@ export default class BusinessModule extends VuexModule {
     }
 
     // Create an implicit org for the current user and the requested business
-    const createBusinessResponse = await businessServices.createOrg({ name: payload.businessNumber })
+    const createBusinessResponse = await businessServices.createOrg({
+      name: payload.businessNumber,
+      affiliatedEntities: []
+    })
 
     // Create an affiliation between implicit org and requested business
     await businessServices.createAffiliation(createBusinessResponse.data['id'], affiliation)

@@ -32,7 +32,12 @@
         </v-btn>
 
         <div class="invite-users-form__row invite-users-form__form-btns">
-          <v-btn class="mr-3" @click="sendInvites" color="primary" large>
+          <v-btn class="mr-3"
+                 @click="sendInvites"
+                 color="primary"
+                 large
+                 :loading="loading"
+                 :disabled="loading || !isFormValid()">
             <span>Send Invites</span>
           </v-btn>
           <v-btn @click="cancel" color="secondary" large>
@@ -47,10 +52,27 @@
 
 <script lang="ts">
 import { Component, Vue, Emit } from 'vue-property-decorator'
-import { SuccessEmitPayload } from '@/models/user'
+import OrgModule from '@/store/modules/org'
+import { mapState, mapActions, mapMutations } from 'vuex'
+import { Organization } from '@/models/Organization'
+import { Invitation } from '@/models/Invitation'
+import { getModule } from 'vuex-module-decorators'
 
-@Component({})
+@Component({
+  computed: {
+    ...mapState('user', ['organizations'])
+  },
+  methods: {
+    ...mapMutations('org', ['resetInvitations']),
+    ...mapActions('org', ['createInvitation'])
+  }
+})
 export default class InviteUsersForm extends Vue {
+  orgStore = getModule(OrgModule, this.$store)
+  readonly organizations!: Organization[]
+  readonly resetInvitations!: () => void
+  readonly createInvitation!: (Invitation) => Promise<void>
+  private loading = false
 
   $refs: {
     form: HTMLFormElement
@@ -59,11 +81,11 @@ export default class InviteUsersForm extends Vue {
   inviteEmails = ['', '', '']
 
   emailRules = [
-        v => !v || /.+@.+\..+/.test(v) || 'E-mail must be valid',
-      ]
+    v => !v || /.+@.+\..+/.test(v) || 'E-mail must be valid'
+  ]
 
   private isFormValid (): boolean {
-    return this.$refs.form.validate()
+    return this.inviteEmails.some(email => email) && this.$refs.form.validate()
   }
 
   removeEmail (index: number) {
@@ -74,16 +96,27 @@ export default class InviteUsersForm extends Vue {
     this.inviteEmails.push('')
   }
 
-  sendInvites () {
+  async sendInvites () {
     if (this.isFormValid()) {
-      try {
-        // send invites to each specified email
-
-        // emit success event
-        this.$emit('invite-success', { isResend: false, invitationCount: this.inviteEmails.length } as SuccessEmitPayload)
-      } catch (exception) {
-        this.$emit('invite-error')
+      // set loading state
+      this.loading = true
+      this.resetInvitations()
+      for (let i = 0; i < this.inviteEmails.length; i++) {
+        const email = this.inviteEmails[i]
+        if (email) {
+          this.createInvitation({
+            recipientEmail: email,
+            sentDate: new Date(),
+            membership: this.organizations
+              .filter(org => org.orgType === 'IMPLICIT')
+              .map(org => { return { membershipType: 'MEMBER', orgId: org.id } })
+          })
+        }
       }
+
+      // emit event to let parent know the invite sequence is complete
+      this.$emit('invites-complete')
+      this.loading = false
     }
   }
 
