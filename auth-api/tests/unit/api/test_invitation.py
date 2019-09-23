@@ -118,6 +118,58 @@ def test_get_invitations_by_user(client, jwt, session):  # pylint:disable=unused
     assert len(invitation_dict['invitations']) == 1
 
 
+def test_get_invitations_by_valid_status(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an invitation by a user can be retrieved."""
+    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    new_invitation = {
+        'recipientEmail': 'test@abc.com',
+        'sentDate': '2019-09-09',
+        'membership': [
+            {
+                'membershipType': 'MEMBER',
+                'orgId': str(org_id)
+            }
+        ]
+    }
+    rv = client.post('/api/v1/invitations', data=json.dumps(new_invitation),
+                     headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/invitations?status=PENDING', headers=headers, content_type='application/json')
+    invitation_dict = json.loads(rv.data)
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert invitation_dict['invitations']
+    assert len(invitation_dict['invitations']) == 1
+
+
+def test_get_invitations_by_valid_status(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an invitation by a user can be retrieved."""
+    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    new_invitation = {
+        'recipientEmail': 'test@abc.com',
+        'sentDate': '2019-09-09',
+        'membership': [
+            {
+                'membershipType': 'MEMBER',
+                'orgId': str(org_id)
+            }
+        ]
+    }
+    rv = client.post('/api/v1/invitations', data=json.dumps(new_invitation),
+                     headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/invitations?status=TEST', headers=headers, content_type='application/json')
+    invitation_dict = json.loads(rv.data)
+    assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+
+
 def test_get_invitations_by_id(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an invitation can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
