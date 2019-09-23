@@ -59,9 +59,11 @@ export default {
   },
 
   refreshToken () {
-    this.kc.updateToken().success(refreshed => {
-      if (refreshed) {
-        this.addToSession()
+    // Set the token expiry time as the minValidity to force refresh token
+    let tokenExpiresIn = this.kc.tokenParsed['exp'] - Math.ceil(new Date().getTime() / 1000) + this.kc.timeSkew + 100;
+    this.kc.updateToken(tokenExpiresIn).success((refreshed) => {
+      if(refreshed) {
+        this.initSessionStorage()
       }
     }).error(() => {
       this.cleanupSession()
