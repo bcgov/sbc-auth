@@ -25,7 +25,7 @@ from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
-
+from auth_api.services.keycloak import KeycloakService
 
 API = Namespace('users', description='Endpoints for user profile management')
 TRACER = Tracer.get_instance()
@@ -53,6 +53,7 @@ class Users(Resource):
 
         try:
             response, status = UserService.save_from_jwt_token(token).as_dict(), http_status.HTTP_201_CREATED
+            KeycloakService.join_public_users_group(g.jwt_oidc_token_info)
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

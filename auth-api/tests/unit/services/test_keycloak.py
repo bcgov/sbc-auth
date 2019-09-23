@@ -19,7 +19,9 @@ Test-Suite to ensure that the Business Service is working as expected.
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.services.keycloak import KeycloakService
+from auth_api.services.keycloak import KeycloakService, KEYCLOAK_ADMIN
+from flask_jwt_oidc import JwtManager
+from auth_api.utils.constants import PASSCODE, GROUP_PUBLIC_USERS
 
 
 ADD_USER_REQUEST = {
@@ -30,11 +32,10 @@ ADD_USER_REQUEST = {
     'email': 'test11@gov.bc.ca',
     'enabled': True,
     'user_type': [
-        '/test',
-        '/basic/editor'
+        '/test'
     ],
     'corp_type': 'CP',
-    'source': 'PASSCODE'
+    'source': PASSCODE
 }
 
 ADD_USER_REQUEST_SAME_EMAIL = {
@@ -49,9 +50,8 @@ ADD_USER_REQUEST_SAME_EMAIL = {
         '/basic/editor'
     ],
     'corp_type': 'CP',
-    'source': 'PASSCODE'
+    'source': PASSCODE
 }
-
 
 KEYCLOAK_SERVICE = KeycloakService()
 
@@ -158,7 +158,6 @@ def test_keycloak_logout(session):
     KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
     response = KEYCLOAK_SERVICE.get_token(ADD_USER_REQUEST.get('username'), ADD_USER_REQUEST.get('password'))
     refresh_token = response.get('refresh_token')
-    response = None
     response = KEYCLOAK_SERVICE.logout(refresh_token)
 
     assert response is not None
@@ -177,4 +176,20 @@ def test_keycloak_logout_wrong_refresh_token(session):
         assert err.code == Error.INVALID_REFRESH_TOKEN.name
         pass
     assert response is None
+    KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
+
+
+def test_join_public_users_group(session):
+    """Test the public_users group membership for public users."""
+    KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
+    user = KEYCLOAK_SERVICE.get_user_by_username(ADD_USER_REQUEST.get('username'))
+    user_id = user.get('id')
+    KEYCLOAK_SERVICE.join_public_users_group({'sub': user_id, 'loginSource': PASSCODE, 'realm_access': {'roles': []}})
+    # Get the user groups and verify the public_users group is in the list
+    user_groups = KEYCLOAK_ADMIN.get_user_groups(user_id=user_id)
+    groups = []
+    for group in user_groups:
+        groups.append(group.get('name'))
+    assert GROUP_PUBLIC_USERS in groups
+
     KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))

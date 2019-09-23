@@ -15,12 +15,15 @@
 
 import os
 
+import requests
 from keycloak import KeycloakAdmin, KeycloakOpenID
 from keycloak.exceptions import KeycloakGetError
+from typing import Dict
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-
+from auth_api.utils.constants import GROUP_PUBLIC_USERS, BCSC, PASSCODE
+from auth_api.utils.roles import Role
 
 KEYCLOAK_ADMIN = KeycloakAdmin(server_url=os.getenv('KEYCLOAK_BASE_URL') + '/auth/',
                                username=os.getenv('KEYCLOAK_ADMIN_CLIENTID'),
@@ -29,7 +32,6 @@ KEYCLOAK_ADMIN = KeycloakAdmin(server_url=os.getenv('KEYCLOAK_BASE_URL') + '/aut
                                client_id=os.getenv('KEYCLOAK_ADMIN_CLIENTID'),
                                client_secret_key=os.getenv('KEYCLOAK_ADMIN_SECRET'),
                                verify=True)
-
 
 # Configure client
 KEYCLOAK_OPENID = KeycloakOpenID(server_url=os.getenv('KEYCLOAK_BASE_URL') + '/auth/',
@@ -148,3 +150,42 @@ class KeycloakService:
             return response
         except Exception as err:
             raise BusinessException(Error.INVALID_REFRESH_TOKEN, err)
+
+    @staticmethod
+    def join_public_users_group(token_info: Dict):
+        """Add user to the public group (public_users) if the user is public."""
+        is_public_user = token_info.get('loginSource', None) in (BCSC, PASSCODE)
+
+        # Cannot check the group from token, so check if the role 'edit' is already present.
+        has_role = Role.EDITOR.value in token_info.get('realm_access').get('roles')
+
+        if not has_role and is_public_user:
+            KeycloakService._add_user_to_group(token_info.get('sub'), GROUP_PUBLIC_USERS)
+
+    @staticmethod
+    def _add_user_to_group(user_id: str, group_name: str):
+        """Add user to the keycloak group."""
+        # Create an admin token
+        base_url = os.getenv('KEYCLOAK_BASE_URL')
+        realm = os.getenv('KEYCLOAK_REALMNAME')
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        token_url = f'{base_url}/auth/realms/{realm}/protocol/openid-connect/token'
+        response = requests.post(token_url, data='client_id={}&grant_type=client_credentials&client_secret={}'.format(
+            os.getenv('KEYCLOAK_ADMIN_CLIENTID'), os.getenv('KEYCLOAK_ADMIN_SECRET')), headers=headers)
+        admin_token = response.json().get('access_token')
+
+        # Get the '$group_name' group
+        get_group_url = f'{base_url}/auth/admin/realms/{realm}/groups?search={group_name}'
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {admin_token}'
+        }
+        response = requests.get(get_group_url, headers=headers)
+        group_id = response.json()[0].get('id')
+
+        # Add user to the keycloak group '$group_name'
+        add_to_group_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/groups/{group_id}'
+        response = requests.put(add_to_group_url, headers=headers)
+        response.raise_for_status()
