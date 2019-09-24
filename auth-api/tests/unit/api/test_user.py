@@ -47,7 +47,11 @@ TEST_JWT_CLAIMS_2 = {
     'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302065',
     'firstname': 'Test',
     'lastname': 'User 2',
-    'preferred_username': 'testuser2'
+    'preferred_username': 'testuser2',
+    'realm_access': {
+        'roles': [
+        ]
+    }
 }
 
 TEST_JWT_INVALID_CLAIMS = {
@@ -75,7 +79,11 @@ UPDATED_TEST_JWT_CLAIMS = {
     'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
     'firstname': 'Updated_Test',
     'lastname': 'User',
-    'username': 'testuser'
+    'username': 'testuser',
+    'realm_access': {
+        'roles': [
+        ]
+    }
 }
 
 TEST_JWT_HEADER = {
