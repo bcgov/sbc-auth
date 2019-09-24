@@ -127,7 +127,7 @@ export default class UserManagement extends Vue {
   pendingUsers = []
 
   mount () {
-    
+
   }
 
   showInviteUsersModal () {

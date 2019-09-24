@@ -53,14 +53,14 @@ class Token(Resource):
 
             # Check if entity record exists in AUTH, and if not create record
             # TODO: This should be removed once a proper method of syncing entity information is implemented
-            entity = EntityService.find_by_business_identifier(data.get('username'))
-            if not entity:
-                EntityService.create_entity({
-                    'businessIdentifier': data.get('username'),
-                    'passCode': data.get('password'),
-                    'businessNumber': 'ABC123',
-                    'name': 'Test Cooperative - {}'.format(data.get('username'))
-                })
+            # entity = EntityService.find_by_business_identifier(data.get('username'))
+            # if not entity:
+            #     EntityService.create_entity({
+            #         'businessIdentifier': data.get('username'),
+            #         'passCode': data.get('password'),
+            #         'businessNumber': 'ABC123',
+            #         'name': 'Test Cooperative - {}'.format(data.get('username'))
+            #     })
 
             current_span = TRACER.tracer.active_span
 
