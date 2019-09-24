@@ -2,7 +2,7 @@
   <v-app id="app">
     <div class="header-group" ref="headerGroup">
       <pay-system-alert></pay-system-alert>
-      <sbc-header></sbc-header>
+      <sbc-header :key="$route.fullPath"></sbc-header>
     </div>
     <div class="app-body">
       <router-view/>

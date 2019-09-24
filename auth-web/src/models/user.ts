@@ -7,3 +7,8 @@ export interface User {
     contacts?: Contact[];
     modified?: Date
 }
+
+export interface SuccessEmitPayload {
+    isResend: boolean,
+    invitationCount: number
+  }
