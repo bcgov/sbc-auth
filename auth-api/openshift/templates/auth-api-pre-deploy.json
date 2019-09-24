@@ -54,7 +54,11 @@
         "MAIL_USE_SSL": "${MAIL_USE_SSL}",
         "MAIL_USERNAME": "${MAIL_USERNAME}",
         "MAIL_PASSWORD": "${MAIL_PASSWORD}",
-        "MAIL_FROM_ID": "${MAIL_FROM_ID}"
+        "MAIL_FROM_ID": "${MAIL_FROM_ID}",
+        "AUTH_WEB_TOKEN_CONFIRM_URL": "${AUTH_WEB_TOKEN_CONFIRM_URL}",
+        "EMAIL_SECURITY_PASSWORD_SALT": "${EMAIL_SECURITY_PASSWORD_SALT}",
+        "EMAIL_TOKEN_SECRET_KEY": "${EMAIL_TOKEN_SECRET_KEY}",
+        "TOKEN_EXPIRY_PERIOD": "${TOKEN_EXPIRY_PERIOD}"
       },
       "type": "Opaque"
     }
@@ -198,6 +202,30 @@
     },
     {
       "name": "MAIL_FROM_ID",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "AUTH_WEB_TOKEN_CONFIRM_URL",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "EMAIL_SECURITY_PASSWORD_SALT",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "EMAIL_TOKEN_SECRET_KEY",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "TOKEN_EXPIRY_PERIOD",
       "required": true,
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"

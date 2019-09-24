@@ -21,16 +21,16 @@
         }
     },
     "properties": {
-      "recipientEmail": {
-        "type": "string",
-        "title": "The recipient email id."
-      },
-      "sentDate": {
-        "type": "string",
-        "format": "datetime",
-        "title": "The date invitation is sent."
-      },
-       "membership": {
+        "recipientEmail": {
+            "type": "string",
+            "title": "The recipient email id."
+        },
+        "sentDate": {
+            "type": "string",
+            "format": "datetime",
+            "title": "The date invitation is sent."
+        },
+        "membership": {
             "type": "array",
             "items": {
                 "$ref": "#/definitions/invitationMembership"
@@ -38,8 +38,7 @@
         }
     },
     "required": [
-      "recipientEmail",
-      "sentDate",
-      "membership"
+        "recipientEmail",
+        "membership"
     ]
 }
