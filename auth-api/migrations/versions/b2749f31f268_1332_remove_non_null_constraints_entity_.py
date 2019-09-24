@@ -1,8 +1,8 @@
-"""removing_non_null_constraints_on_entity
+"""1332_removing_non_null_constraints_on_entity
 
-Revision ID: 06a6dac9fc82
-Revises: 6848a30e95cd
-Create Date: 2019-09-24 12:58:35.437471
+Revision ID: b2749f31f268
+Revises: 4a305e1c8c69
+Create Date: 2019-09-24 14:48:54.760496
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '06a6dac9fc82'
-down_revision = '6848a30e95cd'
+revision = 'b2749f31f268'
+down_revision = '4a305e1c8c69'
 branch_labels = None
 depends_on = None
 
