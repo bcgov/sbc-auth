@@ -16,9 +16,8 @@
 Test suite to ensure that the Authorization service routines are working as expected.
 """
 
-import uuid
-
 import pytest
+import uuid
 from werkzeug.exceptions import HTTPException
 
 from auth_api.services.authorization import Authorization, check_auth

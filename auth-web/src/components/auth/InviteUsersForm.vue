@@ -51,7 +51,6 @@ import { SuccessEmitPayload } from '@/models/user'
 
 @Component({})
 export default class InviteUsersForm extends Vue {
-
   $refs: {
     form: HTMLFormElement
   }
@@ -59,8 +58,8 @@ export default class InviteUsersForm extends Vue {
   inviteEmails = ['', '', '']
 
   emailRules = [
-        v => !v || /.+@.+\..+/.test(v) || 'E-mail must be valid',
-      ]
+    v => !v || /.+@.+\..+/.test(v) || 'E-mail must be valid'
+  ]
 
   private isFormValid (): boolean {
     return this.$refs.form.validate()
