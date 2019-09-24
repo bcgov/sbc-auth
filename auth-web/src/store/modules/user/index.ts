@@ -65,7 +65,9 @@ export default class UserModule extends VuexModule {
   @Action({ commit: 'setUserProfile' })
   public async createUserProfile () {
     return userServices.createUserProfile()
-      .then(response => {
+      .then(async response => {
+        // Refresh token to get the new token with additional roles
+        await keycloakService.refreshToken()
         return response.data
       })
   }
