@@ -83,8 +83,8 @@ class Invitations(Resource):
         return response, status
 
 
-@cors_preflight('GET,PUT,DELETE,OPTIONS')
-@API.route('/<string:invitation_id>', methods=['GET', 'PUT', 'DELETE'])
+@cors_preflight('GET,PATCH,DELETE,OPTIONS')
+@API.route('/<string:invitation_id>', methods=['GET', 'PATCH', 'DELETE'])
 class Invitation(Resource):
     """Resource for managing a single invitation."""
 
@@ -106,18 +106,23 @@ class Invitation(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
-    def put(invitation_id):
-        """Get the invitation specified by the provided id."""
-        invitation = InvitationService.find_invitation_by_id(invitation_id)
-        if invitation is None:
-            response, status = {'message': 'The requested invitation could not be found.'}, \
+    def patch(invitation_id):
+        """Update the invitation specified by the provided id as retried."""
+        token = g.jwt_oidc_token_info
+        try:
+            user = UserService.find_by_jwt_token(token)
+            if user is None:
+                response, status = {'message': 'Not authorized to perform this action'}, \
+                                   http_status.HTTP_401_UNAUTHORIZED
+            else:
+                invitation = InvitationService.find_invitation_by_id(invitation_id)
+                if invitation is None:
+                    response, status = {'message': 'The requested invitation could not be found.'}, \
                                http_status.HTTP_404_NOT_FOUND
-        else:
-            request_json = request.get_json()
-            try:
-                response, status = invitation.update_invitation(request_json).as_dict(), http_status.HTTP_200_OK
-            except BusinessException as exception:
-                response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+                else:
+                    response, status = invitation.update_invitation(user).as_dict(), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
 
     @staticmethod
