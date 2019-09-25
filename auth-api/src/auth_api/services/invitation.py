@@ -107,8 +107,7 @@ class Invitation:
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
         confirmation_token = Invitation.generate_confirmation_token(invitation.id)
-        token_json = {'token': confirmation_token}
-        token_confirm_url = CONFIG.AUTH_WEB_TOKEN_CONFIRM_URL + '?' + urllib.parse.urlencode(token_json)
+        token_confirm_url = '{}/validatetoken/{}'.format(CONFIG.AUTH_WEB_TOKEN_CONFIRM_URL, confirmation_token)
         template = ENV.get_template('email_templates/business_invitation_email.html')
         try:
             Notification.send_email(subject, sender, recipient, template.render(invitation=invitation,
