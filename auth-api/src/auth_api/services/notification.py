@@ -13,18 +13,12 @@
 # limitations under the License.
 """Service for managing Invitation data."""
 
-
 from flask_mail import Message
 
 from auth_api.extensions import mail
 
-
-class Notification:  # pylint: disable=too-few-public-methods
-    """Class that manages notification."""
-
-    @staticmethod
-    def send_email(subject, sender, recipients, html_body):
-        """Send the email using the given details."""
-        msg = Message(subject, sender=sender, recipients=recipients.split())
-        msg.html = html_body
-        mail.send(msg)
+def send_email(subject, sender, recipients, html_body):
+    """Send the email asynchronously, using the given details."""
+    msg = Message(subject, sender=sender, recipients=recipients.split())
+    msg.html = html_body
+    mail.send(msg)

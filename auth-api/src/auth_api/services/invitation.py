@@ -13,10 +13,11 @@
 # limitations under the License.
 """Service for managing Invitation data."""
 
-
 import urllib
 
 from datetime import datetime
+from threading import Thread
+from flask import copy_current_request_context
 from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 
@@ -27,7 +28,7 @@ from auth_api.models import Invitation as InvitationModel
 from auth_api.schemas import InvitationSchema
 from auth_api.models import Membership as MembershipModel
 from config import get_named_config
-from .notification import Notification
+from .notification import send_email
 
 
 ENV = Environment(loader=FileSystemLoader('.'))
@@ -114,8 +115,12 @@ class Invitation:
         token_confirm_url = CONFIG.AUTH_WEB_TOKEN_CONFIRM_URL + '?' + urllib.parse.urlencode(token_json)
         template = ENV.get_template('email_templates/business_invitation_email.html')
         try:
-            Notification.send_email(subject, sender, recipient, template.render(invitation=invitation,
-                                                                                url=token_confirm_url, user=user))
+            @copy_current_request_context
+            def run_job():
+                send_email(subject, sender, recipient, template.render(invitation=invitation, url=token_confirm_url, user=user))
+            thread = Thread(target=run_job)
+            thread.start()
+
         except:
             invitation.invitation_status_code = 'FAILED'
             invitation.save()
