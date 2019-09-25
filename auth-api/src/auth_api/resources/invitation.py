@@ -84,7 +84,7 @@ class Invitations(Resource):
 
 
 @cors_preflight('GET,PUT,DELETE,OPTIONS')
-@API.route('/<string:invitation_id>', methods=['GET', 'PUT', 'DELETE'])
+@API.route('/<string:invitation_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
 class Invitation(Resource):
     """Resource for managing a single invitation."""
 

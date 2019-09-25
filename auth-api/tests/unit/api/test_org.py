@@ -92,7 +92,7 @@ def factory_invite(org_id, email):
         'membership': [
             {
                 'membershipType': 'MEMBER',
-                'orgId': str(org_id)
+                'orgId': org_id
             }
         ]
     }

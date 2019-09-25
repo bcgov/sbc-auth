@@ -27,6 +27,7 @@ from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.models import User as UserModel
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
+from auth_api.services import User as UserService
 
 
 TEST_ORG_INFO = {
@@ -195,22 +196,23 @@ def test_get_members(session):  # pylint:disable=unused-argument
 def test_get_invitations(session):  # pylint:disable=unused-argument
     """Assert that invitations for an org can be retrieved."""
     user = factory_user_model(username='testuser',
+                              firstname='Test',
+                              lastname='User',
                               roles='{edit,uma_authorization,basic}',
                               keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
     org = OrgService.create_org(TEST_ORG_INFO, user.id)
 
     invitation_info = {
         'recipientEmail': 'abc.test@gmail.com',
-        'sentDate': '2019-09-09',
         'membership': [
             {
                 'membershipType': 'MEMBER',
-                'orgId':  org.as_dict()['id']
+                'orgId':   org.as_dict()['id']
             }
         ]
     }
 
-    invitation = InvitationService.create_invitation(invitation_info, user.id)
+    invitation = InvitationService.create_invitation(invitation_info, UserService(user))
 
     response = org.get_invitations()
     assert response
