@@ -139,34 +139,28 @@ class Invitation(Resource):
         return response, status
 
 
-@cors_preflight('GET,OPTIONS')
-@API.route('/tokens/<string:token>', methods=['GET', 'OPTIONS'])
-class InvitationValidator(Resource):
+@cors_preflight('GET,PUT,OPTIONS')
+@API.route('/tokens/<string:invitation_token>', methods=['GET', 'PUT', 'OPTIONS'])
+class InvitationAction(Resource):
     """Check whether a token is valid."""
 
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    def get(token):
+    def get(invitation_token):
         """Check whether the passed token is valid."""
         try:
-            InvitationService.validate_token(token)
+            InvitationService.validate_token(invitation_token)
             response, status = {}, http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
 
-
-@cors_preflight('PUT,OPTIONS')
-@API.route('/tokens/<string:confirmation_token>', methods=['PUT', 'OPTIONS'])
-class InvitationAction(Resource):
-    """Resource for managing the acceptance of an invitation."""
-
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
-    def put(confirmation_token):
+    def put(invitation_token):
         """Check whether the passed token is valid and add user, role and org from invitation to membership."""
 
         token = g.jwt_oidc_token_info
@@ -176,7 +170,8 @@ class InvitationAction(Resource):
                 response, status = {'message': 'Not authorized to perform this action'}, \
                                    http_status.HTTP_401_UNAUTHORIZED
             else:
-                invitation_id = InvitationService.validate_token(confirmation_token)
+                invitation_id = InvitationService.validate_token(invitation_token)
+                print(invitation_id)
                 response, status = InvitationService.accept_invitation(invitation_id, user.identifier).as_dict(), \
                                    http_status.HTTP_200_OK
         except BusinessException as exception:
