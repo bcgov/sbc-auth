@@ -59,6 +59,20 @@ class Invitation:
         Invitation.send_invitation(invitation, user.as_dict())
         return Invitation(invitation)
 
+    def update_invitation(self, user):
+        """Update the specified invitation with new data."""
+        updated_invitation = self._model.update_invitation_as_retried()
+        Invitation.send_invitation(updated_invitation, user.as_dict())
+        return Invitation(updated_invitation)
+
+    @staticmethod
+    def delete_invitation(invitation_id):
+        """Delete the specified invitation."""
+        invitation = InvitationModel.find_invitation_by_id(invitation_id)
+        if invitation is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        invitation.delete()
+
     @staticmethod
     def get_invitations(user_id, status):
         """Get invitations sent by a user."""
@@ -86,14 +100,6 @@ class Invitation:
         return Invitation(invitation)
 
     @staticmethod
-    def delete_invitation(invitation_id):
-        """Delete the specified invitation."""
-        invitation = InvitationModel.find_invitation_by_id(invitation_id)
-        if invitation is None:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
-        invitation.delete()
-
-    @staticmethod
     def send_invitation(invitation: InvitationModel, user):
         """Send the email notification."""
         subject = '[BC Registries & Online Services] {} {} has invited you to join a team'.format(user['firstname'],
@@ -101,8 +107,7 @@ class Invitation:
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
         confirmation_token = Invitation.generate_confirmation_token(invitation.id)
-        token_json = {'token': confirmation_token}
-        token_confirm_url = CONFIG.AUTH_WEB_TOKEN_CONFIRM_URL + '?' + urllib.parse.urlencode(token_json)
+        token_confirm_url = '{}/validatetoken/{}'.format(CONFIG.AUTH_WEB_TOKEN_CONFIRM_URL, confirmation_token)
         template = ENV.get_template('email_templates/business_invitation_email.html')
         try:
             Notification.send_email(subject, sender, recipient, template.render(invitation=invitation,
@@ -111,11 +116,6 @@ class Invitation:
             invitation.invitation_status_code = 'FAILED'
             invitation.save()
             raise BusinessException(Error.FAILED_INVITATION, None)
-
-    def update_invitation(self, invitation):
-        """Update the specified invitation with new data."""
-        self._model.update_invitation(invitation)
-        return self
 
     @staticmethod
     def generate_confirmation_token(invitation_id):
