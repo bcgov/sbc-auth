@@ -16,15 +16,15 @@
 from datetime import datetime, timedelta
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship
 
 from config import get_named_config
+
 from .base_model import BaseModel
+from .db import db
 from .invitation_membership import InvitationMembership
 from .invite_status import InvitationStatus
-
-from .db import db
 
 
 class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
@@ -45,12 +45,14 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
 
     @hybrid_property
     def expires_on(self):
+        """Calculate the expiry date based on the config value."""
         if self.invitation_status_code == 'PENDING':
             return self.sent_date + timedelta(days=int(get_named_config().TOKEN_EXPIRY_PERIOD))
         return None
 
     @hybrid_property
     def status(self):
+        """Calculate the status based on the config value."""
         current_time = datetime.now()
         if self.invitation_status_code == 'PENDING':
             expiry_time = self.sent_date + timedelta(days=int(get_named_config().TOKEN_EXPIRY_PERIOD))

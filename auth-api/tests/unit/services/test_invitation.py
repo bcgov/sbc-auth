@@ -16,10 +16,9 @@
 Test suite to ensure that the Invitation service routines are working as expected.
 """
 
-import auth_api.services.authorization as auth
-
 from unittest.mock import patch
 
+import auth_api.services.authorization as auth
 from auth_api.models import User as UserModel
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
@@ -52,7 +51,7 @@ def factory_user_model(username,
 
 def test_as_dict(session):  # pylint:disable=unused-argument
     """Assert that the Invitation is exported correctly as a dictionary."""
-    with patch.object(InvitationService, 'send_invitation', return_value=None) as mock_notify:
+    with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(username='testuser',
                                   roles='{edit,uma_authorization,basic}',
                                   keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
@@ -100,7 +99,7 @@ def test_create_invitation(session):  # pylint:disable=unused-argument
 
 def test_get_invitations(session):  # pylint:disable=unused-argument
     """Assert that invitations can be retrieved."""
-    with patch.object(InvitationService, 'send_invitation', return_value=None) as mock_notify:
+    with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(username='testuser',
                                   roles='{edit,uma_authorization,basic}',
                                   keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
@@ -123,7 +122,7 @@ def test_get_invitations(session):  # pylint:disable=unused-argument
 
 def test_find_invitation_by_id(session):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided id."""
-    with patch.object(InvitationService, 'send_invitation', return_value=None) as mock_notify:
+    with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(username='testuser',
                                   roles='{edit,uma_authorization,basic}',
                                   keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
@@ -146,7 +145,7 @@ def test_find_invitation_by_id(session):  # pylint:disable=unused-argument
 
 def test_delete_invitation(session):  # pylint:disable=unused-argument
     """Delete the specified invitation."""
-    with patch.object(InvitationService, 'send_invitation', return_value=None) as mock_notify:
+    with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(username='testuser',
                                   roles='{edit,uma_authorization,basic}',
                                   keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
@@ -169,7 +168,7 @@ def test_delete_invitation(session):  # pylint:disable=unused-argument
 
 def test_update_invitation(session):  # pylint:disable=unused-argument
     """Update the specified invitation with new data."""
-    with patch.object(InvitationService, 'send_invitation', return_value=None) as mock_notify:
+    with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(username='testuser',
                                   roles='{edit,uma_authorization,basic}',
                                   keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
@@ -190,20 +189,22 @@ def test_update_invitation(session):  # pylint:disable=unused-argument
 
 
 def test_generate_confirmation_token(session):
-    """Generate the confirmation token."""
+    """Generate the invitation token."""
     confirmation_token = InvitationService.generate_confirmation_token(1)
     assert confirmation_token is not None
 
 
 def test_validate_token_valid(session):
+    """Validate the invitation token."""
     confirmation_token = InvitationService.generate_confirmation_token(1)
     invitation_id = InvitationService.validate_token(confirmation_token)
     assert invitation_id == 1
 
 
 def test_accept_invitation(session):
-    with patch.object(InvitationService, 'send_invitation', return_value=None) as mock_notify:
-        with patch.object(auth, 'check_auth', return_value=True) as mock_auth:
+    """Accept the invitation and add membership from the invitation to the org."""
+    with patch.object(InvitationService, 'send_invitation', return_value=None):
+        with patch.object(auth, 'check_auth', return_value=True):
             user = factory_user_model(username='testuser',
                                       roles='{edit,uma_authorization,basic}',
                                       keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')

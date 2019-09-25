@@ -17,7 +17,6 @@ Test suite to ensure that the  model routines are working as expected.
 """
 
 from _datetime import datetime
-
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationMembership as InvitationMembershipModel
 from auth_api.models import Org as OrgModel
@@ -129,5 +128,3 @@ def test_invitations_by_status(session):  # pylint:disable=unused-argument
 
     retrieved_invitation = InvitationModel.find_invitations_by_status(invitation.sender_id, 'FAILED')
     assert len(retrieved_invitation) == 0
-
-

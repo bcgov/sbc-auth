@@ -14,19 +14,19 @@
 """Service for managing Invitation data."""
 
 
-import urllib
-
 from datetime import datetime
+
 from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
-
 from sbc_common_components.tracing.service_tracing import ServiceTracing
+
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel
-from auth_api.schemas import InvitationSchema
 from auth_api.models import Membership as MembershipModel
+from auth_api.schemas import InvitationSchema
 from config import get_named_config
+
 from .notification import Notification
 
 
@@ -112,7 +112,7 @@ class Invitation:
         try:
             Notification.send_email(subject, sender, recipient, template.render(invitation=invitation,
                                                                                 url=token_confirm_url, user=user))
-        except:
+        except:  # noqa: E722
             invitation.invitation_status_code = 'FAILED'
             invitation.save()
             raise BusinessException(Error.FAILED_INVITATION, None)
@@ -130,7 +130,7 @@ class Invitation:
         token_valid_for = int(CONFIG.TOKEN_EXPIRY_PERIOD)*3600*24 if CONFIG.TOKEN_EXPIRY_PERIOD else 3600*24*7
         try:
             invitation_id = serializer.loads(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT, max_age=token_valid_for)
-        except:
+        except:  # noqa: E722
             raise BusinessException(Error.EXPIRED_INVITATION, None)
         return invitation_id
 
