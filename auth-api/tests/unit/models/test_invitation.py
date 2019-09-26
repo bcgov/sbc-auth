@@ -27,7 +27,7 @@ from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.models import User
 
 
-def factory_invitation_model(session):
+def factory_invitation_model(session, status):
     """Produce a templated invitation model."""
     user = User(username='CP1234567',
                 roles='{edit, uma_authorization, staff}',
@@ -59,7 +59,7 @@ def factory_invitation_model(session):
     invitation.recipient_email = 'abc@test.com'
     invitation.sender = user
     invitation.sent_date = datetime.now()
-    invitation.invitation_status_code = 'PENDING'
+    invitation.invitation_status_code = status
 
     invitation_membership = InvitationMembershipModel()
     invitation_membership.org_id = org.id
@@ -72,15 +72,15 @@ def factory_invitation_model(session):
 
 def test_create_invitation(session):
     """Assert that an Invitation can be stored in the service."""
-    invitation = factory_invitation_model(session=session)
+    invitation = factory_invitation_model(session=session, status='PENDING')
     session.add(invitation)
     session.commit()
     assert invitation.id is not None
 
 
-def test_invitation_find_by_id(session):  # pylint:disable=unused-argument
+def test_find_invitation_by_id(session):  # pylint:disable=unused-argument
     """Assert that an Invitation can retrieved by its id."""
-    invitation = factory_invitation_model(session=session)
+    invitation = factory_invitation_model(session=session, status='PENDING')
     session.add(invitation)
     session.commit()
 
@@ -89,9 +89,9 @@ def test_invitation_find_by_id(session):  # pylint:disable=unused-argument
     assert retrieved_invitation.id == invitation.id
 
 
-def test_invitation_find_by_user(session):  # pylint:disable=unused-argument
+def test_find_invitations_by_user(session):  # pylint:disable=unused-argument
     """Assert that an Invitation can retrieved by the user id."""
-    invitation = factory_invitation_model(session=session)
+    invitation = factory_invitation_model(session=session, status='PENDING')
     session.add(invitation)
     session.commit()
 
@@ -100,23 +100,19 @@ def test_invitation_find_by_user(session):  # pylint:disable=unused-argument
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
 
 
-def test_update_invitation(session):  # pylint:disable=unused-argument
+def test_update_invitation_as_retried(session):  # pylint:disable=unused-argument
     """Assert that an Invitation can be updated."""
-    invitation = factory_invitation_model(session=session)
+    invitation = factory_invitation_model(session=session, status='FAILED')
     session.add(invitation)
     session.commit()
-
-    update_invitation = {
-        'status': 'ACCEPTED'
-    }
-    invitation.update_invitation(update_invitation)
+    invitation.update_invitation_as_retried()
     assert invitation
-    assert invitation.invitation_status_code == update_invitation['status']
+    assert invitation.invitation_status_code == 'PENDING'
 
 
 def test_find_invitations_by_org(session):  # pylint:disable=unused-argument
     """Assert that Invitations for a specified org can be retrieved."""
-    invitation = factory_invitation_model(session=session)
+    invitation = factory_invitation_model(session=session, status='PENDING')
     session.add(invitation)
     session.commit()
 
@@ -124,3 +120,25 @@ def test_find_invitations_by_org(session):  # pylint:disable=unused-argument
     assert found_invitations
     assert len(found_invitations) == 1
     assert found_invitations[0].membership[0].org_id == invitation.membership[0].org_id
+    assert invitation.invitation_status_code == 'PENDING'
+
+
+def test_find_pending_invitations_by_user(session):  # pylint:disable=unused-argument
+    """Assert that an Invitation can retrieved by the user id."""
+    invitation = factory_invitation_model(session=session, status='PENDING')
+    session.add(invitation)
+    session.commit()
+
+    retrieved_invitation = InvitationModel.find_pending_invitations_by_user(invitation.sender_id)
+    assert len(retrieved_invitation) == 1
+    assert retrieved_invitation[0].recipient_email == invitation.recipient_email
+
+
+def test_invitations_by_status(session):  # pylint:disable=unused-argument
+    """Assert that an Invitation can retrieved by the user id."""
+    invitation = factory_invitation_model(session=session, status='PENDING')
+    session.add(invitation)
+    session.commit()
+
+    retrieved_invitation = InvitationModel.find_invitations_by_status(invitation.sender_id, 'FAILED')
+    assert len(retrieved_invitation) == 0

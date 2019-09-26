@@ -98,19 +98,18 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         """Find all invitations that are not in accepted state."""
         return db.session.query(Invitation). \
             filter(Invitation.sender_id == user_id). \
-            filter(Invitation.invitation_status_code != 'ACCEPTED')
+            filter(Invitation.invitation_status_code != 'ACCEPTED').all()
 
     @staticmethod
     def find_invitations_by_status(user_id, status):
         """Find all invitations that are not in accepted state."""
         return db.session.query(Invitation). \
             filter(Invitation.sender_id == user_id). \
-            filter(Invitation.invitation_status_code == status)
+            filter(Invitation.invitation_status_code == status).all()
 
-    def update_invitation(self, invitation_info: dict):
+    def update_invitation_as_retried(self):
         """Update this invitation with the new data."""
-        if invitation_info:
-            if 'acceptedDate' in invitation_info:
-                self.accepted_date = invitation_info['acceptedDate']
-            self.invitation_status_code = invitation_info['status']
-            self.save()
+        self.sent_date = datetime.now()
+        self.invitation_status = InvitationStatus.get_default_status()
+        self.save()
+        return self
