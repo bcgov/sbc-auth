@@ -210,6 +210,7 @@ export default class UserManagement extends Vue {
     const invitationToResend = this.pendingBasicMembers.find(invitation => invitation.id === pendingUser.invitationId)
     if (invitationToResend) {
       await this.resendInvitation(invitationToResend)
+      this.isInviteSuccessModalVisible = true
       this.getPendingBasicMembers()
     }
   }
