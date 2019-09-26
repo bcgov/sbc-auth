@@ -51,7 +51,7 @@
     </v-card>
 
     <!-- Invite Users Modal -->
-    <v-dialog v-model="isInviteUsersModalVisible" persistent max-width="550px">
+    <v-dialog content-class="invite-user-dialog" v-model="isInviteUsersModalVisible" scrollable  persistent>
       <InviteUsersForm
         @invites-complete="showInviteSummaryModal()"
         @cancel="cancelModal()"
@@ -59,17 +59,23 @@
       </InviteUsersForm>
     </v-dialog>
 
-    <v-dialog v-model="isInviteSuccessModalVisible" persistent max-width="350px">
+    <!-- Notification Dialog (Success) -->
+    <v-dialog content-class="notify-dialog text-center" v-model="isInviteSuccessModalVisible">
       <v-card>
-          <v-card-text class="text-center">
-            <v-icon class="outlined my-5" x-large color="black">check</v-icon>
-            <p class="title my-5" v-show="!resending">Invited {{ sentInvitations.length }} Team Members</p>
-            <p class="title my-5" v-show="resending">{{ sentInvitations.length }} invitations resent</p>
-            <p class="my-5">Your team invitations were sent successfully.</p>
-            <v-btn class="my-5" @click="okCloseModal()" color="primary" large>
-              Okay
-            </v-btn>
-          </v-card-text>
+        <v-card-title class="pb-2">
+          <v-icon x-large color="success" class="mt-3">check</v-icon>
+          <span class="mt-5">Invited {{ sentInvitations.length }} Team Members</span> 
+        </v-card-title>
+        <v-card-text class="text-center">
+          <!--
+          <p v-show="!resending">Invited {{ sentInvitations.length }} Team Members</p>
+          <p v-show="resending">{{ sentInvitations.length }} invitations resent</p>
+          -->
+          <p class="my-5">Your team invitations were sent successfully.</p>
+          <v-btn large color="success" class="my-5" @click="okCloseModal()">
+            OK
+          </v-btn>
+        </v-card-text>
         </v-card>
     </v-dialog>
   </div>
@@ -222,6 +228,20 @@ export default class UserManagement extends Vue {
   .header {
     display: flex;
     justify-content: space-between
+  }
+
+  // Invite Users Dialog
+  .invite-user-dialog {
+    max-width: 40rem;
+  }
+
+  // Notification Dialog (Success/Error)
+  .notify-dialog {
+    max-width: 30rem;
+
+    .v-card__title {
+      flex-direction: column;
+    }
   }
 
   .invite-user-btn {

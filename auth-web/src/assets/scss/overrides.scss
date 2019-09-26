@@ -7,7 +7,7 @@
 .v-btn {
   letter-spacing: 0;
   text-transform: none;
-  font-weight: 700;
+  font-weight: 400;
 
 // Position progress indicator in the button
   .v-progress-circular {
@@ -37,17 +37,17 @@
 
 // v-dialog 
 .v-dialog > .v-card > .v-card__title {
-  padding-top: 1.5rem;
+  padding-top: 1.25rem;
   padding-bottom: 1rem;
   letter-spacing: -0.01em;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 // v-card
 // We don't want a 50% opacity on our v-card__text by default
 .theme--light.v-card > .v-card__text {
-  color: rgba($gray9, 0.8);
+  //color: rgba($gray9, 0.5);
 }
 
 // Increase the default font-size the default size of v-card__text
@@ -68,11 +68,11 @@ input:-webkit-autofill:active {
 
 // Adjust font size of help messages
 .v-messages__message {
-  font-size: 13px;
+  //font-size: 14px;
   height: 1.5rem;
 }
 
 // Adjust size and position of input label
 [class^="v-text-field"] .v-label--active {
-  transform: translateY(-10px) scale(0.8);
+  transform: translateY(-8px) scale(0.75);
 }
