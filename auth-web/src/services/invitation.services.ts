@@ -14,4 +14,12 @@ export default class InvitationService {
   public static async deleteInvitation (invitationId: number): Promise<AxiosResponse<Invitation>> {
     return Axios.delete(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/invitations/${invitationId}`)
   }
+
+  public static async validateToken (token: string): Promise<AxiosResponse<any>> {
+    return Axios.get(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/invitations/tokens/${token}`)
+  }
+
+  public static async acceptInvitation (token: string): Promise<AxiosResponse<any>> {
+    return Axios.put(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/invitations/tokens/${token}`, {})
+  }
 }

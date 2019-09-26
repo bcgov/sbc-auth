@@ -65,4 +65,18 @@ export default class OrgModule extends VuexModule {
   public async deleteInvitation (invitation: Invitation) {
     await InvitationService.deleteInvitation(invitation.id)
   }
+
+  @Action({ rawError: true })
+  public async validateInvitationToken (token: string) {
+    return InvitationService.validateToken(token).then(response => {
+      return response.data
+    })
+  }
+
+  @Action({ rawError: true })
+  public async acceptInvitation (token: string) {
+    return InvitationService.acceptInvitation(token).then(response => {
+      return response.data
+    })
+  }
 }
