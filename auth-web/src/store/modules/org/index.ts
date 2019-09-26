@@ -19,6 +19,7 @@ export default class OrgModule extends VuexModule {
 
   @Mutation
   public resetInvitations () {
+    this.resending = false
     this.sentInvitations = []
     this.failedInvitations = []
   }
@@ -33,13 +34,35 @@ export default class OrgModule extends VuexModule {
     this.failedInvitations.push(failedInvitation)
   }
 
+  @Mutation
+  public setResending (resendingStatus: boolean) {
+    this.resending = resendingStatus
+  }
+
   @Action({ rawError: true })
-  public createInvitation (invitation: Invitation) {
+  public async createInvitation (invitation: Invitation) {
     try {
-      InvitationService.createInvitation(invitation)
+      await InvitationService.createInvitation(invitation)
       this.context.commit('addSentInvitation', invitation)
     } catch (exception) {
       this.context.commit('addFailedInvitation', invitation)
     }
+  }
+
+  @Action({ rawError: true })
+  public async resendInvitation (invitation: Invitation) {
+    this.context.commit('resetInvitations')
+    this.context.commit('setResending', true)
+    try {
+      await InvitationService.resendInvitation(invitation)
+      this.context.commit('addSentInvitation', invitation)
+    } catch (exception) {
+      this.context.commit('addFailedInvitation', invitation)
+    }
+  }
+
+  @Action({ rawError: true })
+  public async deleteInvitation (invitation: Invitation) {
+    await InvitationService.deleteInvitation(invitation.id)
   }
 }

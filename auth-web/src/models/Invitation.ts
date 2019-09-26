@@ -1,7 +1,9 @@
 export interface Invitation {
+    id?: number;
     recipientEmail: string;
     sentDate: Date;
-    membership: InvitationMembership[]
+    membership: InvitationMembership[];
+    expiresOn: Date;
 }
 
 export interface Invitations {
@@ -10,5 +12,5 @@ export interface Invitations {
 
 export interface InvitationMembership {
     membershipType: string;
-    orgId: string;
+    orgId: number;
 }

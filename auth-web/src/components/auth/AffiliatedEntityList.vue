@@ -75,7 +75,7 @@ export default class AffiliatedEntityList extends Vue {
     return affiliatedEntities
   }
 
-  mounted () {
+  created () {
     this.getOrganizations()
   }
 
