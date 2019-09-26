@@ -6,9 +6,7 @@
     "title": "Entity",
     "additionalProperties": false,
     "required": [
-      "businessIdentifier",
-      "businessNumber",
-      "name"
+      "businessIdentifier"
     ],
     "properties": {
       "businessIdentifier": {

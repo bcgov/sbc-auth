@@ -41,20 +41,24 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action
+  public async createBusinessIfNotFound (businessNumber: string) {
+    return this.loadBusiness(businessNumber).catch(() => {
+      businessServices.createBusiness({ businessIdentifier: businessNumber })
+        .then(createResponse => {
+          if ((createResponse.status === 200 || createResponse.status === 201) && createResponse.data) {
+            this.context.commit('setCurrentBusiness', createResponse.data)
+          }
+        })
+    })
+  }
+
+  @Action
   public async loadBusiness (businessNumber: string) {
     return businessServices.getBusiness(businessNumber)
       .then(response => {
         if (response.data) {
           this.context.commit('setCurrentBusiness', response.data)
         }
-      })
-      .catch(() => {
-        businessServices.createBusiness({ businessIdentifier: businessNumber })
-          .then(createResponse => {
-            if ((createResponse.status === 200 || createResponse.status === 201) && createResponse.data) {
-              this.context.commit('setCurrentBusiness', createResponse.data)
-            }
-          })
       })
   }
 

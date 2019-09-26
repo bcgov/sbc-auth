@@ -45,6 +45,7 @@ class EntityResources(Resource):
     def post():
         """Post a new Entity using the request body."""
         request_json = request.get_json()
+
         valid_format, errors = schema_utils.validate(request_json, 'entity')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
@@ -121,7 +122,7 @@ class ContactResource(Resource):
 
         try:
             entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
-                                                               allowed_roles=CLIENT_AUTH_ROLES)
+                                                               allowed_roles=ALL_ALLOWED_ROLES)
             if entity:
                 response, status = entity.update_contact(request_json).as_dict(), \
                                    http_status.HTTP_200_OK

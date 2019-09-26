@@ -5,7 +5,7 @@ import { UserInfo } from '@/models/userInfo'
 import { User } from '@/models/user'
 import { Contact } from '@/models/contact'
 import { Organization, Members, Member } from '@/models/Organization'
-import AuthService from 'sbc-common-components/src/services/auth.services'
+import authService from '@/services/login.services'
 import ConfigHelper from '@/util/config-helper'
 import { AppConstants } from '@/util/constants'
 import OrgService from '@/services/org.services'
@@ -26,6 +26,8 @@ interface PendingUserRecord {
   invitationSent: string
   invitationExpires?: string
 }
+
+
 
 @Module({
   name: 'user',
@@ -141,7 +143,7 @@ export default class UserModule extends VuexModule {
     const loginType = ConfigHelper.getFromSession('LOGIN_TYPE')
     const authApiURL = ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API') + '/'
     if (loginType && loginType === 'passcode') {
-      AuthService.logout(sessionStorage.getItem('KEYCLOAK_REFRESH_TOKEN'), authApiURL).then(response => {
+      authService.logout().then(response => {
         if (response.status === 204) {
           ConfigHelper.clearSession()
           window.location.assign(window.location.origin + AppConstants.RootPath)

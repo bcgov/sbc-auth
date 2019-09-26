@@ -150,7 +150,7 @@ export default class PasscodeForm extends Vue {
           configHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, this.businessNumber)
 
           // attempt to load business
-          this.businessStore.loadBusiness(this.businessNumber)
+          this.businessStore.createBusinessIfNotFound(this.businessNumber)
             .then(() => {
               this.redirectToNext()
             })
