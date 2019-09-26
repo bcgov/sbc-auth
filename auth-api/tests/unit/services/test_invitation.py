@@ -16,7 +16,6 @@
 Test suite to ensure that the Invitation service routines are working as expected.
 """
 from unittest.mock import patch
-import auth_api.services.authorization as auth
 
 import auth_api.services.authorization as auth
 from auth_api.models import User as UserModel

@@ -136,7 +136,8 @@ class Affiliation:
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        entity = EntityService.find_by_business_identifier(business_identifier, token_info=token_info, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+        entity = EntityService.find_by_business_identifier(business_identifier, token_info=token_info,
+                                                           allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
