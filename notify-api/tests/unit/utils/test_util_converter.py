@@ -17,7 +17,7 @@
 Test-Suite to ensure that the camelCase/snake_case converters are working as expected.
 """
 
-from auth_api.utils.util import camelback2snake, snake2camelback
+from notify_api.utils.util import camelback2snake, snake2camelback
 
 
 def test_camel_back_to_snake_case():

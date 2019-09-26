@@ -106,11 +106,13 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     # email server
     MAIL_SERVER = os.getenv('MAIL_SERVER')
     MAIL_PORT = os.getenv('MAIL_PORT')
-    MAIL_USE_TLS = False
-    MAIL_USE_SSL = True
+    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS')
+    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL')
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_FROM_ID = os.getenv('MAIL_FROM_ID')
+
+    SENTRY_DSN = os.getenv('SENTRY_DSN')
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
@@ -137,6 +139,8 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
         port=int(DB_PORT),
         name=DB_NAME,
     ))
+
+    MAIL_SUPPRESS_SEND = True
 
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use

@@ -11,16 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Manager for invitation schema and export."""
+"""This manages a Notification Type record in the Notification service.
 
-from notify_api.models import Notification as NotificationModel
-from notify_api.schemas.camel_case_schema import CamelCaseSchema
+This is a mapping between type codes and descriptions for Notification objects.
+"""
+
+from sqlalchemy import Boolean, Column, String
+
+from .base_model import BaseModel
+from .db import db
 
 
-class NotifySchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
-    """This is the schema for the notify model."""
+class NotificationType(db.Model, BaseModel):  # pylint: disable=too-few-public-methods
+    """This is the model for a notification Type record."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the notify fields to a default schema."""
+    __tablename__ = 'notification_type'
 
-        model = NotificationModel
+    code = Column(String(15), primary_key=True, unique=True)
+    desc = Column(String(100))
+    default = Column(Boolean(), default=False, nullable=False)

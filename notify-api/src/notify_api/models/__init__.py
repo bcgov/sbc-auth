@@ -20,6 +20,9 @@ from sqlalchemy.engine import Engine
 from sbc_common_components.tracing.db_tracing import DBTracing
 
 from .db import db, ma
+from .notification import Notification
+from .notification_status import NotificationStatus
+from .notification_type import NotificationType
 
 
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)
