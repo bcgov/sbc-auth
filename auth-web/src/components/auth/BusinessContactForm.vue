@@ -81,6 +81,7 @@ import BusinessModule from '../../store/modules/business'
 import configHelper from '../../util/config-helper'
 import { mask } from 'vue-the-mask'
 import { Contact } from '../../models/contact'
+import { SessionStorageKeys } from '../../util/constants'
 
 @Component({
   directives: {
@@ -127,13 +128,15 @@ export default class BusinessContactForm extends Vue {
   }
 
   mounted () {
-    if (this.businessStore.currentBusiness.contacts && this.businessStore.currentBusiness.contacts.length > 0) {
+    this.businessStore.loadBusiness(configHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)).then(() => {
+      if (this.businessStore.currentBusiness.contacts && this.businessStore.currentBusiness.contacts.length > 0) {
       // TODO: For now grab first contact as the business contact.  Post MVP, we should check the contact type, grab the correct one.
-      const contact = this.businessStore.currentBusiness.contacts[0]
-      this.emailAddress = this.confirmedEmailAddress = contact.email
-      this.phoneNumber = contact.phone
-      this.extension = contact.phoneExtension
-    }
+        const contact = this.businessStore.currentBusiness.contacts[0]
+        this.emailAddress = this.confirmedEmailAddress = contact.email
+        this.phoneNumber = contact.phone
+        this.extension = contact.phoneExtension
+      }
+    })
   }
 
   save () {
