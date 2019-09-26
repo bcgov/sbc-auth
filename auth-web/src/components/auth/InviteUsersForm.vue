@@ -1,12 +1,10 @@
 <template>
   <v-card>
     <v-card-title class="d-flex">
-        Invite Team Members
-        
-        <v-btn large icon>
-          <v-icon @click="cancel()">close</v-icon>
-        </v-btn>
-        
+      Invite Team Members
+      <v-btn large icon>
+        <v-icon @click="cancel()">close</v-icon>
+      </v-btn>     
     </v-card-title>
     <v-card-text>
       <p>Enter email addresses to invite team members. Team members will be required to sign in with their <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank">BC Services Card</a>.</p>

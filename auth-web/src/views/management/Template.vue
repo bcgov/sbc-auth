@@ -1,10 +1,10 @@
 <template>
-  <div class="d-flex mt-5 ml-5">
+  <v-container class="view-container">
     <ManagementMenu :menu="menu" />
-    <div class="content ml-5">
+    <article class="view-container__content">
       <component :is="selectedComponent" />
-    </div>
-  </div>
+    </article>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -39,7 +39,7 @@ export default class Dashboard extends Vue {
   ]
 
   mounted () {
-    this.setSelectedComponent(EntityManagement)
+    this.setSelectedComponent(UserManagement)
   }
 
   setSelectedComponent (selectedComponent: VueConstructor) {
@@ -48,9 +48,22 @@ export default class Dashboard extends Vue {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+  .view-container {
+    display: flex;
+    flex-direction: row;
+  }
 
-.content {
-  width: 80%
-}
+  .view-container__content {
+    flex: 1 1 auto;
+  }
+
+  article {
+    margin-left: 1.5rem;
+    padding: 0;
+  }
+
+  aside {
+    margin: 0;
+  }
 </style>

@@ -1,17 +1,16 @@
 <template>
-  <v-navigation-drawer
-    value="true"
-    mobile-break-point="960"
-    class="ml-5"
-    :mini-variant="mini()"
-  >
-    <v-list>
-      <v-list-item
+  <v-navigation-drawer width="216">
+    <v-list dense nav>
+      <v-list-item small color="primary"
         v-for="(item, i) in menu"
         :key="i"
         @click="item.activate()">
-        <v-icon>{{ item.icon }}</v-icon>&nbsp;&nbsp;
-        <v-list-item-title v-text="item.title"></v-list-item-title>
+        <v-list-item-icon>
+          <v-icon>{{ item.icon }}</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title v-text="item.title"></v-list-item-title>
+        </v-list-item-content>
       </v-list-item>
     </v-list>
   </v-navigation-drawer>
@@ -42,5 +41,13 @@ export default class ManagementMenu extends Vue {
 <style lang="scss">
   .v-navigation-drawer {
     background-color : transparent !important;
+  }
+
+  .v-navigation-drawer__border {
+    display: none;
+  }
+
+  .v-list--nav {
+    padding: 0;
   }
 </style>
