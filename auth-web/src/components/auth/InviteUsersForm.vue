@@ -104,7 +104,7 @@ export default class InviteUsersForm extends Vue {
       for (let i = 0; i < this.inviteEmails.length; i++) {
         const email = this.inviteEmails[i]
         if (email) {
-          this.createInvitation({
+          await this.createInvitation({
             recipientEmail: email,
             sentDate: new Date(),
             membership: this.organizations

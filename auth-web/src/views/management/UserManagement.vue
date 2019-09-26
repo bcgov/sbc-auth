@@ -23,6 +23,11 @@
                 :items-per-page="5"
                 class="elevation-1"
               >
+              <template v-slot:item.action="{ item }">
+                <v-btn outlined @click="removeMember(item)">
+                  Remove
+                </v-btn>
+              </template>
           </v-data-table>
         </v-tab-item>
         <v-tab-item>
@@ -32,6 +37,14 @@
                 :items-per-page="5"
                 class="elevation-1"
               >
+              <template v-slot:item.action="{ item }">
+                <v-btn outlined class="mr-2" @click="resend(item)">
+                  Resend
+                </v-btn>
+                <v-btn outlined @click="removeInvite(item)">
+                  Remove
+                </v-btn>
+              </template>
           </v-data-table>
         </v-tab-item>
       </v-tabs-items>
@@ -63,24 +76,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
 import { mapState, mapGetters, mapActions } from 'vuex'
 import { Organization, Member } from '@/models/Organization'
 import { Invitation } from '@/models/Invitation'
-import moment from 'moment'
-
-interface ActiveUserRecord {
-  name: string
-  role: string
-  lastActive: string
-}
-
-interface PendingUserRecord {
-  email: string
-  invitationSent: string
-  invitationExpires?: string
-}
+import OrgModule from '@/store/modules/org'
+import UserModule from '@/store/modules/user'
+import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
@@ -89,13 +92,16 @@ interface PendingUserRecord {
   computed: {
     ...mapState('org', ['currentOrg', 'resending', 'sentInvitations']),
     ...mapState('user', ['activeBasicMembers', 'pendingBasicMembers']),
-    ...mapGetters('user', ['organizations'])
+    ...mapGetters('user', ['organizations', 'activeUserListing', 'pendingUserListing'])
   },
   methods: {
-    ...mapActions('user', ['getOrganizations', 'getActiveBasicMembers', 'getPendingBasicMembers'])
+    ...mapActions('user', ['getOrganizations', 'getActiveBasicMembers', 'getPendingBasicMembers']),
+    ...mapActions('org', ['resendInvitation', 'deleteInvitation'])
   }
 })
 export default class UserManagement extends Vue {
+  userStore = getModule(UserModule, this.$store)
+  orgStore = getModule(OrgModule, this.$store)
   tab = null
   isInviteUsersModalVisible = false
   isInviteSuccessModalVisible = false
@@ -110,13 +116,18 @@ export default class UserManagement extends Vue {
   readonly getOrganizations!: () => Organization[]
   readonly getActiveBasicMembers!: () => Member[]
   readonly getPendingBasicMembers!: () => Invitation[]
+  readonly resendInvitation!: (Invitation) => void
+  readonly deleteInvitation!: (Invitation) => void
+  readonly activeUserListing!: any
+  readonly pendingUserListing!: any
 
   headersActive = [
     {
       text: 'User',
       align: 'left',
       sortable: true,
-      value: 'name'
+      value: 'name',
+      width: '25%'
     },
     {
       text: 'Roles',
@@ -129,6 +140,11 @@ export default class UserManagement extends Vue {
       align: 'left',
       sortable: true,
       value: 'lastActive'
+    },
+    {
+      text: '',
+      value: 'action',
+      sortable: false
     }
   ]
 
@@ -137,7 +153,8 @@ export default class UserManagement extends Vue {
       text: 'User',
       align: 'left',
       sortable: true,
-      value: 'email'
+      value: 'email',
+      width: '25%'
     },
     {
       text: 'Invitation Sent',
@@ -150,27 +167,13 @@ export default class UserManagement extends Vue {
       align: 'left',
       sortable: true,
       value: 'invitationExpires'
+    },
+    {
+      text: '',
+      value: 'action',
+      sortable: false
     }
   ]
-
-  get activeUserListing (): ActiveUserRecord[] {
-    return this.activeBasicMembers.map(member => {
-      return {
-        name: `${member.user.firstname} ${member.user.lastname}`,
-        role: member.membershipTypeCode,
-        lastActive: moment(member.user.modified).format('l')
-      }
-    })
-  }
-
-  get pendingUserListing (): PendingUserRecord[] {
-    return this.pendingBasicMembers.map(invitation => {
-      return {
-        email: invitation.recipientEmail,
-        invitationSent: moment(invitation.sentDate).format('lll')
-      }
-    })
-  }
 
   mounted () {
     this.getOrganizations()
@@ -195,6 +198,22 @@ export default class UserManagement extends Vue {
   okCloseModal () {
     this.isInviteSuccessModalVisible = false
     this.isInviteErrorModalVisible = false
+  }
+
+  async resend (pendingUser: any) {
+    const invitationToResend = this.pendingBasicMembers.find(invitation => invitation.id === pendingUser.invitationId)
+    if (invitationToResend) {
+      await this.resendInvitation(invitationToResend)
+      this.getPendingBasicMembers()
+    }
+  }
+
+  async removeInvite (pendingUser: any) {
+    const invitationToDelete = this.pendingBasicMembers.find(invitation => invitation.id === pendingUser.invitationId)
+    if (invitationToDelete) {
+      await this.deleteInvitation(invitationToDelete)
+      this.getPendingBasicMembers()
+    }
   }
 }
 </script>

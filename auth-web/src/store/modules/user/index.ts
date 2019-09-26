@@ -11,6 +11,21 @@ import { AppConstants } from '@/util/constants'
 import OrgService from '@/services/org.services'
 import _ from 'lodash'
 import { Invitation } from '@/models/Invitation'
+import moment from 'moment'
+
+interface ActiveUserRecord {
+  username: string
+  name: string
+  role: string
+  lastActive: string
+}
+
+interface PendingUserRecord {
+  invitationId: number
+  email: string
+  invitationSent: string
+  invitationExpires?: string
+}
 
 @Module({
   name: 'user',
@@ -20,9 +35,31 @@ export default class UserModule extends VuexModule {
   currentUser: UserInfo
   userProfile: User
   userContact: Contact
-  organizations: Organization[]
-  activeBasicMembers: Member[]
-  pendingBasicMembers: Invitation[]
+  organizations: Organization[] = []
+  activeBasicMembers: Member[] = []
+  pendingBasicMembers: Invitation[] = []
+
+  get activeUserListing (): ActiveUserRecord[] {
+    return this.activeBasicMembers.map(member => {
+      return {
+        username: member.user.username,
+        name: `${member.user.firstname} ${member.user.lastname}`,
+        role: member.membershipTypeCode,
+        lastActive: moment(member.user.modified).format('DD MMM, YYYY')
+      }
+    })
+  }
+
+  get pendingUserListing (): PendingUserRecord[] {
+    return this.pendingBasicMembers.map(invitation => {
+      return {
+        invitationId: invitation.id,
+        email: invitation.recipientEmail,
+        invitationSent: moment(invitation.sentDate).format('DD MMM, YYYY'),
+        invitationExpires: moment(invitation.expiresOn).format('DD MMM, YYYY')
+      }
+    })
+  }
 
   @Mutation
   public setOrganizations (organizations: Organization[]) {
