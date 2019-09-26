@@ -17,6 +17,7 @@ from flask_mail import Message
 
 from auth_api.extensions import mail
 
+
 def send_email(subject, sender, recipients, html_body):
     """Send the email asynchronously, using the given details."""
     msg = Message(subject, sender=sender, recipients=recipients.split())

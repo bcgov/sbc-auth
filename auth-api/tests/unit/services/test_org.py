@@ -16,6 +16,8 @@
 Test suite to ensure that the Org service routines are working as expected.
 """
 
+from unittest.mock import patch
+
 import pytest
 
 from auth_api.exceptions import BusinessException
@@ -195,26 +197,27 @@ def test_get_members(session):  # pylint:disable=unused-argument
 
 def test_get_invitations(session):  # pylint:disable=unused-argument
     """Assert that invitations for an org can be retrieved."""
-    user = factory_user_model(username='testuser',
-                              firstname='Test',
-                              lastname='User',
-                              roles='{edit,uma_authorization,basic}',
-                              keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
-    org = OrgService.create_org(TEST_ORG_INFO, user.id)
+    with patch.object(InvitationService, 'send_invitation', return_value=None):
+        user = factory_user_model(username='testuser',
+                                  firstname='Test',
+                                  lastname='User',
+                                  roles='{edit,uma_authorization,basic}',
+                                  keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
+        org = OrgService.create_org(TEST_ORG_INFO, user.id)
 
-    invitation_info = {
-        'recipientEmail': 'abc.test@gmail.com',
-        'membership': [
-            {
-                'membershipType': 'MEMBER',
-                'orgId':   org.as_dict()['id']
-            }
-        ]
-    }
+        invitation_info = {
+            'recipientEmail': 'abc.test@gmail.com',
+            'membership': [
+                {
+                    'membershipType': 'MEMBER',
+                    'orgId':   org.as_dict()['id']
+                }
+            ]
+        }
 
-    invitation = InvitationService.create_invitation(invitation_info, UserService(user))
+        invitation = InvitationService.create_invitation(invitation_info, UserService(user))
 
-    response = org.get_invitations()
-    assert response
-    assert len(response['invitations']) == 1
-    assert response['invitations'][0]['recipientEmail'] == invitation.as_dict()['recipientEmail']
+        response = org.get_invitations()
+        assert response
+        assert len(response['invitations']) == 1
+        assert response['invitations'][0]['recipientEmail'] == invitation.as_dict()['recipientEmail']
