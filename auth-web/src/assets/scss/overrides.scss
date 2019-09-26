@@ -15,7 +15,7 @@
     margin-left: -0.5rem;
   }
 
-  .v-icon {
+  .v-icon:first-child {
     margin-right: 0.25rem;
     margin-left: -0.5rem;
   }
@@ -24,7 +24,6 @@
     margin: 0;
   }
 }
-
 
 // Updating sizing 
 .v-btn.v-size--small {
@@ -45,9 +44,9 @@
 }
 
 // v-card
-// We don't want a 50% opacity on our v-card__text by default
-.theme--light.v-card > .v-card__text {
-  //color: rgba($gray9, 0.5);
+// Add space between elements in case we use a close button
+.v-card__title {
+  justify-content: space-between;
 }
 
 // Increase the default font-size the default size of v-card__text
@@ -75,4 +74,24 @@ input:-webkit-autofill:active {
 // Adjust size and position of input label
 [class^="v-text-field"] .v-label--active {
   transform: translateY(-8px) scale(0.75);
+}
+
+// Tab Navigation
+.v-tab {
+  text-transform: none;
+  font-size: 1rem;
+}
+
+// Tables
+.v-data-table table {
+  border-collapse: collapse;
+}
+
+.v-data-table th {
+  font-weight: 400;
+}
+
+// Aside Navigation
+.v-application--is-ltr .v-list-item__icon:first-child {
+  margin-right: 1rem;
 }

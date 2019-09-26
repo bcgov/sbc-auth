@@ -1,11 +1,14 @@
 <template>
-  <div>
-    <div class="header">
-      <h2>Manage Businesses</h2>
-      <v-btn class="add-business-btn" color="primary" @click="showAddBusinessModal()">
-        Add Business
-      </v-btn>
-    </div>
+  <div class="entity-mgmt-view">
+    <header class="view-header mt-1 mb-9">
+      <h1>Manage Businesses</h1>
+      <div class="view-header__actions">
+        <v-btn outlined color="primary" @click="showAddBusinessModal()">
+          <v-icon>add</v-icon>
+          <span>Add Business</span>
+        </v-btn>
+      </div>
+    </header>
 
     <AffiliatedEntityList
       @add-business="showAddBusinessModal()"
@@ -13,14 +16,20 @@
     />
 
     <!-- Add Business Modal -->
-    <v-dialog v-model="isBusinessModalVisible" persistent max-width="400px">
+    <v-dialog content-class="add-business-dialog" v-model="isBusinessModalVisible" persistent>
       <v-card>
-        <v-card-title>
-          <h2>Add Business</h2>
-          <p>Please enter your incorporation number and passcode below.</p>
+        <v-card-title class="d-flex">
+          Add Business
+          <!-- TODO: We need to standardize how we are leveraging dialogs (See InviteUsersform.vue) -->
+          <!--
+          <v-btn large icon>
+            <v-icon @click="cancel()">close</v-icon>
+          </v-btn>
+          -->
         </v-card-title>
         <v-card-text>
-          <AddBusinessForm
+          <p>Enter your Incorporation Number and Passcode.</p>
+          <AddBusinessForm class="mt-7"
             @add-success="showAddSuccessModal()"
             @add-failed-invalid-code="showInvalidCodeModal()"
             @cancel="cancelModal()"
@@ -31,18 +40,35 @@
     </v-dialog>
 
     <!-- Success/Fail Model -->
-    <v-dialog v-model="isResultDialogVisible" persistent max-width="400px">
-      <v-card>
-        <v-card-title>
-          <h2 v-show="addSuccess">Success</h2>
-          <h2 v-show="!addSuccess">Invalid Passcode</h2>
+    <v-dialog content-class="notify-dialog text-center" v-model="isResultDialogVisible" persistent>
+      
+      <!-- Success -->
+      <v-card v-show="addSuccess">
+        <v-card-title class="pb-2">
+          <v-icon x-large color="success" class="mt-3">check</v-icon>
+          <span class="mt-5">Success</span> 
         </v-card-title>
-        <v-card-text v-show="addSuccess">You have successfully added a business</v-card-text>
-        <v-card-text v-show="!addSuccess">The business was unable to be added due to the provided passcode being invalid or already in use</v-card-text>
-        <v-card-actions>
-          <v-flex class="text-xs-right">
-            <v-btn color="primary" @click="isResultDialogVisible = false">Okay</v-btn>
+        <v-card-text>
+          You have successfully added a business.
+        </v-card-text>
+        <v-card-actions class="pb-8">
+          <v-flex>
+            <v-btn color="primary" @click="isResultDialogVisible = false">OK</v-btn>
           </v-flex>
+        </v-card-actions>
+      </v-card>
+
+      <!-- Fail -->
+      <v-card v-show="!addSuccess">
+        <v-card-title class="pb-2">
+          <v-icon x-large color="error" class="mt-3">error</v-icon>
+          <span class="mt-5">Invalid Passcode</span> 
+        </v-card-title>
+        <v-card-text>
+          <p class="mt-5">Unable to add the business. The provided Passcode is invalid or already in use.</p>
+        </v-card-text>
+        <v-card-actions class="pb-8">
+          <v-btn large color="error" @click="isResultDialogVisible = false">OK</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -123,16 +149,23 @@ export default class EntityManagement extends Vue {
 </script>
 
 <style lang="scss">
-  .header {
-    display: flex;
-    justify-content: space-between
+  @import '../../assets/scss/theme.scss';
+
+  .add-business-dialog {
+    max-width: 40rem;
+    width: 40rem;
   }
 
-  .add-business-btn {
-    margin-right: 1.5em
-  }
+  // Notification Dialog (Success/Error)
+  .notify-dialog {
+    max-width: 30rem;
 
-  .okay-button {
-    margin-left: auto
+    .v-card__title {
+      flex-direction: column;
+    }
+
+    .v-card__actions {
+      justify-content: center;
+    }
   }
 </style>
