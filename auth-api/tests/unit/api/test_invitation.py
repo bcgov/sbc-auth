@@ -142,7 +142,7 @@ def test_get_invitations_by_valid_status(client, jwt, session):  # pylint:disabl
     assert len(invitation_dict['invitations']) == 1
 
 
-def test_get_invitations_by_valid_status(client, jwt, session):  # pylint:disable=unused-argument
+def test_get_invitations_by_invalid_status(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an invitation by a user can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -240,15 +240,12 @@ def test_update_invitation(client, jwt, session):  # pylint:disable=unused-argum
                      headers=headers, content_type='application/json')
     invitation_dictionary = json.loads(rv.data)
     invitation_id = invitation_dictionary['id']
-    updated_invitation = {
-        'status': 'ACCEPTED',
-        'acceptedDate': '2019-09-11T00:00:00+00:00'
-    }
-    rv = client.put('/api/v1/invitations/{}'.format(invitation_id),
-                    data=json.dumps(updated_invitation), headers=headers, content_type='application/json')
+    updated_invitation = {}
+    rv = client.patch('/api/v1/invitations/{}'.format(invitation_id), data=json.dumps(updated_invitation),
+                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     dictionary = json.loads(rv.data)
-    assert dictionary['status'] == updated_invitation['status']
+    assert dictionary['status'] == 'PENDING'
 
 
 def test_validate_token(client, jwt, session):  # pylint:disable=unused-argument
@@ -273,8 +270,8 @@ def test_validate_token(client, jwt, session):  # pylint:disable=unused-argument
     invitation_dictionary = json.loads(rv.data)
     invitation_id = invitation_dictionary['id']
     invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
-    rv = client.get('/api/v1/invitations/tokens/{}'.format(invitation_id_token),
-                     headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/invitations/tokens/{}'.format(invitation_id_token), headers=headers,
+                    content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
 
 
