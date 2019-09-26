@@ -142,6 +142,8 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
 
     MAIL_SUPPRESS_SEND = True
 
+    SENTRY_DSN = None
+
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use
     JWT_OIDC_TEST_MODE = True
