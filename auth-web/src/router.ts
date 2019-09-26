@@ -12,6 +12,8 @@ import Template from './views/management/Template.vue'
 import UserProfile from './views/UserProfile.vue'
 import Signout from './components/auth/Signout.vue'
 import SearchBusinessForm from './components/auth/SearchBusinessForm.vue'
+import TokenValidator from './views/TokenValidator.vue'
+import AcceptInvite from './views/AcceptInvite.vue'
 
 Vue.use(Router)
 
@@ -34,7 +36,9 @@ export function getRoutes (appFlavor:String) {
       { path: '/home', component: AuthHome },
       { path: '/main', component: Template, meta: { requiresAuth: true } },
       { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
-      { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } }
+      { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
+      { path: '/validatetoken/:token', component: TokenValidator, props: true, meta: { requiresAuth: false } },
+      { path: '/confirmtoken/:token', component: AcceptInvite, props: true, meta: { requiresAuth: true } }
     ]
   }
 
