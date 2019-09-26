@@ -84,6 +84,20 @@ def factory_auth_header(jwt, claims):
     return {'Authorization': 'Bearer ' + jwt.create_jwt(claims=claims, header=TEST_JWT_HEADER)}
 
 
+def factory_invite(org_id, email):
+    """Produce an invite for the given org and email."""
+    return {
+        'recipientEmail': email,
+        'sentDate': '2019-09-09',
+        'membership': [
+            {
+                'membershipType': 'MEMBER',
+                'orgId': org_id
+            }
+        ]
+    }
+
+
 def test_add_org(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
@@ -271,3 +285,29 @@ def test_get_members(client, jwt, session):  # pylint:disable=unused-argument
     assert dictionary['members']
     assert len(dictionary['members']) == 1
     assert dictionary['members'][0]['membershipTypeCode'] == 'OWNER'
+
+
+def test_get_invitations(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a list of invitations for an org can be retrieved."""
+    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invite(org_id, 'abc123@email.com')),
+                     headers=headers, content_type='application/json')
+
+    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invite(org_id, 'xyz456@email.com')),
+                     headers=headers, content_type='application/json')
+
+    rv = client.get('/api/v1/orgs/{}/invitations'.format(org_id),
+                    headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['invitations']
+    assert len(dictionary['invitations']) == 2
+    assert dictionary['invitations'][0]['recipientEmail'] == 'abc123@email.com'
+    assert dictionary['invitations'][1]['recipientEmail'] == 'xyz456@email.com'

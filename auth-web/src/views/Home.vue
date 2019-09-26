@@ -33,9 +33,34 @@ export default ({
 </script>
 
 <style lang="scss" scoped>
-
   .sign-in-card .container {
     padding: 1.5rem;
+  }
+
+  article {
+    flex: 1 1 auto;
+  }
+
+  aside {
+    flex: 0 0 auto;
+    margin-top: 2rem;
+  }
+
+  @media (min-width: 960px) {
+    article {
+      padding-top: 0.8rem;
+      padding-bottom: 0.8rem;
+    }
+
+    aside {
+      margin-top: 0;
+      margin-left: 2rem;
+      width: 20rem;
+    }
+
+    .view-container {
+      flex-flow: row nowrap;
+    }
   }
 
   @media (min-width: 960px) {

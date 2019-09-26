@@ -1,13 +1,14 @@
 <template>
-  <div>
-    <div class="empty-business-panel" v-if="affiliatedEntities.length === 0">
-      <v-card>
-        <v-card-text>
-          <p class="business-list-empty-message">{{ $t('businessListEmptyMessage')}}</p>
-          <p><a @click="addBusiness()">{{ $t('businessListActionMessage')}}</a></p>
-        </v-card-text>
-      </v-card>
-    </div>
+  <div class="entity-list-component">
+    
+    <!-- No Results Message -->
+    <v-card class="no-results" v-if="affiliatedEntities.length === 0" @click="addBusiness()">
+      <v-card-title class="pt-4 pb-1">{{ $t('businessListEmptyMessage')}}</v-card-title>
+      <v-card-text class="pb-4 text-center">
+        {{ $t('businessListActionMessage')}}
+      </v-card-text>
+    </v-card>
+
     <ul class="org-details" v-if="affiliatedEntities.length > 0">
       <li
         class="list-item"
@@ -47,19 +48,25 @@ import { getModule } from 'vuex-module-decorators'
 import UserModule from '../../store/modules/user'
 import configHelper from '../../util/config-helper'
 import { AffiliatedEntity, Organization, RemoveBusinessPayload } from '../../models/Organization'
+import { mapGetters, mapState, mapActions } from 'vuex'
 
-@Component
+@Component({
+  computed: {
+    ...mapState('user', ['organizations'])
+  },
+  methods: {
+    ...mapActions('user', ['getOrganizations'])
+  }
+})
 export default class AffiliatedEntityList extends Vue {
   private VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   private userStore = getModule(UserModule, this.$store)
-
-  get organizations () {
-    return this.userStore.organizations
-  }
+  readonly organizations!: Organization[]
+  readonly getOrganizations!: () => Organization[]
 
   get affiliatedEntities () {
     let affiliatedEntities: AffiliatedEntity[] = []
-    this.userStore.organizations.forEach(organization => {
+    this.organizations.forEach(organization => {
       if (organization.affiliatedEntities) {
         organization.affiliatedEntities.forEach(entity => {
           affiliatedEntities.push(entity)
@@ -69,8 +76,8 @@ export default class AffiliatedEntityList extends Vue {
     return affiliatedEntities
   }
 
-  mounted () {
-    this.userStore.getOrganizations()
+  created () {
+    this.getOrganizations()
   }
 
   @Emit()
@@ -169,7 +176,26 @@ dd {
   }
 }
 
-.empty-business-panel {
-  margin-right: 1.5rem;
+// No Results
+// TODO: Move somewhere we can access globally
+.no-results .v-card__title {
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.no-results .v-card__text {
+  text-align: center;
+}
+.no-results__title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.no-results__subtitle {
+  margin-top: 0.25rem;
+  color: $gray6;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 </style>

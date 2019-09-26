@@ -66,7 +66,7 @@ def test_add_invitation(client, jwt, session):  # pylint:disable=unused-argument
         'membership': [
             {
                 'membershipType': 'MEMBER',
-                'orgId': str(org_id)
+                'orgId': org_id
             }
         ]
     }
@@ -103,7 +103,7 @@ def test_get_invitations_by_user(client, jwt, session):  # pylint:disable=unused
         'membership': [
             {
                 'membershipType': 'MEMBER',
-                'orgId': str(org_id)
+                'orgId': org_id
             }
         ]
     }
@@ -129,7 +129,7 @@ def test_get_invitations_by_valid_status(client, jwt, session):  # pylint:disabl
         'membership': [
             {
                 'membershipType': 'MEMBER',
-                'orgId': str(org_id)
+                'orgId': org_id
             }
         ]
     }
@@ -155,7 +155,7 @@ def test_get_invitations_by_invalid_status(client, jwt, session):  # pylint:disa
         'membership': [
             {
                 'membershipType': 'MEMBER',
-                'orgId': str(org_id)
+                'orgId': org_id
             }
         ]
     }
@@ -178,7 +178,7 @@ def test_get_invitations_by_id(client, jwt, session):  # pylint:disable=unused-a
         'membership': [
             {
                 'membershipType': 'MEMBER',
-                'orgId': str(org_id)
+                'orgId': org_id
             }
         ]
     }
@@ -203,7 +203,7 @@ def test_delete_invitation(client, jwt, session):  # pylint:disable=unused-argum
         'membership': [
             {
                 'membershipType': 'MEMBER',
-                'orgId': str(org_id)
+                'orgId': org_id
             }
         ]
     }
@@ -232,7 +232,7 @@ def test_update_invitation(client, jwt, session):  # pylint:disable=unused-argum
         'membership': [
             {
                 'membershipType': 'MEMBER',
-                'orgId': str(org_id)
+                'orgId': org_id
             }
         ]
     }
@@ -261,7 +261,7 @@ def test_validate_token(client, jwt, session):  # pylint:disable=unused-argument
         'membership': [
             {
                 'membershipType': 'MEMBER',
-                'orgId': str(org_id)
+                'orgId': org_id
             }
         ]
     }
@@ -288,7 +288,7 @@ def test_accept_invitation(client, jwt, session):  # pylint:disable=unused-argum
         'membership': [
             {
                 'membershipType': 'MEMBER',
-                'orgId': str(org_id)
+                'orgId': org_id
             }
         ]
     }

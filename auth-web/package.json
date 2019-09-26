@@ -16,7 +16,9 @@
     "axios": "^0.18.0",
     "core-js": "^3.1.4",
     "keycloak-js": "^6.0.0",
+    "lodash": "^4.17.15",
     "material-icons": "^0.3.1",
+    "moment": "^2.24.0",
     "regenerator-runtime": "^0.13.3",
     "register-service-worker": "^1.6.2",
     "sbc-common-components": "^2.0.1",
@@ -27,12 +29,12 @@
     "vue-the-mask": "^0.11.1",
     "vuetify": "^2.0.11",
     "vuex": "^3.0.1",
-    "vuex-module-decorators": "^0.10.1",
     "vuex-persist": "^2.0.1"
   },
   "devDependencies": {
     "@kazupon/vue-i18n-loader": "^0.3.0",
     "@types/jest": "^23.1.4",
+    "@types/lodash": "^4.14.138",
     "@vue/cli-plugin-babel": "^3.5.0",
     "@vue/cli-plugin-e2e-nightwatch": "^3.5.0",
     "@vue/cli-plugin-eslint": "^3.5.0",
@@ -51,10 +53,13 @@
     "sass": "^1.22.10",
     "sass-loader": "^7.3.1",
     "sinon": "^6.3.5",
+    "stylus": "^0.54.7",
+    "stylus-loader": "^3.0.2",
     "ts-jest": "^23.0.0",
     "typescript": "^3.2.1",
     "vue-class-component": "^7.1.0",
     "vue-cli-plugin-vuetify": "^0.5.0",
-    "vue-template-compiler": "^2.5.21"
+    "vue-template-compiler": "^2.5.21",
+    "vuex-module-decorators": "^0.10.1"
   }
 }

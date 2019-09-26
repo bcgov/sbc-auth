@@ -90,6 +90,11 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         """Find an invitation record that matches the id."""
         return cls.query.filter_by(id=invitation_id).first()
 
+    @classmethod
+    def find_invitations_by_org(cls, org_id):
+        """Find all invitations sent for specific org."""
+        return cls.query.filter(Invitation.membership.any(InvitationMembership.org_id == org_id)).all()
+
     @staticmethod
     def find_pending_invitations_by_user(user_id):
         """Find all invitations that are not in accepted state."""

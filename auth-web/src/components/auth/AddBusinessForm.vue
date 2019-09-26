@@ -36,12 +36,12 @@
           v-model="passcode"
         ></v-text-field>
       </div>
-      <div class="passcode-form__row passcode-form__form-btns">
-        <v-btn class="cancel-btn" @click="cancel" color="secondary" large>
-          <span>Cancel</span>
-        </v-btn>
-        <v-btn class="sign-in-btn" @click="addBusiness" color="primary" large>
+      <div class="form__btns mt-8">
+        <v-btn depressed large color="primary" @click="addBusiness">
           <span>Add Business</span>
+        </v-btn>
+        <v-btn depressed large color="default" class="ml-2" @click="cancel">
+          <span>Cancel</span>
         </v-btn>
       </div>
     </v-form>
@@ -119,106 +119,10 @@ export default class AddBusinessForm extends Vue {
 
 <style lang="scss" scoped>
 @import '../../assets/scss/theme.scss';
-
-.passcode-form__row{
-  margin-top: 1rem;
-  justify-content: space-between;
-}
-
-.passcode-form__form-btns{
-  margin-top: 2rem;
-  display: flex;
-}
-
-.v-btn{
-  margin: 0;
-}
-
-.v-btn.recovery-btn{
-  margin-right: auto;
-  padding-right: 0.7rem;
-  padding-left: 0.7rem;
-  text-decoration: underline;
-  font-size: 1rem;
-}
-
-.v-btn.sign-in-btn{
-  font-weight: 700;
-}
-
-.v-input{
-  max-width: 25rem;
-}
-
-.passcode-form__alert-container{
-  margin-bottom: 2rem;
-}
-
-.v-alert{
-  margin: 0;
-}
-
-@media (max-width: 600px){
-  .passcode-form__form-btns{
-    flex-flow: column nowrap
+  
+  .form__btns {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
   }
-
-  .v-btn.recovery-btn{
-    order: 1;
-    margin-top: 0.5rem;
-    margin-left: auto;
-  }
-
-  .v-btn.sign-in-btn{
-    width: 100%
-  }
-}
-
-@media (min-width: 960px){
-  .v-btn.recovery-btn{
-    font-size: 0.875rem
-  }
-}
-
-// Contact List
-.contact-list{
-  margin-top: 1.5rem;
-  padding: 0;
-  font-weight: 500;
-  list-style-type: none;
-}
-
-.contact-list__row{
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.contact-list__row .v-icon {
-    vertical-align: middle;
-    margin-top: -0.2rem;
-    margin-right: 1.25rem;
-}
-
-.contact-list__row + .contact-list__row{
-  margin-top: 0.5rem
-}
-
-// Passcode Dialog
-.v-dialog{
-  margin: 2rem
-}
-
-.v-card__title{
-  padding: 1.25rem 1.5rem;
-  color: $BCgovFontColorInverted;
-  background: $BCgovBlue5;
-  font-size: 1.5em;
-  font-weight: 400;
-}
-
-.v-card__text{
-  padding: 1.5rem;
-  font-weight: 300;
-}
 </style>

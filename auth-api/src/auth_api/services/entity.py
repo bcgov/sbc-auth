@@ -65,7 +65,7 @@ class Entity:
 
     @classmethod
     def find_by_business_identifier(cls, business_identifier: str = None, token_info: Dict = None,
-                                    allowed_roles: Tuple = None):
+                                    allowed_roles: Tuple = None, skip_auth: bool = False):
         """Given a business identifier, this will return the corresponding entity or None."""
         if not business_identifier:
             return None
@@ -74,7 +74,8 @@ class Entity:
         if not entity_model:
             return None
 
-        auth.check_auth(token_info, one_of_roles=allowed_roles, business_identifier=business_identifier)
+        if not skip_auth:
+            auth.check_auth(token_info, one_of_roles=allowed_roles, business_identifier=business_identifier)
 
         entity = Entity(entity_model)
         return entity

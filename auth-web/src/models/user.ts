@@ -4,7 +4,8 @@ export interface User {
     firstname: string;
     lastname: string;
     username: string;
-    contacts: Contact[]
+    contacts?: Contact[];
+    modified?: Date
 }
 
 export interface SuccessEmitPayload {

@@ -17,6 +17,7 @@ Test suite to ensure that the  model routines are working as expected.
 """
 
 from _datetime import datetime
+
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationMembership as InvitationMembershipModel
 from auth_api.models import Org as OrgModel
@@ -106,6 +107,19 @@ def test_update_invitation_as_retried(session):  # pylint:disable=unused-argumen
     session.commit()
     invitation.update_invitation_as_retried()
     assert invitation
+    assert invitation.invitation_status_code == 'PENDING'
+
+
+def test_find_invitations_by_org(session):  # pylint:disable=unused-argument
+    """Assert that Invitations for a specified org can be retrieved."""
+    invitation = factory_invitation_model(session=session, status='PENDING')
+    session.add(invitation)
+    session.commit()
+
+    found_invitations = InvitationModel.find_invitations_by_org(invitation.membership[0].org_id)
+    assert found_invitations
+    assert len(found_invitations) == 1
+    assert found_invitations[0].membership[0].org_id == invitation.membership[0].org_id
     assert invitation.invitation_status_code == 'PENDING'
 
 

@@ -13,9 +13,10 @@
 # limitations under the License.
 """Service for managing Invitation data."""
 
-
 from datetime import datetime
+from threading import Thread
 
+from flask import copy_current_request_context
 from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing
@@ -27,7 +28,7 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.schemas import InvitationSchema
 from config import get_named_config
 
-from .notification import Notification
+from .notification import send_email
 
 
 ENV = Environment(loader=FileSystemLoader('.'))
@@ -88,6 +89,15 @@ class Invitation:
         return collection
 
     @staticmethod
+    def get_invitations_by_org_id(org_id):
+        """Get invitations for an org."""
+        collection = []
+        invitations = InvitationModel.find_invitations_by_org(org_id)
+        for invitation in invitations:
+            collection.append(Invitation(invitation).as_dict())
+        return collection
+
+    @staticmethod
     def find_invitation_by_id(invitation_id):
         """Find an existing invitation with the provided id."""
         if invitation_id is None:
@@ -110,8 +120,13 @@ class Invitation:
         token_confirm_url = '{}/validatetoken/{}'.format(CONFIG.AUTH_WEB_TOKEN_CONFIRM_URL, confirmation_token)
         template = ENV.get_template('email_templates/business_invitation_email.html')
         try:
-            Notification.send_email(subject, sender, recipient, template.render(invitation=invitation,
-                                                                                url=token_confirm_url, user=user))
+            @copy_current_request_context
+            def run_job():
+                send_email(subject, sender, recipient,
+                           template.render(invitation=invitation, url=token_confirm_url, user=user))
+            thread = Thread(target=run_job)
+            thread.start()
+
         except:  # noqa: E722
             invitation.invitation_status_code = 'FAILED'
             invitation.save()
