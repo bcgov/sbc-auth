@@ -13,17 +13,19 @@
       <v-form ref="form" class="mt-8">
         <ul class="invite-list">
           <transition-group name="slide-y-transition">
-            <li class="d-flex" v-for="(email, index) in inviteEmails" v-bind:key="index">
+            <li class="d-flex" v-for="(invite, index) in invitations" v-bind:key="index">
               <v-text-field
                 filled
                 label="Email Address"
-                v-model="inviteEmails[index]"
-                validate-on-blur="true"
+                v-model="invitations[index].emailAddress"
                 :rules="emailRules"
               ></v-text-field>
               <v-select class="select-role ml-1"
                 filled
                 label="Select Role"
+                :items="availableRoles"
+                value="Member"
+                v-model="invitations[index].role"
               ></v-select>
               <v-btn icon class="mt-3 ml-1"
                 @click="removeEmail(index)">
@@ -62,6 +64,11 @@ import { Organization } from '@/models/Organization'
 import { Invitation } from '@/models/Invitation'
 import { getModule } from 'vuex-module-decorators'
 
+interface InvitationInfo {
+  emailAddress: string
+  role: string
+}
+
 @Component({
   computed: {
     ...mapState('user', ['organizations'])
@@ -82,22 +89,32 @@ export default class InviteUsersForm extends Vue {
     form: HTMLFormElement
   }
 
-  inviteEmails = ['', '', '']
+  invitations: InvitationInfo[] = [
+    { emailAddress: '', role: 'Member' },
+    { emailAddress: '', role: 'Member' },
+    { emailAddress: '', role: 'Member' }
+  ]
 
   emailRules = [
     v => !v || /.+@.+\..+/.test(v) || 'Enter a valid email address'
   ]
 
+  availableRoles = [
+    'Member',
+    'Admin',
+    'Owner'
+  ]
+
   private isFormValid (): boolean {
-    return this.inviteEmails.some(email => email) && this.$refs.form.validate()
+    return this.invitations.some(invite => invite.emailAddress) && this.$refs.form.validate()
   }
 
   removeEmail (index: number) {
-    this.inviteEmails.splice(index, 1)
+    this.invitations.splice(index, 1)
   }
 
   addEmail () {
-    this.inviteEmails.push('')
+    this.invitations.push({ emailAddress: '', role: 'Member' })
   }
 
   async sendInvites () {
@@ -105,15 +122,15 @@ export default class InviteUsersForm extends Vue {
       // set loading state
       this.loading = true
       this.resetInvitations()
-      for (let i = 0; i < this.inviteEmails.length; i++) {
-        const email = this.inviteEmails[i]
-        if (email) {
+      for (let i = 0; i < this.invitations.length; i++) {
+        const invite = this.invitations[i]
+        if (invite && invite.emailAddress) {
           await this.createInvitation({
-            recipientEmail: email,
+            recipientEmail: invite.emailAddress,
             sentDate: new Date(),
             membership: this.organizations
               .filter(org => org.orgType === 'IMPLICIT')
-              .map(org => { return { membershipType: 'MEMBER', orgId: org.id } })
+              .map(org => { return { membershipType: invite.role.toUpperCase(), orgId: org.id } })
           })
         }
       }
