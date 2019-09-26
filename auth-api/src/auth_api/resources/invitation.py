@@ -162,7 +162,6 @@ class InvitationAction(Resource):
     @_JWT.requires_auth
     def put(invitation_token):
         """Check whether the passed token is valid and add user, role and org from invitation to membership."""
-
         token = g.jwt_oidc_token_info
         try:
             user = UserService.find_by_jwt_token(token)
@@ -171,9 +170,8 @@ class InvitationAction(Resource):
                                    http_status.HTTP_401_UNAUTHORIZED
             else:
                 invitation_id = InvitationService.validate_token(invitation_token)
-                print(invitation_id)
-                response, status = InvitationService.accept_invitation(invitation_id, user.identifier).as_dict(), \
-                                   http_status.HTTP_200_OK
+                response, status = InvitationService.accept_invitation(invitation_id, user.identifier).as_dict(),\
+                                   http_status.HTTP_200_OK  # noqa:E127
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
