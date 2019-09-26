@@ -5,17 +5,74 @@
 
 // Buttons
 .v-btn {
-  letter-spacing: 0.03rem;
+  letter-spacing: 0;
   text-transform: none;
-  font-weight: 400;
+  font-weight: 700;
 
 // Position progress indicator in the button
   .v-progress-circular {
     margin-right: 1rem;
     margin-left: -0.5rem;
   }
+
+  .v-icon {
+    margin-right: 0.25rem;
+    margin-left: -0.5rem;
+  }
+
+  .v-icon:only-child {
+    margin: 0;
+  }
 }
 
+
+// Updating sizing 
+.v-btn.v-size--small {
+  font-size: 0.8125rem;
+}
+
+.v-btn.v-size--large {
+  font-size: 0.9375rem;
+}
+
+// v-dialog 
+.v-dialog > .v-card > .v-card__title {
+  padding-top: 1.5rem;
+  padding-bottom: 1rem;
+  letter-spacing: -0.01em;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+// v-card
+// We don't want a 50% opacity on our v-card__text by default
+.theme--light.v-card > .v-card__text {
+  color: rgba($gray9, 0.8);
+}
+
+// Increase the default font-size the default size of v-card__text
+.v-card__text {
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
+// Form Inputs
+// Chrome: remove the blue highlight on auto-filled inputs
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-transition: "color 9999s ease-out, background-color 9999s ease-out";
+    -webkit-transition-delay: 9999s;
+}
+
+// Adjust font size of help messages
+.v-messages__message {
+  font-size: 13px;
+  height: 1.5rem;
+}
+
+// Adjust size and position of input label
 [class^="v-text-field"] .v-label--active {
-  transform: translateY(-8px) scale(0.75);
+  transform: translateY(-10px) scale(0.8);
 }

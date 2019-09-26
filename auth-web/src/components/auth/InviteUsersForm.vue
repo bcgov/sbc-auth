@@ -1,51 +1,55 @@
 <template>
   <v-card>
-    <v-card-title>
-      <v-layout class="header">
-        <h2>Invite Team Members</h2>
-        <v-btn icon>
+    <v-card-title class="d-flex">
+        Invite Team Members
+        
+        <v-btn large icon>
           <v-icon @click="cancel()">close</v-icon>
         </v-btn>
-      </v-layout>
+        
     </v-card-title>
     <v-card-text>
-
-      <p class="subtitle-1">
-        Enter email addresses to invite team members. Team members will be required to sign in with their
-        <a href="">BC Services Card</a>.
-      </p>
-      <v-form ref="form">
-        <div class="d-flex" v-for="(email, index) in inviteEmails" v-bind:key="index">
-          <v-text-field
-            filled
-            label="Email Address"
-            persistent-hint
-            v-model="inviteEmails[index]"
-            :rules="emailRules"
-          ></v-text-field>
-          <v-btn icon @click="removeEmail(index)" class="mt-3 ml-1">
-            <v-icon>close</v-icon>
-          </v-btn>
-        </div>
-        <v-btn outlined @click="addEmail()">
-          + Add Another
+      <p>Enter email addresses to invite team members. Team members will be required to sign in with their <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank">BC Services Card</a>.</p>
+      <v-form ref="form" class="mt-8">
+        <ul class="invite-list">
+          <transition-group name="slide-y-transition">
+            <li class="d-flex" v-for="(email, index) in inviteEmails" v-bind:key="index">
+              <v-text-field
+                filled
+                label="Email Address"
+                v-model="inviteEmails[index]"
+                validate-on-blur="true"
+                :rules="emailRules"
+              ></v-text-field>
+              <v-select class="select-role ml-1"
+                filled
+                label="Select Role"
+              ></v-select>
+              <v-btn icon class="mt-3 ml-1"
+                @click="removeEmail(index)">
+                <v-icon>close</v-icon>
+              </v-btn>
+            </li>
+          </transition-group>
+        </ul>
+        <v-btn text small color="primary"
+          @click="addEmail()">
+          <v-icon>add_box</v-icon>
+          <span>Add Another</span>
         </v-btn>
-
-        <div class="invite-users-form__row invite-users-form__form-btns">
-          <v-btn class="mr-3"
+        <div class="form__btns">
+          <v-btn large depressed color="primary"
                  @click="sendInvites"
-                 color="primary"
-                 large
                  :loading="loading"
                  :disabled="loading || !isFormValid()">
             <span>Send Invites</span>
           </v-btn>
-          <v-btn @click="cancel" color="secondary" large>
+          <v-btn large depressed class="ml-2"
+            @click="cancel">
             <span>Cancel</span>
           </v-btn>
         </div>
       </v-form>
-
     </v-card-text>
   </v-card>
 </template>
@@ -81,7 +85,7 @@ export default class InviteUsersForm extends Vue {
   inviteEmails = ['', '', '']
 
   emailRules = [
-    v => !v || /.+@.+\..+/.test(v) || 'E-mail must be valid'
+    v => !v || /.+@.+\..+/.test(v) || 'Enter a valid email address'
   ]
 
   private isFormValid (): boolean {
@@ -125,18 +129,26 @@ export default class InviteUsersForm extends Vue {
 }
 </script>
 
-<style lang="scss">
-  .header {
+<style lang="scss" scoped>
+  @import '../../assets/scss/theme.scss';
+
+  .v-card__title {
     justify-content: space-between;
   }
 
-  .invite-users-form__row {
-    margin-top: 1rem;
-    justify-content: right;
+  .invite-list {
+    margin: 0;
+    padding: 0;
   }
 
-  .invite-users-form__form-btns {
-    margin-top: 2rem;
-    display: flex;
+  .invite-list .select-role {
+    width: 8rem;
   }
+
+  .form__btns {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
 </style>
