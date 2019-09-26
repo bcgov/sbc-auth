@@ -64,7 +64,7 @@ class Invitations(Resource):
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
     def get():
-        """Return a set of users based on search query parameters (staff only)."""
+        """Return a set of invitations sent by the user specified by the token."""
         token = g.jwt_oidc_token_info
         try:
             user = UserService.find_by_jwt_token(token)
@@ -84,7 +84,7 @@ class Invitations(Resource):
 
 
 @cors_preflight('GET,PATCH,DELETE,OPTIONS')
-@API.route('/<string:invitation_id>', methods=['GET', 'PATCH', 'DELETE'])
+@API.route('/<string:invitation_id>', methods=['GET', 'PATCH', 'DELETE', 'OPTIONS'])
 class Invitation(Resource):
     """Resource for managing a single invitation."""
 

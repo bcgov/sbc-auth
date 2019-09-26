@@ -5,7 +5,7 @@
 
 // Buttons
 .v-btn {
-  letter-spacing: 0.03rem;
+  letter-spacing: 0;
   text-transform: none;
   font-weight: 400;
 
@@ -14,8 +14,84 @@
     margin-right: 1rem;
     margin-left: -0.5rem;
   }
+
+  .v-icon:first-child {
+    margin-right: 0.25rem;
+    margin-left: -0.5rem;
+  }
+
+  .v-icon:only-child {
+    margin: 0;
+  }
 }
 
+// Updating sizing 
+.v-btn.v-size--small {
+  font-size: 0.8125rem;
+}
+
+.v-btn.v-size--large {
+  font-size: 0.9375rem;
+}
+
+// v-dialog 
+.v-dialog > .v-card > .v-card__title {
+  padding-top: 1.25rem;
+  padding-bottom: 1rem;
+  letter-spacing: -0.01em;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+// v-card
+// Add space between elements in case we use a close button
+.v-card__title {
+  justify-content: space-between;
+}
+
+// Increase the default font-size the default size of v-card__text
+.v-card__text {
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
+// Form Inputs
+// Chrome: remove the blue highlight on auto-filled inputs
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-transition: "color 9999s ease-out, background-color 9999s ease-out";
+    -webkit-transition-delay: 9999s;
+}
+
+// Adjust font size of help messages
+.v-messages__message {
+  //font-size: 14px;
+  height: 1.5rem;
+}
+
+// Adjust size and position of input label
 [class^="v-text-field"] .v-label--active {
   transform: translateY(-8px) scale(0.75);
+}
+
+// Tab Navigation
+.v-tab {
+  text-transform: none;
+  font-size: 1rem;
+}
+
+// Tables
+.v-data-table table {
+  border-collapse: collapse;
+}
+
+.v-data-table th {
+  font-weight: 400;
+}
+
+// Aside Navigation
+.v-application--is-ltr .v-list-item__icon:first-child {
+  margin-right: 1rem;
 }

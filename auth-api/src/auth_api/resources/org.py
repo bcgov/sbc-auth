@@ -257,3 +257,29 @@ class OrgContacts(Resource):
                 response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 
             return response, status
+
+    @cors_preflight('GET,OPTIONS')
+    @API.route('/<string:org_id>/invitations', methods=['GET', 'OPTIONS'])
+    class OrgInvitations(Resource):
+        """Resource for managing a set of invitations for a single organization."""
+
+        @staticmethod
+        @_JWT.requires_auth
+        @TRACER.trace()
+        @cors.crossdomain(origin='*')
+        def get(org_id):
+            """Retrieve the set of invitations for the given org."""
+            try:
+                org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
+                                                allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+                if org:
+                    response, status = jsonify(org.get_invitations()), \
+                        http_status.HTTP_200_OK
+                else:
+                    response, status = {'message': 'The requested organization could not be found.'}, \
+                        http_status.HTTP_404_NOT_FOUND
+
+            except BusinessException as exception:
+                response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
+            return response, status
