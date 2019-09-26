@@ -183,15 +183,8 @@ def test_update_invitation(session):  # pylint:disable=unused-argument
             ]
         }
         new_invitation = InvitationService.create_invitation(invitation_info, User(user))
-        new_invitation_dict = new_invitation.as_dict()
-        updated_invitation_info = {
-            'id': new_invitation_dict['id'],
-            'sentDate': '2019-09-09T00:00:00+00:00',
-            'status': 'ACCEPTED',
-            'acceptedDate': '2019-09-11T00:00:00+00:00'
-        }
-        updated_invitation = new_invitation.update_invitation(updated_invitation_info).as_dict()
-        assert updated_invitation['status'] == updated_invitation_info['status']
+        updated_invitation = new_invitation.update_invitation(User(user)).as_dict()
+        assert updated_invitation['status'] == 'PENDING'
 
 
 def test_generate_confirmation_token(session):  # pylint:disable=unused-argument
