@@ -13,7 +13,6 @@
 # limitations under the License.
 """API endpoints for managing an Org resource."""
 
-import urllib.parse
 from flask import g, jsonify, request
 from flask_restplus import Namespace, Resource, cors
 

@@ -15,7 +15,6 @@
 
 from flask import g, request
 from flask_restplus import Namespace, Resource, cors
-from sqlalchemy import exc
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
@@ -39,7 +38,7 @@ class EntityResources(Resource):
     """Resource for managing entities."""
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.EDITOR.value])
+    @_JWT.has_one_of_roles([Role.SYSTEM.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def post():
@@ -51,10 +50,9 @@ class EntityResources(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            response, status = EntityService.create_entity(request_json).as_dict(), http_status.HTTP_201_CREATED
-        except exc.IntegrityError:
-            response, status = {'message': 'Business with specified identifier already exists.'}, \
-                               http_status.HTTP_409_CONFLICT
+            response, status = EntityService.save_entity(request_json).as_dict(), http_status.HTTP_201_CREATED
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
 
 
