@@ -78,7 +78,7 @@ export default class BusinessModule extends VuexModule {
     await businessServices.createAffiliation(createBusinessResponse.data['id'], affiliation)
 
     // Update store
-    this.context.dispatch('getOrganizations', null, { root: true })
+    this.context.dispatch('user/getOrganizations', null, { root: true })
   }
 
   // Following searchBusiness will search data from legal-api.
@@ -98,7 +98,7 @@ export default class BusinessModule extends VuexModule {
     const removeAffiliationResponse = await businessServices.removeAffiliation(payload.orgIdentifier, payload.incorporationNumber)
     if (removeAffiliationResponse.status === 200) {
       // Update store
-      this.context.dispatch('getOrganizations', null, { root: true })
+      this.context.dispatch('user/getOrganizations', null, { root: true })
     }
   }
 

@@ -54,17 +54,42 @@ def test_as_dict(session):  # pylint:disable=unused-argument
     assert dictionary['businessIdentifier'] == 'CP1234567'
 
 
-def test_create_entity(session):  # pylint:disable=unused-argument
+def test_save_entity_new(session):  # pylint:disable=unused-argument
     """Assert that an Entity can be created from a dictionary."""
-    entity = EntityService.create_entity({
+    entity = EntityService.save_entity({
         'businessIdentifier': 'CP1234567',
         'businessNumber': '791861073BC0001',
+        'passCode': '1234567',
         'name': 'Foobar, Inc.'
     })
 
     assert entity is not None
     dictionary = entity.as_dict()
     assert dictionary['businessIdentifier'] == 'CP1234567'
+
+
+def test_save_entity_existing(session):  # pylint:disable=unused-argument
+    """Assert that an Entity can be updated from a dictionary."""
+    entity = EntityService.save_entity({
+        'businessIdentifier': 'CP1234567',
+        'businessNumber': '791861073BC0001',
+        'passCode': '1234567',
+        'name': 'Foobar, Inc.'
+    })
+
+    assert entity
+
+    updated_entity_info = {
+        'businessIdentifier': 'CP1234567',
+        'businessNumber': '791861073BC0001',
+        'passCode': '9898989',
+        'name': 'Barfoo, Inc.'
+    }
+
+    updated_entity = EntityService.save_entity(updated_entity_info)
+
+    assert updated_entity
+    assert updated_entity.as_dict()['name'] == updated_entity_info['name']
 
 
 def test_entity_find_by_business_id(session, auth_mock):  # pylint:disable=unused-argument
