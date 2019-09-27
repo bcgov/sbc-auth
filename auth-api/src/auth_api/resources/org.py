@@ -283,7 +283,6 @@ class OrgContacts(Resource):
 
             return response, status
 
-
     @cors_preflight('GET,OPTIONS')
     @API.route('/<string:org_id>/invitations', methods=['GET', 'OPTIONS'])
     class OrgInvitations(Resource):
