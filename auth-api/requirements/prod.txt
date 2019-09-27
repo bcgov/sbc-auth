@@ -16,4 +16,4 @@ jsonschema
 requests
 python-keycloak
 itsdangerous
-
+sentry-sdk[flask]

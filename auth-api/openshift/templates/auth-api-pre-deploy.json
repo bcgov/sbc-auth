@@ -21,7 +21,8 @@
         }
       },
       "data": {
-        "POD_TESTING": "true"
+        "POD_TESTING": "true",
+        "SENTRY_DSN":  "https://<account>@sentry.io/<project>"
       }
     },
     {
@@ -229,6 +230,13 @@
       "required": true,
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "SENTRY_DSN",
+      "displayName": "Sentry Init URL",
+      "description": "Sentry DSN URL to initialize the Sentry SDK",
+      "required": true,
+      "value": "https://account.sentry.ioo/project/id"
     }
   ]
 }
