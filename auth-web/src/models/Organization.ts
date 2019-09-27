@@ -8,7 +8,7 @@ export interface Organizations
 export interface Organization {
   id?: string;
   name: string;
-  affiliatedEntities: AffiliatedEntity[];
+  affiliatedEntities?: AffiliatedEntity[];
   orgType?: string;
 }
 
@@ -24,10 +24,25 @@ export interface RemoveBusinessPayload {
 }
 
 export interface Member {
+  id: number
   membershipTypeCode: string
   user: User
 }
 
 export interface Members {
   members: Member []
+}
+
+export interface ActiveUserRecord {
+  username: string
+  name: string
+  role: string
+  lastActive: string
+}
+
+export interface PendingUserRecord {
+  invitationId: number
+  email: string
+  invitationSent: string
+  invitationExpires?: string
 }

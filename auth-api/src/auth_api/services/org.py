@@ -28,7 +28,7 @@ from auth_api.schemas import OrgSchema
 from auth_api.utils.util import camelback2snake
 
 from .invitation import Invitation as InvitationService
-
+from .membership import Membership as MembershipService
 
 class Org:
     """Manages all aspects of Org data.
@@ -138,3 +138,12 @@ class Org:
     def get_invitations(self):
         """Return the unresolved (pending or failed) invitations for this org."""
         return {'invitations': InvitationService.get_invitations_by_org_id(self._model.id)}
+
+    def remove_member(self, member_id):
+        """Remove the user with specified username from this org."""
+        for member in self._model.members:
+            if member.id == int(member_id):
+                self._model.members.remove(member)
+                self._model.commit()
+                return MembershipService(member)
+        return None

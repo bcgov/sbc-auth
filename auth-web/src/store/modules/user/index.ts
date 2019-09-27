@@ -4,7 +4,7 @@ import userServices from '@/services/user.services'
 import { UserInfo } from '@/models/userInfo'
 import { User } from '@/models/user'
 import { Contact } from '@/models/contact'
-import { Organization, Members, Member } from '@/models/Organization'
+import { Organization, Member, ActiveUserRecord, PendingUserRecord } from '@/models/Organization'
 import authService from '@/services/login.services'
 import ConfigHelper from '@/util/config-helper'
 import { AppConstants } from '@/util/constants'
@@ -12,22 +12,6 @@ import OrgService from '@/services/org.services'
 import _ from 'lodash'
 import { Invitation } from '@/models/Invitation'
 import moment from 'moment'
-
-interface ActiveUserRecord {
-  username: string
-  name: string
-  role: string
-  lastActive: string
-}
-
-interface PendingUserRecord {
-  invitationId: number
-  email: string
-  invitationSent: string
-  invitationExpires?: string
-}
-
-
 
 @Module({
   name: 'user',

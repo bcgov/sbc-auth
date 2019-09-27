@@ -71,8 +71,7 @@ export default class BusinessModule extends VuexModule {
 
     // Create an implicit org for the current user and the requested business
     const createBusinessResponse = await businessServices.createOrg({
-      name: payload.businessNumber,
-      affiliatedEntities: []
+      name: payload.businessNumber
     })
 
     // Create an affiliation between implicit org and requested business

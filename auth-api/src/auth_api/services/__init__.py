@@ -15,5 +15,6 @@
 from .affiliation import Affiliation
 from .entity import Entity
 from .invitation import Invitation
+from .membership import Membership
 from .org import Org
 from .user import User

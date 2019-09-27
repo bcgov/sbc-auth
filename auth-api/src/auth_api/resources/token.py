@@ -21,6 +21,7 @@ from sbc_common_components.tracing.trace_tags import TraceTags
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
+from auth_api.services import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
@@ -52,14 +53,14 @@ class Token(Resource):
 
             # Check if entity record exists in AUTH, and if not create record
             # TODO: This should be removed once a proper method of syncing entity information is implemented
-            # entity = EntityService.find_by_business_identifier(data.get('username'))
-            # if not entity:
-            #     EntityService.create_entity({
-            #         'businessIdentifier': data.get('username'),
-            #         'passCode': data.get('password'),
-            #         'businessNumber': 'ABC123',
-            #         'name': 'Test Cooperative - {}'.format(data.get('username'))
-            #     })
+            entity = EntityService.find_by_business_identifier(data.get('username'))
+            if not entity:
+                EntityService.create_entity({
+                    'businessIdentifier': data.get('username'),
+                    'passCode': data.get('password'),
+                    'businessNumber': 'ABC123',
+                    'name': 'Test Cooperative - {}'.format(data.get('username'))
+                })
 
             current_span = TRACER.tracer.active_span
 
