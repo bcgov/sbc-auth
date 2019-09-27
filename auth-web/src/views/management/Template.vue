@@ -39,7 +39,7 @@ export default class Dashboard extends Vue {
   ]
 
   mounted () {
-    this.setSelectedComponent(UserManagement)
+    this.setSelectedComponent(EntityManagement)
   }
 
   setSelectedComponent (selectedComponent: VueConstructor) {

@@ -3,6 +3,7 @@ import InvitationService from '@/services/invitation.services'
 import { Invitation } from '@/models/Invitation'
 import { Organization, Member } from '@/models/Organization'
 import OrgService from '@/services/org.services'
+import { EmptyResponse } from '@/models/global'
 
 interface DeleteMemberPayload {
   orgId: string
@@ -73,14 +74,14 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async validateInvitationToken (token: string) {
+  public async validateInvitationToken (token: string): Promise<EmptyResponse> {
     return InvitationService.validateToken(token).then(response => {
       return response.data
     })
   }
 
   @Action({ rawError: true })
-  public async acceptInvitation (token: string) {
+  public async acceptInvitation (token: string): Promise<Invitation> {
     return InvitationService.acceptInvitation(token).then(response => {
       return response.data
     })
