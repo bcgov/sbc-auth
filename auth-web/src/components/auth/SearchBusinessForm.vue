@@ -3,13 +3,13 @@
       <div class="view-container">
         <article>
           <h1>Search Co-operatives</h1>
-          <p class="intro-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam at porttitor sem. Aliquam erat volutpat. Donec placerat nisl magna, et faucibus arcu condimentum sed.</p>
-          <v-divider></v-divider>
+          <!-- <p class="intro-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam at porttitor sem. Aliquam erat volutpat. Donec placerat nisl magna, et faucibus arcu condimentum sed.</p>
+          <v-divider></v-divider> -->
           <p class="intro-text"/>
           <p class="intro-text">Please enter the co-op's Incorporation number below to access their dashboard.</p>
               <h2>Incorporation Number</h2>
               <div class="search-for">
-                <v-form ref="form" lazy-validation>
+                <v-form ref="form" lazy-validation v-on:submit.prevent="searchBusiness">
                   <div class="loading-msg" v-if="errorMessage">
                     <v-alert
                      :value="true"
@@ -34,7 +34,7 @@
                   <v-divider></v-divider>
                   <p class="intro-text"/>
                   <v-layout align-end justify-end>
-                    <v-btn class="search-btn" @click="searchBusiness" color="primary" large>
+                    <v-btn class="search-btn" @click="searchBusiness" color="primary" large >
                       <span>Enter</span>
                       <v-icon dark right>arrow_forward</v-icon>
                     </v-btn>
@@ -81,17 +81,16 @@ export default class searchBusinessForm extends Vue {
     return this.$refs.form.validate()
   }
 
-  async searchBusiness () {
+  searchBusiness () {
     if (this.isFormValid()) {
-      try {
         // attempt to searchBusiness
-        await this.businessStore.searchBusiness(this.businessNumber)
-        this.errorMessage = ''
-        // redirect to the coops UI
-        window.location.href = this.VUE_APP_COPS_REDIRECT_URL
-      } catch (exception) {
-        this.errorMessage = this.$t('noResultMsg').toString()
-      }
+        this.businessStore.searchBusiness(this.businessNumber).then(()=>{
+          this.errorMessage = ''
+          // redirect to the coops UI
+          window.location.href = this.VUE_APP_COPS_REDIRECT_URL
+        }).catch (exception => {
+          this.errorMessage = this.$t('noResultMsg').toString()
+        })
     }
   }
 }

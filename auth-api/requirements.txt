@@ -2,7 +2,7 @@ Click==7.0
 Flask-Mail==0.9.1
 Flask-Migrate==2.5.2
 Flask-Moment==0.9.0
-Flask-SQLAlchemy==2.4.0
+Flask-SQLAlchemy==2.4.1
 Flask-Script==2.0.6
 Flask==1.1.1
 Jinja2==2.10.1
@@ -10,7 +10,7 @@ Mako==1.1.0
 MarkupSafe==1.1.1
 SQLAlchemy==1.3.8
 Werkzeug==0.16.0
-alembic==1.2.0
+alembic==1.2.1
 aniso8601==8.0.0
 attrs==19.1.0
 blinker==1.4
@@ -38,7 +38,8 @@ python-keycloak==0.17.5
 pytz==2019.2
 requests==2.22.0
 rsa==4.0
+sentry-sdk==0.12.2
 six==1.12.0
-urllib3==1.25.5
+urllib3==1.25.6
 -e git://github.com/pwei1018/jaeger-client-python.git@186f14e14758273ed108508c0d388a4f4de5c75b#egg=jaeger-client
 -e git+https://github.com/bcgov/sbc-common-components.git@48f454595b5b2a7d3f2f86ec9b8e944bef2bcfb2#egg=sbc-common-components-1.0.0&subdirectory=python
