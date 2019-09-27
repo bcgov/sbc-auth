@@ -60,7 +60,7 @@ TEST_JWT_CLAIMS = {
     'preferred_username': 'testuser',
     'realm_access': {
         'roles': [
-            'edit'
+            'system'
         ]
     }
 }
@@ -87,7 +87,7 @@ TEST_PASSCODE_JWT_CLAIMS = {
     'username': 'CP1234567',
     'realm_access': {
         'roles': [
-            'edit'
+            'system'
         ]
     },
     'loginSource': 'PASSCODE'
@@ -126,16 +126,6 @@ def test_add_entity_no_auth_returns_401(client, session):  # pylint:disable=unus
     rv = client.post('/api/v1/entities', data=json.dumps(TEST_ENTITY_INFO),
                      headers=None, content_type='application/json')
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
-
-
-def test_add_entity_duplicate_returns_409(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert that POSTing an entity that already exists returns a 409."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
-    rv = client.post('/api/v1/entities', data=json.dumps(TEST_ENTITY_INFO),
-                     headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/entities', data=json.dumps(TEST_ENTITY_INFO),
-                     headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_409_CONFLICT
 
 
 def test_get_entity(client, jwt, session):  # pylint:disable=unused-argument
@@ -189,8 +179,10 @@ def test_get_entity_no_entity_returns_404(client, jwt, session):  # pylint:disab
 def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an entity."""
     headers = factory_auth_header(jwt=jwt, claims=TEST_PASSCODE_JWT_CLAIMS)
-    client.post('/api/v1/entities', data=json.dumps(TEST_ENTITY_INFO),
-                headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/entities', data=json.dumps(TEST_ENTITY_INFO),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
     rv = client.post('/api/v1/entities/{}/contacts'.format(TEST_ENTITY_INFO['businessIdentifier']),
                      headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED

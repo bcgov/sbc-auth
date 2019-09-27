@@ -93,11 +93,23 @@ class Entity:
         return Entity(entity_model)
 
     @staticmethod
-    def create_entity(entity_info: dict):
-        """Create an Entity."""
-        entity = EntityModel.create_from_dict(entity_info)
-        entity.commit()
-        return Entity(entity)
+    def save_entity(entity_info: dict):
+        """Create/update an entity from the given dictionary."""
+        if not entity_info:
+            return None
+
+        existing_entity = EntityModel.find_by_business_identifier(entity_info['businessIdentifier'])
+        if existing_entity is None:
+            entity_model = EntityModel.create_from_dict(entity_info)
+        else:
+            existing_entity.update_from_dict(**entity_info)
+            entity_model = existing_entity
+
+        if not entity_model:
+            return None
+
+        entity = Entity(entity_model)
+        return entity
 
     def add_contact(self, contact_info: dict):
         """Add a business contact to this entity."""

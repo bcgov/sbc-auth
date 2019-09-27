@@ -88,9 +88,6 @@ export default class AddBusinessForm extends Vue {
   async addBusiness () {
     if (this.isFormValid()) {
       try {
-        // still need to call login as we need to verify if businessNumber and passCode are correct.
-        const loginResponse = await this.businessStore.login({ businessNumber: this.businessNumber, passCode: this.passcode })
-
         // attempt to add business
         await this.businessStore.addBusiness({ businessNumber: this.businessNumber, passCode: this.passcode })
 

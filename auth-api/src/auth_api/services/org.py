@@ -30,6 +30,7 @@ from auth_api.utils.util import camelback2snake
 from .invitation import Invitation as InvitationService
 from .membership import Membership as MembershipService
 
+
 class Org:
     """Manages all aspects of Org data.
 

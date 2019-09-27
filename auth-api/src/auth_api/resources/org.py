@@ -13,7 +13,6 @@
 # limitations under the License.
 """API endpoints for managing an Org resource."""
 
-import urllib.parse
 from flask import g, jsonify, request
 from flask_restplus import Namespace, Resource, cors
 
@@ -283,7 +282,6 @@ class OrgContacts(Resource):
                 response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 
             return response, status
-
 
     @cors_preflight('GET,OPTIONS')
     @API.route('/<string:org_id>/invitations', methods=['GET', 'OPTIONS'])

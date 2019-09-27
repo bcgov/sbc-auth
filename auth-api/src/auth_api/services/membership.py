@@ -20,6 +20,7 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from auth_api.schemas import MembershipSchema
 
+
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
 class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public-methods
     """Manages all aspects of the Membership Entity.
