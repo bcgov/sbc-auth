@@ -1,6 +1,6 @@
 <template>
   <div class="user-mgmt-view">
-    <header class="view-header mt-1 mb-6">
+    <header class="view-header mt-1 mb-5">
       <h1>Manage Users</h1>
       <div class="view-header__actions">
         <v-btn outlined color="primary" @click="showInviteUsersModal()">
@@ -11,13 +11,13 @@
     </header>
 
     <!-- Tab Navigation -->
-    <v-tabs background-color="transparent" class="mb-6" v-model="tab">
+    <v-tabs v-model="tab" background-color="transparent" class="mb-3">
       <v-tab>Active</v-tab>
       <v-tab>Pending</v-tab>
     </v-tabs>
 
-    <!-- Tab Contents -->
     <v-card>
+      <!-- Tab Contents -->
       <v-tabs-items v-model="tab">
         <v-tab-item>
           <v-data-table
@@ -52,7 +52,7 @@
     </v-card>
 
     <!-- Invite Users Modal -->
-    <v-dialog content-class="invite-user-dialog" v-model="isInviteUsersModalVisible" scrollable  persistent>
+    <v-dialog content-class="invite-user-dialog" :fullscreen="$vuetify.breakpoint.mdOnly" v-model="isInviteUsersModalVisible" scrollable persistent>
       <InviteUsersForm
         @invites-complete="showInviteSummaryModal()"
         @cancel="cancelModal()"
@@ -60,26 +60,23 @@
       </InviteUsersForm>
     </v-dialog>
 
-    <!-- Notification Dialog (Success) -->
+    <!-- Alert Dialog (Success) -->
     <v-dialog content-class="notify-dialog text-center" v-model="isInviteSuccessModalVisible">
-      <v-card>
-        <v-card-title class="pb-2">
-          <v-icon x-large color="success" class="mt-3">check</v-icon>
-          <span class="mt-5">Invited {{ sentInvitations.length }} Team Members</span>
-        </v-card-title>
-        <v-card-text class="text-center">
-          <!--
-          <p v-show="!resending">Invited {{ sentInvitations.length }} Team Members</p>
-          <p v-show="resending">{{ sentInvitations.length }} invitations resent</p>
-          -->
-          <p class="mt-5">Your team invitations were sent successfully.</p>
-        </v-card-text>
-        <v-card-actions class="pb-8">
-          <v-btn large color="success" @click="okCloseModal()">
-            OK
-          </v-btn>
-        </v-card-actions>
-      </v-card>
+      <AlertDialogContent>
+        <template v-slot:icon>
+          <v-icon large color="success">check</v-icon>
+        </template>
+        <template v-slot:title>
+          <span v-show="!resending">Invited {{ sentInvitations.length }} Team Members</span>
+          <span v-show="resending">{{ sentInvitations.length }} invitations resent</span>
+        </template>
+        <template v-slot:text>
+          Your team invitations were sent successfully.
+        </template>
+        <template v-slot:actions>
+          <v-btn large color="success" @click="okCloseModal()">OK</v-btn>
+        </template>
+      </AlertDialogContent>
     </v-dialog>
   </div>
 </template>
@@ -87,6 +84,7 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
+import AlertDialogContent from '@/components/AlertDialogContent.vue'
 import { mapState, mapGetters, mapActions } from 'vuex'
 import { Organization, Member, PendingUserRecord, ActiveUserRecord } from '@/models/Organization'
 import { Invitation } from '@/models/Invitation'
@@ -96,7 +94,8 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
-    InviteUsersForm
+    InviteUsersForm,
+    AlertDialogContent
   },
   computed: {
     ...mapState('org', ['currentOrg', 'resending', 'sentInvitations']),
@@ -247,18 +246,9 @@ export default class UserManagement extends Vue {
 </script>
 
 <style lang="scss">
-  // Invite Users Dialog
-  .invite-user-dialog {
-    max-width: 40rem;
-    width: 40rem;
-  }
-
-  // Notification Dialog (Success/Error)
-  .notify-dialog {
-    max-width: 30rem;
-
-    .v-card__title {
-      flex-direction: column;
+  @media (min-width: 1264px) {
+    .invite-user-dialog {
+      max-width: 45rem;
     }
   }
 </style>
