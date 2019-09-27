@@ -13,6 +13,7 @@
 # limitations under the License.
 """API endpoints for managing an Org resource."""
 
+import urllib.parse
 from flask import g, jsonify, request
 from flask_restplus import Namespace, Resource, cors
 
@@ -257,6 +258,32 @@ class OrgContacts(Resource):
                 response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 
             return response, status
+
+    @cors_preflight('DELETE,OPTIONS')
+    @API.route('/<string:org_id>/members/<string:member_id>', methods=['DELETE', 'OPTIONS'])
+    class OrgMember(Resource):
+        """Resource for managing a single membership record between an org and a user."""
+
+        @staticmethod
+        @_JWT.requires_auth
+        @TRACER.trace()
+        @cors.crossdomain(origin='*')
+        def delete(org_id, member_id):
+            """Delete a membership record for the given org and user."""
+            try:
+                org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
+                                                allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+                if org:
+                    response, status = org.remove_member(member_id).as_dict(), \
+                        http_status.HTTP_200_OK
+                else:
+                    response, status = {'message': 'The requested organization could not be found.'}, \
+                        http_status.HTTP_404_NOT_FOUND
+            except BusinessException as exception:
+                response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
+            return response, status
+
 
     @cors_preflight('GET,OPTIONS')
     @API.route('/<string:org_id>/invitations', methods=['GET', 'OPTIONS'])

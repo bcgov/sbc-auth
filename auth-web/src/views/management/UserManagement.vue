@@ -15,7 +15,7 @@
       <v-tab>Active</v-tab>
       <v-tab>Pending</v-tab>
     </v-tabs>
-    
+
     <!-- Tab Contents -->
     <v-card>
       <v-tabs-items v-model="tab">
@@ -65,7 +65,7 @@
       <v-card>
         <v-card-title class="pb-2">
           <v-icon x-large color="success" class="mt-3">check</v-icon>
-          <span class="mt-5">Invited {{ sentInvitations.length }} Team Members</span> 
+          <span class="mt-5">Invited {{ sentInvitations.length }} Team Members</span>
         </v-card-title>
         <v-card-text class="text-center">
           <!--
@@ -88,7 +88,7 @@
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
 import { mapState, mapGetters, mapActions } from 'vuex'
-import { Organization, Member } from '@/models/Organization'
+import { Organization, Member, PendingUserRecord, ActiveUserRecord } from '@/models/Organization'
 import { Invitation } from '@/models/Invitation'
 import OrgModule from '@/store/modules/org'
 import UserModule from '@/store/modules/user'
@@ -100,12 +100,12 @@ import { getModule } from 'vuex-module-decorators'
   },
   computed: {
     ...mapState('org', ['currentOrg', 'resending', 'sentInvitations']),
-    ...mapState('user', ['activeBasicMembers', 'pendingBasicMembers']),
-    ...mapGetters('user', ['organizations', 'activeUserListing', 'pendingUserListing'])
+    ...mapState('user', ['organizations', 'activeBasicMembers', 'pendingBasicMembers']),
+    ...mapGetters('user', ['activeUserListing', 'pendingUserListing'])
   },
   methods: {
     ...mapActions('user', ['getOrganizations', 'getActiveBasicMembers', 'getPendingBasicMembers']),
-    ...mapActions('org', ['resendInvitation', 'deleteInvitation'])
+    ...mapActions('org', ['resendInvitation', 'deleteInvitation', 'deleteMember'])
   }
 })
 export default class UserManagement extends Vue {
@@ -127,8 +127,9 @@ export default class UserManagement extends Vue {
   readonly getPendingBasicMembers!: () => Invitation[]
   readonly resendInvitation!: (Invitation) => void
   readonly deleteInvitation!: (Invitation) => void
-  readonly activeUserListing!: any
-  readonly pendingUserListing!: any
+  readonly deleteMember!: (Member) => void
+  readonly activeUserListing!: ActiveUserRecord[]
+  readonly pendingUserListing!: PendingUserRecord[]
 
   headersActive = [
     {
@@ -214,7 +215,7 @@ export default class UserManagement extends Vue {
     this.isInviteErrorModalVisible = false
   }
 
-  async resend (pendingUser: any) {
+  async resend (pendingUser: PendingUserRecord) {
     const invitationToResend = this.pendingBasicMembers.find(invitation => invitation.id === pendingUser.invitationId)
     if (invitationToResend) {
       await this.resendInvitation(invitationToResend)
@@ -223,11 +224,23 @@ export default class UserManagement extends Vue {
     }
   }
 
-  async removeInvite (pendingUser: any) {
+  async removeInvite (pendingUser: PendingUserRecord) {
     const invitationToDelete = this.pendingBasicMembers.find(invitation => invitation.id === pendingUser.invitationId)
     if (invitationToDelete) {
       await this.deleteInvitation(invitationToDelete)
       this.getPendingBasicMembers()
+    }
+  }
+
+  async removeMember (activeMember: ActiveUserRecord) {
+    const memberToDelete = this.activeBasicMembers.find(member => member.user.username === activeMember.username)
+    if (memberToDelete) {
+      this.organizations
+        .filter(org => org.orgType === 'IMPLICIT')
+        .forEach(async org => {
+          await this.deleteMember({ orgId: org.id, memberId: memberToDelete.id })
+        })
+      this.getActiveBasicMembers()
     }
   }
 }
