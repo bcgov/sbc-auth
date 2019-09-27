@@ -39,55 +39,61 @@
       </v-card>
     </v-dialog>
 
-    <!-- Success/Fail Model -->
+    <!-- Alert Dialog (Success/Fail) -->
     <v-dialog content-class="notify-dialog text-center" v-model="isResultDialogVisible" persistent>
       
       <!-- Success -->
-      <v-card v-show="addSuccess">
-        <v-card-title class="pb-2">
-          <v-icon x-large color="success" class="mt-3">check</v-icon>
-          <span class="mt-5">Success</span> 
-        </v-card-title>
-        <v-card-text>
+      <AlertDialogContent v-show="addSuccess">
+        <template v-slot:icon>
+          <v-icon large color="success">check</v-icon>
+        </template>
+        <template v-slot:title>
+          Success
+        </template>
+        <template v-slot:text>
           You have successfully added a business.
-        </v-card-text>
-        <v-card-actions class="pb-8">
-          <v-flex>
-            <v-btn color="primary" @click="isResultDialogVisible = false">OK</v-btn>
-          </v-flex>
-        </v-card-actions>
-      </v-card>
-
-      <!-- Fail -->
-      <v-card v-show="!addSuccess">
-        <v-card-title class="pb-2">
-          <v-icon x-large color="error" class="mt-3">error</v-icon>
-          <span class="mt-5">Invalid Passcode</span> 
-        </v-card-title>
-        <v-card-text>
-          <p class="mt-5">Unable to add the business. The provided Passcode is invalid or already in use.</p>
-        </v-card-text>
-        <v-card-actions class="pb-8">
+        </template>
+        <template v-slot:actions>
           <v-btn large color="error" @click="isResultDialogVisible = false">OK</v-btn>
-        </v-card-actions>
-      </v-card>
+        </template>
+      </AlertDialogContent>
+
+      <!-- Error -->
+      <AlertDialogContent v-show="!addSuccess">
+        <template v-slot:icon>
+          <v-icon large color="error">error</v-icon>
+        </template>
+        <template v-slot:title>
+          Invalid Passcode
+        </template>
+        <template v-slot:text>
+          Unable to add the business. The provided Passcode is invalid or already in use.
+        </template>
+        <template v-slot:actions>
+          <v-btn large color="error" @click="isResultDialogVisible = false">OK</v-btn>
+        </template>
+      </AlertDialogContent>
     </v-dialog>
 
     <!-- Confirm delete modal -->
     <v-dialog v-model="isConfirmDeleteModalVisible" persistent max-width="400px">
-      <v-card>
-        <v-card-title>
-          <h2>Confirm Remove Business</h2>
-        </v-card-title>
-        <v-card-text>Are you sure you wish to remove this business?</v-card-text>
-        <v-card-actions>
-          <v-flex class="text-xs-right">
-            <v-btn color="secondary" @click="isConfirmDeleteModalVisible = false">Cancel</v-btn>
-            <v-btn color="primary" @click="removeBusiness()">Remove</v-btn>
-          </v-flex>
-        </v-card-actions>
-      </v-card>
+      <AlertDialogContent>
+        <template v-slot:icon>
+          <v-icon large color="error">error</v-icon>
+        </template>
+        <template v-slot:title>
+          Remove Business
+        </template>
+        <template v-slot:text>
+          Are you sure you wish to remove this business?
+        </template>
+        <template v-slot:actions>
+          <v-btn large color="primary" @click="removeBusiness()">Remove</v-btn>
+          <v-btn large color="default" @click="isConfirmDeleteModalVisible = false">Cancel</v-btn>
+        </template>
+      </AlertDialogContent>
     </v-dialog>
+
   </div>
 </template>
 
@@ -95,6 +101,7 @@
 import { Vue, Component } from 'vue-property-decorator'
 import AddBusinessForm from '@/components/auth/AddBusinessForm.vue'
 import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
+import AlertDialogContent from '@/components/AlertDialogContent.vue'
 import { getModule } from 'vuex-module-decorators'
 import UserModule from '@/store/modules/user'
 import businessServices from '@/services/business.services'
@@ -104,7 +111,8 @@ import { RemoveBusinessPayload } from '@/models/Organization'
 @Component({
   components: {
     AddBusinessForm,
-    AffiliatedEntityList
+    AffiliatedEntityList,
+    AlertDialogContent
   }
 })
 export default class EntityManagement extends Vue {

@@ -1,10 +1,11 @@
 <template>
   <div class="entity-list-component">
-    
+
+   
     <!-- No Results Message -->
-    <v-card class="no-results" v-if="affiliatedEntities.length === 0" @click="addBusiness()">
-      <v-card-title class="pt-4 pb-1">{{ $t('businessListEmptyMessage')}}</v-card-title>
-      <v-card-text class="pb-4 text-center">
+    <v-card class="no-results text-center" v-if="affiliatedEntities.length === 0" @click="addBusiness()">
+      <v-card-title class="pt-6 pb-0">{{ $t('businessListEmptyMessage')}}</v-card-title>
+      <v-card-text class="pb-8">
         {{ $t('businessListActionMessage')}}
       </v-card-text>
     </v-card>
@@ -180,22 +181,12 @@ dd {
 // TODO: Move somewhere we can access globally
 .no-results .v-card__title {
   justify-content: center;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 700;
 }
 
 .no-results .v-card__text {
-  text-align: center;
-}
-.no-results__title {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 0.9375rem;
 }
 
-.no-results__subtitle {
-  margin-top: 0.25rem;
-  color: $gray6;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
 </style>

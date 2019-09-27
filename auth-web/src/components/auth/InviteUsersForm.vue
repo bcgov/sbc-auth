@@ -1,7 +1,7 @@
 <template>
-  <v-card>
+  <v-card background="transparent">
     <v-card-title class="d-flex">
-      Invite Team Members
+      <span>Invite Team Members</span>
       <v-btn large icon>
         <v-icon @click="cancel()">close</v-icon>
       </v-btn>     
@@ -148,7 +148,15 @@ export default class InviteUsersForm extends Vue {
   @import '../../assets/scss/theme.scss';
 
   .v-card__title {
+    flex-wrap: nowrap;
     justify-content: space-between;
+    white-space: nowrap;
+
+    :first-child {
+      flex: 1 1 auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
   .invite-list {

@@ -41,6 +41,7 @@ export default class ManagementMenu extends Vue {
 <style lang="scss">
   .v-navigation-drawer {
     background-color : transparent !important;
+    transform: none !important;
   }
 
   .v-navigation-drawer__border {
