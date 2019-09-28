@@ -22,9 +22,9 @@
 import groovy.json.*
 
 // define constants - values sent in as env vars from whatever calls this pipeline
-def APP_NAME = 'auth-web-staging'
-def APP_RUNTIME_NAME = "${APP_NAME}-runtime"
+def APP_NAME = 'auth-web'
 def DESTINATION_TAG = 'staging'
+def APP_RUNTIME_NAME = "${APP_NAME}-${DESTINATION_TAG}-runtime"
 def DESTINATION_ENV_TAG = 'test'
 def TOOLS_TAG = 'tools'
 def NAMESPACE_APP = '1rdehl'
