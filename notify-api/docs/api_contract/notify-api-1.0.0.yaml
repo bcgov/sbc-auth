@@ -1,0 +1,162 @@
+---
+openapi: 3.0.0
+info:
+  title: SBC Notify API Reference
+  description: BC Registries Notify API reference documentation
+  version: 1.0.0
+paths:
+  /api/v1/notify/:notification_id:
+    get:
+      tags:
+        - Notification
+      summary: Get Notification details
+      description: Get Notification details
+      operationId: Get_Notification
+      parameters:
+        - name: notification_id
+          in: path
+          description: Notification Id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+              examples:
+                notify_1:
+                  value: '1'
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+              examples:
+                notify_1:
+                  value: '*'
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+              examples:
+                notify_1:
+                  value: 'GET, POST'
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+              examples:
+                notify_1:
+                  value: 'Content-Type, api_key, Authorization'
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notify'
+              examples:
+                notify_1:
+                  value: '{
+                            "id": 1,
+                            "notificationStatus": "SUCCESS",
+                            "notificationType": "EMAIL",
+                            "recipients": "test@abc.com",
+                            "requestDate": "2019-09-25T09:08:57.515479+00:00",
+                            "sentDate": "2019-09-26T09:34:34.792527+00:00"
+                        }'
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    parameters:
+      - name: notification_id
+        in: path
+        required: true
+        schema:
+          type: string
+        examples:
+          notify_1:
+            value: 1
+
+  /api/v1/notify:
+    post:
+      tags:
+      - Notification
+      summary: Create Notification record
+      description: Create Notification record
+      operationId: Create_Notification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notify'
+            examples:
+                notify_post_1:
+                  value : '{
+                    "notifyType": "EMAIL",
+                    "requestDate": "2019-09-25T09:08:57.515479+00:00",
+                    "subject": "test email",
+                    "recipients": "test@abc.com",
+                    "contentBody": "This is a test email from notify service."
+                  }'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notify'
+              examples:
+                notify_post_1:
+                  value : '{
+                            "id": 1,
+                            "notificationStatus": "SUCCESS",
+                            "notificationType": "EMAIL",
+                            "recipients": "test@abc.com",
+                            "requestDate": "2019-09-25T09:08:57.515479+00:00",
+                            "sentDate": "2019-09-26T09:34:34.792527+00:00"
+                        }'
+
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Identifier representing the type of error that occurred.
+        message:
+          type: string
+          description: Description of the error.
+      description: Contains details of an error that was encountered.
+    Notify:
+      type: object
+      properties:
+        notifyType:
+          type: string
+          description: notify Type
+        requestDate:
+          type: string
+          description: Date on which the notification are applicable
+        subject:
+          type: string
+          description: Subject of notification message
+        recipients:
+          type: string
+          description: Recipients of notification message
+        contentBody:
+          type: string
+          description: Text body of notification message
+

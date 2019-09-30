@@ -15,4 +15,5 @@ marshmallow-sqlalchemy
 jsonschema
 requests
 python-keycloak
+sentry-sdk==0.12.2
 
