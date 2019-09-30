@@ -51,15 +51,11 @@ paths:
               examples:
                 notify_1:
                   value: 'Content-Type, api_key, Authorization'
-                fee_2:
-                  value: 'Content-Type, api_key, Authorization'
-                fee_3:
-                  value: 'Content-Type, api_key, Authorization'
 
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Fee'
+                $ref: '#/components/schemas/Notify'
               examples:
                 notify_1:
                   value: '{
