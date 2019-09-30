@@ -28,6 +28,7 @@
                       persistent-hint
                       :rules="entityNumRules"
                       v-model="businessNumber"
+                      id="txtBusinessNumber"
                     ></v-text-field>
                   </div>
                   <p class="intro-text"/>
