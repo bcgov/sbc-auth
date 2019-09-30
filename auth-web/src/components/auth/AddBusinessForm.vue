@@ -34,6 +34,7 @@
           :rules="entityPasscodeRules"
           :maxlength="9"
           v-model="passcode"
+          autocomplete="off"
         ></v-text-field>
       </div>
       <div class="form__btns mt-8">
@@ -118,7 +119,7 @@ export default class AddBusinessForm extends Vue {
 
 <style lang="scss" scoped>
 @import '../../assets/scss/theme.scss';
-  
+
   .form__btns {
     display: flex;
     flex-direction: row;

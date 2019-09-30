@@ -1,14 +1,9 @@
 import { Module, VuexModule, Mutation, Action } from 'vuex-module-decorators'
 import InvitationService from '@/services/invitation.services'
 import { Invitation } from '@/models/Invitation'
-import { Organization, Member } from '@/models/Organization'
+import { Organization, Member, DeleteMemberPayload } from '@/models/Organization'
 import OrgService from '@/services/org.services'
 import { EmptyResponse } from '@/models/global'
-
-interface DeleteMemberPayload {
-  orgId: string
-  memberId: string
-}
 
 @Module({
   name: 'org',
@@ -90,6 +85,6 @@ export default class OrgModule extends VuexModule {
   @Action({ rawError: true })
   public async deleteMember (memberInfo: DeleteMemberPayload) {
     debugger
-    return OrgService.removeMember(memberInfo.orgId, memberInfo.memberId)
+    return OrgService.removeMember(memberInfo.orgIdentifier, memberInfo.memberId)
   }
 }

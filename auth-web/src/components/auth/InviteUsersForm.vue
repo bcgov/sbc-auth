@@ -1,57 +1,51 @@
 <template>
-  <v-card background="transparent">
-    <v-card-title class="d-flex">
-      <span>Invite Team Members</span>
-      <v-btn large icon>
-        <v-icon @click="cancel()">close</v-icon>
-      </v-btn>     
-    </v-card-title>
-    <v-card-text>
-      <p>Enter email addresses to invite team members. Team members will be required to sign in with their <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank">BC Services Card</a>.</p>
-      <v-form ref="form" class="mt-8">
-        <ul class="invite-list">
-          <transition-group name="slide-y-transition">
-            <li class="d-flex" v-for="(invite, index) in invitations" v-bind:key="index">
-              <v-text-field
-                filled
-                label="Email Address"
-                v-model="invitations[index].emailAddress"
-                :rules="emailRules"
-              ></v-text-field>
-              <v-select class="select-role ml-1"
-                filled
-                label="Select Role"
-                :items="availableRoles"
-                value="Member"
-                v-model="invitations[index].role"
-              ></v-select>
-              <v-btn icon class="mt-3 ml-1"
-                @click="removeEmail(index)">
-                <v-icon>close</v-icon>
-              </v-btn>
-            </li>
-          </transition-group>
-        </ul>
-        <v-btn text small color="primary"
+  <div>
+    <p class="text-left">Enter email addresses to invite team members. Team members will be required to sign in with their <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank">BC Services Card</a>.</p>
+    <v-form ref="form" class="mt-8">
+      <ul class="invite-list">
+        <transition-group name="slide-y-transition">
+          <li class="d-flex" v-for="(invite, index) in invitations" v-bind:key="index + 1">
+            <v-text-field
+              filled
+              label="Email Address"
+              v-model="invitations[index].emailAddress"
+              :rules="emailRules"
+            ></v-text-field>
+            <v-select class="select-role ml-1"
+              filled
+              label="Select Role"
+              :items="availableRoles"
+              value="Member"
+              v-model="invitations[index].role"
+            ></v-select>
+            <v-btn icon class="mt-3 ml-1"
+              @click="removeEmail(index)">
+              <v-icon>close</v-icon>
+            </v-btn>
+          </li>
+        </transition-group>
+      </ul>
+      <v-row>
+        <v-btn left text small color="primary"
           @click="addEmail()">
           <v-icon>add_box</v-icon>
           <span>Add Another</span>
         </v-btn>
-        <div class="form__btns">
-          <v-btn large depressed color="primary"
-                 @click="sendInvites"
-                 :loading="loading"
-                 :disabled="loading || !isFormValid()">
-            <span>Send Invites</span>
-          </v-btn>
-          <v-btn large depressed class="ml-2"
-            @click="cancel">
-            <span>Cancel</span>
-          </v-btn>
-        </div>
-      </v-form>
-    </v-card-text>
-  </v-card>
+      </v-row>
+      <div class="form__btns">
+        <v-btn large depressed color="primary"
+                @click="sendInvites"
+                :loading="loading"
+                :disabled="loading || !isFormValid()">
+          <span>Send Invites</span>
+        </v-btn>
+        <v-btn large depressed class="ml-2"
+          @click="cancel">
+          <span>Cancel</span>
+        </v-btn>
+      </div>
+    </v-form>
+  </div>
 </template>
 
 <script lang="ts">

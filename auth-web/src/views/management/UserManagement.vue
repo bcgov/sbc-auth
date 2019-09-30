@@ -51,14 +51,24 @@
       </v-tabs-items>
     </v-card>
 
-    <!-- Invite Users Modal -->
-    <v-dialog content-class="invite-user-dialog" :fullscreen="$vuetify.breakpoint.mdOnly" v-model="isInviteUsersModalVisible" scrollable persistent>
-      <InviteUsersForm
-        @invites-complete="showSuccessModal()"
-        @cancel="cancelModal()"
-      >
-      </InviteUsersForm>
-    </v-dialog>
+    <ModalDialog
+      ref="inviteUsersDialog"
+      :show-icon=false
+      :show-actions=false
+      :fullscreen-on-mobile="$vuetify.breakpoint.xsOnly || $vuetify.breakpoint.smOnly || $vuetify.breakpoint.mdOnly"
+      :is-persistent="true"
+      :is-scrollable="true"
+    >
+      <template v-slot:title>
+        <span>Invite Team Members</span>
+      </template>
+      <template v-slot:text>
+        <InviteUsersForm
+          @invites-complete="showSuccessModal()"
+          @cancel="cancelInviteUsersModal()"
+        />
+      </template>
+    </ModalDialog>
 
     <!-- Alert Dialog (Success) -->
     <ModalDialog
@@ -71,21 +81,19 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
-import AlertDialogContent from '@/components/AlertDialogContent.vue'
 import { mapState, mapGetters, mapActions } from 'vuex'
-import { Organization, Member, PendingUserRecord, ActiveUserRecord } from '@/models/Organization'
+import { Organization, Member, PendingUserRecord, ActiveUserRecord, DeleteMemberPayload } from '@/models/Organization'
 import { Invitation } from '@/models/Invitation'
+import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
-import ModalDialog from '@/components/auth/ModalDialog.vue'
 
 @Component({
   components: {
     InviteUsersForm,
-    AlertDialogContent,
     ModalDialog
   },
   computed: {
@@ -99,33 +107,30 @@ import ModalDialog from '@/components/auth/ModalDialog.vue'
   }
 })
 export default class UserManagement extends Vue {
-  userStore = getModule(UserModule, this.$store)
-  orgStore = getModule(OrgModule, this.$store)
-  tab = null
-  isInviteUsersModalVisible = false
-  isInviteSuccessModalVisible = false
-  isInviteErrorModalVisible = false
-
-  readonly organizations!: Organization[]
-  readonly currentOrg!: Organization
-  readonly resending!: boolean
-  readonly sentInvitations!: Invitation[]
-  readonly activeBasicMembers!: Member[]
-  readonly pendingBasicMembers!: Invitation[]
-  readonly getOrganizations!: () => Organization[]
-  readonly getActiveBasicMembers!: () => Member[]
-  readonly getPendingBasicMembers!: () => Invitation[]
-  readonly resendInvitation!: (Invitation) => void
-  readonly deleteInvitation!: (Invitation) => void
-  readonly deleteMember!: (Member) => void
-  readonly activeUserListing!: ActiveUserRecord[]
-  readonly pendingUserListing!: PendingUserRecord[]
-
+  private orgStore = getModule(OrgModule, this.$store)
+  private userStore = getModule(UserModule, this.$store)
   private successTitle = ''
   private successText = ''
+  private tab = null
+
+  private readonly organizations!: Organization[]
+  private readonly currentOrg!: Organization
+  private readonly resending!: boolean
+  private readonly sentInvitations!: Invitation[]
+  private readonly activeBasicMembers!: Member[]
+  private readonly pendingBasicMembers!: Invitation[]
+  private readonly getOrganizations!: () => Organization[]
+  private readonly getActiveBasicMembers!: () => Member[]
+  private readonly getPendingBasicMembers!: () => Invitation[]
+  private readonly resendInvitation!: (invitation: Invitation) => void
+  private readonly deleteInvitation!: (invitation: Invitation) => void
+  private readonly deleteMember!: (deleteMemberPayload: DeleteMemberPayload) => void
+  private readonly activeUserListing!: ActiveUserRecord[]
+  private readonly pendingUserListing!: PendingUserRecord[]
 
   $refs: {
     successDialog: ModalDialog
+    inviteUsersDialog: ModalDialog
   }
 
   headersActive = [
@@ -194,24 +199,19 @@ export default class UserManagement extends Vue {
   }
 
   showInviteUsersModal () {
-    this.isInviteUsersModalVisible = true
+    this.$refs.inviteUsersDialog.open()
   }
 
-  cancelModal () {
-    this.isInviteUsersModalVisible = false
+  cancelInviteUsersModal () {
+    this.$refs.inviteUsersDialog.close()
   }
 
   showSuccessModal () {
-    this.isInviteUsersModalVisible = false
+    this.$refs.inviteUsersDialog.close()
     this.successTitle = `Invited ${this.sentInvitations.length} Team Members`
     this.successText = 'Your team invitations have been sent successfully.'
     this.$refs.successDialog.open()
     this.getPendingBasicMembers()
-  }
-
-  okCloseModal () {
-    this.isInviteSuccessModalVisible = false
-    this.isInviteErrorModalVisible = false
   }
 
   async resend (pendingUser: PendingUserRecord) {
@@ -236,18 +236,10 @@ export default class UserManagement extends Vue {
       this.organizations
         .filter(org => org.orgType === 'IMPLICIT')
         .forEach(async org => {
-          await this.deleteMember({ orgId: org.id, memberId: memberToDelete.id })
+          await this.deleteMember({ orgIdentifier: org.id, memberId: memberToDelete.id })
         })
       this.getActiveBasicMembers()
     }
   }
 }
 </script>
-
-<style lang="scss">
-  @media (min-width: 1264px) {
-    .invite-user-dialog {
-      max-width: 45rem;
-    }
-  }
-</style>

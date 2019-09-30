@@ -1,7 +1,5 @@
 <template>
   <div class="entity-list-component">
-
-   
     <!-- No Results Message -->
     <v-card class="no-results text-center" v-if="affiliatedEntities.length === 0" @click="addBusiness()">
       <v-card-title class="pt-6 pb-0">{{ $t('businessListEmptyMessage')}}</v-card-title>
@@ -85,7 +83,7 @@ export default class AffiliatedEntityList extends Vue {
   addBusiness () {}
 
   @Emit()
-  removeBusiness (orgId: string, incorporationNumber: string): RemoveBusinessPayload {
+  removeBusiness (orgId: number, incorporationNumber: string): RemoveBusinessPayload {
     return {
       orgIdentifier: orgId,
       incorporationNumber: incorporationNumber
