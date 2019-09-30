@@ -5,18 +5,38 @@
     "type": "object",
     "title": "Notify",
     "properties": {
-        "recipientEmail": {
+        "notifyType": {
             "type": "string",
-            "title": "The recipient email id."
+            "title": "The notification type.",
+            "default": "EMAIL",
+            "required": [
+                "EMAIL",
+                "TEXT"
+            ]
         },
-        "sentDate": {
+        "requestDate": {
             "type": "string",
-            "format": "date",
-            "title": "The date notification is sent."
+            "format": "datetime",
+            "title": "The date notification requested."
+        },
+        "subject": {
+            "type": "string",
+            "title": "The notification's subject ."
+        },
+        "recipients": {
+            "type": "string",
+            "title": "The recipient email address(s)."
+        },
+        "contentBody": {
+            "type": "string",
+            "title": "The notification's body ."
         }
     },
     "required": [
-        "recipientEmail",
-        "sentDate"
+        "notifyType",
+        "requestDate",
+        "subject",
+        "recipients",
+        "contentBody"
     ]
 }

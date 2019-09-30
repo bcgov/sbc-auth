@@ -28,7 +28,8 @@
         "MAIL_USE_SSL": "False",
         "MAIL_USERNAME": "",
         "MAIL_PASSWORD": "",
-        "MAIL_FROM_ID": "Sofi.Dev@gov.bc.ca"
+        "MAIL_FROM_ID": "Sofi.Dev@gov.bc.ca",
+        "SENTRY_DSN": ""
       }
     }
   ],

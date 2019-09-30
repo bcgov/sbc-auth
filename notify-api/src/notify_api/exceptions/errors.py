@@ -11,16 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Manager for invitation schema and export."""
+"""Descriptive error codes and descriptions for readability.
 
-from notify_api.models import Notification as NotificationModel
-from notify_api.schemas.camel_case_schema import CamelCaseSchema
+Standardize error message to display user friendly messages.
+"""
+
+from enum import Enum
+
+from notify_api import status as http_status
 
 
-class NotifySchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
-    """This is the schema for the notify model."""
+class Error(Enum):
+    """Error Codes."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the notify fields to a default schema."""
+    SEND_EMAIL_FAIL = 'Sending Email failed, please check.', http_status.HTTP_500_INTERNAL_SERVER_ERROR
 
-        model = NotificationModel
+    def __new__(cls, message, status_code):
+        """Attributes for the enum."""
+        obj = object.__new__(cls)
+        obj.message = message
+        obj.status_code = status_code
+        return obj
