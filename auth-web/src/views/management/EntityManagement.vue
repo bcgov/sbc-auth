@@ -32,6 +32,7 @@
           <AddBusinessForm class="mt-7"
             @add-success="showAddSuccessModal()"
             @add-failed-invalid-code="showInvalidCodeModal()"
+            @add-failed-no-entity="showEntityNotFoundModal()"
             @cancel="cancelModal()"
           >
           </AddBusinessForm>
@@ -39,60 +40,49 @@
       </v-card>
     </v-dialog>
 
-    <!-- Alert Dialog (Success/Fail) -->
-    <v-dialog content-class="notify-dialog text-center" v-model="isResultDialogVisible" persistent>
-      
-      <!-- Success -->
-      <AlertDialogContent v-show="addSuccess">
-        <template v-slot:icon>
-          <v-icon large color="success">check</v-icon>
-        </template>
-        <template v-slot:title>
-          Success
-        </template>
-        <template v-slot:text>
-          You have successfully added a business.
-        </template>
-        <template v-slot:actions>
-          <v-btn large color="error" @click="isResultDialogVisible = false">OK</v-btn>
-        </template>
-      </AlertDialogContent>
+  <!-- 200 - Dialog for home -->
+  <ModalDialog
+    ref="successDialog"
+    :title="dialogTitle"
+    :text="dialogText"
+  />
 
-      <!-- Error -->
-      <AlertDialogContent v-show="!addSuccess">
-        <template v-slot:icon>
-          <v-icon large color="error">error</v-icon>
-        </template>
-        <template v-slot:title>
-          Invalid Passcode
-        </template>
-        <template v-slot:text>
-          Unable to add the business. The provided Passcode is invalid or already in use.
-        </template>
-        <template v-slot:actions>
-          <v-btn large color="error" @click="isResultDialogVisible = false">OK</v-btn>
-        </template>
-      </AlertDialogContent>
-    </v-dialog>
+  <!-- 401 - Dialog for code not valid -->
+  <ModalDialog
+    ref="invalidCodeDialog"
+    :title="dialogTitle"
+    :text="dialogText"
+  >
+    <template v-slot:icon>
+      <v-icon large color="error">error</v-icon>
+    </template>
+  </ModalDialog>
 
-    <!-- Confirm delete modal -->
-    <v-dialog v-model="isConfirmDeleteModalVisible" persistent max-width="400px">
-      <AlertDialogContent>
-        <template v-slot:icon>
-          <v-icon large color="error">error</v-icon>
-        </template>
-        <template v-slot:title>
-          Remove Business
-        </template>
-        <template v-slot:text>
-          Are you sure you wish to remove this business?
-        </template>
-        <template v-slot:actions>
-          <v-btn large color="primary" @click="removeBusiness()">Remove</v-btn>
-          <v-btn large color="default" @click="isConfirmDeleteModalVisible = false">Cancel</v-btn>
-        </template>
-      </AlertDialogContent>
-    </v-dialog>
+  <!-- 404 - Dialog for entity not found -->
+  <ModalDialog
+    ref="entityNotFoundDialog"
+    :title="dialogTitle"
+    :text="dialogText"
+  >
+    <template v-slot:icon>
+      <v-icon large color="error">error</v-icon>
+    </template>
+  </ModalDialog>
+
+  <!-- Dialog for confirming business removal -->
+  <ModalDialog
+    ref="confirmDeleteDialog"
+    :title="dialogTitle"
+    :text="dialogText"
+  >
+    <template v-slot:icon>
+      <v-icon large color="error">error</v-icon>
+    </template>
+    <template v-slot:actions>
+      <v-btn large color="primary" @click="removeBusiness()">Remove</v-btn>
+      <v-btn large color="default" @click="cancelConfirmDelete()">Cancel</v-btn>
+    </template>
+  </ModalDialog>
 
   </div>
 </template>
@@ -107,33 +97,56 @@ import UserModule from '@/store/modules/user'
 import businessServices from '@/services/business.services'
 import BusinessModule from '@/store/modules/business'
 import { RemoveBusinessPayload } from '@/models/Organization'
+import ModalDialog from '@/components/auth/ModalDialog.vue'
 
 @Component({
   components: {
     AddBusinessForm,
     AffiliatedEntityList,
-    AlertDialogContent
+    AlertDialogContent,
+    ModalDialog
   }
 })
 export default class EntityManagement extends Vue {
   private userStore = getModule(UserModule, this.$store)
   private businessStore = getModule(BusinessModule, this.$store)
-  isBusinessModalVisible = false
-  isResultDialogVisible = false
-  isConfirmDeleteModalVisible = false
-  addSuccess = false
-  removeBusinessPayload = null
+  private isBusinessModalVisible = false
+  private isResultDialogVisible = false
+  private isConfirmDeleteModalVisible = false
+  private addSuccess = false
+  private invalidPassCode = false
+  private entityNotFound = false
+  private removeBusinessPayload = null
+
+  private dialogTitle = ''
+  private dialogText = ''
+
+  $refs: {
+    successDialog: ModalDialog
+    invalidCodeDialog: ModalDialog
+    entityNotFoundDialog: ModalDialog
+    confirmDeleteDialog: ModalDialog
+  }
 
   showAddSuccessModal () {
-    this.addSuccess = true
     this.isBusinessModalVisible = false
-    this.isResultDialogVisible = true
+    this.dialogTitle = 'Business Added'
+    this.dialogText = 'You have successfully added a business'
+    this.$refs.successDialog.open()
   }
 
   showInvalidCodeModal () {
-    this.addSuccess = false
     this.isBusinessModalVisible = false
-    this.isResultDialogVisible = true
+    this.dialogTitle = 'Invalid Passcode'
+    this.dialogText = 'Unable to add the business. The provided Passcode is invalid or already in use.'
+    this.$refs.invalidCodeDialog.open()
+  }
+
+  showEntityNotFoundModal () {
+    this.isBusinessModalVisible = false
+    this.dialogTitle = 'Business Not Found'
+    this.dialogText = 'The specified business was not found.'
+    this.$refs.entityNotFoundDialog.open()
   }
 
   showAddBusinessModal () {
@@ -142,11 +155,13 @@ export default class EntityManagement extends Vue {
 
   showConfirmRemoveModal (removeBusinessPayload: RemoveBusinessPayload) {
     this.removeBusinessPayload = removeBusinessPayload
-    this.isConfirmDeleteModalVisible = true
+    this.dialogTitle = 'Confirm Remove Business'
+    this.dialogText = 'Are you sure you wish to remove this business?'
+    this.$refs.confirmDeleteDialog.open()
   }
 
-  cancelModal () {
-    this.isBusinessModalVisible = false
+  cancelConfirmDelete () {
+    this.$refs.confirmDeleteDialog.close()
   }
 
   removeBusiness () {

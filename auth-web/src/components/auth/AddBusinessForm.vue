@@ -96,6 +96,8 @@ export default class AddBusinessForm extends Vue {
       } catch (exception) {
         if (exception.response && exception.response.status === 401) {
           this.$emit('add-failed-invalid-code')
+        } else if (exception.response && exception.response.status === 404) {
+          this.$emit('add-failed-no-entity')
         }
       } finally {
         this.resetForm()

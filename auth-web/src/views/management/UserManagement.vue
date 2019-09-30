@@ -54,30 +54,19 @@
     <!-- Invite Users Modal -->
     <v-dialog content-class="invite-user-dialog" :fullscreen="$vuetify.breakpoint.mdOnly" v-model="isInviteUsersModalVisible" scrollable persistent>
       <InviteUsersForm
-        @invites-complete="showInviteSummaryModal()"
+        @invites-complete="showSuccessModal()"
         @cancel="cancelModal()"
       >
       </InviteUsersForm>
     </v-dialog>
 
     <!-- Alert Dialog (Success) -->
-    <v-dialog content-class="notify-dialog text-center" v-model="isInviteSuccessModalVisible">
-      <AlertDialogContent>
-        <template v-slot:icon>
-          <v-icon large color="success">check</v-icon>
-        </template>
-        <template v-slot:title>
-          <span v-show="!resending">Invited {{ sentInvitations.length }} Team Members</span>
-          <span v-show="resending">{{ sentInvitations.length }} invitations resent</span>
-        </template>
-        <template v-slot:text>
-          Your team invitations were sent successfully.
-        </template>
-        <template v-slot:actions>
-          <v-btn large color="success" @click="okCloseModal()">OK</v-btn>
-        </template>
-      </AlertDialogContent>
-    </v-dialog>
+    <ModalDialog
+      ref="successDialog"
+      :title="successTitle"
+      :text="successText">
+    </ModalDialog>
+
   </div>
 </template>
 
@@ -91,11 +80,13 @@ import { Invitation } from '@/models/Invitation'
 import OrgModule from '@/store/modules/org'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
+import ModalDialog from '@/components/auth/ModalDialog.vue'
 
 @Component({
   components: {
     InviteUsersForm,
-    AlertDialogContent
+    AlertDialogContent,
+    ModalDialog
   },
   computed: {
     ...mapState('org', ['currentOrg', 'resending', 'sentInvitations']),
@@ -129,6 +120,13 @@ export default class UserManagement extends Vue {
   readonly deleteMember!: (Member) => void
   readonly activeUserListing!: ActiveUserRecord[]
   readonly pendingUserListing!: PendingUserRecord[]
+
+  private successTitle = ''
+  private successText = ''
+
+  $refs: {
+    successDialog: ModalDialog
+  }
 
   headersActive = [
     {
@@ -203,9 +201,11 @@ export default class UserManagement extends Vue {
     this.isInviteUsersModalVisible = false
   }
 
-  showInviteSummaryModal () {
+  showSuccessModal () {
     this.isInviteUsersModalVisible = false
-    this.isInviteSuccessModalVisible = true
+    this.successTitle = `Invited ${this.sentInvitations.length} Team Members`
+    this.successText = 'Your team invitations have been sent successfully.'
+    this.$refs.successDialog.open()
     this.getPendingBasicMembers()
   }
 
@@ -218,8 +218,7 @@ export default class UserManagement extends Vue {
     const invitationToResend = this.pendingBasicMembers.find(invitation => invitation.id === pendingUser.invitationId)
     if (invitationToResend) {
       await this.resendInvitation(invitationToResend)
-      this.isInviteSuccessModalVisible = true
-      this.getPendingBasicMembers()
+      this.showSuccessModal()
     }
   }
 
