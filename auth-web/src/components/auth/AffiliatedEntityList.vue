@@ -44,10 +44,11 @@
 import Vue from 'vue'
 import { Component, Emit } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
-import UserModule from '../../store/modules/user'
-import configHelper from '../../util/config-helper'
+import UserModule from '@/store/modules/user'
+import configHelper from '@/util/config-helper'
 import { AffiliatedEntity, Organization, RemoveBusinessPayload } from '../../models/Organization'
 import { mapGetters, mapState, mapActions } from 'vuex'
+import { SessionStorageKeys } from '@/util/constants'
 
 @Component({
   computed: {
@@ -90,10 +91,10 @@ export default class AffiliatedEntityList extends Vue {
     }
   }
 
-  redirectToNext (incorporationNumber: String) {
+  redirectToNext (incorporationNumber: string) {
     if (this.VUE_APP_COPS_REDIRECT_URL) {
-      // Temporary code: Must change once the solution is finalized.
-      const redirectURL = this.VUE_APP_COPS_REDIRECT_URL + '/dashboard?corp=' + incorporationNumber
+      configHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, incorporationNumber)
+      const redirectURL = this.VUE_APP_COPS_REDIRECT_URL + '/dashboard'
       window.location.href = decodeURIComponent(redirectURL)
     }
   }

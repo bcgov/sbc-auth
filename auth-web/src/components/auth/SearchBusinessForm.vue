@@ -35,7 +35,7 @@
                   <v-divider></v-divider>
                   <p class="intro-text"/>
                   <v-layout align-end justify-end>
-                    <v-btn class="search-btn" @click="searchBusiness" color="primary" large >
+                    <v-btn class="search-btn" @click="search" color="primary" large >
                       <span>Enter</span>
                       <v-icon dark right>arrow_forward</v-icon>
                     </v-btn>
@@ -54,44 +54,48 @@
 import Vue from 'vue'
 import { Component, Prop, Emit } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
-import BusinessModule from '../../store/modules/business'
+import BusinessModule from '@/store/modules/business'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
-import configHelper from '../../util/config-helper'
+import configHelper from '@/util/config-helper'
+import { mapActions } from 'vuex'
 
 @Component({
   components: {
     SupportInfoCard
+  },
+  methods: {
+    ...mapActions('business', ['searchBusiness'])
   }
 })
-export default class searchBusinessForm extends Vue {
-  VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
+export default class SearchBusinessForm extends Vue {
+  private businessStore = getModule(BusinessModule, this.$store)
+  private VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
+  private entityNumRules = [v => !!v || 'Incorporation Number is required']
+  private businessNumber = ''
+  private errorMessage = ''
+
+  private readonly searchBusiness!: (businessNumber: string) => void
+
   $refs: {
     form: HTMLFormElement
   }
-
-  entityNumRules = [
-    v => !!v || 'Incorporation Number is required'
-  ]
-
-  businessStore = getModule(BusinessModule, this.$store)
-
-  businessNumber: string = ''
-  errorMessage:string = ''
 
   private isFormValid (): boolean {
     return this.$refs.form.validate()
   }
 
-  searchBusiness () {
+  async search () {
     if (this.isFormValid()) {
-        // attempt to searchBusiness
-        this.businessStore.searchBusiness(this.businessNumber).then(()=>{
-          this.errorMessage = ''
-          // redirect to the coops UI
-          window.location.href = this.VUE_APP_COPS_REDIRECT_URL
-        }).catch (exception => {
-          this.errorMessage = this.$t('noResultMsg').toString()
-        })
+      try {
+        // Search for business, action will set session storage
+        await this.searchBusiness(this.businessNumber)
+        this.errorMessage = ''
+
+        // Redirect to the coops UI
+        window.location.href = this.VUE_APP_COPS_REDIRECT_URL
+      } catch (exception) {
+        this.errorMessage = this.$t('noResultMsg').toString()
+      }
     }
   }
 }
