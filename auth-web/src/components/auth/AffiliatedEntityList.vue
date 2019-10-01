@@ -94,7 +94,7 @@ export default class AffiliatedEntityList extends Vue {
   redirectToNext (incorporationNumber: string) {
     if (this.VUE_APP_COPS_REDIRECT_URL) {
       configHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, incorporationNumber)
-      const redirectURL = this.VUE_APP_COPS_REDIRECT_URL + '/dashboard'
+      const redirectURL = this.VUE_APP_COPS_REDIRECT_URL + 'dashboard'
       window.location.href = decodeURIComponent(redirectURL)
     }
   }
