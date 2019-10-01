@@ -3,13 +3,15 @@
   font-family: 'BCSans', sans-serif  // override the default Vuetify font
 } 
 
+// Position progress indicator in the button
+
+
 // Buttons
 .v-btn {
   letter-spacing: 0;
   text-transform: none;
   font-weight: 400;
 
-// Position progress indicator in the button
   .v-progress-circular {
     margin-right: 1rem;
     margin-left: -0.5rem;
@@ -40,7 +42,7 @@
   padding-bottom: 1rem;
   letter-spacing: -0.01em;
   font-size: 1.5rem;
-  font-weight: 400;
+  font-weight: 700;
 }
 
 // v-card
@@ -56,24 +58,25 @@
 }
 
 // Form Inputs
-// Chrome: remove the blue highlight on auto-filled inputs
+
+// Adjust font size of help messages
+// Do this to prevent unexpected sizing if using any transitions
+.v-text-field__details {
+  min-height: 1.25rem;
+}
+
+// Adjust size and position of input label
+[class^="v-text-field"] .v-label--active {
+  transform: translateY(-8px) scale(0.75);
+}
+
+// Fix weird blue highlight in autocomplete boxes (Chrome)
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
     -webkit-transition: "color 9999s ease-out, background-color 9999s ease-out";
     -webkit-transition-delay: 9999s;
-}
-
-// Adjust font size of help messages
-.v-messages__message {
-  //font-size: 14px;
-  height: 1.5rem;
-}
-
-// Adjust size and position of input label
-[class^="v-text-field"] .v-label--active {
-  transform: translateY(-8px) scale(0.75);
 }
 
 // Tab Navigation

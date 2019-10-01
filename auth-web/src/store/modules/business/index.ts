@@ -75,7 +75,7 @@ export default class BusinessModule extends VuexModule {
     })
 
     // Create an affiliation between implicit org and requested business
-    await businessServices.createAffiliation(createBusinessResponse.data['id'], affiliation)
+    await businessServices.createAffiliation(createBusinessResponse.data.id, affiliation)
 
     // Update store
     this.context.dispatch('user/getOrganizations', null, { root: true })

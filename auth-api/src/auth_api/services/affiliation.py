@@ -114,7 +114,7 @@ class Affiliation:
 
         if not authorized:
             # If org being affiliated was IMPLICIT, remove it since the affiliation was not valid
-            if org.as_dict()['org_type'] == 'IMPLICIT':
+            if org.as_dict()['orgType'] == 'IMPLICIT':
                 org.delete_org()
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
 
@@ -149,3 +149,7 @@ class Affiliation:
 
         affiliation.delete()
         entity.set_pass_code_claimed(False)
+
+        # If org is implicit, delete it as it only exists to faciliate this affiliation
+        if org.as_dict()['orgType'] == 'IMPLICIT':
+            org.delete_org()

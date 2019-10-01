@@ -1,4 +1,4 @@
-import { User } from '@/models/user';
+import { User } from '@/models/user'
 
 export interface Organizations
 {
@@ -6,7 +6,7 @@ export interface Organizations
 }
 
 export interface Organization {
-  id?: string;
+  id?: number;
   name: string;
   affiliatedEntities?: AffiliatedEntity[];
   orgType?: string;
@@ -18,8 +18,13 @@ export interface AffiliatedEntity {
   name: string;
 }
 
+export interface DeleteMemberPayload {
+  orgIdentifier: number
+  memberId: number
+}
+
 export interface RemoveBusinessPayload {
-  orgIdentifier: string
+  orgIdentifier: number
   incorporationNumber: string
 }
 

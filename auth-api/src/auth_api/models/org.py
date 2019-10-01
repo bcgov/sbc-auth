@@ -44,6 +44,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     members = relationship('Membership', back_populates='org', cascade='all,delete,delete-orphan')
     affiliated_entities = relationship('Affiliation', back_populates='org',
                                        primaryjoin="and_(Org.id == Affiliation.org_id, Org.type_code == 'IMPLICIT')")
+    invitations = relationship('InvitationMembership', back_populates='org', cascade='all,delete,delete-orphan')
 
     @classmethod
     def create_from_dict(cls, org_info: dict):
