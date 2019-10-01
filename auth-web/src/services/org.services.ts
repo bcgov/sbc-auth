@@ -8,8 +8,8 @@ export default class OrgService {
     return Axios.get(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgId}/members`)
   }
 
-  public static async getOrgInvitations (orgId: number): Promise<AxiosResponse<Invitations>> {
-    return Axios.get(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgId}/invitations`)
+  public static async getOrgInvitations (orgId: number, status: string = 'ALL'): Promise<AxiosResponse<Invitations>> {
+    return Axios.get(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgId}/invitations?status=${status}`)
   }
 
   public static async removeMember (orgId: number, memberId: number): Promise<AxiosResponse<Member>> {

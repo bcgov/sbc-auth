@@ -295,10 +295,11 @@ class OrgContacts(Resource):
         def get(org_id):
             """Retrieve the set of invitations for the given org."""
             try:
+                invitation_status = request.args.get('status').upper() if request.args.get('status') else 'ALL'
                 org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
                                                 allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
                 if org:
-                    response, status = jsonify(org.get_invitations()), \
+                    response, status = jsonify(org.get_invitations(invitation_status)), \
                         http_status.HTTP_200_OK
                 else:
                     response, status = {'message': 'The requested organization could not be found.'}, \

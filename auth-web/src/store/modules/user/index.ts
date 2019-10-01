@@ -165,7 +165,7 @@ export default class UserModule extends VuexModule {
     for (let i = 0; i < orgs.length; i++) {
       const organization = orgs[i]
       if (organization.orgType === 'IMPLICIT') {
-        const response = await OrgService.getOrgInvitations(organization.id)
+        const response = await OrgService.getOrgInvitations(organization.id, 'PENDING')
         if (response.status === 200 && response.data) {
           invitations = invitations.concat(response.data.invitations)
         }
