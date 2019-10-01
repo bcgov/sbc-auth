@@ -15,79 +15,58 @@
       @remove-business="showConfirmRemoveModal($event)"
     />
 
-    <!-- Add Business Modal -->
-    <v-dialog content-class="add-business-dialog" v-model="isBusinessModalVisible" persistent>
-      <v-card>
-        <v-card-title class="d-flex">
-          Add Business
-          <!-- TODO: We need to standardize how we are leveraging dialogs (See InviteUsersform.vue) -->
-          <!--
-          <v-btn large icon>
-            <v-icon @click="cancel()">close</v-icon>
-          </v-btn>
-          -->
-        </v-card-title>
-        <v-card-text>
-          <p>Enter your Incorporation Number and Passcode.</p>
-          <AddBusinessForm class="mt-7"
-            @add-success="showAddSuccessModal()"
-            @add-failed-invalid-code="showInvalidCodeModal()"
-            @cancel="cancelModal()"
-          >
-          </AddBusinessForm>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+    <!-- Add Business Dialog -->
+    <ModalDialog
+      ref="addBusinessDialog"
+      :is-persistent="true"
+      :title="dialogTitle"
+      :show-icon=false
+      :show-actions=false
+    >
+      <template v-slot:text>
+        <p>Enter your Incorporation Number and Passcode.</p>
+        <AddBusinessForm class="mt-7"
+          @add-success="showAddSuccessModal()"
+          @add-failed-invalid-code="showInvalidCodeModal()"
+          @add-failed-no-entity="showEntityNotFoundModal()"
+          @cancel="cancelAddBusiness()"
+        />
+      </template>
+    </ModalDialog>
 
-    <!-- Success/Fail Model -->
-    <v-dialog content-class="notify-dialog text-center" v-model="isResultDialogVisible" persistent>
-      
-      <!-- Success -->
-      <v-card v-show="addSuccess">
-        <v-card-title class="pb-2">
-          <v-icon x-large color="success" class="mt-3">check</v-icon>
-          <span class="mt-5">Success</span> 
-        </v-card-title>
-        <v-card-text>
-          You have successfully added a business.
-        </v-card-text>
-        <v-card-actions class="pb-8">
-          <v-flex>
-            <v-btn color="primary" @click="isResultDialogVisible = false">OK</v-btn>
-          </v-flex>
-        </v-card-actions>
-      </v-card>
+    <!-- Success Dialog -->
+    <ModalDialog
+      ref="successDialog"
+      :title="dialogTitle"
+      :text="dialogText"
+    />
 
-      <!-- Fail -->
-      <v-card v-show="!addSuccess">
-        <v-card-title class="pb-2">
-          <v-icon x-large color="error" class="mt-3">error</v-icon>
-          <span class="mt-5">Invalid Passcode</span> 
-        </v-card-title>
-        <v-card-text>
-          <p class="mt-5">Unable to add the business. The provided Passcode is invalid or already in use.</p>
-        </v-card-text>
-        <v-card-actions class="pb-8">
-          <v-btn large color="error" @click="isResultDialogVisible = false">OK</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <!-- Error Dialog -->
+    <ModalDialog
+      ref="errorDialog"
+      :title="dialogTitle"
+      :text="dialogText"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">error</v-icon>
+      </template>
+    </ModalDialog>
 
-    <!-- Confirm delete modal -->
-    <v-dialog v-model="isConfirmDeleteModalVisible" persistent max-width="400px">
-      <v-card>
-        <v-card-title>
-          <h2>Confirm Remove Business</h2>
-        </v-card-title>
-        <v-card-text>Are you sure you wish to remove this business?</v-card-text>
-        <v-card-actions>
-          <v-flex class="text-xs-right">
-            <v-btn color="secondary" @click="isConfirmDeleteModalVisible = false">Cancel</v-btn>
-            <v-btn color="primary" @click="removeBusiness()">Remove</v-btn>
-          </v-flex>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <!-- Dialog for confirming business removal -->
+    <ModalDialog
+      ref="confirmDeleteDialog"
+      :title="dialogTitle"
+      :text="dialogText"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">error</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-btn large color="primary" @click="remove()">Remove</v-btn>
+        <v-btn large color="default" @click="cancelConfirmDelete()">Cancel</v-btn>
+      </template>
+    </ModalDialog>
+
   </div>
 </template>
 
@@ -95,55 +74,82 @@
 import { Vue, Component } from 'vue-property-decorator'
 import AddBusinessForm from '@/components/auth/AddBusinessForm.vue'
 import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
-import { getModule } from 'vuex-module-decorators'
 import UserModule from '@/store/modules/user'
-import businessServices from '@/services/business.services'
 import BusinessModule from '@/store/modules/business'
 import { RemoveBusinessPayload } from '@/models/Organization'
+import ModalDialog from '@/components/auth/ModalDialog.vue'
+import { mapActions } from 'vuex'
+import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
     AddBusinessForm,
-    AffiliatedEntityList
+    AffiliatedEntityList,
+    ModalDialog
+  },
+  methods: {
+    ...mapActions('business', ['removeBusiness'])
   }
 })
 export default class EntityManagement extends Vue {
-  private userStore = getModule(UserModule, this.$store)
   private businessStore = getModule(BusinessModule, this.$store)
-  isBusinessModalVisible = false
-  isResultDialogVisible = false
-  isConfirmDeleteModalVisible = false
-  addSuccess = false
-  removeBusinessPayload = null
+  private removeBusinessPayload = null
+  private dialogTitle = ''
+  private dialogText = ''
+
+  private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => void
+
+  $refs: {
+    successDialog: ModalDialog
+    errorDialog: ModalDialog
+    confirmDeleteDialog: ModalDialog
+    addBusinessDialog: ModalDialog
+  }
 
   showAddSuccessModal () {
-    this.addSuccess = true
-    this.isBusinessModalVisible = false
-    this.isResultDialogVisible = true
+    this.$refs.addBusinessDialog.close()
+    this.dialogTitle = 'Business Added'
+    this.dialogText = 'You have successfully added a business'
+    this.$refs.successDialog.open()
   }
 
   showInvalidCodeModal () {
-    this.addSuccess = false
-    this.isBusinessModalVisible = false
-    this.isResultDialogVisible = true
+    this.$refs.addBusinessDialog.close()
+    this.dialogTitle = 'Invalid Passcode'
+    this.dialogText = 'Unable to add the business. The provided Passcode is invalid or already in use.'
+    this.$refs.errorDialog.open()
+  }
+
+  showEntityNotFoundModal () {
+    this.$refs.addBusinessDialog.close()
+    this.dialogTitle = 'Business Not Found'
+    this.dialogText = 'The specified business was not found.'
+    this.$refs.errorDialog.open()
   }
 
   showAddBusinessModal () {
-    this.isBusinessModalVisible = true
+    this.dialogTitle = 'Add Business'
+    this.$refs.addBusinessDialog.open()
   }
 
   showConfirmRemoveModal (removeBusinessPayload: RemoveBusinessPayload) {
     this.removeBusinessPayload = removeBusinessPayload
-    this.isConfirmDeleteModalVisible = true
+    this.dialogTitle = 'Confirm Remove Business'
+    this.dialogText = 'Are you sure you wish to remove this business?'
+    this.$refs.confirmDeleteDialog.open()
   }
 
-  cancelModal () {
-    this.isBusinessModalVisible = false
+  cancelConfirmDelete () {
+    this.$refs.confirmDeleteDialog.close()
   }
 
-  removeBusiness () {
-    this.businessStore.removeBusiness(this.removeBusinessPayload)
-    this.isConfirmDeleteModalVisible = false
+  cancelAddBusiness () {
+    this.$refs.addBusinessDialog.close()
+  }
+
+  remove () {
+    this.removeBusiness(this.removeBusinessPayload)
+    this.$refs.confirmDeleteDialog.close()
   }
 }
 </script>

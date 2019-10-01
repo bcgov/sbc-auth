@@ -20,11 +20,18 @@
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
 
-import OrgModule from '../store/modules/org'
+import OrgModule from '@/store/modules/org'
+import { mapActions } from 'vuex'
+import { Invitation } from '@/models/Invitation'
 
-@Component
+@Component({
+  methods: {
+    ...mapActions('org', ['acceptInvitation'])
+  }
+})
 export default class AcceptInvite extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
+  private readonly acceptInvitation!: (token: string) => Invitation
 
   @Prop()
   token: string
@@ -34,12 +41,12 @@ export default class AcceptInvite extends Vue {
   expiredInvitation: Boolean = false
 
   mounted () {
-    this.acceptInvitation()
+    this.accept()
   }
 
-  async acceptInvitation () {
+  async accept () {
     try {
-      await this.orgStore.acceptInvitation(this.token)
+      await this.acceptInvitation(this.token)
       this.$router.push('/main')
     } catch (exception) {
       if (exception.message === 'Request failed with status code 400') {

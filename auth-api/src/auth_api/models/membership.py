@@ -36,8 +36,8 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     )
 
     membership_type = relationship('MembershipType', foreign_keys=[membership_type_code])
-    user = relationship('User', back_populates='orgs', foreign_keys=[user_id])
-    org = relationship('Org', back_populates='members', foreign_keys=[org_id])
+    user = relationship('User', back_populates='orgs', foreign_keys=[user_id], lazy='subquery')
+    org = relationship('Org', back_populates='members', foreign_keys=[org_id], lazy='subquery')
 
     def __init__(self, **kwargs):
         """Initialize a new membership."""

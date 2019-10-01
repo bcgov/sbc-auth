@@ -1,23 +1,23 @@
 <template>
   <div class="user-mgmt-view">
-    <header class="view-header mt-1 mb-6">
-      <h1>Manage Users</h1>
+    <header class="view-header mt-1 mb-5">
+      <h1>Manage Team</h1>
       <div class="view-header__actions">
         <v-btn outlined color="primary" @click="showInviteUsersModal()">
           <v-icon>add</v-icon>
-          <span>Invite Users</span>
+          <span>Invite Team Members</span>
         </v-btn>
       </div>
     </header>
 
     <!-- Tab Navigation -->
-    <v-tabs background-color="transparent" class="mb-6" v-model="tab">
+    <v-tabs v-model="tab" background-color="transparent" class="mb-3">
       <v-tab>Active</v-tab>
       <v-tab>Pending</v-tab>
     </v-tabs>
 
-    <!-- Tab Contents -->
     <v-card>
+      <!-- Tab Contents -->
       <v-tabs-items v-model="tab">
         <v-tab-item>
           <v-data-table
@@ -51,52 +51,50 @@
       </v-tabs-items>
     </v-card>
 
-    <!-- Invite Users Modal -->
-    <v-dialog content-class="invite-user-dialog" v-model="isInviteUsersModalVisible" scrollable  persistent>
-      <InviteUsersForm
-        @invites-complete="showInviteSummaryModal()"
-        @cancel="cancelModal()"
-      >
-      </InviteUsersForm>
-    </v-dialog>
+    <ModalDialog
+      ref="inviteUsersDialog"
+      :show-icon=false
+      :show-actions=false
+      :fullscreen-on-mobile="$vuetify.breakpoint.xsOnly || $vuetify.breakpoint.smOnly || $vuetify.breakpoint.mdOnly"
+      :is-persistent="true"
+      :is-scrollable="true"
+    >
+      <template v-slot:title>
+        <span>Invite Team Members</span>
+      </template>
+      <template v-slot:text>
+        <InviteUsersForm
+          @invites-complete="showSuccessModal()"
+          @cancel="cancelInviteUsersModal()"
+        />
+      </template>
+    </ModalDialog>
 
-    <!-- Notification Dialog (Success) -->
-    <v-dialog content-class="notify-dialog text-center" v-model="isInviteSuccessModalVisible">
-      <v-card>
-        <v-card-title class="pb-2">
-          <v-icon x-large color="success" class="mt-3">check</v-icon>
-          <span class="mt-5">Invited {{ sentInvitations.length }} Team Members</span>
-        </v-card-title>
-        <v-card-text class="text-center">
-          <!--
-          <p v-show="!resending">Invited {{ sentInvitations.length }} Team Members</p>
-          <p v-show="resending">{{ sentInvitations.length }} invitations resent</p>
-          -->
-          <p class="mt-5">Your team invitations were sent successfully.</p>
-        </v-card-text>
-        <v-card-actions class="pb-8">
-          <v-btn large color="success" @click="okCloseModal()">
-            OK
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <!-- Alert Dialog (Success) -->
+    <ModalDialog
+      ref="successDialog"
+      :title="successTitle"
+      :text="successText">
+    </ModalDialog>
+
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
 import { mapState, mapGetters, mapActions } from 'vuex'
-import { Organization, Member, PendingUserRecord, ActiveUserRecord } from '@/models/Organization'
+import { Organization, Member, PendingUserRecord, ActiveUserRecord, DeleteMemberPayload } from '@/models/Organization'
 import { Invitation } from '@/models/Invitation'
+import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
-    InviteUsersForm
+    InviteUsersForm,
+    ModalDialog
   },
   computed: {
     ...mapState('org', ['currentOrg', 'resending', 'sentInvitations']),
@@ -109,31 +107,35 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class UserManagement extends Vue {
-  userStore = getModule(UserModule, this.$store)
-  orgStore = getModule(OrgModule, this.$store)
-  tab = null
-  isInviteUsersModalVisible = false
-  isInviteSuccessModalVisible = false
-  isInviteErrorModalVisible = false
+  private orgStore = getModule(OrgModule, this.$store)
+  private userStore = getModule(UserModule, this.$store)
+  private successTitle = ''
+  private successText = ''
+  private tab = null
 
-  readonly organizations!: Organization[]
-  readonly currentOrg!: Organization
-  readonly resending!: boolean
-  readonly sentInvitations!: Invitation[]
-  readonly activeBasicMembers!: Member[]
-  readonly pendingBasicMembers!: Invitation[]
-  readonly getOrganizations!: () => Organization[]
-  readonly getActiveBasicMembers!: () => Member[]
-  readonly getPendingBasicMembers!: () => Invitation[]
-  readonly resendInvitation!: (Invitation) => void
-  readonly deleteInvitation!: (Invitation) => void
-  readonly deleteMember!: (Member) => void
-  readonly activeUserListing!: ActiveUserRecord[]
-  readonly pendingUserListing!: PendingUserRecord[]
+  private readonly organizations!: Organization[]
+  private readonly currentOrg!: Organization
+  private readonly resending!: boolean
+  private readonly sentInvitations!: Invitation[]
+  private readonly activeBasicMembers!: Member[]
+  private readonly pendingBasicMembers!: Invitation[]
+  private readonly getOrganizations!: () => Organization[]
+  private readonly getActiveBasicMembers!: () => Member[]
+  private readonly getPendingBasicMembers!: () => Invitation[]
+  private readonly resendInvitation!: (invitation: Invitation) => void
+  private readonly deleteInvitation!: (invitation: Invitation) => void
+  private readonly deleteMember!: (deleteMemberPayload: DeleteMemberPayload) => void
+  private readonly activeUserListing!: ActiveUserRecord[]
+  private readonly pendingUserListing!: PendingUserRecord[]
+
+  $refs: {
+    successDialog: ModalDialog
+    inviteUsersDialog: ModalDialog
+  }
 
   headersActive = [
     {
-      text: 'User',
+      text: 'Team Member',
       align: 'left',
       sortable: true,
       value: 'name',
@@ -163,7 +165,7 @@ export default class UserManagement extends Vue {
 
   headersPending = [
     {
-      text: 'User',
+      text: 'Contact',
       align: 'left',
       sortable: true,
       value: 'email',
@@ -197,30 +199,26 @@ export default class UserManagement extends Vue {
   }
 
   showInviteUsersModal () {
-    this.isInviteUsersModalVisible = true
+    this.$refs.inviteUsersDialog.open()
   }
 
-  cancelModal () {
-    this.isInviteUsersModalVisible = false
+  cancelInviteUsersModal () {
+    this.$refs.inviteUsersDialog.close()
   }
 
-  showInviteSummaryModal () {
-    this.isInviteUsersModalVisible = false
-    this.isInviteSuccessModalVisible = true
+  showSuccessModal () {
+    this.$refs.inviteUsersDialog.close()
+    this.successTitle = `Invited ${this.sentInvitations.length} Team Members`
+    this.successText = 'Your team invitations have been sent successfully.'
+    this.$refs.successDialog.open()
     this.getPendingBasicMembers()
-  }
-
-  okCloseModal () {
-    this.isInviteSuccessModalVisible = false
-    this.isInviteErrorModalVisible = false
   }
 
   async resend (pendingUser: PendingUserRecord) {
     const invitationToResend = this.pendingBasicMembers.find(invitation => invitation.id === pendingUser.invitationId)
     if (invitationToResend) {
       await this.resendInvitation(invitationToResend)
-      this.isInviteSuccessModalVisible = true
-      this.getPendingBasicMembers()
+      this.showSuccessModal()
     }
   }
 
@@ -238,27 +236,10 @@ export default class UserManagement extends Vue {
       this.organizations
         .filter(org => org.orgType === 'IMPLICIT')
         .forEach(async org => {
-          await this.deleteMember({ orgId: org.id, memberId: memberToDelete.id })
+          await this.deleteMember({ orgIdentifier: org.id, memberId: memberToDelete.id })
         })
       this.getActiveBasicMembers()
     }
   }
 }
 </script>
-
-<style lang="scss">
-  // Invite Users Dialog
-  .invite-user-dialog {
-    max-width: 40rem;
-    width: 40rem;
-  }
-
-  // Notification Dialog (Success/Error)
-  .notify-dialog {
-    max-width: 30rem;
-
-    .v-card__title {
-      flex-direction: column;
-    }
-  }
-</style>

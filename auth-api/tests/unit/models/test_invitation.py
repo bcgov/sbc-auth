@@ -134,6 +134,17 @@ def test_find_pending_invitations_by_user(session):  # pylint:disable=unused-arg
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
 
 
+def test_find_pending_invitations_by_org(session):  # pylint:disable=unused-argument
+    """Assert that an Invitation can retrieved by the org id."""
+    invitation = factory_invitation_model(session=session, status='PENDING')
+    session.add(invitation)
+    session.commit()
+
+    retrieved_invitation = InvitationModel.find_pending_invitations_by_org(invitation.membership[0].org_id)
+    assert len(retrieved_invitation) == 1
+    assert retrieved_invitation[0].recipient_email == invitation.recipient_email
+
+
 def test_invitations_by_status(session):  # pylint:disable=unused-argument
     """Assert that an Invitation can retrieved by the user id."""
     invitation = factory_invitation_model(session=session, status='PENDING')

@@ -12,8 +12,8 @@ interface BusinessService {
   updateContact: (business: Business, coontact: Contact) => Promise<AxiosResponse<Business>>
   getOrgs: () => Promise<AxiosResponse<any>>
   createOrg: (org: Organization) => Promise<AxiosResponse<Organization>>
-  createAffiliation: (orgIdentifier: string, affiliation: Affiliation) => Promise<AxiosResponse<Affiliation>>
-  removeAffiliation: (orgIdentifier: string, incorporationNumber: string) => Promise<AxiosResponse<void>>
+  createAffiliation: (orgIdentifier: number, affiliation: Affiliation) => Promise<AxiosResponse<Affiliation>>
+  removeAffiliation: (orgIdentifier: number, incorporationNumber: string) => Promise<AxiosResponse<void>>
   // Following searchBusiness will search data from legal-api.
   searchBusiness: (businessNumber: string) => Promise<AxiosResponse<any>>
 }
@@ -37,10 +37,10 @@ export default {
   async createOrg (org: Organization): Promise<AxiosResponse<Organization>> {
     return Axios.post(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs`, org)
   },
-  async createAffiliation (orgIdentifier: string, affiliation: Affiliation): Promise<AxiosResponse<any>> {
+  async createAffiliation (orgIdentifier: number, affiliation: Affiliation): Promise<AxiosResponse<any>> {
     return Axios.post(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/affiliations`, affiliation)
   },
-  async removeAffiliation (orgIdentifier: string, incorporationNumber: string): Promise<AxiosResponse<void>> {
+  async removeAffiliation (orgIdentifier: number, incorporationNumber: string): Promise<AxiosResponse<void>> {
     return Axios.delete(`${configHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/affiliations/${incorporationNumber}`)
   },
   async searchBusiness (businessIdentifier: string): Promise<AxiosResponse<any>> {
