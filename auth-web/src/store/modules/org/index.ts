@@ -84,7 +84,6 @@ export default class OrgModule extends VuexModule {
 
   @Action({ rawError: true })
   public async deleteMember (memberInfo: DeleteMemberPayload) {
-    debugger
     return OrgService.removeMember(memberInfo.orgIdentifier, memberInfo.memberId)
   }
 }
