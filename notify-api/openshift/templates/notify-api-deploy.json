@@ -393,6 +393,15 @@
                         "key": "MAIL_FROM_ID"
                       }
                     }
+                  },
+                  {
+                    "name": "SENTRY_DSN",
+                    "valueFrom": {
+                      "configMapKeyRef": {
+                        "name": "${NAME}-${TAG_NAME}-config",
+                        "key": "SENTRY_DSN"
+                      }
+                    }
                   }
                 ],
                 "resources": {
