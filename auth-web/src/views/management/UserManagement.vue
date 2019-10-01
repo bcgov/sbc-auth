@@ -1,11 +1,11 @@
 <template>
   <div class="user-mgmt-view">
     <header class="view-header mt-1 mb-5">
-      <h1>Manage Users</h1>
+      <h1>Manage Team</h1>
       <div class="view-header__actions">
         <v-btn outlined color="primary" @click="showInviteUsersModal()">
           <v-icon>add</v-icon>
-          <span>Invite Users</span>
+          <span>Invite Team Members</span>
         </v-btn>
       </div>
     </header>
@@ -135,7 +135,7 @@ export default class UserManagement extends Vue {
 
   headersActive = [
     {
-      text: 'User',
+      text: 'Team Member',
       align: 'left',
       sortable: true,
       value: 'name',
@@ -165,7 +165,7 @@ export default class UserManagement extends Vue {
 
   headersPending = [
     {
-      text: 'User',
+      text: 'Contact',
       align: 'left',
       sortable: true,
       value: 'email',
