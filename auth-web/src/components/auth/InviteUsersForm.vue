@@ -1,7 +1,7 @@
 <template>
   <div>
-    <p class="text-left">Enter email addresses to invite team members. Team members will be required to sign in with their <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank">BC Services Card</a>.</p>
-    <v-form ref="form" class="mt-8">
+    <p>Enter email addresses to invite team members. Team members will be required to sign in with their <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank">BC Services Card</a>.</p>
+    <v-form ref="form" class="mt-9">
       <ul class="invite-list">
         <transition-group name="slide-y-transition">
           <li class="d-flex" v-for="(invite, index) in invitations" v-bind:key="index + 1">
@@ -25,13 +25,11 @@
           </li>
         </transition-group>
       </ul>
-      <v-row>
-        <v-btn left text small color="primary"
-          @click="addEmail()">
-          <v-icon>add_box</v-icon>
-          <span>Add Another</span>
-        </v-btn>
-      </v-row>
+      <v-btn text small color="primary"
+        @click="addEmail()">
+        <v-icon>add_box</v-icon>
+        <span>Add Another</span>
+      </v-btn>
       <div class="form__btns">
         <v-btn large depressed color="primary"
                 @click="sendInvites"
@@ -140,19 +138,6 @@ export default class InviteUsersForm extends Vue {
 
 <style lang="scss" scoped>
   @import '../../assets/scss/theme.scss';
-
-  .v-card__title {
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    white-space: nowrap;
-
-    :first-child {
-      flex: 1 1 auto;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-
   .invite-list {
     margin: 0;
     padding: 0;
@@ -167,5 +152,4 @@ export default class InviteUsersForm extends Vue {
     flex-direction: row;
     justify-content: flex-end;
   }
-
 </style>

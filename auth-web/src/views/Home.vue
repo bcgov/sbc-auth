@@ -6,7 +6,7 @@
         <p class="intro-text">Sign in to start filing your BC Co-operative Annual Report. You will need to provide your <em>Incorporation Number</em> and your <em>Passcode</em> in the letter you received in the mail.</p>
         <v-card class="sign-in-card">
           <v-container>
-            <h2>Sign In</h2>
+            <h2 class="mb-7">Sign In</h2>
             <PasscodeForm/>
           </v-container>
         </v-card>
@@ -33,10 +33,7 @@ export default ({
 </script>
 
 <style lang="scss" scoped>
-  .sign-in-card .container {
-    padding: 1.5rem;
-  }
-
+  // Layout
   article {
     flex: 1 1 auto;
   }
@@ -48,8 +45,8 @@ export default ({
 
   @media (min-width: 960px) {
     article {
-      padding-top: 0.8rem;
-      padding-bottom: 0.8rem;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
     }
 
     aside {
@@ -61,6 +58,15 @@ export default ({
     .view-container {
       flex-flow: row nowrap;
     }
+  }
+
+  .intro-text {
+    margin-bottom: 3rem;
+  }
+
+  // Sign In
+  .sign-in-card .container {
+    padding: 1.5rem;
   }
 
   @media (min-width: 960px) {

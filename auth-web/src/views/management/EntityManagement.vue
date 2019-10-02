@@ -20,8 +20,9 @@
       ref="addBusinessDialog"
       :is-persistent="true"
       :title="dialogTitle"
-      :show-icon=false
-      :show-actions=false
+      :show-icon="false"
+      :show-actions="false"
+      max-width="640">
     >
       <template v-slot:text>
         <p>Enter your Incorporation Number and Passcode.</p>
@@ -39,6 +40,8 @@
       ref="successDialog"
       :title="dialogTitle"
       :text="dialogText"
+      dialog-class="notify-dialog"
+      max-width="640"
     />
 
     <!-- Error Dialog -->
@@ -46,9 +49,14 @@
       ref="errorDialog"
       :title="dialogTitle"
       :text="dialogText"
+      dialog-class="notify-dialog"
+      max-width="640"
     >
       <template v-slot:icon>
         <v-icon large color="error">error</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-btn large color="error" @click="close()">OK</v-btn>
       </template>
     </ModalDialog>
 
@@ -57,6 +65,8 @@
       ref="confirmDeleteDialog"
       :title="dialogTitle"
       :text="dialogText"
+      dialog-class="notify-dialog"
+      max-width="640"
     >
       <template v-slot:icon>
         <v-icon large color="error">error</v-icon>
@@ -96,6 +106,8 @@ export default class EntityManagement extends Vue {
   private removeBusinessPayload = null
   private dialogTitle = ''
   private dialogText = ''
+  private className = ''
+  private maxWidth = ''
 
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => void
 
@@ -110,6 +122,8 @@ export default class EntityManagement extends Vue {
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Business Added'
     this.dialogText = 'You have successfully added a business'
+    this.className = 'notify-dialog'
+    this.maxWidth = '640'
     this.$refs.successDialog.open()
   }
 
@@ -117,6 +131,8 @@ export default class EntityManagement extends Vue {
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Invalid Passcode'
     this.dialogText = 'Unable to add the business. The provided Passcode is invalid or already in use.'
+    this.className = 'notify-dialog'
+    this.maxWidth = '640'
     this.$refs.errorDialog.open()
   }
 
@@ -124,11 +140,14 @@ export default class EntityManagement extends Vue {
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Business Not Found'
     this.dialogText = 'The specified business was not found.'
+    this.className = 'notify-dialog'
+    this.maxWidth = '640'
     this.$refs.errorDialog.open()
   }
 
   showAddBusinessModal () {
     this.dialogTitle = 'Add Business'
+    this.maxWidth = '640'
     this.$refs.addBusinessDialog.open()
   }
 
@@ -136,6 +155,8 @@ export default class EntityManagement extends Vue {
     this.removeBusinessPayload = removeBusinessPayload
     this.dialogTitle = 'Confirm Remove Business'
     this.dialogText = 'Are you sure you wish to remove this business?'
+    this.className = 'notify-dialog'
+    this.maxWidth = '640'
     this.$refs.confirmDeleteDialog.open()
   }
 
@@ -151,27 +172,9 @@ export default class EntityManagement extends Vue {
     this.removeBusiness(this.removeBusinessPayload)
     this.$refs.confirmDeleteDialog.close()
   }
+
+  close () {
+    this.$refs.errorDialog.close()
+  }
 }
 </script>
-
-<style lang="scss">
-  @import '../../assets/scss/theme.scss';
-
-  .add-business-dialog {
-    max-width: 40rem;
-    width: 40rem;
-  }
-
-  // Notification Dialog (Success/Error)
-  .notify-dialog {
-    max-width: 30rem;
-
-    .v-card__title {
-      flex-direction: column;
-    }
-
-    .v-card__actions {
-      justify-content: center;
-    }
-  }
-</style>
