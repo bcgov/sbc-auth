@@ -1,19 +1,19 @@
 <template>
   <v-card class="support-info-card">
-    <header>Need Assistance?</header>
-    <div class="container">
-      <p>For support or questions about this application, please contact us at:</p>
-      <ul class="contact-list">
-        <li class="contact-list__row">
-          <v-icon small color="primary">phone</v-icon>
+    <v-card-title>Need Assistance?</v-card-title>
+    <v-card-text>
+      <p class="mb-0">For support or questions about this application, please contact us at:</p>
+      <ul class="contact-info">
+        <li class="contact-info__row">
+          <span class="contact-info__type">Phone:</span>
           <span class="contact-info__value">{{ $t('techSupportPhone') }}</span>
         </li>
-        <li class="contact-list__row">
-          <v-icon small color="primary">email</v-icon>
+        <li class="contact-info__row">
+          <span class="contact-info__type">Email:</span>
           <span class="contact-info__value"><a v-bind:href="'mailto:' + $t('techSupportEmail')">{{ $t('techSupportEmail') }}</a></span>
         </li>
       </ul>
-    </div>
+    </v-card-text>
   </v-card>
 </template>
 
@@ -26,53 +26,46 @@ export default {
 <style lang="scss" scoped>
   @import "../assets/scss/theme.scss";
 
-  .support-info-card{
+  .v-card__title {
+    padding-top: 1.25rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-bottom: 1rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+
+  .v-card__text {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-bottom: 1.5rem;
+    color: rgba($gray9, 0.8);
     font-size: 1rem;
   }
 
-  header{
-    padding: 1.5rem;
-    padding-bottom: 0;
-    font-size: 1.5em;
-    font-weight: 500;
-  }
-
-  .container{
-    padding-top: 1.125rem;
-    font-size: 1em;
-  }
-
-  @media (min-width: 960px){
-    header{
-      font-size: 1.125em;
-    }
-
-    .container{
-      font-size: 0.875em
-    }
-  }
-
-  .contact-list{
+  // Contact Info
+  .contact-info {
     margin-top: 1.5rem;
     padding: 0;
     font-weight: 500;
     list-style-type: none;
   }
 
-  .contact-list__row{
+  .contact-info__row {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .contact-info__type {
+    flex: 0 0 auto;
+    min-width: 4rem;
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    letter-spacing: -0.02rem;
+    font-weight: 700;
   }
 
-  .contact-list__row .v-icon{
-      vertical-align: middle;
-      margin-top: -0.15rem;
-      margin-right: 1rem;
+  .contact-info__value {
+    flex: 1 1 auto;
+    overflow: hidden;
   }
-
-  .contact-list__row + .contact-list__row{
-    margin-top: 0.2rem;
-  }
-
 </style>
