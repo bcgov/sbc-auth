@@ -1,21 +1,10 @@
 // Vuetify Overrides
-.v-application {
-  font-family: 'BCSans', sans-serif  // override the default Vuetify font
-} 
-
-// Position progress indicator in the button
-
 
 // Buttons
 .v-btn {
   letter-spacing: 0;
   text-transform: none;
   font-weight: 400;
-
-  .v-progress-circular {
-    margin-right: 1rem;
-    margin-left: -0.5rem;
-  }
 
   .v-icon:first-child {
     margin-right: 0.25rem;
@@ -32,17 +21,16 @@
   font-size: 0.8125rem;
 }
 
-.v-btn.v-size--large {
-  font-size: 0.9375rem;
-}
-
 // v-dialog 
 .v-dialog > .v-card > .v-card__title {
-  padding-top: 1.25rem;
-  padding-bottom: 1rem;
+  padding: 1.25rem 1.5rem;
   letter-spacing: -0.01em;
   font-size: 1.5rem;
   font-weight: 700;
+}
+
+.v-dialog--fullscreen > .v-sheet {
+  border-radius: 0;
 }
 
 // v-card
@@ -55,6 +43,10 @@
 .v-card__text {
   line-height: 1.5;
   font-size: 1rem;
+}
+
+.theme--light.v-card >.v-card__text {
+  color: rgba($gray9, 0.8);
 }
 
 // Form Inputs
