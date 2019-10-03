@@ -143,7 +143,7 @@ export default class BusinessContactForm extends Vue {
     if (this.isFormValid()) {
       let result: Promise<void>
       const contact: Contact = {
-        email: this.emailAddress,
+        email: this.emailAddress.toLowerCase(),
         phone: this.phoneNumber,
         phoneExtension: this.extension
       }
