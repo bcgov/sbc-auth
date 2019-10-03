@@ -16,9 +16,8 @@
 This module manages the Membership Information between an org and a user.
 """
 
-from sbc_common_components.tracing.service_tracing import ServiceTracing
-
 from auth_api.schemas import MembershipSchema
+from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)

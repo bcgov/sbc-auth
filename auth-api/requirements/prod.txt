@@ -17,3 +17,4 @@ requests
 python-keycloak
 itsdangerous
 sentry-sdk[flask]
+bcrypt

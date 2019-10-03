@@ -19,7 +19,6 @@ from threading import Thread
 from flask import copy_current_request_context
 from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
-from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -27,6 +26,7 @@ from auth_api.models import Invitation as InvitationModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.schemas import InvitationSchema
 from config import get_named_config
+from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from .notification import send_email
 
@@ -145,7 +145,7 @@ class Invitation:
     def validate_token(token):
         """Check whether the passed token is valid."""
         serializer = URLSafeTimedSerializer(CONFIG.EMAIL_TOKEN_SECRET_KEY)
-        token_valid_for = int(CONFIG.TOKEN_EXPIRY_PERIOD)*3600*24 if CONFIG.TOKEN_EXPIRY_PERIOD else 3600*24*7
+        token_valid_for = int(CONFIG.TOKEN_EXPIRY_PERIOD) * 3600 * 24 if CONFIG.TOKEN_EXPIRY_PERIOD else 3600 * 24 * 7
         try:
             invitation_id = serializer.loads(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT, max_age=token_valid_for)
         except:  # noqa: E722

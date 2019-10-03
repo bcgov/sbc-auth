@@ -3,6 +3,7 @@
 
 # Testing
 pytest<4.1
+attrs==19.1.0
 pytest-mock
 requests
 pyhamcrest
