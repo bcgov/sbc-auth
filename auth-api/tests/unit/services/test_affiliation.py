@@ -24,7 +24,6 @@ from auth_api.models.payment_type import PaymentType as PaymentTypeModel
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
-from auth_api.utils import passcode
 
 
 def factory_entity_service(business_identifier='CP1234567', business_number='791861073BC0001', name='Foobar, Inc.'):
@@ -42,12 +41,11 @@ def factory_entity_service(business_identifier='CP1234567', business_number='791
 def factory_entity_with_passcode_service(business_identifier='CP1234567', business_number='791861073BC0001',
                                          name='Foobar, Inc.', pass_code='111111111'):
     """Produce a templated entity model."""
-    hashed_pass_code: str = passcode.passcode_hash(pass_code)
     entity = EntityModel.create_from_dict({
         'business_identifier': business_identifier,
         'business_number': business_number,
         'name': name,
-        'pass_code': hashed_pass_code})
+        'pass_code': pass_code})
     entity.save()
     entity_service = EntityService(entity)
     return entity_service
