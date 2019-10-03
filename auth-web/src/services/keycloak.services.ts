@@ -5,6 +5,7 @@ import { SessionStorageKeys, AppConstants } from '../util/constants'
 
 const kc: Keycloak.KeycloakInstance = null
 const keyCloakConfig = `/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`
+const parsedToken = null
 
 export default {
 
@@ -20,13 +21,17 @@ export default {
     return this.kc.init({ token: token, onLoad: 'login-required' })
   },
 
-  initSessionStorage () {
+  initSession () {
     configHelper.addToSession(SessionStorageKeys.KeyCloakToken, this.kc.token)
     configHelper.addToSession(SessionStorageKeys.KeyCloakRefreshToken, this.kc.refreshToken)
+    this.parsedToken = this.kc.tokenParsed
   },
 
   getUserInfo () : UserInfo {
-    let token = this.kc.tokenParsed
+    let token = this.parsedToken
+    if (!token) {
+      this.parsedToken = token = this.decodeToken()
+    }
     return {
       lastName: token.lastname,
       firstName: token.firstname,
@@ -68,6 +73,30 @@ export default {
     }).error(() => {
       this.cleanupSession()
     })
+  },
+
+  verifyRoles (allowedRoles:[], disabledRoles:[]) {
+    let isAuthorized = false
+    if (allowedRoles || disabledRoles) {
+      let userInfo = this.getUserInfo()
+      isAuthorized = allowedRoles ? allowedRoles.some(role => userInfo.roles.includes(role)) : !disabledRoles.some(role => userInfo.roles.includes(role))
+    } else {
+      isAuthorized = true
+    }
+    return isAuthorized
+  },
+
+  decodeToken () {
+    try {
+      let token = sessionStorage.getItem(SessionStorageKeys.KeyCloakToken)
+      const base64Url = token.split('.')[1]
+      const base64 = decodeURIComponent(window.atob(base64Url).split('').map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+      }).join(''))
+      return JSON.parse(base64)
+    } catch (error) {
+      throw new Error('Error parsing JWT - ' + error)
+    }
   }
 
 }
