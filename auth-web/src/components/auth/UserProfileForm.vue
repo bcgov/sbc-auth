@@ -161,7 +161,7 @@ export default class UserProfileForm extends Vue {
   save () {
     if (this.isFormValid()) {
       this.userStore.createUserContact({
-        email: this.emailAddress,
+        email: this.emailAddress.toLowerCase(),
         phone: this.phoneNumber,
         phoneExtension: this.extension
       }).then((contact) => {
