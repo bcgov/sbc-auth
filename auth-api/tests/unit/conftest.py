@@ -156,4 +156,5 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
 @pytest.fixture()
 def auth_mock(monkeypatch):
     """Mock check_auth."""
-    monkeypatch.setattr('auth_api.services.authorization.check_auth', lambda *args, **kwargs: None)
+    monkeypatch.setattr('auth_api.services.entity.check_auth', lambda *args, **kwargs: None)
+    monkeypatch.setattr('auth_api.services.org.check_auth', lambda *args, **kwargs: None)

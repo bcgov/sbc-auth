@@ -187,20 +187,20 @@ def test_update_invitation(session):  # pylint:disable=unused-argument
         assert updated_invitation['status'] == 'PENDING'
 
 
-def test_generate_confirmation_token(session):
+def test_generate_confirmation_token(session):  # pylint:disable=unused-argument
     """Generate the invitation token."""
     confirmation_token = InvitationService.generate_confirmation_token(1)
     assert confirmation_token is not None
 
 
-def test_validate_token_valid(session):
+def test_validate_token_valid(session):  # pylint:disable=unused-argument
     """Validate the invitation token."""
     confirmation_token = InvitationService.generate_confirmation_token(1)
     invitation_id = InvitationService.validate_token(confirmation_token)
     assert invitation_id == 1
 
 
-def test_accept_invitation(session):
+def test_accept_invitation(session, auth_mock):  # pylint:disable=unused-argument
     """Accept the invitation and add membership from the invitation to the org."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         with patch.object(auth, 'check_auth', return_value=True):
