@@ -15,8 +15,6 @@
 
 from typing import Dict, Tuple
 
-from sbc_common_components.tracing.service_tracing import ServiceTracing
-
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -24,6 +22,8 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
 from auth_api.utils.util import camelback2snake
+from sbc_common_components.tracing.service_tracing import ServiceTracing
+
 from .authorization import check_auth
 
 

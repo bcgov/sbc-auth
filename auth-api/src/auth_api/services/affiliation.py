@@ -16,7 +16,6 @@
 from typing import Dict
 
 from flask import current_app
-from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -24,7 +23,9 @@ from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
+from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF
+from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -104,8 +105,7 @@ class Affiliation:
         # If a passcode was provided...
         if pass_code:
             # ... and the entity has a passcode on it, check that they match
-            if entity.pass_code != pass_code:
-                authorized = False
+            authorized = validate_passcode(pass_code, entity.pass_code)
         # If a passcode was not provided...
         else:
             # ... check that the entity does not have a passcode protecting it

@@ -24,6 +24,7 @@ from auth_api.models.payment_type import PaymentType as PaymentTypeModel
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
+from auth_api.utils import passcode
 
 
 def factory_entity_service(business_identifier='CP1234567', business_number='791861073BC0001', name='Foobar, Inc.'):
@@ -33,6 +34,20 @@ def factory_entity_service(business_identifier='CP1234567', business_number='791
         'business_number': business_number,
         'name': name
     })
+    entity.save()
+    entity_service = EntityService(entity)
+    return entity_service
+
+
+def factory_entity_with_passcode_service(business_identifier='CP1234567', business_number='791861073BC0001',
+                                         name='Foobar, Inc.', pass_code='111111111'):
+    """Produce a templated entity model."""
+    hashed_pass_code: str = passcode.passcode_hash(pass_code)
+    entity = EntityModel.create_from_dict({
+        'business_identifier': business_identifier,
+        'business_number': business_number,
+        'name': name,
+        'pass_code': hashed_pass_code})
     entity.save()
     entity_service = EntityService(entity)
     return entity_service
@@ -79,6 +94,24 @@ def test_create_affiliation(session, auth_mock):  # pylint:disable=unused-argume
     org_id = org_dictionary['id']
 
     affiliation = AffiliationService.create_affiliation(org_id, business_identifier, {})
+    assert affiliation
+    assert affiliation.entity.identifier == entity_service.identifier
+    assert affiliation.as_dict()['org']['id'] == org_dictionary['id']
+
+
+def test_create_affiliation_with_passcode(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that an Affiliation can be created."""
+    entity_service = factory_entity_with_passcode_service()
+    entity_dictionary = entity_service.as_dict()
+    business_identifier = entity_dictionary['businessIdentifier']
+
+    org_service = factory_org_service(name='My Test Org')
+    org_dictionary = org_service.as_dict()
+    org_id = org_dictionary['id']
+
+    pass_code = '111111111'
+
+    affiliation = AffiliationService.create_affiliation(org_id, business_identifier, pass_code, {})
     assert affiliation
     assert affiliation.entity.identifier == entity_service.identifier
     assert affiliation.as_dict()['org']['id'] == org_dictionary['id']
