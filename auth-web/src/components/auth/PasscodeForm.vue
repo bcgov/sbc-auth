@@ -33,7 +33,7 @@
         <v-btn text large color="primary" class="recovery-btn" @click.stop="noPasscodeDialog = true">
           Don't have a Passcode?
         </v-btn>
-        <v-btn large color="primary" class="sign-in-btn" @click="login" 
+        <v-btn large color="primary" class="sign-in-btn" @click="login"
           :loading="showSpinner"
           :disabled="showSpinner">
           <span>{{showSpinner ? 'Signing in' : 'Sign In'}}</span>

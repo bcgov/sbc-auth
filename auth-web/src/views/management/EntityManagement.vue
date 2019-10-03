@@ -106,8 +106,6 @@ export default class EntityManagement extends Vue {
   private removeBusinessPayload = null
   private dialogTitle = ''
   private dialogText = ''
-  private className = ''
-  private maxWidth = ''
 
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => void
 
@@ -122,8 +120,6 @@ export default class EntityManagement extends Vue {
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Business Added'
     this.dialogText = 'You have successfully added a business'
-    this.className = 'notify-dialog'
-    this.maxWidth = '640'
     this.$refs.successDialog.open()
   }
 
@@ -131,8 +127,6 @@ export default class EntityManagement extends Vue {
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Invalid Passcode'
     this.dialogText = 'Unable to add the business. The provided Passcode is invalid or already in use.'
-    this.className = 'notify-dialog'
-    this.maxWidth = '640'
     this.$refs.errorDialog.open()
   }
 
@@ -140,14 +134,11 @@ export default class EntityManagement extends Vue {
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Business Not Found'
     this.dialogText = 'The specified business was not found.'
-    this.className = 'notify-dialog'
-    this.maxWidth = '640'
     this.$refs.errorDialog.open()
   }
 
   showAddBusinessModal () {
     this.dialogTitle = 'Add Business'
-    this.maxWidth = '640'
     this.$refs.addBusinessDialog.open()
   }
 
@@ -155,8 +146,6 @@ export default class EntityManagement extends Vue {
     this.removeBusinessPayload = removeBusinessPayload
     this.dialogTitle = 'Confirm Remove Business'
     this.dialogText = 'Are you sure you wish to remove this business?'
-    this.className = 'notify-dialog'
-    this.maxWidth = '640'
     this.$refs.confirmDeleteDialog.open()
   }
 
