@@ -1,44 +1,44 @@
 <template>
-  <div>
-    <v-form ref="form" lazy-validation>
-      <v-expand-transition>
-        <div class="form_alert-container" v-show="formError">
-          <v-alert
-            :value="true"
-            color="error"
-            icon="warning"
-          >
-          {{formError}}
-          </v-alert>
-        </div>
-      </v-expand-transition>
-      <div class="form_row">
-        <v-layout wrap>
-          <v-flex xs6 class="mr-5">
-            <v-text-field
-              filled
-              label="First Name"
-              req
-              persistent-hint
-              readonly
-              v-model="firstName"
-            >
-            </v-text-field>
-          </v-flex>
-          <v-flex xs5>
-            <v-text-field
-              filled
-              label="Last Name"
-              req
-              persistent-hint
-              readonly
-              v-model="lastName"
-            >
-            </v-text-field>
-          </v-flex>
-        </v-layout>
+  <v-form ref="form" lazy-validation>
+    <v-expand-transition>
+      <div class="form_alert-container" v-show="formError">
+        <v-alert
+          :value="true"
+          color="error"
+          icon="warning"
+        >
+        {{formError}}
+        </v-alert>
       </div>
-      <div class="form_row">
+    </v-expand-transition>
+    <!-- First / Last Name -->
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-text-field
+          filled
+          label="First Name"
+          req
+          persistent-hint
+          readonly
+          v-model="firstName"
+        >
+        </v-text-field>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-text-field
+          filled
+          label="Last Name"
+          req
+          persistent-hint
+          readonly
+          v-model="lastName"
+        >
+        </v-text-field>
+      </v-col>
+    </v-row>
+    <!-- Email Address -->
+    <v-row>
+      <v-col cols="12">
         <v-text-field
           filled
           label="Email Address"
@@ -48,8 +48,10 @@
           v-model="emailAddress"
         >
         </v-text-field>
-      </div>
-      <div class="form_row">
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
         <v-text-field
           filled
           label="Confirm Email Address"
@@ -59,43 +61,41 @@
           v-model="confirmedEmailAddress"
         >
         </v-text-field>
-      </div>
-      <div class="form_row">
-        <v-layout wrap>
-          <v-flex xs6 class="mr-5">
-            <v-text-field
-              filled
-              label="Phone e.g. (555)-555-5555"
-              persistent-hint
-              type="tel"
-              v-mask="['(###)-###-####']"
-              v-model="phoneNumber"
-              :rules="phoneRules"
-            >
-            </v-text-field>
-          </v-flex>
-          <v-flex xs3>
-            <v-text-field
-              filled label="Extension"
-              persistent-hint
-              :rules="extensionRules"
-              v-mask="'###'"
-              v-model="extension"
-            >
-            </v-text-field>
-          </v-flex>
-        </v-layout>
-      </div>
-      <div class="form_row">
-        <v-layout wrap>
-          <v-spacer></v-spacer>
-          <v-btn class=".save-continue-button" @click="save" color="primary" large :disabled='!isFormValid()'>
-            <span>Next</span>
-          </v-btn>
-        </v-layout>
-      </div>
-    </v-form>
-  </div>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-text-field
+          filled
+          label="Phone Number"
+          persistent-hint
+          type="tel"
+          v-mask="['(###) ###-####']"
+          v-model="phoneNumber"
+          hint="Example: (555) 555-5555"
+          :rules="phoneRules"
+        >
+        </v-text-field>
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-text-field
+          filled label="Extension"
+          persistent-hint
+          :rules="extensionRules"
+          v-mask="'###'"
+          v-model="extension"
+        >
+        </v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" class="form__btns pb-0">
+        <v-btn large color="primary" class=".save-continue-button" :disabled='!isFormValid()' @click="save">
+          Next
+        </v-btn>
+      </v-col>
+    </v-row>
+  </v-form>
 </template>
 
 <script lang="ts">
@@ -161,7 +161,7 @@ export default class UserProfileForm extends Vue {
   save () {
     if (this.isFormValid()) {
       this.userStore.createUserContact({
-        email: this.emailAddress,
+        email: this.emailAddress.toLowerCase(),
         phone: this.phoneNumber,
         phoneExtension: this.extension
       }).then((contact) => {
@@ -171,7 +171,18 @@ export default class UserProfileForm extends Vue {
   }
 }
 </script>
+
 <style lang="scss" scoped>
 @import '../../assets/scss/theme.scss';
+
+  [class^="col"] {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .form__btns {
+    display: flex;
+    justify-content: flex-end;
+  }
 
 </style>

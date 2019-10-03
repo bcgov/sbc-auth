@@ -3,22 +3,23 @@
     :persistent="isPersistent"
     :fullscreen="fullscreenOnMobile"
     :scrollable="isScrollable"
-    content-class="text-center"
+    :content-class="dialogClass"
+    :max-width="maxWidth"
     v-model="isOpen"
     @keydown.esc="cancel">
     <v-card>
-      <v-card-title class="pt-8">
+      <v-card-title>
         <slot v-if="showIcon" name="icon">
           <v-icon large color="success">check</v-icon>
         </slot>
-        <span class="mt-5">
+        <span>
           <slot name="title">{{ title }}</slot>
         </span>
       </v-card-title>
       <v-card-text>
         <slot name="text">{{ text }}</slot>
       </v-card-text>
-      <v-card-actions v-if="showActions" class="pt-8 pb-8">
+      <v-card-actions v-if="showActions">
         <slot name="actions">
           <v-btn large color="success" @click="close()">OK</v-btn>
         </slot>
@@ -41,6 +42,8 @@ export default class ModalDialog extends Vue {
   @Prop({ default: false }) private isPersistent: boolean
   @Prop({ default: false }) private fullscreenOnMobile: boolean
   @Prop({ default: false }) private isScrollable: boolean
+  @Prop({ default: '' }) private dialogClass: string
+  @Prop({ default: '' }) private maxWidth: string
 
   public open () {
     this.isOpen = true
@@ -52,16 +55,25 @@ export default class ModalDialog extends Vue {
 }
 </script>
 
-<style lang="scss">
-.v-dialog {
-    max-width: 35rem;
+<style lang="scss" scoped>
+  // Notify Dialog Variant
+  // Vertical stacked title container (icon w/ text)
+  // Center-aligned text throughout
+  .notify-dialog .v-card__title {
+    flex-direction: column;
 
-    .v-card__title {
-      flex-direction: column;
+    >>> i {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
     }
+  }
 
-    .v-card__actions {
-      justify-content: center;
-    }
+  .notify-dialog .v-card__text {
+    text-align: center;
+  }
+
+  .notify-dialog .v-card__actions {
+    justify-content: center;
+    padding: 1.5rem;
   }
 </style>
