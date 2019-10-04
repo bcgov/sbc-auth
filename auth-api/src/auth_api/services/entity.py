@@ -22,6 +22,7 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
 from auth_api.utils.util import camelback2snake
+from auth_api.utils.passcode import passcode_hash
 from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from .authorization import check_auth
@@ -102,6 +103,8 @@ class Entity:
         if existing_entity is None:
             entity_model = EntityModel.create_from_dict(entity_info)
         else:
+            # TODO temporary allow update passcode, should replace with reset passcode endpoint.
+            entity_info['passCode'] = passcode_hash(entity_info['passCode'])
             existing_entity.update_from_dict(**entity_info)
             entity_model = existing_entity
 
