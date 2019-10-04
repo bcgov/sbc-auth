@@ -24,6 +24,7 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel
+from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.schemas import InvitationSchema
 from config import get_named_config
@@ -166,10 +167,9 @@ class Invitation:
             membership_model = MembershipModel()
             membership_model.org_id = membership.org_id
             membership_model.user_id = user_id
-            membership_model.membership_type_code = membership.membership_type_code
-            membership_model.flush()
+            membership_model.membership_type = membership.membership_type
+            membership_model.save()
         invitation.accepted_date = datetime.now()
-        invitation.invitation_status_code = 'ACCEPTED'
-        invitation.flush()
-        MembershipModel.commit()
+        invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')
+        invitation.save()
         return Invitation(invitation)
