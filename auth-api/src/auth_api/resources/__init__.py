@@ -22,16 +22,17 @@ That are used to expose operational health information about the service, and me
 """
 
 from flask import Blueprint
-
-from auth_api.resources.admin.users import API as USER_API
+from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
 
 from .apihelper import Api
 from .entity import API as ENTITY_API
+from .invitation import API as INVITATION_API
 from .logout import API as LOGOUT_API
 from .meta import API as META_API
 from .ops import API as OPS_API
+from .org import API as ORG_API
 from .token import API as TOKEN_API
-from .usersinfo import API as USERINFO_API
+from .user import API as USER_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
@@ -64,9 +65,12 @@ API = Api(
     authorizations=AUTHORIZATIONS,
 )
 
+HANDLER = ExceptionHandler(API)
+
 API.add_namespace(META_API, path='/meta')
-API.add_namespace(USERINFO_API, path='/users/info')
 API.add_namespace(TOKEN_API, path='/token')
-API.add_namespace(USER_API, path='/admin/users')
+API.add_namespace(USER_API, path='/users')
 API.add_namespace(LOGOUT_API, path='/logout')
 API.add_namespace(ENTITY_API, path='/entities')
+API.add_namespace(ORG_API, path='/orgs')
+API.add_namespace(INVITATION_API, path='/invitations')

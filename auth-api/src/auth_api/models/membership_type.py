@@ -16,24 +16,21 @@
 It defines the available types of membership Users have with Orgs.
 """
 
-from sqlalchemy import Column, String
+from sqlalchemy import Boolean, Column, String
 
-from .db import db, ma
+from .base_model import BaseModel
 
 
-class MembershipType(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class MembershipType(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the Membership Type model for the Auth service."""
 
     __tablename__ = 'membership_type'
 
     code = Column(String(15), primary_key=True)
     desc = Column(String(100))
+    default = Column(Boolean(), default=False, nullable=False)
 
-
-class MembershipTypeSchema(ma.ModelSchema):
-    """Used to manage the default schema between JSON and MembershipType model."""
-
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the MembershipType fields to a default schema."""
-
-        model = MembershipType
+    @classmethod
+    def get_default_type(cls):
+        """Return the default type code for Membership."""
+        return cls.query.filter_by(default=True).first()

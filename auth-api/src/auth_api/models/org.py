@@ -16,33 +16,58 @@
 Basic users will have an internal Org that is not created explicitly, but implicitly upon User account creation.
 """
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from flask import current_app
+from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 
-from .db import db, ma
+from .base_model import BaseModel
+from .org_status import OrgStatus
+from .org_type import OrgType
+from .payment_type import PaymentType
 
 
-class Org(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
-    """Model for an Org record.  Associates User (via User Roles) to Entities."""
+class Org(BaseModel):  # pylint: disable=too-few-public-methods
+    """Model for an Org record."""
 
     __tablename__ = 'org'
 
     id = Column(Integer, primary_key=True)
-    created = Column(DateTime)
-    created_by = Column(ForeignKey('user.id'), nullable=False)
-    last_modified = Column(DateTime)
-    last_modified_by = Column(ForeignKey('user.id'), nullable=False)
     type_code = Column(ForeignKey('org_type.code'), nullable=False)
     status_code = Column(ForeignKey('org_status.code'), nullable=False)
     name = Column(String(250), index=True)
-    contact1 = Column(ForeignKey('contact.id'))
-    contact2 = Column(ForeignKey('contact.id'))
-    preferred_payment = Column(ForeignKey('payment_type.code'), nullable=False)
+    preferred_payment_code = Column(ForeignKey('payment_type.code'), nullable=False)
 
+    contacts = relationship('ContactLink', back_populates='org')
+    org_type = relationship('OrgType')
+    org_status = relationship('OrgStatus')
+    preferred_payment = relationship('PaymentType')
+    members = relationship('Membership', back_populates='org', cascade='all,delete,delete-orphan')
+    affiliated_entities = relationship('Affiliation', back_populates='org',
+                                       primaryjoin="and_(Org.id == Affiliation.org_id, Org.type_code == 'IMPLICIT')")
+    invitations = relationship('InvitationMembership', back_populates='org', cascade='all,delete,delete-orphan')
 
-class OrgSchema(ma.ModelSchema):
-    """Used to manage the default mapping between JSON and Org model."""
+    @classmethod
+    def create_from_dict(cls, org_info: dict):
+        """Create a new Org from the provided dictionary."""
+        if org_info:
+            org = Org(**org_info)
+            current_app.logger.debug(
+                'Creating org from dictionary {}'.format(org_info)
+            )
+            org.org_type = OrgType.get_default_type()
+            org.org_status = OrgStatus.get_default_status()
+            org.preferred_payment = PaymentType.get_default_payment_type()
+            org.save()
+            return org
+        return None
 
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Org fields to a default schema."""
+    @classmethod
+    def find_by_org_id(cls, org_id):
+        """Find an Org instance that matches the provided id."""
+        return cls.query.filter_by(id=org_id).first()
 
-        model = Org
+    def update_org_from_dict(self, org_info: dict):
+        """Update this org with the provided dictionary."""
+        # Update from provided dictionary, but specify additional fields not to update.
+        self.update_from_dict(**org_info, _exclude=('status_code', 'type_code', 'preferred_payment_code'))
+        self.save()

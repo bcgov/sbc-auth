@@ -3,6 +3,11 @@ import loginServices from '@/services/login.services'
 import { Business } from '@/models/business'
 import { Contact } from '@/models/contact'
 import businessServices from '@/services/business.services'
+import { Affiliation } from '@/models/affiliation'
+
+import { RemoveBusinessPayload } from '@/models/Organization'
+import configHelper from '@/util/config-helper'
+import { SessionStorageKeys } from '@/util/constants'
 
 interface LoginPayload {
   businessNumber: string
@@ -10,7 +15,8 @@ interface LoginPayload {
 }
 
 @Module({
-  name: 'business'
+  name: 'business',
+  namespaced: true
 })
 export default class BusinessModule extends VuexModule {
   currentBusiness: Business = {
@@ -35,6 +41,18 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action
+  public async createBusinessIfNotFound (businessNumber: string) {
+    return this.loadBusiness(businessNumber).catch(() => {
+      businessServices.createBusiness({ businessIdentifier: businessNumber })
+        .then(createResponse => {
+          if ((createResponse.status === 200 || createResponse.status === 201) && createResponse.data) {
+            this.context.commit('setCurrentBusiness', createResponse.data)
+          }
+        })
+    })
+  }
+
+  @Action
   public async loadBusiness (businessNumber: string) {
     return businessServices.getBusiness(businessNumber)
       .then(response => {
@@ -42,14 +60,46 @@ export default class BusinessModule extends VuexModule {
           this.context.commit('setCurrentBusiness', response.data)
         }
       })
-      .catch(() => {
-        businessServices.createBusiness({ businessIdentifier: businessNumber })
-          .then(createResponse => {
-            if ((createResponse.status === 200 || createResponse.status === 201) && createResponse.data) {
-              this.context.commit('setCurrentBusiness', createResponse.data)
-            }
-          })
+  }
+
+  @Action({ rawError: true })
+  public async addBusiness (payload: LoginPayload) {
+    const affiliation: Affiliation = {
+      businessIdentifier: payload.businessNumber,
+      passCode: payload.passCode
+    }
+
+    // Create an implicit org for the current user and the requested business
+    const createBusinessResponse = await businessServices.createOrg({
+      name: payload.businessNumber
+    })
+
+    // Create an affiliation between implicit org and requested business
+    await businessServices.createAffiliation(createBusinessResponse.data.id, affiliation)
+
+    // Update store
+    this.context.dispatch('user/getOrganizations', null, { root: true })
+  }
+
+  // Following searchBusiness will search data from legal-api.
+  @Action({ rawError: true })
+  public async searchBusiness (businessNumber: string) {
+    return businessServices.searchBusiness(businessNumber)
+      .then(response => {
+        if (response.status === 200) {
+          configHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessNumber)
+        }
       })
+  }
+
+  @Action({ rawError: true })
+  public async removeBusiness (payload: RemoveBusinessPayload) {
+    // Remove an affiliation between the given entity and org
+    const removeAffiliationResponse = await businessServices.removeAffiliation(payload.orgIdentifier, payload.incorporationNumber)
+    if (removeAffiliationResponse.status === 200) {
+      // Update store
+      this.context.dispatch('user/getOrganizations', null, { root: true })
+    }
   }
 
   @Action({ rawError: true })

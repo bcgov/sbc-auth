@@ -21,7 +21,8 @@
         }
       },
       "data": {
-        "POD_TESTING": "true"
+        "POD_TESTING": "true",
+        "SENTRY_DSN":  "https://<account>@sentry.io/<project>"
       }
     },
     {
@@ -47,7 +48,18 @@
         "KEYCLOAK_AUTH_AUDIENCE": "${KEYCLOAK_AUTH_AUDIENCE}",
         "KEYCLOAK_AUTH_CLIENT_SECRET": "${KEYCLOAK_AUTH_CLIENT_SECRET}",
         "KEYCLOAK_BASE_URL": "${KEYCLOAK_BASE_URL}",
-        "KEYCLOAK_REALMNAME": "${KEYCLOAK_REALMNAME}"
+        "KEYCLOAK_REALMNAME": "${KEYCLOAK_REALMNAME}",
+        "MAIL_SERVER": "${MAIL_SERVER}",
+        "MAIL_PORT": "${MAIL_PORT}",
+        "MAIL_USE_TLS": "${MAIL_USE_TLS}",
+        "MAIL_USE_SSL": "${MAIL_USE_SSL}",
+        "MAIL_USERNAME": "${MAIL_USERNAME}",
+        "MAIL_PASSWORD": "${MAIL_PASSWORD}",
+        "MAIL_FROM_ID": "${MAIL_FROM_ID}",
+        "AUTH_WEB_TOKEN_CONFIRM_URL": "${AUTH_WEB_TOKEN_CONFIRM_URL}",
+        "EMAIL_SECURITY_PASSWORD_SALT": "${EMAIL_SECURITY_PASSWORD_SALT}",
+        "EMAIL_TOKEN_SECRET_KEY": "${EMAIL_TOKEN_SECRET_KEY}",
+        "TOKEN_EXPIRY_PERIOD": "${TOKEN_EXPIRY_PERIOD}"
       },
       "type": "Opaque"
     }
@@ -152,6 +164,79 @@
       "required": true,
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "MAIL_SERVER",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "MAIL_PORT",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "MAIL_USE_TLS",
+      "displayName": "Name",
+      "required": true,
+      "value": "False"
+    },
+    {
+      "name": "MAIL_USE_SSL",
+      "displayName": "Name",
+      "required": true,
+      "value": "True"
+    },
+    {
+      "name": "MAIL_USERNAME",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "MAIL_PASSWORD",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "MAIL_FROM_ID",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "AUTH_WEB_TOKEN_CONFIRM_URL",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "EMAIL_SECURITY_PASSWORD_SALT",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "EMAIL_TOKEN_SECRET_KEY",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "TOKEN_EXPIRY_PERIOD",
+      "required": true,
+      "generate": "expression",
+      "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "SENTRY_DSN",
+      "displayName": "Sentry Init URL",
+      "description": "Sentry DSN URL to initialize the Sentry SDK",
+      "required": true,
+      "value": "https://account.sentry.ioo/project/id"
     }
   ]
 }

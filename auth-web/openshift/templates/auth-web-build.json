@@ -162,7 +162,7 @@
       "displayName": "Resources Memory Request",
       "description": "The resources Memory request (in Mi, Gi, etc) for this build.",
       "required": true,
-      "value": "100Mi"
+      "value": "256Mi"
     },
     {
       "name": "MEMORY_LIMIT",

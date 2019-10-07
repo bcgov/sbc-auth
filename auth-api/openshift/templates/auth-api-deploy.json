@@ -335,6 +335,114 @@
                         "key": "POD_TESTING"
                       }
                     }
+                  },
+                  {
+                    "name": "MAIL_SERVER",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "MAIL_SERVER"
+                      }
+                    }
+                  },
+                  {
+                    "name": "MAIL_PORT",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "MAIL_PORT"
+                      }
+                    }
+                  },
+                  {
+                    "name": "MAIL_USE_TLS",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "MAIL_USE_TLS"
+                      }
+                    }
+                  },
+                  {
+                    "name": "MAIL_USE_SSL",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "MAIL_USE_SSL"
+                      }
+                    }
+                  },
+                  {
+                    "name": "MAIL_USERNAME",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "MAIL_USERNAME"
+                      }
+                    }
+                  },
+                  {
+                    "name": "MAIL_PASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "MAIL_PASSWORD"
+                      }
+                    }
+                  },
+                  {
+                    "name": "MAIL_FROM_ID",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "MAIL_FROM_ID"
+                      }
+                    }
+                  },
+                  {
+                    "name": "AUTH_WEB_TOKEN_CONFIRM_URL",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "AUTH_WEB_TOKEN_CONFIRM_URL"
+                      }
+                    }
+                  },
+                  {
+                    "name": "EMAIL_SECURITY_PASSWORD_SALT",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "EMAIL_SECURITY_PASSWORD_SALT"
+                      }
+                    }
+                  },
+                  {
+                    "name": "EMAIL_TOKEN_SECRET_KEY",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "EMAIL_TOKEN_SECRET_KEY"
+                      }
+                    }
+                  },
+                  {
+                    "name": "TOKEN_EXPIRY_PERIOD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                        "key": "TOKEN_EXPIRY_PERIOD"
+                      }
+                    }
+                  },
+                  {
+                    "name": "SENTRY_DSN",
+                    "valueFrom": {
+                        "configMapKeyRef": {
+                            "name": "${NAME}-${TAG_NAME}-config",
+                            "key": "SENTRY_DSN"
+                        }
+                    }
                   }
                 ],
                 "resources": {

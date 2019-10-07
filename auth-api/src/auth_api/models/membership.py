@@ -16,29 +16,34 @@
 The Membership object connects User models to one or more Org models.
 """
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer
+from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy.orm import relationship
 
-from .db import db, ma
+from .base_model import BaseModel
+from .membership_type import MembershipType
 
 
-class Membership(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """Model for a Membership model.  Associates Users and Orgs."""
 
     __tablename__ = 'membership'
 
     id = Column(Integer, primary_key=True)
-    created = Column(DateTime)
-    user = Column(ForeignKey('user.id'), nullable=False)
-    org = Column(ForeignKey('org.id'), nullable=False)
-    membership_type = Column(
+    user_id = Column(ForeignKey('user.id'), nullable=False)
+    org_id = Column(ForeignKey('org.id'), nullable=False)
+    membership_type_code = Column(
         ForeignKey('membership_type.code'), nullable=False
     )
 
+    membership_type = relationship('MembershipType', foreign_keys=[membership_type_code])
+    user = relationship('User', back_populates='orgs', foreign_keys=[user_id], lazy='subquery')
+    org = relationship('Org', back_populates='members', foreign_keys=[org_id], lazy='subquery')
 
-class MembershipSchema(ma.ModelSchema):
-    """Used to manage the default mapping betweeen JSON and Membership model."""
+    def __init__(self, **kwargs):
+        """Initialize a new membership."""
+        self.org_id = kwargs.get('org_id')
+        self.user_id = kwargs.get('user_id')
 
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Membership fields to a default schema."""
-
-        model = Membership
+        self.membership_type_code = kwargs.get('membership_type_code')
+        if self.membership_type_code is None:
+            self.membership_type = MembershipType.get_default_type()

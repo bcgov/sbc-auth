@@ -13,7 +13,7 @@
       </v-expand-transition>
     <div class="business-contact-form_row">
       <v-text-field
-        box
+        filled
         label="Email Address"
         req
         persistent-hint
@@ -24,7 +24,7 @@
     </div>
     <div class="business-contact-form_row">
       <v-text-field
-        box
+        filled
         label="Confirm Email Address"
         req
         persistent-hint
@@ -37,7 +37,7 @@
       <v-layout wrap>
         <v-flex xs6 class="mr-5">
           <v-text-field
-            box
+            filled
             label="Phone e.g. (555)-555-5555"
             persistent-hint
             type="tel"
@@ -49,7 +49,7 @@
         </v-flex>
         <v-flex xs3>
           <v-text-field
-            box label="Extension"
+            filled label="Extension"
             persistent-hint
             :rules="extensionRules"
             v-mask="'###'"
@@ -81,6 +81,7 @@ import BusinessModule from '../../store/modules/business'
 import configHelper from '../../util/config-helper'
 import { mask } from 'vue-the-mask'
 import { Contact } from '../../models/contact'
+import { SessionStorageKeys } from '../../util/constants'
 
 @Component({
   directives: {
@@ -127,23 +128,24 @@ export default class BusinessContactForm extends Vue {
   }
 
   mounted () {
-    if (this.businessStore.currentBusiness.contacts && this.businessStore.currentBusiness.contacts.length > 0) {
+    this.businessStore.loadBusiness(configHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)).then(() => {
+      if (this.businessStore.currentBusiness.contacts && this.businessStore.currentBusiness.contacts.length > 0) {
       // TODO: For now grab first contact as the business contact.  Post MVP, we should check the contact type, grab the correct one.
-      const contact = this.businessStore.currentBusiness.contacts[0]
-      this.emailAddress = this.confirmedEmailAddress = contact.emailAddress
-      this.phoneNumber = contact.phoneNumber
-      this.extension = contact.extension
-      this.editing = true
-    }
+        const contact = this.businessStore.currentBusiness.contacts[0]
+        this.emailAddress = this.confirmedEmailAddress = contact.email
+        this.phoneNumber = contact.phone
+        this.extension = contact.phoneExtension
+      }
+    })
   }
 
   save () {
     if (this.isFormValid()) {
       let result: Promise<void>
       const contact: Contact = {
-        emailAddress: this.emailAddress,
-        phoneNumber: this.phoneNumber,
-        extension: this.extension
+        email: this.emailAddress.toLowerCase(),
+        phone: this.phoneNumber,
+        phoneExtension: this.extension
       }
 
       if (!this.businessStore.currentBusiness.contacts || this.businessStore.currentBusiness.contacts.length === 0) {
@@ -177,18 +179,22 @@ export default class BusinessContactForm extends Vue {
 }
 </script>
 
-<style lang="stylus" scoped>
-  @import '../../assets/styl/theme.styl';
+<style lang="scss" scoped>
+  @import '../../assets/scss/theme.scss';
 
-  .business-contact-form_row
-    margin-top 1rem
+  .business-contact-form_row{
+    margin-top: 1rem;
+  }
 
-  .business-contact-form_alert-container
-    margin-bottom 2rem
+  .business-contact-form_alert-container{
+    margin-bottom: 2rem;
+  }
 
-  .v-alert
-    margin 0
+  .v-alert{
+    margin: 0;
+  }
 
-  .v-btn
-    font-weight: 700
+  .v-btn{
+    font-weight: 700;
+  }
 </style>

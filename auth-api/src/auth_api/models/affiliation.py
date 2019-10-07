@@ -16,30 +16,35 @@
 An Affiliation is between an Org and an Entity.
 """
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer
+from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy.orm import relationship
 
-from .db import db, ma
+from .base_model import BaseModel
 
 
-class Affiliation(db.Model):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class Affiliation(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Affiliation."""
 
     __tablename__ = 'affiliation'
 
-    id = Column(Integer, primary_key=True)
-    entity = Column(ForeignKey('entity.id'), nullable=False)
-    org = Column(ForeignKey('org.id'), nullable=False)
-    created = Column(DateTime)
-    created_by = Column(ForeignKey('user.id'), nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    entity_id = Column(ForeignKey('entity.id'), nullable=False)
+    org_id = Column(ForeignKey('org.id'), nullable=False)
 
+    entity = relationship('Entity', foreign_keys=[entity_id])
+    org = relationship('Org', back_populates='affiliated_entities', foreign_keys=[org_id])
 
-class AffiliationSchema(ma.ModelSchema):
-    """This is the Schema for an Affiliation model.
+    @classmethod
+    def find_affiliation_by_org_and_entity_ids(cls, org_id, entity_id):
+        """Return an affiliation for the provided org and entity ids."""
+        return cls.query.filter_by(org_id=org_id, entity_id=entity_id).first()
 
-    It is used to managed the default mapping between the JSON and model.
-    """
+    @classmethod
+    def find_affiliation_by_ids(cls, org_id: int, affiliation_id: int):
+        """Return the first Affiliation with the provided ids."""
+        return cls.query.filter_by(org_id=org_id).filter_by(id=affiliation_id).first()
 
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Affiliation fields to a default schema."""
-
-        model = Affiliation
+    @classmethod
+    def find_affiliations_by_org_id(cls, org_id: int):
+        """Return the affiliations with the provided org id."""
+        return cls.query.filter_by(org_id=org_id).all()

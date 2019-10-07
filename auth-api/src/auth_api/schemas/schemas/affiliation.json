@@ -1,0 +1,33 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/affiliation",
+    "type": "object",
+    "title": "Affiliation",
+    "required": [
+      "businessIdentifier"
+    ],
+    "properties": {
+      "businessIdentifier": {
+        "$id": "#/properties/businessIdentifier",
+        "type": "string",
+        "title": "Business Identifier",
+        "default": "",
+        "examples": [
+          "CP1234567"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "passCode": {
+        "$id": "#/properties/passCode",
+        "type": "string",
+        "title": "Passcode",
+        "default": "",
+        "examples": [
+          "12345"
+        ],
+        "pattern": "^(.*)$"
+      }
+    }
+  }
+  

@@ -95,6 +95,12 @@
                   "name": "${NAME}-${TAG_NAME}-ui-configuration",
                   "defaultMode": 420
                 }
+              }, {
+                "name": "keycloak-configuration",
+                "configMap": {
+                  "name": "${NAME}-${TAG_NAME}-keycloak-config",
+                  "defaultMode": 420
+                }
               }
             ],
             "containers": [
@@ -118,6 +124,11 @@
                     "name": "web-ui-configuration",
                     "readOnly": true,
                     "mountPath": "/var/www/html/${WEB_APP_CONTEXT_PATH}/config"
+                  },
+                  {
+                    "name": "keycloak-configuration",
+                    "readOnly": true,
+                    "mountPath": "/var/www/html/${WEB_APP_CONTEXT_PATH}/config/kc"
                   }
                 ],
                 "envFrom": [],

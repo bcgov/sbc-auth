@@ -1,6 +1,7 @@
 gunicorn
 Flask
 Flask-Migrate
+Flask-Mail
 Flask-Script
 Flask-Moment
 Flask-SQLAlchemy
@@ -14,4 +15,5 @@ marshmallow-sqlalchemy
 jsonschema
 requests
 python-keycloak
-
+itsdangerous
+sentry-sdk[flask]

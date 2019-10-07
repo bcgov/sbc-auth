@@ -58,16 +58,15 @@ describe('BusinessContactForm.vue', () => {
     expect(wrapper.vm.$data.emailAddress).toBe('')
   })
 
-  it ('confirm email data is empty', () => {
+  it('confirm email data is empty', () => {
     expect(wrapper.vm.$data.confirmedEmailAddress).toBe('')
   })
 
-  it ('confirm phone data is empty', () => {
+  it('confirm phone data is empty', () => {
     expect(wrapper.vm.$data.phoneNumber).toBe('')
   })
 
-  it ('confirm extension data to be empty', () => {
+  it('confirm extension data to be empty', () => {
     expect(wrapper.vm.$data.extension).toBe('')
   })
 })
-

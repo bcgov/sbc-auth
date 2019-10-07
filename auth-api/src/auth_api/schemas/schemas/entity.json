@@ -4,17 +4,48 @@
     "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/entity",
     "type": "object",
     "title": "Entity",
+    "additionalProperties": false,
     "required": [
       "businessIdentifier"
     ],
     "properties": {
-      "business_identifier": {
+      "businessIdentifier": {
         "$id": "#/properties/businessIdentifier",
         "type": "string",
         "title": "Business Identifier",
         "default": "",
         "examples": [
           "CP1234567"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "businessNumber": {
+        "$id": "#/properties/businessNumber",
+        "type": "string",
+        "title": "Business Number",
+        "default": "",
+        "examples": [
+          "791861073BC0001"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "name": {
+        "$id": "#/properties/name",
+        "type": "string",
+        "title": "Business Name",
+        "default": "",
+        "examples": [
+          "Foobar, Inc."
+        ],
+        "pattern": "^(.*)$"
+      },
+      "passCode": {
+        "$id": "#/properties/passCode",
+        "type": "string",
+        "title": "Passcode",
+        "default": "",
+        "examples": [
+          "12345"
         ],
         "pattern": "^(.*)$"
       }

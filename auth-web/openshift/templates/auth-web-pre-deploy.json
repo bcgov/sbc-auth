@@ -32,7 +32,22 @@
         }
       },
       "data": {
-        "configuration.json": "{\n  \"VUE_APP_COPS_REDIRECT_URL\": \"https://coops-${TAG_NAME}.pathfinder.gov.bc.ca/\",\n  \"VUE_APP_PAY_ROOT_API\": \"https://pay-api-${TAG_NAME}.pathfinder.gov.bc.ca/api/v1\",\n  \"VUE_APP_AUTH_ROOT_API\": \"https://auth-api-${TAG_NAME}.pathfinder.gov.bc.ca/api/v1\"\n}\n"
+        "configuration.json": "{\n  \"VUE_APP_COPS_REDIRECT_URL\": \"https://coops-${TAG_NAME}.pathfinder.gov.bc.ca/\",\n  \"VUE_APP_PAY_ROOT_API\": \"https://pay-api-${TAG_NAME}.pathfinder.gov.bc.ca/api/v1\",\n  \"VUE_APP_AUTH_ROOT_API\": \"https://auth-api-${TAG_NAME}.pathfinder.gov.bc.ca/api/v1\",\n  \"VUE_APP_FLAVOR\": \"mvp\"\n}\n"
+      }
+    },
+    {
+      "kind": "ConfigMap",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${NAME}-${TAG_NAME}-keycloak-config",
+        "labels": {
+          "app": "${NAME}-${TAG_NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-pre-deploy"
+        }
+      },
+      "data": {
+        "keycloak.json": "{}"
       }
     }
   ],

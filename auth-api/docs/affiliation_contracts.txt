@@ -1,0 +1,18 @@
+Affiliation Resource
+
+/orgs/{org_id}/affiliations
+	POST
+	Description: Create a new affiliation
+	Permissions: Any basic user is required to create an affiliation
+	Entity information is specified in request body.
+
+/orgs/{org_id}/affiliations
+	GET
+	Description: Return a list of affiliations which have specific org_id
+	Permissions: Any basic user
+
+/orgs/{org_id}/affiliations/{business_identifier}
+
+	DELETE
+	Description: Delete the affiliation between the org (org_id) and entity (business_identifier)
+	Permissions: Must be the owner of that org

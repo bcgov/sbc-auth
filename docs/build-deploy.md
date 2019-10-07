@@ -98,6 +98,7 @@ oc get secret my-secret --export=true -o json \
         -p NAME=auth-api \
         -p TAG_NAME=dev \
         -p REPLICAS=1 \
+        -p JAEGER_COLLECTOR=--collector.host-port=jaeger-collector.d7eovc-dev.svc:14267 \
     | oc apply -f -
    ```
 
@@ -126,7 +127,7 @@ oc get secret my-secret --export=true -o json \
         -p NAME=auth-api \
         -p TAG_NAME=dev \
         -p GIT_REPO_URL=https://github.com/bcgov/sbc-auth.git \
-        -p GIT_REF=development
+        -p GIT_REF=development \
         -p WEBHOOK=github-auth-api-dev \
         -p JENKINS_FILE=./jenkins/dev.groovy \
     | oc apply -f -
@@ -186,7 +187,7 @@ oc get secret my-secret --export=true -o json \
    oc process -f auth-web-build.json \
          -p NAME=auth-web \
          -p GIT_REPO_URL=https://github.com/bcgov/sbc-auth.git \
-         -p GIT_REF=development
+         -p GIT_REF=development \
     |  oc apply -f -
    ```
 

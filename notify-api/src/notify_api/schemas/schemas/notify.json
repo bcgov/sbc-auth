@@ -1,0 +1,42 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/notify",
+    "type": "object",
+    "title": "Notify",
+    "properties": {
+        "notifyType": {
+            "type": "string",
+            "title": "The notification type.",
+            "default": "EMAIL",
+            "required": [
+                "EMAIL",
+                "TEXT"
+            ]
+        },
+        "requestDate": {
+            "type": "string",
+            "format": "datetime",
+            "title": "The date notification requested."
+        },
+        "subject": {
+            "type": "string",
+            "title": "The notification's subject ."
+        },
+        "recipients": {
+            "type": "string",
+            "title": "The recipient email address(s)."
+        },
+        "contentBody": {
+            "type": "string",
+            "title": "The notification's body ."
+        }
+    },
+    "required": [
+        "notifyType",
+        "requestDate",
+        "subject",
+        "recipients",
+        "contentBody"
+    ]
+}

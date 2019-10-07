@@ -18,13 +18,19 @@ This module is the API for the Legal Entity system.
 import os
 
 from flask import Flask
+from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
+from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
 
 from auth_api import models
+from auth_api.extensions import mail
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.models import db, ma
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
 from config import CONFIGURATION, _Config
+
+
+import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports; conflicts with Flake8
 
 
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first
@@ -37,15 +43,25 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     app = Flask(__name__)
     app.config.from_object(CONFIGURATION[run_mode])
 
+    # Configure Sentry
+    if app.config.get('SENTRY_DSN', None):
+        sentry_sdk.init(
+            dsn=app.config.get('SENTRY_DSN'),
+            integrations=[FlaskIntegration()]
+        )
+
     from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT
 
     db.init_app(app)
     ma.init_app(app)
+    mail.init_app(app)
 
     app.register_blueprint(API_BLUEPRINT)
     app.register_blueprint(OPS_BLUEPRINT)
 
     setup_jwt_manager(app, JWT)
+
+    ExceptionHandler(app)
 
     @app.after_request
     def add_version(response):  # pylint: disable=unused-variable

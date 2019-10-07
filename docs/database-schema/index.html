@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>auth Database</title>
+  <title>postgres Database</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
@@ -46,7 +46,7 @@
     <nav class="navbar navbar-static-top">
       <div class="container">
         <div class="navbar-header">
-          <a href="index.html" class="navbar-brand"><b>auth</b> Database</a>
+          <a href="index.html" class="navbar-brand"><b>postgres</b> Database</a>
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
             <i class="fa fa-bars"></i>
           </button>
@@ -80,14 +80,14 @@
 		<div class="row">
 			<div class="col-md-12">
 				<div class="callout callout-info">
-					<h4>SchemaSpy Analysis of auth</h4>
-					<p>Generated on Tue Apr 09 12:30 PDT 2019</p>
+					<h4>SchemaSpy Analysis of postgres</h4>
+					<p>Generated on Wed Aug 14 09:44 PDT 2019</p>
 				</div>
 			</div>
 		</div>
 
 
-        <a href="auth.public.xml" title="XML Representation">XML Representation</a></br>
+        <a href="postgres.public.xml" title="XML Representation">XML Representation</a></br>
 		<a href="insertionOrder.txt" title="Useful for loading data into a database">Insertion Order</a>
         <a href="deletionOrder.txt" title="Useful for purging data from a database">Deletion Order</a>	
       </section>
@@ -99,7 +99,7 @@
 				  <span class="info-box-icon bg-aqua"><i class="fa fa-table"></i></span>
 				  <div class="info-box-content">
 					  <span class="info-box-text">TABLES</span>
-					  <span class="info-box-number">7</span>
+					  <span class="info-box-number">12</span>
 				  </div>
 				  <!-- /.info-box-content -->
 			  </div>
@@ -125,7 +125,7 @@
 
 				  <div class="info-box-content">
 					  <span class="info-box-text">COLUMNS</span>
-					  <span class="info-box-number">41</span>
+					  <span class="info-box-number">59</span>
 				  </div>
 				  <!-- /.info-box-content -->
 			  </div>
@@ -138,7 +138,7 @@
 
 				  <div class="info-box-content">
 					  <span class="info-box-text">Constraints</span>
-					  <span class="info-box-number">6</span>
+					  <span class="info-box-number">18</span>
 				  </div>
 				  <!-- /.info-box-content -->
 			  </div>
@@ -151,7 +151,7 @@
 
 				  <div class="info-box-content">
 					  <span class="info-box-text">Anomalies</span>
-					  <span class="info-box-number">0</span>
+					  <span class="info-box-number">3</span>
 				  </div>
 				  <!-- /.info-box-content -->
 			  </div>
@@ -178,7 +178,7 @@
 			  <span class="label label-primary pull-right"><i class="fa fa-cog fa-2x"></i></span>			  
 			</div><!-- /.box-header -->
 			<div class="box-body">
-			  <p>Database Type: PostgreSQL - 11.1</p>			  
+			  <p>Database Type: PostgreSQL - 11.2 (Debian 11.2-1.pgdg90+1)</p>			  
 			</div><!-- /.box-body -->
 		</div>
 		<div class="box box-primary">		
@@ -213,42 +213,74 @@
 					</tr>
 				</thead>
 				<tbody>
-				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/action.html">action</a></td>
+				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/payment_type.html">payment_type</a></td>
 				  <td class="detail" align="right">1</td>
+				  <td class="detail" align="right">0</td>
+				  <td class="detail" align="right">2</td>
+				  <td class="detail" align="right">0</td>
+				  <td class="detail" align="right">Table</td>
+				  <td class="comment detail" style="display: table-cell;"></td>
+				  </tr>
+				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/contact_link.html">contact_link</a></td>
 				  <td class="detail" align="right">0</td>
 				  <td class="detail" align="right">4</td>
+				  <td class="detail" align="right">5</td>
 				  <td class="detail" align="right">0</td>
 				  <td class="detail" align="right">Table</td>
 				  <td class="comment detail" style="display: table-cell;"></td>
 				  </tr>
-				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/affiliation_business.html">affiliation_business</a></td>
-				  <td class="detail" align="right">1</td>
+				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/membership.html">membership</a></td>
 				  <td class="detail" align="right">0</td>
 				  <td class="detail" align="right">3</td>
+				  <td class="detail" align="right">5</td>
 				  <td class="detail" align="right">0</td>
 				  <td class="detail" align="right">Table</td>
 				  <td class="comment detail" style="display: table-cell;"></td>
 				  </tr>
-				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/action_log.html">action_log</a></td>
+				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/contact.html">contact</a></td>
+				  <td class="detail" align="right">3</td>
+				  <td class="detail" align="right">1</td>
+				  <td class="detail" align="right">12</td>
+				  <td class="detail" align="right">1</td>
+				  <td class="detail" align="right">Table</td>
+				  <td class="comment detail" style="display: table-cell;"></td>
+				  </tr>
+				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/org_type.html">org_type</a></td>
+				  <td class="detail" align="right">1</td>
 				  <td class="detail" align="right">0</td>
 				  <td class="detail" align="right">2</td>
+				  <td class="detail" align="right">0</td>
+				  <td class="detail" align="right">Table</td>
+				  <td class="comment detail" style="display: table-cell;"></td>
+				  </tr>
+				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/entity.html">entity</a></td>
+				  <td class="detail" align="right">3</td>
+				  <td class="detail" align="right">0</td>
+				  <td class="detail" align="right">3</td>
+				  <td class="detail" align="right">1</td>
+				  <td class="detail" align="right">Table</td>
+				  <td class="comment detail" style="display: table-cell;"></td>
+				  </tr>
+				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/org_status.html">org_status</a></td>
+				  <td class="detail" align="right">1</td>
+				  <td class="detail" align="right">0</td>
+				  <td class="detail" align="right">2</td>
+				  <td class="detail" align="right">0</td>
+				  <td class="detail" align="right">Table</td>
+				  <td class="comment detail" style="display: table-cell;"></td>
+				  </tr>
+				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/membership_type.html">membership_type</a></td>
+				  <td class="detail" align="right">1</td>
+				  <td class="detail" align="right">0</td>
+				  <td class="detail" align="right">2</td>
+				  <td class="detail" align="right">0</td>
+				  <td class="detail" align="right">Table</td>
+				  <td class="comment detail" style="display: table-cell;"></td>
+				  </tr>
+				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/org.html">org</a></td>
+				  <td class="detail" align="right">3</td>
 				  <td class="detail" align="right">7</td>
-				  <td class="detail" align="right">0</td>
-				  <td class="detail" align="right">Table</td>
-				  <td class="comment detail" style="display: table-cell;"></td>
-				  </tr>
-				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/user_type.html">user_type</a></td>
-				  <td class="detail" align="right">1</td>
-				  <td class="detail" align="right">0</td>
-				  <td class="detail" align="right">3</td>
-				  <td class="detail" align="right">0</td>
-				  <td class="detail" align="right">Table</td>
-				  <td class="comment detail" style="display: table-cell;"></td>
-				  </tr>
-				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/affiliation_status.html">affiliation_status</a></td>
-				  <td class="detail" align="right">1</td>
-				  <td class="detail" align="right">0</td>
-				  <td class="detail" align="right">2</td>
+				  <td class="detail" align="right">11</td>
 				  <td class="detail" align="right">0</td>
 				  <td class="detail" align="right">Table</td>
 				  <td class="comment detail" style="display: table-cell;"></td>
@@ -256,16 +288,24 @@
 				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/affiliation.html">affiliation</a></td>
 				  <td class="detail" align="right">0</td>
 				  <td class="detail" align="right">3</td>
-				  <td class="detail" align="right">10</td>
+				  <td class="detail" align="right">5</td>
 				  <td class="detail" align="right">0</td>
 				  <td class="detail" align="right">Table</td>
 				  <td class="comment detail" style="display: table-cell;"></td>
 				  </tr>
-				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/users.html">users</a></td>
-				  <td class="detail" align="right">2</td>
-				  <td class="detail" align="right">1</td>
-				  <td class="detail" align="right">12</td>
+				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/user.html">user</a></td>
+				  <td class="detail" align="right">5</td>
 				  <td class="detail" align="right">0</td>
+				  <td class="detail" align="right">9</td>
+				  <td class="detail" align="right">0</td>
+				  <td class="detail" align="right">Table</td>
+				  <td class="comment detail" style="display: table-cell;"></td>
+				  </tr>
+				 <tr class="tbl even" valign="top">  <td class="detail"><a href="tables/alembic_version.html">alembic_version</a></td>
+				  <td class="detail" align="right">0</td>
+				  <td class="detail" align="right">0</td>
+				  <td class="detail" align="right">1</td>
+				  <td class="detail" align="right">1</td>
 				  <td class="detail" align="right">Table</td>
 				  <td class="comment detail" style="display: table-cell;"></td>
 				  </tr>

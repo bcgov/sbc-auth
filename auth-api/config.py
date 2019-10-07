@@ -100,6 +100,27 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     KEYCLOAK_ADMIN_USERNAME = os.getenv("KEYCLOAK_ADMIN_CLIENTID")
     KEYCLOAK_ADMIN_SECRET = os.getenv("KEYCLOAK_ADMIN_SECRET")
 
+    # Config to skip migrations when alembic migrate is used
+    SKIPPED_MIGRATIONS = ['authorizations_view']
+
+    # email server
+    MAIL_SERVER = os.getenv('MAIL_SERVER')
+    MAIL_PORT = os.getenv('MAIL_PORT')
+    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS')
+    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL')
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    MAIL_FROM_ID = os.getenv('MAIL_FROM_ID')
+
+    # mail token  configuration
+    AUTH_WEB_TOKEN_CONFIRM_URL = os.getenv('AUTH_WEB_TOKEN_CONFIRM_URL')
+    EMAIL_SECURITY_PASSWORD_SALT = os.getenv('EMAIL_SECURITY_PASSWORD_SALT')
+    EMAIL_TOKEN_SECRET_KEY = os.getenv('EMAIL_TOKEN_SECRET_KEY')
+    TOKEN_EXPIRY_PERIOD = os.getenv('TOKEN_EXPIRY_PERIOD')
+
+    # Sentry Config
+    SENTRY_DSN = os.getenv('SENTRY_DSN', None)
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False
@@ -135,7 +156,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     JWT_OIDC_TEST_KEYS = {
         "keys": [
             {
-                "kid": "sbc-auth-cron-job",
+                "kid": "sbc-auth-web",
                 "kty": "RSA",
                 "alg": "RS256",
                 "use": "sig",
@@ -148,7 +169,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     JWT_OIDC_TEST_PRIVATE_KEY_JWKS = {
         "keys": [
             {
-                "kid": "sbc-auth-cron-job",
+                "kid": "sbc-auth-web",
                 "kty": "RSA",
                 "alg": "RS256",
                 "use": "sig",

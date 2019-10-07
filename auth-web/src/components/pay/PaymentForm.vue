@@ -49,11 +49,11 @@ export default class PaymentForm extends Vue {
         })
     }
     goToUrl (url:string) {
-      window.location.href = url ? url : this.redirectUrl
+      window.location.href = url || this.redirectUrl
     }
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 
 </style>

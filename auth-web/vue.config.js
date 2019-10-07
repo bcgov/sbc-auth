@@ -1,9 +1,9 @@
 module.exports = {
   configureWebpack: {
-    devtool: 'source-map',
+    devtool: 'source-map'
   },
   publicPath: process.env.VUE_APP_PATH,
-  transpileDependencies: ['vuex-persist'],
+  transpileDependencies: ['vuex-persist', 'vuetify'],
   devServer: {
     // not used
     proxy: {
