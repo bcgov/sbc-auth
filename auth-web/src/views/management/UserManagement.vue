@@ -20,29 +20,55 @@
       <!-- Tab Contents -->
       <v-tabs-items v-model="tab">
         <v-tab-item>
-          <v-data-table
+          <v-data-table class="user-list__active"
             :headers="headersActive"
-            :items="activeUserListing"
+            :items="testData"
             :items-per-page="5"
+            :calculate-widths="true"
           >
+            <template v-slot:item.name="{ item }">
+              <span class="user-name">{{ item.name }}</span>
+              {{ item.email }}
+            </template>
+            <template v-slot:item.role="{ role }">
+              <v-menu offset-y>
+                <template v-slot:activator="{ on }">
+                  <v-btn depressed small
+                    v-on="on"
+                  >
+                    Role
+                    <v-icon small class="ml-1">keyboard_arrow_down</v-icon>
+                  </v-btn>
+                </template>
+                <v-list>
+                  <v-list-item
+                    v-for="(item, index) in testRoles"
+                    :key="index"
+                  >
+                    <v-list-item-title>{{ item.title }}</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </template>
             <template v-slot:item.action="{ item }">
-              <v-btn outlined @click="removeMember(item)">
+              <v-btn depressed small @click="removeMember(item)">
                 Remove
               </v-btn>
             </template>
           </v-data-table>
         </v-tab-item>
         <v-tab-item>
-          <v-data-table
+          <v-data-table class="user-list__pending"
             :headers="headersPending"
-            :items="pendingUserListing"
+            :items="testInviteData"
             :items-per-page="5"
+            :calculate-widths="true"
           >
             <template v-slot:item.action="{ item }">
-              <v-btn outlined class="mr-2" @click="resend(item)">
+              <v-btn depressed small class="mr-2" @click="resend(item)">
                 Resend
               </v-btn>
-              <v-btn outlined @click="removeInvite(item)">
+              <v-btn depressed small @click="removeInvite(item)">
                 Remove
               </v-btn>
             </template>
@@ -136,62 +162,75 @@ export default class UserManagement extends Vue {
     inviteUsersDialog: ModalDialog
   }
 
+  testData = [
+    { name: 'Test User One', email: 'email@email.com' },
+    { name: 'Test User Two', email: 'email@email.com' }
+  ]
+
+  testInviteData = [
+    { name: 'Test User One', email: 'email@email.com' },
+    { name: 'Test User Two', email: 'email@email.com' }
+  ]
+
+  testRoles = [
+    { title: 'Owner' },
+    { title: 'Admin' },
+    { title: 'Member' }
+  ]
+
   headersActive = [
     {
       text: 'Team Member',
       align: 'left',
       sortable: true,
-      value: 'name',
-      width: '25%'
+      value: 'name'
     },
     {
       text: 'Roles',
       align: 'left',
       sortable: true,
-      value: 'role',
-      width: '25%'
+      value: 'role'
     },
     {
       text: 'Last Active',
       align: 'left',
       sortable: true,
       value: 'lastActive',
-      width: '25%'
     },
     {
-      text: ' ',
+      text: 'Actions',
+      align: 'left',
       value: 'action',
       sortable: false,
-      width: '25%'
+      width: '95'
     }
   ]
 
   headersPending = [
     {
-      text: 'Contact',
+      text: 'Email',
       align: 'left',
       sortable: true,
       value: 'email',
-      width: '25%'
     },
     {
       text: 'Invitation Sent',
       align: 'left',
       sortable: true,
       value: 'invitationSent',
-      width: '25%'
     },
     {
       text: 'Expires',
       align: 'left',
       sortable: true,
       value: 'invitationExpires',
-      width: '25%'
     },
     {
-      text: '',
+      text: 'Actions',
+      align: 'left',
       value: 'action',
-      sortable: false
+      sortable: false,
+      width: '195'
     }
   ]
 
@@ -246,3 +285,20 @@ export default class UserManagement extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  >>> .v-data-table td {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+  
+  >>> .v-data-table.user-list__active td {
+    height: 4rem;
+    vertical-align: top;
+  }
+
+  .user-name {
+    display: block;
+    font-weight: 700;
+  }
+</style>
