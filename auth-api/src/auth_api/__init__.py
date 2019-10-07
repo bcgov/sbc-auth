@@ -15,11 +15,11 @@
 
 This module is the API for the Legal Entity system.
 """
+
 import os
 
 from flask import Flask
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
-from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
 
 from auth_api import models
 from auth_api.extensions import mail
@@ -30,7 +30,10 @@ from auth_api.utils.util_logging import setup_logging
 from config import CONFIGURATION, _Config
 
 
-import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports; conflicts with Flake8
+from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001; pylint: disable=wrong-import-order
+
+
+import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports,wrong-import-order; conflicts with Flake8
 
 
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first

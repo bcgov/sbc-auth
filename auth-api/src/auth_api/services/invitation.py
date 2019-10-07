@@ -15,6 +15,7 @@
 
 from datetime import datetime
 from threading import Thread
+from typing import Dict
 
 from flask import copy_current_request_context
 from itsdangerous import URLSafeTimedSerializer
@@ -27,8 +28,10 @@ from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.schemas import InvitationSchema
+from auth_api.utils.roles import ADMIN, OWNER
 from config import get_named_config
 
+from .authorization import check_auth
 from .notification import send_email
 
 
@@ -54,44 +57,43 @@ class Invitation:
         return obj
 
     @staticmethod
-    def create_invitation(invitation_info: dict, user):
+    def create_invitation(invitation_info: Dict, user, token_info: Dict = None):
         """Create a new invitation."""
+        # Ensure that the current user is OWNER or ADMIN on each org being invited to
+        for membership in invitation_info['membership']:
+            org_id = membership['orgId']
+            check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
         invitation = InvitationModel.create_from_dict(invitation_info, user.identifier)
         invitation.save()
         Invitation.send_invitation(invitation, user.as_dict())
         return Invitation(invitation)
 
-    def update_invitation(self, user):
+    def update_invitation(self, user, token_info: Dict = None):
         """Update the specified invitation with new data."""
+        # Ensure that the current user is OWNER or ADMIN on each org being re-invited to
+        for membership in self._model.membership:
+            org_id = membership.org_id
+            check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
         updated_invitation = self._model.update_invitation_as_retried()
         Invitation.send_invitation(updated_invitation, user.as_dict())
         return Invitation(updated_invitation)
 
     @staticmethod
-    def delete_invitation(invitation_id):
+    def delete_invitation(invitation_id, token_info: Dict = None):
         """Delete the specified invitation."""
+        # Ensure that the current user is OWNER or ADMIN for each org in the invitation
         invitation = InvitationModel.find_invitation_by_id(invitation_id)
+        for membership in invitation.membership:
+            org_id = membership.org_id
+            check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
         if invitation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         invitation.delete()
 
     @staticmethod
-    def get_invitations(user_id, status):
-        """Get invitations sent by a user."""
-        collection = []
-        if status == 'ALL':
-            invitations = InvitationModel.find_invitations_by_user(user_id)
-        elif status == 'PENDING':
-            invitations = InvitationModel.find_pending_invitations_by_user(user_id)
-        else:
-            invitations = InvitationModel.find_invitations_by_status(user_id, status)
-        for invitation in invitations:
-            collection.append(Invitation(invitation).as_dict())
-        return collection
-
-    @staticmethod
-    def get_invitations_by_org_id(org_id, status):
+    def get_invitations_by_org_id(org_id, status, token_info: Dict = None):
         """Get invitations for an org."""
+        check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
         collection = []
         if status == 'ALL':
             invitations = InvitationModel.find_invitations_by_org(org_id)
@@ -102,7 +104,7 @@ class Invitation:
         return collection
 
     @staticmethod
-    def find_invitation_by_id(invitation_id):
+    def find_invitation_by_id(invitation_id, token_info: Dict = None):
         """Find an existing invitation with the provided id."""
         if invitation_id is None:
             return None
@@ -110,6 +112,11 @@ class Invitation:
         invitation = InvitationModel.find_invitation_by_id(invitation_id)
         if not invitation:
             return None
+
+        # Ensure that the current user is an OWNER or ADMIN on each org in the invite being retrieved
+        for membership in invitation.membership:
+            org_id = membership.org_id
+            check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
 
         return Invitation(invitation)
 

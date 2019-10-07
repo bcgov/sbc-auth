@@ -24,6 +24,7 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
 from auth_api.utils.util import camelback2snake
+
 from .authorization import check_auth
 
 
