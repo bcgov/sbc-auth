@@ -17,7 +17,6 @@ from typing import Dict, Tuple
 
 from sbc_common_components.tracing.service_tracing import ServiceTracing
 
-import auth_api.services.authorization as auth
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -25,6 +24,7 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
 from auth_api.utils.util import camelback2snake
+from .authorization import check_auth
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -75,7 +75,7 @@ class Entity:
             return None
 
         if not skip_auth:
-            auth.check_auth(token_info, one_of_roles=allowed_roles, business_identifier=business_identifier)
+            check_auth(token_info, one_of_roles=allowed_roles, business_identifier=business_identifier)
 
         entity = Entity(entity_model)
         return entity

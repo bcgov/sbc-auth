@@ -58,6 +58,7 @@
       :fullscreen-on-mobile="$vuetify.breakpoint.xsOnly || $vuetify.breakpoint.smOnly || $vuetify.breakpoint.mdOnly"
       :is-persistent="true"
       :is-scrollable="true"
+      max-width="640"
     >
       <template v-slot:title>
         <span>Invite Team Members</span>
@@ -74,7 +75,9 @@
     <ModalDialog
       ref="successDialog"
       :title="successTitle"
-      :text="successText">
+      :text="successText"
+      dialog-class="notify-dialog"
+      max-width="640">
     </ModalDialog>
 
   </div>
