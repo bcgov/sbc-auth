@@ -67,7 +67,7 @@ export default class UserProfile extends Vue {
     margin-bottom: 3rem;
   }
 
-  // Sign In
+  // Profile Card
   .profile-card .container {
     padding: 1.5rem;
   }
