@@ -47,3 +47,8 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         self.membership_type_code = kwargs.get('membership_type_code')
         if self.membership_type_code is None:
             self.membership_type = MembershipType.get_default_type()
+
+    @classmethod
+    def find_membership_by_id(cls, membership_id):
+        """Find the first membership with the given id and return it."""
+        return cls.query.filter_by(id=membership_id).first()

@@ -21,6 +21,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
+from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
@@ -258,10 +259,37 @@ class OrgContacts(Resource):
 
             return response, status
 
-    @cors_preflight('DELETE,OPTIONS')
-    @API.route('/<string:org_id>/members/<string:member_id>', methods=['DELETE', 'OPTIONS'])
+    @cors_preflight('DELETE,PATCH,OPTIONS')
+    @API.route('/<string:org_id>/members/<string:membership_id>', methods=['DELETE', 'PATCH', 'OPTIONS'])
     class OrgMember(Resource):
         """Resource for managing a single membership record between an org and a user."""
+
+        @staticmethod
+        @_JWT.requires_auth
+        @TRACER.trace()
+        @cors.crossdomain(origin='*')
+        def patch(org_id, membership_id):  # pylint:disable=unused-argument
+            """Update a membership record with new member role."""
+            token = g.jwt_oidc_token_info
+            request_json = request.get_json()
+            role = request_json['role']
+            try:
+                if not role:
+                    response, status = {'message': 'Invalid role provided.'}, http_status.HTTP_400_BAD_REQUEST
+                    return response, status
+                updated_role = MembershipService.get_membership_type_by_code(role)
+                membership = MembershipService.find_membership_by_id(membership_id, token)
+                if not membership:
+                    response, status = {'message': 'The requested membership record could not be found.'}, \
+                            http_status.HTTP_404_NOT_FOUND
+                    return response, status
+
+                return membership.update_membership_role(updated_role=updated_role, token_info=token).as_dict(), \
+                    http_status.HTTP_200_OK
+
+            except BusinessException as exception:
+                response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+                return response, status
 
         @staticmethod
         @_JWT.requires_auth
