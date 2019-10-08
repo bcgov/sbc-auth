@@ -1,77 +1,75 @@
 <template>
-  <div>
-    <v-form ref="form" lazy-validation>
-      <v-expand-transition>
-        <div class="business-contact-form_alert-container" v-show="formError">
-          <v-alert
-            :value="true"
-            color="error"
-            icon="warning"
-          >{{formError}}
-          </v-alert>
-        </div>
-      </v-expand-transition>
-    <div class="business-contact-form_row">
-      <v-text-field
-        filled
-        label="Email Address"
-        req
-        persistent-hint
-        :rules="emailRules"
-        v-model="emailAddress"
-      >
-      </v-text-field>
-    </div>
-    <div class="business-contact-form_row">
-      <v-text-field
-        filled
-        label="Confirm Email Address"
-        req
-        persistent-hint
-        :error-messages="emailMustMatch()"
-        v-model="confirmedEmailAddress"
-      >
-      </v-text-field>
-    </div>
-    <div class="business-contact-form_row">
-      <v-layout wrap>
-        <v-flex xs6 class="mr-5">
-          <v-text-field
-            filled
-            label="Phone e.g. (555)-555-5555"
-            persistent-hint
-            type="tel"
-            v-mask="['(###)-###-####']"
-            v-model="phoneNumber"
-            :rules="phoneRules"
-          >
-          </v-text-field>
-        </v-flex>
-        <v-flex xs3>
-          <v-text-field
-            filled label="Extension"
-            persistent-hint
-            :rules="extensionRules"
-            v-mask="'###'"
-            v-model="extension"
-          >
-          </v-text-field>
-        </v-flex>
-      </v-layout>
-    </div>
-    <div class="business-contact-form_row">
-      <v-layout wrap>
-        <v-spacer></v-spacer>
-        <v-btn v-show="editing" class=".cancel-button" @click="cancel" color="secondary" large>
-          <span>Cancel</span>
+  <v-form ref="form" lazy-validation>
+    <v-expand-transition>
+      <div class="business-contact-form__alert-container" v-show="formError">
+        <v-alert type="error" class="mb-0"
+          :value="true"
+        >{{formError}}
+        </v-alert>
+      </div>
+    </v-expand-transition>
+    <v-row>
+      <v-col cols="12">
+        <v-text-field
+          filled
+          label="Email Address"
+          req
+          persistent-hint
+          :rules="emailRules"
+          v-model="emailAddress"
+        >
+        </v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-text-field
+          filled
+          label="Confirm Email Address"
+          req
+          persistent-hint
+          :error-messages="emailMustMatch()"
+          v-model="confirmedEmailAddress"
+        >
+        </v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-text-field
+          filled
+          label="Phone Number"
+          persistent-hint
+          hint="Example: (555) 555-5555"
+          type="tel"
+          v-mask="['(###) ###-####']"
+          v-model="phoneNumber"
+          :rules="phoneRules"
+        >
+        </v-text-field>
+      </v-col>
+      <v-col cols="3">
+        <v-text-field
+          filled label="Extension"
+          persistent-hint
+          :rules="extensionRules"
+          v-mask="'###'"
+          v-model="extension"
+        >
+        </v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" class="form__btns pb-0">
+        <v-btn large color="default" v-show="editing" @click="cancel">
+          Cancel
         </v-btn>
-        <v-btn class=".save-continue-button" @click="save" :disabled='!isFormValid()' color="primary" large>
-          <span>Save and Continue</span>
+        <v-btn large color="primary" @click="save" :disabled='!isFormValid()'>
+          Save and Continue
         </v-btn>
-      </v-layout>
-    </div>
-    </v-form>
-  </div>
+      </v-col>
+    </v-row>
+  </v-form>
 </template>
 
 <script lang="ts">
@@ -182,19 +180,18 @@ export default class BusinessContactForm extends Vue {
 <style lang="scss" scoped>
   @import '../../assets/scss/theme.scss';
 
-  .business-contact-form_row{
-    margin-top: 1rem;
+  // Tighten up some of the spacing between rows
+  [class^="col"] {
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
-  .business-contact-form_alert-container{
-    margin-bottom: 2rem;
+  .form__btns {
+    display: flex;
+    justify-content: flex-end;
   }
 
-  .v-alert{
-    margin: 0;
-  }
-
-  .v-btn{
-    font-weight: 700;
+  .business-contact-form__alert-container {
+    margin-bottom: 2.25rem;
   }
 </style>
