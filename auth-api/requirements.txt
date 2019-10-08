@@ -7,7 +7,7 @@ certifi==2019.9.11
 cffi==1.12.3
 chardet==3.0.4
 Click==7.0
-ecdsa==0.13.2
+ecdsa==0.13.3
 Flask==1.1.1
 flask-jwt-oidc==0.1.5
 Flask-Mail==0.9.1
