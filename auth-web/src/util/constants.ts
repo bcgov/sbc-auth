@@ -5,7 +5,3 @@ export enum SessionStorageKeys {
     ApiConfigKey = 'AUTH_API_CONFIG',
     BusinessIdentifierKey = 'BUSINESS_IDENTIFIER'
 }
-
-export enum AppConstants {
-    RootPath = '/auth'
-}

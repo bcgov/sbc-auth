@@ -7,7 +7,6 @@ import { Contact } from '@/models/contact'
 import { Organization, Member, ActiveUserRecord, PendingUserRecord } from '@/models/Organization'
 import authService from '@/services/login.services'
 import ConfigHelper from '@/util/config-helper'
-import { AppConstants } from '@/util/constants'
 import OrgService from '@/services/org.services'
 import _ from 'lodash'
 import { Invitation } from '@/models/Invitation'
@@ -130,7 +129,7 @@ export default class UserModule extends VuexModule {
       authService.logout().then(response => {
         if (response.status === 204) {
           ConfigHelper.clearSession()
-          window.location.assign(window.location.origin + AppConstants.RootPath)
+          window.location.assign(window.location.origin + process.env.VUE_APP_PATH)
         }
       })
     } else {
