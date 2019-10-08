@@ -51,9 +51,65 @@ export default class BusinessProfile extends Vue {
 </script>
 
 <style lang="scss" scoped>
+  // Layout
+  article {
+    flex: 1 1 auto;
+  }
 
+  aside {
+    flex: 0 0 auto;
+    margin-top: 2rem;
+  }
+
+  @media (min-width: 960px) {
+    article {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+
+    aside {
+      margin-top: 0;
+      margin-left: 2rem;
+      width: 20rem;
+    }
+
+    .view-container {
+      flex-flow: row nowrap;
+    }
+  }
+
+  aside {
+    margin-top: 2rem;
+  }
+
+  @media (min-width: 960px) {
+    article {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+
+    aside {
+      margin-top: 0;
+    }
+
+    .view-container {
+      flex-flow: row nowrap;
+    }
+  }
+
+  .intro-text {
+    margin-bottom: 3rem;
+  }
+
+  // Profile Card
   .profile-card .container {
-      padding: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  @media (min-width: 960px) {
+    .profile-card .container {
+      padding: 2rem;
+    }
   }
 
 </style>
