@@ -135,9 +135,9 @@ class Org:
         """Return the set of members for this org."""
         return {'members': self.as_dict()['members']}
 
-    def get_invitations(self, status='ALL'):
+    def get_invitations(self, status='ALL', token_info: Dict = None):
         """Return the unresolved (pending or failed) invitations for this org."""
-        return {'invitations': InvitationService.get_invitations_by_org_id(self._model.id, status)}
+        return {'invitations': InvitationService.get_invitations_by_org_id(self._model.id, status, token_info)}
 
     def remove_member(self, member_id):
         """Remove the user with specified username from this org."""
