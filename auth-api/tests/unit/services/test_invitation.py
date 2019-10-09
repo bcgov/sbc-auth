@@ -48,7 +48,7 @@ def factory_user_model(username,
     return user
 
 
-def test_as_dict(session):  # pylint:disable=unused-argument
+def test_as_dict(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that the Invitation is exported correctly as a dictionary."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(username='testuser',
@@ -67,12 +67,12 @@ def test_as_dict(session):  # pylint:disable=unused-argument
                 }
             ]
         }
-        invitation = InvitationService.create_invitation(invitation_info, User(user))
+        invitation = InvitationService.create_invitation(invitation_info, User(user), {})
         invitation_dictionary = invitation.as_dict()
         assert invitation_dictionary['recipientEmail'] == invitation_info['recipientEmail']
 
 
-def test_create_invitation(session):  # pylint:disable=unused-argument
+def test_create_invitation(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an Invitation can be created."""
     with patch.object(InvitationService, 'send_invitation', return_value=None) as mock_notify:
         user = factory_user_model(username='testuser',
@@ -96,30 +96,7 @@ def test_create_invitation(session):  # pylint:disable=unused-argument
         mock_notify.assert_called()
 
 
-def test_get_invitations(session):  # pylint:disable=unused-argument
-    """Assert that invitations can be retrieved."""
-    with patch.object(InvitationService, 'send_invitation', return_value=None):
-        user = factory_user_model(username='testuser',
-                                  roles='{edit,uma_authorization,basic}',
-                                  keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
-        org = OrgService.create_org(TEST_ORG_INFO, user_id=user.id)
-        org_dictionary = org.as_dict()
-        invitation_info = {
-            'recipientEmail': 'abc.test@gmail.com',
-            'membership': [
-                {
-                    'membershipType': 'MEMBER',
-                    'orgId': org_dictionary['id']
-                }
-            ]
-        }
-        InvitationService.create_invitation(invitation_info, User(user))
-        invitation = InvitationService.get_invitations(user.id, 'ALL')
-        invitation_dictionary = invitation[0]
-        assert invitation_dictionary['recipientEmail'] == invitation_info['recipientEmail']
-
-
-def test_find_invitation_by_id(session):  # pylint:disable=unused-argument
+def test_find_invitation_by_id(session, auth_mock):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided id."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(username='testuser',
@@ -142,7 +119,7 @@ def test_find_invitation_by_id(session):  # pylint:disable=unused-argument
         assert invitation['recipientEmail'] == invitation_info['recipientEmail']
 
 
-def test_delete_invitation(session):  # pylint:disable=unused-argument
+def test_delete_invitation(session, auth_mock):  # pylint:disable=unused-argument
     """Delete the specified invitation."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(username='testuser',
@@ -165,7 +142,7 @@ def test_delete_invitation(session):  # pylint:disable=unused-argument
         assert invitation is None
 
 
-def test_update_invitation(session):  # pylint:disable=unused-argument
+def test_update_invitation(session, auth_mock):  # pylint:disable=unused-argument
     """Update the specified invitation with new data."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(username='testuser',

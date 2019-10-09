@@ -195,7 +195,7 @@ def test_get_members(session):  # pylint:disable=unused-argument
     assert response['members'][0]['membershipTypeCode'] == 'OWNER'
 
 
-def test_get_invitations(session):  # pylint:disable=unused-argument
+def test_get_invitations(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that invitations for an org can be retrieved."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(username='testuser',

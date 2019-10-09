@@ -34,3 +34,8 @@ class InvitationStatus(BaseModel):  # pylint: disable=too-few-public-methods # T
     def get_default_status(cls):
         """Return the default status code for an Invitation."""
         return cls.query.filter_by(default=True).first()
+
+    @classmethod
+    def get_status_by_code(cls, code: str):
+        """Return the status object corresponding to the given code."""
+        return cls.query.filter_by(code=code).first()

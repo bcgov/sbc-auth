@@ -21,6 +21,7 @@ import json
 import os
 
 from auth_api import status as http_status
+from auth_api.services import Invitation as InvitationService
 
 
 TEST_ORG_INFO = {
@@ -59,6 +60,20 @@ TEST_JWT_CLAIMS = {
         ]
     }
 }
+
+TEST_INVITED_USER_JWT_CLAIMS = {
+    'iss': os.getenv('JWT_OIDC_ISSUER'),
+    'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302075',
+    'firstname': 'Test',
+    'lastname': 'User 2',
+    'preferred_username': 'testuser2',
+    'realm_access': {
+        'roles': [
+            'edit'
+        ]
+    }
+}
+
 TEST_STAFF_JWT_CLAIMS = {
     'iss': os.getenv('JWT_OIDC_ISSUER'),
     'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
@@ -311,3 +326,54 @@ def test_get_invitations(client, jwt, session):  # pylint:disable=unused-argumen
     assert len(dictionary['invitations']) == 2
     assert dictionary['invitations'][0]['recipientEmail'] == 'abc123@email.com'
     assert dictionary['invitations'][1]['recipientEmail'] == 'xyz456@email.com'
+
+
+def test_update_member(client, jwt, session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that a member of an org can have their role updated."""
+    # Set up: create/login user, create org
+    headers_invitee = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers_invitee, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+                     headers=headers_invitee, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    # Invite a user to the org
+    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invite(org_id, 'abc123@email.com')),
+                     headers=headers_invitee, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    invitation_id = dictionary['id']
+    invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
+
+    # Create/login as invited user
+    headers_invited = factory_auth_header(jwt=jwt, claims=TEST_INVITED_USER_JWT_CLAIMS)
+    rv = client.post('/api/v1/users', headers=headers_invited, content_type='application/json')
+
+    # Accept invite as invited user
+    rv = client.put('/api/v1/invitations/tokens/{}'.format(invitation_id_token),
+                    headers=headers_invited, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['status'] == 'ACCEPTED'
+
+    # Get members for the org as invitee and assert length of 2
+    rv = client.get('/api/v1/orgs/{}/members'.format(org_id), headers=headers_invitee)
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['members']
+    assert len(dictionary['members']) == 2
+
+    # Find the newly added member
+    new_member = list(filter(lambda x: x['user']['username'] == TEST_INVITED_USER_JWT_CLAIMS['preferred_username'],
+                             dictionary['members']))
+    assert len(new_member) == 1
+    assert new_member[0]['membershipTypeCode'] == 'MEMBER'
+    member_id = new_member[0]['id']
+
+    # Update the new member
+    rv = client.patch('/api/v1/orgs/{}/members/{}'.format(org_id, member_id), headers=headers_invitee,
+                      data=json.dumps({'role': 'ADMIN'}), content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['membershipTypeCode'] == 'ADMIN'
