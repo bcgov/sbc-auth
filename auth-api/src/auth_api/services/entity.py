@@ -105,7 +105,7 @@ class Entity:
         else:
             # TODO temporary allow update passcode, should replace with reset passcode endpoint.
             entity_info['passCode'] = passcode_hash(entity_info['passCode'])
-            existing_entity.update_from_dict(**entity_info)
+            existing_entity.update_from_dict(**camelback2snake(entity_info))
             entity_model = existing_entity
 
         if not entity_model:

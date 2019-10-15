@@ -146,4 +146,5 @@ class Org:
                 self._model.members.remove(member)
                 self._model.commit()
                 return MembershipService(member)
-        return None
+        # If we get to this point, member with that id could not be found, so raise exception
+        raise BusinessException(Error.DATA_NOT_FOUND, None)

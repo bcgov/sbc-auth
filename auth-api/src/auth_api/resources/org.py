@@ -295,13 +295,13 @@ class OrgContacts(Resource):
         @_JWT.requires_auth
         @TRACER.trace()
         @cors.crossdomain(origin='*')
-        def delete(org_id, member_id):
+        def delete(org_id, membership_id):
             """Delete a membership record for the given org and user."""
             try:
                 org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
                                                 allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
                 if org:
-                    response, status = org.remove_member(member_id).as_dict(), \
+                    response, status = org.remove_member(membership_id).as_dict(), \
                         http_status.HTTP_200_OK
                 else:
                     response, status = {'message': 'The requested organization could not be found.'}, \
