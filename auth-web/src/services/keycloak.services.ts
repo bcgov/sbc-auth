@@ -28,17 +28,16 @@ export default {
   },
 
   getUserInfo () : UserInfo {
-    let token = this.parsedToken
-    if (!token) {
-      this.parsedToken = token = this.decodeToken()
+    if (!this.parsedToken) {
+      this.parsedToken = this.decodeToken()
     }
     return {
-      lastName: token.lastname,
-      firstName: token.firstname,
-      email: token.email,
-      roles: token.realm_access.roles,
-      keycloakGuid: token.jti,
-      userName: token.username
+      lastName: this.parsedToken.lastname,
+      firstName: this.parsedToken.firstname,
+      email: this.parsedToken.email,
+      roles: this.parsedToken.realm_access.roles,
+      keycloakGuid: this.parsedToken.jti,
+      userName: this.parsedToken.username
     }
   },
 
