@@ -1,24 +1,23 @@
 <template>
   <div class="entity-list-component">
     <!-- No Results Message -->
-    <v-card class="no-results text-center" v-if="affiliatedEntities.length === 0" @click="addBusiness()">
+    <v-card
+      class="no-results text-center"
+      v-if="affiliatedEntities.length === 0"
+      @click="addBusiness()"
+    >
       <v-card-title class="pt-6 pb-0">{{ $t('businessListEmptyMessage')}}</v-card-title>
-      <v-card-text class="pb-8">
-        {{ $t('businessListActionMessage')}}
-      </v-card-text>
+      <v-card-text class="pb-8">{{ $t('businessListActionMessage')}}</v-card-text>
     </v-card>
 
     <ul class="org-details" v-if="affiliatedEntities.length > 0">
-      <li
-        class="list-item"
-        v-for="org in organizations"
-        v-bind:key="org.id"
-      >
+      <li class="list-item" v-for="org in organizations" v-bind:key="org.id">
         <ul class="entity-details">
           <li
             class="list-item"
             v-for="entity in org.affiliatedEntities"
-            v-bind:key="entity.businessIdentifier">
+            v-bind:key="entity.businessIdentifier"
+          >
             <v-card class="mb-3">
               <v-card-title class="list-item_entity-number">
                 <a @click="redirectToNext(entity.businessIdentifier)">{{entity.name}}</a>
@@ -41,28 +40,27 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { Component, Emit } from 'vue-property-decorator'
-import { getModule } from 'vuex-module-decorators'
-import UserModule from '@/store/modules/user'
-import configHelper from '@/util/config-helper'
-import { AffiliatedEntity, Organization, RemoveBusinessPayload } from '../../models/Organization'
-import { mapGetters, mapState, mapActions } from 'vuex'
+import { AffiliatedEntity, Organization, RemoveBusinessPayload } from '@/models/Organization'
+import { Component, Emit, Vue } from 'vue-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
+import OrgModule from '@/store/modules/org'
 import { SessionStorageKeys } from '@/util/constants'
+import configHelper from '@/util/config-helper'
+import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
-    ...mapState('user', ['organizations'])
+    ...mapState('org', ['organizations'])
   },
   methods: {
-    ...mapActions('user', ['getOrganizations'])
+    ...mapActions('org', ['syncOrganizations'])
   }
 })
 export default class AffiliatedEntityList extends Vue {
   private VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
-  private userStore = getModule(UserModule, this.$store)
+  private orgStore = getModule(OrgModule, this.$store)
   readonly organizations!: Organization[]
-  readonly getOrganizations!: () => Organization[]
+  readonly syncOrganizations!: () => Organization[]
 
   get affiliatedEntities () {
     let affiliatedEntities: AffiliatedEntity[] = []
@@ -77,11 +75,11 @@ export default class AffiliatedEntityList extends Vue {
   }
 
   created () {
-    this.getOrganizations()
+    this.syncOrganizations()
   }
 
   @Emit()
-  addBusiness () {}
+  addBusiness () { }
 
   @Emit()
   removeBusiness (orgId: number, incorporationNumber: string): RemoveBusinessPayload {
@@ -102,7 +100,7 @@ export default class AffiliatedEntityList extends Vue {
 </script>
 
 <style lang="scss" scoped>
- @import '../../assets/scss/theme.scss';
+@import "../../assets/scss/theme.scss";
 
 .org-details {
   padding: 0;
@@ -113,7 +111,7 @@ export default class AffiliatedEntityList extends Vue {
 
 .entity-details {
   padding: 0;
-  list-style-type: none
+  list-style-type: none;
 }
 
 .list-item {
@@ -155,7 +153,8 @@ a {
   font-size: 0.875rem;
 }
 
-dd, dt {
+dd,
+dt {
   float: left;
 }
 
@@ -168,7 +167,7 @@ dd {
 
   + dt {
     &:before {
-      content: '•';
+      content: "•";
       display: inline-block;
       margin-right: 0.75rem;
       margin-left: 0.75rem;
@@ -187,5 +186,4 @@ dd {
 .no-results .v-card__text {
   font-size: 0.9375rem;
 }
-
 </style>
