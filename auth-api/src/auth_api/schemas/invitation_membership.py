@@ -28,7 +28,7 @@ class InvitationMembershipSchema(CamelCaseSchema):  # pylint: disable=too-many-a
 
         model = InvitationMembershipModel
 
-    org = fields.Nested('OrgSchema', exclude=['contacts', 'created', 'created_by', 'id',
+    org = fields.Nested('OrgSchema', exclude=['contacts', 'created', 'created_by', 'affiliated_entities', 'invitations',
                                               'members', 'modified', 'preferred_payment', 'org_status',
                                               'org_type'])
 
