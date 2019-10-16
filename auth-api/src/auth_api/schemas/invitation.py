@@ -31,4 +31,3 @@ class InvitationSchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, 
         fields = ('id', 'recipient_email', 'sent_date', 'expires_on', 'accepted_date', 'status', 'membership')
 
     membership = fields.Nested(InvitationMembershipSchema, many=True)
-    expires_on = fields.Str(data_key='expiresOn')

@@ -34,3 +34,4 @@ class InvitationMembership(BaseModel):  # pylint: disable=too-few-public-methods
 
     membership_type = relationship('MembershipType', foreign_keys=[membership_type_code])
     org = relationship('Org', foreign_keys=[org_id])
+    invitation = relationship('Invitation', foreign_keys=[invitation_id])
