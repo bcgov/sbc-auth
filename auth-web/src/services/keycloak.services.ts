@@ -1,7 +1,7 @@
 import Keycloak from 'keycloak-js'
 import configHelper from '../util/config-helper'
 import { UserInfo } from '../models/userInfo'
-import { SessionStorageKeys, AppConstants } from '../util/constants'
+import { SessionStorageKeys } from '../util/constants'
 
 const kc: Keycloak.KeycloakInstance = null
 const keyCloakConfig = `/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`
@@ -49,7 +49,7 @@ export default {
         if (authenticated) {
           configHelper.clearSession()
           if (!redirectUrl) {
-            redirectUrl = window.location.origin + AppConstants.RootPath
+            redirectUrl = window.location.origin + process.env.VUE_APP_PATH
           }
           this.kc.logout({ redirectUri: redirectUrl })
         }

@@ -6,10 +6,6 @@ export enum SessionStorageKeys {
     BusinessIdentifierKey = 'BUSINESS_IDENTIFIER'
 }
 
-export enum AppConstants {
-    RootPath = '/auth'
-}
-
 export enum Role {
     Staff = 'staff',
     Public = 'public_user',
