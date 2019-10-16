@@ -8,6 +8,6 @@ errors stdout
 
 rewrite /auth {
     regexp .*
-    to {path} /auth/
+    to {path} /cooperatives/auth/
 }
 

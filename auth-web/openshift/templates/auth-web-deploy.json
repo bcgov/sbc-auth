@@ -306,7 +306,7 @@
       "displayName": "WEB_APP_CONTEXT_PATH",
       "description": "The path at which web application is deployed.Context root for the web applicaton",
       "required": true,
-      "value": "auth"
+      "value": "cooperatives/auth"
     }
   ]
 }
