@@ -5,3 +5,10 @@ export enum SessionStorageKeys {
     ApiConfigKey = 'AUTH_API_CONFIG',
     BusinessIdentifierKey = 'BUSINESS_IDENTIFIER'
 }
+
+export enum Role {
+    Staff = 'staff',
+    Public = 'public_user',
+    Edit = 'edit',
+    Basic = 'basic'
+}

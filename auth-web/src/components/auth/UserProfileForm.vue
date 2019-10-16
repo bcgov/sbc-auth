@@ -2,10 +2,8 @@
   <v-form ref="form" lazy-validation>
     <v-expand-transition>
       <div class="form_alert-container" v-show="formError">
-        <v-alert
+        <v-alert type="error" class="mb-0"
           :value="true"
-          color="error"
-          icon="warning"
         >
         {{formError}}
         </v-alert>
@@ -175,6 +173,7 @@ export default class UserProfileForm extends Vue {
 <style lang="scss" scoped>
 @import '../../assets/scss/theme.scss';
 
+  // Tighten up some of the spacing between rows
   [class^="col"] {
     padding-top: 0;
     padding-bottom: 0;
@@ -184,5 +183,4 @@ export default class UserProfileForm extends Vue {
     display: flex;
     justify-content: flex-end;
   }
-
 </style>

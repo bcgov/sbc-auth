@@ -15,8 +15,6 @@
 
 from typing import Dict, Tuple
 
-from sbc_common_components.tracing.service_tracing import ServiceTracing
-
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -25,8 +23,9 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import OrgSchema
 from auth_api.utils.util import camelback2snake
-from .authorization import check_auth
+from sbc_common_components.tracing.service_tracing import ServiceTracing
 
+from .authorization import check_auth
 from .invitation import Invitation as InvitationService
 from .membership import Membership as MembershipService
 
@@ -136,9 +135,9 @@ class Org:
         """Return the set of members for this org."""
         return {'members': self.as_dict()['members']}
 
-    def get_invitations(self, status='ALL'):
+    def get_invitations(self, status='ALL', token_info: Dict = None):
         """Return the unresolved (pending or failed) invitations for this org."""
-        return {'invitations': InvitationService.get_invitations_by_org_id(self._model.id, status)}
+        return {'invitations': InvitationService.get_invitations_by_org_id(self._model.id, status, token_info)}
 
     def remove_member(self, member_id):
         """Remove the user with specified username from this org."""

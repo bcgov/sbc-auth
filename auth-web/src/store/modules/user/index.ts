@@ -84,7 +84,7 @@ export default class UserModule extends VuexModule {
   @Action({ commit: 'setCurrentUser' })
   public async initializeSession () {
     // Set values to session storage
-    keycloakService.initSessionStorage()
+    keycloakService.initSession()
     // Load User Info
     return keycloakService.getUserInfo()
   }
