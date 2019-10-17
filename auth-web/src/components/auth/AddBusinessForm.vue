@@ -19,7 +19,7 @@
           req
           persistent-hint
           :rules="entityNumRules"
-          v-model="businessNumber"
+          v-model="businessIdentifier"
         ></v-text-field>
       </div>
       <div class="passcode-form__row">
@@ -38,7 +38,7 @@
         ></v-text-field>
       </div>
       <div class="form__btns mt-8">
-        <v-btn depressed large color="primary" @click="addBusiness">
+        <v-btn depressed large color="primary" @click="add">
           <span>Add Business</span>
         </v-btn>
         <v-btn depressed large color="default" class="ml-2" @click="cancel">
@@ -46,36 +46,39 @@
         </v-btn>
       </div>
     </v-form>
-
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { Component, Prop, Emit } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { mapActions, mapMutations, mapState } from 'vuex'
+import BusinessModule from '@/store/modules/business'
+import ConfigHelper from '@/util/config-helper'
+import { LoginPayload } from '@/models/Business'
 import { getModule } from 'vuex-module-decorators'
-import BusinessModule from '../../store/modules/business'
-import configHelper from '../../util/config-helper'
 
-@Component
-export default class AddBusinessForm extends Vue {
-  $refs: {
-    form: HTMLFormElement
+@Component({
+  methods: {
+    ...mapActions('business', ['addBusiness'])
   }
-  showPasscode = false
-  validationError = ''
-  VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
-  entityNumRules = [
-    v => !!v || 'Incorporation Number is required'
-  ]
-  entityPasscodeRules = [
+})
+export default class AddBusinessForm extends Vue {
+  private businessStore = getModule(BusinessModule, this.$store)
+  private readonly addBusiness!: (loginPayload: LoginPayload) => void
+  private showPasscode = false
+  private validationError = ''
+  private entityNumRules = [v => !!v || 'Incorporation Number is required']
+  private entityPasscodeRules = [
     v => !!v || 'Passcode is required',
     v => v.length >= 9 || 'Passcode must be exactly 9 digits'
   ]
-  businessStore = getModule(BusinessModule, this.$store)
+  private VUE_APP_COPS_REDIRECT_URL = ConfigHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
+  private businessIdentifier: string = ''
+  private passcode: string = ''
 
-  businessNumber: string = ''
-  passcode: string = ''
+  $refs: {
+    form: HTMLFormElement
+  }
 
   private isFormValid (): boolean {
     return this.$refs.form.validate()
@@ -86,11 +89,11 @@ export default class AddBusinessForm extends Vue {
     this.$router.push('/main')
   }
 
-  async addBusiness () {
+  async add () {
     if (this.isFormValid()) {
       try {
         // attempt to add business
-        await this.businessStore.addBusiness({ businessNumber: this.businessNumber, passCode: this.passcode })
+        await this.addBusiness({ businessIdentifier: this.businessIdentifier, passCode: this.passcode })
 
         // emit event to let parent know business added
         this.$emit('add-success')
@@ -110,7 +113,7 @@ export default class AddBusinessForm extends Vue {
   cancel () {}
 
   resetForm () {
-    this.businessNumber = ''
+    this.businessIdentifier = ''
     this.passcode = ''
     this.$refs.form.resetValidation()
   }

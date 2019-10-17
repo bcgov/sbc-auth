@@ -1,17 +1,12 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { Business, LoginPayload } from '@/models/Business'
 import { Affiliation } from '@/models/affiliation'
-import { Business } from '@/models/business'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import LoginService from '@/services/login.services'
 import { RemoveBusinessPayload } from '@/models/Organization'
 import { SessionStorageKeys } from '@/util/constants'
-
-interface LoginPayload {
-  businessNumber: string
-  passCode: string
-}
 
 @Module({
   name: 'business',
@@ -36,7 +31,7 @@ export default class BusinessModule extends VuexModule {
 
   @Action({ rawError: true })
   public async login (payload: LoginPayload) {
-    return LoginService.login(payload.businessNumber, payload.passCode)
+    return LoginService.login(payload.businessIdentifier, payload.passCode)
   }
 
   @Action
@@ -64,20 +59,20 @@ export default class BusinessModule extends VuexModule {
   @Action({ rawError: true })
   public async addBusiness (payload: LoginPayload) {
     const affiliation: Affiliation = {
-      businessIdentifier: payload.businessNumber,
+      businessIdentifier: payload.businessIdentifier,
       passCode: payload.passCode
     }
 
     // Create an implicit org for the current user and the requested business
     const createBusinessResponse = await BusinessService.createOrg({
-      name: payload.businessNumber
+      name: payload.businessIdentifier
     })
 
     // Create an affiliation between implicit org and requested business
     await BusinessService.createAffiliation(createBusinessResponse.data.id, affiliation)
 
     // Update store
-    this.context.dispatch('org/getOrganizations', null, { root: true })
+    this.context.dispatch('org/syncOrganizations', null, { root: true })
   }
 
   // Following searchBusiness will search data from legal-api.
@@ -97,7 +92,7 @@ export default class BusinessModule extends VuexModule {
     const removeAffiliationResponse = await BusinessService.removeAffiliation(payload.orgIdentifier, payload.incorporationNumber)
     if (removeAffiliationResponse.status === 200) {
       // Update store
-      this.context.dispatch('org/getOrganizations', null, { root: true })
+      this.context.dispatch('org/syncOrganizations', null, { root: true })
     }
   }
 

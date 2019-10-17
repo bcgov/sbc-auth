@@ -1,7 +1,7 @@
 import Axios, { AxiosResponse } from 'axios'
 import { CreateRequestBody, Organization } from '@/models/Organization'
 import { Affiliation } from '@/models/affiliation'
-import { Business } from '@/models/business'
+import { Business } from '@/models/Business'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 
