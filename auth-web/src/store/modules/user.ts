@@ -1,5 +1,4 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { AppConstants } from '@/util/constants'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import KeycloakService from '@/services/keycloak.services'
@@ -40,7 +39,7 @@ export default class UserModule extends VuexModule {
   @Action({ commit: 'setCurrentUser' })
   public async initializeSession () {
     // Set values to session storage
-    KeycloakService.initSessionStorage()
+    KeycloakService.initSession()
     // Load User Info
     return KeycloakService.getUserInfo()
   }
@@ -79,7 +78,7 @@ export default class UserModule extends VuexModule {
       LoginService.logout().then(response => {
         if (response.status === 204) {
           ConfigHelper.clearSession()
-          window.location.assign(window.location.origin + AppConstants.RootPath)
+          window.location.assign(window.location.origin + '/' + process.env.VUE_APP_PATH)
         }
       })
     } else {

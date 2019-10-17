@@ -14,9 +14,11 @@ import Signout from './components/auth/Signout.vue'
 import SearchBusinessForm from './components/auth/SearchBusinessForm.vue'
 import TokenValidator from './views/TokenValidator.vue'
 import AcceptInvite from './views/AcceptInvite.vue'
+import KeyCloakService from '@/services/keycloak.services'
+import { SessionStorageKeys, Role } from './util/constants'
+import Unauthorized from './components/auth/Unauthorized.vue'
 
 Vue.use(Router)
-
 function mapReturnPayVars (route) {
   return {
     paymentId: route.params.paymentId,
@@ -35,10 +37,10 @@ export function getRoutes (appFlavor:String) {
       { path: '/', component: Home },
       { path: '/home', component: AuthHome },
       { path: '/main', component: Template, meta: { requiresAuth: true } },
-      { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
+      { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true} },
       { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
-      { path: '/validatetoken/:token', component: TokenValidator, props: true, meta: { requiresAuth: false } },
-      { path: '/confirmtoken/:token', component: AcceptInvite, props: true, meta: { requiresAuth: true } }
+      { path: '/validatetoken/:token', component: TokenValidator, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
+      { path: '/confirmtoken/:token', component: AcceptInvite, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } }
     ]
   }
 
@@ -48,9 +50,10 @@ export function getRoutes (appFlavor:String) {
     { path: '/signout', component: Signout, props: true, meta: { requiresAuth: true } },
     { path: '/signout/:redirectUrl', component: Signout, props: true, meta: { requiresAuth: true } },
     { path: '/businessprofile', component: BusinessProfile, meta: { requiresAuth: true } },
-    { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: true } },
-    { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true } },
-    { path: '/searchbusiness', component: SearchBusinessForm, props: true, meta: { requiresAuth: true } },
+    { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } },
+    { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } },
+    { path: '/searchbusiness', component: SearchBusinessForm, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
+    { path: '/unauthorized', component: Unauthorized, props: true, meta: { requiresAuth: false } },
     { path: '*', component: PageNotFound }
   ]
 
@@ -62,20 +65,29 @@ const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL
 })
-
 router.beforeEach((to, from, next) => {
+  // If the user is authenticated;
+  //    If there are allowed or disabled roles specified on the route check if the user has those roles else route to unauthorized
+  // If the user is not authenticated
+  //    Redirect the user to login page to login page
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (sessionStorage.getItem('KEYCLOAK_TOKEN')) {
-      next()
+    if (sessionStorage.getItem(SessionStorageKeys.KeyCloakToken)) {
+      if (KeyCloakService.verifyRoles(to.meta.allowedRoles, to.meta.disabledRoles)) {
+        return next()
+      } else {
+        return next({
+          path: '/unauthorized',
+          query: { redirect: to.fullPath }
+        })
+      }
     } else {
-      next({
-        path: '/',
+      return next({
+        path: '/', // TODO Change this to login home page once it's ready
         query: { redirect: to.fullPath }
       })
     }
-  } else {
-    next()
   }
+  next()
 })
 
 export default router
