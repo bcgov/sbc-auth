@@ -49,7 +49,7 @@ export default {
         if (authenticated) {
           configHelper.clearSession()
           if (!redirectUrl) {
-            redirectUrl = window.location.origin + process.env.VUE_APP_PATH
+            redirectUrl = `${window.location.origin}/${process.env.VUE_APP_PATH}`
           }
           this.kc.logout({ redirectUri: redirectUrl })
         }
