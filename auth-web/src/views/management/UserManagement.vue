@@ -23,7 +23,7 @@
           <v-data-table
             class="user-list__active"
             :headers="headersActive"
-            :items="memberList"
+            :items="basicMembers"
             :items-per-page="5"
             :calculate-widths="true"
             :loading="isLoading"
@@ -63,7 +63,7 @@
           <v-data-table
             class="user-list__pending"
             :headers="headersPending"
-            :items="invitationList"
+            :items="basicInvitations"
             :items-per-page="5"
             :calculate-widths="true"
           >
@@ -105,7 +105,7 @@
 </template>
 
 <script lang="ts">
-import { ActiveUserRecord, DeleteMemberPayload, Member, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
+import { ActiveUserRecord, Member, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
 import { Component, Vue } from 'vue-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { Invitation } from '@/models/Invitation'
@@ -127,7 +127,34 @@ import moment from 'moment'
       'organizations',
       'resending',
       'sentInvitations'
-    ])
+    ]),
+    basicMembers (): ActiveUserRecord[] {
+      return _.uniqWith(
+        _.flatten(this.organizations.map(org => org.members)),
+        (memberA: Member, memberB: Member) => memberA.user.username === memberB.user.username
+      )
+        .map((member: Member) => {
+          return {
+            username: member.user.username,
+            name: `${member.user.firstname} ${member.user.lastname}`,
+            role: member.membershipTypeCode,
+            lastActive: moment(member.user.modified).format('DD MMM, YYYY'),
+            member
+          }
+        })
+    },
+    basicInvitations (): PendingUserRecord[] {
+      return _.flatten(this.organizations.map(org => org.invitations))
+        .filter((inv: Invitation) => inv.status === 'PENDING')
+        .map((invitation: Invitation) => {
+          return {
+            email: invitation.recipientEmail,
+            invitationSent: moment(invitation.sentDate).format('DD MMM, YYYY'),
+            invitationExpires: moment(invitation.expiresOn).format('DD MMM, YYYY'),
+            invitation
+          }
+        })
+    }
   },
   methods: {
     ...mapActions('org', [
@@ -146,8 +173,6 @@ export default class UserManagement extends Vue {
   private successText = ''
   private tab = null
   private isLoading = true
-  private memberList: ActiveUserRecord[] = []
-  private invitationList: PendingUserRecord[] = []
 
   private readonly organizations!: Organization[]
   private readonly resending!: boolean
@@ -155,7 +180,7 @@ export default class UserManagement extends Vue {
   private readonly syncOrganizations!: () => Organization[]
   private readonly resendInvitation!: (invitation: Invitation) => void
   private readonly deleteInvitation!: (invitation: Invitation) => void
-  private readonly deleteMember!: (deleteMemberPayload: DeleteMemberPayload) => void
+  private readonly deleteMember!: (deleteMemberPayload: UpdateMemberPayload) => void
   private readonly updateMemberRole!: (UpdateMemberPayload: UpdateMemberPayload) => void
 
   $refs: {
@@ -225,54 +250,10 @@ export default class UserManagement extends Vue {
     }
   ]
 
-  private async refresh () {
+  async created () {
     this.isLoading = true
-    // BASIC user - fetch all organizations
     await this.syncOrganizations()
-    // TODO - fetch a single org for PREMIUM user
-
-    this.refreshMembers()
-    this.refreshInvitations()
     this.isLoading = false
-  }
-
-  // Refresh the display list of members against the current store
-  private refreshMembers () {
-    // BASIC USER ONLY
-    // flatten, remove duplicates, and map to displayable record for MEMBERS
-    this.memberList = _.uniqWith(
-      _.flatten(this.organizations.map(org => org.members)),
-      (memberA, memberB) => memberA.user.username === memberB.user.username
-    )
-      .map(member => {
-        return {
-          username: member.user.username,
-          name: `${member.user.firstname} ${member.user.lastname}`,
-          role: member.membershipTypeCode,
-          lastActive: moment(member.user.modified).format('DD MMM, YYYY'),
-          member
-        }
-      })
-  }
-
-  // Refresh the displayed list of invitations against the current store
-  private refreshInvitations () {
-    // BASIC USER ONLY
-    // flatten, filter by status, and map to display record for INVITES
-    this.invitationList = _.flatten(this.organizations.map(org => org.invitations))
-      .filter(inv => inv.status === 'PENDING')
-      .map(invitation => {
-        return {
-          email: invitation.recipientEmail,
-          invitationSent: moment(invitation.sentDate).format('DD MMM, YYYY'),
-          invitationExpires: moment(invitation.expiresOn).format('DD MMM, YYYY'),
-          invitation
-        }
-      })
-  }
-
-  created () {
-    this.refresh()
   }
 
   showInviteUsersModal () {
@@ -288,7 +269,6 @@ export default class UserManagement extends Vue {
     this.successTitle = `Invited ${this.sentInvitations.length} Team Members`
     this.successText = 'Your team invitations have been sent successfully.'
     this.$refs.successDialog.open()
-    this.refreshInvitations()
   }
 
   async resend (pendingUser: PendingUserRecord) {
@@ -298,7 +278,6 @@ export default class UserManagement extends Vue {
 
   async removeInvite (pendingUser: PendingUserRecord) {
     await this.deleteInvitation(pendingUser.invitation)
-    this.refreshInvitations()
   }
 
   async removeMember (activeMember: ActiveUserRecord) {
@@ -308,7 +287,6 @@ export default class UserManagement extends Vue {
       .forEach(async org => {
         await this.deleteMember({ orgIdentifier: org.id, memberId: activeMember.member.id })
       })
-    this.refreshMembers()
   }
 
   changeRole (activeMember: ActiveUserRecord, targetRole: string) {
@@ -322,12 +300,9 @@ export default class UserManagement extends Vue {
         await this.updateMemberRole({
           orgIdentifier: org.id,
           memberId: activeMember.member.id,
-          role: targetRole.toUpperCase(),
-          prevRole: activeMember.member.membershipTypeCode.toUpperCase()
+          role: targetRole.toUpperCase()
         })
       })
-
-    this.refreshMembers()
   }
 }
 </script>

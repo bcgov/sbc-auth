@@ -1,5 +1,5 @@
-import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { DeleteMemberPayload, Member, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { Action, Module, Mutation, VuexModule, MutationAction } from 'vuex-module-decorators'
+import { Organization, UpdateMemberPayload, Member } from '@/models/Organization'
 import { EmptyResponse } from '@/models/global'
 import { Invitation, CreateRequestBody } from '@/models/Invitation'
 import InvitationService from '@/services/invitation.services'
@@ -7,11 +7,22 @@ import OrgService from '@/services/org.services'
 import UserService from '@/services/user.services'
 import _ from 'lodash'
 
+interface SetMembersPayload {
+  orgId: number
+  members: Member[]
+}
+
+interface SetMemberPayload {
+  orgId: number
+  member: Member
+}
+
 @Module({
   name: 'org',
   namespaced: true
 })
 export default class OrgModule extends VuexModule {
+  list = []
   currentOrg: Organization = {
     name: '',
     affiliatedEntities: [],
@@ -23,6 +34,55 @@ export default class OrgModule extends VuexModule {
   sentInvitations: Invitation[] = []
   failedInvitations: Invitation[] = []
   organizations: Organization[] = []
+
+  get orgMembers () {
+    return (orgId: number) => {
+      const org = this.organizations.find(org => org.id === orgId)
+      if (org) {
+        return org.members
+      } else {
+        return []
+      }
+    }
+  }
+
+  get orgInvitations () {
+    return (orgId: number) => {
+      const org = this.organizations.find(org => org.id === orgId)
+      if (org) {
+        return org.invitations
+      } else {
+        return []
+      }
+    }
+  }
+
+  get orgMember () {
+    return (orgId: number, memberId: number) => {
+      const org = this.organizations.find(org => org.id === orgId)
+      if (org) {
+        return org.members.find(member => member.id === memberId)
+      } else {
+        return null
+      }
+    }
+  }
+
+  @Mutation
+  public setMembers (payload: SetMembersPayload) {
+    const org = this.organizations.find(org => org.id === payload.orgId)
+    if (org) {
+      org.members = payload.members
+    }
+  }
+
+  @Mutation
+  public addMember (payload: SetMemberPayload) {
+    const org = this.organizations.find(org => org.id === payload.orgId)
+    if (org) {
+      org.members.push(payload.member)
+    }
+  }
 
   @Mutation
   public resetInvitations () {
@@ -63,7 +123,7 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
-  public removeMember (removeMemberPayload: DeleteMemberPayload) {
+  public removeMember (removeMemberPayload: UpdateMemberPayload) {
     const org = this.organizations.find(org => org.id === removeMemberPayload.orgIdentifier)
     const index = org.members.findIndex(member => member.id === removeMemberPayload.memberId)
     org.members.splice(index, 1)
@@ -140,9 +200,10 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async deleteMember (memberInfo: DeleteMemberPayload) {
+  public async deleteMember (memberInfo: UpdateMemberPayload) {
+    // const savedMembers = [...this.organizations.find(org => org.id === memberInfo.orgIdentifier).members]
+    const savedMembers = [...this.orgMembers(memberInfo.orgIdentifier)]
     // Update store first (for better UX)
-    const prevState = this.context.state
     this.context.commit('removeMember', memberInfo)
     try {
       // Send request to remove member on server and get result
@@ -154,7 +215,7 @@ export default class OrgModule extends VuexModule {
       }
     } catch (exception) {
       // Any errors, roll back to previous state
-      this.context.state = prevState
+      this.context.commit('setMembers', { orgId: memberInfo.orgIdentifier, members: savedMembers })
     }
   }
 
@@ -162,7 +223,8 @@ export default class OrgModule extends VuexModule {
   public async updateMemberRole (memberInfo: UpdateMemberPayload) {
     // Update store first, but save current role
     // (for UX reasons, we don't make user to wait to see role change)
-    const prevState = this.context.state
+    // const savedMembers = [...this.orgMembers(memberInfo.orgIdentifier)]
+    const savedMemberRole = this.orgMember(memberInfo.orgIdentifier, memberInfo.memberId).membershipTypeCode
     this.context.commit('updateMember', memberInfo)
     try {
       // Send request to update member on server and get result
@@ -174,7 +236,7 @@ export default class OrgModule extends VuexModule {
       }
     } catch (exception) {
       // On exception, roll back to previous state
-      this.context.state = prevState
+      this.context.commit('updateMember', { ...memberInfo, role: savedMemberRole })
     }
   }
 

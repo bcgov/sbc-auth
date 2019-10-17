@@ -25,16 +25,10 @@ export interface AffiliatedEntity {
   name: string;
 }
 
-export interface DeleteMemberPayload {
-  orgIdentifier: number
-  memberId: number
-}
-
 export interface UpdateMemberPayload {
   orgIdentifier: number
   memberId: number
-  prevRole: string
-  role: string
+  role?: string
 }
 
 export interface RemoveBusinessPayload {
