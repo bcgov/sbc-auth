@@ -52,7 +52,6 @@ venv/bin/activate: requirements/prod.txt requirements/dev.txt
 .PHONY: install-dev
 install-dev: venv/bin/activate
 	. venv/bin/activate ; \
-	chmod 755 -R .eggs/ ; \  # for windows wsl
 	pip install -e .
 
 .PHONY: activate
