@@ -74,7 +74,6 @@ import { Component, Prop } from 'vue-property-decorator'
 import { getModule } from 'vuex-module-decorators'
 import BusinessModule from '../../store/modules/business'
 import configHelper from '../../util/config-helper'
-import iframeServices from '../../services/iframe.services'
 import { SessionStorageKeys } from '@/util/constants'
 
 @Component
@@ -84,7 +83,6 @@ export default class PasscodeForm extends Vue {
   noPasscodeDialog = false
   loginError = ''
   valid = false
-  VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   entityNumRules = [
     v => !!v || 'Incorporation Number is required'
   ]
@@ -109,14 +107,10 @@ export default class PasscodeForm extends Vue {
     if ((this.businessStore.currentBusiness.contacts &&
          this.businessStore.currentBusiness.contacts.length > 0) || this.businessStore.skippedContactEntry) {
       // transition to co-ops UI as we already have a contact set (or user has opted to skip already in this session)
-      setTimeout(() => {
-        window.location.href = this.VUE_APP_COPS_REDIRECT_URL
-      }, 500)
+      window.location.href = configHelper.getCoopsURL()
     } else {
       // transition to business contact UI
-      setTimeout(() => {
-        this.$router.push('/businessprofile')
-      }, 500)
+      this.$router.push('/businessprofile')
     }
   }
 

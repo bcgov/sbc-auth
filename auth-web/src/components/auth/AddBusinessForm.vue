@@ -64,7 +64,6 @@ export default class AddBusinessForm extends Vue {
   }
   showPasscode = false
   validationError = ''
-  VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   entityNumRules = [
     v => !!v || 'Incorporation Number is required'
   ]
