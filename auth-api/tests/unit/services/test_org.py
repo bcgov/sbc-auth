@@ -215,7 +215,7 @@ def test_get_invitations(session, auth_mock):  # pylint:disable=unused-argument
             ]
         }
 
-        invitation = InvitationService.create_invitation(invitation_info, UserService(user))
+        invitation = InvitationService.create_invitation(invitation_info, UserService(user), {}, '')
 
         response = org.get_invitations()
         assert response

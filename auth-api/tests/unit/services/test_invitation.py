@@ -67,7 +67,7 @@ def test_as_dict(session, auth_mock):  # pylint:disable=unused-argument
                 }
             ]
         }
-        invitation = InvitationService.create_invitation(invitation_info, User(user), {})
+        invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
         invitation_dictionary = invitation.as_dict()
         assert invitation_dictionary['recipientEmail'] == invitation_info['recipientEmail']
 
@@ -89,7 +89,7 @@ def test_create_invitation(session, auth_mock):  # pylint:disable=unused-argumen
                 }
             ]
         }
-        invitation = InvitationService.create_invitation(invitation_info, User(user))
+        invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
         invitation_dictionary = invitation.as_dict()
         assert invitation_dictionary['recipientEmail'] == invitation_info['recipientEmail']
         assert invitation_dictionary['id']
@@ -113,7 +113,7 @@ def test_find_invitation_by_id(session, auth_mock):  # pylint:disable=unused-arg
                 }
             ]
         }
-        new_invitation = InvitationService.create_invitation(invitation_info, User(user)).as_dict()
+        new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '').as_dict()
         invitation = InvitationService.find_invitation_by_id(new_invitation['id']).as_dict()
         assert invitation
         assert invitation['recipientEmail'] == invitation_info['recipientEmail']
@@ -136,7 +136,7 @@ def test_delete_invitation(session, auth_mock):  # pylint:disable=unused-argumen
                 }
             ]
         }
-        new_invitation = InvitationService.create_invitation(invitation_info, User(user)).as_dict()
+        new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '').as_dict()
         InvitationService.delete_invitation(new_invitation['id'])
         invitation = InvitationService.find_invitation_by_id(new_invitation['id'])
         assert invitation is None
@@ -159,8 +159,8 @@ def test_update_invitation(session, auth_mock):  # pylint:disable=unused-argumen
                 }
             ]
         }
-        new_invitation = InvitationService.create_invitation(invitation_info, User(user))
-        updated_invitation = new_invitation.update_invitation(User(user)).as_dict()
+        new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
+        updated_invitation = new_invitation.update_invitation(User(user), {}, '').as_dict()
         assert updated_invitation['status'] == 'PENDING'
 
 
@@ -195,7 +195,7 @@ def test_accept_invitation(session, auth_mock):  # pylint:disable=unused-argumen
                     }
                 ]
             }
-            new_invitation = InvitationService.create_invitation(invitation_info, User(user))
+            new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
             new_invitation_dict = new_invitation.as_dict()
             InvitationService.accept_invitation(new_invitation_dict['id'], user.id)
             org_dict = OrgService.find_by_org_id(org_dictionary['id'], allowed_roles={'basic'}).as_dict()
