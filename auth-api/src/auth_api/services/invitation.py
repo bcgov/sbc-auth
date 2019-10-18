@@ -57,25 +57,27 @@ class Invitation:
         return obj
 
     @staticmethod
-    def create_invitation(invitation_info: Dict, user, token_info: Dict = None):
+    def create_invitation(invitation_info: Dict, user, token_info: Dict, invitation_origin):
         """Create a new invitation."""
         # Ensure that the current user is OWNER or ADMIN on each org being invited to
+        context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         for membership in invitation_info['membership']:
             org_id = membership['orgId']
             check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
         invitation = InvitationModel.create_from_dict(invitation_info, user.identifier)
         invitation.save()
-        Invitation.send_invitation(invitation, user.as_dict())
+        Invitation.send_invitation(invitation, user.as_dict(), '{}/{}'.format(invitation_origin, context_path))
         return Invitation(invitation)
 
-    def update_invitation(self, user, token_info: Dict = None):
+    def update_invitation(self, user, token_info: Dict, invitation_origin):
         """Update the specified invitation with new data."""
         # Ensure that the current user is OWNER or ADMIN on each org being re-invited to
+        context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         for membership in self._model.membership:
             org_id = membership.org_id
             check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
         updated_invitation = self._model.update_invitation_as_retried()
-        Invitation.send_invitation(updated_invitation, user.as_dict())
+        Invitation.send_invitation(updated_invitation, user.as_dict(), '{}/{}'.format(invitation_origin, context_path))
         return Invitation(updated_invitation)
 
     @staticmethod
@@ -121,14 +123,14 @@ class Invitation:
         return Invitation(invitation)
 
     @staticmethod
-    def send_invitation(invitation: InvitationModel, user):
+    def send_invitation(invitation: InvitationModel, user, confirm_url):
         """Send the email notification."""
         subject = '[BC Registries & Online Services] {} {} has invited you to join a team'.format(user['firstname'],
                                                                                                   user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
         confirmation_token = Invitation.generate_confirmation_token(invitation.id)
-        token_confirm_url = '{}/validatetoken/{}'.format(CONFIG.AUTH_WEB_TOKEN_CONFIRM_URL, confirmation_token)
+        token_confirm_url = '{}/validatetoken/{}'.format(confirm_url, confirmation_token)
         template = ENV.get_template('email_templates/business_invitation_email.html')
         try:
             @copy_current_request_context
