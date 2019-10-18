@@ -5,7 +5,6 @@ import { mount, createLocalVue, Wrapper } from '@vue/test-utils'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import VueRouter from 'vue-router'
-import VuexPersistence from 'vuex-persist'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -25,17 +24,11 @@ describe('Signin.vue', () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
-    const vuexPersist = new VuexPersistence({
-      key: 'AUTH_WEB',
-      storage: sessionStorage
-    })
-
     const store = new Vuex.Store({
       strict: false,
       modules: {
         user: UserModule
-      },
-      plugins: [vuexPersist.plugin]
+      }
     })
 
     let vuetify = new Vuetify({})
