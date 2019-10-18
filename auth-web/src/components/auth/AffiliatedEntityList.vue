@@ -59,7 +59,6 @@ import { SessionStorageKeys } from '@/util/constants'
   }
 })
 export default class AffiliatedEntityList extends Vue {
-  private VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   private userStore = getModule(UserModule, this.$store)
   readonly organizations!: Organization[]
   readonly getOrganizations!: () => Organization[]
@@ -92,11 +91,9 @@ export default class AffiliatedEntityList extends Vue {
   }
 
   redirectToNext (incorporationNumber: string) {
-    if (this.VUE_APP_COPS_REDIRECT_URL) {
-      configHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, incorporationNumber)
-      const redirectURL = this.VUE_APP_COPS_REDIRECT_URL + 'dashboard'
-      window.location.href = decodeURIComponent(redirectURL)
-    }
+    configHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, incorporationNumber)
+    const redirectURL = configHelper.getCoopsURL() + 'dashboard'
+    window.location.href = decodeURIComponent(redirectURL)
   }
 }
 </script>

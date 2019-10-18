@@ -69,7 +69,6 @@ import { mapActions } from 'vuex'
 })
 export default class SearchBusinessForm extends Vue {
   private businessStore = getModule(BusinessModule, this.$store)
-  private VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   private entityNumRules = [v => !!v || 'Incorporation Number is required']
   private businessNumber = ''
   private errorMessage = ''
@@ -92,7 +91,7 @@ export default class SearchBusinessForm extends Vue {
         this.errorMessage = ''
 
         // Redirect to the coops UI
-        window.location.href = this.VUE_APP_COPS_REDIRECT_URL
+        window.location.href = configHelper.getCoopsURL()
       } catch (exception) {
         this.errorMessage = this.$t('noResultMsg').toString()
       }
