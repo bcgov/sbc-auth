@@ -29,11 +29,10 @@
 </template>
 
 <script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
-import { Vue, Component } from 'vue-property-decorator'
+import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
-
-import UserModule from '../store/modules/user'
 
 @Component({
   components: {

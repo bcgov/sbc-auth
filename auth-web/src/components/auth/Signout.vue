@@ -3,11 +3,10 @@
   </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import { User } from '@/models/user'
+import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
-import commonUtils from '../../util/common-util'
-import UserModule from '../../store/modules/user'
-import { User } from '../../models/user'
 
 @Component
 export default class Signout extends Vue {

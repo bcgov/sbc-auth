@@ -1,10 +1,10 @@
-import UserModule from '@/store/modules/user'
+import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import Signout from '@/components/auth/Signout.vue'
-import Vuex from 'vuex'
-import { mount, createLocalVue, Wrapper } from '@vue/test-utils'
+import UserModule from '@/store/modules/user'
 import Vue from 'vue'
-import Vuetify from 'vuetify'
 import VueRouter from 'vue-router'
+import Vuetify from 'vuetify'
+import Vuex from 'vuex'
 import VuexPersistence from 'vuex-persist'
 
 Vue.use(Vuetify)
