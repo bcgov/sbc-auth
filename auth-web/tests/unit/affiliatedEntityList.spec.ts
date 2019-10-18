@@ -1,4 +1,3 @@
-import VuexPersistence from 'vuex-persist'
 import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
 import Vue from 'vue'
 import Vuex from 'vuex'
@@ -28,17 +27,11 @@ describe('AffiliatedEntityList.vue', () => {
     localVue = createLocalVue()
     localVue.use(Vuex)
 
-    const vuexPersist = new VuexPersistence({
-      key: 'AUTH_WEB',
-      storage: sessionStorage
-    })
-
     store = new Vuex.Store({
       strict: false,
       modules: {
         user: UserModule
-      },
-      plugins: [vuexPersist.plugin]
+      }
     })
 
     jest.resetModules()
