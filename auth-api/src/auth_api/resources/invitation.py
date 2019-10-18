@@ -100,7 +100,8 @@ class Invitation(Resource):
                     response, status = {'message': 'The requested invitation could not be found.'}, \
                                http_status.HTTP_404_NOT_FOUND
                 else:
-                    response, status = invitation.update_invitation(user, token, origin).as_dict(), http_status.HTTP_200_OK
+                    response, status = invitation.update_invitation(user, token, origin).as_dict(), \
+                               http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
