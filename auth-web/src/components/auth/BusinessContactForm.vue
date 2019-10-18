@@ -87,7 +87,6 @@ import { SessionStorageKeys } from '../../util/constants'
   }
 })
 export default class BusinessContactForm extends Vue {
-  private VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   private businessStore = getModule(BusinessModule, this.$store)
   private emailAddress = ''
   private confirmedEmailAddress = ''
@@ -154,15 +153,13 @@ export default class BusinessContactForm extends Vue {
 
       result.then(response => {
         // TODO: Change this to transition to entity dashboard once complete
-        setTimeout(() => {
-          window.location.href = this.VUE_APP_COPS_REDIRECT_URL
-        }, 500)
+        window.location.href = configHelper.getCoopsURL()
       })
     }
   }
 
   cancel () {
-    window.location.href = this.VUE_APP_COPS_REDIRECT_URL
+    window.location.href = configHelper.getCoopsURL()
   }
 
   skip () {
@@ -170,9 +167,7 @@ export default class BusinessContactForm extends Vue {
     this.businessStore.setSkippedContactEntry(true)
 
     // Go directly to co-op UI without saving
-    setTimeout(() => {
-      window.location.href = this.VUE_APP_COPS_REDIRECT_URL
-    }, 500)
+    window.location.href = configHelper.getCoopsURL()
   }
 }
 </script>

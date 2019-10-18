@@ -31,6 +31,16 @@ export default {
     }
   },
 
+  getCoopsURL () {
+    // this needs trailing slash
+    return `${window.location.origin}/${process.env.VUE_APP_PATH_COOPS}/`
+  },
+
+  getSelfURL () {
+    // this is without a trailing slash
+    return `${window.location.origin}/${process.env.VUE_APP_PATH}`
+  },
+
   getValue (key: String) {
     // @ts-ignore
     return JSON.parse(sessionStorage.getItem(SessionStorageKeys.ApiConfigKey))[key]
