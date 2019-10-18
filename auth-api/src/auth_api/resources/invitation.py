@@ -43,6 +43,7 @@ class Invitations(Resource):
     def post():
         """Send a new invitation using the details in request and saves the invitation."""
         token = g.jwt_oidc_token_info
+        origin = request.environ.get('HTTP_ORIGIN', 'localhost')
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'invitation')
         if not valid_format:
@@ -53,7 +54,7 @@ class Invitations(Resource):
                 response, status = {'message': 'Not authorized to perform this action'}, \
                     http_status.HTTP_401_UNAUTHORIZED
             else:
-                response, status = InvitationService.create_invitation(request_json, user, token).as_dict(), \
+                response, status = InvitationService.create_invitation(request_json, user, token, origin).as_dict(), \
                     http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -87,6 +88,7 @@ class Invitation(Resource):
     def patch(invitation_id):
         """Update the invitation specified by the provided id as retried."""
         token = g.jwt_oidc_token_info
+        origin = request.environ.get('HTTP_ORIGIN', 'localhost')
         try:
             user = UserService.find_by_jwt_token(token)
             if user is None:
@@ -98,7 +100,7 @@ class Invitation(Resource):
                     response, status = {'message': 'The requested invitation could not be found.'}, \
                                http_status.HTTP_404_NOT_FOUND
                 else:
-                    response, status = invitation.update_invitation(user, token).as_dict(), http_status.HTTP_200_OK
+                    response, status = invitation.update_invitation(user, token, origin).as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

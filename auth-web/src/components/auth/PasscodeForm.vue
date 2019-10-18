@@ -108,14 +108,10 @@ export default class PasscodeForm extends Vue {
     if ((this.businessStore.currentBusiness.contacts &&
          this.businessStore.currentBusiness.contacts.length > 0) || this.businessStore.skippedContactEntry) {
       // transition to co-ops UI as we already have a contact set (or user has opted to skip already in this session)
-      setTimeout(() => {
-        window.location.href = this.VUE_APP_COPS_REDIRECT_URL
-      }, 500)
+      window.location.href = configHelper.getCoopsURL()
     } else {
       // transition to business contact UI
-      setTimeout(() => {
-        this.$router.push('/businessprofile')
-      }, 500)
+      this.$router.push('/businessprofile')
     }
   }
 
