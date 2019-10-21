@@ -5,7 +5,6 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import VuexPersistence from 'vuex-persist'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -29,17 +28,11 @@ describe('SearchBusinessForm.vue', () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
-    const vuexPersist = new VuexPersistence({
-      key: 'AUTH_WEB',
-      storage: sessionStorage
-    })
-
     const store = new Vuex.Store({
       strict: false,
       modules: {
         business: BusinessModule
-      },
-      plugins: [vuexPersist.plugin]
+      }
     })
 
     const $t = () => {}
