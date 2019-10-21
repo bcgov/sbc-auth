@@ -15,7 +15,7 @@
         req
         persistent-hint
         :rules="entityNumRules"
-        v-model="businessNumber"
+        v-model="businessIdentifier"
       ></v-text-field>
       <v-text-field
         :append-icon="showPasscode ? 'visibility' : 'visibility_off'"
@@ -69,12 +69,12 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import { Component, Prop } from 'vue-property-decorator'
-import { getModule } from 'vuex-module-decorators'
-import BusinessModule from '../../store/modules/business'
-import configHelper from '../../util/config-helper'
+import BusinessModule from '@/store/modules/business'
+import ConfigHelper from '@/util/config-helper'
 import { SessionStorageKeys } from '@/util/constants'
+import Vue from 'vue'
+import { getModule } from 'vuex-module-decorators'
 
 @Component
 export default class PasscodeForm extends Vue {
@@ -83,6 +83,7 @@ export default class PasscodeForm extends Vue {
   noPasscodeDialog = false
   loginError = ''
   valid = false
+  VUE_APP_COPS_REDIRECT_URL = ConfigHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   entityNumRules = [
     v => !!v || 'Incorporation Number is required'
   ]
@@ -92,7 +93,7 @@ export default class PasscodeForm extends Vue {
   ]
   businessStore = getModule(BusinessModule, this.$store)
 
-  businessNumber: string = ''
+  businessIdentifier: string = ''
   passcode: string = ''
 
   private isFormValid (): boolean {
@@ -107,7 +108,7 @@ export default class PasscodeForm extends Vue {
     if ((this.businessStore.currentBusiness.contacts &&
          this.businessStore.currentBusiness.contacts.length > 0) || this.businessStore.skippedContactEntry) {
       // transition to co-ops UI as we already have a contact set (or user has opted to skip already in this session)
-      window.location.href = configHelper.getCoopsURL()
+      window.location.href = ConfigHelper.getCoopsURL()
     } else {
       // transition to business contact UI
       this.$router.push('/businessprofile')
@@ -123,17 +124,17 @@ export default class PasscodeForm extends Vue {
   login () {
     if (this.isFormValid()) {
       this.showSpinner = true
-      this.businessStore.login({ businessNumber: this.businessNumber, passCode: this.passcode })
+      this.businessStore.login({ businessIdentifier: this.businessIdentifier, passCode: this.passcode })
         .then(response => {
           // set token and store in storage
-          configHelper.addToSession(SessionStorageKeys.KeyCloakToken, response.data.access_token)
-          configHelper.addToSession(SessionStorageKeys.KeyCloakRefreshToken, response.data.refresh_token)
+          ConfigHelper.addToSession(SessionStorageKeys.KeyCloakToken, response.data.access_token)
+          ConfigHelper.addToSession(SessionStorageKeys.KeyCloakRefreshToken, response.data.refresh_token)
           sessionStorage.REGISTRIES_TRACE_ID = response.data['registries-trace-id']
           sessionStorage.LOGIN_TYPE = 'passcode'
-          configHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, this.businessNumber)
+          ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, this.businessIdentifier)
 
           // attempt to load business
-          this.businessStore.createBusinessIfNotFound(this.businessNumber)
+          this.businessStore.createBusinessIfNotFound(this.businessIdentifier)
             .then(() => {
               this.redirectToNext()
             })

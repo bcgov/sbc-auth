@@ -27,8 +27,9 @@ class InvitationMembershipSchema(CamelCaseSchema):  # pylint: disable=too-many-a
         """Maps all of the Membership fields to a default schema."""
 
         model = InvitationMembershipModel
-        fields = ('org', 'membership_type')
 
-    org = fields.Nested('OrgSchema', exclude=['contacts', 'created', 'created_by', 'id',
+    org = fields.Nested('OrgSchema', exclude=['contacts', 'created', 'created_by', 'affiliated_entities', 'invitations',
                                               'members', 'modified', 'preferred_payment', 'org_status',
                                               'org_type'])
+
+    invitation = fields.Nested('InvitationSchema', only=('id', 'recipient_email', 'sent_date', 'expires_on', 'status'))

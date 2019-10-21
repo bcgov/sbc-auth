@@ -55,7 +55,7 @@ class BaseModel(db.Model):
         Used to populate the created_by and modified_by relationships on all models.
         """
         try:
-            from .user import User as UserModel  # pylint:disable=cyclic-import
+            from .user import User as UserModel  # pylint:disable=cyclic-import, import-outside-toplevel
             token = g.jwt_oidc_token_info
             user = UserModel.find_by_jwt_token(token)
             if not user:

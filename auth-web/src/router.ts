@@ -37,7 +37,7 @@ export function getRoutes (appFlavor:String) {
       { path: '/', component: Home },
       { path: '/home', component: AuthHome },
       { path: '/main', component: Template, meta: { requiresAuth: true } },
-      { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true} },
+      { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
       { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
       { path: '/validatetoken/:token', component: TokenValidator, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
       { path: '/confirmtoken/:token', component: AcceptInvite, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } }

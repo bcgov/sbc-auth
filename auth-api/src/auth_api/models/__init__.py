@@ -16,8 +16,7 @@
 
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
-
-from sbc_common_components.tracing.db_tracing import DBTracing
+from sbc_common_components.tracing.db_tracing import DBTracing  # noqa: I001
 
 from .affiliation import Affiliation
 from .contact import Contact

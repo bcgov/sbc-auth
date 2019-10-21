@@ -20,6 +20,7 @@ import os
 
 from flask import Flask
 from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
+from sbc_common_components.exception_handling.exception_handler import ExceptionHandler  # noqa: I001
 
 from auth_api import models
 from auth_api.extensions import mail
@@ -28,10 +29,6 @@ from auth_api.models import db, ma
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
 from config import CONFIGURATION, _Config
-from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
-
-
-from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001; pylint: disable=wrong-import-order
 
 
 import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports,wrong-import-order; conflicts with Flake8
@@ -54,7 +51,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
             integrations=[FlaskIntegration()]
         )
 
-    from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT
+    from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT  # pylint: disable=import-outside-toplevel
 
     db.init_app(app)
     ma.init_app(app)

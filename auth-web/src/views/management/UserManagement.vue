@@ -21,30 +21,55 @@
       <v-tabs-items v-model="tab">
         <v-tab-item>
           <v-data-table
+            class="user-list__active"
             :headers="headersActive"
-            :items="activeUserListing"
+            :items="basicMembers"
             :items-per-page="5"
+            :calculate-widths="true"
+            :loading="isLoading"
           >
+            <template v-slot:loading>
+              Loading...
+            </template>
+            <template v-slot:item.name="{ item }">
+              <span class="user-name">{{ item.name }}</span>
+              {{ item.email }}
+            </template>
+            <template v-slot:item.role="{ item }">
+              <v-menu offset-y>
+                <template v-slot:activator="{ on }">
+                  <v-btn depressed small v-on="on">
+                    {{ item.role }}
+                    <v-icon small class="ml-1">keyboard_arrow_down</v-icon>
+                  </v-btn>
+                </template>
+                <v-list>
+                  <v-list-item
+                    v-for="(role, index) in availableRoles"
+                    :key="index"
+                    @click="changeRole(item, role)"
+                  >
+                    <v-list-item-title>{{ role }}</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </template>
             <template v-slot:item.action="{ item }">
-              <v-btn outlined @click="removeMember(item)">
-                Remove
-              </v-btn>
+              <v-btn depressed small @click="removeMember(item)">Remove</v-btn>
             </template>
           </v-data-table>
         </v-tab-item>
         <v-tab-item>
           <v-data-table
+            class="user-list__pending"
             :headers="headersPending"
-            :items="pendingUserListing"
+            :items="basicInvitations"
             :items-per-page="5"
+            :calculate-widths="true"
           >
             <template v-slot:item.action="{ item }">
-              <v-btn outlined class="mr-2" @click="resend(item)">
-                Resend
-              </v-btn>
-              <v-btn outlined @click="removeInvite(item)">
-                Remove
-              </v-btn>
+              <v-btn depressed small class="mr-2" @click="resend(item)">Resend</v-btn>
+              <v-btn depressed small @click="removeInvite(item)">Remove</v-btn>
             </template>
           </v-data-table>
         </v-tab-item>
@@ -53,8 +78,8 @@
 
     <ModalDialog
       ref="inviteUsersDialog"
-      :show-icon=false
-      :show-actions=false
+      :show-icon="false"
+      :show-actions="false"
       :fullscreen-on-mobile="$vuetify.breakpoint.xsOnly || $vuetify.breakpoint.smOnly || $vuetify.breakpoint.mdOnly"
       :is-persistent="true"
       :is-scrollable="true"
@@ -64,10 +89,7 @@
         <span>Invite Team Members</span>
       </template>
       <template v-slot:text>
-        <InviteUsersForm
-          @invites-complete="showSuccessModal()"
-          @cancel="cancelInviteUsersModal()"
-        />
+        <InviteUsersForm @invites-complete="showSuccessModal()" @cancel="cancelInviteUsersModal()" />
       </template>
     </ModalDialog>
 
@@ -77,22 +99,23 @@
       :title="successTitle"
       :text="successText"
       dialog-class="notify-dialog"
-      max-width="640">
-    </ModalDialog>
-
+      max-width="640"
+    ></ModalDialog>
   </div>
 </template>
 
 <script lang="ts">
+import { ActiveUserRecord, Member, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
 import { Component, Vue } from 'vue-property-decorator'
-import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
-import { mapState, mapGetters, mapActions } from 'vuex'
-import { Organization, Member, PendingUserRecord, ActiveUserRecord, DeleteMemberPayload } from '@/models/Organization'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import { Invitation } from '@/models/Invitation'
+import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import UserModule from '@/store/modules/user'
+import _ from 'lodash'
 import { getModule } from 'vuex-module-decorators'
+import moment from 'moment'
 
 @Component({
   components: {
@@ -100,13 +123,47 @@ import { getModule } from 'vuex-module-decorators'
     ModalDialog
   },
   computed: {
-    ...mapState('org', ['currentOrg', 'resending', 'sentInvitations']),
-    ...mapState('user', ['organizations', 'activeBasicMembers', 'pendingBasicMembers']),
-    ...mapGetters('user', ['activeUserListing', 'pendingUserListing'])
+    ...mapState('org', [
+      'organizations',
+      'resending',
+      'sentInvitations'
+    ]),
+    basicMembers (): ActiveUserRecord[] {
+      return _.uniqWith(
+        _.flatten(this.organizations.map(org => org.members)),
+        (memberA: Member, memberB: Member) => memberA.user.username === memberB.user.username
+      )
+        .map((member: Member) => {
+          return {
+            username: member.user.username,
+            name: `${member.user.firstname} ${member.user.lastname}`,
+            role: member.membershipTypeCode,
+            lastActive: moment(member.user.modified).format('DD MMM, YYYY'),
+            member
+          }
+        })
+    },
+    basicInvitations (): PendingUserRecord[] {
+      return _.flatten(this.organizations.map(org => org.invitations))
+        .filter((inv: Invitation) => inv.status === 'PENDING')
+        .map((invitation: Invitation) => {
+          return {
+            email: invitation.recipientEmail,
+            invitationSent: moment(invitation.sentDate).format('DD MMM, YYYY'),
+            invitationExpires: moment(invitation.expiresOn).format('DD MMM, YYYY'),
+            invitation
+          }
+        })
+    }
   },
   methods: {
-    ...mapActions('user', ['getOrganizations', 'getActiveBasicMembers', 'getPendingBasicMembers']),
-    ...mapActions('org', ['resendInvitation', 'deleteInvitation', 'deleteMember'])
+    ...mapActions('org', [
+      'syncOrganizations',
+      'resendInvitation',
+      'deleteInvitation',
+      'deleteMember',
+      'updateMemberRole'
+    ])
   }
 })
 export default class UserManagement extends Vue {
@@ -115,90 +172,88 @@ export default class UserManagement extends Vue {
   private successTitle = ''
   private successText = ''
   private tab = null
+  private isLoading = true
 
   private readonly organizations!: Organization[]
-  private readonly currentOrg!: Organization
   private readonly resending!: boolean
   private readonly sentInvitations!: Invitation[]
-  private readonly activeBasicMembers!: Member[]
-  private readonly pendingBasicMembers!: Invitation[]
-  private readonly getOrganizations!: () => Organization[]
-  private readonly getActiveBasicMembers!: () => Member[]
-  private readonly getPendingBasicMembers!: () => Invitation[]
+  private readonly syncOrganizations!: () => Organization[]
   private readonly resendInvitation!: (invitation: Invitation) => void
   private readonly deleteInvitation!: (invitation: Invitation) => void
-  private readonly deleteMember!: (deleteMemberPayload: DeleteMemberPayload) => void
-  private readonly activeUserListing!: ActiveUserRecord[]
-  private readonly pendingUserListing!: PendingUserRecord[]
+  private readonly deleteMember!: (deleteMemberPayload: UpdateMemberPayload) => void
+  private readonly updateMemberRole!: (UpdateMemberPayload: UpdateMemberPayload) => void
 
   $refs: {
     successDialog: ModalDialog
     inviteUsersDialog: ModalDialog
   }
 
+  availableRoles = [
+    'Member',
+    'Admin',
+    'Owner'
+  ]
+
   headersActive = [
     {
       text: 'Team Member',
       align: 'left',
       sortable: true,
-      value: 'name',
-      width: '25%'
+      value: 'name'
     },
     {
       text: 'Roles',
       align: 'left',
       sortable: true,
-      value: 'role',
-      width: '25%'
+      value: 'role'
     },
     {
       text: 'Last Active',
       align: 'left',
       sortable: true,
-      value: 'lastActive',
-      width: '25%'
+      value: 'lastActive'
     },
     {
-      text: ' ',
+      text: 'Actions',
+      align: 'left',
       value: 'action',
       sortable: false,
-      width: '25%'
+      width: '95'
     }
   ]
 
   headersPending = [
     {
-      text: 'Contact',
+      text: 'Email',
       align: 'left',
       sortable: true,
-      value: 'email',
-      width: '25%'
+      value: 'email'
     },
     {
       text: 'Invitation Sent',
       align: 'left',
       sortable: true,
-      value: 'invitationSent',
-      width: '25%'
+      value: 'invitationSent'
     },
     {
       text: 'Expires',
       align: 'left',
       sortable: true,
-      value: 'invitationExpires',
-      width: '25%'
+      value: 'invitationExpires'
     },
     {
-      text: '',
+      text: 'Actions',
+      align: 'left',
       value: 'action',
-      sortable: false
+      sortable: false,
+      width: '195'
     }
   ]
 
-  mounted () {
-    this.getOrganizations()
-    this.getActiveBasicMembers()
-    this.getPendingBasicMembers()
+  async created () {
+    this.isLoading = true
+    await this.syncOrganizations()
+    this.isLoading = false
   }
 
   showInviteUsersModal () {
@@ -214,35 +269,57 @@ export default class UserManagement extends Vue {
     this.successTitle = `Invited ${this.sentInvitations.length} Team Members`
     this.successText = 'Your team invitations have been sent successfully.'
     this.$refs.successDialog.open()
-    this.getPendingBasicMembers()
   }
 
   async resend (pendingUser: PendingUserRecord) {
-    const invitationToResend = this.pendingBasicMembers.find(invitation => invitation.id === pendingUser.invitationId)
-    if (invitationToResend) {
-      await this.resendInvitation(invitationToResend)
-      this.showSuccessModal()
-    }
+    await this.resendInvitation(pendingUser.invitation)
+    this.showSuccessModal()
   }
 
   async removeInvite (pendingUser: PendingUserRecord) {
-    const invitationToDelete = this.pendingBasicMembers.find(invitation => invitation.id === pendingUser.invitationId)
-    if (invitationToDelete) {
-      await this.deleteInvitation(invitationToDelete)
-      this.getPendingBasicMembers()
-    }
+    await this.deleteInvitation(pendingUser.invitation)
   }
 
   async removeMember (activeMember: ActiveUserRecord) {
-    const memberToDelete = this.activeBasicMembers.find(member => member.user.username === activeMember.username)
-    if (memberToDelete) {
-      this.organizations
-        .filter(org => org.orgType === 'IMPLICIT')
-        .forEach(async org => {
-          await this.deleteMember({ orgIdentifier: org.id, memberId: memberToDelete.id })
-        })
-      this.getActiveBasicMembers()
+    // BASIC user only
+    this.organizations
+      .filter(org => org.orgType === 'IMPLICIT')
+      .forEach(async org => {
+        await this.deleteMember({ orgIdentifier: org.id, memberId: activeMember.member.id })
+      })
+  }
+
+  changeRole (activeMember: ActiveUserRecord, targetRole: string) {
+    if (activeMember.role.toUpperCase() === targetRole.toUpperCase()) {
+      return
     }
+    // BASIC user only
+    this.organizations
+      .filter(org => org.orgType === 'IMPLICIT')
+      .forEach(async org => {
+        await this.updateMemberRole({
+          orgIdentifier: org.id,
+          memberId: activeMember.member.id,
+          role: targetRole.toUpperCase()
+        })
+      })
   }
 }
 </script>
+
+<style lang="scss" scoped>
+>>> .v-data-table td {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+>>> .v-data-table.user-list__active td {
+  height: 4rem;
+  vertical-align: top;
+}
+
+.user-name {
+  display: block;
+  font-weight: 700;
+}
+</style>
