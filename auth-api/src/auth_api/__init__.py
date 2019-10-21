@@ -19,8 +19,6 @@ This module is the API for the Authroization system.
 import os
 
 from flask import Flask
-from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
-from sbc_common_components.exception_handling.exception_handler import ExceptionHandler  # noqa: I001
 
 from auth_api import models
 from auth_api.extensions import mail

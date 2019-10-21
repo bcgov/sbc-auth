@@ -15,15 +15,13 @@
 
 This module manages the Membership Information between an org and a user.
 """
-
 from typing import Dict
-
-from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.schemas import MembershipSchema
 from auth_api.utils.roles import ADMIN, OWNER
+from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from .authorization import check_auth
 
