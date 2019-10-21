@@ -1,8 +1,8 @@
 <template>
   <v-app id="app">
     <div class="header-group" ref="headerGroup">
-      <pay-system-alert></pay-system-alert>
       <sbc-header :key="$route.fullPath"></sbc-header>
+      <pay-system-alert></pay-system-alert>
     </div>
     <div class="app-body">
       <router-view/>
