@@ -295,7 +295,7 @@ class OrgContacts(Resource):
         @_JWT.requires_auth
         @TRACER.trace()
         @cors.crossdomain(origin='*')
-        def delete(org_id, membership_id):  # pylint:disable=unused-argument
+        def delete(org_id, membership_id):
             """Delete a membership record for the given org and user."""
             try:
                 org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,

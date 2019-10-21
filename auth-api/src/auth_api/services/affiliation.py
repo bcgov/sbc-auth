@@ -16,6 +16,7 @@
 from typing import Dict
 
 from flask import current_app
+from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -25,7 +26,6 @@ from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF
-from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)

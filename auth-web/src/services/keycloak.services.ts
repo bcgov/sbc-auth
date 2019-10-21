@@ -67,7 +67,7 @@ export default {
     let tokenExpiresIn = this.kc.tokenParsed['exp'] - Math.ceil(new Date().getTime() / 1000) + this.kc.timeSkew + 100
     this.kc.updateToken(tokenExpiresIn).success((refreshed) => {
       if (refreshed) {
-        this.initSessionStorage()
+        this.initSession()
       }
     }).error(() => {
       this.cleanupSession()

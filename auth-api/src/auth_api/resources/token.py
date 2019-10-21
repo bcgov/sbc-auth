@@ -17,13 +17,13 @@ import json
 
 from flask import request
 from flask_restplus import Namespace, Resource, cors
+from sbc_common_components.tracing.trace_tags import TraceTags  # noqa: I001
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.services.keycloak import KeycloakService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
-from sbc_common_components.tracing.trace_tags import TraceTags
 
 
 API = Namespace('token', description='Authentication System - Passcode login')

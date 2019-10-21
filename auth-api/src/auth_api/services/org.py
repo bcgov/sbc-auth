@@ -15,6 +15,8 @@
 
 from typing import Dict, Tuple
 
+from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -23,7 +25,6 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import OrgSchema
 from auth_api.utils.util import camelback2snake
-from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from .authorization import check_auth
 from .invitation import Invitation as InvitationService
@@ -146,4 +147,5 @@ class Org:
                 self._model.members.remove(member)
                 self._model.commit()
                 return MembershipService(member)
-        return None
+        # If we get to this point, member with that id could not be found, so raise exception
+        raise BusinessException(Error.DATA_NOT_FOUND, None)

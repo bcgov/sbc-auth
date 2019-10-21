@@ -20,7 +20,7 @@ This module is a wrapper for the Flask JwtManager
 class JWTWrapper:  # pylint: disable=too-few-public-methods
     """Singleton wrapper for Flask JwtManager."""
 
-    from flask_jwt_oidc import JwtManager
+    from flask_jwt_oidc import JwtManager  # pylint: disable=import-outside-toplevel
     __instance = None
 
     @staticmethod

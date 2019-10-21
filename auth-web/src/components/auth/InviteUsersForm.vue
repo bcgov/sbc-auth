@@ -47,11 +47,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Emit } from 'vue-property-decorator'
-import OrgModule from '@/store/modules/org'
-import { mapState, mapActions, mapMutations } from 'vuex'
-import { Organization } from '@/models/Organization'
+import { Component, Emit, Vue } from 'vue-property-decorator'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import { Invitation } from '@/models/Invitation'
+import OrgModule from '@/store/modules/org'
+import { Organization } from '@/models/Organization'
 import { getModule } from 'vuex-module-decorators'
 
 interface InvitationInfo {
@@ -61,7 +61,7 @@ interface InvitationInfo {
 
 @Component({
   computed: {
-    ...mapState('user', ['organizations'])
+    ...mapState('org', ['organizations'])
   },
   methods: {
     ...mapMutations('org', ['resetInvitations']),

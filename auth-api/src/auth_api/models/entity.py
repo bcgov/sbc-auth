@@ -20,8 +20,8 @@ from flask import current_app
 from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.util import camelback2snake
 from auth_api.utils.passcode import passcode_hash
+from auth_api.utils.util import camelback2snake
 
 from .base_model import BaseModel
 
