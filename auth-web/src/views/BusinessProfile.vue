@@ -20,12 +20,12 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { Component } from 'vue-property-decorator'
-import { getModule } from 'vuex-module-decorators'
-import BusinessModule from '@/store/modules/business'
 import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
+import BusinessModule from '@/store/modules/business'
+import { Component } from 'vue-property-decorator'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
+import Vue from 'vue'
+import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {

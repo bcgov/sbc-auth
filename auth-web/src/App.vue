@@ -12,10 +12,10 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
-import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import PaySystemAlert from '@/components/pay/PaySystemAlert.vue'
+import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
+import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
+import Vue from 'vue'
 
 export default Vue.extend({
   name: 'app',

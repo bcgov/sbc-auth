@@ -1,10 +1,10 @@
-import Vue from 'vue'
 import Vuex, { StoreOptions } from 'vuex'
-import { RootState } from './types'
 import BusinessModule from './modules/business'
-import PaymentModule from '@/store/modules/payment'
-import UserModule from '@/store/modules/user'
 import OrgModule from '@/store/modules/org'
+import PaymentModule from '@/store/modules/payment'
+import { RootState } from './types'
+import UserModule from '@/store/modules/user'
+import Vue from 'vue'
 
 Vue.use(Vuex)
 

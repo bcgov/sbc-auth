@@ -1,7 +1,7 @@
 import Keycloak from 'keycloak-js'
-import configHelper from '../util/config-helper'
-import { UserInfo } from '../models/userInfo'
 import { SessionStorageKeys } from '../util/constants'
+import { UserInfo } from '../models/userInfo'
+import configHelper from '../util/config-helper'
 
 const kc: Keycloak.KeycloakInstance = null
 const keyCloakConfig = `/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`
