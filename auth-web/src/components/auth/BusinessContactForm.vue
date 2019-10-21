@@ -73,13 +73,13 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
+import BusinessModule from '@/store/modules/business'
+import ConfigHelper from '@/util/config-helper'
+import { Contact } from '@/models/contact'
+import { SessionStorageKeys } from '@/util/constants'
 import { getModule } from 'vuex-module-decorators'
-import BusinessModule from '../../store/modules/business'
-import configHelper from '../../util/config-helper'
 import { mask } from 'vue-the-mask'
-import { Contact } from '../../models/contact'
-import { SessionStorageKeys } from '../../util/constants'
 
 @Component({
   directives: {
@@ -125,7 +125,7 @@ export default class BusinessContactForm extends Vue {
   }
 
   mounted () {
-    this.businessStore.loadBusiness(configHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)).then(() => {
+    this.businessStore.loadBusiness(ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)).then(() => {
       if (this.businessStore.currentBusiness.contacts && this.businessStore.currentBusiness.contacts.length > 0) {
       // TODO: For now grab first contact as the business contact.  Post MVP, we should check the contact type, grab the correct one.
         const contact = this.businessStore.currentBusiness.contacts[0]
@@ -153,13 +153,13 @@ export default class BusinessContactForm extends Vue {
 
       result.then(response => {
         // TODO: Change this to transition to entity dashboard once complete
-        window.location.href = configHelper.getCoopsURL()
+        window.location.href = ConfigHelper.getCoopsURL()
       })
     }
   }
 
   cancel () {
-    window.location.href = configHelper.getCoopsURL()
+    window.location.href = ConfigHelper.getCoopsURL()
   }
 
   skip () {
@@ -167,7 +167,7 @@ export default class BusinessContactForm extends Vue {
     this.businessStore.setSkippedContactEntry(true)
 
     // Go directly to co-op UI without saving
-    window.location.href = configHelper.getCoopsURL()
+    window.location.href = ConfigHelper.getCoopsURL()
   }
 }
 </script>

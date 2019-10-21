@@ -17,12 +17,11 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
-import { getModule } from 'vuex-module-decorators'
-
-import OrgModule from '@/store/modules/org'
-import { mapActions } from 'vuex'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Invitation } from '@/models/Invitation'
+import OrgModule from '@/store/modules/org'
+import { getModule } from 'vuex-module-decorators'
+import { mapActions } from 'vuex'
 
 @Component({
   methods: {

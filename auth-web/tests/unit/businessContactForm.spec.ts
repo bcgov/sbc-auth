@@ -1,10 +1,10 @@
-import BusinessModule from '@/store/modules/business'
+import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
-import Vuex from 'vuex'
-import { mount, createLocalVue, Wrapper } from '@vue/test-utils'
+import BusinessModule from '@/store/modules/business'
 import Vue from 'vue'
-import Vuetify from 'vuetify'
 import VueRouter from 'vue-router'
+import Vuetify from 'vuetify'
+import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)

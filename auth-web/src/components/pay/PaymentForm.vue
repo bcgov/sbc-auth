@@ -13,7 +13,7 @@
 
 <script lang="ts">
 
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import PaymentServices from '@/services/payment.services'
 import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
 
