@@ -97,12 +97,11 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
+import { User } from '@/models/user'
+import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
-import UserModule from '../../store/modules/user'
-import configHelper from '../../util/config-helper'
 import { mask } from 'vue-the-mask'
-import { User } from '../../models/user'
 
 @Component({
   directives: {

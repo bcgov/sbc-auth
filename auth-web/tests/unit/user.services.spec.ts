@@ -1,6 +1,6 @@
 import Axios from 'axios'
-import UserService from '../../src/services/user.services'
 import { Contact } from '../../src/models/contact'
+import UserService from '../../src/services/user.services'
 
 jest.mock('axios', () => ({
   get: jest.fn(),

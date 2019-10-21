@@ -1,24 +1,25 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import Home from './views/Home.vue'
+import { Role, SessionStorageKeys } from './util/constants'
+import AcceptInvite from './views/AcceptInvite.vue'
 import AuthHome from './views/AuthHome.vue'
 import BusinessProfile from './views/BusinessProfile.vue'
-import Signin from './components/auth/Signin.vue'
+import CreateAccount from './views/CreateAccount.vue'
+import Home from './views/Home.vue'
+import KeyCloakService from '@/services/keycloak.services'
+import PageNotFound from './views/PageNotFound.vue'
 import PaymentForm from './components/pay/PaymentForm.vue'
 import PaymentReturnForm from './components/pay/PaymentReturnForm.vue'
-import PageNotFound from './views/PageNotFound.vue'
-import CreateAccount from './views/CreateAccount.vue'
-import Template from './views/management/Template.vue'
-import UserProfile from './views/UserProfile.vue'
-import Signout from './components/auth/Signout.vue'
+import Router from 'vue-router'
 import SearchBusinessForm from './components/auth/SearchBusinessForm.vue'
+import Signin from './components/auth/Signin.vue'
+import Signout from './components/auth/Signout.vue'
+import Template from './views/management/Template.vue'
 import TokenValidator from './views/TokenValidator.vue'
-import AcceptInvite from './views/AcceptInvite.vue'
-import KeyCloakService from '@/services/keycloak.services'
-import { SessionStorageKeys, Role } from './util/constants'
 import Unauthorized from './components/auth/Unauthorized.vue'
+import UserProfile from './views/UserProfile.vue'
+import Vue from 'vue'
 
 Vue.use(Router)
+
 function mapReturnPayVars (route) {
   return {
     paymentId: route.params.paymentId,

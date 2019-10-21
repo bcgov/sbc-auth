@@ -18,11 +18,11 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
 import { Component } from 'vue-property-decorator'
-import { getModule } from 'vuex-module-decorators'
-import UserProfileForm from '@/components/auth/UserProfileForm.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
+import UserProfileForm from '@/components/auth/UserProfileForm.vue'
+import Vue from 'vue'
+import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
