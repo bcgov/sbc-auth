@@ -103,7 +103,7 @@ class Affiliation:
             authorized = False
 
         # If a passcode was provided...
-        if pass_code:
+        elif pass_code:
             # ... and the entity has a passcode on it, check that they match
             authorized = validate_passcode(pass_code, entity.pass_code)
         # If a passcode was not provided...
