@@ -74,6 +74,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
+import { Business } from '../../models/Business'
 import BusinessModule from '@/store/modules/business'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -84,6 +86,12 @@ import { mask } from 'vue-the-mask'
 @Component({
   directives: {
     mask
+  },
+  computed: {
+    ...mapState('business', ['currentBusiness'])
+  },
+  methods: {
+    ...mapActions('business', ['loadBusiness', 'addContact', 'updateContact'])
   }
 })
 export default class BusinessContactForm extends Vue {
@@ -94,6 +102,10 @@ export default class BusinessContactForm extends Vue {
   private extension = ''
   private formError = ''
   private editing = false
+  private readonly currentBusiness: Business
+  private readonly loadBusiness!: (businessIdentifier: string) => Business
+  private readonly addContact!: (contact: Contact) => void
+  private readonly updateContact!: (contact: Contact) => void
 
   private emailRules = [
     v => !!v || 'Email address is required',
@@ -124,50 +136,48 @@ export default class BusinessContactForm extends Vue {
       this.emailAddress === this.confirmedEmailAddress
   }
 
-  mounted () {
-    this.businessStore.loadBusiness(ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)).then(() => {
-      if (this.businessStore.currentBusiness.contacts && this.businessStore.currentBusiness.contacts.length > 0) {
-      // TODO: For now grab first contact as the business contact.  Post MVP, we should check the contact type, grab the correct one.
-        const contact = this.businessStore.currentBusiness.contacts[0]
-        this.emailAddress = this.confirmedEmailAddress = contact.email
-        this.phoneNumber = contact.phone
-        this.extension = contact.phoneExtension
-      }
-    })
+  private redirectToNext () {
+    if (this.$route.query.redirect) {
+      this.$router.push({ path: '/main' })
+    } else {
+      window.location.href = ConfigHelper.getCoopsURL()
+    }
   }
 
-  save () {
+  async mounted () {
+    // If a business is currently in the store, show contact info for that one
+    if (!this.currentBusiness) {
+      await this.loadBusiness(ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey))
+    }
+
+    if (this.currentBusiness.contacts && this.currentBusiness.contacts.length > 0) {
+      const contact = this.currentBusiness.contacts[0]
+      this.emailAddress = this.confirmedEmailAddress = contact.email
+      this.phoneNumber = contact.phone
+      this.extension = contact.phoneExtension
+    }
+  }
+
+  async save () {
     if (this.isFormValid()) {
-      let result: Promise<void>
       const contact: Contact = {
         email: this.emailAddress.toLowerCase(),
         phone: this.phoneNumber,
         phoneExtension: this.extension
       }
 
-      if (!this.businessStore.currentBusiness.contacts || this.businessStore.currentBusiness.contacts.length === 0) {
-        result = this.businessStore.addContact(contact)
+      if (!this.currentBusiness.contacts || this.currentBusiness.contacts.length === 0) {
+        await this.addContact(contact)
       } else {
-        result = this.businessStore.updateContact(contact)
+        await this.updateContact(contact)
       }
 
-      result.then(response => {
-        // TODO: Change this to transition to entity dashboard once complete
-        window.location.href = ConfigHelper.getCoopsURL()
-      })
+      this.redirectToNext()
     }
   }
 
   cancel () {
-    window.location.href = ConfigHelper.getCoopsURL()
-  }
-
-  skip () {
-    // Mark store as having skipped contact entry for this session
-    this.businessStore.setSkippedContactEntry(true)
-
-    // Go directly to co-op UI without saving
-    window.location.href = ConfigHelper.getCoopsURL()
+    this.redirectToNext()
   }
 }
 </script>

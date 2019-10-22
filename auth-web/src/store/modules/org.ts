@@ -1,6 +1,7 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { CreateRequestBody, Invitation } from '@/models/Invitation'
 import { Member, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { Business } from '@/models/Business'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
@@ -64,6 +65,24 @@ export default class OrgModule extends VuexModule {
         return org.members.find(member => member.id === memberId)
       } else {
         return null
+      }
+    }
+  }
+
+  get orgAffiliatedBusinesses (): (orgId?: number) => Business[] {
+    return (orgId?: number) => {
+      debugger
+      if (orgId) {
+        const org = this.organizations.find(org => org.id === orgId)
+        if (org && org.affiliatedEntities) {
+          return org.affiliatedEntities
+        }
+        return []
+      } else {
+        // If no orgId provided, return flattened list for all IMPLICIT orgs
+        return _.flatten<Business>(this.organizations
+          .filter(org => org.orgType === 'IMPLICIT')
+          .map(org => org.affiliatedEntities))
       }
     }
   }

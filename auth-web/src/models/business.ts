@@ -7,5 +7,7 @@ export interface LoginPayload {
 
 export interface Business {
     businessIdentifier: string;
+    businessNumber?: string;
+    name?: string;
     contacts?: Contact[];
 }
