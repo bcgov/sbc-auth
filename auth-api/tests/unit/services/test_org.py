@@ -199,10 +199,10 @@ def test_remove_member(session):  # pylint:disable=unused-argument
     members = org.get_members()
 
     # test input id is not match with org's member id
-    org.remove_member(0)
-    response = org.get_members()
-    assert response
-    assert len(response['members']) == 1
+    with pytest.raises(BusinessException) as exception:
+        org.remove_member(0)
+
+    assert exception.value.code == Error.DATA_NOT_FOUND.name
 
     # test remove
     org.remove_member(member_id=members['members'][0]['id'])
@@ -211,6 +211,7 @@ def test_remove_member(session):  # pylint:disable=unused-argument
     assert len(response['members']) == 0
 
     # test remove again
-    org.remove_member(member_id=members['members'][0]['id'])
-    response = org.get_members()
-    assert len(response['members']) == 0
+    with pytest.raises(BusinessException) as exception:
+        org.remove_member(member_id=members['members'][0]['id'])
+
+    assert exception.value.code == Error.DATA_NOT_FOUND.name

@@ -37,23 +37,8 @@ def test_as_dict(session, auth_mock):  # pylint:disable=unused-argument
         user = factory_user_model()
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
-<<<<<<< HEAD
-        print(org_dictionary)
-        invitation_info = {
-            'recipientEmail': 'abc.test@gmail.com',
-            'sentDate': '2019-09-09',
-            'membership': [
-                {
-                    'membershipType': 'MEMBER',
-                    'orgId': org_dictionary['id']
-                }
-            ]
-        }
-        invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
-=======
         invitation_info = factory_invitation(org_dictionary['id'])
-        invitation = InvitationService.create_invitation(invitation_info, User(user), {})
->>>>>>> Improve covage rate and testcase setup.
+        invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
         invitation_dictionary = invitation.as_dict()
         assert invitation_dictionary['recipientEmail'] == invitation_info['recipientEmail']
 
@@ -64,21 +49,8 @@ def test_create_invitation(session, auth_mock):  # pylint:disable=unused-argumen
         user = factory_user_model(TestUserInfo.user_test)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
-<<<<<<< HEAD
-        invitation_info = {
-            'recipientEmail': 'abc.test@gmail.com',
-            'membership': [
-                {
-                    'membershipType': 'MEMBER',
-                    'orgId':  org_dictionary['id']
-                }
-            ]
-        }
-        invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
-=======
         invitation_info = factory_invitation(org_dictionary['id'])
-        invitation = InvitationService.create_invitation(invitation_info, User(user))
->>>>>>> Improve covage rate and testcase setup.
+        invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
         invitation_dictionary = invitation.as_dict()
         assert invitation_dictionary['recipientEmail'] == invitation_info['recipientEmail']
         assert invitation_dictionary['id']
@@ -91,21 +63,8 @@ def test_find_invitation_by_id(session, auth_mock):  # pylint:disable=unused-arg
         user = factory_user_model(TestUserInfo.user_test)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
-<<<<<<< HEAD
-        invitation_info = {
-            'recipientEmail': 'abc.test@gmail.com',
-            'membership': [
-                {
-                    'membershipType': 'MEMBER',
-                    'orgId': org_dictionary['id']
-                }
-            ]
-        }
-        new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '').as_dict()
-=======
         invitation_info = factory_invitation(org_dictionary['id'])
-        new_invitation = InvitationService.create_invitation(invitation_info, User(user)).as_dict()
->>>>>>> Improve covage rate and testcase setup.
+        new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '').as_dict()
         invitation = InvitationService.find_invitation_by_id(new_invitation['id']).as_dict()
         assert invitation
         assert invitation['recipientEmail'] == invitation_info['recipientEmail']
@@ -123,21 +82,8 @@ def test_delete_invitation(session, auth_mock):  # pylint:disable=unused-argumen
         user = factory_user_model(TestUserInfo.user_test)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
-<<<<<<< HEAD
-        invitation_info = {
-            'recipientEmail': 'abc.test@gmail.com',
-            'membership': [
-                {
-                    'membershipType': 'MEMBER',
-                    'orgId': org_dictionary['id']
-                }
-            ]
-        }
-        new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '').as_dict()
-=======
         invitation_info = factory_invitation(org_dictionary['id'])
-        new_invitation = InvitationService.create_invitation(invitation_info, User(user)).as_dict()
->>>>>>> Improve covage rate and testcase setup.
+        new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '').as_dict()
         InvitationService.delete_invitation(new_invitation['id'])
         invitation = InvitationService.find_invitation_by_id(new_invitation['id'])
         assert invitation is None
@@ -157,23 +103,9 @@ def test_update_invitation(session, auth_mock):  # pylint:disable=unused-argumen
         user = factory_user_model(TestUserInfo.user_test)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
-<<<<<<< HEAD
-        invitation_info = {
-            'recipientEmail': 'abc.test@gmail.com',
-            'membership': [
-                {
-                    'membershipType': 'MEMBER',
-                    'orgId': org_dictionary['id']
-                }
-            ]
-        }
+        invitation_info = factory_invitation(org_dictionary['id'])
         new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
         updated_invitation = new_invitation.update_invitation(User(user), {}, '').as_dict()
-=======
-        invitation_info = factory_invitation(org_dictionary['id'])
-        new_invitation = InvitationService.create_invitation(invitation_info, User(user))
-        updated_invitation = new_invitation.update_invitation(User(user)).as_dict()
->>>>>>> Improve covage rate and testcase setup.
         assert updated_invitation['status'] == 'PENDING'
 
 
@@ -205,21 +137,8 @@ def test_accept_invitation(session, auth_mock):  # pylint:disable=unused-argumen
             user = factory_user_model(TestUserInfo.user_test)
             org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
             org_dictionary = org.as_dict()
-<<<<<<< HEAD
-            invitation_info = {
-                'recipientEmail': 'abc.test@gmail.com',
-                'membership': [
-                    {
-                        'membershipType': 'MEMBER',
-                        'orgId': org_dictionary['id']
-                    }
-                ]
-            }
-            new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
-=======
             invitation_info = factory_invitation(org_dictionary['id'])
-            new_invitation = InvitationService.create_invitation(invitation_info, User(user))
->>>>>>> Improve covage rate and testcase setup.
+            new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
             new_invitation_dict = new_invitation.as_dict()
             InvitationService.accept_invitation(new_invitation_dict['id'], user.id)
             org_dict = OrgService.find_by_org_id(org_dictionary['id'], allowed_roles={'basic'}).as_dict()
@@ -240,7 +159,7 @@ def test_accept_invitation_exceptions(session, auth_mock):  # pylint:disable=unu
 
             assert exception.value.code == Error.DATA_NOT_FOUND.name
 
-            new_invitation = InvitationService.create_invitation(invitation_info, User(user))
+            new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
             new_invitation_dict = new_invitation.as_dict()
             InvitationService.accept_invitation(new_invitation_dict['id'], user.id)
 
@@ -266,7 +185,7 @@ def test_get_invitations_by_org_id(session, auth_mock):  # pylint:disable=unused
         org_dictionary = org.as_dict()
         org_id = org_dictionary['id']
         invitation_info = factory_invitation(org_dictionary['id'])
-        InvitationService.create_invitation(invitation_info, User(user)).as_dict()
+        InvitationService.create_invitation(invitation_info, User(user), {}, '').as_dict()
         invitations: list = InvitationService.get_invitations_by_org_id(org_id, 'ALL')
         assert invitations
         assert len(invitations) == 1
@@ -287,6 +206,6 @@ def test_send_invitation_exception(session, auth_mock):  # pylint:disable=unused
     invitation = InvitationModel.create_from_dict(invitation_info, user.id)
 
     with pytest.raises(BusinessException) as exception:
-        InvitationService.send_invitation(invitation, user_dictionary)
+        InvitationService.send_invitation(invitation, user_dictionary, '')
 
     assert exception.value.code == Error.FAILED_INVITATION.name
