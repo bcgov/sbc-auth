@@ -14,8 +14,8 @@
 """Service for managing Entity data."""
 
 from typing import Dict, Tuple
-from flask import current_app
 
+from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.exceptions import BusinessException

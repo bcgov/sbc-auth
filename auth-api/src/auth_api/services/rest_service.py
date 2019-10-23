@@ -70,7 +70,7 @@ class RestService:
         return response
 
     @staticmethod
-    def get(endpoint, token = None, auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
+    def get(endpoint, token=None, auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
             content_type: ContentType = ContentType.JSON, retry_on_failure: bool = False):
         """GET service."""
         current_app.logger.debug('<GET')

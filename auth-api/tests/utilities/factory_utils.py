@@ -29,9 +29,9 @@ from auth_api.models.user import User as UserModel
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
-from tests.utilities.factory_scenarios import (JWT_HEADER, TestContactInfo, TestEntityInfo, TestOrgInfo,
-                                               TestOrgStatusInfo, TestOrgTypeInfo, TestPaymentTypeInfo,
-                                               TestUserInfo)
+from tests.utilities.factory_scenarios import (
+    JWT_HEADER, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgStatusInfo, TestOrgTypeInfo, TestPaymentTypeInfo,
+    TestUserInfo)
 
 
 def factory_auth_header(jwt, claims):
