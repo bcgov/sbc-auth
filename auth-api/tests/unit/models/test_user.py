@@ -71,8 +71,8 @@ def test_create_from_jwt_token(session):  # pylint: disable=unused-argument
                 'edit',
                 'uma_authorization',
                 'basic'
-                ]
-            },
+            ]
+        },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
     u = User.create_from_jwt_token(token)
@@ -97,8 +97,8 @@ def test_update_from_jwt_token(session):  # pylint: disable=unused-argument
                 'edit',
                 'uma_authorization',
                 'basic'
-                ]
-            },
+            ]
+        },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
     user = User.create_from_jwt_token(token)
@@ -112,8 +112,8 @@ def test_update_from_jwt_token(session):  # pylint: disable=unused-argument
                 'edit',
                 'uma_authorization',
                 'basic'
-                ]
-            },
+            ]
+        },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
     user = User.update_from_jwt_token(updated_token, user)
@@ -132,14 +132,34 @@ def test_update_from_jwt_token_no_token(session):  # pylint:disable=unused-argum
                 'edit',
                 'uma_authorization',
                 'basic'
-                ]
-            },
+            ]
+        },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
     existing_user = User.create_from_jwt_token(token)
 
     token = None
     user = User.update_from_jwt_token(token, existing_user)
+    assert user is None
+
+
+def test_update_from_jwt_token_no_user(session):  # pylint:disable=unused-argument
+    """Assert that a user is not updateable without a user (should return None)."""
+    token = {
+        'preferred_username': 'CP1234567',
+        'firstname': 'Bobby',
+        'lasname': 'Joe',
+        'realm_access': {
+            'roles': [
+                'edit',
+                'uma_authorization',
+                'basic'
+            ]
+        },
+        'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
+    }
+
+    user = User.update_from_jwt_token(token, None)
     assert user is None
 
 
