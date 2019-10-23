@@ -1,4 +1,4 @@
-import { Business } from '@/models/Business'
+import { Business } from '@/models/business'
 import { Invitation } from '@/models/Invitation'
 import { User } from '@/models/user'
 
