@@ -14,6 +14,7 @@
 """Service for managing Entity data."""
 
 from typing import Dict, Tuple
+from flask import current_app
 
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
@@ -25,9 +26,9 @@ from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
 from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.util import camelback2snake
-from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from .authorization import check_auth
+from .oauth_service import OAuthService as RestService
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -171,3 +172,14 @@ class Entity:
         if pass_code == self._model.pass_code:
             return True
         return False
+
+    def sync_name(self):
+        """Sync this entity's name with the name used in the LEAR database."""
+        legal_url = current_app.config.get('LEGAL_API_URL') + f'/businesses/{self._model.business_identifier}'
+        legal_response = RestService.get(legal_url)
+
+        if legal_response:
+            entity_json = legal_response.json()
+            entity_name = entity_json.get('business').get('legalName')
+            self._model.name = entity_name
+            self._model.save()

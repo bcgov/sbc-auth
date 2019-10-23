@@ -118,6 +118,9 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     EMAIL_TOKEN_SECRET_KEY = os.getenv('EMAIL_TOKEN_SECRET_KEY')
     TOKEN_EXPIRY_PERIOD = os.getenv('TOKEN_EXPIRY_PERIOD')
 
+    # Legal-API URL
+    LEGAL_API_URL = os.getenv('LEGAL_API_URL')
+
     # Sentry Config
     SENTRY_DSN = os.getenv('SENTRY_DSN', None)
 
