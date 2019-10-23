@@ -71,7 +71,6 @@ export default class OrgModule extends VuexModule {
 
   get orgAffiliatedBusinesses (): (orgId?: number) => Business[] {
     return (orgId?: number) => {
-      debugger
       if (orgId) {
         const org = this.organizations.find(org => org.id === orgId)
         if (org && org.affiliatedEntities) {
