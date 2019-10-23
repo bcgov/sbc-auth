@@ -106,7 +106,7 @@ export default class PasscodeForm extends Vue {
 
   private redirectToNext (): void {
     if ((this.businessStore.currentBusiness.contacts &&
-         this.businessStore.currentBusiness.contacts.length > 0) || this.businessStore.skippedContactEntry) {
+         this.businessStore.currentBusiness.contacts.length > 0)) {
       // transition to co-ops UI as we already have a contact set (or user has opted to skip already in this session)
       window.location.href = ConfigHelper.getCoopsURL()
     } else {

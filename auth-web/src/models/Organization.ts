@@ -1,3 +1,4 @@
+import { Business } from '@/models/Business'
 import { Invitation } from '@/models/Invitation'
 import { User } from '@/models/user'
 
@@ -13,16 +14,10 @@ export interface Organizations
 export interface Organization {
   id?: number;
   name: string;
-  affiliatedEntities?: AffiliatedEntity[];
+  affiliatedEntities?: Business[];
   orgType?: string;
   members?: Member[];
   invitations?: Invitation[];
-}
-
-export interface AffiliatedEntity {
-  businessIdentifier: string;
-  businessNumber: string;
-  name: string;
 }
 
 export interface UpdateMemberPayload {
@@ -32,8 +27,8 @@ export interface UpdateMemberPayload {
 }
 
 export interface RemoveBusinessPayload {
-  orgIdentifier: number
-  incorporationNumber: string
+  orgIdentifiers: number[]
+  businessIdentifier: string
 }
 
 export interface Member {
