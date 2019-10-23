@@ -54,7 +54,7 @@ import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import BusinessModule from '@/store/modules/business'
 import ConfigHelper from '@/util/config-helper'
-import { LoginPayload } from '@/models/Business'
+import { LoginPayload } from '@/models/business'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({

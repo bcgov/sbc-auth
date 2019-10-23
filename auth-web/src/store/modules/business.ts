@@ -1,5 +1,5 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { Business, LoginPayload } from '@/models/Business'
+import { Business, LoginPayload } from '@/models/business'
 import { Affiliation } from '@/models/affiliation'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
