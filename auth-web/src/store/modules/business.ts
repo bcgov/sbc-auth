@@ -14,19 +14,14 @@ import { SessionStorageKeys } from '@/util/constants'
 })
 export default class BusinessModule extends VuexModule {
   currentBusiness: Business = {
-    businessIdentifier: ''
+    businessIdentifier: '',
+    businessNumber: '',
+    name: ''
   }
-
-  skippedContactEntry = false
 
   @Mutation
   public setCurrentBusiness (business: Business) {
     this.currentBusiness = business
-  }
-
-  @Mutation
-  public setSkippedContactEntry (skippedStatus: boolean) {
-    this.skippedContactEntry = skippedStatus
   }
 
   @Action({ rawError: true })
@@ -46,14 +41,12 @@ export default class BusinessModule extends VuexModule {
     })
   }
 
-  @Action
-  public async loadBusiness (businessNumber: string) {
-    return BusinessService.getBusiness(businessNumber)
-      .then(response => {
-        if (response.data) {
-          this.context.commit('setCurrentBusiness', response.data)
-        }
-      })
+  @Action({ commit: 'setCurrentBusiness', rawError: true })
+  public async loadBusiness (businessIdentifier: string) {
+    const response = await BusinessService.getBusiness(businessIdentifier)
+    if (response && response.data && response.status === 200) {
+      return response.data
+    }
   }
 
   @Action({ rawError: true })
@@ -88,31 +81,25 @@ export default class BusinessModule extends VuexModule {
 
   @Action({ rawError: true })
   public async removeBusiness (payload: RemoveBusinessPayload) {
-    // Remove an affiliation between the given entity and org
-    const removeAffiliationResponse = await BusinessService.removeAffiliation(payload.orgIdentifier, payload.incorporationNumber)
-    if (removeAffiliationResponse.status === 200) {
-      // Update store
+    // Remove an affiliation between the given business and each specified org
+    try {
+      for await (const orgId of payload.orgIdentifiers) {
+        await BusinessService.removeAffiliation(orgId, payload.businessIdentifier)
+      }
+    } catch (exception) {
+
+    } finally {
       this.context.dispatch('org/syncOrganizations', null, { root: true })
     }
   }
 
-  @Action({ rawError: true })
+  @Action({ commit: 'setCurrentBusiness', rawError: true })
   public async addContact (contact: Contact) {
     return BusinessService.addContact(this.currentBusiness, contact)
-      .then(response => {
-        if ((response.status === 200 || response.status === 201) && response.data) {
-          this.context.commit('setCurrentBusiness', response.data)
-        }
-      })
   }
 
-  @Action({ rawError: true })
+  @Action({ commit: 'setCurrentBusiness', rawError: true })
   public async updateContact (contact: Contact) {
     return BusinessService.updateContact(this.currentBusiness, contact)
-      .then(response => {
-        if ((response.status === 200 || response.status === 201) && response.data) {
-          this.context.commit('setCurrentBusiness', response.data)
-        }
-      })
   }
 }
