@@ -19,7 +19,7 @@ from flask import request
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
-from auth_api.exceptions import BusinessException, catch_custom_exception
+from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.services.keycloak import KeycloakService
 from auth_api.tracer import Tracer
@@ -39,7 +39,6 @@ class Logout(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @catch_custom_exception
     def post():
         """Return a JSON object that includes user detail information."""
         data = request.get_json()

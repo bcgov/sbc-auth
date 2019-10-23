@@ -38,3 +38,24 @@ def test_entity_find_by_business_id(session):
     result_entity = EntityModel.find_by_business_identifier(business_identifier=business_id)
 
     assert result_entity.id is not None
+
+
+def test_create_from_dict(session):  # pylint:disable=unused-argument
+    """Assert that an Entity can be created from schema."""
+    updated_entity_info = {
+        'businessIdentifier': 'CP1234567',
+        'businessNumber': '791861073BC0001',
+        'passCode': '9898989',
+        'name': 'Barfoo, Inc.'
+    }
+
+    result_entity = EntityModel.create_from_dict(updated_entity_info)
+
+    assert result_entity.id is not None
+
+
+def test_create_from_dict_no_schema(session):  # pylint:disable=unused-argument
+    """Assert that an Entity can not be created without schema."""
+    result_entity = EntityModel.create_from_dict(None)
+
+    assert result_entity is None
