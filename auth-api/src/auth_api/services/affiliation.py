@@ -76,8 +76,7 @@ class Affiliation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         for affiliation_model in affiliation_models:
-            if affiliation_model:
-                data.append(EntityService(affiliation_model.entity).as_dict())
+            data.append(EntityService(affiliation_model.entity).as_dict())
         current_app.logger.debug('>find_affiliations_by_org_id')
 
         return data

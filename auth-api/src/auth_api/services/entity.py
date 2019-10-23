@@ -25,6 +25,7 @@ from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
 from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.util import camelback2snake
+from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from .authorization import check_auth
 
@@ -108,9 +109,6 @@ class Entity:
             entity_info['passCode'] = passcode_hash(entity_info['passCode'])
             existing_entity.update_from_dict(**camelback2snake(entity_info))
             entity_model = existing_entity
-
-        if not entity_model:
-            return None
 
         entity = Entity(entity_model)
         return entity

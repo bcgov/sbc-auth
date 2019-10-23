@@ -85,11 +85,11 @@ class Invitation:
         """Delete the specified invitation."""
         # Ensure that the current user is OWNER or ADMIN for each org in the invitation
         invitation = InvitationModel.find_invitation_by_id(invitation_id)
+        if invitation is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
         for membership in invitation.membership:
             org_id = membership.org_id
             check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
-        if invitation is None:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
         invitation.delete()
 
     @staticmethod
