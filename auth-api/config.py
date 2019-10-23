@@ -205,6 +205,9 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     4H8UZcVFN95vEKxJiLRjAmj6g273pu9kK4ymXNEjWWJn
     -----END RSA PRIVATE KEY-----"""
 
+    # Legal-API URL
+    LEGAL_API_URL = 'https://mock-lear-tools.pathfinder.gov.bc.ca/rest/legal-api/0.82/api/v1'
+
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
     """Production environment configuration."""

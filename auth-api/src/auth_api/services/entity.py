@@ -28,7 +28,7 @@ from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.util import camelback2snake
 
 from .authorization import check_auth
-from .oauth_service import OAuthService as RestService
+from .rest_service import RestService
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)

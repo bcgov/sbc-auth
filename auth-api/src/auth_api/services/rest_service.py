@@ -29,7 +29,7 @@ from auth_api.utils.enums import AuthHeaderType, ContentType
 RETRY_ADAPTER = HTTPAdapter(max_retries=Retry(total=5, backoff_factor=1, status_forcelist=[404]))
 
 
-class OAuthService:
+class RestService:
     """Service to invoke Rest services which uses OAuth 2.0 implementation."""
 
     @staticmethod
