@@ -146,7 +146,7 @@ export default class BusinessContactForm extends Vue {
 
   async mounted () {
     // If a business is currently in the store, show contact info for that one
-    if (!this.currentBusiness) {
+    if (!this.currentBusiness || !this.currentBusiness.businessIdentifier) {
       await this.loadBusiness(ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey))
     }
 
