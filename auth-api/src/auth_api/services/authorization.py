@@ -49,10 +49,6 @@ class Authorization:
             auth_response = {
                 'roles': ['edit', 'view']
             }
-        elif 'staff' in token_info.get('realm_access').get('roles'):
-            auth_response = {
-                'roles': ['edit', 'view']
-            }
         else:
             keycloak_guid = token_info.get('sub', None)
             auth = AuthorizationView.find_user_authorization_by_business_number(keycloak_guid, business_identifier)

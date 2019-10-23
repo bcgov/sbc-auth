@@ -15,8 +15,7 @@
 
 Test suite to ensure that the  model routines are working as expected.
 """
-
-from _datetime import datetime
+from _datetime import datetime, timedelta
 
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationMembership as InvitationMembershipModel
@@ -25,9 +24,10 @@ from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.models import User
+from config import get_named_config
 
 
-def factory_invitation_model(session, status):
+def factory_invitation_model(session, status, sent_date=datetime.now()):
     """Produce a templated invitation model."""
     user = User(username='CP1234567',
                 roles='{edit, uma_authorization, staff}',
@@ -58,7 +58,7 @@ def factory_invitation_model(session, status):
     invitation = InvitationModel()
     invitation.recipient_email = 'abc@test.com'
     invitation.sender = user
-    invitation.sent_date = datetime.now()
+    invitation.sent_date = sent_date
     invitation.invitation_status_code = status
 
     invitation_membership = InvitationMembershipModel()
@@ -153,3 +153,73 @@ def test_invitations_by_status(session):  # pylint:disable=unused-argument
 
     retrieved_invitation = InvitationModel.find_invitations_by_status(invitation.sender_id, 'FAILED')
     assert len(retrieved_invitation) == 0
+
+
+def test_create_from_dict(session):  # pylint:disable=unused-argument
+    """Assert that an Entity can be created from schema."""
+    user = User(username='CP1234567',
+                roles='{edit, uma_authorization, staff}',
+                keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
+
+    session.add(user)
+    session.commit()
+
+    org_type = OrgTypeModel(code='TEST', desc='Test')
+    session.add(org_type)
+    session.commit()
+
+    org_status = OrgStatusModel(code='TEST', desc='Test')
+    session.add(org_status)
+    session.commit()
+
+    preferred_payment = PaymentTypeModel(code='TEST', desc='Test')
+    session.add(preferred_payment)
+    session.commit()
+
+    org = OrgModel()
+    org.name = 'Test Org'
+    org.org_type = org_type
+    org.org_status = org_status
+    org.preferred_payment = preferred_payment
+    org.save()
+
+    invitation_info = {
+        'recipientEmail': 'abc.test@gmail.com',
+        'membership': [
+            {
+                'membershipType': 'MEMBER',
+                'orgId': org.id
+            }
+        ]
+    }
+    result_invitation = InvitationModel.create_from_dict(invitation_info, user.id)
+
+    assert result_invitation.id is not None
+
+
+def test_create_from_dict_no_schema(session):  # pylint:disable=unused-argument
+    """Assert that an Entity can not be created without schema."""
+    user = User(username='CP1234567',
+                roles='{edit, uma_authorization, staff}',
+                keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
+
+    session.add(user)
+    session.commit()
+
+    result_invitation = InvitationModel.create_from_dict(None, user.id)
+
+    assert result_invitation is None
+
+
+def test_invitations_status_expiry(session):  # pylint:disable=unused-argument
+    """Assert can set the status from PENDING to EXPIRED."""
+    sent_date = datetime.now() - timedelta(days=int(get_named_config().TOKEN_EXPIRY_PERIOD) + 1)
+    invitation = factory_invitation_model(session=session,
+                                          status='PENDING',
+                                          sent_date=sent_date)
+    session.add(invitation)
+    session.commit()
+
+    result: str = invitation.status
+
+    assert result == 'EXPIRED'
