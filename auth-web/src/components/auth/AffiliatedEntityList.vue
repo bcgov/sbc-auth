@@ -52,7 +52,7 @@
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import { Business } from '@/models/Business'
+import { Business } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
 import { SessionStorageKeys } from '@/util/constants'

@@ -1,7 +1,7 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { CreateRequestBody, Invitation } from '@/models/Invitation'
 import { Member, Organization, UpdateMemberPayload } from '@/models/Organization'
-import { Business } from '@/models/Business'
+import { Business } from '@/models/business'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
