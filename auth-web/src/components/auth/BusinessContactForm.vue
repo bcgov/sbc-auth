@@ -75,7 +75,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import { Business } from '../../models/Business'
+import { Business } from '../../models/business'
 import BusinessModule from '@/store/modules/business'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
