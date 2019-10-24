@@ -144,7 +144,8 @@ import moment from 'moment'
         })
     },
     basicInvitations (): PendingUserRecord[] {
-      return _.flatten(this.organizations.map(org => org.invitations))
+      return _.uniqWith(_.flatten(this.organizations.map(org => org.invitations)),
+        (invitationA: Invitation, invitationB: Invitation) => invitationA.id === invitationB.id)
         .filter((inv: Invitation) => inv.status === 'PENDING')
         .map((invitation: Invitation) => {
           return {
