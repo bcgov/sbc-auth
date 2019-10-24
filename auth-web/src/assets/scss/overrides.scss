@@ -45,6 +45,10 @@
   font-size: 1rem;
 }
 
+.v-card__actions {
+  padding: 1.25rem 1.5rem;
+}
+
 .theme--light.v-card >.v-card__text {
   color: rgba($gray9, 0.8);
 }
