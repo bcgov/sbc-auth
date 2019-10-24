@@ -286,7 +286,10 @@ export default class UserManagement extends Vue {
     this.organizations
       .filter(org => org.orgType === 'IMPLICIT')
       .forEach(async org => {
-        await this.deleteMember({ orgIdentifier: org.id, memberId: activeMember.member.id })
+        const specificMember = org.members.find(member => member.user.username === activeMember.username)
+        if (specificMember) {
+          await this.deleteMember({ orgIdentifier: org.id, memberId: specificMember.id })
+        }
       })
   }
 
