@@ -203,6 +203,10 @@ class TestEntityInfo(dict, Enum):
                         'name': 'BarFoo, Inc.',
                         'passCode': '222222222'}
     invalid = {'foo': 'bar'}
+    entity_lear_mock = {'businessIdentifier': 'CP0002103',
+                        'businessNumber': '791861078BC0001',
+                        'name': 'BarFoo, Inc.',
+                        'passCode': '222222222'}
 
 
 class TestAffliationInfo(dict, Enum):

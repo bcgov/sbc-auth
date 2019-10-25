@@ -82,15 +82,10 @@ export default class BusinessModule extends VuexModule {
   @Action({ rawError: true })
   public async removeBusiness (payload: RemoveBusinessPayload) {
     // Remove an affiliation between the given business and each specified org
-    try {
-      for await (const orgId of payload.orgIdentifiers) {
-        await BusinessService.removeAffiliation(orgId, payload.businessIdentifier)
-      }
-    } catch (exception) {
-
-    } finally {
-      this.context.dispatch('org/syncOrganizations', null, { root: true })
+    for await (const orgId of payload.orgIdentifiers) {
+      await BusinessService.removeAffiliation(orgId, payload.businessIdentifier)
     }
+    this.context.dispatch('org/syncOrganizations', null, { root: true })
   }
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })
