@@ -203,6 +203,14 @@ class TestEntityInfo(dict, Enum):
                         'name': 'BarFoo, Inc.',
                         'passCode': '222222222'}
     invalid = {'foo': 'bar'}
+    entity_lear_mock = {'businessIdentifier': 'CP0002103',
+                        'businessNumber': '791861078BC0001',
+                        'name': 'BarFoo, Inc.',
+                        'passCode': '222222222'}
+    entity_lear_mock2 = {'businessIdentifier': 'CP0002106',
+                         'businessNumber': '791861078BC0002',
+                         'name': 'Foobar, Inc.',
+                         'passCode': '222222222'}
 
 
 class TestAffliationInfo(dict, Enum):
@@ -210,6 +218,8 @@ class TestAffliationInfo(dict, Enum):
 
     affliation1 = {'businessIdentifier': 'CP1234567'}
     affliation2 = {'businessIdentifier': 'CP1234568'}
+    affiliation3 = {'businessIdentifier': 'CP0002103', 'passCode': '222222222'}
+    affiliation4 = {'businessIdentifier': 'CP0002106', 'passCode': '222222222'}
     invalid = {'name': 'CP1234567'}
 
 

@@ -425,7 +425,7 @@ def test_update_member(client, jwt, session, auth_mock):  # pylint:disable=unuse
 def test_add_affiliation(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
-    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
                      headers=headers, content_type='application/json')
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -435,7 +435,7 @@ def test_add_affiliation(client, jwt, session):  # pylint:disable=unused-argumen
     org_id = dictionary['id']
 
     rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers,
-                     data=json.dumps(TestAffliationInfo.affliation1), content_type='application/json')
+                     data=json.dumps(TestAffliationInfo.affiliation3), content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
     assert dictionary['org']['id'] == org_id
@@ -487,9 +487,9 @@ def test_add_affiliation_returns_exception(client, jwt, session):  # pylint:disa
 def test_get_affiliations(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a list of affiliation for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
-    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
                      headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity2),
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock2),
                      headers=headers, content_type='application/json')
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -499,16 +499,16 @@ def test_get_affiliations(client, jwt, session):  # pylint:disable=unused-argume
     org_id = dictionary['id']
 
     rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
-                     data=json.dumps(TestAffliationInfo.affliation1),
+                     data=json.dumps(TestAffliationInfo.affiliation3),
                      headers=headers,
                      content_type='application/json')
     rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
-                     data=json.dumps(TestAffliationInfo.affliation2),
+                     data=json.dumps(TestAffliationInfo.affiliation4),
                      headers=headers,
                      content_type='application/json')
 
     rv = client.get('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers)
     assert rv.status_code == http_status.HTTP_200_OK
     affiliations = json.loads(rv.data)
-    assert affiliations[0]['businessIdentifier'] == TestEntityInfo.entity1['businessIdentifier']
-    assert affiliations[1]['businessIdentifier'] == TestEntityInfo.entity2['businessIdentifier']
+    assert affiliations[0]['businessIdentifier'] == TestEntityInfo.entity_lear_mock['businessIdentifier']
+    assert affiliations[1]['businessIdentifier'] == TestEntityInfo.entity_lear_mock2['businessIdentifier']
