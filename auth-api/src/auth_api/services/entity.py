@@ -110,6 +110,7 @@ class Entity:
             entity_info['passCode'] = passcode_hash(entity_info['passCode'])
             existing_entity.update_from_dict(**camelback2snake(entity_info))
             entity_model = existing_entity
+            entity_model.commit()
 
         entity = Entity(entity_model)
         return entity
