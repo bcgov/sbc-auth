@@ -24,6 +24,7 @@ export default {
   initSession () {
     configHelper.addToSession(SessionStorageKeys.KeyCloakToken, this.kc.token)
     configHelper.addToSession(SessionStorageKeys.KeyCloakRefreshToken, this.kc.refreshToken)
+    configHelper.addToSession(SessionStorageKeys.UserFullName, this.getUserInfo().firstName)
     this.parsedToken = this.kc.tokenParsed
   },
 
