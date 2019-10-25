@@ -5,7 +5,7 @@
         <v-row>
           <v-col sm="12" lg="8">
             <h1 class="mb-6">Welcome to Cooperatives Online<sup>Beta</sup></h1>
-            <p class="mb-3">File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
+            <p class="mb-3">File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
           </v-col>
         </v-row>
       </v-container>
@@ -25,7 +25,7 @@
                   </div>
                   <div class="section-card__text">
                     <h3>1) &nbsp;Log in with your BC Services Card</h3>
-                    <p class="mb-0">You must securely log in with your BC Services Card, government’s trusted way to access online services. It typically takes five minutes or less to <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card/mobile-card/set-up-mobile-card" target="_blank">set up</a> your mobile card, and the only information BC Registries can access from your card is your legal name.</p>
+                    <p class="mb-0">You must securely log in with your BC Services Card, government’s trusted way to access online services. It typically takes five minutes or less to <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card/mobile-card/set-up-mobile-card" target="_blank">set up</a> your mobile card, and the only information BC Registries can access from your card is your legal name.</p>
                   </div>
                 </v-col>
                 <v-col sm="12" md="4" class="section-card__links">
@@ -64,7 +64,7 @@
                   </div>
                   <div class="section-card__text">
                     <h3>2) &nbsp;Authorize to file for a cooperative</h3>
-                    <p class="mb-0">You will need to authorize to manage a cooperative by providing the <strong>Incorporation Number</strong> ​and <strong>Passcode</strong> located in the <strong>Access Letter</strong> you received in the mail from BC Registries.</p>
+                    <p class="mb-0">You will need to authorize to manage a cooperative by providing the <strong>Incorporation Number</strong> and <strong>Passcode</strong> located in the <strong>Access Letter</strong> you received in the mail from BC Registries.</p>
                   </div>
                 </v-col>
                 <v-col sm="12" md="4" class="section-card__links">
@@ -110,7 +110,7 @@
                       </v-card-actions>
                     </v-card>
                   </v-dialog>
-                  
+
                 </v-col>
               </v-row>
             </v-card>
@@ -156,9 +156,9 @@
         <v-row>
           <v-col sm="12" md="8">
             <h3 class="mb-3">Need more information?</h3>
-            <p class="mb-4">To learn more about Cooperative Associations in British Columbia, please visit the Cooperative Associations information page on the <a href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations" target="_blank" rel="noopener">BC Government website</a>.</p>   
+            <p class="mb-4">To learn more about Cooperative Associations in British Columbia, please visit the Cooperative Associations information page on the <a href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations" target="_blank" rel="noopener">BC Government website</a>.</p>
           </v-col>
-          
+
           <v-col sm="12" md="4">
             <h3 class="mb-3">Contact Us</h3>
             <p class="mb-5">For support or questions about this application, contact us at:</p>
@@ -176,13 +176,13 @@
 </template>
 
 <script>
-  export default {
-    data () {
-      return {
-        noPasscodeDialog: false,
-      }
-    },
+export default {
+  data () {
+    return {
+      noPasscodeDialog: false
+    }
   }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -350,7 +350,7 @@
     h3 {
       font-size: 1.5rem;
     }
-    
+
     .container {
       padding-top: 1.5rem;
       padding-bottom: 2rem;
