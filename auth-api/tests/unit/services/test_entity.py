@@ -263,3 +263,13 @@ def test_validate_invalid_pass_code(app, session):  # pylint:disable=unused-argu
 
     validated = entity.validate_pass_code('222222222')
     assert not validated
+
+
+def test_entity_name_sync(app, session):  # pylint:disable=unused-argument
+    """Assert that the name syncing for entity affiliation is working correctly."""
+    entity_model = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
+    entity = EntityService(entity_model)
+    entity.sync_name()
+
+    dictionary = entity.as_dict()
+    assert dictionary['name'] == 'Legal Name CP0002103'

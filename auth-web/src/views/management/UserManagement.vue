@@ -144,7 +144,8 @@ import moment from 'moment'
         })
     },
     basicInvitations (): PendingUserRecord[] {
-      return _.flatten(this.organizations.map(org => org.invitations))
+      return _.uniqWith(_.flatten(this.organizations.map(org => org.invitations)),
+        (invitationA: Invitation, invitationB: Invitation) => invitationA.id === invitationB.id)
         .filter((inv: Invitation) => inv.status === 'PENDING')
         .map((invitation: Invitation) => {
           return {
@@ -285,7 +286,10 @@ export default class UserManagement extends Vue {
     this.organizations
       .filter(org => org.orgType === 'IMPLICIT')
       .forEach(async org => {
-        await this.deleteMember({ orgIdentifier: org.id, memberId: activeMember.member.id })
+        const specificMember = org.members.find(member => member.user.username === activeMember.username)
+        if (specificMember) {
+          await this.deleteMember({ orgIdentifier: org.id, memberId: specificMember.id })
+        }
       })
   }
 

@@ -122,6 +122,10 @@ class Affiliation:
         if affiliation is not None:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
+        # Retrieve entity name from Legal-API and update the entity with current name
+        # TODO: Create subscription to listen for future name updates
+        entity.sync_name()
+
         affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id)
         affiliation.save()
         entity.set_pass_code_claimed(True)
