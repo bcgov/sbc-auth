@@ -108,7 +108,10 @@ export default class AffiliatedEntityList extends Vue {
     // Otherwise remove affiliation for the specific org
     if (!orgId) {
       return {
-        orgIdentifiers: this.implicitOrgs.map(org => org.id),
+        orgIdentifiers: this.implicitOrgs
+          .filter(org => org.affiliatedEntities && org.affiliatedEntities
+            .some(business => business.businessIdentifier === businessIdentifier))
+          .map(org => org.id),
         businessIdentifier
       }
     } else {
