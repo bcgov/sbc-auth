@@ -89,7 +89,7 @@
     <v-row>
       <v-col cols="12" class="form__btns pb-0">
         <v-btn large color="primary" class=".save-continue-button" :disabled='!isFormValid()' @click="save">
-          Next
+          Save
         </v-btn>
       </v-col>
     </v-row>
@@ -117,6 +117,7 @@ export default class UserProfileForm extends Vue {
   private phoneNumber = ''
   private extension = ''
   private formError = ''
+  private editing = false
 
   private emailRules = [
     v => !!v || 'Email address is required',
@@ -151,19 +152,27 @@ export default class UserProfileForm extends Vue {
         this.emailAddress = this.confirmedEmailAddress = userProfile.contacts[0].email
         this.phoneNumber = userProfile.contacts[0].phone
         this.extension = userProfile.contacts[0].phoneExtension
+        this.editing = true
       }
     })
   }
 
-  save () {
+  async save () {
     if (this.isFormValid()) {
-      this.userStore.createUserContact({
-        email: this.emailAddress.toLowerCase(),
-        phone: this.phoneNumber,
-        phoneExtension: this.extension
-      }).then((contact) => {
-        this.$router.push('/main')
-      })
+      if (!this.editing) {
+        await this.userStore.createUserContact({
+          email: this.emailAddress.toLowerCase(),
+          phone: this.phoneNumber,
+          phoneExtension: this.extension
+        })
+      } else {
+        await this.userStore.updateUserContact({
+          email: this.emailAddress.toLowerCase(),
+          phone: this.phoneNumber,
+          phoneExtension: this.extension
+        })
+      }
+      this.$router.push('/main')
     }
   }
 }
