@@ -5,7 +5,7 @@
         <v-row>
           <v-col sm="12" lg="8">
             <h1 class="mb-6">Welcome to Cooperatives Online<sup>Beta</sup></h1>
-            <p class="mb-3">File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
+            <p class="mb-2">File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
           </v-col>
         </v-row>
       </v-container>
@@ -19,9 +19,7 @@
               <v-row>
                 <v-col sm="12" md="8" class="section-card__inner">
                   <div class="section-card__icon">
-                    <img
-                      src="../assets/img/verified_user-24px.svg"
-                      alt="Verify User">
+                    <v-icon>verified_user</v-icon>
                   </div>
                   <div class="section-card__text">
                     <h3>1) &nbsp;Log in with your BC Services Card</h3>
@@ -39,7 +37,7 @@
                     <li>
                       <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card" target="_blank" rel="noopener">
                         <v-icon small>open_in_new</v-icon>
-                        <span>How do I log in my BC <span class="nobr">Services Card?</span></span>
+                        <span>How do I log in with my BC <span class="nobr">Services Card?</span></span>
                       </v-btn>
                     </li>
                     <li>
@@ -58,9 +56,7 @@
               <v-row>
                 <v-col sm="12" md="8" class="section-card__inner">
                   <div class="section-card__icon">
-                    <img
-                      src="../assets/img/lock_open-24px.svg"
-                      alt="Authorize to file">
+                    <v-icon>lock_open</v-icon>
                   </div>
                   <div class="section-card__text">
                     <h3>2) &nbsp;Authorize to file for a cooperative</h3>
@@ -72,7 +68,7 @@
                     <li>
                       <v-btn text color="primary" @click.stop="noPasscodeDialog = true">
                         <v-icon small>open_in_new</v-icon>
-                        <span>I lost or forgot my Passcode</span>
+                        <span>I lost or forgot my cooperative passcode</span>
                       </v-btn>
                     </li>
                     <li>
@@ -120,13 +116,11 @@
               <v-row>
                 <v-col sm="12" md="8" class="section-card__inner">
                   <div class="section-card__icon">
-                    <img
-                      src="../assets/img/assignment_turned_in-24px.svg"
-                      alt="Complete Filings">
+                    <v-icon>assignment_turned_in</v-icon>
                   </div>
                   <div class="section-card__text">
                     <h3>3) &nbsp;Complete your cooperative's filings</h3>
-                    <p class="mb-0">Once you have logged in and authorized to manage a cooperative, simply click on the cooperative you want to do work for and complete your filings.</p>
+                    <p class="mb-0">Once you have logged in and are authorized to manage a cooperative, simply click on the cooperative you want to do work for, and complete your filings.</p>
                   </div>
                 </v-col>
                 <v-col sm="12" md="4" class="section-card__links">
@@ -147,6 +141,11 @@
                 </v-col>
               </v-row>
             </v-card>
+
+            <div class="cta-container">
+              <v-btn x-large color="#fcba19" class="cta-btn" active-class="cta-btn--active" to="/signin/bcsc">Log in with BC Services Card</v-btn>
+            </div>
+
           </section>
         </section>
       </v-container>
@@ -155,12 +154,12 @@
       <v-container>
         <v-row>
           <v-col sm="12" md="8">
-            <h3 class="mb-3">Need more information?</h3>
+            <h3 class="mb-6">Need more information?</h3>
             <p class="mb-4">To learn more about Cooperative Associations in British Columbia, please visit the Cooperative Associations information page on the <a href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations" target="_blank" rel="noopener">BC Government website</a>.</p>
           </v-col>
 
           <v-col sm="12" md="4">
-            <h3 class="mb-3">Contact Us</h3>
+            <h3 class="mb-6">Contact Us</h3>
             <p class="mb-5">For support or questions about this application, contact us at:</p>
             <ul class="contact-info__list mb-5">
               <li><span>Toll Free:</span> 1-877-526-1526</li>
@@ -188,9 +187,6 @@ export default {
 <style lang="scss" scoped>
   @import "../assets/scss/theme.scss";
 
-  // Variables
-  $section-card-icon-width: 9rem;
-
   article {
     padding: 0;
   }
@@ -200,8 +196,8 @@ export default {
   }
 
   h2 {
-    margin-bottom: 2rem;
-    font-size: 1.875rem;
+    margin-bottom: 2.5rem;
+    font-size: 2rem;
   }
 
   // Hero Banner
@@ -231,16 +227,30 @@ export default {
     }
   }
 
-  @media (max-width: 960px) {
+  @media (max-width: 1200px) {
     .hero-banner {
       text-align: center;
+
+      p {
+        margin: 0 auto;
+        max-width: 40rem;
+      }
     }
   }
 
   // How to Section
-  .how-to-container .container {
-    padding-top: 2rem;
-    padding-bottom: 3.5rem;
+  .how-to-container {
+    background: rgb(248,249,250);
+    background: radial-gradient(circle, $gray1 25%, $gray3 100%);
+
+    .container {
+      padding-top: 3rem;
+      padding-bottom: 3.5rem;
+    }
+
+    h2 {
+      text-align: center;
+    }
   }
 
   // Section Cards
@@ -264,14 +274,18 @@ export default {
     flex-direction: row;
   }
 
+  // Variables
+  $section-card-icon-width: 9rem;
+
   .section-card__icon {
     flex: 0 0 auto;
     position: relative;
     width: $section-card-icon-width;
     text-align: center;
 
-    img {
-      width: 3.75rem;
+    .v-icon {
+      color: $BCgovGold5;
+      font-size: 4rem;
     }
 
     .step {
@@ -332,7 +346,7 @@ export default {
     li {
       display: flex;
       align-items: flex-start;
-      padding: 0.5rem 1rem;
+      padding: 0.4rem 1rem;
       color: $gray6;
       font-size: 0.875rem;
       font-weight: 700;
@@ -348,12 +362,10 @@ export default {
   // Contact Section
   .contact-info-container {
     h3 {
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid $gray3;
       font-size: 1.5rem;
-    }
-
-    .container {
-      padding-top: 1.5rem;
-      padding-bottom: 2rem;
     }
   }
 
@@ -373,6 +385,16 @@ export default {
     .contact-info-container {
       text-align: center;
     }
+  }
+
+  .cta-container {
+    margin-top: 3rem;
+    text-align: center;
+  }
+
+  .v-btn.cta-btn {
+    color: $BCgovBlue5;
+    font-weight: 700;
   }
 
   // Helper Classes
