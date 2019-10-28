@@ -1,17 +1,23 @@
 <template>
     <v-row>
         <v-col sm="12">
-            <v-checkbox   v-on:change="emitStatus()" class="terms-checkbox" color="default" v-model="termsAccepted" required on :disabled="!this.canCheckTerms">
-                <template v-slot:label>
-                    <div class="terms-checkbox-label">
-                        <span>I have read and agreed to the</span>
-                        <v-btn text color="primary" class="pr-1 pl-1" @click.stop="openDialog()">
-                            Terms of Use
-                        </v-btn>
-                    </div>
+            <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                    <v-checkbox v-on:change="emitStatus()" class="terms-checkbox" color="default" v-on="on"
+                                v-model="termsAccepted" required on :disabled="!canCheckTerms">
+                        <template v-slot:label>
+                            <div class="terms-checkbox-label">
+                                <span>I have read and agreed to the</span>
+                                <v-btn text color="primary" class="pr-1 pl-1" @click.stop="openDialog()">
+                                    Terms of Use
+                                </v-btn>
+                            </div>
+                        </template>
+                    </v-checkbox>
                 </template>
-            </v-checkbox>
-            <v-dialog scrollable width="1024" v-model="termsDialog" persistent="true">
+                <span>{{tooltipTxt}}</span>
+            </v-tooltip>
+            <v-dialog scrollable width="1024" v-model="termsDialog" :persistent="true">
                 <v-card>
                     <v-card-title>Terms of Use</v-card-title>
                     <v-card-text id="scroll-target">
@@ -52,8 +58,7 @@ export default class TermsOfServiceDialog extends Vue {
     private termsAccepted = false
     private content: string = ''
     private version: string = ''
-    private canCheckTerms:boolean = false // shud be checkable only when terms dialos is opened atleast once
-
+    private canCheckTerms: boolean = false // shud be checkable only when terms dialos is opened atleast once
     mounted () {
       // TODO may be , cache the file somewhere in session storage or so.repeated service calls are not necessary
       documentService.getTermsOfService('termsofuse').then(response => {
@@ -61,6 +66,12 @@ export default class TermsOfServiceDialog extends Vue {
         this.version = response.data.version_id
       })
     }
+
+    get tooltipTxt () {
+      // return !this.canCheckTerms ? 'please read and agree to the terms of use' : 'please select terms of use'
+      return 'Please read and agree to the Terms Of Use'
+    }
+
     @Watch('lastAcceptedVersion')
     onVersionChanged (val: string, oldVal: string) {
       if (val === this.version) {
@@ -74,6 +85,7 @@ export default class TermsOfServiceDialog extends Vue {
       this.termsDialog = true
       this.canCheckTerms = true
     }
+
     onScroll (e) {
       this.offsetTop = e.target.scrollTop
     }
@@ -92,6 +104,7 @@ export default class TermsOfServiceDialog extends Vue {
         padding-top: 0;
         padding-bottom: 0;
     }
+
     .terms-checkbox {
         pointer-events: auto !important;
     }
@@ -121,6 +134,7 @@ export default class TermsOfServiceDialog extends Vue {
             width: 10rem;
         }
     }
+
     // Terms and Conditions Container
     $indent-width: 3rem;
 
