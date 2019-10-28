@@ -24,7 +24,7 @@ export default {
   initSession () {
     configHelper.addToSession(SessionStorageKeys.KeyCloakToken, this.kc.token)
     configHelper.addToSession(SessionStorageKeys.KeyCloakRefreshToken, this.kc.refreshToken)
-    configHelper.addToSession(SessionStorageKeys.UserFullName, this.getUserInfo().firstName)
+    configHelper.addToSession(SessionStorageKeys.UserFullName, this.getUserInfo().fullName)
     this.parsedToken = this.kc.tokenParsed
   },
 
@@ -38,7 +38,8 @@ export default {
       email: this.parsedToken.email,
       roles: this.parsedToken.realm_access.roles,
       keycloakGuid: this.parsedToken.jti,
-      userName: this.parsedToken.username
+      userName: this.parsedToken.username,
+      fullName: `${this.parsedToken.firstname} ${this.parsedToken.lastname}`
     }
   },
 
