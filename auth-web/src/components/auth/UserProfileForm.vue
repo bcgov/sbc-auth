@@ -165,7 +165,6 @@ export default class UserProfileForm extends Vue {
         this.extension = userProfile.contacts[0].phoneExtension
         if (userProfile.is_terms_of_use_accepted) {
           this.lastAcceptedVersion = userProfile.terms_of_use_version
-          console.log('this.las' + this.lastAcceptedVersion)
         }
         this.editing = true
       }
@@ -177,15 +176,18 @@ export default class UserProfileForm extends Vue {
     this.userStore.updateCurrentUserTerms({ terms_of_use_accepted_version: event.termsversion, is_terms_of_use_accepted: event.istermsaccepted })
   }
 
-
   async save () {
     if (this.isFormValid()) {
       if (!this.editing) {
-        await this.userStore.createUserContact({
-          email: this.emailAddress.toLowerCase(),
-          phone: this.phoneNumber,
-          phoneExtension: this.extension
-        })
+        await Promise.all([
+          this.userStore.createUserContact({
+            email: this.emailAddress.toLowerCase(),
+            phone: this.phoneNumber,
+            phoneExtension: this.extension
+          }),
+          this.userStore.updateUserTerms()
+        ]
+        )
       } else {
         await this.userStore.updateUserContact({
           email: this.emailAddress.toLowerCase(),
@@ -194,7 +196,6 @@ export default class UserProfileForm extends Vue {
         })
       }
       this.$router.push('/main')
-
     }
   }
 }

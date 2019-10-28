@@ -1,30 +1,30 @@
 <template>
     <v-row>
         <v-col sm="12">
-            <v-checkbox  v-on:change="emitStatus()" color="default" v-model="termsAccepted" required on>
+            <v-checkbox   v-on:change="emitStatus()" class="terms-checkbox" color="default" v-model="termsAccepted" required on :disabled="!this.canCheckTerms">
                 <template v-slot:label>
                     <div class="terms-checkbox-label">
                         <span>I have read and agreed to the</span>
-                        <v-btn text color="primary" class="pr-1 pl-1" @click.stop="termsDialog = true">
+                        <v-btn text color="primary" class="pr-1 pl-1" @click.stop="openDialog()">
                             Terms of Use
                         </v-btn>
                     </div>
                 </template>
             </v-checkbox>
-            <v-dialog scrollable width="1024" v-model="termsDialog">
+            <v-dialog scrollable width="1024" v-model="termsDialog" persistent="true">
                 <v-card>
                     <v-card-title>Terms of Use</v-card-title>
                     <v-card-text id="scroll-target">
                         <div v-scroll:#scroll-target="onScroll" style="height: 2000px;">
-                            <p v-html="content"></p>
+                            <p v-html="content" class="terms-container"></p>
                         </div>
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn large depressed color="primary" class="agree-btn"
+                        <v-btn large depressed color="primary" class="agree-btn" :disabled="this.offsetTop < 3000"
                                @click="termsDialog = false ;termsAccepted = true ;emitStatus()">
                             <span>Agree to Terms</span>
                         </v-btn>
-                        <v-btn large depressed color="primary" class="agree-btn"
+                        <v-btn large depressed color="primary" class="agree-btn" :disabled="this.offsetTop < 3000"
                                @click="termsDialog = false ;emitStatus()">
                             <span>Close</span>
                         </v-btn>
@@ -52,6 +52,7 @@ export default class TermsOfServiceDialog extends Vue {
     private termsAccepted = false
     private content: string = ''
     private version: string = ''
+    private canCheckTerms:boolean = false // shud be checkable only when terms dialos is opened atleast once
 
     mounted () {
       // TODO may be , cache the file somewhere in session storage or so.repeated service calls are not necessary
@@ -64,10 +65,15 @@ export default class TermsOfServiceDialog extends Vue {
     onVersionChanged (val: string, oldVal: string) {
       if (val === this.version) {
         this.termsAccepted = true
+        this.canCheckTerms = true
         this.emitStatus()
       }
     }
 
+    openDialog () {
+      this.termsDialog = true
+      this.canCheckTerms = true
+    }
     onScroll (e) {
       this.offsetTop = e.target.scrollTop
     }
@@ -85,6 +91,9 @@ export default class TermsOfServiceDialog extends Vue {
     [class^="col"] {
         padding-top: 0;
         padding-bottom: 0;
+    }
+    .terms-checkbox {
+        pointer-events: auto !important;
     }
 
     .form__btns {
@@ -110,6 +119,55 @@ export default class TermsOfServiceDialog extends Vue {
 
         .v-btn {
             width: 10rem;
+        }
+    }
+    // Terms and Conditions Container
+    $indent-width: 3rem;
+
+    .terms-container ::v-deep {
+        article {
+            padding: 2rem;
+            background: $gray1;
+        }
+
+        section {
+            margin-top: 2rem;
+        }
+
+        section header {
+            margin-bottom: 1rem;
+            color: $gray9;
+            text-transform: uppercase;
+            letter-spacing: -0.02rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        section header > span {
+            display: inline-block;
+            width: $indent-width;
+        }
+
+        section div > p {
+            padding-left: $indent-width;
+        }
+
+        section p:last-child {
+            margin-bottom: 0;
+        }
+
+        p {
+            position: relative;
+        }
+
+        p + div {
+            margin-left: $indent-width;
+        }
+
+        p > span {
+            position: absolute;
+            top: 0;
+            left: 0;
         }
     }
 </style>
