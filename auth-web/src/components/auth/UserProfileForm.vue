@@ -87,6 +87,12 @@
       </v-col>
     </v-row>
     <v-row>
+      <v-col cols="12">
+        <terms-of-use-dialog :lastAcceptedVersion="lastAcceptedVersion" @termsupdated="updateTerms"></terms-of-use-dialog>
+      </v-col>
+    </v-row>
+
+      <v-row>
       <v-col cols="12" class="form__btns pb-0">
         <v-btn large color="primary" class=".save-continue-button" :disabled='!isFormValid()' @click="save">
           Save
@@ -97,13 +103,16 @@
 </template>
 
 <script lang="ts">
+
 import { Component, Vue } from 'vue-property-decorator'
+import TermsOfUseDialog from '@/components/auth/TermsOfUseDialog.vue'
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 import { mask } from 'vue-the-mask'
 
 @Component({
+  components: { TermsOfUseDialog },
   directives: {
     mask
   }
@@ -117,6 +126,8 @@ export default class UserProfileForm extends Vue {
   private phoneNumber = ''
   private extension = ''
   private formError = ''
+  private lastAcceptedVersion = ''
+  private isTermsAccepted:boolean
   private editing = false
 
   private emailRules = [
@@ -141,7 +152,7 @@ export default class UserProfileForm extends Vue {
 
   private isFormValid (): boolean {
     return (!this.$refs || !this.$refs.form) ? false : (this.$refs.form as Vue & { validate: () => boolean }).validate() &&
-      this.confirmedEmailAddress === this.emailAddress
+            (this.confirmedEmailAddress === this.emailAddress) && this.isTermsAccepted
   }
 
   mounted () {
@@ -152,10 +163,20 @@ export default class UserProfileForm extends Vue {
         this.emailAddress = this.confirmedEmailAddress = userProfile.contacts[0].email
         this.phoneNumber = userProfile.contacts[0].phone
         this.extension = userProfile.contacts[0].phoneExtension
+        if (userProfile.is_terms_of_use_accepted) {
+          this.lastAcceptedVersion = userProfile.terms_of_use_version
+          console.log('this.las' + this.lastAcceptedVersion)
+        }
         this.editing = true
       }
     })
   }
+
+  updateTerms (event) {
+    this.isTermsAccepted = event.istermsaccepted
+    this.userStore.updateCurrentUserTerms({ terms_of_use_accepted_version: event.termsversion, is_terms_of_use_accepted: event.istermsaccepted })
+  }
+
 
   async save () {
     if (this.isFormValid()) {
@@ -173,6 +194,7 @@ export default class UserProfileForm extends Vue {
         })
       }
       this.$router.push('/main')
+
     }
   }
 }

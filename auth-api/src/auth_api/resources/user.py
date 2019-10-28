@@ -218,3 +218,27 @@ class AuthorizationResource(Resource):
         """Add a new contact for the Entity identified by the provided id."""
         sub = g.jwt_oidc_token_info.get('sub', None)
         return AuthorizationService.get_user_authorizations(sub), http_status.HTTP_200_OK
+
+
+@cors_preflight('PATCH, OPTIONS')
+@API.route('/termsofuse', methods=['PATCH', 'OPTIONS'])
+class UserTermsOfUse(Resource):
+    """Resource for managing users terms of use."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def patch():
+        """Update terms of service for the user."""
+        token = g.jwt_oidc_token_info
+        request_json = request.get_json()
+        version = request_json['termsversion']
+        is_terms_accepted = request_json['istermsaccepted']
+        if not token:
+            return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
+        try:
+            response, status = UserService.update_terms_of_use(token, is_terms_accepted, version).as_dict(), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status

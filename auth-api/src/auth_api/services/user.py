@@ -118,6 +118,14 @@ class User:  # pylint: disable=too-many-instance-attributes
         return User(user)
 
     @staticmethod
+    def update_terms_of_use(token, is_terms_accepted, terms_of_use_version):
+        """Update terms of use for an existing user."""
+        if token is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        user = UserModel.update_terms_of_use(token, is_terms_accepted, terms_of_use_version)
+        return User(user)
+
+    @staticmethod
     def delete_contact(token):
         """Delete the contact for an existing user."""
         user = UserModel.find_by_jwt_token(token)
