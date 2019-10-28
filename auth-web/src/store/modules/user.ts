@@ -70,6 +70,14 @@ export default class UserModule extends VuexModule {
       })
   }
 
+  @Action({ commit: 'setUserContact' })
+  public async updateUserContact (contact: Contact) {
+    const response = await UserService.updateContact(contact)
+    if (response && response.data && response.status === 200) {
+      return response.data
+    }
+  }
+
   @Action({ rawError: true })
   public logout (redirectUrl: string) {
     const loginType = ConfigHelper.getFromSession('LOGIN_TYPE')
