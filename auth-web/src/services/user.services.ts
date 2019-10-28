@@ -17,6 +17,10 @@ export default class UserService {
     return Axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/users/contacts`, contact)
   }
 
+  static async updateContact (contact: Contact): Promise<AxiosResponse<Contact>> {
+    return Axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/users/contacts`, contact)
+  }
+
   static async getOrganizations (): Promise<AxiosResponse<Organizations>> {
     return Axios.get(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/users/orgs`)
   }
