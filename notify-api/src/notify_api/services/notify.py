@@ -12,64 +12,77 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Invitation data."""
+import logging
 
-from datetime import datetime
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy.orm import Session
 
-from flask import current_app
-from flask_mail import Message
-
-from notify_api.exceptions import NotifyException
-from notify_api.exceptions.errors import Error
-from notify_api.extensions import mail
-from notify_api.models import Notification as NotificationModel
-from notify_api.schemas import NotifySchema
-from notify_api.utils.enums import NotificationStatus, NotificationType
-from sbc_common_components.tracing.service_tracing import ServiceTracing
+from notify_api.core import config as AppConfig
+from notify_api.core.queue_publisher import publish
+from notify_api.db.crud import notification as NotificaitonCRUD
+from notify_api.db.crud import notification_contents as ContentsCRUD
+from notify_api.db.models.notification import NotificationRequest, NotificationUpdate
+from notify_api.db.models.notification_status import NotificationStatusEnum
 
 
-class Notify:  # pylint: disable=too-few-public-methods
+logger = logging.getLogger(__name__)
+
+
+class NotifyService:  # pylint: disable=too-few-public-methods
     """Class that manages notification."""
 
-    def __init__(self, model):
+    def __init__(self):
         """Return a Notification service instance."""
-        self._model = model
-
-    @ServiceTracing.disable_tracing
-    def as_dict(self):
-        """Return the internal Notification model as a dictionary."""
-        notify_schema = NotifySchema()
-        obj = notify_schema.dump(self._model, many=False)
-        return obj
 
     @staticmethod
-    def create_notification(notify_info: dict):
-        """Create a new notification and send it out."""
-        notification = NotificationModel.create_from_dict(notify_info)
-        if notification.type_code == NotificationType.EMAIL.value:
-            try:
-                # sent email success then update the status
-                Notify.send_email(notify_info)
-                notification.sent_date = datetime.now()
-                notification.status_code = NotificationStatus.SUCCESS.value
-            except NotifyException:
-                notification.status_code = NotificationStatus.FAILURE.value
-            notification.save()
-        return Notify(notification)
-
-    @staticmethod
-    def get_notification(notification_id):
+    async def find_notification(db_session: Session, notification_id: int):
         """Get notification by an id."""
-        notification = NotificationModel.find_by_notification_id(notification_id)
-        return Notify(notification)
+        notification = await NotificaitonCRUD.find_notification_by_id(db_session, notification_id=notification_id)
+        return notification
 
     @staticmethod
-    def send_email(notify_info: NotifySchema):
+    async def find_notifications_by_status(db_session: Session, status: str):
+        """Get notifications by status."""
+        notifications = None
+        if status == NotificationStatusEnum.FAILURE:
+            hours = AppConfig.DELIVERY_FAILURE_RETRY_TIME_FRAME
+            notifications = await NotificaitonCRUD.find_notifications_by_status_time(db_session,
+                                                                                     status,
+                                                                                     hours)
+        else:
+            notifications = await NotificaitonCRUD.find_notifications_by_status(db_session, status)
+
+        return notifications
+
+    @staticmethod
+    async def send_notification(db_session: Session, notification: NotificationRequest):
+        """Create a new notification and send it out."""
+        new_notification = await NotificaitonCRUD.create_notification(db_session, notification=notification)
+
+        # save email contents
+        await ContentsCRUD.create_contents(db_session,
+                                           contents=notification.contents,
+                                           notification_id=new_notification.id)
+
+        # push the email to the queue service
+        await NotifyService.send_notification_to_queue(jsonable_encoder(new_notification.id))
+
+        return new_notification
+
+    @staticmethod
+    async def update_notification_status(db_session: Session, notification: NotificationUpdate):
+        """Create a new notification and send it out."""
+        notification_exists = await NotificaitonCRUD.find_notification_by_id(db_session, notification.id)
+        if notification_exists:
+            notification_exists.sent_date = notification.sent_date
+            notification_exists.status_code = notification.notify_status
+            updated_notification = await NotificaitonCRUD.update_notification(db_session, notification_exists)
+            return updated_notification
+
+    @staticmethod
+    async def send_notification_to_queue(notification_id: int):
         """Send the email using the given details."""
         try:
-            sender = current_app.config.get('MAIL_FROM_ID')
-            msg = Message(notify_info['subject'], sender=sender, recipients=notify_info['recipients'].split())
-            msg.html = notify_info['contentBody']
-            mail.send(msg)
-        except Exception as exception:
-            current_app.logger.error('Send email fail {}'.format(exception))
-            raise NotifyException(Error.SEND_EMAIL_FAIL, exception)
+            await publish(payload=notification_id)
+        except Exception as queue_error:  # pylint: disable=broad-except
+            logger.info('publish to queue error: %s %s', notification_id, str(queue_error))

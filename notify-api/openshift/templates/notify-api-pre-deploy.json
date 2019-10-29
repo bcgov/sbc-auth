@@ -1,0 +1,59 @@
+{
+  "kind": "Template",
+  "apiVersion": "v1",
+  "metadata": {
+    "annotations": {
+      "description": "Pre deployment template for a auth api service. This template may not include real value of secrets; you need to manually replace the value in Openshift.",
+      "tags": "${NAME}-${TAG_NAME}"
+    },
+    "name": "${NAME}-pre-deploy"
+  },
+  "objects": [
+    {
+      "kind": "ConfigMap",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${NAME}-${TAG_NAME}-config",
+        "labels": {
+          "app": "${NAME}-${TAG_NAME}",
+          "app-group": "${APP_GROUP}",
+          "template": "${NAME}-pre-deploy"
+        }
+      },
+      "data": {
+        "POD_TESTING": "True",
+        "MAIL_SERVER": "apps.smtp.gov.bc.ca",
+        "MAIL_PORT": "25",
+        "MAIL_USE_TLS": "False",
+        "MAIL_USE_SSL": "False",
+        "MAIL_USERNAME": "",
+        "MAIL_PASSWORD": "",
+        "MAIL_FROM_ID": "Sofi.Dev@gov.bc.ca",
+        "SENTRY_DSN": ""
+      }
+    }
+  ],
+  "parameters": [
+    {
+      "name": "NAME",
+      "displayName": "Name",
+      "description": "The name assigned to all of the OpenShift resources associated to the server instance.",
+      "required": true,
+      "value": "notify-api"
+    },
+    {
+      "name": "APP_GROUP",
+      "displayName": "App Group",
+      "description": "The name assigned to all of the deployments in this project.",
+      "required": true,
+      "value": "sbc-auth"
+    },
+    {
+      "name": "TAG_NAME",
+      "displayName": "Environment TAG name",
+      "description": "The TAG name for this environment, e.g., dev, test, prod",
+      "required": true,
+      "value": "dev"
+    }
+  ]
+}
