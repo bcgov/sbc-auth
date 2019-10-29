@@ -121,6 +121,54 @@ def test_update_from_jwt_token(session):  # pylint: disable=unused-argument
     assert user.firstname == 'Bob'
 
 
+def test_update_terms_of_user_success(session):  # pylint:disable=unused-argument
+    """Assert User is updated from a JWT with new terms of use."""
+    token = {
+        'preferred_username': 'CP1234567',
+        'firstname': 'Bobby',
+        'lasname': 'Joe',
+        'realm_access': {
+            'roles': [
+                'edit',
+                'uma_authorization',
+                'basic'
+            ]
+        },
+        'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
+    }
+    user = User.create_from_jwt_token(token)
+    assert user.is_terms_of_use_accepted is False
+    assert user.terms_of_use_accepted_version is None
+
+    user = User.update_terms_of_use(token, True, 1)
+    assert user.is_terms_of_use_accepted is True
+    assert user.terms_of_use_accepted_version == 1
+
+
+def test_update_terms_of_user_success_with_string(session):  # pylint:disable=unused-argument
+    """Assert User is updated from a JWT with new terms of use."""
+    token = {
+        'preferred_username': 'CP1234567',
+        'firstname': 'Bobby',
+        'lasname': 'Joe',
+        'realm_access': {
+            'roles': [
+                'edit',
+                'uma_authorization',
+                'basic'
+            ]
+        },
+        'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
+    }
+    user = User.create_from_jwt_token(token)
+    assert user.is_terms_of_use_accepted is False
+    assert user.terms_of_use_accepted_version is None
+
+    user = User.update_terms_of_use(token, True, '1')
+    assert user.is_terms_of_use_accepted is True
+    assert user.terms_of_use_accepted_version == 1
+
+
 def test_update_from_jwt_token_no_token(session):  # pylint:disable=unused-argument
     """Assert that a user is not updateable without a token (should return None)."""
     token = {

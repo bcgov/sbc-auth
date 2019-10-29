@@ -10,11 +10,11 @@
     "properties": {
       "termsversion": {
         "$id": "#/properties/termsversion",
-        "type": "string",
+        "type": "integer",
         "title": "terms version",
         "default": "",
         "examples": [
-          "1"
+          1
         ],
         "pattern": "^(.*)$"
       },
