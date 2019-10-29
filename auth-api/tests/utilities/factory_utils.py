@@ -19,6 +19,7 @@ import datetime
 
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
+from auth_api.models import Documents as DocumentsModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
@@ -150,3 +151,13 @@ def factory_invitation(org_id,
             }
         ]
     }
+
+
+def factory_document_model(version_id, doc_type, content):
+    """Produce a Document model."""
+    document = DocumentsModel(version_id=version_id,
+                              type=doc_type,
+                              content=content)
+
+    document.save()
+    return document

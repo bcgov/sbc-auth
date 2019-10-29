@@ -113,6 +113,15 @@ def test_update_contact_for_user(session):  # pylint: disable=unused-argument
     assert dictionary['contacts'][0]['email'] == TestContactInfo.contact2['email']
 
 
+def test_update_terms_of_use_for_user(session):  # pylint: disable=unused-argument
+    """Assert that a terms of use can be updated for a user."""
+    UserService.save_from_jwt_token(TestJwtClaims.user_test)
+
+    updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 1)
+    dictionary = updated_user.as_dict()
+    assert dictionary['is_terms_of_use_accepted'] is True
+
+
 def test_update_contact_for_user_no_user(session):  # pylint: disable=unused-argument
     """Assert that a contact cannot be updated for a user that does not exist."""
     with pytest.raises(BusinessException) as exception:
