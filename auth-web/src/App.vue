@@ -29,9 +29,6 @@ export default Vue.extend({
 </script>
 
 <style lang="scss">
-  @import "./assets/scss/base.scss";
-  @import "./assets/scss/layout.scss";
-  @import "./assets/scss/overrides.scss";
 
   .app-container {
     display: flex;
