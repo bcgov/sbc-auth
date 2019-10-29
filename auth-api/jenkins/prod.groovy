@@ -58,10 +58,10 @@ node {
                 }
                 openshift.withCluster() {
                     openshift.withProject("${NAMESPACE_BUILD}") {
-                        echo "Tagging ${APP_NAME}:${DESTINATION_TAG}-prev ..."
-                        def IMAGE_HASH = getImageTagHash("${APP_NAME}", "${DESTINATION_TAG}")
-                        echo "IMAGE_HASH: ${IMAGE_HASH}"
-                        openshift.tag("${APP_NAME}@${IMAGE_HASH}", "${APP_NAME}:${DESTINATION_TAG}-prev")
+                        // echo "Tagging ${APP_NAME}:${DESTINATION_TAG}-prev ..."
+                        // def IMAGE_HASH = getImageTagHash("${APP_NAME}", "${DESTINATION_TAG}")
+                        // echo "IMAGE_HASH: ${IMAGE_HASH}"
+                        // openshift.tag("${APP_NAME}@${IMAGE_HASH}", "${APP_NAME}:${DESTINATION_TAG}-prev")
 
                         echo "Tagging ${APP_NAME} for deployment to ${DESTINATION_TAG} ..."
 						openshift.tag("${APP_NAME}:${SOURCE_TAG}", "${APP_NAME}:${DESTINATION_TAG}")
