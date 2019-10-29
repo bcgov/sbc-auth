@@ -29,7 +29,7 @@
                 <v-col sm="12" md="4" class="section-card__links">
                   <ul class="mb-0">
                     <li>
-                      <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card" target="_blank" rel="noopener">
+                      <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank" rel="noopener">
                         <v-icon small>open_in_new</v-icon>
                         <span>What is a BC <span class="nobr">Services Card?</span></span>
                       </v-btn>
@@ -244,7 +244,7 @@ export default {
     background: radial-gradient(circle, $gray1 25%, $gray3 100%);
 
     .container {
-      padding-top: 3rem;
+      padding-top: 2.5rem;
       padding-bottom: 3.5rem;
     }
 
