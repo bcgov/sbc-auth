@@ -169,7 +169,6 @@ import moment from 'moment'
 })
 export default class UserManagement extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
-  private userStore = getModule(UserModule, this.$store)
   private successTitle = ''
   private successText = ''
   private tab = null

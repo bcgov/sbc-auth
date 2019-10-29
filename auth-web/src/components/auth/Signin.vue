@@ -29,16 +29,15 @@ export default class Signin extends Vue {
       this.userStore.initKeycloak(this.idpHint).then((kcInit) => {
         kcInit.success((authenticated) => {
           if (authenticated === true) {
-            this.userStore.initializeSession().then((currentUser) => {
-              // Make a POST to the users endpoint if it's bcsc (not needed for IDIR I guess)
-              if (this.idpHint !== 'idir') {
-                this.userStore.createUserProfile().then((userProfile) => {
-                  this.redirectToNext()
-                })
-              } else {
+            const currentUsr = this.userStore.initializeSession()
+            // Make a POST to the users endpoint if it's bcsc (not needed for IDIR I guess)
+            if (this.idpHint !== 'idir') {
+              this.userStore.createUserProfile().then((userProfile) => {
                 this.redirectToNext()
-              }
-            })
+              })
+            } else {
+              this.redirectToNext()
+            }
           }
         })
       })

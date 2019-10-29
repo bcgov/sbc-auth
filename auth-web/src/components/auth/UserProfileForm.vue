@@ -98,6 +98,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
+import { Contact } from '@/models/contact'
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
@@ -106,10 +108,19 @@ import { mask } from 'vue-the-mask'
 @Component({
   directives: {
     mask
+  },
+  computed: {
+    ...mapState('user', ['userProfile'])
+  },
+  methods: {
+    ...mapActions('user', ['createUserContact', 'updateUserContact'])
   }
 })
 export default class UserProfileForm extends Vue {
   private userStore = getModule(UserModule, this.$store)
+  private readonly userProfile!: User
+  private readonly createUserContact!: (contact: Contact) => Contact
+  private readonly updateUserContact!: (contact: Contact) => Contact
   private firstName = ''
   private lastName = ''
   private emailAddress = ''
@@ -145,32 +156,29 @@ export default class UserProfileForm extends Vue {
   }
 
   mounted () {
-    this.userStore.getUserProfile('@me').then((userProfile:User) => {
-      this.firstName = userProfile.firstname
-      this.lastName = userProfile.lastname
-      if (userProfile.contacts && userProfile.contacts[0]) {
-        this.emailAddress = this.confirmedEmailAddress = userProfile.contacts[0].email
-        this.phoneNumber = userProfile.contacts[0].phone
-        this.extension = userProfile.contacts[0].phoneExtension
+    if (this.userProfile) {
+      this.firstName = this.userProfile.firstname
+      this.lastName = this.userProfile.lastname
+      if (this.userProfile.contacts && this.userProfile.contacts[0]) {
+        this.emailAddress = this.confirmedEmailAddress = this.userProfile.contacts[0].email
+        this.phoneNumber = this.userProfile.contacts[0].phone
+        this.extension = this.userProfile.contacts[0].phoneExtension
         this.editing = true
       }
-    })
+    }
   }
 
   async save () {
     if (this.isFormValid()) {
+      const contact = {
+        email: this.emailAddress.toLowerCase(),
+        phone: this.phoneNumber,
+        phoneExtension: this.extension
+      }
       if (!this.editing) {
-        await this.userStore.createUserContact({
-          email: this.emailAddress.toLowerCase(),
-          phone: this.phoneNumber,
-          phoneExtension: this.extension
-        })
+        await this.createUserContact(contact)
       } else {
-        await this.userStore.updateUserContact({
-          email: this.emailAddress.toLowerCase(),
-          phone: this.phoneNumber,
-          phoneExtension: this.extension
-        })
+        await this.updateUserContact(contact)
       }
       this.$router.push('/main')
     }
