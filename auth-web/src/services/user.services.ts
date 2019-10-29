@@ -25,9 +25,9 @@ export default class UserService {
     return Axios.get(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/users/orgs`)
   }
 
-  static async updateUserTerms (termsversion: string,
+  static async updateUserTerms (identifier: string, termsversion: string,
     istermsaccepted: boolean): Promise<AxiosResponse<User>> {
-    return Axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/users/termsofuse`, { termsversion: termsversion,
+    return Axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/users/${identifier}`, { termsversion: termsversion,
       istermsaccepted: istermsaccepted })
   }
 }

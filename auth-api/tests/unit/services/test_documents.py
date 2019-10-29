@@ -23,7 +23,7 @@ from auth_api.services import Documents as DocumentService
 
 def test_as_dict(session):  # pylint: disable=unused-argument
     """Assert that a document is rendered correctly as a dictionary."""
-    _model = DocumentsModel.fetch_latest_document_by_type('termsofuse')
+    _model = DocumentsModel.fetch_latest_document('termsofuse')
     termsofuse = DocumentService(_model)
     dictionary = termsofuse.as_dict()
     assert dictionary['type'] == 'termsofuse'
@@ -31,11 +31,11 @@ def test_as_dict(session):  # pylint: disable=unused-argument
 
 def test_with_valid_type(session):  # pylint: disable=unused-argument
     """Assert that a document is rendered correctly as a dictionary."""
-    terms_of_use = DocumentService.fetch_terms_of_use_document('termsofuse')
+    terms_of_use = DocumentService.fetch_latest_document('termsofuse')
     assert terms_of_use is not None
 
 
 def test_with_no_valid_type(session):  # pylint: disable=unused-argument
     """Assert that a document is rendered correctly as a dictionary."""
-    terms_of_use = DocumentService.fetch_terms_of_use_document('sometype')
+    terms_of_use = DocumentService.fetch_latest_document('sometype')
     assert terms_of_use is None

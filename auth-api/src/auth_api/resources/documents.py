@@ -39,7 +39,7 @@ class Documents(Resource):
     def get(document_type):
         """Return the latest terms of use."""
         try:
-            doc = DocumentService.fetch_terms_of_use_document(document_type)
+            doc = DocumentService.fetch_latest_document(document_type)
             if doc is not None:
                 response, status = doc.as_dict(), http_status.HTTP_200_OK
             else:

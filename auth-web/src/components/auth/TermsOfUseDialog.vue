@@ -72,6 +72,15 @@ export default class TermsOfServiceDialog extends Vue {
       return 'Please read and agree to the Terms Of Use'
     }
 
+    @Watch('version')
+    onDocVersionChanged (val: string, oldVal: string) {
+      if (val === this.lastAcceptedVersion) {
+        this.termsAccepted = true
+        this.canCheckTerms = true
+        this.emitStatus()
+      }
+    }
+
     @Watch('lastAcceptedVersion')
     onVersionChanged (val: string, oldVal: string) {
       if (val === this.version) {

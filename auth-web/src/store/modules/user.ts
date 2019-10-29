@@ -115,7 +115,7 @@ export default class UserModule extends VuexModule {
   }
   @Action({})
   public async updateUserTerms () {
-    return UserService.updateUserTerms(this.termsOfUseVersion, this.isTermsAccepted)
+    return UserService.updateUserTerms('@me', this.termsOfUseVersion, this.isTermsAccepted)
       .then(response => {
         return response.data
       })
