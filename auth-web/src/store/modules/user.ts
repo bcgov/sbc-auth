@@ -12,9 +12,9 @@ import UserService from '@/services/user.services'
   namespaced: true
 })
 export default class UserModule extends VuexModule {
-  currentUser: UserInfo
-  userProfile: User
-  userContact: Contact
+  currentUser: UserInfo = undefined
+  userProfile: User = undefined
+  userContact: Contact = undefined
 
   @Mutation
   public setUserProfile (userProfile: User) {
@@ -37,7 +37,7 @@ export default class UserModule extends VuexModule {
   }
 
   @Action({ commit: 'setCurrentUser' })
-  public async initializeSession () {
+  public initializeSession () {
     // Set values to session storage
     KeycloakService.initSession()
     // Load User Info
@@ -46,10 +46,10 @@ export default class UserModule extends VuexModule {
 
   @Action({ commit: 'setUserProfile' })
   public async getUserProfile (identifier: string) {
-    return UserService.getUserProfile(identifier)
-      .then(response => {
-        return response.data ? response.data : null
-      })
+    const response = await UserService.getUserProfile(identifier)
+    if (response && response.data) {
+      return response.data
+    }
   }
 
   @Action({ commit: 'setUserProfile' })
@@ -57,17 +57,17 @@ export default class UserModule extends VuexModule {
     return UserService.createUserProfile()
       .then(async response => {
         // Refresh token to get the new token with additional roles
-        await KeycloakService.refreshToken()
+        KeycloakService.refreshToken()
         return response.data
       })
   }
 
   @Action({ commit: 'setUserContact' })
-  public async createUserContact (contact:Contact) {
-    return UserService.createContact(contact)
-      .then(response => {
-        return response.data
-      })
+  public async createUserContact (contact: Contact) {
+    const response = await UserService.createContact(contact)
+    if (response && response.data && response.status === 201) {
+      return response.data
+    }
   }
 
   @Action({ commit: 'setUserContact' })
