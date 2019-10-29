@@ -17,40 +17,50 @@
 Test-Suite to ensure that the /documents endpoint is working as expected.
 """
 
-import copy
-import json
-import uuid
-
 from auth_api import status as http_status
-
-from tests.utilities.factory_utils import (
-    factory_affiliation_model, factory_auth_header, factory_entity_model, factory_membership_model, factory_org_model,
-    factory_user_model,factory_document_model)
+from tests.utilities.factory_utils import factory_document_model
 
 
 def test_documents_returns_200(client, jwt, session):  # pylint:disable=unused-argument
     """Assert authorizations for affiliated users returns 200."""
-    html_content = '<HTML></HTML>'
-    version_id = 1
-    document = factory_document_model(version_id,'termsofuse',html_content)
+    rv = client.get(f'/api/v1/documents/termsofuse', content_type='application/json')
 
-    rv = client.get(f'/api/v1/documents/termsofuse',content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('version_id') == 1
+
+
+def test_invalid_documents_returns_404(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert authorizations for affiliated users returns 200."""
+    rv = client.get(f'/api/v1/documents/junk', content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+    assert rv.json.get('message') == 'The requested invitation could not be found.'
+
+
+def test_documents_returns_200_for_some_type(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert authorizations for affiliated users returns 200."""
+    html_content = '<HTML></HTML>'
+    version_id = 10
+    factory_document_model(version_id, 'sometype', html_content)
+
+    rv = client.get(f'/api/v1/documents/sometype', content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
     assert rv.json.get('content') == html_content
     assert rv.json.get('version_id') == version_id
 
+
 def test_documents_returns_latest_always(client, jwt, session):  # pylint:disable=unused-argument
     """Assert authorizations for affiliated users returns 200."""
     html_content_1 = '<HTML>1</HTML>'
-    version_id_1 = 1
-    document_1 = factory_document_model(version_id_1,'termsofuse',html_content_1)
+    version_id_1 = 2
+    factory_document_model(version_id_1, 'termsofuse', html_content_1)
 
     html_content_2 = '<HTML>2</HTML>'
-    version_id_2 = 2
-    document_2 = factory_document_model(version_id_2, 'termsofuse', html_content_2)
+    version_id_2 = 3
+    factory_document_model(version_id_2, 'termsofuse', html_content_2)
 
-    rv = client.get(f'/api/v1/documents/termsofuse',content_type='application/json')
+    rv = client.get(f'/api/v1/documents/termsofuse', content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
     assert rv.json.get('content') == html_content_2

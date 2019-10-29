@@ -49,7 +49,7 @@ class User(BaseModel):
         ForeignKey('documents.version_id'), nullable=True
     )
     terms_of_use_version = relationship('Documents', foreign_keys=[terms_of_use_accepted_version], uselist=False,
-                                    lazy='select')
+                                        lazy='select')
 
     @classmethod
     def find_by_username(cls, username):

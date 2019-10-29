@@ -19,6 +19,7 @@ Documents which are static in nature are stored in this table  ie.terms of use
 from sqlalchemy import Column, Integer, String, Text, desc
 
 from .base_model import BaseModel
+from .db import db
 
 
 class Documents(BaseModel):
@@ -27,11 +28,12 @@ class Documents(BaseModel):
     __tablename__ = 'documents'
 
     # TODO version concept is not well refined..this is the first version..refine it
-    version_id = Column(Integer, primary_key=True)
+    version_id = Column(Integer, primary_key=True, autoincrement=False)
     type = Column('type', String(20), nullable=False)
     content = Column('content', Text)
 
     @classmethod
     def fetch_latest_document_by_type(cls, file_type):
         """Fetch latest document of any time."""
-        return cls.query.filter_by(type=file_type).order_by(desc(Documents.version_id)).first()
+        return db.session.query(Documents).filter(
+            Documents.type == file_type).order_by(desc(Documents.version_id)).limit(1).one_or_none()

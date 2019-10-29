@@ -49,4 +49,7 @@ class Documents:
     @classmethod
     def fetch_terms_of_use_document(cls, document_type):
         """Get a membership type by the given code."""
-        return Documents(DocumentsModel.fetch_latest_document_by_type(file_type=document_type))
+        doc = DocumentsModel.fetch_latest_document_by_type(file_type=document_type)
+        if doc:
+            return Documents(doc)
+        return None

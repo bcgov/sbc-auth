@@ -39,7 +39,12 @@ class Documents(Resource):
     def get(document_type):
         """Return the latest terms of use."""
         try:
-            response, status = DocumentService.fetch_terms_of_use_document(document_type).as_dict(), http_status.HTTP_200_OK
+            doc = DocumentService.fetch_terms_of_use_document(document_type)
+            if doc is not None:
+                response, status = doc.as_dict(), http_status.HTTP_200_OK
+            else:
+                response, status = {'message': 'The requested invitation could not be found.'}, \
+                                   http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
