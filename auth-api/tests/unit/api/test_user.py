@@ -77,7 +77,7 @@ def test_update_user_terms_of_use(client, jwt, session):  # pylint:disable=unuse
     # post token with updated claims
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.updated_test)
     input_data = json.dumps({'termsversion': 1, 'istermsaccepted': True})
-    rv = client.patch('/api/v1/users/termsofuse', headers=headers,
+    rv = client.patch('/api/v1/users/@me', headers=headers,
                       data=input_data, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     user = json.loads(rv.data)
@@ -95,7 +95,7 @@ def test_update_user_terms_of_use_invalid_input(client, jwt, session):  # pylint
     # post token with updated claims
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.updated_test)
     input_data = json.dumps({'invalid': True})
-    rv = client.patch('/api/v1/users/termsofuse', headers=headers,
+    rv = client.patch('/api/v1/users/@me', headers=headers,
                       data=input_data, content_type='application/json')
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
@@ -110,7 +110,7 @@ def test_update_user_terms_of_use_no_jwt(client, jwt, session):  # pylint:disabl
 
     # post token with updated claims
     input_data = json.dumps({'invalid': True})
-    rv = client.patch('/api/v1/users/termsofuse',
+    rv = client.patch('/api/v1/users/@me',
                       data=input_data, content_type='application/json')
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
