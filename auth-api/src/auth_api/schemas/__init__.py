@@ -17,6 +17,7 @@
 from .affiliation import AffiliationSchema
 from .contact import ContactSchema
 from .contact_link import ContactLinkSchema
+from .documents import DocumentSchema
 from .entity import EntitySchema
 from .invitation import InvitationSchema
 from .invitation_membership import InvitationMembershipSchema

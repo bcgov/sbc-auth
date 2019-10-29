@@ -14,14 +14,15 @@
 
 """This exports all of the models and schemas used by the application."""
 
+from sbc_common_components.tracing.db_tracing import DBTracing  # noqa: I001
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
-from sbc_common_components.tracing.db_tracing import DBTracing  # noqa: I001
 
 from .affiliation import Affiliation
 from .contact import Contact
 from .contact_link import ContactLink
 from .db import db, ma
+from .documents import Documents
 from .entity import Entity
 from .invitation import Invitation
 from .invitation_membership import InvitationMembership
