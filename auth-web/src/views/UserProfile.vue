@@ -17,7 +17,7 @@
         </div>
         <v-card class="profile-card">
           <v-container>
-            <h2 class="mb-7">Enter User Profile</h2>
+            <h2 class="mb-7">Your Profile</h2>
             <UserProfileForm/>
           </v-container>
         </v-card>
