@@ -23,6 +23,7 @@ from sentry_sdk.integrations.flask import FlaskIntegration  # pylint: disable=un
 
 from config import CONFIGURATION, _Config
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler  # noqa: I001
+from sbc_common_components.utils.camel_case_response import convert_to_camel
 from status_api import models
 from status_api.jwt_wrapper import JWTWrapper
 from status_api.utils.run_version import get_run_version
@@ -50,6 +51,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
     app.register_blueprint(API_BLUEPRINT)
     app.register_blueprint(OPS_BLUEPRINT)
+    app.after_request(convert_to_camel)
 
     setup_jwt_manager(app, JWT)
 
