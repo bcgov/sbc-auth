@@ -11,11 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all of the Services used in the API."""
-from .affiliation import Affiliation
-from .documents import Documents
-from .entity import Entity
-from .invitation import Invitation
-from .membership import Membership
-from .org import Org
-from .user import User
+"""Manager for user schema and export."""
+
+from auth_api.models import Documents as DocumentsModel
+
+from .base_schema import BaseSchema
+
+
+class DocumentSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the Documents model."""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps all of the documents fields to a default schema."""
+
+        model = DocumentsModel

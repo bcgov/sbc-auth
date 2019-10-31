@@ -21,6 +21,14 @@ export default class UserModule extends VuexModule {
     this.userProfile = userProfile
   }
 
+  get termsOfUseVersion () {
+    return this.userProfile.terms_of_use_version
+  }
+
+  get isTermsAccepted () {
+    return this.userProfile.is_terms_of_use_accepted
+  }
+
   @Mutation
   public setCurrentUser (currentUser: UserInfo) {
     this.currentUser = currentUser
@@ -70,6 +78,18 @@ export default class UserModule extends VuexModule {
     }
   }
 
+  @Mutation
+  // eslint-disable-next-line camelcase
+  public setCurrentUserTerms (terms:{ is_terms_of_use_accepted:boolean, terms_of_use_accepted_version:string }) {
+    this.userProfile.is_terms_of_use_accepted = terms.is_terms_of_use_accepted
+    this.userProfile.terms_of_use_version = terms.terms_of_use_accepted_version
+  }
+
+  @Action({ commit: 'setCurrentUserTerms' })
+  // eslint-disable-next-line camelcase
+  public updateCurrentUserTerms (terms:{ is_terms_of_use_accepted:boolean, terms_of_use_accepted_version:string }) {
+    return terms
+  }
   @Action({ commit: 'setUserContact' })
   public async updateUserContact (contact: Contact) {
     const response = await UserService.updateContact(contact)
@@ -92,5 +112,12 @@ export default class UserModule extends VuexModule {
     } else {
       KeycloakService.logout(redirectUrl)
     }
+  }
+  @Action({})
+  public async updateUserTerms () {
+    return UserService.updateUserTerms('@me', this.termsOfUseVersion, this.isTermsAccepted)
+      .then(response => {
+        return response.data
+      })
   }
 }
