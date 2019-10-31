@@ -97,8 +97,8 @@ class UserStaff(Resource):
         return response, status
 
 
-@cors_preflight('GET,OPTIONS')
-@API.route('/@me', methods=['GET', 'OPTIONS'])
+@cors_preflight('GET,OPTIONS,PATCH')
+@API.route('/@me', methods=['GET', 'OPTIONS','PATCH'])
 class User(Resource):
     """Resource for managing an individual user."""
 
@@ -114,6 +114,30 @@ class User(Resource):
 
         try:
             response, status = UserService.find_by_jwt_token(token).as_dict(), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def patch():
+        """Update terms of service for the user."""
+        token = g.jwt_oidc_token_info
+        request_json = request.get_json()
+
+        valid_format, errors = schema_utils.validate(request_json, 'termsofuse')
+        if not token:
+            return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
+        if not valid_format:
+            return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+
+        version = request_json['termsversion']
+        is_terms_accepted = request_json['istermsaccepted']
+        try:
+            response, status = UserService.update_terms_of_use(token, is_terms_accepted, version).as_dict(), \
+                               http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -218,3 +242,6 @@ class AuthorizationResource(Resource):
         """Add a new contact for the Entity identified by the provided id."""
         sub = g.jwt_oidc_token_info.get('sub', None)
         return AuthorizationService.get_user_authorizations(sub), http_status.HTTP_200_OK
+
+
+

@@ -19,7 +19,7 @@ A User stores basic information from a KeyCloak user (including the KeyCloak GUI
 import datetime
 
 from flask import current_app
-from sqlalchemy import Column, Integer, String, or_
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -43,6 +43,13 @@ class User(BaseModel):
 
     contacts = relationship('ContactLink', back_populates='user', primaryjoin='User.id == ContactLink.user_id')
     orgs = relationship('Membership', back_populates='user', primaryjoin='User.id == Membership.user_id')
+
+    is_terms_of_use_accepted = Column(Boolean(), default=False, nullable=True)
+    terms_of_use_accepted_version = Column(
+        ForeignKey('documents.version_id'), nullable=True
+    )
+    terms_of_use_version = relationship('Documents', foreign_keys=[terms_of_use_accepted_version], uselist=False,
+                                        lazy='select')
 
     @classmethod
     def find_by_username(cls, username):
@@ -102,6 +109,23 @@ class User(BaseModel):
         if first_name == '' and last_name == '' and email == '':
             return cls.query.all()
         return cls.query.filter(or_(cls.firstname == first_name, cls.lastname == last_name, cls.email == email)).all()
+
+    @classmethod
+    def update_terms_of_use(cls, token: dict, is_terms_accepted, terms_of_use_version):
+        """Update the terms of service for the user."""
+        if token:
+            user = cls.find_by_jwt_token(token)
+            user.is_terms_of_use_accepted = is_terms_accepted
+            user.terms_of_use_accepted_version = terms_of_use_version
+
+            current_app.logger.debug(
+                'Updating users Terms of use is_terms_accepted:{}; terms_of_use_version:{}'.format(
+                    is_terms_accepted, terms_of_use_version)
+            )
+
+            cls.commit()
+            return user
+        return None
 
     def delete(self):
         """Users cannot be deleted so intercept the ORM by just returning."""

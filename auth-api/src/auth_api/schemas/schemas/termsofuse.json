@@ -1,0 +1,32 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/termsofuse",
+    "type": "object",
+    "title": "TermsOfUse",
+    "required": [
+      "termsversion","istermsaccepted"
+    ],
+    "properties": {
+      "termsversion": {
+        "$id": "#/properties/termsversion",
+        "type": "integer",
+        "title": "terms version",
+        "default": "",
+        "examples": [
+          1
+        ],
+        "pattern": "^(.*)$"
+      },
+      "istermsaccepted": {
+        "$id": "#/properties/istermsaccepted",
+        "type": "boolean",
+        "title": "istermsaccepted",
+        "default": "",
+        "examples": [
+          true
+        ]
+      }
+    }
+  }
+  
