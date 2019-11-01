@@ -4,27 +4,27 @@
   font-family: 'BCSans';
   font-style: normal;
   font-weight: 400;
-  src: url('assets/fonts/BCSans/BCSans-Regular.woff2') format('woff2'), /* Optimized for very modern browsers */
-       url('assets/fonts/BCSans/BCSans-Regular.woff') format('woff'), /* Modern Browsers */
+  src: url('../fonts/BCSans/BCSans-Regular.woff2') format('woff2'), /* Optimized for very modern browsers */
+       url('../fonts/BCSans/BCSans-Regular.woff') format('woff'), /* Modern Browsers */
 }
 @font-face{
   font-family: 'BCSans';
   font-style: italic;
-  src: url('assets/fonts/BCSans/BCSans-Italic.woff2') format('woff2'), /* Optimized for very modern browsers */
-       url('assets/fonts/BCSans/BCSans-Italic.woff') format('woff'); /* Modern Browsers */
+  src: url('../fonts/BCSans/BCSans-Italic.woff2') format('woff2'), /* Optimized for very modern browsers */
+       url('../fonts/BCSans/BCSans-Italic.woff') format('woff'); /* Modern Browsers */
 }
 @font-face{
   font-family: 'BCSans';
   font-weight: 700; 
-  src: url('assets/fonts/BCSans/BCSans-Bold.woff2') format('woff2'), /* Optimized for very modern browsers */
-       url('assets/fonts/BCSans/BCSans-Bold.woff') format('woff'); /* Modern Browsers */
+  src: url('../fonts/BCSans/BCSans-Bold.woff2') format('woff2'), /* Optimized for very modern browsers */
+       url('../fonts/BCSans/BCSans-Bold.woff') format('woff'); /* Modern Browsers */
 }
 @font-face{
   font-family: 'BCSans';
   font-style: italic;
   font-weight: 700; 
-  src: url('assets/fonts/BCSans/BCSans-BoldItalic.woff2') format('woff2'), /* Optimized for very modern browsers */
-       url('assets/fonts/BCSans/BCSans-BoldItalic.woff') format('woff'); /* Modern Browsers */
+  src: url('../fonts/BCSans/BCSans-BoldItalic.woff2') format('woff2'), /* Optimized for very modern browsers */
+       url('../fonts/BCSans/BCSans-BoldItalic.woff') format('woff'); /* Modern Browsers */
 }
 
 html,
@@ -36,7 +36,7 @@ html {
   font-size: 14px;
 }
 
-@media (min-width: 960px) {
+@media (min-width: 600px) {
   html {
     font-size: 16px;
   }
@@ -50,7 +50,7 @@ h1, h2, h3, h4 {
   color: $gray9;
 }
 
-h1, h2 {
+h1, h2, h3 {
   letter-spacing: -0.03rem;
   font-weight: 700;
 }
@@ -60,8 +60,20 @@ h1 {
   font-size: 2.0625rem; // 33px based off of 1rem = 16px
 }
 
+h2 {
+  font-size: 1.75rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
 p {
   font-weight: 400;
+}
+
+strong {
+  letter-spacing: -0.01rem;
 }
 
 .v-application {
@@ -71,4 +83,9 @@ p {
 .theme--light.v-application {
   color: $gray7;
   background-color: $gray1;
+}
+
+// Helpers
+.nobr {
+  white-space: nowrap; // Utility class to prevent orphaned text
 }

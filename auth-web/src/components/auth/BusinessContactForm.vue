@@ -1,95 +1,100 @@
 <template>
-  <div>
-    <v-form ref="form" lazy-validation>
-      <v-expand-transition>
-        <div class="business-contact-form_alert-container" v-show="formError">
-          <v-alert
-            :value="true"
-            color="error"
-            icon="warning"
-          >{{formError}}
-          </v-alert>
-        </div>
-      </v-expand-transition>
-    <div class="business-contact-form_row">
-      <v-text-field
-        filled
-        label="Email Address"
-        req
-        persistent-hint
-        :rules="emailRules"
-        v-model="emailAddress"
-      >
-      </v-text-field>
-    </div>
-    <div class="business-contact-form_row">
-      <v-text-field
-        filled
-        label="Confirm Email Address"
-        req
-        persistent-hint
-        :error-messages="emailMustMatch()"
-        v-model="confirmedEmailAddress"
-      >
-      </v-text-field>
-    </div>
-    <div class="business-contact-form_row">
-      <v-layout wrap>
-        <v-flex xs6 class="mr-5">
-          <v-text-field
-            filled
-            label="Phone e.g. (555)-555-5555"
-            persistent-hint
-            type="tel"
-            v-mask="['(###)-###-####']"
-            v-model="phoneNumber"
-            :rules="phoneRules"
-          >
-          </v-text-field>
-        </v-flex>
-        <v-flex xs3>
-          <v-text-field
-            filled label="Extension"
-            persistent-hint
-            :rules="extensionRules"
-            v-mask="'###'"
-            v-model="extension"
-          >
-          </v-text-field>
-        </v-flex>
-      </v-layout>
-    </div>
-    <div class="business-contact-form_row">
-      <v-layout wrap>
-        <v-spacer></v-spacer>
-        <v-btn v-show="editing" class=".cancel-button" @click="cancel" color="secondary" large>
-          <span>Cancel</span>
+  <v-form ref="form" lazy-validation>
+    <v-expand-transition>
+      <div class="business-contact-form__alert-container" v-show="formError">
+        <v-alert type="error" class="mb-0"
+          :value="true"
+        >{{formError}}
+        </v-alert>
+      </div>
+    </v-expand-transition>
+    <v-row>
+      <v-col cols="12">
+        <v-text-field
+          filled
+          label="Email Address"
+          req
+          persistent-hint
+          :rules="emailRules"
+          v-model="emailAddress"
+        >
+        </v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-text-field
+          filled
+          label="Confirm Email Address"
+          req
+          persistent-hint
+          :error-messages="emailMustMatch()"
+          v-model="confirmedEmailAddress"
+        >
+        </v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-text-field
+          filled
+          label="Phone Number"
+          persistent-hint
+          hint="Example: (555) 555-5555"
+          type="tel"
+          v-mask="['(###) ###-####']"
+          v-model="phoneNumber"
+          :rules="phoneRules"
+        >
+        </v-text-field>
+      </v-col>
+      <v-col cols="3">
+        <v-text-field
+          filled label="Extension"
+          persistent-hint
+          :rules="extensionRules"
+          v-mask="'###'"
+          v-model="extension"
+        >
+        </v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" class="form__btns pb-0">
+        <v-btn large color="default" v-show="editing" @click="cancel">
+          Cancel
         </v-btn>
-        <v-btn class=".save-continue-button" @click="save" :disabled='!isFormValid()' color="primary" large>
-          <span>Save and Continue</span>
+        <v-btn large color="primary" @click="save" :disabled='!isFormValid()'>
+          Save and Continue
         </v-btn>
-      </v-layout>
-    </div>
-    </v-form>
-  </div>
+      </v-col>
+    </v-row>
+  </v-form>
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
+import { Business } from '../../models/business'
+import BusinessModule from '@/store/modules/business'
+import ConfigHelper from '@/util/config-helper'
+import { Contact } from '@/models/contact'
+import { SessionStorageKeys } from '@/util/constants'
 import { getModule } from 'vuex-module-decorators'
-import BusinessModule from '../../store/modules/business'
-import configHelper from '../../util/config-helper'
 import { mask } from 'vue-the-mask'
-import { Contact } from '../../models/contact'
-import { SessionStorageKeys } from '../../util/constants'
 
 @Component({
   directives: {
     mask
+  },
+  computed: {
+    ...mapState('business', ['currentBusiness'])
+  },
+  methods: {
+    ...mapActions('business', ['loadBusiness', 'addContact', 'updateContact'])
   }
 })
 export default class BusinessContactForm extends Vue {
-  private VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   private businessStore = getModule(BusinessModule, this.$store)
   private emailAddress = ''
   private confirmedEmailAddress = ''
@@ -97,6 +102,10 @@ export default class BusinessContactForm extends Vue {
   private extension = ''
   private formError = ''
   private editing = false
+  private readonly currentBusiness: Business
+  private readonly loadBusiness!: (businessIdentifier: string) => Business
+  private readonly addContact!: (contact: Contact) => void
+  private readonly updateContact!: (contact: Contact) => void
 
   private emailRules = [
     v => !!v || 'Email address is required',
@@ -127,54 +136,48 @@ export default class BusinessContactForm extends Vue {
       this.emailAddress === this.confirmedEmailAddress
   }
 
-  mounted () {
-    this.businessStore.loadBusiness(configHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)).then(() => {
-      if (this.businessStore.currentBusiness.contacts && this.businessStore.currentBusiness.contacts.length > 0) {
-      // TODO: For now grab first contact as the business contact.  Post MVP, we should check the contact type, grab the correct one.
-        const contact = this.businessStore.currentBusiness.contacts[0]
-        this.emailAddress = this.confirmedEmailAddress = contact.email
-        this.phoneNumber = contact.phone
-        this.extension = contact.phoneExtension
-      }
-    })
+  private redirectToNext () {
+    if (this.$route.query.redirect) {
+      this.$router.push({ path: '/main' })
+    } else {
+      window.location.href = ConfigHelper.getCoopsURL()
+    }
   }
 
-  save () {
+  async mounted () {
+    // If a business is currently in the store, show contact info for that one
+    if (!this.currentBusiness || !this.currentBusiness.businessIdentifier) {
+      await this.loadBusiness(ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey))
+    }
+
+    if (this.currentBusiness.contacts && this.currentBusiness.contacts.length > 0) {
+      const contact = this.currentBusiness.contacts[0]
+      this.emailAddress = this.confirmedEmailAddress = contact.email
+      this.phoneNumber = contact.phone
+      this.extension = contact.phoneExtension
+    }
+  }
+
+  async save () {
     if (this.isFormValid()) {
-      let result: Promise<void>
       const contact: Contact = {
         email: this.emailAddress.toLowerCase(),
         phone: this.phoneNumber,
         phoneExtension: this.extension
       }
 
-      if (!this.businessStore.currentBusiness.contacts || this.businessStore.currentBusiness.contacts.length === 0) {
-        result = this.businessStore.addContact(contact)
+      if (!this.currentBusiness.contacts || this.currentBusiness.contacts.length === 0) {
+        await this.addContact(contact)
       } else {
-        result = this.businessStore.updateContact(contact)
+        await this.updateContact(contact)
       }
 
-      result.then(response => {
-        // TODO: Change this to transition to entity dashboard once complete
-        setTimeout(() => {
-          window.location.href = this.VUE_APP_COPS_REDIRECT_URL
-        }, 500)
-      })
+      this.redirectToNext()
     }
   }
 
   cancel () {
-    window.location.href = this.VUE_APP_COPS_REDIRECT_URL
-  }
-
-  skip () {
-    // Mark store as having skipped contact entry for this session
-    this.businessStore.setSkippedContactEntry(true)
-
-    // Go directly to co-op UI without saving
-    setTimeout(() => {
-      window.location.href = this.VUE_APP_COPS_REDIRECT_URL
-    }, 500)
+    this.redirectToNext()
   }
 }
 </script>
@@ -182,19 +185,18 @@ export default class BusinessContactForm extends Vue {
 <style lang="scss" scoped>
   @import '../../assets/scss/theme.scss';
 
-  .business-contact-form_row{
-    margin-top: 1rem;
+  // Tighten up some of the spacing between rows
+  [class^="col"] {
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
-  .business-contact-form_alert-container{
-    margin-bottom: 2rem;
+  .form__btns {
+    display: flex;
+    justify-content: flex-end;
   }
 
-  .v-alert{
-    margin: 0;
-  }
-
-  .v-btn{
-    font-weight: 700;
+  .business-contact-form__alert-container {
+    margin-bottom: 2.25rem;
   }
 </style>

@@ -51,12 +51,14 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { Component, Prop, Emit } from 'vue-property-decorator'
-import { getModule } from 'vuex-module-decorators'
+
+import { Component, Emit, Prop } from 'vue-property-decorator'
+
 import BusinessModule from '@/store/modules/business'
+import ConfigHelper from '@/util/config-helper'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
-import configHelper from '@/util/config-helper'
+import Vue from 'vue'
+import { getModule } from 'vuex-module-decorators'
 import { mapActions } from 'vuex'
 
 @Component({
@@ -69,7 +71,6 @@ import { mapActions } from 'vuex'
 })
 export default class SearchBusinessForm extends Vue {
   private businessStore = getModule(BusinessModule, this.$store)
-  private VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   private entityNumRules = [v => !!v || 'Incorporation Number is required']
   private businessNumber = ''
   private errorMessage = ''
@@ -92,7 +93,7 @@ export default class SearchBusinessForm extends Vue {
         this.errorMessage = ''
 
         // Redirect to the coops UI
-        window.location.href = this.VUE_APP_COPS_REDIRECT_URL
+        window.location.href = ConfigHelper.getCoopsURL()
       } catch (exception) {
         this.errorMessage = this.$t('noResultMsg').toString()
       }

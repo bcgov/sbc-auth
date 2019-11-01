@@ -25,6 +25,7 @@ from flask import Blueprint
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
 
 from .apihelper import Api
+from .documents import API as DOCUMENTS_API
 from .entity import API as ENTITY_API
 from .invitation import API as INVITATION_API
 from .logout import API as LOGOUT_API
@@ -74,3 +75,4 @@ API.add_namespace(LOGOUT_API, path='/logout')
 API.add_namespace(ENTITY_API, path='/entities')
 API.add_namespace(ORG_API, path='/orgs')
 API.add_namespace(INVITATION_API, path='/invitations')
+API.add_namespace(DOCUMENTS_API, path='/documents')

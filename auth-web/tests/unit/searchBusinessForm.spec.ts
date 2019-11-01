@@ -1,11 +1,10 @@
+import { createLocalVue, mount } from '@vue/test-utils'
 import BusinessModule from '@/store/modules/business'
 import SearchBusinessForm from '@/components/auth/SearchBusinessForm.vue'
-import Vuex from 'vuex'
-import { mount, createLocalVue, Wrapper } from '@vue/test-utils'
 import Vue from 'vue'
-import Vuetify from 'vuetify'
 import VueRouter from 'vue-router'
-import VuexPersistence from 'vuex-persist'
+import Vuetify from 'vuetify'
+import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -29,17 +28,11 @@ describe('SearchBusinessForm.vue', () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
-    const vuexPersist = new VuexPersistence({
-      key: 'AUTH_WEB',
-      storage: sessionStorage
-    })
-
     const store = new Vuex.Store({
       strict: false,
       modules: {
         business: BusinessModule
-      },
-      plugins: [vuexPersist.plugin]
+      }
     })
 
     const $t = () => {}

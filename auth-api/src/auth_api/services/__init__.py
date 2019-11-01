@@ -13,6 +13,7 @@
 # limitations under the License.
 """Exposes all of the Services used in the API."""
 from .affiliation import Affiliation
+from .documents import Documents
 from .entity import Entity
 from .invitation import Invitation
 from .membership import Membership

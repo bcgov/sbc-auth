@@ -1,12 +1,11 @@
-import VuexPersistence from 'vuex-persist'
-import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
-import Vue from 'vue'
-import Vuex from 'vuex'
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-import Vuetify from 'vuetify'
-import VueRouter from 'vue-router'
-import UserService from '../../src/services/user.services'
+import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
 import UserModule from '@/store/modules/user'
+import UserService from '../../src/services/user.services'
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import Vuetify from 'vuetify'
+import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -28,17 +27,11 @@ describe('AffiliatedEntityList.vue', () => {
     localVue = createLocalVue()
     localVue.use(Vuex)
 
-    const vuexPersist = new VuexPersistence({
-      key: 'AUTH_WEB',
-      storage: sessionStorage
-    })
-
     store = new Vuex.Store({
       strict: false,
       modules: {
         user: UserModule
-      },
-      plugins: [vuexPersist.plugin]
+      }
     })
 
     jest.resetModules()

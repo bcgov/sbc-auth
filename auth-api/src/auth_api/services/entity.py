@@ -15,7 +15,8 @@
 
 from typing import Dict, Tuple
 
-from sbc_common_components.tracing.service_tracing import ServiceTracing
+from flask import current_app
+from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -23,8 +24,11 @@ from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
+from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.util import camelback2snake
+
 from .authorization import check_auth
+from .rest_service import RestService
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -102,11 +106,11 @@ class Entity:
         if existing_entity is None:
             entity_model = EntityModel.create_from_dict(entity_info)
         else:
-            existing_entity.update_from_dict(**entity_info)
+            # TODO temporary allow update passcode, should replace with reset passcode endpoint.
+            entity_info['passCode'] = passcode_hash(entity_info['passCode'])
+            existing_entity.update_from_dict(**camelback2snake(entity_info))
             entity_model = existing_entity
-
-        if not entity_model:
-            return None
+            entity_model.commit()
 
         entity = Entity(entity_model)
         return entity
@@ -169,3 +173,14 @@ class Entity:
         if pass_code == self._model.pass_code:
             return True
         return False
+
+    def sync_name(self):
+        """Sync this entity's name with the name used in the LEAR database."""
+        legal_url = current_app.config.get('LEGAL_API_URL') + f'/businesses/{self._model.business_identifier}'
+        legal_response = RestService.get(legal_url)
+
+        if legal_response:
+            entity_json = legal_response.json()
+            entity_name = entity_json.get('business').get('legalName')
+            self._model.name = entity_name
+            self._model.save()

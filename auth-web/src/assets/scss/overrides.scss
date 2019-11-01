@@ -1,4 +1,5 @@
 // Vuetify Overrides
+@import "theme.scss";
 
 // Buttons
 .v-btn {
@@ -43,6 +44,10 @@
 .v-card__text {
   line-height: 1.5;
   font-size: 1rem;
+}
+
+.v-card__actions {
+  padding: 1.25rem 1.5rem;
 }
 
 .theme--light.v-card >.v-card__text {

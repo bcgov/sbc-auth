@@ -3,12 +3,12 @@
   </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
-import { getModule } from 'vuex-module-decorators'
-import commonUtils from '../../util/common-util'
-import UserModule from '../../store/modules/user'
-import { User } from '../../models/user'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
+import { User } from '@/models/user'
+import UserModule from '@/store/modules/user'
+import { getModule } from 'vuex-module-decorators'
 
 @Component
 export default class Signin extends Vue {
@@ -29,16 +29,15 @@ export default class Signin extends Vue {
       this.userStore.initKeycloak(this.idpHint).then((kcInit) => {
         kcInit.success((authenticated) => {
           if (authenticated === true) {
-            this.userStore.initializeSession().then((currentUser) => {
-              // Make a POST to the users endpoint if it's bcsc (not needed for IDIR I guess)
-              if (this.idpHint !== 'idir') {
-                this.userStore.createUserProfile().then((userProfile) => {
-                  this.redirectToNext()
-                })
-              } else {
+            const currentUsr = this.userStore.initializeSession()
+            // Make a POST to the users endpoint if it's bcsc (not needed for IDIR I guess)
+            if (this.idpHint !== 'idir') {
+              this.userStore.createUserProfile().then((userProfile) => {
                 this.redirectToNext()
-              }
-            })
+              })
+            } else {
+              this.redirectToNext()
+            }
           }
         })
       })
@@ -48,7 +47,7 @@ export default class Signin extends Vue {
   redirectToNext () {
     // If a redirect url is given, redirect to that page else continue to dashboard or userprofile
     if (this.redirectUrl) {
-      if (commonUtils.isUrl(this.redirectUrl)) {
+      if (CommonUtils.isUrl(this.redirectUrl)) {
         window.location.href = decodeURIComponent(this.redirectUrl)
       } else {
         this.$router.push('/' + this.redirectUrl)

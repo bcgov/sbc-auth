@@ -20,6 +20,7 @@ from flask import current_app
 from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.orm import relationship
 
+from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.util import camelback2snake
 
 from .base_model import BaseModel
@@ -49,6 +50,7 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods
         """Create a new Entity from the provided dictionary."""
         if entity_info:
             entity = Entity(**camelback2snake(entity_info))
+            entity.pass_code = passcode_hash(entity.pass_code)
             current_app.logger.debug(
                 'Creating entity from dictionary {}'.format(entity_info)
             )

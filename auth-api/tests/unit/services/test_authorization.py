@@ -30,7 +30,7 @@ from tests.utilities.factory_utils import (
 def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-argument
     """Assert that user authorizations for entity is working."""
     user = factory_user_model()
-    org = factory_org_model('TEST')
+    org = factory_org_model()
     membership = factory_membership_model(user.id, org.id)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
@@ -82,7 +82,7 @@ def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-a
 def test_get_user_authorizations(session):  # pylint:disable=unused-argument
     """Assert that listing all user authorizations is working."""
     user = factory_user_model()
-    org = factory_org_model('TEST')
+    org = factory_org_model()
     membership = factory_membership_model(user.id, org.id)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
@@ -100,7 +100,7 @@ def test_get_user_authorizations(session):  # pylint:disable=unused-argument
 def test_check_auth(session):  # pylint:disable=unused-argument
     """Assert that check_auth is working as expected."""
     user = factory_user_model()
-    org = factory_org_model('TEST')
+    org = factory_org_model()
     factory_membership_model(user.id, org.id)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
@@ -110,6 +110,9 @@ def test_check_auth(session):  # pylint:disable=unused-argument
     # Test for owner role
     check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, one_of_roles=OWNER,
                business_identifier=entity.business_identifier)
+    # Test for owner role with org id
+    check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, one_of_roles=OWNER,
+               org_id=org.id)
 
     # Test for exception, check for auth if resource is available for STAFF users
     with pytest.raises(HTTPException) as excinfo:
@@ -127,4 +130,10 @@ def test_check_auth(session):  # pylint:disable=unused-argument
     with pytest.raises(HTTPException) as excinfo:
         check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, equals_role=MEMBER,
                    business_identifier=entity.business_identifier)
+        assert excinfo.exception.code == 403
+
+    # Test auth where STAFF role is exact match
+    with pytest.raises(HTTPException) as excinfo:
+        check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, equals_role=MEMBER,
+                   org_id=org.id)
         assert excinfo.exception.code == 403

@@ -1,9 +1,9 @@
+import { createLocalVue, mount } from '@vue/test-utils'
 import PasscodeForm from '@/components/auth/PasscodeForm.vue'
-import Vuex from 'vuex'
-import { mount, createLocalVue } from '@vue/test-utils'
 import Vue from 'vue'
-import Vuetify from 'vuetify'
 import VueRouter from 'vue-router'
+import Vuetify from 'vuetify'
+import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)

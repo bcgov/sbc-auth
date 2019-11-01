@@ -25,7 +25,7 @@ from tests.utilities.factory_utils import (
 def test_find_user_authorization_by_business_number(session):  # pylint:disable=unused-argument
     """Assert that authorization view is returning result."""
     user = factory_user_model()
-    org = factory_org_model('TEST')
+    org = factory_org_model()
     membership = factory_membership_model(user.id, org.id)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
@@ -39,7 +39,7 @@ def test_find_user_authorization_by_business_number(session):  # pylint:disable=
 def test_find_invalid_user_authorization_by_business_number(session):  # pylint:disable=unused-argument
     """Test with invalid user id and assert that auth is None."""
     user = factory_user_model()
-    org = factory_org_model('TEST')
+    org = factory_org_model()
     factory_membership_model(user.id, org.id)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
@@ -55,7 +55,7 @@ def test_find_invalid_user_authorization_by_business_number(session):  # pylint:
 def test_find_all_user_authorizations(session):  # pylint:disable=unused-argument
     """Test find all user authoirzations."""
     user = factory_user_model()
-    org = factory_org_model('TEST')
+    org = factory_org_model()
     membership = factory_membership_model(user.id, org.id)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
@@ -68,7 +68,7 @@ def test_find_all_user_authorizations(session):  # pylint:disable=unused-argumen
 def test_find_all_user_authorizations_for_empty(session):  # pylint:disable=unused-argument
     """Test with invalid user id and assert that auth is None."""
     user = factory_user_model()
-    org = factory_org_model('TEST')
+    org = factory_org_model()
     factory_membership_model(user.id, org.id)
 
     authorizations = Authorization.find_all_authorizations_for_user(str(user.keycloak_guid))

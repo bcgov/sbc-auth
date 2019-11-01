@@ -3,6 +3,7 @@ export interface UserInfo {
     firstName: string;
     keycloakGuid: string;
     userName: string;
-    roles: [];
+    roles: string[];
     email: string;
+    fullName: string;
 }

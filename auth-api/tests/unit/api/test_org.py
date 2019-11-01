@@ -18,108 +18,71 @@ Test-Suite to ensure that the /orgs endpoint is working as expected.
 """
 
 import json
-import os
+from unittest.mock import patch
 
 from auth_api import status as http_status
-
-
-TEST_ORG_INFO = {
-    'name': 'My Test Org'
-}
-
-TEST_INVALID_ORG_INFO = {
-    'foo': 'bar'
-}
-
-TEST_CONTACT_INFO = {
-    'email': 'foo@bar.com',
-    'phone': '(555) 555-5555',
-    'phoneExtension': '123'
-}
-
-TEST_UPDATED_CONTACT_INFO = {
-    'email': 'bar@foo.com',
-    'phone': '(555) 555-5555',
-    'phoneExtension': '123'
-}
-
-TEST_INVALID_CONTACT_INFO = {
-    'email': 'bar'
-}
-
-TEST_JWT_CLAIMS = {
-    'iss': os.getenv('JWT_OIDC_ISSUER'),
-    'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
-    'firstname': 'Test',
-    'lastname': 'User',
-    'preferred_username': 'testuser',
-    'realm_access': {
-        'roles': [
-            'edit'
-        ]
-    }
-}
-TEST_STAFF_JWT_CLAIMS = {
-    'iss': os.getenv('JWT_OIDC_ISSUER'),
-    'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
-    'firstname': 'Test',
-    'lastname': 'User',
-    'preferred_username': 'testuser',
-    'realm_access': {
-        'roles': [
-            'staff'
-        ]
-    }
-}
-
-TEST_JWT_HEADER = {
-    'alg': os.getenv('JWT_OIDC_ALGORITHMS'),
-    'typ': 'JWT',
-    'kid': os.getenv('JWT_OIDC_AUDIENCE')
-}
-
-
-def factory_auth_header(jwt, claims):
-    """Produce JWT tokens for use in tests."""
-    return {'Authorization': 'Bearer ' + jwt.create_jwt(claims=claims, header=TEST_JWT_HEADER)}
-
-
-def factory_invite(org_id, email):
-    """Produce an invite for the given org and email."""
-    return {
-        'recipientEmail': email,
-        'sentDate': '2019-09-09',
-        'membership': [
-            {
-                'membershipType': 'MEMBER',
-                'orgId': org_id
-            }
-        ]
-    }
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
+from auth_api.services import Affiliation as AffiliationService
+from auth_api.services import Invitation as InvitationService
+from auth_api.services import Org as OrgService
+from auth_api.services import User as UserService
+from tests.utilities.factory_scenarios import (
+    TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo)
+from tests.utilities.factory_utils import factory_auth_header, factory_invitation
 
 
 def test_add_org(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
 
 def test_add_org_invalid_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that POSTing an invalid org returns a 400."""
-    headers = factory_auth_header(jwt, claims=TEST_JWT_CLAIMS)
-    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_INVALID_ORG_INFO),
+    headers = factory_auth_header(jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.invalid),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
+def test_add_org_invalid_returns_401(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that POSTing an invalid org returns a 401."""
+    headers = factory_auth_header(jwt, claims=TestJwtClaims.view_role)
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+
+def test_add_org_invalid_user_returns_401(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that POSTing an org with invalid user returns a 401."""
+    headers = factory_auth_header(jwt, claims=TestJwtClaims.edit_role)
+
+    with patch.object(UserService, 'find_by_jwt_token', return_value=None):
+        rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                         headers=headers, content_type='application/json')
+        assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+
+def test_add_org_invalid_returns_exception(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that POSTing an invalid org returns an exception."""
+    headers = factory_auth_header(jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+
+    with patch.object(OrgService, 'create_org', side_effect=BusinessException(Error.DATA_ALREADY_EXISTS, None)):
+        rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                         headers=headers, content_type='application/json')
+        assert rv.status_code == 400
+
+
 def test_get_org(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an org can be retrieved via GET."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
@@ -133,9 +96,9 @@ def test_get_org(client, jwt, session):  # pylint:disable=unused-argument
 
 def test_get_org_no_auth_returns_401(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an org cannot be retrieved without an authorization header."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
@@ -146,133 +109,228 @@ def test_get_org_no_auth_returns_401(client, jwt, session):  # pylint:disable=un
 
 def test_get_org_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that attempting to retrieve a non-existent org returns a 404."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
-    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.get('/api/v1/orgs/{}'.format(999),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
+def test_update_org(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an org can be updated via PUT."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(TestOrgInfo.org1),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['id'] == org_id
+
+
+def test_update_org_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an org can not be updated and return 400 error via PUT."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(TestOrgInfo.invalid),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+
+
+def test_update_org_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that attempting to update a non-existent org returns a 404."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.put('/api/v1/orgs/{}'.format(999), data=json.dumps(TestOrgInfo.org1),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+
+
+def test_update_org_returns_exception(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that attempting to update a non-existent org returns an exception."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    with patch.object(OrgService, 'update_org', side_effect=BusinessException(Error.DATA_ALREADY_EXISTS, None)):
+        rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(TestOrgInfo.org1),
+                        headers=headers, content_type='application/json')
+        assert rv.status_code == 400
+
+
 def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an org."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
     rv = client.post('/api/v1/orgs/{}/contacts'.format(org_id),
-                     headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
+                     headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['email'] == TEST_CONTACT_INFO['email']
+    assert dictionary['contacts'][0]['email'] == TestContactInfo.contact1['email']
 
 
 def test_add_contact_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that adding an invalidly formatted contact returns a 400."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
     rv = client.post('/api/v1/orgs/{}/contacts'.format(org_id),
-                     headers=headers, data=json.dumps(TEST_INVALID_CONTACT_INFO), content_type='application/json')
+                     headers=headers, data=json.dumps(TestContactInfo.invalid), content_type='application/json')
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
 def test_add_contact_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that adding a contact to a non-existant org returns 404."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/orgs/{}/contacts'.format(99),
-                     headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
+                     headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
 def test_add_contact_duplicate_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that adding a duplicate contact to an org returns 400."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
     client.post('/api/v1/orgs/{}/contacts'.format(org_id),
-                headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
+                headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
     rv = client.post('/api/v1/orgs/{}/contacts'.format(org_id),
-                     headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
+                     headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
 def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a contact can be updated on an org."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
     rv = client.post('/api/v1/orgs/{}/contacts'.format(org_id),
-                     headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
+                     headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
     rv = client.put('/api/v1/orgs/{}/contacts'.format(org_id),
-                    headers=headers, data=json.dumps(TEST_UPDATED_CONTACT_INFO), content_type='application/json')
+                    headers=headers, data=json.dumps(TestContactInfo.contact2), content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
     dictionary = json.loads(rv.data)
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['email'] == TEST_UPDATED_CONTACT_INFO['email']
+    assert dictionary['contacts'][0]['email'] == TestContactInfo.contact2['email']
 
 
 def test_update_contact_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that updating with an invalidly formatted contact returns a 400."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
     client.post('/api/v1/orgs/{}/contacts'.format(org_id),
-                headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
+                headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
     rv = client.put('/api/v1/orgs/{}/contacts'.format(org_id),
-                    headers=headers, data=json.dumps(TEST_INVALID_CONTACT_INFO), content_type='application/json')
+                    headers=headers, data=json.dumps(TestContactInfo.invalid), content_type='application/json')
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
 def test_update_contact_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that updating a contact on a non-existant entity returns 404."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.put('/api/v1/orgs/{}/contacts'.format(99),
-                    headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
+                    headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
 def test_update_contact_missing_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that updating a non-existant contact returns 404."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
     rv = client.put('/api/v1/orgs/{}/contacts'.format(org_id),
-                    headers=headers, data=json.dumps(TEST_CONTACT_INFO), content_type='application/json')
+                    headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+
+
+def test_delete_contact(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a contact can be deleted on an org."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.post('/api/v1/orgs/{}/contacts'.format(org_id),
+                     headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    rv = client.delete('/api/v1/orgs/{}/contacts'.format(org_id),
+                       headers=headers, data=json.dumps(TestContactInfo.contact2), content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert len(dictionary['contacts']) == 0
+
+
+def test_delete_contact_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that deleting a contact on a non-existant entity returns 404."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.delete('/api/v1/orgs/{}/contacts'.format(99),
+                       headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
+    assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+
+
+def test_delete_contact_returns_exception(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that attempting to delete an org returns an exception."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    with patch.object(OrgService, 'delete_contact', side_effect=BusinessException(Error.DATA_ALREADY_EXISTS, None)):
+        rv = client.delete('/api/v1/orgs/{}/contacts'.format(org_id), headers=headers, content_type='application/json')
+        assert rv.status_code == 400
 
 
 def test_get_members(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a list of members for an org can be retrieved."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
@@ -289,17 +347,17 @@ def test_get_members(client, jwt, session):  # pylint:disable=unused-argument
 
 def test_get_invitations(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a list of invitations for an org can be retrieved."""
-    headers = factory_auth_header(jwt=jwt, claims=TEST_JWT_CLAIMS)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TEST_ORG_INFO),
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
-    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invite(org_id, 'abc123@email.com')),
+    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation(org_id, 'abc123@email.com')),
                      headers=headers, content_type='application/json')
 
-    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invite(org_id, 'xyz456@email.com')),
+    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation(org_id, 'xyz456@email.com')),
                      headers=headers, content_type='application/json')
 
     rv = client.get('/api/v1/orgs/{}/invitations'.format(org_id),
@@ -311,3 +369,146 @@ def test_get_invitations(client, jwt, session):  # pylint:disable=unused-argumen
     assert len(dictionary['invitations']) == 2
     assert dictionary['invitations'][0]['recipientEmail'] == 'abc123@email.com'
     assert dictionary['invitations'][1]['recipientEmail'] == 'xyz456@email.com'
+
+
+def test_update_member(client, jwt, session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that a member of an org can have their role updated."""
+    # Set up: create/login user, create org
+    headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers_invitee, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers_invitee, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    # Invite a user to the org
+    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation(org_id, 'abc123@email.com')),
+                     headers=headers_invitee, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    invitation_id = dictionary['id']
+    invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
+
+    # Create/login as invited user
+    headers_invited = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role_2)
+    rv = client.post('/api/v1/users', headers=headers_invited, content_type='application/json')
+
+    # Accept invite as invited user
+    rv = client.put('/api/v1/invitations/tokens/{}'.format(invitation_id_token),
+                    headers=headers_invited, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['status'] == 'ACCEPTED'
+
+    # Get members for the org as invitee and assert length of 2
+    rv = client.get('/api/v1/orgs/{}/members'.format(org_id), headers=headers_invitee)
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['members']
+    assert len(dictionary['members']) == 2
+
+    # Find the newly added member
+    new_member = list(filter(lambda x: x['user']['username'] == TestJwtClaims.edit_role_2['preferred_username'],
+                             dictionary['members']))
+    assert len(new_member) == 1
+    assert new_member[0]['membershipTypeCode'] == 'MEMBER'
+    member_id = new_member[0]['id']
+
+    # Update the new member
+    rv = client.patch('/api/v1/orgs/{}/members/{}'.format(org_id, member_id), headers=headers_invitee,
+                      data=json.dumps({'role': 'ADMIN'}), content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['membershipTypeCode'] == 'ADMIN'
+
+
+def test_add_affiliation(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a contact can be added to an org."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
+                     headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers,
+                     data=json.dumps(TestAffliationInfo.affiliation3), content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    dictionary = json.loads(rv.data)
+    assert dictionary['org']['id'] == org_id
+
+
+def test_add_affiliation_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that adding an invalidly formatted affiliations returns a 400."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
+                     headers=headers, data=json.dumps(TestAffliationInfo.invalid), content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+
+
+def test_add_affiliation_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that adding a contact to a non-existant org returns 404."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(99), headers=headers,
+                     data=json.dumps(TestAffliationInfo.affliation1), content_type='application/json')
+    assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+
+
+def test_add_affiliation_returns_exception(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that attempting to delete an affiliation returns an exception."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
+                     headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    with patch.object(AffiliationService, 'create_affiliation',
+                      side_effect=BusinessException(Error.DATA_ALREADY_EXISTS, None)):
+        rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
+                         data=json.dumps(TestAffliationInfo.affliation1),
+                         headers=headers,
+                         content_type='application/json')
+        assert rv.status_code == 400
+
+
+def test_get_affiliations(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a list of affiliation for an org can be retrieved."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
+                     headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock2),
+                     headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
+                     data=json.dumps(TestAffliationInfo.affiliation3),
+                     headers=headers,
+                     content_type='application/json')
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
+                     data=json.dumps(TestAffliationInfo.affiliation4),
+                     headers=headers,
+                     content_type='application/json')
+
+    rv = client.get('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+    affiliations = json.loads(rv.data)
+    assert affiliations[0]['businessIdentifier'] == TestEntityInfo.entity_lear_mock['businessIdentifier']
+    assert affiliations[1]['businessIdentifier'] == TestEntityInfo.entity_lear_mock2['businessIdentifier']

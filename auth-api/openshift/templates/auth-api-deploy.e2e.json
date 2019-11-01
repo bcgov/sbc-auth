@@ -32,7 +32,9 @@
             "pre": {
               "failurePolicy": "Abort",
               "execNewPod": {
-                "command": ["/opt/app-root/src/pre-hook-update-db.sh"],
+                "command": [
+                  "/opt/app-root/src/pre-hook-update-db.sh"
+                ],
                 "env": [
                   {
                     "name": "DATABASE_ADMIN_PASSWORD",
@@ -47,7 +49,7 @@
                     "name": "DATABASE_USERNAME",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-auth-${TAG_NAME}-config",
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_USER"
                       }
                     }
@@ -65,7 +67,7 @@
                     "name": "DATABASE_NAME",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-auth-${TAG_NAME}-config",
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_NAME"
                       }
                     }
@@ -74,7 +76,7 @@
                     "name": "DATABASE_HOST",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-auth-${TAG_NAME}-config",
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_HOST"
                       }
                     }
@@ -83,7 +85,7 @@
                     "name": "DATABASE_PORT",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-auth-${TAG_NAME}-config",
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_PORT"
                       }
                     }
@@ -99,7 +101,9 @@
             "type": "ImageChange",
             "imageChangeParams": {
               "automatic": true,
-              "containerNames": ["${NAME}-${TAG_NAME}"],
+              "containerNames": [
+                "${NAME}-${TAG_NAME}"
+              ],
               "from": {
                 "kind": "ImageStreamTag",
                 "namespace": "${IMAGE_NAMESPACE}",
@@ -137,12 +141,19 @@
                     "protocol": "TCP"
                   }
                 ],
+                "envFrom": [
+                  {
+                    "configMapRef": {
+                      "name": "${NAME}-${TAG_NAME}-config"
+                    }
+                  }
+                ],
                 "env": [
                   {
                     "name": "DATABASE_USERNAME",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-auth-${TAG_NAME}-config",
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_USER"
                       }
                     }
@@ -160,7 +171,7 @@
                     "name": "DATABASE_NAME",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-auth-${TAG_NAME}-config",
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_NAME"
                       }
                     }
@@ -169,7 +180,7 @@
                     "name": "DATABASE_HOST",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-auth-${TAG_NAME}-config",
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_HOST"
                       }
                     }
@@ -178,7 +189,7 @@
                     "name": "DATABASE_PORT",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-auth-${TAG_NAME}-config",
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_PORT"
                       }
                     }
@@ -187,7 +198,7 @@
                     "name": "DATABASE_TEST_USERNAME",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-auth-${TAG_NAME}-config",
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_TEST_USER"
                       }
                     }
@@ -205,7 +216,7 @@
                     "name": "DATABASE_TEST_NAME",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-auth-${TAG_NAME}-config",
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_TEST_NAME"
                       }
                     }
@@ -214,7 +225,7 @@
                     "name": "DATABASE_TEST_HOST",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-auth-${TAG_NAME}-config",
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_TEST_HOST"
                       }
                     }
@@ -223,61 +234,16 @@
                     "name": "DATABASE_TEST_PORT",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-auth-${TAG_NAME}-config",
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "DATABASE_TEST_PORT"
-                      }
-                    }
-                  },
-                  {
-                    "name": "JWT_OIDC_ALGORITHMS",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "JWT_OIDC_ALGORITHMS"
-                      }
-                    }
-                  },
-                  {
-                    "name": "JWT_OIDC_AUDIENCE",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "JWT_OIDC_AUDIENCE"
-                      }
-                    }
-                  },
-                  {
-                    "name": "JWT_OIDC_CLIENT_SECRET",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "JWT_OIDC_CLIENT_SECRET"
-                      }
-                    }
-                  },
-                  {
-                    "name": "JWT_OIDC_WELL_KNOWN_CONFIG",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "JWT_OIDC_WELL_KNOWN_CONFIG"
-                      }
-                    }
-                  },
-                  {
-                    "name": "JWT_OIDC_JWKS_CACHE_TIMEOUT",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "JWT_OIDC_JWKS_CACHE_TIMEOUT"
                       }
                     }
                   },
                   {
                     "name": "KEYCLOAK_BASE_URL",
                     "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                      "configMapKeyRef": {
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "KEYCLOAK_BASE_URL"
                       }
                     }
@@ -285,8 +251,8 @@
                   {
                     "name": "KEYCLOAK_REALMNAME",
                     "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                      "configMapKeyRef": {
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "KEYCLOAK_REALMNAME"
                       }
                     }
@@ -294,8 +260,8 @@
                   {
                     "name": "KEYCLOAK_ADMIN_CLIENTID",
                     "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                      "configMapKeyRef": {
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "KEYCLOAK_ADMIN_CLIENTID"
                       }
                     }
@@ -303,8 +269,8 @@
                   {
                     "name": "KEYCLOAK_ADMIN_SECRET",
                     "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                      "configMapKeyRef": {
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "KEYCLOAK_ADMIN_SECRET"
                       }
                     }
@@ -312,8 +278,8 @@
                   {
                     "name": "KEYCLOAK_AUTH_AUDIENCE",
                     "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
+                      "configMapKeyRef": {
+                        "name": "${NAME}-${TAG_NAME}-config",
                         "key": "KEYCLOAK_AUTH_AUDIENCE"
                       }
                     }
@@ -321,18 +287,9 @@
                   {
                     "name": "KEYCLOAK_AUTH_CLIENT_SECRET",
                     "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "KEYCLOAK_AUTH_CLIENT_SECRET"
-                      }
-                    }
-                  },
-                  {
-                    "name": "POD_TESTING",
-                    "valueFrom": {
                       "configMapKeyRef": {
                         "name": "${NAME}-${TAG_NAME}-config",
-                        "key": "POD_TESTING"
+                        "key": "KEYCLOAK_AUTH_CLIENT_SECRET"
                       }
                     }
                   }
@@ -394,7 +351,9 @@
                     "protocol": "UDP"
                   }
                 ],
-                "args": ["${JAEGER_COLLECTOR}"]
+                "args": [
+                  "${JAEGER_COLLECTOR}"
+                ]
               }
             ],
             "restartPolicy": "Always",
@@ -563,7 +522,7 @@
       "displayName": "Jaeger Tracing collector address",
       "description": "Jaeger Tracing collector address.",
       "required": true,
-      "value": "--collector.host-port=jaeger-collector.d7eovc-${TAG_NAME}.svc:14267"
+      "value": "--collector.host-port=jaeger-collector.d7eovc-dev.svc:14267"
     }
   ]
 }

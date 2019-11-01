@@ -88,3 +88,21 @@ def test_update_org_from_dict(session):  # pylint:disable=unused-argument
     org.update_org_from_dict(update_dictionary)
     assert org
     assert org.name == update_dictionary['name']
+
+
+def test_create_from_dict(session):  # pylint:disable=unused-argument
+    """Assert that an Org can be created from schema."""
+    org_info = {
+        'name': 'My Test Org'
+    }
+
+    result_org = OrgModel.create_from_dict(org_info)
+
+    assert result_org.id is not None
+
+
+def test_create_from_dict_no_schema(session):  # pylint:disable=unused-argument
+    """Assert that an Org can not be created without schema."""
+    result_org = OrgModel.create_from_dict(None)
+
+    assert result_org is None

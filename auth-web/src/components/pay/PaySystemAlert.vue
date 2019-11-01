@@ -3,9 +3,9 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
-import SbcSystemBanner from 'sbc-common-components/src/components/SbcSystemBanner.vue'
+import { Component, Vue } from 'vue-property-decorator'
 import PaymentModule from '@/store/modules/payment'
+import SbcSystemBanner from 'sbc-common-components/src/components/SbcSystemBanner.vue'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({

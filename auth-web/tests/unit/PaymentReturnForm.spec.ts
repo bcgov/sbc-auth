@@ -1,10 +1,10 @@
 
-import { shallowMount, mount } from '@vue/test-utils'
+import { mount, shallowMount } from '@vue/test-utils'
 import PaymentReturnForm from '@/components/pay/PaymentReturnForm.vue'
-import Vue from 'vue'
-import Vuetify from 'vuetify'
-import VueRouter from 'vue-router'
 import PaymentServices from '../../src/services/payment.services'
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import Vuetify from 'vuetify'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)

@@ -15,3 +15,9 @@ For more information on the web component refer to:
 # License
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
+# Testing Thanks
+
+Thanks to BrowserStack for Testing Tool support via OpenSource Licensing
+
+[![BrowserStack](browserstack-logo-white-small.png)](http://browserstack.com/)

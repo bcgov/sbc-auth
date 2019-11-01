@@ -9,8 +9,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import ManagementMenu from '../../components/auth/ManagementMenu.vue'
 import EntityManagement from './EntityManagement.vue'
+import ManagementMenu from '../../components/auth/ManagementMenu.vue'
 import UserManagement from './UserManagement.vue'
 import { VueConstructor } from 'vue'
 

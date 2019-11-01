@@ -16,7 +16,7 @@
 This module manages the User Information.
 """
 
-from sbc_common_components.tracing.service_tracing import ServiceTracing
+from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -115,6 +115,14 @@ class User:  # pylint: disable=too-many-instance-attributes
         contact.commit()
 
         # return the user with the updated contact
+        return User(user)
+
+    @staticmethod
+    def update_terms_of_use(token, is_terms_accepted, terms_of_use_version):
+        """Update terms of use for an existing user."""
+        if token is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        user = UserModel.update_terms_of_use(token, is_terms_accepted, terms_of_use_version)
         return User(user)
 
     @staticmethod

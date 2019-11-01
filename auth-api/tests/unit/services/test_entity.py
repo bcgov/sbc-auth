@@ -15,175 +15,241 @@
 
 Test suite to ensure that the Entity service routines are working as expected.
 """
-
 import pytest
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.models.entity import Entity as EntityModel
+from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.services.entity import Entity as EntityService
-
-
-TEST_CONTACT_INFO = {
-    'email': 'foo@bar.com'
-}
-
-TEST_UPDATED_CONTACT_INFO = {
-    'email': 'bar@foo.com'
-}
-
-
-def factory_entity_model(business_identifier='CP1234567',
-                         business_number='791861073BC0001',
-                         name='Foobar, Inc.', pass_code=None):
-    """Return a valid entity object with the provided fields."""
-    entity = EntityModel(business_identifier=business_identifier,
-                         business_number=business_number,
-                         name=name,
-                         pass_code=pass_code)
-    entity.save()
-    return entity
+from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo
+from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_org_service
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
     """Assert that the Entity is exported correctly as a dictionary."""
-    entity_model = factory_entity_model(business_identifier='CP1234567')
+    entity_model = factory_entity_model()
     entity = EntityService(entity_model)
 
     dictionary = entity.as_dict()
-    assert dictionary['businessIdentifier'] == 'CP1234567'
+    assert dictionary['businessIdentifier'] == TestEntityInfo.entity1['businessIdentifier']
 
 
 def test_save_entity_new(session):  # pylint:disable=unused-argument
     """Assert that an Entity can be created from a dictionary."""
     entity = EntityService.save_entity({
-        'businessIdentifier': 'CP1234567',
-        'businessNumber': '791861073BC0001',
-        'passCode': '1234567',
-        'name': 'Foobar, Inc.'
+        'businessIdentifier': TestEntityInfo.entity_passcode['businessIdentifier'],
+        'businessNumber': TestEntityInfo.entity_passcode['businessNumber'],
+        'passCode': TestEntityInfo.entity_passcode['passCode'],
+        'name': TestEntityInfo.entity_passcode['name']
     })
 
     assert entity is not None
     dictionary = entity.as_dict()
-    assert dictionary['businessIdentifier'] == 'CP1234567'
+    assert dictionary['businessIdentifier'] == TestEntityInfo.entity_passcode['businessIdentifier']
 
 
 def test_save_entity_existing(session):  # pylint:disable=unused-argument
     """Assert that an Entity can be updated from a dictionary."""
     entity = EntityService.save_entity({
-        'businessIdentifier': 'CP1234567',
-        'businessNumber': '791861073BC0001',
-        'passCode': '1234567',
-        'name': 'Foobar, Inc.'
+        'businessIdentifier': TestEntityInfo.entity_passcode['businessIdentifier'],
+        'businessNumber': TestEntityInfo.entity_passcode['businessNumber'],
+        'passCode': TestEntityInfo.entity_passcode['passCode'],
+        'name': TestEntityInfo.entity_passcode['name']
     })
 
     assert entity
 
     updated_entity_info = {
-        'businessIdentifier': 'CP1234567',
-        'businessNumber': '791861073BC0001',
-        'passCode': '9898989',
-        'name': 'Barfoo, Inc.'
+        'businessIdentifier': TestEntityInfo.entity_passcode2['businessIdentifier'],
+        'businessNumber': TestEntityInfo.entity_passcode2['businessNumber'],
+        'passCode': TestEntityInfo.entity_passcode['passCode'],
+        'name': TestEntityInfo.entity_passcode['name']
     }
 
     updated_entity = EntityService.save_entity(updated_entity_info)
 
     assert updated_entity
     assert updated_entity.as_dict()['name'] == updated_entity_info['name']
+    assert updated_entity.as_dict()['businessNumber'] == updated_entity_info['businessNumber']
+
+
+def test_save_entity_no_input(session):  # pylint:disable=unused-argument
+    """Assert that an Entity can not be updated with no input."""
+    updated_entity = EntityService.save_entity(None)
+
+    assert updated_entity is None
 
 
 def test_entity_find_by_business_id(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an Entity can be retrieved by business identifier."""
-    factory_entity_model(business_identifier='CP1234567')
-    entity = EntityService.find_by_business_identifier('CP1234567')
+    factory_entity_model()
+    entity = EntityService.find_by_business_identifier(TestEntityInfo.entity1['businessIdentifier'])
 
     assert entity is not None
     dictionary = entity.as_dict()
-    assert dictionary['businessIdentifier'] == 'CP1234567'
+    assert dictionary['businessIdentifier'] == TestEntityInfo.entity1['businessIdentifier']
 
 
 def test_entity_find_by_business_id_no_model(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an Entity which does not exist cannot be retrieved."""
-    entity = EntityService.find_by_business_identifier('CP1234567')
+    entity = EntityService.find_by_business_identifier(TestEntityInfo.entity1['businessIdentifier'])
+
+    assert entity is None
+
+
+def test_entity_find_by_entity_id(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that an Entity can be retrieved by entity identifier."""
+    entity_model = factory_entity_model()
+    entity = EntityService(entity_model)
+
+    entity = EntityService.find_by_entity_id(entity.identifier)
+
+    assert entity is not None
+    dictionary = entity.as_dict()
+    assert dictionary['businessIdentifier'] == TestEntityInfo.entity1['businessIdentifier']
+
+
+def test_entity_find_by_entity_id_no_id(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that an Entity can not be retrieved when no id input or entity not exists."""
+    entity = EntityService.find_by_entity_id(None)
+
+    assert entity is None
+
+    entity = EntityService.find_by_entity_id(9999)
 
     assert entity is None
 
 
 def test_add_contact(session):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an Entity."""
-    entity_model = factory_entity_model(business_identifier='CP1234567')
+    entity_model = factory_entity_model()
     entity = EntityService(entity_model)
-    entity.add_contact(TEST_CONTACT_INFO)
+    entity.add_contact(TestContactInfo.contact1)
 
     dictionary = entity.as_dict()
     assert dictionary['contacts']
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['email'] == TEST_CONTACT_INFO['email']
+    assert dictionary['contacts'][0]['email'] == TestContactInfo.contact1['email']
 
 
 def test_add_contact_duplicate(session):  # pylint:disable=unused-argument
     """Assert that a contact cannot be added to an Entity if that Entity already has a contact."""
-    entity_model = factory_entity_model(business_identifier='CP1234567')
+    entity_model = factory_entity_model()
     entity = EntityService(entity_model)
-    entity.add_contact(TEST_CONTACT_INFO)
+    entity.add_contact(TestContactInfo.contact1)
 
     with pytest.raises(BusinessException) as exception:
-        entity.add_contact(TEST_UPDATED_CONTACT_INFO)
+        entity.add_contact(TestContactInfo.contact2)
     assert exception.value.code == Error.DATA_ALREADY_EXISTS.name
 
 
 def test_update_contact(session):  # pylint:disable=unused-argument
     """Assert that a contact for an existing Entity can be updated."""
-    entity_model = factory_entity_model(business_identifier='CP1234567')
+    entity_model = factory_entity_model()
     entity = EntityService(entity_model)
-    entity.add_contact(TEST_CONTACT_INFO)
+    entity.add_contact(TestContactInfo.contact1)
 
     dictionary = entity.as_dict()
     assert len(dictionary['contacts']) == 1
     assert dictionary['contacts'][0]['email'] == \
-        TEST_CONTACT_INFO['email']
+        TestContactInfo.contact1['email']
 
-    entity.update_contact(TEST_UPDATED_CONTACT_INFO)
+    entity.update_contact(TestContactInfo.contact2)
 
     dictionary = None
     dictionary = entity.as_dict()
     assert len(dictionary['contacts']) == 1
     assert dictionary['contacts'][0]['email'] == \
-        TEST_UPDATED_CONTACT_INFO['email']
+        TestContactInfo.contact2['email']
 
 
 def test_update_contact_no_contact(session):  # pylint:disable=unused-argument
     """Assert that a contact for a non-existent contact cannot be updated."""
-    entity_model = factory_entity_model(business_identifier='CP1234567')
+    entity_model = factory_entity_model()
     entity = EntityService(entity_model)
 
     with pytest.raises(BusinessException) as exception:
-        entity.update_contact(TEST_UPDATED_CONTACT_INFO)
+        entity.update_contact(TestContactInfo.contact2)
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
 
 def test_get_contact_by_business_identifier(session):  # pylint:disable=unused-argument
     """Assert that a contact can be retrieved by the associated business id."""
-    entity_model = factory_entity_model(business_identifier='CP1234567')
+    entity_model = factory_entity_model()
     entity = EntityService(entity_model)
-    entity.add_contact(TEST_CONTACT_INFO)
+    entity.add_contact(TestContactInfo.contact1)
 
     contact = entity.get_contact()
     assert contact is not None
-    assert contact.email == TEST_CONTACT_INFO['email']
+    assert contact.email == TestContactInfo.contact1['email']
 
 
 def test_get_contact_by_business_identifier_no_contact(session):  # pylint:disable=unused-argument
     """Assert that a contact cannot be retrieved from an entity with no contact."""
-    entity_model = factory_entity_model(business_identifier='CP1234567')
+    entity_model = factory_entity_model()
     entity = EntityService(entity_model)
     contact = entity.get_contact()
     assert contact is None
 
 
+def test_delete_contact(session):  # pylint:disable=unused-argument
+    """Assert that a contact can be deleted to an Entity."""
+    entity_model = factory_entity_model()
+    entity = EntityService(entity_model)
+    entity.add_contact(TestContactInfo.contact1)
+
+    updated_entity = entity.delete_contact()
+    dictionary = updated_entity.as_dict()
+    assert not dictionary['contacts']
+
+
+def test_delete_contact_no_entity(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that a contact can not be deleted without entity."""
+    entity_model = factory_entity_model()
+    entity = EntityService(entity_model)
+    entity.add_contact(TestContactInfo.contact1)
+
+    updated_entity = entity.delete_contact()
+
+    with pytest.raises(BusinessException) as exception:
+        updated_entity.delete_contact()
+
+    assert exception.value.code == Error.DATA_NOT_FOUND.name
+
+
+def test_delete_contact_entity_link(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that a contact can not be deleted without entity."""
+    entity_model = factory_entity_model()
+    entity = EntityService(entity_model)
+
+    org = factory_org_service()
+    org_dictionary = org.as_dict()
+    org_id = org_dictionary['id']
+
+    contact = factory_contact_model()
+
+    contact_link = ContactLinkModel()
+    contact_link.contact = contact
+    contact_link.entity = entity._model  # pylint:disable=protected-access
+    contact_link.org = org._model  # pylint:disable=protected-access
+    contact_link.commit()
+
+    updated_entity = entity.delete_contact()
+
+    dictionary = None
+    dictionary = updated_entity.as_dict()
+    assert len(dictionary['contacts']) == 0
+
+    delete_contact_link = ContactLinkModel.find_by_entity_id(entity.identifier)
+    assert not delete_contact_link
+
+    exist_contact_link = ContactLinkModel.find_by_org_id(org_id)
+    assert exist_contact_link
+
+
 def test_validate_pass_code(app, session):  # pylint:disable=unused-argument
     """Assert that a valid passcode can be correctly validated."""
-    entity_model = factory_entity_model(business_identifier='CP1234567', pass_code='12345678')
+    entity_model = factory_entity_model(entity_info=TestEntityInfo.entity_passcode)
     entity = EntityService(entity_model)
 
     validated = entity.validate_pass_code(entity_model.pass_code)
@@ -192,8 +258,18 @@ def test_validate_pass_code(app, session):  # pylint:disable=unused-argument
 
 def test_validate_invalid_pass_code(app, session):  # pylint:disable=unused-argument
     """Assert that an invalid passcode in not validated."""
-    entity_model = factory_entity_model(business_identifier='CP1234567', pass_code='12345678')
+    entity_model = factory_entity_model(entity_info=TestEntityInfo.entity_passcode)
     entity = EntityService(entity_model)
 
-    validated = entity.validate_pass_code('1234')
+    validated = entity.validate_pass_code('222222222')
     assert not validated
+
+
+def test_entity_name_sync(app, session):  # pylint:disable=unused-argument
+    """Assert that the name syncing for entity affiliation is working correctly."""
+    entity_model = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
+    entity = EntityService(entity_model)
+    entity.sync_name()
+
+    dictionary = entity.as_dict()
+    assert dictionary['name'] == 'Legal Name CP0002103'

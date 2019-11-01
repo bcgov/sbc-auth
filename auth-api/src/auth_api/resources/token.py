@@ -17,7 +17,7 @@ import json
 
 from flask import request
 from flask_restplus import Namespace, Resource, cors
-from sbc_common_components.tracing.trace_tags import TraceTags
+from sbc_common_components.tracing.trace_tags import TraceTags  # noqa: I001
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException

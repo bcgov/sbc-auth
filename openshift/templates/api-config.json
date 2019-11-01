@@ -3,10 +3,10 @@
   "apiVersion": "v1",
   "metadata": {
     "annotations": {
-      "description": "Pre deployment template for a auth api service. This template may not include real value of secrets; you need to manually replace the value in Openshift.",
+      "description": "Configmap template for the api service. This template may not include real value of secrets; you need to manually replace the value in Openshift.",
       "tags": "${NAME}-${TAG_NAME}"
     },
-    "name": "${NAME}-pre-deploy"
+    "name": "${NAME}-config"
   },
   "objects": [
     {
@@ -17,26 +17,12 @@
         "labels": {
           "app": "${NAME}-${TAG_NAME}",
           "app-group": "${APP_GROUP}",
-          "template": "${NAME}-pre-deploy"
+          "template": "${NAME}-config"
         }
       },
       "data": {
         "POD_TESTING": "true",
-        "SENTRY_DSN":  "https://<account>@sentry.io/<project>"
-      }
-    },
-    {
-      "kind": "Secret",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-        "labels": {
-          "app": "${NAME}-${TAG_NAME}",
-          "app-group": "${APP_GROUP}",
-          "template": "${NAME}-pre-deploy"
-        }
-      },
-      "stringData": {
+        "SENTRY_DSN": "https://<account>@sentry.io/<project>",
         "JWT_OIDC_ALGORITHMS": "${JWT_OIDC_ALGORITHMS}",
         "JWT_OIDC_AUDIENCE": "${JWT_OIDC_AUDIENCE}",
         "JWT_OIDC_CLIENT_SECRET": "${JWT_OIDC_CLIENT_SECRET}",
@@ -59,9 +45,9 @@
         "AUTH_WEB_TOKEN_CONFIRM_URL": "${AUTH_WEB_TOKEN_CONFIRM_URL}",
         "EMAIL_SECURITY_PASSWORD_SALT": "${EMAIL_SECURITY_PASSWORD_SALT}",
         "EMAIL_TOKEN_SECRET_KEY": "${EMAIL_TOKEN_SECRET_KEY}",
-        "TOKEN_EXPIRY_PERIOD": "${TOKEN_EXPIRY_PERIOD}"
-      },
-      "type": "Opaque"
+        "TOKEN_EXPIRY_PERIOD": "${TOKEN_EXPIRY_PERIOD}",
+        "LEGAL_API_URL": ""
+      }
     }
   ],
   "parameters": [
@@ -70,7 +56,7 @@
       "displayName": "Name",
       "description": "The name assigned to all of the OpenShift resources associated to the server instance.",
       "required": true,
-      "value": "auth-api"
+      "value": "api"
     },
     {
       "name": "APP_GROUP",

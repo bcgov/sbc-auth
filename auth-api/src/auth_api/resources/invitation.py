@@ -13,7 +13,7 @@
 # limitations under the License.
 """API endpoints for managing an Invitation resource."""
 
-from flask import g, jsonify, request
+from flask import g, request
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
@@ -43,6 +43,7 @@ class Invitations(Resource):
     def post():
         """Send a new invitation using the details in request and saves the invitation."""
         token = g.jwt_oidc_token_info
+        origin = request.environ.get('HTTP_ORIGIN', 'localhost')
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'invitation')
         if not valid_format:
@@ -53,31 +54,8 @@ class Invitations(Resource):
                 response, status = {'message': 'Not authorized to perform this action'}, \
                     http_status.HTTP_401_UNAUTHORIZED
             else:
-                response, status = InvitationService.create_invitation(request_json, user).as_dict(), \
+                response, status = InvitationService.create_invitation(request_json, user, token, origin).as_dict(), \
                     http_status.HTTP_201_CREATED
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-        return response, status
-
-    @staticmethod
-    @TRACER.trace()
-    @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
-    def get():
-        """Return a set of invitations sent by the user specified by the token."""
-        token = g.jwt_oidc_token_info
-        try:
-            user = UserService.find_by_jwt_token(token)
-            if user is None:
-                response, status = {'message': 'Not authorized to perform this action'}, \
-                    http_status.HTTP_401_UNAUTHORIZED
-            else:
-                invitation_status = request.args.get('status').upper() if request.args.get('status') else 'ALL'
-                invitations = InvitationService.get_invitations(user.identifier, invitation_status)
-                if not invitations:
-                    response, status = {'message': 'No invitations found.'}, http_status.HTTP_404_NOT_FOUND
-                else:
-                    response, status = jsonify(invitations=invitations), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -94,7 +72,8 @@ class Invitation(Resource):
     @_JWT.requires_auth
     def get(invitation_id):
         """Get the invitation specified by the provided id."""
-        invitation = InvitationService.find_invitation_by_id(invitation_id)
+        token = g.jwt_oidc_token_info
+        invitation = InvitationService.find_invitation_by_id(invitation_id, token)
         if invitation is None:
             response, status = {'message': 'The requested invitation could not be found.'}, \
                 http_status.HTTP_404_NOT_FOUND
@@ -109,18 +88,20 @@ class Invitation(Resource):
     def patch(invitation_id):
         """Update the invitation specified by the provided id as retried."""
         token = g.jwt_oidc_token_info
+        origin = request.environ.get('HTTP_ORIGIN', 'localhost')
         try:
             user = UserService.find_by_jwt_token(token)
             if user is None:
                 response, status = {'message': 'Not authorized to perform this action'}, \
                                    http_status.HTTP_401_UNAUTHORIZED
             else:
-                invitation = InvitationService.find_invitation_by_id(invitation_id)
+                invitation = InvitationService.find_invitation_by_id(invitation_id, token)
                 if invitation is None:
                     response, status = {'message': 'The requested invitation could not be found.'}, \
                                http_status.HTTP_404_NOT_FOUND
                 else:
-                    response, status = invitation.update_invitation(user).as_dict(), http_status.HTTP_200_OK
+                    response, status = invitation.update_invitation(user, token, origin).as_dict(), \
+                               http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -131,8 +112,9 @@ class Invitation(Resource):
     @_JWT.requires_auth
     def delete(invitation_id):
         """Delete the specified invitation."""
+        token = g.jwt_oidc_token_info
         try:
-            InvitationService.delete_invitation(invitation_id)
+            InvitationService.delete_invitation(invitation_id, token)
             response, status = {}, http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

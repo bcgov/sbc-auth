@@ -11,14 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""The Legal API service.
+"""The Authroization API service.
 
-This module is the API for the Legal Entity system.
+This module is the API for the Authroization system.
 """
+
 import os
 
 from flask import Flask
-from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
+from sbc_common_components.exception_handling.exception_handler import ExceptionHandler  # noqa: I001
 from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
 
 from auth_api import models
@@ -30,7 +31,7 @@ from auth_api.utils.util_logging import setup_logging
 from config import CONFIGURATION, _Config
 
 
-import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports; conflicts with Flake8
+import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports,wrong-import-order; conflicts with Flake8
 
 
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first
@@ -50,7 +51,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
             integrations=[FlaskIntegration()]
         )
 
-    from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT
+    from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT  # pylint: disable=import-outside-toplevel
 
     db.init_app(app)
     ma.init_app(app)

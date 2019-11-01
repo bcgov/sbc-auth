@@ -1,108 +1,142 @@
 <template>
   <div class="entity-list-component">
+    <!-- Loading status -->
+    <v-progress-circular
+      :indeterminate=true
+      v-if="isLoading"
+    />
+
     <!-- No Results Message -->
-    <v-card class="no-results text-center" v-if="affiliatedEntities.length === 0" @click="addBusiness()">
+    <v-card
+      class="no-results text-center"
+      v-if="basicAffiliations.length === 0 && !isLoading"
+      @click="addBusiness()"
+    >
       <v-card-title class="pt-6 pb-0">{{ $t('businessListEmptyMessage')}}</v-card-title>
-      <v-card-text class="pb-8">
-        {{ $t('businessListActionMessage')}}
-      </v-card-text>
+      <v-card-text class="pb-8">{{ $t('businessListActionMessage')}}</v-card-text>
     </v-card>
 
-    <ul class="org-details" v-if="affiliatedEntities.length > 0">
-      <li
-        class="list-item"
-        v-for="org in organizations"
-        v-bind:key="org.id"
+    <div v-if="!isLoading" class="entity-details">
+      <v-row
+        v-for="business in basicAffiliations"
+        v-bind:key="business.businessIdentifier"
+        class="mb-3"
       >
-        <ul class="entity-details">
-          <li
-            class="list-item"
-            v-for="entity in org.affiliatedEntities"
-            v-bind:key="entity.businessIdentifier">
-            <v-card class="mb-3">
-              <v-card-title class="list-item_entity-number">
-                <a @click="redirectToNext(entity.businessIdentifier)">{{entity.name}}</a>
-                <v-icon @click="removeBusiness(org.id, entity.businessIdentifier)">close</v-icon>
-              </v-card-title>
-              <v-card-text class="card-layout">
-                <dl class="meta-container">
-                  <dt>Business No:</dt>
-                  <dd class="list-item_business-number">{{ entity.businessNumber }}</dd>
-                  <dt>Incorporation No:</dt>
-                  <dd class="list-item_incorp-number">{{ entity.businessIdentifier }}</dd>
-                </dl>
-              </v-card-text>
-            </v-card>
-          </li>
-        </ul>
-      </li>
-    </ul>
+        <v-card width="100%">
+          <v-card-title class="list-item_entity-number">
+            <a @click="redirectToNext(business.businessIdentifier)">{{business.name}}</a>
+            <span>
+              <v-btn outlined small class="mr-2" @click="editContact(business.businessIdentifier)">
+                Edit
+              </v-btn>
+              <v-btn outlined small color="red" @click="removeBusiness(business.businessIdentifier)">
+                Remove
+              </v-btn>
+            </span>
+          </v-card-title>
+          <v-card-text class="card-layout">
+            <dl class="meta-container">
+              <dt>Business No:</dt>
+              <dd class="list-item_business-number">{{ business.businessNumber }}</dd>
+              <dt>Incorporation No:</dt>
+              <dd class="list-item_incorp-number">{{ business.businessIdentifier }}</dd>
+            </dl>
+          </v-card-text>
+        </v-card>
+      </v-row>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { Component, Emit } from 'vue-property-decorator'
-import { getModule } from 'vuex-module-decorators'
-import UserModule from '@/store/modules/user'
-import configHelper from '@/util/config-helper'
-import { AffiliatedEntity, Organization, RemoveBusinessPayload } from '../../models/Organization'
-import { mapGetters, mapState, mapActions } from 'vuex'
+import { Component, Emit, Vue } from 'vue-property-decorator'
+import { Organization, RemoveBusinessPayload } from '@/models/Organization'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { Business } from '@/models/business'
+import ConfigHelper from '@/util/config-helper'
+import OrgModule from '@/store/modules/org'
 import { SessionStorageKeys } from '@/util/constants'
+import _ from 'lodash'
+import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
-    ...mapState('user', ['organizations'])
+    ...mapState('org', ['organizations'])
   },
   methods: {
-    ...mapActions('user', ['getOrganizations'])
+    ...mapMutations('business', ['setCurrentBusiness']),
+    ...mapActions('org', ['syncOrganizations'])
   }
 })
 export default class AffiliatedEntityList extends Vue {
-  private VUE_APP_COPS_REDIRECT_URL = configHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
-  private userStore = getModule(UserModule, this.$store)
-  readonly organizations!: Organization[]
-  readonly getOrganizations!: () => Organization[]
+  private VUE_APP_COPS_REDIRECT_URL = ConfigHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
+  private orgStore = getModule(OrgModule, this.$store)
+  private isLoading = true
+  private readonly organizations!: Organization[]
+  private readonly setCurrentBusiness!: (business: Business) => void
+  private readonly syncOrganizations!: () => Organization[]
 
-  get affiliatedEntities () {
-    let affiliatedEntities: AffiliatedEntity[] = []
-    this.organizations.forEach(organization => {
-      if (organization.affiliatedEntities) {
-        organization.affiliatedEntities.forEach(entity => {
-          affiliatedEntities.push(entity)
-        })
-      }
-    })
-    return affiliatedEntities
+  private get implicitOrgs () {
+    return this.organizations.filter(org => org.orgType === 'IMPLICIT')
   }
 
-  created () {
-    this.getOrganizations()
+  private get basicAffiliations () {
+    return _.uniqWith(
+      _.flatten(this.implicitOrgs.map(org => org.affiliatedEntities)),
+      (businessA: Business, businessB: Business) => businessA.businessIdentifier === businessB.businessIdentifier
+    )
   }
 
-  @Emit()
-  addBusiness () {}
-
-  @Emit()
-  removeBusiness (orgId: number, incorporationNumber: string): RemoveBusinessPayload {
-    return {
-      orgIdentifier: orgId,
-      incorporationNumber: incorporationNumber
+  private get businessById () {
+    return (businessIdentifier: string) => {
+      return this.basicAffiliations.find(business => business.businessIdentifier === businessIdentifier)
     }
+  }
+
+  async created () {
+    this.isLoading = true
+    await this.syncOrganizations()
+    this.isLoading = false
+  }
+
+  @Emit()
+  addBusiness () { }
+
+  @Emit()
+  removeBusiness (businessIdentifier: string, orgId?: number): RemoveBusinessPayload {
+    // If no orgId was supplied, remove affiliations between all implicit orgs and the specified business
+    // Otherwise remove affiliation for the specific org
+    if (!orgId) {
+      return {
+        orgIdentifiers: this.implicitOrgs
+          .filter(org => org.affiliatedEntities && org.affiliatedEntities
+            .some(business => business.businessIdentifier === businessIdentifier))
+          .map(org => org.id),
+        businessIdentifier
+      }
+    } else {
+      return {
+        orgIdentifiers: [orgId],
+        businessIdentifier
+      }
+    }
+  }
+
+  editContact (businessidentifier: string) {
+    this.setCurrentBusiness(this.businessById(businessidentifier))
+    this.$router.push({ path: '/businessprofile', query: { redirect: '/main' } })
   }
 
   redirectToNext (incorporationNumber: string) {
-    if (this.VUE_APP_COPS_REDIRECT_URL) {
-      configHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, incorporationNumber)
-      const redirectURL = this.VUE_APP_COPS_REDIRECT_URL + 'dashboard'
-      window.location.href = decodeURIComponent(redirectURL)
-    }
+    ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, incorporationNumber)
+    const redirectURL = ConfigHelper.getCoopsURL() + 'dashboard'
+    window.location.href = decodeURIComponent(redirectURL)
   }
 }
 </script>
 
 <style lang="scss" scoped>
- @import '../../assets/scss/theme.scss';
+@import "../../assets/scss/theme.scss";
 
 .org-details {
   padding: 0;
@@ -113,7 +147,7 @@ export default class AffiliatedEntityList extends Vue {
 
 .entity-details {
   padding: 0;
-  list-style-type: none
+  list-style-type: none;
 }
 
 .list-item {
@@ -155,7 +189,8 @@ a {
   font-size: 0.875rem;
 }
 
-dd, dt {
+dd,
+dt {
   float: left;
 }
 
@@ -168,7 +203,7 @@ dd {
 
   + dt {
     &:before {
-      content: '•';
+      content: "•";
       display: inline-block;
       margin-right: 0.75rem;
       margin-left: 0.75rem;
@@ -187,5 +222,4 @@ dd {
 .no-results .v-card__text {
   font-size: 0.9375rem;
 }
-
 </style>

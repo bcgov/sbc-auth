@@ -21,6 +21,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
+from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
@@ -57,10 +58,10 @@ class Orgs(Resource):
             user = UserService.find_by_jwt_token(token)
             if user is None:
                 response, status = {'message': 'Not authorized to perform this action'}, \
-                                   http_status.HTTP_401_UNAUTHORIZED
+                    http_status.HTTP_401_UNAUTHORIZED
             else:
                 response, status = OrgService.create_org(request_json, user.identifier).as_dict(), \
-                                   http_status.HTTP_201_CREATED
+                    http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -80,7 +81,7 @@ class Org(Resource):
         org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=ALL_ALLOWED_ROLES)
         if org is None:
             response, status = {'message': 'The requested organization could not be found.'}, \
-                               http_status.HTTP_404_NOT_FOUND
+                http_status.HTTP_404_NOT_FOUND
         else:
             response, status = org.as_dict(), http_status.HTTP_200_OK
         return response, status
@@ -91,14 +92,18 @@ class Org(Resource):
     @_JWT.requires_auth
     def put(org_id):
         """Update the org specified by the provided id with the request body."""
-        org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=CLIENT_ADMIN_ROLES)
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'org')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            response, status = org.update_org(request_json).as_dict(), http_status.HTTP_200_OK
+            org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=CLIENT_ADMIN_ROLES)
+            if org:
+                response, status = org.update_org(request_json).as_dict(), http_status.HTTP_200_OK
+            else:
+                response, status = {'message': 'The requested organization could not be found.'}, \
+                    http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -126,7 +131,7 @@ class OrgContacts(Resource):
                 response, status = org.add_contact(request_json).as_dict(), http_status.HTTP_201_CREATED
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \
-                                   http_status.HTTP_404_NOT_FOUND
+                    http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -147,7 +152,7 @@ class OrgContacts(Resource):
                 response, status = org.update_contact(request_json).as_dict(), http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \
-                                   http_status.HTTP_404_NOT_FOUND
+                    http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -164,7 +169,7 @@ class OrgContacts(Resource):
                 response, status = org.delete_contact().as_dict(), http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \
-                                   http_status.HTTP_404_NOT_FOUND
+                    http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -204,7 +209,7 @@ class OrgContacts(Resource):
             try:
                 response, status = jsonify(
                     AffiliationService.find_affiliated_entities_by_org_id(org_id, g.jwt_oidc_token_info)), \
-                                   http_status.HTTP_200_OK
+                    http_status.HTTP_200_OK
 
             except BusinessException as exception:
                 response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -228,7 +233,7 @@ class OrgContacts(Resource):
 
             except BusinessException as exception:
                 response, status = {'code': exception.code, 'message': exception.message}, \
-                                   exception.status_code
+                    exception.status_code
 
             return response, status
 
@@ -258,8 +263,8 @@ class OrgContacts(Resource):
 
             return response, status
 
-    @cors_preflight('DELETE,OPTIONS')
-    @API.route('/<string:org_id>/members/<string:member_id>', methods=['DELETE', 'OPTIONS'])
+    @cors_preflight('DELETE,PATCH,OPTIONS')
+    @API.route('/<string:org_id>/members/<string:membership_id>', methods=['DELETE', 'PATCH', 'OPTIONS'])
     class OrgMember(Resource):
         """Resource for managing a single membership record between an org and a user."""
 
@@ -267,13 +272,40 @@ class OrgContacts(Resource):
         @_JWT.requires_auth
         @TRACER.trace()
         @cors.crossdomain(origin='*')
-        def delete(org_id, member_id):
+        def patch(org_id, membership_id):  # pylint:disable=unused-argument
+            """Update a membership record with new member role."""
+            token = g.jwt_oidc_token_info
+            request_json = request.get_json()
+            role = request_json['role']
+            try:
+                if not role:
+                    response, status = {'message': 'Invalid role provided.'}, http_status.HTTP_400_BAD_REQUEST
+                    return response, status
+                updated_role = MembershipService.get_membership_type_by_code(role)
+                membership = MembershipService.find_membership_by_id(membership_id, token)
+                if not membership:
+                    response, status = {'message': 'The requested membership record could not be found.'}, \
+                        http_status.HTTP_404_NOT_FOUND
+                    return response, status
+
+                return membership.update_membership_role(updated_role=updated_role, token_info=token).as_dict(), \
+                    http_status.HTTP_200_OK
+
+            except BusinessException as exception:
+                response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+                return response, status
+
+        @staticmethod
+        @_JWT.requires_auth
+        @TRACER.trace()
+        @cors.crossdomain(origin='*')
+        def delete(org_id, membership_id):
             """Delete a membership record for the given org and user."""
             try:
                 org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
                                                 allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
                 if org:
-                    response, status = org.remove_member(member_id).as_dict(), \
+                    response, status = org.remove_member(membership_id).as_dict(), \
                         http_status.HTTP_200_OK
                 else:
                     response, status = {'message': 'The requested organization could not be found.'}, \
@@ -295,11 +327,12 @@ class OrgContacts(Resource):
         def get(org_id):
             """Retrieve the set of invitations for the given org."""
             try:
+
                 invitation_status = request.args.get('status').upper() if request.args.get('status') else 'ALL'
                 org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
                                                 allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
                 if org:
-                    response, status = jsonify(org.get_invitations(invitation_status)), \
+                    response, status = jsonify(org.get_invitations(invitation_status, g.jwt_oidc_token_info)), \
                         http_status.HTTP_200_OK
                 else:
                     response, status = {'message': 'The requested organization could not be found.'}, \

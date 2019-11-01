@@ -106,17 +106,20 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     # email server
     MAIL_SERVER = os.getenv('MAIL_SERVER')
     MAIL_PORT = os.getenv('MAIL_PORT')
-    MAIL_USE_TLS = os.getenv('MAIL_USE_TLS')
-    MAIL_USE_SSL = os.getenv('MAIL_USE_SSL')
+    MAIL_USE_TLS = bool(os.getenv('MAIL_USE_TLS') == 'True')
+    MAIL_USE_SSL = bool(os.getenv('MAIL_USE_SSL') == 'True')
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_FROM_ID = os.getenv('MAIL_FROM_ID')
 
     # mail token  configuration
-    AUTH_WEB_TOKEN_CONFIRM_URL = os.getenv('AUTH_WEB_TOKEN_CONFIRM_URL')
+    AUTH_WEB_TOKEN_CONFIRM_PATH = os.getenv('AUTH_WEB_TOKEN_CONFIRM_PATH')
     EMAIL_SECURITY_PASSWORD_SALT = os.getenv('EMAIL_SECURITY_PASSWORD_SALT')
     EMAIL_TOKEN_SECRET_KEY = os.getenv('EMAIL_TOKEN_SECRET_KEY')
     TOKEN_EXPIRY_PERIOD = os.getenv('TOKEN_EXPIRY_PERIOD')
+
+    # Legal-API URL
+    LEGAL_API_URL = os.getenv('LEGAL_API_URL')
 
     # Sentry Config
     SENTRY_DSN = os.getenv('SENTRY_DSN', None)
@@ -201,6 +204,9 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     NrQw+2OdQACBJiEHsdZzAkBcsTk7frTH4yGx0VfHxXDPjfTj4wmD6gZIlcIr9lZg
     4H8UZcVFN95vEKxJiLRjAmj6g273pu9kK4ymXNEjWWJn
     -----END RSA PRIVATE KEY-----"""
+
+    # Legal-API URL
+    LEGAL_API_URL = 'https://mock-lear-tools.pathfinder.gov.bc.ca/rest/legal-api/0.82/api/v1'
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods

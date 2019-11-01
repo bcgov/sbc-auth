@@ -22,11 +22,13 @@
       :title="dialogTitle"
       :show-icon="false"
       :show-actions="false"
-      max-width="640">
+      max-width="640"
     >
+      >
       <template v-slot:text>
         <p>Enter your Incorporation Number and Passcode.</p>
-        <AddBusinessForm class="mt-7"
+        <AddBusinessForm
+          class="mt-7"
           @add-success="showAddSuccessModal()"
           @add-failed-invalid-code="showInvalidCodeModal()"
           @add-failed-no-entity="showEntityNotFoundModal()"
@@ -76,20 +78,19 @@
         <v-btn large color="default" @click="cancelConfirmDelete()">Cancel</v-btn>
       </template>
     </ModalDialog>
-
   </div>
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 import AddBusinessForm from '@/components/auth/AddBusinessForm.vue'
 import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
-import UserModule from '@/store/modules/user'
 import BusinessModule from '@/store/modules/business'
-import { RemoveBusinessPayload } from '@/models/Organization'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
-import { mapActions } from 'vuex'
+import { RemoveBusinessPayload } from '@/models/Organization'
+import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
+import { mapActions } from 'vuex'
 
 @Component({
   components: {

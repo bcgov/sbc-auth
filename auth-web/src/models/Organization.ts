@@ -1,31 +1,34 @@
+import { Business } from '@/models/business'
+import { Invitation } from '@/models/Invitation'
 import { User } from '@/models/user'
+
+export interface CreateRequestBody {
+  name: string
+}
 
 export interface Organizations
 {
-  orgs : Organization []
+  orgs : Organization[]
 }
 
 export interface Organization {
   id?: number;
   name: string;
-  affiliatedEntities?: AffiliatedEntity[];
+  affiliatedEntities?: Business[];
   orgType?: string;
+  members?: Member[];
+  invitations?: Invitation[];
 }
 
-export interface AffiliatedEntity {
-  businessIdentifier: string;
-  businessNumber: string;
-  name: string;
-}
-
-export interface DeleteMemberPayload {
+export interface UpdateMemberPayload {
   orgIdentifier: number
   memberId: number
+  role?: string
 }
 
 export interface RemoveBusinessPayload {
-  orgIdentifier: number
-  incorporationNumber: string
+  orgIdentifiers: number[]
+  businessIdentifier: string
 }
 
 export interface Member {
@@ -43,11 +46,12 @@ export interface ActiveUserRecord {
   name: string
   role: string
   lastActive: string
+  member: Member
 }
 
 export interface PendingUserRecord {
-  invitationId: number
   email: string
   invitationSent: string
   invitationExpires?: string
+  invitation: Invitation
 }

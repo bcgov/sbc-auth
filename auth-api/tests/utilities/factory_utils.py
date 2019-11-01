@@ -15,30 +15,52 @@
 
 Test Utility for creating model factory.
 """
-import uuid
+import datetime
 
 from auth_api.models import Affiliation as AffiliationModel
+from auth_api.models import Contact as ContactModel
+from auth_api.models import Documents as DocumentsModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
-from auth_api.models.membership import Membership
-from auth_api.models.user import User
+from auth_api.models.membership import Membership as MembershipModel
+from auth_api.models.user import User as UserModel
+from auth_api.services import Affiliation as AffiliationService
+from auth_api.services import Entity as EntityService
+from auth_api.services import Org as OrgService
+from tests.utilities.factory_scenarios import (
+    JWT_HEADER, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgStatusInfo, TestOrgTypeInfo, TestPaymentTypeInfo,
+    TestUserInfo)
 
 
-def factory_entity_model():
+def factory_auth_header(jwt, claims):
+    """Produce JWT tokens for use in tests."""
+    return {'Authorization': 'Bearer ' + jwt.create_jwt(claims=claims, header=JWT_HEADER)}
+
+
+def factory_entity_model(entity_info: dict = TestEntityInfo.entity1):
     """Produce a templated entity model."""
-    entity = EntityModel(business_identifier='CP1234567', business_number='791861073BC0001', name='Foobar, Inc.')
+    entity = EntityModel.create_from_dict(entity_info)
     entity.save()
     return entity
 
 
-def factory_user_model():
+def factory_entity_service(entity_info: dict = TestEntityInfo.entity1):
+    """Produce a templated entity service."""
+    entity_model = factory_entity_model(entity_info)
+    entity_service = EntityService(entity_model)
+    return entity_service
+
+
+def factory_user_model(user_info: dict = TestUserInfo.user1):
     """Produce a user model."""
-    user = User(username='CP1234567',
-                roles='{edit, uma_authorization, staff}',
-                keycloak_guid=uuid.uuid4())
+    user = UserModel(username=user_info['username'],
+                     firstname=user_info['firstname'],
+                     lastname=user_info['lastname'],
+                     roles=user_info['roles'],
+                     keycloak_guid=user_info['keycloak_guid'])
 
     user.save()
     return user
@@ -46,26 +68,31 @@ def factory_user_model():
 
 def factory_membership_model(user_id, org_id, member_type='OWNER'):
     """Produce a Membership model."""
-    membership = Membership(user_id=user_id,
-                            org_id=org_id,
-                            membership_type_code=member_type)
+    membership = MembershipModel(user_id=user_id,
+                                 org_id=org_id,
+                                 membership_type_code=member_type)
 
     membership.save()
     return membership
 
 
-def factory_org_model(name):
+def factory_org_model(org_info: dict = TestOrgInfo.org1,
+                      org_type_info: dict = TestOrgTypeInfo.test_type,
+                      org_status_info: dict = TestOrgStatusInfo.test_status,
+                      payment_type_info: dict = TestPaymentTypeInfo.test_type):
     """Produce a templated org model."""
-    org_type = OrgTypeModel(code='TEST', desc='Test')
-    org_type.save()
+    org_type = OrgTypeModel.get_default_type()
+    if org_type_info['code'] != TestOrgTypeInfo.implicit['code']:
+        org_type = OrgTypeModel(code=org_type_info['code'], desc=org_type_info['desc'])
+        org_type.save()
 
-    org_status = OrgStatusModel(code='TEST', desc='Test')
+    org_status = OrgStatusModel(code=org_status_info['code'], desc=org_status_info['desc'])
     org_status.save()
 
-    preferred_payment = PaymentTypeModel(code='TEST', desc='Test')
+    preferred_payment = PaymentTypeModel(code=payment_type_info['code'], desc=payment_type_info['desc'])
     preferred_payment.save()
 
-    org = OrgModel(name=name)
+    org = OrgModel(name=org_info['name'])
     org.org_type = org_type
     org.org_status = org_status
     org.preferred_payment = preferred_payment
@@ -74,8 +101,63 @@ def factory_org_model(name):
     return org
 
 
+def factory_org_service(org_info: dict = TestOrgInfo.org1,
+                        org_type_info: dict = TestOrgTypeInfo.test_type,
+                        org_status_info: dict = TestOrgStatusInfo.test_status,
+                        payment_type_info: dict = TestPaymentTypeInfo.test_type):
+    """Produce a templated org service."""
+    org_model = factory_org_model(org_info=org_info,
+                                  org_type_info=org_type_info,
+                                  org_status_info=org_status_info,
+                                  payment_type_info=payment_type_info)
+    org_service = OrgService(org_model)
+    return org_service
+
+
 def factory_affiliation_model(entity_id, org_id):
     """Produce a templated affiliation model."""
     affiliation = AffiliationModel(entity_id=entity_id, org_id=org_id)
     affiliation.save()
     return affiliation
+
+
+def factory_affiliation_service(entity_id, org_id):
+    """Produce a templated affiliation service."""
+    affiliation = AffiliationModel(entity=entity_id, org=org_id)
+    affiliation.save()
+    affiliation_service = AffiliationService(affiliation)
+    return affiliation_service
+
+
+def factory_contact_model(contact_info: dict = TestContactInfo.contact1):
+    """Return a valid contact object with the provided fields."""
+    contact = ContactModel(email=contact_info['email'])
+    contact.save()
+    return contact
+
+
+def factory_invitation(org_id,
+                       email='abc123@email.com',
+                       sent_date=datetime.datetime.now().strftime('Y-%m-%d %H:%M:%S'),
+                       membership_type='MEMBER'):
+    """Produce an invite for the given org and email."""
+    return {
+        'recipientEmail': email,
+        'sentDate': sent_date,
+        'membership': [
+            {
+                'membershipType': membership_type,
+                'orgId': org_id
+            }
+        ]
+    }
+
+
+def factory_document_model(version_id, doc_type, content):
+    """Produce a Document model."""
+    document = DocumentsModel(version_id=version_id,
+                              type=doc_type,
+                              content=content)
+
+    document.save()
+    return document

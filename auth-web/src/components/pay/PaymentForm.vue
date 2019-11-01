@@ -13,7 +13,7 @@
 
 <script lang="ts">
 
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import PaymentServices from '@/services/payment.services'
 import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
 
@@ -34,7 +34,7 @@ export default class PaymentForm extends Vue {
         this.errorMessage = this.$t('payNoParams').toString()
         return
       }
-      PaymentServices.createTransaction(this.paymentId, encodeURIComponent(this.redirectUrl))
+      PaymentServices.createTransaction(this.paymentId, this.redirectUrl)
         .then(response => {
           this.returnUrl = response.data.paySystemUrl
           this.goToUrl(this.returnUrl)

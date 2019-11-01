@@ -46,7 +46,7 @@ venv/bin/activate: requirements/prod.txt requirements/dev.txt
 	pip freeze | sort > requirements.txt ;\
 	cat requirements/repo-libraries.txt >> requirements.txt ;\
 	pip install -Ur requirements/repo-libraries.txt ;\
-	pip install -Ur requirements/dev.txt
+	pip install -Ur requirements/dev.txt ;\
 	touch venv/bin/activate  # update so it's as new as requirements/prod.txt
 
 .PHONY: install-dev
@@ -56,7 +56,7 @@ install-dev: venv/bin/activate
 
 .PHONY: activate
 activate: venv/bin/activate
-	. venv/bin/activate 
+	. venv/bin/activate
 
 .PHONY: local-test
 local-test: venv/bin/activate
@@ -72,10 +72,10 @@ local-coverage: venv/bin/activate
 coverage-report: local-coverage
 	. venv/bin/activate ; \
 	coverage report ; \
-	coverage html 
+	coverage html
 
 ## Run the coverage report and display in a browser window
-mac-cov:	install-dev coverage-report 
+mac-cov:	install-dev coverage-report
 	open -a "Google Chrome" htmlcov/index.html
 
 ## run pylint on the package and tests

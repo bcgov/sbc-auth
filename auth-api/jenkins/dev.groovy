@@ -21,9 +21,10 @@
 
 import groovy.json.*
 
-// define constants - values sent in as env vars from whatever calls this pipeline 
+// define constants - values sent in as env vars from whatever calls this pipeline
 def APP_NAME = 'auth-api'
 def DESTINATION_TAG = 'dev'
+def E2E_TAG = 'e2e'
 def TOOLS_TAG = 'tools'
 def NAMESPACE_APP = '1rdehl'
 def NAMESPACE_SHARED = 'd7eovc'
@@ -155,6 +156,23 @@ if( run_pipeline ) {
                     }
                 }
             }
+
+            stage("Tag ${APP_NAME}:${E2E_TAG}") {
+                script {
+                    openshift.withCluster() {
+                        openshift.withProject("${NAMESPACE_BUILD}") {
+                            try {
+                                echo "Tagging ${APP_NAME} for deployment to ${E2E_TAG} ..."
+                                openshift.tag("${APP_NAME}:${DESTINATION_TAG}", "${APP_NAME}:${E2E_TAG}")
+                            } catch (Exception e) {
+                                echo e.getMessage()
+                                build_ok = false
+                            }
+                        }
+                    }
+                }
+            }
+
         }
 
         if (build_ok) {
