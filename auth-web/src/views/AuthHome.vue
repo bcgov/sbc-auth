@@ -87,7 +87,7 @@
                         <p class="mb-7">If you have not received your Access Letter from BC Registries, or have lost your Passcode, please contact us at:</p>
                         <ul class="contact-info__list mb-7">
                           <li>
-                            <span>Toll Free:</span> 1-877-526-1526
+                            <span>Toll Free:</span> {{ $t('techSupportTollFree') }}
                           </li>
                           <li>
                             <span>Phone:</span> {{ $t('techSupportPhone') }}
@@ -162,8 +162,8 @@
             <h3 class="mb-6">Contact Us</h3>
             <p class="mb-5">For support or questions about this application, contact us at:</p>
             <ul class="contact-info__list mb-5">
-              <li><span>Toll Free:</span> 1-877-526-1526</li>
-              <li><span>Phone:</span> 250 952-0568</li>
+              <li><span>Toll Free:</span> {{ $t('techSupportTollFree') }}</li>
+              <li><span>Phone:</span> {{ $t('techSupportPhone') }}</li>
               <li><span>Email:</span> <a href="mailto:bcregistries@gov.bc.ca?subject=BC Registries - Cooperatives Online Support Request">bcregistries@gov.bc.ca</a></li>
             </ul>
             <p class="mb-0"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
