@@ -1,8 +1,8 @@
 import Vuex, { StoreOptions } from 'vuex'
 import BusinessModule from './modules/business'
 import OrgModule from '@/store/modules/org'
-import PaymentModule from '@/store/modules/payment'
 import { RootState } from './types'
+import StatusModule from '@/store/modules/status'
 import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 
@@ -14,7 +14,7 @@ const storeOptions: StoreOptions<RootState> = {
   strict: debug,
   modules: {
     business: BusinessModule,
-    paymentmodule: PaymentModule,
+    statusmodule: StatusModule,
     user: UserModule,
     org: OrgModule
   }
