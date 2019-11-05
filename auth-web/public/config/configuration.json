@@ -4,6 +4,7 @@
   "VUE_APP_AUTH_ROOT_API": "http://localhost:5000/api/v1",
   "VUE_APP_LEGAL_ROOT_API": "https://legal-api-dev.pathfinder.gov.bc.ca/api/v1",
   "VUE_APP_AUTH_WEB_ROOT_URL": "https://auth-web-dev.pathfinder.gov.bc.ca/auth",
+  "VUE_APP_STATUS_ROOT_API": "https://status-api-dev.pathfinder.gov.bc.ca/api/v1",
   "VUE_APP_FLAVOR": "post-mvp",
   "VUE_APP_FEATURE_HIDE": {
     "BCSC": false,
