@@ -59,6 +59,7 @@ import { getModule } from 'vuex-module-decorators'
   },
   methods: {
     ...mapMutations('business', ['setCurrentBusiness']),
+    ...mapMutations('org', ['setCurrentOrg']),
     ...mapActions('org', ['syncOrganizations'])
   }
 })
@@ -69,6 +70,25 @@ export default class AffiliatedEntityList extends Vue {
   private readonly organizations!: Organization[]
   private readonly setCurrentBusiness!: (business: Business) => void
   private readonly syncOrganizations!: () => Organization[]
+  private readonly setCurrentOrg!: (org: Organization) => void
+
+  private get tableHeaders () {
+    return [
+      {
+        text: 'Name',
+        align: 'left',
+        sortable: true,
+        value: 'info'
+      },
+      {
+        text: 'Actions',
+        align: 'left',
+        value: 'action',
+        sortable: false,
+        width: '300'
+      }
+    ]
+  }
 
   private get tableHeaders () {
     return [
@@ -211,6 +231,16 @@ dd {
 .no-results .v-card__title,
 .no-results .v-card__text {
   justify-content: center;
+}
+
+::v-deep .v-data-table td {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+::v-deep .v-data-table.user-list__active td {
+  height: 4rem;
+  vertical-align: top;
 }
 
 ::v-deep .v-data-table td {
