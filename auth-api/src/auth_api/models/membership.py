@@ -52,3 +52,8 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     def find_membership_by_id(cls, membership_id):
         """Find the first membership with the given id and return it."""
         return cls.query.filter_by(id=membership_id).first()
+
+    @classmethod
+    def find_members_by_org_id(cls, org_id):
+        """returns all members of the org with a status"""
+        return cls.query.filter_by(org_id=org_id).first()
