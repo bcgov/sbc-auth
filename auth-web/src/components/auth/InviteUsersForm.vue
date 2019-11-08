@@ -61,7 +61,7 @@ interface InvitationInfo {
 
 @Component({
   computed: {
-    ...mapState('org', ['organizations'])
+    ...mapState('org', ['currentOrg'])
   },
   methods: {
     ...mapMutations('org', ['resetInvitations']),
@@ -70,9 +70,9 @@ interface InvitationInfo {
 })
 export default class InviteUsersForm extends Vue {
   orgStore = getModule(OrgModule, this.$store)
-  readonly organizations!: Organization[]
-  readonly resetInvitations!: () => void
-  readonly createInvitation!: (Invitation) => Promise<void>
+  private readonly currentOrg!: Organization
+  private readonly resetInvitations!: () => void
+  private readonly createInvitation!: (Invitation) => Promise<void>
   private loading = false
 
   $refs: {
@@ -118,9 +118,7 @@ export default class InviteUsersForm extends Vue {
           await this.createInvitation({
             recipientEmail: invite.emailAddress,
             sentDate: new Date(),
-            membership: this.organizations
-              .filter(org => org.orgType === 'IMPLICIT')
-              .map(org => { return { membershipType: invite.role.toUpperCase(), orgId: org.id } })
+            membership: [{ membershipType: invite.role.toUpperCase(), orgId: this.currentOrg.id }]
           })
         }
       }

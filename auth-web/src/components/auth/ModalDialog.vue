@@ -62,7 +62,7 @@ export default class ModalDialog extends Vue {
   .notify-dialog .v-card__title {
     flex-direction: column;
 
-    >>> i {
+    ::v-deep i {
       margin-top: 1rem;
       margin-bottom: 1rem;
     }

@@ -21,7 +21,7 @@
     "moment": "^2.24.0",
     "regenerator-runtime": "^0.13.3",
     "register-service-worker": "^1.6.2",
-    "sbc-common-components": "^2.0.17",
+    "sbc-common-components": "^2.0.20",
     "vue": "^2.6.10",
     "vue-i18n": "^8.0.0",
     "vue-property-decorator": "^8.1.1",

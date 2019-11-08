@@ -1,11 +1,11 @@
 <template>
-  <div class="user-mgmt-view">
+  <v-container class="view-container">
     <header class="view-header mt-1 mb-5">
-      <h1>Manage Team</h1>
+      <h1>Team Members <span class="body-1" v-if="currentBusiness">({{ currentBusiness.name }})</span></h1>
       <div class="view-header__actions">
         <v-btn outlined color="primary" @click="showInviteUsersModal()">
           <v-icon>add</v-icon>
-          <span>Invite Team Members</span>
+          <span>Invite People</span>
         </v-btn>
       </div>
     </header>
@@ -13,7 +13,8 @@
     <!-- Tab Navigation -->
     <v-tabs v-model="tab" background-color="transparent" class="mb-3">
       <v-tab>Active</v-tab>
-      <v-tab>Pending</v-tab>
+      <v-tab>Pending Approval</v-tab>
+      <v-tab>Invitations</v-tab>
     </v-tabs>
 
     <v-card>
@@ -22,8 +23,8 @@
         <v-tab-item>
           <v-data-table
             class="user-list__active"
-            :headers="headersActive"
-            :items="basicMembers"
+            :headers="headerMembers"
+            :items="orgMembers"
             :items-per-page="5"
             :calculate-widths="true"
             :loading="isLoading"
@@ -32,14 +33,14 @@
               Loading...
             </template>
             <template v-slot:item.name="{ item }">
-              <span class="user-name">{{ item.name }}</span>
-              {{ item.email }}
+              <span class="user-name">{{ item.user.firstname }} {{ item.user.lastname }}</span>
+              <span v-if="item.user.contacts && item.user.contacts.length > 0">{{ item.user.contacts[0].email }}</span>
             </template>
             <template v-slot:item.role="{ item }">
               <v-menu offset-y>
                 <template v-slot:activator="{ on }">
                   <v-btn depressed small v-on="on">
-                    {{ item.role }}
+                    {{ item.membershipTypeCode }}
                     <v-icon small class="ml-1">keyboard_arrow_down</v-icon>
                   </v-btn>
                 </template>
@@ -54,19 +55,30 @@
                 </v-list>
               </v-menu>
             </template>
+            <template v-slot:item.lastActive="{ item }">
+              {{ formatDate(item.user.modified) }}
+            </template>
             <template v-slot:item.action="{ item }">
-              <v-btn depressed small @click="removeMember(item)">Remove</v-btn>
+              <v-btn depressed small @click="showConfirmRemoveModal(item)">Remove</v-btn>
             </template>
           </v-data-table>
         </v-tab-item>
         <v-tab-item>
+        </v-tab-item>
+        <v-tab-item>
           <v-data-table
             class="user-list__pending"
-            :headers="headersPending"
-            :items="basicInvitations"
+            :headers="headerInvitations"
+            :items="orgInvitations"
             :items-per-page="5"
             :calculate-widths="true"
           >
+            <template v-slot:item.sentDate="{ item }">
+              {{ formatDate (item.sentDate) }}
+            </template>
+            <template v-slot:item.expiresOn="{ item }">
+              {{ formatDate (item.expiresOn) }}
+            </template>
             <template v-slot:item.action="{ item }">
               <v-btn depressed small class="mr-2" @click="resend(item)">Resend</v-btn>
               <v-btn depressed small @click="removeInvite(item)">Remove</v-btn>
@@ -76,6 +88,7 @@
       </v-tabs-items>
     </v-card>
 
+    <!-- Invite Users Dialog -->
     <ModalDialog
       ref="inviteUsersDialog"
       :show-icon="false"
@@ -93,6 +106,23 @@
       </template>
     </ModalDialog>
 
+    <!-- Confirm Delete Dialog -->
+    <ModalDialog
+      ref="confirmRemoveDialog"
+      :title="$t('confirmRemoveMemberTitle')"
+      :text="$t('confirmRemoveMemberText')"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">error</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-btn large color="primary" @click="removeMember()">Remove</v-btn>
+        <v-btn large color="default" @click="cancelRemove()">Cancel</v-btn>
+      </template>
+    </ModalDialog>
+
     <!-- Alert Dialog (Success) -->
     <ModalDialog
       ref="successDialog"
@@ -101,13 +131,14 @@
       dialog-class="notify-dialog"
       max-width="640"
     ></ModalDialog>
-  </div>
+  </v-container>
 </template>
 
 <script lang="ts">
 import { ActiveUserRecord, Member, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
 import { Component, Vue } from 'vue-property-decorator'
 import { mapActions, mapGetters, mapState } from 'vuex'
+import { Business } from '@/models/business'
 import { Invitation } from '@/models/Invitation'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
@@ -124,42 +155,26 @@ import moment from 'moment'
   },
   computed: {
     ...mapState('org', [
+      'currentOrg',
       'organizations',
       'resending',
       'sentInvitations'
     ]),
-    basicMembers (): ActiveUserRecord[] {
-      return _.uniqWith(
-        _.flatten(this.organizations.map(org => org.members)),
-        (memberA: Member, memberB: Member) => memberA.user.username === memberB.user.username
-      )
-        .map((member: Member) => {
-          return {
-            username: member.user.username,
-            name: `${member.user.firstname} ${member.user.lastname}`,
-            role: member.membershipTypeCode,
-            lastActive: moment(member.user.modified).format('DD MMM, YYYY'),
-            member
-          }
-        })
+    ...mapState('business', ['currentBusiness']),
+    orgMembers () {
+      if (this.currentOrg) {
+        return this.currentOrg.members
+      }
     },
-    basicInvitations (): PendingUserRecord[] {
-      return _.uniqWith(_.flatten(this.organizations.map(org => org.invitations)),
-        (invitationA: Invitation, invitationB: Invitation) => invitationA.id === invitationB.id)
-        .filter((inv: Invitation) => inv.status === 'PENDING')
-        .map((invitation: Invitation) => {
-          return {
-            email: invitation.recipientEmail,
-            invitationSent: moment(invitation.sentDate).format('DD MMM, YYYY'),
-            invitationExpires: moment(invitation.expiresOn).format('DD MMM, YYYY'),
-            invitation
-          }
-        })
+    orgInvitations () {
+      if (this.currentOrg) {
+        return this.currentOrg.invitations
+      }
     }
   },
   methods: {
     ...mapActions('org', [
-      'syncOrganizations',
+      'syncCurrentOrg',
       'resendInvitation',
       'deleteInvitation',
       'deleteMember',
@@ -173,19 +188,24 @@ export default class UserManagement extends Vue {
   private successText = ''
   private tab = null
   private isLoading = true
+  private memberToBeRemoved: Member
+  private invitationToBeRemoved: Invitation
 
+  private readonly currentOrg!: Organization
+  private readonly currentBusiness!: Business
   private readonly organizations!: Organization[]
   private readonly resending!: boolean
   private readonly sentInvitations!: Invitation[]
-  private readonly syncOrganizations!: () => Organization[]
+  private readonly syncCurrentOrg!: () => Organization
   private readonly resendInvitation!: (invitation: Invitation) => void
-  private readonly deleteInvitation!: (invitation: Invitation) => void
-  private readonly deleteMember!: (deleteMemberPayload: UpdateMemberPayload) => void
-  private readonly updateMemberRole!: (UpdateMemberPayload: UpdateMemberPayload) => void
+  private readonly deleteInvitation!: (invitationId: number) => void
+  private readonly deleteMember!: (memberId: number) => void
+  private readonly updateMemberRole!: (updateMemberPayload: UpdateMemberPayload) => void
 
   $refs: {
     successDialog: ModalDialog
     inviteUsersDialog: ModalDialog
+    confirmRemoveDialog: ModalDialog
   }
 
   availableRoles = [
@@ -194,7 +214,7 @@ export default class UserManagement extends Vue {
     'Owner'
   ]
 
-  headersActive = [
+  headerMembers = [
     {
       text: 'Team Member',
       align: 'left',
@@ -222,24 +242,24 @@ export default class UserManagement extends Vue {
     }
   ]
 
-  headersPending = [
+  headerInvitations = [
     {
       text: 'Email',
       align: 'left',
       sortable: true,
-      value: 'email'
+      value: 'recipientEmail'
     },
     {
       text: 'Invitation Sent',
       align: 'left',
       sortable: true,
-      value: 'invitationSent'
+      value: 'sentDate'
     },
     {
       text: 'Expires',
       align: 'left',
       sortable: true,
-      value: 'invitationExpires'
+      value: 'expiresOn'
     },
     {
       text: 'Actions',
@@ -250,9 +270,23 @@ export default class UserManagement extends Vue {
     }
   ]
 
-  async created () {
+  // get orgMembers (): Member[] {
+  //   return this.currentOrg && this.currentOrg.members ? this.currentOrg.members : []
+  // }
+
+  // get orgInvitations (): Invitation[] {
+  //   return this.currentOrg && this.currentOrg.invitations ? this.currentOrg.invitations : []
+  // }
+
+  private formatDate (date: Date) {
+    return moment(date).format('DD MMM, YYYY')
+  }
+
+  async mounted () {
     this.isLoading = true
-    await this.syncOrganizations()
+    if (!this.currentOrg) {
+      await this.syncCurrentOrg()
+    }
     this.isLoading = false
   }
 
@@ -276,47 +310,53 @@ export default class UserManagement extends Vue {
     this.showSuccessModal()
   }
 
-  async removeInvite (pendingUser: PendingUserRecord) {
-    await this.deleteInvitation(pendingUser.invitation)
+  async removeInvite (invitation: Invitation) {
+    await this.deleteInvitation(invitation.id)
   }
 
-  async removeMember (activeMember: ActiveUserRecord) {
-    // BASIC user only
-    this.organizations
-      .filter(org => org.orgType === 'IMPLICIT')
-      .forEach(async org => {
-        const specificMember = org.members.find(member => member.user.username === activeMember.username)
-        if (specificMember) {
-          await this.deleteMember({ orgIdentifier: org.id, memberId: specificMember.id })
-        }
-      })
+  showConfirmRemoveModal (member: Member) {
+    this.memberToBeRemoved = member
+    this.$refs.confirmRemoveDialog.open()
   }
 
-  changeRole (activeMember: ActiveUserRecord, targetRole: string) {
-    if (activeMember.role.toUpperCase() === targetRole.toUpperCase()) {
+  cancelRemove () {
+    this.$refs.confirmRemoveDialog.close()
+  }
+
+  private async removeMember () {
+    await this.deleteMember(this.memberToBeRemoved.id)
+    this.$refs.confirmRemoveDialog.close()
+  }
+
+  private async changeRole (member: Member, targetRole: string) {
+    if (member.membershipTypeCode.toUpperCase() === targetRole.toUpperCase()) {
       return
     }
-    // BASIC user only
-    this.organizations
-      .filter(org => org.orgType === 'IMPLICIT')
-      .forEach(async org => {
-        await this.updateMemberRole({
-          orgIdentifier: org.id,
-          memberId: activeMember.member.id,
-          role: targetRole.toUpperCase()
-        })
-      })
+
+    await this.updateMemberRole({
+      memberId: member.id,
+      role: targetRole.toUpperCase()
+    })
   }
 }
 </script>
 
 <style lang="scss" scoped>
->>> .v-data-table td {
+.view-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.view-container__content {
+  flex: 1 1 auto;
+}
+
+::v-deep .v-data-table td {
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
 }
 
->>> .v-data-table.user-list__active td {
+::v-deep .v-data-table.user-list__active td {
   height: 4rem;
   vertical-align: top;
 }

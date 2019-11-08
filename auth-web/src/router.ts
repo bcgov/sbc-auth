@@ -1,21 +1,22 @@
-import { Role, SessionStorageKeys } from './util/constants'
-import AcceptInvite from './views/AcceptInvite.vue'
-import AuthHome from './views/AuthHome.vue'
-import BusinessProfile from './views/BusinessProfile.vue'
-import CreateAccount from './views/CreateAccount.vue'
-import Home from './views/Home.vue'
+import { Role, SessionStorageKeys } from '@/util/constants'
+import AcceptInvite from '@/views/AcceptInvite.vue'
+import AuthHome from '@/views/AuthHome.vue'
+import BusinessProfile from '@/views/BusinessProfile.vue'
+import CreateAccount from '@/views/CreateAccount.vue'
+import EntityManagement from '@/views/management/EntityManagement.vue'
+import Home from '@/views/Home.vue'
 import KeyCloakService from '@/services/keycloak.services'
-import PageNotFound from './views/PageNotFound.vue'
-import PaymentForm from './components/pay/PaymentForm.vue'
-import PaymentReturnForm from './components/pay/PaymentReturnForm.vue'
+import PageNotFound from '@/views/PageNotFound.vue'
+import PaymentForm from '@/components/pay/PaymentForm.vue'
+import PaymentReturnForm from '@/components/pay/PaymentReturnForm.vue'
 import Router from 'vue-router'
-import SearchBusinessForm from './components/auth/SearchBusinessForm.vue'
-import Signin from './components/auth/Signin.vue'
-import Signout from './components/auth/Signout.vue'
-import Template from './views/management/Template.vue'
-import TokenValidator from './views/TokenValidator.vue'
-import Unauthorized from './components/auth/Unauthorized.vue'
-import UserProfile from './views/UserProfile.vue'
+import SearchBusinessForm from '@/components/auth/SearchBusinessForm.vue'
+import Signin from '@/components/auth/Signin.vue'
+import Signout from '@/components/auth/Signout.vue'
+import TokenValidator from '@/views/TokenValidator.vue'
+import Unauthorized from '@/components/auth/Unauthorized.vue'
+import UserManagement from '@/views/management/UserManagement.vue'
+import UserProfile from '@/views/UserProfile.vue'
 import Vue from 'vue'
 
 Vue.use(Router)
@@ -37,7 +38,8 @@ export function getRoutes (appFlavor:String) {
     varRoutes = [
       { path: '/', component: AuthHome },
       { path: '/home', component: AuthHome },
-      { path: '/main', component: Template, meta: { requiresAuth: true } },
+      { path: '/main', component: EntityManagement, meta: { requiresAuth: true } },
+      { path: '/team', component: UserManagement, meta: { requiresAuth: true } },
       { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
       { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
       { path: '/validatetoken/:token', component: TokenValidator, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },

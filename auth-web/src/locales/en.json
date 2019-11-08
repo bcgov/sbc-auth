@@ -18,5 +18,7 @@
   "expiredInvitationMessage": "The invitation to join this BC Registries and Online Services account has been revoked or has expired. Account invitations can only be used one.",
   "invitationProcessingErrorMsg": "An error occured during processing the invitation. Please try again later.",
   "staffUnauthorizedMsg": "You are not authorized to access this page.",
-  "clientUnauthorizedMsg": "You are not authorized to access this page. If you having trouble, or require access to this application, please contact support."
+  "clientUnauthorizedMsg": "You are not authorized to access this page. If you having trouble, or require access to this application, please contact support.",
+  "confirmRemoveMemberTitle": "Confirm Removal",
+  "confirmRemoveMemberText": "Are you sure you wish to remove this member?"
 }

@@ -16,35 +16,23 @@
       <v-card-text class="pb-8">{{ $t('businessListActionMessage')}}</v-card-text>
     </v-card>
 
-    <div v-if="!isLoading" class="entity-details">
-      <v-row
-        v-for="business in basicAffiliations"
-        v-bind:key="business.businessIdentifier"
-        class="mb-3"
-      >
-        <v-card width="100%">
-          <v-card-title class="list-item_entity-number">
-            <a @click="redirectToNext(business.businessIdentifier)">{{business.name}}</a>
-            <span>
-              <v-btn outlined small class="mr-2" @click="editContact(business.businessIdentifier)">
-                Edit
-              </v-btn>
-              <v-btn outlined small color="red" @click="removeBusiness(business.businessIdentifier)">
-                Remove
-              </v-btn>
-            </span>
-          </v-card-title>
-          <v-card-text class="card-layout">
-            <dl class="meta-container">
-              <dt>Business No:</dt>
-              <dd class="list-item_business-number">{{ business.businessNumber }}</dd>
-              <dt>Incorporation No:</dt>
-              <dd class="list-item_incorp-number">{{ business.businessIdentifier }}</dd>
-            </dl>
-          </v-card-text>
-        </v-card>
-      </v-row>
-    </div>
+    <!-- Business Data Table -->
+    <v-data-table
+      v-if="!isLoading"
+      :headers="tableHeaders"
+      :items="basicAffiliations"
+      :items-per-page="5"
+      :calculate-widths="true"
+    >
+      <template v-slot:item.info="{ item }">
+        <v-row class="ml-2 list-item_entity-number">{{ item.name }}</v-row>
+        <v-row class="ml-2">Incorporation Number: {{ item.businessIdentifier }}</v-row>
+      </template>
+      <template v-slot:item.action="{ item }">
+        <v-btn depressed small class="mr-2" @click="manageTeam(item)">Manage Team</v-btn>
+        <v-btn depressed small @click="goToDashboard(item.businessIdentifier)">Dashboard</v-btn>
+      </template>
+    </v-data-table>
   </div>
 </template>
 
@@ -65,6 +53,7 @@ import { getModule } from 'vuex-module-decorators'
   },
   methods: {
     ...mapMutations('business', ['setCurrentBusiness']),
+    ...mapMutations('org', ['setCurrentOrg']),
     ...mapActions('org', ['syncOrganizations'])
   }
 })
@@ -75,6 +64,25 @@ export default class AffiliatedEntityList extends Vue {
   private readonly organizations!: Organization[]
   private readonly setCurrentBusiness!: (business: Business) => void
   private readonly syncOrganizations!: () => Organization[]
+  private readonly setCurrentOrg!: (org: Organization) => void
+
+  private get tableHeaders () {
+    return [
+      {
+        text: 'Name',
+        align: 'left',
+        sortable: true,
+        value: 'info'
+      },
+      {
+        text: 'Actions',
+        align: 'left',
+        value: 'action',
+        sortable: false,
+        width: '300'
+      }
+    ]
+  }
 
   private get implicitOrgs () {
     return this.organizations.filter(org => org.orgType === 'IMPLICIT')
@@ -127,16 +135,26 @@ export default class AffiliatedEntityList extends Vue {
     this.$router.push({ path: '/businessprofile', query: { redirect: '/main' } })
   }
 
-  redirectToNext (incorporationNumber: string) {
+  goToDashboard (incorporationNumber: string) {
     ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, incorporationNumber)
     const redirectURL = ConfigHelper.getCoopsURL() + 'dashboard'
     window.location.href = decodeURIComponent(redirectURL)
+  }
+
+  manageTeam (business: Business) {
+    // BASIC user only - find the implicit org for this affiliated business
+    const org = this.implicitOrgs.find(
+      org => org.name.toUpperCase() === business.businessIdentifier.toUpperCase()
+    )
+    this.setCurrentOrg(org)
+    this.setCurrentBusiness(business)
+    this.$router.push({ path: '/team' })
   }
 }
 </script>
 
 <style lang="scss" scoped>
-@import "../../assets/scss/theme.scss";
+@import "$assets/scss/theme.scss";
 
 .org-details {
   padding: 0;
@@ -174,6 +192,7 @@ p {
 
 .list-item_entity-number {
   font-weight: 500;
+  font-size: 20px;
   display: flex;
   justify-content: space-between;
   padding-bottom: 0px !important;
@@ -221,5 +240,15 @@ dd {
 
 .no-results .v-card__text {
   font-size: 0.9375rem;
+}
+
+::v-deep .v-data-table td {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+::v-deep .v-data-table.user-list__active td {
+  height: 4rem;
+  vertical-align: top;
 }
 </style>

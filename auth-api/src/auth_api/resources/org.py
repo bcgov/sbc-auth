@@ -68,7 +68,7 @@ class Orgs(Resource):
 
 
 @cors_preflight('GET,PUT,OPTIONS')
-@API.route('/<string:org_id>', methods=['GET', 'PUT'])
+@API.route('/<string:org_id>', methods=['GET', 'PUT', 'OPTIONS'])
 class Org(Resource):
     """Resource for managing a single org."""
 

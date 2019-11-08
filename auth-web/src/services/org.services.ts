@@ -1,9 +1,13 @@
 import Axios, { AxiosResponse } from 'axios'
-import { Member, Members } from '@/models/Organization'
+import { Member, Members, Organization } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
 import { Invitations } from '@/models/Invitation'
 
 export default class OrgService {
+  public static async getOrganization (orgId: number): Promise<AxiosResponse<Organization>> {
+    return Axios.get(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgId}`)
+  }
+
   public static async getOrgMembers (orgId: number): Promise<AxiosResponse<Members>> {
     return Axios.get(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgId}/members`)
   }

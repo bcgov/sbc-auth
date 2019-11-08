@@ -1,8 +1,12 @@
 <template>
-  <div class="entity-mgmt-view">
+  <v-container class="view-container">
     <header class="view-header mt-1 mb-9">
       <h1>Manage Businesses</h1>
       <div class="view-header__actions">
+        <v-btn class="mr-2" outlined color="primary" @click="showInviteMultipleUsersModal()">
+          <v-icon>add</v-icon>
+          <span>Invite People</span>
+        </v-btn>
         <v-btn outlined color="primary" @click="showAddBusinessModal()">
           <v-icon>add</v-icon>
           <span>Add Business</span>
@@ -78,7 +82,7 @@
         <v-btn large color="default" @click="cancelConfirmDelete()">Cancel</v-btn>
       </template>
     </ModalDialog>
-  </div>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -168,3 +172,23 @@ export default class EntityManagement extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .view-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .view-container__content {
+    flex: 1 1 auto;
+  }
+
+  article {
+    margin-left: 1.5rem;
+    padding: 0;
+  }
+
+  aside {
+    margin: 0;
+  }
+</style>
