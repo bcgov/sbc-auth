@@ -3,10 +3,6 @@
     <header class="view-header mt-1 mb-9">
       <h1>Manage Businesses</h1>
       <div class="view-header__actions">
-        <v-btn class="mr-2" outlined color="primary" @click="showInviteMultipleUsersModal()">
-          <v-icon>add</v-icon>
-          <span>Invite People</span>
-        </v-btn>
         <v-btn outlined color="primary" @click="showAddBusinessModal()">
           <v-icon>add</v-icon>
           <span>Add Business</span>

@@ -1,10 +1,10 @@
 <template>
-  <v-container class="view-container">
+  <v-app class="view-container">
     <ManagementMenu :menu="menu" />
     <article class="view-container__content">
       <component :is="selectedComponent" />
     </article>
-  </v-container>
+  </v-app>
 </template>
 
 <script lang="ts">
@@ -55,7 +55,6 @@ export default class Dashboard extends Vue {
 <style lang="scss" scoped>
   .view-container {
     display: flex;
-    flex-direction: row;
   }
 
   .view-container__content {

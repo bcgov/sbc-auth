@@ -13,6 +13,7 @@ import Router from 'vue-router'
 import SearchBusinessForm from '@/components/auth/SearchBusinessForm.vue'
 import Signin from '@/components/auth/Signin.vue'
 import Signout from '@/components/auth/Signout.vue'
+import Template from '@/views/management/Template.vue'
 import TokenValidator from '@/views/TokenValidator.vue'
 import Unauthorized from '@/components/auth/Unauthorized.vue'
 import UserManagement from '@/views/management/UserManagement.vue'
@@ -38,7 +39,7 @@ export function getRoutes (appFlavor:String) {
     varRoutes = [
       { path: '/', component: AuthHome },
       { path: '/home', component: AuthHome },
-      { path: '/main', component: EntityManagement, meta: { requiresAuth: true } },
+      { path: '/main', component: Template, meta: { requiresAuth: true } },
       { path: '/team', component: UserManagement, meta: { requiresAuth: true } },
       { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
       { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },

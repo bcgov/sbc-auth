@@ -1,5 +1,8 @@
 <template>
-  <v-navigation-drawer width="216">
+  <v-toolbar class="management-header">
+    <span>Org Name</span>
+  </v-toolbar>
+  <!-- <v-navigation-drawer width="216">
     <v-list dense nav>
       <v-list-item small color="primary"
         v-for="(item, i) in menu"
@@ -13,7 +16,7 @@
         </v-list-item-content>
       </v-list-item>
     </v-list>
-  </v-navigation-drawer>
+  </v-navigation-drawer> -->
 </template>
 
 <script lang="ts">
@@ -39,16 +42,11 @@ export default class ManagementMenu extends Vue {
 </script>
 
 <style lang="scss">
-  .v-navigation-drawer {
-    background-color : transparent !important;
-    transform: none !important;
-  }
+  @import "$assets/scss/theme.scss";
 
-  .v-navigation-drawer__border {
-    display: none;
-  }
-
-  .v-list--nav {
-    padding: 0;
+  .management-header {
+    background-color: $BCgovBlue4 !important;
+    max-height: 3.5em;
+    color: white !important;
   }
 </style>

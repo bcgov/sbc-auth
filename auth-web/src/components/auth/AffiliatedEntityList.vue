@@ -17,22 +17,26 @@
     </v-card>
 
     <!-- Business Data Table -->
-    <v-data-table
-      v-if="!isLoading"
-      :headers="tableHeaders"
-      :items="basicAffiliations"
-      :items-per-page="5"
-      :calculate-widths="true"
-    >
-      <template v-slot:item.info="{ item }">
-        <v-row class="ml-2 list-item_entity-number">{{ item.name }}</v-row>
-        <v-row class="ml-2">Incorporation Number: {{ item.businessIdentifier }}</v-row>
-      </template>
-      <template v-slot:item.action="{ item }">
-        <v-btn depressed small class="mr-2" @click="manageTeam(item)">Manage Team</v-btn>
-        <v-btn depressed small @click="goToDashboard(item.businessIdentifier)">Dashboard</v-btn>
-      </template>
-    </v-data-table>
+    <v-card>
+      <v-data-table
+        v-if="!isLoading"
+        :headers="tableHeaders"
+        :items="basicAffiliations"
+        :items-per-page="5"
+        :calculate-widths="true"
+        :hide-default-footer="basicAffiliations.length <= 5"
+        :custom-sort="customSort"
+      >
+        <template v-slot:item.info="{ item }">
+          <v-row class="ml-2 list-item_entity-number">{{ item.name }}</v-row>
+          <v-row class="ml-2">Incorporation Number: {{ item.businessIdentifier }}</v-row>
+        </template>
+        <template v-slot:item.action="{ item }">
+          <v-btn depressed small class="mr-2" @click="manageTeam(item)">Manage Team</v-btn>
+          <v-btn depressed small @click="goToDashboard(item.businessIdentifier)">Dashboard</v-btn>
+        </template>
+      </v-data-table>
+    </v-card>
   </div>
 </template>
 
@@ -99,6 +103,20 @@ export default class AffiliatedEntityList extends Vue {
     return (businessIdentifier: string) => {
       return this.basicAffiliations.find(business => business.businessIdentifier === businessIdentifier)
     }
+  }
+
+  private customSort (items, index, isDescending) {
+    const isDesc = isDescending.length > 0 && isDescending[0]
+    if (index[0] === 'info') {
+      items.sort((a, b) => {
+        if (isDesc) {
+          return a.name < b.name ? -1 : 1
+        } else {
+          return b.name < a.name ? -1 : 1
+        }
+      })
+    }
+    return items
   }
 
   async created () {
