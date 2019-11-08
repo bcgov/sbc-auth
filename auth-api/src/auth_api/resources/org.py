@@ -29,7 +29,6 @@ from auth_api.tracer import Tracer
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role, Status
 from auth_api.utils.util import cors_preflight
 
-
 API = Namespace('orgs', description='Endpoints for organization management')
 
 TRACER = Tracer.get_instance()
