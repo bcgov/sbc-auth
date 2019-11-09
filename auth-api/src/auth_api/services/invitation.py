@@ -22,10 +22,12 @@ from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api.utils.roles import PENDING_STATUS
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
+from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.schemas import InvitationSchema
 from auth_api.utils.roles import ADMIN, OWNER
@@ -177,6 +179,8 @@ class Invitation:
             membership_model.org_id = membership.org_id
             membership_model.user_id = user_id
             membership_model.membership_type = membership.membership_type
+            # user needs to get approval
+            membership_model.status = MembershipStatusCodeModel.get_membership_status_by_code(PENDING_STATUS).id
             membership_model.save()
         invitation.accepted_date = datetime.now()
         invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')

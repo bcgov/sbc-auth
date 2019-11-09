@@ -22,7 +22,7 @@ def upgrade():
                                              sa.Column('created', sa.DateTime(), nullable=True),
                                              sa.Column('modified', sa.DateTime(), nullable=True),
                                              sa.Column('id', sa.Integer(), nullable=False),
-                                             sa.Column('name', sa.String(length=15), nullable=True),
+                                             sa.Column('name', sa.String(length=25), nullable=True),
                                              sa.Column('description', sa.String(length=100), nullable=True),
                                              sa.Column('created_by_id', sa.Integer(), nullable=True),
                                              sa.Column('modified_by_id', sa.Integer(), nullable=True),
@@ -38,7 +38,8 @@ def upgrade():
         [
             {'id': '1', 'name': 'ACTIVE', 'description': 'Active Users ;Active in the system'},
             {'id': '2', 'name': 'INACTIVE', 'description': 'Inactive Users;Not fetched anywhere'},
-            {'id': '3', 'name': 'REJECTED', 'description': 'Rejected'}
+            {'id': '3', 'name': 'REJECTED', 'description': 'Rejected'},
+            {'id': '4', 'name': 'PENDING_APPROVAL', 'description': 'Pending Admin Approval'}
         ]
     )
     # ### end Alembic commands ###
