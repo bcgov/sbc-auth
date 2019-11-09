@@ -66,6 +66,13 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
         """Find an Org instance that matches the provided id."""
         return cls.query.filter_by(id=org_id).first()
 
+    @classmethod
+    def find_similar_org_by_name(cls, name):
+        print(name)
+        """Find an Org instance that matches the provided name."""
+        # TODO: add more fancy comparison
+        return cls.query.filter(Org.name.ilike(f'%{name}%')).first()
+
     def update_org_from_dict(self, org_info: dict):
         """Update this org with the provided dictionary."""
         # Update from provided dictionary, but specify additional fields not to update.

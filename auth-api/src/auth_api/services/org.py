@@ -54,6 +54,10 @@ class Org:
     @staticmethod
     def create_org(org_info: dict, user_id):
         """Create a new organization."""
+        existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'])
+        if existing_similar__org is not None:
+            raise BusinessException(Error.DATA_CONFLICT, None)
+
         org = OrgModel.create_from_dict(org_info=org_info)
         org.save()
 
