@@ -13,6 +13,7 @@
 # limitations under the License.
 """API endpoints for managing an Invitation resource."""
 
+import json
 from flask import g, request
 from flask_restplus import Namespace, Resource, cors
 
@@ -21,10 +22,11 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Invitation as InvitationService
+from auth_api.services import Membership as MembershipService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
-
+from auth_api.schemas.user import UserSchema as UserSchema
 
 API = Namespace('invitations', description='Endpoints for invitations management')
 TRACER = Tracer.get_instance()
@@ -52,10 +54,10 @@ class Invitations(Resource):
             user = UserService.find_by_jwt_token(token)
             if user is None:
                 response, status = {'message': 'Not authorized to perform this action'}, \
-                    http_status.HTTP_401_UNAUTHORIZED
+                                   http_status.HTTP_401_UNAUTHORIZED
             else:
                 response, status = InvitationService.create_invitation(request_json, user, token, origin).as_dict(), \
-                    http_status.HTTP_201_CREATED
+                                   http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -76,7 +78,7 @@ class Invitation(Resource):
         invitation = InvitationService.find_invitation_by_id(invitation_id, token)
         if invitation is None:
             response, status = {'message': 'The requested invitation could not be found.'}, \
-                http_status.HTTP_404_NOT_FOUND
+                               http_status.HTTP_404_NOT_FOUND
         else:
             response, status = invitation.as_dict(), http_status.HTTP_200_OK
         return response, status
@@ -98,10 +100,10 @@ class Invitation(Resource):
                 invitation = InvitationService.find_invitation_by_id(invitation_id, token)
                 if invitation is None:
                     response, status = {'message': 'The requested invitation could not be found.'}, \
-                               http_status.HTTP_404_NOT_FOUND
+                                       http_status.HTTP_404_NOT_FOUND
                 else:
                     response, status = invitation.update_invitation(user, token, origin).as_dict(), \
-                               http_status.HTTP_200_OK
+                                       http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -145,6 +147,8 @@ class InvitationAction(Resource):
     def put(invitation_token):
         """Check whether the passed token is valid and add user, role and org from invitation to membership."""
         token = g.jwt_oidc_token_info
+        origin = request.environ.get('HTTP_ORIGIN', 'localhost')
+
         try:
             user = UserService.find_by_jwt_token(token)
             if user is None:
@@ -152,8 +156,11 @@ class InvitationAction(Resource):
                                    http_status.HTTP_401_UNAUTHORIZED
             else:
                 invitation_id = InvitationService.validate_token(invitation_token)
-                response, status = InvitationService.accept_invitation(invitation_id, user.identifier).as_dict(),\
+                InvitationService.accept_invitation(invitation_id, user.identifier).as_dict(), \
                                    http_status.HTTP_200_OK  # noqa:E127
+                response, status = InvitationService.notify_admin(user, invitation_id, origin).as_dict(), \
+                                   http_status.HTTP_200_OK  # noqa:E127
+
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

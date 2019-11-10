@@ -19,10 +19,14 @@ A User stores basic information from a KeyCloak user (including the KeyCloak GUI
 import datetime
 
 from flask import current_app
+from .db import db
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+from auth_api.utils.roles import ACTIVE_STATUS
 
+from .membership import Membership as MembershipModel
+from .org import Org as OrgModel
 from .base_model import BaseModel
 
 
@@ -126,6 +130,15 @@ class User(BaseModel):
             cls.commit()
             return user
         return None
+
+    @classmethod
+    def find_members_by_org_id_by_status_by_roles(cls, org_id, roles, status=ACTIVE_STATUS):
+        """returns all members of the org with a status"""
+        return db.session.query(User). \
+            join(MembershipModel,
+                 (User.id == MembershipModel.user_id) & (MembershipModel.status == status) &
+                 (MembershipModel.membership_type_code.in_(roles))). \
+            join(OrgModel).filter(OrgModel.id == org_id).all()
 
     def delete(self):
         """Users cannot be deleted so intercept the ORM by just returning."""
