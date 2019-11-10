@@ -17,7 +17,7 @@ This module manages the User Information.
 """
 
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
-
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role,ACTIVE_STATUS
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel

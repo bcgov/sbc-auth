@@ -22,12 +22,10 @@ from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
-from auth_api.utils.roles import PENDING_STATUS
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
-from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import OrgSettings as OrgSettingsModel
 from auth_api.models.org import Org as OrgModel
@@ -35,10 +33,8 @@ from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
 from auth_api.utils.roles import ADMIN, OWNER, Status
 from config import get_named_config
-
 from .authorization import check_auth
 from .notification import send_email
-
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
