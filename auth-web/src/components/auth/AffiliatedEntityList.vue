@@ -1,10 +1,5 @@
 <template>
   <div class="entity-list-component">
-    <!-- Loading status -->
-    <v-progress-circular
-      :indeterminate=true
-      v-if="isLoading"
-    />
 
     <!-- No Results Message -->
     <v-card
@@ -19,7 +14,8 @@
     <!-- Business Data Table -->
     <v-card>
       <v-data-table
-        v-if="!isLoading"
+        :loading="isLoading"
+        loading-text="Loading... Please wait"
         :headers="tableHeaders"
         :items="basicAffiliations"
         :items-per-page="5"
@@ -28,12 +24,17 @@
         :custom-sort="customSort"
       >
         <template v-slot:item.info="{ item }">
-          <v-row class="ml-2 list-item_entity-number">{{ item.name }}</v-row>
-          <v-row class="ml-2">Incorporation Number: {{ item.businessIdentifier }}</v-row>
+          <div class="meta">
+            <v-list-item-title>{{ item.name }}</v-list-item-title>
+            <v-list-item-subtitle>Incorporation Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
+          </div>
         </template>
         <template v-slot:item.action="{ item }">
-          <v-btn depressed small class="mr-2" @click="manageTeam(item)">Manage Team</v-btn>
-          <v-btn depressed small @click="goToDashboard(item.businessIdentifier)">Dashboard</v-btn>
+          <div class="actions">
+            <v-btn depressed small @click="manageTeam(item)">Manage Team</v-btn>
+            <v-btn depressed small @click="goToDashboard(item.businessIdentifier)">Dashboard</v-btn>
+            <v-btn depressed small @click="removeBusiness(item.businessIdentifier)">Remove</v-btn>
+          </div>
         </template>
       </v-data-table>
     </v-card>
@@ -83,7 +84,7 @@ export default class AffiliatedEntityList extends Vue {
         align: 'left',
         value: 'action',
         sortable: false,
-        width: '300'
+        width: '340'
       }
     ]
   }
@@ -174,56 +175,26 @@ export default class AffiliatedEntityList extends Vue {
 <style lang="scss" scoped>
 @import "$assets/scss/theme.scss";
 
-.org-details {
-  padding: 0;
-  list-style-type: none;
-  margin-right: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.entity-details {
-  padding: 0;
-  list-style-type: none;
-}
-
-.list-item {
-  flex-direction: row;
-  align-items: center;
-  background: #ffffff;
-}
-
-.card-layout {
-  padding: 1.5rem;
-}
-
-h2 {
-  margin-bottom: 1.5rem;
-}
-
-p {
-  text-align: center;
-}
-
-.business-list-empty-message {
-  font-weight: 500;
-}
-
-.list-item_entity-number {
-  font-weight: 500;
-  font-size: 20px;
-  display: flex;
-  justify-content: space-between;
-  padding-bottom: 0px !important;
-}
-
-a {
-  color: black;
-}
-
 .meta-container {
   overflow: hidden;
   color: $gray6;
-  font-size: 0.875rem;
+}
+
+.meta {
+  .v-list-item__title {
+    letter-spacing: -0.01rem;
+    font-weight: 700;
+  }
+
+  .v-list-item__subtitle {
+    color: $gray7;
+  }
+}
+
+.actions {
+  .v-btn + .v-btn {
+    margin-left: 0.4rem;
+  }
 }
 
 dd,
@@ -251,13 +222,13 @@ dd {
 // No Results
 // TODO: Move somewhere we can access globally
 .no-results .v-card__title {
-  justify-content: center;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 700;
 }
 
+.no-results .v-card__title,
 .no-results .v-card__text {
-  font-size: 0.9375rem;
+  justify-content: center;
 }
 
 ::v-deep .v-data-table td {

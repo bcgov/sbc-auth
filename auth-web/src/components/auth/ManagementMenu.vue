@@ -1,8 +1,18 @@
 <template>
-  <v-toolbar class="management-header">
-    <span>Org Name</span>
-  </v-toolbar>
-  <!-- <v-navigation-drawer width="216">
+  <div class="team-toolbar">
+  <v-container class="pt-0 pb-0">
+    <div class="team-name">Organization Name</div>
+    <nav>
+      <ul class="pl-0">
+        <li v-for="(item, i) in menu"
+          :key="i">
+          <v-btn tile text color="#ffffff" @click="item.activate()">{{item.title}}</v-btn>
+        </li>
+      </ul>
+    </nav>
+
+  <!--
+  <v-navigation-drawer width="216">
     <v-list dense nav>
       <v-list-item small color="primary"
         v-for="(item, i) in menu"
@@ -16,7 +26,10 @@
         </v-list-item-content>
       </v-list-item>
     </v-list>
-  </v-navigation-drawer> -->
+  </v-navigation-drawer>
+  -->
+  </v-container>
+  </div>
 </template>
 
 <script lang="ts">
@@ -41,12 +54,36 @@ export default class ManagementMenu extends Vue {
 }
 </script>
 
-<style lang="scss">
-  @import "$assets/scss/theme.scss";
+<style lang="scss" scoped>
+  @import '../../assets/scss/theme.scss';
 
-  .management-header {
-    background-color: $BCgovBlue4 !important;
-    max-height: 3.5em;
-    color: white !important;
+  ul {
+    list-style-type: none;
+  }
+
+  .team-toolbar {
+    color: #ffffff;
+    background-color: $BCgovBlue4;
+  }
+
+  .team-toolbar .container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .team-toolbar .team-name {
+    margin-right: 1.25rem;
+    font-weight: 700;
+  }
+
+  .team-toolbar nav > ul > li {
+    display: inline-block;
+  }
+
+  .v-btn {
+    height: 4.5rem !important;
+    letter-spacing: 0.01rem;
+    font-weight: 400;
   }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <v-app class="view-container">
     <ManagementMenu :menu="menu" />
-    <article class="view-container__content">
+    <article>
       <component :is="selectedComponent" />
     </article>
   </v-app>
@@ -39,7 +39,7 @@ export default class Dashboard extends Vue {
     const featureHide = ConfigHelper.getValue('VUE_APP_FEATURE_HIDE')
     if (!featureHide || !featureHide.USER_MGMT) {
       this.menu.push({
-        title: 'Manage Teams',
+        title: 'Manage Team',
         icon: 'group',
         activate: () => { this.setSelectedComponent(UserManagement) }
       })
@@ -55,15 +55,6 @@ export default class Dashboard extends Vue {
 <style lang="scss" scoped>
   .view-container {
     display: flex;
-  }
-
-  .view-container__content {
-    flex: 1 1 auto;
-  }
-
-  article {
-    margin-left: 1.5rem;
-    padding: 0;
   }
 
   aside {
