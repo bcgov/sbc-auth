@@ -2,19 +2,20 @@
   <v-container>
     <div class="view-container">
       <article>
-        <h1>Update Business Profile</h1>
+        <h1>Edit Business Profile</h1>
         <p class="intro-text" v-show="!editing">It looks like we are missing some contact information for your {{businessType}}. You will need to supply us with a few additional details before you can get started...</p>
-        <p class="intro-text" v-show="editing">Please update the contact information for your {{businessType}} below.</p>
+        <p class="intro-text" v-show="editing">Update the contact information for your {{businessType}} below.</p>
         <v-card class="profile-card">
           <v-container>
-            <h2>Business Contact</h2>
-            <BusinessContactForm/>
+            <v-card-title>
+              <h2>Business Contact</h2>
+            </v-card-title>
+            <v-card-text>
+              <BusinessContactForm/>
+            </v-card-text>
           </v-container>
         </v-card>
       </article>
-      <aside>
-        <SupportInfoCard/>
-      </aside>
     </div>
   </v-container>
 </template>
@@ -62,50 +63,15 @@ export default class BusinessProfile extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  // Layout
   article {
     flex: 1 1 auto;
+    margin: 0 auto;
+    max-width: 50rem;
   }
 
-  aside {
-    flex: 0 0 auto;
-    margin-top: 2rem;
-  }
-
-  @media (min-width: 960px) {
-    article {
-      padding-top: 0.5rem;
-      padding-bottom: 0.5rem;
-    }
-
-    aside {
-      margin-top: 0;
-      margin-left: 2rem;
-      width: 20rem;
-    }
-
-    .view-container {
-      flex-flow: row nowrap;
-    }
-  }
-
-  aside {
-    margin-top: 2rem;
-  }
-
-  @media (min-width: 960px) {
-    article {
-      padding-top: 0.5rem;
-      padding-bottom: 0.5rem;
-    }
-
-    aside {
-      margin-top: 0;
-    }
-
-    .view-container {
-      flex-flow: row nowrap;
-    }
+  .v-card__title {
+    font-weight: 700;
+    letter-spacing: -0.01rem;
   }
 
   .intro-text {
@@ -114,13 +80,6 @@ export default class BusinessProfile extends Vue {
 
   // Profile Card
   .profile-card .container {
-    padding: 1.5rem;
+    padding: 1rem;
   }
-
-  @media (min-width: 960px) {
-    .profile-card .container {
-      padding: 2rem;
-    }
-  }
-
 </style>

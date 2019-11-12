@@ -65,7 +65,7 @@
           Cancel
         </v-btn>
         <v-btn large color="primary" @click="save" :disabled='!isFormValid()'>
-          Save and Continue
+          Save
         </v-btn>
       </v-col>
     </v-row>
