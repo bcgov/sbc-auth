@@ -13,6 +13,8 @@
 # limitations under the License.
 """API endpoints for managing an Org resource."""
 
+import json
+
 from flask import g, jsonify, request
 from flask_restplus import Namespace, Resource, cors
 
@@ -22,6 +24,7 @@ from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import utils as schema_utils
 from auth_api.schemas.membership import MembershipSchema
 from auth_api.services import Affiliation as AffiliationService
+from auth_api.schemas.user import UserSchema as UserSchema
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
