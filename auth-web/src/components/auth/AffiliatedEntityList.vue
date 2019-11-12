@@ -31,9 +31,9 @@
         </template>
         <template v-slot:item.action="{ item }">
           <div class="actions">
-            <v-btn depressed small @click="manageTeam(item)">Manage Team</v-btn>
-            <v-btn depressed small @click="goToDashboard(item.businessIdentifier)">Dashboard</v-btn>
-            <v-btn depressed small @click="removeBusiness(item.businessIdentifier)">Remove</v-btn>
+            <v-btn depressed small @click="goToDashboard(item.businessIdentifier)" title="Go to Business Dashboard">Dashboard</v-btn>
+            <v-btn depressed small @click="editContact(item)" title="Edit Business Profile">Edit</v-btn>
+            <v-btn depressed small @click="removeBusiness(item.businessIdentifier)" title="Remove Business">Remove</v-btn>
           </div>
         </template>
       </v-data-table>
@@ -83,7 +83,7 @@ export default class AffiliatedEntityList extends Vue {
         align: 'left',
         value: 'action',
         sortable: false,
-        width: '340'
+        width: '280'
       }
     ]
   }
@@ -134,8 +134,8 @@ export default class AffiliatedEntityList extends Vue {
     }
   }
 
-  editContact (businessidentifier: string) {
-    this.setCurrentBusiness(this.businessById(businessidentifier))
+  editContact (business: Business) {
+    this.setCurrentBusiness(business)
     this.$router.push({ path: '/businessprofile', query: { redirect: '/main' } })
   }
 

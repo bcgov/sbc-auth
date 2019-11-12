@@ -18,28 +18,13 @@ export default class BusinessModule extends VuexModule {
 
   @Mutation
   public setCurrentBusiness (business: Business) {
+    ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, business.businessIdentifier)
     this.currentBusiness = business
   }
 
-  @Action({ rawError: true })
-  public async login (payload: LoginPayload) {
-    return LoginService.login(payload.businessIdentifier, payload.passCode)
-  }
-
-  @Action
-  public async createBusinessIfNotFound (businessNumber: string) {
-    return this.loadBusiness(businessNumber).catch(() => {
-      BusinessService.createBusiness({ businessIdentifier: businessNumber })
-        .then(createResponse => {
-          if ((createResponse.status === 200 || createResponse.status === 201) && createResponse.data) {
-            this.context.commit('setCurrentBusiness', createResponse.data)
-          }
-        })
-    })
-  }
-
   @Action({ commit: 'setCurrentBusiness', rawError: true })
-  public async loadBusiness (businessIdentifier: string) {
+  public async loadBusiness () {
+    const businessIdentifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)
     const response = await BusinessService.getBusiness(businessIdentifier)
     if (response && response.data && response.status === 200) {
       return response.data
@@ -88,11 +73,11 @@ export default class BusinessModule extends VuexModule {
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })
   public async addContact (contact: Contact) {
-    return BusinessService.addContact(this.currentBusiness, contact)
+    return BusinessService.addContact(this.context.state['currentBusiness'], contact)
   }
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })
   public async updateContact (contact: Contact) {
-    return BusinessService.updateContact(this.currentBusiness, contact)
+    return BusinessService.updateContact(this.context.state['currentBusiness'], contact)
   }
 }

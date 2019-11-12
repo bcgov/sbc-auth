@@ -1,36 +1,32 @@
 <template>
   <div>
-    <div class="v-form" v-if="organizations.length > 0">
+    <div v-if="organizations.length > 0">
       You already belong to a team: <span class="font-weight-bold">{{ organizations[0].name }}</span>
       <v-row>
         <v-col cols="12" class="form__btns pb-0">
-          <v-btn large color="primary" @click="redirectToNext">
-            Next
-          </v-btn>
+          <v-btn large color="primary" @click="redirectToNext">OK</v-btn>
         </v-col>
       </v-row>
     </div>
-    <v-form v-if="organizations.length === 0" ref="createTeamForm">
-      <v-radio-group v-model="teamType" :mandatory="true">
-        <v-radio class="mb-5" label="I manage my own business" value="BASIC"/>
-        <v-radio label="I manage businesses on behalf of my clients" value="PREMIUM" />
-      </v-radio-group>
-      <div class="mt-5">
-        <h3 v-if="teamType === 'BASIC'">Your Team Name</h3>
-        <h3 v-if="teamType === 'PREMIUM'">Your Organization Name</h3>
-        <v-text-field :rules="teamNameRules" placeholder="Team Name" v-model="teamName" />
-      </div>
-      <v-row>
-        <v-col cols="12" class="form__btns pb-0">
-          <v-btn large color="primary" class="mr-2" :disabled='!isFormValid()' @click="save">
-            Next
-          </v-btn>
-          <v-btn large color="secondary" @click="cancel">
-            Cancel
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-form>
+    <div>
+      <v-form v-if="organizations.length === 0" ref="createTeamForm">
+        <v-radio-group class="mt-0 mb-5 pt-0" v-model="teamType" :mandatory="true">
+          <v-radio class="mb-3" label="I manage my own business" value="BASIC"/>
+          <v-radio label="I manage multiple businesses on behalf of my clients" value="PREMIUM" />
+        </v-radio-group>
+        <v-text-field filled :rules="teamNameRules" v-model="teamName" :label="teamType === 'BASIC' ? 'Your Business Name' : 'Your Management Company or Law Firm Name'" />
+        <v-row>
+          <v-col cols="12" class="form__btns pb-0">
+            <v-btn large color="primary" class="mr-2" :disabled='!isFormValid()' @click="save">
+              Save and Continue
+            </v-btn>
+            <v-btn large color="default" @click="cancel">
+              Cancel
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-form>
+    </div>
   </div>
 </template>
 
@@ -106,12 +102,16 @@ export default class TeamForm extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  .v-form {
-    padding: 1.5rem;
+  @import '$assets/scss/theme.scss';
 
-    .form__btns {
-      display: flex;
-      justify-content: flex-end;
-    }
+  // Tighten up some of the spacing between rows
+  [class^="col"] {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .form__btns {
+    display: flex;
+    justify-content: flex-end;
   }
 </style>
