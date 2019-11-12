@@ -10,7 +10,7 @@ module.exports = {
     }
   },
   publicPath: process.env.VUE_APP_PATH,
-  transpileDependencies: ['vuetify'],
+  transpileDependencies: ['vuetify', 'vuex-persist'],
   devServer: {
     overlay: {
       warnings: true,
