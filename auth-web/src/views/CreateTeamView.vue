@@ -3,10 +3,15 @@
     <div class="view-container">
       <article>
         <h1 class="mb-5">Create Team</h1>
-        <p class="intro-text">Create your Cooperatives Online Team.</p>
+        <p class="intro-text">Tell us about your team and enter a team name.</p>
         <v-card class="profile-card">
           <v-container>
-            <TeamForm />
+            <v-card-title>
+              <h2>Your Team Profile</h2>
+            </v-card-title>
+            <v-card-text>
+              <TeamForm />
+            </v-card-text>
           </v-container>
         </v-card>
       </article>
@@ -38,18 +43,17 @@ export default class CreateTeamView extends Vue {
     max-width: 50rem;
   }
 
+  .v-card__title {
+    font-weight: 700;
+    letter-spacing: -0.01rem;
+  }
+
   .intro-text {
     margin-bottom: 3rem;
   }
 
   // Profile Card
   .profile-card .container {
-    padding: 1.5rem;
-  }
-
-  @media (min-width: 960px) {
-    .profile-card .container {
-      padding: 2rem;
-    }
+    padding: 1rem;
   }
 </style>

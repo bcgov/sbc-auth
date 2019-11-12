@@ -4,16 +4,13 @@
       You already belong to a team: <span class="font-weight-bold">{{ organizations[0].name }}</span>
       <v-row>
         <v-col cols="12" class="form__btns pb-0">
-          <v-btn large color="primary" @click="redirectToNext">
-            Next
-          </v-btn>
+          <v-btn large color="primary" @click="redirectToNext">OK</v-btn>
         </v-col>
       </v-row>
     </div>
     <div>
-      <h2 class="mb-6">Your Team Name</h2>
       <v-form v-if="organizations.length === 0" ref="createTeamForm">
-        <v-radio-group class="mb-3" v-model="teamType" :mandatory="true">
+        <v-radio-group class="mt-0 mb-5 pt-0" v-model="teamType" :mandatory="true">
           <v-radio class="mb-3" label="I manage my own business" value="BASIC"/>
           <v-radio label="I manage multiple businesses on behalf of my clients" value="PREMIUM" />
         </v-radio-group>

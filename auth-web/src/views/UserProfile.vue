@@ -17,8 +17,12 @@
         </div>
         <v-card class="profile-card">
           <v-container>
-            <h2 class="mb-7">Your Profile</h2>
-            <UserProfileForm/>
+            <v-card-title>
+              <h2>Your Profile</h2>
+            </v-card-title>
+            <v-card-text>
+              <UserProfileForm/>
+            </v-card-text>
           </v-container>
         </v-card>
       </article>
@@ -69,18 +73,17 @@ export default class UserProfile extends Vue {
     max-width: 50rem;
   }
 
+  .v-card__title {
+    font-weight: 700;
+    letter-spacing: -0.01rem;
+  }
+
   .intro-text {
     margin-bottom: 3rem;
   }
 
   // Profile Card
   .profile-card .container {
-    padding: 1.5rem;
-  }
-
-  @media (min-width: 960px) {
-    .profile-card .container {
-      padding: 2rem;
-    }
+    padding: 1rem;
   }
 </style>
