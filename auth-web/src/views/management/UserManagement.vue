@@ -10,14 +10,14 @@
       </div>
     </header>
 
-    <!-- Tab Navigation -->
-    <v-tabs v-model="tab" background-color="transparent" class="mb-3">
-      <v-tab>Active</v-tab>
-      <v-tab>Pending Approval</v-tab>
-      <v-tab>Invitations</v-tab>
-    </v-tabs>
-
     <v-card>
+      <!-- Tab Navigation -->
+      <v-tabs class="mb-0" v-model="tab">
+        <v-tab>Active</v-tab>
+        <v-tab>Pending Approval</v-tab>
+        <v-tab>Invitations</v-tab>
+      </v-tabs>
+
       <!-- Tab Contents -->
       <v-tabs-items v-model="tab">
         <v-tab-item>
