@@ -21,6 +21,7 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import MembershipType as MembershipTypeModel
+from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.schemas import MembershipSchema
 from auth_api.utils.roles import ADMIN, OWNER
 
@@ -54,6 +55,11 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         """Get a membership type by the given code."""
         return MembershipTypeModel.get_membership_type_by_code(type_code=type_code)
 
+    @staticmethod
+    def get_membership_status_by_code(name):
+        """Get a membership type by the given code."""
+        return MembershipStatusCodeModel.get_membership_status_by_code(name=name)
+
     @classmethod
     def find_membership_by_id(cls, membership_id, token_info: Dict = None):
         """Retrieve a membership record by id."""
@@ -65,10 +71,13 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             return Membership(membership)
         return None
 
-    def update_membership_role(self, updated_role: MembershipTypeModel, token_info: Dict = None):
+    def update_membership(self, updated_fields, token_info: Dict = None):
         """Update an existing membership with the given role."""
         # Ensure that this user is an ADMIN or OWNER on the org associated with this membership
         check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
-        self._model.membership_type = updated_role
+        for key, value in updated_fields.items():
+            if value is not None:
+                setattr(self._model, key, value)
         self._model.save()
+        self._model.commit()
         return self

@@ -28,7 +28,7 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role, Status
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('orgs', description='Endpoints for organization management')
@@ -258,7 +258,8 @@ class OrgMembers(Resource):
             status = request.args.get('status')
             roles = request.args.get('roles')
 
-            users = UserService.get_members_for_org(org_id,status =status,membership_roles=roles, token_info=g.jwt_oidc_token_info,
+            users = UserService.get_members_for_org(org_id, status=status, membership_roles=roles,
+                                                    token_info=g.jwt_oidc_token_info,
                                                     allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
             if users:
                 response, status = json.dumps(UserSchema(exclude=['orgs']).dump(users, many=True)), \
@@ -286,19 +287,22 @@ class OrgMember(Resource):
         """Update a membership record with new member role."""
         token = g.jwt_oidc_token_info
         request_json = request.get_json()
-        role = request_json['role']
+        role = request.get_json().get('role')
+        status = request.get_json().get('status')
+        updated_fields_dict = { }
         try:
-            if not role:
-                response, status = {'message': 'Invalid role provided.'}, http_status.HTTP_400_BAD_REQUEST
-                return response, status
-            updated_role = MembershipService.get_membership_type_by_code(role)
+            if role is not None:
+                updated_role = MembershipService.get_membership_type_by_code(role)
+                updated_fields_dict['membership_type'] = updated_role
+            if status is not None:
+                updated_fields_dict['membership_status'] = MembershipService.get_membership_status_by_code(status)
             membership = MembershipService.find_membership_by_id(membership_id, token)
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
                 return response, status
 
-            return membership.update_membership_role(updated_role=updated_role, token_info=token).as_dict(), \
+            return membership.update_membership(updated_fields=updated_fields_dict, token_info=token).as_dict(), \
                    http_status.HTTP_200_OK
 
         except BusinessException as exception:
