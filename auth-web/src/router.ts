@@ -3,7 +3,8 @@ import AcceptInvite from '@/views/AcceptInvite.vue'
 import AuthHome from '@/views/AuthHome.vue'
 import BusinessProfile from '@/views/BusinessProfile.vue'
 import CreateAccount from '@/views/CreateAccount.vue'
-import EntityManagement from '@/views/management/EntityManagement.vue'
+import CreateTeamView from '@/views/CreateTeamView.vue'
+import Dashboard from '@/views/management/Dashboard.vue'
 import Home from '@/views/Home.vue'
 import KeyCloakService from '@/services/keycloak.services'
 import PageNotFound from '@/views/PageNotFound.vue'
@@ -13,7 +14,6 @@ import Router from 'vue-router'
 import SearchBusinessForm from '@/components/auth/SearchBusinessForm.vue'
 import Signin from '@/components/auth/Signin.vue'
 import Signout from '@/components/auth/Signout.vue'
-import Template from '@/views/management/Template.vue'
 import TokenValidator from '@/views/TokenValidator.vue'
 import Unauthorized from '@/components/auth/Unauthorized.vue'
 import UserManagement from '@/views/management/UserManagement.vue'
@@ -39,9 +39,10 @@ export function getRoutes (appFlavor:String) {
     varRoutes = [
       { path: '/', component: AuthHome },
       { path: '/home', component: AuthHome },
-      { path: '/main', component: Template, meta: { requiresAuth: true } },
+      { path: '/main', component: Dashboard, meta: { requiresAuth: true } },
       { path: '/team', component: UserManagement, meta: { requiresAuth: true } },
       { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
+      { path: '/createteam', component: CreateTeamView, meta: { requiresAuth: true } },
       { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
       { path: '/validatetoken/:token', component: TokenValidator, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
       { path: '/confirmtoken/:token', component: AcceptInvite, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } }

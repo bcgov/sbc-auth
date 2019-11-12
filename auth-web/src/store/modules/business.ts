@@ -1,11 +1,12 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { Business, LoginPayload } from '@/models/business'
+import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { Affiliation } from '@/models/affiliation'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import LoginService from '@/services/login.services'
-import { RemoveBusinessPayload } from '@/models/Organization'
+
 import { SessionStorageKeys } from '@/util/constants'
 
 @Module({
@@ -13,11 +14,7 @@ import { SessionStorageKeys } from '@/util/constants'
   namespaced: true
 })
 export default class BusinessModule extends VuexModule {
-  currentBusiness: Business = {
-    businessIdentifier: '',
-    businessNumber: '',
-    name: ''
-  }
+  currentBusiness: Business = undefined
 
   @Mutation
   public setCurrentBusiness (business: Business) {
@@ -57,12 +54,13 @@ export default class BusinessModule extends VuexModule {
     }
 
     // Create an implicit org for the current user and the requested business
-    const createBusinessResponse = await BusinessService.createOrg({
-      name: payload.businessIdentifier
-    })
+    // const createBusinessResponse = await BusinessService.createOrg({
+    //   name: payload.businessIdentifier
+    // })
+    const myOrg: Organization = this.context.rootGetters['org/myOrg']
 
     // Create an affiliation between implicit org and requested business
-    await BusinessService.createAffiliation(createBusinessResponse.data.id, affiliation)
+    await BusinessService.createAffiliation(myOrg.id, affiliation)
 
     // Update store
     this.context.dispatch('org/syncOrganizations', null, { root: true })

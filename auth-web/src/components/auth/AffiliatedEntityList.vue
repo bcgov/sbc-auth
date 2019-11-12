@@ -4,7 +4,7 @@
     <!-- No Results Message -->
     <v-card
       class="no-results text-center"
-      v-if="basicAffiliations.length === 0 && !isLoading"
+      v-if="myBusinesses.length === 0 && !isLoading"
       @click="addBusiness()"
     >
       <v-card-title class="pt-6 pb-0">{{ $t('businessListEmptyMessage')}}</v-card-title>
@@ -12,15 +12,15 @@
     </v-card>
 
     <!-- Business Data Table -->
-    <v-card>
+    <v-card v-if="myBusinesses.length > 0 && !isLoading">
       <v-data-table
         :loading="isLoading"
         loading-text="Loading... Please wait"
         :headers="tableHeaders"
-        :items="basicAffiliations"
+        :items="myBusinesses"
         :items-per-page="5"
         :calculate-widths="true"
-        :hide-default-footer="basicAffiliations.length <= 5"
+        :hide-default-footer="myBusinesses.length <= 5"
         :custom-sort="customSort"
       >
         <template v-slot:item.info="{ item }">
@@ -49,6 +49,7 @@ import { Business } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
 import { SessionStorageKeys } from '@/util/constants'
+import UserManagement from '@/views/management/UserManagement.vue'
 import _ from 'lodash'
 import { getModule } from 'vuex-module-decorators'
 
@@ -58,7 +59,6 @@ import { getModule } from 'vuex-module-decorators'
   },
   methods: {
     ...mapMutations('business', ['setCurrentBusiness']),
-    ...mapMutations('org', ['setCurrentOrg']),
     ...mapActions('org', ['syncOrganizations'])
   }
 })
@@ -69,7 +69,6 @@ export default class AffiliatedEntityList extends Vue {
   private readonly organizations!: Organization[]
   private readonly setCurrentBusiness!: (business: Business) => void
   private readonly syncOrganizations!: () => Organization[]
-  private readonly setCurrentOrg!: (org: Organization) => void
 
   private get tableHeaders () {
     return [
@@ -89,20 +88,20 @@ export default class AffiliatedEntityList extends Vue {
     ]
   }
 
-  private get implicitOrgs () {
-    return this.organizations.filter(org => org.orgType === 'IMPLICIT')
+  private get myOrg (): Organization {
+    if (this.organizations && this.organizations.length > 0) {
+      return this.organizations[0]
+    }
+    return undefined
   }
 
-  private get basicAffiliations () {
-    return _.uniqWith(
-      _.flatten(this.implicitOrgs.map(org => org.affiliatedEntities)),
-      (businessA: Business, businessB: Business) => businessA.businessIdentifier === businessB.businessIdentifier
-    )
+  private get myBusinesses () {
+    return this.myOrg.affiliatedEntities
   }
 
   private get businessById () {
     return (businessIdentifier: string) => {
-      return this.basicAffiliations.find(business => business.businessIdentifier === businessIdentifier)
+      return this.myBusinesses.find(business => business.businessIdentifier === businessIdentifier)
     }
   }
 
@@ -120,9 +119,7 @@ export default class AffiliatedEntityList extends Vue {
     return items
   }
 
-  async created () {
-    this.isLoading = true
-    await this.syncOrganizations()
+  async mounted () {
     this.isLoading = false
   }
 
@@ -130,22 +127,10 @@ export default class AffiliatedEntityList extends Vue {
   addBusiness () { }
 
   @Emit()
-  removeBusiness (businessIdentifier: string, orgId?: number): RemoveBusinessPayload {
-    // If no orgId was supplied, remove affiliations between all implicit orgs and the specified business
-    // Otherwise remove affiliation for the specific org
-    if (!orgId) {
-      return {
-        orgIdentifiers: this.implicitOrgs
-          .filter(org => org.affiliatedEntities && org.affiliatedEntities
-            .some(business => business.businessIdentifier === businessIdentifier))
-          .map(org => org.id),
-        businessIdentifier
-      }
-    } else {
-      return {
-        orgIdentifiers: [orgId],
-        businessIdentifier
-      }
+  removeBusiness (businessIdentifier: string): RemoveBusinessPayload {
+    return {
+      orgIdentifiers: [this.myOrg.id],
+      businessIdentifier
     }
   }
 
@@ -160,14 +145,11 @@ export default class AffiliatedEntityList extends Vue {
     window.location.href = decodeURIComponent(redirectURL)
   }
 
-  manageTeam (business: Business) {
-    // BASIC user only - find the implicit org for this affiliated business
-    const org = this.implicitOrgs.find(
-      org => org.name.toUpperCase() === business.businessIdentifier.toUpperCase()
-    )
-    this.setCurrentOrg(org)
+  private manageTeam (business: Business) {
     this.setCurrentBusiness(business)
-    this.$router.push({ path: '/team' })
+    // Not ideal, as this makes the component less reusable
+    // TODO: Come up with a better solution: global event bus?
+    this.$parent.$emit('change-to', UserManagement)
   }
 }
 </script>

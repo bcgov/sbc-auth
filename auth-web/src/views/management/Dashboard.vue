@@ -2,29 +2,45 @@
   <v-app class="view-container">
     <ManagementMenu :menu="menu" />
     <article>
-      <component :is="selectedComponent" />
+      <component
+        :is="selectedComponent"
+        @change-to="setSelectedComponent($event)"
+      />
     </article>
   </v-app>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
-import EntityManagement from './EntityManagement.vue'
-import ManagementMenu from '../../components/auth/ManagementMenu.vue'
-import UserManagement from './UserManagement.vue'
+import EntityManagement from '@/views/management/EntityManagement.vue'
+import ManagementMenu from '@/components/auth/ManagementMenu.vue'
+import { Organization } from '@/models/Organization'
+import { User } from '@/models/user'
+import UserManagement from '@/views/management/UserManagement.vue'
 import { VueConstructor } from 'vue'
 
 @Component({
-  name: 'Template',
+  name: 'Dashboard',
   components: {
     ManagementMenu,
     EntityManagement,
     UserManagement
+  },
+  computed: {
+    ...mapState('user', ['userProfile'])
+  },
+  methods: {
+    ...mapActions('user', ['getUserProfile']),
+    ...mapActions('org', ['syncOrganizations'])
   }
 })
 export default class Dashboard extends Vue {
   private selectedComponent = null
+  private readonly userProfile!: User
+  private readonly getUserProfile!: (identifier: string) => User
+  private readonly syncOrganizations!: () => Organization[]
 
   private menu = [
     {
@@ -44,6 +60,14 @@ export default class Dashboard extends Vue {
         activate: () => { this.setSelectedComponent(UserManagement) }
       })
     }
+
+    // Check for existing state, and if not tell store to update
+    if (!this.userProfile) {
+      this.getUserProfile('@me')
+    }
+
+    // Always pull organization list
+    this.syncOrganizations()
   }
 
   setSelectedComponent (selectedComponent: VueConstructor) {

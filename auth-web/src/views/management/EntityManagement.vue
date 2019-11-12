@@ -32,6 +32,7 @@
           @add-success="showAddSuccessModal()"
           @add-failed-invalid-code="showInvalidCodeModal()"
           @add-failed-no-entity="showEntityNotFoundModal()"
+          @add-unknown-error="showUnknownErrorModal()"
           @cancel="cancelAddBusiness()"
         />
       </template>
@@ -135,6 +136,13 @@ export default class EntityManagement extends Vue {
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Business Not Found'
     this.dialogText = 'The specified business was not found.'
+    this.$refs.errorDialog.open()
+  }
+
+  showUnknownErrorModal () {
+    this.$refs.addBusinessDialog.close()
+    this.dialogTitle = 'Error Adding Business'
+    this.dialogText = 'An error occurred adding your business. Please try again.'
     this.$refs.errorDialog.open()
   }
 

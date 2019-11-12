@@ -1,5 +1,5 @@
 import Axios, { AxiosResponse } from 'axios'
-import { Member, Members, Organization } from '@/models/Organization'
+import { CreateRequestBody, Member, Members, Organization } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
 import { Invitations } from '@/models/Invitation'
 
@@ -22,5 +22,9 @@ export default class OrgService {
 
   public static async updateMember (orgId: number, memberId: number, role: string): Promise<AxiosResponse<Member>> {
     return Axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgId}/members/${memberId}`, { role })
+  }
+
+  public static async createOrg (createRequestBody: CreateRequestBody): Promise<AxiosResponse<Organization>> {
+    return Axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs`, createRequestBody)
   }
 }

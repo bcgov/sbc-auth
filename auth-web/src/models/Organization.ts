@@ -3,7 +3,8 @@ import { Invitation } from '@/models/Invitation'
 import { User } from '@/models/user'
 
 export interface CreateRequestBody {
-  name: string
+  name: string,
+  typeCode?: string
 }
 
 export interface Organizations

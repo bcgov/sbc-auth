@@ -18,35 +18,49 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 import { Invitation } from '@/models/Invitation'
 import OrgModule from '@/store/modules/org'
+import { Organization } from '@/models/Organization'
+import { User } from '@/models/user'
+import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
-import { mapActions } from 'vuex'
 
 @Component({
+  computed: {
+    ...mapState('user', ['userProfile'])
+  },
   methods: {
-    ...mapActions('org', ['acceptInvitation'])
+    ...mapActions('org', ['acceptInvitation', 'syncOrganizations']),
+    ...mapActions('user', ['getUserProfile'])
   }
 })
 export default class AcceptInvite extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
+  private userStore = getModule(UserModule, this.$store)
+  private readonly userProfile!: User
   private readonly acceptInvitation!: (token: string) => Invitation
+  private readonly syncOrganizations!: () => Organization[]
+  private readonly getUserProfile!: (identifier: string) => User
 
-  @Prop()
-  token: string
+  @Prop() token: string
+  private processingError: Boolean = false
+  private expiredInvitation: Boolean = false
 
-  processingError: Boolean = false
-
-  expiredInvitation: Boolean = false
-
-  mounted () {
+  private async mounted () {
+    await this.getUserProfile('@me')
+    await this.syncOrganizations()
     this.accept()
   }
 
-  async accept () {
+  private async accept () {
     try {
       await this.acceptInvitation(this.token)
-      this.$router.push('/main')
+      if (this.userProfile.contacts && this.userProfile.contacts.length > 0) {
+        this.$router.push('/main')
+      } else {
+        this.$router.push('/userprofile')
+      }
     } catch (exception) {
       if (exception.message === 'Request failed with status code 400') {
         this.expiredInvitation = true

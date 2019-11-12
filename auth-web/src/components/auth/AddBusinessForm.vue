@@ -85,7 +85,6 @@ export default class AddBusinessForm extends Vue {
   }
 
   private redirectToNext (): void {
-    // transition to business contact UI
     this.$router.push('/main')
   }
 
@@ -102,6 +101,8 @@ export default class AddBusinessForm extends Vue {
           this.$emit('add-failed-invalid-code')
         } else if (exception.response && exception.response.status === 404) {
           this.$emit('add-failed-no-entity')
+        } else {
+          this.$emit('add-unknown-error')
         }
       } finally {
         this.resetForm()

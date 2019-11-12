@@ -4,44 +4,60 @@
 </template>
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { KeycloakError, KeycloakPromise } from 'keycloak-js'
+import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
+import OrgModule from '@/store/modules/org'
+import { Organization } from '@/models/Organization'
 import { User } from '@/models/user'
+import { UserInfo } from '@/models/userInfo'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 
-@Component
+@Component({
+  computed: {
+    ...mapState('user', ['userProfile']),
+    ...mapState('org', ['organizations'])
+  },
+  methods: {
+    ...mapActions('user',
+      [
+        'initKeycloak',
+        'initializeSession',
+        'syncUserProfile'
+      ]
+    ),
+    ...mapActions('org', ['syncOrganizations'])
+  }
+})
 export default class Signin extends Vue {
   private userStore = getModule(UserModule, this.$store)
-  private appFlavor:string = ConfigHelper.getValue('VUE_APP_FLAVOR')
+  private orgStore = getModule(OrgModule, this.$store)
+  private readonly userProfile!: User
+  private readonly initKeycloak!: (idpHint: string) => Promise<KeycloakPromise<boolean, KeycloakError>>
+  private readonly initializeSession!: () => UserInfo
+  private readonly syncUserProfile!: () => User
+  private readonly organizations!: Organization[]
+  private readonly syncOrganizations!: () => Organization[]
 
-  @Prop({ default: 'bcsc' })
-  idpHint: string
+  @Prop({ default: 'bcsc' }) idpHint: string
 
-  @Prop()
-  redirectUrl: string
+  @Prop() redirectUrl: string
 
-  mounted () {
-    if (this.appFlavor === 'mvp' && this.idpHint === 'bcsc') {
-      // bcsc login is not a valid sigin option for mvp, redirect the user to passcode login
-      this.redirectToLogin()
-    } else {
-      this.userStore.initKeycloak(this.idpHint).then((kcInit) => {
-        kcInit.success((authenticated) => {
-          if (authenticated === true) {
-            const currentUsr = this.userStore.initializeSession()
-            // Make a POST to the users endpoint if it's bcsc (not needed for IDIR I guess)
-            if (this.idpHint !== 'idir') {
-              this.userStore.createUserProfile().then((userProfile) => {
-                this.redirectToNext()
-              })
-            } else {
-              this.redirectToNext()
-            }
-          }
-        })
-      })
-    }
+  private async mounted () {
+    const kcInit = await this.userStore.initKeycloak(this.idpHint)
+    kcInit.success(async authenticated => {
+      if (authenticated) {
+        this.initializeSession()
+        // Make a POST to the users endpoint if it's bcsc (only need for BCSC)
+        if (this.idpHint === 'bcsc') {
+          await this.syncUserProfile()
+          await this.syncOrganizations()
+        }
+        this.redirectToNext()
+      }
+    })
   }
 
   redirectToNext () {
@@ -56,10 +72,20 @@ export default class Signin extends Vue {
       if (this.idpHint === 'idir') {
         this.$router.push('/searchbusiness')
       } else {
-        this.userStore.getUserProfile('@me').then((userProfile:User) => {
-          // If contact exists redirect to dashboard, else to user profile page
-          this.$router.push(userProfile.contacts && userProfile.contacts.length > 0 ? '/main' : '/userprofile')
-        })
+        if (this.userProfile) {
+          // Redirect to user profile if no contact info
+          // Redirect to create team if no orgs
+          // Redirect to dashboard otherwise
+          if (!this.userProfile.contacts || this.userProfile.contacts.length === 0) {
+            this.$router.push('/userprofile')
+          } else if (this.organizations.length === 0) {
+            this.$router.push('/createteam')
+          } else {
+            this.$router.push('/main')
+          }
+        } else {
+          this.redirectToLogin()
+        }
       }
     }
   }
@@ -69,8 +95,3 @@ export default class Signin extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-@import '../../assets/scss/theme.scss';
-
-</style>
