@@ -34,3 +34,8 @@ class OrgType(BaseModel):  # pylint: disable=too-few-public-methods
     def get_default_type(cls):
         """Return the default type code for an Org."""
         return cls.query.filter_by(default=True).first()
+
+    @classmethod
+    def get_type_for_code(cls, code):
+        """Return the type for the provided code."""
+        return cls.query.filter_by(code=code).first()

@@ -18,6 +18,16 @@
           "Foobar Inc."
         ],
         "pattern": "^(.*)$"
+      },
+      "typeCode": {
+        "$id": "#/properties/orgType",
+        "type": "string",
+        "title": "Organizational Type",
+        "default": "IMPLICIT",
+        "examples": [
+          "IMPLICIT", "EXPLICIT"
+        ],
+        "pattern": "^(.*)$"
       }
     }
   }

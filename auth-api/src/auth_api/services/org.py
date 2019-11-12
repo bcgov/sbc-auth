@@ -54,7 +54,7 @@ class Org:
     @staticmethod
     def create_org(org_info: dict, user_id):
         """Create a new organization."""
-        org = OrgModel.create_from_dict(org_info=org_info)
+        org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.save()
 
         # create the membership record for this user
@@ -65,7 +65,7 @@ class Org:
 
     def update_org(self, org_info):
         """Update the passed organization with the new info."""
-        self._model.update_org_from_dict(org_info)
+        self._model.update_org_from_dict(camelback2snake(org_info))
         return self
 
     def delete_org(self):
