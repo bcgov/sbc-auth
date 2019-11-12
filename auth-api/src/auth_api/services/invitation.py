@@ -30,7 +30,7 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
 from auth_api.utils.roles import ADMIN, OWNER
-from auth_api.utils.roles import PENDING_APPROVAL_STATUS
+from auth_api.utils.roles import Status
 from config import get_named_config
 from .authorization import check_auth
 from .notification import send_email
@@ -216,7 +216,7 @@ class Invitation:
             membership_model.user_id = user_id
             membership_model.membership_type = membership.membership_type
             # user needs to get approval
-            membership_model.status = PENDING_APPROVAL_STATUS
+            membership_model.status = Status.PENDING_APPROVAL.value
             membership_model.save()
         invitation.accepted_date = datetime.now()
         invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')

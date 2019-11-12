@@ -13,6 +13,8 @@
 # limitations under the License.
 """API endpoints for managing an Org resource."""
 
+import json
+
 from flask import g, jsonify, request
 from flask_restplus import Namespace, Resource, cors
 
@@ -21,6 +23,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
+from auth_api.schemas.user import UserSchema as UserSchema
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
@@ -218,8 +221,6 @@ class OrgAffiliations(Resource):
 
 
 @cors_preflight('DELETE,OPTIONS')
-
-
 @API.route('/<string:org_id>/affiliations/<string:business_identifier>', methods=['DELETE', 'OPTIONS'])
 class OrgAffiliation(Resource):
     """Resource for managing a single affiliation between an org and an entity."""
@@ -253,13 +254,17 @@ class OrgMembers(Resource):
     def get(org_id):
         """Retrieve the set of members for the given org."""
         try:
-            org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
-                                            allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
-            if org:
-                response, status = jsonify(org.get_members()), \
+
+            status = request.args.get('status')
+            roles = request.args.get('roles')
+
+            users = UserService.get_members_for_org(org_id,status =status,membership_roles=roles, token_info=g.jwt_oidc_token_info,
+                                                    allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+            if users:
+                response, status = json.dumps(UserSchema(exclude=['orgs']).dump(users, many=True)), \
                                    http_status.HTTP_200_OK
             else:
-                response, status = {'message': 'The requested organization could not be found.'}, \
+                response, status = {'message': 'No users found found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
 
         except BusinessException as exception:

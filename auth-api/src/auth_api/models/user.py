@@ -23,7 +23,7 @@ from .db import db
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from auth_api.utils.roles import ACTIVE_STATUS
+from auth_api.utils.roles import Status
 
 from .membership import Membership as MembershipModel
 from .org import Org as OrgModel
@@ -132,7 +132,7 @@ class User(BaseModel):
         return None
 
     @classmethod
-    def find_members_by_org_id_by_status_by_roles(cls, org_id, roles, status=ACTIVE_STATUS):
+    def find_members_by_org_id_by_status_by_roles(cls, org_id, roles, status=Status.ACTIVE.value):
         """returns all members of the org with a status"""
         return db.session.query(User). \
             join(MembershipModel,

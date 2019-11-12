@@ -16,12 +16,16 @@
 This module manages the User Information.
 """
 
+from typing import Dict, Tuple
+
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role,ACTIVE_STATUS
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role, Status
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
+from auth_api.models import Org as OrgModel
+from .authorization import check_auth
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import UserSchema
@@ -179,12 +183,34 @@ class User:  # pylint: disable=too-many-instance-attributes
         return User(user_model)
 
     @staticmethod
-    def get_admins_for_membership(membership_id):
+    def get_members_for_org(org_id, status=None, membership_roles=None, token_info: Dict = None,
+                            allowed_roles: Tuple = None):
+        """get members of org .Fetches using status and roles"""
+        if org_id is None:
+            return None
+
+        if membership_roles is None:
+            membership_roles = ALL_ALLOWED_ROLES
+        if not status:
+            status = Status.ACTIVE.value
+        else:
+            status = Status[status].value
+
+        org_model = OrgModel.find_by_org_id(org_id)
+        if not org_model:
+            return None
+
+        # Check authorization for the user
+        check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
+        return UserModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status)
+
+    @staticmethod
+    def get_admins_for_membership(membership_id, status=Status.ACTIVE.value):
         """get admins for an org """
         membership = MembershipModel.find_membership_by_id(membership_id)
         org_id = membership.org_id
 
-        return UserModel.find_members_by_org_id_by_status_by_roles(org_id, CLIENT_ADMIN_ROLES, ACTIVE_STATUS)
+        return UserModel.find_members_by_org_id_by_status_by_roles(org_id, CLIENT_ADMIN_ROLES, status)
 
     def get_orgs(self):
         """Return the orgs associated with this user."""
