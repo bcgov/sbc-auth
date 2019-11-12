@@ -28,4 +28,8 @@ export default class OrgService {
   public static async createOrg (createRequestBody: CreateRequestBody): Promise<AxiosResponse<Organization>> {
     return Axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs`, createRequestBody)
   }
+
+  public static async createOrg (createRequestBody: CreateRequestBody): Promise<AxiosResponse<Organization>> {
+    return Axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs`, createRequestBody)
+  }
 }

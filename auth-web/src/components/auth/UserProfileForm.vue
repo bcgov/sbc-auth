@@ -240,6 +240,15 @@ export default class UserProfileForm extends Vue {
         this.$router.push({ path: '/main' })
       }
     }
+
+    private redirectToNext () {
+      // If this user is not a member of a team, redirect to Create Team view
+      if (!this.organizations || this.organizations.length === 0) {
+        this.$router.push({ path: '/createteam' })
+      } else { // If a member of a team, redirect to dashboard for that team
+        this.$router.push({ path: '/main' })
+      }
+    }
 }
 </script>
 

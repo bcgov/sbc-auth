@@ -59,7 +59,6 @@ import { getModule } from 'vuex-module-decorators'
   },
   methods: {
     ...mapMutations('business', ['setCurrentBusiness']),
-    ...mapMutations('org', ['setCurrentOrg']),
     ...mapActions('org', ['syncOrganizations'])
   }
 })
@@ -70,7 +69,6 @@ export default class AffiliatedEntityList extends Vue {
   private readonly organizations!: Organization[]
   private readonly setCurrentBusiness!: (business: Business) => void
   private readonly syncOrganizations!: () => Organization[]
-  private readonly setCurrentOrg!: (org: Organization) => void
 
   private get tableHeaders () {
     return [
