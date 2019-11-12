@@ -31,7 +31,7 @@
         </template>
         <template v-slot:item.action="{ item }">
           <div class="actions">
-            <v-btn depressed small @click="manageTeam(item)">Manage Team</v-btn>
+            <v-btn depressed small @click="editContact(item)">Edit Contact</v-btn>
             <v-btn depressed small @click="goToDashboard(item.businessIdentifier)">Dashboard</v-btn>
             <v-btn depressed small @click="removeBusiness(item.businessIdentifier)">Remove</v-btn>
           </div>
@@ -134,8 +134,8 @@ export default class AffiliatedEntityList extends Vue {
     }
   }
 
-  editContact (businessidentifier: string) {
-    this.setCurrentBusiness(this.businessById(businessidentifier))
+  editContact (business: Business) {
+    this.setCurrentBusiness(business)
     this.$router.push({ path: '/businessprofile', query: { redirect: '/main' } })
   }
 

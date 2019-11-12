@@ -5,7 +5,6 @@ import BusinessProfile from '@/views/BusinessProfile.vue'
 import CreateAccount from '@/views/CreateAccount.vue'
 import CreateTeamView from '@/views/CreateTeamView.vue'
 import Dashboard from '@/views/management/Dashboard.vue'
-import Home from '@/views/Home.vue'
 import KeyCloakService from '@/services/keycloak.services'
 import PageNotFound from '@/views/PageNotFound.vue'
 import PaymentForm from '@/components/pay/PaymentForm.vue'
@@ -30,24 +29,20 @@ function mapReturnPayVars (route) {
   }
 }
 
-export function getRoutes (appFlavor:String) {
+export function getRoutes (appFlavor: String) {
   let varRoutes
 
-  if (appFlavor === 'mvp') {
-    varRoutes = [{ path: '/', component: Home }]
-  } else {
-    varRoutes = [
-      { path: '/', component: AuthHome },
-      { path: '/home', component: AuthHome },
-      { path: '/main', component: Dashboard, meta: { requiresAuth: true } },
-      { path: '/team', component: UserManagement, meta: { requiresAuth: true } },
-      { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
-      { path: '/createteam', component: CreateTeamView, meta: { requiresAuth: true } },
-      { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
-      { path: '/validatetoken/:token', component: TokenValidator, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
-      { path: '/confirmtoken/:token', component: AcceptInvite, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } }
-    ]
-  }
+  varRoutes = [
+    { path: '/', component: AuthHome },
+    { path: '/home', component: AuthHome },
+    { path: '/main', component: Dashboard, meta: { requiresAuth: true } },
+    { path: '/team', component: UserManagement, meta: { requiresAuth: true } },
+    { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
+    { path: '/createteam', component: CreateTeamView, meta: { requiresAuth: true } },
+    { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
+    { path: '/validatetoken/:token', component: TokenValidator, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
+    { path: '/confirmtoken/:token', component: AcceptInvite, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } }
+  ]
 
   let routes = [
     { path: '/signin/:idpHint', component: Signin, props: true, meta: { requiresAuth: false } },

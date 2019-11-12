@@ -20,6 +20,8 @@
 </template>
 
 <script lang="ts">
+import { mapActions, mapState } from 'vuex'
+import { Business } from '@/models/business'
 import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
 import BusinessModule from '@/store/modules/business'
 import { Component } from 'vue-property-decorator'
@@ -31,19 +33,28 @@ import { getModule } from 'vuex-module-decorators'
   components: {
     BusinessContactForm,
     SupportInfoCard
+  },
+  computed: {
+    ...mapState('business', ['currentBusiness'])
+  },
+  methods: {
+    ...mapActions('business', ['loadBusiness'])
   }
 })
 export default class BusinessProfile extends Vue {
   private businessStore = getModule(BusinessModule, this.$store)
   // TODO: Set businessType from current business in store
   private businessType = 'Cooperative'
-  editing = false
+  private editing = false
+  private readonly currentBusiness!: Business
+  private readonly loadBusiness!: () => Business
 
-  mounted () {
+  async mounted () {
     // Check if there is already contact info so that we display the appropriate copy
-    if (this.businessStore.currentBusiness &&
-      this.businessStore.currentBusiness.contacts &&
-      this.businessStore.currentBusiness.contacts.length > 0) {
+    await this.loadBusiness()
+    if (this.currentBusiness &&
+      this.currentBusiness.contacts &&
+      this.currentBusiness.contacts.length > 0) {
       this.editing = true
     }
   }
