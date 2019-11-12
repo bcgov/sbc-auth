@@ -2,12 +2,12 @@
   <v-container>
     <div class="view-container">
       <article>
-        <div>
-          <h1>Create Team</h1>
-          <p>Create your Cooperatives Online Team</p>
-        </div>
+        <h1 class="mb-5">Create Team</h1>
+        <p class="intro-text">Create your Cooperatives Online Team.</p>
         <v-card class="profile-card">
-          <TeamForm />
+          <v-container>
+            <TeamForm />
+          </v-container>
         </v-card>
       </article>
     </div>
@@ -32,20 +32,10 @@ export default class CreateTeamView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  // Layout
   article {
     flex: 1 1 auto;
-  }
-
-  @media (min-width: 960px) {
-    article {
-      padding-top: 0.5rem;
-      padding-bottom: 0.5rem;
-    }
-
-    .view-container {
-      flex-flow: row nowrap;
-    }
+    margin: 0 auto;
+    max-width: 50rem;
   }
 
   .intro-text {

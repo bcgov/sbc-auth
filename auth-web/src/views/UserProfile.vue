@@ -8,12 +8,12 @@
     <div v-if="!isLoading" class="view-container">
       <article>
         <div v-if="!editing">
-          <h1>Complete User Profile</h1>
+          <h1 class="mb-5">Complete User Profile</h1>
           <p class="intro-text">It looks like we are missing some information to complete your user profile.</p>
         </div>
         <div v-if="editing">
-          <h1>Edit User Profile</h1>
-          <p class="intro-text">Update and manage your contact information</p>
+          <h1 class="mb-5">Edit User Profile</h1>
+          <p class="intro-text">Update and manage your contact information.</p>
         </div>
         <v-card class="profile-card">
           <v-container>
@@ -22,9 +22,6 @@
           </v-container>
         </v-card>
       </article>
-      <aside>
-        <SupportInfoCard/>
-      </aside>
     </div>
   </v-container>
 </template>
@@ -66,31 +63,10 @@ export default class UserProfile extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  // Layout
   article {
     flex: 1 1 auto;
-  }
-
-  aside {
-    flex: 0 0 auto;
-    margin-top: 2rem;
-  }
-
-  @media (min-width: 960px) {
-    article {
-      padding-top: 0.5rem;
-      padding-bottom: 0.5rem;
-    }
-
-    aside {
-      margin-top: 0;
-      margin-left: 2rem;
-      width: 20rem;
-    }
-
-    .view-container {
-      flex-flow: row nowrap;
-    }
+    margin: 0 auto;
+    max-width: 50rem;
   }
 
   .intro-text {
