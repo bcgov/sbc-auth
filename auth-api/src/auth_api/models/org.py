@@ -54,7 +54,10 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
             current_app.logger.debug(
                 'Creating org from dictionary {}'.format(org_info)
             )
-            org.org_type = OrgType.get_default_type()
+            if org.type_code:
+                org.org_type = OrgType.get_type_for_code(org.type_code)
+            else:
+                org.org_type = OrgType.get_default_type()
             org.org_status = OrgStatus.get_default_status()
             org.preferred_payment = PaymentType.get_default_payment_type()
             org.save()

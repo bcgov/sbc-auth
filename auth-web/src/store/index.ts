@@ -5,10 +5,15 @@ import { RootState } from './types'
 import StatusModule from '@/store/modules/status'
 import UserModule from '@/store/modules/user'
 import Vue from 'vue'
+import VuexPersistance from 'vuex-persist'
 
 Vue.use(Vuex)
 
 const debug = process.env.NODE_ENV !== 'production'
+
+const vuexSession = new VuexPersistance<RootState>({
+  storage: window.sessionStorage
+})
 
 const storeOptions: StoreOptions<RootState> = {
   strict: debug,
@@ -17,7 +22,8 @@ const storeOptions: StoreOptions<RootState> = {
     statusmodule: StatusModule,
     user: UserModule,
     org: OrgModule
-  }
+  },
+  plugins: [vuexSession.plugin]
 }
 
 export default new Vuex.Store<RootState>(storeOptions)

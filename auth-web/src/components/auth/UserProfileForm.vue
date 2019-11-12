@@ -105,6 +105,7 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import { Contact } from '@/models/contact'
+import { Organization } from '@/models/Organization'
 import TermsOfUseDialog from '@/components/auth/TermsOfUseDialog.vue'
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
@@ -117,17 +118,30 @@ import { mask } from 'vue-the-mask'
       mask
     },
     computed: {
-      ...mapState('user', ['userProfile'])
+      ...mapState('user', ['userProfile']),
+      ...mapState('org', ['organizations'])
     },
     methods: {
-      ...mapActions('user', ['createUserContact', 'updateUserContact'])
+      ...mapActions('user',
+        [
+          'createUserContact',
+          'updateUserContact',
+          'updateUserTerms',
+          'getUserProfile'
+        ]
+      ),
+      ...mapActions('org', ['syncOrganizations'])
     }
   })
 export default class UserProfileForm extends Vue {
     private userStore = getModule(UserModule, this.$store)
     private readonly userProfile!: User
+    private readonly organizations!: Organization[]
     private readonly createUserContact!: (contact: Contact) => Contact
     private readonly updateUserContact!: (contact: Contact) => Contact
+    private readonly updateUserTerms!: () => User
+    private readonly getUserProfile!: (identifer: string) => User
+    private readonly syncOrganizations!: () => Organization[]
     private firstName = ''
     private lastName = ''
     private emailAddress = ''
@@ -137,7 +151,7 @@ export default class UserProfileForm extends Vue {
     private formError = ''
     private editing = false
     private lastAcceptedVersion = ''
-    private isTermsAccepted:boolean
+    private isTermsAccepted: boolean
 
     private emailRules = [
       v => !!v || 'Email address is required',
@@ -164,18 +178,24 @@ export default class UserProfileForm extends Vue {
               this.confirmedEmailAddress === this.emailAddress && this.isTermsAccepted
     }
 
-    mounted () {
-      if (this.userProfile) {
-        this.firstName = this.userProfile.firstname
-        this.lastName = this.userProfile.lastname
-        if (this.userProfile.contacts && this.userProfile.contacts[0]) {
-          this.emailAddress = this.confirmedEmailAddress = this.userProfile.contacts[0].email
-          this.phoneNumber = this.userProfile.contacts[0].phone
-          this.extension = this.userProfile.contacts[0].phoneExtension
-          this.editing = true
-          if (this.userProfile.is_terms_of_use_accepted) {
-            this.lastAcceptedVersion = this.userProfile.terms_of_use_version
-          }
+    async mounted () {
+      if (!this.userProfile) {
+        await this.getUserProfile('@me')
+      }
+
+      if (!this.organizations) {
+        await this.syncOrganizations()
+      }
+
+      this.firstName = this.userProfile.firstname
+      this.lastName = this.userProfile.lastname
+      if (this.userProfile.contacts && this.userProfile.contacts[0]) {
+        this.emailAddress = this.confirmedEmailAddress = this.userProfile.contacts[0].email
+        this.phoneNumber = this.userProfile.contacts[0].phone
+        this.extension = this.userProfile.contacts[0].phoneExtension
+        this.editing = true
+        if (this.userProfile.is_terms_of_use_accepted) {
+          this.lastAcceptedVersion = this.userProfile.terms_of_use_version
         }
       }
     }
@@ -195,7 +215,7 @@ export default class UserProfileForm extends Vue {
         if (!this.editing) {
           await Promise.all([
             await this.createUserContact(contact),
-            await this.userStore.updateUserTerms()
+            await this.updateUserTerms()
           ])
         } else {
           await this.updateUserContact(contact)
@@ -203,11 +223,20 @@ export default class UserProfileForm extends Vue {
         this.$router.push('/main')
       }
     }
+
+    private redirectToNext () {
+      // If this user is not a member of a team, redirect to Create Team view
+      if (!this.organizations || this.organizations.length === 0) {
+        this.$router.push({ path: '/createteam' })
+      } else { // If a member of a team, redirect to dashboard for that team
+        this.$router.push({ path: '/main' })
+      }
+    }
 }
 </script>
 
 <style lang="scss" scoped>
-  @import '../../assets/scss/theme.scss';
+  @import '$assets/scss/theme.scss';
 
   // Tighten up some of the spacing between rows
   [class^="col"] {

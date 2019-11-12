@@ -44,9 +44,6 @@ import { getModule } from 'vuex-module-decorators'
     UserProfileForm,
     SupportInfoCard
   },
-  methods: {
-    ...mapActions('user', ['getUserProfile'])
-  },
   computed: {
     ...mapState('user', ['userProfile'])
   }
@@ -59,10 +56,6 @@ export default class UserProfile extends Vue {
   private isLoading = true
 
   async mounted () {
-    if (!this.userProfile) {
-      await this.getUserProfile('@me')
-    }
-
     if (this.userProfile.contacts && this.userProfile.contacts[0]) {
       this.editing = true
     }

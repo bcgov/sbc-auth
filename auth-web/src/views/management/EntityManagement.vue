@@ -3,12 +3,8 @@
     <header class="view-header mt-1 mb-9">
       <h1>Manage Businesses</h1>
       <div class="view-header__actions">
-        <v-btn class="mr-2" outlined color="primary" @click="showInviteMultipleUsersModal()">
-          <v-icon>add</v-icon>
-          <span>Invite People</span>
-        </v-btn>
         <v-btn outlined color="primary" @click="showAddBusinessModal()">
-          <v-icon>add</v-icon>
+          <v-icon small>add</v-icon>
           <span>Add Business</span>
         </v-btn>
       </div>
@@ -36,6 +32,7 @@
           @add-success="showAddSuccessModal()"
           @add-failed-invalid-code="showInvalidCodeModal()"
           @add-failed-no-entity="showEntityNotFoundModal()"
+          @add-unknown-error="showUnknownErrorModal()"
           @cancel="cancelAddBusiness()"
         />
       </template>
@@ -139,6 +136,13 @@ export default class EntityManagement extends Vue {
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Business Not Found'
     this.dialogText = 'The specified business was not found.'
+    this.$refs.errorDialog.open()
+  }
+
+  showUnknownErrorModal () {
+    this.$refs.addBusinessDialog.close()
+    this.dialogTitle = 'Error Adding Business'
+    this.dialogText = 'An error occurred adding your business. Please try again.'
     this.$refs.errorDialog.open()
   }
 

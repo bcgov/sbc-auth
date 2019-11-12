@@ -1,30 +1,46 @@
 <template>
-  <v-container class="view-container">
+  <v-app class="view-container">
     <ManagementMenu :menu="menu" />
-    <article class="view-container__content">
-      <component :is="selectedComponent" />
+    <article>
+      <component
+        :is="selectedComponent"
+        @change-to="setSelectedComponent($event)"
+      />
     </article>
-  </v-container>
+  </v-app>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
-import EntityManagement from './EntityManagement.vue'
-import ManagementMenu from '../../components/auth/ManagementMenu.vue'
-import UserManagement from './UserManagement.vue'
+import EntityManagement from '@/views/management/EntityManagement.vue'
+import ManagementMenu from '@/components/auth/ManagementMenu.vue'
+import { Organization } from '@/models/Organization'
+import { User } from '@/models/user'
+import UserManagement from '@/views/management/UserManagement.vue'
 import { VueConstructor } from 'vue'
 
 @Component({
-  name: 'Template',
+  name: 'Dashboard',
   components: {
     ManagementMenu,
     EntityManagement,
     UserManagement
+  },
+  computed: {
+    ...mapState('user', ['userProfile'])
+  },
+  methods: {
+    ...mapActions('user', ['getUserProfile']),
+    ...mapActions('org', ['syncOrganizations'])
   }
 })
 export default class Dashboard extends Vue {
   private selectedComponent = null
+  private readonly userProfile!: User
+  private readonly getUserProfile!: (identifier: string) => User
+  private readonly syncOrganizations!: () => Organization[]
 
   private menu = [
     {
@@ -39,11 +55,19 @@ export default class Dashboard extends Vue {
     const featureHide = ConfigHelper.getValue('VUE_APP_FEATURE_HIDE')
     if (!featureHide || !featureHide.USER_MGMT) {
       this.menu.push({
-        title: 'Manage Teams',
+        title: 'Manage Team',
         icon: 'group',
         activate: () => { this.setSelectedComponent(UserManagement) }
       })
     }
+
+    // Check for existing state, and if not tell store to update
+    if (!this.userProfile) {
+      this.getUserProfile('@me')
+    }
+
+    // Always pull organization list
+    this.syncOrganizations()
   }
 
   setSelectedComponent (selectedComponent: VueConstructor) {
@@ -55,16 +79,6 @@ export default class Dashboard extends Vue {
 <style lang="scss" scoped>
   .view-container {
     display: flex;
-    flex-direction: row;
-  }
-
-  .view-container__content {
-    flex: 1 1 auto;
-  }
-
-  article {
-    margin-left: 1.5rem;
-    padding: 0;
   }
 
   aside {

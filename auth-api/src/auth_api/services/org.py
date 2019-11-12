@@ -58,7 +58,7 @@ class Org:
         if existing_similar__org is not None:
             raise BusinessException(Error.DATA_CONFLICT, None)
 
-        org = OrgModel.create_from_dict(org_info=org_info)
+        org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.save()
 
         # create the membership record for this user
@@ -69,7 +69,7 @@ class Org:
 
     def update_org(self, org_info):
         """Update the passed organization with the new info."""
-        self._model.update_org_from_dict(org_info)
+        self._model.update_org_from_dict(camelback2snake(org_info))
         return self
 
     def delete_org(self):
