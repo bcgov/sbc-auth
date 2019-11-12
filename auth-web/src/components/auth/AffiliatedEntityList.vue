@@ -83,7 +83,7 @@ export default class AffiliatedEntityList extends Vue {
         align: 'left',
         value: 'action',
         sortable: false,
-        width: '340'
+        width: '280'
       }
     ]
   }
