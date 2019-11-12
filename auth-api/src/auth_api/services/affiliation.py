@@ -152,7 +152,3 @@ class Affiliation:
 
         affiliation.delete()
         entity.set_pass_code_claimed(False)
-
-        # If org is implicit, delete it as it only exists to faciliate this affiliation
-        if org.as_dict()['orgType'] == 'IMPLICIT':
-            org.delete_org()
