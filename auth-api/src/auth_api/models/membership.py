@@ -21,7 +21,8 @@ from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
 from .membership_type import MembershipType
-
+from .membership_status_code import MembershipStatusCode
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role, Status
 
 class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """Model for a Membership model.  Associates Users and Orgs."""
@@ -50,6 +51,8 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         self.membership_type_code = kwargs.get('membership_type_code')
         if self.membership_type_code is None:
             self.membership_type = MembershipType.get_default_type()
+        if 'membership_type_status' in kwargs:
+            self.status = kwargs.get('membership_type_status')
 
     @classmethod
     def find_membership_by_id(cls, membership_id):

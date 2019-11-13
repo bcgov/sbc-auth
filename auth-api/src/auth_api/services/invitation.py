@@ -27,6 +27,7 @@ from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
+from auth_api.models import OrgSettings as OrgSettingsModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
 from auth_api.utils.roles import ADMIN, OWNER
@@ -186,14 +187,15 @@ class Invitation:
         return invitation_id
 
     @staticmethod
-    def notify_admin(user, invitation_id, invitation_origin):
+    def notify_admin(user, invitation_id, membership_id, invitation_origin):
         """admins should be notified if user has responded to invitation"""
-        admin_list = UserService.get_admins_for_membership(invitation_id)
+        admin_list = UserService.get_admins_for_membership(membership_id)
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         admin_emails = ''
         for contact in admin_list:
-            admin_emails = contact.contacts[0].contact.email + ' ' + admin_emails
+            if contact.contacts:
+                admin_emails = contact.contacts[0].contact.email + ' ' + admin_emails
 
         Invitation.send_admin_notification(user.as_dict(),
                                            '{}/{}'.format(invitation_origin, context_path),
@@ -201,23 +203,32 @@ class Invitation:
         return Invitation(invitation)
 
     @staticmethod
-    def accept_invitation(invitation_id, user_id):
+    def accept_invitation(invitation_id, user, origin):
         """Add user, role and org from the invitation to membership."""
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
+
         if invitation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         if invitation.invitation_status_code == 'ACCEPTED':
             raise BusinessException(Error.ACTIONED_INVITATION, None)
         if invitation.invitation_status_code == 'EXPIRED':
             raise BusinessException(Error.EXPIRED_INVITATION, None)
+        # TODO : isnt this only one?remove for loop
         for membership in invitation.membership:
             membership_model = MembershipModel()
             membership_model.org_id = membership.org_id
-            membership_model.user_id = user_id
+            membership_model.user_id = user.identifier
             membership_model.membership_type = membership.membership_type
             # user needs to get approval
-            membership_model.status = Status.PENDING_APPROVAL.value
+            is_auto_approval = OrgSettingsModel.is_admin_auto_approved_invitees(membership.org_id)
+            if is_auto_approval:
+                membership_model.status = Status.ACTIVE.value
+            else:
+                membership_model.status = Status.PENDING_APPROVAL.value
             membership_model.save()
+            if not is_auto_approval:
+                Invitation.notify_admin(user, invitation_id, membership.id, origin)
+
         invitation.accepted_date = datetime.now()
         invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')
         invitation.save()
