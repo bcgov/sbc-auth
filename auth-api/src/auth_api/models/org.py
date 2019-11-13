@@ -42,8 +42,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     org_status = relationship('OrgStatus')
     preferred_payment = relationship('PaymentType')
     members = relationship('Membership', back_populates='org', cascade='all,delete,delete-orphan')
-    affiliated_entities = relationship('Affiliation', back_populates='org',
-                                       primaryjoin="and_(Org.id == Affiliation.org_id, Org.type_code == 'IMPLICIT')")
+    affiliated_entities = relationship('Affiliation', back_populates='org')
     invitations = relationship('InvitationMembership', back_populates='org', cascade='all,delete,delete-orphan')
 
     @classmethod
@@ -71,7 +70,6 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
 
     @classmethod
     def find_similar_org_by_name(cls, name):
-        print(name)
         """Find an Org instance that matches the provided name."""
         # TODO: add more fancy comparison
         return cls.query.filter(Org.name.ilike(f'%{name}%')).first()

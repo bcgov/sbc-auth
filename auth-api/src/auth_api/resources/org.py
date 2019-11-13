@@ -23,12 +23,12 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
-from auth_api.schemas.user import UserSchema as UserSchema
+from auth_api.schemas.user import UserSchema
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role, Status
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('orgs', description='Endpoints for organization management')
@@ -286,10 +286,9 @@ class OrgMember(Resource):
     def patch(org_id, membership_id):  # pylint:disable=unused-argument
         """Update a membership record with new member role."""
         token = g.jwt_oidc_token_info
-        request_json = request.get_json()
         role = request.get_json().get('role')
         status = request.get_json().get('status')
-        updated_fields_dict = { }
+        updated_fields_dict = {}
         try:
             if role is not None:
                 updated_role = MembershipService.get_membership_type_by_code(role)
