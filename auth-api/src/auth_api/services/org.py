@@ -26,6 +26,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.schemas import OrgSchema
 from auth_api.utils.roles import Status
 from auth_api.utils.util import camelback2snake
+from auth_api.utils.roles import Status
 
 from .authorization import check_auth
 from .invitation import Invitation as InvitationService

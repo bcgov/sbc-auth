@@ -37,5 +37,4 @@ from .org_type import OrgType
 from .payment_type import PaymentType
 from .user import User
 
-
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)
