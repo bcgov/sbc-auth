@@ -24,12 +24,12 @@ from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import utils as schema_utils
 from auth_api.schemas.membership import MembershipSchema
 from auth_api.services import Affiliation as AffiliationService
-from auth_api.schemas.user import UserSchema as UserSchema
+from auth_api.schemas.user import UserSchema
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role, Status
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('orgs', description='Endpoints for organization management')
