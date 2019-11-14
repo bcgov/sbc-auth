@@ -30,4 +30,4 @@ class UserSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-pub
         exclude = ('id',)
 
     contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
-    #orgs = fields.Pluck('MembershipSchema', 'org', many=True)
+    orgs = fields.Pluck('MembershipSchema', 'org', many=True)
