@@ -2,10 +2,10 @@
   <v-data-table
     class="user-list__pending"
     :headers="headerInvitations"
-    :items="pendingInvites"
+    :items="pendingOrgInvitations"
     :items-per-page="5"
     :calculate-widths="true"
-    :hide-default-footer="pendingInvites.length <= 5"
+    :hide-default-footer="pendingOrgInvitations.length <= 5"
   >
     <template v-slot:item.sentDate="{ item }">
       {{ formatDate (item.sentDate) }}
@@ -22,21 +22,24 @@
 
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import { Invitation } from '@/models/Invitation'
 import { Organization } from '@/models/Organization'
-import { mapGetters } from 'vuex'
 import moment from 'moment'
 
 @Component({
   computed: {
-    ...mapGetters('org', ['myOrg']),
-    pendingInvites (): Invitation[] {
-      return this.myOrg.invitations.filter(invitation => invitation.status === 'PENDING')
-    }
+    ...mapState('org', ['pendingOrgInvitations']),
+    ...mapGetters('org', ['myOrg'])
+  },
+  methods: {
+    ...mapActions('org', ['syncPendingOrgInvitations'])
   }
 })
 export default class InvitationsDataTable extends Vue {
   private readonly myOrg!: Organization
+  private readonly pendingOrgInvitations!: Invitation[]
+  private readonly syncPendingOrgInvitations!: () => Invitation[]
   private readonly headerInvitations = [
     {
       text: 'Email',
@@ -64,6 +67,10 @@ export default class InvitationsDataTable extends Vue {
       width: '195'
     }
   ]
+
+  private async mounted () {
+    await this.syncPendingOrgInvitations()
+  }
 
   private formatDate (date: Date) {
     return moment(date).format('DD MMM, YYYY')

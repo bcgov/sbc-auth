@@ -1,7 +1,7 @@
 <template>
   <v-container class="view-container">
     <header class="view-header mt-1 mb-5">
-      <h1>Manage Team <span class="body-1" v-if="currentBusiness">({{ currentBusiness.name }})</span></h1>
+      <h1>Manage Team</h1>
       <div class="view-header__actions">
         <v-btn outlined color="primary" @click="showInviteUsersModal()">
           <v-icon>add</v-icon>
@@ -27,6 +27,10 @@
           />
         </v-tab-item>
         <v-tab-item>
+          <PendingMemberDataTable
+            @confirm-approve-member="showConfirmApproveModal($event)"
+            @confirm-deny-member="showConfirmDenyModal($event)"
+          />
         </v-tab-item>
         <v-tab-item>
           <InvitationsDataTable
@@ -128,6 +132,7 @@ import InvitationsDataTable from '@/components/auth/InvitationsDataTable.vue'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
+import PendingMemberDataTable from '@/components/auth/PendingMemberDataTable.vue'
 import UserModule from '@/store/modules/user'
 import _ from 'lodash'
 import { getModule } from 'vuex-module-decorators'
@@ -136,12 +141,12 @@ import { getModule } from 'vuex-module-decorators'
   components: {
     MemberDataTable,
     InvitationsDataTable,
+    PendingMemberDataTable,
     InviteUsersForm,
     ModalDialog
   },
   computed: {
     ...mapState('org', [
-      'organizations',
       'resending',
       'sentInvitations'
     ]),
@@ -170,7 +175,6 @@ export default class UserManagement extends Vue {
   private confirmRemoveInviteText = ''
 
   private readonly currentBusiness!: Business
-  private readonly organizations!: Organization[]
   private readonly resending!: boolean
   private readonly sentInvitations!: Invitation[]
   private readonly resendInvitation!: (invitation: Invitation) => void

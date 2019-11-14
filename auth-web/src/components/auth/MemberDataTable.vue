@@ -2,10 +2,10 @@
   <v-data-table
     class="user-list__active"
     :headers="headerMembers"
-    :items="myOrg.members"
+    :items="activeOrgMembers"
     :items-per-page="5"
     :calculate-widths="true"
-    :hide-default-footer="myOrg.members.length <= 5"
+    :hide-default-footer="activeOrgMembers.length <= 5"
     :custom-sort="customSortActive"
   >
     <template v-slot:loading>
@@ -45,7 +45,7 @@
 
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
-import { mapGetters, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import { Member } from '@/models/Organization'
 import moment from 'moment'
 
@@ -56,10 +56,17 @@ export interface ChangeRolePayload {
 
 @Component({
   computed: {
+    ...mapState('org', ['activeOrgMembers']),
     ...mapGetters('org', ['myOrg'])
+  },
+  methods: {
+    ...mapActions('org', ['syncActiveOrgMembers'])
   }
 })
 export default class MemberDataTable extends Vue {
+  private readonly activeOrgMembers!: Member[]
+  private readonly syncActiveOrgMembers!: () => Member[]
+
   private readonly availableRoles = [
     'Member',
     'Admin',
@@ -93,6 +100,10 @@ export default class MemberDataTable extends Vue {
       width: '95'
     }
   ]
+
+  private async mounted () {
+    await this.syncActiveOrgMembers()
+  }
 
   private formatDate (date: Date) {
     return moment(date).format('DD MMM, YYYY')
