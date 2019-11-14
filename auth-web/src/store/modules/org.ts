@@ -184,7 +184,7 @@ export default class OrgModule extends VuexModule {
 
   @Action({ commit: 'setPendingOrgMembers', rawError: true })
   public async syncPendingOrgMembers () {
-    const response = await OrgService.getOrgMembers(this.context.getters['myOrg'].id, 'PENDING')
+    const response = await OrgService.getOrgMembers(this.context.getters['myOrg'].id, 'PENDING_APPROVAL')
     return response.data && response.data.members ? response.data.members : []
   }
 

@@ -55,7 +55,7 @@ export default class PendingMemberDataTable extends Vue {
     }
   ]
 
-  private async mount () {
+  private async mounted () {
     await this.syncPendingOrgMembers()
   }
 
