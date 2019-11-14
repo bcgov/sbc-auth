@@ -4,7 +4,7 @@
       <h1>Manage Businesses</h1>
       <div class="view-header__actions">
         <v-btn outlined color="primary" @click="showAddBusinessModal()">
-          <v-icon small>add</v-icon>
+          <v-icon small>mdi-plus</v-icon>
           <span>Add Business</span>
         </v-btn>
       </div>
@@ -56,7 +56,7 @@
       max-width="640"
     >
       <template v-slot:icon>
-        <v-icon large color="error">error</v-icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:actions>
         <v-btn large color="error" @click="close()">OK</v-btn>
@@ -72,7 +72,7 @@
       max-width="640"
     >
       <template v-slot:icon>
-        <v-icon large color="error">error</v-icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:actions>
         <v-btn large color="primary" @click="remove()">Remove</v-btn>

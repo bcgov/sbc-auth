@@ -19,7 +19,7 @@
               <v-row>
                 <v-col sm="12" md="8" class="section-card__inner">
                   <div class="section-card__icon">
-                    <v-icon>verified_user</v-icon>
+                    <v-icon>mdi-shield-check</v-icon>
                   </div>
                   <div class="section-card__text">
                     <h3>1) &nbsp;Log in with your BC Services Card</h3>
@@ -30,19 +30,19 @@
                   <ul class="mb-0">
                     <li>
                       <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank" rel="noopener">
-                        <v-icon small>open_in_new</v-icon>
+                        <v-icon small>mdi-open-in-new</v-icon>
                         <span>What is a BC <span class="nobr">Services Card?</span></span>
                       </v-btn>
                     </li>
                     <li>
                       <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card" target="_blank" rel="noopener">
-                        <v-icon small>open_in_new</v-icon>
+                        <v-icon small>mdi-open-in-new</v-icon>
                         <span>How do I log in with my BC <span class="nobr">Services Card?</span></span>
                       </v-btn>
                     </li>
                     <li>
                       <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/get-a-card" target="_blank" rel="noopener">
-                        <v-icon small>open_in_new</v-icon>
+                        <v-icon small>mdi-open-in-new</v-icon>
                         <span>I don't have a BC <span class="nobr">Services Card</span></span>
                       </v-btn>
                     </li>
@@ -56,7 +56,7 @@
               <v-row>
                 <v-col sm="12" md="8" class="section-card__inner">
                   <div class="section-card__icon">
-                    <v-icon>lock_open</v-icon>
+                    <v-icon>mdi-lock-open</v-icon>
                   </div>
                   <div class="section-card__text">
                     <h3>2) &nbsp;Authorize to file for a cooperative</h3>
@@ -67,13 +67,13 @@
                   <ul class="mb-0">
                     <li>
                       <v-btn text color="primary" @click.stop="noPasscodeDialog = true">
-                        <v-icon small>open_in_new</v-icon>
+                        <v-icon small>mdi-open-in-new</v-icon>
                         <span>I lost or forgot my cooperative passcode</span>
                       </v-btn>
                     </li>
                     <li>
                       <v-btn text color="primary" @click.stop="noPasscodeDialog = true">
-                        <v-icon small>open_in_new</v-icon>
+                        <v-icon small>mdi-open-in-new</v-icon>
                         <span>I didn't receive my <span class="nobr">Access Letter</span></span>
                       </v-btn>
                     </li>
@@ -116,7 +116,7 @@
               <v-row>
                 <v-col sm="12" md="8" class="section-card__inner">
                   <div class="section-card__icon">
-                    <v-icon>assignment_turned_in</v-icon>
+                    <v-icon>mdi-clipboard-check</v-icon>
                   </div>
                   <div class="section-card__text">
                     <h3>3) &nbsp;Complete your cooperative's filings</h3>
@@ -126,15 +126,15 @@
                 <v-col sm="12" md="4" class="section-card__links">
                   <ul class="static-links mb-0">
                     <li>
-                      <v-icon small>check</v-icon>
+                      <v-icon small>mdi-check</v-icon>
                       <span>Annual Reports</span>
                     </li>
                     <li>
-                      <v-icon small>check</v-icon>
+                      <v-icon small>mdi-check</v-icon>
                       <span>Manage Office Addresses</span>
                     </li>
                     <li>
-                      <v-icon small>check</v-icon>
+                      <v-icon small>mdi-check</v-icon>
                       <span>Manage Director Information</span>
                     </li>
                   </ul>
