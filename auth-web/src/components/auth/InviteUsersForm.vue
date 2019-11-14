@@ -20,14 +20,14 @@
             ></v-select>
             <v-btn icon class="mt-3 ml-1"
               @click="removeEmail(index)">
-              <v-icon>close</v-icon>
+              <v-icon>mdi-close</v-icon>
             </v-btn>
           </li>
         </transition-group>
       </ul>
       <v-btn text small color="primary"
         @click="addEmail()">
-        <v-icon>add_box</v-icon>
+        <v-icon>mdi-plus-box</v-icon>
         <span>Add Another</span>
       </v-btn>
       <div class="form__btns">

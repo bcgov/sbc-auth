@@ -20,7 +20,7 @@
         <template v-slot:activator="{ on }">
           <v-btn depressed small v-on="on">
             {{ item.membershipTypeCode }}
-            <v-icon small class="ml-1">keyboard_arrow_down</v-icon>
+            <v-icon small class="ml-1">mdi-chevron-down</v-icon>
           </v-btn>
         </template>
         <v-list>

@@ -4,7 +4,7 @@
       <h1>Manage Team</h1>
       <div class="view-header__actions">
         <v-btn outlined color="primary" @click="showInviteUsersModal()">
-          <v-icon>add</v-icon>
+          <v-icon>mdi-plus</v-icon>
           <span>Invite People</span>
         </v-btn>
       </div>
@@ -68,7 +68,7 @@
       max-width="640"
     >
       <template v-slot:icon>
-        <v-icon large color="error">error</v-icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:actions>
         <v-btn large color="primary" @click="removeMember()">Remove</v-btn>
@@ -85,7 +85,7 @@
       max-width="640"
     >
       <template v-slot:icon>
-        <v-icon large color="error">error</v-icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:actions>
         <v-btn large color="primary" @click="changeRole()">Confirm</v-btn>
@@ -102,7 +102,7 @@
       max-width="640"
     >
       <template v-slot:icon>
-        <v-icon large color="error">error</v-icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:actions>
         <v-btn large color="primary" @click="removeInvite()">Remove</v-btn>
