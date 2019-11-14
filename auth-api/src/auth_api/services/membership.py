@@ -18,14 +18,14 @@ This module manages the Membership Information between an org and a user.
 from typing import Dict, Tuple
 
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role, Status
-from auth_api.models import Membership as MembershipModel
-from auth_api.models import MembershipType as MembershipTypeModel
-from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
-from auth_api.schemas import MembershipSchema
-from auth_api.models import Org as OrgModel
-from auth_api.utils.roles import ADMIN, OWNER
 
+from auth_api.models import Membership as MembershipModel
+from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
+from auth_api.models import MembershipType as MembershipTypeModel
+from auth_api.models import Org as OrgModel
+from auth_api.schemas import MembershipSchema
+from auth_api.utils.roles import ADMIN, OWNER
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, Status
 from .authorization import check_auth
 
 
@@ -77,7 +77,6 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         # Check authorization for the user
         check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
         return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status)
-
 
     @staticmethod
     def get_membership_status_by_code(name):
