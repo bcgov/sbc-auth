@@ -259,10 +259,10 @@ class OrgMembers(Resource):
             roles = request.args.get('roles')
 
             members = MembershipService.get_members_for_org(org_id, status=status, membership_roles=roles,
-                                                    token_info=g.jwt_oidc_token_info,
-                                                    allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+                                                            token_info=g.jwt_oidc_token_info,
+                                                            allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
             if members:
-                response, status = json.dumps(MembershipSchema().dump(members, many=True)), \
+                response, status = json.dumps({'members': MembershipSchema().dump(members, many=True)}), \
                                    http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'No users found found.'}, \

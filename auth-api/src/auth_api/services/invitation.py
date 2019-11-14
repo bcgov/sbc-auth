@@ -227,7 +227,7 @@ class Invitation:
                 membership_model.status = Status.PENDING_APPROVAL.value
             membership_model.save()
             if not is_auto_approval:
-                Invitation.notify_admin(user, invitation_id, membership.id, origin)
+                Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
 
         invitation.accepted_date = datetime.now()
         invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')
