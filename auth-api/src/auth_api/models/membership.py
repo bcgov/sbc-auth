@@ -18,10 +18,12 @@ The Membership object connects User models to one or more Org models.
 
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
-
+from .db import db
 from .base_model import BaseModel
 from .membership_type import MembershipType
+from .org import Org as OrgModel
 from .membership_status_code import MembershipStatusCode
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, and_
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role, Status
 
 class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
@@ -63,3 +65,9 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     def find_members_by_org_id(cls, org_id):
         """returns all members of the org with a status"""
         return cls.query.filter_by(org_id=org_id).first()
+
+    @classmethod
+    def find_members_by_org_id_by_status_by_roles(cls, org_id, roles, status=Status.ACTIVE.value):
+        """returns all members of the org with a status"""
+        return db.session.query(Membership).filter(and_(Membership.status == status , Membership.membership_type_code.in_(roles))). \
+            join(OrgModel).filter(OrgModel.id == org_id).all()
