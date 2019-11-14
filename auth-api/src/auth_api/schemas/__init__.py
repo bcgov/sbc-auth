@@ -22,6 +22,8 @@ from .entity import EntitySchema
 from .invitation import InvitationSchema
 from .invitation_membership import InvitationMembershipSchema
 from .membership import MembershipSchema
+from .membership_status_code import MembershipStatusCodeSchema
+from .membership_type import MembershipTypeSchema
 from .org import OrgSchema
 from .org_type import OrgTypeSchema
 from .user import UserSchema

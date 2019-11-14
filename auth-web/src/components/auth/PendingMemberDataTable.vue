@@ -17,6 +17,7 @@
     </template>
     <template v-slot:item.action="{ item }">
       <v-btn depressed small @click="confirmApproveMember(item)">Approve</v-btn>
+      <v-btn depressed small @click="confirmDenyMember(item)">Deny</v-btn>
     </template>
   </v-data-table>
 </template>
@@ -51,7 +52,7 @@ export default class PendingMemberDataTable extends Vue {
       align: 'left',
       value: 'action',
       sortable: false,
-      width: '95'
+      width: '195'
     }
   ]
 
@@ -70,6 +71,12 @@ export default class PendingMemberDataTable extends Vue {
     })
     return items
   }
+
+  @Emit()
+  private confirmApproveMember (member: Member) {}
+
+  @Emit()
+  private confirmDenyMember (member: Member) {}
 }
 </script>
 

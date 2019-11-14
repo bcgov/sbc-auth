@@ -29,7 +29,7 @@
         <v-tab-item>
           <PendingMemberDataTable
             @confirm-approve-member="showConfirmApproveModal($event)"
-            @confirm-deny-member="showConfirmDenyModal($event)"
+            @confirm-deny-member="showConfirmRemoveModal($event)"
           />
         </v-tab-item>
         <v-tab-item>
@@ -215,7 +215,12 @@ export default class UserManagement extends Vue {
   }
 
   private showConfirmRemoveModal (member: Member) {
-    this.confirmRemoveMemberText = `Are you sure you want to remove ${member.user.firstname} from the team?`
+    if (member.membershipStatus === 'PENDING_APPROVAL') {
+      this.confirmRemoveMemberText = `Are you sure with the deny membership to ${member.user.firstname}?`
+    } else {
+      this.confirmRemoveMemberText = `Are you sure you want to remove ${member.user.firstname} from the team?`
+    }
+
     this.memberToBeRemoved = member
     this.$refs.confirmRemoveDialog.open()
   }

@@ -34,6 +34,7 @@ export interface RemoveBusinessPayload {
 export interface Member {
   id: number
   membershipTypeCode: string
+  membershipStatus: string
   user: User
 }
 
