@@ -4,7 +4,7 @@
       <h1>Manage Businesses</h1>
       <div class="view-header__actions">
         <v-btn outlined color="primary" @click="showAddBusinessModal()">
-          <v-icon small>mdi-plus</v-icon>
+          <v-icon>mdi-plus</v-icon>
           <span>Add Business</span>
         </v-btn>
       </div>
