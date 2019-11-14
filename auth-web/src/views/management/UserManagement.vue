@@ -1,6 +1,6 @@
 <template>
   <v-container class="view-container">
-    <header class="view-header mt-1 mb-5">
+    <header class="view-header mt-1 mb-9">
       <h1>Manage Team</h1>
       <div class="view-header__actions">
         <v-btn outlined color="primary" @click="showInviteUsersModal()">

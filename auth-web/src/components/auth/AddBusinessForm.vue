@@ -24,9 +24,6 @@
       </div>
       <div class="passcode-form__row">
         <v-text-field
-          :append-icon="showPasscode ? 'visibility' : 'visibility_off'"
-          :type="showPasscode ? 'text' : 'password'"
-          @click:append="showPasscode = !showPasscode"
           filled
           label="Enter your Passcode"
           hint="Passcode must be exactly 9 digits"
@@ -65,7 +62,6 @@ import { getModule } from 'vuex-module-decorators'
 export default class AddBusinessForm extends Vue {
   private businessStore = getModule(BusinessModule, this.$store)
   private readonly addBusiness!: (loginPayload: LoginPayload) => void
-  private showPasscode = false
   private validationError = ''
   private entityNumRules = [v => !!v || 'Incorporation Number is required']
   private entityPasscodeRules = [
