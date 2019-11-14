@@ -19,15 +19,16 @@ A User stores basic information from a KeyCloak user (including the KeyCloak GUI
 import datetime
 
 from flask import current_app
-from .db import db
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, or_
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
-from auth_api.utils.roles import Status
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship
+
+from auth_api.utils.roles import Status
+from .base_model import BaseModel
+from .db import db
 from .membership import Membership as MembershipModel
 from .org import Org as OrgModel
-from .base_model import BaseModel
 
 
 class User(BaseModel):
@@ -136,7 +137,7 @@ class User(BaseModel):
         return None
 
     @classmethod
-    def find_members_by_org_id_by_status_by_roles(cls, org_id, roles, status=Status.ACTIVE.value):
+    def find_users_by_org_id_by_status_by_roles(cls, org_id, roles, status=Status.ACTIVE.value):
         """returns all members of the org with a status"""
         return db.session.query(User). \
             join(MembershipModel,

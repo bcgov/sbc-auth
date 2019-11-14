@@ -1,6 +1,6 @@
 <template>
   <v-container class="unauthorized-view text-center">
-    <v-icon x-large class="mb-6">lock</v-icon>
+    <v-icon x-large class="mb-6">mdi-lock</v-icon>
     <h1 class="mb-7">Not Authorized</h1>
     <p class="mb-9">{{ errorMessage }}</p>
     <v-btn large depressed link color="primary" href="./">Go to Homepage</v-btn>

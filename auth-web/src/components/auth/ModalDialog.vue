@@ -10,7 +10,7 @@
     <v-card>
       <v-card-title>
         <slot v-if="showIcon" name="icon">
-          <v-icon large color="success">check</v-icon>
+          <v-icon large color="success">mdi-check</v-icon>
         </slot>
         <span>
           <slot name="title">{{ title }}</slot>

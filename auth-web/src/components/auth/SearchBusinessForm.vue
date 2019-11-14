@@ -37,7 +37,7 @@
                   <v-layout align-end justify-end>
                     <v-btn class="search-btn" @click="search" color="primary" large >
                       <span>Enter</span>
-                      <v-icon dark right>arrow_forward</v-icon>
+                      <v-icon dark right>mdi-arrow-right</v-icon>
                     </v-btn>
                   </v-layout>
                 </v-form>

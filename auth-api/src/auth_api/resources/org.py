@@ -262,7 +262,7 @@ class OrgMembers(Resource):
                                                             token_info=g.jwt_oidc_token_info,
                                                             allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
             if members:
-                response, status = json.dumps({'members': MembershipSchema().dump(members, many=True)}), \
+                response, status = json.dumps({'members': MembershipSchema(exclude=['org']).dump(members, many=True)}), \
                                    http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'No users found found.'}, \

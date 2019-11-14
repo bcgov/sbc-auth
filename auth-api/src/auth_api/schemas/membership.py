@@ -16,7 +16,6 @@
 from marshmallow import fields
 
 from auth_api.models import Membership as MembershipModel
-
 from .base_schema import BaseSchema
 
 
