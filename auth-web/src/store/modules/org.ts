@@ -23,6 +23,9 @@ export default class OrgModule extends VuexModule {
   sentInvitations: Invitation[] = []
   failedInvitations: Invitation[] = []
   organizations: Organization[] = []
+  activeOrgMembers: Member[] = []
+  pendingOrgMembers: Member[] = []
+  pendingOrgInvitations: Invitation[] = []
 
   // This simply returns the first org in the list.
   // TODO: Once account switching is in place, this will have to return the
@@ -34,74 +37,24 @@ export default class OrgModule extends VuexModule {
     return undefined
   }
 
-  get orgMembers () {
-    return (orgId: number) => {
-      const org = this.organizations.find(org => org.id === orgId)
-      if (org) {
-        return org.members
-      } else {
-        return []
-      }
-    }
+  @Mutation
+  public setActiveOrgMembers (activeMembers: Member[]) {
+    this.activeOrgMembers = activeMembers
   }
 
-  get orgInvitations () {
-    return (orgId: number) => {
-      const org = this.organizations.find(org => org.id === orgId)
-      if (org) {
-        return org.invitations
-      } else {
-        return []
-      }
-    }
+  @Mutation
+  public setPendingOrgMembers (pendingMembers: Member[]) {
+    this.pendingOrgMembers = pendingMembers
   }
 
-  get orgMember () {
-    return (orgId: number, memberId: number) => {
-      const org = this.organizations.find(org => org.id === orgId)
-      if (org) {
-        return org.members.find(member => member.id === memberId)
-      } else {
-        return null
-      }
-    }
-  }
-
-  get orgAffiliatedBusinesses (): (orgId?: number) => Business[] {
-    return (orgId?: number) => {
-      if (orgId) {
-        const org = this.organizations.find(org => org.id === orgId)
-        if (org && org.affiliatedEntities) {
-          return org.affiliatedEntities
-        }
-        return []
-      } else {
-        // If no orgId provided, return flattened list for all IMPLICIT orgs
-        return _.flatten<Business>(this.organizations
-          .filter(org => org.orgType === 'IMPLICIT')
-          .map(org => org.affiliatedEntities))
-      }
-    }
+  @Mutation
+  public setPendingOrgInvitations (pendingInvitations: Invitation[]) {
+    this.pendingOrgInvitations = pendingInvitations
   }
 
   @Mutation
   public addOrganization (org: Organization) {
     this.organizations.push(org)
-  }
-
-  @Mutation
-  public setMembers (members: Member[]) {
-    if (this.myOrg) {
-      this.myOrg.members = members
-    }
-  }
-
-  @Mutation
-  public addMember (payload: SetMemberPayload) {
-    const org = this.organizations.find(org => org.id === payload.orgId)
-    if (org) {
-      org.members.push(payload.member)
-    }
   }
 
   @Mutation
@@ -131,37 +84,6 @@ export default class OrgModule extends VuexModule {
     this.organizations = organizations
   }
 
-  @Mutation
-  public setOrganization (organization: Organization) {
-    const index = this.organizations.findIndex(org => org.id === organization.id)
-    this.organizations[index] = organization
-  }
-
-  @Mutation
-  public removeMember (memberId: number) {
-    if (this.myOrg && this.myOrg.members) {
-      const index = this.myOrg.members.findIndex(member => member.id === memberId)
-      this.myOrg.members.splice(index, 1)
-    }
-  }
-
-  @Mutation
-  public updateMember (updateMemberPayload: UpdateMemberPayload) {
-    const member = this.myOrg.members.find(member => member.id === updateMemberPayload.memberId)
-    if (member) {
-      member.membershipTypeCode = updateMemberPayload.role
-    }
-  }
-
-  @Mutation
-  public removeInvitation (invitationId: number) {
-    debugger
-    if (this.myOrg && this.myOrg.invitations) {
-      const index = this.myOrg.invitations.findIndex(invitation => invitation.id === invitationId)
-      this.myOrg.invitations.splice(index, 1)
-    }
-  }
-
   @Action({ rawError: true, commit: 'addOrganization' })
   public async createOrg (createRequestBody: CreateOrgRequestBody) {
     const response = await OrgService.createOrg(createRequestBody)
@@ -182,7 +104,7 @@ export default class OrgModule extends VuexModule {
         throw new Error('Unable to create invitation')
       }
       this.context.commit('addSentInvitation', response.data)
-      this.context.dispatch('syncOrganizations')
+      this.context.dispatch('syncPendingOrgInvitations')
     } catch (exception) {
       this.context.commit('addFailedInvitation', invitation)
     }
@@ -206,24 +128,19 @@ export default class OrgModule extends VuexModule {
     if (!response || response.status !== 200 || !response.data) {
       throw Error('Unable to delete invitation')
     }
-    this.context.dispatch('syncOrganizations')
+    this.context.dispatch('syncPendingOrgInvitations')
   }
 
   @Action({ rawError: true })
   public async validateInvitationToken (token: string): Promise<EmptyResponse> {
     const response = await InvitationService.validateToken(token)
-    if (response && response.data && response.status === 200) {
-      return response.data
-    }
+    return response && response.data ? response.data : undefined
   }
 
   @Action({ rawError: true })
   public async acceptInvitation (token: string): Promise<Invitation> {
     const response = await InvitationService.acceptInvitation(token)
-    if (response && response.data && response.status === 200) {
-      this.context.dispatch('syncOrganizations')
-      return response.data
-    }
+    return response && response.data ? response.data : undefined
   }
 
   @Action({ rawError: true })
@@ -235,7 +152,7 @@ export default class OrgModule extends VuexModule {
     if (!response || response.status !== 200 || !response.data) {
       throw Error('Unable to delete member')
     } else {
-      this.context.dispatch('syncOrganizations')
+      this.context.dispatch('syncActiveOrgMembers')
     }
   }
 
@@ -248,7 +165,8 @@ export default class OrgModule extends VuexModule {
     if (!response || response.status !== 200 || !response.data) {
       throw Error('Unable to update member role')
     } else {
-      this.context.dispatch('syncOrganizations')
+      this.context.dispatch('syncActiveOrgMembers')
+      this.context.dispatch('syncPendingOrgMembers')
     }
   }
 
@@ -256,5 +174,23 @@ export default class OrgModule extends VuexModule {
   public async syncOrganizations () {
     const response = await UserService.getOrganizations()
     return response.data && response.data.orgs ? response.data.orgs : []
+  }
+
+  @Action({ commit: 'setActiveOrgMembers', rawError: true })
+  public async syncActiveOrgMembers () {
+    const response = await OrgService.getOrgMembers(this.context.getters['myOrg'].id, 'ACTIVE')
+    return response.data && response.data.members ? response.data.members : []
+  }
+
+  @Action({ commit: 'setPendingOrgMembers', rawError: true })
+  public async syncPendingOrgMembers () {
+    const response = await OrgService.getOrgMembers(this.context.getters['myOrg'].id, 'PENDING')
+    return response.data && response.data.members ? response.data.members : []
+  }
+
+  @Action({ commit: 'setPendingOrgInvitations', rawError: true })
+  public async syncPendingOrgInvitations () {
+    const response = await OrgService.getOrgInvitations(this.context.getters['myOrg'].id, 'PENDING')
+    return response.data && response.data.invitations ? response.data.invitations : []
   }
 }

@@ -22,8 +22,8 @@ from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import utils as schema_utils
-from auth_api.schemas.membership import MembershipSchema
 from auth_api.services import Affiliation as AffiliationService
+from auth_api.schemas.membership import MembershipSchema
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
@@ -262,7 +262,7 @@ class OrgMembers(Resource):
                                                             token_info=g.jwt_oidc_token_info,
                                                             allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
             if members:
-                response, status = json.dumps(MembershipSchema(exclude=['org']).dump(members, many=True)), \
+                response, status = json.dumps({'members': MembershipSchema(exclude=['org']).dump(members, many=True)}), \
                                    http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'No users found found.'}, \
