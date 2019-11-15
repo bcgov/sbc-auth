@@ -19,7 +19,7 @@ Basic users will have an internal Org that is not created explicitly, but implic
 from flask import current_app
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
-
+from sqlalchemy import and_, or_
 from .base_model import BaseModel
 from .db import db
 from .org_status import OrgStatus
@@ -84,7 +84,9 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     @classmethod
     def find_orgs_for_user(cls, user_id):
         from .membership import Membership as MembershipModel
-        orgs = db.session.query(Org).filter(Org.members.any(MembershipModel.user_id == user_id)) \
+        orgs = db.session.query(Org).filter(Org.members.any(and_(MembershipModel.user_id == user_id,
+                                                                 or_(MembershipModel.status == 1,
+                                                                     MembershipModel.status == 4)))) \
             .all()
         for org in orgs:
             org.members = list(filter(lambda member: member.user_id == user_id, org.members))

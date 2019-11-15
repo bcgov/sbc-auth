@@ -30,6 +30,7 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import OrgSettings as OrgSettingsModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
+from auth_api.models.org import Org as OrgModel
 from auth_api.utils.roles import ADMIN, OWNER
 from auth_api.utils.roles import Status
 from config import get_named_config
@@ -65,9 +66,14 @@ class Invitation:
         for membership in invitation_info['membership']:
             org_id = membership['orgId']
             check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
+        # TODO doesnt work when invited to multiple teams.. Re-work the logic when multiple teams introduced
+        org_name = OrgModel.find_by_org_id(invitation_info['membership'][0]['orgId']).name
+
+
+        print('org_name-----',org_name)
         invitation = InvitationModel.create_from_dict(invitation_info, user.identifier)
         invitation.save()
-        Invitation.send_invitation(invitation, user.as_dict(), '{}/{}'.format(invitation_origin, context_path))
+        Invitation.send_invitation(invitation,org_name, user.as_dict(), '{}/{}'.format(invitation_origin, context_path))
         return Invitation(invitation)
 
     def update_invitation(self, user, token_info: Dict, invitation_origin):
@@ -146,7 +152,7 @@ class Invitation:
             raise BusinessException(Error.FAILED_INVITATION, None)
 
     @staticmethod
-    def send_invitation(invitation: InvitationModel, user, confirm_url):
+    def send_invitation(invitation: InvitationModel, org_name , user, confirm_url):
         """Send the email notification."""
         subject = '[BC Registries & Online Services] {} {} has invited you to join a team'.format(user['firstname'],
                                                                                                   user['lastname'])
@@ -159,7 +165,7 @@ class Invitation:
             @copy_current_request_context
             def run_job():
                 send_email(subject, sender, recipient,
-                           template.render(invitation=invitation, url=token_confirm_url, user=user))
+                           template.render(invitation=invitation, url=token_confirm_url, user=user,org_name = org_name))
 
             thread = Thread(target=run_job)
             thread.start()
