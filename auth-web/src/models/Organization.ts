@@ -23,7 +23,8 @@ export interface Organization {
 
 export interface UpdateMemberPayload {
   memberId: number
-  role: string
+  role?: string
+  status?: string
 }
 
 export interface RemoveBusinessPayload {

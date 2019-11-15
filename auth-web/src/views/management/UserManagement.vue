@@ -59,11 +59,11 @@
       </template>
     </ModalDialog>
 
-    <!-- Confirm Delete Dialog -->
+    <!-- Confirm Action Dialog -->
     <ModalDialog
-      ref="confirmRemoveDialog"
-      :title="$t('confirmRemoveMemberTitle')"
-      :text="confirmRemoveMemberText"
+      ref="confirmActionDialog"
+      :title="confirmActionTitle"
+      :text="confirmActionText"
       dialog-class="notify-dialog"
       max-width="640"
     >
@@ -71,13 +71,13 @@
         <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:actions>
-        <v-btn large color="primary" @click="removeMember()">Remove</v-btn>
-        <v-btn large color="default" @click="cancel()">Cancel</v-btn>
+        <v-btn large color="primary" @click="confirmHandler()">{{ primaryActionText }}</v-btn>
+        <v-btn large color="default" @click="cancel()">{{ secondaryActionText }}</v-btn>
       </template>
     </ModalDialog>
 
     <!-- Confirm Role Change Dialog -->
-    <ModalDialog
+    <!-- <ModalDialog
       ref="confirmRoleChangeDialog"
       :title="$t('confirmRoleChangeTitle')"
       :text="confirmRoleChangeText"
@@ -91,10 +91,27 @@
         <v-btn large color="primary" @click="changeRole()">Confirm</v-btn>
         <v-btn large color="default" @click="cancel()">Cancel</v-btn>
       </template>
-    </ModalDialog>
+    </ModalDialog> -->
+
+    <!-- Confirm Approve Member Dialog -->
+    <!-- <ModalDialog
+      ref="confirmApproveMemberDialog"
+      :title="$t('confirmApproveMemberTitle')"
+      :text="confirmApproveMemberText"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-btn large color="primary" @click="approve()">Approve</v-btn>
+        <v-btn large color="default" @click="cancel()">Cancel</v-btn>
+      </template>
+    </ModalDialog> -->
 
     <!-- Confirm Remove Invite Dialog -->
-    <ModalDialog
+    <!-- <ModalDialog
       ref="confirmRemoveInviteDialog"
       :title="$t('confirmRemoveInviteTitle')"
       :text="confirmRemoveInviteText"
@@ -108,7 +125,7 @@
         <v-btn large color="primary" @click="removeInvite()">Remove</v-btn>
         <v-btn large color="default" @click="cancel()">Cancel</v-btn>
       </template>
-    </ModalDialog>
+    </ModalDialog> -->
 
     <!-- Alert Dialog (Success) -->
     <ModalDialog
@@ -157,22 +174,27 @@ import { getModule } from 'vuex-module-decorators'
       'resendInvitation',
       'deleteInvitation',
       'deleteMember',
-      'updateMemberRole'
+      'updateMember',
+      'approveMember'
     ])
   }
 })
 export default class UserManagement extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
-  private successTitle = ''
-  private successText = ''
+  private successTitle: string = ''
+  private successText: string = ''
   private tab = null
   private isLoading = true
   private memberToBeRemoved: Member
+  private memberToBeApproved: Member
   private invitationToBeRemoved: Invitation
   private roleChangeToAction: ChangeRolePayload
-  private confirmRemoveMemberText = ''
-  private confirmRoleChangeText = ''
-  private confirmRemoveInviteText = ''
+  private confirmActionTitle: string = ''
+  private confirmActionText: string = ''
+  private primaryActionText: string = ''
+  private secondaryActionText = 'Cancel'
+
+  private confirmHandler: () => void = undefined
 
   private readonly currentBusiness!: Business
   private readonly resending!: boolean
@@ -180,14 +202,13 @@ export default class UserManagement extends Vue {
   private readonly resendInvitation!: (invitation: Invitation) => void
   private readonly deleteInvitation!: (invitationId: number) => void
   private readonly deleteMember!: (memberId: number) => void
-  private readonly updateMemberRole!: (updateMemberPayload: UpdateMemberPayload) => void
+  private readonly updateMember!: (updateMemberPayload: UpdateMemberPayload) => void
+  private readonly approveMember!: (memberId: number) => void
 
   $refs: {
     successDialog: ModalDialog
     inviteUsersDialog: ModalDialog
-    confirmRemoveDialog: ModalDialog
-    confirmRoleChangeDialog: ModalDialog
-    confirmRemoveInviteDialog: ModalDialog
+    confirmActionDialog: ModalDialog
   }
 
   private async mounted () {
@@ -216,52 +237,89 @@ export default class UserManagement extends Vue {
 
   private showConfirmRemoveModal (member: Member) {
     if (member.membershipStatus === 'PENDING_APPROVAL') {
-      this.confirmRemoveMemberText = `Are you sure with the deny membership to ${member.user.firstname}?`
+      this.confirmActionTitle = this.$t('confirmDenyMemberTitle').toString()
+      this.confirmActionText = `Are you sure you want to deny membership to ${member.user.firstname}?`
+      this.confirmHandler = this.deny
+      this.primaryActionText = 'Deny'
     } else {
-      this.confirmRemoveMemberText = `Are you sure you want to remove ${member.user.firstname} from the team?`
+      this.confirmActionTitle = this.$t('confirmRemoveMemberTitle').toString()
+      this.confirmActionText = `Are you sure you want to remove ${member.user.firstname} from the team?`
+      this.confirmHandler = this.removeMember
+      this.primaryActionText = 'Remove'
     }
-
     this.memberToBeRemoved = member
-    this.$refs.confirmRemoveDialog.open()
+    this.$refs.confirmActionDialog.open()
   }
 
   private showConfirmChangeRoleModal (payload: ChangeRolePayload) {
     if (payload.member.membershipTypeCode.toUpperCase() === payload.targetRole.toUpperCase()) {
       return
     }
-    this.confirmRoleChangeText = `Are you sure you wish to change ${payload.member.user.firstname}'s role to ${payload.targetRole}?`
+    this.confirmActionTitle = this.$t('confirmRoleChangeTitle').toString()
+    this.confirmActionText = `Are you sure you wish to change ${payload.member.user.firstname}'s role to ${payload.targetRole}?`
     this.roleChangeToAction = payload
-    this.$refs.confirmRoleChangeDialog.open()
+    this.confirmHandler = this.changeRole
+    this.primaryActionText = 'Change'
+    this.$refs.confirmActionDialog.open()
   }
 
   private showConfirmRemoveInviteModal (invitation: Invitation) {
-    this.confirmRemoveInviteText = `Are you sure wish to remove the invite to ${invitation.recipientEmail}?`
+    this.confirmActionTitle = this.$t('confirmRemoveInviteTitle').toString()
+    this.confirmActionText = `Are you sure wish to remove the invite to ${invitation.recipientEmail}?`
     this.invitationToBeRemoved = invitation
-    this.$refs.confirmRemoveInviteDialog.open()
+    this.confirmHandler = this.removeInvite
+    this.primaryActionText = 'Remove'
+    this.$refs.confirmActionDialog.open()
+  }
+
+  private showConfirmApproveModal (member: Member) {
+    this.confirmActionTitle = this.$t('confirmApproveMemberTitle').toString()
+    this.confirmActionText = `Are you sure you wish to approve membership for ${member.user.firstname}?`
+    this.memberToBeApproved = member
+    this.confirmHandler = this.approve
+    this.primaryActionText = 'Approve'
+    this.$refs.confirmActionDialog.open()
   }
 
   private cancel () {
-    this.$refs.confirmRemoveDialog.close()
-    this.$refs.confirmRoleChangeDialog.close()
-    this.$refs.confirmRemoveInviteDialog.close()
+    this.$refs.confirmActionDialog.close()
   }
 
   private async removeMember () {
-    await this.deleteMember(this.memberToBeRemoved.id)
-    this.$refs.confirmRemoveDialog.close()
+    await this.updateMember({
+      memberId: this.memberToBeRemoved.id,
+      status: 'INACTIVE'
+    })
+    this.$refs.confirmActionDialog.close()
   }
 
   private async changeRole () {
-    await this.updateMemberRole({
+    await this.updateMember({
       memberId: this.roleChangeToAction.member.id,
       role: this.roleChangeToAction.targetRole.toUpperCase()
     })
-    this.$refs.confirmRoleChangeDialog.close()
+    this.$refs.confirmActionDialog.close()
   }
 
   private async removeInvite () {
     await this.deleteInvitation(this.invitationToBeRemoved.id)
-    this.$refs.confirmRemoveInviteDialog.close()
+    this.$refs.confirmActionDialog.close()
+  }
+
+  private async approve () {
+    await this.updateMember({
+      memberId: this.memberToBeApproved.id,
+      status: 'ACTIVE'
+    })
+    this.$refs.confirmActionDialog.close()
+  }
+
+  private async deny () {
+    await this.updateMember({
+      memberId: this.memberToBeRemoved.id,
+      status: 'REJECTED'
+    })
+    this.$refs.confirmActionDialog.close()
   }
 }
 </script>

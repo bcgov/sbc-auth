@@ -157,14 +157,16 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async updateMemberRole (updatePayload: UpdateMemberPayload) {
+  public async updateMember (updatePayload: UpdateMemberPayload) {
     // Send request to update member on server and get result
-    const response = await OrgService.updateMember(this.context.getters['myOrg'].id, updatePayload.memberId, updatePayload.role)
+    const response = await OrgService.updateMember(this.context.getters['myOrg'].id, updatePayload)
 
     // If no response or error, throw exception to be caught
     if (!response || response.status !== 200 || !response.data) {
+      debugger
       throw Error('Unable to update member role')
     } else {
+      debugger
       this.context.dispatch('syncActiveOrgMembers')
       this.context.dispatch('syncPendingOrgMembers')
     }

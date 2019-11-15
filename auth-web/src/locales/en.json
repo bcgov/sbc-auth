@@ -21,5 +21,7 @@
   "clientUnauthorizedMsg": "You are not authorized to access this page. If you having trouble, or require access to this application, please contact support.",
   "confirmRemoveMemberTitle": "Confirm Member Removal",
   "confirmRoleChangeTitle": "Confirm Role Change",
-  "confirmRemoveInviteTitle": "Confirm Invite Removal"
+  "confirmRemoveInviteTitle": "Confirm Invite Removal",
+  "confirmApproveMemberTitle": "Confirm Member Approval",
+  "confirmDenyMemberTitle": "Confirm Member Denial"
 }

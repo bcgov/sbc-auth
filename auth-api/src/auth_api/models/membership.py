@@ -41,7 +41,7 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         ForeignKey('membership_status_code.id')
     )
     membership_type = relationship('MembershipType', foreign_keys=[membership_type_code])
-    membership_status = relationship('MembershipStatusCode', foreign_keys=[status])
+    membership_status = relationship('MembershipStatusCode', foreign_keys=[status], lazy='subquery')
     user = relationship('User', back_populates='orgs', foreign_keys=[user_id], lazy='subquery')
     org = relationship('Org', back_populates='members', foreign_keys=[org_id], lazy='subquery')
 
