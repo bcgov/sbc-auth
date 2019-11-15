@@ -23,10 +23,13 @@ export default class OrgService {
   public static async updateMember (orgId: number, updatePayload: UpdateMemberPayload): Promise<AxiosResponse<Member>> {
     return Axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgId}/members/${updatePayload.memberId}`,
       { role: updatePayload.role, status: updatePayload.status })
+<<<<<<< HEAD
   }
 
   public static async createOrg (createRequestBody: CreateRequestBody): Promise<AxiosResponse<Organization>> {
     return Axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs`, createRequestBody)
+=======
+>>>>>>> Adjustments to PendingMember interface
   }
 
   public static async createOrg (createRequestBody: CreateRequestBody): Promise<AxiosResponse<Organization>> {

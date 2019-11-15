@@ -25,6 +25,7 @@
   "confirmRoleChangeTitle": "Confirm Role Change",
   "confirmRemoveInviteTitle": "Confirm Invite Removal",
   "confirmApproveMemberTitle": "Confirm Member Approval",
+<<<<<<< HEAD
   "confirmDenyMemberTitle": "Confirm Member Denial",
   "noPendingApprovalLabel": "No Pending Approvals",
   "noPendingInvitesLabel": "No Pending Invitations",
@@ -34,4 +35,7 @@
   "noActiveUsersLabel": "No Active Users",
   "pageNotFoundTitle": "Page not found",
   "pageNotFoundMsg": "The page you are looking for has been removed or doesn't exist."
+=======
+  "confirmDenyMemberTitle": "Confirm Member Denial"
+>>>>>>> Adjustments to PendingMember interface
 }
