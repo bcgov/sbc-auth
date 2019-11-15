@@ -154,3 +154,8 @@ class Org:
                 return MembershipService(member)
         # If we get to this point, member with that id could not be found, so raise exception
         raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+    @staticmethod
+    def get_orgs(user_id):
+        """Return the orgs associated with this user."""
+        return OrgModel.find_orgs_for_user(user_id)

@@ -19,14 +19,15 @@ from flask_restplus import Namespace, Resource, cors
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.schemas import OrgSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.keycloak import KeycloakService
+from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
-
 
 API = Namespace('users', description='Endpoints for user profile management')
 TRACER = Tracer.get_instance()
@@ -224,7 +225,11 @@ class UserOrgs(Resource):
             if not user:
                 response, status = {'message': 'User not found.'}, http_status.HTTP_404_NOT_FOUND
             else:
-                response, status = jsonify(user.get_orgs()), http_status.HTTP_200_OK
+                #response, status = jsonify(user.get_orgs()), http_status.HTTP_200_OK
+                orgs = OrgSchema().dump(
+                    OrgService.get_orgs(user.identifier), many=True)
+                response, status = jsonify({'orgs': orgs}), http_status.HTTP_200_OK
+
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

@@ -88,7 +88,8 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <terms-of-use-dialog :lastAcceptedVersion="lastAcceptedVersion" @termsupdated="updateTerms"></terms-of-use-dialog>
+        <terms-of-use-dialog :lastAcceptedVersion="lastAcceptedVersion"
+                             @termsupdated="updateTerms"></terms-of-use-dialog>
       </v-col>
     </v-row>
     <v-row>
@@ -105,6 +106,7 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import { Contact } from '@/models/contact'
+import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
 import TermsOfUseDialog from '@/components/auth/TermsOfUseDialog.vue'
 import { User } from '@/models/user'
@@ -135,6 +137,7 @@ import { mask } from 'vue-the-mask'
   })
 export default class UserProfileForm extends Vue {
     private userStore = getModule(UserModule, this.$store)
+    private orgStore = getModule(OrgModule, this.$store)
     private readonly userProfile!: User
     private readonly organizations!: Organization[]
     private readonly createUserContact!: (contact: Contact) => Contact
@@ -175,7 +178,7 @@ export default class UserProfileForm extends Vue {
 
     private isFormValid (): boolean {
       return (!this.$refs || !this.$refs.form) ? false : (this.$refs.form as Vue & { validate: () => boolean }).validate() &&
-              this.confirmedEmailAddress === this.emailAddress && this.isTermsAccepted
+        this.confirmedEmailAddress === this.emailAddress && this.isTermsAccepted
     }
 
     async mounted () {
@@ -183,7 +186,7 @@ export default class UserProfileForm extends Vue {
         await this.getUserProfile('@me')
       }
 
-      if (!this.organizations) {
+      if (!this.organizations || this.organizations.length < 1) {
         await this.syncOrganizations()
       }
 
@@ -202,7 +205,10 @@ export default class UserProfileForm extends Vue {
 
     updateTerms (event) {
       this.isTermsAccepted = event.istermsaccepted
-      this.userStore.updateCurrentUserTerms({ terms_of_use_accepted_version: event.termsversion, is_terms_of_use_accepted: event.istermsaccepted })
+      this.userStore.updateCurrentUserTerms({
+        terms_of_use_accepted_version: event.termsversion,
+        is_terms_of_use_accepted: event.istermsaccepted
+      })
     }
 
     async save () {
@@ -220,7 +226,7 @@ export default class UserProfileForm extends Vue {
         } else {
           await this.updateUserContact(contact)
         }
-        this.$router.push('/main')
+        this.redirectToNext()
       }
     }
 
@@ -228,6 +234,8 @@ export default class UserProfileForm extends Vue {
       // If this user is not a member of a team, redirect to Create Team view
       if (!this.organizations || this.organizations.length === 0) {
         this.$router.push({ path: '/createteam' })
+      } else if (this.organizations.some(org => org.members[0].membershipStatus === 'PENDING_APPROVAL')) {
+        this.$router.push('/unapproved/')
       } else { // If a member of a team, redirect to dashboard for that team
         this.$router.push({ path: '/main' })
       }

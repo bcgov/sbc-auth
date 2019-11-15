@@ -29,7 +29,7 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
         model = OrgModel
 
     contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
-    members = fields.Nested('MembershipSchema', only=('id', 'user', 'membership_type_code'), many=True)
+    members = fields.Nested('MembershipSchema', only=('id', 'user', 'membership_type_code','membership_status'), many=True)
     invitations = fields.Pluck('InvitationMembershipSchema', 'invitation', many=True)
     affiliated_entities = fields.Pluck('AffiliationSchema', 'entity', many=True, data_key='affiliatedEntities')
     org_type = fields.Pluck('OrgTypeSchema', 'code', data_key='orgType')

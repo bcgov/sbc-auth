@@ -80,6 +80,8 @@ export default class Signin extends Vue {
             this.$router.push('/userprofile')
           } else if (this.organizations.length === 0) {
             this.$router.push('/createteam')
+          } else if (this.organizations.some(org => org.members[0].membershipStatus === 'PENDING_APPROVAL')) {
+            this.$router.push('/unapproved/' + this.organizations[0].name)
           } else {
             this.$router.push('/main')
           }
