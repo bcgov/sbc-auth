@@ -265,8 +265,8 @@ class OrgMembers(Resource):
                 response, status = {'members': MembershipSchema(exclude=['org']).dump(members, many=True)}, \
                                    http_status.HTTP_200_OK
             else:
-                response, status = {'message': 'No users found found.'}, \
-                                   http_status.HTTP_404_NOT_FOUND
+                response, status = {}, \
+                                   http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
