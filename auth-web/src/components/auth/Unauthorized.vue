@@ -1,11 +1,15 @@
 <template>
-  <v-container class="unauthorized-view text-center">
-    <v-icon x-large class="mb-6">mdi-lock</v-icon>
-    <h1 class="mb-7">Not Authorized</h1>
-    <p class="mb-9">{{ errorMessage }}</p>
-    <v-btn large depressed link color="primary" href="./">Go to Homepage</v-btn>
-    <v-btn large outlined link color="primary" href="mailto:SBC_ITOperationsSupport@gov.bc.ca?subject=BC Registries Application Support Request"
-      v-if="isStaff">Contact Support</v-btn>
+  <v-container>
+    <v-row justify="center">
+      <v-col cols="12" lg="8" class="text-center">
+        <v-icon size="48" color="error" class="mb-6">mdi-lock-outline</v-icon>
+        <h1 class="mb-5">Not Authorized</h1>
+        <p class="mb-9">{{ errorMessage }}</p>
+        <v-btn large link color="primary" href="./">Go to Homepage</v-btn>
+        <v-btn large outlined link color="primary" class="ml-1" href="mailto:SBC_ITOperationsSupport@gov.bc.ca?subject=BC Registries Application Support Request"
+          v-if="isStaff">Contact Support</v-btn>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -36,7 +40,10 @@ export default class Unauthorized extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  .v-btn + .v-btn {
-    margin-left: 0.5rem;
+  @import "$assets/scss/theme.scss";
+
+  .container {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
   }
 </style>

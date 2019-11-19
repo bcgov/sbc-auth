@@ -1,18 +1,21 @@
 <template>
   <v-container>
-    <div>
-      <v-card v-if="processingError">
-        <v-card-text>
-          <p align="center">{{ $t('invitationProcessingErrorMsg')}}</p>
-        </v-card-text>
-      </v-card>
-      <v-card v-if="expiredInvitation">
-        <v-card-text>
-          <h1 align="center">{{ $t('expiredInvitationTitle')}}</h1>
-          <p align="center">{{ $t('expiredInvitationMessage')}}</p>
-        </v-card-text>
-      </v-card>
-    </div>
+    <v-row justify="center">
+      <v-col cols="12" lg="8" class="text-center">
+        <div v-if="expiredInvitation">
+          <v-icon size="48" color="error" class="mb-6">mdi-alert-circle-outline</v-icon>
+          <h1 class="mb-7">{{ $t('expiredInvitationTitle')}}</h1>
+          <p class="mb-9">{{ $t('expiredInvitationMessage')}}</p>
+          <v-btn large link color="primary" href="../">{{ $t('homeBtnLabel')}}</v-btn>
+        </div>
+        <div v-if="processingError">
+          <v-icon size="48" color="error" class="mb-6">mdi-alert-circle-outline</v-icon>
+          <h1 class="mb-7">{{ $t('errorOccurredTitle')}}</h1>
+          <p class="mb-9">{{ $t('invitationProcessingErrorMsg')}}</p>
+          <v-btn large link color="primary" href="../">{{ $t('homeBtnLabel')}}</v-btn>
+        </div>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 

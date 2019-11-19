@@ -7,7 +7,7 @@
     :calculate-widths="true"
     :hide-default-footer="pendingOrgMembers.length <= 5"
     :custom-sort="customSortPending"
-    :no-data-text="$t('noPendingApprovalMsg')"
+    :no-data-text="$t('noPendingApprovalLabel')"
   >
     <template v-slot:loading>
       Loading...
