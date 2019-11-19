@@ -7,7 +7,7 @@
           <h1 class="mb-5">Thanks for joining the team {{ $route.params.team_name }} at BC Registries & Online Services.</h1>
           <p class="mb-9">{{ $t('pendingInvitationMsg')}}</p>
         </div>
-        <div>
+        <div v-if="!$route.params.team_name">
           <h1 class="mb-7">{{ $t('noPendingInvitationTitle')}}</h1>
           <p class="mb-9">{{ $t('noPendingInvitationMsg')}}</p>
         </div>
