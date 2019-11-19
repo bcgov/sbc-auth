@@ -159,4 +159,4 @@ class Org:
     @staticmethod
     def get_orgs(user_id):
         """Return the orgs associated with this user."""
-        return OrgModel.find_orgs_for_user(user_id)
+        return MembershipModel.find_orgs_for_user(user_id)

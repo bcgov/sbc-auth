@@ -48,7 +48,8 @@ class User(BaseModel):
 
     contacts = relationship('ContactLink', back_populates='user', primaryjoin='User.id == ContactLink.user_id')
     orgs = relationship('Membership', back_populates='user',
-                        primaryjoin='and_(User.id == Membership.user_id, or_(Membership.status == 1, Membership.status == 4))')
+                        primaryjoin='and_(User.id == Membership.user_id, \
+                        or_(Membership.status == 1, Membership.status == 4))')
 
     is_terms_of_use_accepted = Column(Boolean(), default=False, nullable=True)
     terms_of_use_accepted_version = Column(
