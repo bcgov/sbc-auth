@@ -16,8 +16,7 @@
 This is a mapping between status codes and descriptions for Org objects.
 """
 
-from sqlalchemy import Boolean, Column, String
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -32,19 +31,17 @@ class OrgSettings(BaseModel):  # pylint: disable=too-few-public-methods # Tempor
     org_id = Column(ForeignKey('org.id'), nullable=False)
     setting = Column(String(100))
     enabled = Column(Boolean(), default=False, nullable=False)
-    org = relationship("Org")
+    org = relationship('Org')
 
     @classmethod
-    def get_org_settings(cls , org_id) :
+    def get_org_settings(cls, org_id):
         """Return the default status code for an Org."""
         return cls.query.filter_by(org_id=org_id).all()
 
     @classmethod
-    def is_admin_auto_approved_invitees(cls,org_id):
+    def is_admin_auto_approved_invitees(cls, org_id):
         """Return the default status code for an Org."""
-        org_model = cls.query.filter_by(org_id=org_id ,setting ='ADMIN_AUTO_APPROVAL_FOR_MEMBER_ACCEPTANCE').first()
+        org_model = cls.query.filter_by(org_id=org_id, setting='ADMIN_AUTO_APPROVAL_FOR_MEMBER_ACCEPTANCE').first()
         if org_model is not None:
             return org_model.enabled
-        else:
-            return False
-
+        return False

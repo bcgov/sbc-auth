@@ -20,6 +20,7 @@ from sqlalchemy import Column, ForeignKey, Integer, and_
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.roles import Status
+
 from .base_model import BaseModel
 from .db import db
 from .membership_type import MembershipType
@@ -63,12 +64,12 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
 
     @classmethod
     def find_members_by_org_id(cls, org_id):
-        """returns all members of the org with a status"""
+        """Find all members of the org with a status."""
         return cls.query.filter_by(org_id=org_id).first()
 
     @classmethod
     def find_members_by_org_id_by_status_by_roles(cls, org_id, roles, status=Status.ACTIVE.value):
-        """returns all members of the org with a status"""
+        """Find all members of the org with a status."""
         return db.session.query(Membership).filter(
             and_(Membership.status == status, Membership.membership_type_code.in_(roles))). \
             join(OrgModel).filter(OrgModel.id == org_id).all()

@@ -35,7 +35,7 @@ MEMBER = 'MEMBER'
 
 
 class Status(Enum):
-    # Membership Status
+    """User Membership status."""
 
     ACTIVE = 1
     INACTIVE = 2

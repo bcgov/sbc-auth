@@ -24,8 +24,8 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import OrgSchema
-from auth_api.utils.util import camelback2snake
 from auth_api.utils.roles import Status
+from auth_api.utils.util import camelback2snake
 
 from .authorization import check_auth
 from .invitation import Invitation as InvitationService
@@ -63,7 +63,8 @@ class Org:
         org.save()
 
         # create the membership record for this user
-        membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='OWNER' ,membership_type_status = Status.ACTIVE.value)
+        membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='OWNER',
+                                     membership_type_status=Status.ACTIVE.value)
         membership.save()
 
         return Org(org)

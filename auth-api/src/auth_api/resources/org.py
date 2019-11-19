@@ -13,8 +13,6 @@
 # limitations under the License.
 """API endpoints for managing an Org resource."""
 
-import json
-
 from flask import g, jsonify, request
 from flask_restplus import Namespace, Resource, cors
 
@@ -22,14 +20,15 @@ from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import utils as schema_utils
-from auth_api.services import Affiliation as AffiliationService
 from auth_api.schemas.membership import MembershipSchema
+from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role
 from auth_api.utils.util import cors_preflight
+
 
 API = Namespace('orgs', description='Endpoints for organization management')
 TRACER = Tracer.get_instance()
@@ -302,7 +301,7 @@ class OrgMember(Resource):
                 return response, status
 
             return membership.update_membership(updated_fields=updated_fields_dict, token_info=token).as_dict(), \
-                   http_status.HTTP_200_OK
+                http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

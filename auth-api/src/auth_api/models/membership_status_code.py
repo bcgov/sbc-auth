@@ -16,12 +16,12 @@
 It defines the available types of membership Status have with Orgs.
 """
 
-from sqlalchemy import Boolean, Column, String, Integer
+from sqlalchemy import Column, Integer, String
 
 from .base_model import BaseModel
 
 
-class MembershipStatusCode(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class MembershipStatusCode(BaseModel):  # pylint: disable=too-few-public-methods
     """This is the Membership Status model for the Auth service."""
 
     __tablename__ = 'membership_status_code'

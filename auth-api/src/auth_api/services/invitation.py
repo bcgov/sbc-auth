@@ -28,14 +28,15 @@ from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import OrgSettings as OrgSettingsModel
+from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
-from auth_api.models.org import Org as OrgModel
-from auth_api.utils.roles import ADMIN, OWNER
-from auth_api.utils.roles import Status
+from auth_api.utils.roles import ADMIN, OWNER, Status
 from config import get_named_config
+
 from .authorization import check_auth
 from .notification import send_email
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -69,11 +70,10 @@ class Invitation:
         # TODO doesnt work when invited to multiple teams.. Re-work the logic when multiple teams introduced
         org_name = OrgModel.find_by_org_id(invitation_info['membership'][0]['orgId']).name
 
-
-        print('org_name-----',org_name)
         invitation = InvitationModel.create_from_dict(invitation_info, user.identifier)
         invitation.save()
-        Invitation.send_invitation(invitation,org_name, user.as_dict(), '{}/{}'.format(invitation_origin, context_path))
+        Invitation.send_invitation(invitation, org_name, user.as_dict(),
+                                   '{}/{}'.format(invitation_origin, context_path))
         return Invitation(invitation)
 
     def update_invitation(self, user, token_info: Dict, invitation_origin):
@@ -83,8 +83,12 @@ class Invitation:
         for membership in self._model.membership:
             org_id = membership.org_id
             check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
+
+        # TODO doesnt work when invited to multiple teams.. Re-work the logic when multiple teams introduced
         updated_invitation = self._model.update_invitation_as_retried()
-        Invitation.send_invitation(updated_invitation, user.as_dict(), '{}/{}'.format(invitation_origin, context_path))
+        org_name = OrgModel.find_by_org_id(self._model.membership[0].org_id).name
+        Invitation.send_invitation(updated_invitation, org_name, user.as_dict(),
+                                   '{}/{}'.format(invitation_origin, context_path))
         return Invitation(updated_invitation)
 
     @staticmethod
@@ -131,7 +135,7 @@ class Invitation:
 
     @staticmethod
     def send_admin_notification(user, url, recipient_email_list, org_name):
-        """send the admin email notification"""
+        """Send the admin email notification."""
         subject = '[BC Registries & Online Services] {} {} has responded for the invitation to join the team {}'. \
             format(user['firstname'], user['firstname'], org_name)
         sender = CONFIG.MAIL_FROM_ID
@@ -152,7 +156,7 @@ class Invitation:
             raise BusinessException(Error.FAILED_INVITATION, None)
 
     @staticmethod
-    def send_invitation(invitation: InvitationModel, org_name , user, confirm_url):
+    def send_invitation(invitation: InvitationModel, org_name, user, confirm_url):
         """Send the email notification."""
         subject = '[BC Registries & Online Services] {} {} has invited you to join a team'.format(user['firstname'],
                                                                                                   user['lastname'])
@@ -165,7 +169,7 @@ class Invitation:
             @copy_current_request_context
             def run_job():
                 send_email(subject, sender, recipient,
-                           template.render(invitation=invitation, url=token_confirm_url, user=user,org_name = org_name))
+                           template.render(invitation=invitation, url=token_confirm_url, user=user, org_name=org_name))
 
             thread = Thread(target=run_job)
             thread.start()
@@ -194,7 +198,7 @@ class Invitation:
 
     @staticmethod
     def notify_admin(user, invitation_id, membership_id, invitation_origin):
-        """admins should be notified if user has responded to invitation"""
+        """Admins should be notified if user has responded to invitation."""
         admin_list = UserService.get_admins_for_membership(membership_id)
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH

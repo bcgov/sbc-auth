@@ -24,8 +24,8 @@ from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
-from auth_api.utils.roles import ADMIN, OWNER
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, Status
+from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, OWNER, Status
+
 from .authorization import check_auth
 
 
@@ -59,7 +59,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
     @staticmethod
     def get_members_for_org(org_id, status=None, membership_roles=None, token_info: Dict = None,
                             allowed_roles: Tuple = None):
-        """get members of org .Fetches using status and roles"""
+        """Get members of org.Fetches using status and roles."""
         if org_id is None:
             return None
 

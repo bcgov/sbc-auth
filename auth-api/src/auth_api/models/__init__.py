@@ -28,13 +28,14 @@ from .invitation import Invitation
 from .invitation_membership import InvitationMembership
 from .invite_status import InvitationStatus
 from .membership import Membership
+from .membership_status_code import MembershipStatusCode
 from .membership_type import MembershipType
 from .org import Org
+from .org_settings import OrgSettings
 from .org_status import OrgStatus
 from .org_type import OrgType
 from .payment_type import PaymentType
 from .user import User
-from .membership_status_code import MembershipStatusCode
-from .org_settings import OrgSettings
+
 
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)

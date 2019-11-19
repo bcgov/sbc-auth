@@ -21,10 +21,10 @@ import datetime
 from flask import current_app
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, or_
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.roles import Status
+
 from .base_model import BaseModel
 from .db import db
 from .membership import Membership as MembershipModel
@@ -47,7 +47,8 @@ class User(BaseModel):
     roles = Column('roles', String(1000))
 
     contacts = relationship('ContactLink', back_populates='user', primaryjoin='User.id == ContactLink.user_id')
-    orgs = relationship('Membership', back_populates='user', primaryjoin='and_(User.id == Membership.user_id, or_(Membership.status == 1, Membership.status == 4))')
+    orgs = relationship('Membership', back_populates='user',
+                        primaryjoin='and_(User.id == Membership.user_id, or_(Membership.status == 1, Membership.status == 4))')
 
     is_terms_of_use_accepted = Column(Boolean(), default=False, nullable=True)
     terms_of_use_accepted_version = Column(
@@ -55,10 +56,6 @@ class User(BaseModel):
     )
     terms_of_use_version = relationship('Documents', foreign_keys=[terms_of_use_accepted_version], uselist=False,
                                         lazy='select')
-
-    @hybrid_property
-    def can_create_team(self):
-        return False
 
     @classmethod
     def find_by_username(cls, username):
@@ -138,7 +135,7 @@ class User(BaseModel):
 
     @classmethod
     def find_users_by_org_id_by_status_by_roles(cls, org_id, roles, status=Status.ACTIVE.value):
-        """returns all members of the org with a status"""
+        """Find all members of the org with a status."""
         return db.session.query(User). \
             join(MembershipModel,
                  (User.id == MembershipModel.user_id) & (MembershipModel.status == status) &

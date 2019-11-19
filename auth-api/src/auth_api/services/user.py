@@ -181,7 +181,7 @@ class User:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def get_admins_for_membership(membership_id, status=Status.ACTIVE.value):
-        """get admins for an org """
+        """Get admins for an org."""
         membership = MembershipModel.find_membership_by_id(membership_id)
         org_id = membership.org_id
 
