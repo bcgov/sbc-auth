@@ -7,6 +7,7 @@
     :calculate-widths="true"
     :hide-default-footer="activeOrgMembers.length <= 5"
     :custom-sort="customSortActive"
+    :no-data-text="$t('noActiveUsersMsg')"
   >
     <template v-slot:loading>
       Loading...

@@ -6,6 +6,7 @@
     :items-per-page="5"
     :calculate-widths="true"
     :hide-default-footer="pendingOrgInvitations.length <= 5"
+    :no-data-text="$t('noPendingInvitesMsg')"
   >
     <template v-slot:item.sentDate="{ item }">
       {{ formatDate (item.sentDate) }}

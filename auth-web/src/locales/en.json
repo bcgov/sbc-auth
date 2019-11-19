@@ -23,5 +23,8 @@
   "confirmRoleChangeTitle": "Confirm Role Change",
   "confirmRemoveInviteTitle": "Confirm Invite Removal",
   "confirmApproveMemberTitle": "Confirm Member Approval",
-  "confirmDenyMemberTitle": "Confirm Member Denial"
+  "confirmDenyMemberTitle": "Confirm Member Denial",
+  "noPendingApprovalMsg": "No Pending Approvals",
+  "noPendingInvitesMsg": "No Pending Invitations",
+  "noActiveUsersMsg": "No Active Users"
 }
