@@ -61,10 +61,6 @@ class User(BaseModel):
     terms_of_use_version = relationship('Documents', foreign_keys=[terms_of_use_accepted_version], uselist=False,
                                         lazy='select')
 
-    @hybrid_property
-    def can_create_team(self):
-        return False
-
     @classmethod
     def find_by_username(cls, username):
         """Return the first user with the provided username."""

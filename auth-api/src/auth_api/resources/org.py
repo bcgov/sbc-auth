@@ -13,8 +13,6 @@
 # limitations under the License.
 """API endpoints for managing an Org resource."""
 
-import json
-
 from flask import g, jsonify, request
 from flask_restplus import Namespace, Resource, cors
 
@@ -32,6 +30,7 @@ from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role
 from auth_api.utils.util import cors_preflight
+
 
 API = Namespace('orgs', description='Endpoints for organization management')
 
