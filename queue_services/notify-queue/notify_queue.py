@@ -18,7 +18,7 @@
 import asyncio
 import datetime
 
-from notify_api.core import config as AppConfig
+from notify_api.core import config as app_config
 from notify_api.db.models.notification_status import NotificationStatusEnum
 
 from notify_service.worker import cb_subscription_handler, job_handler, qsm
@@ -27,21 +27,21 @@ from notify_service.worker import cb_subscription_handler, job_handler, qsm
 async def queue_worker(event_loop):
     """Run monitor Nats queue for email."""
     await qsm.run(loop=event_loop,
-                  config=AppConfig,
+                  config=app_config,
                   callback=cb_subscription_handler)
 
 
 async def pending_job_worker():
     """Run handle send PENDING email job every 5 minutes."""
     while True:
-        await asyncio.sleep(AppConfig.PENDING_EMAIL_TIME_FRAME)
+        await asyncio.sleep(app_config.PENDING_EMAIL_TIME_FRAME)
         await job_handler(NotificationStatusEnum.PENDING)
 
 
 async def failure_job_worker():
     """Run handle resend FAILURE email job every 10 minutes."""
     while True:
-        await asyncio.sleep(AppConfig.FAILURE_EMAIL_TIME_FRAME)
+        await asyncio.sleep(app_config.FAILURE_EMAIL_TIME_FRAME)
         await job_handler(NotificationStatusEnum.FAILURE)
 
 
@@ -59,9 +59,9 @@ async def archive_job_worker(dt):
 
 if __name__ == '__main__':
     event_loop = asyncio.get_event_loop()
-    # asyncio.Task(queue_worker(event_loop)),
 
-    tasks = [asyncio.Task(pending_job_worker()),
+    tasks = [asyncio.Task(queue_worker(event_loop)),
+             asyncio.Task(pending_job_worker()),
              asyncio.Task(failure_job_worker())]
     event_loop.run_until_complete(asyncio.gather(*tasks))
 

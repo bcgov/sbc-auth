@@ -73,9 +73,9 @@ class NotifyAPI(FastAPI):
             self.bind = None
 
     @property
-    def db_ession(self):
+    def db_session(self):
         """ Convenience property for the global Session """
-        return db_session
+        return db_session()
 
     def setup(self) -> None:
         """ Override setup() to not add openapi_prefix to openapi_url """

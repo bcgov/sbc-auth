@@ -20,12 +20,12 @@ import time
 from contextlib import contextmanager
 
 import pytest
+from fastapi import FastAPI
 from nats.aio.client import Client as Nats
+from notify_api.core.config import get_named_config
 from sqlalchemy import event, text
 from stan.aio.client import Client as Stan
-from fastapi import FastAPI
 from starlette.testclient import TestClient
-from notify_api.core.config import get_named_config
 
 from . import FROZEN_DATETIME
 
