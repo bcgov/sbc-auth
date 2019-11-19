@@ -235,7 +235,7 @@ export default class UserProfileForm extends Vue {
       if (!this.organizations || this.organizations.length === 0) {
         this.$router.push({ path: '/createteam' })
       } else if (this.organizations.some(org => org.members[0].membershipStatus === 'PENDING_APPROVAL')) {
-        this.$router.push('/unapproved/' + this.organizations[0].name)
+        this.$router.push('/pendingapproval/' + this.organizations[0].name)
       } else { // If a member of a team, redirect to dashboard for that team
         this.$router.push({ path: '/main' })
       }

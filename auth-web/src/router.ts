@@ -9,12 +9,12 @@ import KeyCloakService from '@/services/keycloak.services'
 import PageNotFound from '@/views/PageNotFound.vue'
 import PaymentForm from '@/components/pay/PaymentForm.vue'
 import PaymentReturnForm from '@/components/pay/PaymentReturnForm.vue'
+import PendingApproval from '@/views/PendingApproval.vue'
 import Router from 'vue-router'
 import SearchBusinessForm from '@/components/auth/SearchBusinessForm.vue'
 import Signin from '@/components/auth/Signin.vue'
 import Signout from '@/components/auth/Signout.vue'
 import TokenValidator from '@/views/TokenValidator.vue'
-import UnApproved from '@/views/UnApproved.vue'
 import Unauthorized from '@/components/auth/Unauthorized.vue'
 import UserManagement from '@/views/management/UserManagement.vue'
 import UserProfile from '@/views/UserProfile.vue'
@@ -55,7 +55,7 @@ export function getRoutes (appFlavor: String) {
     { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } },
     { path: '/searchbusiness', component: SearchBusinessForm, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
     { path: '/unauthorized', component: Unauthorized, props: true, meta: { requiresAuth: false } },
-    { path: '/unapproved/:team_name?', component: UnApproved, props: true, meta: { requiresAuth: false } },
+    { path: '/pendingapproval/:team_name?', component: PendingApproval, props: true, meta: { requiresAuth: false } },
     { path: '*', component: PageNotFound }
   ]
 
