@@ -78,8 +78,8 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     def find_orgs_for_user(cls, user_id):
         """Find the org for a user."""
         orgs = db.session.query(OrgModel).filter(OrgModel.members.any(and_(cls.user_id == user_id,
-                                                                           or_(cls.status == 1,
-                                                                               cls.status == 4)))) \
+                                                                           or_(cls.status == Status.ACTIVE.value,
+                                                                               cls.status == Status.PENDING_APPROVAL.value)))) \
             .all()
         for org in orgs:
             org.members = list(filter(lambda member: member.user_id == user_id, org.members))

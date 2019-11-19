@@ -80,16 +80,3 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
         self.update_from_dict(**org_info, _exclude=('status_code', 'type_code', 'preferred_payment_code'))
         self.save()
 
-    # @classmethod
-    # def find_orgs_for_user(cls, user_id):
-    #     """Find the org for a user."""
-    #     # pylint: disable=import-outside-toplevel
-    #     # TODO  it creates a circular import and everything fails when imported outside
-    #     from .membership import Membership as MembershipModel
-    #     orgs = db.session.query(Org).filter(Org.members.any(and_(MembershipModel.user_id == user_id,
-    #                                                              or_(MembershipModel.status == 1,
-    #                                                                  MembershipModel.status == 4)))) \
-    #         .all()
-    #     for org in orgs:
-    #         org.members = list(filter(lambda member: member.user_id == user_id, org.members))
-    #     return orgs

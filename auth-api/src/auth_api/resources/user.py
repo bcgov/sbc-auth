@@ -26,7 +26,7 @@ from auth_api.services.keycloak import KeycloakService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.roles import Role
+from auth_api.utils.roles import Role,Status
 from auth_api.utils.util import cors_preflight
 
 
@@ -232,7 +232,7 @@ class UserOrgs(Resource):
                 # only approved users should see entities..
                 # TODO when endpoints are separated into afilliations endpoint, this logic can be removed
                 if all_orgs:
-                    if all_orgs[0].members and all_orgs[0].members[0].status != 1:
+                    if all_orgs[0].members and all_orgs[0].members[0].status != Status.ACTIVE.value:
                         exclude_fields.append('affiliated_entities')
                 orgs = OrgSchema(exclude=exclude_fields).dump(
                     all_orgs, many=True)
