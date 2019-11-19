@@ -41,8 +41,19 @@
 >>>>>>> Adjustments to PendingMember interface
 =======
   "confirmDenyMemberTitle": "Confirm Member Denial",
+<<<<<<< HEAD
   "noPendingApprovalMsg": "No Pending Approvals",
   "noPendingInvitesMsg": "No Pending Invitations",
   "noActiveUsersMsg": "No Active Users"
 >>>>>>> [entity1852] Create Consistent No Record Labels (#235)
+=======
+  "noPendingApprovalLabel": "No Pending Approvals",
+  "noPendingInvitesLabel": "No Pending Invitations",
+  "noPendingInvitationTitle": "No Pending Invitations",
+  "noPendingInvitationMsg": "You don't have any pending invitations to BC Registries and Online Services.",
+  "pendingInvitationMsg": "The administrator for this team needs to verify your invitation before you can access this application.",
+  "noActiveUsersLabel": "No Active Users",
+  "pageNotFoundTitle": "Page not found",
+  "pageNotFoundMsg": "The page you are looking for has been removed or doesn't exist."
+>>>>>>> UI Clean-up of Status Views (#237)
 }
