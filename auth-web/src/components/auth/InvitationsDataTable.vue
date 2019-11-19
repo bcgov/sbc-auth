@@ -1,6 +1,6 @@
 <template>
   <v-data-table
-    class="user-list__pending"
+    class="user-list"
     :headers="headerInvitations"
     :items="pendingOrgInvitations"
     :items-per-page="5"
@@ -84,7 +84,3 @@ export default class InvitationsDataTable extends Vue {
   private resend (invitation: Invitation) {}
 }
 </script>
-
-<style lang="scss" scoped>
-
-</style>
