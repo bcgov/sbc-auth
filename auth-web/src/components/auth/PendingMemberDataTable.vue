@@ -1,6 +1,6 @@
 <template>
   <v-data-table
-    class="user-list__active"
+    class="user-list"
     :headers="headerPendingMembers"
     :items="pendingOrgMembers"
     :items-per-page="5"
@@ -80,7 +80,3 @@ export default class PendingMemberDataTable extends Vue {
   private confirmDenyMember (member: Member) {}
 }
 </script>
-
-<style lang="scss" scoped>
-
-</style>

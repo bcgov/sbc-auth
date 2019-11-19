@@ -1,6 +1,6 @@
 <template>
   <v-data-table
-    class="user-list__active"
+    class="user-list"
     :headers="headerMembers"
     :items="activeOrgMembers"
     :items-per-page="5"
@@ -155,7 +155,3 @@ export default class MemberDataTable extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-</style>

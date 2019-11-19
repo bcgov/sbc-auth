@@ -334,18 +334,17 @@ export default class UserManagement extends Vue {
   flex: 1 1 auto;
 }
 
-::v-deep .v-data-table td {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-}
+::v-deep {
+  .v-data-table td {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    height: auto;
+    vertical-align: top;
+  }
 
-::v-deep .v-data-table.user-list__active td {
-  height: 4rem;
-  vertical-align: top;
-}
-
-.user-name {
-  display: block;
-  font-weight: 700;
+  .v-list-item__title {
+    display: block;
+    font-weight: 700;
+  }
 }
 </style>
