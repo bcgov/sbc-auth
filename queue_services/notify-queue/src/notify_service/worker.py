@@ -50,24 +50,22 @@ qsm = QueueServiceManager()  # pylint: disable=invalid-name
 app = NotifyAPI(bind=app_config.SQLALCHEMY_DATABASE_URI)
 
 
-async def send_with_send_message(message):
+async def send_with_send_message(sender, recipients, message):
     """Send email."""
     smtp_client = SMTP(hostname=app_config.MAIL_SERVER, port=app_config.MAIL_PORT)
     await smtp_client.connect()
-    await smtp_client.send_message(message)
+    await smtp_client.send_message(message=message, recipients=recipients, sender=sender)
     await smtp_client.quit()
 
 
 async def process_notification(notification_id: int):
     """Render the payment status."""
     try:
-        notification: Notification = await NotifyService.find_notification(app.db_ession, notification_id)
-
+        notification: Notification = await NotifyService.find_notification(app.db_session, notification_id)
+        encoding = 'utf-8'
         message = MIMEMultipart()
-        message['From'] = app_config.MAIL_FROM_ID
-        message['To'] = notification.recipients
         message['Subject'] = notification.contents.subject
-        message.attach(MIMEText(notification.contents.body, 'html', 'utf-8'))
+        message.attach(MIMEText(notification.contents.body, 'html', encoding))
 
         if notification.contents.attachment:
             part = MIMEBase('application', 'octet-stream')
@@ -88,13 +86,13 @@ async def process_notification(notification_id: int):
 
             message.attach(part)
 
-        await send_with_send_message(message)
+        await send_with_send_message(app_config.MAIL_FROM_ID, notification.recipients.split(','), message)
 
         update_notification: NotificationUpdate = NotificationUpdate(id=notification_id,
                                                                      sent_date=datetime.utcnow(),
                                                                      notify_status=NotificationStatusEnum.DELIVERED)
 
-        await NotifyService.update_notification_status(app.db_ession, update_notification)
+        await NotifyService.update_notification_status(app.db_session, update_notification)
     except Exception as err:  # pylint: disable=broad-except, unused-variable # noqa F841;
         capture_message(f'Notify Service Error: Failied to send email:{notification.recipients} with error:{err}',
                         level='error')
@@ -103,7 +101,7 @@ async def process_notification(notification_id: int):
                                                                      sent_date=datetime.utcnow(),
                                                                      notify_status=NotificationStatusEnum.FAILURE)
 
-        await NotifyService.update_notification_status(app.db_ession, update_notification)
+        await NotifyService.update_notification_status(app.db_session, update_notification)
 
     return
 
@@ -125,7 +123,7 @@ async def job_handler(status: str):
     """Use schedule task to process notifications from db."""
     try:
         logger.info('Schedule Job for sending %s email run at:%s', status, datetime.utcnow())
-        notifications = await NotifyService.find_notifications_by_status(app.db_ession, status)
+        notifications = await NotifyService.find_notifications_by_status(app.db_session, status)
         for notification in notifications:
             logger.info('Process notificaiton id: %s', notification.id)
             await process_notification(notification.id)
