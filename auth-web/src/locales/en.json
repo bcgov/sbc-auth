@@ -26,6 +26,7 @@
   "confirmRemoveInviteTitle": "Confirm Invite Removal",
   "confirmApproveMemberTitle": "Confirm Member Approval",
 <<<<<<< HEAD
+<<<<<<< HEAD
   "confirmDenyMemberTitle": "Confirm Member Denial",
   "noPendingApprovalLabel": "No Pending Approvals",
   "noPendingInvitesLabel": "No Pending Invitations",
@@ -38,4 +39,10 @@
 =======
   "confirmDenyMemberTitle": "Confirm Member Denial"
 >>>>>>> Adjustments to PendingMember interface
+=======
+  "confirmDenyMemberTitle": "Confirm Member Denial",
+  "noPendingApprovalMsg": "No Pending Approvals",
+  "noPendingInvitesMsg": "No Pending Invitations",
+  "noActiveUsersMsg": "No Active Users"
+>>>>>>> [entity1852] Create Consistent No Record Labels (#235)
 }
