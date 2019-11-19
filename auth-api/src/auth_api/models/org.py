@@ -21,7 +21,6 @@ from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy import and_, or_
 from .base_model import BaseModel
-from .db import db
 from .org_status import OrgStatus
 from .org_type import OrgType
 from .payment_type import PaymentType
