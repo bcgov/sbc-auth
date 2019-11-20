@@ -15,7 +15,6 @@
 import pytest
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
-from sqlalchemy.schema import DropConstraint, MetaData
 
 from auth_api import create_app
 from auth_api.jwt_wrapper import JWTWrapper
