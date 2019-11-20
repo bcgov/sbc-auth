@@ -117,7 +117,6 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     EMAIL_SECURITY_PASSWORD_SALT = os.getenv('EMAIL_SECURITY_PASSWORD_SALT')
     EMAIL_TOKEN_SECRET_KEY = os.getenv('EMAIL_TOKEN_SECRET_KEY')
     TOKEN_EXPIRY_PERIOD = os.getenv('TOKEN_EXPIRY_PERIOD')
-    SQLALCHEMY_ECHO = True
     # Legal-API URL
     LEGAL_API_URL = os.getenv('LEGAL_API_URL')
 

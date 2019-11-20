@@ -26,11 +26,12 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role, Status
 from auth_api.utils.util import cors_preflight
 
 
 API = Namespace('orgs', description='Endpoints for organization management')
+
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
 
@@ -286,24 +287,26 @@ class OrgMember(Resource):
         """Update a membership record with new member role."""
         token = g.jwt_oidc_token_info
         role = request.get_json().get('role')
-        status = request.get_json().get('status')
+        membership_status = request.get_json().get('status')
         updated_fields_dict = {}
         origin = request.environ.get('HTTP_ORIGIN', 'localhost')
         try:
             if role is not None:
                 updated_role = MembershipService.get_membership_type_by_code(role)
                 updated_fields_dict['membership_type'] = updated_role
-            if status is not None:
-                updated_fields_dict['membership_status'] = MembershipService.get_membership_status_by_code(status)
+            if membership_status is not None:
+                updated_fields_dict['membership_status'] = MembershipService.get_membership_status_by_code(membership_status)
             membership = MembershipService.find_membership_by_id(membership_id, token)
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
-                return response, status
-
-            return membership.update_membership(updated_fields=updated_fields_dict, token_info=token, origin=origin).as_dict(), \
-                http_status.HTTP_200_OK
-
+            else:
+                response, status = membership.update_membership(updated_fields=updated_fields_dict, token_info=token
+                                                                ).as_dict(), http_status.HTTP_200_OK
+                # if user status changed to active , mail the user
+                if membership_status == Status.ACTIVE.name:
+                    membership.send_approval_notification_to_member(origin)
+            return response, status
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
             return response, status

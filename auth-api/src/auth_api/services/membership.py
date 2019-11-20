@@ -105,9 +105,9 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             return Membership(membership)
         return None
 
-    @staticmethod
-    def send_approval_notification_to_member(user, url, org_name):
+    def send_approval_notification_to_member(self, origin_url):
         """Send the admin email notification."""
+        org_name = self._model.org.name
         subject = '[BC Registries & Online Services] Welcome to the team {}'. \
             format(org_name)
         sender = CONFIG.MAIL_FROM_ID
@@ -116,8 +116,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         try:
             @copy_current_request_context
             def run_job():
-                send_email(subject, sender, user.contacts[0].contact.email,
-                           template.render(url=url, user=user, org_name=org_name))
+                send_email(subject, sender, self._model.user.contacts[0].contact.email,
+                           template.render(url=origin_url, org_name=org_name))
 
             thread = Thread(target=run_job)
             thread.start()
@@ -127,7 +127,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             # invitation.save()
             raise BusinessException(Error.FAILED_NOTIFICATION, None)
 
-    def update_membership(self, updated_fields, token_info: Dict = None, origin=None):
+    def update_membership(self, updated_fields, token_info: Dict = None):
         """Update an existing membership with the given role."""
         # Ensure that this user is an ADMIN or OWNER on the org associated with this membership
         check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
@@ -136,7 +136,4 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 setattr(self._model, key, value)
         self._model.save()
         self._model.commit()
-        if updated_fields['membership_status'].id == Status.ACTIVE.value:
-            # user is approved ;send him a notification
-            self.send_approval_notification_to_member(self._model.user, origin, self._model.org.name)
         return self
