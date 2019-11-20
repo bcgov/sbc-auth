@@ -13,7 +13,7 @@
 # limitations under the License.
 """Notification contents data model."""
 from pydantic import BaseModel
-from sqlalchemy import Binary, Column, ForeignKey, Integer, String
+from sqlalchemy import Binary, Column, ForeignKey, Integer, String, Text
 
 from notify_api.core.utils import to_camel
 from notify_api.db.database import BASE
@@ -25,7 +25,7 @@ class NotificationContentsModel(BASE):  # pylint: disable=too-few-public-methods
 
     id = Column(Integer, primary_key=True)
     subject = Column(String(2000), nullable=False)
-    body = Column(String(2000), nullable=False)
+    body = Column(Text, nullable=False)
     attachment_name = Column(String(200), nullable=True)
     attachment = Column(Binary, nullable=True)
     notification_id = Column(ForeignKey('notification.id'), nullable=False)
