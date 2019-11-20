@@ -117,6 +117,8 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
         # Catch Exception so that any error is still caught and the message is removed from the queue
         capture_message('Notify Queue Error:', level='error')
         logger.error('Notify Queue Error: %s', exc_info=True)
+    finally:
+        app.db_session.close()
 
 
 async def job_handler(status: str):
@@ -132,3 +134,5 @@ async def job_handler(status: str):
         # Catch Exception so that any error is still caught and the message is removed from the queue
         capture_message('Notify Job Error:', level='error')
         logger.error('Notify Job Error: %s', exc_info=True)
+    finally:
+        app.db_session.close()
