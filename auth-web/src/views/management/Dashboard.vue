@@ -1,5 +1,5 @@
 <template>
-  <v-app class="view-container">
+  <div class="dashboard-view">
     <ManagementMenu :menu="menu" />
     <article>
       <component
@@ -7,7 +7,7 @@
         @change-to="setSelectedComponent($event)"
       />
     </article>
-  </v-app>
+  </div>
 </template>
 
 <script lang="ts">
@@ -75,13 +75,3 @@ export default class Dashboard extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .view-container {
-    display: flex;
-  }
-
-  aside {
-    margin: 0;
-  }
-</style>

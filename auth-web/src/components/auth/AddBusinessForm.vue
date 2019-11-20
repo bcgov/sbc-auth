@@ -35,7 +35,7 @@
         ></v-text-field>
       </div>
       <div class="form__btns mt-8">
-        <v-btn depressed large color="primary" @click="add">
+        <v-btn large color="primary" @click="add">
           <span>Add Business</span>
         </v-btn>
         <v-btn depressed large color="default" class="ml-2" @click="cancel">

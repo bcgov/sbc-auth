@@ -1,10 +1,10 @@
 <template>
   <v-container class="view-container">
-    <header class="view-header mt-1 mb-9">
+    <header class="view-header">
       <h1>Manage Businesses</h1>
       <div class="view-header__actions">
-        <v-btn outlined color="primary" @click="showAddBusinessModal()">
-          <v-icon>mdi-plus</v-icon>
+        <v-btn large color="primary" @click="showAddBusinessModal()">
+          <v-icon small>mdi-plus</v-icon>
           <span>Add Business</span>
         </v-btn>
       </div>
@@ -178,21 +178,33 @@ export default class EntityManagement extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  .view-container {
+  .view-header {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-top: 1.5rem;
+    padding-bottom: 2.5rem;
+
+    h1 {
+      margin-bottom: 0;
+    }
+
+    .v-btn {
+      font-weight: 700;
+    }
   }
 
-  .view-container__content {
-    flex: 1 1 auto;
-  }
+  ::v-deep {
+    .v-data-table td {
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+      height: auto;
+      vertical-align: top;
+    }
 
-  article {
-    margin-left: 1.5rem;
-    padding: 0;
-  }
-
-  aside {
-    margin: 0;
+    .v-list-item__title {
+      display: block;
+      font-weight: 700;
+    }
   }
 </style>

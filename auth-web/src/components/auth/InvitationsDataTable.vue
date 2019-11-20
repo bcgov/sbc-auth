@@ -15,7 +15,7 @@
       {{ formatDate (item.expiresOn) }}
     </template>
     <template v-slot:item.action="{ item }">
-      <v-btn depressed small class="mr-2" @click="resend(item)">Resend</v-btn>
+      <v-btn small color="primary" class="mr-2" @click="resend(item)">Resend</v-btn>
       <v-btn depressed small @click="confirmRemoveInvite(item)">Remove</v-btn>
     </template>
   </v-data-table>
@@ -65,7 +65,7 @@ export default class InvitationsDataTable extends Vue {
       align: 'left',
       value: 'action',
       sortable: false,
-      width: '195'
+      width: '193'
     }
   ]
 

@@ -29,7 +29,6 @@ export default Vue.extend({
 </script>
 
 <style lang="scss">
-
   .app-container {
     display: flex;
     flex-flow: column nowrap;
@@ -45,14 +44,12 @@ export default Vue.extend({
   }
 
   .app-body {
-    flex: 1 1 auto
-  }
+    flex: 1 1 auto;
+    position: relative;
 
-  @media (min-width: 1264px) {
-    .app-body
-      > .container:first-child {
-        padding-top: 3rem;
-        padding-bottom: 3rem
-      }
+    > .container:first-child {
+      padding-top: 3rem;
+      padding-bottom: 4rem;
+    }
   }
 </style>

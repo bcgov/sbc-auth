@@ -61,11 +61,11 @@
     </v-row>
     <v-row>
       <v-col cols="12" class="form__btns pb-0">
-        <v-btn large color="default" v-show="editing" @click="cancel">
-          Cancel
-        </v-btn>
         <v-btn large color="primary" @click="save" :disabled='!isFormValid()'>
           Save
+        </v-btn>
+        <v-btn large depressed color="default" @click="cancel">
+          Cancel
         </v-btn>
       </v-col>
     </v-row>
@@ -177,7 +177,7 @@ export default class BusinessContactForm extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import '../../assets/scss/theme.scss';
+  @import '$assets/scss/theme.scss';
 
   // Tighten up some of the spacing between rows
   [class^="col"] {
@@ -188,6 +188,10 @@ export default class BusinessContactForm extends Vue {
   .form__btns {
     display: flex;
     justify-content: flex-end;
+
+    .v-btn + .v-btn {
+      margin-left: 0.5rem;
+    }
   }
 
   .business-contact-form__alert-container {
