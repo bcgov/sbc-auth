@@ -65,7 +65,7 @@ class NotifyAPI(FastAPI):
         )
         if bind is not None:
             if isinstance(bind, str):
-                self.bind = create_engine(bind, pool_pre_ping=True)
+                self.bind = create_engine(bind, pool_pre_ping=True, pool_size=20)
             else:
                 self.bind = bind
             db_session.configure(bind=self.bind)
