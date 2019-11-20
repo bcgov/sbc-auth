@@ -79,4 +79,3 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
         # Update from provided dictionary, but specify additional fields not to update.
         self.update_from_dict(**org_info, _exclude=('status_code', 'type_code', 'preferred_payment_code'))
         self.save()
-

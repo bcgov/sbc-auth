@@ -31,8 +31,10 @@ from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
 from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, OWNER, Status
 from config import get_named_config
+
 from .authorization import check_auth
 from .notification import send_email
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -134,7 +136,6 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 setattr(self._model, key, value)
         self._model.save()
         self._model.commit()
-        user = self._model
         if updated_fields['membership_status'].id == Status.ACTIVE.value:
             # user is approved ;send him a notification
             self.send_approval_notification_to_member(self._model.user, origin, self._model.org.name)
