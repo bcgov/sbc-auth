@@ -288,6 +288,7 @@ class OrgMember(Resource):
         role = request.get_json().get('role')
         status = request.get_json().get('status')
         updated_fields_dict = {}
+        origin = request.environ.get('HTTP_ORIGIN', 'localhost')
         try:
             if role is not None:
                 updated_role = MembershipService.get_membership_type_by_code(role)
@@ -300,7 +301,7 @@ class OrgMember(Resource):
                                    http_status.HTTP_404_NOT_FOUND
                 return response, status
 
-            return membership.update_membership(updated_fields=updated_fields_dict, token_info=token).as_dict(), \
+            return membership.update_membership(updated_fields=updated_fields_dict, token_info=token, origin=origin).as_dict(), \
                 http_status.HTTP_200_OK
 
         except BusinessException as exception:

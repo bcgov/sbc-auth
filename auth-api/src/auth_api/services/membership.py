@@ -15,18 +15,27 @@
 
 This module manages the Membership Information between an org and a user.
 """
+from threading import Thread
 from typing import Dict, Tuple
 
+from flask import copy_current_request_context
+from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
 from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, OWNER, Status
-
+from config import get_named_config
 from .authorization import check_auth
+from .notification import send_email
+
+ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
+CONFIG = get_named_config()
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -94,7 +103,29 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             return Membership(membership)
         return None
 
-    def update_membership(self, updated_fields, token_info: Dict = None):
+    @staticmethod
+    def send_approval_notification_to_member(user, url, org_name):
+        """Send the admin email notification."""
+        subject = '[BC Registries & Online Services] Welcome to the team {}'. \
+            format(org_name)
+        sender = CONFIG.MAIL_FROM_ID
+        template = ENV.get_template('email_templates/membership_approved_notification_email.html')
+
+        try:
+            @copy_current_request_context
+            def run_job():
+                send_email(subject, sender, user.contacts[0].contact.email,
+                           template.render(url=url, user=user, org_name=org_name))
+
+            thread = Thread(target=run_job)
+            thread.start()
+
+        except:  # noqa: E722
+            # invitation.invitation_status_code = 'FAILED'
+            # invitation.save()
+            raise BusinessException(Error.FAILED_NOTIFICATION, None)
+
+    def update_membership(self, updated_fields, token_info: Dict = None, origin=None):
         """Update an existing membership with the given role."""
         # Ensure that this user is an ADMIN or OWNER on the org associated with this membership
         check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
@@ -103,4 +134,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 setattr(self._model, key, value)
         self._model.save()
         self._model.commit()
+        user = self._model
+        if updated_fields['membership_status'].id == Status.ACTIVE.value:
+            # user is approved ;send him a notification
+            self.send_approval_notification_to_member(self._model.user, origin, self._model.org.name)
         return self
