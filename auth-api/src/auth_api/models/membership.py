@@ -23,8 +23,8 @@ from auth_api.utils.roles import Status
 
 from .base_model import BaseModel
 from .db import db
-from .membership_type import MembershipType
 from .membership_status_code import MembershipStatusCode
+from .membership_type import MembershipType
 from .org import Org as OrgModel
 
 
@@ -61,7 +61,6 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
             self.status = MembershipStatusCode.get_default_type()
         else:
             self.status = kwargs.get('membership_type_status')
-           
 
     @classmethod
     def find_membership_by_id(cls, membership_id):

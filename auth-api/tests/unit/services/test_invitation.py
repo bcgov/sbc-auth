@@ -171,7 +171,8 @@ def test_accept_invitation_exceptions(session, auth_mock):  # pylint:disable=unu
                 assert exception.value.code == Error.ACTIONED_INVITATION.name
 
                 with pytest.raises(BusinessException) as exception:
-                    expired_invitation: InvitationModel = InvitationModel.find_invitation_by_id(new_invitation_dict['id'])
+                    expired_invitation: InvitationModel = InvitationModel \
+                        .find_invitation_by_id(new_invitation_dict['id'])
                     expired_invitation.invitation_status = InvitationStatusModel.get_status_by_code('EXPIRED')
                     expired_invitation.save()
                     InvitationService.accept_invitation(expired_invitation.id, User(user), '')
