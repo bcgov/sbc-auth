@@ -34,3 +34,8 @@ class MembershipStatusCode(BaseModel):  # pylint: disable=too-few-public-methods
     def get_membership_status_by_code(cls, name):
         """Return the membership type object that corresponds to given code."""
         return cls.query.filter_by(name=name).first()
+
+    @classmethod
+    def get_default_type(cls):
+        """Return the default type code for Membership Status."""
+        return 1

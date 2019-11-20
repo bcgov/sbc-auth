@@ -15,7 +15,6 @@
 import pytest
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
-from sqlalchemy.schema import DropConstraint, MetaData
 
 from auth_api import create_app
 from auth_api.jwt_wrapper import JWTWrapper
@@ -64,29 +63,17 @@ def client_ctx(app):  # pylint: disable=redefined-outer-name
 def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a session-wide initialised database.
 
-    Drops all existing tables - Meta follows Postgres FKs
+    Drops schema, and recreate.
     """
     with app.app_context():
-        # Clear out any existing tables
-        metadata = MetaData(_db.engine)
-        metadata.reflect()
-        for table in metadata.tables.values():
-            for fk in table.foreign_keys:  # pylint: disable=invalid-name
-                _db.engine.execute(DropConstraint(fk.constraint))
-        metadata.drop_all()
-        _db.drop_all()
-
-        sequence_sql = """SELECT sequence_name FROM information_schema.sequences
-                          WHERE sequence_schema='public'
-                       """
+        drop_schema_sql = """DROP SCHEMA public CASCADE;
+                             CREATE SCHEMA public;
+                             GRANT ALL ON SCHEMA public TO postgres;
+                             GRANT ALL ON SCHEMA public TO public;
+                          """
 
         sess = _db.session()
-        for seq in [name for (name,) in sess.execute(text(sequence_sql))]:
-            try:
-                sess.execute(text('DROP SEQUENCE public.%s ;' % seq))
-                print('DROP SEQUENCE public.%s ' % seq)
-            except Exception as err:  # pylint: disable=broad-except
-                print(f'Error: {err}')
+        sess.execute(drop_schema_sql)
         sess.commit()
 
         # ############################################
@@ -138,3 +125,11 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         # This instruction rollsback any commit that were executed in the tests.
         txn.rollback()
         conn.close()
+
+
+@pytest.fixture()
+def auth_mock(monkeypatch):
+    """Mock check_auth."""
+    monkeypatch.setattr('auth_api.services.entity.check_auth', lambda *args, **kwargs: None)
+    monkeypatch.setattr('auth_api.services.org.check_auth', lambda *args, **kwargs: None)
+    monkeypatch.setattr('auth_api.services.invitation.check_auth', lambda *args, **kwargs: None)
