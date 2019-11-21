@@ -65,7 +65,7 @@ class NotifyService:  # pylint: disable=too-few-public-methods
                                            notification_id=new_notification.id)
 
         # push the email to the queue service
-        await NotifyService.send_notification_to_queue(jsonable_encoder(new_notification.id))
+        await publish(payload=new_notification.id)
 
         return new_notification
 
@@ -78,11 +78,3 @@ class NotifyService:  # pylint: disable=too-few-public-methods
             notification_exists.status_code = notification.notify_status
             updated_notification = await NotificaitonCRUD.update_notification(db_session, notification_exists)
             return updated_notification
-
-    @staticmethod
-    async def send_notification_to_queue(notification_id: int):
-        """Send the email using the given details."""
-        try:
-            await publish(payload=notification_id)
-        except Exception as queue_error:  # pylint: disable=broad-except
-            logger.info('publish to queue error: %s %s', notification_id, str(queue_error))
