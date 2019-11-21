@@ -25,7 +25,7 @@ from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
 from auth_api.utils.passcode import validate_passcode
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -85,7 +85,7 @@ class Affiliation:
     def create_affiliation(org_id, business_identifier, pass_code=None, token_info: Dict = None):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
-        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=CLIENT_ADMIN_ROLES)
+        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=CLIENT_AUTH_ROLES)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -112,9 +112,6 @@ class Affiliation:
                 authorized = False
 
         if not authorized:
-            # If org being affiliated was IMPLICIT, remove it since the affiliation was not valid
-            if org.as_dict()['orgType'] == 'IMPLICIT':
-                org.delete_org()
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
 
         # Ensure this affiliation does not already exist
