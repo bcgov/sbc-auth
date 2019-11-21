@@ -19,9 +19,9 @@
     <template v-slot:item.role="{ item }">
       <v-menu offset-y>
         <template v-slot:activator="{ on }">
-          <v-btn depressed small v-on="on">
+          <v-btn small depressed v-on="on">
             {{ item.membershipTypeCode }}
-            <v-icon small class="ml-1">mdi-chevron-down</v-icon>
+            <v-icon small depressed class="ml-1">mdi-chevron-down</v-icon>
           </v-btn>
         </template>
         <v-list>
@@ -98,7 +98,7 @@ export default class MemberDataTable extends Vue {
       align: 'left',
       value: 'action',
       sortable: false,
-      width: '95'
+      width: '77'
     }
   ]
 

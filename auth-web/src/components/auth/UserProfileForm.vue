@@ -17,7 +17,7 @@
                 label="First Name"
                 req
                 persistent-hint
-                readonly
+                disabled
                 v-model="firstName"
         >
         </v-text-field>
@@ -28,7 +28,7 @@
                 label="Last Name"
                 req
                 persistent-hint
-                readonly
+                disabled
                 v-model="lastName"
         >
         </v-text-field>
@@ -97,6 +97,7 @@
         <v-btn large color="primary" class=".save-continue-button" :disabled='!isFormValid()' @click="save">
           Save
         </v-btn>
+        <v-btn large depressed @click="cancel">Cancel</v-btn>
       </v-col>
     </v-row>
   </v-form>
@@ -240,6 +241,10 @@ export default class UserProfileForm extends Vue {
         this.$router.push({ path: '/main' })
       }
     }
+
+    cancel () {
+      window.history.back()
+    }
 }
 </script>
 
@@ -255,5 +260,9 @@ export default class UserProfileForm extends Vue {
   .form__btns {
     display: flex;
     justify-content: flex-end;
+
+    .v-btn + .v-btn {
+      margin-left: 0.5rem;
+    }
   }
 </style>
