@@ -14,7 +14,6 @@
 """Service for managing Invitation data."""
 import logging
 
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from notify_api.core import config as AppConfig

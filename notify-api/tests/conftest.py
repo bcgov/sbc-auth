@@ -29,14 +29,16 @@ DATABASE_URL = AppConfig.SQLALCHEMY_TEST_DATABASE_URI
 
 
 @event.listens_for(NotificationTypeModel.__table__, 'after_create')
-def insert_data(target, connection, **kw):
+def insert_data(target, connection, **kw):  # pylint: disable=unused-argument
+    """Load notification type data."""
     connection.execute(target.insert(),
                        {'code': 'EMAIL', 'desc': 'The Email type of notification', 'default': True},
                        {'code': 'TEXT', 'desc': 'The Text message type of notification', 'default': False})
 
 
 @event.listens_for(NotificationStatusModel.__table__, 'after_create')
-def insert_data2(target, connection, **kw):
+def insert_data2(target, connection, **kw):  # pylint: disable=unused-argument
+    """Load notification status data."""
     connection.execute(target.insert(),
                        {'code': 'PENDING', 'desc': 'Initial state of the notification', 'default': True},
                        {'code': 'DELIVERED', 'desc': 'Status for the notification sent successful', 'default': False},
@@ -50,6 +52,7 @@ def loop_fixture():
 
 @pytest.fixture(scope='session', name='engine')
 def engine_fixture():
+    """Connect to the database."""
     engine = sqlalchemy.create_engine(AppConfig.SQLALCHEMY_TEST_DATABASE_URI)
     SESSION.configure(bind=engine)
     return engine
@@ -57,7 +60,7 @@ def engine_fixture():
 
 @pytest.fixture(scope='function', name='session')
 def session_fixture(engine):
-
+    """Create and drop all database metadata."""
     def _drop_all():
         meta = sqlalchemy.MetaData()
         meta.reflect(bind=engine)
@@ -76,6 +79,7 @@ def session_fixture(engine):
 
 @pytest.fixture(scope='function', name='app')
 def app_fixture(engine):
+    """FastAPI app."""
     return applications.NotifyAPI(
         engine,
         title='notify_api',
@@ -85,4 +89,5 @@ def app_fixture(engine):
 
 @pytest.fixture(scope='function', name='client')
 def client_fixture(app):
+    """FastAPI test client."""
     return TestClient(app)

@@ -28,7 +28,7 @@ def test_ops_healthz_success(client):
     assert rv.json() == {'message': 'api is healthy'}
 
 
-def test_ops_healthz_fail(session, client):
+def test_ops_healthz_fail(session, client):  # pylint: disable=unused-argument
     """Assert that the service is unhealthy if a connection toThe database cannot be made."""
     engine = sqlalchemy.create_engine('postgresql://does:not@exist:5432/nada')
     SESSION.configure(bind=engine)

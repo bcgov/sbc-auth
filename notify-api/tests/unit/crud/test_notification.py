@@ -1,3 +1,18 @@
+# Copyright © 2019 Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""The Unit Test for the CRUD."""
 from datetime import datetime
 
 from notify_api.db.crud import notification as NotificaitonCRUD
@@ -6,6 +21,7 @@ from tests.utilities.factory_scenarios import NOTIFICATION_DATA
 
 
 def test_find_notification_by_id(session, loop):
+    """Assert the test can retrieve notification by id."""
     notification = NotificationModel(**NOTIFICATION_DATA[0])
     session.add(notification)
     session.commit()
@@ -20,6 +36,7 @@ def test_find_notification_by_id(session, loop):
 
 
 def test_find_notification_by_status(session, loop):
+    """Assert the test can retrieve notifications by status."""
     notification = NotificationModel(**NOTIFICATION_DATA[0])
     session.add(notification)
     session.commit()
@@ -34,6 +51,7 @@ def test_find_notification_by_status(session, loop):
 
 
 def test_find_notification_by_status_time(session, loop):
+    """Assert the test can retrieve notifications by status and time frame."""
     notification = NotificationModel(**NOTIFICATION_DATA[3])
     session.add(notification)
     session.commit()
@@ -48,6 +66,7 @@ def test_find_notification_by_status_time(session, loop):
 
 
 def test_create_notification(session, loop):
+    """Assert the test can create notification."""
     result = loop.run_until_complete(
         NotificaitonCRUD.create_notification(session, NotificationModel(**NOTIFICATION_DATA[0]))
     )
@@ -56,6 +75,7 @@ def test_create_notification(session, loop):
 
 
 def test_update_notification(session, loop):
+    """Assert the test can update notification."""
     notification = NotificationModel(**NOTIFICATION_DATA[0])
     session.add(notification)
     session.commit()
