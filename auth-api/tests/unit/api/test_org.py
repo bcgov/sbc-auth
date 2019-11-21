@@ -400,19 +400,17 @@ def test_update_member(client, jwt, session, auth_mock):  # pylint:disable=unuse
     dictionary = json.loads(rv.data)
     assert dictionary['status'] == 'ACCEPTED'
 
-    # Get members for the org as invitee and assert length of 2
-    rv = client.get('/api/v1/orgs/{}/members'.format(org_id), headers=headers_invitee)
+    # Get pending members for the org as invitee and assert length of 1
+    rv = client.get('/api/v1/orgs/{}/members?status=PENDING_APPROVAL'.format(org_id), headers=headers_invitee)
     assert rv.status_code == http_status.HTTP_200_OK
     dictionary = json.loads(rv.data)
     assert dictionary['members']
-    assert len(dictionary['members']) == 2
+    assert len(dictionary['members']) == 1
 
-    # Find the newly added member
-    new_member = list(filter(lambda x: x['user']['username'] == TestJwtClaims.edit_role_2['preferred_username'],
-                             dictionary['members']))
-    assert len(new_member) == 1
-    assert new_member[0]['membershipTypeCode'] == 'MEMBER'
-    member_id = new_member[0]['id']
+    # Find the pending member
+    new_member = dictionary['members'][0]
+    assert new_member['membershipTypeCode'] == 'MEMBER'
+    member_id = new_member['id']
 
     # Update the new member
     rv = client.patch('/api/v1/orgs/{}/members/{}'.format(org_id, member_id), headers=headers_invitee,

@@ -66,11 +66,12 @@ def factory_user_model(user_info: dict = TestUserInfo.user1):
     return user
 
 
-def factory_membership_model(user_id, org_id, member_type='OWNER'):
+def factory_membership_model(user_id, org_id, member_type='OWNER', member_status=1):
     """Produce a Membership model."""
     membership = MembershipModel(user_id=user_id,
                                  org_id=org_id,
-                                 membership_type_code=member_type)
+                                 membership_type_code=member_type,
+                                 membership_type_status=member_status)
 
     membership.save()
     return membership

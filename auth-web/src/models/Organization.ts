@@ -3,7 +3,8 @@ import { Invitation } from '@/models/Invitation'
 import { User } from '@/models/user'
 
 export interface CreateRequestBody {
-  name: string
+  name: string,
+  typeCode?: string
 }
 
 export interface Organizations
@@ -21,9 +22,9 @@ export interface Organization {
 }
 
 export interface UpdateMemberPayload {
-  orgIdentifier: number
   memberId: number
   role?: string
+  status?: string
 }
 
 export interface RemoveBusinessPayload {
@@ -34,6 +35,7 @@ export interface RemoveBusinessPayload {
 export interface Member {
   id: number
   membershipTypeCode: string
+  membershipStatus: string
   user: User
 }
 

@@ -42,8 +42,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     org_status = relationship('OrgStatus')
     preferred_payment = relationship('PaymentType')
     members = relationship('Membership', back_populates='org', cascade='all,delete,delete-orphan')
-    affiliated_entities = relationship('Affiliation', back_populates='org',
-                                       primaryjoin="and_(Org.id == Affiliation.org_id, Org.type_code == 'IMPLICIT')")
+    affiliated_entities = relationship('Affiliation', back_populates='org')
     invitations = relationship('InvitationMembership', back_populates='org', cascade='all,delete,delete-orphan')
 
     @classmethod
@@ -54,7 +53,10 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
             current_app.logger.debug(
                 'Creating org from dictionary {}'.format(org_info)
             )
-            org.org_type = OrgType.get_default_type()
+            if org.type_code:
+                org.org_type = OrgType.get_type_for_code(org.type_code)
+            else:
+                org.org_type = OrgType.get_default_type()
             org.org_status = OrgStatus.get_default_status()
             org.preferred_payment = PaymentType.get_default_payment_type()
             org.save()
@@ -65,6 +67,12 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     def find_by_org_id(cls, org_id):
         """Find an Org instance that matches the provided id."""
         return cls.query.filter_by(id=org_id).first()
+
+    @classmethod
+    def find_similar_org_by_name(cls, name):
+        """Find an Org instance that matches the provided name."""
+        # TODO: add more fancy comparison
+        return cls.query.filter(Org.name.ilike(f'%{name}%')).first()
 
     def update_org_from_dict(self, org_info: dict):
         """Update this org with the provided dictionary."""

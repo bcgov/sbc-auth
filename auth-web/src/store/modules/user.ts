@@ -61,13 +61,13 @@ export default class UserModule extends VuexModule {
   }
 
   @Action({ commit: 'setUserProfile' })
-  public async createUserProfile () {
-    return UserService.createUserProfile()
-      .then(async response => {
-        // Refresh token to get the new token with additional roles
-        KeycloakService.refreshToken()
-        return response.data
-      })
+  public async syncUserProfile () {
+    const response = await UserService.syncUserProfile()
+    if (response && response.data && (response.status === 200 || response.status === 201)) {
+      // Refresh token to get the new token with additional roles
+      KeycloakService.refreshToken()
+      return response.data
+    }
   }
 
   @Action({ commit: 'setUserContact' })

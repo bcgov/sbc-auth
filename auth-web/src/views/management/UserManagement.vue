@@ -1,81 +1,47 @@
 <template>
-  <div class="user-mgmt-view">
-    <header class="view-header mt-1 mb-5">
+  <v-container class="view-container">
+    <header class="view-header mt-1 mb-9">
       <h1>Manage Team</h1>
       <div class="view-header__actions">
         <v-btn outlined color="primary" @click="showInviteUsersModal()">
-          <v-icon>add</v-icon>
-          <span>Invite Team Members</span>
+          <v-icon>mdi-plus</v-icon>
+          <span>Invite People</span>
         </v-btn>
       </div>
     </header>
 
-    <!-- Tab Navigation -->
-    <v-tabs v-model="tab" background-color="transparent" class="mb-3">
-      <v-tab>Active</v-tab>
-      <v-tab>Pending</v-tab>
-    </v-tabs>
-
     <v-card>
+      <!-- Tab Navigation -->
+      <v-tabs class="mb-0" v-model="tab">
+        <v-tab>Active</v-tab>
+        <v-tab>Pending Approval</v-tab>
+        <v-tab>Invitations</v-tab>
+      </v-tabs>
+
       <!-- Tab Contents -->
       <v-tabs-items v-model="tab">
         <v-tab-item>
-          <v-data-table
-            class="user-list__active"
-            :headers="headersActive"
-            :items="basicMembers"
-            :items-per-page="5"
-            :calculate-widths="true"
-            :loading="isLoading"
-          >
-            <template v-slot:loading>
-              Loading...
-            </template>
-            <template v-slot:item.name="{ item }">
-              <span class="user-name">{{ item.name }}</span>
-              {{ item.email }}
-            </template>
-            <template v-slot:item.role="{ item }">
-              <v-menu offset-y>
-                <template v-slot:activator="{ on }">
-                  <v-btn depressed small v-on="on">
-                    {{ item.role }}
-                    <v-icon small class="ml-1">keyboard_arrow_down</v-icon>
-                  </v-btn>
-                </template>
-                <v-list>
-                  <v-list-item
-                    v-for="(role, index) in availableRoles"
-                    :key="index"
-                    @click="changeRole(item, role)"
-                  >
-                    <v-list-item-title>{{ role }}</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </template>
-            <template v-slot:item.action="{ item }">
-              <v-btn depressed small @click="removeMember(item)">Remove</v-btn>
-            </template>
-          </v-data-table>
+          <MemberDataTable
+            @confirm-remove-member="showConfirmRemoveModal($event)"
+            @confirm-change-role="showConfirmChangeRoleModal($event)"
+          />
         </v-tab-item>
         <v-tab-item>
-          <v-data-table
-            class="user-list__pending"
-            :headers="headersPending"
-            :items="basicInvitations"
-            :items-per-page="5"
-            :calculate-widths="true"
-          >
-            <template v-slot:item.action="{ item }">
-              <v-btn depressed small class="mr-2" @click="resend(item)">Resend</v-btn>
-              <v-btn depressed small @click="removeInvite(item)">Remove</v-btn>
-            </template>
-          </v-data-table>
+          <PendingMemberDataTable
+            @confirm-approve-member="showConfirmApproveModal($event)"
+            @confirm-deny-member="showConfirmRemoveModal($event)"
+          />
+        </v-tab-item>
+        <v-tab-item>
+          <InvitationsDataTable
+            @confirm-remove-invite="showConfirmRemoveInviteModal($event)"
+            @resend="resend($event)"
+          />
         </v-tab-item>
       </v-tabs-items>
     </v-card>
 
+    <!-- Invite Users Dialog -->
     <ModalDialog
       ref="inviteUsersDialog"
       :show-icon="false"
@@ -93,6 +59,74 @@
       </template>
     </ModalDialog>
 
+    <!-- Confirm Action Dialog -->
+    <ModalDialog
+      ref="confirmActionDialog"
+      :title="confirmActionTitle"
+      :text="confirmActionText"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-btn large color="primary" @click="confirmHandler()">{{ primaryActionText }}</v-btn>
+        <v-btn large color="default" @click="cancel()">{{ secondaryActionText }}</v-btn>
+      </template>
+    </ModalDialog>
+
+    <!-- Confirm Role Change Dialog -->
+    <!-- <ModalDialog
+      ref="confirmRoleChangeDialog"
+      :title="$t('confirmRoleChangeTitle')"
+      :text="confirmRoleChangeText"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-btn large color="primary" @click="changeRole()">Confirm</v-btn>
+        <v-btn large color="default" @click="cancel()">Cancel</v-btn>
+      </template>
+    </ModalDialog> -->
+
+    <!-- Confirm Approve Member Dialog -->
+    <!-- <ModalDialog
+      ref="confirmApproveMemberDialog"
+      :title="$t('confirmApproveMemberTitle')"
+      :text="confirmApproveMemberText"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-btn large color="primary" @click="approve()">Approve</v-btn>
+        <v-btn large color="default" @click="cancel()">Cancel</v-btn>
+      </template>
+    </ModalDialog> -->
+
+    <!-- Confirm Remove Invite Dialog -->
+    <!-- <ModalDialog
+      ref="confirmRemoveInviteDialog"
+      :title="$t('confirmRemoveInviteTitle')"
+      :text="confirmRemoveInviteText"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-btn large color="primary" @click="removeInvite()">Remove</v-btn>
+        <v-btn large color="default" @click="cancel()">Cancel</v-btn>
+      </template>
+    </ModalDialog> -->
+
     <!-- Alert Dialog (Success) -->
     <ModalDialog
       ref="successDialog"
@@ -101,228 +135,216 @@
       dialog-class="notify-dialog"
       max-width="640"
     ></ModalDialog>
-  </div>
+  </v-container>
 </template>
 
 <script lang="ts">
 import { ActiveUserRecord, Member, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
 import { Component, Vue } from 'vue-property-decorator'
+import MemberDataTable, { ChangeRolePayload } from '@/components/auth/MemberDataTable.vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
+import { Business } from '@/models/business'
 import { Invitation } from '@/models/Invitation'
+import InvitationsDataTable from '@/components/auth/InvitationsDataTable.vue'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
+import PendingMemberDataTable from '@/components/auth/PendingMemberDataTable.vue'
 import UserModule from '@/store/modules/user'
 import _ from 'lodash'
 import { getModule } from 'vuex-module-decorators'
-import moment from 'moment'
 
 @Component({
   components: {
+    MemberDataTable,
+    InvitationsDataTable,
+    PendingMemberDataTable,
     InviteUsersForm,
     ModalDialog
   },
   computed: {
     ...mapState('org', [
-      'organizations',
       'resending',
       'sentInvitations'
     ]),
-    basicMembers (): ActiveUserRecord[] {
-      return _.uniqWith(
-        _.flatten(this.organizations.map(org => org.members)),
-        (memberA: Member, memberB: Member) => memberA.user.username === memberB.user.username
-      )
-        .map((member: Member) => {
-          return {
-            username: member.user.username,
-            name: `${member.user.firstname} ${member.user.lastname}`,
-            role: member.membershipTypeCode,
-            lastActive: moment(member.user.modified).format('DD MMM, YYYY'),
-            member
-          }
-        })
-    },
-    basicInvitations (): PendingUserRecord[] {
-      return _.uniqWith(_.flatten(this.organizations.map(org => org.invitations)),
-        (invitationA: Invitation, invitationB: Invitation) => invitationA.id === invitationB.id)
-        .filter((inv: Invitation) => inv.status === 'PENDING')
-        .map((invitation: Invitation) => {
-          return {
-            email: invitation.recipientEmail,
-            invitationSent: moment(invitation.sentDate).format('DD MMM, YYYY'),
-            invitationExpires: moment(invitation.expiresOn).format('DD MMM, YYYY'),
-            invitation
-          }
-        })
-    }
+    ...mapState('business', ['currentBusiness'])
   },
   methods: {
     ...mapActions('org', [
-      'syncOrganizations',
       'resendInvitation',
       'deleteInvitation',
       'deleteMember',
-      'updateMemberRole'
+      'updateMember',
+      'approveMember'
     ])
   }
 })
 export default class UserManagement extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
-  private successTitle = ''
-  private successText = ''
+  private successTitle: string = ''
+  private successText: string = ''
   private tab = null
   private isLoading = true
+  private memberToBeRemoved: Member
+  private memberToBeApproved: Member
+  private invitationToBeRemoved: Invitation
+  private roleChangeToAction: ChangeRolePayload
+  private confirmActionTitle: string = ''
+  private confirmActionText: string = ''
+  private primaryActionText: string = ''
+  private secondaryActionText = 'Cancel'
 
-  private readonly organizations!: Organization[]
+  private confirmHandler: () => void = undefined
+
+  private readonly currentBusiness!: Business
   private readonly resending!: boolean
   private readonly sentInvitations!: Invitation[]
-  private readonly syncOrganizations!: () => Organization[]
   private readonly resendInvitation!: (invitation: Invitation) => void
-  private readonly deleteInvitation!: (invitation: Invitation) => void
-  private readonly deleteMember!: (deleteMemberPayload: UpdateMemberPayload) => void
-  private readonly updateMemberRole!: (UpdateMemberPayload: UpdateMemberPayload) => void
+  private readonly deleteInvitation!: (invitationId: number) => void
+  private readonly deleteMember!: (memberId: number) => void
+  private readonly updateMember!: (updateMemberPayload: UpdateMemberPayload) => void
+  private readonly approveMember!: (memberId: number) => void
 
   $refs: {
     successDialog: ModalDialog
     inviteUsersDialog: ModalDialog
+    confirmActionDialog: ModalDialog
   }
 
-  availableRoles = [
-    'Member',
-    'Admin',
-    'Owner'
-  ]
-
-  headersActive = [
-    {
-      text: 'Team Member',
-      align: 'left',
-      sortable: true,
-      value: 'name'
-    },
-    {
-      text: 'Roles',
-      align: 'left',
-      sortable: true,
-      value: 'role'
-    },
-    {
-      text: 'Last Active',
-      align: 'left',
-      sortable: true,
-      value: 'lastActive'
-    },
-    {
-      text: 'Actions',
-      align: 'left',
-      value: 'action',
-      sortable: false,
-      width: '95'
-    }
-  ]
-
-  headersPending = [
-    {
-      text: 'Email',
-      align: 'left',
-      sortable: true,
-      value: 'email'
-    },
-    {
-      text: 'Invitation Sent',
-      align: 'left',
-      sortable: true,
-      value: 'invitationSent'
-    },
-    {
-      text: 'Expires',
-      align: 'left',
-      sortable: true,
-      value: 'invitationExpires'
-    },
-    {
-      text: 'Actions',
-      align: 'left',
-      value: 'action',
-      sortable: false,
-      width: '195'
-    }
-  ]
-
-  async created () {
-    this.isLoading = true
-    await this.syncOrganizations()
+  private async mounted () {
     this.isLoading = false
   }
 
-  showInviteUsersModal () {
+  private showInviteUsersModal () {
     this.$refs.inviteUsersDialog.open()
   }
 
-  cancelInviteUsersModal () {
+  private cancelInviteUsersModal () {
     this.$refs.inviteUsersDialog.close()
   }
 
-  showSuccessModal () {
+  private showSuccessModal () {
     this.$refs.inviteUsersDialog.close()
     this.successTitle = `Invited ${this.sentInvitations.length} Team Members`
     this.successText = 'Your team invitations have been sent successfully.'
     this.$refs.successDialog.open()
   }
 
-  async resend (pendingUser: PendingUserRecord) {
-    await this.resendInvitation(pendingUser.invitation)
+  private async resend (invitation: Invitation) {
+    await this.resendInvitation(invitation)
     this.showSuccessModal()
   }
 
-  async removeInvite (pendingUser: PendingUserRecord) {
-    await this.deleteInvitation(pendingUser.invitation)
+  private showConfirmRemoveModal (member: Member) {
+    if (member.membershipStatus === 'PENDING_APPROVAL') {
+      this.confirmActionTitle = this.$t('confirmDenyMemberTitle').toString()
+      this.confirmActionText = `Are you sure you want to deny membership to ${member.user.firstname}?`
+      this.confirmHandler = this.deny
+      this.primaryActionText = 'Deny'
+    } else {
+      this.confirmActionTitle = this.$t('confirmRemoveMemberTitle').toString()
+      this.confirmActionText = `Are you sure you want to remove ${member.user.firstname} from the team?`
+      this.confirmHandler = this.removeMember
+      this.primaryActionText = 'Remove'
+    }
+    this.memberToBeRemoved = member
+    this.$refs.confirmActionDialog.open()
   }
 
-  async removeMember (activeMember: ActiveUserRecord) {
-    // BASIC user only
-    this.organizations
-      .filter(org => org.orgType === 'IMPLICIT')
-      .forEach(async org => {
-        const specificMember = org.members.find(member => member.user.username === activeMember.username)
-        if (specificMember) {
-          await this.deleteMember({ orgIdentifier: org.id, memberId: specificMember.id })
-        }
-      })
-  }
-
-  changeRole (activeMember: ActiveUserRecord, targetRole: string) {
-    if (activeMember.role.toUpperCase() === targetRole.toUpperCase()) {
+  private showConfirmChangeRoleModal (payload: ChangeRolePayload) {
+    if (payload.member.membershipTypeCode.toUpperCase() === payload.targetRole.toUpperCase()) {
       return
     }
-    // BASIC user only
-    this.organizations
-      .filter(org => org.orgType === 'IMPLICIT')
-      .forEach(async org => {
-        await this.updateMemberRole({
-          orgIdentifier: org.id,
-          memberId: activeMember.member.id,
-          role: targetRole.toUpperCase()
-        })
-      })
+    this.confirmActionTitle = this.$t('confirmRoleChangeTitle').toString()
+    this.confirmActionText = `Are you sure you wish to change ${payload.member.user.firstname}'s role to ${payload.targetRole}?`
+    this.roleChangeToAction = payload
+    this.confirmHandler = this.changeRole
+    this.primaryActionText = 'Change'
+    this.$refs.confirmActionDialog.open()
+  }
+
+  private showConfirmRemoveInviteModal (invitation: Invitation) {
+    this.confirmActionTitle = this.$t('confirmRemoveInviteTitle').toString()
+    this.confirmActionText = `Are you sure wish to remove the invite to ${invitation.recipientEmail}?`
+    this.invitationToBeRemoved = invitation
+    this.confirmHandler = this.removeInvite
+    this.primaryActionText = 'Remove'
+    this.$refs.confirmActionDialog.open()
+  }
+
+  private showConfirmApproveModal (member: Member) {
+    this.confirmActionTitle = this.$t('confirmApproveMemberTitle').toString()
+    this.confirmActionText = `Are you sure you wish to approve membership for ${member.user.firstname}?`
+    this.memberToBeApproved = member
+    this.confirmHandler = this.approve
+    this.primaryActionText = 'Approve'
+    this.$refs.confirmActionDialog.open()
+  }
+
+  private cancel () {
+    this.$refs.confirmActionDialog.close()
+  }
+
+  private async removeMember () {
+    await this.updateMember({
+      memberId: this.memberToBeRemoved.id,
+      status: 'INACTIVE'
+    })
+    this.$refs.confirmActionDialog.close()
+  }
+
+  private async changeRole () {
+    await this.updateMember({
+      memberId: this.roleChangeToAction.member.id,
+      role: this.roleChangeToAction.targetRole.toUpperCase()
+    })
+    this.$refs.confirmActionDialog.close()
+  }
+
+  private async removeInvite () {
+    await this.deleteInvitation(this.invitationToBeRemoved.id)
+    this.$refs.confirmActionDialog.close()
+  }
+
+  private async approve () {
+    await this.updateMember({
+      memberId: this.memberToBeApproved.id,
+      status: 'ACTIVE'
+    })
+    this.$refs.confirmActionDialog.close()
+  }
+
+  private async deny () {
+    await this.updateMember({
+      memberId: this.memberToBeRemoved.id,
+      status: 'REJECTED'
+    })
+    this.$refs.confirmActionDialog.close()
   }
 }
 </script>
 
 <style lang="scss" scoped>
->>> .v-data-table td {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
+.view-container {
+  display: flex;
+  flex-direction: column;
 }
 
->>> .v-data-table.user-list__active td {
-  height: 4rem;
-  vertical-align: top;
+.view-container__content {
+  flex: 1 1 auto;
 }
 
-.user-name {
-  display: block;
-  font-weight: 700;
+::v-deep {
+  .v-data-table td {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    height: auto;
+    vertical-align: top;
+  }
+
+  .v-list-item__title {
+    display: block;
+    font-weight: 700;
+  }
 }
 </style>

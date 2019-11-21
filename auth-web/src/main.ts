@@ -1,4 +1,5 @@
 import 'core-js/stable' // to polyfill ECMAScript features
+import '@mdi/font/css/materialdesignicons.min.css' // icon library (https://materialdesignicons.com/)
 import 'regenerator-runtime/runtime' // to use transpiled generator functions
 import router, { getRoutes } from './router'
 import App from './App.vue'

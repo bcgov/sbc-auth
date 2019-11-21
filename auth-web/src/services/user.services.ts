@@ -9,7 +9,7 @@ export default class UserService {
     return Axios.get(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/users/${identifier}`)
   }
 
-  static async createUserProfile (): Promise<AxiosResponse<User>> {
+  static async syncUserProfile (): Promise<AxiosResponse<User>> {
     return Axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/users`, {})
   }
 
