@@ -35,14 +35,46 @@
         ></v-text-field>
       </div>
       <div class="form__btns mt-8">
-        <v-btn large color="primary" @click="add">
-          <span>Add Business</span>
+        <v-btn text color="primary" @click.stop="helpDialog = true">
+          <v-icon small>mdi-open-in-new</v-icon>
+          <span>I lost or forgot my passcode</span>
         </v-btn>
-        <v-btn depressed large color="default" class="ml-2" @click="cancel">
-          <span>Cancel</span>
-        </v-btn>
+        <div>
+          <v-btn large color="primary" @click="add">
+            <span>Add Business</span>
+          </v-btn>
+          <v-btn large depressed color="default" class="ml-2" @click="cancel">
+            <span>Cancel</span>
+          </v-btn>
+        </div>
       </div>
     </v-form>
+    <v-dialog v-model="helpDialog" hide-overlay max-width="640">
+      <v-card>
+        <v-card-title>Need Assistance?</v-card-title>
+        <v-card-text>
+          <p class="mb-7">If you have not received your Access Letter from BC Registries, or have lost your Passcode, please contact us at:</p>
+          <ul class="contact-info__list mb-7">
+            <li>
+              <span>Toll Free:</span>&nbsp;&nbsp;{{ $t('techSupportTollFree') }}
+            </li>
+            <li>
+              <span>Phone:</span>&nbsp;&nbsp;{{ $t('techSupportPhone') }}
+            </li>
+            <li>
+              <span>Email:</span>&nbsp;&nbsp;<a v-bind:href="'mailto:' + $t('techSupportEmail') + '?subject=' + $t('techSupportEmailSubject')">{{ $t('techSupportEmail') }}</a>
+            </li>
+          </ul>
+          <div>
+            <p class="mb-0"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn large color="primary" @click="helpDialog = false">OK</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -71,6 +103,7 @@ export default class AddBusinessForm extends Vue {
   private VUE_APP_COPS_REDIRECT_URL = ConfigHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   private businessIdentifier: string = ''
   private passcode: string = ''
+  private helpDialog = false
 
   $refs: {
     form: HTMLFormElement
@@ -123,6 +156,7 @@ export default class AddBusinessForm extends Vue {
   .form__btns {
     display: flex;
     flex-direction: row;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
   }
 </style>
