@@ -1,44 +1,47 @@
 <template>
   <v-container class="view-container">
-    <header class="view-header mt-1 mb-9">
+    <header class="view-header">
       <h1>Manage Team</h1>
       <div class="view-header__actions">
-        <v-btn outlined color="primary" @click="showInviteUsersModal()">
+        <v-btn large color="primary" @click="showInviteUsersModal()">
           <v-icon>mdi-plus</v-icon>
           <span>Invite People</span>
         </v-btn>
       </div>
     </header>
 
-    <v-card>
-      <!-- Tab Navigation -->
-      <v-tabs class="mb-0" v-model="tab">
-        <v-tab>Active</v-tab>
-        <v-tab>Pending Approval</v-tab>
-        <v-tab>Invitations</v-tab>
-      </v-tabs>
+    <!-- Tab Navigation -->
+    <v-tabs class="mb-7" v-model="tab" background-color="transparent">
+      <v-tab>Active</v-tab>
+      <v-tab>Pending Approval</v-tab>
+      <v-tab>Invitations</v-tab>
+    </v-tabs>
 
-      <!-- Tab Contents -->
-      <v-tabs-items v-model="tab">
-        <v-tab-item>
-          <MemberDataTable
-            @confirm-remove-member="showConfirmRemoveModal($event)"
-            @confirm-change-role="showConfirmChangeRoleModal($event)"
-          />
-        </v-tab-item>
-        <v-tab-item>
-          <PendingMemberDataTable
-            @confirm-approve-member="showConfirmApproveModal($event)"
-            @confirm-deny-member="showConfirmRemoveModal($event)"
-          />
-        </v-tab-item>
-        <v-tab-item>
-          <InvitationsDataTable
-            @confirm-remove-invite="showConfirmRemoveInviteModal($event)"
-            @resend="resend($event)"
-          />
-        </v-tab-item>
-      </v-tabs-items>
+    <v-card>
+      <v-card-text>
+
+        <!-- Tab Contents -->
+        <v-tabs-items v-model="tab">
+          <v-tab-item>
+            <MemberDataTable
+              @confirm-remove-member="showConfirmRemoveModal($event)"
+              @confirm-change-role="showConfirmChangeRoleModal($event)"
+            />
+          </v-tab-item>
+          <v-tab-item>
+            <PendingMemberDataTable
+              @confirm-approve-member="showConfirmApproveModal($event)"
+              @confirm-deny-member="showConfirmRemoveModal($event)"
+            />
+          </v-tab-item>
+          <v-tab-item>
+            <InvitationsDataTable
+              @confirm-remove-invite="showConfirmRemoveInviteModal($event)"
+              @resend="resend($event)"
+            />
+          </v-tab-item>
+        </v-tabs-items>
+      </v-card-text>
     </v-card>
 
     <!-- Invite Users Dialog -->
@@ -325,26 +328,33 @@ export default class UserManagement extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.view-container {
-  display: flex;
-  flex-direction: column;
-}
+  .view-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-top: 1.5rem;
+    padding-bottom: 1rem;
 
-.view-container__content {
-  flex: 1 1 auto;
-}
+    h1 {
+      margin-bottom: 0;
+    }
 
-::v-deep {
-  .v-data-table td {
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-    height: auto;
-    vertical-align: top;
+    .v-btn {
+      font-weight: 700;
+    }
   }
 
-  .v-list-item__title {
-    display: block;
-    font-weight: 700;
+  ::v-deep {
+    .v-data-table td {
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+      height: auto;
+      vertical-align: top;
+    }
+
+    .v-list-item__title {
+      display: block;
+      font-weight: 700;
+    }
   }
-}
 </style>

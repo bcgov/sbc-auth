@@ -24,7 +24,7 @@
 
 // v-dialog 
 .v-dialog > .v-card > .v-card__title {
-  padding: 1.25rem 1.5rem;
+  padding: 1.5rem;
   letter-spacing: -0.01em;
   font-size: 1.5rem;
   font-weight: 700;
@@ -47,7 +47,7 @@
 }
 
 .v-card__actions {
-  padding: 1.25rem 1.5rem;
+  padding: 1.5rem;
 }
 
 .theme--light.v-card >.v-card__text {
@@ -78,17 +78,13 @@ input:-webkit-autofill:active {
 
 // Tab Navigation
 .v-tab {
-  text-transform: none;
-  font-size: 1rem;
+  min-width: auto;
+  font-weight: 700;
 }
 
 // Tables
-.v-data-table table {
-  border-collapse: collapse;
-}
-
 .v-data-table th {
-  font-weight: 400;
+  font-weight: 700;
 }
 
 // Aside Navigation

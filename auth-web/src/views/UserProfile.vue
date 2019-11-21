@@ -1,30 +1,37 @@
 <template>
   <v-container>
+
     <!-- Loading status -->
-    <v-progress-circular
-      :indeterminate=true
-      v-if="isLoading"
-    />
-    <div v-if="!isLoading" class="view-container">
+    <v-fade-transition>
+      <div class="loading-container" v-if="isLoading">
+        <v-progress-circular size="50" width="5" color="primary" indeterminate="isLoading"/>
+      </div>
+    </v-fade-transition>
+
+    <div class="user-profile-container" v-if="!isLoading">
       <article>
-        <div v-if="!editing">
-          <h1 class="mb-5">Complete User Profile</h1>
-          <p class="intro-text">It looks like we are missing some information to complete your user profile.</p>
-        </div>
-        <div v-if="editing">
-          <h1 class="mb-5">Edit User Profile</h1>
-          <p class="intro-text">Update and manage your contact information.</p>
-        </div>
-        <v-card class="profile-card">
-          <v-container>
-            <v-card-title>
-              <h2>Your Profile</h2>
-            </v-card-title>
-            <v-card-text>
-              <UserProfileForm/>
-            </v-card-text>
-          </v-container>
-        </v-card>
+        <v-row justify="center">
+          <v-col lg="8" class="pt-0 pb-0">
+            <div v-if="!editing">
+              <h1 class="mb-4">Complete Profile</h1>
+              <p class="intro-text">Enter your contact information to complete your profile.</p>
+            </div>
+            <div v-if="editing">
+              <h1 class="mb-4">Edit Profile</h1>
+              <p class="intro-text">Edit your profile contact information</p>
+            </div>
+            <v-card class="profile-card">
+              <v-container>
+                <v-card-title class="mb-4">
+                  {{ userProfile.firstname }} {{ userProfile.lastname}}
+                </v-card-title>
+                <v-card-text>
+                  <UserProfileForm/>
+                </v-card-text>
+              </v-container>
+            </v-card>
+          </v-col>
+        </v-row>
       </article>
     </div>
   </v-container>
@@ -67,23 +74,32 @@ export default class UserProfile extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  article {
-    flex: 1 1 auto;
-    margin: 0 auto;
-    max-width: 50rem;
+   @import '$assets/scss/theme.scss';
+
+  .view-container {
+    padding-top: 2.5rem;
+    padding-bottom: 3rem;
   }
 
   .v-card__title {
     font-weight: 700;
-    letter-spacing: -0.01rem;
+    letter-spacing: -0.02rem;
   }
 
-  .intro-text {
-    margin-bottom: 3rem;
+  .profile-card {
+    margin-top: 3rem;
   }
 
-  // Profile Card
-  .profile-card .container {
-    padding: 1rem;
+  .loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    background: $gray2;
   }
 </style>

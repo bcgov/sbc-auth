@@ -17,7 +17,7 @@
       <v-list-item-subtitle v-if="item.user.contacts && item.user.contacts.length > 0">{{ item.user.contacts[0].email }}</v-list-item-subtitle>
     </template>
     <template v-slot:item.action="{ item }">
-      <v-btn class="mr-2" depressed small @click="confirmApproveMember(item)">Approve</v-btn>
+      <v-btn small color="primary" class="mr-2" @click="confirmApproveMember(item)">Approve</v-btn>
       <v-btn depressed small @click="confirmDenyMember(item)">Deny</v-btn>
     </template>
   </v-data-table>
