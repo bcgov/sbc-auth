@@ -1,21 +1,23 @@
-import { Role, SessionStorageKeys } from './util/constants'
-import AcceptInvite from './views/AcceptInvite.vue'
-import AuthHome from './views/AuthHome.vue'
-import BusinessProfile from './views/BusinessProfile.vue'
-import CreateAccount from './views/CreateAccount.vue'
-import Home from './views/Home.vue'
+import { Role, SessionStorageKeys } from '@/util/constants'
+import AcceptInvite from '@/views/AcceptInvite.vue'
+import AuthHome from '@/views/AuthHome.vue'
+import BusinessProfile from '@/views/BusinessProfile.vue'
+import CreateAccount from '@/views/CreateAccount.vue'
+import CreateTeamView from '@/views/CreateTeamView.vue'
+import Dashboard from '@/views/management/Dashboard.vue'
 import KeyCloakService from '@/services/keycloak.services'
-import PageNotFound from './views/PageNotFound.vue'
-import PaymentForm from './components/pay/PaymentForm.vue'
-import PaymentReturnForm from './components/pay/PaymentReturnForm.vue'
+import PageNotFound from '@/views/PageNotFound.vue'
+import PaymentForm from '@/components/pay/PaymentForm.vue'
+import PaymentReturnForm from '@/components/pay/PaymentReturnForm.vue'
+import PendingApproval from '@/views/PendingApproval.vue'
 import Router from 'vue-router'
-import SearchBusinessForm from './components/auth/SearchBusinessForm.vue'
-import Signin from './components/auth/Signin.vue'
-import Signout from './components/auth/Signout.vue'
-import Template from './views/management/Template.vue'
-import TokenValidator from './views/TokenValidator.vue'
-import Unauthorized from './components/auth/Unauthorized.vue'
-import UserProfile from './views/UserProfile.vue'
+import SearchBusinessForm from '@/components/auth/SearchBusinessForm.vue'
+import Signin from '@/components/auth/Signin.vue'
+import Signout from '@/components/auth/Signout.vue'
+import TokenValidator from '@/views/TokenValidator.vue'
+import Unauthorized from '@/components/auth/Unauthorized.vue'
+import UserManagement from '@/views/management/UserManagement.vue'
+import UserProfile from '@/views/UserProfile.vue'
 import Vue from 'vue'
 
 Vue.use(Router)
@@ -28,22 +30,20 @@ function mapReturnPayVars (route) {
   }
 }
 
-export function getRoutes (appFlavor:String) {
+export function getRoutes (appFlavor: String) {
   let varRoutes
 
-  if (appFlavor === 'mvp') {
-    varRoutes = [{ path: '/', component: Home }]
-  } else {
-    varRoutes = [
-      { path: '/', component: AuthHome },
-      { path: '/home', component: AuthHome },
-      { path: '/main', component: Template, meta: { requiresAuth: true } },
-      { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
-      { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
-      { path: '/validatetoken/:token', component: TokenValidator, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
-      { path: '/confirmtoken/:token', component: AcceptInvite, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } }
-    ]
-  }
+  varRoutes = [
+    { path: '/', component: AuthHome },
+    { path: '/home', component: AuthHome },
+    { path: '/main', component: Dashboard, meta: { requiresAuth: true } },
+    { path: '/team', component: UserManagement, meta: { requiresAuth: true } },
+    { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
+    { path: '/createteam', component: CreateTeamView, meta: { requiresAuth: true } },
+    { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
+    { path: '/validatetoken/:token', component: TokenValidator, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
+    { path: '/confirmtoken/:token', component: AcceptInvite, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } }
+  ]
 
   let routes = [
     { path: '/signin/:idpHint', component: Signin, props: true, meta: { requiresAuth: false } },
@@ -55,6 +55,7 @@ export function getRoutes (appFlavor:String) {
     { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } },
     { path: '/searchbusiness', component: SearchBusinessForm, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
     { path: '/unauthorized', component: Unauthorized, props: true, meta: { requiresAuth: false } },
+    { path: '/pendingapproval/:team_name?', component: PendingApproval, props: true, meta: { requiresAuth: false } },
     { path: '*', component: PageNotFound }
   ]
 

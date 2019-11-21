@@ -10,7 +10,7 @@
     <v-card>
       <v-card-title>
         <slot v-if="showIcon" name="icon">
-          <v-icon large color="success">check</v-icon>
+          <v-icon large color="success">mdi-check</v-icon>
         </slot>
         <span>
           <slot name="title">{{ title }}</slot>
@@ -62,7 +62,7 @@ export default class ModalDialog extends Vue {
   .notify-dialog .v-card__title {
     flex-direction: column;
 
-    >>> i {
+    ::v-deep i {
       margin-top: 1rem;
       margin-bottom: 1rem;
     }

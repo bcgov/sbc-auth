@@ -1,54 +1,83 @@
 <template>
-  <v-navigation-drawer width="216">
-    <v-list dense nav>
-      <v-list-item small color="primary"
-        v-for="(item, i) in menu"
-        :key="i"
-        @click="item.activate()">
-        <v-list-item-icon>
-          <v-icon>{{ item.icon }}</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-title v-text="item.title"></v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-    </v-list>
-  </v-navigation-drawer>
+  <div class="team-toolbar">
+  <v-container class="pt-0 pb-0">
+    <div v-if="myOrg" class="team-name">{{ myOrg.name }}</div>
+    <nav>
+      <ul class="pl-0">
+        <li v-for="(item, i) in menu"
+          :key="i">
+          <v-btn tile text color="#ffffff" @click="item.activate()">{{ item.title }}</v-btn>
+        </li>
+      </ul>
+    </nav>
+  </v-container>
+  </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
+import OrgModule from '@/store/modules/org'
+import { Organization } from '@/models/Organization'
+import { User } from '@/models/user'
+import UserModule from '@/store/modules/user'
+import { getModule } from 'vuex-module-decorators'
 
 @Component({
-  name: 'ManagementMenu'
+  name: 'ManagementMenu',
+  computed: {
+    ...mapGetters('org', ['myOrg'])
+  },
+  methods: {
+    ...mapActions('org', ['syncOrganizations'])
+  }
 })
 export default class ManagementMenu extends Vue {
-  @Prop()
-  menu
+  @Prop() menu
+  private orgStore = getModule(OrgModule, this.$store)
+  private userStore = getModule(UserModule, this.$store)
+  private readonly myOrg!: Organization
+  private readonly syncOrganizations!: () => Organization[]
 
-  mini () {
-    switch (this.$vuetify.breakpoint.name) {
-      case 'xs': return true
-      case 'sm': return true
-      case 'md': return false
-      case 'lg': return false
-      case 'xl': return false
+  async mounted () {
+    await this.syncOrganizations()
+    if (!this.myOrg) {
+      this.$router.push({ path: '/createteam' })
     }
   }
 }
 </script>
 
-<style lang="scss">
-  .v-navigation-drawer {
-    background-color : transparent !important;
-    transform: none !important;
+<style lang="scss" scoped>
+  @import '$assets/scss/theme.scss';
+
+  ul {
+    list-style-type: none;
   }
 
-  .v-navigation-drawer__border {
-    display: none;
+  .team-toolbar {
+    color: #ffffff;
+    background-color: $BCgovBlue4;
   }
 
-  .v-list--nav {
-    padding: 0;
+  .team-toolbar .container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .team-toolbar .team-name {
+    margin-right: 1.25rem;
+    font-weight: 700;
+  }
+
+  .team-toolbar nav > ul > li {
+    display: inline-block;
+  }
+
+  .v-btn {
+    height: 4.5rem !important;
+    letter-spacing: 0.01rem;
+    font-weight: 400;
   }
 </style>

@@ -11,19 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Schema package."""
+"""Manager for membership type schema and export."""
+
+from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
+
+from .base_schema import BaseSchema
 
 
-from .affiliation import AffiliationSchema
-from .contact import ContactSchema
-from .contact_link import ContactLinkSchema
-from .documents import DocumentSchema
-from .entity import EntitySchema
-from .invitation import InvitationSchema
-from .invitation_membership import InvitationMembershipSchema
-from .membership import MembershipSchema
-from .membership_status_code import MembershipStatusCodeSchema
-from .membership_type import MembershipTypeSchema
-from .org import OrgSchema
-from .org_type import OrgTypeSchema
-from .user import UserSchema
+class MembershipStatusCodeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the MembershipStatusCode model."""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps all of the MembershipType fields to a default schema."""
+
+        model = MembershipStatusCodeModel

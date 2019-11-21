@@ -1,17 +1,12 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { CreateRequestBody, Invitation } from '@/models/Invitation'
-import { Member, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
+import { CreateRequestBody as CreateOrgRequestBody, Member, Organization, UpdateMemberPayload } from '@/models/Organization'
 import { Business } from '@/models/business'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
 import UserService from '@/services/user.services'
 import _ from 'lodash'
-
-interface SetMembersPayload {
-  orgId: number
-  members: Member[]
-}
 
 interface SetMemberPayload {
   orgId: number
@@ -24,82 +19,42 @@ interface SetMemberPayload {
 })
 export default class OrgModule extends VuexModule {
   list = []
-  currentOrg: Organization = {
-    name: '',
-    affiliatedEntities: [],
-    members: [],
-    invitations: []
-  }
-
   resending = false
   sentInvitations: Invitation[] = []
   failedInvitations: Invitation[] = []
   organizations: Organization[] = []
+  activeOrgMembers: Member[] = []
+  pendingOrgMembers: Member[] = []
+  pendingOrgInvitations: Invitation[] = []
 
-  get orgMembers () {
-    return (orgId: number) => {
-      const org = this.organizations.find(org => org.id === orgId)
-      if (org) {
-        return org.members
-      } else {
-        return []
-      }
+  // This simply returns the first org in the list.
+  // TODO: Once account switching is in place, this will have to return the
+  // correct org in the list
+  get myOrg (): Organization {
+    if (this.organizations && this.organizations.length > 0) {
+      return this.organizations[0]
     }
-  }
-
-  get orgInvitations () {
-    return (orgId: number) => {
-      const org = this.organizations.find(org => org.id === orgId)
-      if (org) {
-        return org.invitations
-      } else {
-        return []
-      }
-    }
-  }
-
-  get orgMember () {
-    return (orgId: number, memberId: number) => {
-      const org = this.organizations.find(org => org.id === orgId)
-      if (org) {
-        return org.members.find(member => member.id === memberId)
-      } else {
-        return null
-      }
-    }
-  }
-
-  get orgAffiliatedBusinesses (): (orgId?: number) => Business[] {
-    return (orgId?: number) => {
-      if (orgId) {
-        const org = this.organizations.find(org => org.id === orgId)
-        if (org && org.affiliatedEntities) {
-          return org.affiliatedEntities
-        }
-        return []
-      } else {
-        // If no orgId provided, return flattened list for all IMPLICIT orgs
-        return _.flatten<Business>(this.organizations
-          .filter(org => org.orgType === 'IMPLICIT')
-          .map(org => org.affiliatedEntities))
-      }
-    }
+    return undefined
   }
 
   @Mutation
-  public setMembers (payload: SetMembersPayload) {
-    const org = this.organizations.find(org => org.id === payload.orgId)
-    if (org) {
-      org.members = payload.members
-    }
+  public setActiveOrgMembers (activeMembers: Member[]) {
+    this.activeOrgMembers = activeMembers
   }
 
   @Mutation
-  public addMember (payload: SetMemberPayload) {
-    const org = this.organizations.find(org => org.id === payload.orgId)
-    if (org) {
-      org.members.push(payload.member)
-    }
+  public setPendingOrgMembers (pendingMembers: Member[]) {
+    this.pendingOrgMembers = pendingMembers
+  }
+
+  @Mutation
+  public setPendingOrgInvitations (pendingInvitations: Invitation[]) {
+    this.pendingOrgInvitations = pendingInvitations
+  }
+
+  @Mutation
+  public addOrganization (org: Organization) {
+    this.organizations.push(org)
   }
 
   @Mutation
@@ -111,11 +66,6 @@ export default class OrgModule extends VuexModule {
 
   @Mutation
   public addSentInvitation (sentInvitation: Invitation) {
-    this.organizations.forEach(org => {
-      if (sentInvitation.membership.some(membership => membership.org.id === org.id)) {
-        org.invitations.push(sentInvitation)
-      }
-    })
     this.sentInvitations.push(sentInvitation)
   }
 
@@ -134,44 +84,27 @@ export default class OrgModule extends VuexModule {
     this.organizations = organizations
   }
 
-  @Mutation
-  public setOrganization (organization: Organization) {
-    const index = this.organizations.findIndex(org => org.id === organization.id)
-    this.organizations[index] = organization
-  }
-
-  @Mutation
-  public removeMember (removeMemberPayload: UpdateMemberPayload) {
-    const org = this.organizations.find(org => org.id === removeMemberPayload.orgIdentifier)
-    const index = org.members.findIndex(member => member.id === removeMemberPayload.memberId)
-    org.members.splice(index, 1)
-  }
-
-  @Mutation
-  public updateMember (updateMemberPayload: UpdateMemberPayload) {
-    const org = this.organizations.find(org => org.id === updateMemberPayload.orgIdentifier)
-    const member = org.members.find(member => member.id === updateMemberPayload.memberId)
-    if (member) {
-      member.membershipTypeCode = updateMemberPayload.role
+  @Action({ rawError: true, commit: 'addOrganization' })
+  public async createOrg (createRequestBody: CreateOrgRequestBody) {
+    const response = await OrgService.createOrg(createRequestBody)
+    if (!response || !response.data) {
+      throw new Error('Unknown error has occured while creating the team')
+    } else if (response.status === 409) {
+      throw new Error('That team already exists')
+    } else if (response.status === 201) {
+      return response.data
     }
   }
 
-  @Mutation
-  public removeInvitation (invitation: Invitation) {
-    this.organizations.forEach(org => {
-      const index = org.invitations.findIndex(invite => invite.id === invitation.id)
-      org.invitations.splice(index, 1)
-    })
-  }
-
   @Action({ rawError: true })
-  public async createInvitation (invitation: CreateRequestBody) {
+  public async createInvitation (invitation: CreateInvitationRequestBody) {
     try {
       const response = await InvitationService.createInvitation(invitation)
       if (!response || !response.data || response.status !== 201) {
         throw new Error('Unable to create invitation')
       }
       this.context.commit('addSentInvitation', response.data)
+      this.context.dispatch('syncPendingOrgInvitations')
     } catch (exception) {
       this.context.commit('addFailedInvitation', invitation)
     }
@@ -190,71 +123,52 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async deleteInvitation (invitation: Invitation) {
-    const prevState = this.context.state
-    this.context.commit('removeInvitation', invitation)
-    try {
-      const response = await InvitationService.deleteInvitation(invitation.id)
-      if (!response || response.status !== 200 || !response.data) {
-        throw Error('Unable to delete invitation')
-      }
-    } catch (exception) {
-      this.context.state = prevState
+  public async deleteInvitation (invitationId: number) {
+    const response = await InvitationService.deleteInvitation(invitationId)
+    if (!response || response.status !== 200 || !response.data) {
+      throw Error('Unable to delete invitation')
     }
+    this.context.dispatch('syncPendingOrgInvitations')
   }
 
   @Action({ rawError: true })
   public async validateInvitationToken (token: string): Promise<EmptyResponse> {
-    return InvitationService.validateToken(token).then(response => {
-      return response.data
-    })
+    const response = await InvitationService.validateToken(token)
+    return response && response.data ? response.data : undefined
   }
 
   @Action({ rawError: true })
   public async acceptInvitation (token: string): Promise<Invitation> {
-    return InvitationService.acceptInvitation(token).then(response => {
-      return response.data
-    })
+    const response = await InvitationService.acceptInvitation(token)
+    return response && response.data ? response.data : undefined
   }
 
   @Action({ rawError: true })
-  public async deleteMember (memberInfo: UpdateMemberPayload) {
-    // const savedMembers = [...this.organizations.find(org => org.id === memberInfo.orgIdentifier).members]
-    const savedMembers = [...this.orgMembers(memberInfo.orgIdentifier)]
-    // Update store first (for better UX)
-    this.context.commit('removeMember', memberInfo)
-    try {
-      // Send request to remove member on server and get result
-      const response = await OrgService.removeMember(memberInfo.orgIdentifier, memberInfo.memberId)
+  public async deleteMember (memberId: number) {
+    // Send request to remove member on server and get result
+    const response = await OrgService.removeMember(this.context.getters['myOrg'].id, memberId)
 
-      // If no response, or error code, throw exception to be caught
-      if (!response || response.status !== 200 || !response.data) {
-        throw Error('Unable to delete member')
-      }
-    } catch (exception) {
-      // Any errors, roll back to previous state
-      this.context.commit('setMembers', { orgId: memberInfo.orgIdentifier, members: savedMembers })
+    // If no response, or error code, throw exception to be caught
+    if (!response || response.status !== 200 || !response.data) {
+      throw Error('Unable to delete member')
+    } else {
+      this.context.dispatch('syncActiveOrgMembers')
     }
   }
 
   @Action({ rawError: true })
-  public async updateMemberRole (memberInfo: UpdateMemberPayload) {
-    // Update store first, but save current role
-    // (for UX reasons, we don't make user to wait to see role change)
-    // const savedMembers = [...this.orgMembers(memberInfo.orgIdentifier)]
-    const savedMemberRole = this.orgMember(memberInfo.orgIdentifier, memberInfo.memberId).membershipTypeCode
-    this.context.commit('updateMember', memberInfo)
-    try {
-      // Send request to update member on server and get result
-      const response = await OrgService.updateMember(memberInfo.orgIdentifier, memberInfo.memberId, memberInfo.role)
+  public async updateMember (updatePayload: UpdateMemberPayload) {
+    // Send request to update member on server and get result
+    const response = await OrgService.updateMember(this.context.getters['myOrg'].id, updatePayload)
 
-      // If no response or error, throw exception to be caught
-      if (!response || response.status !== 200 || !response.data) {
-        throw Error('Unable to update member role')
-      }
-    } catch (exception) {
-      // On exception, roll back to previous state
-      this.context.commit('updateMember', { ...memberInfo, role: savedMemberRole })
+    // If no response or error, throw exception to be caught
+    if (!response || response.status !== 200 || !response.data) {
+      debugger
+      throw Error('Unable to update member role')
+    } else {
+      debugger
+      this.context.dispatch('syncActiveOrgMembers')
+      this.context.dispatch('syncPendingOrgMembers')
     }
   }
 
@@ -262,5 +176,23 @@ export default class OrgModule extends VuexModule {
   public async syncOrganizations () {
     const response = await UserService.getOrganizations()
     return response.data && response.data.orgs ? response.data.orgs : []
+  }
+
+  @Action({ commit: 'setActiveOrgMembers', rawError: true })
+  public async syncActiveOrgMembers () {
+    const response = await OrgService.getOrgMembers(this.context.getters['myOrg'].id, 'ACTIVE')
+    return response.data && response.data.members ? response.data.members : []
+  }
+
+  @Action({ commit: 'setPendingOrgMembers', rawError: true })
+  public async syncPendingOrgMembers () {
+    const response = await OrgService.getOrgMembers(this.context.getters['myOrg'].id, 'PENDING_APPROVAL')
+    return response.data && response.data.members ? response.data.members : []
+  }
+
+  @Action({ commit: 'setPendingOrgInvitations', rawError: true })
+  public async syncPendingOrgInvitations () {
+    const response = await OrgService.getOrgInvitations(this.context.getters['myOrg'].id, 'PENDING')
+    return response.data && response.data.invitations ? response.data.invitations : []
   }
 }

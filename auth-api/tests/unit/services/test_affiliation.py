@@ -304,6 +304,3 @@ def test_delete_affiliation_implicit(session, auth_mock):  # pylint:disable=unus
 
     found_affiliation = AffiliationModel.query.filter_by(id=affiliation.identifier).first()
     assert found_affiliation is None
-
-    found_org = OrgModel.query.filter_by(id=org_id).first()
-    assert found_org is None

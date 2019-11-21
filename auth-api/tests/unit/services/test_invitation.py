@@ -134,47 +134,50 @@ def test_accept_invitation(session, auth_mock):  # pylint:disable=unused-argumen
     """Accept the invitation and add membership from the invitation to the org."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         with patch.object(auth, 'check_auth', return_value=True):
-            user = factory_user_model(TestUserInfo.user_test)
-            org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
-            org_dictionary = org.as_dict()
-            invitation_info = factory_invitation(org_dictionary['id'])
-            new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
-            new_invitation_dict = new_invitation.as_dict()
-            InvitationService.accept_invitation(new_invitation_dict['id'], user.id)
-            org_dict = OrgService.find_by_org_id(org_dictionary['id'], allowed_roles={'basic'}).as_dict()
-            assert len(org_dict['members']) == 2  # Member count will be 2 only if the invite accept is successful.
+            with patch.object(InvitationService, 'notify_admin', return_value=None):
+                user = factory_user_model(TestUserInfo.user_test)
+                org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+                org_dictionary = org.as_dict()
+                invitation_info = factory_invitation(org_dictionary['id'])
+                new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
+                new_invitation_dict = new_invitation.as_dict()
+                InvitationService.accept_invitation(new_invitation_dict['id'], User(user), '')
+                org_dict = OrgService.find_by_org_id(org_dictionary['id'], allowed_roles={'basic'}).as_dict()
+                assert len(org_dict['members']) == 2  # Member count will be 2 only if the invite accept is successful.
 
 
 def test_accept_invitation_exceptions(session, auth_mock):  # pylint:disable=unused-argument
     """Accept the invitation and add membership from the invitation to the org."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         with patch.object(auth, 'check_auth', return_value=True):
-            user = factory_user_model(TestUserInfo.user_test)
-            org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
-            org_dictionary = org.as_dict()
-            invitation_info = factory_invitation(org_dictionary['id'])
+            with patch.object(InvitationService, 'notify_admin', return_value=None):
+                user = factory_user_model(TestUserInfo.user_test)
+                org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+                org_dictionary = org.as_dict()
+                invitation_info = factory_invitation(org_dictionary['id'])
 
-            with pytest.raises(BusinessException) as exception:
-                InvitationService.accept_invitation(None, user.id)
+                with pytest.raises(BusinessException) as exception:
+                    InvitationService.accept_invitation(None, User(user), '')
 
-            assert exception.value.code == Error.DATA_NOT_FOUND.name
+                assert exception.value.code == Error.DATA_NOT_FOUND.name
 
-            new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
-            new_invitation_dict = new_invitation.as_dict()
-            InvitationService.accept_invitation(new_invitation_dict['id'], user.id)
+                new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
+                new_invitation_dict = new_invitation.as_dict()
+                InvitationService.accept_invitation(new_invitation_dict['id'], User(user), '')
 
-            with pytest.raises(BusinessException) as exception:
-                InvitationService.accept_invitation(new_invitation_dict['id'], user.id)
+                with pytest.raises(BusinessException) as exception:
+                    InvitationService.accept_invitation(new_invitation_dict['id'], User(user), '')
 
-            assert exception.value.code == Error.ACTIONED_INVITATION.name
+                assert exception.value.code == Error.ACTIONED_INVITATION.name
 
-            with pytest.raises(BusinessException) as exception:
-                expired_invitation: InvitationModel = InvitationModel.find_invitation_by_id(new_invitation_dict['id'])
-                expired_invitation.invitation_status = InvitationStatusModel.get_status_by_code('EXPIRED')
-                expired_invitation.save()
-                InvitationService.accept_invitation(expired_invitation.id, user.id)
+                with pytest.raises(BusinessException) as exception:
+                    expired_invitation: InvitationModel = InvitationModel \
+                        .find_invitation_by_id(new_invitation_dict['id'])
+                    expired_invitation.invitation_status = InvitationStatusModel.get_status_by_code('EXPIRED')
+                    expired_invitation.save()
+                    InvitationService.accept_invitation(expired_invitation.id, User(user), '')
 
-            assert exception.value.code == Error.EXPIRED_INVITATION.name
+                assert exception.value.code == Error.EXPIRED_INVITATION.name
 
 
 def test_get_invitations_by_org_id(session, auth_mock):  # pylint:disable=unused-argument
@@ -206,6 +209,6 @@ def test_send_invitation_exception(session, auth_mock):  # pylint:disable=unused
     invitation = InvitationModel.create_from_dict(invitation_info, user.id)
 
     with pytest.raises(BusinessException) as exception:
-        InvitationService.send_invitation(invitation, user_dictionary, '')
+        InvitationService.send_invitation(invitation, org_dictionary['name'], user_dictionary, '')
 
     assert exception.value.code == Error.FAILED_INVITATION.name

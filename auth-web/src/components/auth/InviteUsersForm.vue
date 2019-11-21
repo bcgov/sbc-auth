@@ -20,14 +20,14 @@
             ></v-select>
             <v-btn icon class="mt-3 ml-1"
               @click="removeEmail(index)">
-              <v-icon>close</v-icon>
+              <v-icon>mdi-close</v-icon>
             </v-btn>
           </li>
         </transition-group>
       </ul>
       <v-btn text small color="primary"
         @click="addEmail()">
-        <v-icon>add_box</v-icon>
+        <v-icon>mdi-plus-box</v-icon>
         <span>Add Another</span>
       </v-btn>
       <div class="form__btns">
@@ -48,7 +48,7 @@
 
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { Invitation } from '@/models/Invitation'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
@@ -61,7 +61,7 @@ interface InvitationInfo {
 
 @Component({
   computed: {
-    ...mapState('org', ['organizations'])
+    ...mapGetters('org', ['myOrg'])
   },
   methods: {
     ...mapMutations('org', ['resetInvitations']),
@@ -69,27 +69,27 @@ interface InvitationInfo {
   }
 })
 export default class InviteUsersForm extends Vue {
-  orgStore = getModule(OrgModule, this.$store)
-  readonly organizations!: Organization[]
-  readonly resetInvitations!: () => void
-  readonly createInvitation!: (Invitation) => Promise<void>
+  private orgStore = getModule(OrgModule, this.$store)
   private loading = false
+  private readonly myOrg!: Organization
+  private readonly resetInvitations!: () => void
+  private readonly createInvitation!: (Invitation) => Promise<void>
 
   $refs: {
     form: HTMLFormElement
   }
 
-  invitations: InvitationInfo[] = [
+  private invitations: InvitationInfo[] = [
     { emailAddress: '', role: 'Member' },
     { emailAddress: '', role: 'Member' },
     { emailAddress: '', role: 'Member' }
   ]
 
-  emailRules = [
+  private readonly emailRules = [
     v => !v || /.+@.+\..+/.test(v) || 'Enter a valid email address'
   ]
 
-  availableRoles = [
+  private readonly availableRoles = [
     'Member',
     'Admin',
     'Owner'
@@ -99,15 +99,15 @@ export default class InviteUsersForm extends Vue {
     return this.invitations.some(invite => invite.emailAddress) && this.$refs.form.validate()
   }
 
-  removeEmail (index: number) {
+  private removeEmail (index: number) {
     this.invitations.splice(index, 1)
   }
 
-  addEmail () {
+  private addEmail () {
     this.invitations.push({ emailAddress: '', role: 'Member' })
   }
 
-  async sendInvites () {
+  private async sendInvites () {
     if (this.isFormValid()) {
       // set loading state
       this.loading = true
@@ -118,9 +118,7 @@ export default class InviteUsersForm extends Vue {
           await this.createInvitation({
             recipientEmail: invite.emailAddress,
             sentDate: new Date(),
-            membership: this.organizations
-              .filter(org => org.orgType === 'IMPLICIT')
-              .map(org => { return { membershipType: invite.role.toUpperCase(), orgId: org.id } })
+            membership: [{ membershipType: invite.role.toUpperCase(), orgId: this.myOrg.id }]
           })
         }
       }
@@ -132,7 +130,7 @@ export default class InviteUsersForm extends Vue {
   }
 
   @Emit()
-  cancel () {}
+  private cancel () {}
 }
 </script>
 

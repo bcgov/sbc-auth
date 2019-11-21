@@ -1,4 +1,4 @@
-import { Contact } from './contact'
+import { Contact } from '@/models/contact'
 
 export interface User {
     firstname: string;
@@ -11,8 +11,3 @@ export interface User {
     // eslint-disable-next-line camelcase
     is_terms_of_use_accepted?: boolean
 }
-
-export interface SuccessEmitPayload {
-    isResend: boolean,
-    invitationCount: number
-  }

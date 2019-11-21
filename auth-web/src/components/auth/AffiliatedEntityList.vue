@@ -1,50 +1,43 @@
 <template>
   <div class="entity-list-component">
-    <!-- Loading status -->
-    <v-progress-circular
-      :indeterminate=true
-      v-if="isLoading"
-    />
 
     <!-- No Results Message -->
     <v-card
       class="no-results text-center"
-      v-if="basicAffiliations.length === 0 && !isLoading"
+      v-if="myBusinesses.length === 0 && !isLoading"
       @click="addBusiness()"
     >
       <v-card-title class="pt-6 pb-0">{{ $t('businessListEmptyMessage')}}</v-card-title>
       <v-card-text class="pb-8">{{ $t('businessListActionMessage')}}</v-card-text>
     </v-card>
 
-    <div v-if="!isLoading" class="entity-details">
-      <v-row
-        v-for="business in basicAffiliations"
-        v-bind:key="business.businessIdentifier"
-        class="mb-3"
+    <!-- Business Data Table -->
+    <v-card v-if="myBusinesses.length > 0 && !isLoading">
+      <v-data-table
+        :loading="isLoading"
+        loading-text="Loading... Please wait"
+        :headers="tableHeaders"
+        :items="myBusinesses"
+        :items-per-page="5"
+        :calculate-widths="true"
+        :hide-default-footer="myBusinesses.length <= 5"
+        :custom-sort="customSort"
       >
-        <v-card width="100%">
-          <v-card-title class="list-item_entity-number">
-            <a @click="redirectToNext(business.businessIdentifier)">{{business.name}}</a>
-            <span>
-              <v-btn outlined small class="mr-2" @click="editContact(business.businessIdentifier)">
-                Edit
-              </v-btn>
-              <v-btn outlined small color="red" @click="removeBusiness(business.businessIdentifier)">
-                Remove
-              </v-btn>
-            </span>
-          </v-card-title>
-          <v-card-text class="card-layout">
-            <dl class="meta-container">
-              <dt>Business No:</dt>
-              <dd class="list-item_business-number">{{ business.businessNumber }}</dd>
-              <dt>Incorporation No:</dt>
-              <dd class="list-item_incorp-number">{{ business.businessIdentifier }}</dd>
-            </dl>
-          </v-card-text>
-        </v-card>
-      </v-row>
-    </div>
+        <template v-slot:item.info="{ item }">
+          <div class="meta">
+            <v-list-item-title>{{ item.name }}</v-list-item-title>
+            <v-list-item-subtitle>Incorporation Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
+          </div>
+        </template>
+        <template v-slot:item.action="{ item }">
+          <div class="actions">
+            <v-btn depressed small @click="goToDashboard(item.businessIdentifier)" title="Go to Business Dashboard">Dashboard</v-btn>
+            <v-btn depressed small @click="editContact(item)" title="Edit Business Profile">Edit</v-btn>
+            <v-btn depressed small @click="removeBusiness(item.businessIdentifier)" title="Remove Business">Remove</v-btn>
+          </div>
+        </template>
+      </v-data-table>
+    </v-card>
   </div>
 </template>
 
@@ -56,6 +49,7 @@ import { Business } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
 import { SessionStorageKeys } from '@/util/constants'
+import UserManagement from '@/views/management/UserManagement.vue'
 import _ from 'lodash'
 import { getModule } from 'vuex-module-decorators'
 
@@ -76,26 +70,56 @@ export default class AffiliatedEntityList extends Vue {
   private readonly setCurrentBusiness!: (business: Business) => void
   private readonly syncOrganizations!: () => Organization[]
 
-  private get implicitOrgs () {
-    return this.organizations.filter(org => org.orgType === 'IMPLICIT')
+  private get tableHeaders () {
+    return [
+      {
+        text: 'Name',
+        align: 'left',
+        sortable: true,
+        value: 'info'
+      },
+      {
+        text: 'Actions',
+        align: 'left',
+        value: 'action',
+        sortable: false,
+        width: '280'
+      }
+    ]
   }
 
-  private get basicAffiliations () {
-    return _.uniqWith(
-      _.flatten(this.implicitOrgs.map(org => org.affiliatedEntities)),
-      (businessA: Business, businessB: Business) => businessA.businessIdentifier === businessB.businessIdentifier
-    )
+  private get myOrg (): Organization {
+    if (this.organizations && this.organizations.length > 0) {
+      return this.organizations[0]
+    }
+    return undefined
+  }
+
+  private get myBusinesses () {
+    return this.myOrg.affiliatedEntities
   }
 
   private get businessById () {
     return (businessIdentifier: string) => {
-      return this.basicAffiliations.find(business => business.businessIdentifier === businessIdentifier)
+      return this.myBusinesses.find(business => business.businessIdentifier === businessIdentifier)
     }
   }
 
-  async created () {
-    this.isLoading = true
-    await this.syncOrganizations()
+  private customSort (items, index, isDescending) {
+    const isDesc = isDescending.length > 0 && isDescending[0]
+    if (index[0] === 'info') {
+      items.sort((a, b) => {
+        if (isDesc) {
+          return a.name < b.name ? -1 : 1
+        } else {
+          return b.name < a.name ? -1 : 1
+        }
+      })
+    }
+    return items
+  }
+
+  async mounted () {
     this.isLoading = false
   }
 
@@ -103,90 +127,56 @@ export default class AffiliatedEntityList extends Vue {
   addBusiness () { }
 
   @Emit()
-  removeBusiness (businessIdentifier: string, orgId?: number): RemoveBusinessPayload {
-    // If no orgId was supplied, remove affiliations between all implicit orgs and the specified business
-    // Otherwise remove affiliation for the specific org
-    if (!orgId) {
-      return {
-        orgIdentifiers: this.implicitOrgs
-          .filter(org => org.affiliatedEntities && org.affiliatedEntities
-            .some(business => business.businessIdentifier === businessIdentifier))
-          .map(org => org.id),
-        businessIdentifier
-      }
-    } else {
-      return {
-        orgIdentifiers: [orgId],
-        businessIdentifier
-      }
+  removeBusiness (businessIdentifier: string): RemoveBusinessPayload {
+    return {
+      orgIdentifiers: [this.myOrg.id],
+      businessIdentifier
     }
   }
 
-  editContact (businessidentifier: string) {
-    this.setCurrentBusiness(this.businessById(businessidentifier))
+  editContact (business: Business) {
+    this.setCurrentBusiness(business)
     this.$router.push({ path: '/businessprofile', query: { redirect: '/main' } })
   }
 
-  redirectToNext (incorporationNumber: string) {
+  goToDashboard (incorporationNumber: string) {
     ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, incorporationNumber)
     const redirectURL = ConfigHelper.getCoopsURL() + 'dashboard'
     window.location.href = decodeURIComponent(redirectURL)
+  }
+
+  private manageTeam (business: Business) {
+    this.setCurrentBusiness(business)
+    // Not ideal, as this makes the component less reusable
+    // TODO: Come up with a better solution: global event bus?
+    this.$parent.$emit('change-to', UserManagement)
   }
 }
 </script>
 
 <style lang="scss" scoped>
-@import "../../assets/scss/theme.scss";
-
-.org-details {
-  padding: 0;
-  list-style-type: none;
-  margin-right: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.entity-details {
-  padding: 0;
-  list-style-type: none;
-}
-
-.list-item {
-  flex-direction: row;
-  align-items: center;
-  background: #ffffff;
-}
-
-.card-layout {
-  padding: 1.5rem;
-}
-
-h2 {
-  margin-bottom: 1.5rem;
-}
-
-p {
-  text-align: center;
-}
-
-.business-list-empty-message {
-  font-weight: 500;
-}
-
-.list-item_entity-number {
-  font-weight: 500;
-  display: flex;
-  justify-content: space-between;
-  padding-bottom: 0px !important;
-}
-
-a {
-  color: black;
-}
+@import "$assets/scss/theme.scss";
 
 .meta-container {
   overflow: hidden;
   color: $gray6;
-  font-size: 0.875rem;
+}
+
+.meta {
+  .v-list-item__title {
+    letter-spacing: -0.01rem;
+    font-weight: 700;
+  }
+
+  .v-list-item__subtitle {
+    color: $gray7;
+  }
+}
+
+.actions {
+  .v-btn + .v-btn {
+    margin-left: 0.4rem;
+  }
 }
 
 dd,
@@ -214,12 +204,22 @@ dd {
 // No Results
 // TODO: Move somewhere we can access globally
 .no-results .v-card__title {
-  justify-content: center;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 700;
 }
 
+.no-results .v-card__title,
 .no-results .v-card__text {
-  font-size: 0.9375rem;
+  justify-content: center;
+}
+
+::v-deep .v-data-table td {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+::v-deep .v-data-table.user-list__active td {
+  height: 4rem;
+  vertical-align: top;
 }
 </style>

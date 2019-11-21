@@ -24,6 +24,7 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import OrgSchema
+from auth_api.utils.roles import Status
 from auth_api.utils.util import camelback2snake
 
 from .authorization import check_auth
@@ -54,18 +55,23 @@ class Org:
     @staticmethod
     def create_org(org_info: dict, user_id):
         """Create a new organization."""
-        org = OrgModel.create_from_dict(org_info=org_info)
+        existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'])
+        if existing_similar__org is not None:
+            raise BusinessException(Error.DATA_CONFLICT, None)
+
+        org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.save()
 
         # create the membership record for this user
-        membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='OWNER')
+        membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='OWNER',
+                                     membership_type_status=Status.ACTIVE.value)
         membership.save()
 
         return Org(org)
 
     def update_org(self, org_info):
         """Update the passed organization with the new info."""
-        self._model.update_org_from_dict(org_info)
+        self._model.update_org_from_dict(camelback2snake(org_info))
         return self
 
     def delete_org(self):
@@ -149,3 +155,8 @@ class Org:
                 return MembershipService(member)
         # If we get to this point, member with that id could not be found, so raise exception
         raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+    @staticmethod
+    def get_orgs(user_id):
+        """Return the orgs associated with this user."""
+        return MembershipModel.find_orgs_for_user(user_id)

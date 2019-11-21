@@ -22,8 +22,10 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
+from auth_api.models import Membership as MembershipModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import UserSchema
+from auth_api.utils.roles import CLIENT_ADMIN_ROLES, Status
 from auth_api.utils.util import camelback2snake
 
 
@@ -176,6 +178,14 @@ class User:  # pylint: disable=too-many-instance-attributes
             return None
 
         return User(user_model)
+
+    @staticmethod
+    def get_admins_for_membership(membership_id, status=Status.ACTIVE.value):
+        """Get admins for an org."""
+        membership = MembershipModel.find_membership_by_id(membership_id)
+        org_id = membership.org_id
+
+        return UserModel.find_users_by_org_id_by_status_by_roles(org_id, CLIENT_ADMIN_ROLES, status)
 
     def get_orgs(self):
         """Return the orgs associated with this user."""

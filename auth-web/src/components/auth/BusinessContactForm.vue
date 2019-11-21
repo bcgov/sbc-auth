@@ -65,7 +65,7 @@
           Cancel
         </v-btn>
         <v-btn large color="primary" @click="save" :disabled='!isFormValid()'>
-          Save and Continue
+          Save
         </v-btn>
       </v-col>
     </v-row>
@@ -91,7 +91,7 @@ import { mask } from 'vue-the-mask'
     ...mapState('business', ['currentBusiness'])
   },
   methods: {
-    ...mapActions('business', ['loadBusiness', 'addContact', 'updateContact'])
+    ...mapActions('business', ['addContact', 'updateContact'])
   }
 })
 export default class BusinessContactForm extends Vue {
@@ -102,8 +102,7 @@ export default class BusinessContactForm extends Vue {
   private extension = ''
   private formError = ''
   private editing = false
-  private readonly currentBusiness: Business
-  private readonly loadBusiness!: (businessIdentifier: string) => Business
+  private readonly currentBusiness!: Business
   private readonly addContact!: (contact: Contact) => void
   private readonly updateContact!: (contact: Contact) => void
 
@@ -145,11 +144,6 @@ export default class BusinessContactForm extends Vue {
   }
 
   async mounted () {
-    // If a business is currently in the store, show contact info for that one
-    if (!this.currentBusiness || !this.currentBusiness.businessIdentifier) {
-      await this.loadBusiness(ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey))
-    }
-
     if (this.currentBusiness.contacts && this.currentBusiness.contacts.length > 0) {
       const contact = this.currentBusiness.contacts[0]
       this.emailAddress = this.confirmedEmailAddress = contact.email

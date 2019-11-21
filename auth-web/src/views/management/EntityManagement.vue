@@ -1,10 +1,10 @@
 <template>
-  <div class="entity-mgmt-view">
+  <v-container class="view-container">
     <header class="view-header mt-1 mb-9">
       <h1>Manage Businesses</h1>
       <div class="view-header__actions">
         <v-btn outlined color="primary" @click="showAddBusinessModal()">
-          <v-icon>add</v-icon>
+          <v-icon>mdi-plus</v-icon>
           <span>Add Business</span>
         </v-btn>
       </div>
@@ -32,6 +32,7 @@
           @add-success="showAddSuccessModal()"
           @add-failed-invalid-code="showInvalidCodeModal()"
           @add-failed-no-entity="showEntityNotFoundModal()"
+          @add-unknown-error="showUnknownErrorModal()"
           @cancel="cancelAddBusiness()"
         />
       </template>
@@ -55,7 +56,7 @@
       max-width="640"
     >
       <template v-slot:icon>
-        <v-icon large color="error">error</v-icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:actions>
         <v-btn large color="error" @click="close()">OK</v-btn>
@@ -71,14 +72,14 @@
       max-width="640"
     >
       <template v-slot:icon>
-        <v-icon large color="error">error</v-icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:actions>
         <v-btn large color="primary" @click="remove()">Remove</v-btn>
         <v-btn large color="default" @click="cancelConfirmDelete()">Cancel</v-btn>
       </template>
     </ModalDialog>
-  </div>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -138,6 +139,13 @@ export default class EntityManagement extends Vue {
     this.$refs.errorDialog.open()
   }
 
+  showUnknownErrorModal () {
+    this.$refs.addBusinessDialog.close()
+    this.dialogTitle = 'Error Adding Business'
+    this.dialogText = 'An error occurred adding your business. Please try again.'
+    this.$refs.errorDialog.open()
+  }
+
   showAddBusinessModal () {
     this.dialogTitle = 'Add Business'
     this.$refs.addBusinessDialog.open()
@@ -168,3 +176,23 @@ export default class EntityManagement extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .view-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .view-container__content {
+    flex: 1 1 auto;
+  }
+
+  article {
+    margin-left: 1.5rem;
+    padding: 0;
+  }
+
+  aside {
+    margin: 0;
+  }
+</style>

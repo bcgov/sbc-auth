@@ -33,7 +33,7 @@ describe('Get user profile', () => {
     Axios.all.mockResolvedValue(results)
     // @ts-ignore
     UserService.getUserProfile('@me')
-    UserService.createUserProfile()
+    UserService.syncUserProfile()
     UserService.createContact(mockContact)
   })
 

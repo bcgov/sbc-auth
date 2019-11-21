@@ -23,7 +23,12 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
+from auth_api.utils.roles import Status
+
 from .base_model import BaseModel
+from .db import db
+from .membership import Membership as MembershipModel
+from .org import Org as OrgModel
 
 
 class User(BaseModel):
@@ -42,7 +47,10 @@ class User(BaseModel):
     roles = Column('roles', String(1000))
 
     contacts = relationship('ContactLink', back_populates='user', primaryjoin='User.id == ContactLink.user_id')
-    orgs = relationship('Membership', back_populates='user', primaryjoin='User.id == Membership.user_id')
+    orgs = relationship('Membership', back_populates='user',
+                        primaryjoin='and_(User.id == Membership.user_id, \
+                        or_(Membership.status == ' + str(Status.ACTIVE.value) + ', Membership.status == ' + str(
+                            Status.PENDING_APPROVAL.value) + '))')   # noqa:E127
 
     is_terms_of_use_accepted = Column(Boolean(), default=False, nullable=True)
     terms_of_use_accepted_version = Column(
@@ -126,6 +134,15 @@ class User(BaseModel):
             cls.commit()
             return user
         return None
+
+    @classmethod
+    def find_users_by_org_id_by_status_by_roles(cls, org_id, roles, status=Status.ACTIVE.value):
+        """Find all members of the org with a status."""
+        return db.session.query(User). \
+            join(MembershipModel,
+                 (User.id == MembershipModel.user_id) & (MembershipModel.status == status) &
+                 (MembershipModel.membership_type_code.in_(roles))). \
+            join(OrgModel).filter(OrgModel.id == org_id).all()
 
     def delete(self):
         """Users cannot be deleted so intercept the ORM by just returning."""

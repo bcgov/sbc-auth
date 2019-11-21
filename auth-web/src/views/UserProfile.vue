@@ -8,23 +8,24 @@
     <div v-if="!isLoading" class="view-container">
       <article>
         <div v-if="!editing">
-          <h1>Complete User Profile</h1>
+          <h1 class="mb-5">Complete User Profile</h1>
           <p class="intro-text">It looks like we are missing some information to complete your user profile.</p>
         </div>
         <div v-if="editing">
-          <h1>Edit User Profile</h1>
-          <p class="intro-text">Update and manage your contact information</p>
+          <h1 class="mb-5">Edit User Profile</h1>
+          <p class="intro-text">Update and manage your contact information.</p>
         </div>
         <v-card class="profile-card">
           <v-container>
-            <h2 class="mb-7">Your Profile</h2>
-            <UserProfileForm/>
+            <v-card-title>
+              <h2>Your Profile</h2>
+            </v-card-title>
+            <v-card-text>
+              <UserProfileForm/>
+            </v-card-text>
           </v-container>
         </v-card>
       </article>
-      <aside>
-        <SupportInfoCard/>
-      </aside>
     </div>
   </v-container>
 </template>
@@ -44,9 +45,6 @@ import { getModule } from 'vuex-module-decorators'
     UserProfileForm,
     SupportInfoCard
   },
-  methods: {
-    ...mapActions('user', ['getUserProfile'])
-  },
   computed: {
     ...mapState('user', ['userProfile'])
   }
@@ -59,10 +57,6 @@ export default class UserProfile extends Vue {
   private isLoading = true
 
   async mounted () {
-    if (!this.userProfile) {
-      await this.getUserProfile('@me')
-    }
-
     if (this.userProfile.contacts && this.userProfile.contacts[0]) {
       this.editing = true
     }
@@ -73,31 +67,15 @@ export default class UserProfile extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  // Layout
   article {
     flex: 1 1 auto;
+    margin: 0 auto;
+    max-width: 50rem;
   }
 
-  aside {
-    flex: 0 0 auto;
-    margin-top: 2rem;
-  }
-
-  @media (min-width: 960px) {
-    article {
-      padding-top: 0.5rem;
-      padding-bottom: 0.5rem;
-    }
-
-    aside {
-      margin-top: 0;
-      margin-left: 2rem;
-      width: 20rem;
-    }
-
-    .view-container {
-      flex-flow: row nowrap;
-    }
+  .v-card__title {
+    font-weight: 700;
+    letter-spacing: -0.01rem;
   }
 
   .intro-text {
@@ -106,12 +84,6 @@ export default class UserProfile extends Vue {
 
   // Profile Card
   .profile-card .container {
-    padding: 1.5rem;
-  }
-
-  @media (min-width: 960px) {
-    .profile-card .container {
-      padding: 2rem;
-    }
+    padding: 1rem;
   }
 </style>

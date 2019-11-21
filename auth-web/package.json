@@ -17,18 +17,19 @@
     "core-js": "^3.3.3",
     "keycloak-js": "^6.0.0",
     "lodash": "^4.17.15",
-    "material-icons": "^0.3.1",
+    "@mdi/font": "^4.5.95",
     "moment": "^2.24.0",
     "regenerator-runtime": "^0.13.3",
     "register-service-worker": "^1.6.2",
-    "sbc-common-components": "^2.0.17",
+    "sbc-common-components": "^2.0.21",
     "vue": "^2.6.10",
     "vue-i18n": "^8.0.0",
     "vue-property-decorator": "^8.1.1",
     "vue-router": "^3.0.1",
     "vue-the-mask": "^0.11.1",
     "vuetify": "^2.1.5",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "vuex-persist": "^2.1.1"
   },
   "devDependencies": {
     "@kazupon/vue-i18n-loader": "^0.3.0",
