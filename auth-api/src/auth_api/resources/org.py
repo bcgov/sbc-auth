@@ -26,7 +26,7 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, Role, Status
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF, Role, Status
 from auth_api.utils.util import cors_preflight
 
 
@@ -258,9 +258,15 @@ class OrgMembers(Resource):
             status = request.args.get('status')
             roles = request.args.get('roles')
 
+            # Require ADMIN or higher for anything other than Active Members list
+            if status == 'ACTIVE':
+                allowed_roles = CLIENT_AUTH_ROLES
+            else:
+                allowed_roles = CLIENT_ADMIN_ROLES
+
             members = MembershipService.get_members_for_org(org_id, status=status, membership_roles=roles,
                                                             token_info=g.jwt_oidc_token_info,
-                                                            allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+                                                            allowed_roles=(*allowed_roles, STAFF))
             if members:
                 response, status = {'members': MembershipSchema(exclude=['org']).dump(members, many=True)}, \
                                    http_status.HTTP_200_OK
