@@ -17,23 +17,35 @@
       <v-list-item-subtitle v-if="item.user.contacts && item.user.contacts.length > 0">{{ item.user.contacts[0].email }}</v-list-item-subtitle>
     </template>
     <template v-slot:item.role="{ item }">
-      <v-menu offset-y>
+      <v-menu>
         <template v-slot:activator="{ on }">
           <v-btn small depressed v-on="on">
             {{ item.membershipTypeCode }}
             <v-icon small depressed class="ml-1">mdi-chevron-down</v-icon>
           </v-btn>
         </template>
-        <v-list>
-          <v-list-item
+        <v-list class="role-list">
+          <v-list-item color="primary"
             v-for="(role, index) in availableRoles"
             :key="index"
-            @click="confirmChangeRole(item, role)"
-          >
-            <v-list-item-title>{{ role }}</v-list-item-title>
+            @click="confirmChangeRole(item, role)">
+            <v-list-item-icon>
+              <v-icon v-text="role.icon"></v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title
+                v-text="role.name"
+              >
+              </v-list-item-title>
+              <v-list-item-subtitle
+                v-text="role.desc"
+              >
+              </v-list-item-subtitle>
+            </v-list-item-content>
           </v-list-item>
         </v-list>
       </v-menu>
+
     </template>
     <template v-slot:item.lastActive="{ item }">
       {{ formatDate(item.user.modified) }}
@@ -69,9 +81,21 @@ export default class MemberDataTable extends Vue {
   private readonly syncActiveOrgMembers!: () => Member[]
 
   private readonly availableRoles = [
-    'Member',
-    'Admin',
-    'Owner'
+    {
+      icon: 'mdi-shield-key',
+      name: 'Owner',
+      desc: 'Can add/remove team members and businesses, and file for a business.'
+    },
+    {
+      icon: 'mdi-settings',
+      name: 'Admin',
+      desc: 'Can add/remove team members, add businesses, and file for a business.'
+    },
+    {
+      icon: 'mdi-account',
+      name: 'Member',
+      desc: 'Can add businesses, and file for a business.'
+    }
   ]
 
   private readonly headerMembers = [
@@ -155,3 +179,22 @@ export default class MemberDataTable extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .role-list {
+    max-width: 26rem;
+
+    .v-list-item__title {
+      letter-spacing: -0.02rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+    }
+
+    .v-list-item__subtitle {
+      white-space: normal;
+      overflow: visible;
+      line-height: 1.5;
+      font-size: 0.875rem;
+    }
+  }
+</style>

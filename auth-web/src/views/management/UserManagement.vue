@@ -255,7 +255,7 @@ export default class UserManagement extends Vue {
   }
 
   private showConfirmChangeRoleModal (payload: ChangeRolePayload) {
-    if (payload.member.membershipTypeCode.toUpperCase() === payload.targetRole.toUpperCase()) {
+    if (payload.member.membershipTypeCode.toString() === payload.targetRole.toString()) {
       return
     }
     this.confirmActionTitle = this.$t('confirmRoleChangeTitle').toString()
@@ -299,7 +299,7 @@ export default class UserManagement extends Vue {
   private async changeRole () {
     await this.updateMember({
       memberId: this.roleChangeToAction.member.id,
-      role: this.roleChangeToAction.targetRole.toUpperCase()
+      role: this.roleChangeToAction.targetRole.toString()
     })
     this.$refs.confirmActionDialog.close()
   }
