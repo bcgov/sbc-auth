@@ -6,7 +6,7 @@
       <ul class="pl-0">
         <li v-for="(item, i) in menu"
           :key="i">
-          <v-btn tile text color="#4d7094" @click="item.activate()">{{ item.title }}</v-btn>
+          <v-btn large text @click="item.activate()">{{ item.title }}</v-btn>
         </li>
       </ul>
     </nav>
@@ -64,11 +64,11 @@ export default class ManagementMenu extends Vue {
     display: flex;
     flex-direction: row;
     align-items: center;
+    height: 4.5rem;
   }
 
   .team-toolbar .team-name {
     margin-right: 1.5rem;
-    color: $BCgovBlue3;
     letter-spacing: -0.03rem;
     font-size: 1rem;
     font-weight: 700;
@@ -79,8 +79,7 @@ export default class ManagementMenu extends Vue {
   }
 
   .v-btn {
-    height: 4.5rem !important;
-    color: #ffffff;
-    font-weight: 400;
+    text-transform: uppercase;
+    font-weight: 700
   }
 </style>
