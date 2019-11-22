@@ -44,13 +44,13 @@ def read(filepath):
     return content
 
 
-REQUIREMENTS = read_requirements('requirements/prod.txt')
+REQUIREMENTS = read_requirements('requirements.txt')
 
 setup(
     name="notify_api",
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
+    py_modules=[splitext(basename(path))[0] for path in glob('*.py')],
     include_package_data=True,
     license=read('LICENSE'),
     long_description=read('README.md'),

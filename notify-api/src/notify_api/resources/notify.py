@@ -12,62 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """API endpoints for managing a notify resource."""
+from typing import List
 
-from flask import request
-from flask_restplus import Namespace, Resource, cors
+from fastapi import APIRouter, Body, Depends, HTTPException, Path
+from sqlalchemy.orm import Session
 
-from notify_api import status as http_status
-from notify_api.jwt_wrapper import JWTWrapper
-from notify_api.schemas import utils as schema_utils
-from notify_api.services import Notify as NotifyService
-from notify_api.tracer import Tracer
-from notify_api.utils.util import cors_preflight
+from notify_api.db.database import get_db
+from notify_api.db.models.notification import NotificationRequest, NotificationResponse
+from notify_api.services.notify import NotifyService
 
 
-API = Namespace('notify', description='Endpoints for notify services')
-TRACER = Tracer.get_instance()
-_JWT = JWTWrapper.get_instance()
+ROUTER = APIRouter()
 
 
-@cors_preflight('POST,OPTIONS')
-@API.route('', methods=['POST', 'OPTIONS'])
-class Notify(Resource):
-    """Resource for notify (POST) service."""
-
-    @staticmethod
-    @TRACER.trace()
-    @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
-    def post():
-        """Send a new notification using the details in request and saves the notification."""
-        request_json = request.get_json()
-        valid_format, errors = schema_utils.validate(request_json, 'notify')
-        if not valid_format:
-            return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
-
-        notification = NotifyService.create_notification(request_json)
-        if notification is None:
-            response, status = {'message': 'Service Error.'}, http_status.HTTP_500_INTERNAL_SERVER_ERROR
-        else:
-            response, status = notification.as_dict(), http_status.HTTP_201_CREATED
-        return response, status
+@ROUTER.get('/{notification_id}', response_model=NotificationResponse)
+async def find_notification(notification_id: int = Path(...), db_session: Session = Depends(get_db)):
+    """get notification endpoint by id."""
+    notification = await NotifyService.find_notification(db_session, notification_id=notification_id)
+    if notification is None:
+        raise HTTPException(status_code=404, detail='Notification not found')
+    return notification
 
 
-@cors_preflight('GET,OPTIONS')
-@API.route('/<string:notification_id>', methods=['GET'])
-class Notification(Resource):
-    """Resource for notify (GET) service."""
+@ROUTER.get('/notifications/{status}', response_model=List[NotificationResponse])
+async def find_notifications(status: str = Path(...), db_session: Session = Depends(get_db)):
+    """get notifications endpoint by status."""
+    notifications = await NotifyService.find_notifications_by_status(db_session, status)
+    return notifications
 
-    @staticmethod
-    @TRACER.trace()
-    @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
-    def get(notification_id):
-        """Get the notification specified by the provided id."""
-        notification = NotifyService.get_notification(notification_id)
-        if notification is None or not notification.as_dict():
-            response, status = {'message': 'The requested notification could not be found.'}, \
-                http_status.HTTP_404_NOT_FOUND
-        else:
-            response, status = notification.as_dict(), http_status.HTTP_200_OK
-        return response, status
+
+@ROUTER.post('/', response_model=NotificationResponse)
+async def send_notification(notification: NotificationRequest = Body(...), db_session: Session = Depends(get_db)):
+    """create and send notification endpoint."""
+    notification = await NotifyService.send_notification(db_session, notification)
+    return notification
