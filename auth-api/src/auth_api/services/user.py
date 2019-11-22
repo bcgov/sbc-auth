@@ -186,7 +186,3 @@ class User:  # pylint: disable=too-many-instance-attributes
         org_id = membership.org_id
 
         return UserModel.find_users_by_org_id_by_status_by_roles(org_id, CLIENT_ADMIN_ROLES, status)
-
-    def get_orgs(self):
-        """Return the orgs associated with this user."""
-        return {'orgs': self.as_dict()['orgs']}
