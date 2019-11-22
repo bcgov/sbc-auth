@@ -25,14 +25,13 @@
           </v-btn>
         </template>
         <v-list>
-          <v-list-item-group
-            class="role-list"
-            color="primary"
-            :value="mapRoleToIndex(item.membershipTypeCode)">
+          <v-item-group
+            class="role-list">
             <v-list-item
               v-for="(role, index) in availableRoles"
               :key="index"
-              @click="confirmChangeRole(item, role.name)">
+              @click="confirmChangeRole(item, role.name)"
+              v-bind:class="{ active: item.membershipTypeCode.toUpperCase() === role.name.toUpperCase() }">
               <v-list-item-icon>
                 <v-icon v-text="role.icon" />
               </v-list-item-icon>
@@ -47,7 +46,7 @@
                 </v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
-          </v-list-item-group>
+          </v-item-group>
         </v-list>
       </v-menu>
 
@@ -135,10 +134,6 @@ export default class MemberDataTable extends Vue {
     await this.syncActiveOrgMembers()
   }
 
-  private mapRoleToIndex (roleCode: string) {
-    return this.availableRoles.map(r => r.name.toLowerCase()).indexOf(roleCode.toLowerCase())
-  }
-
   private formatDate (date: Date) {
     return moment(date).format('DD MMM, YYYY')
   }
@@ -190,8 +185,19 @@ export default class MemberDataTable extends Vue {
 </script>
 
 <style lang="scss" scoped>
+  @import "$assets/scss/theme.scss";
+
+  .v-list {
+    padding-top: 0px;
+    padding-bottom: 0px;
+  }
+
   .role-list {
     max-width: 26rem;
+
+    .v-list-item.active {
+      background: $BCgovBlue2;
+    }
 
     .v-list-item__title {
       letter-spacing: -0.02rem;
