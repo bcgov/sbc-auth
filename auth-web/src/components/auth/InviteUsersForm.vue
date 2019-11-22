@@ -11,13 +11,26 @@
               v-model="invitations[index].emailAddress"
               :rules="emailRules"
             ></v-text-field>
-            <v-select class="select-role ml-1"
+            <v-overflow-btn
               filled
-              label="Select Role"
+              class="ml-2"
               :items="availableRoles"
-              value="Member"
-              v-model="invitations[index].role"
-            ></v-select>
+              item-text="name"
+              item-value="name"
+              :value="availableRoles[2]"
+            >
+              <template v-slot:selection="{ item }">
+                {{ item.name }}
+              </template>
+              <template v-slot:item="{ item }">
+                <v-item>
+                  <div>
+                    <span class="v-list-item__title"><v-icon v-text="item.icon"/>&nbsp;&nbsp;{{ item.name }}<br/></span>
+                    <span class="v-list-item__subtitle">{{ item.desc }}</span>
+                  </div>
+                </v-item>
+              </template>
+            </v-overflow-btn>
             <v-btn icon class="mt-3 ml-1"
               @click="removeEmail(index)">
               <v-icon>mdi-close</v-icon>
@@ -54,9 +67,15 @@ import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
 import { getModule } from 'vuex-module-decorators'
 
+interface RoleInfo {
+  icon: string
+  name: string
+  desc: string
+}
+
 interface InvitationInfo {
   emailAddress: string
-  role: string
+  role: RoleInfo
 }
 
 @Component({
@@ -79,24 +98,40 @@ export default class InviteUsersForm extends Vue {
     form: HTMLFormElement
   }
 
-  private invitations: InvitationInfo[] = [
-    { emailAddress: '', role: 'Member' },
-    { emailAddress: '', role: 'Member' },
-    { emailAddress: '', role: 'Member' }
-  ]
+  private invitations: InvitationInfo[]
 
   private readonly emailRules = [
     v => !v || /.+@.+\..+/.test(v) || 'Enter a valid email address'
   ]
 
   private readonly availableRoles = [
-    'Member',
-    'Admin',
-    'Owner'
+    {
+      icon: 'mdi-shield-key',
+      name: 'Owner',
+      desc: 'Can add/remove team members and businesses, and file for a business.'
+    },
+    {
+      icon: 'mdi-settings',
+      name: 'Admin',
+      desc: 'Can add/remove team members, add businesses, and file for a business.'
+    },
+    {
+      icon: 'mdi-account',
+      name: 'Member',
+      desc: 'Can add businesses, and file for a business.'
+    }
   ]
 
+  private created () {
+    this.invitations = [
+      { emailAddress: '', role: this.availableRoles[2] },
+      { emailAddress: '', role: this.availableRoles[2] },
+      { emailAddress: '', role: this.availableRoles[2] }
+    ]
+  }
+
   private isFormValid (): boolean {
-    return this.invitations.some(invite => invite.emailAddress) && this.$refs.form.validate()
+    return this.invitations && this.invitations.some(invite => invite.emailAddress) && this.$refs.form.validate()
   }
 
   private removeEmail (index: number) {
@@ -104,7 +139,7 @@ export default class InviteUsersForm extends Vue {
   }
 
   private addEmail () {
-    this.invitations.push({ emailAddress: '', role: 'Member' })
+    this.invitations.push({ emailAddress: '', role: this.availableRoles[2] })
   }
 
   private async sendInvites () {
@@ -118,7 +153,7 @@ export default class InviteUsersForm extends Vue {
           await this.createInvitation({
             recipientEmail: invite.emailAddress,
             sentDate: new Date(),
-            membership: [{ membershipType: invite.role.toUpperCase(), orgId: this.myOrg.id }]
+            membership: [{ membershipType: invite.role.name.toUpperCase(), orgId: this.myOrg.id }]
           })
         }
       }
@@ -135,7 +170,7 @@ export default class InviteUsersForm extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import '../../assets/scss/theme.scss';
+  @import '$assets/scss/theme.scss';
   .invite-list {
     margin: 0;
     padding: 0;
@@ -149,5 +184,27 @@ export default class InviteUsersForm extends Vue {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
+  }
+
+  .v-list {
+    padding-top: 0px;
+    padding-bottom: 0px;
+  }
+
+  .v-list-item.active {
+    background: $BCgovBlue0;
+  }
+
+  .v-list-item__title {
+      letter-spacing: -0.02rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+  }
+
+  .v-list-item__subtitle {
+      white-space: normal;
+      overflow: visible;
+      line-height: 1.5;
+      font-size: 0.875rem;
   }
 </style>

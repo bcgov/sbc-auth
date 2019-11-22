@@ -196,7 +196,7 @@ export default class MemberDataTable extends Vue {
     max-width: 26rem;
 
     .v-list-item.active {
-      background: $BCgovBlue2;
+      background: $BCgovBlue0;
     }
 
     .v-list-item__title {
