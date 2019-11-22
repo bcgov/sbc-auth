@@ -23,22 +23,19 @@
 
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import { Invitation } from '@/models/Invitation'
-import { Organization } from '@/models/Organization'
 import moment from 'moment'
 
 @Component({
   computed: {
-    ...mapState('org', ['pendingOrgInvitations']),
-    ...mapGetters('org', ['myOrg'])
+    ...mapState('org', ['pendingOrgInvitations'])
   },
   methods: {
     ...mapActions('org', ['syncPendingOrgInvitations'])
   }
 })
 export default class InvitationsDataTable extends Vue {
-  private readonly myOrg!: Organization
   private readonly pendingOrgInvitations!: Invitation[]
   private readonly syncPendingOrgInvitations!: () => Invitation[]
   private readonly headerInvitations = [

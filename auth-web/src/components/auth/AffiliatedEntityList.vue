@@ -46,7 +46,7 @@
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import { Business } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
@@ -57,7 +57,7 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
-    ...mapState('org', ['organizations'])
+    ...mapGetters('org', ['myOrg'])
   },
   methods: {
     ...mapMutations('business', ['setCurrentBusiness']),
@@ -68,7 +68,7 @@ export default class AffiliatedEntityList extends Vue {
   private VUE_APP_COPS_REDIRECT_URL = ConfigHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   private orgStore = getModule(OrgModule, this.$store)
   private isLoading = true
-  private readonly organizations!: Organization[]
+  private readonly myOrg!: Organization
   private readonly setCurrentBusiness!: (business: Business) => void
   private readonly syncOrganizations!: () => Organization[]
 
@@ -88,13 +88,6 @@ export default class AffiliatedEntityList extends Vue {
         width: '270'
       }
     ]
-  }
-
-  private get myOrg (): Organization {
-    if (this.organizations && this.organizations.length > 0) {
-      return this.organizations[0]
-    }
-    return undefined
   }
 
   private get myBusinesses () {

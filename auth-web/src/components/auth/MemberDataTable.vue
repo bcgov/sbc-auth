@@ -62,7 +62,7 @@
 
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import { Member } from '@/models/Organization'
 import moment from 'moment'
 
@@ -73,8 +73,7 @@ export interface ChangeRolePayload {
 
 @Component({
   computed: {
-    ...mapState('org', ['activeOrgMembers']),
-    ...mapGetters('org', ['myOrg'])
+    ...mapState('org', ['activeOrgMembers'])
   },
   methods: {
     ...mapActions('org', ['syncActiveOrgMembers'])
