@@ -133,3 +133,9 @@ def auth_mock(monkeypatch):
     monkeypatch.setattr('auth_api.services.entity.check_auth', lambda *args, **kwargs: None)
     monkeypatch.setattr('auth_api.services.org.check_auth', lambda *args, **kwargs: None)
     monkeypatch.setattr('auth_api.services.invitation.check_auth', lambda *args, **kwargs: None)
+
+
+@pytest.fixture()
+def notify_mock(monkeypatch):
+    """Mock send_email."""
+    monkeypatch.setattr('auth_api.services.invitation.send_email', lambda *args, **kwargs: None)

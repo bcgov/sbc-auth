@@ -15,10 +15,8 @@
 
 This module manages the Membership Information between an org and a user.
 """
-from threading import Thread
 from typing import Dict, Tuple
 
-from flask import copy_current_request_context
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
