@@ -5,11 +5,11 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { KeycloakError, KeycloakPromise } from 'keycloak-js'
+import { MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
-import { Organization } from '@/models/Organization'
 import { User } from '@/models/user'
 import { UserInfo } from '@/models/userInfo'
 import UserModule from '@/store/modules/user'
@@ -80,7 +80,7 @@ export default class Signin extends Vue {
             this.$router.push('/userprofile')
           } else if (this.organizations.length === 0) {
             this.$router.push('/createteam')
-          } else if (this.organizations.some(org => org.members[0].membershipStatus === 'PENDING_APPROVAL')) {
+          } else if (this.organizations.some(org => org.members[0].membershipStatus === MembershipStatus.Pending)) {
             this.$router.push('/pendingapproval/' + this.organizations[0].name)
           } else {
             this.$router.push('/main')

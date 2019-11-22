@@ -3,7 +3,7 @@
     <header class="view-header">
       <h1>Manage Team</h1>
       <div class="view-header__actions">
-        <v-btn large color="primary" @click="showInviteUsersModal()">
+        <v-btn v-if="canInvite()" large color="primary" @click="showInviteUsersModal()">
           <v-icon>mdi-plus</v-icon>
           <span>Invite People</span>
         </v-btn>
@@ -79,57 +79,6 @@
       </template>
     </ModalDialog>
 
-    <!-- Confirm Role Change Dialog -->
-    <!-- <ModalDialog
-      ref="confirmRoleChangeDialog"
-      :title="$t('confirmRoleChangeTitle')"
-      :text="confirmRoleChangeText"
-      dialog-class="notify-dialog"
-      max-width="640"
-    >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-      </template>
-      <template v-slot:actions>
-        <v-btn large color="primary" @click="changeRole()">Confirm</v-btn>
-        <v-btn large color="default" @click="cancel()">Cancel</v-btn>
-      </template>
-    </ModalDialog> -->
-
-    <!-- Confirm Approve Member Dialog -->
-    <!-- <ModalDialog
-      ref="confirmApproveMemberDialog"
-      :title="$t('confirmApproveMemberTitle')"
-      :text="confirmApproveMemberText"
-      dialog-class="notify-dialog"
-      max-width="640"
-    >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-      </template>
-      <template v-slot:actions>
-        <v-btn large color="primary" @click="approve()">Approve</v-btn>
-        <v-btn large color="default" @click="cancel()">Cancel</v-btn>
-      </template>
-    </ModalDialog> -->
-
-    <!-- Confirm Remove Invite Dialog -->
-    <!-- <ModalDialog
-      ref="confirmRemoveInviteDialog"
-      :title="$t('confirmRemoveInviteTitle')"
-      :text="confirmRemoveInviteText"
-      dialog-class="notify-dialog"
-      max-width="640"
-    >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-      </template>
-      <template v-slot:actions>
-        <v-btn large color="primary" @click="removeInvite()">Remove</v-btn>
-        <v-btn large color="default" @click="cancel()">Cancel</v-btn>
-      </template>
-    </ModalDialog> -->
-
     <!-- Alert Dialog (Success) -->
     <ModalDialog
       ref="successDialog"
@@ -142,7 +91,7 @@
 </template>
 
 <script lang="ts">
-import { ActiveUserRecord, Member, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
+import { ActiveUserRecord, Member, MembershipStatus, MembershipType, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
 import { Component, Vue } from 'vue-property-decorator'
 import MemberDataTable, { ChangeRolePayload } from '@/components/auth/MemberDataTable.vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
@@ -170,7 +119,8 @@ import { getModule } from 'vuex-module-decorators'
       'resending',
       'sentInvitations'
     ]),
-    ...mapState('business', ['currentBusiness'])
+    ...mapState('business', ['currentBusiness']),
+    ...mapGetters('org', ['myOrgMembership'])
   },
   methods: {
     ...mapActions('org', [
@@ -202,6 +152,7 @@ export default class UserManagement extends Vue {
   private readonly currentBusiness!: Business
   private readonly resending!: boolean
   private readonly sentInvitations!: Invitation[]
+  private readonly myOrgMembership!: Member
   private readonly resendInvitation!: (invitation: Invitation) => void
   private readonly deleteInvitation!: (invitationId: number) => void
   private readonly deleteMember!: (memberId: number) => void
@@ -216,6 +167,13 @@ export default class UserManagement extends Vue {
 
   private async mounted () {
     this.isLoading = false
+  }
+
+  private canInvite (): boolean {
+    return this.myOrgMembership &&
+            this.myOrgMembership.membershipStatus === MembershipStatus.Active &&
+            (this.myOrgMembership.membershipTypeCode === MembershipType.Owner ||
+             this.myOrgMembership.membershipTypeCode === MembershipType.Admin)
   }
 
   private showInviteUsersModal () {
@@ -239,7 +197,7 @@ export default class UserManagement extends Vue {
   }
 
   private showConfirmRemoveModal (member: Member) {
-    if (member.membershipStatus === 'PENDING_APPROVAL') {
+    if (member.membershipStatus === MembershipStatus.Pending) {
       this.confirmActionTitle = this.$t('confirmDenyMemberTitle').toString()
       this.confirmActionText = `Are you sure you want to deny membership to ${member.user.firstname}?`
       this.confirmHandler = this.deny

@@ -34,8 +34,8 @@ export interface RemoveBusinessPayload {
 
 export interface Member {
   id: number
-  membershipTypeCode: string
-  membershipStatus: string
+  membershipTypeCode: MembershipType
+  membershipStatus: MembershipStatus
   user: User
 }
 
@@ -56,4 +56,17 @@ export interface PendingUserRecord {
   invitationSent: string
   invitationExpires?: string
   invitation: Invitation
+}
+
+export enum MembershipStatus {
+  'Active' = 'ACTIVE',
+  'Inactive' = 'INACTIVE',
+  'Rejected' = 'REJECTED',
+  'Pending' = 'PENDING_APPROVAL'
+}
+
+export enum MembershipType {
+  'Owner' = 'OWNER',
+  'Admin' = 'ADMIN',
+  'Member' = 'MEMBER'
 }

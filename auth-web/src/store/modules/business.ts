@@ -38,10 +38,6 @@ export default class BusinessModule extends VuexModule {
       passCode: payload.passCode
     }
 
-    // Create an implicit org for the current user and the requested business
-    // const createBusinessResponse = await BusinessService.createOrg({
-    //   name: payload.businessIdentifier
-    // })
     const myOrg: Organization = this.context.rootGetters['org/myOrg']
 
     // Create an affiliation between implicit org and requested business

@@ -1,10 +1,10 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { CreateRequestBody as CreateOrgRequestBody, Member, Organization, UpdateMemberPayload } from '@/models/Organization'
-import { Business } from '@/models/business'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
+import { UserInfo } from '@/models/userInfo'
 import UserService from '@/services/user.services'
 import _ from 'lodash'
 
@@ -33,6 +33,14 @@ export default class OrgModule extends VuexModule {
   get myOrg (): Organization {
     if (this.organizations && this.organizations.length > 0) {
       return this.organizations[0]
+    }
+    return undefined
+  }
+
+  get myOrgMembership (): Member {
+    const currentUser: UserInfo = this.context.rootState.user.currentUser
+    if (this.myOrg && currentUser) {
+      return this.myOrg.members.find(member => member.user.username === currentUser.userName)
     }
     return undefined
   }
