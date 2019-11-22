@@ -25,14 +25,13 @@
 
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import { Member } from '@/models/Organization'
 import moment from 'moment'
 
 @Component({
   computed: {
-    ...mapState('org', ['pendingOrgMembers']),
-    ...mapGetters('org', ['myOrg'])
+    ...mapState('org', ['pendingOrgMembers'])
   },
   methods: {
     ...mapActions('org', ['syncPendingOrgMembers'])
