@@ -103,7 +103,7 @@ export default class InviteUsersForm extends Vue {
     form: HTMLFormElement
   }
 
-  private invitations: InvitationInfo[]
+  private invitations: InvitationInfo[] = []
 
   private readonly emailRules = [
     v => !v || /.+@.+\..+/.test(v) || 'Enter a valid email address'
@@ -128,11 +128,9 @@ export default class InviteUsersForm extends Vue {
   ]
 
   private created () {
-    this.invitations = [
-      { emailAddress: '', role: this.availableRoles[2] },
-      { emailAddress: '', role: this.availableRoles[2] },
-      { emailAddress: '', role: this.availableRoles[2] }
-    ]
+    for (let i = 0; i < 3; i++) {
+      this.invitations.push({ emailAddress: '', role: this.availableRoles[2] })
+    }
   }
 
   private isFormValid (): boolean {
