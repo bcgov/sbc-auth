@@ -11,11 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""Tests to assure the ops end-point.
+"""
+Tests to assure the ops end-point.
 
 Test-Suite to ensure that the /ops endpoint is working as expected.
 """
+import sqlalchemy
+from notify_api.db.database import SESSION
 
 
 def test_ops_healthz_success(client):
@@ -23,17 +25,17 @@ def test_ops_healthz_success(client):
     rv = client.get('/ops/healthz')
 
     assert rv.status_code == 200
-    assert rv.json == {'message': 'api is healthy'}
+    assert rv.json() == {'message': 'api is healthy'}
 
 
-def test_ops_healthz_fail(app_request):
+def test_ops_healthz_fail(session, client):  # pylint: disable=unused-argument
     """Assert that the service is unhealthy if a connection toThe database cannot be made."""
-    app_request.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://does:not@exist:5432/nada'
-    with app_request.test_client() as client:
-        rv = client.get('/ops/healthz')
+    engine = sqlalchemy.create_engine('postgresql://does:not@exist:5432/nada')
+    SESSION.configure(bind=engine)
+    rv = client.get('/ops/healthz')
 
-        assert rv.status_code == 500
-        assert rv.json == {'message': 'api is down'}
+    assert rv.status_code == 500
+    assert rv.json() == {'message': 'api is down'}
 
 
 def test_ops_readyz(client):
@@ -41,4 +43,4 @@ def test_ops_readyz(client):
     rv = client.get('/ops/readyz')
 
     assert rv.status_code == 200
-    assert rv.json == {'message': 'api is ready'}
+    assert rv.json() == {'message': 'api is ready'}

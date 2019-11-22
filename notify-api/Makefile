@@ -83,15 +83,15 @@ pylint:
 	pylint --rcfile=setup.cfg \
 	 --load-plugins=pylint_flask \
 	 --disable=C0301,W0511 \
-	 src/notify_api
+	 app
 
 ## run flake8 on the package and tests
 flake8:
-	flake8 src/notify_api tests
+	flake8 src tests
 
 ## Verify source code license headers.
 license:
-	./scripts/verify_license_headers.sh src/notify_api tests
+	./scripts/verify_license_headers.sh src tests
 
 #################################################################################
 # Self Documenting Commands                                                     #

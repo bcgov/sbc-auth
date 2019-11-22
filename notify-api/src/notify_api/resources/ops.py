@@ -11,43 +11,37 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Endpoints to check and manage the health of the service."""
-from flask_restplus import Namespace, Resource
+"""API endpoints for managing a notify resource."""
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 from sqlalchemy import exc, text
+from starlette.responses import JSONResponse
 
-from notify_api.models import db
+from notify_api.db.database import get_db
 
 
-API = Namespace('OPS', description='Service - OPS checks')
+ROUTER = APIRouter()
 
 SQL = text('select 1')
 
 
-@API.route('healthz')
-class Healthz(Resource):
-    """Determines if the service and required dependnecies are still working.
+@ROUTER.get('/healthz')
+async def healthz(db_session: Session = Depends(get_db)):
+    """Determines if the service and required dependencies are still working.
 
-    This could be thought of as a heartbeat for the service
+    This could be thought of as a heartbeat for the service.
     """
+    try:
+        db_session.execute(SQL)
+    except exc.SQLAlchemyError:
+        return JSONResponse(status_code=500, content={'message': 'api is down'})
 
-    @staticmethod
-    def get():
-        """Return a JSON object stating the health of the Service and dependencies."""
-        try:
-            db.engine.execute(SQL)
-        except exc.SQLAlchemyError:
-            return {'message': 'api is down'}, 500
-
-        # made it here, so all checks passed
-        return {'message': 'api is healthy'}, 200
+    # made it here, so all checks passed
+    return JSONResponse(status_code=200, content={'message': 'api is healthy'})
 
 
-@API.route('readyz')
-class Readyz(Resource):
-    """Determines if the service is ready to respond."""
-
-    @staticmethod
-    def get():
-        """Return a JSON object that identifies if the service is setupAnd ready to work."""
-        # TODO: add a poll to the DB when called
-        return {'message': 'api is ready'}, 200
+@ROUTER.get('/readyz')
+async def readyz():
+    """Return a JSON object that identifies if the service is setupAnd ready to work."""
+    # TODO: add a poll to the DB when called
+    return JSONResponse(status_code=200, content={'message': 'api is ready'})

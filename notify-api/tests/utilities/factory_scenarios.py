@@ -1,0 +1,77 @@
+from datetime import datetime
+
+NOTIFICATION_DATA = [
+    {
+        'id': 1,
+        'request_date': datetime.now(),
+        'recipients': 'aaa@aaa.com',
+        'type_code': 'EMAIL',
+        'status_code': 'PENDING'
+    },
+    {
+        'id': 2,
+        'request_date': datetime.now(),
+        'recipients': 'bbb@bbb.com',
+        'type_code': 'EMAIL',
+        'status_code': 'FAILURE'
+    },
+    {
+        'id': 3,
+        'request_date': datetime(1988, 8, 1, 6, 30),
+        'recipients': 'bbb@bbb.com',
+        'type_code': 'EMAIL',
+        'status_code': 'FAILURE'
+    },
+    {
+        'id': 4,
+        'request_date': datetime.now(),
+        'recipients': 'ccc@ccc.com',
+        'type_code': 'EMAIL',
+        'status_code': 'DELIVERED'
+    },
+    {
+        'id': 5,
+        'request_date': datetime.now(),
+        'recipients': 'ddd@ddd.com',
+        'type_code': 'EMAIL',
+        'status_code': 'DELIVERED'
+    }
+]
+
+NOTIFICATION_REQUEST_DATA = [
+    {
+        'recipients': 'aaa@aaa.com',
+        'contents': {
+            'subject': 'test url',
+            'body': 'test url',
+            'attachmentName': 'aaa.pdf',
+            'attachmentBytes': '',
+            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+        }
+    }
+]
+
+
+CONTENT_DATA = [
+    {
+        'id': 1,
+        'subject': 'test',
+        'body': 'test'
+    },
+    {
+        'id': 2,
+        'subject': 'test pdf',
+        'body': 'test pdf',
+        'attachment_name': 'aaa.pdf',
+        'attachment': '',
+        'attachment_url': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+    },
+    {
+        'id': 3,
+        'subject': 'test bytes',
+        'body': 'test bytes',
+        'attachment_name': 'aaa.txt',
+        'attachment': 'dGVzdCB0eHQ=',
+        'attachment_url': ''
+    }
+]
