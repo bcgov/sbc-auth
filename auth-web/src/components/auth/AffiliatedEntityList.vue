@@ -22,7 +22,7 @@
           :items-per-page="5"
           :hide-default-footer="myBusinesses.length <= 5"
           :custom-sort="customSort"
-          calculate-widths="true"
+          :calculate-widths="true"
         >
           <template v-slot:item.info="{ item }">
             <div class="meta">
