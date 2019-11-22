@@ -13,30 +13,32 @@
 
     <!-- Business Data Table -->
     <v-card v-if="myBusinesses.length > 0 && !isLoading">
-      <v-data-table
-        :loading="isLoading"
-        loading-text="Loading... Please wait"
-        :headers="tableHeaders"
-        :items="myBusinesses"
-        :items-per-page="5"
-        :calculate-widths="true"
-        :hide-default-footer="myBusinesses.length <= 5"
-        :custom-sort="customSort"
-      >
-        <template v-slot:item.info="{ item }">
-          <div class="meta">
-            <v-list-item-title>{{ item.name }}</v-list-item-title>
-            <v-list-item-subtitle>Incorporation Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
-          </div>
-        </template>
-        <template v-slot:item.action="{ item }">
-          <div class="actions">
-            <v-btn depressed small @click="goToDashboard(item.businessIdentifier)" title="Go to Business Dashboard">Dashboard</v-btn>
-            <v-btn depressed small @click="editContact(item)" title="Edit Business Profile">Edit</v-btn>
-            <v-btn depressed small @click="removeBusiness(item.businessIdentifier)" title="Remove Business">Remove</v-btn>
-          </div>
-        </template>
-      </v-data-table>
+      <v-card-text class="p-1">
+        <v-data-table
+          :loading="isLoading"
+          loading-text="Loading... Please wait"
+          :headers="tableHeaders"
+          :items="myBusinesses"
+          :items-per-page="5"
+          :hide-default-footer="myBusinesses.length <= 5"
+          :custom-sort="customSort"
+          calculate-widths="true"
+        >
+          <template v-slot:item.info="{ item }">
+            <div class="meta">
+              <v-list-item-title>{{ item.name }}</v-list-item-title>
+              <v-list-item-subtitle>Incorporation Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
+            </div>
+          </template>
+          <template v-slot:item.action="{ item }">
+            <div class="actions">
+              <v-btn small depressed color="primary" @click="goToDashboard(item.businessIdentifier)" title="Go to Business Dashboard">Dashboard</v-btn>
+              <v-btn small depressed @click="editContact(item)" title="Edit Business Profile">Edit</v-btn>
+              <v-btn small depressed @click="removeBusiness(item.businessIdentifier)" title="Remove Business">Remove</v-btn>
+            </div>
+          </template>
+        </v-data-table>
+      </v-card-text>
     </v-card>
   </div>
 </template>
@@ -81,9 +83,9 @@ export default class AffiliatedEntityList extends Vue {
       {
         text: 'Actions',
         align: 'left',
-        value: 'action',
         sortable: false,
-        width: '280'
+        value: 'action',
+        width: '270'
       }
     ]
   }

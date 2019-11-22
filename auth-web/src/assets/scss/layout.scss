@@ -1,11 +1,6 @@
 // Layout style rules shared across the app
 .container {
-  max-width: 1200px;
-  padding: 1.5rem;
-}
-
-h1,h2 {
-  margin-bottom: 1.5rem;
+  max-width: 1224px;
 }
 
 .intro-text {
@@ -18,11 +13,6 @@ h1,h2 {
     font-style: normal;
     font-weight: 700;
   }
-}
-
-.view-container {
-  display: flex;
-  flex-flow: column nowrap;
 }
 
 // Layout styling for different device sizes
@@ -40,30 +30,5 @@ h1,h2 {
   .intro-text {
     margin-bottom: 3rem;
     font-size: 1.125rem;
-  }
-}
-
-@media (min-width: 960px) {
-  aside {
-    margin-top: 0;
-    margin-left: 2rem;
-    width: 20rem;
-  }
-
-  .view-container {
-    flex-flow: row nowrap;
-  }
-}
-
-// View Header
-.view-header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  h1 {
-    flex: 1 1 auto;
-    margin: 0;
-    font-size: 1.75rem;
   }
 }
