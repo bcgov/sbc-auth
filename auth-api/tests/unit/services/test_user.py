@@ -231,19 +231,6 @@ def test_user_find_by_username_missing_username(session):  # pylint: disable=unu
     assert user is None
 
 
-def test_get_orgs(session):  # pylint:disable=unused-argument
-    """Assert that orgs for a user can be retrieved."""
-    user_model = factory_user_model(user_info=TestUserInfo.user_test)
-    user = UserService(user_model)
-
-    OrgService.create_org(TestOrgInfo.org1, user_id=user.identifier)
-
-    response = user.get_orgs()
-    assert response['orgs']
-    assert len(response['orgs']) == 1
-    assert response['orgs'][0]['name'] == TestOrgInfo.org1['name']
-
-
 def test_delete_contact_user_link(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that a contact can not be deleted if contact link exists."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
