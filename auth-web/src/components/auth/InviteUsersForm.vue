@@ -13,7 +13,7 @@
             ></v-text-field>
             <v-overflow-btn
               filled
-              class="ml-2"
+              class="ml-3"
               :items="availableRoles"
               item-text="name"
               item-value="name"
@@ -22,15 +22,20 @@
               <template v-slot:selection="{ item }">
                 {{ item.name }}
               </template>
+
               <template v-slot:item="{ item }">
-                <v-item>
-                  <div>
-                    <span class="v-list-item__title"><v-icon v-text="item.icon"/>&nbsp;&nbsp;{{ item.name }}<br/></span>
-                    <span class="v-list-item__subtitle">{{ item.desc }}</span>
-                  </div>
-                </v-item>
+                <div class="role-container">
+                  <v-list-item-icon>
+                    <v-icon v-text="item.icon" />
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <v-list-item-title>{{ item.name }}</v-list-item-title>
+                    <v-list-item-subtitle>{{ item.desc }}</v-list-item-subtitle>
+                  </v-list-item-content>
+                </div>
               </template>
             </v-overflow-btn>
+
             <v-btn icon class="mt-3 ml-1"
               @click="removeEmail(index)">
               <v-icon>mdi-close</v-icon>
@@ -186,25 +191,25 @@ export default class InviteUsersForm extends Vue {
     justify-content: flex-end;
   }
 
-  .v-list {
-    padding-top: 0px;
-    padding-bottom: 0px;
-  }
+  .role-container {
+    display: flex;
+    max-width: 20rem;
 
-  .v-list-item.active {
-    background: $BCgovBlue0;
-  }
-
-  .v-list-item__title {
+    .v-list-item__title {
       letter-spacing: -0.02rem;
       font-size: 0.875rem;
       font-weight: 700;
-  }
+    }
 
-  .v-list-item__subtitle {
+    .v-list-item__subtitle {
       white-space: normal;
       overflow: visible;
       line-height: 1.5;
       font-size: 0.875rem;
+    }
+  }
+
+  .v-list-item.active {
+    background: $BCgovBlue0;
   }
 </style>
