@@ -259,7 +259,7 @@ class OrgMembers(Resource):
             roles = request.args.get('roles')
 
             # Require ADMIN or higher for anything other than Active Members list
-            if status == Status.ACTIVE:
+            if status == Status.ACTIVE.name:
                 allowed_roles = CLIENT_AUTH_ROLES
             else:
                 allowed_roles = CLIENT_ADMIN_ROLES
