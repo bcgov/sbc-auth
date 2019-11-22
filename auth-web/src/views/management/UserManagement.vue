@@ -299,7 +299,7 @@ export default class UserManagement extends Vue {
   private async changeRole () {
     await this.updateMember({
       memberId: this.roleChangeToAction.member.id,
-      role: this.roleChangeToAction.targetRole.toString()
+      role: this.roleChangeToAction.targetRole.toString().toUpperCase()
     })
     this.$refs.confirmActionDialog.close()
   }

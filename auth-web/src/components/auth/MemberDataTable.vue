@@ -24,25 +24,30 @@
             <v-icon small depressed class="ml-1">mdi-chevron-down</v-icon>
           </v-btn>
         </template>
-        <v-list class="role-list">
-          <v-list-item color="primary"
-            v-for="(role, index) in availableRoles"
-            :key="index"
-            @click="confirmChangeRole(item, role)">
-            <v-list-item-icon>
-              <v-icon v-text="role.icon"></v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-title
-                v-text="role.name"
-              >
-              </v-list-item-title>
-              <v-list-item-subtitle
-                v-text="role.desc"
-              >
-              </v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
+        <v-list>
+          <v-list-item-group
+            class="role-list"
+            color="primary"
+            :value="mapRoleToIndex(item.membershipTypeCode)">
+            <v-list-item
+              v-for="(role, index) in availableRoles"
+              :key="index"
+              @click="confirmChangeRole(item, role.name)">
+              <v-list-item-icon>
+                <v-icon v-text="role.icon" />
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title
+                  v-text="role.name"
+                >
+                </v-list-item-title>
+                <v-list-item-subtitle
+                  v-text="role.desc"
+                >
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-item-group>
         </v-list>
       </v-menu>
 
@@ -128,6 +133,10 @@ export default class MemberDataTable extends Vue {
 
   private async mounted () {
     await this.syncActiveOrgMembers()
+  }
+
+  private mapRoleToIndex (roleCode: string) {
+    return this.availableRoles.map(r => r.name.toLowerCase()).indexOf(roleCode.toLowerCase())
   }
 
   private formatDate (date: Date) {
