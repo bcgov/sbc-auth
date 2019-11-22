@@ -17,6 +17,19 @@
   }
 }
 
+// Overflow Button 
+.v-overflow-btn .v-input__control:before {
+  display: none;
+}
+
+.v-overflow-btn .v-select__slot {
+  height: auto;
+}
+
+.v-overflow-btn .v-input__append-inner {
+  margin-top: 0 !important;
+}
+
 // Updating sizing 
 .v-btn.v-size--small {
   font-size: 0.8125rem;
