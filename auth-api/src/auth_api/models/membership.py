@@ -19,8 +19,7 @@ The Membership object connects User models to one or more Org models.
 from sqlalchemy import Column, ForeignKey, Integer, and_, or_
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.roles import Status
-
+from auth_api.utils.roles import Status, VALID_STATUSES
 from .base_model import BaseModel
 from .db import db
 from .membership_status_code import MembershipStatusCode
@@ -83,8 +82,13 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     def find_orgs_for_user(cls, user_id):
         """Find the org for a user."""
         orgs = db.session.query(OrgModel).filter(OrgModel.members.any(and_(cls.user_id == user_id,
-                                                                           or_(cls.status == Status.ACTIVE.value,
-                                                                               cls.status == Status.PENDING_APPROVAL.value)))).all()   # noqa:E501
+                                                                           or_(cls.status.in_(
+                                                                               VALID_STATUSES))))).all()  # noqa:E501
+        # because members are fetched using backpopulates,cant add these conditions programmatically.so resorting to manually looping   # noqa:E501
         for org in orgs:
-            org.members = list(filter(lambda member: member.user_id == user_id, org.members))
+            # user can have multiple memberships.if the user getting denied first and added again,it will be multiple memberships..filter out denied records # noqa:E501
+            # fix for https://github.com/bcgov/entity/issues/1951   # noqa:E501
+            org.members = list(
+                filter(lambda member: (member.user_id == user_id and (member.status in VALID_STATUSES)), org.members))
+
         return orgs

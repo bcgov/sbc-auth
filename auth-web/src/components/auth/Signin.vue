@@ -3,13 +3,13 @@
   </div>
 </template>
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { KeycloakError, KeycloakPromise } from 'keycloak-js'
-import { MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
+import NextPageMixin from './NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
+import { Organization } from '@/models/Organization'
 import { User } from '@/models/user'
 import { UserInfo } from '@/models/userInfo'
 import UserModule from '@/store/modules/user'
@@ -31,7 +31,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('org', ['syncOrganizations'])
   }
 })
-export default class Signin extends Vue {
+export default class Signin extends Mixins(NextPageMixin) {
   private userStore = getModule(UserModule, this.$store)
   private orgStore = getModule(OrgModule, this.$store)
   private readonly userProfile!: User
@@ -72,22 +72,7 @@ export default class Signin extends Vue {
       if (this.idpHint === 'idir') {
         this.$router.push('/searchbusiness')
       } else {
-        if (this.userProfile) {
-          // Redirect to user profile if no contact info
-          // Redirect to create team if no orgs
-          // Redirect to dashboard otherwise
-          if (!this.userProfile.contacts || this.userProfile.contacts.length === 0) {
-            this.$router.push('/userprofile')
-          } else if (this.organizations.length === 0) {
-            this.$router.push('/createteam')
-          } else if (this.organizations.some(org => org.members[0].membershipStatus === MembershipStatus.Pending)) {
-            this.$router.push('/pendingapproval/' + this.organizations[0].name)
-          } else {
-            this.$router.push('/main')
-          }
-        } else {
-          this.redirectToLogin()
-        }
+        this.$router.push(this.getNextPageUrl(this.userProfile, this.organizations))
       }
     }
   }

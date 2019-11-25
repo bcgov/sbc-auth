@@ -13,3 +13,10 @@ export enum Role {
     Edit = 'edit',
     Basic = 'basic'
 }
+
+export enum Pages {
+    USER_PROFILE = 'userprofile',
+    CREATE_TEAM = 'createteam',
+    PENDING_APPROVAL = 'pendingapproval',
+    MAIN = 'main'
+}
