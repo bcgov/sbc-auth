@@ -17,7 +17,7 @@
       <v-tab>Invitations</v-tab>
     </v-tabs>
 
-    <v-card>
+    <v-card flat>
       <v-card-text>
 
         <!-- Tab Contents -->
