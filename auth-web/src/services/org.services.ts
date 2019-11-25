@@ -16,7 +16,7 @@ export default class OrgService {
     return Axios.get(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgId}/invitations?status=${status}`)
   }
 
-  public static async removeMember (orgId: number, memberId: number): Promise<AxiosResponse<Member>> {
+  public static async leaveOrg (orgId: number, memberId: number): Promise<AxiosResponse<Member>> {
     return Axios.delete(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgId}/members/${memberId}`)
   }
 

@@ -66,17 +66,11 @@
 
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
+import { Organization, RoleInfo } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { Invitation } from '@/models/Invitation'
 import OrgModule from '@/store/modules/org'
-import { Organization } from '@/models/Organization'
 import { getModule } from 'vuex-module-decorators'
-
-interface RoleInfo {
-  icon: string
-  name: string
-  desc: string
-}
 
 interface InvitationInfo {
   emailAddress: string

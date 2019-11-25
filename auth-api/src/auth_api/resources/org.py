@@ -301,7 +301,8 @@ class OrgMember(Resource):
                 updated_role = MembershipService.get_membership_type_by_code(role)
                 updated_fields_dict['membership_type'] = updated_role
             if membership_status is not None:
-                updated_fields_dict['membership_status'] = MembershipService.get_membership_status_by_code(membership_status)
+                updated_fields_dict['membership_status'] = \
+                    MembershipService.get_membership_status_by_code(membership_status)
             membership = MembershipService.find_membership_by_id(membership_id, token)
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
@@ -321,16 +322,17 @@ class OrgMember(Resource):
     @_JWT.requires_auth
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    def delete(org_id, membership_id):
-        """Delete a membership record for the given org and user."""
+    def delete(org_id, membership_id):  # pylint:disable=unused-argument
+        """Mark a membership record as inactive.  Membership must match current user token."""
+        token = g.jwt_oidc_token_info
         try:
-            org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
-                                            allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
-            if org:
-                response, status = org.remove_member(membership_id).as_dict(), \
+            membership = MembershipService.find_membership_by_id(membership_id, token)
+
+            if membership:
+                response, status = membership.deactivate_membership(token).as_dict(), \
                                    http_status.HTTP_200_OK
             else:
-                response, status = {'message': 'The requested organization could not be found.'}, \
+                response, status = {'message': 'The requested membership could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

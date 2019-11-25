@@ -101,7 +101,9 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
         if membership:
             # Ensure that this user is an ADMIN or OWNER on the org associated with this membership
-            check_auth(org_id=membership.org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
+            # or that the membership is for the current user
+            if membership.user.username != token_info.get('username'):
+                check_auth(org_id=membership.org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
             return Membership(membership)
         return None
 
@@ -135,6 +137,15 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         for key, value in updated_fields.items():
             if value is not None:
                 setattr(self._model, key, value)
+        self._model.save()
+        self._model.commit()
+        return self
+
+    def deactivate_membership(self, token_info: Dict = None):
+        """Mark this membership as inactive."""
+        if self._model.user.username != token_info.get('username'):
+            check_auth(token_info=token_info, one_of_roles=(ADMIN, OWNER))
+        self._model.membership_status = MembershipStatusCodeModel.get_membership_status_by_code('INACTIVE')
         self._model.save()
         self._model.commit()
         return self
