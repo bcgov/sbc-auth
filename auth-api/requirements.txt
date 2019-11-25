@@ -23,7 +23,7 @@ flask-jwt-oidc==0.1.5
 flask-marshmallow==0.10.1
 flask-restplus==0.13.0
 future==0.18.2
-gunicorn==20.0.0
+gunicorn==20.0.2
 idna==2.8
 importlib-metadata==0.23
 itsdangerous==1.1.0
@@ -34,7 +34,7 @@ more-itertools==7.2.0
 psycopg2-binary==2.8.4
 pyasn1==0.4.8
 pycparser==2.19
-pyrsistent==0.15.5
+pyrsistent==0.15.6
 python-dateutil==2.8.1
 python-dotenv==0.10.3
 python-editor==1.0.4
@@ -43,7 +43,7 @@ python-keycloak==0.17.6
 pytz==2019.3
 requests==2.22.0
 rsa==4.0
-sentry-sdk==0.13.2
+sentry-sdk==0.13.3
 six==1.13.0
 urllib3==1.25.7
 zipp==0.6.0
