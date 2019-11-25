@@ -89,9 +89,9 @@ export default class MemberDataTable extends Vue {
 
   private readonly availableRoles: RoleInfo[] = [
     {
-      icon: 'mdi-shield-key',
-      name: 'Owner',
-      desc: 'Can add/remove team members and businesses, and file for a business.'
+      icon: 'mdi-account',
+      name: 'Member',
+      desc: 'Can add businesses, and file for a business.'
     },
     {
       icon: 'mdi-settings',
@@ -99,9 +99,9 @@ export default class MemberDataTable extends Vue {
       desc: 'Can add/remove team members, add businesses, and file for a business.'
     },
     {
-      icon: 'mdi-account',
-      name: 'Member',
-      desc: 'Can add businesses, and file for a business.'
+      icon: 'mdi-shield-key',
+      name: 'Owner',
+      desc: 'Can add/remove team members and businesses, and file for a business.'
     }
   ]
 

@@ -17,7 +17,7 @@
               :items="availableRoles"
               item-text="name"
               item-value="name"
-              :value="availableRoles[2]"
+              :value="availableRoles[0]"
             >
               <template v-slot:selection="{ item }">
                 {{ item.name }}
@@ -66,7 +66,7 @@
 
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
-import { Organization, RoleInfo } from '@/models/Organization'
+import { Member, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { Invitation } from '@/models/Invitation'
 import OrgModule from '@/store/modules/org'
@@ -79,7 +79,7 @@ interface InvitationInfo {
 
 @Component({
   computed: {
-    ...mapGetters('org', ['myOrg'])
+    ...mapGetters('org', ['myOrg', 'myOrgMembership'])
   },
   methods: {
     ...mapMutations('org', ['resetInvitations']),
@@ -90,11 +90,19 @@ export default class InviteUsersForm extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
   private loading = false
   private readonly myOrg!: Organization
+  private readonly myOrgMembership!: Member
   private readonly resetInvitations!: () => void
   private readonly createInvitation!: (Invitation) => Promise<void>
 
   $refs: {
     form: HTMLFormElement
+  }
+
+  private get availableRoles () {
+    if (this.myOrgMembership.membershipTypeCode !== MembershipType.Owner) {
+      return this.roles.filter(role => role.name !== 'Owner')
+    }
+    return this.roles
   }
 
   private invitations: InvitationInfo[] = []
@@ -103,11 +111,11 @@ export default class InviteUsersForm extends Vue {
     v => !v || /.+@.+\..+/.test(v) || 'Enter a valid email address'
   ]
 
-  private readonly availableRoles = [
+  private readonly roles: RoleInfo[] = [
     {
-      icon: 'mdi-shield-key',
-      name: 'Owner',
-      desc: 'Can add/remove team members and businesses, and file for a business.'
+      icon: 'mdi-account',
+      name: 'Member',
+      desc: 'Can add businesses, and file for a business.'
     },
     {
       icon: 'mdi-settings',
@@ -115,15 +123,15 @@ export default class InviteUsersForm extends Vue {
       desc: 'Can add/remove team members, add businesses, and file for a business.'
     },
     {
-      icon: 'mdi-account',
-      name: 'Member',
-      desc: 'Can add businesses, and file for a business.'
+      icon: 'mdi-shield-key',
+      name: 'Owner',
+      desc: 'Can add/remove team members and businesses, and file for a business.'
     }
   ]
 
   private created () {
     for (let i = 0; i < 3; i++) {
-      this.invitations.push({ emailAddress: '', role: this.availableRoles[2] })
+      this.invitations.push({ emailAddress: '', role: this.roles[2] })
     }
   }
 
@@ -136,7 +144,7 @@ export default class InviteUsersForm extends Vue {
   }
 
   private addEmail () {
-    this.invitations.push({ emailAddress: '', role: this.availableRoles[2] })
+    this.invitations.push({ emailAddress: '', role: this.roles[2] })
   }
 
   private async sendInvites () {
