@@ -15,22 +15,22 @@ import { UserInfo } from '@/models/userInfo'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 
-  @Component({
-    computed: {
-      ...mapState('user', ['userProfile']),
-      ...mapState('org', ['organizations'])
-    },
-    methods: {
-      ...mapActions('user',
-        [
-          'initKeycloak',
-          'initializeSession',
-          'syncUserProfile'
-        ]
-      ),
-      ...mapActions('org', ['syncOrganizations'])
-    }
-  })
+@Component({
+  computed: {
+    ...mapState('user', ['userProfile']),
+    ...mapState('org', ['organizations'])
+  },
+  methods: {
+    ...mapActions('user',
+      [
+        'initKeycloak',
+        'initializeSession',
+        'syncUserProfile'
+      ]
+    ),
+    ...mapActions('org', ['syncOrganizations'])
+  }
+})
 export default class Signin extends Mixins(NextPageMixin) {
   private userStore = getModule(UserModule, this.$store)
   private orgStore = getModule(OrgModule, this.$store)
