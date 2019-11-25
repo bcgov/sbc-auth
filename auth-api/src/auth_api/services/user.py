@@ -16,8 +16,6 @@
 This module manages the User Information.
 """
 
-from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
-
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -27,6 +25,7 @@ from auth_api.models import User as UserModel
 from auth_api.schemas import UserSchema
 from auth_api.utils.roles import CLIENT_ADMIN_ROLES, Status
 from auth_api.utils.util import camelback2snake
+from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)

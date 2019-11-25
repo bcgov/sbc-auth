@@ -19,7 +19,7 @@ from flask import current_app
 from .rest_service import RestService
 
 
-def send_email(subject: str, sender: str, recipients: str, html_body: str):
+def send_email(subject: str, sender: str, recipients: str, html_body: str):  # pylint:disable=unused-argument
     """Send the email asynchronously, using the given details."""
     notify_url = current_app.config.get('NOTIFY_API_URL') + '/notify/'
     notify_body = {
