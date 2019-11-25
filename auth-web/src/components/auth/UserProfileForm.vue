@@ -104,9 +104,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import { Contact } from '@/models/contact'
+import NextPageMixin from './NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
 import TermsOfUseDialog from '@/components/auth/TermsOfUseDialog.vue'
@@ -115,28 +116,28 @@ import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 import { mask } from 'vue-the-mask'
 
-  @Component({
-    components: { TermsOfUseDialog },
-    directives: {
-      mask
-    },
-    computed: {
-      ...mapState('user', ['userProfile']),
-      ...mapState('org', ['organizations'])
-    },
-    methods: {
-      ...mapActions('user',
-        [
-          'createUserContact',
-          'updateUserContact',
-          'updateUserTerms',
-          'getUserProfile'
-        ]
-      ),
-      ...mapActions('org', ['syncOrganizations'])
-    }
-  })
-export default class UserProfileForm extends Vue {
+@Component({
+  components: { TermsOfUseDialog },
+  directives: {
+    mask
+  },
+  computed: {
+    ...mapState('user', ['userProfile']),
+    ...mapState('org', ['organizations'])
+  },
+  methods: {
+    ...mapActions('user',
+      [
+        'createUserContact',
+        'updateUserContact',
+        'updateUserTerms',
+        'getUserProfile'
+      ]
+    ),
+    ...mapActions('org', ['syncOrganizations'])
+  }
+})
+export default class UserProfileForm extends Mixins(NextPageMixin) {
     private userStore = getModule(UserModule, this.$store)
     private orgStore = getModule(OrgModule, this.$store)
     private readonly userProfile!: User
@@ -227,19 +228,13 @@ export default class UserProfileForm extends Vue {
         } else {
           await this.updateUserContact(contact)
         }
+        await this.getUserProfile('@me')
         this.redirectToNext()
       }
     }
 
     private redirectToNext () {
-      // If this user is not a member of a team, redirect to Create Team view
-      if (!this.organizations || this.organizations.length === 0) {
-        this.$router.push({ path: '/createteam' })
-      } else if (this.organizations.some(org => org.members[0].membershipStatus === 'PENDING_APPROVAL')) {
-        this.$router.push('/pendingapproval/' + this.organizations[0].name)
-      } else { // If a member of a team, redirect to dashboard for that team
-        this.$router.push({ path: '/main' })
-      }
+      this.$router.push(this.getNextPageUrl(this.userProfile, this.organizations))
     }
 
     cancel () {

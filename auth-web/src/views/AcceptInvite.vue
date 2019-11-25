@@ -20,9 +20,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import { Invitation } from '@/models/Invitation'
+import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
 import { User } from '@/models/user'
@@ -31,20 +32,22 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
-    ...mapState('user', ['userProfile'])
+    ...mapState('user', ['userProfile']),
+    ...mapState('org', ['organizations'])
   },
   methods: {
     ...mapActions('org', ['acceptInvitation', 'syncOrganizations']),
     ...mapActions('user', ['getUserProfile'])
   }
 })
-export default class AcceptInvite extends Vue {
+export default class AcceptInvite extends Mixins(NextPageMixin) {
   private orgStore = getModule(OrgModule, this.$store)
   private userStore = getModule(UserModule, this.$store)
   private readonly userProfile!: User
   private readonly acceptInvitation!: (token: string) => Invitation
   private readonly syncOrganizations!: () => Organization[]
   private readonly getUserProfile!: (identifier: string) => User
+  private readonly organizations!: Organization[]
 
   @Prop() token: string
   private processingError: Boolean = false
@@ -59,11 +62,7 @@ export default class AcceptInvite extends Vue {
   private async accept () {
     try {
       await this.acceptInvitation(this.token)
-      if (this.userProfile.contacts && this.userProfile.contacts.length > 0) {
-        this.$router.push('/main')
-      } else {
-        this.$router.push('/userprofile')
-      }
+      this.$router.push(this.getNextPageUrl(this.userProfile, this.organizations))
     } catch (exception) {
       if (exception.message === 'Request failed with status code 400') {
         this.expiredInvitation = true
