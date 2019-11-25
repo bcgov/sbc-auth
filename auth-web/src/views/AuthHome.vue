@@ -3,9 +3,10 @@
     <header class="hero-banner light">
       <v-container>
         <v-row>
-          <v-col sm="12" lg="8">
+          <v-col cols="12" lg="8">
             <h1 class="mb-6">Welcome to Cooperatives Online<sup>Beta</sup></h1>
             <p class="mb-2">File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
+            <v-btn x-large color="#fcba19" class="cta-btn mt-8" active-class="cta-btn--active" to="/main" v-if="userProfile">Manage Businesses</v-btn>
           </v-col>
         </v-row>
       </v-container>
@@ -15,14 +16,14 @@
         <section>
           <h2>How do I file?</h2>
           <section>
-            <v-card class="section-card elevation-1">
+            <v-card flat class="section-card">
               <v-row>
                 <v-col sm="12" md="8" class="section-card__inner">
                   <div class="section-card__icon">
                     <v-icon>mdi-shield-check</v-icon>
                   </div>
                   <div class="section-card__text">
-                    <h3>1) &nbsp;Log in with your BC Services Card</h3>
+                    <h3>1. &nbsp;Log in with your BC Services Card</h3>
                     <p class="mb-0">You must securely log in with your BC Services Card, government’s trusted way to access online services. It typically takes five minutes or less to <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card/mobile-card/set-up-mobile-card" target="_blank">set up</a> your mobile card, and the only information BC Registries can access from your card is your legal name.</p>
                   </div>
                 </v-col>
@@ -52,14 +53,14 @@
             </v-card>
           </section>
           <section>
-            <v-card class="section-card elevation-1">
+            <v-card flat class="section-card">
               <v-row>
                 <v-col sm="12" md="8" class="section-card__inner">
                   <div class="section-card__icon">
                     <v-icon>mdi-lock-open</v-icon>
                   </div>
                   <div class="section-card__text">
-                    <h3>2) &nbsp;Authorize to file for a cooperative</h3>
+                    <h3>2. &nbsp;Authorize to file for a cooperative</h3>
                     <p class="mb-0">You will need to authorize to manage a cooperative by providing the <strong>Incorporation Number</strong> and <strong>Passcode</strong> located in the <strong>Access Letter</strong> you received in the mail from BC Registries.</p>
                   </div>
                 </v-col>
@@ -112,14 +113,14 @@
             </v-card>
           </section>
           <section>
-            <v-card class="section-card elevation-1">
+            <v-card flat class="section-card">
               <v-row>
                 <v-col sm="12" md="8" class="section-card__inner">
                   <div class="section-card__icon">
                     <v-icon>mdi-clipboard-check</v-icon>
                   </div>
                   <div class="section-card__text">
-                    <h3>3) &nbsp;Complete your cooperative's filings</h3>
+                    <h3>3. &nbsp;Complete your cooperative's filings</h3>
                     <p class="mb-0">Once you have logged in and are authorized to manage a cooperative, simply click on the cooperative you want to do work for, and complete your filings.</p>
                   </div>
                 </v-col>
@@ -143,7 +144,8 @@
             </v-card>
 
             <div class="cta-container">
-              <v-btn x-large color="#fcba19" class="cta-btn" active-class="cta-btn--active" to="/signin/bcsc">Log in with BC Services Card</v-btn>
+              <v-btn x-large color="#fcba19" class="cta-btn" active-class="cta-btn--active" to="/main" v-if="userProfile">Manage Businesses</v-btn>
+              <v-btn x-large color="#fcba19" class="cta-btn" active-class="cta-btn--active" to="/signin/bcsc" v-if="!userProfile">Log in with BC Services Card</v-btn>
             </div>
 
           </section>
@@ -174,13 +176,23 @@
   </article>
 </template>
 
-<script>
-export default {
-  data () {
-    return {
-      noPasscodeDialog: false
-    }
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
+import { User } from '@/models/user'
+import { VueConstructor } from 'vue'
+
+@Component({
+  name: 'Home',
+  computed: {
+    ...mapState('user', ['userProfile'])
   }
+})
+
+export default class Home extends Vue {
+  private readonly userProfile!: User
+  private readonly getUserProfile!: (identifier: string) => User
+  private noPasscodeDialog = false
 }
 </script>
 
@@ -192,7 +204,7 @@ export default {
   }
 
   section + section {
-    margin-top: 1.5rem;
+    margin-top: 1rem;
   }
 
   h2 {
@@ -203,11 +215,12 @@ export default {
   // Hero Banner
   .hero-banner {
     h1 {
+      letter-spacing: -0.06rem;
       line-height: 1.25;
-      font-size: 2.5rem;
+      font-size: 2.75rem;
 
       sup {
-        top: -0.75rem;
+        top: -0.9rem;
         margin-left: 0.25rem;
         vertical-align: middle;
         color: $gray7;
@@ -223,7 +236,7 @@ export default {
 
     .container {
       padding-top: 2.5rem;
-      padding-bottom: 3rem;
+      padding-bottom: 3.25rem;
     }
   }
 
@@ -255,11 +268,11 @@ export default {
 
   // Section Cards
   .section-card {
-    padding-top: 1.25rem;
-    padding-bottom: 1.75rem;
+    padding-top: 1.75rem;
+    padding-bottom: 2rem;
 
     h3 {
-      margin-bottom: 1rem;
+      margin-bottom: 1.25rem;
       font-size: 1.5rem;
       font-weight: 700;
     }
@@ -284,6 +297,7 @@ export default {
     text-align: center;
 
     .v-icon {
+      margin-top: -0.65rem;
       color: $BCgovGold5;
       font-size: 4rem;
     }
@@ -305,7 +319,6 @@ export default {
     padding-right: 2rem;
 
     ul {
-      margin-left: -0.65rem;
       padding: 0;
       list-style-type: none;
     }
@@ -361,6 +374,11 @@ export default {
 
   // Contact Section
   .contact-info-container {
+    .container {
+      padding-top: 2rem;
+      padding-bottom: 2.5rem;
+    }
+
     h3 {
       margin-bottom: 1rem;
       padding-bottom: 0.5rem;
