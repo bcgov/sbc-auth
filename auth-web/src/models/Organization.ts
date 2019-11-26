@@ -70,3 +70,9 @@ export enum MembershipType {
   'Admin' = 'ADMIN',
   'Member' = 'MEMBER'
 }
+
+export interface RoleInfo {
+  icon: string
+  name: string
+  desc: string
+}

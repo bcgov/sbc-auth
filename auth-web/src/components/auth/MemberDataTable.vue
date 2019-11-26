@@ -19,7 +19,7 @@
     <template v-slot:item.role="{ item }">
       <v-menu>
         <template v-slot:activator="{ on }">
-          <v-btn small depressed v-on="on">
+          <v-btn :disabled="!canChangeRole(item)" small depressed v-on="on">
             {{ item.membershipTypeCode }}
             <v-icon small depressed class="ml-1">mdi-chevron-down</v-icon>
           </v-btn>
@@ -31,6 +31,7 @@
               v-for="(role, index) in availableRoles"
               :key="index"
               @click="confirmChangeRole(item, role.name)"
+              :disabled="!isRoleEnabled(role)"
               v-bind:class="{ active: item.membershipTypeCode.toUpperCase() === role.name.toUpperCase() }">
               <v-list-item-icon>
                 <v-icon v-text="role.icon" />
@@ -55,15 +56,16 @@
       {{ formatDate(item.user.modified) }}
     </template>
     <template v-slot:item.action="{ item }">
-      <v-btn depressed small @click="confirmRemoveMember(item)">Remove</v-btn>
+      <v-btn :disabled="!canRemove(item)" v-show="!canLeave(item)" depressed small @click="confirmRemoveMember(item)">Remove</v-btn>
+      <v-btn v-show="canLeave(item)" depressed small @click="confirmLeaveTeam(item)">Leave</v-btn>
     </template>
   </v-data-table>
 </template>
 
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
-import { Member } from '@/models/Organization'
+import { Member, MembershipStatus, MembershipType, RoleInfo } from '@/models/Organization'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import moment from 'moment'
 
 export interface ChangeRolePayload {
@@ -73,7 +75,8 @@ export interface ChangeRolePayload {
 
 @Component({
   computed: {
-    ...mapState('org', ['activeOrgMembers'])
+    ...mapState('org', ['activeOrgMembers']),
+    ...mapGetters('org', ['myOrgMembership'])
   },
   methods: {
     ...mapActions('org', ['syncActiveOrgMembers'])
@@ -81,13 +84,14 @@ export interface ChangeRolePayload {
 })
 export default class MemberDataTable extends Vue {
   private readonly activeOrgMembers!: Member[]
+  private readonly myOrgMembership!: Member
   private readonly syncActiveOrgMembers!: () => Member[]
 
-  private readonly availableRoles = [
+  private readonly availableRoles: RoleInfo[] = [
     {
-      icon: 'mdi-shield-key',
-      name: 'Owner',
-      desc: 'Can add/remove team members and businesses, and file for a business.'
+      icon: 'mdi-account',
+      name: 'Member',
+      desc: 'Can add businesses, and file for a business.'
     },
     {
       icon: 'mdi-settings',
@@ -95,9 +99,9 @@ export default class MemberDataTable extends Vue {
       desc: 'Can add/remove team members, add businesses, and file for a business.'
     },
     {
-      icon: 'mdi-account',
-      name: 'Member',
-      desc: 'Can add businesses, and file for a business.'
+      icon: 'mdi-shield-key',
+      name: 'Owner',
+      desc: 'Can add/remove team members and businesses, and file for a business.'
     }
   ]
 
@@ -135,6 +139,74 @@ export default class MemberDataTable extends Vue {
 
   private formatDate (date: Date) {
     return moment(date).format('DD MMM, YYYY')
+  }
+
+  private isRoleEnabled (role: RoleInfo): boolean {
+    if (role.name !== 'Owner') {
+      return true
+    }
+
+    if (this.myOrgMembership.membershipTypeCode === MembershipType.Owner) {
+      return true
+    }
+
+    return false
+  }
+
+  private canChangeRole (memberBeingChanged: Member): boolean {
+    // Can't change own role
+    if (this.myOrgMembership.user.username === memberBeingChanged.user.username) {
+      return false
+    }
+
+    // If member, can't change any roles
+    if (this.myOrgMembership.membershipTypeCode === MembershipType.Member) {
+      return false
+    }
+
+    // If not an active member, can't change
+    if (this.myOrgMembership.membershipStatus !== MembershipStatus.Active) {
+      return false
+    }
+
+    // Only owners can change owner roles
+    if (memberBeingChanged.membershipTypeCode === MembershipType.Owner &&
+        this.myOrgMembership.membershipTypeCode !== MembershipType.Owner) {
+      return false
+    }
+
+    return true
+  }
+
+  private canRemove (memberToRemove: Member): boolean {
+    // Can't remove yourself
+    if (this.myOrgMembership.user.username === memberToRemove.user.username) {
+      return false
+    }
+
+    // Can't remove unless Admin/Owner
+    if (this.myOrgMembership.membershipTypeCode === MembershipType.Member) {
+      return false
+    }
+
+    // Can't remove Owners unless an Owner
+    if (memberToRemove.membershipTypeCode === MembershipType.Owner &&
+        this.myOrgMembership.membershipTypeCode !== MembershipType.Owner) {
+      return false
+    }
+
+    return true
+  }
+
+  private canLeave (member: Member): boolean {
+    if (this.myOrgMembership.user.username !== member.user.username) {
+      return false
+    }
+    return true
+  }
+
+  private ownerCount (): number {
+    return this.activeOrgMembers.filter(member => member.membershipTypeCode === MembershipType.Owner).length
   }
 
   private customSortActive (items, index, isDescending) {
@@ -178,6 +250,14 @@ export default class MemberDataTable extends Vue {
     return {
       member,
       targetRole
+    }
+  }
+
+  private confirmLeaveTeam (member: Member) {
+    if (member.membershipTypeCode === MembershipType.Owner && this.ownerCount() === 1) {
+      this.$emit('single-owner-error')
+    } else {
+      this.$emit('confirm-leave-team')
     }
   }
 }

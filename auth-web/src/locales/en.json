@@ -33,5 +33,9 @@
   "pendingInvitationMsg": "The administrator for this team needs to verify your invitation before you can access this application.",
   "noActiveUsersLabel": "No Active Users",
   "pageNotFoundTitle": "Page not found",
-  "pageNotFoundMsg": "The page you are looking for has been removed or doesn't exist."
+  "pageNotFoundMsg": "The page you are looking for has been removed or doesn't exist.",
+  "singleOwnerErrorTitle": "Unable to Leave Team",
+  "singleOwnerErrorText": "You must designate a new Owner prior to leaving the team.",
+  "confirmLeaveTeamTitle": "Confirm Leave Team",
+  "confirmLeaveTeamText": "Are you sure you wish to leave the team? If you leave, you will need an invite from an Admin to rejoin."
 }
