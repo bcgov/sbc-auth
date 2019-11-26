@@ -62,6 +62,8 @@ export default class AcceptInvite extends Mixins(NextPageMixin) {
   private async accept () {
     try {
       await this.acceptInvitation(this.token)
+      // the accept invitation creates a new org
+      await this.syncOrganizations()
       this.$router.push(this.getNextPageUrl(this.userProfile, this.organizations))
     } catch (exception) {
       if (exception.message === 'Request failed with status code 400') {
