@@ -152,9 +152,9 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async deleteMember (memberId: number) {
+  public async leaveTeam (memberId: number) {
     // Send request to remove member on server and get result
-    const response = await OrgService.removeMember(this.context.getters['myOrg'].id, memberId)
+    const response = await OrgService.leaveOrg(this.context.getters['myOrg'].id, memberId)
 
     // If no response, or error code, throw exception to be caught
     if (!response || response.status !== 200 || !response.data) {

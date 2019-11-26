@@ -13,8 +13,8 @@
     <!-- Tab Navigation -->
     <v-tabs class="mb-7" v-model="tab" background-color="transparent">
       <v-tab>Active</v-tab>
-      <v-tab>Pending Approval</v-tab>
-      <v-tab>Invitations</v-tab>
+      <v-tab v-show="canInvite()">Pending Approval</v-tab>
+      <v-tab v-show="canInvite()">Invitations</v-tab>
     </v-tabs>
 
     <v-card flat>
@@ -26,6 +26,8 @@
             <MemberDataTable
               @confirm-remove-member="showConfirmRemoveModal($event)"
               @confirm-change-role="showConfirmChangeRoleModal($event)"
+              @confirm-leave-team="showConfirmLeaveTeamModal()"
+              @single-owner-error="showSingleOwnerErrorModal()"
             />
           </v-tab-item>
           <v-tab-item>
@@ -87,6 +89,22 @@
       dialog-class="notify-dialog"
       max-width="640"
     ></ModalDialog>
+
+    <!-- Alert Dialog (Error) -->
+    <ModalDialog
+      ref="errorDialog"
+      :title="errorTitle"
+      :text="errorText"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-btn large color="error" @click="close()">OK</v-btn>
+      </template>
+    </ModalDialog>
   </v-container>
 </template>
 
@@ -126,9 +144,9 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('org', [
       'resendInvitation',
       'deleteInvitation',
-      'deleteMember',
       'updateMember',
-      'approveMember'
+      'approveMember',
+      'leaveTeam'
     ])
   }
 })
@@ -136,6 +154,8 @@ export default class UserManagement extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
   private successTitle: string = ''
   private successText: string = ''
+  private errorTitle: string = ''
+  private errorText: string = ''
   private tab = null
   private isLoading = true
   private memberToBeRemoved: Member
@@ -155,12 +175,13 @@ export default class UserManagement extends Vue {
   private readonly myOrgMembership!: Member
   private readonly resendInvitation!: (invitation: Invitation) => void
   private readonly deleteInvitation!: (invitationId: number) => void
-  private readonly deleteMember!: (memberId: number) => void
   private readonly updateMember!: (updateMemberPayload: UpdateMemberPayload) => void
   private readonly approveMember!: (memberId: number) => void
+  private readonly leaveTeam!: (memberId: number) => void
 
   $refs: {
     successDialog: ModalDialog
+    errorDialog: ModalDialog
     inviteUsersDialog: ModalDialog
     confirmActionDialog: ModalDialog
   }
@@ -224,6 +245,20 @@ export default class UserManagement extends Vue {
     this.$refs.confirmActionDialog.open()
   }
 
+  private showConfirmLeaveTeamModal () {
+    this.confirmActionTitle = this.$t('confirmLeaveTeamTitle').toString()
+    this.confirmActionText = this.$t('confirmLeaveTeamText').toString()
+    this.confirmHandler = this.leave
+    this.primaryActionText = 'Leave'
+    this.$refs.confirmActionDialog.open()
+  }
+
+  private showSingleOwnerErrorModal () {
+    this.errorTitle = this.$t('singleOwnerErrorTitle').toString()
+    this.errorText = this.$t('singleOwnerErrorText').toString()
+    this.$refs.errorDialog.open()
+  }
+
   private showConfirmRemoveInviteModal (invitation: Invitation) {
     this.confirmActionTitle = this.$t('confirmRemoveInviteTitle').toString()
     this.confirmActionText = `Are you sure wish to remove the invite to ${invitation.recipientEmail}?`
@@ -249,7 +284,7 @@ export default class UserManagement extends Vue {
   private async removeMember () {
     await this.updateMember({
       memberId: this.memberToBeRemoved.id,
-      status: 'INACTIVE'
+      status: MembershipStatus.Inactive
     })
     this.$refs.confirmActionDialog.close()
   }
@@ -270,7 +305,7 @@ export default class UserManagement extends Vue {
   private async approve () {
     await this.updateMember({
       memberId: this.memberToBeApproved.id,
-      status: 'ACTIVE'
+      status: MembershipStatus.Active
     })
     this.$refs.confirmActionDialog.close()
   }
@@ -278,9 +313,19 @@ export default class UserManagement extends Vue {
   private async deny () {
     await this.updateMember({
       memberId: this.memberToBeRemoved.id,
-      status: 'REJECTED'
+      status: MembershipStatus.Rejected
     })
     this.$refs.confirmActionDialog.close()
+  }
+
+  private async leave () {
+    await this.leaveTeam(this.myOrgMembership.id)
+    this.$refs.confirmActionDialog.close()
+    this.$router.push('/')
+  }
+
+  private close () {
+    this.$refs.errorDialog.close()
   }
 }
 </script>

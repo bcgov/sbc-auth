@@ -34,7 +34,7 @@
             <div class="actions">
               <v-btn small color="primary" @click="goToDashboard(item.businessIdentifier)" title="Go to Business Dashboard">Dashboard</v-btn>
               <v-btn small depressed @click="editContact(item)" title="Edit Business Profile">Edit</v-btn>
-              <v-btn small depressed @click="removeBusiness(item.businessIdentifier)" title="Remove Business">Remove</v-btn>
+              <v-btn :disabled="!canRemove()" small depressed @click="removeBusiness(item.businessIdentifier)" title="Remove Business">Remove</v-btn>
             </div>
           </template>
         </v-data-table>
@@ -45,7 +45,7 @@
 
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
-import { Organization, RemoveBusinessPayload } from '@/models/Organization'
+import { Member, MembershipStatus, MembershipType, Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import { Business } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
@@ -57,7 +57,7 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
-    ...mapGetters('org', ['myOrg'])
+    ...mapGetters('org', ['myOrg', 'myOrgMembership'])
   },
   methods: {
     ...mapMutations('business', ['setCurrentBusiness']),
@@ -69,6 +69,7 @@ export default class AffiliatedEntityList extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
   private isLoading = true
   private readonly myOrg!: Organization
+  private readonly myOrgMembership!: Member
   private readonly setCurrentBusiness!: (business: Business) => void
   private readonly syncOrganizations!: () => Organization[]
 
@@ -98,6 +99,12 @@ export default class AffiliatedEntityList extends Vue {
     return (businessIdentifier: string) => {
       return this.myBusinesses.find(business => business.businessIdentifier === businessIdentifier)
     }
+  }
+
+  private canRemove (): boolean {
+    return this.myOrgMembership &&
+            this.myOrgMembership.membershipStatus === MembershipStatus.Active &&
+            this.myOrgMembership.membershipTypeCode === MembershipType.Owner
   }
 
   private customSort (items, index, isDescending) {
