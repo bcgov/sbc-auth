@@ -22,7 +22,7 @@
 import groovy.json.*
 
 // define constants - values sent in as env vars from whatever calls this pipeline
-def APP_NAME = 'notify-api'
+def APP_NAME = 'notify-queue'
 def DESTINATION_TAG = 'dev'
 def E2E_TAG = 'e2e'
 def TOOLS_TAG = 'tools'
