@@ -33,7 +33,8 @@ class RestService:
     """Service to invoke Rest services which uses OAuth 2.0 implementation."""
 
     @staticmethod
-    def post(endpoint, token, auth_header_type: AuthHeaderType, content_type: ContentType, data):
+    def post(endpoint, token=None, auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
+             content_type: ContentType = ContentType.JSON, data=None):
         """POST service."""
         current_app.logger.debug('<post')
 

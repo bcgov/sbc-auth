@@ -28,72 +28,7 @@
             "intervalSeconds": 1,
             "timeoutSeconds": 600,
             "maxUnavailable": "25%",
-            "maxSurge": "25%",
-            "pre": {
-              "failurePolicy": "Abort",
-              "execNewPod": {
-                "command": [
-                  "/opt/app-root/src/pre-hook-update-db.sh"
-                ],
-                "env": [
-                  {
-                    "name": "DATABASE_ADMIN_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-secret",
-                        "key": "DATABASE_ADMIN_PASSWORD"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DATABASE_USERNAME",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
-                        "key": "DATABASE_USER"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DATABASE_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-secret",
-                        "key": "DATABASE_PASSWORD"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DATABASE_NAME",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
-                        "key": "DATABASE_NAME"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DATABASE_HOST",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
-                        "key": "DATABASE_HOST"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DATABASE_PORT",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
-                        "key": "DATABASE_PORT"
-                      }
-                    }
-                  }
-                ],
-                "containerName": "${NAME}-${TAG_NAME}"
-              }
-            }
+            "maxSurge": "25%"
           }
         },
         "triggers": [
@@ -139,6 +74,13 @@
                   {
                     "containerPort": 8080,
                     "protocol": "TCP"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "configMapRef": {
+                      "name": "api-${TAG_NAME}-config"
+                    }
                   }
                 ],
                 "env": [
@@ -231,177 +173,6 @@
                         "key": "DATABASE_TEST_PORT"
                       }
                     }
-                  },
-                  {
-                    "name": "JWT_OIDC_ALGORITHMS",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "JWT_OIDC_ALGORITHMS"
-                      }
-                    }
-                  },
-                  {
-                    "name": "JWT_OIDC_AUDIENCE",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "JWT_OIDC_AUDIENCE"
-                      }
-                    }
-                  },
-                  {
-                    "name": "JWT_OIDC_CLIENT_SECRET",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "JWT_OIDC_CLIENT_SECRET"
-                      }
-                    }
-                  },
-                  {
-                    "name": "JWT_OIDC_WELL_KNOWN_CONFIG",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "JWT_OIDC_WELL_KNOWN_CONFIG"
-                      }
-                    }
-                  },
-                  {
-                    "name": "JWT_OIDC_JWKS_CACHE_TIMEOUT",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "JWT_OIDC_JWKS_CACHE_TIMEOUT"
-                      }
-                    }
-                  },
-                  {
-                    "name": "KEYCLOAK_BASE_URL",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "KEYCLOAK_BASE_URL"
-                      }
-                    }
-                  },
-                  {
-                    "name": "KEYCLOAK_REALMNAME",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "KEYCLOAK_REALMNAME"
-                      }
-                    }
-                  },
-                  {
-                    "name": "KEYCLOAK_ADMIN_CLIENTID",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "KEYCLOAK_ADMIN_CLIENTID"
-                      }
-                    }
-                  },
-                  {
-                    "name": "KEYCLOAK_ADMIN_SECRET",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "KEYCLOAK_ADMIN_SECRET"
-                      }
-                    }
-                  },
-                  {
-                    "name": "KEYCLOAK_AUTH_AUDIENCE",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "KEYCLOAK_AUTH_AUDIENCE"
-                      }
-                    }
-                  },
-                  {
-                    "name": "KEYCLOAK_AUTH_CLIENT_SECRET",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${KEYCLOAK_NAME}-${TAG_NAME}-secret",
-                        "key": "KEYCLOAK_AUTH_CLIENT_SECRET"
-                      }
-                    }
-                  },
-                  {
-                    "name": "MAIL_SERVER",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${NAME}-${TAG_NAME}-config",
-                        "key": "MAIL_SERVER"
-                      }
-                    }
-                  },
-                  {
-                    "name": "MAIL_PORT",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${NAME}-${TAG_NAME}-config",
-                        "key": "MAIL_PORT"
-                      }
-                    }
-                  },
-                  {
-                    "name": "MAIL_USE_TLS",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${NAME}-${TAG_NAME}-config",
-                        "key": "MAIL_USE_TLS"
-                      }
-                    }
-                  },
-                  {
-                    "name": "MAIL_USE_SSL",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${NAME}-${TAG_NAME}-config",
-                        "key": "MAIL_USE_SSL"
-                      }
-                    }
-                  },
-                  {
-                    "name": "MAIL_USERNAME",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${NAME}-${TAG_NAME}-config",
-                        "key": "MAIL_USERNAME"
-                      }
-                    }
-                  },
-                  {
-                    "name": "MAIL_PASSWORD",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${NAME}-${TAG_NAME}-config",
-                        "key": "MAIL_PASSWORD"
-                      }
-                    }
-                  },
-                  {
-                    "name": "MAIL_FROM_ID",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${NAME}-${TAG_NAME}-config",
-                        "key": "MAIL_FROM_ID"
-                      }
-                    }
-                  },
-                  {
-                    "name": "SENTRY_DSN",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${NAME}-${TAG_NAME}-config",
-                        "key": "SENTRY_DSN"
-                      }
-                    }
                   }
                 ],
                 "resources": {
@@ -439,31 +210,6 @@
                 "terminationMessagePath": "/dev/termination-log",
                 "terminationMessagePolicy": "File",
                 "imagePullPolicy": "Always"
-              },
-              {
-                "name": "jaeger-agent",
-                "image": "jaegertracing/jaeger-agent",
-                "ports": [
-                  {
-                    "containerPort": 5775,
-                    "protocol": "UDP"
-                  },
-                  {
-                    "containerPort": 5778,
-                    "protocol": "UDP"
-                  },
-                  {
-                    "containerPort": 6831,
-                    "protocol": "UDP"
-                  },
-                  {
-                    "containerPort": 6832,
-                    "protocol": "UDP"
-                  }
-                ],
-                "args": [
-                  "${JAEGER_COLLECTOR}"
-                ]
               }
             ],
             "restartPolicy": "Always",
@@ -586,13 +332,6 @@
       "value": "postgresql-notify"
     },
     {
-      "name": "KEYCLOAK_NAME",
-      "displayName": "Name",
-      "description": "The name assigned to all of the OpenShift resources associated to the server instance.",
-      "required": true,
-      "value": "keycloak"
-    },
-    {
       "name": "CPU_REQUEST",
       "displayName": "Resources CPU Request",
       "description": "The resources CPU request (in cores) for this build.",
@@ -626,13 +365,6 @@
       "description": "The number of replicas to run in this environment.",
       "required": true,
       "value": "1"
-    },
-    {
-      "name": "JAEGER_COLLECTOR",
-      "displayName": "Jaeger Tracing collector address",
-      "description": "Jaeger Tracing collector address.",
-      "required": true,
-      "value": "--collector.host-port=jaeger-collector.d7eovc-${TAG_NAME}.svc:14267"
     }
   ]
 }

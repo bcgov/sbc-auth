@@ -15,10 +15,8 @@
 
 This module manages the Membership Information between an org and a user.
 """
-from threading import Thread
 from typing import Dict, Tuple
 
-from flask import copy_current_request_context
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
@@ -115,19 +113,9 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         sender = CONFIG.MAIL_FROM_ID
         template = ENV.get_template('email_templates/membership_approved_notification_email.html')
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
-
-        try:
-            @copy_current_request_context
-            def run_job():
-                send_email(subject, sender, self._model.user.contacts[0].contact.email,
-                           template.render(url='{}/{}'.format(origin_url, context_path), org_name=org_name))
-
-            thread = Thread(target=run_job)
-            thread.start()
-
-        except:  # noqa: E722
-            # invitation.invitation_status_code = 'FAILED'
-            # invitation.save()
+        sent_response = send_email(subject, sender, self._model.user.contacts[0].contact.email,
+                                   template.render(url='{}/{}'.format(origin_url, context_path), org_name=org_name))
+        if not sent_response:
             raise BusinessException(Error.FAILED_NOTIFICATION, None)
 
     def update_membership(self, updated_fields, token_info: Dict = None):

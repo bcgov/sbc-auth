@@ -119,6 +119,8 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     TOKEN_EXPIRY_PERIOD = os.getenv('TOKEN_EXPIRY_PERIOD')
     # Legal-API URL
     LEGAL_API_URL = os.getenv('LEGAL_API_URL')
+    # notify-API URL
+    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
 
     # Sentry Config
     SENTRY_DSN = os.getenv('SENTRY_DSN', None)
@@ -206,6 +208,8 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
 
     # Legal-API URL
     LEGAL_API_URL = 'https://mock-lear-tools.pathfinder.gov.bc.ca/rest/legal-api/0.82/api/v1'
+
+    NOTIFY_API_URL = 'https://mock-lear-tools.pathfinder.gov.bc.ca/rest/SBC+Notify+API+Reference/2.0.0/api/v1'
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods

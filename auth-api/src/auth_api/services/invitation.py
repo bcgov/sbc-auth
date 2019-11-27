@@ -14,10 +14,8 @@
 """Service for managing Invitation data."""
 
 from datetime import datetime
-from threading import Thread
 from typing import Dict
 
-from flask import copy_current_request_context
 from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
@@ -140,19 +138,9 @@ class Invitation:
             format(user['firstname'], user['firstname'], org_name)
         sender = CONFIG.MAIL_FROM_ID
         template = ENV.get_template('email_templates/admin_notification_email.html')
-
-        try:
-            @copy_current_request_context
-            def run_job():
-                send_email(subject, sender, recipient_email_list,
-                           template.render(url=url, user=user, org_name=org_name))
-
-            thread = Thread(target=run_job)
-            thread.start()
-
-        except:  # noqa: E722
-            # invitation.invitation_status_code = 'FAILED'
-            # invitation.save()
+        sent_response = send_email(subject, sender, recipient_email_list,
+                                   template.render(url=url, user=user, org_name=org_name))
+        if not sent_response:
             raise BusinessException(Error.FAILED_INVITATION, None)
 
     @staticmethod
@@ -165,16 +153,12 @@ class Invitation:
         confirmation_token = Invitation.generate_confirmation_token(invitation.id)
         token_confirm_url = '{}/validatetoken/{}'.format(confirm_url, confirmation_token)
         template = ENV.get_template('email_templates/business_invitation_email.html')
-        try:
-            @copy_current_request_context
-            def run_job():
-                send_email(subject, sender, recipient,
-                           template.render(invitation=invitation, url=token_confirm_url, user=user, org_name=org_name))
-
-            thread = Thread(target=run_job)
-            thread.start()
-
-        except:  # noqa: E722
+        sent_response = send_email(subject, sender, recipient,
+                                   template.render(invitation=invitation,
+                                                   url=token_confirm_url,
+                                                   user=user,
+                                                   org_name=org_name))
+        if not sent_response:
             invitation.invitation_status_code = 'FAILED'
             invitation.save()
             raise BusinessException(Error.FAILED_INVITATION, None)
