@@ -158,7 +158,6 @@ class Invitation:
                                                    url=token_confirm_url,
                                                    user=user,
                                                    org_name=org_name))
-        print(sent_response)
         if not sent_response:
             invitation.invitation_status_code = 'FAILED'
             invitation.save()
