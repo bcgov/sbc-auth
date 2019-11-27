@@ -14,7 +14,7 @@
           <v-radio class="mb-3" label="I manage my own business" value="BASIC"/>
           <v-radio label="I manage multiple businesses on behalf of my clients" value="PREMIUM" />
         </v-radio-group>
-        <v-text-field filled :rules="teamNameRules" v-model="teamName" :label="teamType === 'BASIC' ? 'Your Business Name' : 'Your Management Company or Law Firm Name'" />
+        <v-text-field filled :rules="teamNameRules" v-model.trim="teamName" :label="teamType === 'BASIC' ? 'Your Business Name' : 'Your Management Company or Law Firm Name'" />
         <v-row>
           <v-col cols="12" class="form__btns pb-0">
             <v-btn large color="primary" class="mr-2" :disabled='!isFormValid()' @click="save">
