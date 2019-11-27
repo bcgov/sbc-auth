@@ -11,13 +11,6 @@
   },
   "objects": [
     {
-      "kind": "ImageStream",
-      "apiVersion": "v1",
-      "metadata": {
-        "name": "${NAME}"
-      }
-    },
-    {
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
@@ -29,8 +22,19 @@
         }
       },
       "spec": {
+        "triggers": [
+          {
+            "type": "ImageChange",
+            "imageChange": {}
+          },
+          {
+            "type": "ConfigChange"
+          }
+        ],
+        "runPolicy": "Serial",
         "source": {
-          "type": "Git",
+          "type": "Dockerfile",
+          "dockerfile": "FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7-2019-10-15\n\nCOPY ./ /app\nCOPY ./requirements.txt /tmp\n\nRUN pip install -r /tmp/requirements.txt\n\nENV PYTHONPATH=./src",
           "git": {
             "uri": "${GIT_REPO_URL}",
             "ref": "${GIT_REF}"
@@ -38,27 +42,20 @@
           "contextDir": "${SOURCE_CONTEXT_DIR}"
         },
         "strategy": {
-          "type": "Source",
-          "sourceStrategy": {
-            "from": {
-              "kind": "${SOURCE_IMAGE_KIND}",
-              "name": "${SOURCE_IMAGE_NAME}:${SOURCE_IMAGE_TAG}",
-              "namespace": "${SOURCE_IMAGE_NAME_SPACE}"
-            },
-            "env": []
-          }
+          "type": "Docker",
+          "dockerStrategy": {}
         },
         "output": {
           "to": {
-            "kind": "ImageStreamTag",
+            "kind": "${OUTPUT_IMAGE_KIND}",
             "name": "${NAME}:${OUTPUT_IMAGE_TAG}"
           }
         },
-        "triggers": [
-          {
-            "type": "ConfigChange"
-          }
-        ]
+        "resources": {},
+        "postCommit": {},
+        "nodeSelector": null,
+        "successfulBuildsHistoryLimit": 5,
+        "failedBuildsHistoryLimit": 5
       }
     }
   ],
@@ -99,32 +96,11 @@
       "value": "notify-api"
     },
     {
-      "name": "SOURCE_IMAGE_KIND",
-      "displayName": "Source Image Kind",
-      "required": true,
-      "description": "The 'kind' (type) of the  source image; typically ImageStreamTag, or DockerImage.",
-      "value": "ImageStreamTag"
-    },
-    {
-      "name": "SOURCE_IMAGE_NAME_SPACE",
-      "displayName": "Source Image Name Space",
-      "required": true,
-      "description": "The name space of the  source image.",
-      "value": "d7eovc-tools"
-    },
-    {
       "name": "SOURCE_IMAGE_NAME",
       "displayName": "Source Image Name",
       "required": true,
       "description": "The name of the source image.",
       "value": "python"
-    },
-    {
-      "name": "SOURCE_IMAGE_TAG",
-      "displayName": "Source Image Tag",
-      "required": true,
-      "description": "The tag of the source image.",
-      "value": "3.7"
     },
     {
       "name": "OUTPUT_IMAGE_TAG",

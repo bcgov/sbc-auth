@@ -20,6 +20,7 @@ from unittest.mock import patch
 import pytest
 
 import auth_api.services.authorization as auth
+import auth_api.services.notification as notification
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel
@@ -197,7 +198,7 @@ def test_get_invitations_by_org_id(session, auth_mock):  # pylint:disable=unused
         assert len(invitations) == 1
 
 
-def test_send_invitation_exception(session, auth_mock):  # pylint:disable=unused-argument
+def test_send_invitation_exception(session, notify_mock):  # pylint:disable=unused-argument
     """Send an existing invitation with exception."""
     user = factory_user_model(TestUserInfo.user_test)
     user_dictionary = User(user).as_dict()
@@ -208,7 +209,8 @@ def test_send_invitation_exception(session, auth_mock):  # pylint:disable=unused
 
     invitation = InvitationModel.create_from_dict(invitation_info, user.id)
 
-    with pytest.raises(BusinessException) as exception:
-        InvitationService.send_invitation(invitation, org_dictionary['name'], user_dictionary, '')
+    with patch.object(notification, 'send_email', return_value=False):
+        with pytest.raises(BusinessException) as exception:
+            InvitationService.send_invitation(invitation, org_dictionary['name'], user_dictionary, '')
 
     assert exception.value.code == Error.FAILED_INVITATION.name
