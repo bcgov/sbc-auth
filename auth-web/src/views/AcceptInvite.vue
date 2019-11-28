@@ -2,13 +2,7 @@
   <v-container>
     <v-row justify="center">
       <v-col cols="12" lg="8" class="text-center">
-        <div v-if="expiredInvitation">
-          <v-icon size="48" color="error" class="mb-6">mdi-alert-circle-outline</v-icon>
-          <h1 class="mb-7">{{ $t('expiredInvitationTitle')}}</h1>
-          <p class="mb-9">{{ $t('expiredInvitationMessage')}}</p>
-          <v-btn large link color="primary" href="../">{{ $t('homeBtnLabel')}}</v-btn>
-        </div>
-        <div v-if="processingError">
+        <div v-if="inviteError">
           <v-icon size="48" color="error" class="mb-6">mdi-alert-circle-outline</v-icon>
           <h1 class="mb-7">{{ $t('errorOccurredTitle')}}</h1>
           <p class="mb-9">{{ $t('invitationProcessingErrorMsg')}}</p>
@@ -50,8 +44,7 @@ export default class AcceptInvite extends Mixins(NextPageMixin) {
   private readonly organizations!: Organization[]
 
   @Prop() token: string
-  private processingError: Boolean = false
-  private expiredInvitation: Boolean = false
+  private inviteError: boolean = false
 
   private async mounted () {
     await this.getUserProfile('@me')
@@ -66,11 +59,7 @@ export default class AcceptInvite extends Mixins(NextPageMixin) {
       await this.syncOrganizations()
       this.$router.push(this.getNextPageUrl(this.userProfile, this.organizations))
     } catch (exception) {
-      if (exception.message === 'Request failed with status code 400') {
-        this.expiredInvitation = true
-      } else {
-        this.processingError = true
-      }
+      this.inviteError = true
     }
   }
 }

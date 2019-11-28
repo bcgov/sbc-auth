@@ -1,5 +1,6 @@
 import { Role, SessionStorageKeys } from '@/util/constants'
 import AcceptInvite from '@/views/AcceptInvite.vue'
+import AcceptInviteLanding from '@/views/AcceptInviteLanding.vue'
 import AuthHome from '@/views/AuthHome.vue'
 import BusinessProfile from '@/views/BusinessProfile.vue'
 import CreateAccount from '@/views/CreateAccount.vue'
@@ -14,7 +15,6 @@ import Router from 'vue-router'
 import SearchBusinessForm from '@/components/auth/SearchBusinessForm.vue'
 import Signin from '@/components/auth/Signin.vue'
 import Signout from '@/components/auth/Signout.vue'
-import TokenValidator from '@/views/TokenValidator.vue'
 import Unauthorized from '@/components/auth/Unauthorized.vue'
 import UserManagement from '@/views/management/UserManagement.vue'
 import UserProfile from '@/views/UserProfile.vue'
@@ -22,7 +22,7 @@ import Vue from 'vue'
 
 Vue.use(Router)
 
-function mapReturnPayVars (route) {
+function mapReturnPayVars (route: any) {
   return {
     paymentId: route.params.paymentId,
     transactionId: route.params.transactionId,
@@ -41,7 +41,7 @@ export function getRoutes (appFlavor: String) {
     { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
     { path: '/createteam', component: CreateTeamView, meta: { requiresAuth: true } },
     { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
-    { path: '/validatetoken/:token', component: TokenValidator, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
+    { path: '/validatetoken/:token', component: AcceptInviteLanding, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
     { path: '/confirmtoken/:token', component: AcceptInvite, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } }
   ]
 
