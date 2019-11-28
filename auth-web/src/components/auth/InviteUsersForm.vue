@@ -131,7 +131,7 @@ export default class InviteUsersForm extends Vue {
 
   private created () {
     for (let i = 0; i < 3; i++) {
-      this.invitations.push({ emailAddress: '', role: this.roles[2] })
+      this.invitations.push({ emailAddress: '', role: this.roles[0] })
     }
   }
 
@@ -144,7 +144,7 @@ export default class InviteUsersForm extends Vue {
   }
 
   private addEmail () {
-    this.invitations.push({ emailAddress: '', role: this.roles[2] })
+    this.invitations.push({ emailAddress: '', role: this.roles[0] })
   }
 
   private async sendInvites () {
