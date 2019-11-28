@@ -68,12 +68,16 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })
-  public async addContact (contact: Contact) {
-    return BusinessService.addContact(this.context.state['currentBusiness'], contact)
-  }
-
-  @Action({ commit: 'setCurrentBusiness', rawError: true })
-  public async updateContact (contact: Contact) {
-    return BusinessService.updateContact(this.context.state['currentBusiness'], contact)
+  public async saveContact (contact: Contact) {
+    let currentBusiness: Business = this.context.state['currentBusiness']
+    let response = null
+    if (!currentBusiness.contacts || currentBusiness.contacts.length === 0) {
+      response = await BusinessService.addContact(currentBusiness, contact)
+    } else {
+      response = await BusinessService.updateContact(currentBusiness, contact)
+    }
+    if (response && response.data && (response.status === 200 || response.status === 201)) {
+      return response.data
+    }
   }
 }
