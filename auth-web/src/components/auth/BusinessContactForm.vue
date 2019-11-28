@@ -91,7 +91,7 @@ import { mask } from 'vue-the-mask'
     ...mapState('business', ['currentBusiness'])
   },
   methods: {
-    ...mapActions('business', ['addContact', 'updateContact'])
+    ...mapActions('business', ['saveContact'])
   }
 })
 export default class BusinessContactForm extends Vue {
@@ -103,8 +103,7 @@ export default class BusinessContactForm extends Vue {
   private formError = ''
   private editing = false
   private readonly currentBusiness!: Business
-  private readonly addContact!: (contact: Contact) => void
-  private readonly updateContact!: (contact: Contact) => void
+  private readonly saveContact!: (contact: Contact) => void
 
   private emailRules = [
     v => !!v || 'Email address is required',
@@ -159,13 +158,7 @@ export default class BusinessContactForm extends Vue {
         phone: this.phoneNumber,
         phoneExtension: this.extension
       }
-
-      if (!this.currentBusiness.contacts || this.currentBusiness.contacts.length === 0) {
-        await this.addContact(contact)
-      } else {
-        await this.updateContact(contact)
-      }
-
+      await this.saveContact(contact)
       this.redirectToNext()
     }
   }
