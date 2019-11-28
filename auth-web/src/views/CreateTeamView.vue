@@ -7,7 +7,7 @@
         <v-card class="profile-card">
           <v-container>
             <v-card-title>
-              <h2>Your Team Profile</h2>
+              <h2 class="mb-4">Your Team Profile</h2>
             </v-card-title>
             <v-card-text>
               <TeamForm />
