@@ -44,15 +44,15 @@ import { mapActions, mapState } from 'vuex'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
 
-  @Component({
-    computed: {
-      ...mapState('org', ['organizations', 'orgCreateMessage'])
-    },
-    methods: {
-      ...mapActions('org', ['createOrg']),
-      ...mapActions('org', ['syncOrganizations'])
-    }
-  })
+@Component({
+  computed: {
+    ...mapState('org', ['organizations', 'orgCreateMessage'])
+  },
+  methods: {
+    ...mapActions('org', ['createOrg']),
+    ...mapActions('org', ['syncOrganizations'])
+  }
+})
 export default class TeamForm extends Vue {
     private orgStore = getModule(OrgModule, this.$store)
     private teamName: string = ''
