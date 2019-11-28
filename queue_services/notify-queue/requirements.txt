@@ -13,13 +13,13 @@ importlib-metadata==0.23
 itsdangerous==1.1.0
 jsonschema==3.2.0
 more-itertools==7.2.0
-protobuf==3.10.0
+protobuf==3.11.0
 pycountry==19.8.18
-pyrsistent==0.15.5
+pyrsistent==0.15.6
 python-dotenv==0.10.3
-sentry-sdk==0.13.2
+sentry-sdk==0.13.4
 six==1.12.0
 urllib3==1.25.7
 zipp==0.6.0
-git+https://github.com/pwei1018/sbc-auth.git@notifyapi#egg=notify_api&subdirectory=notify-api
+git+https://github.com/bcgov/sbc-auth.git@development#egg=notify_api&subdirectory=notify-api
 git+https://github.com/bcgov/lear.git#egg=entity_queue_common&subdirectory=queue_services/common
