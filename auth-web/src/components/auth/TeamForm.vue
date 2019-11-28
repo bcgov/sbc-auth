@@ -10,7 +10,7 @@
     </div>
     <div>
       <v-form v-if="organizations.length === 0" ref="createTeamForm">
-        <v-radio-group class="mt-0 mb-5 pt-0" v-model="teamType" :mandatory="true">
+        <v-radio-group class="mt-0 mb-4 pt-0" v-model="teamType" :mandatory="true">
           <v-radio class="mb-3" label="I manage my own business" value="BASIC"/>
           <v-radio label="I manage multiple businesses on behalf of my clients" value="PREMIUM"/>
         </v-radio-group>
