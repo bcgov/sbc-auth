@@ -12,11 +12,11 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import EntityManagement from '@/views/management/EntityManagement.vue'
 import ManagementMenu from '@/components/auth/ManagementMenu.vue'
-import { Organization } from '@/models/Organization'
 import { User } from '@/models/user'
 import UserManagement from '@/views/management/UserManagement.vue'
 import { VueConstructor } from 'vue'
@@ -29,7 +29,8 @@ import { VueConstructor } from 'vue'
     UserManagement
   },
   computed: {
-    ...mapState('user', ['userProfile'])
+    ...mapState('user', ['userProfile']),
+    ...mapGetters('org', ['myOrg', 'myOrgMembership'])
   },
   methods: {
     ...mapActions('user', ['getUserProfile']),
@@ -39,6 +40,8 @@ import { VueConstructor } from 'vue'
 export default class Dashboard extends Vue {
   private selectedComponent = null
   private readonly userProfile!: User
+  private readonly myOrg!: Organization
+  private readonly myOrgMembership!: Member
   private readonly getUserProfile!: (identifier: string) => User
   private readonly syncOrganizations!: () => Organization[]
 
@@ -68,10 +71,26 @@ export default class Dashboard extends Vue {
 
     // Always pull organization list
     this.syncOrganizations()
+
+    // Check the current user's team status
+    // TODO: For now this means checking their single team, later it will mean checking the active team.
+    this.redirectBasedOnTeamStatus()
   }
 
   setSelectedComponent (selectedComponent: VueConstructor) {
     this.selectedComponent = selectedComponent
+  }
+
+  private redirectBasedOnTeamStatus (): void {
+    // If user is pending approval by an admin, redirect to pending approval page
+    if (this.myOrgMembership && this.myOrgMembership.membershipStatus === MembershipStatus.Pending) {
+      this.$router.push(`/pendingapproval/${this.myOrg.name}`)
+    }
+
+    // If user is not an active member of a team at all, redirect to create team page
+    if (!this.myOrgMembership) {
+      this.$router.push('/createteam')
+    }
   }
 }
 </script>
