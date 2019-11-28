@@ -180,7 +180,13 @@ class TestOrgInfo(dict, Enum):
 
     org1 = {'name': 'My Test Org'}
     org2 = {'name': 'My Test Updated Org'}
+    org3 = {'name': 'M'}
     invalid = {'foo': 'bar'}
+    invalid_name_space = {'name': ''}
+    invalid_name_spaces = {'name': '    '}
+    invalid_name_start_space = {'name': '  helo'}
+    invalid_name_end_space = {'name': '  helo   '}
+
 
 
 class TestEntityInfo(dict, Enum):

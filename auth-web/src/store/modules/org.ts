@@ -26,6 +26,7 @@ export default class OrgModule extends VuexModule {
   activeOrgMembers: Member[] = []
   pendingOrgMembers: Member[] = []
   pendingOrgInvitations: Invitation[] = []
+  orgCreateMessage = 'success'
 
   // This simply returns the first org in the list.
   // TODO: Once account switching is in place, this will have to return the
@@ -92,15 +93,29 @@ export default class OrgModule extends VuexModule {
     this.organizations = organizations
   }
 
-  @Action({ rawError: true, commit: 'addOrganization' })
+  @Mutation
+  public setOrgCreateMessage (message:string) {
+    this.orgCreateMessage = message
+  }
+
+  @Action({ rawError: true })
   public async createOrg (createRequestBody: CreateOrgRequestBody) {
-    const response = await OrgService.createOrg(createRequestBody)
-    if (!response || !response.data) {
-      throw new Error('Unknown error has occured while creating the team')
-    } else if (response.status === 409) {
-      throw new Error('That team already exists')
-    } else if (response.status === 201) {
-      return response.data
+    try {
+      const response = await OrgService.createOrg(createRequestBody)
+      this.context.commit('setOrgCreateMessage', 'success')
+      this.context.commit('addOrganization', response.data)
+    } catch (err) {
+      switch (err.response.status) {
+        case 409:
+          this.context.commit('setOrgCreateMessage', 'Teams with similar names exists')
+          break
+        case 400:
+          this.context.commit('setOrgCreateMessage', 'Invalid team name')
+          break
+        default:
+          this.context.commit('setOrgCreateMessage', 'Error happened while creating team')
+          break
+      }
     }
   }
 

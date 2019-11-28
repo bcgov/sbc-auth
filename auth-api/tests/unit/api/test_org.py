@@ -40,11 +40,51 @@ def test_add_org(client, jwt, session):  # pylint:disable=unused-argument
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
+def test_add_same_org_409(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_409_CONFLICT
 
 def test_add_org_invalid_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that POSTing an invalid org returns a 400."""
     headers = factory_auth_header(jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.invalid),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+
+
+def test_add_org_invalid_space_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that POSTing an invalid org returns a 400."""
+    headers = factory_auth_header(jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.invalid_name_space),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+
+def test_add_org_invalid_spaces_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that POSTing an invalid org returns a 400."""
+    headers = factory_auth_header(jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.invalid_name_spaces),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+
+
+def test_add_org_invalid_end_space_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that POSTing an invalid org returns a 400."""
+    headers = factory_auth_header(jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.invalid_name_end_space),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+
+def test_add_org_invalid_start_space_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that POSTing an invalid org returns a 400."""
+    headers = factory_auth_header(jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.invalid_name_start_space),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
