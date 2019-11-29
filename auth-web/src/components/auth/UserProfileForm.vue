@@ -11,7 +11,7 @@
     </v-expand-transition>
     <!-- First / Last Name -->
     <v-row>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="6" class="pt-0 pb-0">
         <v-text-field
                 filled
                 label="First Name"
@@ -22,7 +22,7 @@
         >
         </v-text-field>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="6" class="pt-0 pb-0">
         <v-text-field
                 filled
                 label="Last Name"
@@ -36,7 +36,7 @@
     </v-row>
     <!-- Email Address -->
     <v-row>
-      <v-col cols="12">
+      <v-col cols="12" class="pt-0 pb-0">
         <v-text-field
                 filled
                 label="Email Address"
@@ -49,7 +49,7 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12">
+      <v-col cols="12" class="pt-0 pb-0">
         <v-text-field
                 filled
                 label="Confirm Email Address"
@@ -62,7 +62,7 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="6" class="pt-0 pb-0">
         <v-text-field
                 filled
                 label="Phone Number"
@@ -75,7 +75,7 @@
         >
         </v-text-field>
       </v-col>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="3" class="pt-0 pb-0">
         <v-text-field
                 filled label="Extension"
                 persistent-hint
@@ -86,18 +86,47 @@
         </v-text-field>
       </v-col>
     </v-row>
+
     <v-row>
-      <v-col cols="12">
+      <v-col cols="12" class="pt-0 pb-0">
         <terms-of-use-dialog :lastAcceptedVersion="lastAcceptedVersion"
                              @termsupdated="updateTerms"></terms-of-use-dialog>
       </v-col>
     </v-row>
+
     <v-row>
-      <v-col cols="12" class="form__btns pb-0">
-        <v-btn large color="primary" class=".save-continue-button" :disabled='!isFormValid()' @click="save">
-          Save
-        </v-btn>
-        <v-btn large depressed @click="cancel">Cancel</v-btn>
+      <v-col cols="12" class="form__btns pt-5">
+        <v-dialog max-width="640" v-model="deactivateProfileDialog" style="display: none;">
+          <template v-slot:activator="{ on }">
+            <v-btn large text color="primary" v-on="on" class="deactivate-btn">Deactivate my profile</v-btn>
+          </template>
+          <v-card>
+            <v-card-title>
+              Deactivate your profile
+            </v-card-title>
+            <v-card-text>
+              <p class="pb-1">Deactivating your Cooperatives Online profile will remove your contact information, and your access to associated teams and/or affiliated businesses. <strong>This action cannot be undone.</strong></p>
+              <v-row>
+                <v-col cols="12" class="form__btns">
+                  <v-btn large color="error" to="./profiledeactivated" :loading="isDeactivating">Deactivate</v-btn>
+                  <!-- Show loading indicator while deactivation process is active -->
+                  <!-- Show ModalDialog Error if process failed -->
+                  <!-- Redirect to 'ProfileDeactivated' view once successful -->
+
+                  <v-btn large depressed color="default" @click="deactivateProfileDialog = false">Cancel</v-btn>
+                  <!-- User should be able to recover when clicking this button (if the deactivation process is delayed and it is visible still) -->
+
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
+        <div>
+          <v-btn large color="primary" class=".save-continue-button" :disabled='!isFormValid()' @click="save">
+            Save
+          </v-btn>
+          <v-btn large depressed @click="cancel">Cancel</v-btn>
+        </div>
       </v-col>
     </v-row>
   </v-form>
@@ -107,6 +136,7 @@
 import { Component, Mixins, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import { Contact } from '@/models/contact'
+import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from './NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
@@ -117,7 +147,9 @@ import { getModule } from 'vuex-module-decorators'
 import { mask } from 'vue-the-mask'
 
 @Component({
-  components: { TermsOfUseDialog },
+  components: {
+    TermsOfUseDialog
+  },
   directives: {
     mask
   },
@@ -157,6 +189,8 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     private editing = false
     private lastAcceptedVersion = ''
     private isTermsAccepted: boolean
+    private deactivateProfileDialog = false
+    private isDeactivating = false
 
     private emailRules = [
       v => !!v || 'Email address is required',
@@ -246,12 +280,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
 <style lang="scss" scoped>
   @import '$assets/scss/theme.scss';
 
-  // Tighten up some of the spacing between rows
-  [class^="col"] {
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-
   .form__btns {
     display: flex;
     justify-content: flex-end;
@@ -259,5 +287,9 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     .v-btn + .v-btn {
       margin-left: 0.5rem;
     }
+  }
+
+  .deactivate-btn {
+    margin-right: auto;
   }
 </style>
