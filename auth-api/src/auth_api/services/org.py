@@ -15,6 +15,9 @@
 
 from typing import Dict, Tuple
 
+from flask import current_app
+from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -24,7 +27,6 @@ from auth_api.models import Org as OrgModel
 from auth_api.schemas import OrgSchema
 from auth_api.utils.roles import Status
 from auth_api.utils.util import camelback2snake
-from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from .authorization import check_auth
 from .invitation import Invitation as InvitationService
@@ -54,13 +56,14 @@ class Org:
     @staticmethod
     def create_org(org_info: dict, user_id):
         """Create a new organization."""
+        current_app.logger.debug('<create_org ')
         existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'])
         if existing_similar__org is not None:
             raise BusinessException(Error.DATA_CONFLICT, None)
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.save()
-
+        current_app.logger.info(f'<created_org org_id:{org.id}')
         # create the membership record for this user
         membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='OWNER',
                                      membership_type_status=Status.ACTIVE.value)
@@ -70,12 +73,16 @@ class Org:
 
     def update_org(self, org_info):
         """Update the passed organization with the new info."""
+        current_app.logger.debug('<update_org ')
         self._model.update_org_from_dict(camelback2snake(org_info))
+        current_app.logger.debug('>update_org ')
         return self
 
     def delete_org(self):
         """Delete this org."""
+        current_app.logger.debug('>delete_org ')
         self._model.delete()
+        current_app.logger.debug('<delete_org ')
 
     @staticmethod
     def find_by_org_id(org_id, token_info: Dict = None, allowed_roles: Tuple = None):
@@ -95,6 +102,7 @@ class Org:
     def add_contact(self, contact_info):
         """Create a new contact for this org."""
         # check for existing contact (only one contact per org for now)
+        current_app.logger.debug('>add_contact ')
         contact_link = ContactLinkModel.find_by_org_id(self._model.id)
         if contact_link is not None:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
@@ -106,11 +114,12 @@ class Org:
         contact_link.contact = contact
         contact_link.org = self._model
         contact_link.commit()
-
+        current_app.logger.debug('>add_contact ')
         return self
 
     def update_contact(self, contact_info):
         """Update the existing contact for this org."""
+        current_app.logger.debug('>update_contact ')
         contact_link = ContactLinkModel.find_by_org_id(self._model.id)
         if contact_link is None or contact_link.contact is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -118,11 +127,12 @@ class Org:
         contact = contact_link.contact
         contact.update_from_dict(**camelback2snake(contact_info))
         contact.commit()
-
+        current_app.logger.debug('<update_contact ')
         return self
 
     def delete_contact(self):
         """Delete the contact for this org."""
+        current_app.logger.debug('>delete_contact ')
         contact_link = ContactLinkModel.find_by_org_id(self._model.id)
         if contact_link is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -134,7 +144,7 @@ class Org:
             contact = contact_link.contact
             contact_link.delete()
             contact.delete()
-
+        current_app.logger.debug('<delete_contact ')
         return self
 
     def get_members(self):

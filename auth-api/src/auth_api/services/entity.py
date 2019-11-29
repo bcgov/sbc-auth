@@ -176,8 +176,10 @@ class Entity:
 
     def sync_name(self):
         """Sync this entity's name with the name used in the LEAR database."""
+        current_app.logger.info(f'<entity sync_name {self._model.business_identifier}')
         legal_url = current_app.config.get('LEGAL_API_URL') + f'/businesses/{self._model.business_identifier}'
         legal_response = RestService.get(legal_url)
+        current_app.logger.debug('<entity legal_response')
 
         if legal_response:
             entity_json = legal_response.json()
