@@ -38,7 +38,7 @@
   "singleOwnerErrorText": "You must designate a new Owner prior to leaving the team.",
   "confirmLeaveTeamTitle": "Confirm Leave Team",
   "confirmLeaveTeamText": "Are you sure you wish to leave the team? If you leave, you will need an invite from an Admin to rejoin.",
-  "acceptInviteLandingTitle": "Log in to Accept",
-  "acceptInviteLandingMessage": "To accept this invite, log in to BC Registries & Online Services with your BC Services Card",
-  "loginBtnLabel": "Log in and Accept Invitation"
+  "acceptInviteLandingTitle": "Log in to accept this invitation",
+  "acceptInviteLandingMessage": "To accept the invitation to this team, log in to Cooperatives Online with your BC Services Card.",
+  "loginBtnLabel": "Log in with BC Services Card"
 }
