@@ -125,6 +125,8 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     # Sentry Config
     SENTRY_DSN = os.getenv('SENTRY_DSN', None)
 
+    # front end serves this image in this name.can be moved to openshift config as well..
+    REGISTRIES_LOGO_IMAGE_NAME = 'bc_logo_for_email.png'
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False
