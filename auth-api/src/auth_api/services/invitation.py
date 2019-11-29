@@ -35,7 +35,6 @@ from config import get_named_config
 from .authorization import check_auth
 from .notification import send_email
 
-
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
 
@@ -139,25 +138,27 @@ class Invitation:
         sender = CONFIG.MAIL_FROM_ID
         template = ENV.get_template('email_templates/admin_notification_email.html')
         sent_response = send_email(subject, sender, recipient_email_list,
-                                   template.render(url=url, user=user, org_name=org_name))
+                                   template.render(url=url, user=user, org_name=org_name,
+                                                   logo_url=f'{url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
         if not sent_response:
             raise BusinessException(Error.FAILED_INVITATION, None)
 
     @staticmethod
-    def send_invitation(invitation: InvitationModel, org_name, user, confirm_url):
+    def send_invitation(invitation: InvitationModel, org_name, user, app_url):
         """Send the email notification."""
         subject = '[BC Registries & Online Services] {} {} has invited you to join a team'.format(user['firstname'],
                                                                                                   user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
         confirmation_token = Invitation.generate_confirmation_token(invitation.id)
-        token_confirm_url = '{}/validatetoken/{}'.format(confirm_url, confirmation_token)
+        token_confirm_url = '{}/validatetoken/{}'.format(app_url, confirmation_token)
         template = ENV.get_template('email_templates/business_invitation_email.html')
         sent_response = send_email(subject, sender, recipient,
                                    template.render(invitation=invitation,
                                                    url=token_confirm_url,
                                                    user=user,
-                                                   org_name=org_name))
+                                                   org_name=org_name,
+                                                   logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
         if not sent_response:
             invitation.invitation_status_code = 'FAILED'
             invitation.save()
