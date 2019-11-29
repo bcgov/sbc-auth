@@ -1,30 +1,28 @@
 <template>
   <v-container>
     <v-row justify="center">
-      <v-card class="token-card justify-center">
-          <v-col class="text-center">
-            <div v-if="!tokenExpiry && !tokenError">
-              <v-icon size="48" color="success" class="mb-6">mdi-account-plus</v-icon>
-              <h1 class="mb-7">{{ $t('acceptInviteLandingTitle') }}</h1>
-              <p class="mb-9">{{ $t('acceptInviteLandingMessage') }}</p>
-              <v-btn v-if="!isUserSignedIn()" large link color="primary" @click="redirectToSignin()">{{ $t('loginBtnLabel') }}</v-btn>
-              <v-btn v-if="isUserSignedIn()" large link color="primary" @click="redirectToConfirm()">{{ $t('acceptButtonLabel') }}</v-btn>
-            </div>
-            <div v-if="tokenExpiry">
-              <v-icon size="48" color="error" class="mb-6">mdi-alert-circle-outline</v-icon>
-              <h1 class="mb-7">{{ $t('expiredInvitationTitle')}}</h1>
-              <p class="mb-9">{{ $t('expiredInvitationMessage')}}</p>
-              <v-btn large link color="primary" href="../">{{ $t('homeBtnLabel')}}</v-btn>
-            </div>
-            <div v-if="tokenError">
-              <v-icon size="48" color="error" class="mb-6">mdi-alert-circle-outline</v-icon>
-              <h1 class="mb-7">{{ $t('errorOccurredTitle')}}</h1>
-              <p class="mb-9">{{ $t('invitationProcessingErrorMsg')}}</p>
-              <v-btn large link color="primary" href="../">{{ $t('homeBtnLabel')}}</v-btn>
-            </div>
-          </v-col>
-       </v-card>
-      </v-row>
+      <v-col cols="12" lg="8" class="text-center">
+        <div v-if="!tokenExpiry && !tokenError">
+          <v-icon size="48" color="primary" class="mb-6">mdi-login-variant</v-icon>
+          <h1 class="mb-7">{{ $t('acceptInviteLandingTitle') }}</h1>
+          <p class="mb-9">{{ $t('acceptInviteLandingMessage') }}</p>
+          <v-btn v-if="!isUserSignedIn()" large link color="primary" @click="redirectToSignin()">{{ $t('loginBtnLabel') }}</v-btn>
+          <v-btn v-if="isUserSignedIn()" large link color="primary" @click="redirectToConfirm()">{{ $t('acceptButtonLabel') }}</v-btn>
+        </div>
+        <div v-if="tokenExpiry">
+          <v-icon size="48" color="error" class="mb-6">mdi-alert-circle-outline</v-icon>
+          <h1 class="mb-7">{{ $t('expiredInvitationTitle')}}</h1>
+          <p class="mb-9">{{ $t('expiredInvitationMessage')}}</p>
+          <v-btn large link color="primary" href="../">{{ $t('homeBtnLabel')}}</v-btn>
+        </div>
+        <div v-if="tokenError">
+          <v-icon size="48" color="error" class="mb-6">mdi-alert-circle-outline</v-icon>
+          <h1 class="mb-7">{{ $t('errorOccurredTitle')}}</h1>
+          <p class="mb-9">{{ $t('invitationProcessingErrorMsg')}}</p>
+          <v-btn large link color="primary" href="../">{{ $t('homeBtnLabel')}}</v-btn>
+        </div>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -82,7 +80,14 @@ export default class AcceptInviteLanding extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  .token-card {
-    max-width: 640px;
+  @import "$assets/scss/theme.scss";
+
+  .container {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .v-icon {
+    font-size: 4rem;
   }
 </style>
