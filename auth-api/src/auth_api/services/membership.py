@@ -19,7 +19,6 @@ from typing import Dict, Tuple
 
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
-
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Membership as MembershipModel
@@ -32,7 +31,6 @@ from config import get_named_config
 
 from .authorization import check_auth
 from .notification import send_email
-
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -113,8 +111,10 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         sender = CONFIG.MAIL_FROM_ID
         template = ENV.get_template('email_templates/membership_approved_notification_email.html')
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
+        app_url = '{}/{}'.format(origin_url, context_path)
         sent_response = send_email(subject, sender, self._model.user.contacts[0].contact.email,
-                                   template.render(url='{}/{}'.format(origin_url, context_path), org_name=org_name))
+                                   template.render(url=app_url, org_name=org_name,
+                                                   logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
         if not sent_response:
             raise BusinessException(Error.FAILED_NOTIFICATION, None)
 
