@@ -14,11 +14,11 @@
 """Service for managing the documents."""
 
 from jinja2 import Environment, FileSystemLoader
+from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 from auth_api.models import Documents as DocumentsModel
 from auth_api.schemas import DocumentSchema
 from config import get_named_config
-from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)

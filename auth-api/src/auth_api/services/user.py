@@ -16,6 +16,9 @@
 This module manages the User Information.
 """
 
+from flask import current_app
+from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -25,7 +28,6 @@ from auth_api.models import User as UserModel
 from auth_api.schemas import UserSchema
 from auth_api.utils.roles import CLIENT_ADMIN_ROLES, Status
 from auth_api.utils.util import camelback2snake
-from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -59,6 +61,7 @@ class User:  # pylint: disable=too-many-instance-attributes
     @classmethod
     def save_from_jwt_token(cls, token: dict = None):
         """Save user to database (create/update)."""
+        current_app.logger.debug('save_from_jwt_token')
         if not token:
             return None
 
@@ -77,6 +80,7 @@ class User:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def add_contact(token, contact_info: dict):
         """Add or update contact information for an existing user."""
+        current_app.logger.debug('add_contact')
         user = UserModel.find_by_jwt_token(token)
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -99,6 +103,7 @@ class User:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def update_contact(token, contact_info: dict):
         """Update a contact for an existing user."""
+        current_app.logger.debug('update_contact')
         user = UserModel.find_by_jwt_token(token)
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -121,6 +126,7 @@ class User:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def update_terms_of_use(token, is_terms_accepted, terms_of_use_version):
         """Update terms of use for an existing user."""
+        current_app.logger.debug('update_terms_of_use')
         if token is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         user = UserModel.update_terms_of_use(token, is_terms_accepted, terms_of_use_version)
@@ -129,6 +135,7 @@ class User:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def delete_contact(token):
         """Delete the contact for an existing user."""
+        current_app.logger.info('delete_contact')
         user = UserModel.find_by_jwt_token(token)
         if not user or not user.contacts:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
