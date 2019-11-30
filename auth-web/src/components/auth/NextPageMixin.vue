@@ -28,8 +28,10 @@ export default class NextPageMixin extends Vue {
         nextStep = Pages.USER_PROFILE
       } else if (!this.myOrg) {
         nextStep = Pages.CREATE_TEAM
-      } else if (this.myOrgMembership.membershipStatus === MembershipStatus.Pending) {
-        nextStep = Pages.PENDING_APPROVAL + '/' + this.myOrg.name
+      } else if (organizations.some(org => org.members[0].membershipStatus === 'ACTIVE')) {
+        nextStep = Pages.MAIN
+        } else if (this.myOrgMembership.membershipStatus === MembershipStatus.Pending) {
+          nextStep = Pages.PENDING_APPROVAL + '/' + this.myOrg.name
       } else {
         nextStep = Pages.MAIN
       }
