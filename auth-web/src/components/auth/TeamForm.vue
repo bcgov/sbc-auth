@@ -71,6 +71,7 @@ export default class TeamForm extends Vue {
     ]
 
     private async mounted () {
+      this.orgStore.setOrgCreateMessage('success') // reset
       if (!this.organizations) {
         await this.syncOrganizations()
       }
