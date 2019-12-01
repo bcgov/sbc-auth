@@ -49,7 +49,12 @@ export default class AcceptInvite extends Mixins(NextPageMixin) {
   private async mounted () {
     await this.getUserProfile('@me')
     await this.syncOrganizations()
-    this.accept()
+    // Check to make sure this user is not already a member of a team
+    if (this.organizations.length > 0) {
+      this.$router.push('/duplicateteam')
+    } else {
+      this.accept()
+    }
   }
 
   private async accept () {
