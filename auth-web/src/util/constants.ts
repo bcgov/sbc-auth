@@ -17,6 +17,7 @@ export enum Role {
 export enum Pages {
     USER_PROFILE = 'userprofile',
     CREATE_TEAM = 'createteam',
+    DUPLICATE_TEAM_MESAGE = 'duplicateteam',
     PENDING_APPROVAL = 'pendingapproval',
     MAIN = 'main'
 }
