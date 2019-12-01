@@ -79,11 +79,12 @@ interface InvitationInfo {
 
 @Component({
   computed: {
+    ...mapState('org', ['pendingOrgInvitations']),
     ...mapGetters('org', ['myOrg', 'myOrgMembership'])
   },
   methods: {
     ...mapMutations('org', ['resetInvitations']),
-    ...mapActions('org', ['createInvitation'])
+    ...mapActions('org', ['createInvitation', 'resendInvitation'])
   }
 })
 export default class InviteUsersForm extends Vue {
@@ -91,8 +92,10 @@ export default class InviteUsersForm extends Vue {
   private loading = false
   private readonly myOrg!: Organization
   private readonly myOrgMembership!: Member
+  private readonly pendingOrgInvitations!: Invitation[]
   private readonly resetInvitations!: () => void
   private readonly createInvitation!: (Invitation) => Promise<void>
+  private readonly resendInvitation!: (Invitation) => Promise<void>
 
   $refs: {
     form: HTMLFormElement
@@ -135,8 +138,24 @@ export default class InviteUsersForm extends Vue {
     }
   }
 
+  private hasDuplicates (): boolean {
+    for (let i = 0; i < this.invitations.length; i++) {
+      for (let j = 0; j < this.invitations.length; j++) {
+        if (i !== j &&
+            this.invitations[j].emailAddress &&
+            this.invitations[i].emailAddress.toLowerCase() === this.invitations[j].emailAddress.toLowerCase()) {
+          return true
+        }
+      }
+    }
+    return false
+  }
+
   private isFormValid (): boolean {
-    return this.invitations && this.invitations.some(invite => invite.emailAddress) && this.$refs.form.validate()
+    return this.invitations &&
+            this.invitations.some(invite => invite.emailAddress) &&
+            !this.hasDuplicates() &&
+            this.$refs.form.validate()
   }
 
   private removeEmail (index: number) {
@@ -147,6 +166,13 @@ export default class InviteUsersForm extends Vue {
     this.invitations.push({ emailAddress: '', role: this.roles[0] })
   }
 
+  private resetForm () {
+    this.invitations.forEach(invitation => {
+      invitation.emailAddress = ''
+      invitation.role = this.roles[0]
+    })
+  }
+
   private async sendInvites () {
     if (this.isFormValid()) {
       // set loading state
@@ -155,13 +181,23 @@ export default class InviteUsersForm extends Vue {
       for (let i = 0; i < this.invitations.length; i++) {
         const invite = this.invitations[i]
         if (invite && invite.emailAddress) {
-          await this.createInvitation({
-            recipientEmail: invite.emailAddress,
-            sentDate: new Date(),
-            membership: [{ membershipType: invite.role.name.toUpperCase(), orgId: this.myOrg.id }]
-          })
+          // Check if there is a pending invitation for this address already
+          const existingInvitation = this.pendingOrgInvitations.find(pendingInvitation =>
+            pendingInvitation.recipientEmail.toLowerCase() === invite.emailAddress.toLowerCase())
+
+          if (existingInvitation) {
+            await this.resendInvitation(existingInvitation)
+          } else {
+            await this.createInvitation({
+              recipientEmail: invite.emailAddress,
+              sentDate: new Date(),
+              membership: [{ membershipType: invite.role.name.toUpperCase(), orgId: this.myOrg.id }]
+            })
+          }
         }
       }
+
+      this.resetForm()
 
       // emit event to let parent know the invite sequence is complete
       this.$emit('invites-complete')
@@ -170,7 +206,9 @@ export default class InviteUsersForm extends Vue {
   }
 
   @Emit()
-  private cancel () {}
+  private cancel () {
+    this.resetForm()
+  }
 }
 </script>
 
