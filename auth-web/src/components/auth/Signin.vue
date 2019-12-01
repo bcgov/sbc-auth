@@ -17,7 +17,6 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
-    ...mapState('user', ['userProfile']),
     ...mapState('org', ['organizations'])
   },
   methods: {
@@ -34,7 +33,6 @@ import { getModule } from 'vuex-module-decorators'
 export default class Signin extends Mixins(NextPageMixin) {
   private userStore = getModule(UserModule, this.$store)
   private orgStore = getModule(OrgModule, this.$store)
-  private readonly userProfile!: User
   private readonly initKeycloak!: (idpHint: string) => Promise<KeycloakPromise<boolean, KeycloakError>>
   private readonly initializeSession!: () => UserInfo
   private readonly syncUserProfile!: () => User
@@ -72,7 +70,7 @@ export default class Signin extends Mixins(NextPageMixin) {
       if (this.idpHint === 'idir') {
         this.$router.push('/searchbusiness')
       } else {
-        this.$router.push(this.getNextPageUrl(this.userProfile, this.organizations))
+        this.$router.push(this.getNextPageUrl())
       }
     }
   }
