@@ -102,7 +102,8 @@ async def process_notification(notification_id: int):
                                                                      notify_status=NotificationStatusEnum.FAILURE)
 
         await NotifyService.update_notification_status(APP.db_session, update_notification)
-
+    finally:
+        APP.db_session.close()
     return
 
 
