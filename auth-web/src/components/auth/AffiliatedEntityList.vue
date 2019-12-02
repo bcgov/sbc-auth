@@ -12,7 +12,7 @@
     </v-card>
 
     <!-- Business Data Table -->
-    <v-card flat v-if="myBusinesses.length > 0 && !isLoading">
+    <v-card flat v-if="myBusinesses.length > 0 || isLoading">
       <v-card-text class="p-1">
         <v-data-table
           :loading="isLoading"
@@ -99,6 +99,12 @@ export default class AffiliatedEntityList extends Vue {
     return (businessIdentifier: string) => {
       return this.myBusinesses.find(business => business.businessIdentifier === businessIdentifier)
     }
+  }
+
+  public async syncBusinesses (): Promise<void> {
+    this.isLoading = true
+    await this.syncOrganizations()
+    this.isLoading = false
   }
 
   private canRemove (): boolean {
