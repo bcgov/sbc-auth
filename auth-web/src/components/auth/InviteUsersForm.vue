@@ -139,16 +139,8 @@ export default class InviteUsersForm extends Vue {
   }
 
   private hasDuplicates (): boolean {
-    for (let i = 0; i < this.invitations.length; i++) {
-      for (let j = 0; j < this.invitations.length; j++) {
-        if (i !== j &&
-            this.invitations[j].emailAddress &&
-            this.invitations[i].emailAddress.toLowerCase() === this.invitations[j].emailAddress.toLowerCase()) {
-          return true
-        }
-      }
-    }
-    return false
+    const invitations = this.invitations.filter(invitation => invitation.emailAddress)
+    return new Set(invitations.map(invitation => invitation.emailAddress.toLowerCase())).size !== invitations.length
   }
 
   private isFormValid (): boolean {
