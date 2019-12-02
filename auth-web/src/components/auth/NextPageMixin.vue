@@ -19,6 +19,7 @@ export default class NextPageMixin extends Vue {
   protected readonly myOrgMembership!: Member
 
   protected getNextPageUrl (): string {
+    debugger
     let nextStep:string = '/'
     // Redirect to user profile if no contact info
     // Redirect to create team if no orgs
