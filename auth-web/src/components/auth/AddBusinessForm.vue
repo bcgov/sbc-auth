@@ -120,6 +120,9 @@ export default class AddBusinessForm extends Vue {
   async add () {
     if (this.isFormValid()) {
       try {
+        // close modal but continue to work in background
+        this.$emit('close-add-business-modal')
+
         // attempt to add business
         await this.addBusiness({ businessIdentifier: this.businessIdentifier, passCode: this.passcode })
 
