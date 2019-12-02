@@ -99,8 +99,8 @@ class UserStaff(Resource):
         return response, status
 
 
-@cors_preflight('GET,OPTIONS,PATCH')
-@API.route('/@me', methods=['GET', 'OPTIONS', 'PATCH'])
+@cors_preflight('GET,OPTIONS,PATCH,DELETE')
+@API.route('/@me', methods=['GET', 'OPTIONS', 'PATCH', 'DELETE'])
 class User(Resource):
     """Resource for managing an individual user."""
 
@@ -140,6 +140,20 @@ class User(Resource):
         try:
             response, status = UserService.update_terms_of_use(token, is_terms_accepted, version).as_dict(), \
                                http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def delete():
+        """Delete the user profile."""
+        token = g.jwt_oidc_token_info
+        try:
+            UserService.delete_user(token)
+            response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

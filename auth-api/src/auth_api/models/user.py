@@ -29,6 +29,7 @@ from .base_model import BaseModel
 from .db import db
 from .membership import Membership as MembershipModel
 from .org import Org as OrgModel
+from .user_status_code import UserStatusCode
 
 
 class User(BaseModel):
@@ -50,7 +51,7 @@ class User(BaseModel):
     orgs = relationship('Membership', back_populates='user',
                         primaryjoin='and_(User.id == Membership.user_id, \
                         or_(Membership.status == ' + str(Status.ACTIVE.value) + ', Membership.status == ' + str(
-                            Status.PENDING_APPROVAL.value) + '))')   # noqa:E127
+                            Status.PENDING_APPROVAL.value) + '))')  # noqa:E127
 
     is_terms_of_use_accepted = Column(Boolean(), default=False, nullable=True)
     terms_of_use_accepted_version = Column(
@@ -58,6 +59,10 @@ class User(BaseModel):
     )
     terms_of_use_version = relationship('Documents', foreign_keys=[terms_of_use_accepted_version], uselist=False,
                                         lazy='select')
+    status = Column(
+        ForeignKey('user_status_code.id')
+    )
+    user_status = relationship('UserStatusCode', foreign_keys=[status], lazy='subquery')
 
     @classmethod
     def find_by_username(cls, username):
@@ -87,6 +92,7 @@ class User(BaseModel):
             current_app.logger.debug(
                 'Creating user from JWT:{}; User:{}'.format(token, user)
             )
+            user.status = UserStatusCode.get_default_type()
             user.save()
             return user
         return None
