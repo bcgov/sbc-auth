@@ -15,6 +15,8 @@
 
 from typing import Dict, Tuple
 
+from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -22,9 +24,8 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import OrgSchema
-from auth_api.utils.roles import Status
+from auth_api.utils.roles import VALID_STATUSES, Status
 from auth_api.utils.util import camelback2snake
-from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from .authorization import check_auth
 from .invitation import Invitation as InvitationService
@@ -158,4 +159,15 @@ class Org:
     @staticmethod
     def get_orgs(user_id):
         """Return the orgs associated with this user."""
-        return MembershipModel.find_orgs_for_user(user_id)
+        # TODO DO_NOT_USE this def if there is a database transaction involved,
+        #  as the below logic removes object from model
+        orgs = MembershipModel.find_orgs_for_user(user_id)
+        # because members are fetched using backpopulates,cant add these conditions programmatically.
+        # so resorting to manually looping   # noqa:E501
+        for org in orgs:
+            # user can have multiple memberships.if the user getting denied first and added again,
+            # it will be multiple memberships..filter out denied records # noqa:E501
+            # fix for https://github.com/bcgov/entity/issues/1951   # noqa:E501
+            org.members = list(
+                filter(lambda member: (member.user_id == user_id and (member.status in VALID_STATUSES)), org.members))
+        return orgs

@@ -35,6 +35,8 @@ class Error(Enum):
     EXPIRED_INVITATION = 'The invitation has expired.', http_status.HTTP_400_BAD_REQUEST
     FAILED_INVITATION = 'Failed to dispatch the invitation', http_status.HTTP_500_INTERNAL_SERVER_ERROR
     FAILED_NOTIFICATION = 'Failed to dispatch the notification', http_status.HTTP_500_INTERNAL_SERVER_ERROR
+    DELETE_FAILED_ONLY_OWNER = 'Cannot delete as user is the only owner of some teams', http_status.HTTP_400_BAD_REQUEST
+    DELETE_FAILED_INACTIVE_USER = 'User is already inactive', http_status.HTTP_400_BAD_REQUEST
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""

@@ -22,11 +22,16 @@ import uuid
 
 from auth_api import status as http_status
 from auth_api.exceptions.errors import Error
+from auth_api.models import Affiliation as AffiliationModel
+from auth_api.models import ContactLink as ContactLinkModel
+from auth_api.models import Membership as MembershipModel
+from auth_api.services import Org as OrgService
+from auth_api.utils.roles import Status
 from tests import skip_in_pod
-from tests.utilities.factory_scenarios import TestContactInfo, TestJwtClaims, TestOrgInfo
+from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
-    factory_affiliation_model, factory_auth_header, factory_entity_model, factory_membership_model, factory_org_model,
-    factory_user_model)
+    factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
+    factory_membership_model, factory_org_model, factory_user_model)
 
 
 def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
@@ -365,3 +370,105 @@ def test_user_authorizations_returns_200(client, jwt, session):  # pylint:disabl
 
     assert rv.status_code == http_status.HTTP_200_OK
     assert len(rv.json.get('authorizations')) == 0
+
+
+def test_delete_user_with_no_orgs_returns_204(client, jwt, session):  # pylint:disable=unused-argument
+    """Test if the user doesn't have any teams/orgs assert status is 204."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    # post token with updated claims
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.updated_test)
+
+    rv = client.delete('/api/v1/users/@me', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+
+def test_delete_inactive_user_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+    """Test if the user doesn't have any teams/orgs assert status is 204."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    # post token with updated claims
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.updated_test)
+
+    rv = client.delete('/api/v1/users/@me', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+    rv = client.delete('/api/v1/users/@me', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+
+
+def test_delete_unknown_user_returns_404(client, jwt, session):  # pylint:disable=unused-argument
+    """Test if the user doesn't have any teams/orgs assert status is 204."""
+    # post token with updated claims
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.updated_test)
+
+    rv = client.delete('/api/v1/users/@me', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+
+
+def test_delete_user_as_only_admin_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+    """Test if the user is the only owner of a team assert status is 400."""
+    user_model = factory_user_model(user_info=TestUserInfo.user_test)
+    contact = factory_contact_model()
+    contact_link = ContactLinkModel()
+    contact_link.contact = contact
+    contact_link.user = user_model
+    contact_link.commit()
+
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
+    org_dictionary = org.as_dict()
+    org_id = org_dictionary['id']
+
+    entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
+
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation.save()
+
+    claims = copy.deepcopy(TestJwtClaims.edit_role.value)
+    claims['sub'] = str(user_model.keycloak_guid)
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+
+    rv = client.delete('/api/v1/users/@me', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+
+
+def test_delete_user_is_member_returns_204(client, jwt, session):  # pylint:disable=unused-argument
+    """Test if the user is the member of a team assert status is 204."""
+    user_model = factory_user_model(user_info=TestUserInfo.user_test)
+    contact = factory_contact_model()
+    contact_link = ContactLinkModel()
+    contact_link.contact = contact
+    contact_link.user = user_model
+    contact_link.commit()
+
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
+    org_dictionary = org.as_dict()
+    org_id = org_dictionary['id']
+
+    entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation.save()
+
+    user_model2 = factory_user_model(user_info=TestUserInfo.user2)
+    contact = factory_contact_model()
+    contact_link = ContactLinkModel()
+    contact_link.contact = contact
+    contact_link.user = user_model2
+    contact_link.commit()
+
+    membership = MembershipModel(org_id=org_id, user_id=user_model2.id, membership_type_code='MEMBER',
+                                 membership_type_status=Status.ACTIVE.value)
+    membership.save()
+
+    claims = copy.deepcopy(TestJwtClaims.edit_role.value)
+    claims['sub'] = str(user_model2.keycloak_guid)
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+
+    rv = client.delete('/api/v1/users/@me', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
