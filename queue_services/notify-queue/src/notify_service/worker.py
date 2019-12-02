@@ -43,7 +43,7 @@ from notify_api.core import config as app_config
 from notify_api.db.models.notification import Notification, NotificationUpdate
 from notify_api.db.models.notification_status import NotificationStatusEnum
 from notify_api.services.notify import NotifyService
-from sentry_sdk import capture_message
+#from sentry_sdk import capture_message
 
 
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
@@ -58,10 +58,10 @@ async def send_with_send_message(sender, recipients, message):
     await smtp_client.quit()
 
 
-async def process_notification(notification_id: int):
+async def process_notification(notification_id: int, db_session):
     """Send the notification to smtp server."""
     try:
-        notification: Notification = await NotifyService.find_notification(APP.db_session, notification_id)
+        notification: Notification = await NotifyService.find_notification(db_session, notification_id)
         encoding = 'utf-8'
         message = MIMEMultipart()
         message['Subject'] = notification.contents.subject
@@ -92,7 +92,7 @@ async def process_notification(notification_id: int):
                                                                      sent_date=datetime.utcnow(),
                                                                      notify_status=NotificationStatusEnum.DELIVERED)
 
-        await NotifyService.update_notification_status(APP.db_session, update_notification)
+        await NotifyService.update_notification_status(db_session, update_notification)
     except Exception as err:  # pylint: disable=broad-except, unused-variable # noqa F841;
         # capture_message(f'Notify Service Error: Failied to send email:{notification.recipients} with error:{err}',
         #                level='error')
@@ -101,39 +101,39 @@ async def process_notification(notification_id: int):
                                                                      sent_date=datetime.utcnow(),
                                                                      notify_status=NotificationStatusEnum.FAILURE)
 
-        await NotifyService.update_notification_status(APP.db_session, update_notification)
-    finally:
-        APP.db_session.close()
+        await NotifyService.update_notification_status(db_session, update_notification)
     return
 
 
 async def cb_subscription_handler(msg: nats.aio.client.Msg):
     """Use Callback to process Queue Msg objects."""
+    db_session = APP.db_session
     try:
         logger.info('Received raw message seq:%s, data=  %s', msg.sequence, msg.data.decode())
         notification_id = json.loads(msg.data.decode('utf-8'))
         logger.info('Extracted id: %s', notification_id)
-        await process_notification(notification_id)
+        await process_notification(notification_id, db_session)
     except (QueueException, Exception):  # pylint: disable=broad-except
         # Catch Exception so that any error is still caught and the message is removed from the queue
         # capture_message('Notify Queue Error:', level='error')
         logger.info('Notify Queue Error: %s', exc_info=True)
     finally:
-        APP.db_session.close()
+        db_session.close()
 
 
 async def job_handler(status: str):
     """Use schedule task to process notifications from db."""
+    db_session = APP.db_session
     try:
         logger.info('Schedule Job for sending %s email run at:%s', status, datetime.utcnow())
-        notifications = await NotifyService.find_notifications_by_status(APP.db_session, status)
+        notifications = await NotifyService.find_notifications_by_status(db_session, status)
         for notification in notifications:
             logger.info('Process notificaiton id: %s', notification.id)
-            await process_notification(notification.id)
+            await process_notification(notification.id, db_session)
         logger.info('Schedule Job for sending %s email finish at:%s', status, datetime.utcnow())
     except Exception:  # pylint: disable=broad-except
         # Catch Exception so that any error is still caught and the message is removed from the queue
-        #capture_message('Notify Job Error:', level='error')
+        # capture_message('Notify Job Error:', level='error')
         logger.info('Notify Job Error: %s', exc_info=True)
     finally:
-        APP.db_session.close()
+        db_session.close()
