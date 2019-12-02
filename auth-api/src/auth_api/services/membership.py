@@ -122,8 +122,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 send_email(subject, sender, self._model.user.contacts[0].contact.email,
                            template.render(url=app_url, org_name=org_name,
                                            logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
-                thread = Thread(target=run_job)
-                thread.start()
+            thread = Thread(target=run_job)
+            thread.start()
 
             current_app.logger.debug('<send_approval_notification_to_member')
         except:  # noqa: E722
