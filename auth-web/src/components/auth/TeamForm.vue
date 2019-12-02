@@ -10,11 +10,18 @@
     </div>
     <div>
       <v-form v-if="organizations.length === 0" ref="createTeamForm">
-        <v-radio-group class="mt-0 mb-5 pt-0" v-model="teamType" :mandatory="true">
+        <v-radio-group class="mt-0 mb-4 pt-0" v-model="teamType" :mandatory="true">
           <v-radio class="mb-3" label="I manage my own business" value="BASIC"/>
-          <v-radio label="I manage multiple businesses on behalf of my clients" value="PREMIUM" />
+          <v-radio label="I manage multiple businesses on behalf of my clients" value="PREMIUM"/>
         </v-radio-group>
-        <v-text-field filled :rules="teamNameRules" v-model="teamName" :label="teamType === 'BASIC' ? 'Your Business Name' : 'Your Management Company or Law Firm Name'" />
+        <v-text-field filled :rules="teamNameRules" v-model.trim="teamName"
+                      :label="teamType === 'BASIC' ? 'Your Business Name' : 'Your Management Company or Law Firm Name'"/>
+        <v-alert v-show="orgCreateMessage !== 'success'" class="mb-0"
+                 dense
+                 outlined
+                 type="error"
+        >{{orgCreateMessage}}
+        </v-alert>
         <v-row>
           <v-col cols="12" class="form__btns pb-0">
             <v-btn large color="primary" class="mr-2" :disabled='!isFormValid()' @click="save">
@@ -39,7 +46,7 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
-    ...mapState('org', ['organizations'])
+    ...mapState('org', ['organizations', 'orgCreateMessage'])
   },
   methods: {
     ...mapActions('org', ['createOrg']),
@@ -47,57 +54,54 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class TeamForm extends Vue {
-  private orgStore = getModule(OrgModule, this.$store)
-  private teamName: string = ''
-  private teamType: string = 'BASIC'
-  private readonly organizations!: Organization[]
-  private readonly createOrg!: (requestBody: CreateRequestBody) => Organization
-  private readonly syncOrganizations!: () => Organization[]
+    private orgStore = getModule(OrgModule, this.$store)
+    private teamName: string = ''
+    private teamType: string = 'BASIC'
+    private readonly organizations!: Organization[]
+    private readonly createOrg!: (requestBody: CreateRequestBody) => Organization
+    private readonly syncOrganizations!: () => Organization[]
+    private readonly orgCreateMessage: string
 
-  $refs: {
-    createTeamForm: HTMLFormElement
-  }
-
-  private readonly teamNameRules = [
-    v => !!v || 'You must provide a team name'
-  ]
-
-  private async mounted () {
-    if (!this.organizations) {
-      await this.syncOrganizations()
+    $refs: {
+      createTeamForm: HTMLFormElement
     }
-  }
 
-  private isFormValid (): boolean {
-    return !!this.teamName
-  }
+    private readonly teamNameRules = [
+      v => !!v || 'You must provide a team name'
+    ]
 
-  private async save () {
-    // Validate form, and then create an team with this user a member
-    if (this.isFormValid()) {
-      const createRequestBody: CreateRequestBody = {
-        name: this.teamName,
-        typeCode: this.teamType === 'BASIC' ? 'IMPLICIT' : 'EXPLICIT'
+    private async mounted () {
+      this.orgStore.setOrgCreateMessage('success') // reset
+      if (!this.organizations) {
+        await this.syncOrganizations()
       }
+    }
 
-      try {
+    private isFormValid (): boolean {
+      return !!this.teamName
+    }
+
+    private async save () {
+      // Validate form, and then create an team with this user a member
+      if (this.isFormValid()) {
+        const createRequestBody: CreateRequestBody = {
+          name: this.teamName,
+          typeCode: this.teamType === 'BASIC' ? 'IMPLICIT' : 'EXPLICIT'
+        }
         await this.createOrg(createRequestBody)
-        this.redirectToNext()
-      } catch (exception) {
-        // Handle error
-        // eslint-disable-next-line no-console
-        console.error(exception.error)
+        if (this.orgCreateMessage === 'success') {
+          this.redirectToNext()
+        }
       }
     }
-  }
 
-  private cancel () {
-    this.$router.push({ path: '/home' })
-  }
+    private cancel () {
+      this.$router.push({ path: '/home' })
+    }
 
-  private redirectToNext () {
-    this.$router.push({ path: '/main' })
-  }
+    private redirectToNext () {
+      this.$router.push({ path: '/main' })
+    }
 }
 </script>
 

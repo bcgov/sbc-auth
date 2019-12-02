@@ -85,6 +85,7 @@ class Affiliation:
     def create_affiliation(org_id, business_identifier, pass_code=None, token_info: Dict = None):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
+        current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
         org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=CLIENT_AUTH_ROLES)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -92,7 +93,7 @@ class Affiliation:
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-
+        current_app.logger.debug('<create_affiliation entity found')
         entity_id = entity.identifier
 
         authorized = True
@@ -112,8 +113,9 @@ class Affiliation:
                 authorized = False
 
         if not authorized:
+            current_app.logger.debug('<create_affiliation not authorized')
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
-
+        current_app.logger.debug('<create_affiliation find affiliation')
         # Ensure this affiliation does not already exist
         affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id)
         if affiliation is not None:
@@ -121,17 +123,20 @@ class Affiliation:
 
         # Retrieve entity name from Legal-API and update the entity with current name
         # TODO: Create subscription to listen for future name updates
+        current_app.logger.debug('<create_affiliation sync_name')
         entity.sync_name()
 
         affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id)
         affiliation.save()
         entity.set_pass_code_claimed(True)
+        current_app.logger.debug('<create_affiliation affiliated')
 
         return Affiliation(affiliation)
 
     @staticmethod
     def delete_affiliation(org_id, business_identifier, token_info: Dict = None):
         """Delete the affiliation for the provided org id and business id."""
+        current_app.logger.info(f'<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}')
         org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)

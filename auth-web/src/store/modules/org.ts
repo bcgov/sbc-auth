@@ -1,6 +1,6 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
-import { CreateRequestBody as CreateOrgRequestBody, Member, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { CreateRequestBody as CreateOrgRequestBody, Member, MembershipStatus, Organization, UpdateMemberPayload } from '@/models/Organization'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
@@ -26,6 +26,7 @@ export default class OrgModule extends VuexModule {
   activeOrgMembers: Member[] = []
   pendingOrgMembers: Member[] = []
   pendingOrgInvitations: Invitation[] = []
+  orgCreateMessage = 'success'
 
   // This simply returns the first org in the list.
   // TODO: Once account switching is in place, this will have to return the
@@ -40,7 +41,8 @@ export default class OrgModule extends VuexModule {
   get myOrgMembership (): Member {
     const currentUser: UserInfo = this.context.rootState.user.currentUser
     if (this.myOrg && currentUser) {
-      return this.myOrg.members.find(member => member.user.username === currentUser.userName)
+      return this.myOrg.members.find(member => member.user.username === currentUser.userName &&
+        (member.membershipStatus === MembershipStatus.Active || member.membershipStatus === MembershipStatus.Pending))
     }
     return undefined
   }
@@ -92,15 +94,29 @@ export default class OrgModule extends VuexModule {
     this.organizations = organizations
   }
 
-  @Action({ rawError: true, commit: 'addOrganization' })
+  @Mutation
+  public setOrgCreateMessage (message:string) {
+    this.orgCreateMessage = message
+  }
+
+  @Action({ rawError: true })
   public async createOrg (createRequestBody: CreateOrgRequestBody) {
-    const response = await OrgService.createOrg(createRequestBody)
-    if (!response || !response.data) {
-      throw new Error('Unknown error has occured while creating the team')
-    } else if (response.status === 409) {
-      throw new Error('That team already exists')
-    } else if (response.status === 201) {
-      return response.data
+    try {
+      const response = await OrgService.createOrg(createRequestBody)
+      this.context.commit('setOrgCreateMessage', 'success')
+      this.context.commit('addOrganization', response.data)
+    } catch (err) {
+      switch (err.response.status) {
+        case 409:
+          this.context.commit('setOrgCreateMessage', 'Teams with similar names exists')
+          break
+        case 400:
+          this.context.commit('setOrgCreateMessage', 'Invalid team name')
+          break
+        default:
+          this.context.commit('setOrgCreateMessage', 'Error happened while creating team')
+          break
+      }
     }
   }
 

@@ -21,6 +21,7 @@ from .rest_service import RestService
 
 def send_email(subject: str, sender: str, recipients: str, html_body: str):  # pylint:disable=unused-argument
     """Send the email asynchronously, using the given details."""
+    current_app.logger.info(f'send_email {recipients}')
     notify_url = current_app.config.get('NOTIFY_API_URL') + '/notify/'
     notify_body = {
         'recipients': recipients,
@@ -30,7 +31,7 @@ def send_email(subject: str, sender: str, recipients: str, html_body: str):  # p
         }
     }
     notify_response = RestService.post(notify_url, data=notify_body)
-
+    current_app.logger.info('send_email notify_response')
     if notify_response:
         response_json = json.loads(notify_response.text)
         if response_json['notifyStatus']['code'] != 'FAILURE':

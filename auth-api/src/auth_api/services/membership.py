@@ -17,6 +17,7 @@ This module manages the Membership Information between an org and a user.
 """
 from typing import Dict, Tuple
 
+from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
@@ -107,33 +108,43 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
     def send_approval_notification_to_member(self, origin_url):
         """Send the admin email notification."""
+        current_app.logger.debug('<send_approval_notification_to_member')
         org_name = self._model.org.name
         subject = '[BC Registries & Online Services] Welcome to the team {}'. \
             format(org_name)
         sender = CONFIG.MAIL_FROM_ID
         template = ENV.get_template('email_templates/membership_approved_notification_email.html')
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
+        app_url = '{}/{}'.format(origin_url, context_path)
         sent_response = send_email(subject, sender, self._model.user.contacts[0].contact.email,
-                                   template.render(url='{}/{}'.format(origin_url, context_path), org_name=org_name))
+                                   template.render(url=app_url, org_name=org_name,
+                                                   logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
+        current_app.logger.debug('<send_approval_notification_to_member')
         if not sent_response:
+            current_app.logger.error('<send_approval_notification_to_member failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None)
 
     def update_membership(self, updated_fields, token_info: Dict = None):
         """Update an existing membership with the given role."""
         # Ensure that this user is an ADMIN or OWNER on the org associated with this membership
+        current_app.logger.debug('<update_membership')
         check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
         for key, value in updated_fields.items():
             if value is not None:
                 setattr(self._model, key, value)
         self._model.save()
         self._model.commit()
+        current_app.logger.debug('>update_membership')
         return self
 
     def deactivate_membership(self, token_info: Dict = None):
         """Mark this membership as inactive."""
+        current_app.logger.debug('<deactivate_membership')
         if self._model.user.username != token_info.get('username'):
             check_auth(token_info=token_info, one_of_roles=(ADMIN, OWNER))
         self._model.membership_status = MembershipStatusCodeModel.get_membership_status_by_code('INACTIVE')
+        current_app.logger.info(f'<deactivate_membership for {self._model.user.username}')
         self._model.save()
         self._model.commit()
+        current_app.logger.debug('>deactivate_membership')
         return self

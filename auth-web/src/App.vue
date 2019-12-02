@@ -52,4 +52,8 @@ export default Vue.extend({
       padding-bottom: 4rem;
     }
   }
+
+  ::v-deep .v-alert__wrapper {
+    max-width: 1224px;
+  }
 </style>
