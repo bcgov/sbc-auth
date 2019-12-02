@@ -94,9 +94,9 @@ async def process_notification(notification_id: int):
 
         await NotifyService.update_notification_status(APP.db_session, update_notification)
     except Exception as err:  # pylint: disable=broad-except, unused-variable # noqa F841;
-        capture_message(f'Notify Service Error: Failied to send email:{notification.recipients} with error:{err}',
-                        level='error')
-        logger.error('Notify Job (process_notification) Error: %s', exc_info=True)
+        # capture_message(f'Notify Service Error: Failied to send email:{notification.recipients} with error:{err}',
+        #                level='error')
+        logger.info('Notify Job (process_notification) Error: %s', exc_info=True)
         update_notification: NotificationUpdate = NotificationUpdate(id=notification_id,
                                                                      sent_date=datetime.utcnow(),
                                                                      notify_status=NotificationStatusEnum.FAILURE)
@@ -116,8 +116,8 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
         await process_notification(notification_id)
     except (QueueException, Exception):  # pylint: disable=broad-except
         # Catch Exception so that any error is still caught and the message is removed from the queue
-        capture_message('Notify Queue Error:', level='error')
-        logger.error('Notify Queue Error: %s', exc_info=True)
+        # capture_message('Notify Queue Error:', level='error')
+        logger.info('Notify Queue Error: %s', exc_info=True)
     finally:
         APP.db_session.close()
 
@@ -133,7 +133,7 @@ async def job_handler(status: str):
         logger.info('Schedule Job for sending %s email finish at:%s', status, datetime.utcnow())
     except Exception:  # pylint: disable=broad-except
         # Catch Exception so that any error is still caught and the message is removed from the queue
-        capture_message('Notify Job Error:', level='error')
-        logger.error('Notify Job Error: %s', exc_info=True)
+        #capture_message('Notify Job Error:', level='error')
+        logger.info('Notify Job Error: %s', exc_info=True)
     finally:
         APP.db_session.close()
