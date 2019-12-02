@@ -2,13 +2,10 @@
   <v-container>
     <div class="view-container">
       <article>
-        <h1 class="mb-5">Create Team</h1>
-        <p class="intro-text">Tell us about your team and enter a team name.</p>
+        <h1 class="mb-5">Already On a Team</h1>
+        <p class="intro-text">You cannot accept this invitation, because you already have membership on a team</p>
         <v-card class="profile-card">
           <v-container>
-            <v-card-title>
-              <h2 class="mb-4">Your Team Profile</h2>
-            </v-card-title>
             <v-card-text>
               <TeamForm />
             </v-card-text>
@@ -31,7 +28,7 @@ import { getModule } from 'vuex-module-decorators'
     TeamForm
   }
 })
-export default class CreateTeamView extends Vue {
+export default class DuplicateTeamWarning extends Vue {
   async mounted () {}
 }
 </script>

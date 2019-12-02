@@ -6,6 +6,7 @@ import BusinessProfile from '@/views/BusinessProfile.vue'
 import CreateAccount from '@/views/CreateAccount.vue'
 import CreateTeamView from '@/views/CreateTeamView.vue'
 import Dashboard from '@/views/management/Dashboard.vue'
+import DuplicateTeamWarning from '@/views/DuplicateTeamWarning.vue'
 import KeyCloakService from '@/services/keycloak.services'
 import PageNotFound from '@/views/PageNotFound.vue'
 import PaymentForm from '@/components/pay/PaymentForm.vue'
@@ -41,6 +42,7 @@ export function getRoutes (appFlavor: String) {
     { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
     { path: '/createteam', component: CreateTeamView, meta: { requiresAuth: true } },
     { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
+    { path: '/duplicateteam', component: DuplicateTeamWarning, meta: { requiresAuth: true } },
     { path: '/validatetoken/:token', component: AcceptInviteLanding, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
     { path: '/confirmtoken/:token', component: AcceptInvite, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } }
   ]

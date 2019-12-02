@@ -17,7 +17,7 @@
         "examples": [
           "Foobar Inc."
         ],
-        "pattern": "^(.*)$"
+        "pattern": "^[^\\s]+(\\s+[^\\s]+)*$"
       },
       "typeCode": {
         "$id": "#/properties/orgType",
