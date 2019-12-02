@@ -19,6 +19,7 @@ export default class NextPageMixin extends Vue {
   protected readonly myOrgMembership!: Member
 
   protected getNextPageUrl (): string {
+    debugger
     let nextStep:string = '/'
     // Redirect to user profile if no contact info
     // Redirect to create team if no orgs
@@ -28,10 +29,10 @@ export default class NextPageMixin extends Vue {
         nextStep = Pages.USER_PROFILE
       } else if (!this.myOrg) {
         nextStep = Pages.CREATE_TEAM
-      } else if (organizations.some(org => org.members[0].membershipStatus === 'ACTIVE')) {
+      } else if (this.myOrgMembership.membershipStatus === MembershipStatus.Active) {
         nextStep = Pages.MAIN
-        } else if (this.myOrgMembership.membershipStatus === MembershipStatus.Pending) {
-          nextStep = Pages.PENDING_APPROVAL + '/' + this.myOrg.name
+      } else if (this.myOrgMembership.membershipStatus === MembershipStatus.Pending) {
+        nextStep = Pages.PENDING_APPROVAL + '/' + this.myOrg.name
       } else {
         nextStep = Pages.MAIN
       }
