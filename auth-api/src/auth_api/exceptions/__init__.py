@@ -8,7 +8,6 @@ status_code - where possible use HTTP Error Codes
 """
 
 import traceback
-from functools import wraps  # noqa: I001
 
 from sbc_common_components.tracing.exception_tracing import ExceptionTracing  # noqa: I001
 

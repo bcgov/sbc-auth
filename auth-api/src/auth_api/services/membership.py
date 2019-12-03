@@ -21,6 +21,7 @@ from threading import Thread
 from flask import current_app, copy_current_request_context
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Membership as MembershipModel
@@ -33,6 +34,7 @@ from config import get_named_config
 
 from .authorization import check_auth
 from .notification import send_email
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()

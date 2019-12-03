@@ -22,12 +22,15 @@ import pytest
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import ContactLink as ContactLinkModel
+from auth_api.models import Membership as MembershipModel
 from auth_api.models import User as UserModel
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
-from tests.utilities.factory_scenarios import TestContactInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
-from tests.utilities.factory_utils import factory_contact_model, factory_user_model
+from auth_api.utils.roles import Status
+from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
+from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_user_model
 
 
 def test_as_dict(session):  # pylint: disable=unused-argument
@@ -259,3 +262,134 @@ def test_delete_contact_user_link(session, auth_mock):  # pylint:disable=unused-
 
     exist_contact_link = ContactLinkModel.find_by_org_id(org_id)
     assert exist_contact_link
+
+
+def test_delete_user(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that a user can be deleted."""
+    user_model = factory_user_model(user_info=TestUserInfo.user_test)
+    contact = factory_contact_model()
+    contact_link = ContactLinkModel()
+    contact_link.contact = contact
+    contact_link.user = user_model
+    contact_link.commit()
+
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
+
+    UserService.delete_user(TestJwtClaims.user_test)
+    updated_user = UserModel.find_by_jwt_token(TestJwtClaims.user_test)
+    assert len(updated_user.contacts) == 0
+
+    user_orgs = MembershipModel.find_orgs_for_user(updated_user.id)
+    for org in user_orgs:
+        assert org.status_code == 'INACTIVE'
+
+
+def test_delete_user_where_org_has_affiliations(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that a user can be deleted."""
+    user_model = factory_user_model(user_info=TestUserInfo.user_test)
+    contact = factory_contact_model()
+    contact_link = ContactLinkModel()
+    contact_link.contact = contact
+    contact_link.user = user_model
+    contact_link.commit()
+
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
+    org_dictionary = org.as_dict()
+    org_id = org_dictionary['id']
+
+    entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
+
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation.save()
+    with pytest.raises(BusinessException) as exception:
+        UserService.delete_user(TestJwtClaims.user_test)
+        assert exception.code == Error.DELETE_FAILED_ONLY_OWNER
+
+    updated_user = UserModel.find_by_jwt_token(TestJwtClaims.user_test)
+    assert len(updated_user.contacts) == 1
+
+    user_orgs = MembershipModel.find_orgs_for_user(updated_user.id)
+    for org in user_orgs:
+        assert org.status_code == 'ACTIVE'
+
+
+def test_delete_user_where_user_is_member_on_org(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that a user can be deleted."""
+    # Create a user and org
+    user_model = factory_user_model(user_info=TestUserInfo.user_test)
+    contact = factory_contact_model()
+    contact_link = ContactLinkModel()
+    contact_link.contact = contact
+    contact_link.user = user_model
+    contact_link.commit()
+
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
+    org_dictionary = org.as_dict()
+    org_id = org_dictionary['id']
+
+    entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation.save()
+
+    # Create another user and add membership to the above org
+    user_model2 = factory_user_model(user_info=TestUserInfo.user2)
+    contact = factory_contact_model()
+    contact_link = ContactLinkModel()
+    contact_link.contact = contact
+    contact_link.user = user_model2
+    contact_link.commit()
+
+    membership = MembershipModel(org_id=org_id, user_id=user_model2.id, membership_type_code='MEMBER',
+                                 membership_type_status=Status.ACTIVE.value)
+    membership.save()
+
+    UserService.delete_user(TestJwtClaims.get_test_user(user_model2.keycloak_guid))
+
+    updated_user = UserModel.find_by_jwt_token(TestJwtClaims.get_test_user(user_model2.keycloak_guid))
+    assert len(updated_user.contacts) == 0
+
+    user_orgs = MembershipModel.find_orgs_for_user(updated_user.id)
+    for org in user_orgs:
+        assert org.status_code == 'INACTIVE'
+
+
+def test_delete_user_where_org_has_another_owner(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that a user can be deleted."""
+    # Create a user and org
+    user_model = factory_user_model(user_info=TestUserInfo.user_test)
+    contact = factory_contact_model()
+    contact_link = ContactLinkModel()
+    contact_link.contact = contact
+    contact_link.user = user_model
+    contact_link.commit()
+
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
+    org_dictionary = org.as_dict()
+    org_id = org_dictionary['id']
+
+    entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation.save()
+
+    # Create another user and add membership to the above org
+    user_model2 = factory_user_model(user_info=TestUserInfo.user2)
+    contact = factory_contact_model()
+    contact_link = ContactLinkModel()
+    contact_link.contact = contact
+    contact_link.user = user_model2
+    contact_link.commit()
+
+    membership = MembershipModel(org_id=org_id, user_id=user_model2.id, membership_type_code='OWNER',
+                                 membership_type_status=Status.ACTIVE.value)
+    membership.save()
+    membership.commit()
+
+    # with pytest.raises(BusinessException) as exception:
+    UserService.delete_user(TestJwtClaims.get_test_user(user_model2.keycloak_guid))
+
+    updated_user = UserModel.find_by_jwt_token(TestJwtClaims.get_test_user(user_model2.keycloak_guid))
+    assert len(updated_user.contacts) == 0
+
+    user_orgs = MembershipModel.find_orgs_for_user(updated_user.id)
+    for org in user_orgs:
+        assert org.status_code == 'INACTIVE'

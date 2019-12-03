@@ -37,6 +37,7 @@ from config import get_named_config
 from .authorization import check_auth
 from .notification import send_email
 
+
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
 

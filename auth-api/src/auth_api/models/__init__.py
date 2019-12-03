@@ -36,6 +36,7 @@ from .org_status import OrgStatus
 from .org_type import OrgType
 from .payment_type import PaymentType
 from .user import User
+from .user_status_code import UserStatusCode
 
 
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)
