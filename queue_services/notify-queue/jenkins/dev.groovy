@@ -216,15 +216,7 @@ if( run_pipeline ) {
         if (build_ok) {
             try {
                 stage("Run tests on ${APP_NAME}:${DESTINATION_TAG}") {
-                    script {
-                        openshift.withCluster() {
-                            openshift.withProject("${NAMESPACE_UNITTEST}") {
-                                def test_pipeline = openshift.selector('bc', 'pytest-pipeline')
-                                test_pipeline.startBuild('--wait=true', "-e=component=${APP_NAME}", "-e=component_tag=${DESTINATION_TAG}", "-e=tag=${DESTINATION_TAG}", "-e=namespace=${NAMESPACE_APP}", "-e=db_type=PG").logs('-f')
-                                echo "All tests passed"
-                            }
-                        }
-                    }
+
                 }
             } catch (Exception e) {
                 echo e.getMessage()

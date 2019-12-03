@@ -16,9 +16,8 @@
 This module manages the Membership Information between an org and a user.
 """
 from typing import Dict, Tuple
-from threading import Thread
 
-from flask import current_app, copy_current_request_context
+from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
@@ -118,17 +117,11 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         app_url = '{}/{}'.format(origin_url, context_path)
 
-        try:
-            @copy_current_request_context
-            def run_job():
-                send_email(subject, sender, self._model.user.contacts[0].contact.email,
-                           template.render(url=app_url, org_name=org_name,
-                                           logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
-            thread = Thread(target=run_job)
-            thread.start()
-
-            current_app.logger.debug('<send_approval_notification_to_member')
-        except:  # noqa: E722
+        sent_response = send_email(subject, sender, self._model.user.contacts[0].contact.email,
+                                   template.render(url=app_url, org_name=org_name,
+                                                   logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
+        current_app.logger.debug('<send_approval_notification_to_member')
+        if not sent_response:
             # invitation.invitation_status_code = 'FAILED'
             # invitation.save()
             current_app.logger.error('<send_approval_notification_to_member failed')
