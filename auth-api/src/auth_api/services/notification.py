@@ -12,14 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Invitation data."""
+import json
 
-from flask_mail import Message
+from flask import current_app
 
-from auth_api.extensions import mail
+from .rest_service import RestService
 
 
-def send_email(subject, sender, recipients, html_body):
+def send_email(subject: str, sender: str, recipients: str, html_body: str):  # pylint:disable=unused-argument
     """Send the email asynchronously, using the given details."""
-    msg = Message(subject, sender=sender, recipients=recipients.split())
-    msg.html = html_body
-    mail.send(msg)
+    current_app.logger.info(f'send_email {recipients}')
+    notify_url = current_app.config.get('NOTIFY_API_URL') + '/notify/'
+    notify_body = {
+        'recipients': recipients,
+        'contents': {
+            'subject': subject,
+            'body': html_body
+        }
+    }
+    notify_response = RestService.post(notify_url, data=notify_body)
+    current_app.logger.info('send_email notify_response')
+    if notify_response:
+        response_json = json.loads(notify_response.text)
+        if response_json['notifyStatus']['code'] != 'FAILURE':
+            return True
+
+    return False
