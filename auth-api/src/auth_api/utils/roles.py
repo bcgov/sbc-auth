@@ -43,6 +43,21 @@ class Status(Enum):
     PENDING_APPROVAL = 4
 
 
+class UserStatus(Enum):
+    """User Membership status."""
+
+    ACTIVE = 1
+    INACTIVE = 2
+
+
+class OrgStatus(Enum):
+    """User Membership status."""
+
+    ACTIVE = 'ACTIVE'
+    INACTIVE = 'INACTIVE'
+    PENDING = 'PENDING'
+
+
 VALID_STATUSES = (Status.ACTIVE.value, Status.PENDING_APPROVAL.value)
 
 CLIENT_ADMIN_ROLES = (ADMIN, OWNER)
