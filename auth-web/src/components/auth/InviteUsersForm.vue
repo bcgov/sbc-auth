@@ -12,7 +12,7 @@
               :rules="emailRules"
             ></v-text-field>
             <v-overflow-btn
-              filled
+              filled v-model="invitations[index].selectedRole.name"
               class="ml-3"
               :items="availableRoles"
               item-text="name"
@@ -75,6 +75,7 @@ import { getModule } from 'vuex-module-decorators'
 interface InvitationInfo {
   emailAddress: string
   role: RoleInfo
+  selectedRole?: RoleInfo
 }
 
 @Component({
@@ -134,7 +135,7 @@ export default class InviteUsersForm extends Vue {
 
   private created () {
     for (let i = 0; i < 3; i++) {
-      this.invitations.push({ emailAddress: '', role: this.roles[0] })
+      this.invitations.push({ emailAddress: '', role: this.roles[0], selectedRole: { ...this.roles[0] } })
     }
   }
 
@@ -162,6 +163,7 @@ export default class InviteUsersForm extends Vue {
     this.invitations.forEach(invitation => {
       invitation.emailAddress = ''
       invitation.role = this.roles[0]
+      invitation.selectedRole = { ...this.roles[0] }
     })
   }
 
@@ -183,7 +185,7 @@ export default class InviteUsersForm extends Vue {
             await this.createInvitation({
               recipientEmail: invite.emailAddress,
               sentDate: new Date(),
-              membership: [{ membershipType: invite.role.name.toUpperCase(), orgId: this.myOrg.id }]
+              membership: [{ membershipType: invite.selectedRole.name.toUpperCase(), orgId: this.myOrg.id }]
             })
           }
         }
