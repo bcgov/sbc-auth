@@ -11,6 +11,7 @@
     </header>
 
     <AffiliatedEntityList
+      ref="affiliatedEntityList"
       @add-business="showAddBusinessModal()"
       @remove-business="showConfirmRemoveModal($event)"
     />
@@ -30,6 +31,7 @@
         <p>Enter your Incorporation Number and Passcode.</p>
         <AddBusinessForm
           class="mt-7"
+          @close-add-business-modal="closeAddBusinessModal()"
           @add-success="showAddSuccessModal()"
           @add-failed-invalid-code="showInvalidCodeModal()"
           @add-failed-no-entity="showEntityNotFoundModal()"
@@ -117,12 +119,14 @@ export default class EntityManagement extends Vue {
     errorDialog: ModalDialog
     confirmDeleteDialog: ModalDialog
     addBusinessDialog: ModalDialog
+    affiliatedEntityList: AffiliatedEntityList
   }
 
-  showAddSuccessModal () {
+  async showAddSuccessModal () {
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Business Added'
     this.dialogText = 'You have successfully added a business'
+    await this.$refs.affiliatedEntityList.syncBusinesses()
     this.$refs.successDialog.open()
   }
 
@@ -167,13 +171,18 @@ export default class EntityManagement extends Vue {
     this.$refs.addBusinessDialog.close()
   }
 
-  remove () {
-    this.removeBusiness(this.removeBusinessPayload)
+  async remove () {
     this.$refs.confirmDeleteDialog.close()
+    await this.removeBusiness(this.removeBusinessPayload)
+    await this.$refs.affiliatedEntityList.syncBusinesses()
   }
 
   close () {
     this.$refs.errorDialog.close()
+  }
+
+  private closeAddBusinessModal () {
+    this.$refs.addBusinessDialog.close()
   }
 }
 </script>

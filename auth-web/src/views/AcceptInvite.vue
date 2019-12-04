@@ -26,7 +26,6 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
-    ...mapState('user', ['userProfile']),
     ...mapState('org', ['organizations'])
   },
   methods: {
@@ -37,7 +36,6 @@ import { getModule } from 'vuex-module-decorators'
 export default class AcceptInvite extends Mixins(NextPageMixin) {
   private orgStore = getModule(OrgModule, this.$store)
   private userStore = getModule(UserModule, this.$store)
-  private readonly userProfile!: User
   private readonly acceptInvitation!: (token: string) => Invitation
   private readonly syncOrganizations!: () => Organization[]
   private readonly getUserProfile!: (identifier: string) => User
@@ -49,7 +47,12 @@ export default class AcceptInvite extends Mixins(NextPageMixin) {
   private async mounted () {
     await this.getUserProfile('@me')
     await this.syncOrganizations()
-    this.accept()
+    // Check to make sure this user is not already a member of a team
+    if (this.organizations.length > 0) {
+      this.$router.push('/duplicateteam')
+    } else {
+      this.accept()
+    }
   }
 
   private async accept () {
@@ -57,7 +60,7 @@ export default class AcceptInvite extends Mixins(NextPageMixin) {
       await this.acceptInvitation(this.token)
       // the accept invitation creates a new org
       await this.syncOrganizations()
-      this.$router.push(this.getNextPageUrl(this.userProfile, this.organizations))
+      this.$router.push(this.getNextPageUrl())
     } catch (exception) {
       this.inviteError = true
     }

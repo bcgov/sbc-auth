@@ -32,7 +32,7 @@
         }
       },
       "data": {
-        "configuration.json": "{\n  \"VUE_APP_COPS_REDIRECT_URL\": \"https://coops-${TAG_NAME}.pathfinder.gov.bc.ca/\",\n  \"VUE_APP_PAY_ROOT_API\": \"https://pay-api-${TAG_NAME}.pathfinder.gov.bc.ca/api/v1\",\n  \"VUE_APP_AUTH_ROOT_API\": \"https://auth-api-${TAG_NAME}.pathfinder.gov.bc.ca/api/v1\",\n  \"VUE_APP_FLAVOR\": \"mvp\"\n}\n"
+        "configuration.json": "{\n  \"VUE_APP_COPS_REDIRECT_URL\": \"https://coops-${TAG_NAME}.pathfinder.gov.bc.ca/\",\n  \"VUE_APP_PAY_ROOT_API\": \"https://pay-api-${TAG_NAME}.pathfinder.gov.bc.ca/api/v1\",\n  \"VUE_APP_AUTH_ROOT_API\": \"https://auth-api-${TAG_NAME}.pathfinder.gov.bc.ca/api/v1\",\n  \"VUE_APP_STATUS_ROOT_API\": \"https://status-api-dev.pathfinder.gov.bc.ca/api/v1\", \"VUE_APP_FLAVOR\": \"mvp\"\n}\n"
       }
     },
     {

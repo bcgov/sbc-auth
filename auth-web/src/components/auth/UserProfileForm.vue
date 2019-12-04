@@ -128,7 +128,6 @@ import { mask } from 'vue-the-mask'
     mask
   },
   computed: {
-    ...mapState('user', ['userProfile']),
     ...mapState('org', ['organizations'])
   },
   methods: {
@@ -146,7 +145,6 @@ import { mask } from 'vue-the-mask'
 export default class UserProfileForm extends Mixins(NextPageMixin) {
     private userStore = getModule(UserModule, this.$store)
     private orgStore = getModule(OrgModule, this.$store)
-    private readonly userProfile!: User
     private readonly organizations!: Organization[]
     private readonly createUserContact!: (contact: Contact) => Contact
     private readonly updateUserContact!: (contact: Contact) => Contact
@@ -240,7 +238,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     }
 
     private redirectToNext () {
-      this.$router.push(this.getNextPageUrl(this.userProfile, this.organizations))
+      this.$router.push(this.getNextPageUrl())
     }
 
     cancel () {

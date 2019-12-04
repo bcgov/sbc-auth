@@ -16,6 +16,7 @@
 from datetime import datetime
 from typing import Dict
 
+from flask import current_app
 from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
@@ -138,30 +139,39 @@ class Invitation:
             format(user['firstname'], user['firstname'], org_name)
         sender = CONFIG.MAIL_FROM_ID
         template = ENV.get_template('email_templates/admin_notification_email.html')
+
         sent_response = send_email(subject, sender, recipient_email_list,
-                                   template.render(url=url, user=user, org_name=org_name))
+                                   template.render(url=url, user=user, org_name=org_name,
+                                                   logo_url=f'{url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
         if not sent_response:
+            # invitation.invitation_status_code = 'FAILED'
+            # invitation.save()
             raise BusinessException(Error.FAILED_INVITATION, None)
 
     @staticmethod
-    def send_invitation(invitation: InvitationModel, org_name, user, confirm_url):
+    def send_invitation(invitation: InvitationModel, org_name, user, app_url):
         """Send the email notification."""
+        current_app.logger.debug('<send_invitation')
         subject = '[BC Registries & Online Services] {} {} has invited you to join a team'.format(user['firstname'],
                                                                                                   user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
         confirmation_token = Invitation.generate_confirmation_token(invitation.id)
-        token_confirm_url = '{}/validatetoken/{}'.format(confirm_url, confirmation_token)
+        token_confirm_url = '{}/validatetoken/{}'.format(app_url, confirmation_token)
         template = ENV.get_template('email_templates/business_invitation_email.html')
+
         sent_response = send_email(subject, sender, recipient,
                                    template.render(invitation=invitation,
                                                    url=token_confirm_url,
                                                    user=user,
-                                                   org_name=org_name))
+                                                   org_name=org_name,
+                                                   logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
         if not sent_response:
             invitation.invitation_status_code = 'FAILED'
             invitation.save()
+            current_app.logger.debug('>send_invitation failed')
             raise BusinessException(Error.FAILED_INVITATION, None)
+        current_app.logger.debug('>send_invitation')
 
     @staticmethod
     def generate_confirmation_token(invitation_id):
@@ -183,6 +193,7 @@ class Invitation:
     @staticmethod
     def notify_admin(user, invitation_id, membership_id, invitation_origin):
         """Admins should be notified if user has responded to invitation."""
+        current_app.logger.debug('<notify_admin')
         admin_list = UserService.get_admins_for_membership(membership_id)
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
@@ -194,11 +205,13 @@ class Invitation:
         Invitation.send_admin_notification(user.as_dict(),
                                            '{}/{}'.format(invitation_origin, context_path),
                                            admin_emails, invitation.membership[0].org.name)
+        current_app.logger.debug('>notify_admin')
         return Invitation(invitation)
 
     @staticmethod
     def accept_invitation(invitation_id, user, origin):
         """Add user, role and org from the invitation to membership."""
+        current_app.logger.debug('>accept_invitation')
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
 
         if invitation is None:
@@ -226,4 +239,5 @@ class Invitation:
         invitation.accepted_date = datetime.now()
         invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')
         invitation.save()
+        current_app.logger.debug('<accept_invitation')
         return Invitation(invitation)

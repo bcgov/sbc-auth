@@ -3,7 +3,7 @@
   "apiVersion": "v1",
   "metadata": {
     "annotations": {
-      "description": "Build template for a notify-api service.",
+      "description": "Build template for a notify queue service.",
       "tags": "flask",
       "iconClass": "icon-python"
     },
