@@ -156,7 +156,7 @@ export default class InviteUsersForm extends Vue {
   }
 
   private addEmail () {
-    this.invitations.push({ emailAddress: '', role: this.roles[0] })
+    this.invitations.push({ emailAddress: '', role: this.roles[0], selectedRole: { ...this.roles[0] } })
   }
 
   private resetForm () {
