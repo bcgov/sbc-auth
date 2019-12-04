@@ -11,16 +11,16 @@
     <div>
       <v-form v-if="organizations.length === 0" ref="createTeamForm">
         <v-radio-group class="mt-0 mb-5 pt-0" v-model="teamType" :mandatory="true">
-          <v-radio class="mb-3" label="I manage my own business" value="BASIC"/>
-          <v-radio label="I manage multiple businesses on behalf of my clients" value="PREMIUM" />
+          <v-radio class="mb-3" label="I manage my own business" value="BASIC" data-test="select-manage-own-business" />
+          <v-radio label="I manage multiple businesses on behalf of my clients" value="PREMIUM" data-test="select-manage-multiple-business" />
         </v-radio-group>
         <v-text-field filled :rules="teamNameRules" v-model="teamName" :label="teamType === 'BASIC' ? 'Your Business Name' : 'Your Management Company or Law Firm Name'" />
         <v-row>
           <v-col cols="12" class="form__btns pb-0">
-            <v-btn large color="primary" class="mr-2" :disabled='!isFormValid()' @click="save">
+            <v-btn large color="primary" class="mr-2" :disabled='!isFormValid()' @click="save" data-test="save-button">
               Save and Continue
             </v-btn>
-            <v-btn large color="default" @click="cancel">
+            <v-btn large color="default" @click="cancel" data-test="cancel-button">
               Cancel
             </v-btn>
           </v-col>

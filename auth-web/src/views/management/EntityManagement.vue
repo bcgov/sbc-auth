@@ -3,7 +3,7 @@
     <header class="view-header">
       <h1>Manage Businesses</h1>
       <div class="view-header__actions">
-        <v-btn large color="primary" @click="showAddBusinessModal()">
+        <v-btn large color="primary" @click="showAddBusinessModal()" data-test="add-business-button">
           <v-icon small>mdi-plus</v-icon>
           <span>Add Business</span>
         </v-btn>
@@ -23,6 +23,7 @@
       :show-icon="false"
       :show-actions="false"
       max-width="640"
+      data-test-tag="add-business"
     >
       >
       <template v-slot:text>
@@ -59,7 +60,7 @@
         <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:actions>
-        <v-btn large color="error" @click="close()">OK</v-btn>
+        <v-btn large color="error" @click="close()" data-test="dialog-ok-button">OK</v-btn>
       </template>
     </ModalDialog>
 
@@ -75,8 +76,8 @@
         <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:actions>
-        <v-btn large color="primary" @click="remove()">Remove</v-btn>
-        <v-btn large color="default" @click="cancelConfirmDelete()">Cancel</v-btn>
+        <v-btn large color="primary" @click="remove()" data-test="dialog-remove-button">Remove</v-btn>
+        <v-btn large color="default" @click="cancelConfirmDelete()" data-test="dialog-cancel-button">Cancel</v-btn>
       </template>
     </ModalDialog>
   </v-container>

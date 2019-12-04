@@ -46,7 +46,8 @@ export default class Dashboard extends Vue {
     {
       title: 'Manage Businesses',
       icon: 'business',
-      activate: () => { this.setSelectedComponent(EntityManagement) }
+      activate: () => { this.setSelectedComponent(EntityManagement) },
+      testTag: 'manage-business-nav'
     }
   ]
 
@@ -57,7 +58,8 @@ export default class Dashboard extends Vue {
       this.menu.push({
         title: 'Manage Team',
         icon: 'group',
-        activate: () => { this.setSelectedComponent(UserManagement) }
+        activate: () => { this.setSelectedComponent(UserManagement) },
+        testTag: 'manage-teams-nav'
       })
     }
 

@@ -3,7 +3,7 @@
     <header class="view-header">
       <h1>Manage Team</h1>
       <div class="view-header__actions">
-        <v-btn v-if="canInvite()" large color="primary" @click="showInviteUsersModal()">
+        <v-btn v-if="canInvite()" large color="primary" @click="showInviteUsersModal()" data-test="invite-people-button">
           <v-icon>mdi-plus</v-icon>
           <span>Invite People</span>
         </v-btn>
@@ -12,9 +12,9 @@
 
     <!-- Tab Navigation -->
     <v-tabs class="mb-7" v-model="tab" background-color="transparent">
-      <v-tab>Active</v-tab>
-      <v-tab v-show="canInvite()">Pending Approval</v-tab>
-      <v-tab v-show="canInvite()">Invitations</v-tab>
+      <v-tab data-test="active-tab">Active</v-tab>
+      <v-tab data-test="pending-approval-tab" v-show="canInvite()">Pending Approval</v-tab>
+      <v-tab data-test="invitations-tab" v-show="canInvite()">Invitations</v-tab>
     </v-tabs>
 
     <v-card flat>
