@@ -10,6 +10,7 @@
               label="Email Address"
               v-model="invitations[index].emailAddress"
               :rules="emailRules"
+              :data-test="getIndexedTag('email-address', index)"
             ></v-text-field>
             <v-overflow-btn
               filled v-model="invitations[index].selectedRole.name"
@@ -18,6 +19,7 @@
               item-text="name"
               item-value="name"
               :value="availableRoles[0]"
+              :data-test="getIndexedTag('role-selector', index)"
             >
               <template v-slot:selection="{ item }">
                 {{ item.name }}
@@ -44,7 +46,7 @@
         </transition-group>
       </ul>
       <v-btn text small color="primary"
-        @click="addEmail()">
+        @click="addEmail()" data-test="add-another-button">
         <v-icon>mdi-plus-box</v-icon>
         <span>Add Another</span>
       </v-btn>
@@ -52,10 +54,12 @@
         <v-btn large depressed color="primary"
                 @click="sendInvites"
                 :loading="loading"
-                :disabled="loading || !isFormValid()">
+                :disabled="loading || !isFormValid()"
+                data-test="send-invites-button"
+        >
           <span>Send Invites</span>
         </v-btn>
-        <v-btn large depressed class="ml-2"
+        <v-btn large depressed class="ml-2" data-test="cancel-button"
           @click="cancel">
           <span>Cancel</span>
         </v-btn>
@@ -132,6 +136,10 @@ export default class InviteUsersForm extends Vue {
       desc: 'Can add/remove team members and businesses, and file for a business.'
     }
   ]
+
+  private getIndexedTag (tag, index): string {
+    return `${tag}-${index}`
+  }
 
   private created () {
     for (let i = 0; i < 3; i++) {
