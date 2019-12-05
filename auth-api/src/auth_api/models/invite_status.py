@@ -16,19 +16,13 @@
 It defines the different statuses of an Invitation.
 """
 
-from sqlalchemy import Boolean, Column, String
-
-from .base_model import BaseModel
+from .base_model import BaseCodeModel
 
 
-class InvitationStatus(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class InvitationStatus(BaseCodeModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the Invitation Status model for the Auth service."""
 
     __tablename__ = 'invitation_status'
-
-    code = Column(String(15), primary_key=True)
-    desc = Column(String(100))
-    default = Column(Boolean(), default=False, nullable=False)
 
     @classmethod
     def get_default_status(cls):
