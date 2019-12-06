@@ -12,7 +12,9 @@ export default {
   },
 
   updateTransaction (paymentId: String, transactionId: String, receiptNum?: String) {
-    const url = `${ConfigHelper.getValue('VUE_APP_PAY_ROOT_API')}/payment-requests/${paymentId}/transactions/${transactionId}?receipt_number=${receiptNum}`
-    return Axios.patch(url)
+    const url = `${ConfigHelper.getValue('VUE_APP_PAY_ROOT_API')}/payment-requests/${paymentId}/transactions/${transactionId}`
+    return Axios.patch(url, {
+      receipt_number: receiptNum
+    })
   }
 }
