@@ -2,10 +2,10 @@
   <v-data-table
     class="user-list"
     :headers="headerMembers"
-    :items="activeOrgMembers"
+    :items="indexedOrgMembers"
     :items-per-page="5"
     :calculate-widths="true"
-    :hide-default-footer="activeOrgMembers.length <= 5"
+    :hide-default-footer="indexedOrgMembers.length <= 5"
     :custom-sort="customSortActive"
     :no-data-text="$t('noActiveUsersLabel')"
   >
@@ -13,13 +13,13 @@
       Loading...
     </template>
     <template v-slot:item.name="{ item }">
-      <v-list-item-title class="user-name">{{ item.user.firstname }} {{ item.user.lastname }}</v-list-item-title>
-      <v-list-item-subtitle v-if="item.user.contacts && item.user.contacts.length > 0">{{ item.user.contacts[0].email }}</v-list-item-subtitle>
+      <v-list-item-title class="user-name" :data-test="getIndexedTag('user-name', item.index)">{{ item.user.firstname }} {{ item.user.lastname }}</v-list-item-title>
+      <v-list-item-subtitle :data-test="getIndexedTag('business-id', item.index)" v-if="item.user.contacts && item.user.contacts.length > 0">{{ item.user.contacts[0].email }}</v-list-item-subtitle>
     </template>
     <template v-slot:item.role="{ item }">
       <v-menu>
         <template v-slot:activator="{ on }">
-          <v-btn :disabled="!canChangeRole(item)" small depressed v-on="on">
+          <v-btn :disabled="!canChangeRole(item)" small depressed v-on="on" :data-test="getIndexedTag('role-selector', item.index)">
             {{ item.membershipTypeCode }}
             <v-icon small depressed class="ml-1">mdi-chevron-down</v-icon>
           </v-btn>
@@ -52,12 +52,12 @@
       </v-menu>
 
     </template>
-    <template v-slot:item.lastActive="{ item }">
+    <template v-slot:item.lastActive="{ item }" :data-test="getIndexedTag('last-active', item.index)">
       {{ formatDate(item.user.modified) }}
     </template>
     <template v-slot:item.action="{ item }">
-      <v-btn :disabled="!canRemove(item)" v-show="!canLeave(item)" depressed small @click="confirmRemoveMember(item)">Remove</v-btn>
-      <v-btn v-show="canLeave(item)" depressed small @click="confirmLeaveTeam(item)">
+      <v-btn :data-test="getIndexedTag('remove-user-button', item.index)" v-show="!canLeave(item)" depressed small @click="confirmLeaveTeam(item)">Remove</v-btn>
+      <v-btn :data-test="getIndexedTag('leave-team-button', item.index)" v-show="canLeave(item)" depressed small @click="confirmLeaveTeam(item)">
         <span v-if="!canDissolve()">Leave</span>
         <span v-if="canDissolve()">Dissolve</span>
       </v-btn>
@@ -136,6 +136,17 @@ export default class MemberDataTable extends Vue {
       width: '77'
     }
   ]
+
+  private getIndexedTag (tag, index): string {
+    return `${tag}-${index}`
+  }
+
+  private get indexedOrgMembers () {
+    return this.activeOrgMembers.map((item, index) => ({
+      index,
+      ...item
+    }))
+  }
 
   private async mounted () {
     await this.syncActiveOrgMembers()

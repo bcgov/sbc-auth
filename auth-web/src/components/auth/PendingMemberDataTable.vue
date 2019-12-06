@@ -2,10 +2,10 @@
   <v-data-table
     class="user-list"
     :headers="headerPendingMembers"
-    :items="pendingOrgMembers"
+    :items="indexedPendingMembers"
     :items-per-page="5"
     :calculate-widths="true"
-    :hide-default-footer="pendingOrgMembers.length <= 5"
+    :hide-default-footer="indexedPendingMembers.length <= 5"
     :custom-sort="customSortPending"
     :no-data-text="$t('noPendingApprovalLabel')"
   >
@@ -13,12 +13,12 @@
       Loading...
     </template>
     <template v-slot:item.name="{ item }">
-      <v-list-item-title class="user-name">{{ item.user.firstname }} {{ item.user.lastname }}</v-list-item-title>
-      <v-list-item-subtitle v-if="item.user.contacts && item.user.contacts.length > 0">{{ item.user.contacts[0].email }}</v-list-item-subtitle>
+      <v-list-item-title class="user-name" :data-test="getIndexedTag('pending-user-name', item.index)">{{ item.user.firstname }} {{ item.user.lastname }}</v-list-item-title>
+      <v-list-item-subtitle :data-test="getIndexedTag('pending-email', item.index)" v-if="item.user.contacts && item.user.contacts.length > 0">{{ item.user.contacts[0].email }}</v-list-item-subtitle>
     </template>
     <template v-slot:item.action="{ item }">
-      <v-btn small color="primary" class="mr-2" @click="confirmApproveMember(item)">Approve</v-btn>
-      <v-btn depressed small @click="confirmDenyMember(item)">Deny</v-btn>
+      <v-btn :data-test="getIndexedTag('approve-button', item.index)" small color="primary" class="mr-2" @click="confirmApproveMember(item)">Approve</v-btn>
+      <v-btn :data-test="getIndexedTag('deny-button', item.index)" depressed small @click="confirmDenyMember(item)">Deny</v-btn>
     </template>
   </v-data-table>
 </template>
@@ -58,6 +58,17 @@ export default class PendingMemberDataTable extends Vue {
 
   private async mounted () {
     await this.syncPendingOrgMembers()
+  }
+
+  private getIndexedTag (tag, index): string {
+    return `${tag}-${index}`
+  }
+
+  private get indexedPendingMembers () {
+    return this.pendingOrgMembers.map((item, index) => ({
+      index,
+      ...item
+    }))
   }
 
   private customSortPending (items, index, isDescending) {

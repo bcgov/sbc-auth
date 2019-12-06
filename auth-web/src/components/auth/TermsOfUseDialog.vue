@@ -8,7 +8,7 @@
                         <template v-slot:label>
                             <div class="terms-checkbox-label">
                                 <span>I have read and agreed to the</span>
-                                <v-btn text color="primary" class="pr-1 pl-1" @click.stop="openDialog()">
+                                <v-btn text color="primary" class="pr-1 pl-1" @click.stop="openDialog()" data-test="terms-of-use-checkbox">
                                     Terms of Use
                                 </v-btn>
                             </div>
@@ -20,18 +20,18 @@
             <v-dialog scrollable width="1024" v-model="termsDialog" :persistent="true">
                 <v-card>
                     <v-card-title>Terms of Use</v-card-title>
-                    <v-card-text id="scroll-target">
+                    <v-card-text id="scroll-target" data-test="scroll-area">
                         <div v-scroll:#scroll-target="onScroll" style="height: 2000px;">
                             <p v-html="content" class="terms-container"></p>
                         </div>
                     </v-card-text>
                     <v-card-actions>
                         <v-btn large depressed color="primary" class="agree-btn" :disabled="this.offsetTop < 3000"
-                               @click="termsDialog = false ;termsAccepted = true ;emitStatus()">
+                               @click="termsDialog = false ;termsAccepted = true ;emitStatus()" data-test="accept-button">
                             <span>Agree to Terms</span>
                         </v-btn>
                         <v-btn large depressed color="primary" class="agree-btn" :disabled="this.offsetTop < 3000"
-                               @click="termsDialog = false ;emitStatus()">
+                               @click="termsDialog = false ;emitStatus()" data-test="close-button">
                             <span>Close</span>
                         </v-btn>
                     </v-card-actions>
