@@ -16,19 +16,18 @@
 It defines the available types of membership Users have with Orgs.
 """
 
-from sqlalchemy import Boolean, Column, String
+from sqlalchemy import Column, String
 
-from .base_model import BaseModel
+from .base_model import BaseCodeModel
 
 
-class MembershipType(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class MembershipType(BaseCodeModel):  # pylint: disable=too-few-public-methods
     """This is the Membership Type model for the Auth service."""
 
     __tablename__ = 'membership_type'
 
-    code = Column(String(15), primary_key=True)
-    desc = Column(String(100))
-    default = Column(Boolean(), default=False, nullable=False)
+    label = Column(String(100))
+    icon = Column(String(100))
 
     @classmethod
     def get_default_type(cls):
