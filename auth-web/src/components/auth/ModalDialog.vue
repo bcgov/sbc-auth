@@ -8,7 +8,7 @@
     v-model="isOpen"
     @keydown.esc="cancel">
     <v-card>
-      <v-card-title>
+      <v-card-title data-test="dialog-header">
         <slot v-if="showIcon" name="icon">
           <v-icon large color="success">mdi-check</v-icon>
         </slot>
@@ -21,7 +21,7 @@
       </v-card-text>
       <v-card-actions v-if="showActions">
         <slot name="actions">
-          <v-btn large color="success" @click="close()">OK</v-btn>
+          <v-btn large color="success" @click="close()" data-test="dialog-ok-button">OK</v-btn>
         </slot>
       </v-card-actions>
     </v-card>

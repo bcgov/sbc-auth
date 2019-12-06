@@ -19,6 +19,7 @@
                 persistent-hint
                 disabled
                 v-model="firstName"
+                data-test="first-name"
         >
         </v-text-field>
       </v-col>
@@ -30,6 +31,7 @@
                 persistent-hint
                 disabled
                 v-model="lastName"
+                data-test="last-name"
         >
         </v-text-field>
       </v-col>
@@ -44,6 +46,7 @@
                 persistent-hint
                 :rules="emailRules"
                 v-model="emailAddress"
+                data-test="email"
         >
         </v-text-field>
       </v-col>
@@ -57,6 +60,7 @@
                 persistent-hint
                 :error-messages="emailMustMatch()"
                 v-model="confirmedEmailAddress"
+                data-test="confirm-email"
         >
         </v-text-field>
       </v-col>
@@ -72,6 +76,7 @@
                 v-model="phoneNumber"
                 hint="Example: (555) 555-5555"
                 :rules="phoneRules"
+                data-test="phone"
         >
         </v-text-field>
       </v-col>
@@ -82,6 +87,7 @@
                 :rules="extensionRules"
                 v-mask="'###'"
                 v-model="extension"
+                data-test="phone-extension"
         >
         </v-text-field>
       </v-col>
@@ -94,10 +100,10 @@
     </v-row>
     <v-row>
       <v-col cols="12" class="form__btns pb-0">
-        <v-btn large color="primary" class=".save-continue-button" :disabled='!isFormValid()' @click="save">
+        <v-btn large color="primary" class="save-continue-button" :disabled='!isFormValid()' @click="save" data-test="save-button">
           Save
         </v-btn>
-        <v-btn large depressed @click="cancel">Cancel</v-btn>
+        <v-btn large depressed @click="cancel" data-test="cancel-button">Cancel</v-btn>
       </v-col>
     </v-row>
   </v-form>
