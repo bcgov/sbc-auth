@@ -190,28 +190,3 @@ def test_delete_contact_org_link(session, auth_mock):  # pylint:disable=unused-a
 
     exist_contact_link = ContactLinkModel.find_by_org_id(org_id)
     assert not exist_contact_link
-
-
-def test_remove_member(session):  # pylint:disable=unused-argument
-    """Assert that members for an org can be removed."""
-    user = factory_user_model()
-    org = OrgService.create_org(TestOrgInfo.org1, user.id)
-    members = org.get_members()
-
-    # test input id is not match with org's member id
-    with pytest.raises(BusinessException) as exception:
-        org.remove_member(0)
-
-    assert exception.value.code == Error.DATA_NOT_FOUND.name
-
-    # test remove
-    org.remove_member(member_id=members['members'][0]['id'])
-    response = org.get_members()
-    assert response
-    assert len(response['members']) == 0
-
-    # test remove again
-    with pytest.raises(BusinessException) as exception:
-        org.remove_member(member_id=members['members'][0]['id'])
-
-    assert exception.value.code == Error.DATA_NOT_FOUND.name

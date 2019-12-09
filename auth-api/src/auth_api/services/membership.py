@@ -33,6 +33,7 @@ from config import get_named_config
 
 from .authorization import check_auth
 from .notification import send_email
+from .org import Org as OrgService
 
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -132,6 +133,18 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         # Ensure that this user is an ADMIN or OWNER on the org associated with this membership
         current_app.logger.debug('<update_membership')
         check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
+
+        # Ensure that a member does not upgrade a member to OWNER from ADMIN unless they are an OWNER themselves
+        if self._model.membership_type == ADMIN and updated_fields['membership_type'] == OWNER:
+            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(OWNER))
+
+        # Ensure that if downgrading from owner that there is at least one other owner in org
+        if self._model.membership_type == OWNER and \
+           updated_fields['membership_type'] != OWNER and \
+           OrgService(self._model.org).get_owner_count() == 1:
+            raise BusinessException(Error.CHANGE_ROLE_FAILED_ONLY_OWNER, None)
+
+
         for key, value in updated_fields.items():
             if value is not None:
                 setattr(self._model, key, value)
@@ -143,8 +156,14 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
     def deactivate_membership(self, token_info: Dict = None):
         """Mark this membership as inactive."""
         current_app.logger.debug('<deactivate_membership')
+        # if this is a member removing another member, check that they admin or owner
         if self._model.user.username != token_info.get('username'):
             check_auth(token_info=token_info, one_of_roles=(ADMIN, OWNER))
+
+        # check to ensure that owner isn't removed by anyone but an owner
+        if self._model.membership_type == OWNER:
+            check_auth(token_info=token_info, one_of_roles=(OWNER))
+
         self._model.membership_status = MembershipStatusCodeModel.get_membership_status_by_code('INACTIVE')
         current_app.logger.info(f'<deactivate_membership for {self._model.user.username}')
         self._model.save()
