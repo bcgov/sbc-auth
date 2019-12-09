@@ -16,7 +16,7 @@
 import datetime
 
 from flask import g
-from sqlalchemy import Column, DateTime, ForeignKey
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 
@@ -123,3 +123,24 @@ class BaseModel(db.Model):
     def rollback():
         """RollBack."""
         db.session.rollback()
+
+
+class BaseCodeModel(BaseModel):
+    """This class manages all of the base code, type or status model functions."""
+
+    __abstract__ = True
+
+    @declared_attr
+    def code(cls):  # pylint:disable=no-self-argument, # noqa: N805
+        """Return column for code."""
+        return Column(String(15), primary_key=True)
+
+    @declared_attr
+    def desc(cls):  # pylint:disable=no-self-argument, # noqa: N805
+        """Return column for desc."""
+        return Column(String(100))
+
+    @declared_attr
+    def default(cls):  # pylint:disable=no-self-argument, # noqa: N805
+        """Return column for default."""
+        return Column(Boolean(), default=False, nullable=False)

@@ -6,6 +6,7 @@ import BusinessProfile from '@/views/BusinessProfile.vue'
 import CreateAccount from '@/views/CreateAccount.vue'
 import CreateTeamView from '@/views/CreateTeamView.vue'
 import Dashboard from '@/views/management/Dashboard.vue'
+import DuplicateTeamWarning from '@/views/DuplicateTeamWarning.vue'
 import KeyCloakService from '@/services/keycloak.services'
 import PageNotFound from '@/views/PageNotFound.vue'
 import PaymentForm from '@/components/pay/PaymentForm.vue'
@@ -42,6 +43,7 @@ export function getRoutes (appFlavor: String) {
     { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
     { path: '/createteam', component: CreateTeamView, meta: { requiresAuth: true } },
     { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
+    { path: '/duplicateteam', component: DuplicateTeamWarning, meta: { requiresAuth: true } },
     { path: '/validatetoken/:token', component: AcceptInviteLanding, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
     { path: '/confirmtoken/:token', component: AcceptInvite, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } }
   ]
@@ -52,9 +54,9 @@ export function getRoutes (appFlavor: String) {
     { path: '/signout', component: Signout, props: true, meta: { requiresAuth: true } },
     { path: '/signout/:redirectUrl', component: Signout, props: true, meta: { requiresAuth: true } },
     { path: '/businessprofile', component: BusinessProfile, meta: { requiresAuth: true } },
-    { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } },
+    { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: false } },
     { path: '/profiledeactivated', component: ProfileDeactivated, props: true, meta: { requiresAuth: false } },
-    { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } },
+    { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: false } },
     { path: '/searchbusiness', component: SearchBusinessForm, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
     { path: '/unauthorized', component: Unauthorized, props: true, meta: { requiresAuth: false } },
     { path: '/pendingapproval/:team_name?', component: PendingApproval, props: true, meta: { requiresAuth: false } },

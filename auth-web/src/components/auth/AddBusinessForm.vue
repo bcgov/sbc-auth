@@ -20,6 +20,7 @@
           persistent-hint
           :rules="entityNumRules"
           v-model="businessIdentifier"
+          data-test="business-identifier"
         ></v-text-field>
       </div>
       <div class="passcode-form__row">
@@ -32,18 +33,19 @@
           :maxlength="9"
           v-model="passcode"
           autocomplete="off"
+          data-test="business-passcode"
         ></v-text-field>
       </div>
       <div class="form__btns mt-8">
-        <v-btn text color="primary" @click.stop="helpDialog = true">
+        <v-btn data-test="forgot-passcode-button" text color="primary" @click.stop="helpDialog = true">
           <v-icon small>mdi-open-in-new</v-icon>
           <span>I lost or forgot my passcode</span>
         </v-btn>
         <div>
-          <v-btn large color="primary" @click="add">
+          <v-btn data-test="add-business-button" large color="primary" @click="add">
             <span>Add Business</span>
           </v-btn>
-          <v-btn large depressed color="default" class="ml-2" @click="cancel">
+          <v-btn data-test="cancel-button" large depressed color="default" class="ml-2" @click="cancel">
             <span>Cancel</span>
           </v-btn>
         </div>
@@ -120,6 +122,9 @@ export default class AddBusinessForm extends Vue {
   async add () {
     if (this.isFormValid()) {
       try {
+        // close modal but continue to work in background
+        this.$emit('close-add-business-modal')
+
         // attempt to add business
         await this.addBusiness({ businessIdentifier: this.businessIdentifier, passCode: this.passcode })
 

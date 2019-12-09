@@ -22,10 +22,10 @@ That are used to expose operational health information about the service, and me
 """
 
 from flask import Blueprint
-
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
 
 from .apihelper import Api
+from .codes import API as CODES_API
 from .documents import API as DOCUMENTS_API
 from .entity import API as ENTITY_API
 from .invitation import API as INVITATION_API
@@ -77,3 +77,4 @@ API.add_namespace(ENTITY_API, path='/entities')
 API.add_namespace(ORG_API, path='/orgs')
 API.add_namespace(INVITATION_API, path='/invitations')
 API.add_namespace(DOCUMENTS_API, path='/documents')
+API.add_namespace(CODES_API, path='/codes')

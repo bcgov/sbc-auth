@@ -16,19 +16,13 @@
 This is a mapping between status codes and descriptions for Org objects.
 """
 
-from sqlalchemy import Boolean, Column, String
-
-from .base_model import BaseModel
+from .base_model import BaseCodeModel
 
 
-class OrgStatus(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class OrgStatus(BaseCodeModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Org Status record."""
 
     __tablename__ = 'org_status'
-
-    code = Column(String(15), primary_key=True)
-    desc = Column(String(100))
-    default = Column(Boolean(), default=False, nullable=False)
 
     @classmethod
     def get_default_status(cls):

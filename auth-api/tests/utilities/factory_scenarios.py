@@ -155,6 +155,24 @@ class TestJwtClaims(dict, Enum):
         'loginSource': 'PASSCODE'
     }
 
+    @staticmethod
+    def get_test_user(sub):
+        """Return test user with subject from argument."""
+        return {
+            'iss': os.getenv('JWT_OIDC_ISSUER'),
+            'sub': sub,
+            'firstname': 'Test',
+            'lastname': 'User',
+            'preferred_username': 'CP1234567',
+            'username': 'CP1234567',
+            'realm_access': {
+                'roles': [
+                    'edit', 'uma_authorization', 'staff'
+                ]
+            },
+            'loginSource': 'PASSCODE'
+        }
+
 
 class TestOrgTypeInfo(dict, Enum):
     """Test scenarios of org type."""
@@ -186,7 +204,6 @@ class TestOrgInfo(dict, Enum):
     invalid_name_spaces = {'name': '    '}
     invalid_name_start_space = {'name': '  helo'}
     invalid_name_end_space = {'name': '  helo   '}
-
 
 
 class TestEntityInfo(dict, Enum):

@@ -3,7 +3,7 @@
     <header class="view-header">
       <h1>Manage Businesses</h1>
       <div class="view-header__actions">
-        <v-btn large color="primary" @click="showAddBusinessModal()">
+        <v-btn large color="primary" @click="showAddBusinessModal()" data-test="add-business-button">
           <v-icon small>mdi-plus</v-icon>
           <span>Add Business</span>
         </v-btn>
@@ -11,6 +11,7 @@
     </header>
 
     <AffiliatedEntityList
+      ref="affiliatedEntityList"
       @add-business="showAddBusinessModal()"
       @remove-business="showConfirmRemoveModal($event)"
     />
@@ -23,12 +24,14 @@
       :show-icon="false"
       :show-actions="false"
       max-width="640"
+      data-test-tag="add-business"
     >
       >
       <template v-slot:text>
         <p>Enter your Incorporation Number and Passcode.</p>
         <AddBusinessForm
           class="mt-7"
+          @close-add-business-modal="closeAddBusinessModal()"
           @add-success="showAddSuccessModal()"
           @add-failed-invalid-code="showInvalidCodeModal()"
           @add-failed-no-entity="showEntityNotFoundModal()"
@@ -59,7 +62,7 @@
         <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:actions>
-        <v-btn large color="error" @click="close()">OK</v-btn>
+        <v-btn large color="error" @click="close()" data-test="dialog-ok-button">OK</v-btn>
       </template>
     </ModalDialog>
 
@@ -75,8 +78,8 @@
         <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:actions>
-        <v-btn large color="primary" @click="remove()">Remove</v-btn>
-        <v-btn large color="default" @click="cancelConfirmDelete()">Cancel</v-btn>
+        <v-btn large color="primary" @click="remove()" data-test="dialog-remove-button">Remove</v-btn>
+        <v-btn large color="default" @click="cancelConfirmDelete()" data-test="dialog-cancel-button">Cancel</v-btn>
       </template>
     </ModalDialog>
   </v-container>
@@ -116,12 +119,14 @@ export default class EntityManagement extends Vue {
     errorDialog: ModalDialog
     confirmDeleteDialog: ModalDialog
     addBusinessDialog: ModalDialog
+    affiliatedEntityList: AffiliatedEntityList
   }
 
-  showAddSuccessModal () {
+  async showAddSuccessModal () {
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Business Added'
     this.dialogText = 'You have successfully added a business'
+    await this.$refs.affiliatedEntityList.syncBusinesses()
     this.$refs.successDialog.open()
   }
 
@@ -166,13 +171,18 @@ export default class EntityManagement extends Vue {
     this.$refs.addBusinessDialog.close()
   }
 
-  remove () {
-    this.removeBusiness(this.removeBusinessPayload)
+  async remove () {
     this.$refs.confirmDeleteDialog.close()
+    await this.removeBusiness(this.removeBusinessPayload)
+    await this.$refs.affiliatedEntityList.syncBusinesses()
   }
 
   close () {
     this.$refs.errorDialog.close()
+  }
+
+  private closeAddBusinessModal () {
+    this.$refs.addBusinessDialog.close()
   }
 }
 </script>
