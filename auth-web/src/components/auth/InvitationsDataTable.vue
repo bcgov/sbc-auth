@@ -2,21 +2,24 @@
   <v-data-table
     class="user-list"
     :headers="headerInvitations"
-    :items="pendingOrgInvitations"
+    :items="indexedInvitations"
     :items-per-page="5"
     :calculate-widths="true"
-    :hide-default-footer="pendingOrgInvitations.length <= 5"
+    :hide-default-footer="indexedInvitations.length <= 5"
     :no-data-text="$t('noPendingInvitesLabel')"
   >
+    <template v-slot:item.recipientEmail="{ item }" >
+      <span :data-test="getIndexedTag('invitation-email', item.index)">{{ item.recipientEmail }}</span>
+    </template>
     <template v-slot:item.sentDate="{ item }">
-      {{ formatDate (item.sentDate) }}
+      <span :data-test="getIndexedTag('invitation-sent', item.index)">{{ formatDate (item.sentDate) }}</span>
     </template>
     <template v-slot:item.expiresOn="{ item }">
-      {{ formatDate (item.expiresOn) }}
+      <span :data-test="getIndexedTag('invitation-expires', item.index)">{{ formatDate (item.expiresOn) }}</span>
     </template>
     <template v-slot:item.action="{ item }">
-      <v-btn small color="primary" class="mr-2" @click="resend(item)">Resend</v-btn>
-      <v-btn depressed small @click="confirmRemoveInvite(item)">Remove</v-btn>
+      <v-btn :data-test="getIndexedTag('resend-button', item.index)" small color="primary" class="mr-2" @click="resend(item)">Resend</v-btn>
+      <v-btn :data-test="getIndexedTag('remove-button', item.index)" depressed small @click="confirmRemoveInvite(item)">Remove</v-btn>
     </template>
   </v-data-table>
 </template>
@@ -72,6 +75,17 @@ export default class InvitationsDataTable extends Vue {
 
   private formatDate (date: Date) {
     return moment(date).format('DD MMM, YYYY')
+  }
+
+  private getIndexedTag (tag, index): string {
+    return `${tag}-${index}`
+  }
+
+  private get indexedInvitations () {
+    return this.pendingOrgInvitations.map((item, index) => ({
+      index,
+      ...item
+    }))
   }
 
   @Emit()
