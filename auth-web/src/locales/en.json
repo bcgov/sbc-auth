@@ -40,5 +40,10 @@
   "confirmLeaveTeamText": "Are you sure you wish to leave the team? If you leave, you will need an invite from an Admin to rejoin.",
   "acceptInviteLandingTitle": "Log in to accept this invitation",
   "acceptInviteLandingMessage": "To accept the invitation to this team, log in to Cooperatives Online with your BC Services Card.",
-  "loginBtnLabel": "Log in with BC Services Card"
+  "loginBtnLabel": "Log in with BC Services Card",
+  "deactivateConfirmTitle": "Deactivate your Profile",
+  "deactivateConfirmText": "Deactivating your Cooperatives Online profile will remove your contact information, and your access to associated teams and/or affiliated businesses.",
+  "deactivateConfirmTextEmphasis": "This action cannot be undone.",
+  "deactivateFailureTitle": "Deactivation Failed",
+  "deactivateFailureText": "Unable to deactivate your profile. If you are a team owner, please dissolve your team or transfer ownership first."
 }

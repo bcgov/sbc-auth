@@ -23,7 +23,7 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.roles import Status
+from auth_api.utils.roles import Status, UserStatus
 
 from .base_model import BaseModel
 from .db import db
@@ -112,6 +112,9 @@ class User(BaseModel):
                 current_app.logger.debug(
                     'Updating user from JWT:{}; User:{}'.format(token, user)
                 )
+
+                # If this user is marked as Inactive, this login will re-activate them
+                user.status = UserStatus.ACTIVE.value
                 cls.commit()
                 return user
         return None
