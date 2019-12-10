@@ -126,7 +126,7 @@ export default class AddBusinessForm extends Vue {
         this.$emit('close-add-business-modal')
 
         // attempt to add business
-        await this.addBusiness({ businessIdentifier: this.businessIdentifier, passCode: this.passcode })
+        await this.addBusiness({ businessIdentifier: this.businessIdentifier.trim().toUpperCase(), passCode: this.passcode })
 
         // emit event to let parent know business added
         this.$emit('add-success')
