@@ -158,11 +158,11 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         current_app.logger.debug('<deactivate_membership')
         # if this is a member removing another member, check that they admin or owner
         if self._model.user.username != token_info.get('username'):
-            check_auth(token_info=token_info, one_of_roles=(ADMIN, OWNER))
+            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
 
         # check to ensure that owner isn't removed by anyone but an owner
         if self._model.membership_type == OWNER:
-            check_auth(token_info=token_info, one_of_roles=(OWNER))
+            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(OWNER))
 
         self._model.membership_status = MembershipStatusCodeModel.get_membership_status_by_code('INACTIVE')
         current_app.logger.info(f'<deactivate_membership for {self._model.user.username}')
