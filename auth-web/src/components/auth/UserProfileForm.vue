@@ -124,11 +124,11 @@
 
         <!-- Modal for deactivation failure -->
         <ModalDialog
-        ref="deactivateUserFailureDialog"
-        :title="$t('deactivateFailureTitle')"
-        :text="$t('deactivateFailureText')"
-        dialog-class="notify-dialog"
-        max-width="640"
+          ref="deactivateUserFailureDialog"
+          :title="$t('deactivateFailureTitle')"
+          :text="$t('deactivateFailureText')"
+          dialog-class="notify-dialog"
+          max-width="640"
         >
           <template v-slot:icon>
             <v-icon large color="error">mdi-alert-circle-outline</v-icon>
