@@ -120,7 +120,6 @@ import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import PendingMemberDataTable from '@/components/auth/PendingMemberDataTable.vue'
-import UserModule from '@/store/modules/user'
 import _ from 'lodash'
 import { getModule } from 'vuex-module-decorators'
 
@@ -146,7 +145,8 @@ import { getModule } from 'vuex-module-decorators'
       'deleteInvitation',
       'updateMember',
       'approveMember',
-      'leaveTeam'
+      'leaveTeam',
+      'syncOrganizations'
     ])
   }
 })
@@ -178,6 +178,7 @@ export default class UserManagement extends Vue {
   private readonly updateMember!: (updateMemberPayload: UpdateMemberPayload) => void
   private readonly approveMember!: (memberId: number) => void
   private readonly leaveTeam!: (memberId: number) => void
+  private readonly syncOrganizations!: () => Promise<Organization[]>
 
   $refs: {
     successDialog: ModalDialog
@@ -295,6 +296,7 @@ export default class UserManagement extends Vue {
       role: this.roleChangeToAction.targetRole.toString().toUpperCase()
     })
     this.$refs.confirmActionDialog.close()
+    await this.syncOrganizations()
   }
 
   private async removeInvite () {

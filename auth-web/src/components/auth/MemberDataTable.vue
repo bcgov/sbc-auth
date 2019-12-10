@@ -19,7 +19,7 @@
     <template v-slot:item.role="{ item }">
       <v-menu>
         <template v-slot:activator="{ on }">
-          <v-btn :disabled="!canChangeRole(item)" small depressed v-on="on" :data-test="getIndexedTag('role-selector', item.index)">
+          <v-btn :disabled="!canChangeRole(item)" class="role-selector" small depressed v-on="on" :data-test="getIndexedTag('role-selector', item.index)">
             {{ item.membershipTypeCode }}
             <v-icon small depressed class="ml-1">mdi-chevron-down</v-icon>
           </v-btn>
@@ -157,40 +157,44 @@ export default class MemberDataTable extends Vue {
   }
 
   private isRoleEnabled (role: RoleInfo): boolean {
-    if (role.name !== 'Owner') {
-      return true
+    switch (this.myOrgMembership.membershipTypeCode) {
+      case MembershipType.Owner:
+        return true
+      case MembershipType.Admin:
+        if (role.name !== 'Owner') {
+          return true
+        }
+        return false
+      default:
+        return false
     }
-
-    if (this.myOrgMembership.membershipTypeCode === MembershipType.Owner) {
-      return true
-    }
-
-    return false
   }
 
   private canChangeRole (memberBeingChanged: Member): boolean {
-    // Can't change own role
-    if (this.myOrgMembership.user.username === memberBeingChanged.user.username) {
-      return false
-    }
-
-    // If member, can't change any roles
-    if (this.myOrgMembership.membershipTypeCode === MembershipType.Member) {
-      return false
-    }
-
-    // If not an active member, can't change
     if (this.myOrgMembership.membershipStatus !== MembershipStatus.Active) {
       return false
     }
 
-    // Only owners can change owner roles
-    if (memberBeingChanged.membershipTypeCode === MembershipType.Owner &&
-        this.myOrgMembership.membershipTypeCode !== MembershipType.Owner) {
-      return false
+    switch (this.myOrgMembership.membershipTypeCode) {
+      case MembershipType.Owner:
+        // Owners can change roles of other users who are not owners
+        if (!this.isOwnMembership(memberBeingChanged) && memberBeingChanged.membershipTypeCode !== MembershipType.Owner) {
+          return true
+        }
+        // And they can downgrade their own role if there is another owner on the team
+        if (this.isOwnMembership(memberBeingChanged) && this.ownerCount() > 1) {
+          return true
+        }
+        return false
+      case MembershipType.Admin:
+        // Admins can change roles of other admins and members, including their own
+        if (memberBeingChanged.membershipTypeCode !== MembershipType.Owner) {
+          return true
+        }
+        return false
+      default:
+        return false
     }
-
-    return true
   }
 
   private canRemove (memberToRemove: Member): boolean {
@@ -284,6 +288,10 @@ export default class MemberDataTable extends Vue {
       this.$emit('confirm-leave-team')
     }
   }
+
+  private isOwnMembership (member: Member) {
+    return !!this.myOrgMembership && this.myOrgMembership.user.username === member.user.username
+  }
 }
 </script>
 
@@ -314,5 +322,9 @@ export default class MemberDataTable extends Vue {
       line-height: 1.5;
       font-size: 0.875rem;
     }
+  }
+
+  .role-selector {
+    width: 100px !important;
   }
 </style>

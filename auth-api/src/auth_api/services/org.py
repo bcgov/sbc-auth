@@ -25,12 +25,11 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import OrgSchema
-from auth_api.utils.roles import VALID_STATUSES, Status
+from auth_api.utils.roles import OWNER, VALID_STATUSES, Status
 from auth_api.utils.util import camelback2snake
 
 from .authorization import check_auth
 from .invitation import Invitation as InvitationService
-from .membership import Membership as MembershipService
 
 
 class Org:
@@ -155,15 +154,9 @@ class Org:
         """Return the unresolved (pending or failed) invitations for this org."""
         return {'invitations': InvitationService.get_invitations_by_org_id(self._model.id, status, token_info)}
 
-    def remove_member(self, member_id):
-        """Remove the user with specified username from this org."""
-        for member in self._model.members:
-            if member.id == int(member_id):
-                self._model.members.remove(member)
-                self._model.commit()
-                return MembershipService(member)
-        # If we get to this point, member with that id could not be found, so raise exception
-        raise BusinessException(Error.DATA_NOT_FOUND, None)
+    def get_owner_count(self):
+        """Get the number of owners for the specified org."""
+        return list(filter(lambda x: x.membership_type == OWNER, self._model.members)).count()
 
     @staticmethod
     def get_orgs(user_id):
