@@ -12,6 +12,7 @@ import PageNotFound from '@/views/PageNotFound.vue'
 import PaymentForm from '@/components/pay/PaymentForm.vue'
 import PaymentReturnForm from '@/components/pay/PaymentReturnForm.vue'
 import PendingApproval from '@/views/PendingApproval.vue'
+import ProfileDeactivated from '@/views/ProfileDeactivated.vue'
 import Router from 'vue-router'
 import SearchBusinessForm from '@/components/auth/SearchBusinessForm.vue'
 import Signin from '@/components/auth/Signin.vue'
@@ -54,6 +55,7 @@ export function getRoutes (appFlavor: String) {
     { path: '/signout/:redirectUrl', component: Signout, props: true, meta: { requiresAuth: true } },
     { path: '/businessprofile', component: BusinessProfile, meta: { requiresAuth: true } },
     { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: false } },
+    { path: '/profiledeactivated', component: ProfileDeactivated, props: true, meta: { requiresAuth: false } },
     { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: false } },
     { path: '/searchbusiness', component: SearchBusinessForm, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
     { path: '/unauthorized', component: Unauthorized, props: true, meta: { requiresAuth: false } },

@@ -32,7 +32,7 @@ class UserStatusCode(BaseModel):  # pylint: disable=too-few-public-methods
 
     @classmethod
     def get_user_status_by_name(cls, name):
-        """Return the suesr status object that corresponds to given name."""
+        """Return the user status object that corresponds to given name."""
         return cls.query.filter_by(name=name).one_or_none()
 
     @classmethod

@@ -11,7 +11,7 @@
     </v-expand-transition>
     <!-- First / Last Name -->
     <v-row>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="6" class="pt-0 pb-0">
         <v-text-field
                 filled
                 label="First Name"
@@ -23,7 +23,7 @@
         >
         </v-text-field>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="6" class="pt-0 pb-0">
         <v-text-field
                 filled
                 label="Last Name"
@@ -38,7 +38,7 @@
     </v-row>
     <!-- Email Address -->
     <v-row>
-      <v-col cols="12">
+      <v-col cols="12" class="pt-0 pb-0">
         <v-text-field
                 filled
                 label="Email Address"
@@ -52,7 +52,7 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12">
+      <v-col cols="12" class="pt-0 pb-0">
         <v-text-field
                 filled
                 label="Confirm Email Address"
@@ -66,7 +66,7 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="6" class="pt-0 pb-0">
         <v-text-field
                 filled
                 label="Phone Number"
@@ -80,7 +80,7 @@
         >
         </v-text-field>
       </v-col>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="3" class="pt-0 pb-0">
         <v-text-field
                 filled label="Extension"
                 persistent-hint
@@ -92,18 +92,54 @@
         </v-text-field>
       </v-col>
     </v-row>
+
     <v-row>
-      <v-col cols="12">
+      <v-col cols="12" class="pt-0 pb-0">
         <terms-of-use-dialog :lastAcceptedVersion="lastAcceptedVersion"
                              @termsupdated="updateTerms"></terms-of-use-dialog>
       </v-col>
     </v-row>
+
     <v-row>
-      <v-col cols="12" class="form__btns pb-0">
-        <v-btn large color="primary" class="save-continue-button" :disabled='!isFormValid()' @click="save" data-test="save-button">
-          Save
-        </v-btn>
-        <v-btn large depressed @click="cancel" data-test="cancel-button">Cancel</v-btn>
+      <v-col cols="12" class="form__btns pt-5">
+        <v-btn v-show="editing" large text color="primary" @click="$refs.deactivateUserConfirmationDialog.open()" class="deactivate-btn">Deactivate my profile</v-btn>
+        <!-- Modal for deactivation confirmation -->
+        <ModalDialog
+          ref="deactivateUserConfirmationDialog"
+          :title="$t('deactivateConfirmTitle')"
+          dialog-class="notify-dialog"
+          max-width="640"
+        >
+          <template v-slot:icon>
+            <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+          </template>
+          <template v-slot:text>
+            <p class="pb-1">{{ $t('deactivateConfirmText')}} <strong>{{ $t('deactivateConfirmTextEmphasis') }}</strong></p>
+          </template>
+          <template v-slot:actions>
+            <v-btn large color="error" @click="deactivate()" :loading="isDeactivating" data-test="deactivate-confirm-button">Deactivate</v-btn>
+            <v-btn large color="default" :disabled="isDeactivating" @click="cancelConfirmDeactivate()" data-test="deactivate-cancel-button">Cancel</v-btn>
+          </template>
+        </ModalDialog>
+
+        <!-- Modal for deactivation failure -->
+        <ModalDialog
+          ref="deactivateUserFailureDialog"
+          :title="$t('deactivateFailureTitle')"
+          :text="$t('deactivateFailureText')"
+          dialog-class="notify-dialog"
+          max-width="640"
+        >
+          <template v-slot:icon>
+            <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+          </template>
+        </ModalDialog>
+        <div>
+          <v-btn large color="primary" class="save-continue-button" :disabled='!isFormValid()' @click="save" data-test="save-button">
+            Save
+          </v-btn>
+          <v-btn large depressed @click="cancel" data-test="cancel-button">Cancel</v-btn>
+        </div>
       </v-col>
     </v-row>
   </v-form>
@@ -113,17 +149,23 @@
 import { Component, Mixins, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import { Contact } from '@/models/contact'
-import NextPageMixin from './NextPageMixin.vue'
+import ModalDialog from '@/components/auth/ModalDialog.vue'
+import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
 import TermsOfUseDialog from '@/components/auth/TermsOfUseDialog.vue'
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
+import UserService from '@/services/user.services'
+import configHelper from '@/util/config-helper'
 import { getModule } from 'vuex-module-decorators'
 import { mask } from 'vue-the-mask'
 
 @Component({
-  components: { TermsOfUseDialog },
+  components: {
+    ModalDialog,
+    TermsOfUseDialog
+  },
   directives: {
     mask
   },
@@ -161,6 +203,14 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     private editing = false
     private lastAcceptedVersion = ''
     private isTermsAccepted: boolean
+    private deactivateProfileDialog = false
+    private isDeactivating = false
+
+    $refs: {
+      deactivateUserConfirmationDialog: ModalDialog,
+      deactivateUserFailureDialog: ModalDialog,
+      form: HTMLFormElement
+    }
 
     private emailRules = [
       v => !!v || 'Email address is required',
@@ -183,11 +233,11 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     }
 
     private isFormValid (): boolean {
-      return (!this.$refs || !this.$refs.form) ? false : (this.$refs.form as Vue & { validate: () => boolean }).validate() &&
+      return this.$refs.form && this.$refs.form.validate() &&
         this.confirmedEmailAddress === this.emailAddress && this.isTermsAccepted
     }
 
-    async mounted () {
+    private async mounted () {
       if (!this.userProfile) {
         await this.getUserProfile('@me')
       }
@@ -209,7 +259,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
       }
     }
 
-    updateTerms (event) {
+    private updateTerms (event) {
       this.isTermsAccepted = event.istermsaccepted
       this.userStore.updateCurrentUserTerms({
         terms_of_use_accepted_version: event.termsversion,
@@ -217,7 +267,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
       })
     }
 
-    async save () {
+    private async save () {
       if (this.isFormValid()) {
         const contact = {
           email: this.emailAddress.toLowerCase(),
@@ -241,20 +291,31 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
       this.$router.push(this.getNextPageUrl())
     }
 
-    cancel () {
+    private cancel () {
       window.history.back()
+    }
+
+    private async deactivate (): Promise<void> {
+      try {
+        this.isDeactivating = true
+        await UserService.deactivateUser()
+        const redirectUri = encodeURIComponent(`${configHelper.getSelfURL()}/profiledeactivated`)
+        this.$router.push(`/signout/${redirectUri}`)
+      } catch (exception) {
+        this.$refs.deactivateUserFailureDialog.open()
+      } finally {
+        this.isDeactivating = false
+      }
+    }
+
+    private cancelConfirmDeactivate () {
+      this.$refs.deactivateUserConfirmationDialog.close()
     }
 }
 </script>
 
 <style lang="scss" scoped>
   @import '$assets/scss/theme.scss';
-
-  // Tighten up some of the spacing between rows
-  [class^="col"] {
-    padding-top: 0;
-    padding-bottom: 0;
-  }
 
   .form__btns {
     display: flex;
@@ -263,5 +324,9 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     .v-btn + .v-btn {
       margin-left: 0.5rem;
     }
+  }
+
+  .deactivate-btn {
+    margin-right: auto;
   }
 </style>
