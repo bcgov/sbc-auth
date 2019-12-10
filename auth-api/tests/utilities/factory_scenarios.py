@@ -263,6 +263,9 @@ class TestContactInfo(dict, Enum):
 
     invalid = {'email': 'bar'}
 
+    # According to front end email validator and email address standard, the email below is valid email.
+    email_valid = {'email': "abc!#$%&'*+-/=?^_`{|.123@test-test.com"}
+
 
 class TestUserInfo(dict, Enum):
     """Test scenarios of user."""
