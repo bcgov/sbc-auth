@@ -52,6 +52,12 @@ export default class Signin extends Mixins(NextPageMixin) {
         if (this.idpHint === 'bcsc') {
           await this.syncUserProfile()
           await this.syncOrganizations()
+          // eslint-disable-next-line no-console
+          console.info('[SignIn.vue]Logged in User.Starting refreshTimer')
+          var self = this
+          this.$tokenService.initUsingUrl(`/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`).then(function (success) {
+            self.$tokenService.scheduleRefreshTimer()
+          })
         }
         this.redirectToNext()
       }
