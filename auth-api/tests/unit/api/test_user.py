@@ -210,6 +210,21 @@ def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
     assert user['contacts'][0]['email'] == 'foo@bar.com'
 
 
+def test_add_contact_valid_email_with_special_characters(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a contact can be added (POST) to an existing user."""
+    # POST a test user
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+
+    # POST a contact to test user
+    rv = client.post('/api/v1/users/contacts', data=json.dumps(TestContactInfo.email_valid),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    user = json.loads(rv.data)
+    assert len(user['contacts']) == 1
+    assert user['contacts'][0]['email'] == TestContactInfo.email_valid['email']
+
+
 def test_add_contact_no_token_returns_401(client, session):  # pylint:disable=unused-argument
     """Assert that adding a contact without providing a token returns a 401."""
     rv = client.post('/api/v1/users/contacts', data=json.dumps(TestContactInfo.contact1),

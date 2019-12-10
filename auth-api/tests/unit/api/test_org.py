@@ -243,6 +243,20 @@ def test_add_contact_invalid_format_returns_400(client, jwt, session):  # pylint
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
+def test_add_contact_valid_email_returns_201(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that adding an valid formatted contact with special characters in email returns a 201."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.post('/api/v1/orgs/{}/contacts'.format(org_id),
+                     headers=headers, data=json.dumps(TestContactInfo.email_valid), content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+
 def test_add_contact_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that adding a contact to a non-existant org returns 404."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
@@ -303,6 +317,22 @@ def test_update_contact_invalid_format_returns_400(client, jwt, session):  # pyl
     rv = client.put('/api/v1/orgs/{}/contacts'.format(org_id),
                     headers=headers, data=json.dumps(TestContactInfo.invalid), content_type='application/json')
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+
+
+def test_update_contact_valid_email_format_returns_200(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that updating with an validly formatted contact with special characters in email returns a 200."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    client.post('/api/v1/orgs/{}/contacts'.format(org_id),
+                headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
+    rv = client.put('/api/v1/orgs/{}/contacts'.format(org_id),
+                    headers=headers, data=json.dumps(TestContactInfo.email_valid), content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
 
 
 def test_update_contact_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
