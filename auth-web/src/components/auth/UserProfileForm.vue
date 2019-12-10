@@ -102,31 +102,38 @@
 
     <v-row>
       <v-col cols="12" class="form__btns pt-5">
-        <v-dialog max-width="640" v-model="deactivateProfileDialog" style="display: none;">
-          <template v-slot:activator="{ on }">
-            <v-btn large text color="primary" v-on="on" class="deactivate-btn">Deactivate my profile</v-btn>
+        <v-btn large text color="primary" @click="$refs.deactivateUserConfirmationDialog.open()" class="deactivate-btn">Deactivate my profile</v-btn>
+        <!-- Modal for deactivation confirmation -->
+        <ModalDialog
+          ref="deactivateUserConfirmationDialog"
+          :title="$t('deactivateConfirmTitle')"
+          dialog-class="notify-dialog"
+          max-width="640"
+        >
+          <template v-slot:icon>
+            <v-icon large color="error">mdi-alert-circle-outline</v-icon>
           </template>
-          <v-card>
-            <v-card-title>
-              Deactivate your profile
-            </v-card-title>
-            <v-card-text>
-              <p class="pb-1">Deactivating your Cooperatives Online profile will remove your contact information, and your access to associated teams and/or affiliated businesses. <strong>This action cannot be undone.</strong></p>
-              <v-row>
-                <v-col cols="12" class="form__btns">
-                  <v-btn large color="error" to="./profiledeactivated" :loading="isDeactivating">Deactivate</v-btn>
-                  <!-- Show loading indicator while deactivation process is active -->
-                  <!-- Show ModalDialog Error if process failed -->
-                  <!-- Redirect to 'ProfileDeactivated' view once successful -->
+          <template v-slot:text>
+            <p class="pb-1">{{ $t('deactivateConfirmText')}} <strong>{{ $t('deactivateConfirmTextEmphasis') }}</strong></p>
+          </template>
+          <template v-slot:actions>
+            <v-btn large color="error" @click="deactivate()" :loading="isDeactivating" data-test="deactivate-confirm-button">Deactivate</v-btn>
+            <v-btn large color="default" :disabled="isDeactivating" @click="cancelConfirmDeactivate()" data-test="deactivate-cancel-button">Cancel</v-btn>
+          </template>
+        </ModalDialog>
 
-                  <v-btn large depressed color="default" @click="deactivateProfileDialog = false">Cancel</v-btn>
-                  <!-- User should be able to recover when clicking this button (if the deactivation process is delayed and it is visible still) -->
-
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </v-card>
-        </v-dialog>
+        <!-- Modal for deactivation failure -->
+        <ModalDialog
+        ref="deactivateUserFailureDialog"
+        :title="$t('deactivateFailureTitle')"
+        :text="$t('deactivateFailureText')"
+        dialog-class="notify-dialog"
+        max-width="640"
+        >
+          <template v-slot:icon>
+            <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+          </template>
+        </ModalDialog>
         <div>
           <v-btn large color="primary" class="save-continue-button" :disabled='!isFormValid()' @click="save" data-test="save-button">
             Save
@@ -149,11 +156,14 @@ import { Organization } from '@/models/Organization'
 import TermsOfUseDialog from '@/components/auth/TermsOfUseDialog.vue'
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
+import UserService from '@/services/user.services'
+import configHelper from '@/util/config-helper'
 import { getModule } from 'vuex-module-decorators'
 import { mask } from 'vue-the-mask'
 
 @Component({
   components: {
+    ModalDialog,
     TermsOfUseDialog
   },
   directives: {
@@ -196,6 +206,12 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     private deactivateProfileDialog = false
     private isDeactivating = false
 
+    $refs: {
+      deactivateUserConfirmationDialog: ModalDialog,
+      deactivateUserFailureDialog: ModalDialog,
+      form: HTMLFormElement
+    }
+
     private emailRules = [
       v => !!v || 'Email address is required',
       v => {
@@ -217,11 +233,11 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     }
 
     private isFormValid (): boolean {
-      return (!this.$refs || !this.$refs.form) ? false : (this.$refs.form as Vue & { validate: () => boolean }).validate() &&
+      return this.$refs.form && this.$refs.form.validate() &&
         this.confirmedEmailAddress === this.emailAddress && this.isTermsAccepted
     }
 
-    async mounted () {
+    private async mounted () {
       if (!this.userProfile) {
         await this.getUserProfile('@me')
       }
@@ -243,7 +259,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
       }
     }
 
-    updateTerms (event) {
+    private updateTerms (event) {
       this.isTermsAccepted = event.istermsaccepted
       this.userStore.updateCurrentUserTerms({
         terms_of_use_accepted_version: event.termsversion,
@@ -251,7 +267,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
       })
     }
 
-    async save () {
+    private async save () {
       if (this.isFormValid()) {
         const contact = {
           email: this.emailAddress.toLowerCase(),
@@ -275,8 +291,25 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
       this.$router.push(this.getNextPageUrl())
     }
 
-    cancel () {
+    private cancel () {
       window.history.back()
+    }
+
+    private async deactivate (): Promise<void> {
+      try {
+        this.isDeactivating = true
+        await UserService.deactivateUser()
+        const redirectUri = encodeURIComponent(`${configHelper.getSelfURL()}/profiledeactivated`)
+        this.$router.push(`/signout/${redirectUri}`)
+      } catch (exception) {
+        this.$refs.deactivateUserFailureDialog.open()
+      } finally {
+        this.isDeactivating = false
+      }
+    }
+
+    private cancelConfirmDeactivate () {
+      this.$refs.deactivateUserConfirmationDialog.close()
     }
 }
 </script>

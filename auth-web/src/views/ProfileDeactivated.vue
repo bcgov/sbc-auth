@@ -7,7 +7,7 @@
           <h1 class="mb-5">Your profile has been deactivated.</h1>
           <p class="mb-9">Your contact information, team associations and business affiliations have been removed.</p>
         </div>
-        <v-btn large link color="primary" href="../">{{ $t('homeBtnLabel')}}</v-btn>
+        <v-btn large link color="primary" @click="goHome()">{{ $t('homeBtnLabel')}}</v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -15,14 +15,12 @@
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator'
-import { Role } from '@/util/constants'
-import { UserInfo } from '@/models/userInfo'
 import Vue from 'vue'
-import { mapState } from 'vuex'
 
-  @Component({})
+@Component({})
 export default class ProfileDeactivated extends Vue {
-  mounted () {
+  private goHome () {
+    this.$router.push('/')
   }
 }
 </script>

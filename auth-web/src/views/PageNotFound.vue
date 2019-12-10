@@ -5,19 +5,21 @@
         <v-icon size="48" color="error" class="mb-6">mdi-alert-circle-outline</v-icon>
         <h1 class="mb-7">{{ $t('pageNotFoundTitle')}}</h1>
         <p class="mb-9">{{ $t('pageNotFoundMsg')}}</p>
-        <v-btn large link color="primary" href="../">{{ $t('homeBtnLabel')}}</v-btn>
+        <v-btn large link color="primary" @click="goHome()">{{ $t('homeBtnLabel')}}</v-btn>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
-<script>
-
-export default ({
-  name: 'PageNotFound',
-  components: {
+<script lang="ts">
+import { Component } from 'vue-property-decorator'
+import Vue from 'vue'
+@Component({})
+export default class PageNotFound extends Vue {
+  private goHome () {
+    this.$router.push('/')
   }
-})
+}
 </script>
 
 <style lang="scss" scoped>
