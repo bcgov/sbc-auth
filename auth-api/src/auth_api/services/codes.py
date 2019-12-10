@@ -48,19 +48,20 @@ class Codes:
         """Return values from code table."""
         try:
             data: [] = None
-            code_model = Codes.fetch_data_model(code_type.lower())
+            if code_type:
+                code_model = Codes.fetch_data_model(code_type.lower())
 
-            if code_model:
-                codes = code_model.query.all()
+                if code_model:
+                    codes = code_model.query.all()
 
-                data = []
-                # transform each of entry to a dictionary base on schema.
-                for entry in codes:
-                    module_name = f'auth_api.schemas.{entry.__tablename__}'
-                    class_name = f'{entry.__class__.__name__}Schema'
-                    schema = getattr(importlib.import_module(module_name), class_name)
-                    code_schema = schema()
-                    data.append(code_schema.dump(entry, many=False))
-            return data
+                    data = []
+                    # transform each of entry to a dictionary base on schema.
+                    for entry in codes:
+                        module_name = f'auth_api.schemas.{entry.__tablename__}'
+                        class_name = f'{entry.__class__.__name__}Schema'
+                        schema = getattr(importlib.import_module(module_name), class_name)
+                        code_schema = schema()
+                        data.append(code_schema.dump(entry, many=False))
+                return data
         except Exception as exception:
             raise BusinessException(Error.UNDEFINED_ERROR, exception)
