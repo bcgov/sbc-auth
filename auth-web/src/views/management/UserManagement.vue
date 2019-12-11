@@ -81,6 +81,36 @@
       </template>
     </ModalDialog>
 
+    <!-- Confirm Action Dialog With Email Question-->
+    <ModalDialog
+            ref="confirmActionDialogWithQuestion"
+            :title="confirmActionTitle"
+            :text="confirmActionText"
+            dialog-class="notify-dialog"
+            max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-container>
+          <v-row justify="center" align="center">
+            <v-col>
+              <v-switch v-model="notifyUser"  label="Notify user using email "></v-switch>
+            </v-col>
+          </v-row>
+          <v-row  justify="center" align="center">
+            <v-col>
+              <v-btn large color="primary" @click="confirmHandler()">{{ primaryActionText }}</v-btn>
+            </v-col>
+            <v-col >
+              <v-btn large color="default" @click="cancel()">{{ secondaryActionText }}</v-btn>
+            </v-col>
+          </v-row>
+        </v-container>
+      </template>
+    </ModalDialog>
+
     <!-- Alert Dialog (Success) -->
     <ModalDialog
       ref="successDialog"
@@ -180,11 +210,14 @@ export default class UserManagement extends Vue {
   private readonly leaveTeam!: (memberId: number) => void
   private readonly syncOrganizations!: () => Promise<Organization[]>
 
+  private notifyUser = false
+
   $refs: {
     successDialog: ModalDialog
     errorDialog: ModalDialog
     inviteUsersDialog: ModalDialog
     confirmActionDialog: ModalDialog
+    confirmActionDialogWithQuestion:ModalDialog
   }
 
   private async mounted () {
@@ -238,12 +271,26 @@ export default class UserManagement extends Vue {
     if (payload.member.membershipTypeCode.toString() === payload.targetRole.toString()) {
       return
     }
+    this.notifyUser = this.isDowngraded(payload.targetRole, payload.member.membershipTypeCode)
     this.confirmActionTitle = this.$t('confirmRoleChangeTitle').toString()
     this.confirmActionText = `Are you sure you wish to change ${payload.member.user.firstname}'s role to ${payload.targetRole}?`
     this.roleChangeToAction = payload
     this.confirmHandler = this.changeRole
     this.primaryActionText = 'Change'
-    this.$refs.confirmActionDialog.open()
+    this.$refs.confirmActionDialogWithQuestion.open()
+  }
+
+  private isDowngraded (newRole:string, currentRole:string) {
+    if (newRole === MembershipType.Admin) {
+      return false
+    }
+    if (newRole === MembershipType.Member) {
+      return true
+    }
+    if (newRole === MembershipType.Owner && currentRole === MembershipType.Admin) {
+      return true
+    }
+    return false
   }
 
   private showConfirmLeaveTeamModal () {
