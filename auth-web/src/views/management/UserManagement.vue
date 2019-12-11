@@ -83,31 +83,24 @@
 
     <!-- Confirm Action Dialog With Email Question-->
     <ModalDialog
-            ref="confirmActionDialogWithQuestion"
-            :title="confirmActionTitle"
-            :text="confirmActionText"
-            dialog-class="notify-dialog"
-            max-width="640"
+      ref="confirmActionDialogWithQuestion"
+      :title="confirmActionTitle"
+      :text="confirmActionText"
+      dialog-class="notify-dialog"
+      max-width="640"
     >
       <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+        <v-icon large color="primary">mdi-information-outline</v-icon>
+      </template>
+      <template v-slot:text>
+        <div class="mb-8">{{ confirmActionText }}</div>
+        <v-checkbox sm hide-details color="primary" class="notify-checkbox" v-model="notifyUser" :label="$t('notifyChangeUserRoleMsg')"></v-checkbox>
       </template>
       <template v-slot:actions>
-        <v-container>
-          <v-row justify="center" align="center">
-            <v-col>
-              <v-switch v-model="notifyUser"  label="Notify user using email "></v-switch>
-            </v-col>
-          </v-row>
-          <v-row  justify="center" align="center">
-            <v-col>
-              <v-btn large color="primary" @click="confirmHandler()">{{ primaryActionText }}</v-btn>
-            </v-col>
-            <v-col >
-              <v-btn large color="default" @click="cancel()">{{ secondaryActionText }}</v-btn>
-            </v-col>
-          </v-row>
-        </v-container>
+        <div>
+          <v-btn large color="primary" @click="confirmHandler()">{{ primaryActionText }}</v-btn>
+          <v-btn large color="default" @click="cancel()">{{ secondaryActionText }}</v-btn>
+        </div>
       </template>
     </ModalDialog>
 
@@ -195,7 +188,7 @@ export default class UserManagement extends Vue {
   private confirmActionTitle: string = ''
   private confirmActionText: string = ''
   private primaryActionText: string = ''
-  private secondaryActionText = 'Cancel'
+  private secondaryActionText = 'No'
 
   private confirmHandler: () => void = undefined
 
@@ -276,7 +269,7 @@ export default class UserManagement extends Vue {
     this.confirmActionText = `Are you sure you wish to change ${payload.member.user.firstname}'s role to ${payload.targetRole}?`
     this.roleChangeToAction = payload
     this.confirmHandler = this.changeRole
-    this.primaryActionText = 'Change'
+    this.primaryActionText = 'Yes'
     this.$refs.confirmActionDialogWithQuestion.open()
   }
 
@@ -407,6 +400,16 @@ export default class UserManagement extends Vue {
     .v-list-item__title {
       display: block;
       font-weight: 700;
+    }
+  }
+
+  .notify-checkbox {
+    justify-content: center;
+
+    ::v-deep {
+      .v-input__slot {
+        margin-bottom: 0 !important;
+      }
     }
   }
 </style>
