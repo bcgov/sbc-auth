@@ -85,7 +85,7 @@
                 filled label="Extension"
                 persistent-hint
                 :rules="extensionRules"
-                v-mask="'###'"
+                v-mask="'####'"
                 v-model="extension"
                 data-test="phone-extension"
         >
@@ -225,7 +225,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     ]
 
     private extensionRules = [
-      v => !v || (v.length >= 0 || v.length <= 3) || 'Extension is invalid'
+      v => !v || (v.length >= 0 || v.length <= 4) || 'Extension is invalid'
     ]
 
     private emailMustMatch (): string {
