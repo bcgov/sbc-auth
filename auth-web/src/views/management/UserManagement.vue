@@ -75,6 +75,11 @@
       <template v-slot:icon>
         <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
+      <template v-slot:text>
+        <div class="mb-8">{{ confirmActionText }}</div>
+        <v-checkbox sm hide-details color="primary" class="notify-checkbox" v-model="notifyUser" :label="$t('notifyChangeUserRoleMsg')"></v-checkbox>
+      </template>
+
       <template v-slot:actions>
         <v-btn large color="primary" @click="confirmHandler()">{{ primaryActionText }}</v-btn>
         <v-btn large color="default" @click="cancel()">{{ secondaryActionText }}</v-btn>
@@ -264,26 +269,12 @@ export default class UserManagement extends Vue {
     if (payload.member.membershipTypeCode.toString() === payload.targetRole.toString()) {
       return
     }
-    this.notifyUser = this.isDowngraded(payload.targetRole, payload.member.membershipTypeCode)
     this.confirmActionTitle = this.$t('confirmRoleChangeTitle').toString()
     this.confirmActionText = `Are you sure you wish to change ${payload.member.user.firstname}'s role to ${payload.targetRole}?`
     this.roleChangeToAction = payload
     this.confirmHandler = this.changeRole
     this.primaryActionText = 'Yes'
     this.$refs.confirmActionDialogWithQuestion.open()
-  }
-
-  private isDowngraded (newRole:string, currentRole:string) {
-    if (newRole === MembershipType.Admin) {
-      return false
-    }
-    if (newRole === MembershipType.Member) {
-      return true
-    }
-    if (newRole === MembershipType.Owner && currentRole === MembershipType.Admin) {
-      return true
-    }
-    return false
   }
 
   private showConfirmLeaveTeamModal () {
@@ -319,7 +310,7 @@ export default class UserManagement extends Vue {
   }
 
   private cancel () {
-    this.$refs.confirmActionDialog.close()
+    this.$refs.confirmActionDialog.close() || this.$refs.confirmActionDialogWithQuestion.close()
   }
 
   private async removeMember () {
@@ -333,7 +324,8 @@ export default class UserManagement extends Vue {
   private async changeRole () {
     await this.updateMember({
       memberId: this.roleChangeToAction.member.id,
-      role: this.roleChangeToAction.targetRole.toString().toUpperCase()
+      role: this.roleChangeToAction.targetRole.toString().toUpperCase(),
+      notifyUser: this.notifyUser
     })
     this.$refs.confirmActionDialog.close()
     await this.syncOrganizations()

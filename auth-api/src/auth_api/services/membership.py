@@ -28,13 +28,13 @@ from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
+from auth_api.utils.enums import NotificationType
 from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, OWNER, Status
 from config import get_named_config
 
 from .authorization import check_auth
 from .notification import send_email
 from .org import Org as OrgService
-
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -107,25 +107,35 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             return Membership(membership)
         return None
 
-    def send_approval_notification_to_member(self, origin_url):
-        """Send the admin email notification."""
-        current_app.logger.debug('<send_approval_notification_to_member')
+    def send_notification_to_member(self, origin_url, notification_type):
+        """generic method for member notification."""
+        current_app.logger.debug(f'<send {notification_type} notification')
         org_name = self._model.org.name
-        subject = '[BC Registries & Online Services] Welcome to the team {}'. \
-            format(org_name)
+        template_name = ''
+        params = {}
+        if notification_type == NotificationType.ROLE_CHANGED.value:
+            subject = '[BC Registries & Online Services] Your Role has been changed'
+            template_name = 'role_changed_notification_email.html'
+            params = {'org_name': org_name, 'role': self._model.membership_type.code,
+                      'label': self._model.membership_type.label}
+        elif notification_type == NotificationType.MEMBERSHIP_APPROVED.value:
+            subject = '[BC Registries & Online Services] Welcome to the team {}'. \
+                format(org_name)
+            template_name = 'membership_approved_notification_email.html'
+            params = {'org_name': org_name}
         sender = CONFIG.MAIL_FROM_ID
         template = ENV.get_template('email_templates/membership_approved_notification_email.html')
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         app_url = '{}/{}'.format(origin_url, context_path)
 
         sent_response = send_email(subject, sender, self._model.user.contacts[0].contact.email,
-                                   template.render(url=app_url, org_name=org_name,
+                                   template.render(url=app_url, params=params,
                                                    logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
         current_app.logger.debug('<send_approval_notification_to_member')
         if not sent_response:
             # invitation.invitation_status_code = 'FAILED'
             # invitation.save()
-            current_app.logger.error('<send_approval_notification_to_member failed')
+            current_app.logger.error('<send_notification_to_member failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None)
 
     def update_membership(self, updated_fields, token_info: Dict = None):
@@ -140,10 +150,9 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
         # Ensure that if downgrading from owner that there is at least one other owner in org
         if self._model.membership_type == OWNER and \
-           updated_fields['membership_type'] != OWNER and \
-           OrgService(self._model.org).get_owner_count() == 1:
+                updated_fields['membership_type'] != OWNER and \
+                OrgService(self._model.org).get_owner_count() == 1:
             raise BusinessException(Error.CHANGE_ROLE_FAILED_ONLY_OWNER, None)
-
 
         for key, value in updated_fields.items():
             if value is not None:
