@@ -36,6 +36,7 @@ from .authorization import check_auth
 from .notification import send_email
 from .org import Org as OrgService
 
+
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
 
@@ -108,7 +109,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         return None
 
     def send_notification_to_member(self, origin_url, notification_type):
-        """generic method for member notification."""
+        """Send member notification."""
         current_app.logger.debug(f'<send {notification_type} notification')
         org_name = self._model.org.name
         template_name = ''
@@ -124,7 +125,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             template_name = 'membership_approved_notification_email.html'
             params = {'org_name': org_name}
         sender = CONFIG.MAIL_FROM_ID
-        template = ENV.get_template('email_templates/membership_approved_notification_email.html')
+        template = ENV.get_template(f'email_templates/{template_name}')
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         app_url = '{}/{}'.format(origin_url, context_path)
 

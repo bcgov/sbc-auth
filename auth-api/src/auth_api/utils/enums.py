@@ -30,7 +30,7 @@ class ContentType(Enum):
 
 
 class NotificationType(Enum):
-    """ notification types """
+    """notification types."""
 
     ROLE_CHANGED = 'ROLE_CHANGED'
     MEMBERSHIP_APPROVED = 'MEMBERSHIP_APPROVED'
