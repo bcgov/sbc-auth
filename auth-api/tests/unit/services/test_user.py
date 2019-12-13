@@ -49,7 +49,7 @@ def test_user_save_by_token(session):  # pylint: disable=unused-argument
     assert user is not None
     dictionary = user.as_dict()
     assert dictionary['username'] == TestJwtClaims.user_test['preferred_username']
-    assert dictionary['keycloak_guid'] == TestJwtClaims.user_test['sub']
+    assert dictionary['keycloakGuid'] == TestJwtClaims.user_test['sub']
 
 
 def test_user_save_by_token_no_token(session):  # pylint: disable=unused-argument
@@ -122,7 +122,7 @@ def test_update_terms_of_use_for_user(session):  # pylint: disable=unused-argume
 
     updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 1)
     dictionary = updated_user.as_dict()
-    assert dictionary['is_terms_of_use_accepted'] is True
+    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
 
 
 def test_update_contact_for_user_no_user(session):  # pylint: disable=unused-argument
@@ -197,7 +197,7 @@ def test_user_find_by_token(session):  # pylint: disable=unused-argument
     assert found_user is not None
     dictionary = found_user.as_dict()
     assert dictionary['username'] == TestJwtClaims.user_test['preferred_username']
-    assert dictionary['keycloak_guid'] == TestJwtClaims.user_test['sub']
+    assert dictionary['keycloakGuid'] == TestJwtClaims.user_test['sub']
 
 
 def test_user_find_by_username(session):  # pylint: disable=unused-argument

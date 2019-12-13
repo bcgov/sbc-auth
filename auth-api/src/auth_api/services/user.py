@@ -208,7 +208,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         2) Find all org membership for the user
         3) Check if the current user is the only owner for any org - If yes, deny the action
         4) Mark the membership as inactive on all orgs for the user
-        5) Delete the contact information for the user
+        5) Delete the contact information for the user and the accepted terms of service
         6) Mark the user record as inactive
         """
         current_app.logger.debug('<delete_user')
@@ -234,6 +234,12 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         # Set the user status as inactive
         user.status = UserStatus.INACTIVE.value
+
+        # Remove accepted terms
+        user.terms_of_use_accepted_version = None
+        user.terms_of_use_version = None
+        user.is_terms_of_use_accepted = False
+
         user.save()
         current_app.logger.debug('<delete_user')
 
