@@ -86,7 +86,7 @@ def test_update_user_terms_of_use(client, jwt, session):  # pylint:disable=unuse
                       data=input_data, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     user = json.loads(rv.data)
-    assert user['terms_of_use_version'] == 1
+    assert user['userTerms']['termsOfUseAcceptedVersion'] == 1
 
 
 def test_update_user_terms_of_use_invalid_input(client, jwt, session):  # pylint:disable=unused-argument
