@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>You Membership Has Been Approved</title>
+    <title>Your Role Has Been Changed</title>
     <style>
         /* Global Resets */
         body, table, div, a, p {
@@ -45,10 +45,13 @@
                 <tr>
                     <td>
                         <h1 style="margin: 0; line-height: 34px; letter-spacing: -1px; font-family: Verdana, Arial, sans-serif; font-size: 24px; font-weight: 700;">
-                            Your membership to the <strong>params['org_name'] </strong> team at Cooperatives Online has been approved.
+                            Your role in the <strong>{{ params['org_name'] }}</strong> team at Cooperatives Online has been changed and you are now {{params['role']}}.
                         </h1>
+                         <p style="margin-top: 20px; margin-bottom: 0; line-height: 24px; font-family: Verdana, Arial, sans-serif; font-size: 16px;">
+                           As {{params['role']}} , now you {{params['label']}}
+                        </p>
                         <p style="margin-top: 20px; margin-bottom: 0; line-height: 24px; font-family: Verdana, Arial, sans-serif; font-size: 16px;">
-                            To access this team, log into Cooperatives Online using your BC Services Card.
+                           As a  To access this team, log into Cooperatives Online using your BC Services Card.
                         </p>
                         <div style="margin-top: 45px;">
                             <!--[if mso]> <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ url }}" style="height:55px; v-text-anchor:middle; width:250px;" arcsize="10%" stroke="f" fillcolor="#003366" alias="CTA1">Join Team<w:anchorlock/> <center> <![endif]-->

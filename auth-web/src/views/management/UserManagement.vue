@@ -75,9 +75,37 @@
       <template v-slot:icon>
         <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
+      <template v-slot:text>
+        <div class="mb-8">{{ confirmActionText }}</div>
+        <v-checkbox sm hide-details color="primary" class="notify-checkbox" v-model="notifyUser" :label="$t('notifyChangeUserRoleMsg')"></v-checkbox>
+      </template>
+
       <template v-slot:actions>
         <v-btn large color="primary" @click="confirmHandler()">{{ primaryActionText }}</v-btn>
         <v-btn large color="default" @click="cancel()">{{ secondaryActionText }}</v-btn>
+      </template>
+    </ModalDialog>
+
+    <!-- Confirm Action Dialog With Email Question-->
+    <ModalDialog
+      ref="confirmActionDialogWithQuestion"
+      :title="confirmActionTitle"
+      :text="confirmActionText"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="primary">mdi-information-outline</v-icon>
+      </template>
+      <template v-slot:text>
+        <div class="mb-8">{{ confirmActionText }}</div>
+        <v-checkbox sm hide-details color="primary" class="notify-checkbox" v-model="notifyUser" :label="$t('notifyChangeUserRoleMsg')"></v-checkbox>
+      </template>
+      <template v-slot:actions>
+        <div>
+          <v-btn large color="primary" @click="confirmHandler()">{{ primaryActionText }}</v-btn>
+          <v-btn large color="default" @click="cancel()">{{ secondaryActionText }}</v-btn>
+        </div>
       </template>
     </ModalDialog>
 
@@ -165,7 +193,7 @@ export default class UserManagement extends Vue {
   private confirmActionTitle: string = ''
   private confirmActionText: string = ''
   private primaryActionText: string = ''
-  private secondaryActionText = 'Cancel'
+  private secondaryActionText = 'No'
 
   private confirmHandler: () => void = undefined
 
@@ -180,11 +208,14 @@ export default class UserManagement extends Vue {
   private readonly leaveTeam!: (memberId: number) => void
   private readonly syncOrganizations!: () => Promise<Organization[]>
 
+  private notifyUser = false
+
   $refs: {
     successDialog: ModalDialog
     errorDialog: ModalDialog
     inviteUsersDialog: ModalDialog
     confirmActionDialog: ModalDialog
+    confirmActionDialogWithQuestion:ModalDialog
   }
 
   private async mounted () {
@@ -242,8 +273,8 @@ export default class UserManagement extends Vue {
     this.confirmActionText = `Are you sure you wish to change ${payload.member.user.firstname}'s role to ${payload.targetRole}?`
     this.roleChangeToAction = payload
     this.confirmHandler = this.changeRole
-    this.primaryActionText = 'Change'
-    this.$refs.confirmActionDialog.open()
+    this.primaryActionText = 'Yes'
+    this.$refs.confirmActionDialogWithQuestion.open()
   }
 
   private showConfirmLeaveTeamModal () {
@@ -279,7 +310,7 @@ export default class UserManagement extends Vue {
   }
 
   private cancel () {
-    this.$refs.confirmActionDialog.close()
+    this.$refs.confirmActionDialog.close() || this.$refs.confirmActionDialogWithQuestion.close()
   }
 
   private async removeMember () {
@@ -293,7 +324,8 @@ export default class UserManagement extends Vue {
   private async changeRole () {
     await this.updateMember({
       memberId: this.roleChangeToAction.member.id,
-      role: this.roleChangeToAction.targetRole.toString().toUpperCase()
+      role: this.roleChangeToAction.targetRole.toString().toUpperCase(),
+      notifyUser: this.notifyUser
     })
     this.$refs.confirmActionDialog.close()
     await this.syncOrganizations()
@@ -360,6 +392,16 @@ export default class UserManagement extends Vue {
     .v-list-item__title {
       display: block;
       font-weight: 700;
+    }
+  }
+
+  .notify-checkbox {
+    justify-content: center;
+
+    ::v-deep {
+      .v-input__slot {
+        margin-bottom: 0 !important;
+      }
     }
   }
 </style>

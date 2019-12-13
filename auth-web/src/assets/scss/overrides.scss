@@ -1,6 +1,9 @@
 // Vuetify Overrides
 @import "theme.scss";
 
+// Mixins
+$font-color: rgba($gray9, 0.8);
+
 // Buttons
 .v-btn {
   letter-spacing: 0;
@@ -63,10 +66,6 @@
   padding: 1.5rem;
 }
 
-.theme--light.v-card >.v-card__text {
-  color: rgba($gray9, 0.8);
-}
-
 // Form Inputs
 
 // Adjust font size of help messages
@@ -92,6 +91,7 @@ input:-webkit-autofill:active {
 // Tab Navigation
 .v-tab {
   min-width: auto;
+  letter-spacing: 0;
   font-weight: 700;
 }
 
@@ -103,4 +103,11 @@ input:-webkit-autofill:active {
 // Aside Navigation
 .v-application--is-ltr .v-list-item__icon:first-child {
   margin-right: 1rem;
+}
+
+// Theme 
+.theme--light {
+  &.v-card > .v-card__text {
+    color: $font-color;
+  }
 }

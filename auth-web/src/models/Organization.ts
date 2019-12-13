@@ -25,6 +25,7 @@ export interface UpdateMemberPayload {
   memberId: number
   role?: string
   status?: string
+  notifyUser?:boolean
 }
 
 export interface RemoveBusinessPayload {

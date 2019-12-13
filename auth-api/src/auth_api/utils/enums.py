@@ -27,3 +27,10 @@ class ContentType(Enum):
 
     JSON = 'application/json'
     FORM_URL_ENCODED = 'application/x-www-form-urlencoded'
+
+
+class NotificationType(Enum):
+    """notification types."""
+
+    ROLE_CHANGED = 'ROLE_CHANGED'
+    MEMBERSHIP_APPROVED = 'MEMBERSHIP_APPROVED'
