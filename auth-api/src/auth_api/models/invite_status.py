@@ -19,7 +19,7 @@ It defines the different statuses of an Invitation.
 from .base_model import BaseCodeModel
 
 
-class InvitationStatus(BaseCodeModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class InvitationStatus(BaseCodeModel):  # pylint: disable=too-few-public-methods
     """This is the Invitation Status model for the Auth service."""
 
     __tablename__ = 'invitation_status'

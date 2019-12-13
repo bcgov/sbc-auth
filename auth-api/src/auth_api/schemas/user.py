@@ -33,6 +33,7 @@ class UserSchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-fe
     user_terms = fields.Method('get_user_terms_object')
 
     def get_user_terms_object(self, obj):  # pylint: disable=no-self-use
+        """Map terms properties into nested object."""
         return {
             'isTermsOfUseAccepted': obj.is_terms_of_use_accepted,
             'termsOfUseAcceptedVersion': obj.terms_of_use_accepted_version

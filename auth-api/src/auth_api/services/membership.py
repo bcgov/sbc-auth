@@ -144,7 +144,6 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
            OrgService(self._model.org).get_owner_count() == 1:
             raise BusinessException(Error.CHANGE_ROLE_FAILED_ONLY_OWNER, None)
 
-
         for key, value in updated_fields.items():
             if value is not None:
                 setattr(self._model, key, value)
