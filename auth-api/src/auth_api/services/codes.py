@@ -63,5 +63,6 @@ class Codes:
                         code_schema = schema()
                         data.append(code_schema.dump(entry, many=False))
                 return data
+            return None
         except Exception as exception:
             raise BusinessException(Error.UNDEFINED_ERROR, exception)
