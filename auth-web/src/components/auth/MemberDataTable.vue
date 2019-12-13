@@ -30,7 +30,7 @@
             <v-list-item
               v-for="(role, index) in availableRoles"
               :key="index"
-              @click="confirmChangeRole(item, role.name)"
+              @click=" item.membershipTypeCode.toUpperCase() !== role.name.toUpperCase()? confirmChangeRole(item, role.name): ''"
               :disabled="!isRoleEnabled(role)"
               v-bind:class="{ active: item.membershipTypeCode.toUpperCase() === role.name.toUpperCase() }">
               <v-list-item-icon>

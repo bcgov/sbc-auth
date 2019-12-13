@@ -30,6 +30,7 @@
   "noPendingInvitesLabel": "No Pending Invitations",
   "noPendingInvitationTitle": "No Pending Invitations",
   "noPendingInvitationMsg": "You don't have any pending invitations to BC Registries and Online Services.",
+  "notifyChangeUserRoleMsg": "Notify user about this change",
   "pendingInvitationMsg": "The administrator for this team needs to verify your invitation before you can access this application.",
   "noActiveUsersLabel": "No Active Users",
   "pageNotFoundTitle": "Page not found",

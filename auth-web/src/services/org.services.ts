@@ -22,7 +22,7 @@ export default class OrgService {
 
   public static async updateMember (orgId: number, updatePayload: UpdateMemberPayload): Promise<AxiosResponse<Member>> {
     return Axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgId}/members/${updatePayload.memberId}`,
-      { role: updatePayload.role, status: updatePayload.status })
+      { role: updatePayload.role, status: updatePayload.status, notifyUser: updatePayload.notifyUser })
   }
 
   public static async createOrg (createRequestBody: CreateRequestBody): Promise<AxiosResponse<Organization>> {

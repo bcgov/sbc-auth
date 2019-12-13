@@ -19,7 +19,7 @@
       <v-card-text>
         <slot name="text">{{ text }}</slot>
       </v-card-text>
-      <v-card-actions v-if="showActions">
+        <v-card-actions v-if="showActions">
         <slot name="actions">
           <v-btn large color="success" @click="close()" data-test="dialog-ok-button">OK</v-btn>
         </slot>

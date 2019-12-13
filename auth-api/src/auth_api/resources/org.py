@@ -26,6 +26,7 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
+from auth_api.utils.enums import NotificationType
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF, Role, Status
 from auth_api.utils.util import cors_preflight
 
@@ -294,6 +295,7 @@ class OrgMember(Resource):
         token = g.jwt_oidc_token_info
         role = request.get_json().get('role')
         membership_status = request.get_json().get('status')
+        notify_user = request.get_json().get('notifyUser')
         updated_fields_dict = {}
         origin = request.environ.get('HTTP_ORIGIN', 'localhost')
         try:
@@ -312,7 +314,10 @@ class OrgMember(Resource):
                                                                 ).as_dict(), http_status.HTTP_200_OK
                 # if user status changed to active , mail the user
                 if membership_status == Status.ACTIVE.name:
-                    membership.send_approval_notification_to_member(origin)
+                    membership.send_notification_to_member(origin, NotificationType.MEMBERSHIP_APPROVED.value)
+                elif notify_user and updated_role:
+                    membership.send_notification_to_member(origin, NotificationType.ROLE_CHANGED.value)
+
             return response, status
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
