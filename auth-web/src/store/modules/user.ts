@@ -7,6 +7,11 @@ import { User } from '@/models/user'
 import { UserInfo } from '@/models/userInfo'
 import UserService from '@/services/user.services'
 
+export interface UserTerms {
+  isTermsOfUseAccepted: boolean
+  termsOfUseAcceptedVersion: string
+}
+
 @Module({
   name: 'user',
   namespaced: true
@@ -22,11 +27,11 @@ export default class UserModule extends VuexModule {
   }
 
   get termsOfUseVersion () {
-    return this.userProfile.terms_of_use_version
+    return this.userProfile.userTerms.termsOfUseAcceptedVersion
   }
 
   get isTermsAccepted () {
-    return this.userProfile.is_terms_of_use_accepted
+    return this.userProfile.userTerms.isTermsOfUseAccepted
   }
 
   @Mutation
@@ -79,17 +84,15 @@ export default class UserModule extends VuexModule {
   }
 
   @Mutation
-  // eslint-disable-next-line camelcase
-  public setCurrentUserTerms (terms:{ is_terms_of_use_accepted:boolean, terms_of_use_accepted_version:string }) {
-    this.userProfile.is_terms_of_use_accepted = terms.is_terms_of_use_accepted
-    this.userProfile.terms_of_use_version = terms.terms_of_use_accepted_version
+  public setCurrentUserTerms (terms: UserTerms) {
+    this.userProfile = { ...this.userProfile, userTerms: terms }
   }
 
   @Action({ commit: 'setCurrentUserTerms' })
-  // eslint-disable-next-line camelcase
-  public updateCurrentUserTerms (terms:{ is_terms_of_use_accepted:boolean, terms_of_use_accepted_version:string }) {
+  public updateCurrentUserTerms (terms: UserTerms) {
     return terms
   }
+
   @Action({ commit: 'setUserContact' })
   public async updateUserContact (contact: Contact) {
     const response = await UserService.updateContact(contact)
@@ -113,11 +116,12 @@ export default class UserModule extends VuexModule {
       KeycloakService.logout(redirectUrl)
     }
   }
+
   @Action({})
-  public async updateUserTerms () {
-    return UserService.updateUserTerms('@me', this.termsOfUseVersion, this.isTermsAccepted)
-      .then(response => {
-        return response.data
-      })
+  public async saveUserTerms () {
+    const response = await UserService.updateUserTerms('@me', this.termsOfUseVersion, this.isTermsAccepted)
+    if (response && response.data) {
+      return response.data
+    }
   }
 }

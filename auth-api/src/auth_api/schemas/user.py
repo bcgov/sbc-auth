@@ -17,16 +17,23 @@ from marshmallow import fields
 
 from auth_api.models import User as UserModel
 
-from .base_schema import BaseSchema
+from .camel_case_schema import CamelCaseSchema
 
 
-class UserSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class UserSchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the User model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the User fields to a default schema."""
 
         model = UserModel
-        exclude = ('id', 'orgs')
+        exclude = ('id', 'orgs', 'is_terms_of_use_accepted', 'terms_of_use_accepted_version', 'terms_of_use_version')
 
     contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
+    user_terms = fields.Method('get_user_terms_object')
+
+    def get_user_terms_object(self, obj):  # pylint: disable=no-self-use
+        return {
+            'isTermsOfUseAccepted': obj.is_terms_of_use_accepted,
+            'termsOfUseAcceptedVersion': obj.terms_of_use_accepted_version
+        }

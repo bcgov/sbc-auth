@@ -95,8 +95,8 @@
 
     <v-row>
       <v-col cols="12" class="pt-0 pb-0">
-        <terms-of-use-dialog :lastAcceptedVersion="lastAcceptedVersion"
-                             @termsupdated="updateTerms"></terms-of-use-dialog>
+        <TermsOfUseDialog @terms-updated="updateTerms($event)"
+        />
       </v-col>
     </v-row>
 
@@ -147,6 +147,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Vue } from 'vue-property-decorator'
+import { User, UserTerms } from '@/models/user'
 import { mapActions, mapState } from 'vuex'
 import { Contact } from '@/models/contact'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
@@ -154,7 +155,6 @@ import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
 import TermsOfUseDialog from '@/components/auth/TermsOfUseDialog.vue'
-import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
 import UserService from '@/services/user.services'
 import configHelper from '@/util/config-helper'
@@ -177,8 +177,9 @@ import { mask } from 'vue-the-mask'
       [
         'createUserContact',
         'updateUserContact',
-        'updateUserTerms',
-        'getUserProfile'
+        'saveUserTerms',
+        'getUserProfile',
+        'updateCurrentUserTerms'
       ]
     ),
     ...mapActions('org', ['syncOrganizations'])
@@ -190,9 +191,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     private readonly organizations!: Organization[]
     private readonly createUserContact!: (contact: Contact) => Contact
     private readonly updateUserContact!: (contact: Contact) => Contact
-    private readonly updateUserTerms!: () => User
+    private readonly saveUserTerms!: () => Promise<User>
     private readonly getUserProfile!: (identifer: string) => User
     private readonly syncOrganizations!: () => Organization[]
+    private readonly updateCurrentUserTerms!: (UserTerms) => void
     private firstName = ''
     private lastName = ''
     private emailAddress = ''
@@ -201,8 +203,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     private extension = ''
     private formError = ''
     private editing = false
-    private lastAcceptedVersion = ''
-    private isTermsAccepted: boolean
     private deactivateProfileDialog = false
     private isDeactivating = false
 
@@ -233,8 +233,11 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     }
 
     private isFormValid (): boolean {
-      return this.$refs.form && this.$refs.form.validate() &&
-        this.confirmedEmailAddress === this.emailAddress && this.isTermsAccepted
+      return this.$refs.form &&
+        this.$refs.form.validate() &&
+        this.confirmedEmailAddress === this.emailAddress &&
+        this.userProfile.userTerms &&
+        this.userProfile.userTerms.isTermsOfUseAccepted
     }
 
     private async mounted () {
@@ -253,17 +256,13 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
         this.phoneNumber = this.userProfile.contacts[0].phone
         this.extension = this.userProfile.contacts[0].phoneExtension
         this.editing = true
-        if (this.userProfile.is_terms_of_use_accepted) {
-          this.lastAcceptedVersion = this.userProfile.terms_of_use_version
-        }
       }
     }
 
-    private updateTerms (event) {
-      this.isTermsAccepted = event.istermsaccepted
-      this.userStore.updateCurrentUserTerms({
-        terms_of_use_accepted_version: event.termsversion,
-        is_terms_of_use_accepted: event.istermsaccepted
+    private async updateTerms (event) {
+      await this.updateCurrentUserTerms({
+        termsOfUseAcceptedVersion: event.termsVersion,
+        isTermsOfUseAccepted: event.isTermsAccepted
       })
     }
 
@@ -277,7 +276,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
         if (!this.editing) {
           await Promise.all([
             await this.createUserContact(contact),
-            await this.updateUserTerms()
+            await this.saveUserTerms()
           ])
         } else {
           await this.updateUserContact(contact)

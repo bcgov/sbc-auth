@@ -11,7 +11,8 @@ module.exports = {
   rules: {
     'no-console': 'error',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'sort-imports': 'error'
+    'sort-imports': 'error',
+    'space-before-function-parentheses': true
   },
   parserOptions: {
     parser: '@typescript-eslint/parser'
