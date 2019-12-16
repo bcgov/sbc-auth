@@ -104,7 +104,7 @@
       <template v-slot:actions>
         <div>
           <v-btn large color="primary" @click="confirmHandler()">{{ primaryActionText }}</v-btn>
-          <v-btn large color="default" @click="cancel()">{{ secondaryActionText }}</v-btn>
+          <v-btn large color="default" @click="cancelEmailModal()">{{ secondaryActionText }}</v-btn>
         </div>
       </template>
     </ModalDialog>
@@ -310,7 +310,11 @@ export default class UserManagement extends Vue {
   }
 
   private cancel () {
-    this.$refs.confirmActionDialog.close() || this.$refs.confirmActionDialogWithQuestion.close()
+    this.$refs.confirmActionDialog.close()
+  }
+
+  private cancelEmailModal () {
+    this.$refs.confirmActionDialogWithQuestion.close()
   }
 
   private async removeMember () {

@@ -79,7 +79,7 @@ class KeyCloakService {
     }
   }
 
-  getKCInstance () :KeycloakInstance {
+  getKCInstance () : KeycloakInstance {
     return this.kc
   }
 

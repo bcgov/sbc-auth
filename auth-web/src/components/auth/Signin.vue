@@ -10,6 +10,7 @@ import CommonUtils from '@/util/common-util'
 import NextPageMixin from './NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
+import TokenService from 'sbc-common-components/src/services/token.services'
 import { User } from '@/models/user'
 import { UserInfo } from '@/models/userInfo'
 import UserModule from '@/store/modules/user'
@@ -55,8 +56,9 @@ export default class Signin extends Mixins(NextPageMixin) {
           // eslint-disable-next-line no-console
           console.info('[SignIn.vue]Logged in User.Starting refreshTimer')
           var self = this
-          this.$tokenService.initUsingUrl(`/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`).then(function (success) {
-            self.$tokenService.scheduleRefreshTimer()
+          let tokenService = new TokenService()
+          tokenService.initUsingUrl(`/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`).then(function (success) {
+            tokenService.scheduleRefreshTimer()
           })
         }
         this.redirectToNext()
