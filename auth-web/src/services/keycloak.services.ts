@@ -42,6 +42,7 @@ class KeyCloakService {
 
   initSession () {
     configHelper.addToSession(SessionStorageKeys.KeyCloakToken, this.kc.token)
+    configHelper.addToSession(SessionStorageKeys.KeyCloakIdToken, this.kc.idToken)
     configHelper.addToSession(SessionStorageKeys.KeyCloakRefreshToken, this.kc.refreshToken)
     configHelper.addToSession(SessionStorageKeys.UserFullName, this.getUserInfo().fullName)
     this.parsedToken = this.kc.tokenParsed as UserToken
@@ -78,9 +79,14 @@ class KeyCloakService {
     }
   }
 
+  getKCInstance () :KeycloakInstance {
+    return this.kc
+  }
+
   cleanupSession () {
     configHelper.removeFromSession(SessionStorageKeys.KeyCloakToken)
     configHelper.removeFromSession(SessionStorageKeys.KeyCloakRefreshToken)
+    configHelper.removeFromSession(SessionStorageKeys.KeyCloakIdToken)
   }
 
   async refreshToken () {
