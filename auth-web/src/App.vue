@@ -15,6 +15,7 @@
 import PaySystemAlert from '@/components/pay/PaySystemAlert.vue'
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
+import TokenService from 'sbc-common-components/src/services/token.services'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -31,8 +32,9 @@ export default Vue.extend({
       // eslint-disable-next-line no-console
       console.info('[APP.vue] Token exists.So start the refreshtimer')
       var self = this
-      this.$tokenService.initUsingUrl(`/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`).then(function (success) {
-        self.$tokenService.scheduleRefreshTimer()
+      let tokenService = new TokenService()
+      tokenService.initUsingUrl(`/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`).then(function (success) {
+        tokenService.scheduleRefreshTimer()
       })
     }
   }

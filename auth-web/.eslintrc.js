@@ -12,7 +12,7 @@ module.exports = {
     'no-console': 'error',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'sort-imports': 'error',
-    'space-before-function-parentheses': true
+    'space-before-function-parentheses': 1
   },
   parserOptions: {
     parser: '@typescript-eslint/parser'
