@@ -1,4 +1,4 @@
-import Keycloak, { KeycloakInstance, KeycloakLoginOptions, KeycloakTokenParsed } from 'keycloak-js'
+import Keycloak, { KeycloakInitOptions, KeycloakInstance, KeycloakLoginOptions, KeycloakTokenParsed } from 'keycloak-js'
 import { SessionStorageKeys } from '@/util/constants'
 import { UserInfo } from '@/models/userInfo'
 import configHelper from '@/util/config-helper'
@@ -67,7 +67,15 @@ class KeyCloakService {
     let token = configHelper.getFromSession(SessionStorageKeys.KeyCloakToken)
     if (token) {
       this.kc = Keycloak(keyCloakConfig)
-      this.kc.init({ token: token, onLoad: 'check-sso' }).success(authenticated => {
+      let kcOptions :KeycloakInitOptions = {
+        onLoad: 'login-required',
+        checkLoginIframe: false,
+        timeSkew: 0,
+        token: sessionStorage.getItem('KEYCLOAK_TOKEN'),
+        refreshToken: sessionStorage.getItem('KEYCLOAK_REFRESH_TOKEN'),
+        idToken: sessionStorage.getItem('KEYCLOAK_ID_TOKEN')
+      }
+      this.kc.init(kcOptions).success(authenticated => {
         if (authenticated) {
           configHelper.clearSession()
           if (!redirectUrl) {
