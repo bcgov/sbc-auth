@@ -35,7 +35,7 @@ function createAxiosResponseInterceptor () {
       if (error.response.status === 401) {
         originalRequest._retry = true
         let tokenservice = new TokenService()
-        tokenservice.initUsingUrl(`/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`).then(function (token) {
+        tokenservice.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`).then(function (token) {
           originalRequest.headers['Authorization'] = `Bearer ${token}`
           return axios(originalRequest)
         }).catch(error => {
