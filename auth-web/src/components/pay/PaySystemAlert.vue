@@ -54,3 +54,12 @@ export default class PaySystemAlert extends Vue {
 }
 
 </script>
+
+<style lang="scss" scoped>
+  ::v-deep {
+    .v-alert__wrapper {
+      margin: 0 auto;
+      max-width: 1224px;
+    }
+  }
+</style>
