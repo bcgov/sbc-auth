@@ -1,15 +1,15 @@
 # Everything the developer needs in addition to the production requirements
 -r prod.txt
 
-# Testing
+coverage
+pylint
+pylint-flask
 pytest
-attrs==19.1.0
+pytest-cov
+pytest-env
+pytest-dotenv
 pytest-mock
 requests
-pyhamcrest
-pytest-cov
-
-# Lint and code style
 flake8
 flake8-blind-except
 flake8-debugger
@@ -18,8 +18,4 @@ flake8-isort
 flake8-quotes
 pep8-naming
 autopep8
-coverage
-pylint
-pylint-flask
-pydocstyle<4
-
+pydocstyle
