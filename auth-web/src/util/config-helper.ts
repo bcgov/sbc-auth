@@ -33,7 +33,7 @@ export default {
 
   getCoopsURL () {
     // this needs trailing slash
-    return `${window.location.origin}${process.env.VUE_APP_PATH_COOPS}`
+    return `${window.location.origin}/${process.env.VUE_APP_PATH_COOPS}/`
   },
 
   getSelfURL () {
