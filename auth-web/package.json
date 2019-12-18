@@ -55,7 +55,7 @@
     "sinon": "^6.3.5",
     "stylus": "^0.54.7",
     "stylus-loader": "^3.0.2",
-    "ts-jest": "^23.0.0",
+    "ts-jest": "23.0.0",
     "typescript": "~3.5.3",
     "vue-class-component": "^7.1.0",
     "vue-cli-plugin-vuetify": "^2.0.2",
