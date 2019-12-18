@@ -66,20 +66,15 @@
 
     <!-- Confirm Action Dialog -->
     <ModalDialog
-      ref="confirmActionDialog"
-      :title="confirmActionTitle"
-      :text="confirmActionText"
-      dialog-class="notify-dialog"
-      max-width="640"
+            ref="confirmActionDialog"
+            :title="confirmActionTitle"
+            :text="confirmActionText"
+            dialog-class="notify-dialog"
+            max-width="640"
     >
       <template v-slot:icon>
         <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
-      <template v-slot:text>
-        <div class="mb-8">{{ confirmActionText }}</div>
-        <v-checkbox sm hide-details color="primary" class="notify-checkbox" v-model="notifyUser" :label="$t('notifyChangeUserRoleMsg')"></v-checkbox>
-      </template>
-
       <template v-slot:actions>
         <v-btn large color="primary" @click="confirmHandler()">{{ primaryActionText }}</v-btn>
         <v-btn large color="default" @click="cancel()">{{ secondaryActionText }}</v-btn>
