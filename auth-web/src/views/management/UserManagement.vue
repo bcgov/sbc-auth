@@ -326,7 +326,7 @@ export default class UserManagement extends Vue {
       role: this.roleChangeToAction.targetRole.toString().toUpperCase(),
       notifyUser: this.notifyUser
     })
-    this.$refs.confirmActionDialog.close()
+    this.$refs.confirmActionDialogWithQuestion.close()
     await this.syncOrganizations()
   }
 
