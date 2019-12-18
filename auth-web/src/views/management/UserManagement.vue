@@ -66,11 +66,11 @@
 
     <!-- Confirm Action Dialog -->
     <ModalDialog
-            ref="confirmActionDialog"
-            :title="confirmActionTitle"
-            :text="confirmActionText"
-            dialog-class="notify-dialog"
-            max-width="640"
+      ref="confirmActionDialog"
+      :title="confirmActionTitle"
+      :text="confirmActionText"
+      dialog-class="notify-dialog"
+      max-width="640"
     >
       <template v-slot:icon>
         <v-icon large color="error">mdi-alert-circle-outline</v-icon>
