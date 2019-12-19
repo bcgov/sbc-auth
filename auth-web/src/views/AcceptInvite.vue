@@ -1,21 +1,14 @@
 <template>
-  <v-container>
-    <v-row justify="center">
-      <v-col cols="12" lg="8" class="text-center">
-        <div v-if="inviteError">
-          <v-icon size="48" color="error" class="mb-6">mdi-alert-circle-outline</v-icon>
-          <h1 class="mb-7">{{ $t('errorOccurredTitle')}}</h1>
-          <p class="mb-9">{{ $t('invitationProcessingErrorMsg')}}</p>
-          <v-btn large link color="primary" href="../">{{ $t('homeBtnLabel')}}</v-btn>
-        </div>
-      </v-col>
-    </v-row>
-  </v-container>
+  <div v-if="inviteError">
+    <interim-landing :summary="$t('errorOccurredTitle')" :description="$t('invitationProcessingErrorMsg')" iconColor="error" icon="mdi-alert-circle-outline">
+    </interim-landing>
+  </div>
 </template>
 
 <script lang="ts">
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
+import InterimLanding from '@/components/auth/InterimLanding.vue'
 import { Invitation } from '@/models/Invitation'
 import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
@@ -31,7 +24,8 @@ import { getModule } from 'vuex-module-decorators'
   methods: {
     ...mapActions('org', ['acceptInvitation', 'syncOrganizations']),
     ...mapActions('user', ['getUserProfile'])
-  }
+  },
+  components: { InterimLanding }
 })
 export default class AcceptInvite extends Mixins(NextPageMixin) {
   private orgStore = getModule(OrgModule, this.$store)
