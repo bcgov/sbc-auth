@@ -53,7 +53,7 @@ export default class Signin extends Mixins(NextPageMixin) {
           console.info('[SignIn.vue]Logged in User.Starting refreshTimer')
           var self = this
           let tokenService = new TokenService()
-          tokenService.initUsingUrl(`/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`).then(function (success) {
+          tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`).then(function (success) {
             tokenService.scheduleRefreshTimer()
           })
         }

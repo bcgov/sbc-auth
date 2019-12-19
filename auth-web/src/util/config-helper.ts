@@ -4,7 +4,7 @@ import { SessionStorageKeys } from './constants'
 /**
  * the configs are used since process.env doesnt play well when we hae only one build config and multiple deployments..so going for this
  */
-const url = `/${process.env.VUE_APP_PATH}/config/configuration.json`
+const url = `${process.env.VUE_APP_PATH}config/configuration.json`
 const KEYCLOAK_TOKEN_SESSION_KEY = 'KEYCLOAK_TOKEN'
 
 export default class ConfigHelper {
@@ -31,7 +31,7 @@ export default class ConfigHelper {
 
   static getSelfURL () {
     // this is without a trailing slash
-    return `${window.location.origin}/${process.env.VUE_APP_PATH}`
+    return `${window.location.origin}/${process.env.VUE_APP_PATH}`.replace(/\/$/, '') // remove the slash at the end
   }
 
   static getAuthAPIUrl () {

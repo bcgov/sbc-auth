@@ -33,7 +33,7 @@ export default Vue.extend({
       console.info('[APP.vue] Token exists.So start the refreshtimer')
       var self = this
       let tokenService = new TokenService()
-      tokenService.initUsingUrl(`/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`).then(function (success) {
+      tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`).then(function (success) {
         tokenService.scheduleRefreshTimer()
       })
     }
@@ -65,9 +65,5 @@ export default Vue.extend({
       padding-top: 3rem;
       padding-bottom: 4rem;
     }
-  }
-
-  ::v-deep .v-alert__wrapper {
-    max-width: 1224px;
   }
 </style>
