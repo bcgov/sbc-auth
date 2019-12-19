@@ -47,7 +47,7 @@ class User(BaseModel):
     )
     roles = Column('roles', String(1000))
 
-    contacts = relationship('ContactLink', back_populates='user', primaryjoin='User.id == ContactLink.user_id')
+    contacts = relationship('ContactLink', primaryjoin='User.id == ContactLink.user_id', lazy='subquery')
     orgs = relationship('Membership', back_populates='user',
                         primaryjoin='and_(User.id == Membership.user_id, \
                         or_(Membership.status == ' + str(Status.ACTIVE.value) + ', Membership.status == ' + str(
