@@ -65,13 +65,22 @@ export default class UserModule extends VuexModule {
     }
   }
 
-  @Action({ commit: 'setUserProfile' })
+  @Action({ rawError: true })
   public async syncUserProfile () {
-    const response = await UserService.syncUserProfile()
-    if (response && response.data && (response.status === 200 || response.status === 201)) {
+    const userResponse = await UserService.syncUserProfile()
+    if (userResponse && userResponse.data && (userResponse.status === 200 || userResponse.status === 201)) {
       // Refresh token to get the new token with additional roles
       KeycloakService.refreshToken()
-      return response.data
+      this.context.commit('setUserProfile', userResponse.data)
+    }
+
+    const contactResponse = await UserService.getContacts()
+    if (contactResponse && contactResponse.data && (contactResponse.status === 200)) {
+      let firstContact: Contact
+      if (contactResponse.data.contacts.length > 0) {
+        firstContact = contactResponse.data.contacts[0]
+      }
+      this.context.commit('setUserContact', firstContact)
     }
   }
 

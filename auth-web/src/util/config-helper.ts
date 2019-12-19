@@ -7,58 +7,55 @@ import { SessionStorageKeys } from './constants'
 const url = `/${process.env.VUE_APP_PATH}/config/configuration.json`
 const KEYCLOAK_TOKEN_SESSION_KEY = 'KEYCLOAK_TOKEN'
 
-export default {
-  fetchConfig () {
-    // console.log('New code:'+url)
-    return Axios
-      .get(url)
-      .then(response => {
-        sessionStorage.setItem(SessionStorageKeys.ApiConfigKey, JSON.stringify(response.data))
-      }).catch(err => {
-        throw err
-      }
-      )
-  },
+export default class ConfigHelper {
+  static async fetchConfig () {
+    const response = await Axios.get(url)
+    sessionStorage.setItem(SessionStorageKeys.ApiConfigKey, JSON.stringify(response.data))
+  }
 
   /**
  * this will run everytime when vue is being loaded..so do the call only when session storage doesnt have the values
  */
-  saveConfigToSessionStorage () {
+  static saveConfigToSessionStorage () {
     if (sessionStorage.getItem(SessionStorageKeys.ApiConfigKey)) {
       return Promise.resolve()
     } else {
       return this.fetchConfig()
     }
-  },
+  }
 
-  getCoopsURL () {
+  static getCoopsURL () {
     // this needs trailing slash
     return `${window.location.origin}/${process.env.VUE_APP_PATH_COOPS}/`
-  },
+  }
 
-  getSelfURL () {
+  static getSelfURL () {
     // this is without a trailing slash
     return `${window.location.origin}/${process.env.VUE_APP_PATH}`
-  },
+  }
 
-  getValue (key: String) {
+  static getAuthAPIUrl () {
+    return ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')
+  }
+
+  static getValue (key: String) {
     // @ts-ignore
     return JSON.parse(sessionStorage.getItem(SessionStorageKeys.ApiConfigKey))[key]
-  },
+  }
 
-  addToSession (key:string, value:any) {
+  static addToSession (key:string, value:any) {
     sessionStorage.setItem(key, value)
-  },
+  }
 
-  getFromSession (key:string):string {
+  static getFromSession (key:string):string {
     return sessionStorage.getItem(key)
-  },
+  }
 
-  removeFromSession (key:string) {
+  static removeFromSession (key:string) {
     sessionStorage.removeItem(key)
-  },
+  }
 
-  clearSession () {
+  static clearSession () {
     sessionStorage.clear()
   }
 }

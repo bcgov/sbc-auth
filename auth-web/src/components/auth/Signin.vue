@@ -17,9 +17,6 @@ import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
-  computed: {
-    ...mapState('org', ['organizations'])
-  },
   methods: {
     ...mapActions('user',
       [
@@ -37,7 +34,6 @@ export default class Signin extends Mixins(NextPageMixin) {
   private readonly initKeycloak!: (idpHint: string) => Promise<KeycloakPromise<boolean, KeycloakError>>
   private readonly initializeSession!: () => UserInfo
   private readonly syncUserProfile!: () => User
-  private readonly organizations!: Organization[]
   private readonly syncOrganizations!: () => Organization[]
 
   @Prop({ default: 'bcsc' }) idpHint: string
