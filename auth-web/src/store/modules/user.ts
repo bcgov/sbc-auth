@@ -109,7 +109,7 @@ export default class UserModule extends VuexModule {
       LoginService.logout().then(response => {
         if (response.status === 204) {
           ConfigHelper.clearSession()
-          window.location.assign(window.location.origin + '/' + process.env.VUE_APP_PATH)
+          window.location.assign(window.location.origin + process.env.VUE_APP_PATH)
         }
       })
     } else {

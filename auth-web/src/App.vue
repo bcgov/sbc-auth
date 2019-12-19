@@ -33,7 +33,7 @@ export default Vue.extend({
       console.info('[APP.vue] Token exists.So start the refreshtimer')
       var self = this
       let tokenService = new TokenService()
-      tokenService.initUsingUrl(`/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`).then(function (success) {
+      tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`).then(function (success) {
         tokenService.scheduleRefreshTimer()
       })
     }

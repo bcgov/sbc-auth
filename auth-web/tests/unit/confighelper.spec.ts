@@ -17,7 +17,7 @@ jest.mock('axios', () => ({
 })
 
 describe('ConfigHeloper tests', () => {
-  let url = `/${process.env.VUE_APP_PATH}/config/configuration.json`
+  let url = `${process.env.VUE_APP_PATH}config/configuration.json`
   it('does not Call Axios config when no session storage is present', () => {
     sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)
     ConfigHelper.saveConfigToSessionStorage()
@@ -26,7 +26,7 @@ describe('ConfigHeloper tests', () => {
 })
 
 describe('ConfigHeloper tests', () => {
-  let url = `/${process.env.VUE_APP_PATH}/config/configuration.json`
+  let url = `${process.env.VUE_APP_PATH}config/configuration.json`
   it('Call Axios config when no session storage is present', () => {
     sessionStorage.removeItem('AUTH_API_CONFIG')
     ConfigHelper.saveConfigToSessionStorage()
