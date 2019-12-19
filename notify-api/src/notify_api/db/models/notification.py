@@ -15,7 +15,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator, networks
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
@@ -52,8 +52,18 @@ class NotificationBase(BaseModel):  # pylint: disable=too-few-public-methods
 
 class NotificationRequest(BaseModel):  # pylint: disable=too-few-public-methods
     """Notification model for resquest."""
-    recipients: str = ''
+    recipients: str = None
     contents: NotificationContentsRequest = None
+
+    @validator('recipients', always=True)
+    def validate_email(cls, v_field):
+        if not v_field:
+            raise ValueError('must not empty')
+
+        for email in v_field.split(','):
+            networks.validate_email(email)
+
+        return v_field
 
     class Config:  # pylint: disable=too-few-public-methods
         alias_generator = to_camel
