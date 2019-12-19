@@ -3,7 +3,7 @@ import { SessionStorageKeys } from '@/util/constants'
 import { UserInfo } from '@/models/userInfo'
 import configHelper from '@/util/config-helper'
 
-const keyCloakConfig = `/${process.env.VUE_APP_PATH}/config/kc/keycloak.json`
+const keyCloakConfig = `${process.env.VUE_APP_PATH}config/kc/keycloak.json`
 
 interface UserToken extends KeycloakTokenParsed {
   lastname: string;
@@ -79,7 +79,7 @@ class KeyCloakService {
         if (authenticated) {
           configHelper.clearSession()
           if (!redirectUrl) {
-            redirectUrl = `${window.location.origin}/${process.env.VUE_APP_PATH}`
+            redirectUrl = `${window.location.origin}${process.env.VUE_APP_PATH}`
           }
           this.kc.logout({ redirectUri: redirectUrl })
         }
