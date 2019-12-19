@@ -48,9 +48,119 @@ NOTIFICATION_REQUEST_DATA = [
             'attachmentBytes': '',
             'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
         }
+    },
+    {
+        'recipients': 'aaa@aaa.com, bbb@aaa.com',
+        'contents': {
+            'subject': 'test url',
+            'body': 'test url',
+            'attachmentName': 'aaa.pdf',
+            'attachmentBytes': '',
+            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+        }
     }
 ]
 
+
+NOTIFICATION_REQUEST_BAD_DATA = [
+    {
+        'recipients': '',
+        'contents': {
+            'subject': 'test url',
+            'body': 'test url',
+            'attachmentName': 'aaa.pdf',
+            'attachmentBytes': '',
+            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+        }
+    },
+    {
+        'contents': {
+            'subject': 'test url',
+            'body': 'test url',
+            'attachmentName': 'aaa.pdf',
+            'attachmentBytes': '',
+            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+        }
+    },
+    {
+        'recipients': 'aaa',
+        'contents': {
+            'subject': 'test url',
+            'body': 'test url',
+            'attachmentName': 'aaa.pdf',
+            'attachmentBytes': '',
+            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+        }
+    },
+    {
+        'recipients': 'aaa@aaa.com, bbbb',
+        'contents': {
+            'subject': 'test url',
+            'body': 'test url',
+            'attachmentName': 'aaa.pdf',
+            'attachmentBytes': '',
+            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+        }
+    },
+    {
+        'recipients': 'aaa@aaa.com, bbbb@bbb',
+        'contents': {
+            'subject': 'test url',
+            'body': 'test url',
+            'attachmentName': 'aaa.pdf',
+            'attachmentBytes': '',
+            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+        }
+    },
+    {
+        'recipients': 'aaa.com, bbbb@bbb.com',
+        'contents': {
+            'subject': 'test url',
+            'body': 'test url',
+            'attachmentName': 'aaa.pdf',
+            'attachmentBytes': '',
+            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+        }
+    },
+    {
+        'recipients': 'aaa@aaa.com',
+        'contents': {
+            'subject': '',
+            'body': 'test url',
+            'attachmentName': 'aaa.pdf',
+            'attachmentBytes': '',
+            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+        }
+    },
+    {
+        'recipients': 'aaa@aaa.com',
+        'contents': {
+            'body': 'test url',
+            'attachmentName': 'aaa.pdf',
+            'attachmentBytes': '',
+            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+        }
+    },
+    {
+        'recipients': 'aaa@aaa.com',
+        'contents': {
+            'subject': 'aa',
+            'body': '',
+            'attachmentName': 'aaa.pdf',
+            'attachmentBytes': '',
+            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+        }
+    },
+    {
+        'recipients': 'aaa@aaa.com',
+        'contents': {
+            'subject': 'aaa',
+            'attachmentName': 'aaa.pdf',
+            'attachmentBytes': '',
+            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+        }
+    }
+]
 
 CONTENT_DATA = [
     {

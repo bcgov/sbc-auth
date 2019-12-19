@@ -5,9 +5,11 @@ coverage
 pylint
 pytest
 pytest-env
+pytest-cov
 pytest-dotenv
 pytest-mock
 requests
 flake8
 flake8-quotes
+autopep8
 
