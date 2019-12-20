@@ -8,6 +8,7 @@ import CreateTeamView from '@/views/CreateTeamView.vue'
 import Dashboard from '@/views/management/Dashboard.vue'
 import DuplicateTeamWarning from '@/views/DuplicateTeamWarning.vue'
 import KeyCloakService from '@/services/keycloak.services'
+import LeaveTeamLanding from '@/views/LeaveTeamLanding.vue'
 import PageNotFound from '@/views/PageNotFound.vue'
 import PaymentForm from '@/components/pay/PaymentForm.vue'
 import PaymentReturnForm from '@/components/pay/PaymentReturnForm.vue'
@@ -60,6 +61,7 @@ export function getRoutes (appFlavor: String) {
     { path: '/searchbusiness', component: SearchBusinessForm, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
     { path: '/unauthorized', component: Unauthorized, props: true, meta: { requiresAuth: false } },
     { path: '/pendingapproval/:team_name?', component: PendingApproval, props: true, meta: { requiresAuth: false } },
+    { path: '/leaveteam', component: LeaveTeamLanding, props: true, meta: { requiresAuth: true } },
     { path: '*', component: PageNotFound }
   ]
 

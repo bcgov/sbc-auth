@@ -354,7 +354,7 @@ export default class UserManagement extends Vue {
   private async leave () {
     await this.leaveTeam(this.myOrgMembership.id)
     this.$refs.confirmActionDialog.close()
-    this.$router.push('/')
+    this.$router.push('/leaveteam')
   }
 
   private close () {
