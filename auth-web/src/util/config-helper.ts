@@ -38,7 +38,7 @@ export default {
 
   getSelfURL () {
     // this is without a trailing slash
-    return `${window.location.origin}/${process.env.VUE_APP_PATH}`.replace(/^\/|\/$/g, '') // remove the slash at the end and start
+    return `${window.location.origin}${process.env.VUE_APP_PATH}`.replace(/\/$/, '') // remove the slash at the end
   },
 
   getValue (key: String) {
