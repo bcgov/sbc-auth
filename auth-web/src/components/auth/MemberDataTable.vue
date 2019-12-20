@@ -56,7 +56,7 @@
       {{ formatDate(item.user.modified) }}
     </template>
     <template v-slot:item.action="{ item }">
-      <v-btn :data-test="getIndexedTag('remove-user-button', item.index)" v-show="!canLeave(item)" depressed small @click="confirmRemoveMember(item)">Remove</v-btn>
+      <v-btn :data-test="getIndexedTag('remove-user-button', item.index)" v-show="canRemove(item)" depressed small @click="confirmRemoveMember(item)">Remove</v-btn>
       <v-btn :data-test="getIndexedTag('leave-team-button', item.index)" v-show="canLeave(item)" depressed small @click="confirmLeaveTeam(item)">
         <span v-if="!canDissolve()">Leave</span>
         <span v-if="canDissolve()">Dissolve</span>
