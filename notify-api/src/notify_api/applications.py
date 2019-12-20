@@ -15,6 +15,7 @@
 from typing import Any, Dict, List, Optional, Union
 
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html, get_swagger_ui_oauth2_redirect_html
 from sqlalchemy.engine import Connection, Engine, create_engine
 from starlette.exceptions import HTTPException
@@ -25,7 +26,7 @@ from starlette.routing import BaseRoute
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from notify_api.core import config as AppConfig
-from notify_api.core.errors import http_422_error_handler, http_error_handler
+from notify_api.core.errors import http_422_error_handler, http_error_handler, validation_exception_handler
 from notify_api.core.middleware import session_middleware
 from notify_api.db.database import SESSION as db_session
 from notify_api.resources import ROUTER as api_router
@@ -119,6 +120,7 @@ class NotifyAPI(FastAPI):
             self.add_route(self.redoc_url, redoc_html, include_in_schema=False)
         self.add_exception_handler(HTTPException, http_error_handler)
         self.add_exception_handler(HTTP_422_UNPROCESSABLE_ENTITY, http_422_error_handler)
+        self.add_exception_handler(RequestValidationError, validation_exception_handler)
         # ADDED
         self.add_default_middleware()
 
