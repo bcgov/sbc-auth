@@ -25,6 +25,12 @@ from starlette.responses import JSONResponse
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 
+async def validation_exception_handler(request: Request,  # pylint: disable=unused-argument
+                                       exc: Exception) -> JSONResponse:
+    """Handler for error to transform default pydantic error object to gothinkster format."""
+    return JSONResponse({'errors': [str(exc)]}, status_code=400)
+
+
 async def http_error_handler(request: Request,  # pylint: disable=unused-argument
                              exc: HTTPException) -> JSONResponse:
     """Handler for error to transform default pydantic error object to gothinkster format."""

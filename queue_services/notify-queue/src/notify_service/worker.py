@@ -11,20 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""The unique worker functionality for this service is contained here.
-
-The entry-point is the **cb_subscription_handler**
-
-The design and flow leverage a few constraints that are placed upon it
-by NATS Streaming and using AWAIT on the default loop.
-- NATS streaming queues require one message to be processed at a time.
-- AWAIT on the default loop effectively runs synchronously
-
-If these constraints change, the use of Flask-SQLAlchemy would need to change.
-Flask-SQLAlchemy currently allows the base model to be changed, or reworking
-the model to a standalone SQLAlchemy usage with an async engine would need
-to be pursued.
-"""
+"""The unique worker functionality for this service is contained here."""
 import json
 import re
 import unicodedata
@@ -43,18 +30,17 @@ from notify_api.core import config as app_config
 from notify_api.db.models.notification import Notification, NotificationUpdate
 from notify_api.db.models.notification_status import NotificationStatusEnum
 from notify_api.services.notify import NotifyService
-#from sentry_sdk import capture_message
 
 
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
 APP = NotifyAPI(bind=app_config.SQLALCHEMY_DATABASE_URI)
 
 
-async def send_with_send_message(sender, recipients, message):
+async def send_with_send_message(message, recipients):
     """Send email."""
     smtp_client = SMTP(hostname=app_config.MAIL_SERVER, port=app_config.MAIL_PORT)
     await smtp_client.connect()
-    await smtp_client.send_message(message=message, recipients=recipients, sender=sender)
+    await smtp_client.send_message(message=message, recipients=recipients)
     await smtp_client.quit()
 
 
@@ -62,9 +48,14 @@ async def process_notification(notification_id: int, db_session):
     """Send the notification to smtp server."""
     try:
         notification: Notification = await NotifyService.find_notification(db_session, notification_id)
+        sender: str = app_config.MAIL_FROM_ID
+        recipients: [] = [s.strip() for s in notification.recipients.split(',')]
+
         encoding = 'utf-8'
         message = MIMEMultipart()
         message['Subject'] = notification.contents.subject
+        message['From'] = sender
+        message['To'] = notification.recipients
         message.attach(MIMEText(notification.contents.body, 'html', encoding))
 
         if notification.contents.attachment:
@@ -86,7 +77,7 @@ async def process_notification(notification_id: int, db_session):
 
             message.attach(part)
 
-        await send_with_send_message(app_config.MAIL_FROM_ID, notification.recipients.split(','), message)
+        await send_with_send_message(message, recipients)
 
         update_notification: NotificationUpdate = NotificationUpdate(id=notification_id,
                                                                      sent_date=datetime.utcnow(),
@@ -94,8 +85,6 @@ async def process_notification(notification_id: int, db_session):
 
         await NotifyService.update_notification_status(db_session, update_notification)
     except Exception as err:  # pylint: disable=broad-except, unused-variable # noqa F841;
-        # capture_message(f'Notify Service Error: Failied to send email:{notification.recipients} with error:{err}',
-        #                level='error')
         logger.info('Notify Job (process_notification) Error: %s', exc_info=True)
         update_notification: NotificationUpdate = NotificationUpdate(id=notification_id,
                                                                      sent_date=datetime.utcnow(),
@@ -114,8 +103,6 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
         logger.info('Extracted id: %s', notification_id)
         await process_notification(notification_id, db_session)
     except (QueueException, Exception):  # pylint: disable=broad-except
-        # Catch Exception so that any error is still caught and the message is removed from the queue
-        # capture_message('Notify Queue Error:', level='error')
         logger.info('Notify Queue Error: %s', exc_info=True)
     finally:
         db_session.close()
@@ -132,8 +119,6 @@ async def job_handler(status: str):
             await process_notification(notification.id, db_session)
         logger.info('Schedule Job for sending %s email finish at:%s', status, datetime.utcnow())
     except Exception:  # pylint: disable=broad-except
-        # Catch Exception so that any error is still caught and the message is removed from the queue
-        # capture_message('Notify Job Error:', level='error')
         logger.info('Notify Job Error: %s', exc_info=True)
     finally:
         db_session.close()
