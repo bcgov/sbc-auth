@@ -1,53 +1,34 @@
 <template>
-    <v-container>
-      <div class="view-container">
-        <article>
-          <h1>Search Co-operatives</h1>
-          <!-- <p class="intro-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam at porttitor sem. Aliquam erat volutpat. Donec placerat nisl magna, et faucibus arcu condimentum sed.</p>
-          <v-divider></v-divider> -->
-          <p class="intro-text"/>
-          <p class="intro-text">Please enter the co-op's Incorporation number below to access their dashboard.</p>
-              <h2>Incorporation Number</h2>
-              <div class="search-for">
-                <v-form ref="form" lazy-validation v-on:submit.prevent="searchBusiness">
-                  <div class="loading-msg" v-if="errorMessage">
-                    <v-alert
-                     :value="true"
-                     color="error"
-                     icon="warning"
-                    >{{errorMessage}}
-                    </v-alert>
-                  </div>
+  <v-container>
 
-                  <div class="search-for__row">
-                    <v-text-field
-                      filled
-                      label="Incorporation Number"
-                      hint="e.g. BC1234567"
-                      req
-                      persistent-hint
-                      :rules="entityNumRules"
-                      v-model="businessNumber"
-                      id="txtBusinessNumber"
-                    ></v-text-field>
-                  </div>
-                  <p class="intro-text"/>
-                  <v-divider></v-divider>
-                  <p class="intro-text"/>
-                  <v-layout align-end justify-end>
-                    <v-btn class="search-btn" @click="search" color="primary" large >
-                      <span>Enter</span>
-                      <v-icon dark right>mdi-arrow-right</v-icon>
-                    </v-btn>
-                  </v-layout>
-                </v-form>
-              </div>
-        </article>
-        <aside>
-          <SupportInfoCard/>
-        </aside>
-      </div>
-    </v-container>
+    <h1 class="mb-4">Search Cooperatives</h1>
+    <p style="margin-bottom: 3rem;">Enter the cooperative's Incorporation Number below to access their dashboard.</p>
+
+      <v-expand-transition>
+        <div v-show="errorMessage">
+          <v-alert
+            type="error"
+            icon="mdi-alert-circle"
+            class="mb-0"
+          >{{errorMessage}} <strong>{{searchedBusinessNumber}}</strong>
+          </v-alert>
+        </div>
+      </v-expand-transition>
+
+    <v-form class="mt-8" ref="form" v-on:submit.prevent="searchBusiness">
+      <v-text-field
+        filled
+        label="Incorporation Number"
+        hint="example: CP0001234"
+        persistent-hint
+        req
+        v-model="businessNumber"
+        id="txtBusinessNumber"
+      >
+      </v-text-field>
+      <v-btn large color="primary" class="search-btn mt-0" type="submit" @click="search" :disabled="!businessNumber" :loading="searchActive">Search</v-btn>
+    </v-form>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -71,8 +52,9 @@ import { mapActions } from 'vuex'
 })
 export default class SearchBusinessForm extends Vue {
   private businessStore = getModule(BusinessModule, this.$store)
-  private entityNumRules = [v => !!v || 'Incorporation Number is required']
   private businessNumber = ''
+  private searchedBusinessNumber = ''
+  private searchActive = false
   private errorMessage = ''
 
   private readonly searchBusiness!: (businessNumber: string) => void
@@ -85,8 +67,14 @@ export default class SearchBusinessForm extends Vue {
     return this.$refs.form.validate()
   }
 
+  private clearError () {
+    this.searchedBusinessNumber = ''
+  }
+
   async search () {
     if (this.isFormValid()) {
+      this.searchActive = true
+
       try {
         // Search for business, action will set session storage
         await this.searchBusiness(this.businessNumber)
@@ -95,7 +83,9 @@ export default class SearchBusinessForm extends Vue {
         // Redirect to the coops UI
         window.location.href = ConfigHelper.getCoopsURL()
       } catch (exception) {
-        this.errorMessage = this.$t('noResultMsg').toString()
+        this.searchActive = false
+        this.searchedBusinessNumber = this.businessNumber
+        this.errorMessage = this.$t('noIncorporationNumberFound').toString()
       }
     }
   }
@@ -104,13 +94,22 @@ export default class SearchBusinessForm extends Vue {
 
 <style lang="scss" scoped>
 @import '../../assets/scss/theme.scss';
-
-.v-btn.search-btn{
-  font-weight : 700
-}
-
 .v-input {
-  max-width : 25rem
+  display: inline-block;
+  width: 20rem;
 }
 
+::v-deep {
+  .v-input__append-outer {
+    margin-top: 0 !important;
+  }
+
+  .search-btn {
+    margin-left: 0.5rem;
+    width: 7rem;
+    min-height: 56px;
+    vertical-align: top;
+    font-weight: bold;
+  }
+}
 </style>
