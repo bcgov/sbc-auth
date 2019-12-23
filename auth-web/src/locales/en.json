@@ -14,6 +14,7 @@
   "businessListEmptyMessage":"You have not added any businesses",
   "businessListActionMessage":"Click Here to add a business by incorporation number and passcode",
   "noResultMsg": "The Incorporation Number you entered does not correspond to a Co-operative in the system. Please try again.",
+  "noIncorporationNumberFound": "No match found for Incorporation Number",
   "errorOccurredTitle": "An error has occurred",
   "expiredInvitationTitle": "Your team invitation has expired",
   "expiredInvitationMessage": "This invitation to join a BC Registries and Online Services team has been revoked or has expired.",
