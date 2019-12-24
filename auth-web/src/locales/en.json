@@ -16,7 +16,7 @@
   "noResultMsg": "The Incorporation Number you entered does not correspond to a Co-operative in the system. Please try again.",
   "errorOccurredTitle": "An error has occurred",
   "expiredInvitationTitle": "Your team invitation is invalid",
-  "expiredInvitationMessage": "This invitation to join a BC Registries and Online Services team has been revoked or has expired or has been accepted.",
+  "expiredInvitationMessage": "This invitation to join a BC Registries and Online Services team has been revoked, accepted or has expired.",
   "homeBtnLabel": "Go to Homepage",
   "invitationProcessingErrorMsg": "An error has occured while processing this invitation. Please try again later.",
   "staffUnauthorizedMsg": "You are not authorized to access this page.",
