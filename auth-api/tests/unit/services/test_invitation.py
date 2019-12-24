@@ -116,11 +116,34 @@ def test_generate_confirmation_token(session):  # pylint:disable=unused-argument
     assert confirmation_token is not None
 
 
-def test_validate_token_valid(session):  # pylint:disable=unused-argument
+def test_validate_token_valid(session, auth_mock):  # pylint:disable=unused-argument
     """Validate the invitation token."""
-    confirmation_token = InvitationService.generate_confirmation_token(1)
-    invitation_id = InvitationService.validate_token(confirmation_token)
-    assert invitation_id == 1
+    with patch.object(InvitationService, 'send_invitation', return_value=None):
+        user = factory_user_model(TestUserInfo.user_test)
+        org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+        org_dictionary = org.as_dict()
+        invitation_info = factory_invitation(org_dictionary['id'])
+        new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '').as_dict()
+        confirmation_token = InvitationService.generate_confirmation_token(new_invitation['id'])
+        invitation_id = InvitationService.validate_token(confirmation_token)
+        assert invitation_id == new_invitation['id']
+
+
+def test_validate_token_accepted(session, auth_mock):  # pylint:disable=unused-argument
+    """Validate invalid invitation token."""
+    with patch.object(InvitationService, 'send_invitation', return_value=None):
+        user = factory_user_model(TestUserInfo.user_test)
+        org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+        org_dictionary = org.as_dict()
+        invitation_info = factory_invitation(org_dictionary['id'])
+        new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '').as_dict()
+        confirmation_token = InvitationService.generate_confirmation_token(new_invitation['id'])
+        InvitationService.accept_invitation(new_invitation['id'], User(user), '')
+
+        with pytest.raises(BusinessException) as exception:
+            InvitationService.validate_token(confirmation_token)
+
+        assert exception.value.code == Error.ACTIONED_INVITATION.name
 
 
 def test_validate_token_exception(session):  # pylint:disable=unused-argument
