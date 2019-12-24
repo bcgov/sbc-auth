@@ -15,7 +15,6 @@
 
 from datetime import datetime
 from typing import Dict
-
 from flask import current_app
 from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
@@ -138,7 +137,10 @@ class Invitation:
         subject = '[BC Registries & Online Services] {} {} has responded for the invitation to join the team {}'. \
             format(user['firstname'], user['firstname'], org_name)
         sender = CONFIG.MAIL_FROM_ID
-        template = ENV.get_template('email_templates/admin_notification_email.html')
+        try:
+            template = ENV.get_template('email_templates/admin_notification_email.html')
+        except Exception as err:
+            raise BusinessException(Error.FAILED_INVITATION, None)
 
         sent_response = send_email(subject, sender, recipient_email_list,
                                    template.render(url=url, user=user, org_name=org_name,
@@ -188,6 +190,16 @@ class Invitation:
             invitation_id = serializer.loads(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT, max_age=token_valid_for)
         except:  # noqa: E722
             raise BusinessException(Error.EXPIRED_INVITATION, None)
+
+        invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
+
+        if invitation is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        if invitation.invitation_status_code == 'ACCEPTED':
+            raise BusinessException(Error.ACTIONED_INVITATION, None)
+        if invitation.invitation_status_code == 'EXPIRED':
+            raise BusinessException(Error.EXPIRED_INVITATION, None)
+
         return invitation_id
 
     @staticmethod
@@ -234,8 +246,10 @@ class Invitation:
                 membership_model.status = Status.PENDING_APPROVAL.value
             membership_model.save()
             if not is_auto_approval:
-                Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
-
+                try:
+                    Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
+                except BusinessException as exception:
+                    current_app.logger.error('<send_notification_to_admin failed', exception.message)
         invitation.accepted_date = datetime.now()
         invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')
         invitation.save()
