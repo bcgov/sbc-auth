@@ -27,6 +27,8 @@ export default class OrgModule extends VuexModule {
   pendingOrgMembers: Member[] = []
   pendingOrgInvitations: Invitation[] = []
   orgCreateMessage = 'success'
+  invalidInvitationToken = false
+  tokenError = false
 
   // This simply returns the first org in the list.
   // TODO: Once account switching is in place, this will have to return the
@@ -155,10 +157,32 @@ export default class OrgModule extends VuexModule {
     this.context.dispatch('syncPendingOrgInvitations')
   }
 
+  @Mutation
+  public setInvalidTokenStatus (status:boolean) {
+    this.invalidInvitationToken = status
+  }
+
+  @Mutation
+  public setTokenErrorStatus (status:boolean) {
+    this.tokenError = status
+  }
+
   @Action({ rawError: true })
   public async validateInvitationToken (token: string): Promise<EmptyResponse> {
-    const response = await InvitationService.validateToken(token)
-    return response && response.data ? response.data : undefined
+    try {
+      const response = await InvitationService.validateToken(token)
+      this.context.commit('setInvalidTokenStatus', false)
+      this.context.commit('setTokenErrorStatus', false)
+      return response && response.data ? response.data : undefined
+    } catch (err) {
+      if (err.response.status === 400) {
+        this.context.commit('setTokenErrorStatus', false)
+        this.context.commit('setInvalidTokenStatus', true)
+      } else {
+        this.context.commit('setTokenErrorStatus', true)
+        this.context.commit('setInvalidTokenStatus', false)
+      }
+    }
   }
 
   @Action({ rawError: true })
