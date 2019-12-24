@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="!tokenExpired && !tokenError">
+    <div v-if="!invalidInvitationToken && !tokenError && !otherError">
       <interim-landing :summary="$t('acceptInviteLandingTitle')" :description="$t('acceptInviteLandingMessage')" icon="mdi-login-variant" showHomePageBtn="false">
         <template v-slot:actions>
           <v-btn v-if="!isUserSignedIn()" large link color="primary" @click="redirectToSignin()">{{ $t('loginBtnLabel') }}</v-btn>
@@ -8,11 +8,11 @@
         </template>
       </interim-landing>
     </div>
-    <div v-if="tokenExpired">
+    <div v-if="invalidInvitationToken">
       <interim-landing :summary="$t('expiredInvitationTitle')" :description="$t('expiredInvitationMessage')" icon="mdi-alert-circle-outline" iconColor="error">
       </interim-landing>
     </div>
-    <div v-if="tokenError">
+    <div v-if="tokenError || otherError">
       <interim-landing :summary="$t('errorOccurredTitle')" :description="$t('invitationProcessingErrorMsg')" icon="mdi-alert-circle-outline" iconColor="error">
       </interim-landing>
     </div>
@@ -21,14 +21,17 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
 import InterimLanding from '@/components/auth/InterimLanding.vue'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
-import { mapActions } from 'vuex'
 
 @Component({
+  computed: {
+    ...mapState('org', ['invalidInvitationToken', 'tokenError'])
+  },
   methods: {
     ...mapActions('org', ['validateInvitationToken'])
   },
@@ -40,8 +43,7 @@ export default class AcceptInviteLanding extends Vue {
 
   @Prop() token: string
 
-  private tokenExpired: boolean = false
-  private tokenError: boolean = false
+  private otherError: boolean = false
 
   private mounted () {
     this.validateToken()
@@ -64,11 +66,7 @@ export default class AcceptInviteLanding extends Vue {
     try {
       await this.validateInvitationToken(this.token)
     } catch (exception) {
-      if (exception.status === 400) {
-        this.tokenExpired = true
-      } else {
-        this.tokenError = true
-      }
+      this.otherError = true
     }
   }
 }
