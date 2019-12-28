@@ -22,16 +22,13 @@
 import groovy.json.*
 
 // define constants - values sent in as env vars from whatever calls this pipeline
-def APP_NAME = 'auth-web'
-def DESTINATION_TAG = 'staging'
-def APP_RUNTIME_NAME = "${APP_NAME}-${DESTINATION_TAG}-runtime"
-def DESTINATION_ENV_TAG = 'test'
+def APP_NAME = 'auth-web-staging'
+def APP_RUNTIME_NAME = "${APP_NAME}-runtime"
+def DESTINATION_TAG = 'test'
 def TOOLS_TAG = 'tools'
 def NAMESPACE_APP = '1rdehl'
-def NAMESPACE_SHARED = 'd7eovc'
 def NAMESPACE_BUILD = "${NAMESPACE_APP}"  + '-' + "${TOOLS_TAG}"
-def NAMESPACE_DEPLOY = "${NAMESPACE_APP}" + '-' + "${DESTINATION_ENV_TAG}"
-def NAMESPACE_UNITTEST = "${NAMESPACE_SHARED}" + '-'+ "${TOOLS_TAG}"
+def NAMESPACE_DEPLOY = "${NAMESPACE_APP}" + '-' + "${DESTINATION_TAG}"
 
 def ROCKETCHAT_DEVELOPER_CHANNEL='#relationship-developers'
 

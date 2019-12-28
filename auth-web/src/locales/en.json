@@ -15,8 +15,8 @@
   "businessListActionMessage":"Click Here to add a business by incorporation number and passcode",
   "noResultMsg": "The Incorporation Number you entered does not correspond to a Co-operative in the system. Please try again.",
   "errorOccurredTitle": "An error has occurred",
-  "expiredInvitationTitle": "Your team invitation has expired",
-  "expiredInvitationMessage": "This invitation to join a BC Registries and Online Services team has been revoked or has expired.",
+  "expiredInvitationTitle": "Your team invitation is invalid",
+  "expiredInvitationMessage": "This invitation to join a BC Registries and Online Services team has been revoked, accepted or has expired.",
   "homeBtnLabel": "Go to Homepage",
   "invitationProcessingErrorMsg": "An error has occured while processing this invitation. Please try again later.",
   "staffUnauthorizedMsg": "You are not authorized to access this page.",
@@ -31,6 +31,7 @@
   "noPendingInvitationTitle": "No Pending Invitations",
   "noPendingInvitationMsg": "You don't have any pending invitations to BC Registries and Online Services.",
   "notifyChangeUserRoleMsg": "Notify user about this change",
+  "pendingInvitationTitle": "Thanks for joining the team {team} at BC Registries & Online Services.",
   "pendingInvitationMsg": "The administrator for this team needs to verify your invitation before you can access this application.",
   "noActiveUsersLabel": "No Active Users",
   "pageNotFoundTitle": "Page not found",
@@ -46,5 +47,9 @@
   "deactivateConfirmText": "Deactivating your Cooperatives Online profile will remove your contact information, and your access to associated teams and/or affiliated businesses.",
   "deactivateConfirmTextEmphasis": "This action cannot be undone.",
   "deactivateFailureTitle": "Deactivation Failed",
-  "deactivateFailureText": "Unable to deactivate your profile. If you are a team owner, please dissolve your team or transfer ownership first."
+  "deactivateFailureText": "Unable to deactivate your profile. If you are a team owner, please dissolve your team or transfer ownership first.",
+  "profileDeactivatedTitle": "Your profile has been deactivated.",
+  "profileDeactivatedMsg": "Your contact information, team associations and business affiliations have been removed.",
+  "leaveTeamTitle": "You have been removed from this team.",
+  "leaveTeamMsg": "If you want to regain access to this team, you will need a new invitation from the team owner."
 }

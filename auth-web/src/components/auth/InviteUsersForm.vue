@@ -114,9 +114,9 @@ export default class InviteUsersForm extends Vue {
   }
 
   private invitations: InvitationInfo[] = []
-
+  private pattern: RegExp = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   private readonly emailRules = [
-    v => !v || /.+@.+\..+/.test(v) || 'Enter a valid email address'
+    v => !v || this.pattern.test(v) || 'Enter a valid email address'
   ]
 
   private readonly roles: RoleInfo[] = [

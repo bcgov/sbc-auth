@@ -31,7 +31,7 @@ export default class ConfigHelper {
 
   static getSelfURL () {
     // this is without a trailing slash
-    return `${window.location.origin}/${process.env.VUE_APP_PATH}`.replace(/\/$/, '') // remove the slash at the end
+    return `${window.location.origin}${process.env.VUE_APP_PATH}`.replace(/\/$/, '') // remove the slash at the end
   }
 
   static getAuthAPIUrl () {

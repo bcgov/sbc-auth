@@ -106,7 +106,7 @@ node {
     def old_version
 
     try {
-        stage("Tag ${APP_NAME}:${DESTINATION_TAG}") {
+        stage("Tag ${APP_RUNTIME_NAME}:${DESTINATION_TAG}") {
             script {
                 openshift.withCluster() {
                     openshift.withProject("${NAMESPACE_DEPLOY}") {
@@ -115,12 +115,12 @@ node {
                 }
                 openshift.withCluster() {
                     openshift.withProject("${NAMESPACE_BUILD}") {
-                        echo "Tagging ${APP_NAME}:${DESTINATION_TAG}-prev ..."
-                        def IMAGE_HASH = getImageTagHash("${APP_NAME}", "${DESTINATION_TAG}")
+                        echo "Tagging ${APP_RUNTIME_NAME}:${DESTINATION_TAG}-prev ..."
+                        def IMAGE_HASH = getImageTagHash("${APP_RUNTIME_NAME}", "${DESTINATION_TAG}")
                         echo "IMAGE_HASH: ${IMAGE_HASH}"
-                        openshift.tag("${APP_NAME}@${IMAGE_HASH}", "${APP_NAME}:${DESTINATION_TAG}-prev")
+                        openshift.tag("${APP_RUNTIME_NAME}@${IMAGE_HASH}", "${APP_RUNTIME_NAME}:${DESTINATION_TAG}-prev")
 
-                        echo "Tagging ${APP_NAME} for deployment to ${DESTINATION_TAG} ..."
+                        echo "Tagging ${APP_RUNTIME_NAME} for deployment to ${DESTINATION_TAG} ..."
 						openshift.tag("${APP_RUNTIME_NAME}:${SOURCE_TAG}", "${APP_RUNTIME_NAME}:${DESTINATION_TAG}")
                     }
                 }

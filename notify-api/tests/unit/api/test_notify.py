@@ -14,7 +14,8 @@
 
 """The Unit Test for the API."""
 from notify_api.db.models.notification import NotificationModel
-from tests.utilities.factory_scenarios import NOTIFICATION_DATA, NOTIFICATION_REQUEST_DATA
+from tests.utilities.factory_scenarios import (
+    NOTIFICATION_DATA, NOTIFICATION_REQUEST_BAD_DATA, NOTIFICATION_REQUEST_DATA)
 
 
 def test_get_by_id(session, app, client):  # pylint: disable=unused-argument
@@ -49,9 +50,17 @@ def test_get_by_status(session, app, client):  # pylint: disable=unused-argument
 
 def test_post(session, app, client):  # pylint: disable=unused-argument
     """Assert the test can create notification."""
-    res = client.post('/api/v1/notify/', json=NOTIFICATION_REQUEST_DATA[0])
-    assert res.status_code == 200
+    for notification_data in NOTIFICATION_REQUEST_DATA:
+        res = client.post('/api/v1/notify/', json=notification_data)
+        assert res.status_code == 200
 
-    response_data = res.json()
-    notification = session.query(NotificationModel).get(response_data['id'])
-    assert notification.id == response_data['id']
+        response_data = res.json()
+        notification = session.query(NotificationModel).get(response_data['id'])
+        assert notification.id == response_data['id']
+
+
+def test_post_with_bad_data(session, app, client):  # pylint: disable=unused-argument
+    """Assert the test can not be create notification."""
+    for notification_data in NOTIFICATION_REQUEST_BAD_DATA:
+        res = client.post('/api/v1/notify/', json=notification_data)
+        assert res.status_code == 400

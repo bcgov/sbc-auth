@@ -1,15 +1,18 @@
 <template>
-  <interim-landing :summary="$t('pageNotFoundTitle')" :description="$t('pageNotFoundMsg')" icon="mdi-alert-circle-outline" iconColor="error">
+  <interim-landing :summary="$t('leaveTeamTitle')" :description="$t('leaveTeamMsg')">
   </interim-landing>
 </template>
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator'
 import InterimLanding from '@/components/auth/InterimLanding.vue'
+
 import Vue from 'vue'
+
 @Component({
   components: { InterimLanding }
 })
-export default class PageNotFound extends Vue {
+export default class LeaveTeamLanding extends Vue {
+
 }
 </script>
