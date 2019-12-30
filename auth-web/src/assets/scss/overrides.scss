@@ -1,9 +1,6 @@
 // Vuetify Overrides
 @import "theme.scss";
 
-// Mixins
-$font-color: rgba($gray9, 0.8);
-
 // Buttons
 .v-btn {
   letter-spacing: 0;
@@ -50,6 +47,15 @@ $font-color: rgba($gray9, 0.8);
   border-radius: 0;
 }
 
+// v-alert 
+.v-alert {
+  font-size: 1rem;
+}
+
+.v-alert__icon.v-icon {
+  font-size: 1.5rem;
+}
+
 // v-card
 // Add space between elements in case we use a close button
 .v-card__title {
@@ -64,6 +70,10 @@ $font-color: rgba($gray9, 0.8);
 
 .v-card__actions {
   padding: 1.5rem;
+}
+
+.theme--light.v-card >.v-card__text {
+  color: rgba($gray9, 0.8);
 }
 
 // Form Inputs
@@ -91,7 +101,6 @@ input:-webkit-autofill:active {
 // Tab Navigation
 .v-tab {
   min-width: auto;
-  letter-spacing: 0;
   font-weight: 700;
 }
 
@@ -103,11 +112,4 @@ input:-webkit-autofill:active {
 // Aside Navigation
 .v-application--is-ltr .v-list-item__icon:first-child {
   margin-right: 1rem;
-}
-
-// Theme 
-.theme--light {
-  &.v-card > .v-card__text {
-    color: $font-color;
-  }
 }
