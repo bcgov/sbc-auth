@@ -40,7 +40,8 @@ def test_save_entity_new(session):  # pylint:disable=unused-argument
         'businessIdentifier': TestEntityInfo.entity_passcode['businessIdentifier'],
         'businessNumber': TestEntityInfo.entity_passcode['businessNumber'],
         'passCode': TestEntityInfo.entity_passcode['passCode'],
-        'name': TestEntityInfo.entity_passcode['name']
+        'name': TestEntityInfo.entity_passcode['name'],
+        'corpTypeCode': TestEntityInfo.entity_passcode['corpTypeCode']
     })
 
     assert entity is not None
@@ -54,7 +55,8 @@ def test_save_entity_existing(session):  # pylint:disable=unused-argument
         'businessIdentifier': TestEntityInfo.entity_passcode['businessIdentifier'],
         'businessNumber': TestEntityInfo.entity_passcode['businessNumber'],
         'passCode': TestEntityInfo.entity_passcode['passCode'],
-        'name': TestEntityInfo.entity_passcode['name']
+        'name': TestEntityInfo.entity_passcode['name'],
+        'corpTypeCode': TestEntityInfo.entity_passcode['corpTypeCode']
     })
 
     assert entity
@@ -63,7 +65,8 @@ def test_save_entity_existing(session):  # pylint:disable=unused-argument
         'businessIdentifier': TestEntityInfo.entity_passcode2['businessIdentifier'],
         'businessNumber': TestEntityInfo.entity_passcode2['businessNumber'],
         'passCode': TestEntityInfo.entity_passcode['passCode'],
-        'name': TestEntityInfo.entity_passcode['name']
+        'name': TestEntityInfo.entity_passcode['name'],
+        'corpTypeCode': TestEntityInfo.entity_passcode['corpTypeCode']
     }
 
     updated_entity = EntityService.save_entity(updated_entity_info)

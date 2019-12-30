@@ -17,9 +17,10 @@ The class and schema are both present in this module.
 """
 
 from flask import current_app
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
+from auth_api.models import CorpType
 from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.util import camelback2snake
 
@@ -37,8 +38,10 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods
     pass_code_claimed = Column('pass_code_claimed', Boolean(), default=False)
     business_number = Column('business_number', String(100), nullable=True)
     name = Column('name', String(250), nullable=True)
+    corp_type_code = Column(String(10), ForeignKey('corp_type.code'), nullable=False)
 
     contacts = relationship('ContactLink', back_populates='entity')
+    corp_type = relationship(CorpType, foreign_keys=[corp_type_code], lazy='joined', innerjoin=True)
 
     @classmethod
     def find_by_business_identifier(cls, business_identifier):

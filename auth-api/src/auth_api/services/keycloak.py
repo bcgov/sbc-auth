@@ -46,7 +46,7 @@ class KeycloakService:
     """For Keycloak services."""
 
     def __init__(self):
-        """Constructor."""
+        """Create Constructor."""
         super()
 
     # Add user to Keycloak

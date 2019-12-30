@@ -21,7 +21,7 @@ from flask import abort
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.schemas.authorization import AuthorizationSchema
-from auth_api.utils.roles import OWNER, STAFF
+from auth_api.utils.roles import OWNER, STAFF, Role
 
 
 class Authorization:
@@ -49,6 +49,15 @@ class Authorization:
             auth_response = {
                 'roles': ['edit', 'view']
             }
+        elif Role.SYSTEM.value in token_info.get('realm_access').get('roles'):
+            # a service account in keycloak should have CORP_TYPE claim setup.
+            keycloak_corp_type = token_info.get('CORP_TYPE', None)
+            if keycloak_corp_type:
+                auth = AuthorizationView.find_user_authorization_by_business_number_and_corp_type(business_identifier,
+                                                                                                  keycloak_corp_type)
+                if auth:
+                    auth_response = Authorization(auth).as_dict(exclude=['business_identifier'])
+                    auth_response['roles'] = ['edit', 'view']
         else:
             keycloak_guid = token_info.get('sub', None)
             auth = AuthorizationView.find_user_authorization_by_business_number(keycloak_guid, business_identifier)
@@ -84,6 +93,23 @@ def check_auth(token_info: Dict, **kwargs):
     """Check if user is authorized to perform action on the service."""
     if 'staff' in token_info.get('realm_access').get('roles'):
         _check_for_roles(STAFF, kwargs)
+    elif Role.SYSTEM.value in token_info.get('realm_access').get('roles') \
+            and not token_info.get('loginSource', None) == 'PASSCODE':
+        corp_type_in_jwt = token_info.get('CORP_TYPE', None)
+        if corp_type_in_jwt is None:
+            # corp type must be present in jwt
+            abort(403)
+        business_identifier = kwargs.get('business_identifier', None)
+        org_identifier = kwargs.get('org_id', None)
+        auth = None
+        if business_identifier:
+            auth = Authorization.get_user_authorizations_for_entity(token_info, business_identifier)
+        elif org_identifier:
+            auth_record = AuthorizationView.find_user_authorization_by_org_id_and_corp_type(org_identifier,
+                                                                                            corp_type_in_jwt)
+            auth = Authorization(auth_record).as_dict() if auth_record else None
+        if auth is None:
+            abort(403)
     else:
         business_identifier = kwargs.get('business_identifier', None)
         org_identifier = kwargs.get('org_id', None)
