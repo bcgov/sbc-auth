@@ -111,7 +111,8 @@ class TestJwtClaims(dict, Enum):
             'roles': [
                 'system'
             ]
-        }
+        },
+        'corp_type': 'CP'
     }
 
     passcode = {
@@ -212,28 +213,29 @@ class TestEntityInfo(dict, Enum):
     entity1 = {'businessIdentifier': 'CP1234567',
                'businessNumber': '791861073BC0001',
                'name': 'Foobar, Inc.',
-               'passCode': ''}
+               'passCode': '',
+               'corpTypeCode': 'CP'}
     entity2 = {'businessIdentifier': 'CP1234568',
                'businessNumber': '791861079BC0001',
                'name': 'BarFoo, Inc.',
-               'passCode': ''}
+               'passCode': '', 'corpTypeCode': 'CP'}
     entity_passcode = {'businessIdentifier': 'CP1234568',
                        'businessNumber': '791861079BC0001',
                        'name': 'Foobar, Inc.',
-                       'passCode': '111111111'}
+                       'passCode': '111111111', 'corpTypeCode': 'CP'}
     entity_passcode2 = {'businessIdentifier': 'CP1234568',
                         'businessNumber': '791861078BC0001',
                         'name': 'BarFoo, Inc.',
-                        'passCode': '222222222'}
+                        'passCode': '222222222', 'corpTypeCode': 'CP'}
     invalid = {'foo': 'bar'}
     entity_lear_mock = {'businessIdentifier': 'CP0002103',
                         'businessNumber': '791861078BC0001',
                         'name': 'BarFoo, Inc.',
-                        'passCode': '222222222'}
+                        'passCode': '222222222', 'corpTypeCode': 'CP'}
     entity_lear_mock2 = {'businessIdentifier': 'CP0002106',
                          'businessNumber': '791861078BC0002',
                          'name': 'Foobar, Inc.',
-                         'passCode': '222222222'}
+                         'passCode': '222222222', 'corpTypeCode': 'CP'}
 
 
 class TestAffliationInfo(dict, Enum):

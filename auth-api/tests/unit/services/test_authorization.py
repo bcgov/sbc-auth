@@ -79,6 +79,36 @@ def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-a
     assert authorization.get('orgMembership', None) is None
 
 
+def test_get_user_authorizations_for_entity_service_account(session):
+    """Assert that user authorizations for entity is working."""
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+
+    # Test for service accounts with correct corp type
+    authorization = Authorization.get_user_authorizations_for_entity(
+        {'loginSource': '', 'realm_access': {'roles': ['system']}, 'corp_type': 'CP'},
+        entity.business_identifier)
+    assert bool(authorization) is True
+    assert authorization.get('orgMembership', None) == 'OWNER'
+
+    # Test for service accounts with wrong corp type
+    authorization = Authorization.get_user_authorizations_for_entity(
+        {'loginSource': '', 'realm_access': {'roles': ['system']}, 'corp_type': 'INVALIDCP'},
+        entity.business_identifier)
+    assert bool(authorization) is False
+    assert authorization.get('orgMembership', None) is None
+
+    # Test for service accounts with no corp type
+    authorization = Authorization.get_user_authorizations_for_entity(
+        {'loginSource': '', 'realm_access': {'roles': ['system']}},
+        entity.business_identifier)
+    assert bool(authorization) is False
+    assert authorization.get('orgMembership', None) is None
+
+
 def test_get_user_authorizations(session):  # pylint:disable=unused-argument
     """Assert that listing all user authorizations is working."""
     user = factory_user_model()
@@ -136,4 +166,53 @@ def test_check_auth(session):  # pylint:disable=unused-argument
     with pytest.raises(HTTPException) as excinfo:
         check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, equals_role=MEMBER,
                    org_id=org.id)
+        assert excinfo.exception.code == 403
+
+
+def test_check_auth_for_service_account_valid_with_org_id(session):  # pylint:disable=unused-argument
+    """Assert that check_auth is working as expected."""
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+
+    # Test for service account with CP corp type
+    check_auth({'realm_access': {'roles': ['system']}, 'corp_type': 'CP'}, org_id=org.id)
+
+
+def test_check_auth_for_service_account_valid_with_business_id(session):  # pylint:disable=unused-argument
+    """Assert that check_auth is working as expected."""
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+
+    # Test for service account with CP corp type
+    check_auth({'realm_access': {'roles': ['system']}, 'corp_type': 'CP'},
+               business_identifier=entity.business_identifier)
+
+
+def test_check_auth_for_service_account_invalid(session):  # pylint:disable=unused-argument
+    """Assert that check_auth is working as expected and throws exception."""
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+
+    # Test for invalid CP
+    with pytest.raises(HTTPException) as excinfo:
+        check_auth({'realm_access': {'roles': ['system']}, 'corp_type': 'IVALIDCP'}, org_id=org.id)
+        assert excinfo.exception.code == 403
+
+    # Test for invalid CP
+    with pytest.raises(HTTPException) as excinfo:
+        check_auth({'realm_access': {'roles': ['system']}}, org_id=org.id)
+        assert excinfo.exception.code == 403
+
+    # Test for invalid CP with no args
+    with pytest.raises(HTTPException) as excinfo:
+        check_auth({'realm_access': {'roles': ['system']}})
         assert excinfo.exception.code == 403
