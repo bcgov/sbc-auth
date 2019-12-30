@@ -112,7 +112,7 @@ class TestJwtClaims(dict, Enum):
                 'system'
             ]
         },
-        'CORP_TYPE': 'CP'
+        'corp_type': 'CP'
     }
 
     passcode = {

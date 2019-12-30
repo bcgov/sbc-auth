@@ -50,8 +50,8 @@ class Authorization:
                 'roles': ['edit', 'view']
             }
         elif Role.SYSTEM.value in token_info.get('realm_access').get('roles'):
-            # a service account in keycloak should have CORP_TYPE claim setup.
-            keycloak_corp_type = token_info.get('CORP_TYPE', None)
+            # a service account in keycloak should have corp_type claim setup.
+            keycloak_corp_type = token_info.get('corp_type', None)
             if keycloak_corp_type:
                 auth = AuthorizationView.find_user_authorization_by_business_number_and_corp_type(business_identifier,
                                                                                                   keycloak_corp_type)
@@ -95,7 +95,7 @@ def check_auth(token_info: Dict, **kwargs):
         _check_for_roles(STAFF, kwargs)
     elif Role.SYSTEM.value in token_info.get('realm_access').get('roles') \
             and not token_info.get('loginSource', None) == 'PASSCODE':
-        corp_type_in_jwt = token_info.get('CORP_TYPE', None)
+        corp_type_in_jwt = token_info.get('corp_type', None)
         if corp_type_in_jwt is None:
             # corp type must be present in jwt
             abort(403)

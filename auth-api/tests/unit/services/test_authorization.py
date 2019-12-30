@@ -89,14 +89,14 @@ def test_get_user_authorizations_for_entity_service_account(session):
 
     # Test for service accounts with correct corp type
     authorization = Authorization.get_user_authorizations_for_entity(
-        {'loginSource': '', 'realm_access': {'roles': ['system']}, 'CORP_TYPE': 'CP'},
+        {'loginSource': '', 'realm_access': {'roles': ['system']}, 'corp_type': 'CP'},
         entity.business_identifier)
     assert bool(authorization) is True
     assert authorization.get('orgMembership', None) == 'OWNER'
 
     # Test for service accounts with wrong corp type
     authorization = Authorization.get_user_authorizations_for_entity(
-        {'loginSource': '', 'realm_access': {'roles': ['system']}, 'CORP_TYPE': 'INVALIDCP'},
+        {'loginSource': '', 'realm_access': {'roles': ['system']}, 'corp_type': 'INVALIDCP'},
         entity.business_identifier)
     assert bool(authorization) is False
     assert authorization.get('orgMembership', None) is None
@@ -178,7 +178,7 @@ def test_check_auth_for_service_account_valid_with_org_id(session):  # pylint:di
     factory_affiliation_model(entity.id, org.id)
 
     # Test for service account with CP corp type
-    check_auth({'realm_access': {'roles': ['system']}, 'CORP_TYPE': 'CP'}, org_id=org.id)
+    check_auth({'realm_access': {'roles': ['system']}, 'corp_type': 'CP'}, org_id=org.id)
 
 
 def test_check_auth_for_service_account_valid_with_business_id(session):  # pylint:disable=unused-argument
@@ -190,7 +190,7 @@ def test_check_auth_for_service_account_valid_with_business_id(session):  # pyli
     factory_affiliation_model(entity.id, org.id)
 
     # Test for service account with CP corp type
-    check_auth({'realm_access': {'roles': ['system']}, 'CORP_TYPE': 'CP'},
+    check_auth({'realm_access': {'roles': ['system']}, 'corp_type': 'CP'},
                business_identifier=entity.business_identifier)
 
 
@@ -204,7 +204,7 @@ def test_check_auth_for_service_account_invalid(session):  # pylint:disable=unus
 
     # Test for invalid CP
     with pytest.raises(HTTPException) as excinfo:
-        check_auth({'realm_access': {'roles': ['system']}, 'CORP_TYPE': 'IVALIDCP'}, org_id=org.id)
+        check_auth({'realm_access': {'roles': ['system']}, 'corp_type': 'IVALIDCP'}, org_id=org.id)
         assert excinfo.exception.code == 403
 
     # Test for invalid CP

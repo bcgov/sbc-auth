@@ -22,6 +22,6 @@ class CorpType(BaseCodeModel):  # pylint: disable=too-few-public-methods # Tempo
     __tablename__ = 'corp_type'
 
     @classmethod
-    def get_default_status(cls):
+    def get_default_corp_type(cls):
         """Return the default Corp type for an Org."""
         return cls.query.filter_by(default=True).first()

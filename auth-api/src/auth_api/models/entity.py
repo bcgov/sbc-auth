@@ -41,7 +41,7 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods
     corp_type_code = Column(String(10), ForeignKey('corp_type.code'), nullable=False)
 
     contacts = relationship('ContactLink', back_populates='entity')
-    corp_type = relationship(CorpType, foreign_keys=[corp_type_code], lazy='joined', innerjoin=True)
+    corp_type = relationship('CorpType', foreign_keys=[corp_type_code], lazy='joined', innerjoin=True)
 
     @classmethod
     def find_by_business_identifier(cls, business_identifier):
