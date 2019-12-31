@@ -15,9 +15,11 @@
 
 Test suite to ensure that the Invitation service routines are working as expected.
 """
+from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import pytest
+from freezegun import freeze_time
 
 import auth_api.services.authorization as auth
 import auth_api.services.notification as notification
@@ -107,6 +109,23 @@ def test_update_invitation(session, auth_mock):  # pylint:disable=unused-argumen
         invitation_info = factory_invitation(org_dictionary['id'])
         new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
         updated_invitation = new_invitation.update_invitation(User(user), {}, '').as_dict()
+        assert updated_invitation['status'] == 'PENDING'
+
+
+def test_update_invitation_verify_different_tokens(session, auth_mock):  # pylint:disable=unused-argument
+    """Update the specified invitation with new data."""
+    with patch.object(InvitationService, 'send_invitation', return_value=None):
+        user = factory_user_model(TestUserInfo.user_test)
+        org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+        org_dictionary = org.as_dict()
+        invitation_info = factory_invitation(org_dictionary['id'])
+        new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
+        old_token = new_invitation.as_dict().get('token')
+        with freeze_time(
+                lambda: datetime.now() + timedelta(seconds=1)):  # to give time difference..or else token will be same..
+            updated_invitation = new_invitation.update_invitation(User(user), {}, '').as_dict()
+            new_token = updated_invitation.get('token')
+        assert old_token != new_token
         assert updated_invitation['status'] == 'PENDING'
 
 
