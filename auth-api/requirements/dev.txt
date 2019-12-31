@@ -19,3 +19,4 @@ flake8-quotes
 pep8-naming
 autopep8
 pydocstyle
+FreezeGun

@@ -16,6 +16,7 @@
 Test suite to ensure that the  model routines are working as expected.
 """
 from _datetime import datetime, timedelta
+
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationMembership as InvitationMembershipModel
 from auth_api.models import Org as OrgModel
@@ -59,6 +60,7 @@ def factory_invitation_model(session, status, sent_date=datetime.now()):
     invitation.sender = user
     invitation.sent_date = sent_date
     invitation.invitation_status_code = status
+    invitation.token = 'ABCD'
 
     invitation_membership = InvitationMembershipModel()
     invitation_membership.org_id = org.id
@@ -97,6 +99,7 @@ def test_find_invitations_by_user(session):  # pylint:disable=unused-argument
     retrieved_invitation = InvitationModel.find_invitations_by_user(invitation.sender_id)
     assert len(retrieved_invitation) > 0
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
+    assert retrieved_invitation[0].token == invitation.token
 
 
 def test_update_invitation_as_retried(session):  # pylint:disable=unused-argument
