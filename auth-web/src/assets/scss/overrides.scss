@@ -101,6 +101,8 @@ input:-webkit-autofill:active {
 // Tab Navigation
 .v-tab {
   min-width: auto;
+  letter-spacing: 0;
+  text-transform: none;
   font-weight: 700;
 }
 
