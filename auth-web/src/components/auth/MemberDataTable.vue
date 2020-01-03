@@ -4,7 +4,6 @@
     :headers="headerMembers"
     :items="indexedOrgMembers"
     :items-per-page="5"
-    :calculate-widths="true"
     :hide-default-footer="indexedOrgMembers.length <= 5"
     :custom-sort="customSortActive"
     :no-data-text="$t('noActiveUsersLabel')"
@@ -24,15 +23,14 @@
             <v-icon small depressed class="ml-1">mdi-chevron-down</v-icon>
           </v-btn>
         </template>
-        <v-list>
-          <v-item-group
-            class="role-list">
-            <v-list-item
+        <v-list dense class="role-list">
+          <v-item-group>
+            <v-list-item three-line
               v-for="(role, index) in availableRoles"
               :key="index"
-              @click=" item.membershipTypeCode.toUpperCase() !== role.name.toUpperCase()? confirmChangeRole(item, role.name): ''"
+              @click="item.membershipTypeCode.toUpperCase() !== role.name.toUpperCase()? confirmChangeRole(item, role.name): ''"
               :disabled="!isRoleEnabled(role)"
-              v-bind:class="{ active: item.membershipTypeCode.toUpperCase() === role.name.toUpperCase() }">
+              v-bind:class="{'primary--text v-item--active v-list-item--active': item.membershipTypeCode.toUpperCase() === role.name.toUpperCase()}">
               <v-list-item-icon>
                 <v-icon v-text="role.icon" />
               </v-list-item-icon>
@@ -45,6 +43,7 @@
                   v-text="role.desc"
                 >
                 </v-list-item-subtitle>
+                <v-divider></v-divider>
               </v-list-item-content>
             </v-list-item>
           </v-item-group>
@@ -133,7 +132,7 @@ export default class MemberDataTable extends Vue {
       align: 'left',
       value: 'action',
       sortable: false,
-      width: '77'
+      width: '80'
     }
   ]
 
@@ -298,33 +297,19 @@ export default class MemberDataTable extends Vue {
 <style lang="scss" scoped>
   @import "$assets/scss/theme.scss";
 
-  .v-list {
-    padding-top: 0px;
-    padding-bottom: 0px;
+  .v-list--dense {
+    .v-list-item {
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+    }
+
+    .v-list-item .v-list-item__title {
+      margin-bottom: 0.25rem;
+      font-weight: 700;
+    }
   }
 
   .role-list {
-    max-width: 26rem;
-
-    .v-list-item.active {
-      background: $BCgovBlue0;
-    }
-
-    .v-list-item__title {
-      letter-spacing: -0.02rem;
-      font-size: 0.875rem;
-      font-weight: 700;
-    }
-
-    .v-list-item__subtitle {
-      white-space: normal;
-      overflow: visible;
-      line-height: 1.5;
-      font-size: 0.875rem;
-    }
-  }
-
-  .role-selector {
-    width: 100px !important;
+    width: 20rem;
   }
 </style>
