@@ -50,12 +50,8 @@ class Invitations(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
         try:
             user = UserService.find_by_jwt_token(token)
-            if user is None:
-                response, status = {'message': 'Not authorized to perform this action'}, \
-                                   http_status.HTTP_401_UNAUTHORIZED
-            else:
-                response, status = InvitationService.create_invitation(request_json, user, token, origin).as_dict(), \
-                                   http_status.HTTP_201_CREATED
+            response, status = InvitationService.create_invitation(request_json, user, token,
+                                                                   origin).as_dict(), http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -90,18 +86,13 @@ class Invitation(Resource):
         token = g.jwt_oidc_token_info
         origin = request.environ.get('HTTP_ORIGIN', 'localhost')
         try:
-            user = UserService.find_by_jwt_token(token)
-            if user is None:
-                response, status = {'message': 'Not authorized to perform this action'}, \
-                                   http_status.HTTP_401_UNAUTHORIZED
+            invitation = InvitationService.find_invitation_by_id(invitation_id, token)
+            if invitation is None:
+                response, status = {'message': 'The requested invitation could not be found.'}, \
+                                   http_status.HTTP_404_NOT_FOUND
             else:
-                invitation = InvitationService.find_invitation_by_id(invitation_id, token)
-                if invitation is None:
-                    response, status = {'message': 'The requested invitation could not be found.'}, \
-                                       http_status.HTTP_404_NOT_FOUND
-                else:
-                    response, status = invitation.update_invitation(user, token, origin).as_dict(), \
-                                       http_status.HTTP_200_OK
+                user = UserService.find_by_jwt_token(token)
+                response, status = invitation.update_invitation(user, token, origin).as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
