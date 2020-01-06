@@ -11,7 +11,6 @@
     </header>
 
     <AffiliatedEntityList
-      ref="affiliatedEntityList"
       @add-business="showAddBusinessModal()"
       @remove-business="showConfirmRemoveModal($event)"
     />
@@ -87,11 +86,12 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import AddBusinessForm from '@/components/auth/AddBusinessForm.vue'
 import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
+import { Business } from '@/models/business'
 import BusinessModule from '@/store/modules/business'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
-import { RemoveBusinessPayload } from '@/models/Organization'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 import { mapActions } from 'vuex'
@@ -103,7 +103,7 @@ import { mapActions } from 'vuex'
     ModalDialog
   },
   methods: {
-    ...mapActions('business', ['removeBusiness'])
+    ...mapActions('business', ['syncBusinesses', 'removeBusiness'])
   }
 })
 export default class EntityManagement extends Vue {
@@ -112,21 +112,25 @@ export default class EntityManagement extends Vue {
   private dialogTitle = ''
   private dialogText = ''
 
-  private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => void
+  private readonly syncBusinesses!: (organization?: Organization) => Promise<Business[]>
+  private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
 
   $refs: {
     successDialog: ModalDialog
     errorDialog: ModalDialog
     confirmDeleteDialog: ModalDialog
     addBusinessDialog: ModalDialog
-    affiliatedEntityList: AffiliatedEntityList
+  }
+
+  async mounted () {
+    await this.syncBusinesses()
   }
 
   async showAddSuccessModal () {
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Business Added'
     this.dialogText = 'You have successfully added a business'
-    await this.$refs.affiliatedEntityList.syncBusinesses()
+    await this.syncBusinesses()
     this.$refs.successDialog.open()
   }
 
@@ -174,7 +178,7 @@ export default class EntityManagement extends Vue {
   async remove () {
     this.$refs.confirmDeleteDialog.close()
     await this.removeBusiness(this.removeBusinessPayload)
-    await this.$refs.affiliatedEntityList.syncBusinesses()
+    await this.syncBusinesses()
   }
 
   close () {

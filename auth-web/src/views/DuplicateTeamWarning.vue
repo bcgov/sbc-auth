@@ -28,9 +28,7 @@ import { getModule } from 'vuex-module-decorators'
     TeamForm
   }
 })
-export default class DuplicateTeamWarning extends Vue {
-  async mounted () {}
-}
+export default class DuplicateTeamWarning extends Vue { }
 </script>
 
 <style lang="scss" scoped>

@@ -5,7 +5,6 @@ import { SessionStorageKeys } from './constants'
  * the configs are used since process.env doesnt play well when we hae only one build config and multiple deployments..so going for this
  */
 const url = `${process.env.VUE_APP_PATH}config/configuration.json`
-const KEYCLOAK_TOKEN_SESSION_KEY = 'KEYCLOAK_TOKEN'
 
 export default class ConfigHelper {
   static async fetchConfig () {

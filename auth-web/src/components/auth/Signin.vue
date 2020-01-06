@@ -25,7 +25,7 @@ import { getModule } from 'vuex-module-decorators'
         'syncUserProfile'
       ]
     ),
-    ...mapActions('org', ['syncOrganizations'])
+    ...mapActions('org', ['syncOrganizations', 'syncCurrentOrganization'])
   }
 })
 export default class Signin extends Mixins(NextPageMixin) {
@@ -35,6 +35,7 @@ export default class Signin extends Mixins(NextPageMixin) {
   private readonly initializeSession!: () => UserInfo
   private readonly syncUserProfile!: () => User
   private readonly syncOrganizations!: () => Organization[]
+  private readonly syncCurrentOrganization!: (organization: Organization) => Promise<void>
 
   @Prop({ default: 'bcsc' }) idpHint: string
 

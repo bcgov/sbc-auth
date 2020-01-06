@@ -84,8 +84,8 @@ interface InvitationInfo {
 
 @Component({
   computed: {
-    ...mapState('org', ['pendingOrgInvitations']),
-    ...mapGetters('org', ['myOrg', 'myOrgMembership'])
+    ...mapState('org', ['currentOrganization', 'pendingOrgInvitations']),
+    ...mapGetters('org', ['myOrgMembership'])
   },
   methods: {
     ...mapMutations('org', ['resetInvitations']),
@@ -95,7 +95,7 @@ interface InvitationInfo {
 export default class InviteUsersForm extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
   private loading = false
-  private readonly myOrg!: Organization
+  private readonly currentOrganization!: Organization
   private readonly myOrgMembership!: Member
   private readonly pendingOrgInvitations!: Invitation[]
   private readonly resetInvitations!: () => void
@@ -193,7 +193,7 @@ export default class InviteUsersForm extends Vue {
             await this.createInvitation({
               recipientEmail: invite.emailAddress,
               sentDate: new Date(),
-              membership: [{ membershipType: invite.selectedRole.name.toUpperCase(), orgId: this.myOrg.id }]
+              membership: [{ membershipType: invite.selectedRole.name.toUpperCase(), orgId: this.currentOrganization.id }]
             })
           }
         }
