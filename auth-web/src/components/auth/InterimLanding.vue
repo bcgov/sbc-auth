@@ -6,7 +6,7 @@
         <h1 class="mb-5">{{ summary }}</h1>
         <p class="mb-9"><slot name="description">{{ description }}</slot></p>
         <slot name="actions">
-          <v-btn large link color="primary" @click="redirectToHome()" v-if="showHomePageBtn">{{ $t('homeBtnLabel') }}</v-btn>
+          <v-btn large link color="primary" @click="goHome()" v-if="showHomePageBtn">{{ $t('homeBtnLabel') }}</v-btn>
         </slot>
       </v-col>
     </v-row>
@@ -24,7 +24,7 @@ export default class InterimLanding extends Vue {
   @Prop({ default: 'primary' }) private iconColor: string
   @Prop({ default: true }) private showHomePageBtn: boolean
 
-  private redirectToHome () {
+  private goHome () {
     this.$router.push('/')
   }
 }

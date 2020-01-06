@@ -20,8 +20,10 @@ import uuid
 
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.sql import expression
 
 from auth_api.models.db import db
+from auth_api.utils.roles import ADMIN, MEMBER, OWNER
 
 
 class Authorization(db.Model):
@@ -35,6 +37,7 @@ class Authorization(db.Model):
     keycloak_guid = Column(UUID, primary_key=True)
     org_id = Column(Integer, primary_key=True)
     org_type = Column(String)
+    corp_type_code = Column(String)
 
     @classmethod
     def find_user_authorization_by_business_number(cls, keycloak_guid: uuid, business_identifier: str):
@@ -42,9 +45,30 @@ class Authorization(db.Model):
         return cls.query.filter_by(keycloak_guid=keycloak_guid, business_identifier=business_identifier).one_or_none()
 
     @classmethod
+    def find_user_authorization_by_business_number_and_corp_type(cls, business_identifier: str, corp_type: str):
+        """Return authorization view object using corp type and business identifier.
+
+        Mainly used for service accounts.Sorted using the membership since service accounts gets all access
+
+        """
+        return cls.query.filter_by(corp_type_code=corp_type, business_identifier=business_identifier) \
+            .order_by(expression.case(((Authorization.org_membership == OWNER, 1),
+                                       (Authorization.org_membership == ADMIN, 2),
+                                       (Authorization.org_membership == MEMBER, 3))))\
+            .first()
+
+    @classmethod
     def find_user_authorization_by_org_id(cls, keycloak_guid: uuid, org_id: int):
         """Return authorization view object."""
         return cls.query.filter_by(keycloak_guid=keycloak_guid, org_id=org_id).one_or_none()
+
+    @classmethod
+    def find_user_authorization_by_org_id_and_corp_type(cls, org_id: int, corp_type: str):
+        """Return authorization view object."""
+        return cls.query.filter_by(corp_type_code=corp_type, org_id=org_id).order_by(
+            expression.case(((Authorization.org_membership == OWNER, 1),
+                             (Authorization.org_membership == ADMIN, 2),
+                             (Authorization.org_membership == MEMBER, 3)))).first()
 
     @classmethod
     def find_all_authorizations_for_user(cls, keycloak_guid):

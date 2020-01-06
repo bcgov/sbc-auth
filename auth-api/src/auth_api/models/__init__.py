@@ -21,6 +21,7 @@ from sqlalchemy.engine import Engine
 from .affiliation import Affiliation
 from .contact import Contact
 from .contact_link import ContactLink
+from .corp_type import CorpType
 from .db import db, ma
 from .documents import Documents
 from .entity import Entity

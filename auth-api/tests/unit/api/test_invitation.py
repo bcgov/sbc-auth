@@ -34,6 +34,8 @@ def test_add_invitation(client, jwt, session):  # pylint:disable=unused-argument
     org_id = dictionary['id']
     rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation(org_id=org_id)),
                      headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    assert dictionary.get('token') is not None
     assert rv.status_code == http_status.HTTP_201_CREATED
 
 

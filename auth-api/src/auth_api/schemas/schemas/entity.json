@@ -48,6 +48,16 @@
           "12345"
         ],
         "pattern": "^(.*)$"
+      },
+      "corpTypeCode": {
+        "$id": "#/properties/corpTypeCode",
+        "type": "string",
+        "title": "corpTypeCode",
+        "default": "",
+        "examples": [
+          "12345"
+        ],
+        "pattern": "^(.*)$"
       }
     }
   }

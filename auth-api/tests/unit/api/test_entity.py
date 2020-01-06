@@ -65,9 +65,10 @@ def test_add_entity_invalid_returns_exception(client, jwt, session):  # pylint:d
 
 def test_get_entity(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an entity can be retrieved via GET."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
-    client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
-                headers=headers, content_type='application/json')
+    headers_system = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv_create = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
+                            headers=headers_system, content_type='application/json')
+    assert rv_create.status_code == http_status.HTTP_201_CREATED
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
 

@@ -12,14 +12,17 @@
               :rules="emailRules"
               :data-test="getIndexedTag('email-address', index)"
             ></v-text-field>
+
             <v-overflow-btn
-              filled v-model="invitations[index].selectedRole.name"
-              class="ml-3"
-              :items="availableRoles"
+              filled
+              class="select-role-btn ml-2"
+              v-model="invitations[index].selectedRole.name"
               item-text="name"
               item-value="name"
+              :items="availableRoles"
               :value="availableRoles[0]"
               :data-test="getIndexedTag('role-selector', index)"
+              menu-props="dense"
             >
               <template v-slot:selection="{ item }">
                 {{ item.name }}
@@ -36,6 +39,7 @@
                   </v-list-item-content>
                 </div>
               </template>
+
             </v-overflow-btn>
 
             <v-btn icon class="mt-3 ml-1"
@@ -233,7 +237,7 @@ export default class InviteUsersForm extends Vue {
 
   .role-container {
     display: flex;
-    max-width: 20rem;
+    width: 20rem;
 
     .v-list-item__title {
       letter-spacing: -0.02rem;
@@ -251,5 +255,11 @@ export default class InviteUsersForm extends Vue {
 
   .v-list-item.active {
     background: $BCgovBlue0;
+  }
+
+  .select-role-btn {
+    ::v-deep .v-input__slot {
+      padding-right: 0 !important
+    }
   }
 </style>

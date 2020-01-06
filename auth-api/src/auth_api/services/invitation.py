@@ -15,6 +15,7 @@
 
 from datetime import datetime
 from typing import Dict
+
 from flask import current_app
 from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
@@ -70,6 +71,8 @@ class Invitation:
         org_name = OrgModel.find_by_org_id(invitation_info['membership'][0]['orgId']).name
 
         invitation = InvitationModel.create_from_dict(invitation_info, user.identifier)
+        confirmation_token = Invitation.generate_confirmation_token(invitation.id)
+        invitation.token = confirmation_token
         invitation.save()
         Invitation.send_invitation(invitation, org_name, user.as_dict(),
                                    '{}/{}'.format(invitation_origin, context_path))
@@ -84,6 +87,8 @@ class Invitation:
             check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
 
         # TODO doesnt work when invited to multiple teams.. Re-work the logic when multiple teams introduced
+        confirmation_token = Invitation.generate_confirmation_token(self._model.id)
+        self._model.token = confirmation_token
         updated_invitation = self._model.update_invitation_as_retried()
         org_name = OrgModel.find_by_org_id(self._model.membership[0].org_id).name
         Invitation.send_invitation(updated_invitation, org_name, user.as_dict(),
@@ -156,7 +161,7 @@ class Invitation:
         sender = CONFIG.MAIL_FROM_ID
         try:
             template = ENV.get_template('email_templates/admin_notification_email.html')
-        except Exception as err:
+        except Exception:
             raise BusinessException(Error.FAILED_INVITATION, None)
 
         sent_response = send_email(subject, sender, recipient_email_list,
@@ -175,8 +180,7 @@ class Invitation:
                                                                                                   user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
-        confirmation_token = Invitation.generate_confirmation_token(invitation.id)
-        token_confirm_url = '{}/validatetoken/{}'.format(app_url, confirmation_token)
+        token_confirm_url = '{}/validatetoken/{}'.format(app_url, invitation.token)
         template = ENV.get_template('email_templates/business_invitation_email.html')
 
         sent_response = send_email(subject, sender, recipient,

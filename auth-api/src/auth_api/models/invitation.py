@@ -37,6 +37,7 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     recipient_email = Column(String(100), nullable=False)
     sent_date = Column(DateTime, nullable=False)
     accepted_date = Column(DateTime, nullable=True)
+    token = Column(String(100), nullable=True)     # stores the one time invitation token
     invitation_status_code = Column(ForeignKey('invitation_status.code'), nullable=False, default='PENDING')
 
     invitation_status = relationship('InvitationStatus', foreign_keys=[invitation_status_code])
