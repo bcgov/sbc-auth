@@ -146,10 +146,6 @@ class Org:
         current_app.logger.debug('<delete_contact ')
         return self
 
-    def get_members(self):
-        """Return the set of members for this org."""
-        return {'members': self.as_dict()['members']}
-
     def get_invitations(self, status='ALL', token_info: Dict = None):
         """Return the unresolved (pending or failed) invitations for this org."""
         return {'invitations': InvitationService.get_invitations_by_org_id(self._model.id, status, token_info)}

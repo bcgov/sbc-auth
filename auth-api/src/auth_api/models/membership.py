@@ -16,7 +16,7 @@
 The Membership object connects User models to one or more Org models.
 """
 
-from sqlalchemy import Column, ForeignKey, Integer, and_, or_
+from sqlalchemy import Column, ForeignKey, Integer, and_, desc
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.roles import VALID_STATUSES, Status
@@ -42,10 +42,10 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     status = Column(
         ForeignKey('membership_status_code.id')
     )
-    membership_type = relationship('MembershipType', foreign_keys=[membership_type_code])
-    membership_status = relationship('MembershipStatusCode', foreign_keys=[status], lazy='subquery')
-    user = relationship('User', back_populates='orgs', foreign_keys=[user_id], lazy='subquery')
-    org = relationship('Org', back_populates='members', foreign_keys=[org_id], lazy='subquery')
+    membership_type = relationship('MembershipType', foreign_keys=[membership_type_code], lazy='select')
+    membership_status = relationship('MembershipStatusCode', foreign_keys=[status], lazy='select')
+    user = relationship('User', foreign_keys=[user_id], lazy='select')
+    org = relationship('Org', foreign_keys=[org_id], lazy='select')
 
     def __init__(self, **kwargs):
         """Initialize a new membership."""
@@ -82,8 +82,16 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
 
     @classmethod
     def find_orgs_for_user(cls, user_id):
-        """Find the org for a user."""
-        return db.session.query(OrgModel).filter(and_(OrgModel.status_code == 'ACTIVE',
-                                                      OrgModel.members.any(and_(cls.user_id == user_id,
-                                                                                or_(cls.status.in_(
-                                                                                    VALID_STATUSES)))))).all()  # noqa:E501
+        """Find the orgs for a user."""
+        records = cls.query \
+            .filter(cls.user_id == user_id) \
+            .filter(cls.status.in_(VALID_STATUSES)) \
+            .filter(OrgModel.status_code == 'ACTIVE') \
+            .all()
+
+        return list(map(lambda x: x.org, records))
+
+    @classmethod
+    def find_membership_by_user_and_org(cls, user_id, org_id):
+        """Get the membership for the specified user and org."""
+        return cls.query.filter_by(user_id=user_id, org_id=org_id).order_by(desc(Membership.created)).first()
