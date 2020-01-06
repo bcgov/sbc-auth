@@ -51,9 +51,6 @@ class Users(Resource):
         """
         token = g.jwt_oidc_token_info
 
-        if not token:
-            return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
-
         try:
             response, status = UserService.save_from_jwt_token(token).as_dict(), http_status.HTTP_201_CREATED
             KeycloakService.join_public_users_group(g.jwt_oidc_token_info)
@@ -111,9 +108,6 @@ class User(Resource):
     def get():
         """Return the user profile associated with the JWT in the authorization header."""
         token = g.jwt_oidc_token_info
-        if not token:
-            return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
-
         try:
             response, status = UserService.find_by_jwt_token(token).as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
@@ -130,8 +124,6 @@ class User(Resource):
         request_json = request.get_json()
 
         valid_format, errors = schema_utils.validate(request_json, 'termsofuse')
-        if not token:
-            return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
@@ -189,8 +181,6 @@ class UserContacts(Resource):
         token = g.jwt_oidc_token_info
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'contact')
-        if not token:
-            return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
@@ -209,8 +199,6 @@ class UserContacts(Resource):
         token = g.jwt_oidc_token_info
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'contact')
-        if not token:
-            return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
         try:
@@ -226,8 +214,6 @@ class UserContacts(Resource):
     def delete():
         """Delete the contact info for the user associated with the JWT in the authorization header."""
         token = g.jwt_oidc_token_info
-        if not token:
-            return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
 
         try:
             response, status = UserService.delete_contact(token).as_dict(), http_status.HTTP_200_OK
@@ -248,8 +234,6 @@ class UserOrgs(Resource):
     def get():
         """Get a list of orgs that the current user is associated with."""
         token = g.jwt_oidc_token_info
-        if not token:
-            return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
 
         try:
             user = UserService.find_by_jwt_token(token)
