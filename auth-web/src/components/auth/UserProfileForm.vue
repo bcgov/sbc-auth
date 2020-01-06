@@ -102,7 +102,7 @@
 
     <v-row>
       <v-col cols="12" class="form__btns pt-5">
-        <v-btn v-show="editing" large text color="primary" @click="$refs.deactivateUserConfirmationDialog.open()" class="deactivate-btn">Deactivate my profile</v-btn>
+        <v-btn v-show="editing" large text color="primary" class="deactivate-btn pr-2 pl-2" @click="$refs.deactivateUserConfirmationDialog.open()">Deactivate my profile</v-btn>
         <!-- Modal for deactivation confirmation -->
         <ModalDialog
           ref="deactivateUserConfirmationDialog"
@@ -318,14 +318,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
 
   .form__btns {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
 
     .v-btn + .v-btn {
       margin-left: 0.5rem;
     }
-  }
-
-  .deactivate-btn {
-    margin-right: auto;
   }
 </style>
