@@ -18,7 +18,7 @@ blinker==1.4
 certifi==2019.11.28
 cffi==1.13.2
 chardet==3.0.4
-ecdsa==0.14.1
+ecdsa==0.15
 flask-jwt-oidc==0.1.5
 flask-marshmallow==0.10.1
 flask-restplus==0.13.0
@@ -31,7 +31,7 @@ jsonschema==3.2.0
 marshmallow-sqlalchemy==0.21.0
 marshmallow==3.0.0rc7
 more-itertools==8.0.2
-opentracing==2.2.0
+opentracing==2.3.0
 psycopg2-binary==2.8.4
 pyasn1==0.4.8
 pycparser==2.19
