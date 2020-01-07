@@ -213,7 +213,7 @@ if( run_pipeline ) {
             }
         }
 
-        if (build_ok) {
+        /*if (build_ok) {
             try {
                 stage("Run tests on ${APP_NAME}:${DESTINATION_TAG}") {
                     script {
@@ -237,7 +237,7 @@ if( run_pipeline ) {
             stage("Run E2E API tests") {
 
             }
-        }
+        }*/
 
         stage("Notify on RocketChat") {
             if(build_ok) {
