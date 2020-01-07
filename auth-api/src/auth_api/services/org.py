@@ -29,6 +29,7 @@ from auth_api.utils.roles import OWNER, VALID_STATUSES, Status
 from auth_api.utils.util import camelback2snake
 
 from .authorization import check_auth
+from .contact import Contact as ContactService
 from .invitation import Invitation as InvitationService
 
 
@@ -98,28 +99,55 @@ class Org:
 
         return Org(org_model)
 
-    def add_contact(self, contact_info):
+    @staticmethod
+    def get_contacts(org_id):
+        """Get the contacts for the given org."""
+        current_app.logger.debug('get_contacts>')
+        org = OrgModel.find_by_org_id(org_id)
+        if org is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        collection = []
+        for contact_link in org.contacts:
+            collection.append(ContactService(contact_link.contact).as_dict())
+        return {'contacts': collection}
+
+    @staticmethod
+    def add_contact(org_id, contact_info):
         """Create a new contact for this org."""
         # check for existing contact (only one contact per org for now)
-        current_app.logger.debug('>add_contact ')
-        contact_link = ContactLinkModel.find_by_org_id(self._model.id)
+        current_app.logger.debug('>add_contact')
+        org = OrgModel.find_by_org_id(org_id)
+        if org is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        contact_link = ContactLinkModel.find_by_org_id(org_id)
         if contact_link is not None:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
         contact = ContactModel(**camelback2snake(contact_info))
+        contact = contact.flush()
         contact.commit()
 
         contact_link = ContactLinkModel()
         contact_link.contact = contact
-        contact_link.org = self._model
+        contact_link.org = org
+        contact_link = contact_link.flush()
         contact_link.commit()
-        current_app.logger.debug('>add_contact ')
-        return self
+        current_app.logger.debug('<add_contact')
 
-    def update_contact(self, contact_info):
+        return ContactService(contact)
+
+    @staticmethod
+    def update_contact(org_id, contact_info):
         """Update the existing contact for this org."""
         current_app.logger.debug('>update_contact ')
-        contact_link = ContactLinkModel.find_by_org_id(self._model.id)
+        org = OrgModel.find_by_org_id(org_id)
+        if org is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # find the contact link for this org
+        contact_link = ContactLinkModel.find_by_org_id(org_id)
         if contact_link is None or contact_link.contact is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -127,28 +155,41 @@ class Org:
         contact.update_from_dict(**camelback2snake(contact_info))
         contact.commit()
         current_app.logger.debug('<update_contact ')
-        return self
 
-    def delete_contact(self):
+        # return the updated contact
+        return ContactService(contact)
+
+    @staticmethod
+    def delete_contact(org_id):
         """Delete the contact for this org."""
         current_app.logger.debug('>delete_contact ')
-        contact_link = ContactLinkModel.find_by_org_id(self._model.id)
-        if contact_link is None:
+        org = OrgModel.find_by_org_id(org_id)
+        if not org or not org.contacts:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        del contact_link.org
-        contact_link.commit()
-
-        if not contact_link.has_links():
-            contact = contact_link.contact
-            contact_link.delete()
-            contact.delete()
+        deleted_contact = Org.__delete_contact(org)
         current_app.logger.debug('<delete_contact ')
-        return self
+
+        return ContactService(deleted_contact)
+
+    @staticmethod
+    def __delete_contact(org):
+        # unlink the org from its contact
+        contact_link = ContactLinkModel.find_by_org_id(org.id)
+        if contact_link:
+            del contact_link.org
+            contact_link.commit()
+            # clean up any orphaned contacts and links
+            if not contact_link.has_links():
+                contact = contact_link.contact
+                contact_link.delete()
+                contact.delete()
+                return contact
+        return None
 
     def get_invitations(self, status='ALL', token_info: Dict = None):
         """Return the unresolved (pending or failed) invitations for this org."""
-        return {'invitations': InvitationService.get_invitations_by_org_id(self._model.id, status, token_info)}
+        return {'invitations': InvitationService.get_invitations_for_org(self._model.id, status, token_info)}
 
     def get_owner_count(self):
         """Get the number of owners for the specified org."""

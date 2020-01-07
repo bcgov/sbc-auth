@@ -28,9 +28,10 @@ from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.services import Invitation as InvitationService
+from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User
-from tests.utilities.factory_scenarios import TestOrgInfo, TestUserInfo
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import factory_invitation, factory_user_model
 
 
@@ -178,15 +179,20 @@ def test_accept_invitation(session, auth_mock):  # pylint:disable=unused-argumen
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         with patch.object(auth, 'check_auth', return_value=True):
             with patch.object(InvitationService, 'notify_admin', return_value=None):
-                user = factory_user_model(TestUserInfo.user_test)
+                user_with_token = TestUserInfo.user_test
+                user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+                user = factory_user_model(user_with_token)
                 org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
                 org_dictionary = org.as_dict()
                 invitation_info = factory_invitation(org_dictionary['id'])
                 new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
                 new_invitation_dict = new_invitation.as_dict()
                 InvitationService.accept_invitation(new_invitation_dict['id'], User(user), '')
-                org_dict = OrgService.find_by_org_id(org_dictionary['id'], allowed_roles={'basic'}).as_dict()
-                assert len(org_dict['members']) == 2  # Member count will be 2 only if the invite accept is successful.
+                members = MembershipService.get_members_for_org(org_dictionary['id'],
+                                                                'PENDING_APPROVAL',
+                                                                token_info=TestJwtClaims.edit_role)
+                assert members
+                assert len(members) == 1
 
 
 def test_accept_invitation_exceptions(session, auth_mock):  # pylint:disable=unused-argument
@@ -226,17 +232,18 @@ def test_accept_invitation_exceptions(session, auth_mock):  # pylint:disable=unu
 def test_get_invitations_by_org_id(session, auth_mock):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided org id."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
-        user = factory_user_model(TestUserInfo.user_test)
+        user_with_token = TestUserInfo.user_test
+        user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+        user = factory_user_model(user_with_token)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         org_id = org_dictionary['id']
         invitation_info = factory_invitation(org_dictionary['id'])
         InvitationService.create_invitation(invitation_info, User(user), {}, '').as_dict()
-        invitations: list = InvitationService.get_invitations_by_org_id(org_id, 'ALL')
+        invitations: list = InvitationService.get_invitations_for_org(org_id,
+                                                                      status='PENDING',
+                                                                      token_info=TestJwtClaims.edit_role)
         assert invitations
-        assert len(invitations) == 1
-
-        invitations: list = InvitationService.get_invitations_by_org_id(org_id, 'PENDING')
         assert len(invitations) == 1
 
 

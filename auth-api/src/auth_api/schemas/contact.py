@@ -17,6 +17,7 @@ from auth_api.models import Contact as ContactModel
 
 from .camel_case_schema import CamelCaseSchema
 
+
 class ContactSchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the Contact model."""
 

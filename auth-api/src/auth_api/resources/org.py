@@ -19,9 +19,8 @@ from flask_restplus import Namespace, Resource, cors
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
-from auth_api.schemas import InvitationSchema
-from auth_api.schemas import MembershipSchema
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
@@ -114,10 +113,22 @@ class Org(Resource):
         return response, status
 
 
-@cors_preflight('DELETE,POST,PUT,OPTIONS')
-@API.route('/<string:org_id>/contacts', methods=['DELETE', 'POST', 'PUT'])
+@cors_preflight('GET,DELETE,POST,PUT,OPTIONS')
+@API.route('/<string:org_id>/contacts', methods=['GET', 'DELETE', 'POST', 'PUT'])
 class OrgContacts(Resource):
     """Resource for managing org contacts."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def get(org_id):
+        """Retrieve the set of contacts associated with the specified org."""
+        try:
+            response, status = OrgService.get_contacts(org_id), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
 
     @staticmethod
     @TRACER.trace()
@@ -131,12 +142,7 @@ class OrgContacts(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=CLIENT_ADMIN_ROLES)
-            if org:
-                response, status = org.add_contact(request_json).as_dict(), http_status.HTTP_201_CREATED
-            else:
-                response, status = {'message': 'The requested organization could not be found.'}, \
-                                   http_status.HTTP_404_NOT_FOUND
+            response, status = OrgService.add_contact(org_id, request_json).as_dict(), http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -152,12 +158,7 @@ class OrgContacts(Resource):
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
         try:
-            org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=CLIENT_ADMIN_ROLES)
-            if org:
-                response, status = org.update_contact(request_json).as_dict(), http_status.HTTP_200_OK
-            else:
-                response, status = {'message': 'The requested organization could not be found.'}, \
-                                   http_status.HTTP_404_NOT_FOUND
+            response, status = OrgService.update_contact(org_id, request_json).as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -169,12 +170,7 @@ class OrgContacts(Resource):
     def delete(org_id):
         """Delete the contact info for the specified org."""
         try:
-            org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=CLIENT_ADMIN_ROLES)
-            if org:
-                response, status = org.delete_contact().as_dict(), http_status.HTTP_200_OK
-            else:
-                response, status = {'message': 'The requested organization could not be found.'}, \
-                                   http_status.HTTP_404_NOT_FOUND
+            response, status = OrgService.delete_contact(org_id).as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -261,7 +257,7 @@ class OrgMembers(Resource):
             status = request.args.get('status').upper() if request.args.get('status') else None
             roles = request.args.get('roles').upper() if request.args.get('roles') else None
 
-            members = MembershipService.get_members_for_org(org_id, status=status, \
+            members = MembershipService.get_members_for_org(org_id, status=status,
                                                             membership_roles=roles, token_info=g.jwt_oidc_token_info)
             if members:
                 response, status = {'members': MembershipSchema(exclude=['org']).dump(members, many=True)}, \
@@ -354,12 +350,11 @@ class OrgInvitations(Resource):
         try:
 
             invitation_status = request.args.get('status').upper() if request.args.get('status') else None
-            invitations = InvitationService.get_invitations_for_org(org_id=org_id, \
-                status=invitation_status, token_info=g.jwt_oidc_token_info)
+            invitations = InvitationService.get_invitations_for_org(org_id=org_id,
+                                                                    status=invitation_status,
+                                                                    token_info=g.jwt_oidc_token_info)
 
-
-            response, status = {'invitations': InvitationSchema().dump(invitations, many=True)}, \
-                                   http_status.HTTP_200_OK
+            response, status = {'invitations': InvitationSchema().dump(invitations, many=True)}, http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 

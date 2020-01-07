@@ -70,8 +70,9 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         return MembershipTypeModel.get_membership_type_by_code(type_code=type_code)
 
     @staticmethod
-    def get_members_for_org(org_id, status=Status.ACTIVE, \
-        membership_roles=ALL_ALLOWED_ROLES, token_info: Dict = None):  # pylint:disable=too-many-return-statements
+    def get_members_for_org(org_id, status=Status.ACTIVE,  # pylint:disable=too-many-return-statements
+                            membership_roles=ALL_ALLOWED_ROLES,
+                            token_info: Dict = None):
         """Get members of org.Fetches using status and roles."""
         org_model = OrgModel.find_by_org_id(org_id)
         if not org_model:
@@ -90,8 +91,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
         # If no active or pending membership return empty array
         if current_user_membership is None or \
-            current_user_membership.status == Status.INACTIVE.value or \
-            current_user_membership.status == Status.REJECTED.value:
+                current_user_membership.status == Status.INACTIVE.value or \
+                current_user_membership.status == Status.REJECTED.value:
             return []
 
         # If pending approval, return empty for active, array of self only for pending
@@ -108,7 +109,6 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 if status == Status.ACTIVE.value else []
 
         return []
-
 
     @staticmethod
     def get_membership_status_by_code(name):
@@ -157,7 +157,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             if not sent_response:
                 current_app.logger.error('<send_notification_to_member failed')
                 raise BusinessException(Error.FAILED_NOTIFICATION, None)
-        except:
+        except:  # noqa=B901
             current_app.logger.error('<send_notification_to_member failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None)
 

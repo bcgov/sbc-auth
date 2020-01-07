@@ -14,6 +14,7 @@
 """Constants definitions."""
 from enum import Enum
 
+
 # Group names
 GROUP_PUBLIC_USERS = 'public_users'
 
@@ -22,8 +23,9 @@ PASSCODE = 'PASSCODE'
 BCSC = 'BCSC'
 STAFF = 'IDIR'
 
-# Invitation statuses
+
 class InvitationStatus(Enum):
     """Invitation statuses."""
+
     ACCEPTED = 'ACCEPTED'
     PENDING = 'PENDING'

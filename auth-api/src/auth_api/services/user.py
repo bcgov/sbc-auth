@@ -96,7 +96,7 @@ class User:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def add_contact(token, contact_info: dict):
-        """Add or update contact information for an existing user."""
+        """Add contact information for an existing user."""
         current_app.logger.debug('add_contact')
         user = UserModel.find_by_jwt_token(token)
         if user is None:
@@ -108,11 +108,13 @@ class User:  # pylint: disable=too-many-instance-attributes
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
         contact = ContactModel(**camelback2snake(contact_info))
+        contact = contact.flush()
         contact.commit()
 
         contact_link = ContactLinkModel()
         contact_link.user = user
         contact_link.contact = contact
+        contact_link = contact_link.flush()
         contact_link.commit()
 
         return ContactService(contact)
@@ -159,7 +161,9 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         deleted_contact = User.__delete_contact(user)
 
-        return ContactService(deleted_contact)
+        if deleted_contact:
+            return ContactService(deleted_contact)
+        return None
 
     @staticmethod
     def __delete_contact(user):
@@ -167,6 +171,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         contact_link = ContactLinkModel.find_by_user_id(user.id)
         if contact_link:
             del contact_link.user
+            contact_link = contact_link.flush()
             contact_link.commit()
             # clean up any orphaned contacts and links
             if not contact_link.has_links():

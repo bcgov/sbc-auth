@@ -127,14 +127,14 @@ class Invitation:
 
         # If no active membership return empty array
         if current_user_membership is None or \
-            current_user_membership.status != Status.ACTIVE.value:
+                current_user_membership.status != Status.ACTIVE.value:
             return []
 
         # Ensure either OWNER or ADMIN
         if current_user_membership.membership_type_code == MEMBER:
             return []
 
-        return InvitationModel.find_invitations_by_org(org_id=org_id, status=status.value)
+        return InvitationModel.find_invitations_by_org(org_id=org_id, status=status)
 
     @staticmethod
     def find_invitation_by_id(invitation_id, token_info: Dict = None):
