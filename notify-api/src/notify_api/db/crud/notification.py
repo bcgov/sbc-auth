@@ -34,10 +34,13 @@ async def find_notifications_by_status(db_session: Session, status: str):
 
 async def find_notifications_by_status_time(db_session: Session, status: str, hours: int):
     """get notificaitons by status and specific time frame."""
-    timebefore: datetime = datetime.utcnow() - timedelta(hours=hours)
+    timecurrent: datetime = datetime.utcnow()
+    timebefore: datetime = timecurrent - timedelta(hours=hours)
+
     db_notifications = db_session.query(NotificationModel)\
         .filter(NotificationModel.status_code == status)\
-        .filter(NotificationModel.request_date < timebefore).all()
+        .filter(NotificationModel.request_date >= timebefore)\
+        .filter(NotificationModel.request_date <= timecurrent).all()
     return db_notifications
 
 
