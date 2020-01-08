@@ -93,8 +93,7 @@
         <v-icon large color="primary">mdi-information-outline</v-icon>
       </template>
       <template v-slot:text>
-        <div class="mb-8">{{ confirmActionText }}</div>
-        <v-checkbox sm hide-details color="primary" class="notify-checkbox" v-model="notifyUser" :label="$t('notifyChangeUserRoleMsg')"></v-checkbox>
+        {{ confirmActionText }}
       </template>
       <template v-slot:actions>
         <div>
@@ -203,7 +202,7 @@ export default class UserManagement extends Vue {
   private readonly leaveTeam!: (memberId: number) => void
   private readonly syncOrganizations!: () => Promise<Organization[]>
 
-  private notifyUser = false
+  private notifyUser = true
 
   $refs: {
     successDialog: ModalDialog
