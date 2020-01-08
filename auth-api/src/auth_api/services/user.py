@@ -31,6 +31,8 @@ from auth_api.schemas import UserSchema
 from auth_api.utils.roles import CLIENT_ADMIN_ROLES, OWNER, OrgStatus, Status, UserStatus
 from auth_api.utils.util import camelback2snake
 
+from .contact import Contact as ContactService
+
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
 class User:  # pylint: disable=too-many-instance-attributes
@@ -80,8 +82,21 @@ class User:  # pylint: disable=too-many-instance-attributes
         return user
 
     @staticmethod
+    def get_contacts(token):
+        """Get the contact associated with this user."""
+        current_app.logger.debug('get_contact')
+        user = UserModel.find_by_jwt_token(token)
+        if user is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        collection = []
+        for contact_link in user.contacts:
+            collection.append(ContactService(contact_link.contact).as_dict())
+        return {'contacts': collection}
+
+    @staticmethod
     def add_contact(token, contact_info: dict):
-        """Add or update contact information for an existing user."""
+        """Add contact information for an existing user."""
         current_app.logger.debug('add_contact')
         user = UserModel.find_by_jwt_token(token)
         if user is None:
@@ -93,14 +108,16 @@ class User:  # pylint: disable=too-many-instance-attributes
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
         contact = ContactModel(**camelback2snake(contact_info))
+        contact = contact.flush()
         contact.commit()
 
         contact_link = ContactLinkModel()
         contact_link.user = user
         contact_link.contact = contact
+        contact_link = contact_link.flush()
         contact_link.commit()
 
-        return User(user)
+        return ContactService(contact)
 
     @staticmethod
     def update_contact(token, contact_info: dict):
@@ -122,8 +139,8 @@ class User:  # pylint: disable=too-many-instance-attributes
         contact = contact.flush()
         contact.commit()
 
-        # return the user with the updated contact
-        return User(user)
+        # return the updated contact
+        return ContactService(contact)
 
     @staticmethod
     def update_terms_of_use(token, is_terms_accepted, terms_of_use_version):
@@ -142,9 +159,11 @@ class User:  # pylint: disable=too-many-instance-attributes
         if not user or not user.contacts:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        User.__delete_contact(user)
+        deleted_contact = User.__delete_contact(user)
 
-        return User(user)
+        if deleted_contact:
+            return ContactService(deleted_contact)
+        return None
 
     @staticmethod
     def __delete_contact(user):
@@ -152,12 +171,15 @@ class User:  # pylint: disable=too-many-instance-attributes
         contact_link = ContactLinkModel.find_by_user_id(user.id)
         if contact_link:
             del contact_link.user
+            contact_link = contact_link.flush()
             contact_link.commit()
             # clean up any orphaned contacts and links
             if not contact_link.has_links():
                 contact = contact_link.contact
                 contact_link.delete()
                 contact.delete()
+                return contact
+        return None
 
     @staticmethod
     def find_users(first_name='', last_name='', email=''):

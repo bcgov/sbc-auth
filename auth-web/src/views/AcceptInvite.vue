@@ -18,9 +18,6 @@ import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
-  computed: {
-    ...mapState('org', ['organizations'])
-  },
   methods: {
     ...mapActions('org', ['acceptInvitation', 'syncOrganizations']),
     ...mapActions('user', ['getUserProfile'])
@@ -33,7 +30,6 @@ export default class AcceptInvite extends Mixins(NextPageMixin) {
   private readonly acceptInvitation!: (token: string) => Invitation
   private readonly syncOrganizations!: () => Organization[]
   private readonly getUserProfile!: (identifier: string) => User
-  private readonly organizations!: Organization[]
 
   @Prop() token: string
   private inviteError: boolean = false

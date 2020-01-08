@@ -151,10 +151,26 @@ class User(Resource):
         return response, status
 
 
-@cors_preflight('DELETE, POST, PUT, OPTIONS')
-@API.route('/contacts', methods=['DELETE', 'POST', 'PUT', 'OPTIONS'])
+@cors_preflight('GET, DELETE, POST, PUT, OPTIONS')
+@API.route('/contacts', methods=['GET', 'DELETE', 'POST', 'PUT', 'OPTIONS'])
 class UserContacts(Resource):
     """Resource for managing user contacts."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def get():
+        """Retrieve the set of contacts asociated with the current user identifier by the JWT in the header."""
+        token = g.jwt_oidc_token_info
+        if not token:
+            return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
+
+        try:
+            response, status = UserService.get_contacts(token), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
 
     @staticmethod
     @TRACER.trace()

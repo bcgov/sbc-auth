@@ -3,3 +3,7 @@ export interface Contact {
     phone: string;
     phoneExtension: string;
 }
+
+export interface Contacts {
+    contacts: Contact[]
+}

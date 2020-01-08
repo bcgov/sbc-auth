@@ -169,9 +169,6 @@ import { mask } from 'vue-the-mask'
   directives: {
     mask
   },
-  computed: {
-    ...mapState('org', ['organizations'])
-  },
   methods: {
     ...mapActions('user',
       [
@@ -188,7 +185,6 @@ import { mask } from 'vue-the-mask'
 export default class UserProfileForm extends Mixins(NextPageMixin) {
     private userStore = getModule(UserModule, this.$store)
     private orgStore = getModule(OrgModule, this.$store)
-    private readonly organizations!: Organization[]
     private readonly createUserContact!: (contact: Contact) => Contact
     private readonly updateUserContact!: (contact: Contact) => Contact
     private readonly saveUserTerms!: () => Promise<User>
@@ -251,10 +247,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
 
       this.firstName = this.userProfile.firstname
       this.lastName = this.userProfile.lastname
-      if (this.userProfile.contacts && this.userProfile.contacts[0]) {
-        this.emailAddress = this.confirmedEmailAddress = this.userProfile.contacts[0].email
-        this.phoneNumber = this.userProfile.contacts[0].phone
-        this.extension = this.userProfile.contacts[0].phoneExtension
+      if (this.userContact) {
+        this.emailAddress = this.confirmedEmailAddress = this.userContact.email
+        this.phoneNumber = this.userContact.phone
+        this.extension = this.userContact.phoneExtension
         this.editing = true
       }
     }

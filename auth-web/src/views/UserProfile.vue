@@ -38,8 +38,10 @@
 </template>
 
 <script lang="ts">
+import { Component, Mixins } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import { Component } from 'vue-property-decorator'
+import { Contact } from '@/models/contact'
+import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
@@ -53,18 +55,17 @@ import { getModule } from 'vuex-module-decorators'
     SupportInfoCard
   },
   computed: {
-    ...mapState('user', ['userProfile'])
+    ...mapState('user', ['userContact'])
   }
 })
-export default class UserProfile extends Vue {
+export default class UserProfile extends Mixins(NextPageMixin) {
   private userStore = getModule(UserModule, this.$store)
-  private readonly userProfile!: User
   private readonly getUserProfile!: (identifier: string) => User
   private editing = false
   private isLoading = true
 
   async mounted () {
-    if (this.userProfile.contacts && this.userProfile.contacts[0]) {
+    if (this.userContact) {
       this.editing = true
     }
 
