@@ -8,11 +8,6 @@ import { UserInfo } from '@/models/userInfo'
 import UserService from '@/services/user.services'
 import _ from 'lodash'
 
-interface SetMemberPayload {
-  orgId: number
-  member: Member
-}
-
 @Module({
   name: 'org',
   namespaced: true
@@ -23,6 +18,7 @@ export default class OrgModule extends VuexModule {
   sentInvitations: Invitation[] = []
   failedInvitations: Invitation[] = []
   organizations: Organization[] = []
+  currentOrganization: Organization = undefined
   activeOrgMembers: Member[] = []
   pendingOrgMembers: Member[] = []
   pendingOrgInvitations: Invitation[] = []
@@ -30,21 +26,11 @@ export default class OrgModule extends VuexModule {
   invalidInvitationToken = false
   tokenError = false
 
-  // This simply returns the first org in the list.
-  // TODO: Once account switching is in place, this will have to return the
-  // correct org in the list
-  get myOrg (): Organization {
-    if (this.organizations && this.organizations.length > 0) {
-      return this.organizations[0]
-    }
-    return undefined
-  }
-
   get myOrgMembership (): Member {
     const currentUser: UserInfo = this.context.rootState.user.currentUser
-    if (this.myOrg && currentUser) {
-      return this.myOrg.members.find(member => member.user.username === currentUser.userName &&
-        (member.membershipStatus === MembershipStatus.Active || member.membershipStatus === MembershipStatus.Pending))
+    const orgMembers: Member[] = [...this.context.rootState.org.activeOrgMembers, ...this.context.rootState.org.pendingOrgMembers]
+    if (orgMembers && currentUser) {
+      return orgMembers.find(member => member.user.username === currentUser.userName)
     }
     return undefined
   }
@@ -97,8 +83,21 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
-  public setOrgCreateMessage (message:string) {
+  public setOrgCreateMessage (message: string) {
     this.orgCreateMessage = message
+  }
+
+  @Mutation
+  public setCurrentOrganization (organization: Organization) {
+    this.currentOrganization = organization
+  }
+
+  @Action({ rawError: true })
+  public async syncCurrentOrganization (organization: Organization): Promise<void> {
+    this.context.commit('setCurrentOrganization', organization)
+    await this.context.dispatch('syncActiveOrgMembers')
+    await this.context.dispatch('syncPendingOrgMembers')
+    await this.context.dispatch('syncPendingOrgInvitations')
   }
 
   @Action({ rawError: true })
@@ -194,7 +193,7 @@ export default class OrgModule extends VuexModule {
   @Action({ rawError: true })
   public async leaveTeam (memberId: number) {
     // Send request to remove member on server and get result
-    const response = await OrgService.leaveOrg(this.context.getters['myOrg'].id, memberId)
+    const response = await OrgService.leaveOrg(this.context.state['currentOrganization'].id, memberId)
 
     // If no response, or error code, throw exception to be caught
     if (!response || response.status !== 200 || !response.data) {
@@ -207,7 +206,7 @@ export default class OrgModule extends VuexModule {
   @Action({ rawError: true })
   public async updateMember (updatePayload: UpdateMemberPayload) {
     // Send request to update member on server and get result
-    const response = await OrgService.updateMember(this.context.getters['myOrg'].id, updatePayload)
+    const response = await OrgService.updateMember(this.context.state['currentOrganization'].id, updatePayload)
 
     // If no response or error, throw exception to be caught
     if (!response || response.status !== 200 || !response.data) {
@@ -218,27 +217,32 @@ export default class OrgModule extends VuexModule {
     }
   }
 
-  @Action({ commit: 'setOrganizations' })
+  @Action({ rawError: true })
   public async syncOrganizations () {
     const response = await UserService.getOrganizations()
-    return response.data && response.data.orgs ? response.data.orgs : []
+    if (response && response.data && response.status === 200) {
+      this.context.commit('setOrganizations', response.data.orgs)
+      if (response.data.orgs && response.data.orgs.length > 0) {
+        await this.context.dispatch('syncCurrentOrganization', response.data.orgs[0])
+      }
+    }
   }
 
   @Action({ commit: 'setActiveOrgMembers', rawError: true })
   public async syncActiveOrgMembers () {
-    const response = await OrgService.getOrgMembers(this.context.getters['myOrg'].id, 'ACTIVE')
+    const response = await OrgService.getOrgMembers(this.context.state['currentOrganization'].id, 'ACTIVE')
     return response.data && response.data.members ? response.data.members : []
   }
 
   @Action({ commit: 'setPendingOrgMembers', rawError: true })
   public async syncPendingOrgMembers () {
-    const response = await OrgService.getOrgMembers(this.context.getters['myOrg'].id, 'PENDING_APPROVAL')
+    const response = await OrgService.getOrgMembers(this.context.state['currentOrganization'].id, 'PENDING_APPROVAL')
     return response.data && response.data.members ? response.data.members : []
   }
 
   @Action({ commit: 'setPendingOrgInvitations', rawError: true })
   public async syncPendingOrgInvitations () {
-    const response = await OrgService.getOrgInvitations(this.context.getters['myOrg'].id, 'PENDING')
+    const response = await OrgService.getOrgInvitations(this.context.state['currentOrganization'].id, 'PENDING')
     return response.data && response.data.invitations ? response.data.invitations : []
   }
 }

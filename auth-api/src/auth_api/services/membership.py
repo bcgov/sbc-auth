@@ -15,7 +15,7 @@
 
 This module manages the Membership Information between an org and a user.
 """
-from typing import Dict, Tuple
+from typing import Dict
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
@@ -35,6 +35,7 @@ from config import get_named_config
 from .authorization import check_auth
 from .notification import send_email
 from .org import Org as OrgService
+from .user import User as UserService
 
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -69,26 +70,45 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         return MembershipTypeModel.get_membership_type_by_code(type_code=type_code)
 
     @staticmethod
-    def get_members_for_org(org_id, status=None, membership_roles=None, token_info: Dict = None,
-                            allowed_roles: Tuple = None):
+    def get_members_for_org(org_id, status=Status.ACTIVE,  # pylint:disable=too-many-return-statements
+                            membership_roles=ALL_ALLOWED_ROLES,
+                            token_info: Dict = None):
         """Get members of org.Fetches using status and roles."""
-        if org_id is None:
-            return None
-
-        if membership_roles is None:
-            membership_roles = ALL_ALLOWED_ROLES
-        if not status:
-            status = Status.ACTIVE.value
-        else:
-            status = Status[status].value
-
         org_model = OrgModel.find_by_org_id(org_id)
         if not org_model:
             return None
 
-        # Check authorization for the user
-        check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
-        return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status)
+        status = Status.ACTIVE.value if status is None else Status[status].value
+        membership_roles = ALL_ALLOWED_ROLES if membership_roles is None else membership_roles
+
+        # If staff return full list
+        if 'staff' in token_info.get('realm_access').get('roles'):
+            return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status)
+
+        current_user: UserService = UserService.find_by_jwt_token(token_info)
+        current_user_membership: MembershipModel = \
+            MembershipModel.find_membership_by_user_and_org(user_id=current_user.identifier, org_id=org_id)
+
+        # If no active or pending membership return empty array
+        if current_user_membership is None or \
+                current_user_membership.status == Status.INACTIVE.value or \
+                current_user_membership.status == Status.REJECTED.value:
+            return []
+
+        # If pending approval, return empty for active, array of self only for pending
+        if current_user_membership.status == Status.PENDING_APPROVAL.value:
+            return [current_user_membership] if status == Status.PENDING_APPROVAL.value else []
+
+        # If active status for current user, then check organizational role
+        if current_user_membership.status == Status.ACTIVE.value:
+            if current_user_membership.membership_type_code == OWNER or \
+               current_user_membership.membership_type_code == ADMIN:
+                return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status)
+
+            return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status) \
+                if status == Status.ACTIVE.value else []
+
+        return []
 
     @staticmethod
     def get_membership_status_by_code(name):
@@ -129,13 +149,15 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         app_url = '{}/{}'.format(origin_url, context_path)
 
-        sent_response = send_email(subject, sender, self._model.user.contacts[0].contact.email,
-                                   template.render(url=app_url, params=params,
-                                                   logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
-        current_app.logger.debug('<send_approval_notification_to_member')
-        if not sent_response:
-            # invitation.invitation_status_code = 'FAILED'
-            # invitation.save()
+        try:
+            sent_response = send_email(subject, sender, self._model.user.contacts[0].contact.email,
+                                       template.render(url=app_url, params=params,
+                                                       logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
+            current_app.logger.debug('<send_approval_notification_to_member')
+            if not sent_response:
+                current_app.logger.error('<send_notification_to_member failed')
+                raise BusinessException(Error.FAILED_NOTIFICATION, None)
+        except:  # noqa=B901
             current_app.logger.error('<send_notification_to_member failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None)
 

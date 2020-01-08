@@ -30,20 +30,22 @@ import { VueConstructor } from 'vue'
   },
   computed: {
     ...mapState('user', ['userProfile']),
-    ...mapGetters('org', ['myOrg', 'myOrgMembership'])
+    ...mapState('org', ['currentOrganization']),
+    ...mapGetters('org', ['myOrgMembership'])
   },
   methods: {
     ...mapActions('user', ['getUserProfile']),
-    ...mapActions('org', ['syncOrganizations'])
+    ...mapActions('org', ['syncOrganizations', 'syncCurrentOrganization'])
   }
 })
 export default class Dashboard extends Vue {
   private selectedComponent = null
   private readonly userProfile!: User
-  private readonly myOrg!: Organization
+  private readonly currentOrganization!: Organization
   private readonly myOrgMembership!: Member
   private readonly getUserProfile!: (identifier: string) => User
   private readonly syncOrganizations!: () => Organization[]
+  private readonly syncCurrentOrganization!: (organization: Organization) => Promise<void>
 
   private menu = [
     {
@@ -54,7 +56,7 @@ export default class Dashboard extends Vue {
     }
   ]
 
-  mounted () {
+  async mounted () {
     this.setSelectedComponent(EntityManagement)
     const featureHide = ConfigHelper.getValue('VUE_APP_FEATURE_HIDE')
     if (!featureHide || !featureHide.USER_MGMT) {
@@ -71,8 +73,9 @@ export default class Dashboard extends Vue {
       this.getUserProfile('@me')
     }
 
-    // Always pull organization list
-    this.syncOrganizations()
+    if (!this.currentOrganization) {
+      await this.syncOrganizations()
+    }
 
     // Check the current user's team status
     // TODO: For now this means checking their single team, later it will mean checking the active team.
@@ -86,7 +89,7 @@ export default class Dashboard extends Vue {
   private redirectBasedOnTeamStatus (): void {
     // If user is pending approval by an admin, redirect to pending approval page
     if (this.myOrgMembership && this.myOrgMembership.membershipStatus === MembershipStatus.Pending) {
-      this.$router.push(`/pendingapproval/${this.myOrg.name}`)
+      this.$router.push(`/pendingapproval/${this.currentOrganization.name}`)
     }
 
     // If user is not an active member of a team at all, redirect to create team page

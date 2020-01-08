@@ -32,14 +32,10 @@ import moment from 'moment'
 @Component({
   computed: {
     ...mapState('org', ['pendingOrgMembers'])
-  },
-  methods: {
-    ...mapActions('org', ['syncPendingOrgMembers'])
   }
 })
 export default class PendingMemberDataTable extends Vue {
   private readonly pendingOrgMembers!: Member[]
-  private readonly syncPendingOrgMembers!: () => Member[]
   private readonly headerPendingMembers = [
     {
       text: 'Team Member',
@@ -55,10 +51,6 @@ export default class PendingMemberDataTable extends Vue {
       width: '195'
     }
   ]
-
-  private async mounted () {
-    await this.syncPendingOrgMembers()
-  }
 
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`

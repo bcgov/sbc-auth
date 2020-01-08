@@ -37,13 +37,13 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     name = Column(String(250), index=True)
     preferred_payment_code = Column(ForeignKey('payment_type.code'), nullable=False)
 
-    contacts = relationship('ContactLink', back_populates='org')
+    contacts = relationship('ContactLink', lazy='select')
     org_type = relationship('OrgType')
     org_status = relationship('OrgStatus')
     preferred_payment = relationship('PaymentType')
-    members = relationship('Membership', back_populates='org', cascade='all,delete,delete-orphan')
-    affiliated_entities = relationship('Affiliation', back_populates='org')
-    invitations = relationship('InvitationMembership', back_populates='org', cascade='all,delete,delete-orphan')
+    members = relationship('Membership', cascade='all,delete,delete-orphan', lazy='select')
+    affiliated_entities = relationship('Affiliation', lazy='select')
+    invitations = relationship('InvitationMembership', cascade='all,delete,delete-orphan', lazy='select')
 
     @classmethod
     def create_from_dict(cls, org_info: dict):

@@ -67,17 +67,15 @@ def test_user_save_by_token_fail(session):  # pylint: disable=unused-argument
 
 def test_add_contact_to_user(session):  # pylint: disable=unused-argument
     """Assert that a contact can be added to a user."""
-    factory_user_model(user_info=TestUserInfo.user_test)
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    factory_user_model(user_info=user_with_token)
 
-    user = UserService.add_contact(TestJwtClaims.user_test, TestContactInfo.contact1)
+    contact = UserService.add_contact(TestJwtClaims.user_test, TestContactInfo.contact1).as_dict()
 
-    assert user is not None
-    dictionary = user.as_dict()
-    assert dictionary['contacts']
-    assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['email'] == TestContactInfo.contact1['email']
-    assert dictionary['contacts'][0]['phone'] == TestContactInfo.contact1['phone']
-    assert dictionary['contacts'][0]['phoneExtension'] == TestContactInfo.contact1['phoneExtension']
+    assert contact['email'] == TestContactInfo.contact1['email']
+    assert contact['phone'] == TestContactInfo.contact1['phone']
+    assert contact['phoneExtension'] == TestContactInfo.contact1['phoneExtension']
 
 
 def test_add_contact_user_no_user(session):  # pylint: disable=unused-argument
@@ -89,7 +87,9 @@ def test_add_contact_user_no_user(session):  # pylint: disable=unused-argument
 
 def test_add_contact_to_user_already_exists(session):  # pylint: disable=unused-argument
     """Assert that a contact cannot be added to a user that already has a contact."""
-    factory_user_model(user_info=TestUserInfo.user_test)
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    factory_user_model(user_info=user_with_token)
 
     UserService.add_contact(TestJwtClaims.user_test, TestContactInfo.contact1)
 
@@ -100,20 +100,18 @@ def test_add_contact_to_user_already_exists(session):  # pylint: disable=unused-
 
 def test_update_contact_for_user(session):  # pylint: disable=unused-argument
     """Assert that a contact can be updated for a user."""
-    factory_user_model(user_info=TestUserInfo.user_test)
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    factory_user_model(user_info=user_with_token)
 
-    user = UserService.add_contact(TestJwtClaims.user_test, TestContactInfo.contact1)
+    contact = UserService.add_contact(TestJwtClaims.user_test, TestContactInfo.contact1).as_dict()
 
-    assert user is not None
-    dictionary = user.as_dict()
-    assert dictionary['contacts']
-    assert len(dictionary['contacts']) == 1
+    assert contact is not None
 
-    updated_user = UserService.update_contact(TestJwtClaims.user_test, TestContactInfo.contact2)
+    updated_contact = UserService.update_contact(TestJwtClaims.user_test, TestContactInfo.contact2).as_dict()
 
-    assert updated_user is not None
-    dictionary = updated_user.as_dict()
-    assert dictionary['contacts'][0]['email'] == TestContactInfo.contact2['email']
+    assert updated_contact is not None
+    assert updated_contact['email'] == TestContactInfo.contact2['email']
 
 
 def test_update_terms_of_use_for_user(session):  # pylint: disable=unused-argument
@@ -143,20 +141,20 @@ def test_update_contact_for_user_no_contact(session):  # pylint: disable=unused-
 
 def test_delete_contact_for_user(session):  # pylint: disable=unused-argument
     """Assert that a contact can be deleted for a user."""
-    factory_user_model(user_info=TestUserInfo.user_test)
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    factory_user_model(user_info=user_with_token)
 
-    user = UserService.add_contact(TestJwtClaims.user_test, TestContactInfo.contact1)
+    contact = UserService.add_contact(TestJwtClaims.user_test, TestContactInfo.contact1).as_dict()
 
-    assert user is not None
-    dictionary = user.as_dict()
-    assert dictionary['contacts']
-    assert len(dictionary['contacts']) == 1
+    assert contact is not None
 
-    updated_user = UserService.delete_contact(TestJwtClaims.user_test)
+    deleted_contact = UserService.delete_contact(TestJwtClaims.user_test).as_dict()
 
-    assert updated_user is not None
-    dictionary = updated_user.as_dict()
-    assert dictionary.get('contacts') == []
+    assert deleted_contact is not None
+
+    contacts = UserService.get_contacts(TestJwtClaims.user_test)
+    assert contacts.get('contacts') == []
 
 
 def test_delete_contact_for_user_no_user(session):  # pylint: disable=unused-argument
@@ -188,7 +186,9 @@ def test_find_users(session):  # pylint: disable=unused-argument
 
 def test_user_find_by_token(session):  # pylint: disable=unused-argument
     """Assert that a user can be found by token."""
-    factory_user_model(user_info=TestUserInfo.user_test)
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    factory_user_model(user_info=user_with_token)
 
     found_user = UserService.find_by_jwt_token(None)
     assert found_user is None
@@ -236,7 +236,9 @@ def test_user_find_by_username_missing_username(session):  # pylint: disable=unu
 
 def test_delete_contact_user_link(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that a contact can not be deleted if contact link exists."""
-    user_model = factory_user_model(user_info=TestUserInfo.user_test)
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user_model = factory_user_model(user_info=user_with_token)
     user = UserService(user_model)
 
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.identifier)
@@ -249,13 +251,12 @@ def test_delete_contact_user_link(session, auth_mock):  # pylint:disable=unused-
     contact_link.contact = contact
     contact_link.user = user_model
     contact_link.org = org._model  # pylint:disable=protected-access
+    contact_link = contact_link.flush()
     contact_link.commit()
 
-    updated_user = user.delete_contact(TestJwtClaims.user_test)
+    deleted_contact = UserService.delete_contact(TestJwtClaims.edit_role)
 
-    dictionary = None
-    dictionary = updated_user.as_dict()
-    assert len(dictionary['contacts']) == 0
+    assert deleted_contact is None
 
     delete_contact_link = ContactLinkModel.find_by_user_id(user.identifier)
     assert not delete_contact_link
@@ -266,7 +267,9 @@ def test_delete_contact_user_link(session, auth_mock):  # pylint:disable=unused-
 
 def test_delete_user(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
-    user_model = factory_user_model(user_info=TestUserInfo.user_test)
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    user_model = factory_user_model(user_info=user_with_token)
     contact = factory_contact_model()
     contact_link = ContactLinkModel()
     contact_link.contact = contact
@@ -291,11 +294,11 @@ def test_delete_user_where_org_has_affiliations(session, auth_mock):  # pylint:d
     contact_link = ContactLinkModel()
     contact_link.contact = contact
     contact_link.user = user_model
+    contact_link = contact_link.flush()
     contact_link.commit()
 
-    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
-    org_dictionary = org.as_dict()
-    org_id = org_dictionary['id']
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id).as_dict()
+    org_id = org['id']
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
 
@@ -306,7 +309,8 @@ def test_delete_user_where_org_has_affiliations(session, auth_mock):  # pylint:d
         assert exception.code == Error.DELETE_FAILED_ONLY_OWNER
 
     updated_user = UserModel.find_by_jwt_token(TestJwtClaims.user_test)
-    assert len(updated_user.contacts) == 1
+    contacts = UserService.get_contacts(TestJwtClaims.user_test)
+    assert len(contacts) == 1
 
     user_orgs = MembershipModel.find_orgs_for_user(updated_user.id)
     for org in user_orgs:

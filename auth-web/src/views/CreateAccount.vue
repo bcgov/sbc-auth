@@ -39,7 +39,5 @@ import { getModule } from 'vuex-module-decorators'
     SupportInfoCard
   }
 })
-export default class CreateAccount extends Vue {
-
-}
+export default class CreateAccount extends Vue { }
 </script>

@@ -31,9 +31,7 @@ import { getModule } from 'vuex-module-decorators'
     TeamForm
   }
 })
-export default class CreateTeamView extends Vue {
-  async mounted () {}
-}
+export default class CreateTeamView extends Vue { }
 </script>
 
 <style lang="scss" scoped>

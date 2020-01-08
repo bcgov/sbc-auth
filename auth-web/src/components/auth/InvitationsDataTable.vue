@@ -26,21 +26,17 @@
 
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
 import { Invitation } from '@/models/Invitation'
+import { mapState } from 'vuex'
 import moment from 'moment'
 
 @Component({
   computed: {
     ...mapState('org', ['pendingOrgInvitations'])
-  },
-  methods: {
-    ...mapActions('org', ['syncPendingOrgInvitations'])
   }
 })
 export default class InvitationsDataTable extends Vue {
   private readonly pendingOrgInvitations!: Invitation[]
-  private readonly syncPendingOrgInvitations!: () => Invitation[]
   private readonly headerInvitations = [
     {
       text: 'Email',
@@ -68,10 +64,6 @@ export default class InvitationsDataTable extends Vue {
       width: '193'
     }
   ]
-
-  private async mounted () {
-    await this.syncPendingOrgInvitations()
-  }
 
   private formatDate (date: Date) {
     return moment(date).format('DD MMM, YYYY')
