@@ -19,6 +19,7 @@ Authorization view wraps details on the entities and membership through orgs and
 import uuid
 
 from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Integer, and_, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import expression
 
@@ -65,7 +66,9 @@ class Authorization(db.Model):
     @classmethod
     def find_user_authorization_by_org_id_and_corp_type(cls, org_id: int, corp_type: str):
         """Return authorization view object."""
-        return cls.query.filter_by(corp_type_code=corp_type, org_id=org_id).order_by(
+        return db.session.query(Authorization).filter(
+            and_(Authorization.org_id == org_id,
+                 or_(Authorization.corp_type_code == corp_type, Authorization.corp_type_code.is_(None)))).order_by(
             expression.case(((Authorization.org_membership == OWNER, 1),
                              (Authorization.org_membership == ADMIN, 2),
                              (Authorization.org_membership == MEMBER, 3)))).first()
