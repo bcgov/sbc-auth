@@ -65,6 +65,19 @@ def test_find_notification_by_status_time(session, loop):
     assert result[0].recipients == NOTIFICATION_DATA[2]['recipients']
 
 
+def test_find_no_notification_by_status_time_(session, loop):
+    """Assert the test can not retrieve notification by status and time frame."""
+    notification = NotificationModel(**NOTIFICATION_DATA[3])
+    session.add(notification)
+    session.commit()
+    notification = session.merge(notification)
+
+    result = loop.run_until_complete(
+        NotifyService.find_notifications_by_status(session, notification.status_code)
+    )
+    assert result == []
+
+
 def test_create_notification(session, loop):
     """Assert the test can create notification."""
     result = loop.run_until_complete(
