@@ -318,10 +318,14 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
 
   .form__btns {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
 
     .v-btn + .v-btn {
       margin-left: 0.5rem;
+    }
+
+    .deactivate-btn {
+      margin-right: auto;
     }
   }
 </style>
