@@ -6,7 +6,7 @@
       <ul class="pl-0">
         <li v-for="(item, i) in menu"
           :key="i">
-          <v-btn large text color="#495057" @click="item.activate()" :data-test="item.testTag">{{ item.title }}</v-btn>
+          <v-btn large text color="#495057" :to="item.path" :data-test="item.testTag">{{ item.title }}</v-btn>
         </li>
       </ul>
     </nav>

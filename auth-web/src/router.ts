@@ -7,6 +7,7 @@ import CreateAccount from '@/views/CreateAccount.vue'
 import CreateTeamView from '@/views/CreateTeamView.vue'
 import Dashboard from '@/views/management/Dashboard.vue'
 import DuplicateTeamWarning from '@/views/DuplicateTeamWarning.vue'
+import EntityManagement from '@/views/management/EntityManagement.vue'
 import KeyCloakService from '@/services/keycloak.services'
 import LeaveTeamLanding from '@/views/LeaveTeamLanding.vue'
 import PageNotFound from '@/views/PageNotFound.vue'
@@ -39,7 +40,20 @@ export function getRoutes (appFlavor: String) {
   varRoutes = [
     { path: '/', component: AuthHome },
     { path: '/home', component: AuthHome },
-    { path: '/main', component: Dashboard, meta: { requiresAuth: true } },
+    { path: '/main',
+      component: Dashboard,
+      meta: { requiresAuth: true },
+      redirect: '/main/business',
+      children: [
+        {
+          path: 'team',
+          component: UserManagement
+        },
+        {
+          path: 'business',
+          component: EntityManagement
+        }]
+    },
     { path: '/team', component: UserManagement, meta: { requiresAuth: true } },
     { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
     { path: '/createteam', component: CreateTeamView, meta: { requiresAuth: true } },
