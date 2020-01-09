@@ -1,37 +1,37 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 NOTIFICATION_DATA = [
     {
         'id': 1,
-        'request_date': datetime.now(),
+        'request_date': datetime.utcnow(),
         'recipients': 'aaa@aaa.com',
         'type_code': 'EMAIL',
         'status_code': 'PENDING'
     },
     {
         'id': 2,
-        'request_date': datetime.now(),
+        'request_date': datetime.utcnow(),
         'recipients': 'bbb@bbb.com',
         'type_code': 'EMAIL',
         'status_code': 'FAILURE'
     },
     {
         'id': 3,
-        'request_date': datetime(1988, 8, 1, 6, 30),
+        'request_date': datetime.utcnow() - timedelta(hours=1),
         'recipients': 'bbb@bbb.com',
         'type_code': 'EMAIL',
         'status_code': 'FAILURE'
     },
     {
         'id': 4,
-        'request_date': datetime.now(),
+        'request_date': datetime.utcnow() - timedelta(hours=5),
         'recipients': 'ccc@ccc.com',
         'type_code': 'EMAIL',
-        'status_code': 'DELIVERED'
+        'status_code': 'FAILURE'
     },
     {
         'id': 5,
-        'request_date': datetime.now(),
+        'request_date': datetime.utcnow(),
         'recipients': 'ddd@ddd.com',
         'type_code': 'EMAIL',
         'status_code': 'DELIVERED'
