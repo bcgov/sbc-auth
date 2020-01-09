@@ -96,10 +96,8 @@
         {{ confirmActionText }}
       </template>
       <template v-slot:actions>
-        <div>
-          <v-btn large color="primary" @click="confirmHandler()">{{ primaryActionText }}</v-btn>
-          <v-btn large color="default" @click="cancelEmailModal()">{{ secondaryActionText }}</v-btn>
-        </div>
+        <v-btn large color="primary" @click="confirmHandler()">{{ primaryActionText }}</v-btn>
+        <v-btn large color="default" @click="cancelEmailModal()">{{ secondaryActionText }}</v-btn>
       </template>
     </ModalDialog>
 
