@@ -58,7 +58,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('user', ['userContact'])
   }
 })
-export default class UserProfile extends Mixins(NextPageMixin) {
+export default class UserProfileView extends Mixins(NextPageMixin) {
   private userStore = getModule(UserModule, this.$store)
   private readonly getUserProfile!: (identifier: string) => User
   private editing = false

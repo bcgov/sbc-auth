@@ -24,7 +24,7 @@ import { getModule } from 'vuex-module-decorators'
   },
   components: { InterimLanding }
 })
-export default class AcceptInvite extends Mixins(NextPageMixin) {
+export default class AcceptInviteView extends Mixins(NextPageMixin) {
   private orgStore = getModule(OrgModule, this.$store)
   private userStore = getModule(UserModule, this.$store)
   private readonly acceptInvitation!: (token: string) => Invitation

@@ -32,5 +32,5 @@ function renderVue () {
     render: (h) => h(App)
   }).$mount('#app')
 
-  router.addRoutes(getRoutes(ConfigHelper.getValue('VUE_APP_FLAVOR')))
+  router.addRoutes(getRoutes())
 }

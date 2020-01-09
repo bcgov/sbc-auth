@@ -37,7 +37,7 @@ import { getModule } from 'vuex-module-decorators'
   },
   components: { InterimLanding }
 })
-export default class AcceptInviteLanding extends Vue {
+export default class AcceptInviteLandingView extends Vue {
   private orgStore = getModule(OrgModule, this.$store);
   private readonly validateInvitationToken!: (token: string) => EmptyResponse
 

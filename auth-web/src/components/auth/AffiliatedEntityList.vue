@@ -52,7 +52,7 @@ import { Business } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
 import { SessionStorageKeys } from '@/util/constants'
-import UserManagement from '@/views/management/UserManagement.vue'
+import UserManagement from '@/components/auth/UserManagement.vue'
 import _ from 'lodash'
 import { getModule } from 'vuex-module-decorators'
 
