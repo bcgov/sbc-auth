@@ -15,10 +15,10 @@ import { Component, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
-import EntityManagement from '@/views/management/EntityManagement.vue'
+import EntityManagement from '@/components/auth/EntityManagement.vue'
 import ManagementMenu from '@/components/auth/ManagementMenu.vue'
 import { User } from '@/models/user'
-import UserManagement from '@/views/management/UserManagement.vue'
+import UserManagement from '@/components/auth/UserManagement.vue'
 import { VueConstructor } from 'vue'
 
 @Component({
@@ -38,7 +38,7 @@ import { VueConstructor } from 'vue'
     ...mapActions('org', ['syncOrganizations', 'syncCurrentOrganization'])
   }
 })
-export default class Dashboard extends Vue {
+export default class DashboardView extends Vue {
   private selectedComponent = null
   private readonly userProfile!: User
   private readonly currentOrganization!: Organization

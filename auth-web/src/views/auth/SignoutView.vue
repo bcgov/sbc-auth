@@ -9,7 +9,7 @@ import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 
 @Component
-export default class Signout extends Vue {
+export default class SignoutView extends Vue {
   private userStore = getModule(UserModule, this.$store)
 
   @Prop()
@@ -22,6 +22,6 @@ export default class Signout extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '../../assets/scss/theme.scss';
+@import '$assets/scss/theme.scss';
 
 </style>

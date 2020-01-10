@@ -189,7 +189,7 @@ import { VueConstructor } from 'vue'
   }
 })
 
-export default class Home extends Vue {
+export default class HomeView extends Vue {
   private readonly userProfile!: User
   private readonly getUserProfile!: (identifier: string) => User
   private noPasscodeDialog = false
@@ -197,7 +197,7 @@ export default class Home extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import "../assets/scss/theme.scss";
+  @import "$assets/scss/theme.scss";
 
   article {
     padding: 0;

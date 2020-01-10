@@ -22,5 +22,5 @@ import { mapState } from 'vuex'
 @Component({
   components: { InterimLanding }
 })
-export default class PendingApproval extends Vue { }
+export default class PendingApprovalView extends Vue { }
 </script>
