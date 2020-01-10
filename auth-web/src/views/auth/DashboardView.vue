@@ -2,10 +2,7 @@
   <div class="dashboard-view">
     <ManagementMenu :menu="menu" />
     <article>
-      <component
-        :is="selectedComponent"
-        @change-to="setSelectedComponent($event)"
-      />
+      <router-view></router-view>
     </article>
   </div>
 </template>
@@ -51,23 +48,18 @@ export default class DashboardView extends Vue {
     {
       title: 'Manage Businesses',
       icon: 'business',
-      activate: () => { this.setSelectedComponent(EntityManagement) },
-      testTag: 'manage-business-nav'
+      testTag: 'manage-business-nav',
+      path: 'business'
+    },
+    {
+      title: 'Manage Team',
+      icon: 'group',
+      testTag: 'manage-teams-nav',
+      path: 'team'
     }
   ]
 
   async mounted () {
-    this.setSelectedComponent(EntityManagement)
-    const featureHide = ConfigHelper.getValue('VUE_APP_FEATURE_HIDE')
-    if (!featureHide || !featureHide.USER_MGMT) {
-      this.menu.push({
-        title: 'Manage Team',
-        icon: 'group',
-        activate: () => { this.setSelectedComponent(UserManagement) },
-        testTag: 'manage-teams-nav'
-      })
-    }
-
     // Check for existing state, and if not tell store to update
     if (!this.userProfile) {
       this.getUserProfile('@me')
