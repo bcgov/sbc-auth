@@ -50,7 +50,7 @@ import { mapActions } from 'vuex'
     ...mapActions('business', ['searchBusiness'])
   }
 })
-export default class SearchBusinessForm extends Vue {
+export default class SearchBusinessView extends Vue {
   private businessStore = getModule(BusinessModule, this.$store)
   private businessNumber = ''
   private searchedBusinessNumber = ''

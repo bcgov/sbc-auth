@@ -25,7 +25,7 @@ import { mapState } from 'vuex'
     ...mapState('user', ['currentUser'])
   }
 })
-export default class Unauthorized extends Vue {
+export default class UnauthorizedView extends Vue {
   readonly currentUser!: UserInfo
   errorMessage : string = ''
   isStaff: boolean = false

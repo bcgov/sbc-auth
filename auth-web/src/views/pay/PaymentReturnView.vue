@@ -22,7 +22,7 @@ import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.
     SbcSystemError
   }
 })
-export default class PaymentReturnForm extends Vue {
+export default class PaymentReturnView extends Vue {
         @Prop() paymentId: string
         @Prop() transactionId: string
         @Prop() receiptNum: string
