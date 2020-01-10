@@ -23,9 +23,9 @@ def upgrade():
     # ### end Alembic commands ###
 
     # Update all existing user records to active
-    op.execute('update "membership_type" set icon=\'mdi-account\', label=\'Can add businesses, and file for a business.\' where code=\'MEMBER\'')
-    op.execute('update "membership_type" set icon=\'mdi-settings\', label=\'Can add/remove team members, add businesses, and file for a business.\' where code=\'ADMIN\'')
-    op.execute('update "membership_type" set icon=\'mdi-shield-key\', label=\'Can add/remove team members and businesses, and file for a business.\' where code=\'OWNER\'')
+    op.execute('update "membership_type" set icon=\'mdi-account\', label=\'can add businesses, and file for a business.\' where code=\'MEMBER\'')
+    op.execute('update "membership_type" set icon=\'mdi-settings\', label=\'can add/remove team members, add businesses, and file for a business.\' where code=\'ADMIN\'')
+    op.execute('update "membership_type" set icon=\'mdi-shield-key\', label=\'can add/remove team members and businesses, and file for a business.\' where code=\'OWNER\'')
 
 
 def downgrade():
