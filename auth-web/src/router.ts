@@ -5,6 +5,7 @@ import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import CreateTeamView from '@/views/auth/CreateTeamView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
+import EntityManagement from '@/components/auth/EntityManagement.vue'
 import HomeView from '@/views/auth/HomeView.vue'
 import KeyCloakService from '@/services/keycloak.services'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
@@ -18,7 +19,9 @@ import SearchBusinessView from '@/views/auth/SearchBusinessView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
+import UserManagement from '@/components/auth/UserManagement.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
+
 import Vue from 'vue'
 
 Vue.use(Router)
@@ -35,7 +38,20 @@ export function getRoutes () {
   const routes = [
     { path: '/', component: HomeView },
     { path: '/home', component: HomeView },
-    { path: '/main', component: DashboardView, meta: { requiresAuth: true } },
+    { path: '/main',
+      component: DashboardView,
+      meta: { requiresAuth: true },
+      redirect: '/main/business',
+      children: [
+        {
+          path: 'team',
+          component: UserManagement
+        },
+        {
+          path: 'business',
+          component: EntityManagement
+        }]
+    },
     { path: '/userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
     { path: '/createteam', component: CreateTeamView, meta: { requiresAuth: true } },
     { path: '/duplicateteam', component: DuplicateTeamWarningView, meta: { requiresAuth: true } },
