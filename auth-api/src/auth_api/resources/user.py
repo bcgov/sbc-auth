@@ -26,7 +26,7 @@ from auth_api.services.keycloak import KeycloakService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.roles import Role, Status
+from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
 
 
