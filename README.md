@@ -1,3 +1,5 @@
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_sbc-auth&metric=alert_status)](https://sonarcloud.io/dashboard?id=bcgov_sbc-auth)
+
 # sbc-auth
 ServiceBC common authentication and authorization services
 
