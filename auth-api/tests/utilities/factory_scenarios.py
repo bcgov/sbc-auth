@@ -156,6 +156,19 @@ class TestJwtClaims(dict, Enum):
         'loginSource': 'PASSCODE'
     }
 
+    postman_role = {
+        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'preferred_username': 'testuser',
+        'realm_access': {
+            'roles': [
+                'postman'
+            ]
+        }
+    }
+
     @staticmethod
     def get_test_user(sub):
         """Return test user with subject from argument."""
@@ -291,5 +304,12 @@ class TestUserInfo(dict, Enum):
         'firstname': 'Test',
         'lastname': 'User',
         'roles': '{edit, uma_authorization, staff}',
+        'keycloak_guid': '1b20db59-19a0-4727-affe-c6f64309fd04'
+    }
+    user_postman = {
+        'username': 'CP1234567',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'roles': '{edit, uma_authorization, postman}',
         'keycloak_guid': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
