@@ -35,7 +35,7 @@ class CleaningTestData:
         for model_class in db.Model._decl_class_registry.values():  # pylint:disable=protected-access
             if hasattr(model_class, 'created_by_id'):
                 print('Root Model: {}'.format(model_class))
-                thing_relations = inspect(model_class).relationships.items()
+                thing_relations_2 = inspect(model_class).relationships.items()
                 i = inspect(model_class)
                 referred_classes = [r.mapper.class_ for r in i.relationships]
                 print('    referred_classes: {}'.format(referred_classes))
