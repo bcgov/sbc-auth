@@ -240,15 +240,8 @@ class UserOrgs(Resource):
             if not user:
                 response, status = {'message': 'User not found.'}, http_status.HTTP_404_NOT_FOUND
             else:
-                # response, status = jsonify(user.get_orgs()), http_status.HTTP_200_OK
                 all_orgs = OrgService.get_orgs(user.identifier)
-                exclude_fields = []
-                # only approved users should see entities..
-                # TODO when endpoints are separated into afilliations endpoint, this logic can be removed
-                if all_orgs:
-                    if all_orgs[0].members and all_orgs[0].members[0].status != Status.ACTIVE.value:
-                        exclude_fields.append('affiliated_entities')
-                orgs = OrgSchema(exclude=exclude_fields).dump(
+                orgs = OrgSchema().dump(
                     all_orgs, many=True)
                 response, status = jsonify({'orgs': orgs}), http_status.HTTP_200_OK
 
