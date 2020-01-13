@@ -1,7 +1,7 @@
 <template>
   <div class="team-toolbar">
   <v-container class="pt-0 pb-0">
-    <div v-if="currentOrganization" class="team-name">{{ currentOrganization.name }}</div>
+    <div v-if="currentOrganization" class="team-name">Cooperatives Online</div>
     <nav>
       <ul class="pl-0">
         <li v-for="(item, i) in menu"

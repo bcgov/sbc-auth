@@ -1,6 +1,8 @@
 import { Role, SessionStorageKeys } from '@/util/constants'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
+import AccountInfo from '@/components/auth/AccountInfo.vue'
+import AccountSettings from '@/views/auth/AccountSettings.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import CreateTeamView from '@/views/auth/CreateTeamView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
@@ -51,6 +53,19 @@ export function getRoutes () {
           path: 'business',
           component: EntityManagement
         }]
+    },
+    { path: '/account-settings',
+      component: AccountSettings,
+      children: [
+        {
+          path: 'account-info',
+          component: AccountInfo
+        },
+        {
+          path: 'team-members',
+          component: UserManagement
+        }
+      ]
     },
     { path: '/userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
     { path: '/createteam', component: CreateTeamView, meta: { requiresAuth: true } },

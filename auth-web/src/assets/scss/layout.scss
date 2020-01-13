@@ -1,6 +1,17 @@
 // Layout style rules shared across the app
 .container {
-  max-width: 1224px;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  max-width: 1248px;
+}
+
+.row {
+  margin-right: -1rem;
+  margin-left: -1rem;
+}
+
+.col {
+  padding: 1rem;
 }
 
 .intro-text {

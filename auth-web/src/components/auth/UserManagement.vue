@@ -1,9 +1,9 @@
 <template>
-  <v-container class="view-container">
+  <v-container>
     <header class="view-header">
-      <h1>Manage Team</h1>
+      <h2 class="view-header__title">Team Members</h2>
       <div class="view-header__actions">
-        <v-btn v-if="canInvite()" large color="primary" @click="showInviteUsersModal()" data-test="invite-people-button">
+        <v-btn color="primary" v-if="canInvite()" @click="showInviteUsersModal()" data-test="invite-people-button">
           <v-icon>mdi-plus</v-icon>
           <span>Invite People</span>
         </v-btn>
@@ -17,34 +17,29 @@
       <v-tab data-test="invitations-tab" v-show="canInvite()">Invitations</v-tab>
     </v-tabs>
 
-    <v-card flat>
-      <v-card-text>
-
-        <!-- Tab Contents -->
-        <v-tabs-items v-model="tab">
-          <v-tab-item>
-            <MemberDataTable
-              @confirm-remove-member="showConfirmRemoveModal($event)"
-              @confirm-change-role="showConfirmChangeRoleModal($event)"
-              @confirm-leave-team="showConfirmLeaveTeamModal()"
-              @single-owner-error="showSingleOwnerErrorModal()"
-            />
-          </v-tab-item>
-          <v-tab-item>
-            <PendingMemberDataTable
-              @confirm-approve-member="showConfirmApproveModal($event)"
-              @confirm-deny-member="showConfirmRemoveModal($event)"
-            />
-          </v-tab-item>
-          <v-tab-item>
-            <InvitationsDataTable
-              @confirm-remove-invite="showConfirmRemoveInviteModal($event)"
-              @resend="resend($event)"
-            />
-          </v-tab-item>
-        </v-tabs-items>
-      </v-card-text>
-    </v-card>
+    <!-- Tab Contents -->
+    <v-tabs-items v-model="tab">
+      <v-tab-item>
+        <MemberDataTable
+          @confirm-remove-member="showConfirmRemoveModal($event)"
+          @confirm-change-role="showConfirmChangeRoleModal($event)"
+          @confirm-leave-team="showConfirmLeaveTeamModal()"
+          @single-owner-error="showSingleOwnerErrorModal()"
+        />
+      </v-tab-item>
+      <v-tab-item>
+        <PendingMemberDataTable
+          @confirm-approve-member="showConfirmApproveModal($event)"
+          @confirm-deny-member="showConfirmRemoveModal($event)"
+        />
+      </v-tab-item>
+      <v-tab-item>
+        <InvitationsDataTable
+          @confirm-remove-invite="showConfirmRemoveInviteModal($event)"
+          @resend="resend($event)"
+        />
+      </v-tab-item>
+    </v-tabs-items>
 
     <!-- Invite Users Dialog -->
     <ModalDialog
@@ -365,16 +360,6 @@ export default class UserManagement extends Vue {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding-top: 1.5rem;
-    padding-bottom: 1rem;
-
-    h1 {
-      margin-bottom: 0;
-    }
-
-    .v-btn {
-      font-weight: 700;
-    }
   }
 
   ::v-deep {
