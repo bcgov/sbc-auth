@@ -84,6 +84,7 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     def find_orgs_for_user(cls, user_id):
         """Find the orgs for a user."""
         records = cls.query \
+            .join(OrgModel) \
             .filter(cls.user_id == user_id) \
             .filter(cls.status.in_(VALID_STATUSES)) \
             .filter(OrgModel.status_code == 'ACTIVE') \
