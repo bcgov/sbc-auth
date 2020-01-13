@@ -123,7 +123,7 @@ export default class EntityManagement extends Vue {
   }
 
   async mounted () {
-    await this.syncBusinesses()
+    this.syncBusinesses()
   }
 
   async showAddSuccessModal () {
