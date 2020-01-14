@@ -3,7 +3,7 @@
     <header class="view-header">
       <h2 class="view-header__title">Account Info</h2>
     </header>
-    <v-text-field filled clearable label="Account Name"></v-text-field>
+    <v-text-field dense filled clearable label="Account Name"></v-text-field>
     <div class="form__btns">
       <v-btn large disabled color="primary">Save</v-btn>
     </div>
@@ -22,13 +22,6 @@ import UserManagement from '@/components/auth/UserManagement.vue'
 @Component({
   components: {
     UserManagement
-  },
-  computed: {
-    // ...mapState('user', ['currentUser']),
-    // ...mapGetters('org', ['myOrg'])
-  },
-  methods: {
-    // ...mapActions('org', ['syncOrganizations'])
   }
 })
 export default class AccountInfo extends Vue {
@@ -36,17 +29,8 @@ export default class AccountInfo extends Vue {
   errorMessage : string = ''
   isStaff: boolean = false
 
-  private tab = null
-
   private teamName: string = ''
   private teamType: string = 'BASIC'
-
-  private readonly myOrg!: Organization
-  private readonly syncOrganizations!: () => Organization[]
-
-  async mounted () {
-    await this.syncOrganizations()
-  }
 }
 </script>
 

@@ -14,13 +14,13 @@
         <v-navigation-drawer floating permanent>
           <v-list dense>
             <v-list-item-group color="primary">
-              <v-list-item to="/account-settings/account-info">
+              <v-list-item @click="accountInfo">
                 <v-list-item-icon>
                   <v-icon left>mdi-information-outline</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Account Info</v-list-item-title>
               </v-list-item>
-              <v-list-item to="/account-settings/team-members">
+              <v-list-item @click="teamMembers">
                 <v-list-item-icon>
                   <v-icon left>mdi-account-group-outline</v-icon>
                 </v-list-item-icon>
@@ -37,26 +37,9 @@
         -->
       </v-container>
       <v-container>
-        <transition name="fade" mode="out-in"
-        >
+        <transition name="fade" mode="out-in">
           <router-view></router-view>
         </transition>
-          <!--
-          <AccountInfo></AccountInfo>
-          -->
-          <!--
-          <UserManagement></UserManagement>
-          -->
-          <!--
-          <v-tabs-items v-model="tab">
-            <v-tab-item eager>
-              <AccountInfo></AccountInfo>
-            </v-tab-item>
-            <v-tab-item eager>
-              <UserManagement></UserManagement>
-            </v-tab-item>
-          </v-tabs-items>
-          -->
       </v-container>
     </v-card>
   </v-container>
@@ -85,6 +68,14 @@ export default class AccountSettings extends Vue {
 
   private teamName: string = ''
   private teamType: string = 'BASIC'
+
+  accountInfo () {
+    this.$router.push('/account-settings/account-info')
+  }
+
+  teamMembers () {
+    this.$router.push('/account-settings/team-members')
+  }
 }
 </script>
 
