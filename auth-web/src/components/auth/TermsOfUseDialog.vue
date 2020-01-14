@@ -5,6 +5,7 @@
         <template v-slot:activator="{ on }">
           <v-checkbox
             v-on:change="emitStatus()"
+            v-on="on"
             class="terms-checkbox"
             color="default"
             v-model="termsAccepted"
@@ -12,7 +13,7 @@
             :disabled="termsAccepted || !canCheckTerms"
           >
             <template v-slot:label>
-              <div class="terms-checkbox-label">
+              <div class="terms-checkbox-label" v-on="on">
                 <span>I have read and agreed to the</span>
                 <v-btn
                   text
@@ -41,7 +42,7 @@
               depressed
               color="primary"
               class="agree-btn"
-              :disabled="this.offsetTop < 3000"
+              :disabled="!atBottom"
               @click="termsDialog = false; termsAccepted = true; emitStatus()"
               data-test="accept-button"
             >
@@ -52,8 +53,7 @@
               depressed
               color="primary"
               class="agree-btn"
-              :disabled="this.offsetTop < 3000"
-              @click="termsDialog = false; emitStatus()"
+              @click="termsDialog = false"
               data-test="close-button"
             >
               <span>Close</span>
@@ -80,11 +80,11 @@ import { mapState } from 'vuex'
 export default class TermsOfServiceDialog extends Vue {
   private readonly userProfile!: User
   private termsDialog = false
-  private offsetTop = '0'
   private termsAccepted = false
   private content: string = ''
   private version: string = ''
   private canCheckTerms: boolean = false
+  private atBottom = false
 
   async mounted () {
     const response = await documentService.getTermsOfService('termsofuse')
@@ -107,11 +107,10 @@ export default class TermsOfServiceDialog extends Vue {
 
   private openDialog () {
     this.termsDialog = true
-    this.canCheckTerms = true
   }
 
   private onScroll (e) {
-    this.offsetTop = e.target.scrollTop
+    this.atBottom = (e.target.scrollHeight - e.target.scrollTop) <= (e.target.offsetHeight + 25)
   }
 
   @Emit('terms-updated')
