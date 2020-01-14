@@ -13,6 +13,8 @@
 # limitations under the License.
 """Manager for contact schema and export."""
 
+from marshmallow import fields
+
 from auth_api.models import Contact as ContactModel
 
 from .camel_case_schema import CamelCaseSchema
@@ -25,4 +27,8 @@ class ContactSchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too
         """Maps all of the User fields to a default schema."""
 
         model = ContactModel
-        exclude = ('id', )
+        exclude = ('id',)
+
+    email = fields.String(data_key='email')
+    phone = fields.String(data_key='phone')
+    phone_extension = fields.String(data_key='phoneExtension')
