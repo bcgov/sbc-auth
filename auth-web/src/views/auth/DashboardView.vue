@@ -50,12 +50,6 @@ export default class DashboardView extends Vue {
       icon: 'business',
       testTag: 'manage-business-nav',
       path: 'business'
-    },
-    {
-      title: 'Manage Team',
-      icon: 'group',
-      testTag: 'manage-teams-nav',
-      path: 'team'
     }
   ]
 
