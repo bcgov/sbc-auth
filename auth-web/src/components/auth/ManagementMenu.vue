@@ -1,16 +1,24 @@
 <template>
-  <div class="team-toolbar">
-  <v-container class="pt-0 pb-0">
-    <div v-if="currentOrganization" class="team-name">Cooperatives Online</div>
-    <nav>
-      <ul class="pl-0">
-        <li v-for="(item, i) in menu"
-          :key="i">
-          <v-btn large text color="#495057" :to="item.path" :data-test="item.testTag">{{ item.title }}</v-btn>
-        </li>
-      </ul>
-    </nav>
-  </v-container>
+  <div class="toolbar-container">
+    <v-toolbar dark flat color="navBg">
+        <v-toolbar-title>Cooperatives Online</v-toolbar-title>
+        <v-toolbar-items flat>
+          <v-btn link color="primary" to="/main/business">Manage Businesses</v-btn>
+        </v-toolbar-items>
+    </v-toolbar>
+    <!--
+    <v-container class="pt-0 pb-0">
+      <div v-if="currentOrganization" class="team-name">Cooperatives Online</div>
+      <nav>
+        <ul class="pl-0">
+          <li v-for="(item, i) in menu"
+            :key="i">
+            <v-btn large text color="#495057" :to="item.path" :data-test="item.testTag">{{ item.title }}</v-btn>
+          </li>
+        </ul>
+      </nav>
+    </v-container>
+    -->
   </div>
 </template>
 
@@ -66,8 +74,19 @@ export default class ManagementMenu extends Vue {
     display: inline-block;
   }
 
+  .v-toolbar__title {
+    margin-right: 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  ::v-deep .v-toolbar__content {
+    max-width: 1248px;
+    margin: 0 auto;
+  }
+
   .v-btn {
-    text-transform: uppercase;
-    font-weight: 700
+    box-shadow: none !important;
+    font-weight: 700;
   }
 </style>

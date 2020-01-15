@@ -24,6 +24,11 @@
 
 .v-overflow-btn .v-select__slot {
   height: auto;
+  border: none;
+}
+
+.v-overflow-btn .v-input__slot {
+  border: none;
 }
 
 .v-overflow-btn .v-input__append-inner {
@@ -82,11 +87,6 @@
 // Do this to prevent unexpected sizing if using any transitions
 .v-text-field__details {
   min-height: 1.25rem;
-}
-
-// Adjust size and position of input label
-[class^="v-text-field"] .v-label--active {
-  transform: translateY(-8px) scale(0.75);
 }
 
 // Fix weird blue highlight in autocomplete boxes (Chrome)
