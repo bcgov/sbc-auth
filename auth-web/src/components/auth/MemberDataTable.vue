@@ -201,9 +201,8 @@ export default class MemberDataTable extends Vue {
       return false
     }
 
-    // Can't remove Owners unless an Owner
-    if (memberToRemove.membershipTypeCode === MembershipType.Owner &&
-        this.myOrgMembership.membershipTypeCode !== MembershipType.Owner) {
+    // No one can change an OWNER's status, only option is OWNER to leave the team. #2319
+    if (memberToRemove.membershipTypeCode === MembershipType.Owner) {
       return false
     }
 

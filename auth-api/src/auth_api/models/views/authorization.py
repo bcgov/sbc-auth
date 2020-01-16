@@ -18,7 +18,7 @@ Authorization view wraps details on the entities and membership through orgs and
 
 import uuid
 
-from sqlalchemy import Column, String, Integer, and_, or_
+from sqlalchemy import Column, Integer, String, and_, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import expression
 
