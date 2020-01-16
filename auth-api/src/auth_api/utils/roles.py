@@ -25,7 +25,7 @@ class Role(Enum):
     EDITOR = 'edit'
     ADMIN = 'admin'
     SYSTEM = 'system'
-    POSTMAN = 'postman'
+    TESTER = 'tester'
 
 
 # Membership types

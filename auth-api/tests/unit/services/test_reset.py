@@ -33,14 +33,14 @@ from tests.utilities.factory_utils import (
 
 def test_reset(session, auth_mock):  # pylint: disable=unused-argument
     """Assert that can be reset data by the provided token."""
-    user_with_token = TestUserInfo.user_postman
-    user_with_token['keycloak_guid'] = TestJwtClaims.postman_role['sub']
+    user_with_token = TestUserInfo.user_tester
+    user_with_token['keycloak_guid'] = TestJwtClaims.tester_role['sub']
     user = factory_user_model(user_info=user_with_token)
     org = factory_org_model(user_id=user.id)
     factory_membership_model(user.id, org.id)
     entity = factory_entity_model(user_id=user.id)
 
-    ResetDataService.reset(TestJwtClaims.postman_role)
+    ResetDataService.reset(TestJwtClaims.tester_role)
 
     with pytest.raises(BusinessException) as exception:
         UserService.find_by_jwt_token(user_with_token)
@@ -58,5 +58,5 @@ def test_reset(session, auth_mock):  # pylint: disable=unused-argument
 
 def test_reset_user_notexists(session, auth_mock):  # pylint: disable=unused-argument
     """Assert that can not be reset data by the provided token not exists in database."""
-    response = ResetDataService.reset(TestJwtClaims.postman_role)
+    response = ResetDataService.reset(TestJwtClaims.tester_role)
     assert response is None

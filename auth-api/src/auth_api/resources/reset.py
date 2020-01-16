@@ -39,7 +39,7 @@ class Reset(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
-    @_JWT.has_one_of_roles([Role.POSTMAN.value])
+    @_JWT.has_one_of_roles([Role.TESTER.value])
     def post():
         """Cleanup test data by the provided token."""
         token = g.jwt_oidc_token_info

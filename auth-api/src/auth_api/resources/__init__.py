@@ -80,17 +80,17 @@ API.add_namespace(INVITATION_API, path='/invitations')
 API.add_namespace(DOCUMENTS_API, path='/documents')
 API.add_namespace(CODES_API, path='/codes')
 
-POSTMAN_BLUEPRINT = Blueprint('POSTMAN', __name__, url_prefix='/postman')
+TEST_BLUEPRINT = Blueprint('TEST', __name__, url_prefix='/test')
 
-API_POSTMAN = Api(
-    POSTMAN_BLUEPRINT,
-    title='Authentication API for postman test',
+API_TEST = Api(
+    TEST_BLUEPRINT,
+    title='Authentication API for testing',
     version='1.0',
-    description='The API for the postman test',
+    description='The API for the testing',
     security=['apikey'],
     authorizations=AUTHORIZATIONS,
 )
 
-HANDLER = ExceptionHandler(API_POSTMAN)
+HANDLER = ExceptionHandler(API_TEST)
 
-API_POSTMAN.add_namespace(RESET_API, path='/reset')
+API_TEST.add_namespace(RESET_API, path='/reset')

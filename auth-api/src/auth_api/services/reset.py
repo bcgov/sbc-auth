@@ -28,6 +28,7 @@ class ResetTestData:  # pylint:disable=too-few-public-methods
         """Cleanup all the data from all tables create by the provided user id."""
         user = UserModel.find_by_jwt_token(token)
         if user:
+            # TODO need to find a way to avoid using protected function
             for model_class in db.Model._decl_class_registry.values():  # pylint:disable=protected-access
                 if hasattr(model_class, 'created_by_id'):
                     for model in model_class.query.filter_by(created_by_id=user.id).all():

@@ -156,7 +156,7 @@ class TestJwtClaims(dict, Enum):
         'loginSource': 'PASSCODE'
     }
 
-    postman_role = {
+    tester_role = {
         'iss': os.getenv('JWT_OIDC_ISSUER'),
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',
@@ -164,7 +164,7 @@ class TestJwtClaims(dict, Enum):
         'preferred_username': 'testuser',
         'realm_access': {
             'roles': [
-                'postman'
+                'tester'
             ]
         }
     }
@@ -306,10 +306,10 @@ class TestUserInfo(dict, Enum):
         'roles': '{edit, uma_authorization, staff}',
         'keycloak_guid': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
-    user_postman = {
+    user_tester = {
         'username': 'CP1234567',
         'firstname': 'Test',
         'lastname': 'User',
-        'roles': '{edit, uma_authorization, postman}',
+        'roles': '{edit, uma_authorization, tester}',
         'keycloak_guid': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
