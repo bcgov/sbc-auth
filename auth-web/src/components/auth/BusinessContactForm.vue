@@ -48,12 +48,12 @@
         >
         </v-text-field>
       </v-col>
-      <v-col cols="3">
+      <v-col cols="4">
         <v-text-field
           filled label="Extension"
           persistent-hint
           :rules="extensionRules"
-          v-mask="'###'"
+          v-mask="'####'"
           v-model="extension"
         >
         </v-text-field>
