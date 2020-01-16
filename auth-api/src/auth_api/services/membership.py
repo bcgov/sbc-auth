@@ -166,7 +166,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
 
         # Ensure that a member does not upgrade a member to OWNER from ADMIN unless they are an OWNER themselves
-        if self._model.membership_type.code == ADMIN and updated_fields['membership_type'] == OWNER:
+        if self._model.membership_type.code == ADMIN and updated_fields.get('membership_type', None) == OWNER:
             check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(OWNER))
 
         # No one can change an OWNER's status, only option is OWNER to leave the team. #2319
@@ -177,7 +177,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
         # Ensure that if downgrading from owner that there is at least one other owner in org
         if self._model.membership_type.code == OWNER and \
-                updated_fields['membership_type'] != OWNER and \
+                updated_fields.get('membership_type', None) != OWNER and \
                 OrgService(self._model.org).get_owner_count() == 1:
             raise BusinessException(Error.CHANGE_ROLE_FAILED_ONLY_OWNER, None)
 
