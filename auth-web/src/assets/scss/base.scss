@@ -36,7 +36,7 @@ html {
   font-size: 14px;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 1200px) and (min-height: 900px) {
   html {
     font-size: 16px;
   }
@@ -78,6 +78,15 @@ strong {
 
 .v-application {
   font-family: 'BCSans', Verdana, Arial, sans-serif;  // BC Government Font
+
+  .title,
+  .caption {
+    font-family: 'BCSans', Verdana, Arial, sans-serif !important;  // BC Government Font
+  }
+
+  .caption {
+    letter-spacing: 0 !important;
+  }
 }
 
 .theme--light.v-application {

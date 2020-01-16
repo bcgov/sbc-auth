@@ -32,7 +32,8 @@ export default new Vuetify({
           darken3: '#343a40',
           darken4: '#212529'
         },
-        navBg: '#003366'
+        navBg: '#003366',
+        navMenuBg: '#26527d'
       }
     }
   }

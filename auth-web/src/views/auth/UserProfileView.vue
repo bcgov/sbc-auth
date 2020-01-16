@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="view-container">
 
     <!-- Loading status -->
     <v-fade-transition>
@@ -9,30 +9,33 @@
     </v-fade-transition>
 
     <div class="user-profile-container" v-if="!isLoading">
-      <article>
-        <v-row justify="center">
-          <v-col lg="8" class="pt-0 pb-0">
-            <div v-if="!editing">
-              <h1 class="mb-4">Complete Profile</h1>
-              <p class="intro-text">Enter your contact information to complete your profile.</p>
+      <v-row justify="center">
+        <v-col lg="8" class="pt-0 pb-0">
+          <div class="view-header" v-if="!editing">
+            <h1>Complete Profile</h1>
+            <p class="mb-0">Enter your contact information to complete your profile.</p>
+          </div>
+          <div class="view-header" v-if="editing">
+            <v-btn large icon color="primary" class="back-btn mr-3" to="/main">
+              <v-icon>mdi-arrow-left</v-icon>
+            </v-btn>
+            <div>
+              <h1>Edit Profile</h1>
+              <p class="mb-0">Edit your profile contact information</p>
             </div>
-            <div v-if="editing">
-              <h1 class="mb-4">Edit Profile</h1>
-              <p class="intro-text">Edit your profile contact information</p>
-            </div>
-            <v-card class="profile-card">
-              <v-container>
-                <v-card-title class="mb-4">
-                  {{ userProfile.firstname }} {{ userProfile.lastname}}
-                </v-card-title>
-                <v-card-text>
-                  <UserProfileForm/>
-                </v-card-text>
-              </v-container>
-            </v-card>
-          </v-col>
-        </v-row>
-      </article>
+          </div>
+          <v-card class="profile-card">
+            <v-container>
+              <v-card-title class="mb-4">
+                {{ userProfile.firstname }} {{ userProfile.lastname}}
+              </v-card-title>
+              <v-card-text>
+                <UserProfileForm/>
+              </v-card-text>
+            </v-container>
+          </v-card>
+        </v-col>
+      </v-row>
     </div>
   </v-container>
 </template>
@@ -77,18 +80,9 @@ export default class UserProfileView extends Mixins(NextPageMixin) {
 <style lang="scss" scoped>
    @import '$assets/scss/theme.scss';
 
-  .view-container {
-    padding-top: 2.5rem;
-    padding-bottom: 3rem;
-  }
-
   .v-card__title {
     font-weight: 700;
     letter-spacing: -0.02rem;
-  }
-
-  .profile-card {
-    margin-top: 3rem;
   }
 
   .loading-container {

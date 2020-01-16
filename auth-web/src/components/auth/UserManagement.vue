@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <header class="view-header">
+    <header class="view-header align-center mb-0">
       <h2 class="view-header__title">Team Members</h2>
       <div class="view-header__actions">
         <v-btn color="primary" v-if="canInvite()" @click="showInviteUsersModal()" data-test="invite-people-button">

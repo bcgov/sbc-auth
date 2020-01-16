@@ -5,6 +5,54 @@
   max-width: 1248px;
 }
 
+@media (max-width: 1024px) {
+  .container {
+    max-width: 1008px
+  }
+}
+
+.view-container {
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+}
+
+.view-header {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 2.65rem;
+
+  h1 + p {
+    margin-top: 0.75rem;
+  }
+
+  .back-btn {
+    margin-top: -0.25rem;
+  }
+
+  &.align-center {
+    align-items: center;
+  }
+
+  &.block {
+    display: block;
+  }
+}
+
+.view-header__title {
+  margin-bottom: 0;
+}
+
+@media (min-width: 1200px) and (min-height: 900px) {
+  .view-header {
+    .back-btn {
+      margin-top: 0;
+    }
+  }
+}
+
+// Increase column padding to 1rem (16px)
+// ~32px gutters to provide some additional space between columns
+
 .row {
   margin-right: -1rem;
   margin-left: -1rem;
@@ -30,16 +78,5 @@
 @media (max-width: 480px) {
   h1 span {
     display: block;
-  }
-}
-
-@media (min-width: 768px) {
-  h1 {
-    margin-bottom: 2rem;
-  }
-
-  .intro-text {
-    margin-bottom: 3rem;
-    font-size: 1.125rem;
   }
 }
