@@ -1,19 +1,35 @@
 <template>
   <div class="toolbar-container">
-    <v-toolbar dark flat color="navBg">
+    <v-toolbar flat>
       <v-toolbar-title>
-        <router-link to="/home" color="#ffffff">Cooperatives Online</router-link>
+        <router-link to="/home">Cooperatives Online</router-link>
       </v-toolbar-title>
       <v-toolbar-items flat>
-        <v-btn color="navBg" to="/main/business">Manage Businesses</v-btn>
+        <v-btn text color="navBg" to="/main/business">Manage Businesses</v-btn>
         <v-menu open-on-hover offset-y transition="slide-y-transition">
           <template v-slot:activator="{ on }">
-            <v-btn color="navBg" v-on="on">
+            <v-btn text color="navBg" v-on="on">
               Menu Item
-              <v-icon small class="ml-2">mdi-chevron-down</v-icon>
+              <v-icon small class="mr-n1 ml-1">mdi-chevron-down</v-icon>
             </v-btn>
           </template>
-          <v-list dark dense flat color="navMenuBg">
+          <v-list dense flat>
+            <v-list-item>
+              <v-list-item-title>Item 1</v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Item 1</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <v-menu open-on-hover offset-y transition="slide-y-transition">
+          <template v-slot:activator="{ on }">
+            <v-btn text color="navBg" v-on="on">
+              Menu Item
+              <v-icon small class="mr-n1 ml-1">mdi-chevron-down</v-icon>
+            </v-btn>
+          </template>
+          <v-list dense flat>
             <v-list-item>
               <v-list-item-title>Item 1</v-list-item-title>
             </v-list-item>
@@ -67,13 +83,13 @@ export default class ManagementMenu extends Vue {
   @import '$assets/scss/theme.scss';
 
   .v-toolbar__title {
-    margin-right: 1rem;
+    margin-right: 1.5rem;
     font-size: 1rem;
     font-weight: 700;
 
     a {
       text-decoration: none;
-      color: #ffffff;
+      color: #003366;
     }
   }
 
@@ -85,6 +101,11 @@ export default class ManagementMenu extends Vue {
   .v-btn {
     box-shadow: none !important;
     font-size: 1rem;
-    font-weight: 400;
+    font-weight: 700;
   }
+
+  .toolbar-container {
+    border-bottom: 2px solid $gray2;
+  }
+
 </style>
