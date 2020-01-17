@@ -193,7 +193,7 @@ class Org:
 
     def get_owner_count(self):
         """Get the number of owners for the specified org."""
-        return list(filter(lambda x: x.membership_type == OWNER, self._model.members)).count()
+        return len([x for x in self._model.members if x.membership_type_code == OWNER])
 
     @staticmethod
     def get_orgs(user_id):
