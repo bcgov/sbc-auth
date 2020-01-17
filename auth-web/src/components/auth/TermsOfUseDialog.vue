@@ -17,6 +17,7 @@
                 <span>I have read and agreed to the</span>
                 <v-btn
                   text
+                  link
                   color="primary"
                   class="pr-1 pl-1"
                   @click.stop="openDialog()"
@@ -143,7 +144,6 @@ export default class TermsOfServiceDialog extends Vue {
 
 .terms-checkbox-label {
   display: flex;
-  align-items: center;
 
   .v-btn {
     height: auto;

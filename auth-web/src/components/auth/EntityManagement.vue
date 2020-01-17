@@ -1,14 +1,14 @@
 <template>
   <v-container class="view-container">
-    <header class="view-header">
-      <h1>Manage Businesses</h1>
+    <div class="view-header align-center">
+      <h1 class="view-header__title">Manage Businesses</h1>
       <div class="view-header__actions">
         <v-btn large color="primary" @click="showAddBusinessModal()" data-test="add-business-button">
           <v-icon small>mdi-plus</v-icon>
           <span>Add Business</span>
         </v-btn>
       </div>
-    </header>
+    </div>
 
     <AffiliatedEntityList
       @add-business="showAddBusinessModal()"
@@ -193,11 +193,7 @@ export default class EntityManagement extends Vue {
 
 <style lang="scss" scoped>
   .view-header {
-    display: flex;
-    flex-direction: row;
     justify-content: space-between;
-    padding-top: 1.5rem;
-    padding-bottom: 2.5rem;
 
     h1 {
       margin-bottom: 0;

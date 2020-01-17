@@ -1,13 +1,21 @@
 <template>
-  <v-container>
-    <div class="header-container">
-      <!--
-      <v-btn large icon tile class="mr-3" to="/main"><v-icon large>mdi-arrow-left</v-icon></v-btn>
-      -->
+  <v-container class="view-container">
+
+    <!-- Loading status -->
+    <v-fade-transition>
+      <div class="loading-container" v-if="isLoading">
+        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+      </div>
+    </v-fade-transition>
+
+    <div class="view-header">
+      <v-btn large icon color="primary" class="back-btn mr-3" to="/main">
+        <v-icon>mdi-arrow-left</v-icon>
+      </v-btn>
       <div>
-      <h1>Account Settings</h1>
-      <p>Manage account information and users of this account</p>
-    </div>
+        <h1 class="view-header__title">Account Settings</h1>
+        <p class="mb-0">Manage account information and users of this account</p>
+      </div>
     </div>
     <v-card flat class="account-settings-card">
       <v-container class="nav-container">
@@ -82,10 +90,6 @@ export default class AccountSettings extends Vue {
 <style lang="scss" scoped>
   @import "$assets/scss/theme.scss";
 
-  h1 {
-    margin-bottom: 1rem;
-  }
-
   .account-settings-card {
     display: flex;
   }
@@ -94,10 +98,6 @@ export default class AccountSettings extends Vue {
     flex: 0 0 auto;
     width: 16rem;
     border-right: 1px solid $gray3;
-  }
-
-  .v-application p {
-    margin-bottom: 3rem;
   }
 
   .v-list--dense .v-list-item .v-list-item__title {
@@ -121,5 +121,18 @@ export default class AccountSettings extends Vue {
   .fade-enter,
   .fade-leave-active {
     opacity: 0
+  }
+
+  .loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 2;
+    background: $gray2;
   }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="view-container">
 
     <!-- Loading status -->
     <v-fade-transition>
@@ -10,21 +10,21 @@
 
     <v-row justify="center">
       <v-col lg="8" class="pt-0 pb-0">
-        <article>
-          <h1 class="mb-4">Edit Business Contact</h1>
-          <p class="intro-text" v-show="!editing">There is no contact information for this {{ businessType }}. You will need to provide the contact information for this {{businessType}} before you continue.</p>
-          <p class="intro-text" v-show="editing">Edit the contact information for this {{businessType}}.</p>
-          <v-card class="profile-card">
-            <v-container>
-              <v-card-title class="mb-4">
-                {{ currentBusiness.name}}
-              </v-card-title>
-              <v-card-text>
-                <BusinessContactForm/>
-              </v-card-text>
-            </v-container>
-          </v-card>
-        </article>
+        <div class="view-header block">
+          <h1>Edit Business Contact</h1>
+          <p v-if="!editing">There is no contact information for this {{ businessType }}. You will need to provide the contact information for this {{businessType}} before you continue.</p>
+          <p v-if="editing">Edit the contact information for this {{businessType}}.</p>
+        </div>
+        <v-card class="profile-card">
+          <v-container>
+            <v-card-title class="mb-4">
+              {{ currentBusiness.name}}
+            </v-card-title>
+            <v-card-text>
+              <BusinessContactForm/>
+            </v-card-text>
+          </v-container>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>
@@ -85,10 +85,6 @@ export default class BusinessProfileView extends Vue {
 
   .intro-text {
     margin-bottom: 3rem;
-  }
-
-  .profile-card {
-    margin-top: 3rem;
   }
 
   .loading-container {

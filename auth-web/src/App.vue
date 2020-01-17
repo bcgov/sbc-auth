@@ -60,10 +60,5 @@ export default Vue.extend({
   .app-body {
     flex: 1 1 auto;
     position: relative;
-
-    > .container:first-child {
-      padding-top: 3rem;
-      padding-bottom: 4rem;
-    }
   }
 </style>

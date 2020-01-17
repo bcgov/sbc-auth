@@ -1,6 +1,6 @@
 <template>
   <v-container class="p-0">
-    <header class="view-header">
+    <header class="view-header mb-2">
       <h2 class="view-header__title">Account Info</h2>
     </header>
     <v-text-field dense filled clearable label="Account Name"></v-text-field>
