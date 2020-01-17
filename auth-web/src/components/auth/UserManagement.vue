@@ -166,7 +166,11 @@ import { getModule } from 'vuex-module-decorators'
       'updateMember',
       'approveMember',
       'leaveTeam',
-      'syncOrganizations'
+      'syncOrganizations',
+      'syncActiveOrgMembers',
+      'syncPendingOrgInvitations',
+      'syncPendingOrgMembers'
+
     ])
   }
 })
@@ -199,6 +203,9 @@ export default class UserManagement extends Vue {
   private readonly approveMember!: (memberId: number) => void
   private readonly leaveTeam!: (memberId: number) => void
   private readonly syncOrganizations!: () => Promise<Organization[]>
+  private readonly syncPendingOrgMembers!: () => Member[]
+  private readonly syncPendingOrgInvitations!: () => Invitation[]
+  private readonly syncActiveOrgMembers!: () => Member[]
 
   private notifyUser = true
 
@@ -212,6 +219,9 @@ export default class UserManagement extends Vue {
 
   private async mounted () {
     this.isLoading = false
+    await this.syncActiveOrgMembers()
+    await this.syncPendingOrgInvitations()
+    await this.syncPendingOrgMembers()
   }
 
   private canInvite (): boolean {
