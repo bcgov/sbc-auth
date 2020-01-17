@@ -40,9 +40,10 @@ def factory_auth_header(jwt, claims):
     return {'Authorization': 'Bearer ' + jwt.create_jwt(claims=claims, header=JWT_HEADER)}
 
 
-def factory_entity_model(entity_info: dict = TestEntityInfo.entity1):
+def factory_entity_model(entity_info: dict = TestEntityInfo.entity1, user_id=None):
     """Produce a templated entity model."""
     entity = EntityModel.create_from_dict(entity_info)
+    entity.created_by_id = user_id
     entity.save()
     return entity
 
@@ -73,6 +74,7 @@ def factory_membership_model(user_id, org_id, member_type='OWNER', member_status
                                  membership_type_code=member_type,
                                  membership_type_status=member_status)
 
+    membership.created_by_id = user_id
     membership.save()
     return membership
 
@@ -80,7 +82,8 @@ def factory_membership_model(user_id, org_id, member_type='OWNER', member_status
 def factory_org_model(org_info: dict = TestOrgInfo.org1,
                       org_type_info: dict = TestOrgTypeInfo.test_type,
                       org_status_info: dict = TestOrgStatusInfo.test_status,
-                      payment_type_info: dict = TestPaymentTypeInfo.test_type):
+                      payment_type_info: dict = TestPaymentTypeInfo.test_type,
+                      user_id=None):
     """Produce a templated org model."""
     org_type = OrgTypeModel.get_default_type()
     if org_type_info['code'] != TestOrgTypeInfo.implicit['code']:
@@ -97,6 +100,7 @@ def factory_org_model(org_info: dict = TestOrgInfo.org1,
     org.org_type = org_type
     org.org_status = org_status
     org.preferred_payment = preferred_payment
+    org.created_by_id = user_id
     org.save()
 
     return org
