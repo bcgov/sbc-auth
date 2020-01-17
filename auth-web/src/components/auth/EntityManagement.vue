@@ -3,7 +3,7 @@
     <div class="view-header align-center">
       <h1 class="view-header__title">Manage Businesses</h1>
       <div class="view-header__actions">
-        <v-btn large color="primary" @click="showAddBusinessModal()" data-test="add-business-button">
+        <v-btn color="primary" @click="showAddBusinessModal()" data-test="add-business-button">
           <v-icon small>mdi-plus</v-icon>
           <span>Add Business</span>
         </v-btn>
