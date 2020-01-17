@@ -56,7 +56,8 @@
         "NATS_SUBJECT": "",
         "DELIVERY_FAILURE_RETRY_TIME_FRAME": "",
         "FAILURE_EMAIL_TIME_FRAME": "",
-        "PENDING_EMAIL_TIME_FRAME": ""
+        "PENDING_EMAIL_TIME_FRAME": "",
+        "FLASK_ENV": ""
       }
     }
   ],

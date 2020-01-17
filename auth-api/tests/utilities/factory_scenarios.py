@@ -299,6 +299,13 @@ class TestUserInfo(dict, Enum):
         'roles': '{edit, uma_authorization, staff}',
         'keycloak_guid': uuid.uuid4()
     }
+    user3 = {
+        'username': 'CP1234569',
+        'firstname': 'Test 3',
+        'lastname': 'User',
+        'roles': '{edit, uma_authorization, staff}',
+        'keycloak_guid': uuid.uuid4()
+    }
     user_test = {
         'username': 'CP1234567',
         'firstname': 'Test',
