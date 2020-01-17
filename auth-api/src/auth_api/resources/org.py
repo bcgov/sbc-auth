@@ -297,6 +297,7 @@ class OrgMember(Resource):
                 updated_fields_dict['membership_status'] = \
                     MembershipService.get_membership_status_by_code(membership_status)
             membership = MembershipService.find_membership_by_id(membership_id, token)
+            is_own_membership = membership.as_dict()['user']['username'] == UserService.find_by_jwt_token(token).as_dict()['username']
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
@@ -306,7 +307,7 @@ class OrgMember(Resource):
                 # if user status changed to active , mail the user
                 if membership_status == Status.ACTIVE.name:
                     membership.send_notification_to_member(origin, NotificationType.MEMBERSHIP_APPROVED.value)
-                elif notify_user and updated_role and updated_role.code != MEMBER:
+                elif notify_user and updated_role and updated_role.code != MEMBER and not is_own_membership:
                     membership.send_notification_to_member(origin, NotificationType.ROLE_CHANGED.value)
 
             return response, status
