@@ -297,7 +297,8 @@ class OrgMember(Resource):
                 updated_fields_dict['membership_status'] = \
                     MembershipService.get_membership_status_by_code(membership_status)
             membership = MembershipService.find_membership_by_id(membership_id, token)
-            is_own_membership = membership.as_dict()['user']['username'] == UserService.find_by_jwt_token(token).as_dict()['username']
+            is_own_membership = membership.as_dict()['user']['username'] == \
+                UserService.find_by_jwt_token(token).as_dict()['username']
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND

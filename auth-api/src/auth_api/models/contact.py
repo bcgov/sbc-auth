@@ -42,4 +42,4 @@ class Contact(BaseModel):  # pylint: disable=too-few-public-methods
     # MVP contact has been migrated over to the contact linking table (revised data model)
     entity_id = Column(Integer, ForeignKey('entity.id'))
 
-    links = relationship('ContactLink', cascade="all, delete-orphan")
+    links = relationship('ContactLink', cascade='all, delete-orphan')
