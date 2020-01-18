@@ -29,8 +29,8 @@ from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
 from tests.utilities.factory_scenarios import TestContactInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
-    factory_contact_model, factory_entity_model, factory_invitation, factory_org_service, factory_user_model,
-    factory_membership_model)
+    factory_contact_model, factory_entity_model, factory_invitation, factory_membership_model, factory_org_service,
+    factory_user_model)
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
