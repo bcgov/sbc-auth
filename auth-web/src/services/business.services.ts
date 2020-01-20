@@ -21,6 +21,6 @@ export default class BusinessService {
   }
 
   static async searchBusiness (businessIdentifier: string): Promise<AxiosResponse<any>> {
-    return Axios.get(`${ConfigHelper.getAuthAPIUrl()}/businesses/${businessIdentifier}`)
+    return Axios.get(`${ConfigHelper.getLegalAPIUrl()}/businesses/${businessIdentifier}`)
   }
 }

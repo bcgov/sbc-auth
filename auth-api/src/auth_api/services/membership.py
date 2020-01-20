@@ -102,7 +102,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         # If active status for current user, then check organizational role
         if current_user_membership.status == Status.ACTIVE.value:
             if current_user_membership.membership_type_code == OWNER or \
-               current_user_membership.membership_type_code == ADMIN:
+                    current_user_membership.membership_type_code == ADMIN:
                 return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status)
 
             return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status) \
@@ -168,12 +168,18 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
 
         # Ensure that a member does not upgrade a member to OWNER from ADMIN unless they are an OWNER themselves
-        if self._model.membership_type == ADMIN and updated_fields['membership_type'] == OWNER:
+        if self._model.membership_type.code == ADMIN and updated_fields.get('membership_type', None) == OWNER:
             check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(OWNER))
 
+        # No one can change an OWNER's status, only option is OWNER to leave the team. #2319
+        if updated_fields.get('membership_status', None) \
+                and updated_fields['membership_status'].id == Status.INACTIVE.value \
+                and self._model.membership_type.code == OWNER:
+            raise BusinessException(Error.OWNER_CANNOT_BE_REMOVED, None)
+
         # Ensure that if downgrading from owner that there is at least one other owner in org
-        if self._model.membership_type == OWNER and \
-                updated_fields['membership_type'] != OWNER and \
+        if self._model.membership_type.code == OWNER and \
+                updated_fields.get('membership_type', None) != OWNER and \
                 OrgService(self._model.org).get_owner_count() == 1:
             raise BusinessException(Error.CHANGE_ROLE_FAILED_ONLY_OWNER, None)
 

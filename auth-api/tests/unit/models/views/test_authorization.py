@@ -116,8 +116,9 @@ def test_find_user_authorization_by_org_id_and_invalid_corp_type(session):  # py
 
     assert authorization is None
 
-def test_find_user_authorization_by_org_id_and_invalid_corp_type_no_affliation(session):  # pylint:disable=unused-argument
-    """Assert that authorization view is returning result for an unclaimed/unaffiliated organisation for even invalid corp type """
+
+def test_find_user_authorization_by_org_id_and_invalid_corp_type_no_affliation(session):  # pylint:disable=unused-argument # noqa: E501
+    """Assert that authorization view is returning correct result for an unclaimed/unaffiliated organization."""
     user = factory_user_model()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
