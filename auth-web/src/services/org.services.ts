@@ -31,6 +31,10 @@ export default class OrgService {
     return Axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs`, createRequestBody)
   }
 
+  public static async updateOrg (orgId: number, createRequestBody: CreateOrganizationRequestBody): Promise<AxiosResponse<Organization>> {
+    return Axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgId}`, createRequestBody)
+  }
+
   static async getAffiliatiatedEntities (orgIdentifier: number): Promise<AxiosResponse<Businesses>> {
     return Axios.get(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/affiliations`)
   }

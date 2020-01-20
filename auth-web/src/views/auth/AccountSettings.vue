@@ -48,8 +48,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { Component, Vue } from 'vue-property-decorator'
 import AccountInfo from '@/components/auth/AccountInfo.vue'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
