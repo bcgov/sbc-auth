@@ -9,7 +9,7 @@
     </v-fade-transition>
 
     <div class="view-header">
-      <v-btn large icon color="primary" class="back-btn mr-3" to="/main" data-test="account-settings-back-button">
+      <v-btn large icon color="secondary" class="back-btn mr-3" to="/main" data-test="account-settings-back-button">
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
       <div>

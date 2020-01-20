@@ -1,6 +1,5 @@
 <template>
   <div>
-    <ManagementMenu :menu="menu" />
     <article>
       <header class="hero-banner light">
         <v-container>
@@ -182,7 +181,6 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import ManagementMenu from '@/components/auth/ManagementMenu.vue'
 import { User } from '@/models/user'
 import { VueConstructor } from 'vue'
 
@@ -190,9 +188,6 @@ import { VueConstructor } from 'vue'
   name: 'Home',
   computed: {
     ...mapState('user', ['userProfile'])
-  },
-  components: {
-    ManagementMenu
   }
 })
 

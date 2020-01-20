@@ -16,7 +16,7 @@
             <p class="mb-0">Enter your contact information to complete your profile.</p>
           </div>
           <div class="view-header" v-if="editing">
-            <v-btn large icon color="primary" class="back-btn mr-3" to="/main">
+            <v-btn large icon color="secondary" class="back-btn mr-3" to="/main">
               <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
             <div>
