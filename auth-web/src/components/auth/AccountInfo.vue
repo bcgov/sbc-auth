@@ -6,12 +6,16 @@
     <v-form ref="editAccountForm">
     <v-text-field dense filled clearable label="Account Name" v-model="orgName"></v-text-field>
     <div class="form__btns">
-      <v-btn large color="primary" @click="updateOrgName()" :disabled='!isFormValid()'>
+      <v-btn large color="primary" @click="updateOrgName()" :disabled="!isFormValid()" :loading="btnLabel == 'Saving'">
+        <!--
         <v-progress-circular
                 indeterminate
                 color="green" v-show="btnLabel == 'Saving'"
         >Saving</v-progress-circular>
-        <v-icon v-show="btnLabel == 'Saved'">mdi-clipboard-check</v-icon>
+        -->
+        <v-scroll-x-transition>
+          <v-icon v-show="btnLabel == 'Saved'" class="mr-1">mdi-check</v-icon>
+        </v-scroll-x-transition>
         {{btnLabel}}
       </v-btn>
     </div>
@@ -98,6 +102,7 @@ export default class AccountInfo extends Vue {
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
+    margin-top: 2rem;
 
     .v-btn {
       width: 6rem;
