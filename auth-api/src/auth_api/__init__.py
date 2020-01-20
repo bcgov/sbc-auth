@@ -51,7 +51,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
             integrations=[FlaskIntegration()]
         )
 
-    from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT, TEST_BLUEPRINT  # pylint: disable=import-outside-toplevel
+    from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT, \
+        TEST_BLUEPRINT  # pylint: disable=import-outside-toplevel
 
     db.init_app(app)
     ma.init_app(app)

@@ -29,7 +29,8 @@ from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
 from tests.utilities.factory_scenarios import TestContactInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
-    factory_contact_model, factory_entity_model, factory_invitation, factory_org_service, factory_user_model)
+    factory_contact_model, factory_entity_model, factory_invitation, factory_membership_model, factory_org_service,
+    factory_user_model)
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -156,6 +157,28 @@ def test_get_invitations(session, auth_mock):  # pylint:disable=unused-argument
         assert response
         assert len(response) == 1
         assert response[0].recipient_email == invitation.as_dict()['recipientEmail']
+
+
+def test_get_owner_count_one_owner(session):  # pylint:disable=unused-argument
+    """Assert that count of owners is correct."""
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user = factory_user_model(user_info=user_with_token)
+    org = OrgService.create_org(TestOrgInfo.org1, user.id)
+    assert org.get_owner_count() == 1
+
+
+def test_get_owner_count_two_owner_with_admins(session):  # pylint:disable=unused-argument
+    """Assert that count of owners is correct."""
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user = factory_user_model(user_info=user_with_token)
+    org = OrgService.create_org(TestOrgInfo.org1, user.id)
+    user2 = factory_user_model(user_info=TestUserInfo.user2)
+    factory_membership_model(user2.id, org._model.id, member_type='ADMIN')
+    user3 = factory_user_model(user_info=TestUserInfo.user3)
+    factory_membership_model(user3.id, org._model.id, member_type='OWNER')
+    assert org.get_owner_count() == 2
 
 
 def test_delete_contact_no_org(session, auth_mock):  # pylint:disable=unused-argument

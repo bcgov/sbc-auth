@@ -230,7 +230,7 @@ class Invitation:
         admin_list = UserService.get_admins_for_membership(membership_id)
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
-        admin_emails = ",".join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
+        admin_emails = ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
         Invitation.send_admin_notification(user.as_dict(),
                                            '{}/{}'.format(invitation_origin, context_path),
                                            admin_emails, invitation.membership[0].org.name)
