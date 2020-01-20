@@ -13,7 +13,13 @@
     <!-- Tab Navigation -->
     <v-tabs class="mb-7" v-model="tab" background-color="transparent">
       <v-tab data-test="active-tab">Active</v-tab>
-      <v-tab data-test="pending-approval-tab" v-show="canInvite()">Pending Approval</v-tab>
+      <v-tab data-test="pending-approval-tab" v-show="canInvite()">
+        <v-badge inline color="error"
+          :content="pendingApprovals"
+          :value="pendingApprovals">
+          Pending Approval
+        </v-badge>
+      </v-tab>
       <v-tab data-test="invitations-tab" v-show="canInvite()">Invitations</v-tab>
     </v-tabs>
 
@@ -154,7 +160,8 @@ import { getModule } from 'vuex-module-decorators'
   computed: {
     ...mapState('org', [
       'resending',
-      'sentInvitations'
+      'sentInvitations',
+      'pendingOrgMembers'
     ]),
     ...mapState('business', ['currentBusiness']),
     ...mapGetters('org', ['myOrgMembership'])
@@ -209,6 +216,10 @@ export default class UserManagement extends Vue {
 
   private notifyUser = true
 
+  // PROTOTYPE TAB ICON (PENDING APPROVAL)
+  private readonly pendingOrgMembers!: Member[]
+  private pendingApprovals = 0
+
   $refs: {
     successDialog: ModalDialog
     errorDialog: ModalDialog
@@ -222,6 +233,7 @@ export default class UserManagement extends Vue {
     await this.syncActiveOrgMembers()
     await this.syncPendingOrgInvitations()
     await this.syncPendingOrgMembers()
+    this.pendingApprovals = this.pendingOrgMembers.length
   }
 
   private canInvite (): boolean {
@@ -398,6 +410,11 @@ export default class UserManagement extends Vue {
     .v-list-item__title {
       display: block;
       font-weight: 700;
+    }
+
+    .v-badge--inline .v-badge__wrapper {
+      margin-left: 0.4rem;
+      font-size: 0.678rem
     }
   }
 
