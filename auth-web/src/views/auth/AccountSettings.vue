@@ -22,13 +22,13 @@
         <v-navigation-drawer floating permanent data-test="account-nav-drawer">
           <v-list dense>
             <v-list-item-group color="primary">
-              <v-list-item @click="goToAccountInfo" data-test="account-info-nav-item">
+              <v-list-item to="/account-settings/account-info" data-test="account-info-nav-item">
                 <v-list-item-icon>
                   <v-icon left>mdi-information-outline</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Account Info</v-list-item-title>
               </v-list-item>
-              <v-list-item @click="goToTeamMembers" data-test="team-members-nav-item">
+              <v-list-item to="/account-settings/team-members" data-test="team-members-nav-item">
                 <v-list-item-icon>
                   <v-icon left>mdi-account-group-outline</v-icon>
                 </v-list-item-icon>
@@ -63,13 +63,7 @@ import UserManagement from '@/components/auth/UserManagement.vue'
   }
 })
 export default class AccountSettings extends Vue {
-  private goToAccountInfo () {
-    this.$router.push('/account-settings/account-info')
-  }
 
-  private goToTeamMembers () {
-    this.$router.push('/account-settings/team-members')
-  }
 }
 </script>
 
