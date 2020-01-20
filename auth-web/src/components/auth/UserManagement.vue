@@ -15,8 +15,8 @@
       <v-tab data-test="active-tab">Active</v-tab>
       <v-tab data-test="pending-approval-tab" v-show="canInvite()">
         <v-badge inline color="error"
-          :content="pendingApprovals"
-          :value="pendingApprovals">
+          :content="pendingApprovalCount"
+          :value="pendingApprovalCount">
           Pending Approval
         </v-badge>
       </v-tab>
@@ -218,14 +218,17 @@ export default class UserManagement extends Vue {
 
   // PROTOTYPE TAB ICON (PENDING APPROVAL)
   private readonly pendingOrgMembers!: Member[]
-  private pendingApprovals = 0
 
   $refs: {
     successDialog: ModalDialog
     errorDialog: ModalDialog
     inviteUsersDialog: ModalDialog
     confirmActionDialog: ModalDialog
-    confirmActionDialogWithQuestion:ModalDialog
+    confirmActionDialogWithQuestion: ModalDialog
+  }
+
+  private get pendingApprovalCount () {
+    return this.pendingOrgMembers.length
   }
 
   private async mounted () {
@@ -233,7 +236,6 @@ export default class UserManagement extends Vue {
     await this.syncActiveOrgMembers()
     await this.syncPendingOrgInvitations()
     await this.syncPendingOrgMembers()
-    this.pendingApprovals = this.pendingOrgMembers.length
   }
 
   private canInvite (): boolean {
