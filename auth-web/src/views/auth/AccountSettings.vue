@@ -9,26 +9,26 @@
     </v-fade-transition>
 
     <div class="view-header">
-      <v-btn large icon color="primary" class="back-btn mr-3" to="/main">
+      <v-btn large icon color="primary" class="back-btn mr-3" to="/main" data-test="account-settings-back-button">
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
       <div>
-        <h1 class="view-header__title">Account Settings</h1>
+        <h1 class="view-header__title" data-test="account-settings-title">Account Settings</h1>
         <p class="mb-0">Manage account information and users of this account</p>
       </div>
     </div>
-    <v-card flat class="account-settings-card">
+    <v-card flat class="account-settings-card" data-test="account-settings-card">
       <v-container class="nav-container">
-        <v-navigation-drawer floating permanent>
+        <v-navigation-drawer floating permanent data-test="account-nav-drawer">
           <v-list dense>
             <v-list-item-group color="primary">
-              <v-list-item @click="accountInfo">
+              <v-list-item @click="goToAccountInfo" data-test="account-info-nav-item">
                 <v-list-item-icon>
                   <v-icon left>mdi-information-outline</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Account Info</v-list-item-title>
               </v-list-item>
-              <v-list-item @click="teamMembers">
+              <v-list-item @click="goToTeamMembers" data-test="team-members-nav-item">
                 <v-list-item-icon>
                   <v-icon left>mdi-account-group-outline</v-icon>
                 </v-list-item-icon>
@@ -37,12 +37,6 @@
             </v-list-item-group>
           </v-list>
         </v-navigation-drawer>
-        <!-- Tab Contents
-        <v-tabs vertical hide-slider mobile-break-point="900" v-model="tab" background-color="transparent">
-          <v-tab><v-icon left>mdi-information-outline</v-icon>Account Info</v-tab>
-          <v-tab><v-icon left>mdi-account-multiple-outline</v-icon>Team Members</v-tab>
-        </v-tabs>
-        -->
       </v-container>
       <v-container>
         <transition name="fade" mode="out-in">
@@ -70,18 +64,11 @@ import UserManagement from '@/components/auth/UserManagement.vue'
   }
 })
 export default class AccountSettings extends Vue {
-  readonly currentUser!: UserInfo
-  errorMessage : string = ''
-  isStaff: boolean = false
-
-  private teamName: string = ''
-  private teamType: string = 'BASIC'
-
-  accountInfo () {
+  private goToAccountInfo () {
     this.$router.push('/account-settings/account-info')
   }
 
-  teamMembers () {
+  private goToTeamMembers () {
     this.$router.push('/account-settings/team-members')
   }
 }
