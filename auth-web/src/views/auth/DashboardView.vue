@@ -1,6 +1,5 @@
 <template>
   <div class="dashboard-view">
-    <ManagementMenu :menu="menu" />
     <article>
       <router-view></router-view>
     </article>
