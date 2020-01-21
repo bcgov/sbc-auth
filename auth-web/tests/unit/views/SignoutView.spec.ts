@@ -1,5 +1,5 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import Signin from '@/components/auth/Signin.vue'
+import SignoutView from '@/views/auth/SignoutView.vue'
 import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -9,16 +9,8 @@ import Vuex from 'vuex'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
-describe('Signin.vue', () => {
-  let wrapper: Wrapper<Signin>
-  const keyCloakConfig = {
-    'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
-    'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
-    'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
-    'VUE_APP_FLAVOR': 'post-mvp'
-  }
-
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(keyCloakConfig)
+describe('SignoutView.vue', () => {
+  let wrapper: Wrapper<SignoutView>
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -31,11 +23,8 @@ describe('Signin.vue', () => {
       }
     })
 
-    let vuetify = new Vuetify({})
-
-    wrapper = mount(Signin, {
+    wrapper = mount(SignoutView, {
       store,
-      vuetify,
       localVue
     })
 

@@ -1,6 +1,6 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import BusinessModule from '@/store/modules/business'
-import SearchBusinessForm from '@/components/auth/SearchBusinessForm.vue'
+import SearchBusinessView from '@/views/auth/SearchBusinessView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -13,7 +13,7 @@ jest.mock('axios', () => ({
   post: jest.fn(() => Promise.resolve({ data: { access_token: 'abcd', refresh_token: 'efgh', registries_trace_id: '12345abcde' } }))
 }))
 
-describe('SearchBusinessForm.vue', () => {
+describe('SearchBusinessView.vue', () => {
   let cmp
   var ob = {
     'VUE_APP_COPS_REDIRECT_URL': 'http://localhost:8081',
@@ -39,31 +39,32 @@ describe('SearchBusinessForm.vue', () => {
 
     let vuetify = new Vuetify({})
 
-    cmp = mount(SearchBusinessForm, {
+    cmp = mount(SearchBusinessView, {
       store,
       localVue,
       vuetify,
       mocks: { $t }
     })
+    cmp.setData({ businessNumber: 'CP0000000' })
 
     jest.resetModules()
     jest.clearAllMocks()
   })
 
   it('searchbusiness screen enter button exists', () => {
-    expect(cmp.find('.search-btn').text().startsWith('Enter')).toBeTruthy()
+    expect(cmp.find('.search-btn').text().startsWith('Search')).toBeTruthy()
     expect(cmp.isVueInstance()).toBeTruthy()
   })
 
   it('incorporation number is empty', () => {
-    expect(cmp.vm.businessNumber).toBe('')
+    expect(cmp.vm.businessNumber).toBe('CP0000000')
   })
 
   it('enter button click invokes searchBusiness method', () => {
     const stub = jest.fn()
-    cmp.setMethods({ searchBusiness: stub })
+    cmp.setMethods({ search: stub })
     cmp.find('.search-btn').trigger('click')
-    expect(cmp.vm.searchBusiness).toBeCalled()
+    expect(cmp.vm.search).toBeCalled()
   })
 
   it('enter button click invokes isFormValid method', () => {

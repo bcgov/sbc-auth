@@ -138,7 +138,7 @@
           <v-btn large color="primary" class="save-continue-button" :disabled='!isFormValid()' @click="save" data-test="save-button">
             Save
           </v-btn>
-          <v-btn large depressed @click="cancel" data-test="cancel-button">Cancel</v-btn>
+          <v-btn large depressed @click="cancel" data-test="cancel-button" class="cancel-button">Cancel</v-btn>
         </div>
       </v-col>
     </v-row>

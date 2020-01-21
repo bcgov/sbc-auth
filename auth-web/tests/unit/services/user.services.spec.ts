@@ -1,6 +1,6 @@
 import Axios from 'axios'
-import { Contact } from '../../src/models/contact'
-import UserService from '../../src/services/user.services'
+import { Contact } from '../../../src/models/contact'
+import UserService from '../../../src/services/user.services'
 
 jest.mock('axios', () => ({
   get: jest.fn(),
@@ -25,7 +25,7 @@ var mockContact : Contact = {
 
 describe('Get user profile', () => {
   const results = []
-  beforeAll(() => {
+  beforeEach(() => {
     sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)
     // @ts-ignore
     Axios.get.mockClear()

@@ -1,5 +1,5 @@
 import Axios from 'axios'
-import PaymentServices from '../../src/services/payment.services'
+import PaymentServices from '../../../src/services/payment.services'
 
 jest.mock('axios', () => ({
   get: jest.fn(),
@@ -30,17 +30,20 @@ describe('create a transaction', () => {
   })
 
   it('should call Axios.post ', () => {
-    expect(Axios.post).toHaveBeenCalledWith(`${mockob.VUE_APP_PAY_ROOT_API}/payment-requests/paymentId/transactions?redirect_uri=www.redirecturl.com`, {})
+    expect(Axios.post).toHaveBeenCalledWith(`${mockob.VUE_APP_PAY_ROOT_API}/payment-requests/paymentId/transactions`, {
+      'clientSystemUrl': 'www.redirecturl.com',
+      'payReturnUrl': 'http://localhost/cooperatives/auth/returnpayment'
+    })
     expect(Axios.post).toBeCalledTimes(1)
   })
 
   it('should call Axios.put wihtout receipt number ', () => {
     PaymentServices.updateTransaction('paymentId', 'transactionId')
-    expect(Axios.patch).toHaveBeenCalledWith(`${mockob.VUE_APP_PAY_ROOT_API}/payment-requests/paymentId/transactions/transactionId?receipt_number=undefined`)
+    expect(Axios.patch).toHaveBeenCalledWith(`${mockob.VUE_APP_PAY_ROOT_API}/payment-requests/paymentId/transactions/transactionId`, {})
   })
 
   it('should call Axios.put  with receipt number', () => {
     PaymentServices.updateTransaction('paymentId', 'transactionId', 'receiptno')
-    expect(Axios.patch).toHaveBeenCalledWith(`${mockob.VUE_APP_PAY_ROOT_API}/payment-requests/paymentId/transactions/transactionId?receipt_number=receiptno`)
+    expect(Axios.patch).toHaveBeenCalledWith(`${mockob.VUE_APP_PAY_ROOT_API}/payment-requests/paymentId/transactions/transactionId`, {})
   })
 })
