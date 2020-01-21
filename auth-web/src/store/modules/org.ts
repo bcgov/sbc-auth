@@ -59,6 +59,7 @@ export default class OrgModule extends VuexModule {
 
   @Mutation
   public updateOrganization (org: Organization) {
+    ConfigHelper.addToSession(SessionStorageKeys.AccountName, org.name)
     const index = this.organizations.findIndex(item => item.id === org.id)
     this.organizations.splice(index, 1, org)
   }
