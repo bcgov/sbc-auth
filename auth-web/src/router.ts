@@ -56,6 +56,8 @@ export function getRoutes () {
     },
     { path: '/account-settings',
       component: AccountSettings,
+      meta: { requiresAuth: true },
+      redirect: '/account-settings/account-info',
       children: [
         {
           path: 'account-info',

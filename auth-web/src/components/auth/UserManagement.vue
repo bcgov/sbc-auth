@@ -400,8 +400,12 @@ export default class UserManagement extends Vue {
     }
 
     .v-badge--inline .v-badge__wrapper {
-      margin-left: 0.4rem;
-      font-size: 0.678rem
+      margin-left: 0;
+
+      .v-badge__badge {
+        margin-right: -0.25rem;
+        margin-left: 0.25rem;
+      }
     }
   }
 

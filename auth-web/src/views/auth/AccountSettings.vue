@@ -9,7 +9,7 @@
     </v-fade-transition>
 
     <div class="view-header">
-      <v-btn large icon color="primary" class="back-btn mr-3" to="/main" data-test="account-settings-back-button">
+      <v-btn large icon color="secondary" class="back-btn mr-3" to="/main" data-test="account-settings-back-button">
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
       <div>
@@ -22,13 +22,13 @@
         <v-navigation-drawer floating permanent data-test="account-nav-drawer">
           <v-list dense>
             <v-list-item-group color="primary">
-              <v-list-item @click="goToAccountInfo" data-test="account-info-nav-item">
+              <v-list-item to="/account-settings/account-info" data-test="account-info-nav-item">
                 <v-list-item-icon>
                   <v-icon left>mdi-information-outline</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Account Info</v-list-item-title>
               </v-list-item>
-              <v-list-item @click="goToTeamMembers" data-test="team-members-nav-item">
+              <v-list-item to="/account-settings/team-members" data-test="team-members-nav-item">
                 <v-list-item-icon>
                   <v-icon left>mdi-account-group-outline</v-icon>
                 </v-list-item-icon>
@@ -48,8 +48,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { Component, Vue } from 'vue-property-decorator'
 import AccountInfo from '@/components/auth/AccountInfo.vue'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
@@ -74,9 +73,6 @@ export default class AccountSettings extends Vue {
     this.$router.push('/account-settings/account-info')
   }
 
-  private goToTeamMembers () {
-    this.$router.push('/account-settings/team-members')
-  }
 }
 </script>
 

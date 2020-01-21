@@ -104,6 +104,10 @@ input:-webkit-autofill:active {
   letter-spacing: 0;
   text-transform: none;
   font-weight: 700;
+
+  .v-badge__badge {
+    font-weight: 400;
+  }
 }
 
 // Tables

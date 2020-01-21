@@ -58,6 +58,12 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
+  public updateOrganization (org: Organization) {
+    var index = this.organizations.findIndex(item => item.id === org.id)
+    this.organizations.splice(index, 1, org)
+  }
+
+  @Mutation
   public resetInvitations () {
     this.resending = false
     this.sentInvitations = []
@@ -119,6 +125,27 @@ export default class OrgModule extends VuexModule {
           break
         default:
           this.context.commit('setOrgCreateMessage', 'Error happened while creating team')
+          break
+      }
+    }
+  }
+
+  @Action({ rawError: true })
+  public async updateOrg (createRequestBody: CreateOrgRequestBody) {
+    try {
+      const response = await OrgService.updateOrg(this.context.state['currentOrganization'].id, createRequestBody)
+      this.context.commit('setOrgCreateMessage', 'success')
+      this.context.commit('updateOrganization', response.data)
+    } catch (err) {
+      switch (err.response.status) {
+        case 409:
+          this.context.commit('setOrgCreateMessage', 'Teams with similar names exists')
+          break
+        case 400:
+          this.context.commit('setOrgCreateMessage', 'Invalid team name')
+          break
+        default:
+          this.context.commit('setOrgCreateMessage', 'Error happened while updating team')
           break
       }
     }
