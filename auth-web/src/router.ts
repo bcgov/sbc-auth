@@ -1,8 +1,6 @@
 import { Role, SessionStorageKeys } from '@/util/constants'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
-import AccountInfo from '@/components/auth/AccountInfo.vue'
-import AccountSettings from '@/views/auth/AccountSettings.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import CreateTeamView from '@/views/auth/CreateTeamView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
@@ -37,6 +35,9 @@ function mapReturnPayVars (route: any) {
 }
 
 export function getRoutes () {
+  const accountSettings = () => import(/* webpackChunkName: "account-settings" */ './views/auth/AccountSettings.vue')
+  const accountInfo = () => import(/* webpackChunkName: "account-settings" */ './components/auth/AccountInfo.vue')
+  const userManagement = () => import(/* webpackChunkName: "account-settings" */ './components/auth/UserManagement.vue')
   const routes = [
     { path: '/', component: HomeView },
     { path: '/home', component: HomeView },
@@ -55,17 +56,17 @@ export function getRoutes () {
         }]
     },
     { path: '/account-settings',
-      component: AccountSettings,
+      component: accountSettings,
       meta: { requiresAuth: true },
       redirect: '/account-settings/account-info',
       children: [
         {
           path: 'account-info',
-          component: AccountInfo
+          component: accountInfo
         },
         {
           path: 'team-members',
-          component: UserManagement
+          component: userManagement
         }
       ]
     },
