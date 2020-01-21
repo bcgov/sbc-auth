@@ -53,14 +53,11 @@ import { getModule } from 'vuex-module-decorators'
 })
 export default class AccountInfo extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
-  readonly currentUser!: UserInfo
-  errorMessage : string = ''
-  isStaff: boolean = false
-  btnLabel = 'Save'
+  private btnLabel = 'Save'
   private readonly currentOrganization!: Organization
   private readonly syncOrganizations!: () => Organization[]
   private readonly updateOrg!: (requestBody: CreateRequestBody) => Organization
-  orgName = ''
+  private orgName = ''
   private readonly orgCreateMessage
   private touched = false
 
@@ -68,7 +65,7 @@ export default class AccountInfo extends Vue {
     return !!this.orgName
   }
 
-  async mounted () {
+  private async mounted () {
     this.orgStore.setOrgCreateMessage('success') // reset
     if (!this.currentOrganization) {
       await this.syncOrganizations()
@@ -76,12 +73,13 @@ export default class AccountInfo extends Vue {
     this.orgName = this.currentOrganization.name
   }
 
-  enableBtn () {
+  private enableBtn () {
     this.btnLabel = 'Save'
     this.touched = true
     this.orgStore.setOrgCreateMessage('success') // reset
   }
-  async updateOrgName () {
+
+  private async updateOrgName () {
     this.btnLabel = 'Saving'
     const createRequestBody: CreateRequestBody = {
       name: this.orgName
