@@ -25,7 +25,7 @@ describe('PaymentReturnView.vue', () => {
   it('renders page and service gets invoked', () => {
     PaymentServices.updateTransaction = jest.fn().mockResolvedValue({})
     const $t = () => 'Preparing your payments'
-    const wrapper = shallowMount(PaymentReturnView, {
+    shallowMount(PaymentReturnView, {
       propsData: {
         paymentId: 'somepaymentId',
         transactionId: 'sometransactionId',
@@ -39,7 +39,6 @@ describe('PaymentReturnView.vue', () => {
   it('service is not invoked when no params are present', () => {
     PaymentServices.updateTransaction = jest.fn().mockResolvedValue({})
 
-    let feeresponse = {}
     const $t = (payNoParams: string) => 'Incorrect configuration'
     const wrapper = shallowMount(PaymentReturnView, {
       propsData: { },
@@ -50,7 +49,6 @@ describe('PaymentReturnView.vue', () => {
   })
 
   it('renders page with error message when service fails', () => {
-    let feeresponse = {}
     const $t = () => 'Preparing your payments'
     PaymentServices.updateTransaction = jest.fn().mockRejectedValue({})
 
