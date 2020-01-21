@@ -114,11 +114,11 @@ export default class BusinessContactForm extends Vue {
   ]
 
   private phoneRules = [
-    v => !v || (v.length === 0 || v.length === 14) || 'Phone number is invalid'
+    v => !v || (v.length === 0 && v.length === 14) || 'Phone number is invalid'
   ]
 
   private extensionRules = [
-    v => !v || (v.length >= 0 || v.length <= 3) || 'Extension is invalid'
+    v => !v || (v.length >= 0 && v.length <= 5) || 'Extension is invalid'
   ]
 
   private emailMustMatch (): string {
