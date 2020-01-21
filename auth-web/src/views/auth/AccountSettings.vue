@@ -38,7 +38,7 @@
           </v-list>
         </v-navigation-drawer>
       </v-container>
-      <v-container>
+      <v-container class="account-settings__content">
         <transition name="fade" mode="out-in">
           <router-view></router-view>
         </transition>
@@ -72,7 +72,6 @@ export default class AccountSettings extends Vue {
   private goToAccountInfo () {
     this.$router.push('/account-settings/account-info')
   }
-
 }
 </script>
 
@@ -93,10 +92,15 @@ export default class AccountSettings extends Vue {
     font-weight: 700;
   }
 
-  ::v-deep {
-    h2 {
-      padding-bottom: 1.5rem;
-      font-size: 1.5rem;
+  .account-settings__content {
+    ::v-deep {
+      .view-header {
+        margin-bottom: 1.75rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
     }
   }
 

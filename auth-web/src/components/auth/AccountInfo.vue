@@ -1,22 +1,31 @@
 <template>
   <v-container class="p-0">
-    <header class="view-header mb-2">
+    <header class="view-header">
       <h2 class="view-header__title">Account Info</h2>
     </header>
     <v-form ref="editAccountForm">
-    <v-text-field dense filled clearable label="Account Name" v-model="orgName" v-on:keydown="enableBtn();"></v-text-field>
+    <v-text-field filled clearable required label="Account Name"
+      :rules="accountNameRules"
+      v-model="orgName"
+      v-on:keydown="enableBtn();">
+    </v-text-field>
       <v-alert v-show="orgCreateMessage !== 'success'" class="mb-0"
-               dense
+               dens
                outlined
                type="error"
       >{{orgCreateMessage}}
       </v-alert>
     <div class="form__btns">
-      <v-btn large color="primary" @click="updateOrgName()" :disabled="!touched || !isFormValid()" :loading="btnLabel == 'Saving'">
-        <v-scroll-x-transition>
-          <v-icon v-show="btnLabel == 'Saved'" class="mr-1">mdi-check</v-icon>
-        </v-scroll-x-transition>
-        {{btnLabel}}
+      <v-btn large class="save-btn"
+        v-bind:class="{ 'disabled' : btnLabel == 'Saved' }"
+        :color="btnLabel == 'Saved'? 'success' : 'primary'"
+        :disabled="!isFormValid()"
+        :loading="btnLabel == 'Saving'"
+        @click="updateOrgName()">
+        <v-expand-x-transition>
+          <v-icon v-show="btnLabel == 'Saved'">mdi-check</v-icon>
+        </v-expand-x-transition>
+        <span class="save-btn__label">{{btnLabel}}</span>
       </v-btn>
     </div>
     </v-form>
@@ -86,6 +95,10 @@ export default class AccountInfo extends Vue {
     this.touched = false
   }
 
+  private readonly accountNameRules = [
+    v => !!v || 'An account name is required'
+  ]
+
   private teamName: string = ''
   private teamType: string = 'BASIC'
 }
@@ -106,10 +119,6 @@ export default class AccountInfo extends Vue {
     font-weight: 700;
   }
 
-  .test {
-    font-size: 1rem;
-  }
-
   .form__btns {
     display: flex;
     flex-direction: row;
@@ -127,16 +136,17 @@ export default class AccountInfo extends Vue {
     border-right: 1px solid #eeeeee;
   }
 
-  ::v-deep .v-tabs-bar {
-    width: 100%;
-  }
-
-  .v-tab {
-    justify-content: left;
-  }
-
   .header-container {
     display: flex;
     flex-direction: row;
+  }
+
+  .save-btn.disabled {
+    pointer-events: none;
+  }
+
+  .save-btn__label {
+    padding-left: 0.2rem;
+    padding-right: 0.2rem;
   }
 </style>
