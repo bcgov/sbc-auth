@@ -21,7 +21,7 @@ All services have 2 defaults sets of endpoints:
 That are used to expose operational health information about the service, and meta information.
 """
 
-from flask import Blueprint
+from flask import Blueprint, current_app
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
 
 from .apihelper import Api
@@ -33,6 +33,7 @@ from .logout import API as LOGOUT_API
 from .meta import API as META_API
 from .ops import API as OPS_API
 from .org import API as ORG_API
+from .reset import API as RESET_API
 from .token import API as TOKEN_API
 from .user import API as USER_API
 
@@ -78,3 +79,18 @@ API.add_namespace(ORG_API, path='/orgs')
 API.add_namespace(INVITATION_API, path='/invitations')
 API.add_namespace(DOCUMENTS_API, path='/documents')
 API.add_namespace(CODES_API, path='/codes')
+
+TEST_BLUEPRINT = Blueprint('TEST', __name__, url_prefix='/test')
+
+API_TEST = Api(
+    TEST_BLUEPRINT,
+    title='Authentication API for testing',
+    version='1.0',
+    description='The API for the testing',
+    security=['apikey'],
+    authorizations=AUTHORIZATIONS,
+)
+
+HANDLER = ExceptionHandler(API_TEST)
+
+API_TEST.add_namespace(RESET_API, path='/reset')

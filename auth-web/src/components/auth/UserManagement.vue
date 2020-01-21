@@ -13,7 +13,13 @@
     <!-- Tab Navigation -->
     <v-tabs class="mb-7" v-model="tab" background-color="transparent">
       <v-tab data-test="active-tab">Active</v-tab>
-      <v-tab data-test="pending-approval-tab" v-show="canInvite()">Pending Approval</v-tab>
+      <v-tab data-test="pending-approval-tab" v-show="canInvite()">
+        <v-badge inline color="error"
+          :content="pendingApprovalCount"
+          :value="pendingApprovalCount">
+          Pending Approval
+        </v-badge>
+      </v-tab>
       <v-tab data-test="invitations-tab" v-show="canInvite()">Invitations</v-tab>
     </v-tabs>
 
@@ -154,7 +160,8 @@ import { getModule } from 'vuex-module-decorators'
   computed: {
     ...mapState('org', [
       'resending',
-      'sentInvitations'
+      'sentInvitations',
+      'pendingOrgMembers'
     ]),
     ...mapState('business', ['currentBusiness']),
     ...mapGetters('org', ['myOrgMembership'])
@@ -166,7 +173,11 @@ import { getModule } from 'vuex-module-decorators'
       'updateMember',
       'approveMember',
       'leaveTeam',
-      'syncOrganizations'
+      'syncOrganizations',
+      'syncActiveOrgMembers',
+      'syncPendingOrgInvitations',
+      'syncPendingOrgMembers'
+
     ])
   }
 })
@@ -199,19 +210,32 @@ export default class UserManagement extends Vue {
   private readonly approveMember!: (memberId: number) => void
   private readonly leaveTeam!: (memberId: number) => void
   private readonly syncOrganizations!: () => Promise<Organization[]>
+  private readonly syncPendingOrgMembers!: () => Member[]
+  private readonly syncPendingOrgInvitations!: () => Invitation[]
+  private readonly syncActiveOrgMembers!: () => Member[]
 
   private notifyUser = true
+
+  // PROTOTYPE TAB ICON (PENDING APPROVAL)
+  private readonly pendingOrgMembers!: Member[]
 
   $refs: {
     successDialog: ModalDialog
     errorDialog: ModalDialog
     inviteUsersDialog: ModalDialog
     confirmActionDialog: ModalDialog
-    confirmActionDialogWithQuestion:ModalDialog
+    confirmActionDialogWithQuestion: ModalDialog
+  }
+
+  private get pendingApprovalCount () {
+    return this.pendingOrgMembers.length
   }
 
   private async mounted () {
     this.isLoading = false
+    await this.syncActiveOrgMembers()
+    await this.syncPendingOrgInvitations()
+    await this.syncPendingOrgMembers()
   }
 
   private canInvite (): boolean {
@@ -388,6 +412,11 @@ export default class UserManagement extends Vue {
     .v-list-item__title {
       display: block;
       font-weight: 700;
+    }
+
+    .v-badge--inline .v-badge__wrapper {
+      margin-left: 0.4rem;
+      font-size: 0.678rem
     }
   }
 
