@@ -41,12 +41,12 @@ class BaseModel(db.Model):
     @declared_attr
     def created_by(cls):  # pylint:disable=no-self-argument, # noqa: N805
         """Return relationship for created by."""
-        return relationship('User', foreign_keys=[cls.created_by_id], uselist=False)
+        return relationship('User', foreign_keys=[cls.created_by_id], post_update=True, uselist=False)
 
     @declared_attr
     def modified_by(cls):  # pylint:disable=no-self-argument, # noqa: N805
         """Return relationship for modified by."""
-        return relationship('User', foreign_keys=[cls.modified_by_id], uselist=False)
+        return relationship('User', foreign_keys=[cls.modified_by_id], post_update=True, uselist=False)
 
     @staticmethod
     def _get_current_user():
