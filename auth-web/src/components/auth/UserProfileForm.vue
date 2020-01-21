@@ -85,7 +85,7 @@
                 filled label="Extension"
                 persistent-hint
                 :rules="extensionRules"
-                v-mask="'####'"
+                v-mask="'#####'"
                 v-model="extension"
                 data-test="phone-extension"
         >
