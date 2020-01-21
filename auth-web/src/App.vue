@@ -43,7 +43,6 @@ export default class App extends Vue {
   private readonly pendingOrgMembers!: Member[]
   private readonly myOrgMembership!: Member
 
-  @Watch('myOrgMembership')
   get pendingActionCount (): number {
     return (this.myOrgMembership &&
             this.myOrgMembership.membershipStatus === MembershipStatus.Active &&
