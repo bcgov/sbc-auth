@@ -44,7 +44,6 @@
           type="tel"
           v-mask="['(###) ###-####']"
           v-model="phoneNumber"
-          :rules="phoneRules"
         >
         </v-text-field>
       </v-col>
@@ -111,10 +110,6 @@ export default class BusinessContactForm extends Vue {
       const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
       return pattern.test(v) || 'Valid email is required'
     }
-  ]
-
-  private phoneRules = [
-    v => !v || 'Phone number is invalid'
   ]
 
   private extensionRules = [
