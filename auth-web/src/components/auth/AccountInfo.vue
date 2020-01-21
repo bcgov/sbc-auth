@@ -4,30 +4,28 @@
       <h2 class="view-header__title">Account Info</h2>
     </header>
     <v-form ref="editAccountForm">
-    <v-text-field filled clearable required label="Account Name"
-      :rules="accountNameRules"
-      v-model="orgName"
-      v-on:keydown="enableBtn();">
-    </v-text-field>
-      <v-alert v-show="orgCreateMessage !== 'success'" class="mb-0"
-               dens
-               outlined
-               type="error"
-      >{{orgCreateMessage}}
+      <v-alert type="error" class="mb-6"
+        v-show="orgCreateMessage !== 'success'">
+        {{orgCreateMessage}}
       </v-alert>
-    <div class="form__btns">
-      <v-btn large class="save-btn"
-        v-bind:class="{ 'disabled' : btnLabel == 'Saved' }"
-        :color="btnLabel == 'Saved'? 'success' : 'primary'"
-        :disabled="!isFormValid()"
-        :loading="btnLabel == 'Saving'"
-        @click="updateOrgName()">
-        <v-expand-x-transition>
-          <v-icon v-show="btnLabel == 'Saved'">mdi-check</v-icon>
-        </v-expand-x-transition>
-        <span class="save-btn__label">{{btnLabel}}</span>
-      </v-btn>
-    </div>
+      <v-text-field filled clearable required label="Account Name"
+        :rules="accountNameRules"
+        v-model="orgName"
+        v-on:keydown="enableBtn();">
+      </v-text-field>
+      <div class="form__btns">
+        <v-btn large class="save-btn"
+          v-bind:class="{ 'disabled' : btnLabel == 'Saved' }"
+          :color="btnLabel == 'Saved'? 'success' : 'primary'"
+          :disabled="!isFormValid()"
+          :loading="btnLabel == 'Saving'"
+          @click="updateOrgName()">
+          <v-expand-x-transition>
+            <v-icon v-show="btnLabel == 'Saved'">mdi-check</v-icon>
+          </v-expand-x-transition>
+          <span class="save-btn__label">{{btnLabel}}</span>
+        </v-btn>
+      </div>
     </v-form>
   </v-container>
 </template>
