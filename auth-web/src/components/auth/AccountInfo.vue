@@ -4,15 +4,15 @@
       <h2 class="view-header__title">Account Info</h2>
     </header>
     <v-form ref="editAccountForm">
-    <v-text-field dense filled clearable label="Account Name" v-model="orgName"></v-text-field>
+    <v-text-field dense filled clearable label="Account Name" v-model="orgName" v-on:keydown="enableBtn();"></v-text-field>
+      <v-alert v-show="orgCreateMessage !== 'success'" class="mb-0"
+               dense
+               outlined
+               type="error"
+      >{{orgCreateMessage}}
+      </v-alert>
     <div class="form__btns">
-      <v-btn large color="primary" @click="updateOrgName()" :disabled="!isFormValid()" :loading="btnLabel == 'Saving'">
-        <!--
-        <v-progress-circular
-                indeterminate
-                color="green" v-show="btnLabel == 'Saving'"
-        >Saving</v-progress-circular>
-        -->
+      <v-btn large color="primary" @click="updateOrgName()" :disabled="!touched || !isFormValid()" :loading="btnLabel == 'Saving'">
         <v-scroll-x-transition>
           <v-icon v-show="btnLabel == 'Saved'" class="mr-1">mdi-check</v-icon>
         </v-scroll-x-transition>
@@ -39,7 +39,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('org', ['syncOrganizations', 'updateOrg'])
   },
   computed: {
-    ...mapState('org', ['currentOrganization'])
+    ...mapState('org', ['currentOrganization', 'orgCreateMessage'])
   }
 })
 export default class AccountInfo extends Vue {
@@ -52,25 +52,38 @@ export default class AccountInfo extends Vue {
   private readonly syncOrganizations!: () => Organization[]
   private readonly updateOrg!: (requestBody: CreateRequestBody) => Organization
   orgName = ''
+  private readonly orgCreateMessage
+  private touched = false
 
   private isFormValid (): boolean {
     return !!this.orgName
   }
 
   async mounted () {
+    this.orgStore.setOrgCreateMessage('success') // reset
     if (!this.currentOrganization) {
       await this.syncOrganizations()
     }
     this.orgName = this.currentOrganization.name
   }
 
+  enableBtn () {
+    this.btnLabel = 'Save'
+    this.touched = true
+    this.orgStore.setOrgCreateMessage('success') // reset
+  }
   async updateOrgName () {
     this.btnLabel = 'Saving'
     const createRequestBody: CreateRequestBody = {
       name: this.orgName
     }
-    this.updateOrg(createRequestBody)
-    this.btnLabel = 'Saved'
+    await this.updateOrg(createRequestBody)
+    if (this.orgCreateMessage === 'success') {
+      this.btnLabel = 'Saved'
+    } else {
+      this.btnLabel = 'Save'
+    }
+    this.touched = false
   }
 
   private teamName: string = ''

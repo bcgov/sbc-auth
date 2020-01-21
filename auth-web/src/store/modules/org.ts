@@ -59,7 +59,7 @@ export default class OrgModule extends VuexModule {
 
   @Mutation
   public updateOrganization (org: Organization) {
-    var index = this.organizations.findIndex(item => item.id === org.id)
+    const index = this.organizations.findIndex(item => item.id === org.id)
     this.organizations.splice(index, 1, org)
   }
 
@@ -136,6 +136,7 @@ export default class OrgModule extends VuexModule {
       const response = await OrgService.updateOrg(this.context.state['currentOrganization'].id, createRequestBody)
       this.context.commit('setOrgCreateMessage', 'success')
       this.context.commit('updateOrganization', response.data)
+      this.context.commit('setCurrentOrganization', response.data)
     } catch (err) {
       switch (err.response.status) {
         case 409:

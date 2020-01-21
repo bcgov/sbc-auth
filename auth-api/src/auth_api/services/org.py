@@ -74,6 +74,11 @@ class Org:
     def update_org(self, org_info):
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
+
+        existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'])
+        if existing_similar__org is not None:
+            raise BusinessException(Error.DATA_CONFLICT, None)
+
         self._model.update_org_from_dict(camelback2snake(org_info))
         current_app.logger.debug('>update_org ')
         return self
