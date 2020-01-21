@@ -64,6 +64,12 @@ import UserManagement from '@/components/auth/UserManagement.vue'
   }
 })
 export default class AccountSettings extends Vue {
+  private isLoading = true
+
+  private mounted () {
+    this.isLoading = false
+  }
+
   private goToAccountInfo () {
     this.$router.push('/account-settings/account-info')
   }

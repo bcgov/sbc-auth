@@ -1,6 +1,6 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
-import { CreateRequestBody as CreateOrgRequestBody, Member, MembershipStatus, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { CreateRequestBody as CreateOrgRequestBody, Member, MembershipStatus, MembershipType, Organization, UpdateMemberPayload } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
@@ -240,6 +240,18 @@ export default class OrgModule extends VuexModule {
   @Action({ commit: 'setPendingOrgMembers', rawError: true })
   public async syncPendingOrgMembers () {
     const response = await OrgService.getOrgMembers(this.context.state['currentOrganization'].id, 'PENDING_APPROVAL')
+    // Sync pending approval count to session storage for admins only
+    const myMembership = this.myOrgMembership
+    if (response.data && response.data.members && myMembership &&
+        myMembership.membershipStatus === MembershipStatus.Active &&
+        myMembership.membershipTypeCode !== MembershipType.Member) {
+      ConfigHelper.addToSession(SessionStorageKeys.PendingApprovalCount, response.data.members.length)
+    } else {
+      ConfigHelper.addToSession(SessionStorageKeys.PendingApprovalCount, 0)
+    }
+
+    // This is a temporary measure used to force update of session storage event listeners
+    window.dispatchEvent(new CustomEvent('updateApprovalCount'))
     return response.data && response.data.members ? response.data.members : []
   }
 

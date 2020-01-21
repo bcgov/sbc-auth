@@ -6,7 +6,9 @@ export enum SessionStorageKeys {
     ApiConfigKey = 'AUTH_API_CONFIG',
     BusinessIdentifierKey = 'BUSINESS_IDENTIFIER',
     UserFullName = 'USER_FULL_NAME',
-    AccountName = 'ACCOUNT_NAME'
+    AccountName = 'ACCOUNT_NAME',
+    UserAccountType = 'USER_ACCOUNT_TYPE',
+    PendingApprovalCount = 'PENDING_APPROVAL_COUNT'
 }
 
 export enum Role {
