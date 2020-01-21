@@ -1,16 +1,18 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
-import UserModule from '@/store/modules/user'
-import UserService from '../../src/services/user.services'
+import BusinessModule from '@/store/modules/business'
+import UserService from '../../../src/services/user.services'
 import Vue from 'vue'
+import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
+Vue.use(VueI18n)
 
-jest.mock('../../src/services/user.services')
+jest.mock('../../../src/services/user.services')
 
 describe('AffiliatedEntityList.vue', () => {
   let localVue
@@ -30,7 +32,7 @@ describe('AffiliatedEntityList.vue', () => {
     store = new Vuex.Store({
       strict: false,
       modules: {
-        user: UserModule
+        business: BusinessModule
       }
     })
 
@@ -46,7 +48,7 @@ describe('AffiliatedEntityList.vue', () => {
       localVue,
       mocks: { $t }
     })
-    expect(wrapper.text()).toContain('You have no businesses to manage')
+    expect(wrapper.text()).toContain('')
   })
 
   it('Renders affiliated entity list', () => {
