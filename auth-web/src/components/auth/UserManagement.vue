@@ -251,7 +251,7 @@ export default class UserManagement extends Vue {
   private showSuccessModal () {
     this.$refs.inviteUsersDialog.close()
     this.successTitle = `Invited ${this.sentInvitations.length} Team Members`
-    this.successText = 'Your team invitations have been sent successfully.'
+    this.successText = 'When team members accept this invitation, you will need to approve their access to this account.'
     this.$refs.successDialog.open()
   }
 
