@@ -6,6 +6,19 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:10.8
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+        - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        
     steps:
     - uses: actions/checkout@v1
     - name: Install Jq
@@ -21,14 +34,4 @@ jobs:
         op --version
         source 1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} ${{ secrets.op_password }}
         #echo env
-    - name: Setup PostgreSQL
-      uses: Harmon758/postgresql-action@v1.0.0
-      with:
-        # Version of PostgreSQL to use
-        postgresql version: latest
-        # POSTGRES_DB - name for the default database that is created
-        postgresql db: $database
-        # POSTGRES_USER - create the specified user with superuser power
-        postgresql user: $username 
-        # POSTGRES_PASSWORD - superuser password
-        postgresql password: $password
+
