@@ -19,7 +19,7 @@ jobs:
     - name: Set up Env
       run: |
         op --version
-        sh 1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} ${{ secrets.op_password }}
+        source 1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} ${{ secrets.op_password }}
     - name: Show Env
       run: |    
         env
