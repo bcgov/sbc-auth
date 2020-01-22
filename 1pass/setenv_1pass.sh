@@ -17,6 +17,6 @@ for row in $(echo ${ev} | jq -r -c '.details.sections[] | select(.title=='\"${ap
         echo ${row} | base64 --decode | jq -r ${1}
     }
     echo "Setting environment variable $(_envvars '.t')"
-    eval $(echo "::set-env name=$(_envvars '.t')::$(_envvars '.v')")
+    eval $(echo ::set-env name=$(_envvars '.t')::$(_envvars '.v'))
 done
 
