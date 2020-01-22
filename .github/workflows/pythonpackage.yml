@@ -11,7 +11,7 @@ jobs:
     - name: Install Jq
       run: |
         apt update
-        apt install -y curl unzip jq 
+        apt install curl unzip jq --yes
         curl -o 1password.zip https://cache.agilebits.com/dist/1P/op/pkg/v0.8.0/op_linux_amd64_v0.8.0.zip 
         unzip 1password.zip -d /usr/local/bin 
         rm 1password.zip
