@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+    - uses: docker://1password/op:latest
     - name: Install Jq
       run: |
         sudo apt update
         sudo apt install jq
-    - uses: 1password/op        
     - name: Set up Env
       run: |
         bash 1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} ${{ secrets.op_password }}
