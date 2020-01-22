@@ -29,11 +29,10 @@ jobs:
         sudo unzip 1password.zip -d /usr/local/bin 
         sudo rm 1password.zip
         sudo chmod 755 /usr/local/bin/op
-    - name: Set up Env and run pytest
+    - name: Set up Env from 1password
       run: |
         op --version
         source 1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} ${{ secrets.op_password }} pytest
-        #echo env
     - name: Set up Python 3.7
       uses: actions/setup-python@v1
       with:
