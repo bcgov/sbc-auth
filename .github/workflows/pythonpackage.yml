@@ -19,9 +19,7 @@ jobs:
     - name: Set up Env
       run: |
         op --version
-        PASS=${{ secrets.op_password }} 
-        echo ${PASS} | op signin registires.1password.ca patrick.wei@gov.bc.ca ${{ secrets.op_secret_key }}
-        #source 1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} ${{ secrets.op_password }}
+        source 1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} \'${{ secrets.op_password }}\'
     - name: Show Env
       run: |    
         env
