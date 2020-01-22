@@ -19,7 +19,8 @@ jobs:
     - name: Set up Env
       run: |
         op --version
-        source 1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} "${{ secrets.op_password }}"
+        #source 1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} "${{ secrets.op_password }}"
+        echo "8v0C3ww$DMCaC0E&" | op signin registries.1password.ca patrick.wei@gov.bc.ca A3-NNTMDY-QAQ44Q-TGJGX-HHKKL-BCXJW-97H7A 
     - name: Show Env
       run: |    
         env
