@@ -8,13 +8,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - uses: docker://1password/op:latest
     - name: Install Jq
       run: |
-        sudo apt update
-        sudo apt install jq
+        apt update
+        apt install -y curl unzip jq 
+        curl -o 1password.zip https://cache.agilebits.com/dist/1P/op/pkg/v0.8.0/op_linux_amd64_v0.8.0.zip 
+        unzip 1password.zip -d /usr/local/bin 
+        rm 1password.zip
     - name: Set up Env
       run: |
+        op --version
         bash 1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} ${{ secrets.op_password }}
     - name: Show Env
       run: |    
