@@ -1,16 +1,19 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
-import BusinessModule from '@/store/modules/business'
+import ModalDialog from '@/components/auth/ModalDialog.vue'
+import TermsOfUseDialog from '@/components/auth/TermsOfUseDialog.vue'
+import UserModule from '@/store/modules/user'
+import UserProfileForm from '@/components/auth/UserProfileForm.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import i18n from '../../../src/plugins/i18n'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
-describe('BusinessContactForm.vue', () => {
-  let wrapper: Wrapper<BusinessContactForm>
+describe('UserProfileForm.vue', () => {
+  let wrapper: Wrapper<UserProfileForm>
   const config = {
     'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
     'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
@@ -21,17 +24,23 @@ describe('BusinessContactForm.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
+    const $t = () => 'test'
 
     const store = new Vuex.Store({
       strict: false,
       modules: {
-        business: BusinessModule
+        user: UserModule
       }
     })
 
-    wrapper = mount(BusinessContactForm, {
+    wrapper = mount(UserProfileForm, {
       store,
-      localVue
+      localVue,
+      mocks: { $t },
+      stubs: {
+        ModalDialog: true,
+        TermsOfUseDialog: true
+      }
     })
 
     jest.resetModules()
@@ -42,9 +51,17 @@ describe('BusinessContactForm.vue', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
-  it('business contact form has save and skip buttons', () => {
+  it('user profile form has save and cancel buttons', () => {
     expect(wrapper.find('.save-continue-button')).toBeTruthy()
-    expect(wrapper.find('.skip-button')).toBeTruthy()
+    expect(wrapper.find('.cancel-button')).toBeTruthy()
+  })
+
+  it('first name is empty', () => {
+    expect(wrapper.vm.$data.firstName).toBe('')
+  })
+
+  it('last name is empty', () => {
+    expect(wrapper.vm.$data.lastName).toBe('')
   })
 
   it('email data is empty', () => {
