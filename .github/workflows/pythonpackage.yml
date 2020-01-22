@@ -15,7 +15,7 @@ jobs:
         sudo curl -o 1password.zip https://cache.agilebits.com/dist/1P/op/pkg/v0.8.0/op_linux_amd64_v0.8.0.zip 
         sudo unzip 1password.zip -d /usr/local/bin 
         sudo rm 1password.zip
-        chmod 755 /usr/local/bin/op
+        sudo chmod 755 /usr/local/bin/op
     - name: Set up Env
       run: |
         op --version
