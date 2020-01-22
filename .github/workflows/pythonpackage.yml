@@ -12,5 +12,6 @@ jobs:
     - name: Set up Env
       run: |
         op --version
-        . ./1pass/setenv_1pass.sh ${{secrets.op_username}} ${{secrets.op_secret_key}} ${{secrets.op_password}}
+        op signin registries.1password.ca
+        . ./1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} ${{ secrets.op_password }}
         env
