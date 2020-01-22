@@ -63,7 +63,7 @@ class KeyCloakService {
     }
   }
 
-  logout (redirectUrl: string) {
+  async logout (redirectUrl: string) {
     let token = configHelper.getFromSession(SessionStorageKeys.KeyCloakToken)
     if (token) {
       this.kc = Keycloak(keyCloakConfig)
@@ -75,14 +75,25 @@ class KeyCloakService {
         refreshToken: sessionStorage.getItem('KEYCLOAK_REFRESH_TOKEN'),
         idToken: sessionStorage.getItem('KEYCLOAK_ID_TOKEN')
       }
-      this.kc.init(kcOptions).success(authenticated => {
-        if (authenticated) {
-          configHelper.clearSession()
-          if (!redirectUrl) {
-            redirectUrl = `${window.location.origin}${process.env.VUE_APP_PATH}`
-          }
-          this.kc.logout({ redirectUri: redirectUrl })
-        }
+      configHelper.clearSession()
+      return new Promise((resolve, reject) => {
+        this.kc.init(kcOptions)
+          .success(authenticated => {
+            if (!authenticated) {
+              resolve()
+            }
+            redirectUrl = redirectUrl || `${window.location.origin}${process.env.VUE_APP_PATH}`
+            this.kc.logout({ redirectUri: redirectUrl })
+              .success(() => {
+                resolve()
+              })
+              .error(error => {
+                reject(error)
+              })
+          })
+          .error(error => {
+            reject(error)
+          })
       })
     }
   }

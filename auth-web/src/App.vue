@@ -25,17 +25,17 @@ export default Vue.extend({
     SbcFooter,
     PaySystemAlert
   },
-  mounted (): void {
+
+  async mounted () {
     // eslint-disable-next-line no-console
     console.log('APP.vue mounted')
     if (sessionStorage.getItem('KEYCLOAK_TOKEN')) {
       // eslint-disable-next-line no-console
-      console.info('[APP.vue] Token exists.So start the refreshtimer')
+      console.info('[APP.vue] Token exists.  So start the refreshtimer')
       var self = this
       let tokenService = new TokenService()
-      tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`).then(function (success) {
-        tokenService.scheduleRefreshTimer()
-      })
+      await tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
+      tokenService.scheduleRefreshTimer()
     }
   }
 })
