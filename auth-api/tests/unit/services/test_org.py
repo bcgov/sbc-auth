@@ -61,6 +61,19 @@ def test_update_org(session):  # pylint:disable=unused-argument
     assert dictionary['name'] == TestOrgInfo.org2['name']
 
 
+def test_update__duplicate_org(session):  # pylint:disable=unused-argument
+    """Assert that an Org cannot be updated."""
+    org = factory_org_service()
+
+    org.update_org(TestOrgInfo.org2)
+
+    dictionary = org.as_dict()
+    assert dictionary['name'] == TestOrgInfo.org2['name']
+
+    with pytest.raises(BusinessException) as exception:
+        org.update_org(TestOrgInfo.org2)
+    assert exception.value.code == Error.DATA_CONFLICT.name
+
 def test_find_org_by_id(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an org can be retrieved by its id."""
     org = factory_org_service()
