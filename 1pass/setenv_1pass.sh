@@ -7,7 +7,7 @@ eval $(echo "$3" | op signin registries.1password.ca $1 $2)
 
 # My setup uses a 1Password type of 'Password' and stores all records within a
 # single section. The label is the key, and the value is the value.
-ev=`op get item --vault=relationship postgresql-dev`
+ev=`op get item --vault=relationship $4`
 app=Auth-api
 
 # Convert to base64 for multi-line secrets.
