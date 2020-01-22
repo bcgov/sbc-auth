@@ -1,58 +1,16 @@
 <template>
-  <div class="toolbar-container">
-    <v-toolbar flat>
-      <v-toolbar-title>
-        <router-link to="/home">Cooperatives Online</router-link>
-      </v-toolbar-title>
-      <v-toolbar-items flat>
-        <v-btn text color="navBg" to="/main/business">Manage Businesses</v-btn>
-        <v-menu open-on-hover offset-y transition="slide-y-transition">
-          <template v-slot:activator="{ on }">
-            <v-btn text color="navBg" v-on="on">
-              Menu Item
-              <v-icon small class="mr-n1 ml-1">mdi-chevron-down</v-icon>
-            </v-btn>
-          </template>
-          <v-list dense flat>
-            <v-list-item>
-              <v-list-item-title>Item 1</v-list-item-title>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-title>Item 1</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-        <v-menu open-on-hover offset-y transition="slide-y-transition">
-          <template v-slot:activator="{ on }">
-            <v-btn text color="navBg" v-on="on">
-              Menu Item
-              <v-icon small class="mr-n1 ml-1">mdi-chevron-down</v-icon>
-            </v-btn>
-          </template>
-          <v-list dense flat>
-            <v-list-item>
-              <v-list-item-title>Item 1</v-list-item-title>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-title>Item 1</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </v-toolbar-items>
-    </v-toolbar>
-    <!--
-    <v-container class="pt-0 pb-0">
-      <div v-if="currentOrganization" class="team-name">Cooperatives Online</div>
-      <nav>
-        <ul class="pl-0">
-          <li v-for="(item, i) in menu"
-            :key="i">
-            <v-btn large text color="#495057" :to="item.path" :data-test="item.testTag">{{ item.title }}</v-btn>
-          </li>
-        </ul>
-      </nav>
-    </v-container>
-    -->
+  <div class="team-toolbar">
+  <v-container class="pt-0 pb-0">
+    <div v-if="currentOrganization" class="team-name">{{ currentOrganization.name }}</div>
+    <nav>
+      <ul class="pl-0">
+        <li v-for="(item, i) in menu"
+          :key="i">
+          <v-btn large text color="#495057" :to="item.path" :data-test="item.testTag">{{ item.title }}</v-btn>
+        </li>
+      </ul>
+    </nav>
+  </v-container>
   </div>
 </template>
 
@@ -82,30 +40,34 @@ export default class ManagementMenu extends Vue {
 <style lang="scss" scoped>
   @import '$assets/scss/theme.scss';
 
-  .v-toolbar__title {
-    margin-right: 1.5rem;
-    font-size: 1rem;
-    font-weight: 700;
-
-    a {
-      text-decoration: none;
-      color: #003366;
-    }
+  ul {
+    list-style-type: none;
   }
 
-  ::v-deep .v-toolbar__content {
-    max-width: 1248px;
-    margin: 0 auto;
+  .team-toolbar {
+    background-color: #ffffff;
+  }
+
+  .team-toolbar .container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 4.5rem;
+  }
+
+  .team-toolbar .team-name {
+    margin-right: 1.5rem;
+    color: $gray7;
+    letter-spacing: -0.02rem;
+    font-size: 1.125rem;
+  }
+
+  .team-toolbar nav > ul > li {
+    display: inline-block;
   }
 
   .v-btn {
-    box-shadow: none !important;
-    font-size: 1rem;
-    font-weight: 700;
+    text-transform: uppercase;
+    font-weight: 700
   }
-
-  .toolbar-container {
-    border-bottom: 2px solid $gray2;
-  }
-
 </style>

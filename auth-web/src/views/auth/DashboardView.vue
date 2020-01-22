@@ -8,32 +8,29 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
+import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapState } from 'vuex'
-import ConfigHelper from '@/util/config-helper'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
-import ManagementMenu from '@/components/auth/ManagementMenu.vue'
 import { User } from '@/models/user'
 import UserManagement from '@/components/auth/UserManagement.vue'
 import { VueConstructor } from 'vue'
 
-@Component({
-  name: 'Dashboard',
-  components: {
-    ManagementMenu,
-    EntityManagement,
-    UserManagement
-  },
-  computed: {
-    ...mapState('user', ['userProfile']),
-    ...mapState('org', ['currentOrganization']),
-    ...mapGetters('org', ['myOrgMembership'])
-  },
-  methods: {
-    ...mapActions('user', ['getUserProfile']),
-    ...mapActions('org', ['syncOrganizations', 'syncCurrentOrganization'])
-  }
-})
+  @Component({
+    name: 'Dashboard',
+    components: {
+      EntityManagement,
+      UserManagement
+    },
+    computed: {
+      ...mapState('user', ['userProfile']),
+      ...mapState('org', ['currentOrganization']),
+      ...mapGetters('org', ['myOrgMembership'])
+    },
+    methods: {
+      ...mapActions('user', ['getUserProfile']),
+      ...mapActions('org', ['syncOrganizations', 'syncCurrentOrganization'])
+    }
+  })
 export default class DashboardView extends Vue {
   private selectedComponent = null
   private readonly userProfile!: User

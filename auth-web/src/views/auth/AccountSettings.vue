@@ -49,17 +49,9 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import AccountInfo from '@/components/auth/AccountInfo.vue'
-import OrgModule from '@/store/modules/org'
-import { Organization } from '@/models/Organization'
-import { Role } from '@/util/constants'
-import { UserInfo } from '@/models/userInfo'
-import UserManagement from '@/components/auth/UserManagement.vue'
 
 @Component({
   components: {
-    AccountInfo,
-    UserManagement
   }
 })
 export default class AccountSettings extends Vue {
@@ -67,10 +59,6 @@ export default class AccountSettings extends Vue {
 
   private mounted () {
     this.isLoading = false
-  }
-
-  private goToAccountInfo () {
-    this.$router.push('/account-settings/account-info')
   }
 }
 </script>

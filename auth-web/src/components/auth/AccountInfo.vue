@@ -94,9 +94,6 @@ export default class AccountInfo extends Vue {
   private readonly accountNameRules = [
     v => !!v || 'An account name is required'
   ]
-
-  private teamName: string = ''
-  private teamType: string = 'BASIC'
 }
 </script>
 
