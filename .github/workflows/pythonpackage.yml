@@ -9,9 +9,10 @@ jobs:
     container: 1password/op
     steps:
     - uses: actions/checkout@v1
+    - name: Install Jq
+      run: sudo apt install jq
     - name: Set up Env
       run: |
-        sudo apt-get install jq
         bash 1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} ${{ secrets.op_password }}
     - name: Show Env
       run: |    
