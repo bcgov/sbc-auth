@@ -34,7 +34,20 @@ jobs:
         op --version
         source 1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} ${{ secrets.op_password }} pytest
         #echo env
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
         cd auth-api
+        python -m pip install --upgrade pip
+        make setup
+    - name: Lint with flake8
+      run: |
+        flake8
+    - name: Test with pytest
+      run: |
         pip install pytest
-        pytest
+        pytest        
 
