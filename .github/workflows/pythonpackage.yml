@@ -29,9 +29,12 @@ jobs:
         sudo unzip 1password.zip -d /usr/local/bin 
         sudo rm 1password.zip
         sudo chmod 755 /usr/local/bin/op
-    - name: Set up Env
+    - name: Set up Env and run pytest
       run: |
         op --version
-        source 1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} ${{ secrets.op_password }}
+        source 1pass/setenv_1pass.sh ${{ secrets.op_username }} ${{ secrets.op_secret_key }} ${{ secrets.op_password }} pytest
         #echo env
+        cd auth-api
+        pip install pytest
+        pytest
 
