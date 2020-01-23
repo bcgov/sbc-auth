@@ -1,7 +1,10 @@
 <template>
   <v-app id="app">
     <div class="header-group" ref="headerGroup">
-      <sbc-header :key="$route.fullPath"></sbc-header>
+      <sbc-header
+        :key="$route.fullPath"
+        :account-name="currentOrganization && currentOrganization.name"
+        :pending-approval-count="pendingActionCount"></sbc-header>
       <pay-system-alert></pay-system-alert>
     </div>
     <div class="app-body">
@@ -12,33 +15,50 @@
 </template>
 
 <script lang="ts">
+import { Component, Watch } from 'vue-property-decorator'
+import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
+import { mapActions, mapGetters, mapState } from 'vuex'
+import OrgModule from '@/store/modules/org'
 import PaySystemAlert from '@/components/pay/PaySystemAlert.vue'
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import TokenService from 'sbc-common-components/src/services/token.services'
 import Vue from 'vue'
+import { getModule } from 'vuex-module-decorators'
 
-export default Vue.extend({
-  name: 'app',
+@Component({
   components: {
     SbcHeader,
     SbcFooter,
     PaySystemAlert
   },
+  computed: {
+    ...mapState('org', ['currentOrganization', 'pendingOrgMembers', 'myOrgMembership']),
+    ...mapGetters('org', ['myOrgMembership'])
+  }
+})
+export default class App extends Vue {
+  private orgStore = getModule(OrgModule, this.$store)
+  private readonly currentOrganization!: Organization
+  private readonly pendingOrgMembers!: Member[]
+  private readonly myOrgMembership!: Member
 
-  async mounted () {
-    // eslint-disable-next-line no-console
-    console.log('APP.vue mounted')
+  get pendingActionCount (): number {
+    return (this.myOrgMembership &&
+            this.myOrgMembership.membershipStatus === MembershipStatus.Active &&
+            this.myOrgMembership.membershipTypeCode !== MembershipType.Member &&
+            this.pendingOrgMembers.length) || 0
+  }
+
+  private async mounted (): Promise<void> {
     if (sessionStorage.getItem('KEYCLOAK_TOKEN')) {
-      // eslint-disable-next-line no-console
-      console.info('[APP.vue] Token exists.  So start the refreshtimer')
       var self = this
       let tokenService = new TokenService()
       await tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
       tokenService.scheduleRefreshTimer()
     }
   }
-})
+}
 
 </script>
 
@@ -60,10 +80,5 @@ export default Vue.extend({
   .app-body {
     flex: 1 1 auto;
     position: relative;
-
-    > .container:first-child {
-      padding-top: 3rem;
-      padding-bottom: 4rem;
-    }
   }
 </style>

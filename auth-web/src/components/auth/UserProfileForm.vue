@@ -102,7 +102,7 @@
 
     <v-row>
       <v-col cols="12" class="form__btns pt-5">
-        <v-btn v-show="editing" large text color="primary" class="deactivate-btn pr-2 pl-2" @click="$refs.deactivateUserConfirmationDialog.open()">Deactivate my profile</v-btn>
+        <v-btn large depressed color="default" class="deactivate-btn" v-show="editing" @click="$refs.deactivateUserConfirmationDialog.open()">Deactivate my profile</v-btn>
         <!-- Modal for deactivation confirmation -->
         <ModalDialog
           ref="deactivateUserConfirmationDialog"
@@ -138,7 +138,7 @@
           <v-btn large color="primary" class="save-continue-button" :disabled='!isFormValid()' @click="save" data-test="save-button">
             Save
           </v-btn>
-          <v-btn large depressed @click="cancel" data-test="cancel-button">Cancel</v-btn>
+          <v-btn large depressed @click="cancel" data-test="cancel-button" class="cancel-button">Cancel</v-btn>
         </div>
       </v-col>
     </v-row>

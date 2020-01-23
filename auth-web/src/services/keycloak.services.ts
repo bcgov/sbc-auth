@@ -46,6 +46,13 @@ class KeyCloakService {
     configHelper.addToSession(SessionStorageKeys.KeyCloakRefreshToken, this.kc.refreshToken)
     configHelper.addToSession(SessionStorageKeys.UserFullName, this.getUserInfo().fullName)
     this.parsedToken = this.kc.tokenParsed as UserToken
+
+    // Set flag in session storage so that common components will know account type
+    if (this.getUserInfo().userName.endsWith('@idir')) {
+      configHelper.addToSession(SessionStorageKeys.UserAccountType, 'IDIR')
+    } else {
+      configHelper.addToSession(SessionStorageKeys.UserAccountType, 'BCSC')
+    }
   }
 
   getUserInfo () : UserInfo {
