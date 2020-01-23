@@ -75,7 +75,10 @@ class KeyCloakService {
         refreshToken: sessionStorage.getItem('KEYCLOAK_REFRESH_TOKEN'),
         idToken: sessionStorage.getItem('KEYCLOAK_ID_TOKEN')
       }
+      // Here we clear session storage, and add a flag in to prevent the app from
+      // putting tokens back in from returning async calls  (see #2341)
       configHelper.clearSession()
+      configHelper.addToSession(SessionStorageKeys.PreventStorageSync, true)
       return new Promise((resolve, reject) => {
         this.kc.init(kcOptions)
           .success(authenticated => {

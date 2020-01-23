@@ -5,7 +5,8 @@ export enum SessionStorageKeys {
     KeyCloakIdToken = 'KEYCLOAK_ID_TOKEN',
     ApiConfigKey = 'AUTH_API_CONFIG',
     BusinessIdentifierKey = 'BUSINESS_IDENTIFIER',
-    UserFullName = 'USER_FULL_NAME'
+    UserFullName = 'USER_FULL_NAME',
+    PreventStorageSync = 'PREVENT_STORAGE_SYNC'
 }
 
 export enum Role {
