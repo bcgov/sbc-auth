@@ -54,9 +54,8 @@ export default class App extends Vue {
     if (sessionStorage.getItem('KEYCLOAK_TOKEN')) {
       var self = this
       let tokenService = new TokenService()
-      tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`).then(function (success) {
-        tokenService.scheduleRefreshTimer()
-      })
+      await tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
+      tokenService.scheduleRefreshTimer()
     }
   }
 }
