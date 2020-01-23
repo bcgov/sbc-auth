@@ -1,17 +1,17 @@
 <template>
-  <v-container class="view-container">
-    <header class="view-header">
-      <h1>Manage Team</h1>
+  <v-container>
+    <header class="view-header align-center">
+      <h2 class="view-header__title">Team Members</h2>
       <div class="view-header__actions">
-        <v-btn v-if="canInvite()" large color="primary" @click="showInviteUsersModal()" data-test="invite-people-button">
-          <v-icon>mdi-plus</v-icon>
+        <v-btn color="primary" v-if="canInvite()" @click="showInviteUsersModal()" data-test="invite-people-button">
+          <v-icon small>mdi-plus</v-icon>
           <span>Invite People</span>
         </v-btn>
       </div>
     </header>
 
     <!-- Tab Navigation -->
-    <v-tabs class="mb-7" v-model="tab" background-color="transparent">
+    <v-tabs class="mb-9" height="40" v-model="tab" background-color="transparent">
       <v-tab data-test="active-tab">Active</v-tab>
       <v-tab data-test="pending-approval-tab" v-show="canInvite()">
         <v-badge inline color="error"
@@ -23,34 +23,29 @@
       <v-tab data-test="invitations-tab" v-show="canInvite()">Invitations</v-tab>
     </v-tabs>
 
-    <v-card flat>
-      <v-card-text>
-
-        <!-- Tab Contents -->
-        <v-tabs-items v-model="tab">
-          <v-tab-item>
-            <MemberDataTable
-              @confirm-remove-member="showConfirmRemoveModal($event)"
-              @confirm-change-role="showConfirmChangeRoleModal($event)"
-              @confirm-leave-team="showConfirmLeaveTeamModal()"
-              @single-owner-error="showSingleOwnerErrorModal()"
-            />
-          </v-tab-item>
-          <v-tab-item>
-            <PendingMemberDataTable
-              @confirm-approve-member="showConfirmApproveModal($event)"
-              @confirm-deny-member="showConfirmRemoveModal($event)"
-            />
-          </v-tab-item>
-          <v-tab-item>
-            <InvitationsDataTable
-              @confirm-remove-invite="showConfirmRemoveInviteModal($event)"
-              @resend="resend($event)"
-            />
-          </v-tab-item>
-        </v-tabs-items>
-      </v-card-text>
-    </v-card>
+    <!-- Tab Contents -->
+    <v-tabs-items v-model="tab">
+      <v-tab-item>
+        <MemberDataTable
+          @confirm-remove-member="showConfirmRemoveModal($event)"
+          @confirm-change-role="showConfirmChangeRoleModal($event)"
+          @confirm-leave-team="showConfirmLeaveTeamModal()"
+          @single-owner-error="showSingleOwnerErrorModal()"
+        />
+      </v-tab-item>
+      <v-tab-item>
+        <PendingMemberDataTable
+          @confirm-approve-member="showConfirmApproveModal($event)"
+          @confirm-deny-member="showConfirmRemoveModal($event)"
+        />
+      </v-tab-item>
+      <v-tab-item>
+        <InvitationsDataTable
+          @confirm-remove-invite="showConfirmRemoveInviteModal($event)"
+          @resend="resend($event)"
+        />
+      </v-tab-item>
+    </v-tabs-items>
 
     <!-- Invite Users Dialog -->
     <ModalDialog
@@ -256,7 +251,7 @@ export default class UserManagement extends Vue {
   private showSuccessModal () {
     this.$refs.inviteUsersDialog.close()
     this.successTitle = `Invited ${this.sentInvitations.length} Team Members`
-    this.successText = 'Your team invitations have been sent successfully.'
+    this.successText = 'When team members accept this invitation, you will need to approve their access to this account.'
     this.$refs.successDialog.open()
   }
 
@@ -389,16 +384,6 @@ export default class UserManagement extends Vue {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding-top: 1.5rem;
-    padding-bottom: 1rem;
-
-    h1 {
-      margin-bottom: 0;
-    }
-
-    .v-btn {
-      font-weight: 700;
-    }
   }
 
   ::v-deep {
@@ -415,8 +400,12 @@ export default class UserManagement extends Vue {
     }
 
     .v-badge--inline .v-badge__wrapper {
-      margin-left: 0.4rem;
-      font-size: 0.678rem
+      margin-left: 0;
+
+      .v-badge__badge {
+        margin-right: -0.25rem;
+        margin-left: 0.25rem;
+      }
     }
   }
 

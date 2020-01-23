@@ -168,11 +168,15 @@ def test_update_org(client, jwt, session):  # pylint:disable=unused-argument
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
-    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(TestOrgInfo.org1),
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo'}),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     dictionary = json.loads(rv.data)
     assert dictionary['id'] == org_id
+
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo'}),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_409_CONFLICT
 
 
 def test_update_org_returns_400(client, jwt, session):  # pylint:disable=unused-argument

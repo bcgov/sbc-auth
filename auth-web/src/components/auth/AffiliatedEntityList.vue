@@ -207,13 +207,14 @@ dd {
   justify-content: center;
 }
 
-::v-deep .v-data-table td {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-}
-
-::v-deep .v-data-table.user-list__active td {
-  height: 4rem;
-  vertical-align: top;
+::v-deep {
+  .v-data-table.user-list__active td {
+    height: 4rem;
+    vertical-align: top;
+  }
+  .v-data-table td {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
 }
 </style>

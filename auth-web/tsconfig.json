@@ -36,5 +36,8 @@
   ],
   "exclude": [
     "node_modules"
+  ],
+  "files": [
+    "./node_modules/vue/types/index.d.ts"
   ]
 }
