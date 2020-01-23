@@ -1,9 +1,11 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
-import { CreateRequestBody as CreateOrgRequestBody, Member, MembershipStatus, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { CreateRequestBody as CreateOrgRequestBody, Member, MembershipStatus, MembershipType, Organization, UpdateMemberPayload } from '@/models/Organization'
+import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
+import { SessionStorageKeys } from '@/util/constants'
 import { UserInfo } from '@/models/userInfo'
 import UserService from '@/services/user.services'
 import _ from 'lodash'
@@ -56,6 +58,13 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
+  public updateOrganization (org: Organization) {
+    ConfigHelper.addToSession(SessionStorageKeys.AccountName, org.name)
+    const index = this.organizations.findIndex(item => item.id === org.id)
+    this.organizations.splice(index, 1, org)
+  }
+
+  @Mutation
   public resetInvitations () {
     this.resending = false
     this.sentInvitations = []
@@ -98,6 +107,7 @@ export default class OrgModule extends VuexModule {
     await this.context.dispatch('syncActiveOrgMembers')
     await this.context.dispatch('syncPendingOrgMembers')
     await this.context.dispatch('syncPendingOrgInvitations')
+    ConfigHelper.addToSession(SessionStorageKeys.AccountName, organization.name)
   }
 
   @Action({ rawError: true })
@@ -116,6 +126,28 @@ export default class OrgModule extends VuexModule {
           break
         default:
           this.context.commit('setOrgCreateMessage', 'Error happened while creating team')
+          break
+      }
+    }
+  }
+
+  @Action({ rawError: true })
+  public async updateOrg (createRequestBody: CreateOrgRequestBody) {
+    try {
+      const response = await OrgService.updateOrg(this.context.state['currentOrganization'].id, createRequestBody)
+      this.context.commit('setOrgCreateMessage', 'success')
+      this.context.commit('updateOrganization', response.data)
+      this.context.commit('setCurrentOrganization', response.data)
+    } catch (err) {
+      switch (err.response.status) {
+        case 409:
+          this.context.commit('setOrgCreateMessage', 'Teams with similar names exists')
+          break
+        case 400:
+          this.context.commit('setOrgCreateMessage', 'Invalid team name')
+          break
+        default:
+          this.context.commit('setOrgCreateMessage', 'Error happened while updating team')
           break
       }
     }

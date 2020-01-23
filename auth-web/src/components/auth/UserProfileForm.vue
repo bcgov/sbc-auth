@@ -102,7 +102,7 @@
 
     <v-row>
       <v-col cols="12" class="form__btns pt-5">
-        <v-btn v-show="editing" large text color="primary" class="deactivate-btn pr-2 pl-2" @click="$refs.deactivateUserConfirmationDialog.open()">Deactivate my profile</v-btn>
+        <v-btn large depressed color="default" class="deactivate-btn" v-show="editing" @click="$refs.deactivateUserConfirmationDialog.open()">Deactivate my profile</v-btn>
         <!-- Modal for deactivation confirmation -->
         <ModalDialog
           ref="deactivateUserConfirmationDialog"

@@ -35,6 +35,9 @@ function mapReturnPayVars (route: any) {
 }
 
 export function getRoutes () {
+  const accountSettings = () => import(/* webpackChunkName: "account-settings" */ './views/auth/AccountSettings.vue')
+  const accountInfo = () => import(/* webpackChunkName: "account-settings" */ './components/auth/AccountInfo.vue')
+  const userManagement = () => import(/* webpackChunkName: "account-settings" */ './components/auth/UserManagement.vue')
   const routes = [
     { path: '/', component: HomeView },
     { path: '/home', component: HomeView },
@@ -51,6 +54,21 @@ export function getRoutes () {
           path: 'business',
           component: EntityManagement
         }]
+    },
+    { path: '/account-settings',
+      component: accountSettings,
+      meta: { requiresAuth: true },
+      redirect: '/account-settings/account-info',
+      children: [
+        {
+          path: 'account-info',
+          component: accountInfo
+        },
+        {
+          path: 'team-members',
+          component: userManagement
+        }
+      ]
     },
     { path: '/userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
     { path: '/createteam', component: CreateTeamView, meta: { requiresAuth: true } },
