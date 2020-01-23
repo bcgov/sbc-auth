@@ -111,7 +111,7 @@ export default class UserModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public logout (redirectUrl: string) {
+  public async logout (redirectUrl: string) {
     const loginType = ConfigHelper.getFromSession('LOGIN_TYPE')
     const authApiURL = ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API') + '/'
     if (loginType && loginType === 'passcode') {
@@ -122,7 +122,7 @@ export default class UserModule extends VuexModule {
         }
       })
     } else {
-      KeycloakService.logout(redirectUrl)
+      await KeycloakService.logout(redirectUrl)
     }
   }
 
