@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - gh-test
+      - github-actions
     types: [assigned, synchronize]
     paths:
       - "auth-api/**"
