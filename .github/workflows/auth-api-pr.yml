@@ -1,9 +1,6 @@
 name: Auth API PR CI
 
 on:
-  push:
-    branches:
-      - github-actions
   pull_request:
     types: [assigned, synchronize]
     paths:
