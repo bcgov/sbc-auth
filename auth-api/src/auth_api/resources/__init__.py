@@ -22,6 +22,7 @@ That are used to expose operational health information about the service, and me
 """
 
 from flask import Blueprint, current_app
+
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
 
 from .apihelper import Api
