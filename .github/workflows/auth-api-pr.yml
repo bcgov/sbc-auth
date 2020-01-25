@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - gh-test
+      - github-actions
       - development
     paths:
       - "auth-api/**"
