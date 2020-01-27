@@ -69,7 +69,7 @@ jobs:
         if: always()
         with:
           type: ${{ job.status }}
-          job_name: '*Auth API Build status*'
+          job_name: '*Auth API Build (pytest) status*'
           mention_if: 'failure'
           channel: '#relationship-developers'
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
