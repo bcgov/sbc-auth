@@ -40,7 +40,7 @@ jobs:
         working-directory: .
         run: |
           op --version
-          vaults='[{ "vault": "shared", "application": ["email"]}, {"vault": "relationship","application": ["notify-api"]}]'
+          vaults='[{ "vault": "shared", "application": ["email"]}, {"vault": "relationship","application": ["auth-api", "notify-api"]}]'
           source setenv_1pass.sh ${{ secrets.op_parameters }} -e pytest -v "${vaults}"
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
