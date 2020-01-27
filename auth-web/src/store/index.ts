@@ -2,7 +2,6 @@ import Vuex, { StoreOptions } from 'vuex'
 import BusinessModule from './modules/business'
 import OrgModule from '@/store/modules/org'
 import { RootState } from './types'
-import StatusModule from '@/store/modules/status'
 import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 import VuexPersistance from 'vuex-persist'
@@ -19,7 +18,6 @@ const storeOptions: StoreOptions<RootState> = {
   strict: debug,
   modules: {
     business: BusinessModule,
-    statusmodule: StatusModule,
     user: UserModule,
     org: OrgModule
   },
