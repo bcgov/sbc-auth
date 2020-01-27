@@ -15,9 +15,8 @@
 
 This module manages the Contact information for a user or entity.
 """
-from sbc_common_components.tracing.service_tracing import ServiceTracing
-
 from auth_api.schemas import ContactSchema
+from sbc_common_components.tracing.service_tracing import ServiceTracing
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
