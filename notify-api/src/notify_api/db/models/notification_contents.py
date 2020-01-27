@@ -48,7 +48,7 @@ class NotificationContentsRequest(BaseModel):  # pylint: disable=too-few-public-
     attachment_url: str = ''
 
     @validator('subject', 'body', always=True)
-    def not_empty(cls, v_field):
+    def not_empty(cls, v_field):  # pylint: disable=no-self-argument, no-self-use
         """This is a validator that valiate field is not empty."""
         if not v_field:
             raise ValueError('must not empty')

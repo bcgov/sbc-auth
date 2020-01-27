@@ -1,0 +1,52 @@
+name: Status API BUILD CI
+
+on:
+  push:
+    branches:
+      - gh-test
+      - development
+    paths:
+      - "status-api/**"
+
+jobs:
+  status-api-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        working-directory: ./status-api
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements/dev.txt
+      - name: Test with pytest
+        working-directory: ./status-api
+        run: |
+          pip install .
+          export PYTHONPATH=./src/
+          pytest --strict -p no:warnings --cov=src/status_api --cov-report xml --cov-report term
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1.0.5
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          flags: pytest
+          fail_ci_if_error: false
+      - name: Rocket.Chat Notification
+        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+        if: always()
+        with:
+          type: ${{ job.status }}
+          job_name: '*Status API Build (pytest) status*'
+          mention_if: 'failure'
+          channel: '#relationship-developers'
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          commit: true
+          token: ${{ secrets.GITHUB_TOKEN }}
