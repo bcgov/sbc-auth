@@ -3,7 +3,6 @@ name: Auth API BUILD CI
 on:
   push:
     branches:
-      - gh-test
       - development
     paths:
       - "auth-api/**"
@@ -40,7 +39,7 @@ jobs:
         working-directory: .
         run: |
           op --version
-          vaults='[{ "vault": "shared", "application": ["keycloak"]}, {"vault": "relationship","application": ["auth-api"]}]'
+          vaults='[{ "vault": "shared", "application": ["keycloak"]}, {"vault": "relationship","application": ["postgres", "auth-api"]}]'
           source setenv_1pass.sh ${{ secrets.op_parameters }} -e pytest -v "${vaults}"
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
