@@ -9,7 +9,7 @@ on:
       - "auth-api/**"
 
 jobs:
-  build:
+  auth-api-build:
     runs-on: ubuntu-latest
     strategy:
       matrix:

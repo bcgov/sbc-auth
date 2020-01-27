@@ -10,7 +10,7 @@ on:
       - "notify-api/**"
 
 jobs:
-  build:
+  notify-api-pr:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,7 +30,7 @@ jobs:
       - name: Lint with pylint
         working-directory: ./notify-api
         run: |
-          pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/notify_api
+          pylint --rcfile=setup.cfg --disable=C0301,W0511 src/notify_api tests
       - name: Lint with flake8
         working-directory: ./notify-api
         run: |

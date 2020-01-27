@@ -10,7 +10,7 @@ on:
       - "status-api/**"
 
 jobs:
-  build:
+  notify-api-pr:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,7 +30,7 @@ jobs:
       - name: Lint with pylint
         working-directory: ./status-api
         run: |
-          pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/status_api
+          pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/status_api tests
       - name: Lint with flake8
         working-directory: ./status-api
         run: |
