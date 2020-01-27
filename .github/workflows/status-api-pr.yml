@@ -10,7 +10,7 @@ on:
       - "status-api/**"
 
 jobs:
-  build:
+  notify-api-pr:
     runs-on: ubuntu-latest
     strategy:
       matrix:

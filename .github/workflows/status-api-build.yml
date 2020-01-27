@@ -9,7 +9,7 @@ on:
       - "status-api/**"
 
 jobs:
-  build:
+  status-api-build:
     runs-on: ubuntu-latest
     strategy:
       matrix:

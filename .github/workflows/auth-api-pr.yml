@@ -10,7 +10,7 @@ on:
       - "auth-api/**"
 
 jobs:
-  build:
+  auth-api-pr:
     runs-on: ubuntu-latest
     strategy:
       matrix:

@@ -9,7 +9,7 @@ on:
       - "notify-api/**"
 
 jobs:
-  build:
+  notify-api-build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
