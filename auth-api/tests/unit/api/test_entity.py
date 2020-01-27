@@ -242,10 +242,13 @@ def test_update_entity_success(client, jwt, session):  # pylint:disable=unused-a
     dictionary = json.loads(rv.data)
     assert dictionary['businessIdentifier'] == TestEntityInfo.entity2['businessIdentifier']
 
-    rv = client.put('/api/v1/entities/{}'.format('1234'),
-                    data=json.dumps(TestEntityInfo.entity2),
+    # test business id alone can be updated
+    rv = client.put('/api/v1/entities/{}'.format(TestEntityInfo.entity2['businessIdentifier']),
+                    data=json.dumps({'businessIdentifier': 'CPNEW123'}),
                     headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['businessIdentifier'] == 'CPNEW123'
 
 
 def test_update_entity_failures(client, jwt, session):  # pylint:disable=unused-argument
@@ -261,6 +264,7 @@ def test_update_entity_failures(client, jwt, session):  # pylint:disable=unused-
                     data=json.dumps(TestEntityInfo.entity2),
                     content_type='application/json')
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
+
 
 def test_authorizations_for_staff_returns_200(client, jwt, session):  # pylint:disable=unused-argument
     """Assert authorizations for staff user returns 200."""
