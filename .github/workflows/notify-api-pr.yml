@@ -3,8 +3,6 @@ name: Notify API PR CI
 on:
   pull_request:
     branches:
-      - gh-test
-      - github-actions
       - development
     paths:
       - "notify-api/**"
