@@ -1,4 +1,4 @@
-name: Auth API BUILD CI
+name: Notify API BUILD CI
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - gh-test
       - development
     paths:
-      - "auth-api/**"
+      - "notify-api/**"
 
 jobs:
   build:
@@ -40,24 +40,24 @@ jobs:
         working-directory: .
         run: |
           op --version
-          vaults='[{ "vault": "shared", "application": ["keycloak"]}, {"vault": "relationship","application": ["auth-api"]}]'
+          vaults='[{ "vault": "shared", "application": ["email"]}, {"vault": "relationship","application": ["notify-api"]}]'
           source setenv_1pass.sh ${{ secrets.op_parameters }} -e pytest -v "${vaults}"
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
-        working-directory: ./auth-api
+        working-directory: ./notify-api
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements/dev.txt
       - name: Test with pytest
-        working-directory: ./auth-api
+        working-directory: ./notify-api
         run: |
           pip install .
           export PYTHONPATH=./src/
-          pytest --strict -p no:warnings --cov=src/auth_api --cov-report xml --cov-report term
+          pytest --strict -p no:warnings --cov=src/notify_api --cov-report xml --cov-report term
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1.0.5
         with:
