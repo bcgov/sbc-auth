@@ -30,7 +30,7 @@ def test_fetch_data_model(session):  # pylint: disable=unused-argument
     """Assert that code type details can be fetch by table name."""
     code_type = 'membership_type'
     c = CodesService.fetch_data_model(code_type)
-    assert c is not None
+    assert c not None
 
 
 def test_fetch_data_model_not_found(session):  # pylint: disable=unused-argument
