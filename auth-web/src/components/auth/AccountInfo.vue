@@ -8,7 +8,7 @@
         v-show="orgCreateMessage !== 'success'">
         {{orgCreateMessage}}
       </v-alert>
-      <v-text-field filled clearable required label="Account Name"
+      <v-text-field filled clearable required label="Account Name" :disabled="!canChangeAccountName()"
         :rules="accountNameRules"
         v-model="orgName"
         v-on:keydown="enableBtn();">
@@ -17,7 +17,7 @@
         <v-btn large class="save-btn"
           v-bind:class="{ 'disabled' : btnLabel == 'Saved' }"
           :color="btnLabel == 'Saved'? 'success' : 'primary'"
-          :disabled="!isFormValid()"
+          :disabled="!isFormValid() || !canChangeAccountName()"
           :loading="btnLabel == 'Saving'"
           @click="updateOrgName()">
           <v-expand-x-transition>
@@ -33,10 +33,9 @@
 <script lang="ts">
 
 import { Component, Vue } from 'vue-property-decorator'
-import { CreateRequestBody, Organization } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import OrgModule from '@/store/modules/org'
-import { UserInfo } from '@/models/userInfo'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -46,7 +45,8 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('org', ['syncOrganizations', 'updateOrg'])
   },
   computed: {
-    ...mapState('org', ['currentOrganization', 'orgCreateMessage'])
+    ...mapState('org', ['currentOrganization', 'orgCreateMessage']),
+    ...mapGetters('org', ['myOrgMembership'])
   }
 })
 export default class AccountInfo extends Vue {
@@ -55,6 +55,7 @@ export default class AccountInfo extends Vue {
   private readonly currentOrganization!: Organization
   private readonly syncOrganizations!: () => Organization[]
   private readonly updateOrg!: (requestBody: CreateRequestBody) => Organization
+  private readonly myOrgMembership!: Member
   private orgName = ''
   private readonly orgCreateMessage
   private touched = false
@@ -69,6 +70,15 @@ export default class AccountInfo extends Vue {
       await this.syncOrganizations()
     }
     this.orgName = this.currentOrganization.name
+  }
+
+  private canChangeAccountName (): boolean {
+    switch (this.myOrgMembership.membershipTypeCode) {
+      case MembershipType.Owner:
+        return true
+      default:
+        return false
+    }
   }
 
   private enableBtn () {
