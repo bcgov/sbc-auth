@@ -106,7 +106,7 @@ for vault_name in $(echo "${VAULT}" | jq -r '.[] | @base64' ); do
             echo ${row} | base64 --decode | jq -r ${1}
         }
         echo "Setting environment variable $(_envvars '.t')"
-        #echo ::set-env name=$(_envvars '.t')::$(_envvars '.v')
+        echo ::set-env name=$(_envvars '.t')::$(_envvars '.v')
     done
   done
 done
