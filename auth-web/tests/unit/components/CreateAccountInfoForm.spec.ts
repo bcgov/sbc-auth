@@ -1,6 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
+import CreateAccountInfoForm from '@/components/auth/CreateAccountInfoForm.vue'
 import OrgModule from '@/store/modules/org'
-import TeamForm from '@/components/auth/TeamForm.vue'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
@@ -15,7 +15,7 @@ jest.mock('axios', () => ({
   post: jest.fn(() => Promise.resolve({ data: { } }))
 }))
 
-describe('TeamForm.vue', () => {
+describe('CreateAccountInfoForm.vue', () => {
   let localVue
   let store
 
@@ -58,7 +58,7 @@ describe('TeamForm.vue', () => {
 
   it('Mounting works', () => {
     const $t = () => 'test'
-    const wrapper = shallowMount(TeamForm, {
+    const wrapper = shallowMount(CreateAccountInfoForm, {
       store,
       localVue,
       mocks: { $t }

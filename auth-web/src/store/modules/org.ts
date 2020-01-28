@@ -119,13 +119,13 @@ export default class OrgModule extends VuexModule {
     } catch (err) {
       switch (err.response.status) {
         case 409:
-          this.context.commit('setOrgCreateMessage', 'Teams with similar names exists')
+          this.context.commit('setOrgCreateMessage', 'An account with this name already exists. Try a different account name.')
           break
         case 400:
-          this.context.commit('setOrgCreateMessage', 'Invalid team name')
+          this.context.commit('setOrgCreateMessage', 'Invalid account name')
           break
         default:
-          this.context.commit('setOrgCreateMessage', 'Error happened while creating team')
+          this.context.commit('setOrgCreateMessage', 'An error occurred while attempting to create your account.')
           break
       }
     }
@@ -141,13 +141,13 @@ export default class OrgModule extends VuexModule {
     } catch (err) {
       switch (err.response.status) {
         case 409:
-          this.context.commit('setOrgCreateMessage', 'Teams with similar names exists')
+          this.context.commit('setOrgCreateMessage', 'An account with this name already exists.')
           break
         case 400:
-          this.context.commit('setOrgCreateMessage', 'Invalid team name')
+          this.context.commit('setOrgCreateMessage', 'Invalid account name')
           break
         default:
-          this.context.commit('setOrgCreateMessage', 'Error happened while updating team')
+          this.context.commit('setOrgCreateMessage', 'An error occurred while updating your account name.')
           break
       }
     }
