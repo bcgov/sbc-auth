@@ -10,6 +10,7 @@ import i18n from './plugins/i18n'
 import interceptorsSetup from '@/util/interceptors'
 import store from './store'
 import vuetify from './plugins/vuetify'
+import './registerServiceWorker'
 
 Vue.config.productionTip = false
 Vue.prototype.$tokenService = new TokenService()
