@@ -1,19 +1,21 @@
-import Axios, { AxiosResponse } from 'axios'
-import ConfigHelper from '../util/config-helper'
+import Axios, { AxiosPromise } from 'axios'
+import ConfigHelper from '@/util/config-helper'
+import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
 
-export default {
+const axios = addAxiosInterceptors(Axios.create())
 
-  createTransaction (paymentId: String, redirectUrl: String) {
-    var url = `${ConfigHelper.getValue('VUE_APP_PAY_ROOT_API')}/payment-requests/${paymentId}/transactions`
-    return Axios.post(url, {
+export default class PaymentService {
+  static createTransaction (paymentId: string, redirectUrl: string): AxiosPromise<any> {
+    var url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${paymentId}/transactions`
+    return axios.post(url, {
       clientSystemUrl: redirectUrl,
       payReturnUrl: ConfigHelper.getSelfURL() + '/returnpayment'
     })
-  },
+  }
 
-  updateTransaction (paymentId: String, transactionId: String, receiptNum?: String) {
-    const url = `${ConfigHelper.getValue('VUE_APP_PAY_ROOT_API')}/payment-requests/${paymentId}/transactions/${transactionId}`
-    return Axios.patch(url, {
+  static updateTransaction (paymentId: String, transactionId: String, receiptNum?: String): AxiosPromise<any> {
+    const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${paymentId}/transactions/${transactionId}`
+    return axios.patch(url, {
       receipt_number: receiptNum
     })
   }

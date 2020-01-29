@@ -16,6 +16,14 @@ const vuexSession = new VuexPersistance<RootState>({
 
 const storeOptions: StoreOptions<RootState> = {
   strict: debug,
+  state: () => ({
+    refreshKey: 0
+  }),
+  mutations: {
+    updateHeader (state) {
+      state.refreshKey++
+    }
+  },
   modules: {
     business: BusinessModule,
     user: UserModule,

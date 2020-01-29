@@ -69,7 +69,7 @@
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { User } from '@/models/user'
-import documentService from '@/services/document.service.ts'
+import documentService from '@/services/document.services.ts'
 import { getModule } from 'vuex-module-decorators'
 import { mapState } from 'vuex'
 

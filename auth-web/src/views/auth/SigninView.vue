@@ -58,6 +58,7 @@ export default class Signin extends Mixins(NextPageMixin) {
             tokenService.scheduleRefreshTimer()
           })
         }
+        this.$store.commit('updateHeader')
         this.redirectToNext()
       }
     })

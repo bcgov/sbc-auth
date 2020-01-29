@@ -356,6 +356,7 @@ export default class UserManagement extends Vue {
       memberId: this.memberToBeApproved.id,
       status: MembershipStatus.Active
     })
+    this.$store.commit('updateHeader')
     this.$refs.confirmActionDialog.close()
   }
 
@@ -364,6 +365,7 @@ export default class UserManagement extends Vue {
       memberId: this.memberToBeRemoved.id,
       status: MembershipStatus.Rejected
     })
+    this.$store.commit('updateHeader')
     this.$refs.confirmActionDialog.close()
   }
 
