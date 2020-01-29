@@ -6,12 +6,10 @@ UserException - error, status_code - user rules error
 error - a description of the error {code / description: classname / full text}
 status_code - where possible use HTTP Error Codes
 """
-
 import traceback
 
-from sbc_common_components.tracing.exception_tracing import ExceptionTracing  # noqa: I001
-
-from auth_api.exceptions.errors import Error
+from auth_api.exceptions.errors import Error  # noqa: I001, I003
+from sbc_common_components.tracing.exception_tracing import ExceptionTracing  # noqa: I001, I003
 
 
 class BusinessException(Exception):

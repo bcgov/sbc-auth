@@ -1,0 +1,35 @@
+name: Status API PR CI
+
+on:
+  pull_request:
+    branches:
+      - development
+    paths:
+      - "status-api/**"
+
+jobs:
+  notify-api-pr:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        working-directory: ./status-api
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements/dev.txt
+      - name: Lint with pylint
+        working-directory: ./status-api
+        run: |
+          pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/status_api tests
+      - name: Lint with flake8
+        working-directory: ./status-api
+        run: |
+          flake8 src/status_api tests

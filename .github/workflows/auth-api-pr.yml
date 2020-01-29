@@ -1,0 +1,35 @@
+name: Auth API PR CI
+
+on:
+  pull_request:
+    branches:
+      - development
+    paths:
+      - "auth-api/**"
+
+jobs:
+  auth-api-pr:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        working-directory: ./auth-api
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements/dev.txt
+      - name: Lint with pylint
+        working-directory: ./auth-api
+        run: |
+          pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/auth_api
+      - name: Lint with flake8
+        working-directory: ./auth-api
+        run: |
+          flake8 src/auth_api tests

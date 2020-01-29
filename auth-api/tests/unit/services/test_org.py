@@ -74,6 +74,7 @@ def test_update__duplicate_org(session):  # pylint:disable=unused-argument
         org.update_org(TestOrgInfo.org2)
     assert exception.value.code == Error.DATA_CONFLICT.name
 
+
 def test_find_org_by_id(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an org can be retrieved by its id."""
     org = factory_org_service()
