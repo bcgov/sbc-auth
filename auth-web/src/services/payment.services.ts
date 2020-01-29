@@ -13,7 +13,7 @@ export default class PaymentService {
     })
   }
 
-  static updateTransaction (paymentId: String, transactionId: String, receiptNum?: String): AxiosPromise<any> {
+  static updateTransaction (paymentId: string, transactionId: string, receiptNum?: string): AxiosPromise<any> {
     const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${paymentId}/transactions/${transactionId}`
     return axios.patch(url, {
       receipt_number: receiptNum
