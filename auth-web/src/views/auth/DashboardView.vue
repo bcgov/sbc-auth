@@ -76,7 +76,7 @@ export default class DashboardView extends Vue {
 
     // If user is not an active member of a team at all, redirect to create team page
     if (!this.myOrgMembership) {
-      this.$router.push('/createteam')
+      this.$router.push('/createaccount')
     }
   }
 }

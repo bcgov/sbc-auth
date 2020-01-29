@@ -7,7 +7,7 @@
         <v-card class="profile-card">
           <v-container>
             <v-card-text>
-              <TeamForm />
+              <CreateAccountInfoForm />
             </v-card-text>
           </v-container>
         </v-card>
@@ -19,13 +19,13 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
+import CreateAccountInfoForm from '@/components/auth/CreateAccountInfoForm.vue'
 import { Organization } from '@/models/Organization'
-import TeamForm from '@/components/auth/TeamForm.vue'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
-    TeamForm
+    CreateAccountInfoForm
   }
 })
 export default class DuplicateTeamWarningView extends Vue { }
