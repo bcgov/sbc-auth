@@ -208,3 +208,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         self._model.commit()
         current_app.logger.debug('>deactivate_membership')
         return self
+
+    @staticmethod
+    def get_membership_for_org_and_user(org_id, user_id):
+        """Get the membership for the given org and user id."""
+        return MembershipModel.find_membership_by_user_and_org(user_id, org_id)

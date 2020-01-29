@@ -7,13 +7,11 @@ import ConfigHelper from '@/util/config-helper'
 import TokenService from 'sbc-common-components/src/services/token.services'
 import Vue from 'vue'
 import i18n from './plugins/i18n'
-import interceptorsSetup from '@/util/interceptors'
 import store from './store'
 import vuetify from './plugins/vuetify'
 
 Vue.config.productionTip = false
 Vue.prototype.$tokenService = new TokenService()
-interceptorsSetup()
 
 /**
  * The server side configs are necessary for app to work , since they are reference in templates and all
