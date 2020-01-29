@@ -1,1 +1,3 @@
-export interface RootState {}
+export interface RootState {
+  refreshKey: number
+}

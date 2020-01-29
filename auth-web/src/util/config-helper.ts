@@ -33,6 +33,10 @@ export default class ConfigHelper {
     return `${window.location.origin}${process.env.VUE_APP_PATH}`.replace(/\/$/, '') // remove the slash at the end
   }
 
+  static getPayAPIURL () {
+    return `${window.location.origin}${process.env.VUE_APP_PAY_ROOT_API}`
+  }
+
   static getAuthAPIUrl () {
     return ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')
   }

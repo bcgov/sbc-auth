@@ -2,7 +2,6 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import KeycloakService from '@/services/keycloak.services'
-import LoginService from '@/services/login.services'
 import { User } from '@/models/user'
 import { UserInfo } from '@/models/userInfo'
 import UserService from '@/services/user.services'
@@ -112,18 +111,7 @@ export default class UserModule extends VuexModule {
 
   @Action({ rawError: true })
   public async logout (redirectUrl: string) {
-    const loginType = ConfigHelper.getFromSession('LOGIN_TYPE')
-    const authApiURL = ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API') + '/'
-    if (loginType && loginType === 'passcode') {
-      LoginService.logout().then(response => {
-        if (response.status === 204) {
-          ConfigHelper.clearSession()
-          window.location.assign(window.location.origin + process.env.VUE_APP_PATH)
-        }
-      })
-    } else {
-      await KeycloakService.logout(redirectUrl)
-    }
+    await KeycloakService.logout(redirectUrl)
   }
 
   @Action({})

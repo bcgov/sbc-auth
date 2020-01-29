@@ -94,6 +94,7 @@ export default class AccountInfo extends Vue {
     }
     await this.updateOrg(createRequestBody)
     if (this.orgCreateMessage === 'success') {
+      this.$store.commit('updateHeader')
       this.btnLabel = 'Saved'
     } else {
       this.btnLabel = 'Save'
