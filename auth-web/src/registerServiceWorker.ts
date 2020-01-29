@@ -21,9 +21,11 @@ register(swPath, {
     console.log('New content is downloading.')
   },
   updated() {
+    // write code for popup here
     console.log('New content is available; please refresh.')
   },
   offline() {
+    // add offline indication here
     console.log('No internet connection found. App is running in offline mode.')
   },
   error(error) {
