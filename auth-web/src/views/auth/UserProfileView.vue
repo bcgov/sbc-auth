@@ -11,7 +11,7 @@
     <div class="user-profile-container" v-if="!isLoading">
       <v-row justify="center">
         <v-col lg="8" class="pt-0 pb-0">
-          <div class="view-header" v-if="!editing">
+          <div class="view-header user-profile-header" v-if="!editing">
             <h1>Complete Profile</h1>
             <p class="mb-0">Enter your contact information to complete your profile.</p>
           </div>
@@ -96,5 +96,9 @@ export default class UserProfileView extends Mixins(NextPageMixin) {
     left: 0;
     z-index: 2;
     background: $gray2;
+  }
+
+  .user-profile-header {
+    flex-direction: column;
   }
 </style>
