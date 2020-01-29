@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="organizations.length > 0">
-      You already belong to a team: <span class="font-weight-bold">{{ organizations[0].name }}</span>
+      You already belong to an account: <strong>{{ organizations[0].name }}</strong>
       <v-row>
         <v-col cols="12" class="form__btns pb-0">
           <v-btn large color="primary" @click="redirectToNext">OK</v-btn>
@@ -9,25 +9,29 @@
       </v-row>
     </div>
     <div>
-      <v-form v-if="organizations.length === 0" ref="createTeamForm">
+      <v-form v-if="organizations.length === 0" ref="createAccountInfoForm">
         <v-radio-group class="mt-0 mb-4 pt-0" v-model="teamType" :mandatory="true">
-          <v-radio class="mb-3" label="I manage my own business" value="BASIC" data-test="select-manage-own-business" />
-          <v-radio label="I manage multiple businesses on behalf of my clients" value="PREMIUM" data-test="select-manage-multiple-business" />
+          <v-radio color="primary" class="mb-3" label="I manage my own business" value="BASIC" data-test="select-manage-own-business" />
+          <v-radio color="primary" label="I manage multiple businesses on behalf of my clients" value="PREMIUM" data-test="select-manage-multiple-business" />
         </v-radio-group>
-        <v-text-field filled :rules="teamNameRules" v-model.trim="teamName"
-                      :label="teamType === 'BASIC' ? 'Your Business Name' : 'Your Management Company or Law Firm Name'"/>
-        <v-alert v-show="orgCreateMessage !== 'success'" class="mb-0"
-                 dense
-                 outlined
-                 type="error"
+
+        <v-alert type="error"
+          v-show="orgCreateMessage !== 'dirty'"
         >{{orgCreateMessage}}
         </v-alert>
+
+        <v-text-field filled
+          label="Account Name"
+          v-model.trim="teamName"
+          :rules="teamNameRules"
+          persistent-hint
+          :hint="teamType === 'BASIC' ? 'Example: Your Business Name' : 'Example: Your Management Company or Law Firm Name'"/>
         <v-row>
           <v-col cols="12" class="form__btns pb-0">
             <v-btn large color="primary" class="mr-2" :disabled='!isFormValid()' @click="save" data-test="save-button">
               Save and Continue
             </v-btn>
-            <v-btn large color="default" @click="cancel" data-test="cancel-button">
+            <v-btn large depressed color="default" @click="cancel" data-test="cancel-button">
               Cancel
             </v-btn>
           </v-col>
@@ -53,7 +57,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('org', ['syncOrganizations'])
   }
 })
-export default class TeamForm extends Vue {
+export default class CreateAccountInfoForm extends Vue {
     private orgStore = getModule(OrgModule, this.$store)
     private teamName: string = ''
     private teamType: string = 'BASIC'
@@ -63,15 +67,14 @@ export default class TeamForm extends Vue {
     private readonly orgCreateMessage: string
 
     $refs: {
-      createTeamForm: HTMLFormElement
+      createAccountInfoForm: HTMLFormElement
     }
 
     private readonly teamNameRules = [
-      v => !!v || 'You must provide a team name'
-    ]
+      v => !!v || 'An account name is required']
 
     private async mounted () {
-      this.orgStore.setOrgCreateMessage('success') // reset
+      this.orgStore.setOrgCreateMessage('dirty') // reset
       if (!this.organizations) {
         await this.syncOrganizations()
       }

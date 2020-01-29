@@ -2,15 +2,13 @@
   <v-container>
     <div class="view-container">
       <article>
-        <h1 class="mb-5">Create Team</h1>
-        <p class="intro-text">Tell us about your team and enter a team name.</p>
+        <h1 class="mb-5">Create Account</h1>
+        <p class="intro-text">Tell us about this account, and enter an account name.</p>
         <v-card class="profile-card">
           <v-container>
-            <v-card-title>
-              <h2 class="mb-4">Your Team Profile</h2>
-            </v-card-title>
+            <v-card-title class="mb-3">Account Information</v-card-title>
             <v-card-text>
-              <TeamForm />
+              <CreateAccountInfoForm />
             </v-card-text>
           </v-container>
         </v-card>
@@ -22,16 +20,16 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
+import CreateAccountInfoForm from '@/components/auth/CreateAccountInfoForm.vue'
 import { Organization } from '@/models/Organization'
-import TeamForm from '@/components/auth/TeamForm.vue'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
-    TeamForm
+    CreateAccountInfoForm
   }
 })
-export default class CreateTeamView extends Vue { }
+export default class CreateAccountView extends Vue { }
 </script>
 
 <style lang="scss" scoped>

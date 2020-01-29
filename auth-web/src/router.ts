@@ -2,7 +2,7 @@ import { Role, SessionStorageKeys } from '@/util/constants'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
-import CreateTeamView from '@/views/auth/CreateTeamView.vue'
+import CreateAccountView from '@/views/auth/CreateAccountView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
@@ -71,7 +71,7 @@ export function getRoutes () {
       ]
     },
     { path: '/userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
-    { path: '/createteam', component: CreateTeamView, meta: { requiresAuth: true } },
+    { path: '/createaccount', component: CreateAccountView, meta: { requiresAuth: true } },
     { path: '/duplicateteam', component: DuplicateTeamWarningView, meta: { requiresAuth: true } },
     { path: '/validatetoken/:token', component: AcceptInviteLandingView, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
     { path: '/confirmtoken/:token', component: AcceptInviteView, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } },
