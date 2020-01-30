@@ -25,7 +25,7 @@ import groovy.json.*
 def APP_NAME = 'auth-web'
 def APP_RUNTIME_NAME = "${APP_NAME}-runtime"
 def SOURCE_TAG = 'test'
-def DESTINATION_TAG = 'dev'
+def DESTINATION_TAG = 'prod'
 def TOOLS_TAG = 'tools'
 
 def NAMESPACE_APP = '1rdehl'
