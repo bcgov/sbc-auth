@@ -25,7 +25,7 @@ import groovy.json.*
 def APP_NAME = 'auth-web'
 def APP_RUNTIME_NAME = "${APP_NAME}-runtime"
 def SOURCE_TAG = 'test'
-def DESTINATION_TAG = 'prod'
+def DESTINATION_TAG = 'dev'
 def TOOLS_TAG = 'tools'
 
 def NAMESPACE_APP = '1rdehl'
@@ -33,17 +33,6 @@ def NAMESPACE_BUILD = "${NAMESPACE_APP}"  + '-' + "${TOOLS_TAG}"
 def NAMESPACE_DEPLOY = "${NAMESPACE_APP}" + '-' + "${DESTINATION_TAG}"
 
 def ROCKETCHAT_DEVELOPER_CHANNEL='#relationship-developers'
-
-// Get an image's hash tag
-String getImageTagHash(String imageName, String tag = "") {
-
-    if(!tag?.trim()) {
-        tag = "latest"
-    }
-
-    def istag = openshift.raw("get istag ${imageName}:${tag} -o template --template='{{.image.dockerImageReference}}'")
-    return istag.out.tokenize('@')[1].trim()
-}
 
 // post a notification to rocketchat
 def rocketChatNotificaiton(token, channel, comments) {
