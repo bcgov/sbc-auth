@@ -60,3 +60,17 @@ def test_reset_user_notexists(session, auth_mock):  # pylint: disable=unused-arg
     """Assert that can not be reset data by the provided token not exists in database."""
     response = ResetDataService.reset(TestJwtClaims.tester_role)
     assert response is None
+
+
+def test_reset_user_without_tester_role(session, auth_mock):  # pylint: disable=unused-argument
+    """Assert that can not be reset data by the user doesn't have tester role."""
+    user_with_token = TestUserInfo.user_tester
+    user_with_token['keycloak_guid'] = TestJwtClaims.tester_role['sub']
+    user = factory_user_model(user_info=user_with_token)
+    org = factory_org_model(user_id=user.id)
+
+    response = ResetDataService.reset(TestJwtClaims.edit_role)
+    assert response is None
+
+    found_org = OrgService.find_by_org_id(org.id)
+    assert found_org is not None

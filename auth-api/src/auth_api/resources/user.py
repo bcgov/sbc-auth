@@ -21,6 +21,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import MembershipSchema, OrgSchema
 from auth_api.schemas import utils as schema_utils
+from auth_api.services import ResetTestData as ResetService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.membership import Membership as MembershipService
@@ -132,7 +133,7 @@ class User(Resource):
         is_terms_accepted = request_json['istermsaccepted']
         try:
             response, status = UserService.update_terms_of_use(token, is_terms_accepted, version).as_dict(), \
-                               http_status.HTTP_200_OK
+                http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -146,6 +147,10 @@ class User(Resource):
         token = g.jwt_oidc_token_info
         try:
             UserService.delete_user(token)
+            # Clean up test data during e2e test
+            if Role.TESTER.value in token.get('realm_access').get('roles'):
+                ResetService.reset(token)
+
             response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
