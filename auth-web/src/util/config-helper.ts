@@ -34,7 +34,7 @@ export default class ConfigHelper {
   }
 
   static getPayAPIURL () {
-    return `${window.location.origin}${process.env.VUE_APP_PAY_ROOT_API}`
+    return ConfigHelper.getValue('PAY_API_URL')
   }
 
   static getAuthAPIUrl () {
