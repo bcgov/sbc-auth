@@ -2,34 +2,33 @@
 
 import { register } from 'register-service-worker'
 
-const swPath = (process.env.NODE_ENV === 'production') ? `${process.env.BASE_URL}service-worker.js` : `./service-worker.js`;
+const swPath = (process.env.NODE_ENV === 'production') ? `${process.env.BASE_URL}service-worker.js` : `./service-worker.js`
 
 register(swPath, {
-  ready() {
+  ready () {
     console.log(
       'App is being served from cache by a service worker.\n' +
       'For more details, visit https://goo.gl/AFskqB'
     )
   },
-  registered() {
+  registered () {
     console.log('Service worker has been registered.')
   },
-  cached() {
+  cached () {
     console.log('Content has been cached for offline use.')
   },
-  updatefound() {
+  updatefound () {
     console.log('New content is downloading.')
   },
-  updated() {
+  updated () {
     // write code for popup here
     console.log('New content is available; please refresh.')
   },
-  offline() {
+  offline () {
     // add offline indication here
     console.log('No internet connection found. App is running in offline mode.')
   },
-  error(error) {
+  error (error) {
     console.error('Error during service worker registration:', error)
   }
 })
-
