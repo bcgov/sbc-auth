@@ -1,77 +1,50 @@
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../LICENSE)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_sbc-auth&metric=alert_status)](https://sonarcloud.io/dashboard?id=bcgov_sbc-auth)
+[![codecov](https://codecov.io/gh/bcgov/sbc-auth/branch/master/graph/badge.svg)](https://codecov.io/gh/bcgov/sbc-auth)
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+# Notify API
+
+BC Registries notify services.
 
 
-# Application Name
+## Development Environment
 
-BC Registries notify API
+Following the instructions of the [Development Readme](http://https://github.com/bcgov/entity/blob/master/docs/development.md)
+to setup your local development environment.
 
-## Technology Stack Used
-* Python, Flask
-* Postgres -  SQLAlchemy, psycopg2-binary & alembic
+## Development Setup
 
-## Third-Party Products/Libraries used and the the License they are covert by
+1. Follow the [instructions](https://github.com/bcgov/entity/blob/master/docs/setup-forking-workflow.md) to checkout the project from GitHub.
+2. Open the notify-api directory in VS Code to treat it as a project (or WSL projec). To prevent version clashes, set up a
+virtual environment to install the Python packages used by this project.
+3. Run `make setup` to set up the virtual environment and install libraries.
+4. Next run `pip install .` to set up the environment for running tests.
 
-## Project Status
+You also need to set up the variables used for environment-specific settings:
+1. Copy the [dotenv template file](../docs/dotenv_template) to somewhere above the source code and rename to `.env`. You will need to fill in missing values.
 
-## Documnentation
+## Running the Auth Database on localhost
 
-GitHub Pages (https://guides.github.com/features/pages/) are a neat way to document you application/project.
+To prepare your local database:
+1. In the [root project folder](../docker/docker-compose.yml): `docker-compose up -d`
+2. In your `venv` environment: `alembic db upgrade`
 
-## Security
+## Running NOTIFY-API
 
-Future - BCGov Keycloak
+1. Start the flask server with `(uvicorn main:app --reload --port 5000)`
+2. View the [OpenAPI Docs](http://127.0.0.1:5000/docs).
 
-Current - JWT hack
+## Running Liniting
 
-## Files in this repository
+1. Run `make flake8` or `flake8 src/auth_api tests`.
+2. Run `make pylint` or `pylint --rcfile=setup.cfg --disable=C0301,W0511 src/auth_api test`
 
-```
-docs/           - Project Documentation
-└── images
-└── icons
+## Running Unit Tests
 
-openshift/      - OpenShift-specific files
-├── scripts     - helper scripts
-└── templates   - application templates
-```
+1. Tests are run from the Status bar at the bottom of the workbench in VS Code or `pytest` command.
+2. Next run `make coverage` to generate the coverage report, which appears
+in the *htmlcov* directory.
 
-## Deployment (Local Development)
+## Openshift Environment
 
-* Developer Workstation Requirements/Setup
-* Application Specific Setup
-
-## Deployment (OpenShift)
-
-See (openshift/Readme.md)
-
-## Getting Help or Reporting an Issue
-
-To report bugs/issues/feature requests, please file an [issue](../../issues).
-
-## Code standards
-
-Refer [checklist](https://github.com/bcgov/sbc-auth/wiki/API-code-review-checklist)
-
-## How to Contribute
-
-If you would like to contribute, please see our [CONTRIBUTING](./CONTRIBUTING.md) guidelines.
-
-Please note that this project is released with a [Contributor Code of Conduct](./CODE_OF_CONDUCT.md).
-By participating in this project you agree to abide by its terms.
-
-## License
-
-    Copyright 2018 Province of British Columbia
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+View the [document](../docs/build-deploy.md).
