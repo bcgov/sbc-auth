@@ -176,7 +176,7 @@ class Invitation:
     def send_invitation(invitation: InvitationModel, org_name, user, app_url):
         """Send the email notification."""
         current_app.logger.debug('<send_invitation')
-        subject = '[BC Registries & Online Services] {} {} has invited you to join a team'.format(user['firstname'],
+        subject = '[BC Registries & Online Services] {} {} has invited you to join an account'.format(user['firstname'],
                                                                                                   user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
