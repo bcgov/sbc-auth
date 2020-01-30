@@ -140,7 +140,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             params = {'org_name': org_name, 'role': self._model.membership_type.code,
                       'label': self._model.membership_type.label}
         elif notification_type == NotificationType.MEMBERSHIP_APPROVED.value:
-            subject = '[BC Registries & Online Services] Welcome to the team {}'. \
+            subject = '[BC Registries & Online Services] Welcome to the account {}'. \
                 format(org_name)
             template_name = 'membership_approved_notification_email.html'
             params = {'org_name': org_name}
