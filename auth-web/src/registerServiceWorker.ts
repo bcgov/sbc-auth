@@ -14,7 +14,8 @@ register(swPath, {
   },
   registered (event) {
     console.log('Service worker has been registered.')
-    console.log(event)
+    console.log('SW URL: ', event.active.scriptURL)
+    console.log('SW state: ', event.active.state)
   },
   cached (event) {
     console.log('Content has been cached for offline use.')
