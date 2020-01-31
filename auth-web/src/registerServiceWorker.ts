@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 
-import { register } from 'register-service-worker'
 import Swal from 'sweetalert2'
+import { register } from 'register-service-worker'
 
 const swPath = (process.env.NODE_ENV === 'production') ? `${process.env.BASE_URL}service-worker.js` : `./service-worker.js`
 
@@ -28,7 +28,7 @@ register(swPath, {
     // write code for popup here
     console.log('New content is available; please refresh.')
     showInteractiveToastReload('New content is available!')
-    console.log(event);
+    console.log(event)
   },
   offline () {
     // add offline indication here
@@ -39,7 +39,6 @@ register(swPath, {
   }
 })
 
-
 const showInteractiveToastReload = (text) => {
   const Toast = Swal.mixin({
     toast: true,
@@ -49,16 +48,15 @@ const showInteractiveToastReload = (text) => {
     timer: 0,
     width: '100',
     grow: 'fullscreen',
-    padding: '1.3rem 3rem',
+    padding: '1.3rem 3rem'
   })
-  
+
   Toast.fire({
     icon: 'info',
-    title: text,
+    title: text
   }).then((result) => {
     if (result.value) {
       window.location.reload(true)
     }
   })
-
 }
