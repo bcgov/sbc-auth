@@ -141,7 +141,6 @@ import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import PendingMemberDataTable from '@/components/auth/PendingMemberDataTable.vue'
-import _ from 'lodash'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
