@@ -115,6 +115,30 @@ class Entity:
         entity = Entity(entity_model)
         return entity
 
+    @staticmethod
+    def update_entity(business_identifier: str, entity_info: dict, token_info: Dict = None):
+        """Update an entity from the given dictionary.
+
+        Completely replaces the entity including the business identifier
+        """
+        if not entity_info or not business_identifier:
+            return None
+        # todo No memberhsip created at this point. check_auth wont work.ideally we shud put the logic in here
+        # check_auth(token_info, one_of_roles=allowed_roles, business_identifier=business_identifier)
+        entity = EntityModel.find_by_business_identifier(business_identifier)
+        if entity is None or entity.corp_type_code is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        if entity.corp_type_code != token_info.get('corp_type', None):
+            raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
+
+        if entity_info.get('passCode') is not None:
+            entity_info['passCode'] = passcode_hash(entity_info['passCode'])
+        entity.update_from_dict(**camelback2snake(entity_info))
+        entity.commit()
+
+        entity = Entity(entity)
+        return entity
+
     def add_contact(self, contact_info: dict):
         """Add a business contact to this entity."""
         # check for existing contact (we only want one contact per user)

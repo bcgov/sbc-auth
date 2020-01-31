@@ -56,8 +56,8 @@ class EntityResources(Resource):
         return response, status
 
 
-@cors_preflight('GET,OPTIONS')
-@API.route('/<string:business_identifier>', methods=['GET', 'OPTIONS'])
+@cors_preflight('GET,OPTIONS,PUT')
+@API.route('/<string:business_identifier>', methods=['GET', 'OPTIONS', 'PUT'])
 class EntityResource(Resource):
     """Resource for managing entities."""
 
@@ -70,6 +70,29 @@ class EntityResource(Resource):
         try:
             entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
                                                                allowed_roles=ALL_ALLOWED_ROLES)
+            if entity is not None:
+                response, status = entity.as_dict(), http_status.HTTP_200_OK
+            else:
+                response, status = {'message': 'A business for {} was not found.'.format(business_identifier)}, \
+                                   http_status.HTTP_404_NOT_FOUND
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value])
+    @TRACER.trace()
+    def put(business_identifier):
+        """Update an existing business by it's business number."""
+        request_json = request.get_json()
+
+        valid_format, errors = schema_utils.validate(request_json, 'entity')
+        if not valid_format:
+            return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+
+        try:
+            entity = EntityService.update_entity(business_identifier, request_json, token_info=g.jwt_oidc_token_info)
             if entity is not None:
                 response, status = entity.as_dict(), http_status.HTTP_200_OK
             else:
