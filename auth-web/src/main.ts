@@ -1,6 +1,7 @@
 import 'core-js/stable' // to polyfill ECMAScript features
 import '@mdi/font/css/materialdesignicons.min.css' // icon library (https://materialdesignicons.com/)
 import 'regenerator-runtime/runtime' // to use transpiled generator functions
+import './registerServiceWorker'
 import router, { getRoutes } from './router'
 import App from './App.vue'
 import ConfigHelper from '@/util/config-helper'
@@ -9,7 +10,6 @@ import Vue from 'vue'
 import i18n from './plugins/i18n'
 import store from './store'
 import vuetify from './plugins/vuetify'
-import './registerServiceWorker'
 
 Vue.config.productionTip = false
 Vue.prototype.$tokenService = new TokenService()
