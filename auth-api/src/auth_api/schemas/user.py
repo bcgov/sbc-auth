@@ -27,10 +27,16 @@ class UserSchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-fe
         """Maps all of the User fields to a default schema."""
 
         model = UserModel
-        exclude = ('id', 'orgs', 'is_terms_of_use_accepted', 'terms_of_use_accepted_version', 'terms_of_use_version')
+        exclude = (
+            'id',
+            'orgs',
+            'is_terms_of_use_accepted',
+            'terms_of_use_accepted_version',
+            'terms_of_use_version'
+        )
 
-    contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
     user_terms = fields.Method('get_user_terms_object')
+    contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
 
     def get_user_terms_object(self, obj):  # pylint: disable=no-self-use
         """Map terms properties into nested object."""

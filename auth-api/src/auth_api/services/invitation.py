@@ -30,7 +30,8 @@ from auth_api.models import OrgSettings as OrgSettingsModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
-from auth_api.utils.roles import ADMIN, OWNER, Status
+from auth_api.utils.constants import InvitationStatus
+from auth_api.utils.roles import ADMIN, MEMBER, OWNER, Status
 from config import get_named_config
 
 from .authorization import check_auth
@@ -107,17 +108,33 @@ class Invitation:
         invitation.delete()
 
     @staticmethod
-    def get_invitations_by_org_id(org_id, status, token_info: Dict = None):
+    def get_invitations_for_org(org_id, status=None, token_info: Dict = None):
         """Get invitations for an org."""
-        check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
-        collection = []
-        if status == 'ALL':
-            invitations = InvitationModel.find_invitations_by_org(org_id)
-        else:
-            invitations = InvitationModel.find_pending_invitations_by_org(org_id)
-        for invitation in invitations:
-            collection.append(Invitation(invitation).as_dict())
-        return collection
+        org_model = OrgModel.find_by_org_id(org_id)
+        if not org_model:
+            return None
+
+        if status:
+            status = InvitationStatus[status]
+
+        # If staff return full list
+        if 'staff' in token_info.get('realm_access').get('roles'):
+            return InvitationModel.find_pending_invitations_by_org(org_id)
+
+        current_user: UserService = UserService.find_by_jwt_token(token_info)
+        current_user_membership: MembershipModel = \
+            MembershipModel.find_membership_by_user_and_org(user_id=current_user.identifier, org_id=org_id)
+
+        # If no active membership return empty array
+        if current_user_membership is None or \
+                current_user_membership.status != Status.ACTIVE.value:
+            return []
+
+        # Ensure either OWNER or ADMIN
+        if current_user_membership.membership_type_code == MEMBER:
+            return []
+
+        return InvitationModel.find_invitations_by_org(org_id=org_id, status=status)
 
     @staticmethod
     def find_invitation_by_id(invitation_id, token_info: Dict = None):
@@ -139,7 +156,7 @@ class Invitation:
     @staticmethod
     def send_admin_notification(user, url, recipient_email_list, org_name):
         """Send the admin email notification."""
-        subject = '[BC Registries & Online Services] {} {} has responded for the invitation to join the team {}'. \
+        subject = '[BC Registries & Online Services] {} {} has responded for the invitation to join the account {}'. \
             format(user['firstname'], user['firstname'], org_name)
         sender = CONFIG.MAIL_FROM_ID
         try:
@@ -159,7 +176,7 @@ class Invitation:
     def send_invitation(invitation: InvitationModel, org_name, user, app_url):
         """Send the email notification."""
         current_app.logger.debug('<send_invitation')
-        subject = '[BC Registries & Online Services] {} {} has invited you to join a team'.format(user['firstname'],
+        subject = '[BC Registries & Online Services] {} {} has invited you to join an account'.format(user['firstname'],
                                                                                                   user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
@@ -213,7 +230,7 @@ class Invitation:
         admin_list = UserService.get_admins_for_membership(membership_id)
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
-        admin_emails = ",".join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
+        admin_emails = ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
         Invitation.send_admin_notification(user.as_dict(),
                                            '{}/{}'.format(invitation_origin, context_path),
                                            admin_emails, invitation.membership[0].org.name)

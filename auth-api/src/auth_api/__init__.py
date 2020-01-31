@@ -19,8 +19,8 @@ This module is the API for the Authroization system.
 import os
 
 from flask import Flask
-from sbc_common_components.exception_handling.exception_handler import ExceptionHandler  # noqa: I001
 from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
+from sbc_common_components.exception_handling.exception_handler import ExceptionHandler  # noqa: I001
 
 from auth_api import models
 from auth_api.extensions import mail
@@ -51,7 +51,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
             integrations=[FlaskIntegration()]
         )
 
-    from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT  # pylint: disable=import-outside-toplevel
+    from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT, \
+        TEST_BLUEPRINT  # pylint: disable=import-outside-toplevel
 
     db.init_app(app)
     ma.init_app(app)
@@ -59,6 +60,9 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
     app.register_blueprint(API_BLUEPRINT)
     app.register_blueprint(OPS_BLUEPRINT)
+
+    if os.getenv('FLASK_ENV', 'production') in ['development', 'testing']:
+        app.register_blueprint(TEST_BLUEPRINT)
 
     setup_jwt_manager(app, JWT)
 

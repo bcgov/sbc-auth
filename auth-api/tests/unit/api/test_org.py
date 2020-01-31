@@ -168,11 +168,15 @@ def test_update_org(client, jwt, session):  # pylint:disable=unused-argument
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
-    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(TestOrgInfo.org1),
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo'}),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     dictionary = json.loads(rv.data)
     assert dictionary['id'] == org_id
+
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo'}),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_409_CONFLICT
 
 
 def test_update_org_returns_400(client, jwt, session):  # pylint:disable=unused-argument
@@ -225,8 +229,7 @@ def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
                      headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
-    assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['email'] == TestContactInfo.contact1['email']
+    assert dictionary['email'] == TestContactInfo.contact1['email']
 
 
 def test_add_contact_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
@@ -299,8 +302,7 @@ def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
 
     assert rv.status_code == http_status.HTTP_200_OK
     dictionary = json.loads(rv.data)
-    assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['email'] == TestContactInfo.contact2['email']
+    assert dictionary['email'] == TestContactInfo.contact2['email']
 
 
 def test_update_contact_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
@@ -374,7 +376,12 @@ def test_delete_contact(client, jwt, session):  # pylint:disable=unused-argument
                        headers=headers, data=json.dumps(TestContactInfo.contact2), content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+
+    rv = client.get('/api/v1/orgs/{}/contacts'.format(org_id), headers=headers)
+
+    dictionary = None
     dictionary = json.loads(rv.data)
+
     assert len(dictionary['contacts']) == 0
 
 
@@ -510,7 +517,7 @@ def test_add_affiliation(client, jwt, session):  # pylint:disable=unused-argumen
                      data=json.dumps(TestAffliationInfo.affiliation3), content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
-    assert dictionary['org']['id'] == org_id
+    assert dictionary['organization']['id'] == org_id
 
 
 def test_add_affiliation_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
@@ -582,5 +589,5 @@ def test_get_affiliations(client, jwt, session):  # pylint:disable=unused-argume
     rv = client.get('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers)
     assert rv.status_code == http_status.HTTP_200_OK
     affiliations = json.loads(rv.data)
-    assert affiliations[0]['businessIdentifier'] == TestEntityInfo.entity_lear_mock['businessIdentifier']
-    assert affiliations[1]['businessIdentifier'] == TestEntityInfo.entity_lear_mock2['businessIdentifier']
+    assert affiliations['entities'][0]['businessIdentifier'] == TestEntityInfo.entity_lear_mock['businessIdentifier']
+    assert affiliations['entities'][1]['businessIdentifier'] == TestEntityInfo.entity_lear_mock2['businessIdentifier']

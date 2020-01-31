@@ -1,26 +1,27 @@
 import { Role, SessionStorageKeys } from '@/util/constants'
-import AcceptInvite from '@/views/AcceptInvite.vue'
-import AcceptInviteLanding from '@/views/AcceptInviteLanding.vue'
-import AuthHome from '@/views/AuthHome.vue'
-import BusinessProfile from '@/views/BusinessProfile.vue'
-import CreateAccount from '@/views/CreateAccount.vue'
-import CreateTeamView from '@/views/CreateTeamView.vue'
-import Dashboard from '@/views/management/Dashboard.vue'
-import DuplicateTeamWarning from '@/views/DuplicateTeamWarning.vue'
+import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
+import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
+import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
+import CreateAccountView from '@/views/auth/CreateAccountView.vue'
+import DashboardView from '@/views/auth/DashboardView.vue'
+import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
+import EntityManagement from '@/components/auth/EntityManagement.vue'
+import HomeView from '@/views/auth/HomeView.vue'
 import KeyCloakService from '@/services/keycloak.services'
-import LeaveTeamLanding from '@/views/LeaveTeamLanding.vue'
-import PageNotFound from '@/views/PageNotFound.vue'
-import PaymentForm from '@/components/pay/PaymentForm.vue'
-import PaymentReturnForm from '@/components/pay/PaymentReturnForm.vue'
-import PendingApproval from '@/views/PendingApproval.vue'
-import ProfileDeactivated from '@/views/ProfileDeactivated.vue'
+import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
+import PageNotFound from '@/views/auth/PageNotFound.vue'
+import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
+import PaymentView from '@/views/pay/PaymentView.vue'
+import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
+import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
 import Router from 'vue-router'
-import SearchBusinessForm from '@/components/auth/SearchBusinessForm.vue'
-import Signin from '@/components/auth/Signin.vue'
-import Signout from '@/components/auth/Signout.vue'
-import Unauthorized from '@/components/auth/Unauthorized.vue'
-import UserManagement from '@/views/management/UserManagement.vue'
-import UserProfile from '@/views/UserProfile.vue'
+import SearchBusinessView from '@/views/auth/SearchBusinessView.vue'
+import SigninView from '@/views/auth/SigninView.vue'
+import SignoutView from '@/views/auth/SignoutView.vue'
+import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
+import UserManagement from '@/components/auth/UserManagement.vue'
+import UserProfileView from '@/views/auth/UserProfileView.vue'
+
 import Vue from 'vue'
 
 Vue.use(Router)
@@ -33,39 +34,62 @@ function mapReturnPayVars (route: any) {
   }
 }
 
-export function getRoutes (appFlavor: String) {
-  let varRoutes
-
-  varRoutes = [
-    { path: '/', component: AuthHome },
-    { path: '/home', component: AuthHome },
-    { path: '/main', component: Dashboard, meta: { requiresAuth: true } },
-    { path: '/team', component: UserManagement, meta: { requiresAuth: true } },
-    { path: '/userprofile', component: UserProfile, props: true, meta: { requiresAuth: true } },
-    { path: '/createteam', component: CreateTeamView, meta: { requiresAuth: true } },
-    { path: '/createaccount', component: CreateAccount, meta: { requiresAuth: false } },
-    { path: '/duplicateteam', component: DuplicateTeamWarning, meta: { requiresAuth: true } },
-    { path: '/validatetoken/:token', component: AcceptInviteLanding, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
-    { path: '/confirmtoken/:token', component: AcceptInvite, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } }
-  ]
-
-  let routes = [
-    { path: '/signin/:idpHint', component: Signin, props: true, meta: { requiresAuth: false } },
-    { path: '/signin/:idpHint/:redirectUrl', component: Signin, props: true, meta: { requiresAuth: false } },
-    { path: '/signout', component: Signout, props: true, meta: { requiresAuth: true } },
-    { path: '/signout/:redirectUrl', component: Signout, props: true, meta: { requiresAuth: true } },
-    { path: '/businessprofile', component: BusinessProfile, meta: { requiresAuth: true } },
-    { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentForm, props: true, meta: { requiresAuth: false } },
-    { path: '/profiledeactivated', component: ProfileDeactivated, props: true, meta: { requiresAuth: false } },
-    { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnForm, props: mapReturnPayVars, meta: { requiresAuth: false } },
-    { path: '/searchbusiness', component: SearchBusinessForm, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
-    { path: '/unauthorized', component: Unauthorized, props: true, meta: { requiresAuth: false } },
-    { path: '/pendingapproval/:team_name?', component: PendingApproval, props: true, meta: { requiresAuth: false } },
-    { path: '/leaveteam', component: LeaveTeamLanding, props: true, meta: { requiresAuth: true } },
+export function getRoutes () {
+  const accountSettings = () => import(/* webpackChunkName: "account-settings" */ './views/auth/AccountSettings.vue')
+  const accountInfo = () => import(/* webpackChunkName: "account-settings" */ './components/auth/AccountInfo.vue')
+  const userManagement = () => import(/* webpackChunkName: "account-settings" */ './components/auth/UserManagement.vue')
+  const routes = [
+    { path: '/', component: HomeView },
+    { path: '/home', component: HomeView },
+    { path: '/main',
+      component: DashboardView,
+      meta: { requiresAuth: true },
+      redirect: '/main/business',
+      children: [
+        {
+          path: 'team',
+          component: UserManagement
+        },
+        {
+          path: 'business',
+          component: EntityManagement
+        }]
+    },
+    { path: '/account-settings',
+      component: accountSettings,
+      meta: { requiresAuth: true },
+      redirect: '/account-settings/account-info',
+      children: [
+        {
+          path: 'account-info',
+          component: accountInfo
+        },
+        {
+          path: 'team-members',
+          component: userManagement
+        }
+      ]
+    },
+    { path: '/userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
+    { path: '/createaccount', component: CreateAccountView, meta: { requiresAuth: true } },
+    { path: '/duplicateteam', component: DuplicateTeamWarningView, meta: { requiresAuth: true } },
+    { path: '/validatetoken/:token', component: AcceptInviteLandingView, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
+    { path: '/confirmtoken/:token', component: AcceptInviteView, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } },
+    { path: '/signin/:idpHint', component: SigninView, props: true, meta: { requiresAuth: false } },
+    { path: '/signin/:idpHint/:redirectUrl', component: SigninView, props: true, meta: { requiresAuth: false } },
+    { path: '/signout', component: SignoutView, props: true, meta: { requiresAuth: true } },
+    { path: '/signout/:redirectUrl', component: SignoutView, props: true, meta: { requiresAuth: true } },
+    { path: '/businessprofile', component: BusinessProfileView, meta: { requiresAuth: true } },
+    { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentView, props: true, meta: { requiresAuth: false } },
+    { path: '/profiledeactivated', component: ProfileDeactivatedView, props: true, meta: { requiresAuth: false } },
+    { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnView, props: mapReturnPayVars, meta: { requiresAuth: false } },
+    { path: '/searchbusiness', component: SearchBusinessView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
+    { path: '/unauthorized', component: UnauthorizedView, props: true, meta: { requiresAuth: false } },
+    { path: '/pendingapproval/:team_name?', component: PendingApprovalView, props: true, meta: { requiresAuth: false } },
+    { path: '/leaveteam', component: LeaveTeamLandingView, props: true, meta: { requiresAuth: true } },
     { path: '*', component: PageNotFound }
   ]
 
-  routes = [...varRoutes, ...routes]
   return routes
 }
 

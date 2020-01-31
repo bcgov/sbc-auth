@@ -205,9 +205,8 @@ def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.post('/api/v1/users/contacts', data=json.dumps(TestContactInfo.contact1),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
-    user = json.loads(rv.data)
-    assert len(user['contacts']) == 1
-    assert user['contacts'][0]['email'] == 'foo@bar.com'
+    contact = json.loads(rv.data)
+    assert contact['email'] == 'foo@bar.com'
 
 
 def test_add_contact_valid_email_with_special_characters(client, jwt, session):  # pylint:disable=unused-argument
@@ -220,9 +219,8 @@ def test_add_contact_valid_email_with_special_characters(client, jwt, session): 
     rv = client.post('/api/v1/users/contacts', data=json.dumps(TestContactInfo.email_valid),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
-    user = json.loads(rv.data)
-    assert len(user['contacts']) == 1
-    assert user['contacts'][0]['email'] == TestContactInfo.email_valid['email']
+    contact = json.loads(rv.data)
+    assert contact['email'] == TestContactInfo.email_valid['email']
 
 
 def test_add_contact_no_token_returns_401(client, session):  # pylint:disable=unused-argument
@@ -274,9 +272,8 @@ def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.put('/api/v1/users/contacts', data=json.dumps(TestContactInfo.contact2),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
-    user = json.loads(rv.data)
-    assert len(user['contacts']) == 1
-    assert user['contacts'][0]['email'] == 'bar@foo.com'
+    contact = json.loads(rv.data)
+    assert contact['email'] == 'bar@foo.com'
 
 
 def test_update_contact_no_token_returns_401(client, session):  # pylint:disable=unused-argument
@@ -323,8 +320,11 @@ def test_delete_contact(client, jwt, session):  # pylint:disable=unused-argument
     # PUT a contact on the same user
     rv = client.delete('/api/v1/users/contacts', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
-    user = json.loads(rv.data)
-    assert user.get('contacts') == []
+
+    rv = client.get('/api/v1/users/contacts', headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    contacts = dictionary.get('contacts')
+    assert len(contacts) == 0
 
 
 def test_delete_contact_no_token_returns_401(client, session):  # pylint:disable=unused-argument, invalid-name
@@ -487,3 +487,19 @@ def test_delete_user_is_member_returns_204(client, jwt, session):  # pylint:disa
 
     rv = client.delete('/api/v1/users/@me', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+
+def test_delete_user_with_tester_role(client, jwt, session):  # pylint:disable=unused-argument
+    """Test delete the user by tester role assert status is 204."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.tester_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    # post token with updated claims
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.tester_role)
+
+    rv = client.delete('/api/v1/users/@me', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+    rv = client.get('/api/v1/users/@me', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_404_NOT_FOUND

@@ -4,7 +4,7 @@
     <!-- No Results Message -->
     <v-card flat
       class="no-results text-center"
-      v-if="myBusinesses.length === 0 && !isLoading"
+      v-if="businesses.length === 0 && !isLoading"
       @click="addBusiness()"
       data-test="no-businesses-message"
     >
@@ -13,15 +13,15 @@
     </v-card>
 
     <!-- Business Data Table -->
-    <v-card flat v-if="myBusinesses.length > 0 || isLoading">
+    <v-card flat v-if="businesses.length > 0 || isLoading">
       <v-card-text class="p-1">
         <v-data-table
           :loading="isLoading"
           loading-text="Loading... Please wait"
           :headers="tableHeaders"
-          :items="myBusinesses"
+          :items="businesses"
           :items-per-page="5"
-          :hide-default-footer="myBusinesses.length <= 5"
+          :hide-default-footer="businesses.length <= 5"
           :custom-sort="customSort"
           :calculate-widths="true"
         >
@@ -47,32 +47,33 @@
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import { Business } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
 import { SessionStorageKeys } from '@/util/constants'
-import UserManagement from '@/views/management/UserManagement.vue'
+import UserManagement from '@/components/auth/UserManagement.vue'
 import _ from 'lodash'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
-    ...mapGetters('org', ['myOrg', 'myOrgMembership'])
+    ...mapState('business', ['businesses']),
+    ...mapState('org', ['currentOrganization']),
+    ...mapGetters('org', ['myOrgMembership'])
   },
   methods: {
-    ...mapMutations('business', ['setCurrentBusiness']),
-    ...mapActions('org', ['syncOrganizations'])
+    ...mapMutations('business', ['setCurrentBusiness'])
   }
 })
 export default class AffiliatedEntityList extends Vue {
   private VUE_APP_COPS_REDIRECT_URL = ConfigHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   private orgStore = getModule(OrgModule, this.$store)
   private isLoading = true
-  private readonly myOrg!: Organization
+  private readonly businesses!: Business[]
+  private readonly currentOrganization!: Organization
   private readonly myOrgMembership!: Member
   private readonly setCurrentBusiness!: (business: Business) => void
-  private readonly syncOrganizations!: () => Organization[]
 
   private get tableHeaders () {
     return [
@@ -90,22 +91,6 @@ export default class AffiliatedEntityList extends Vue {
         width: '270'
       }
     ]
-  }
-
-  private get myBusinesses () {
-    return this.myOrg.affiliatedEntities
-  }
-
-  private get businessById () {
-    return (businessIdentifier: string) => {
-      return this.myBusinesses.find(business => business.businessIdentifier === businessIdentifier)
-    }
-  }
-
-  public async syncBusinesses (): Promise<void> {
-    this.isLoading = true
-    await this.syncOrganizations()
-    this.isLoading = false
   }
 
   private canRemove (): boolean {
@@ -138,7 +123,7 @@ export default class AffiliatedEntityList extends Vue {
   @Emit()
   removeBusiness (businessIdentifier: string): RemoveBusinessPayload {
     return {
-      orgIdentifiers: [this.myOrg.id],
+      orgIdentifiers: [this.currentOrganization.id],
       businessIdentifier
     }
   }
@@ -222,13 +207,14 @@ dd {
   justify-content: center;
 }
 
-::v-deep .v-data-table td {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-}
-
-::v-deep .v-data-table.user-list__active td {
-  height: 4rem;
-  vertical-align: top;
+::v-deep {
+  .v-data-table.user-list__active td {
+    height: 4rem;
+    vertical-align: top;
+  }
+  .v-data-table td {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
 }
 </style>

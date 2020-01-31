@@ -46,6 +46,13 @@ class KeyCloakService {
     configHelper.addToSession(SessionStorageKeys.KeyCloakRefreshToken, this.kc.refreshToken)
     configHelper.addToSession(SessionStorageKeys.UserFullName, this.getUserInfo().fullName)
     this.parsedToken = this.kc.tokenParsed as UserToken
+
+    // Set flag in session storage so that common components will know account type
+    if (this.getUserInfo().userName.endsWith('@idir')) {
+      configHelper.addToSession(SessionStorageKeys.UserAccountType, 'IDIR')
+    } else {
+      configHelper.addToSession(SessionStorageKeys.UserAccountType, 'BCSC')
+    }
   }
 
   getUserInfo () : UserInfo {
@@ -63,7 +70,7 @@ class KeyCloakService {
     }
   }
 
-  logout (redirectUrl: string) {
+  async logout (redirectUrl: string) {
     let token = configHelper.getFromSession(SessionStorageKeys.KeyCloakToken)
     if (token) {
       this.kc = Keycloak(keyCloakConfig)
@@ -75,14 +82,28 @@ class KeyCloakService {
         refreshToken: sessionStorage.getItem('KEYCLOAK_REFRESH_TOKEN'),
         idToken: sessionStorage.getItem('KEYCLOAK_ID_TOKEN')
       }
-      this.kc.init(kcOptions).success(authenticated => {
-        if (authenticated) {
-          configHelper.clearSession()
-          if (!redirectUrl) {
-            redirectUrl = `${window.location.origin}${process.env.VUE_APP_PATH}`
-          }
-          this.kc.logout({ redirectUri: redirectUrl })
-        }
+      // Here we clear session storage, and add a flag in to prevent the app from
+      // putting tokens back in from returning async calls  (see #2341)
+      configHelper.clearSession()
+      configHelper.addToSession(SessionStorageKeys.PreventStorageSync, true)
+      return new Promise((resolve, reject) => {
+        this.kc.init(kcOptions)
+          .success(authenticated => {
+            if (!authenticated) {
+              resolve()
+            }
+            redirectUrl = redirectUrl || `${window.location.origin}${process.env.VUE_APP_PATH}`
+            this.kc.logout({ redirectUri: redirectUrl })
+              .success(() => {
+                resolve()
+              })
+              .error(error => {
+                reject(error)
+              })
+          })
+          .error(error => {
+            reject(error)
+          })
       })
     }
   }

@@ -47,11 +47,13 @@ class User(BaseModel):
     )
     roles = Column('roles', String(1000))
 
-    contacts = relationship('ContactLink', back_populates='user', primaryjoin='User.id == ContactLink.user_id')
-    orgs = relationship('Membership', back_populates='user',
+    contacts = relationship('ContactLink', primaryjoin='User.id == ContactLink.user_id', lazy='select')
+    orgs = relationship('Membership',
                         primaryjoin='and_(User.id == Membership.user_id, \
-                        or_(Membership.status == ' + str(Status.ACTIVE.value) + ', Membership.status == ' + str(
-                            Status.PENDING_APPROVAL.value) + '))')  # noqa:E127
+                        or_(Membership.status == ' + str(Status.ACTIVE.value) +
+                        ', Membership.status == ' + str(
+                            Status.PENDING_APPROVAL.value) + '))',
+                        lazy='select')  # noqa:E127
 
     is_terms_of_use_accepted = Column(Boolean(), default=False, nullable=True)
     terms_of_use_accepted_version = Column(

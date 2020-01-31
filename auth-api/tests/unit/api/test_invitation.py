@@ -137,6 +137,8 @@ def test_accept_invitation(client, jwt, session):  # pylint:disable=unused-argum
     rv = client.put('/api/v1/invitations/tokens/{}'.format(invitation_id_token), headers=headers,
                     content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
-    rv = client.get('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/orgs/{}/members?status=PENDING_APPROVAL'.format(org_id),
+                    headers=headers,
+                    content_type='application/json')
     dictionary = json.loads(rv.data)
-    assert len(dictionary['members']) == 2
+    assert len(dictionary['members']) == 1

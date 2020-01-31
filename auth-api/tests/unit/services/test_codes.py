@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests to verify the User Service.
 
 Test-Suite to ensure that the User Service is working as expected.
@@ -29,23 +28,23 @@ from auth_api.services import Codes as CodesService
 def test_fetch_data_model(session):  # pylint: disable=unused-argument
     """Assert that code type details can be fetch by table name."""
     code_type = 'membership_type'
-    c = CodesService.fetch_data_model(code_type)
-    assert c is not None
+    code_result = CodesService.fetch_data_model(code_type)
+    assert code_result is not None
 
 
 def test_fetch_data_model_not_found(session):  # pylint: disable=unused-argument
     """Assert that code type details can be fetch by table name."""
     code_type = 'membership_type1'
-    c = CodesService.fetch_data_model(code_type)
-    assert not c
+    code_result = CodesService.fetch_data_model(code_type)
+    assert not code_result
 
     code_type = 'user'
-    c = CodesService.fetch_data_model(code_type)
-    assert not c
+    code_result = CodesService.fetch_data_model(code_type)
+    assert not code_result
 
     code_type = ''
-    c = CodesService.fetch_data_model(code_type)
-    assert not c
+    code_result = CodesService.fetch_data_model(code_type)
+    assert not code_result
 
 
 def test_fetch_codes(session):  # pylint: disable=unused-argument

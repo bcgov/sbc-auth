@@ -68,6 +68,7 @@
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { mapActions, mapGetters, mapState } from 'vuex'
+import { Business } from '@/models/business'
 import moment from 'moment'
 
 export interface ChangeRolePayload {
@@ -77,18 +78,15 @@ export interface ChangeRolePayload {
 
 @Component({
   computed: {
+    ...mapState('business', ['businesses']),
     ...mapState('org', ['activeOrgMembers']),
-    ...mapGetters('org', ['myOrg', 'myOrgMembership'])
-  },
-  methods: {
-    ...mapActions('org', ['syncActiveOrgMembers'])
+    ...mapGetters('org', ['myOrgMembership'])
   }
 })
 export default class MemberDataTable extends Vue {
+  private readonly businesses!: Business[]
   private readonly activeOrgMembers!: Member[]
-  private readonly myOrg!: Organization
   private readonly myOrgMembership!: Member
-  private readonly syncActiveOrgMembers!: () => Member[]
 
   private readonly availableRoles: RoleInfo[] = [
     {
@@ -147,10 +145,6 @@ export default class MemberDataTable extends Vue {
     }))
   }
 
-  private async mounted () {
-    await this.syncActiveOrgMembers()
-  }
-
   private formatDate (date: Date) {
     return moment(date).format('DD MMM, YYYY')
   }
@@ -207,9 +201,8 @@ export default class MemberDataTable extends Vue {
       return false
     }
 
-    // Can't remove Owners unless an Owner
-    if (memberToRemove.membershipTypeCode === MembershipType.Owner &&
-        this.myOrgMembership.membershipTypeCode !== MembershipType.Owner) {
+    // No one can change an OWNER's status, only option is OWNER to leave the team. #2319
+    if (memberToRemove.membershipTypeCode === MembershipType.Owner) {
       return false
     }
 
@@ -261,7 +254,7 @@ export default class MemberDataTable extends Vue {
   }
 
   private canDissolve (): boolean {
-    if (this.activeOrgMembers.length === 1 && this.myOrg.affiliatedEntities.length === 0) {
+    if (this.activeOrgMembers.length === 1 && this.businesses.length === 0) {
       return true
     }
     return false

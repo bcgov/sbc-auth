@@ -10,7 +10,7 @@ BC Registries Names Examination, research and approval system API
 * Python, Flask
 * Postgres -  SQLAlchemy, psycopg2-binary & alembic 
 
-## Third-Party Products/Libraries used and the the License they are covert by
+## Third-Party Products/Libraries used and the the License they are covered by
 
 ## Project Status
 As of 2018-02-22 in **ALPHA**

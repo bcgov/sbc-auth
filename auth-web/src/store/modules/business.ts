@@ -1,12 +1,11 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { Business, LoginPayload } from '@/models/business'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { Affiliation } from '@/models/affiliation'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
-import LoginService from '@/services/login.services'
-
+import { CreateRequestBody as CreateAffiliationRequestBody } from '@/models/affiliation'
+import OrgService from '@/services/org.services'
 import { SessionStorageKeys } from '@/util/constants'
 
 @Module({
@@ -15,11 +14,28 @@ import { SessionStorageKeys } from '@/util/constants'
 })
 export default class BusinessModule extends VuexModule {
   currentBusiness: Business = undefined
+  businesses: Business[] = []
 
   @Mutation
   public setCurrentBusiness (business: Business) {
     ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, business.businessIdentifier)
     this.currentBusiness = business
+  }
+
+  @Mutation
+  public setBusinesses (businesses: Business[]) {
+    this.businesses = businesses
+  }
+
+  @Action({ commit: 'setBusinesses', rawError: true })
+  public async syncBusinesses (organization?: Organization): Promise<Business[]> {
+    if (!organization) {
+      organization = this.context.rootState.org.currentOrganization
+    }
+    const response = await OrgService.getAffiliatiatedEntities(organization.id)
+    if (response && response.data && response.status === 200) {
+      return response.data.entities
+    }
   }
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })
@@ -33,15 +49,15 @@ export default class BusinessModule extends VuexModule {
 
   @Action({ rawError: true })
   public async addBusiness (payload: LoginPayload) {
-    const affiliation: Affiliation = {
+    const requestBody: CreateAffiliationRequestBody = {
       businessIdentifier: payload.businessIdentifier,
       passCode: payload.passCode
     }
 
-    const myOrg: Organization = this.context.rootGetters['org/myOrg']
+    const currentOrganization: Organization = this.context.rootState.org.currentOrganization
 
     // Create an affiliation between implicit org and requested business
-    await BusinessService.createAffiliation(myOrg.id, affiliation)
+    await OrgService.createAffiliation(currentOrganization.id, requestBody)
   }
 
   // Following searchBusiness will search data from legal-api.
@@ -59,7 +75,7 @@ export default class BusinessModule extends VuexModule {
   public async removeBusiness (payload: RemoveBusinessPayload) {
     // Remove an affiliation between the given business and each specified org
     for (const orgId of payload.orgIdentifiers) {
-      await BusinessService.removeAffiliation(orgId, payload.businessIdentifier)
+      await OrgService.removeAffiliation(orgId, payload.businessIdentifier)
     }
   }
 

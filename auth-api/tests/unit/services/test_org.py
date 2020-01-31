@@ -23,12 +23,14 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.services import Invitation as InvitationService
+from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
-from tests.utilities.factory_scenarios import TestContactInfo, TestOrgInfo
+from tests.utilities.factory_scenarios import TestContactInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
-    factory_contact_model, factory_entity_model, factory_invitation, factory_org_service, factory_user_model)
+    factory_contact_model, factory_entity_model, factory_invitation, factory_membership_model, factory_org_service,
+    factory_user_model)
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -59,6 +61,20 @@ def test_update_org(session):  # pylint:disable=unused-argument
     assert dictionary['name'] == TestOrgInfo.org2['name']
 
 
+def test_update__duplicate_org(session):  # pylint:disable=unused-argument
+    """Assert that an Org cannot be updated."""
+    org = factory_org_service()
+
+    org.update_org(TestOrgInfo.org2)
+
+    dictionary = org.as_dict()
+    assert dictionary['name'] == TestOrgInfo.org2['name']
+
+    with pytest.raises(BusinessException) as exception:
+        org.update_org(TestOrgInfo.org2)
+    assert exception.value.code == Error.DATA_CONFLICT.name
+
+
 def test_find_org_by_id(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an org can be retrieved by its id."""
     org = factory_org_service()
@@ -80,90 +96,121 @@ def test_find_org_by_id_no_org(session, auth_mock):  # pylint:disable=unused-arg
 def test_add_contact(session):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an org."""
     org = factory_org_service()
-    org.add_contact(TestContactInfo.contact1)
-    dictionary = org.as_dict()
-    assert dictionary['contacts']
-    assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['email'] == TestContactInfo.contact1['email']
+    org_dictionary = org.as_dict()
+    contact = OrgService.add_contact(org_dictionary['id'], TestContactInfo.contact1)
+    dictionary = contact.as_dict()
+    assert dictionary['email'] == TestContactInfo.contact1['email']
 
 
 def test_add_contact_duplicate(session):  # pylint:disable=unused-argument
     """Assert that a contact cannot be added to an Org if that Org already has a contact."""
     org = factory_org_service()
-    org.add_contact(TestContactInfo.contact1)
+    org_dictionary = org.as_dict()
+    OrgService.add_contact(org_dictionary['id'], TestContactInfo.contact1)
 
     with pytest.raises(BusinessException) as exception:
-        org.add_contact(TestContactInfo.contact2)
+        OrgService.add_contact(org_dictionary['id'], TestContactInfo.contact2)
     assert exception.value.code == Error.DATA_ALREADY_EXISTS.name
 
 
 def test_update_contact(session):  # pylint:disable=unused-argument
     """Assert that a contact for an existing Org can be updated."""
     org = factory_org_service()
-    org.add_contact(TestContactInfo.contact1)
+    org_dictionary = org.as_dict()
+    contact = OrgService.add_contact(org_dictionary['id'], TestContactInfo.contact1)
+    dictionary = contact.as_dict()
 
-    dictionary = org.as_dict()
-    assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['email'] == TestContactInfo.contact1['email']
+    assert dictionary['email'] == TestContactInfo.contact1['email']
 
-    org.update_contact(TestContactInfo.contact2)
+    updated_contact = OrgService.update_contact(org_dictionary['id'], TestContactInfo.contact2)
+    dictionary = updated_contact.as_dict()
 
-    dictionary = org.as_dict()
-    assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['email'] == TestContactInfo.contact2['email']
+    assert dictionary['email'] == TestContactInfo.contact2['email']
 
 
 def test_update_contact_no_contact(session):  # pylint:disable=unused-argument
     """Assert that a contact for a non-existent contact cannot be updated."""
     org = factory_org_service()
+    org_dictionary = org.as_dict()
 
     with pytest.raises(BusinessException) as exception:
-        org.update_contact(TestContactInfo.contact2)
+        OrgService.update_contact(org_dictionary['id'], TestContactInfo.contact2)
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
 
 def test_get_members(session):  # pylint:disable=unused-argument
     """Assert that members for an org can be retrieved."""
-    user = factory_user_model()
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user = factory_user_model(user_info=user_with_token)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
+    org_dictionary = org.as_dict()
 
-    response = org.get_members()
+    response = MembershipService.get_members_for_org(org_dictionary['id'],
+                                                     status='ACTIVE',
+                                                     token_info=TestJwtClaims.edit_role)
     assert response
-    assert len(response['members']) == 1
-    assert response['members'][0]['membershipTypeCode'] == 'OWNER'
+    assert len(response) == 1
+    assert response[0].membership_type_code == 'OWNER'
 
 
 def test_get_invitations(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that invitations for an org can be retrieved."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
-        user = factory_user_model()
+        user_with_token = TestUserInfo.user_test
+        user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+        user = factory_user_model(user_info=user_with_token)
         org = OrgService.create_org(TestOrgInfo.org1, user.id)
+        org_dictionary = org.as_dict()
 
-        invitation_info = factory_invitation(org.as_dict()['id'])
+        invitation_info = factory_invitation(org_dictionary['id'])
 
         invitation = InvitationService.create_invitation(invitation_info, UserService(user), {}, '')
 
-        response = org.get_invitations()
+        response = InvitationService.get_invitations_for_org(org_dictionary['id'], 'PENDING', TestJwtClaims.edit_role)
         assert response
-        assert len(response['invitations']) == 1
-        assert response['invitations'][0]['recipientEmail'] == invitation.as_dict()['recipientEmail']
+        assert len(response) == 1
+        assert response[0].recipient_email == invitation.as_dict()['recipientEmail']
+
+
+def test_get_owner_count_one_owner(session):  # pylint:disable=unused-argument
+    """Assert that count of owners is correct."""
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user = factory_user_model(user_info=user_with_token)
+    org = OrgService.create_org(TestOrgInfo.org1, user.id)
+    assert org.get_owner_count() == 1
+
+
+def test_get_owner_count_two_owner_with_admins(session):  # pylint:disable=unused-argument
+    """Assert that count of owners is correct."""
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user = factory_user_model(user_info=user_with_token)
+    org = OrgService.create_org(TestOrgInfo.org1, user.id)
+    user2 = factory_user_model(user_info=TestUserInfo.user2)
+    factory_membership_model(user2.id, org._model.id, member_type='ADMIN')
+    user3 = factory_user_model(user_info=TestUserInfo.user3)
+    factory_membership_model(user3.id, org._model.id, member_type='OWNER')
+    assert org.get_owner_count() == 2
 
 
 def test_delete_contact_no_org(session, auth_mock):  # pylint:disable=unused-argument
-    """Assert that a contact can not be deleted without org."""
+    """Assert that a contact can not be deleted if it doesn't exist."""
     org = factory_org_service()
-    org.add_contact(TestContactInfo.contact1)
+    org_dictionary = org.as_dict()
+    OrgService.add_contact(org_dictionary['id'], TestContactInfo.contact1)
 
-    updated_org = org.delete_contact()
+    OrgService.delete_contact(org_dictionary['id'])
 
     with pytest.raises(BusinessException) as exception:
-        updated_org.delete_contact()
+        OrgService.delete_contact(org_dictionary['id'])
 
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
 
 def test_delete_contact_org_link(session, auth_mock):  # pylint:disable=unused-argument
-    """Assert that a contact can not be deleted without entity."""
+    """Assert that a contact can not be deleted if it's still being used by an entity."""
     entity_model = factory_entity_model()
     entity = EntityService(entity_model)
 
@@ -179,11 +226,11 @@ def test_delete_contact_org_link(session, auth_mock):  # pylint:disable=unused-a
     contact_link.org = org._model  # pylint:disable=protected-access
     contact_link.commit()
 
-    updated_org = org.delete_contact()
+    OrgService.delete_contact(org_id=org_id)
+    org = OrgService.find_by_org_id(org_id)
+    response = OrgService.get_contacts(org_id)
 
-    dictionary = None
-    dictionary = updated_org.as_dict()
-    assert len(dictionary['contacts']) == 0
+    assert len(response['contacts']) == 0
 
     delete_contact_link = ContactLinkModel.find_by_entity_id(entity.identifier)
     assert delete_contact_link

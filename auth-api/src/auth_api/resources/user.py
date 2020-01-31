@@ -19,14 +19,16 @@ from flask_restplus import Namespace, Resource, cors
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
-from auth_api.schemas import OrgSchema
+from auth_api.schemas import MembershipSchema, OrgSchema
 from auth_api.schemas import utils as schema_utils
+from auth_api.services import ResetTestData as ResetService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.keycloak import KeycloakService
+from auth_api.services.membership import Membership as MembershipService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.roles import Role, Status
+from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
 
 
@@ -131,7 +133,7 @@ class User(Resource):
         is_terms_accepted = request_json['istermsaccepted']
         try:
             response, status = UserService.update_terms_of_use(token, is_terms_accepted, version).as_dict(), \
-                               http_status.HTTP_200_OK
+                http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -145,16 +147,36 @@ class User(Resource):
         token = g.jwt_oidc_token_info
         try:
             UserService.delete_user(token)
+            # Clean up test data during e2e test
+            if Role.TESTER.value in token.get('realm_access').get('roles'):
+                ResetService.reset(token)
+
             response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
 
 
-@cors_preflight('DELETE, POST, PUT, OPTIONS')
-@API.route('/contacts', methods=['DELETE', 'POST', 'PUT', 'OPTIONS'])
+@cors_preflight('GET, DELETE, POST, PUT, OPTIONS')
+@API.route('/contacts', methods=['GET', 'DELETE', 'POST', 'PUT', 'OPTIONS'])
 class UserContacts(Resource):
     """Resource for managing user contacts."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def get():
+        """Retrieve the set of contacts asociated with the current user identifier by the JWT in the header."""
+        token = g.jwt_oidc_token_info
+        if not token:
+            return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
+
+        try:
+            response, status = UserService.get_contacts(token), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
 
     @staticmethod
     @TRACER.trace()
@@ -224,18 +246,36 @@ class UserOrgs(Resource):
             if not user:
                 response, status = {'message': 'User not found.'}, http_status.HTTP_404_NOT_FOUND
             else:
-                # response, status = jsonify(user.get_orgs()), http_status.HTTP_200_OK
                 all_orgs = OrgService.get_orgs(user.identifier)
-                exclude_fields = []
-                # only approved users should see entities..
-                # TODO when endpoints are separated into afilliations endpoint, this logic can be removed
-                if all_orgs:
-                    if all_orgs[0].members and all_orgs[0].members[0].status != Status.ACTIVE.value:
-                        exclude_fields.append('affiliated_entities')
-                orgs = OrgSchema(exclude=exclude_fields).dump(
+                orgs = OrgSchema().dump(
                     all_orgs, many=True)
                 response, status = jsonify({'orgs': orgs}), http_status.HTTP_200_OK
 
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+
+@cors_preflight('GET, OPTIONS')
+@API.route('/orgs/<string:org_id>/membership', methods=['GET', 'OPTIONS'])
+class MembershipResource(Resource):
+    """Resource for managing a user's org membership."""
+
+    @staticmethod
+    @_JWT.requires_auth
+    @cors.crossdomain(origin='*')
+    def get(org_id):
+        """Get the membership for the given org and user."""
+        token = g.jwt_oidc_token_info
+
+        try:
+            user = UserService.find_by_jwt_token(token)
+            if not user:
+                response, status = {'message': 'User not found.'}, http_status.HTTP_404_NOT_FOUND
+            else:
+                membership = MembershipService \
+                    .get_membership_for_org_and_user(org_id=org_id, user_id=user.identifier)
+                response, status = MembershipSchema(exclude=['user', 'org']).dump(membership), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

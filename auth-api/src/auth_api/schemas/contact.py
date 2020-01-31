@@ -17,17 +17,17 @@ from marshmallow import fields
 
 from auth_api.models import Contact as ContactModel
 
-from .base_schema import BaseSchema
+from .camel_case_schema import CamelCaseSchema
 
 
-class ContactSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class ContactSchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the Contact model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the User fields to a default schema."""
 
         model = ContactModel
-        exclude = ('id', )
+        exclude = ('id',)
 
     email = fields.String(data_key='email')
     phone = fields.String(data_key='phone')

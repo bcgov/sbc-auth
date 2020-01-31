@@ -5,7 +5,11 @@ export enum SessionStorageKeys {
     KeyCloakIdToken = 'KEYCLOAK_ID_TOKEN',
     ApiConfigKey = 'AUTH_API_CONFIG',
     BusinessIdentifierKey = 'BUSINESS_IDENTIFIER',
-    UserFullName = 'USER_FULL_NAME'
+    UserFullName = 'USER_FULL_NAME',
+    PreventStorageSync = 'PREVENT_STORAGE_SYNC',
+    AccountName = 'ACCOUNT_NAME',
+    UserAccountType = 'USER_ACCOUNT_TYPE',
+    PendingApprovalCount = 'PENDING_APPROVAL_COUNT'
 }
 
 export enum Role {
@@ -17,7 +21,7 @@ export enum Role {
 
 export enum Pages {
     USER_PROFILE = 'userprofile',
-    CREATE_TEAM = 'createteam',
+    CREATE_ACCOUNT = 'createaccount',
     DUPLICATE_TEAM_MESAGE = 'duplicateteam',
     PENDING_APPROVAL = 'pendingapproval',
     MAIN = 'main'

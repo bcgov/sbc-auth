@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "72ad562e-20ac-42bd-98ac-6b48f909e338",
+		"_postman_id": "276d5b39-a86e-4ded-80fd-c6066aba90eb",
 		"name": "auth-api-load-entities",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -34,7 +34,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"businessIdentifier\": \"{{corp_num}}\",\n    \"businessNumber\": \"{{corp_num}}\",\n    \"name\":\"{{corp_num}} - Test Coop\",\n    \"passCode\": \"{{temp_password}}\"\n}"
+					"raw": "{\n    \"businessIdentifier\": \"{{corp_num}}\",\n    \"businessNumber\": \"{{corp_num}}\",\n    \"name\": \"{{corp_num}} - Test Coop\",\n    \"passCode\": \"{{temp_password}}\",\n    \"corpTypeCode\": \"{{corp_typ_cd}}\"\n}"
 				},
 				"url": {
 					"raw": "{{api_url}}/api/v1/entities",
@@ -127,5 +127,6 @@
 				]
 			}
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }

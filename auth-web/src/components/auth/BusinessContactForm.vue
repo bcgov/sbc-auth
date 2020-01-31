@@ -44,16 +44,15 @@
           type="tel"
           v-mask="['(###) ###-####']"
           v-model="phoneNumber"
-          :rules="phoneRules"
         >
         </v-text-field>
       </v-col>
-      <v-col cols="3">
+      <v-col cols="4">
         <v-text-field
           filled label="Extension"
           persistent-hint
           :rules="extensionRules"
-          v-mask="'###'"
+          v-mask="'#####'"
           v-model="extension"
         >
         </v-text-field>
@@ -113,12 +112,8 @@ export default class BusinessContactForm extends Vue {
     }
   ]
 
-  private phoneRules = [
-    v => !v || (v.length === 0 || v.length === 14) || 'Phone number is invalid'
-  ]
-
   private extensionRules = [
-    v => !v || (v.length >= 0 || v.length <= 3) || 'Extension is invalid'
+    v => !v || (v.length >= 0 && v.length <= 5) || 'Extension is invalid'
   ]
 
   private emailMustMatch (): string {

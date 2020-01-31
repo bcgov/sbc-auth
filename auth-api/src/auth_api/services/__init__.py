@@ -14,9 +14,11 @@
 """Exposes all of the Services used in the API."""
 from .affiliation import Affiliation
 from .codes import Codes
+from .contact import Contact
 from .documents import Documents
 from .entity import Entity
 from .invitation import Invitation
 from .membership import Membership
 from .org import Org
+from .reset import ResetTestData
 from .user import User

@@ -43,7 +43,7 @@ def test_create_affiliation(session, auth_mock):  # pylint:disable=unused-argume
                                                         {})
     assert affiliation
     assert affiliation.entity.identifier == entity_service.identifier
-    assert affiliation.as_dict()['org']['id'] == org_dictionary['id']
+    assert affiliation.as_dict()['organization']['id'] == org_dictionary['id']
 
 
 def test_create_affiliation_no_org(session, auth_mock):  # pylint:disable=unused-argument
@@ -105,7 +105,7 @@ def test_create_affiliation_with_passcode(session, auth_mock):  # pylint:disable
                                                         {})
     assert affiliation
     assert affiliation.entity.identifier == entity_service.identifier
-    assert affiliation.as_dict()['org']['id'] == org_dictionary['id']
+    assert affiliation.as_dict()['organization']['id'] == org_dictionary['id']
 
 
 def test_create_affiliation_with_passcode_no_passcode_input(session, auth_mock):  # pylint:disable=unused-argument

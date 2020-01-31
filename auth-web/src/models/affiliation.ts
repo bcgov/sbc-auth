@@ -1,4 +1,12 @@
+import { Business } from '@/models/business'
+import { Organization } from '@/models/Organization'
+
+export interface CreateRequestBody {
+  businessIdentifier: string
+  passCode: string
+}
+
 export interface Affiliation {
-    businessIdentifier: string;
-    passCode: string;
+  organization: Organization
+  business: Business
 }
