@@ -13,8 +13,7 @@ if (process.env.NODE_ENV === 'production') {
     },
     registered (event) {
       console.log('Service worker has been registered.')
-      console.log('SW 2 URL: ', event.active.scriptURL)
-      console.log('SW 2 state: ', event.active.state)
+      console.log('SW 3 state: ', event.active.state)
     },
     cached (event) {
       console.log('Content has been cached for offline use.')
