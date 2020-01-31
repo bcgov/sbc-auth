@@ -21,7 +21,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.services.entity import Entity as EntityService
-from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo
+from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestUserInfo
 from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_org_service
 
 
@@ -74,6 +74,103 @@ def test_save_entity_existing(session):  # pylint:disable=unused-argument
     assert updated_entity
     assert updated_entity.as_dict()['name'] == updated_entity_info['name']
     assert updated_entity.as_dict()['businessNumber'] == updated_entity_info['businessNumber']
+
+
+def test_update_entity_existing_success(session):  # pylint:disable=unused-argument
+    """Assert that an Entity can be updated from a dictionary."""
+    entity = EntityService.save_entity({
+        'businessIdentifier': TestEntityInfo.bc_entity_passcode3['businessIdentifier'],
+        'businessNumber': TestEntityInfo.bc_entity_passcode3['businessNumber'],
+        'passCode': TestEntityInfo.bc_entity_passcode3['passCode'],
+        'name': TestEntityInfo.bc_entity_passcode3['name'],
+        'corpTypeCode': TestEntityInfo.bc_entity_passcode3['corpTypeCode']
+    })
+
+    assert entity
+    assert entity.as_dict()['corpType'] == 'BC'
+
+    updated_entity_info = {
+        'businessIdentifier': TestEntityInfo.bc_entity_passcode4['businessIdentifier'],
+        'businessNumber': TestEntityInfo.bc_entity_passcode4['businessNumber'],
+        'name': TestEntityInfo.bc_entity_passcode4['name'],
+        'corpTypeCode': TestEntityInfo.bc_entity_passcode4['corpTypeCode']
+    }
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+
+    updated_entity = EntityService.update_entity(entity.as_dict().get('businessIdentifier'), updated_entity_info,
+                                                 {'loginSource': '', 'realm_access': {'roles': ['system']},
+                                                  'corp_type': 'BC'})
+
+    assert updated_entity
+    assert updated_entity.as_dict()['name'] == updated_entity_info['name']
+    assert updated_entity.as_dict()['businessNumber'] == updated_entity_info['businessNumber']
+
+
+def test_update_entity_existing_failures(session):  # pylint:disable=unused-argument
+    """Assert that an Entity can be updated from a dictionary."""
+    entity = EntityService.save_entity({
+        'businessIdentifier': TestEntityInfo.bc_entity_passcode3['businessIdentifier'],
+        'businessNumber': TestEntityInfo.bc_entity_passcode3['businessNumber'],
+        'passCode': TestEntityInfo.bc_entity_passcode3['passCode'],
+        'name': TestEntityInfo.bc_entity_passcode3['name'],
+        'corpTypeCode': TestEntityInfo.bc_entity_passcode3['corpTypeCode']
+    })
+
+    assert entity
+    assert entity.as_dict()['corpType'] == 'BC'
+
+    updated_entity_info = {
+        'businessIdentifier': TestEntityInfo.bc_entity_passcode4['businessIdentifier'],
+        'businessNumber': TestEntityInfo.bc_entity_passcode4['businessNumber'],
+        'name': TestEntityInfo.bc_entity_passcode4['name'],
+        'corpTypeCode': TestEntityInfo.bc_entity_passcode4['corpTypeCode']
+    }
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+
+    with pytest.raises(BusinessException) as exception:
+        EntityService.update_entity(entity.as_dict().get('businessIdentifier'), updated_entity_info,
+                                    {'loginSource': '', 'realm_access': {'roles': ['system']},
+                                     'corp_type': 'INVALID_CP'})
+
+    assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
+
+    with pytest.raises(BusinessException) as exception:
+        EntityService.update_entity('invalidbusinessnumber', updated_entity_info,
+                                    {'loginSource': '', 'realm_access': {'roles': ['system']},
+                                     'corp_type': 'INVALID_CP'})
+
+    assert exception.value.code == Error.DATA_NOT_FOUND.name
+
+
+def test_update_entity_existing_failures_no_cp_for_saved_entity(session):  # pylint:disable=unused-argument
+    """Assert that an Entity can be updated from a dictionary."""
+    entity = EntityService.save_entity({
+        'businessIdentifier': TestEntityInfo.bc_entity_passcode3['businessIdentifier'],
+        'businessNumber': TestEntityInfo.bc_entity_passcode3['businessNumber'],
+        'passCode': TestEntityInfo.bc_entity_passcode3['passCode'],
+        'name': TestEntityInfo.bc_entity_passcode3['name']
+    })
+
+    assert entity
+    assert entity.as_dict().get('corpType', None) is None
+
+    updated_entity_info = {
+        'businessIdentifier': TestEntityInfo.bc_entity_passcode4['businessIdentifier'],
+        'businessNumber': TestEntityInfo.bc_entity_passcode4['businessNumber'],
+        'name': TestEntityInfo.bc_entity_passcode4['name'],
+        'corpTypeCode': TestEntityInfo.bc_entity_passcode4['corpTypeCode']
+    }
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+
+    with pytest.raises(BusinessException) as exception:
+        EntityService.update_entity(entity.as_dict().get('businessIdentifier'), updated_entity_info,
+                                    {'loginSource': '', 'realm_access': {'roles': ['system']},
+                                     'corp_type': 'INVALID_CP'})
+
+    assert exception.value.code == Error.DATA_NOT_FOUND.name
 
 
 def test_save_entity_no_input(session):  # pylint:disable=unused-argument
@@ -155,7 +252,7 @@ def test_update_contact(session):  # pylint:disable=unused-argument
     dictionary = entity.as_dict()
     assert len(dictionary['contacts']) == 1
     assert dictionary['contacts'][0]['email'] == \
-        TestContactInfo.contact1['email']
+           TestContactInfo.contact1['email']
 
     entity.update_contact(TestContactInfo.contact2)
 
@@ -163,7 +260,7 @@ def test_update_contact(session):  # pylint:disable=unused-argument
     dictionary = entity.as_dict()
     assert len(dictionary['contacts']) == 1
     assert dictionary['contacts'][0]['email'] == \
-        TestContactInfo.contact2['email']
+           TestContactInfo.contact2['email']
 
 
 def test_update_contact_no_contact(session):  # pylint:disable=unused-argument

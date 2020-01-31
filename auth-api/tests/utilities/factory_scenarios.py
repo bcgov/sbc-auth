@@ -240,11 +240,24 @@ class TestEntityInfo(dict, Enum):
                         'businessNumber': '791861078BC0001',
                         'name': 'BarFoo, Inc.',
                         'passCode': '222222222', 'corpTypeCode': 'CP'}
+
+    bc_entity_passcode3 = {'businessIdentifier': 'CP123456890',
+                           'businessNumber': '791861078BC0002',
+                           'name': 'BarFoo, Inc.3',
+                           'passCode': '222222222', 'corpTypeCode': 'BC'}
+
+    bc_entity_passcode4 = {'businessIdentifier': 'CP123456891',
+                           'businessNumber': '791861078BC0003',
+                           'name': 'BarFoo, Inc.4',
+                           'passCode': '222222222', 'corpTypeCode': 'BC'}
+
     invalid = {'foo': 'bar'}
+
     entity_lear_mock = {'businessIdentifier': 'CP0002103',
                         'businessNumber': '791861078BC0001',
                         'name': 'BarFoo, Inc.',
                         'passCode': '222222222', 'corpTypeCode': 'CP'}
+
     entity_lear_mock2 = {'businessIdentifier': 'CP0002106',
                          'businessNumber': '791861078BC0002',
                          'name': 'Foobar, Inc.',
