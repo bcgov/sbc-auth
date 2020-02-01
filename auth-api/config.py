@@ -75,6 +75,7 @@ class _Config(object):  # pylint: disable=too-few-public-methods
         port=int(DB_PORT),
         name=DB_NAME,
     )
+    SQLALCHEMY_ECHO = True
 
     # JWT_OIDC Settings
     JWT_OIDC_WELL_KNOWN_CONFIG = os.getenv('JWT_OIDC_WELL_KNOWN_CONFIG')
@@ -127,6 +128,9 @@ class _Config(object):  # pylint: disable=too-few-public-methods
 
     # front end serves this image in this name.can be moved to openshift config as well..
     REGISTRIES_LOGO_IMAGE_NAME = 'bc_logo_for_email.png'
+
+    # url for the front end app
+    WEB_APP_URL = os.getenv('WEB_APP_URL')
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False

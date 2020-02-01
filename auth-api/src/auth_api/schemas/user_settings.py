@@ -11,15 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all of the Services used in the API."""
-from .affiliation import Affiliation
-from .codes import Codes
-from .contact import Contact
-from .documents import Documents
-from .entity import Entity
-from .invitation import Invitation
-from .membership import Membership
-from .org import Org
-from .reset import ResetTestData
-from .user import User
-from .user_settings import UserSettings
+"""Manager for org schema and export."""
+
+from auth_api.models import ma
+
+
+class UserSettingsSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the User Settings model."""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps all of the User Settings fields to a default schema."""
+
+        fields = ("id", "label", "url_origin", "url_path", "type")
