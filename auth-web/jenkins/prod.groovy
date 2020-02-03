@@ -34,17 +34,6 @@ def NAMESPACE_DEPLOY = "${NAMESPACE_APP}" + '-' + "${DESTINATION_TAG}"
 
 def ROCKETCHAT_DEVELOPER_CHANNEL='#relationship-developers'
 
-// Get an image's hash tag
-String getImageTagHash(String imageName, String tag = "") {
-
-    if(!tag?.trim()) {
-        tag = "latest"
-    }
-
-    def istag = openshift.raw("get istag ${imageName}:${tag} -o template --template='{{.image.dockerImageReference}}'")
-    return istag.out.tokenize('@')[1].trim()
-}
-
 // post a notification to rocketchat
 def rocketChatNotificaiton(token, channel, comments) {
   def payload = JsonOutput.toJson([text: comments, channel: channel])
