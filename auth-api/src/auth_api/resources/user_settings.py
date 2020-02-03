@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""API endpoints for managing a User Settings Resource."""
+"""API endpoints for managing a User resource."""
 
-from flask import g
+from flask import g, jsonify
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
@@ -25,6 +25,7 @@ from auth_api.services.user_settings import UserSettings as UserSettingsService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
 
+
 API = Namespace('users', description='Endpoints for user settings management')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
@@ -32,7 +33,7 @@ _JWT = JWTWrapper.get_instance()
 
 @cors_preflight('GET, OPTIONS')
 @API.route('', methods=['GET', 'OPTIONS'])
-class SettingsResource(Resource):
+class SettingsResource(Resource):  # pylint: disable=too-few-public-methods
     """Resource for managing a user's settings."""
 
     @staticmethod
@@ -48,7 +49,7 @@ class SettingsResource(Resource):
 
         # TODO make this check better.may be read from DB or something
         if token.get('sub', None) != user_id:
-            return {'message': "Unauthorised"}, http_status.HTTP_401_UNAUTHORIZED
+            return {'message': 'Unauthorised'}, http_status.HTTP_401_UNAUTHORIZED
 
         try:
             user = UserService.find_by_jwt_token(token)
@@ -60,4 +61,4 @@ class SettingsResource(Resource):
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-        return response, status
+        return jsonify(response), status

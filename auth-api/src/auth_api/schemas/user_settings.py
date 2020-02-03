@@ -22,4 +22,4 @@ class UserSettingsSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors,
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the User Settings fields to a default schema."""
 
-        fields = ("id", "label", "url_origin", "url_path", "type")
+        fields = ('id', 'label', 'urlorigin', 'urlpath', 'type')

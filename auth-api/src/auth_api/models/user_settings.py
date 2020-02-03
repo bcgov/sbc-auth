@@ -18,16 +18,18 @@ It defines the settings available for the user which can be displayed in the hea
 
 
 class UserSettings():  # pylint: disable=too-few-public-methods
-    """This is the User Settings model
+    """
+    This is the User Settings model.
 
     the structure of the model is not well defined.so going for this now.
     In general , it should items info and a way to access them [url] which user has access to.
     Can extended to product which user has access to.
-    ."""
+    """
 
-    def __init__(self, id_, label, url_origin, url_path, type_):
-        self.id_ = id_
+    def __init__(self, id_, label, urlorigin, urlpath, type_):  # pylint: disable=too-many-arguments
+        """Return a usersettings."""
+        self.id = id_
         self.label = label
-        self.url_origin = url_origin
-        self.url_path = url_path
+        self.urlorigin = urlorigin
+        self.urlpath = urlpath
         self.type = type_

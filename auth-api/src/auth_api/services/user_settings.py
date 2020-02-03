@@ -19,7 +19,7 @@ from auth_api.models.user_settings import UserSettings as UserSettingsModel
 from auth_api.services.org import Org as OrgService
 
 
-class UserSettings:
+class UserSettings:  # pylint: disable=too-few-public-methods
     """Service for user settings."""
 
     def __init__(self, model):
@@ -35,7 +35,10 @@ class UserSettings:
         url_origin = current_app.config.get('WEB_APP_URL')
         for org in all_orgs:
             all_settings.append(
-                UserSettingsModel(org.id, org.name, url_origin, '/account/' + str(org.id) + '/settings', "ACCOUNT"))
+                UserSettingsModel(org.id, org.name, url_origin, '/account/' + str(org.id) + '/settings', 'ACCOUNT'))
 
-        all_settings.append(UserSettingsModel(user_id, "USER PROFILE", url_origin, '/userprofile', "USER_PROFILE"))
+        all_settings.append(UserSettingsModel(user_id, 'USER PROFILE', url_origin, '/userprofile', 'USER_PROFILE'))
+        all_settings.append(
+            UserSettingsModel(user_id, 'CREATE ACCOUNT', url_origin, '/createaccount', 'CREATE_ACCOUNT'))
+
         return all_settings
