@@ -61,4 +61,4 @@ class SettingsResource(Resource):  # pylint: disable=too-few-public-methods
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-        return jsonify(response), status
+        return response, status
