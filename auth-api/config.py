@@ -75,7 +75,7 @@ class _Config(object):  # pylint: disable=too-few-public-methods
         port=int(DB_PORT),
         name=DB_NAME,
     )
-    SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = False
 
     # JWT_OIDC Settings
     JWT_OIDC_WELL_KNOWN_CONFIG = os.getenv('JWT_OIDC_WELL_KNOWN_CONFIG')
