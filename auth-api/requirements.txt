@@ -49,5 +49,5 @@ threadloop==1.0.2
 thrift==0.13.0
 tornado==6.0.3
 urllib3==1.25.8
-zipp==2.1.0
+zipp==2.0.1
 -e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components-2.0.0&subdirectory=python

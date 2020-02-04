@@ -225,6 +225,47 @@ def test_authorizations_passcode_returns_200(client, jwt, session):  # pylint:di
     assert rv.json.get('role', None) is None
 
 
+def test_update_entity_success(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an entity can be updated."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    client.post('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1['businessIdentifier']),
+                headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
+
+    rv = client.put('/api/v1/entities/{}'.format(TestEntityInfo.entity1['businessIdentifier']),
+                    data=json.dumps(TestEntityInfo.entity2),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['businessIdentifier'] == TestEntityInfo.entity2['businessIdentifier']
+
+    # test business id alone can be updated
+    rv = client.put('/api/v1/entities/{}'.format(TestEntityInfo.entity2['businessIdentifier']),
+                    data=json.dumps({'businessIdentifier': 'CPNEW123'}),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['businessIdentifier'] == 'CPNEW123'
+
+
+def test_update_entity_failures(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an entity can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+
+    rv = client.put('/api/v1/entities/{}'.format('1234'),
+                    data=json.dumps(TestEntityInfo.entity2),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+
+    rv = client.put('/api/v1/entities/{}'.format('1234'),
+                    data=json.dumps(TestEntityInfo.entity2),
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+
 def test_authorizations_for_staff_returns_200(client, jwt, session):  # pylint:disable=unused-argument
     """Assert authorizations for staff user returns 200."""
     inc_number = 'tester'

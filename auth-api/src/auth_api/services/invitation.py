@@ -156,7 +156,7 @@ class Invitation:
     @staticmethod
     def send_admin_notification(user, url, recipient_email_list, org_name):
         """Send the admin email notification."""
-        subject = '[BC Registries & Online Services] {} {} has responded for the invitation to join the team {}'. \
+        subject = '[BC Registries & Online Services] {} {} has responded for the invitation to join the account {}'. \
             format(user['firstname'], user['firstname'], org_name)
         sender = CONFIG.MAIL_FROM_ID
         try:
@@ -176,7 +176,7 @@ class Invitation:
     def send_invitation(invitation: InvitationModel, org_name, user, app_url):
         """Send the email notification."""
         current_app.logger.debug('<send_invitation')
-        subject = '[BC Registries & Online Services] {} {} has invited you to join a team'.format(user['firstname'],
+        subject = '[BC Registries & Online Services] {} {} has invited you to join an account'.format(user['firstname'],
                                                                                                   user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
