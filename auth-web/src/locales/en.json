@@ -22,7 +22,7 @@
   "invitationProcessingErrorMsg": "An error has occured while processing this invitation. Please try again later.",
   "staffUnauthorizedMsg": "You are not authorized to access this page.",
   "clientUnauthorizedMsg": "You are not authorized to access this page. If you having trouble, or require access to this application, please contact support.",
-  "confirmRemoveMemberTitle": "Confirm Member Removal",
+  "confirmRemoveMemberTitle": "Remove Team Member",
   "confirmRoleChangeTitle": "Confirm Role Change",
   "confirmRemoveInviteTitle": "Confirm Invite Removal",
   "confirmApproveMemberTitle": "Confirm Member Approval",
