@@ -9,7 +9,7 @@ BC Registries authentication and authorization services.
 
 ## Development Environment
 
-Follow the instructions of the [Development Readme](http://https://github.com/bcgov/entity/blob/master/docs/development.md)
+Follow the instructions of the [Development Readme](https://github.com/bcgov/entity/blob/master/docs/development.md)
 to setup your local development environment.
 
 ## Development Setup
@@ -42,9 +42,7 @@ To prepare your local database:
 ## Running Unit Tests
 
 1. Tests are run from the Status bar at the bottom of the workbench in VS Code or `pytest` command.
-2. Next run `make coverage` to generate the coverage report, which appears
-in the *htmlcov* directory.
-
+2. Next run `make coverage` to generate the coverage report, which appears in the *htmlcov* directory.
 
 ## Running Integration (postman) Tests
 

@@ -9,7 +9,7 @@ BC Registries Status services to track the serivce status.
 
 ## Development Environment
 
-Follow the instructions of the [Development Readme](http://https://github.com/bcgov/entity/blob/master/docs/development.md)
+Follow the instructions of the [Development Readme](https://github.com/bcgov/entity/blob/master/docs/development.md)
 to setup your local development environment.
 
 ## Development Setup
@@ -21,7 +21,7 @@ virtual environment to install the Python packages used by this project.
 4. Next run `pip install .` to set up the environment for running tests.
 
 You also need to set up the variables used for environment-specific settings:
-1. Copy the [dotenv template file](../docs/dotenv_template) to somewhere above the source code and rename to `.env`. You will need to fill in missing values.
+1. Copy the [dotenv template file](./docs/dotenv_template) to somewhere above the source code and rename to `.env`. You will need to fill in missing values.
 
 ## Running STATUS-API
 
