@@ -38,6 +38,8 @@ class Authorization(db.Model):
     org_id = Column(Integer, primary_key=True)
     org_type = Column(String)
     corp_type_code = Column(String)
+    product_code = Column(String)
+    roles = Column(String)
 
     @classmethod
     def find_user_authorization_by_business_number(cls, keycloak_guid: uuid, business_identifier: str):
@@ -71,6 +73,11 @@ class Authorization(db.Model):
                      expression.case(((Authorization.org_membership == OWNER, 1),
                                       (Authorization.org_membership == ADMIN, 2),
                                       (Authorization.org_membership == MEMBER, 3)))).first()
+
+    @classmethod
+    def find_account_authorization_by_org_id_and_product_for_user(cls, keycloak_guid: uuid, org_id: int, product: str):
+        """Return authorization view object."""
+        return cls.query.filter_by(keycloak_guid=keycloak_guid, org_id=org_id, product_code=product).one_or_none()
 
     @classmethod
     def find_all_authorizations_for_user(cls, keycloak_guid):
