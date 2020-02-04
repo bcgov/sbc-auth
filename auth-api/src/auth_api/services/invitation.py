@@ -177,7 +177,7 @@ class Invitation:
         """Send the email notification."""
         current_app.logger.debug('<send_invitation')
         subject = '[BC Registries & Online Services] {} {} has invited you to join an account'.format(user['firstname'],
-                                                                                                  user['lastname'])
+                                                                                                      user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
         token_confirm_url = '{}/validatetoken/{}'.format(app_url, invitation.token)

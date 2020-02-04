@@ -1,6 +1,6 @@
 {
   "VUE_APP_PAY_ROOT_API": "https://pay-api-dev.pathfinder.gov.bc.ca/api/v1",
-  "VUE_APP_AUTH_ROOT_API": "https://auth-api-dev.pathfinder.gov.bc.ca/api/v1",
+  "VUE_APP_AUTH_ROOT_API": "http://localhost:5000/api/v1",
   "VUE_APP_LEGAL_ROOT_API": "https://legal-api-dev.pathfinder.gov.bc.ca/api/v1",
   "VUE_APP_STATUS_ROOT_API": "https://status-api-dev.pathfinder.gov.bc.ca/api/v1",
   "VUE_APP_FLAVOR": "post-mvp",
