@@ -21,7 +21,7 @@ if (process.env.NODE_ENV === 'production') {
     },
     updated (updatedEvent) {
       // write code for popup here
-      console.log('New content is available; please refresh.')
+      console.log('New content is available; refreshing page in 1 sec')
       // showInteractiveToastReload('New content is available!', updatedEvent)
 
       updatedEvent.waiting.postMessage({ action: 'skipWaiting' })
