@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 
-import Swal from 'sweetalert2'
 import { register } from 'register-service-worker'
 
 if (process.env.NODE_ENV === 'production') {
@@ -23,7 +22,13 @@ if (process.env.NODE_ENV === 'production') {
     updated (updatedEvent) {
       // write code for popup here
       console.log('New content is available; please refresh.')
-      showInteractiveToastReload('New content is available!', updatedEvent)
+      // showInteractiveToastReload('New content is available!', updatedEvent)
+
+      updatedEvent.waiting.postMessage({ action: 'skipWaiting' })
+      // timeout is for the service worker to get activated
+      setTimeout(() => {
+        window.location.reload(true)
+      }, 1000)
     },
     offline () {
       // add offline indication here
@@ -33,26 +38,4 @@ if (process.env.NODE_ENV === 'production') {
       console.error('Error during service worker registration:', error)
     }
   })
-
-  const showInteractiveToastReload = (text, updatedEvent) => {
-    const Toast = Swal.mixin({
-      toast: true,
-      position: 'bottom-right',
-      showConfirmButton: true,
-      confirmButtonText: 'Refresh',
-      timer: 0,
-      width: '100',
-      grow: 'fullscreen',
-      padding: '1.3rem 3rem'
-    })
-
-    Toast.fire({
-      icon: 'info',
-      title: text
-    }).then((result) => {
-      if (result.value) {
-        updatedEvent.waiting.postMessage({ action: 'skipWaiting' })
-      }
-    })
-  }
 }
