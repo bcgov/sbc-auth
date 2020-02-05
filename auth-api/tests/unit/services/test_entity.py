@@ -251,16 +251,14 @@ def test_update_contact(session):  # pylint:disable=unused-argument
 
     dictionary = entity.as_dict()
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['email'] == \
-           TestContactInfo.contact1['email']
+    assert dictionary['contacts'][0]['email'] == TestContactInfo.contact1['email']
 
     entity.update_contact(TestContactInfo.contact2)
 
     dictionary = None
     dictionary = entity.as_dict()
     assert len(dictionary['contacts']) == 1
-    assert dictionary['contacts'][0]['email'] == \
-           TestContactInfo.contact2['email']
+    assert dictionary['contacts'][0]['email'] == TestContactInfo.contact2['email']
 
 
 def test_update_contact_no_contact(session):  # pylint:disable=unused-argument
