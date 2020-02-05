@@ -14,9 +14,8 @@
 
 """This exports all of the models and schemas used by the application."""
 from sqlalchemy import event
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine import Engine  # noqa: I001, I003, I004
 
-# noqa: I001, I003, I004
 from sbc_common_components.tracing.db_tracing import DBTracing  # noqa: I001
 
 from .affiliation import Affiliation
