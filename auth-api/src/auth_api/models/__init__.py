@@ -13,10 +13,11 @@
 # limitations under the License.
 
 """This exports all of the models and schemas used by the application."""
-# noqa: I001, I003, I004
-from sbc_common_components.tracing.db_tracing import DBTracing  # noqa: I001
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
+
+# noqa: I001, I003, I004
+from sbc_common_components.tracing.db_tracing import DBTracing  # noqa: I001
 
 from .affiliation import Affiliation
 from .contact import Contact
@@ -36,11 +37,8 @@ from .org_settings import OrgSettings
 from .org_status import OrgStatus
 from .org_type import OrgType
 from .payment_type import PaymentType
-from .product_code import ProductCode
-from .product_role import ProductRole
-from .product_role_code import ProductRoleCode
-from .product_subscription import ProductSubscription
 from .user import User
+from .user_settings import UserSettings
 from .user_status_code import UserStatusCode
 
 
