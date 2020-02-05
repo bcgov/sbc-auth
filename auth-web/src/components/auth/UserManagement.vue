@@ -141,7 +141,6 @@ import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import PendingMemberDataTable from '@/components/auth/PendingMemberDataTable.vue'
-import _ from 'lodash'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -268,9 +267,9 @@ export default class UserManagement extends Vue {
       this.primaryActionText = 'Deny'
     } else {
       this.confirmActionTitle = this.$t('confirmRemoveMemberTitle').toString()
-      this.confirmActionText = `Are you sure you want to remove ${member.user.firstname} from the team?`
+      this.confirmActionText = `Are you sure you want to remove ${member.user.firstname} from the account?`
       this.confirmHandler = this.removeMember
-      this.primaryActionText = 'Remove'
+      this.primaryActionText = 'Yes'
     }
     this.memberToBeRemoved = member
     this.$refs.confirmActionDialog.open()

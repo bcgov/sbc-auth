@@ -1,0 +1,79 @@
+version: "3.1"
+
+services:
+  ####################### AUTH Database Definition #######################
+  authdb:
+    image: postgres:11
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "54330:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data0
+
+  ####################### AUTH Unit Test Database Definition #######################
+  authdb-test:
+    image: postgres:11
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "54331:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data1
+
+  ####################### Notify Database Definition #######################
+  notifydb:
+    image: postgres:11
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "54334:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data4
+
+  ####################### Notify Unit Test Database Definition #######################
+  notifydb-test:
+    image: postgres:11
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "54335:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data5
+
+  #################### Jaeger Tracing Service Definition ####################
+  jaeger:
+    image: jaegertracing/all-in-one
+    restart: always
+    ports:
+      - "16686:16686"
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+
+  #################### Nats Service Definition ####################
+    nats:
+        image: nats-streaming
+        restart: always
+        mem_limit: 512m
+        expose:
+          - 4222
+          - 8222
+        labels:
+          - entity.services=nats
+        ports:
+          - 4222:4222
+          - 8222:8222
+        tty: true
+
+volumes:
+  db-data:
+    driver: local
