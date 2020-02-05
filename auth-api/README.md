@@ -29,6 +29,25 @@ To prepare your local database:
 1. In the [root project folder](../docker/docker-compose.yml): `docker-compose up -d`
 2. In your `venv` environment: `python manage.py db upgrade`
 
+
+Note: 
+
+**[Mac Users]**
+: You might get an error regarding the SSL certificate verification failed.
+follow the steps to resolve that issue:
+1. Open the terminal window, and run **`python3 -v`** command to check the version of python.
+2. run the following command:
+```
+pip install certifi /Applications/Python\ <version of your python>/Install\ Certificates.command
+```
+
+eg: if your python version is 3.7,
+then, run 
+
+```
+pip install certifi /Applications/Python\ 3.7/Install\ Certificates.command
+```
+
 ## Running AUTH-API
 
 1. Start the flask server with `(python -m flask run -p 5000)`
