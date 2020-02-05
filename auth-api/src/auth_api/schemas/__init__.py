@@ -27,3 +27,4 @@ from .membership_type import MembershipTypeSchema
 from .org import OrgSchema
 from .org_type import OrgTypeSchema
 from .user import UserSchema
+from .user_settings import UserSettingsSchema
