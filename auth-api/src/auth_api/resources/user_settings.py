@@ -13,7 +13,7 @@
 # limitations under the License.
 """API endpoints for managing a User resource."""
 
-from flask import g, jsonify
+from flask import g
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status

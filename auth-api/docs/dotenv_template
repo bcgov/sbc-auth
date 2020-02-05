@@ -1,0 +1,73 @@
+#
+# This file contains the environment-specific settings that are read by python-dotenv. Place it somewhere above your
+# source code and it will be used.
+#
+
+# =====  auth-api ======================================================================================================
+
+# Connection to local database.
+DATABASE_URL="postgresql://postgres@localhost/postgres"
+DATABASE_USERNAME="postgres"
+DATABASE_PASSWORD="postgres"
+DATABASE_NAME="postgres"
+DATABASE_HOST="localhost"
+DATABASE_PORT="54330"
+
+# Connection to unit test database.
+DATABASE_TEST_URL="postgresql://postgres:admin@localhost:54331/postgres"
+DATABASE_TEST_USERNAME=postgres
+DATABASE_TEST_PASSWORD=postgres
+DATABASE_TEST_HOST=localhost
+DATABASE_TEST_PORT=54331
+DATABASE_TEST_NAME=postgres
+
+# Flask settings
+PYTHONWARNINGS="once"
+FLASK_APP=wsgi.py
+FLASK_ENV="development"
+FLASK_DEBUG=True
+POD_TESTING=True
+SQLALCHEMY_ECHO=False
+
+# The sentry.io Data Source Name for the project. For local development this should always be blank, to prevent the
+# logging (and emailing) of errors. However it can be temporarily set when working with sentry itself.
+#
+SENTRY_DSN=
+
+# keycloak settings
+JWT_OIDC_ISSUER=
+JWT_OIDC_WELL_KNOWN_CONFIG=
+JWT_OIDC_ALGORITHMS=
+JWT_OIDC_AUDIENCE=
+JWT_OIDC_CLIENT_SECRET=
+JWT_OIDC_JWKS_CACHE_TIMEOUT=
+
+KEYCLOAK_ADMIN_CLIENTID='
+KEYCLOAK_ADMIN_SECRET=
+KEYCLOAK_AUTH_AUDIENCE=
+KEYCLOAK_AUTH_CLIENT_SECRET=
+KEYCLOAK_BASE_URL=
+KEYCLOAK_REALMNAME=
+
+#application settings
+TOKEN_EXPIRY_PERIOD=7
+AUTH_WEB_TOKEN_CONFIRM_PATH=cooperatives/auth
+EMAIL_SECURITY_PASSWORD_SALT=
+EMAIL_TOKEN_SECRET_KEY=
+AUTH_WEB_PAY_TRANSACTION_URL=
+REPORT_API_BASE_URL="https://mock-lear-tools.pathfinder.gov.bc.ca/rest/PayBC+API+Reference/1.0.0/cfs/parties/"
+PAYBC_BASE_URL=https://mock-lear-tools.pathfinder.gov.bc.ca/rest/PayBC+API+Reference/1.0.0
+PAYBC_CLIENT_ID=test
+PAYBC_CLIENT_SECRET=test
+PAYBC_PORTAL_URL=http://localhost:8080
+NOTIFY_API_URL="https://mock-lear-tools.pathfinder.gov.bc.ca/rest/SBC+Notify+API+Reference/2.0.0/api/v1"
+LEGAL_API_URL="https://legal-api-dev.pathfinder.gov.bc.ca/api/v1"
+
+
+
+
+
+
+
+
+
