@@ -37,6 +37,7 @@ from .org import API as ORG_API
 from .reset import API as RESET_API
 from .token import API as TOKEN_API
 from .user import API as USER_API
+from .user_settings import API as USER_SETTINGS_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
@@ -74,6 +75,7 @@ HANDLER = ExceptionHandler(API)
 API.add_namespace(META_API, path='/meta')
 API.add_namespace(TOKEN_API, path='/token')
 API.add_namespace(USER_API, path='/users')
+API.add_namespace(USER_SETTINGS_API, path='/users/<string:user_id>/settings')
 API.add_namespace(LOGOUT_API, path='/logout')
 API.add_namespace(ENTITY_API, path='/entities')
 API.add_namespace(ORG_API, path='/orgs')

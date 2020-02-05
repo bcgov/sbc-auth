@@ -6,6 +6,7 @@ export enum SessionStorageKeys {
     ApiConfigKey = 'AUTH_API_CONFIG',
     BusinessIdentifierKey = 'BUSINESS_IDENTIFIER',
     UserFullName = 'USER_FULL_NAME',
+    UserKcId = 'USER_KC_ID',
     PreventStorageSync = 'PREVENT_STORAGE_SYNC',
     AccountName = 'ACCOUNT_NAME',
     UserAccountType = 'USER_ACCOUNT_TYPE',
