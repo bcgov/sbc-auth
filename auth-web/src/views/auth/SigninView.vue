@@ -1,5 +1,10 @@
 <template>
   <div>
+    <v-fade-transition>
+      <div class="loading-container" v-if="isLoading">
+        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+      </div>
+    </v-fade-transition>
   </div>
 </template>
 <script lang="ts">
@@ -7,9 +12,11 @@ import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { KeycloakError, KeycloakPromise } from 'keycloak-js'
 import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
 import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
+import { SessionStorageKeys } from '@/util/constants'
 import TokenService from 'sbc-common-components/src/services/token.services'
 import { User } from '@/models/user'
 import { UserInfo } from '@/models/userInfo'
@@ -25,20 +32,19 @@ import { getModule } from 'vuex-module-decorators'
         'syncUserProfile'
       ]
     ),
-    ...mapActions('org', ['syncOrganizations', 'syncCurrentOrganization'])
+    ...mapActions('org', ['syncOrganization'])
   }
 })
 export default class Signin extends Mixins(NextPageMixin) {
   private userStore = getModule(UserModule, this.$store)
   private orgStore = getModule(OrgModule, this.$store)
+  private isLoading = true
   private readonly initKeycloak!: (idpHint: string) => Promise<KeycloakPromise<boolean, KeycloakError>>
   private readonly initializeSession!: () => UserInfo
   private readonly syncUserProfile!: () => User
-  private readonly syncOrganizations!: () => Organization[]
-  private readonly syncCurrentOrganization!: (organization: Organization) => Promise<void>
+  private readonly syncOrganization!: (currentAccount: string) => Promise<void>
 
   @Prop({ default: 'bcsc' }) idpHint: string
-
   @Prop() redirectUrl: string
 
   private async mounted () {
@@ -46,10 +52,10 @@ export default class Signin extends Mixins(NextPageMixin) {
     kcInit.success(async authenticated => {
       if (authenticated) {
         this.initializeSession()
+        this.$store.commit('updateHeader') // Force a remount of header so it can retrieve account (now that is has token)
         // Make a POST to the users endpoint if it's bcsc (only need for BCSC)
         if (this.idpHint === 'bcsc') {
           await this.syncUserProfile()
-          await this.syncOrganizations()
           // eslint-disable-next-line no-console
           console.info('[SignIn.vue]Logged in User.Starting refreshTimer')
           var self = this
@@ -58,8 +64,15 @@ export default class Signin extends Mixins(NextPageMixin) {
             tokenService.scheduleRefreshTimer()
           })
         }
-        this.$store.commit('updateHeader')
-        this.redirectToNext()
+        // Set up a listener for the account sync event from SbcHeader
+        // This event signals that the current account has been loaded, and we are ready to sync against it
+        this.$root.$once('accountSyncReady', async (accountId: string) => {
+          const currentAccountId = ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccountId) || null
+          if (currentAccountId) {
+            await this.syncOrganization(currentAccountId)
+          }
+          this.redirectToNext()
+        })
       }
     })
   }

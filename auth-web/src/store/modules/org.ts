@@ -101,12 +101,13 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async syncCurrentOrganization (organization: Organization): Promise<void> {
+  public async syncOrganization (orgId: number): Promise<void> {
+    const response = await OrgService.getOrganization(orgId)
+    const organization = response?.data
     this.context.commit('setCurrentOrganization', organization)
     await this.context.dispatch('syncActiveOrgMembers')
     await this.context.dispatch('syncPendingOrgMembers')
     await this.context.dispatch('syncPendingOrgInvitations')
-    ConfigHelper.addToSession(SessionStorageKeys.AccountName, organization.name)
   }
 
   @Action({ rawError: true })
@@ -245,17 +246,6 @@ export default class OrgModule extends VuexModule {
     } else {
       this.context.dispatch('syncActiveOrgMembers')
       this.context.dispatch('syncPendingOrgMembers')
-    }
-  }
-
-  @Action({ rawError: true })
-  public async syncOrganizations () {
-    const response = await UserService.getOrganizations()
-    if (response && response.data && response.status === 200) {
-      this.context.commit('setOrganizations', response.data.orgs)
-      if (response.data.orgs && response.data.orgs.length > 0) {
-        await this.context.dispatch('syncCurrentOrganization', response.data.orgs[0])
-      }
     }
   }
 

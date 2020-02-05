@@ -19,7 +19,6 @@ import SearchBusinessView from '@/views/auth/SearchBusinessView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
-import UserManagement from '@/components/auth/UserManagement.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
 
 import Vue from 'vue'
@@ -41,24 +40,23 @@ export function getRoutes () {
   const routes = [
     { path: '/', component: HomeView },
     { path: '/home', component: HomeView },
-    { path: '/main',
+    { path: '/account/:orgId/',
       component: DashboardView,
       meta: { requiresAuth: true },
-      redirect: '/main/business',
+      redirect: '/account/:orgId/business',
+      props: true,
       children: [
         {
-          path: 'team',
-          component: UserManagement
-        },
-        {
           path: 'business',
-          component: EntityManagement
+          component: EntityManagement,
+          props: true
         }]
     },
-    { path: '/account-settings',
+    { path: '/account/:orgId/settings',
       component: accountSettings,
       meta: { requiresAuth: true },
-      redirect: '/account-settings/account-info',
+      redirect: '/account/:orgId/settings/account-info',
+      props: true,
       children: [
         {
           path: 'account-info',

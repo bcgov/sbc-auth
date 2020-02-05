@@ -27,8 +27,7 @@ import { VueConstructor } from 'vue'
       ...mapGetters('org', ['myOrgMembership'])
     },
     methods: {
-      ...mapActions('user', ['getUserProfile']),
-      ...mapActions('org', ['syncOrganizations', 'syncCurrentOrganization'])
+      ...mapActions('user', ['getUserProfile'])
     }
   })
 export default class DashboardView extends Vue {
@@ -37,8 +36,6 @@ export default class DashboardView extends Vue {
   private readonly currentOrganization!: Organization
   private readonly myOrgMembership!: Member
   private readonly getUserProfile!: (identifier: string) => User
-  private readonly syncOrganizations!: () => Organization[]
-  private readonly syncCurrentOrganization!: (organization: Organization) => Promise<void>
 
   private menu = [
     {
@@ -53,10 +50,6 @@ export default class DashboardView extends Vue {
     // Check for existing state, and if not tell store to update
     if (!this.userProfile) {
       this.getUserProfile('@me')
-    }
-
-    if (!this.currentOrganization) {
-      await this.syncOrganizations()
     }
 
     // Check the current user's team status

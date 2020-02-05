@@ -85,7 +85,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import AddBusinessForm from '@/components/auth/AddBusinessForm.vue'
 import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
@@ -107,6 +107,7 @@ import { mapActions } from 'vuex'
   }
 })
 export default class EntityManagement extends Vue {
+  @Prop({ default: '' }) private orgId: string;
   private businessStore = getModule(BusinessModule, this.$store)
   private removeBusinessPayload = null
   private dialogTitle = ''

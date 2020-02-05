@@ -129,7 +129,7 @@ export default class AffiliatedEntityList extends Vue {
 
   editContact (business: Business) {
     this.setCurrentBusiness(business)
-    this.$router.push({ path: '/businessprofile', query: { redirect: '/main' } })
+    this.$router.push({ path: '/businessprofile', query: { redirect: `/account/${this.currentOrganization.id}` } })
   }
 
   goToDashboard (incorporationNumber: string) {

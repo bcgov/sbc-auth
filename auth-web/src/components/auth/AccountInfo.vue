@@ -41,9 +41,6 @@ import { getModule } from 'vuex-module-decorators'
 @Component({
   components: {
   },
-  methods: {
-    ...mapActions('org', ['syncOrganizations', 'updateOrg'])
-  },
   computed: {
     ...mapState('org', ['currentOrganization', 'orgCreateMessage']),
     ...mapGetters('org', ['myOrgMembership'])
@@ -53,7 +50,6 @@ export default class AccountInfo extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
   private btnLabel = 'Save'
   private readonly currentOrganization!: Organization
-  private readonly syncOrganizations!: () => Organization[]
   private readonly updateOrg!: (requestBody: CreateRequestBody) => Organization
   private readonly myOrgMembership!: Member
   private orgName = ''
@@ -66,9 +62,6 @@ export default class AccountInfo extends Vue {
 
   private async mounted () {
     this.orgStore.setOrgCreateMessage('success') // reset
-    if (!this.currentOrganization) {
-      await this.syncOrganizations()
-    }
     this.orgName = this.currentOrganization.name
   }
 
