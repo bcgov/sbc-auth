@@ -11,7 +11,7 @@ import Vue from 'vue'
 @Component({
   computed: {
     ...mapState('user', ['userProfile', 'userContact']),
-    ...mapState('org', ['organizations', 'currentOrganization']),
+    ...mapState('org', ['currentOrganization']),
     ...mapGetters('org', ['myOrgMembership'])
   }
 })
@@ -19,7 +19,6 @@ export default class NextPageMixin extends Vue {
   protected readonly userProfile!: User
   protected readonly userContact!: Contact
   protected readonly myOrgMembership!: Member
-  protected readonly organizations!: Organization[]
   protected readonly currentOrganization!: Organization
 
   protected getNextPageUrl (): string {
@@ -32,11 +31,11 @@ export default class NextPageMixin extends Vue {
     } else if (!this.currentOrganization) {
       nextStep = Pages.CREATE_ACCOUNT
     } else if (this.myOrgMembership.membershipStatus === MembershipStatus.Active) {
-      nextStep = Pages.MAIN
+      nextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
     } else if (this.myOrgMembership.membershipStatus === MembershipStatus.Pending) {
       nextStep = Pages.PENDING_APPROVAL + '/' + this.currentOrganization.name
     } else {
-      nextStep = Pages.MAIN
+      nextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
     }
     return '/' + nextStep
   }

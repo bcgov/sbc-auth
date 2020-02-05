@@ -36,7 +36,7 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
   private async mounted () {
     await this.getUserProfile('@me')
     // Check to make sure this user is not already a member of a team
-    if (this.organizations.length > 0) {
+    if (this.currentOrganization) {
       this.$router.push('/duplicateteam')
     } else {
       this.accept()

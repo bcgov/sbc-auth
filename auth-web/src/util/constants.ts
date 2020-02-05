@@ -26,5 +26,5 @@ export enum Pages {
     CREATE_ACCOUNT = 'createaccount',
     DUPLICATE_TEAM_MESAGE = 'duplicateteam',
     PENDING_APPROVAL = 'pendingapproval',
-    MAIN = 'main'
+    MAIN = 'account'
 }
