@@ -17,7 +17,7 @@ Basic users will have an internal Org that is not created explicitly, but implic
 """
 
 from flask import current_app
-from sqlalchemy import Column, ForeignKey, Integer, String, func, and_
+from sqlalchemy import Column, ForeignKey, Integer, String, and_, func
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel

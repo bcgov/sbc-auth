@@ -40,23 +40,25 @@ def test_add_org(client, jwt, session):  # pylint:disable=unused-argument
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
+
 def test_add_org_multiple(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed.But in limited number"""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv1 = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
-                     headers=headers, content_type='application/json')
+                      headers=headers, content_type='application/json')
     assert rv1.status_code == http_status.HTTP_201_CREATED
     rv2 = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org2),
-                     headers=headers, content_type='application/json')
+                      headers=headers, content_type='application/json')
     assert rv2.status_code == http_status.HTTP_201_CREATED
     rv3 = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org3),
-                     headers=headers, content_type='application/json')
+                      headers=headers, content_type='application/json')
     assert rv3.status_code == http_status.HTTP_201_CREATED
     rv4 = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org4),
-                     headers=headers, content_type='application/json')
+                      headers=headers, content_type='application/json')
 
     assert rv4.status_code == http_status.HTTP_400_BAD_REQUEST
+
 
 def test_add_same_org_409(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
