@@ -76,7 +76,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
 
     @classmethod
     def get_count_of_org_created_by_user_id(cls, user_id):
-        """Find the count of the organisations created by the user"""
+        """Find the count of the organisations created by the user."""
         return cls.query.filter(and_(Org.created_by_id == user_id, Org.status_code == 'ACTIVE')).with_entities(
             func.count()).scalar()
 

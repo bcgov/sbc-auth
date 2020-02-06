@@ -42,7 +42,7 @@ def test_add_org(client, jwt, session):  # pylint:disable=unused-argument
 
 
 def test_add_org_multiple(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert that an org can be POSTed.But in limited number"""
+    """Assert that an org can be POSTed.But in limited number."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv1 = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
