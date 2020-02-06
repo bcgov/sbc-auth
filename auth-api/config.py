@@ -132,6 +132,15 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     # url for the front end app
     WEB_APP_URL = os.getenv('WEB_APP_URL')
 
+    # max number of orgs a user can create
+    MAX_NUMBER_ = os.getenv('NOTIFY_API_URL')
+
+    try:
+        MAX_NUMBER_OF_ORGS = int(os.getenv('MAX_NUMBER_OF_ORGS'))
+    except:
+        MAX_NUMBER_OF_ORGS = 3
+
+
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False
     DEBUG = True
