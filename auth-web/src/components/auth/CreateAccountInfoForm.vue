@@ -80,6 +80,7 @@ export default class CreateAccountInfoForm extends Vue {
         }
         const organization = await this.createOrg(createRequestBody)
         if (this.orgCreateMessage === 'success') {
+          this.$store.commit('updateHeader')
           this.redirectToNext(organization)
         }
       }
