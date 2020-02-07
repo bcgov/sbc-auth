@@ -91,7 +91,7 @@ export default class CreateAccountInfoForm extends Vue {
     }
 
     private redirectToNext (organization?: Organization) {
-      this.$router.push({ path: `/account/${organization.id}` })
+      this.$router.push({ path: `/account/${organization.id}/` })
     }
 }
 </script>
