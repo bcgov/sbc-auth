@@ -1,7 +1,7 @@
 <template>
   <v-app id="app">
     <div class="header-group" ref="headerGroup">
-      <sbc-header :key="$store.state.refreshKey" ref="commonHeader"></sbc-header>
+      <sbc-header :key="$store.state.refreshKey"></sbc-header>
       <pay-system-alert></pay-system-alert>
     </div>
     <div class="app-body">
@@ -42,7 +42,6 @@ export default class App extends Vue {
   private readonly syncMembership!: (currentAccountId: string) => Promise<Member>
   private readonly syncOrganization!: (currentAccountId: string) => Promise<Organization>
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
-  private commonHeader: SbcHeader;
 
   private async mounted (): Promise<void> {
     if (ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)) {
