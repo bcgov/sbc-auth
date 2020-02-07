@@ -9,7 +9,7 @@
     </v-fade-transition>
 
     <div class="view-header">
-      <v-btn large icon color="secondary" class="back-btn mr-3" to="/main" data-test="account-settings-back-button">
+      <v-btn large icon color="secondary" class="back-btn mr-3" @click="handleBackButton()" data-test="account-settings-back-button">
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
       <div>
@@ -54,6 +54,10 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 export default class AccountSettings extends Vue {
   @Prop({ default: '' }) private orgId: string
   private isLoading = true
+
+  private handleBackButton (): void {
+    this.$router.push(`/account/${this.orgId}/business`)
+  }
 
   private get accountInfoUrl (): string {
     return `/account/${this.orgId}/settings/account-info`

@@ -11,7 +11,7 @@ export enum SessionStorageKeys {
     AccountName = 'ACCOUNT_NAME',
     UserAccountType = 'USER_ACCOUNT_TYPE',
     PendingApprovalCount = 'PENDING_APPROVAL_COUNT',
-    CurrentAccountId = 'CURRENT_ACCOUNT_ID'
+    CurrentAccount = 'CURRENT_ACCOUNT'
 }
 
 export enum Role {

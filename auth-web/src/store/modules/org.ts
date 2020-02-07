@@ -1,11 +1,10 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
-import { CreateRequestBody as CreateOrgRequestBody, Member, MembershipStatus, MembershipType, Organization, UpdateMemberPayload } from '@/models/Organization'
-import ConfigHelper from '@/util/config-helper'
+import { CreateRequestBody as CreateOrgRequestBody, Member, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { AccountSettings } from '@/models/account-settings'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
-import { SessionStorageKeys } from '@/util/constants'
 import { UserInfo } from '@/models/userInfo'
 import UserService from '@/services/user.services'
 
@@ -18,8 +17,9 @@ export default class OrgModule extends VuexModule {
   resending = false
   sentInvitations: Invitation[] = []
   failedInvitations: Invitation[] = []
-  organizations: Organization[] = []
+  currentAccountSettings: AccountSettings = undefined
   currentOrganization: Organization = undefined
+  currentMembership: Member = undefined
   activeOrgMembers: Member[] = []
   pendingOrgMembers: Member[] = []
   pendingOrgInvitations: Invitation[] = []
@@ -52,15 +52,8 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
-  public addOrganization (org: Organization) {
-    this.organizations.push(org)
-  }
-
-  @Mutation
-  public updateOrganization (org: Organization) {
-    ConfigHelper.addToSession(SessionStorageKeys.AccountName, org.name)
-    const index = this.organizations.findIndex(item => item.id === org.id)
-    this.organizations.splice(index, 1, org)
+  public setCurrentAccountSettings (accountSettings: AccountSettings) {
+    this.currentAccountSettings = accountSettings
   }
 
   @Mutation
@@ -86,11 +79,6 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
-  public setOrganizations (organizations: Organization[]) {
-    this.organizations = organizations
-  }
-
-  @Mutation
   public setOrgCreateMessage (message: string) {
     this.orgCreateMessage = message
   }
@@ -100,14 +88,26 @@ export default class OrgModule extends VuexModule {
     this.currentOrganization = organization
   }
 
+  @Mutation
+  public setCurrentMembership (membership: Member) {
+    this.currentMembership = membership
+  }
+
   @Action({ rawError: true })
-  public async syncOrganization (orgId: number): Promise<void> {
+  public async syncOrganization (orgId: number): Promise<Organization> {
     const response = await OrgService.getOrganization(orgId)
     const organization = response?.data
     this.context.commit('setCurrentOrganization', organization)
     await this.context.dispatch('syncActiveOrgMembers')
     await this.context.dispatch('syncPendingOrgMembers')
     await this.context.dispatch('syncPendingOrgInvitations')
+    return organization
+  }
+
+  @Action({ rawError: true, commit: 'setCurrentMembership' })
+  public async syncMembership (orgId: number): Promise<Member> {
+    const response = await UserService.getMembership(orgId)
+    return response?.data
   }
 
   @Action({ rawError: true })
@@ -115,7 +115,7 @@ export default class OrgModule extends VuexModule {
     try {
       const response = await OrgService.createOrg(createRequestBody)
       this.context.commit('setOrgCreateMessage', 'success')
-      this.context.commit('addOrganization', response.data)
+      this.context.commit('setCurrentOrganization', response?.data)
     } catch (err) {
       switch (err.response.status) {
         case 409:
@@ -136,7 +136,6 @@ export default class OrgModule extends VuexModule {
     try {
       const response = await OrgService.updateOrg(this.context.state['currentOrganization'].id, createRequestBody)
       this.context.commit('setOrgCreateMessage', 'success')
-      this.context.commit('updateOrganization', response.data)
       this.context.commit('setCurrentOrganization', response.data)
     } catch (err) {
       switch (err.response.status) {

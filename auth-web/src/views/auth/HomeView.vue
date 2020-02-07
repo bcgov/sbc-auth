@@ -7,7 +7,7 @@
             <v-col cols="12" lg="8">
               <h1 class="mb-6">Welcome to Cooperatives Online<sup>Beta</sup></h1>
               <p class="mb-2">File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
-              <v-btn x-large color="#fcba19" class="cta-btn mt-8" active-class="cta-btn--active" :to="manageBusinessesUrl" v-if="userProfile">Manage Businesses</v-btn>
+              <v-btn x-large color="#fcba19" class="cta-btn mt-8" active-class="cta-btn--active" @click="manageBusinessesUrl()" v-if="showManageBusinessesBtn">Manage Businesses</v-btn>
             </v-col>
           </v-row>
         </v-container>
@@ -180,28 +180,34 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
-import ConfigHelper from '../../util/config-helper'
-import { SessionStorageKeys } from '../../util/constants'
+import ConfigHelper from '@/util/config-helper'
+import { SessionStorageKeys } from '@/util/constants'
 import { User } from '@/models/user'
 import { VueConstructor } from 'vue'
 
 @Component({
   name: 'Home',
   computed: {
-    ...mapState('user', ['userProfile'])
+    ...mapState('user', ['userProfile']),
+    ...mapState('org', ['currentAccount', 'currentMembership'])
   }
 })
 
 export default class HomeView extends Vue {
   private readonly userProfile!: User
+  private readonly currentAccount!: Organization
+  private readonly currentMembership!: Member
   private readonly getUserProfile!: (identifier: string) => User
   private noPasscodeDialog = false
 
-  private get manageBusinessesUrl (): string {
-    // At this point, common components will have written the current account id to session storage
-    const currentAccountId = ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccountId) || '0'
-    return `/account/${currentAccountId}/business`
+  private get showManageBusinessesBtn (): boolean {
+    return this.currentAccount && this.currentMembership?.membershipStatus === MembershipStatus.Active
+  }
+
+  private manageBusinessesUrl (): void {
+    this.$router.push(`/account/${this.currentAccount.id}/business`)
   }
 }
 </script>

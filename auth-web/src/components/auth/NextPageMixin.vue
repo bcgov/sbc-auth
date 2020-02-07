@@ -2,6 +2,7 @@
 <script lang="ts">
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapGetters, mapState } from 'vuex'
+import { AccountSettings } from '@/models/account-settings'
 import Component from 'vue-class-component'
 import { Contact } from '@/models/contact'
 import { Pages } from '@/util/constants'
@@ -11,15 +12,16 @@ import Vue from 'vue'
 @Component({
   computed: {
     ...mapState('user', ['userProfile', 'userContact']),
-    ...mapState('org', ['currentOrganization']),
+    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings']),
     ...mapGetters('org', ['myOrgMembership'])
   }
 })
 export default class NextPageMixin extends Vue {
   protected readonly userProfile!: User
   protected readonly userContact!: Contact
-  protected readonly myOrgMembership!: Member
   protected readonly currentOrganization!: Organization
+  protected readonly currentMembership!: Member
+  protected readonly currentAccountSettings!: AccountSettings
 
   protected getNextPageUrl (): string {
     let nextStep = '/'
@@ -28,12 +30,12 @@ export default class NextPageMixin extends Vue {
     // Redirect to dashboard otherwise
     if (!this.userContact || !this.userProfile.userTerms.isTermsOfUseAccepted) {
       nextStep = Pages.USER_PROFILE
-    } else if (!this.currentOrganization) {
+    } else if (!this.currentOrganization && !this.currentMembership) {
       nextStep = Pages.CREATE_ACCOUNT
-    } else if (this.myOrgMembership.membershipStatus === MembershipStatus.Active) {
+    } else if (this.currentMembership.membershipStatus === MembershipStatus.Active) {
       nextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
-    } else if (this.myOrgMembership.membershipStatus === MembershipStatus.Pending) {
-      nextStep = Pages.PENDING_APPROVAL + '/' + this.currentOrganization.name
+    } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
+      nextStep = `${Pages.PENDING_APPROVAL}/${this.currentAccountSettings.label}`
     } else {
       nextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
     }

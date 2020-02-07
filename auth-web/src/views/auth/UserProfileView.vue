@@ -16,7 +16,7 @@
             <p class="mb-0">Enter your contact information to complete your profile.</p>
           </div>
           <div class="view-header" v-if="editing">
-            <v-btn large icon color="secondary" class="back-btn mr-3" :to="accountInfoUrl">
+            <v-btn large icon color="secondary" class="back-btn mr-3" @click="navigateBack()">
               <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
             <div>
@@ -67,11 +67,15 @@ export default class UserProfileView extends Mixins(NextPageMixin) {
   private editing = false
   private isLoading = true
 
-  private get accountInfoUrl (): string {
-    return `/account/${this.currentOrganization.id}`
+  private navigateBack (): void {
+    if (this.currentOrganization) {
+      this.$router.push(`/account/${this.currentOrganization.id}`)
+    } else {
+      this.$router.push('/home')
+    }
   }
 
-  async mounted () {
+  private async mounted () {
     if (this.userContact) {
       this.editing = true
     }

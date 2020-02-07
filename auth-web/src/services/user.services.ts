@@ -1,7 +1,7 @@
 import Axios, { AxiosResponse } from 'axios'
 import { Contact, Contacts } from '@/models/contact'
+import { Member, Organizations } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
-import { Organizations } from '@/models/Organization'
 import { User } from '@/models/user'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
 
@@ -42,5 +42,9 @@ export default class UserService {
 
   static async deactivateUser (): Promise<AxiosResponse<User>> {
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/users/@me`)
+  }
+
+  static async getMembership (orgId: number): Promise<AxiosResponse<Member>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/users/orgs/${orgId}/membership`)
   }
 }

@@ -3,6 +3,7 @@
     <v-fade-transition>
       <div class="loading-container" v-if="isLoading">
         <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+        <div class="ml-2">Signing in...</div>
       </div>
     </v-fade-transition>
   </div>
@@ -10,12 +11,13 @@
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { KeycloakError, KeycloakPromise } from 'keycloak-js'
-import { mapActions, mapState } from 'vuex'
+import { Member, MembershipStatus, Organization } from '@/models/Organization'
+import { mapActions, mapMutations, mapState } from 'vuex'
+import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
-import { Organization } from '@/models/Organization'
 import { SessionStorageKeys } from '@/util/constants'
 import TokenService from 'sbc-common-components/src/services/token.services'
 import { User } from '@/models/user'
@@ -25,6 +27,7 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   methods: {
+    ...mapMutations('org', ['setCurrentAccountSettings']),
     ...mapActions('user',
       [
         'initKeycloak',
@@ -32,7 +35,7 @@ import { getModule } from 'vuex-module-decorators'
         'syncUserProfile'
       ]
     ),
-    ...mapActions('org', ['syncOrganization'])
+    ...mapActions('org', ['syncOrganization', 'syncMembership'])
   }
 })
 export default class Signin extends Mixins(NextPageMixin) {
@@ -42,12 +45,29 @@ export default class Signin extends Mixins(NextPageMixin) {
   private readonly initKeycloak!: (idpHint: string) => Promise<KeycloakPromise<boolean, KeycloakError>>
   private readonly initializeSession!: () => UserInfo
   private readonly syncUserProfile!: () => User
-  private readonly syncOrganization!: (currentAccount: string) => Promise<void>
+  private readonly syncOrganization!: (currentAccount: string) => Promise<Organization>
+  private readonly syncMembership!: (currentAccount: string) => Promise<Member>
+  private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
 
   @Prop({ default: 'bcsc' }) idpHint: string
   @Prop() redirectUrl: string
 
   private async mounted () {
+    // Set up a listener for the account sync event from SbcHeader
+    // This event signals that the current account has been loaded, and we are ready to sync against it
+    this.$root.$once('accountSyncReady', async (currentAccount: AccountSettings) => {
+      // const currentAccount = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '')
+      if (currentAccount) {
+        this.setCurrentAccountSettings(currentAccount)
+        const membership = await this.syncMembership(currentAccount.id)
+        if (membership.membershipStatus === MembershipStatus.Active) {
+          await this.syncOrganization(currentAccount.id)
+        }
+      }
+      this.redirectToNext()
+    })
+
+    // Initialize keycloak session
     const kcInit = await this.userStore.initKeycloak(this.idpHint)
     kcInit.success(async authenticated => {
       if (authenticated) {
@@ -64,15 +84,6 @@ export default class Signin extends Mixins(NextPageMixin) {
             tokenService.scheduleRefreshTimer()
           })
         }
-        // Set up a listener for the account sync event from SbcHeader
-        // This event signals that the current account has been loaded, and we are ready to sync against it
-        this.$root.$once('accountSyncReady', async (accountId: string) => {
-          const currentAccountId = ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccountId) || null
-          if (currentAccountId) {
-            await this.syncOrganization(currentAccountId)
-          }
-          this.redirectToNext()
-        })
       }
     })
   }
@@ -99,3 +110,20 @@ export default class Signin extends Mixins(NextPageMixin) {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  @import '$assets/scss/theme.scss';
+
+  .loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 2;
+    background: $gray2;
+  }
+</style>
