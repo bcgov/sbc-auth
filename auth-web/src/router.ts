@@ -40,7 +40,7 @@ export function getRoutes () {
   const routes = [
     { path: '/', component: HomeView },
     { path: '/home', component: HomeView },
-    { path: '/account/:orgId/',
+    { path: '/account/:orgId',
       component: DashboardView,
       meta: { requiresAuth: true },
       redirect: '/account/:orgId/business',
