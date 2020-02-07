@@ -25,7 +25,6 @@
       max-width="640"
       data-test-tag="add-business"
     >
-      >
       <template v-slot:text>
         <p>Enter your Incorporation Number and Passcode.</p>
         <AddBusinessForm
@@ -34,6 +33,7 @@
           @add-success="showAddSuccessModal()"
           @add-failed-invalid-code="showInvalidCodeModal()"
           @add-failed-no-entity="showEntityNotFoundModal()"
+          @add-failed-passcode-claimed="showPasscodeClaimedModal()"
           @add-unknown-error="showUnknownErrorModal()"
           @cancel="cancelAddBusiness()"
         />
@@ -94,6 +94,7 @@ import BusinessModule from '@/store/modules/business'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
+import i18n from '@/plugins/i18n'
 import { mapActions } from 'vuex'
 
 @Component({
@@ -111,6 +112,7 @@ export default class EntityManagement extends Vue {
   private removeBusinessPayload = null
   private dialogTitle = ''
   private dialogText = ''
+  private messageTextList = i18n.messages[i18n.locale];
 
   private readonly syncBusinesses!: (organization?: Organization) => Promise<Business[]>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
@@ -145,6 +147,14 @@ export default class EntityManagement extends Vue {
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Business Not Found'
     this.dialogText = 'The specified business was not found.'
+    this.$refs.errorDialog.open()
+  }
+
+  showPasscodeClaimedModal () {
+    const contactNumber = (this.messageTextList && this.messageTextList.techSupportTollFree) ? this.messageTextList.techSupportTollFree : 'helpdesk'
+    this.$refs.addBusinessDialog.close()
+    this.dialogTitle = 'Passcode Already Claimed'
+    this.dialogText = `This passcode has already been claimed. If you have questions, please call ${contactNumber}`
     this.$refs.errorDialog.open()
   }
 
