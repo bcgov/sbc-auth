@@ -1,15 +1,7 @@
 <template>
   <div>
-    <div v-if="currentOrganization">
-      You already belong to an account: <strong>{{ currentOrganization.name }}</strong>
-      <v-row>
-        <v-col cols="12" class="form__btns pb-0">
-          <v-btn large color="primary" @click="redirectToNext">OK</v-btn>
-        </v-col>
-      </v-row>
-    </div>
     <div>
-      <v-form v-if="!currentOrganization" ref="createAccountInfoForm">
+      <v-form ref="createAccountInfoForm">
         <v-radio-group class="mt-0 mb-4 pt-0" v-model="teamType" :mandatory="true">
           <v-radio color="primary" class="mb-3" label="I manage my own business" value="BASIC" data-test="select-manage-own-business" />
           <v-radio color="primary" label="I manage multiple businesses on behalf of my clients" value="PREMIUM" data-test="select-manage-multiple-business" />

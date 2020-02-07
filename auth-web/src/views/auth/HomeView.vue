@@ -8,6 +8,7 @@
               <h1 class="mb-6">Welcome to Cooperatives Online<sup>Beta</sup></h1>
               <p class="mb-2">File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
               <v-btn x-large color="#fcba19" class="cta-btn mt-8" active-class="cta-btn--active" @click="manageBusinessesUrl()" v-if="showManageBusinessesBtn">Manage Businesses</v-btn>
+              <v-btn x-large color="success" class="cta-btn mt-8 ml-2" active-class="cta-btn--active" @click="createAccount()" v-if="showCreateAccountBtn">+ Create Account</v-btn>
             </v-col>
           </v-row>
         </v-container>
@@ -181,9 +182,10 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
+import { Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapState } from 'vuex'
+import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
-import { SessionStorageKeys } from '@/util/constants'
 import { User } from '@/models/user'
 import { VueConstructor } from 'vue'
 
@@ -191,23 +193,33 @@ import { VueConstructor } from 'vue'
   name: 'Home',
   computed: {
     ...mapState('user', ['userProfile']),
-    ...mapState('org', ['currentAccount', 'currentMembership'])
+    ...mapState('org', ['currentAccountSettings', 'currentMembership'])
   }
 })
 
 export default class HomeView extends Vue {
   private readonly userProfile!: User
-  private readonly currentAccount!: Organization
+  private readonly currentAccountSettings!: AccountSettings
   private readonly currentMembership!: Member
   private readonly getUserProfile!: (identifier: string) => User
   private noPasscodeDialog = false
 
   private get showManageBusinessesBtn (): boolean {
-    return this.currentAccount && this.currentMembership?.membershipStatus === MembershipStatus.Active
+    return this.currentAccountSettings && this.currentMembership?.membershipStatus === MembershipStatus.Active
+  }
+
+  private get showCreateAccountBtn (): boolean {
+    return !!this.currentAccountSettings
   }
 
   private manageBusinessesUrl (): void {
-    this.$router.push(`/account/${this.currentAccount.id}/business`)
+    this.$router.push(`/${Pages.MAIN}/${this.currentAccountSettings.id}`)
+  }
+
+  private createAccount (): void {
+    if (this.currentAccountSettings) {
+      this.$router.push(`/${Pages.CREATE_ACCOUNT}`)
+    }
   }
 }
 </script>

@@ -116,6 +116,7 @@ export default class OrgModule extends VuexModule {
       const response = await OrgService.createOrg(createRequestBody)
       this.context.commit('setOrgCreateMessage', 'success')
       this.context.commit('setCurrentOrganization', response?.data)
+      return response?.data
     } catch (err) {
       switch (err.response.status) {
         case 409:

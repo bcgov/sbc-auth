@@ -32,7 +32,7 @@
 
 <script lang="ts">
 
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import OrgModule from '@/store/modules/org'
@@ -57,12 +57,17 @@ export default class AccountInfo extends Vue {
   private touched = false
 
   private isFormValid (): boolean {
-    return !!this.orgName
+    return !!this.orgName || this.orgName === this.currentOrganization?.name
   }
 
   private async mounted () {
     this.orgStore.setOrgCreateMessage('success') // reset
-    this.orgName = this.currentOrganization.name
+    this.orgName = this.currentOrganization?.name || ''
+  }
+
+  @Watch('currentOrganization')
+  private onCurrentAccountChange (newVal: Organization, oldVal: Organization) {
+    this.orgName = newVal?.name || ''
   }
 
   private canChangeAccountName (): boolean {
