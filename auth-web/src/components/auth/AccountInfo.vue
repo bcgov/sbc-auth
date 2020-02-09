@@ -44,13 +44,16 @@ import { getModule } from 'vuex-module-decorators'
   computed: {
     ...mapState('org', ['currentOrganization', 'orgCreateMessage']),
     ...mapGetters('org', ['myOrgMembership'])
+  },
+  methods: {
+    ...mapActions('org', ['updateOrg'])
   }
 })
 export default class AccountInfo extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
   private btnLabel = 'Save'
   private readonly currentOrganization!: Organization
-  private readonly updateOrg!: (requestBody: CreateRequestBody) => Organization
+  private readonly updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
   private readonly myOrgMembership!: Member
   private orgName = ''
   private readonly orgCreateMessage
