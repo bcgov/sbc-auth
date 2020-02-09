@@ -45,6 +45,9 @@ class KeyCloakService {
     configHelper.addToSession(SessionStorageKeys.KeyCloakIdToken, this.kc.idToken)
     configHelper.addToSession(SessionStorageKeys.KeyCloakRefreshToken, this.kc.refreshToken)
     configHelper.addToSession(SessionStorageKeys.UserFullName, this.getUserInfo().fullName)
+    configHelper.addToSession(SessionStorageKeys.UserFullName, this.getUserInfo().fullName)
+    configHelper.addToSession(SessionStorageKeys.UserKcId, this.getUserInfo().keycloakGuid)
+
     this.parsedToken = this.kc.tokenParsed as UserToken
 
     // Set flag in session storage so that common components will know account type
@@ -64,7 +67,7 @@ class KeyCloakService {
       firstName: this.parsedToken.firstname,
       email: this.parsedToken.email,
       roles: this.parsedToken.realm_access.roles,
-      keycloakGuid: this.parsedToken.jti,
+      keycloakGuid: this.parsedToken.sub,
       userName: this.parsedToken.username,
       fullName: `${this.parsedToken.firstname} ${this.parsedToken.lastname}`
     }

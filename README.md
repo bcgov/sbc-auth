@@ -1,8 +1,6 @@
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_sbc-auth&metric=alert_status)](https://sonarcloud.io/dashboard?id=bcgov_sbc-auth)
-[![codecov](https://codecov.io/gh/bcgov/sbc-auth/branch/master/graph/badge.svg)](https://codecov.io/gh/bcgov/sbc-auth)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-# sbc-auth
-ServiceBC common authentication and authorization services
+# BC Registiries authentication and authorization services
 
 BC Registries and Online Services is beginning a phased, multi-year modernization initiative to replace and improve the applications used for BC Online, the Corporate, Personal Property and Manufactured Homes Registries. Our vision is to develop a better service experience and make it easier for citizens and businesses to complete transactions and filings with the province of BC and across other jurisdictions, manage accounts and pay for services.
 
@@ -15,12 +13,42 @@ For more information on the web component refer to:
 
 [auth-web\Readme](auth-web/README.md)
 
-# License
+For more information on the Notify API component refer to:
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[notify-api\Readme](notify-api/README.md)
+
+For more information on the Status API component refer to:
+
+[status-api\Readme](status-api/README.md)
+
+## How to Contribute
+
+If you would like to contribute, please see our [contributing](CONTRIBUTING.md)
+guidelines. Please note that this project is released with a
+[Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this
+project you agree to abide by its terms.
+
+## License
+
+    Copyright 2019 Province of British Columbia
+
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not
+    use this file except in compliance with the License. You may obtain a copy
+    of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+    License for the specific language governing permissions and limitations
+    under the License.
 
 # Testing Thanks
 
 Thanks to BrowserStack for Testing Tool support via OpenSource Licensing
 
 [![BrowserStack](browserstack-logo-white-small.png)](http://browserstack.com/)
+
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=sbc-auth)
+

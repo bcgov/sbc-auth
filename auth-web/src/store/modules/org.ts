@@ -8,7 +8,6 @@ import OrgService from '@/services/org.services'
 import { SessionStorageKeys } from '@/util/constants'
 import { UserInfo } from '@/models/userInfo'
 import UserService from '@/services/user.services'
-import _ from 'lodash'
 
 @Module({
   name: 'org',
