@@ -5,9 +5,42 @@
         <v-container>
           <v-row>
             <v-col cols="12" lg="8">
-              <h1 class="mb-6">Welcome to Cooperatives Online<sup>Beta</sup></h1>
-              <p class="mb-2">File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
-              <v-btn x-large color="#fcba19" class="cta-btn mt-8" active-class="cta-btn--active" to="/main" v-if="userProfile">Manage Businesses</v-btn>
+              <h1>Welcome to Cooperatives Online<sup>Beta</sup></h1>
+              <p>File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
+
+              <div class="hero-banner__cta-btns">
+                <!-- Authenticated -->
+                <div v-if="userProfile">
+                  <v-btn large color="#fcba19" class="cta-btn"
+                    to="/main">
+                    Manage Businesses
+                  </v-btn>
+                  <v-btn large color="#fcba19" class="cta-btn">
+                    Create a New BC Registries Account
+                  </v-btn>
+                </div>
+
+                <!-- Non-authenticated -->
+                <v-btn large color="#fcba19" class="cta-btn"
+                  v-if="!userProfile"
+                  @click="accountDialog = true">
+                  Create a BC Registries Account
+                </v-btn>
+              </div>
+
+              <v-dialog v-model="accountDialog" max-width="640">
+                <v-card>
+                  <v-card-title>Create a BC Registries Account</v-card-title>
+                  <v-card-text>
+                    To create a BC Registries account you will need to log in using your BC Services Card, the government of British Columbia's trusted way to access online services.
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn large color="primary" @click="login()">Log in</v-btn>
+                    <v-btn large depressed color="default" @click="accountDialog = false">Cancel</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
             </v-col>
           </v-row>
         </v-container>
@@ -104,7 +137,7 @@
                         </v-card-text>
                         <v-card-actions>
                           <v-spacer></v-spacer>
-                          <v-btn depressed color="primary" @click="noPasscodeDialog = false">OK</v-btn>
+                          <v-btn large depressed color="primary" @click="noPasscodeDialog = false">OK</v-btn>
                         </v-card-actions>
                       </v-card>
                     </v-dialog>
@@ -145,8 +178,8 @@
               </v-card>
 
               <div class="cta-container">
-                <v-btn x-large color="#fcba19" class="cta-btn" active-class="cta-btn--active" to="/main" v-if="userProfile">Manage Businesses</v-btn>
-                <v-btn x-large color="#fcba19" class="cta-btn" active-class="cta-btn--active" to="/signin/bcsc" v-if="!userProfile">Log in with BC Services Card</v-btn>
+                <v-btn large color="#fcba19" class="cta-btn" active-class="cta-btn--active" to="/main" v-if="userProfile">Manage Businesses</v-btn>
+                <v-btn large color="#fcba19" class="cta-btn" active-class="cta-btn--active" to="/signin/bcsc" v-if="!userProfile">Log in with BC Services Card</v-btn>
               </div>
 
             </section>
@@ -195,6 +228,11 @@ export default class HomeView extends Vue {
   private readonly userProfile!: User
   private readonly getUserProfile!: (identifier: string) => User
   private noPasscodeDialog = false
+  private accountDialog = false
+
+  login () {
+    window.location.assign('/cooperatives/auth/signin/bcsc')
+  }
 }
 </script>
 
@@ -217,6 +255,7 @@ export default class HomeView extends Vue {
   // Hero Banner
   .hero-banner {
     h1 {
+      margin-bottom: 1.5rem;
       letter-spacing: -0.06rem;
       line-height: 1.25;
       font-size: 2.75rem;
@@ -233,12 +272,19 @@ export default class HomeView extends Vue {
     }
 
     p {
-      font-size: 1.25rem;
+      margin-bottom: 2.5rem;
+      font-size: 1.125rem;
     }
 
     .container {
-      padding-top: 2.5rem;
+      padding-top: 2.25rem;
       padding-bottom: 3.25rem;
+    }
+  }
+
+  .hero-banner__cta-btns {
+    .cta-btn + .cta-btn {
+      margin-left: 0.5rem;
     }
   }
 
