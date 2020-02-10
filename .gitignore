@@ -112,9 +112,6 @@ node_modules/
 # pycharm
 .idea/
 
-# npm
-package-lock.json
-
 # Mac OS
 .DS_Store
 
