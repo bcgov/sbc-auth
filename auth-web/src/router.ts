@@ -111,10 +111,18 @@ router.beforeEach((to, from, next) => {
         })
       }
     } else {
-      return next({
-        path: '/', // TODO Change this to login home page once it's ready
-        query: { redirect: to.fullPath }
-      })
+      let nextPath
+      if (to.meta.allowedRoles.length === 1 && to.meta.allowedRoles[0] === Role.Staff) {
+        nextPath = {
+          path: '/signin/idir' + to.path
+        }
+      } else {
+        nextPath = {
+          path: '/',
+          query: { redirect: to.fullPath }
+        }
+      }
+      return next(nextPath)
     }
   }
   next()
