@@ -33,7 +33,7 @@
                   <v-card-title>Create a BC Registries Account</v-card-title>
                   <v-card-text>
                     <p class="mb-7">To access this service, you will need to log in using your BC Services Card, the government of British Columbia's trusted way to access online services. Learn how to set up and use your BC Services card here.</p>
-                    <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card"
+                    <a rel="noopener noreferrer" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card"
                       target="_blank">
                       <v-icon small class="mr-2">mdi-open-in-new</v-icon>
                       <span>Learn how to set up and use your BC Services Card</span>
