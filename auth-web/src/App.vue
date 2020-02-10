@@ -49,7 +49,7 @@ export default class App extends Vue {
       await tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
       tokenService.scheduleRefreshTimer()
 
-      this.$root.$once('accountSyncReady', async (currentAccount: AccountSettings) => {
+      this.$root.$on('accountSyncReady', async (currentAccount: AccountSettings) => {
         if (currentAccount) {
           this.setCurrentAccountSettings(currentAccount)
           const membership = await this.syncMembership(currentAccount.id)
