@@ -2,6 +2,12 @@
   <v-app id="app">
     <div class="header-group" ref="headerGroup">
       <sbc-header :key="$store.state.refreshKey"></sbc-header>
+      <v-snackbar v-model="showNotifcation" color="info" :timeout=6000 top multi-line>
+        <span v-html="notificationText"></span>
+        <v-btn dark text @click="showNotifcation = false">
+          Close
+        </v-btn>
+      </v-snackbar>
       <pay-system-alert></pay-system-alert>
     </div>
     <div class="app-body">
@@ -44,6 +50,8 @@ export default class App extends Vue {
   private readonly syncOrganization!: (currentAccountId: string) => Promise<Organization>
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
   private businessStore = getModule(BusinessModule, this.$store)
+  showNotifcation = false
+  notificationText = ''
 
   private async mounted (): Promise<void> {
     if (ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)) {
@@ -57,6 +65,8 @@ export default class App extends Vue {
           const membership = await this.syncMembership(currentAccount.id)
           if (membership.membershipStatus === MembershipStatus.Active) {
             await this.syncOrganization(currentAccount.id)
+            this.notificationText = `Your account has been switched.<br/><br/> New account: <b>${currentAccount.label}</b>`
+            this.showNotifcation = true
           }
         }
       })
