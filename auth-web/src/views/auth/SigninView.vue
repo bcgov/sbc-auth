@@ -63,7 +63,9 @@ export default class Signin extends Mixins(NextPageMixin) {
           await this.syncOrganization(currentAccount.id)
         }
       }
-      this.redirectToNext()
+      if (this.$route.name === 'signin' || this.$route.name === 'signin-redirect') {
+        this.redirectToNext()
+      }
     })
 
     // Initialize keycloak session
