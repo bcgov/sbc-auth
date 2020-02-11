@@ -1,6 +1,7 @@
 <template>
   <v-app id="app">
     <div class="header-group" ref="headerGroup">
+      <sbc-loader :show="showLoading"></sbc-loader>
       <sbc-header :key="$store.state.refreshKey"></sbc-header>
       <v-snackbar v-model="showNotification" color="info" :timeout=6000 top multi-line>
         <span v-html="notificationText"></span>
@@ -28,6 +29,7 @@ import OrgModule from '@/store/modules/org'
 import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.vue'
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
+import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
 import { SessionStorageKeys } from '@/util/constants'
 import TokenService from 'sbc-common-components/src/services/token.services'
 import Vue from 'vue'
@@ -37,6 +39,7 @@ import { getModule } from 'vuex-module-decorators'
   components: {
     SbcHeader,
     SbcFooter,
+    SbcLoader,
     PaySystemAlert
   },
   computed: {
@@ -56,9 +59,15 @@ export default class App extends Vue {
   private businessStore = getModule(BusinessModule, this.$store)
   showNotification = false
   notificationText = ''
+  showLoading = true
 
   private async mounted (): Promise<void> {
+    this.showLoading = false
     if (ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)) {
+      this.$root.$on('accountSyncStarted', async () => {
+        this.showLoading = true
+      })
+
       let tokenService = new TokenService()
       await tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
       tokenService.scheduleRefreshTimer()
@@ -72,6 +81,7 @@ export default class App extends Vue {
             await this.syncOrganization(currentAccount.id)
             this.notificationText = `Your account has been switched.<br/><br/> New account: <b>${currentAccount.label}</b>`
             this.showNotification = switchingToNewAccount
+            this.showLoading = false
           }
         }
       })
