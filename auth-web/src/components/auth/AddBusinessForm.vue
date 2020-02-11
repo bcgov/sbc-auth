@@ -98,7 +98,6 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class AddBusinessForm extends Vue {
-  private businessStore = getModule(BusinessModule, this.$store)
   private readonly currentOrganization!: Organization
   private readonly addBusiness!: (loginPayload: LoginPayload) => void
   private validationError = ''

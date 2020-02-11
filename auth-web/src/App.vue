@@ -15,6 +15,7 @@
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapMutations } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
+import BusinessModule from '@/store/modules/business'
 import { Component } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
@@ -42,6 +43,7 @@ export default class App extends Vue {
   private readonly syncMembership!: (currentAccountId: string) => Promise<Member>
   private readonly syncOrganization!: (currentAccountId: string) => Promise<Organization>
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
+  private businessStore = getModule(BusinessModule, this.$store)
 
   private async mounted (): Promise<void> {
     if (ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)) {

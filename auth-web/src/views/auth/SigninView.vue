@@ -55,8 +55,7 @@ export default class Signin extends Mixins(NextPageMixin) {
   private async mounted () {
     // Set up a listener for the account sync event from SbcHeader
     // This event signals that the current account has been loaded, and we are ready to sync against it
-    this.$root.$once('accountSyncReady', async (currentAccount: AccountSettings) => {
-      // const currentAccount = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '')
+    this.$root.$on('accountSyncReady', async (currentAccount: AccountSettings) => {
       if (currentAccount) {
         this.setCurrentAccountSettings(currentAccount)
         const membership = await this.syncMembership(currentAccount.id)

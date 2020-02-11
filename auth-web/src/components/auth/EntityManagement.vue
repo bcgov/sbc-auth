@@ -118,7 +118,6 @@ import { mapActions } from 'vuex'
 })
 export default class EntityManagement extends Vue {
   @Prop({ default: '' }) private orgId: string;
-  private businessStore = getModule(BusinessModule, this.$store)
   private removeBusinessPayload = null
   private dialogTitle = ''
   private dialogText = ''

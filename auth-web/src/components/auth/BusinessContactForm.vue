@@ -96,7 +96,6 @@ import { mask } from 'vue-the-mask'
   }
 })
 export default class BusinessContactForm extends Vue {
-  private businessStore = getModule(BusinessModule, this.$store)
   private emailAddress = ''
   private confirmedEmailAddress = ''
   private phoneNumber = ''
