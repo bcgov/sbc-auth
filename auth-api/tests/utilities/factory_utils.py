@@ -26,6 +26,9 @@ from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.models.membership import Membership as MembershipModel
+from auth_api.models.product_role import ProductRole as ProductRoleModel
+from auth_api.models.product_role_code import ProductRoleCode as ProductRoleCodeModel
+from auth_api.models.product_subscription import ProductSubscription as ProductSubscriptionModel
 from auth_api.models.user import User as UserModel
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Entity as EntityService
@@ -90,11 +93,17 @@ def factory_org_model(org_info: dict = TestOrgInfo.org1,
         org_type = OrgTypeModel(code=org_type_info['code'], desc=org_type_info['desc'])
         org_type.save()
 
-    org_status = OrgStatusModel(code=org_status_info['code'], desc=org_status_info['desc'])
-    org_status.save()
+    if org_status_info:
+        org_status = OrgStatusModel(code=org_status_info['code'], desc=org_status_info['desc'])
+        org_status.save()
+    else:
+        org_status = OrgStatusModel.get_default_status()
 
-    preferred_payment = PaymentTypeModel(code=payment_type_info['code'], desc=payment_type_info['desc'])
-    preferred_payment.save()
+    if payment_type_info:
+        preferred_payment = PaymentTypeModel(code=payment_type_info['code'], desc=payment_type_info['desc'])
+        preferred_payment.save()
+    else:
+        preferred_payment = PaymentTypeModel.get_default_payment_type()
 
     org = OrgModel(name=org_info['name'])
     org.org_type = org_type
@@ -166,3 +175,20 @@ def factory_document_model(version_id, doc_type, content):
 
     document.save()
     return document
+
+
+def factory_product_model(org_id: str,
+                          product_code: str = 'PPR',
+                          product_role_codes: list = ['search']
+                          ):
+    """Produce a templated product model."""
+    subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code)
+    subscription.save()
+
+    # Save product roles
+    for role_code in product_role_codes:
+        product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role_code, product_code)
+        product_role = ProductRoleModel(product_subscription_id=subscription.id, product_role_id=product_role_code.id)
+        product_role.save()
+
+    return subscription

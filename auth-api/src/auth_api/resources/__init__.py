@@ -25,6 +25,7 @@ from flask import Blueprint, current_app
 # noqa: I001, I003, I004
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
 
+from .account import API as ACCOUNTS_API
 from .apihelper import Api
 from .codes import API as CODES_API
 from .documents import API as DOCUMENTS_API
@@ -82,6 +83,7 @@ API.add_namespace(ORG_API, path='/orgs')
 API.add_namespace(INVITATION_API, path='/invitations')
 API.add_namespace(DOCUMENTS_API, path='/documents')
 API.add_namespace(CODES_API, path='/codes')
+API.add_namespace(ACCOUNTS_API, path='/accounts')
 
 TEST_BLUEPRINT = Blueprint('TEST', __name__, url_prefix='/test')
 
