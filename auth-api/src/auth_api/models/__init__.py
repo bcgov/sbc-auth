@@ -36,6 +36,10 @@ from .org_settings import OrgSettings
 from .org_status import OrgStatus
 from .org_type import OrgType
 from .payment_type import PaymentType
+from .product_code import ProductCode
+from .product_role import ProductRole
+from .product_role_code import ProductRoleCode
+from .product_subscription import ProductSubscription
 from .user import User
 from .user_settings import UserSettings
 from .user_status_code import UserStatusCode
