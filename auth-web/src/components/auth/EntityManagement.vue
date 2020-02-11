@@ -134,8 +134,6 @@ export default class EntityManagement extends Vue {
     addBusinessDialog: ModalDialog
   }
 
-  private beforeMounted () {}
-
   async mounted () {
     await this.syncBusinesses()
     this.isLoading = false
