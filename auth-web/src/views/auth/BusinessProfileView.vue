@@ -53,7 +53,6 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class BusinessProfileView extends Vue {
-  private businessStore = getModule(BusinessModule, this.$store)
   // TODO: Set businessType from current business in store
   private businessType = 'cooperative'
   private editing = false

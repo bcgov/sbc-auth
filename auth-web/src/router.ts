@@ -19,7 +19,6 @@ import SearchBusinessView from '@/views/auth/SearchBusinessView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
-import UserManagement from '@/components/auth/UserManagement.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
 
 import Vue from 'vue'
@@ -39,55 +38,59 @@ export function getRoutes () {
   const accountInfo = () => import(/* webpackChunkName: "account-settings" */ './components/auth/AccountInfo.vue')
   const userManagement = () => import(/* webpackChunkName: "account-settings" */ './components/auth/UserManagement.vue')
   const routes = [
-    { path: '/', component: HomeView },
-    { path: '/home', component: HomeView },
-    { path: '/main',
+    { path: '/', name: 'root', component: HomeView },
+    { path: '/home', name: 'home', component: HomeView },
+    { path: '/account/:orgId',
+      name: 'account',
       component: DashboardView,
       meta: { requiresAuth: true },
-      redirect: '/main/business',
+      redirect: '/account/:orgId/business',
+      props: true,
       children: [
         {
-          path: 'team',
-          component: UserManagement
-        },
-        {
           path: 'business',
-          component: EntityManagement
+          name: 'business',
+          component: EntityManagement,
+          props: true
         }]
     },
-    { path: '/account-settings',
+    { path: '/account/:orgId/settings',
+      name: 'account-settings',
       component: accountSettings,
       meta: { requiresAuth: true },
-      redirect: '/account-settings/account-info',
+      redirect: '/account/:orgId/settings/account-info',
+      props: true,
       children: [
         {
           path: 'account-info',
+          name: 'account-info',
           component: accountInfo
         },
         {
           path: 'team-members',
+          name: 'team-members',
           component: userManagement
         }
       ]
     },
-    { path: '/userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
-    { path: '/createaccount', component: CreateAccountView, meta: { requiresAuth: true } },
-    { path: '/duplicateteam', component: DuplicateTeamWarningView, meta: { requiresAuth: true } },
-    { path: '/validatetoken/:token', component: AcceptInviteLandingView, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
-    { path: '/confirmtoken/:token', component: AcceptInviteView, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } },
-    { path: '/signin/:idpHint', component: SigninView, props: true, meta: { requiresAuth: false } },
-    { path: '/signin/:idpHint/:redirectUrl', component: SigninView, props: true, meta: { requiresAuth: false } },
-    { path: '/signout', component: SignoutView, props: true, meta: { requiresAuth: true } },
-    { path: '/signout/:redirectUrl', component: SignoutView, props: true, meta: { requiresAuth: true } },
-    { path: '/businessprofile', component: BusinessProfileView, meta: { requiresAuth: true } },
-    { path: '/makepayment/:paymentId/:redirectUrl', component: PaymentView, props: true, meta: { requiresAuth: false } },
-    { path: '/profiledeactivated', component: ProfileDeactivatedView, props: true, meta: { requiresAuth: false } },
-    { path: '/returnpayment/:paymentId/transaction/:transactionId', component: PaymentReturnView, props: mapReturnPayVars, meta: { requiresAuth: false } },
-    { path: '/searchbusiness', component: SearchBusinessView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
-    { path: '/unauthorized', component: UnauthorizedView, props: true, meta: { requiresAuth: false } },
-    { path: '/pendingapproval/:team_name?', component: PendingApprovalView, props: true, meta: { requiresAuth: false } },
-    { path: '/leaveteam', component: LeaveTeamLandingView, props: true, meta: { requiresAuth: true } },
-    { path: '*', component: PageNotFound }
+    { path: '/userprofile', name: 'userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
+    { path: '/createaccount', name: 'createaccount', component: CreateAccountView, meta: { requiresAuth: true } },
+    { path: '/duplicateteam', name: 'duplicateteam', component: DuplicateTeamWarningView, meta: { requiresAuth: true } },
+    { path: '/validatetoken/:token', name: 'validatetoken', component: AcceptInviteLandingView, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
+    { path: '/confirmtoken/:token', name: 'confirmtoken', component: AcceptInviteView, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } },
+    { path: '/signin/:idpHint', name: 'signin', component: SigninView, props: true, meta: { requiresAuth: false } },
+    { path: '/signin/:idpHint/:redirectUrl', name: 'signin-redirect', component: SigninView, props: true, meta: { requiresAuth: false } },
+    { path: '/signout', name: 'signout', component: SignoutView, props: true, meta: { requiresAuth: true } },
+    { path: '/signout/:redirectUrl', name: 'signout-redirect', component: SignoutView, props: true, meta: { requiresAuth: true } },
+    { path: '/businessprofile', name: 'businessprofile', component: BusinessProfileView, meta: { requiresAuth: true } },
+    { path: '/makepayment/:paymentId/:redirectUrl', name: 'makepayment', component: PaymentView, props: true, meta: { requiresAuth: false } },
+    { path: '/profiledeactivated', name: 'profiledeactivated', component: ProfileDeactivatedView, props: true, meta: { requiresAuth: false } },
+    { path: '/returnpayment/:paymentId/transaction/:transactionId', name: 'returnpayment', component: PaymentReturnView, props: mapReturnPayVars, meta: { requiresAuth: false } },
+    { path: '/searchbusiness', name: 'searchbusiness', component: SearchBusinessView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
+    { path: '/unauthorized', name: 'unauthorized', component: UnauthorizedView, props: true, meta: { requiresAuth: false } },
+    { path: '/pendingapproval/:team_name?', name: 'pendingapproval', component: PendingApprovalView, props: true, meta: { requiresAuth: false } },
+    { path: '/leaveteam', name: 'leaveteam', component: LeaveTeamLandingView, props: true, meta: { requiresAuth: true } },
+    { path: '*', name: 'notfound', component: PageNotFound }
   ]
 
   return routes

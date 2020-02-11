@@ -1,15 +1,7 @@
 <template>
   <div>
-    <div v-if="organizations.length > 0">
-      You already belong to an account: <strong>{{ organizations[0].name }}</strong>
-      <v-row>
-        <v-col cols="12" class="form__btns pb-0">
-          <v-btn large color="primary" @click="redirectToNext">OK</v-btn>
-        </v-col>
-      </v-row>
-    </div>
     <div>
-      <v-form v-if="organizations.length === 0" ref="createAccountInfoForm">
+      <v-form ref="createAccountInfoForm">
         <v-radio-group class="mt-0 mb-4 pt-0" v-model="teamType" :mandatory="true">
           <v-radio color="primary" class="mb-3" label="I manage my own business" value="BASIC" data-test="select-manage-own-business" />
           <v-radio color="primary" label="I manage multiple businesses on behalf of my clients" value="PREMIUM" data-test="select-manage-multiple-business" />
@@ -50,21 +42,19 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
-    ...mapState('org', ['organizations', 'orgCreateMessage'])
+    ...mapState('org', ['currentOrganization', 'orgCreateMessage'])
   },
   methods: {
-    ...mapActions('org', ['createOrg']),
-    ...mapActions('org', ['syncOrganizations'])
+    ...mapActions('org', ['createOrg'])
   }
 })
 export default class CreateAccountInfoForm extends Vue {
     private orgStore = getModule(OrgModule, this.$store)
     private teamName: string = ''
     private teamType: string = 'BASIC'
-    private readonly organizations!: Organization[]
     private readonly createOrg!: (requestBody: CreateRequestBody) => Organization
-    private readonly syncOrganizations!: () => Organization[]
     private readonly orgCreateMessage: string
+    private readonly currentOrganization!: Organization
 
     $refs: {
       createAccountInfoForm: HTMLFormElement
@@ -75,9 +65,6 @@ export default class CreateAccountInfoForm extends Vue {
 
     private async mounted () {
       this.orgStore.setOrgCreateMessage('dirty') // reset
-      if (!this.organizations) {
-        await this.syncOrganizations()
-      }
     }
 
     private isFormValid (): boolean {
@@ -91,9 +78,10 @@ export default class CreateAccountInfoForm extends Vue {
           name: this.teamName,
           typeCode: this.teamType === 'BASIC' ? 'IMPLICIT' : 'EXPLICIT'
         }
-        await this.createOrg(createRequestBody)
+        const organization = await this.createOrg(createRequestBody)
         if (this.orgCreateMessage === 'success') {
-          this.redirectToNext()
+          this.$store.commit('updateHeader')
+          this.redirectToNext(organization)
         }
       }
     }
@@ -102,8 +90,8 @@ export default class CreateAccountInfoForm extends Vue {
       this.$router.push({ path: '/home' })
     }
 
-    private redirectToNext () {
-      this.$router.push({ path: '/main' })
+    private redirectToNext (organization?: Organization) {
+      this.$router.push({ path: `/account/${organization.id}/` })
     }
 }
 </script>

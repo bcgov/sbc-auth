@@ -32,7 +32,7 @@
 
 <script lang="ts">
 
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import OrgModule from '@/store/modules/org'
@@ -41,35 +41,36 @@ import { getModule } from 'vuex-module-decorators'
 @Component({
   components: {
   },
-  methods: {
-    ...mapActions('org', ['syncOrganizations', 'updateOrg'])
-  },
   computed: {
     ...mapState('org', ['currentOrganization', 'orgCreateMessage']),
     ...mapGetters('org', ['myOrgMembership'])
+  },
+  methods: {
+    ...mapActions('org', ['updateOrg'])
   }
 })
 export default class AccountInfo extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
   private btnLabel = 'Save'
   private readonly currentOrganization!: Organization
-  private readonly syncOrganizations!: () => Organization[]
-  private readonly updateOrg!: (requestBody: CreateRequestBody) => Organization
+  private readonly updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
   private readonly myOrgMembership!: Member
   private orgName = ''
   private readonly orgCreateMessage
   private touched = false
 
   private isFormValid (): boolean {
-    return !!this.orgName
+    return !!this.orgName || this.orgName === this.currentOrganization?.name
   }
 
   private async mounted () {
     this.orgStore.setOrgCreateMessage('success') // reset
-    if (!this.currentOrganization) {
-      await this.syncOrganizations()
-    }
-    this.orgName = this.currentOrganization.name
+    this.orgName = this.currentOrganization?.name || ''
+  }
+
+  @Watch('currentOrganization')
+  private onCurrentAccountChange (newVal: Organization, oldVal: Organization) {
+    this.orgName = newVal?.name || ''
   }
 
   private canChangeAccountName (): boolean {

@@ -10,7 +10,8 @@ export enum SessionStorageKeys {
     PreventStorageSync = 'PREVENT_STORAGE_SYNC',
     AccountName = 'ACCOUNT_NAME',
     UserAccountType = 'USER_ACCOUNT_TYPE',
-    PendingApprovalCount = 'PENDING_APPROVAL_COUNT'
+    PendingApprovalCount = 'PENDING_APPROVAL_COUNT',
+    CurrentAccount = 'CURRENT_ACCOUNT'
 }
 
 export enum Role {
@@ -25,5 +26,5 @@ export enum Pages {
     CREATE_ACCOUNT = 'createaccount',
     DUPLICATE_TEAM_MESAGE = 'duplicateteam',
     PENDING_APPROVAL = 'pendingapproval',
-    MAIN = 'main'
+    MAIN = 'account'
 }

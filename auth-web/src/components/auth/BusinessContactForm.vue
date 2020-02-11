@@ -74,10 +74,11 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import { Business } from '../../models/business'
+import { Business } from '@/models/business'
 import BusinessModule from '@/store/modules/business'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
+import { Organization } from '@/models/Organization'
 import { SessionStorageKeys } from '@/util/constants'
 import { getModule } from 'vuex-module-decorators'
 import { mask } from 'vue-the-mask'
@@ -87,14 +88,14 @@ import { mask } from 'vue-the-mask'
     mask
   },
   computed: {
-    ...mapState('business', ['currentBusiness'])
+    ...mapState('business', ['currentBusiness']),
+    ...mapState('org', ['currentOrganization'])
   },
   methods: {
     ...mapActions('business', ['saveContact'])
   }
 })
 export default class BusinessContactForm extends Vue {
-  private businessStore = getModule(BusinessModule, this.$store)
   private emailAddress = ''
   private confirmedEmailAddress = ''
   private phoneNumber = ''
@@ -103,6 +104,7 @@ export default class BusinessContactForm extends Vue {
   private editing = false
   private readonly currentBusiness!: Business
   private readonly saveContact!: (contact: Contact) => void
+  private readonly currentOrganization!: Organization
 
   private emailRules = [
     v => !!v || 'Email address is required',
@@ -131,7 +133,7 @@ export default class BusinessContactForm extends Vue {
 
   private redirectToNext () {
     if (this.$route.query.redirect) {
-      this.$router.push({ path: '/main' })
+      this.$router.push({ path: `/account/${this.currentOrganization.id}` })
     } else {
       window.location.href = ConfigHelper.getCoopsURL()
     }
