@@ -70,23 +70,26 @@ export default class Signin extends Mixins(NextPageMixin) {
 
     // Initialize keycloak session
     const kcInit = await this.userStore.initKeycloak(this.idpHint)
-    kcInit.success(async authenticated => {
-      if (authenticated) {
-        this.initializeSession()
-        this.$store.commit('updateHeader') // Force a remount of header so it can retrieve account (now that is has token)
-        // Make a POST to the users endpoint if it's bcsc (only need for BCSC)
-        if (this.idpHint === 'bcsc') {
-          await this.syncUserProfile()
-          // eslint-disable-next-line no-console
-          console.info('[SignIn.vue]Logged in User.Starting refreshTimer')
-          var self = this
-          let tokenService = new TokenService()
-          tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`).then(function (success) {
-            tokenService.scheduleRefreshTimer()
-          })
+    await new Promise((resolve, reject) => {
+      kcInit.success(async authenticated => {
+        if (authenticated) {
+          this.initializeSession()
+          // Make a POST to the users endpoint if it's bcsc (only need for BCSC)
+          if (this.idpHint === 'bcsc') {
+            await this.syncUserProfile()
+            // eslint-disable-next-line no-console
+            console.info('[SignIn.vue]Logged in User.Starting refreshTimer')
+            var self = this
+            let tokenService = new TokenService()
+            tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`).then(function (success) {
+              tokenService.scheduleRefreshTimer()
+            })
+          }
+          resolve()
         }
-      }
+      })
     })
+    this.$store.commit('updateHeader') // Force a remount of header so it can retrieve account (now that is has token)
   }
 
   redirectToNext () {

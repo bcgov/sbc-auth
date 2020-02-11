@@ -27,7 +27,7 @@
           <v-card class="profile-card">
             <v-container>
               <v-card-title class="mb-4">
-                {{ userProfile.firstname }} {{ userProfile.lastname}}
+                {{ userProfile.firstname }} {{ userProfile.lastname }}
               </v-card-title>
               <v-card-text>
                 <UserProfileForm/>

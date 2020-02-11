@@ -35,7 +35,7 @@ export default class NextPageMixin extends Vue {
     } else if (this.currentMembership.membershipStatus === MembershipStatus.Active) {
       nextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
     } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
-      nextStep = `${Pages.PENDING_APPROVAL}/${this.currentAccountSettings.label}`
+      nextStep = `${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}`
     } else {
       nextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
     }
