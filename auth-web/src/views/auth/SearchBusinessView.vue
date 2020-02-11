@@ -51,7 +51,6 @@ import { mapActions } from 'vuex'
   }
 })
 export default class SearchBusinessView extends Vue {
-  private businessStore = getModule(BusinessModule, this.$store)
   private businessNumber = ''
   private searchedBusinessNumber = ''
   private searchActive = false

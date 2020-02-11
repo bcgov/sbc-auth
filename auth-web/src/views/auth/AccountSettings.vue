@@ -9,7 +9,7 @@
     </v-fade-transition>
 
     <div class="view-header">
-      <v-btn large icon color="secondary" class="back-btn mr-3" to="/main" data-test="account-settings-back-button">
+      <v-btn large icon color="secondary" class="back-btn mr-3" @click="handleBackButton()" data-test="account-settings-back-button">
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
       <div>
@@ -22,13 +22,13 @@
         <v-navigation-drawer floating permanent data-test="account-nav-drawer">
           <v-list dense>
             <v-list-item-group color="primary">
-              <v-list-item to="/account-settings/account-info" data-test="account-info-nav-item">
+              <v-list-item :to="accountInfoUrl" data-test="account-info-nav-item">
                 <v-list-item-icon>
                   <v-icon left>mdi-information-outline</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Account Info</v-list-item-title>
               </v-list-item>
-              <v-list-item to="/account-settings/team-members" data-test="team-members-nav-item">
+              <v-list-item :to="teamMembersUrl" data-test="team-members-nav-item">
                 <v-list-item-icon>
                   <v-icon left>mdi-account-group-outline</v-icon>
                 </v-list-item-icon>
@@ -48,14 +48,24 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-@Component({
-  components: {
-  }
-})
+@Component({})
 export default class AccountSettings extends Vue {
+  @Prop({ default: '' }) private orgId: string
   private isLoading = true
+
+  private handleBackButton (): void {
+    this.$router.push(`/account/${this.orgId}/business`)
+  }
+
+  private get accountInfoUrl (): string {
+    return `/account/${this.orgId}/settings/account-info`
+  }
+
+  private get teamMembersUrl (): string {
+    return `/account/${this.orgId}/settings/team-members`
+  }
 
   private mounted () {
     this.isLoading = false

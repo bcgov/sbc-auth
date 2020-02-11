@@ -2,8 +2,8 @@
   <v-container>
     <div class="view-container">
       <article>
-        <h1 class="mb-5">Create Account</h1>
-        <p class="intro-text">Tell us about this account, and enter an account name.</p>
+        <h1 class="mb-5">Create a New Account</h1>
+        <p class="intro-text">Tell us about this new account, and enter an account name.</p>
         <v-card class="profile-card">
           <v-container>
             <v-card-title class="mb-3">Account Information</v-card-title>
