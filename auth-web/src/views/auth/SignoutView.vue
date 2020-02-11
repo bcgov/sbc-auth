@@ -3,7 +3,6 @@
     <v-fade-transition>
       <div class="loading-container" v-if="isLoading">
         <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
-        <div class="ml-2">Signing out...</div>
       </div>
     </v-fade-transition>
   </div>
