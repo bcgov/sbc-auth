@@ -212,7 +212,9 @@ class TestOrgInfo(dict, Enum):
 
     org1 = {'name': 'My Test Org'}
     org2 = {'name': 'My Test Updated Org'}
-    org3 = {'name': 'M'}
+    org3 = {'name': 'Third Orgs'}
+    org4 = {'name': 'fourth Orgs'}
+    org5 = {'name': 'fifth Orgs'}
     invalid = {'foo': 'bar'}
     invalid_name_space = {'name': ''}
     invalid_name_spaces = {'name': '    '}

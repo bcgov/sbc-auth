@@ -39,6 +39,7 @@ class Error(Enum):
     DELETE_FAILED_INACTIVE_USER = 'User is already inactive', http_status.HTTP_400_BAD_REQUEST
     CHANGE_ROLE_FAILED_ONLY_OWNER = 'User is only owner in org', http_status.HTTP_400_BAD_REQUEST
     OWNER_CANNOT_BE_REMOVED = 'Owner cannot be removed by anyone', http_status.HTTP_400_BAD_REQUEST
+    MAX_NUMBER_OF_ORGS_LIMIT = 'Maximum number of organisations reached', http_status.HTTP_400_BAD_REQUEST
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""
