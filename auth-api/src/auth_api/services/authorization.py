@@ -78,6 +78,16 @@ class Authorization:
                 authorizations_response['authorizations'].append(Authorization(auth).as_dict())
         return authorizations_response
 
+    @staticmethod
+    def get_account_authorizations_for_product(keycloak_guid: str, account_id: str, product_code: str):
+        """Get account authorizations for the product."""
+        auth_response: Dict = {'roles': []}
+        authorization = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(keycloak_guid,
+                                                                                                    account_id,
+                                                                                                    product_code)
+        auth_response['roles'] = authorization.roles.split(',') if authorization and authorization.roles else []
+        return auth_response
+
     def as_dict(self, exclude: [] = None):
         """Return the authorization as a python dictionary.
 
