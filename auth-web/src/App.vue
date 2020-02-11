@@ -2,9 +2,9 @@
   <v-app id="app">
     <div class="header-group" ref="headerGroup">
       <sbc-header :key="$store.state.refreshKey"></sbc-header>
-      <v-snackbar v-model="showNotifcation" color="info" :timeout=6000 top multi-line>
+      <v-snackbar v-model="showNotification" color="info" :timeout=6000 top multi-line>
         <span v-html="notificationText"></span>
-        <v-btn dark text @click="showNotifcation = false">
+        <v-btn dark text @click="showNotification = false">
           Close
         </v-btn>
       </v-snackbar>
@@ -19,7 +19,7 @@
 
 <script lang="ts">
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
-import { mapActions, mapMutations } from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import BusinessModule from '@/store/modules/business'
 import { Component } from 'vue-property-decorator'
@@ -39,6 +39,9 @@ import { getModule } from 'vuex-module-decorators'
     SbcFooter,
     PaySystemAlert
   },
+  computed: {
+    ...mapState('org', ['currentAccountSettings'])
+  },
   methods: {
     ...mapActions('org', ['syncMembership', 'syncOrganization']),
     ...mapMutations('org', ['setCurrentAccountSettings'])
@@ -46,11 +49,12 @@ import { getModule } from 'vuex-module-decorators'
 })
 export default class App extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
+  private readonly currentAccountSettings!: AccountSettings
   private readonly syncMembership!: (currentAccountId: string) => Promise<Member>
   private readonly syncOrganization!: (currentAccountId: string) => Promise<Organization>
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
   private businessStore = getModule(BusinessModule, this.$store)
-  showNotifcation = false
+  showNotification = false
   notificationText = ''
 
   private async mounted (): Promise<void> {
@@ -61,12 +65,13 @@ export default class App extends Vue {
 
       this.$root.$on('accountSyncReady', async (currentAccount: AccountSettings) => {
         if (currentAccount) {
+          const switchingToNewAccount = !this.currentAccountSettings || this.currentAccountSettings.id !== currentAccount.id
           this.setCurrentAccountSettings(currentAccount)
           const membership = await this.syncMembership(currentAccount.id)
           if (membership.membershipStatus === MembershipStatus.Active) {
             await this.syncOrganization(currentAccount.id)
             this.notificationText = `Your account has been switched.<br/><br/> New account: <b>${currentAccount.label}</b>`
-            this.showNotifcation = true
+            this.showNotification = switchingToNewAccount
           }
         }
       })
