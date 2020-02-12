@@ -2,6 +2,7 @@ import { Role, SessionStorageKeys } from '@/util/constants'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
+import ConfigHelper from '@/util/config-helper'
 import CreateAccountView from '@/views/auth/CreateAccountView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
@@ -20,7 +21,6 @@ import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
-
 import Vue from 'vue'
 
 Vue.use(Router)
@@ -40,6 +40,10 @@ export function getRoutes () {
   const routes = [
     { path: '/', name: 'root', component: HomeView },
     { path: '/home', name: 'home', component: HomeView },
+    { path: '/business',
+      name: 'business-root',
+      redirect: `/account/${JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}').id || 0}/business`
+    },
     { path: '/account/:orgId',
       name: 'account',
       component: DashboardView,
