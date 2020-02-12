@@ -3,10 +3,10 @@
     <div class="header-group" ref="headerGroup">
       <sbc-loader :show="showLoading"></sbc-loader>
       <sbc-header :key="$store.state.refreshKey"></sbc-header>
-      <v-snackbar v-model="showNotification" color="info" :timeout=6000 top multi-line>
+      <v-snackbar top color="primary" v-model="showNotification">
         <span v-html="notificationText"></span>
-        <v-btn dark text @click="showNotification = false">
-          Close
+        <v-btn icon @click="showNotification = false">
+          <v-icon class="white--text">mdi-close</v-icon>
         </v-btn>
       </v-snackbar>
       <pay-system-alert></pay-system-alert>
@@ -79,7 +79,7 @@ export default class App extends Vue {
           const membership = await this.syncMembership(currentAccount.id)
           if (membership.membershipStatus === MembershipStatus.Active) {
             await this.syncOrganization(currentAccount.id)
-            this.notificationText = `Your account has been switched.<br/><br/> New account: <b>${currentAccount.label}</b>`
+            this.notificationText = `Switched to account '${currentAccount.label}'`
             this.showNotification = switchingToNewAccount
             this.showLoading = false
           }
