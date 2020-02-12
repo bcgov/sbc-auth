@@ -42,6 +42,7 @@ export function getRoutes () {
     { path: '/home', name: 'home', component: HomeView },
     { path: '/business',
       name: 'business-root',
+      meta: { requiresAuth: true },
       redirect: `/account/${JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}').id || 0}/business`
     },
     { path: '/account/:orgId',
@@ -121,7 +122,7 @@ router.beforeEach((to, from, next) => {
       }
     } else {
       let nextPath
-      if (to.meta.allowedRoles.length === 1 && to.meta.allowedRoles[0] === Role.Staff) {
+      if (to.meta.allowedRoles?.length === 1 && to.meta.allowedRoles[0] === Role.Staff) {
         nextPath = {
           path: '/signin/idir' + to.path
         }
