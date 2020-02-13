@@ -23,7 +23,6 @@ export default class OrgModule extends VuexModule {
   activeOrgMembers: Member[] = []
   pendingOrgMembers: Member[] = []
   pendingOrgInvitations: Invitation[] = []
-  orgCreateMessage = 'success'
   invalidInvitationToken = false
   tokenError = false
 
@@ -79,11 +78,6 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
-  public setOrgCreateMessage (message: string) {
-    this.orgCreateMessage = message
-  }
-
-  @Mutation
   public setCurrentOrganization (organization: Organization) {
     this.currentOrganization = organization
   }
@@ -112,29 +106,10 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async createOrg (createRequestBody: CreateOrgRequestBody) {
-    try {
-      const response = await OrgService.createOrg(createRequestBody)
-      this.context.commit('setOrgCreateMessage', 'success')
-      this.context.commit('setCurrentOrganization', response?.data)
-      return response?.data
-    } catch (err) {
-      switch (err.response.status) {
-        case 409:
-          this.context.commit('setOrgCreateMessage', 'An account with this name already exists. Try a different account name.')
-          break
-        case 400:
-          if (err.response.data.code === 'MAX_NUMBER_OF_ORGS_LIMIT') {
-            this.context.commit('setOrgCreateMessage', 'Maximum number of accounts reached')
-          } else {
-            this.context.commit('setOrgCreateMessage', 'Invalid account name')
-          }
-          break
-        default:
-          this.context.commit('setOrgCreateMessage', 'An error occurred while attempting to create your account.')
-          break
-      }
-    }
+  public async createOrg (createRequestBody: CreateOrgRequestBody): Promise<Organization> {
+    const response = await OrgService.createOrg(createRequestBody)
+    this.context.commit('setCurrentOrganization', response?.data)
+    return response?.data
   }
 
   @Action({ rawError: true })

@@ -27,6 +27,7 @@ import { getModule } from 'vuex-module-decorators'
 @Component({
   methods: {
     ...mapMutations('org', ['setCurrentAccountSettings']),
+    ...mapMutations('user', ['setRedirectAfterLoginUrl']),
     ...mapActions('user',
       [
         'initKeycloak',
@@ -47,25 +48,13 @@ export default class Signin extends Mixins(NextPageMixin) {
   private readonly syncOrganization!: (currentAccount: string) => Promise<Organization>
   private readonly syncMembership!: (currentAccount: string) => Promise<Member>
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
+  private readonly setRedirectAfterLoginUrl!: (url: string) => void
 
   @Prop({ default: 'bcsc' }) idpHint: string
-  @Prop() redirectUrl: string
+  @Prop({ default: '' }) redirectUrl: string
 
   private async mounted () {
-    // Set up a listener for the account sync event from SbcHeader
-    // This event signals that the current account has been loaded, and we are ready to sync against it
-    this.$root.$on('accountSyncReady', async (currentAccount: AccountSettings) => {
-      if (currentAccount) {
-        this.setCurrentAccountSettings(currentAccount)
-        const membership = await this.syncMembership(currentAccount.id)
-        if (membership.membershipStatus === MembershipStatus.Active) {
-          await this.syncOrganization(currentAccount.id)
-        }
-      }
-      if (this.$route.name === 'signin' || this.$route.name === 'signin-redirect') {
-        this.redirectToNext()
-      }
-    })
+    this.setRedirectAfterLoginUrl(this.redirectUrl || this.idpHint === 'idir' ? '/searchbusiness' : '')
 
     // Initialize keycloak session
     const kcInit = await this.userStore.initKeycloak(this.idpHint)
