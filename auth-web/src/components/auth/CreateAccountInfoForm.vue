@@ -7,23 +7,28 @@
           <v-radio color="primary" label="I manage multiple businesses on behalf of my clients" value="PREMIUM" data-test="select-manage-multiple-business" />
         </v-radio-group>
 
-        <v-alert type="error"
-          v-show="orgCreateMessage !== 'dirty'"
-        >{{orgCreateMessage}}
-        </v-alert>
+        <v-alert type="error" v-show="errorMessage">{{errorMessage}}</v-alert>
 
         <v-text-field filled
           label="Account Name"
           v-model.trim="teamName"
           :rules="teamNameRules"
           persistent-hint
+          :disabled="saving"
           :hint="teamType === 'BASIC' ? 'Example: Your Business Name' : 'Example: Your Management Company or Law Firm Name'"/>
         <v-row>
           <v-col cols="12" class="form__btns pb-0">
-            <v-btn large color="primary" class="mr-2" :disabled='!isFormValid()' @click="save" data-test="save-button">
+            <v-btn
+              large
+              color="primary"
+              class="mr-2"
+              :loading = "saving"
+              :disabled="!isFormValid() || saving"
+              @click="save"
+              data-test="save-button">
               Save and Continue
             </v-btn>
-            <v-btn large depressed color="default" @click="cancel" data-test="cancel-button">
+            <v-btn large depressed color="default" :disable="saving" @click="cancel" data-test="cancel-button">
               Cancel
             </v-btn>
           </v-col>
@@ -35,7 +40,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { CreateRequestBody, Organization } from '@/models/Organization'
+import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
@@ -45,14 +50,18 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('org', ['currentOrganization', 'orgCreateMessage'])
   },
   methods: {
-    ...mapActions('org', ['createOrg'])
+    ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization'])
   }
 })
 export default class CreateAccountInfoForm extends Vue {
     private orgStore = getModule(OrgModule, this.$store)
     private teamName: string = ''
     private teamType: string = 'BASIC'
-    private readonly createOrg!: (requestBody: CreateRequestBody) => Organization
+    private errorMessage: string = ''
+    private saving = false
+    private readonly createOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
+    private readonly syncMembership!: (orgId: number) => Promise<Member>
+    private readonly syncOrganization!: (orgId: number) => Promise<Organization>
     private readonly orgCreateMessage: string
     private readonly currentOrganization!: Organization
 
@@ -62,10 +71,6 @@ export default class CreateAccountInfoForm extends Vue {
 
     private readonly teamNameRules = [
       v => !!v || 'An account name is required']
-
-    private async mounted () {
-      this.orgStore.setOrgCreateMessage('dirty') // reset
-    }
 
     private isFormValid (): boolean {
       return !!this.teamName
@@ -78,10 +83,29 @@ export default class CreateAccountInfoForm extends Vue {
           name: this.teamName,
           typeCode: this.teamType === 'BASIC' ? 'IMPLICIT' : 'EXPLICIT'
         }
-        const organization = await this.createOrg(createRequestBody)
-        if (this.orgCreateMessage === 'success') {
+        try {
+          this.saving = true
+          const organization = await this.createOrg(createRequestBody)
+          await this.syncOrganization(organization.id)
+          await this.syncMembership(organization.id)
           this.$store.commit('updateHeader')
           this.redirectToNext(organization)
+        } catch (err) {
+          this.saving = false
+          switch (err.response.status) {
+            case 409:
+              this.errorMessage = 'An account with this name already exists. Try a different account name.'
+              break
+            case 400:
+              if (err.response.data.code === 'MAX_NUMBER_OF_ORGS_LIMIT') {
+                this.errorMessage = 'Maximum number of accounts reached'
+              } else {
+                this.errorMessage = 'Invalid account name'
+              }
+              break
+            default:
+              this.errorMessage = 'An error occurred while attempting to create your account.'
+          }
         }
       }
     }
