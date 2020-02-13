@@ -17,7 +17,7 @@ Basic users will have an internal Org that is not created explicitly, but implic
 """
 
 from flask import current_app
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, and_, func
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -44,6 +44,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     members = relationship('Membership', cascade='all,delete,delete-orphan', lazy='select')
     affiliated_entities = relationship('Affiliation', lazy='select')
     invitations = relationship('InvitationMembership', cascade='all,delete,delete-orphan', lazy='select')
+    products = relationship('ProductSubscription', cascade='all,delete,delete-orphan', lazy='select')
 
     @classmethod
     def create_from_dict(cls, org_info: dict):
@@ -73,6 +74,12 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
         """Find an Org instance that matches the provided name."""
         # TODO: add more fancy comparison
         return cls.query.filter(Org.name.ilike(f'%{name}%')).first()
+
+    @classmethod
+    def get_count_of_org_created_by_user_id(cls, user_id):
+        """Find the count of the organisations created by the user."""
+        return cls.query.filter(and_(Org.created_by_id == user_id, Org.status_code == 'ACTIVE')).with_entities(
+            func.count()).scalar()
 
     def update_org_from_dict(self, org_info: dict):
         """Update this org with the provided dictionary."""

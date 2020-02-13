@@ -24,7 +24,8 @@ from werkzeug.exceptions import HTTPException
 from auth_api.services.authorization import Authorization, check_auth
 from auth_api.utils.roles import MEMBER, OWNER, STAFF
 from tests.utilities.factory_utils import (
-    factory_affiliation_model, factory_entity_model, factory_membership_model, factory_org_model, factory_user_model)
+    TestOrgInfo, TestOrgTypeInfo, factory_affiliation_model, factory_entity_model, factory_membership_model,
+    factory_org_model, factory_product_model, factory_user_model)
 
 
 def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-argument
@@ -216,3 +217,48 @@ def test_check_auth_for_service_account_invalid(session):  # pylint:disable=unus
     with pytest.raises(HTTPException) as excinfo:
         check_auth({'realm_access': {'roles': ['system']}})
         assert excinfo.exception.code == 403
+
+
+def test_get_account_authorizations_for_product(session):  # pylint:disable=unused-argument
+    """Assert that user authorizations for product is working."""
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+
+    authorization = Authorization.get_account_authorizations_for_product(
+        str(user.keycloak_guid),
+        org.id,
+        'PPR')
+    assert authorization is not None
+    assert len(authorization.get('roles')) == 0
+
+    # Now add some product subscription for the org
+    factory_product_model(org.id)
+    authorization = Authorization.get_account_authorizations_for_product(
+        str(user.keycloak_guid),
+        org.id,
+        'PPR')
+    assert authorization is not None
+    assert len(authorization.get('roles')) == 1
+    assert authorization.get('roles')[0] == 'search'
+
+    # Create another org and assert that the roles are empty
+    org = factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit, org_status_info=None,
+                            payment_type_info=None)
+    factory_membership_model(user.id, org.id)
+    authorization = Authorization.get_account_authorizations_for_product(
+        str(user.keycloak_guid),
+        org.id,
+        'PPR')
+    assert authorization is not None
+    assert len(authorization.get('roles')) == 0
+
+    factory_product_model(org.id, product_role_codes=['search', 'register'])
+    authorization = Authorization.get_account_authorizations_for_product(
+        str(user.keycloak_guid),
+        org.id,
+        'PPR')
+    assert authorization is not None
+    assert len(authorization.get('roles')) == 2
+    assert 'search' in authorization.get('roles')
+    assert 'register' in authorization.get('roles')

@@ -1,91 +1,100 @@
 <template>
-  <v-container class="view-container">
-    <div class="view-header align-center">
-      <h1 class="view-header__title">Manage Businesses</h1>
-      <div class="view-header__actions">
-        <v-btn large color="primary" @click="showAddBusinessModal()" data-test="add-business-button">
-          <v-icon small>mdi-plus</v-icon>
-          <span>Add Business</span>
-        </v-btn>
-      </div>
+  <div>
+    <div>
+      <v-fade-transition>
+        <div class="loading-container" v-if="isLoading">
+          <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+        </div>
+      </v-fade-transition>
     </div>
+    <v-container class="view-container">
+      <div class="view-header align-center">
+        <h1 class="view-header__title">Manage Businesses</h1>
+        <div class="view-header__actions">
+          <v-btn large color="primary" @click="showAddBusinessModal()" data-test="add-business-button">
+            <v-icon small>mdi-plus</v-icon>
+            <span>Add Business</span>
+          </v-btn>
+        </div>
+      </div>
 
-    <AffiliatedEntityList
-      @add-business="showAddBusinessModal()"
-      @remove-business="showConfirmRemoveModal($event)"
-    />
+      <AffiliatedEntityList
+        @add-business="showAddBusinessModal()"
+        @remove-business="showConfirmRemoveModal($event)"
+      />
 
-    <!-- Add Business Dialog -->
-    <ModalDialog
-      ref="addBusinessDialog"
-      :is-persistent="true"
-      :title="dialogTitle"
-      :show-icon="false"
-      :show-actions="false"
-      max-width="640"
-      data-test-tag="add-business"
-    >
-      <template v-slot:text>
-        <p>Enter your Incorporation Number and Passcode.</p>
-        <AddBusinessForm
-          class="mt-7"
-          @close-add-business-modal="closeAddBusinessModal()"
-          @add-success="showAddSuccessModal()"
-          @add-failed-invalid-code="showInvalidCodeModal()"
-          @add-failed-no-entity="showEntityNotFoundModal()"
-          @add-failed-passcode-claimed="showPasscodeClaimedModal()"
-          @add-unknown-error="showUnknownErrorModal()"
-          @cancel="cancelAddBusiness()"
-        />
-      </template>
-    </ModalDialog>
+      <!-- Add Business Dialog -->
+      <ModalDialog
+        ref="addBusinessDialog"
+        :is-persistent="true"
+        :title="dialogTitle"
+        :show-icon="false"
+        :show-actions="false"
+        max-width="640"
+        data-test-tag="add-business"
+      >
+        <template v-slot:text>
+          <p>Enter your Incorporation Number and Passcode.</p>
+          <AddBusinessForm
+            class="mt-7"
+            @close-add-business-modal="closeAddBusinessModal()"
+            @add-success="showAddSuccessModal()"
+            @add-failed-invalid-code="showInvalidCodeModal()"
+            @add-failed-no-entity="showEntityNotFoundModal()"
+            @add-failed-passcode-claimed="showPasscodeClaimedModal()"
+            @add-unknown-error="showUnknownErrorModal()"
+            @cancel="cancelAddBusiness()"
+          />
+        </template>
+      </ModalDialog>
 
-    <!-- Success Dialog -->
-    <ModalDialog
-      ref="successDialog"
-      :title="dialogTitle"
-      :text="dialogText"
-      dialog-class="notify-dialog"
-      max-width="640"
-    />
+      <!-- Success Dialog -->
+      <ModalDialog
+        ref="successDialog"
+        :title="dialogTitle"
+        :text="dialogText"
+        dialog-class="notify-dialog"
+        max-width="640"
+      />
 
-    <!-- Error Dialog -->
-    <ModalDialog
-      ref="errorDialog"
-      :title="dialogTitle"
-      :text="dialogText"
-      dialog-class="notify-dialog"
-      max-width="640"
-    >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-      </template>
-      <template v-slot:actions>
-        <v-btn large color="error" @click="close()" data-test="dialog-ok-button">OK</v-btn>
-      </template>
-    </ModalDialog>
+      <!-- Error Dialog -->
+      <ModalDialog
+        ref="errorDialog"
+        :title="dialogTitle"
+        :text="dialogText"
+        dialog-class="notify-dialog"
+        max-width="640"
+      >
+        <template v-slot:icon>
+          <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+        </template>
+        <template v-slot:actions>
+          <v-btn large color="error" @click="close()" data-test="dialog-ok-button">OK</v-btn>
+        </template>
+      </ModalDialog>
 
-    <!-- Dialog for confirming business removal -->
-    <ModalDialog
-      ref="confirmDeleteDialog"
-      :title="dialogTitle"
-      :text="dialogText"
-      dialog-class="notify-dialog"
-      max-width="640"
-    >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-      </template>
-      <template v-slot:actions>
-        <v-btn large color="primary" @click="remove()" data-test="dialog-remove-button">Remove</v-btn>
-        <v-btn large color="default" @click="cancelConfirmDelete()" data-test="dialog-cancel-button">Cancel</v-btn>
-      </template>
-    </ModalDialog>
-  </v-container>
+      <!-- Dialog for confirming business removal -->
+      <ModalDialog
+        ref="confirmDeleteDialog"
+        :title="dialogTitle"
+        :text="dialogText"
+        dialog-class="notify-dialog"
+        max-width="640"
+      >
+        <template v-slot:icon>
+          <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+        </template>
+        <template v-slot:actions>
+          <v-btn large color="primary" @click="remove()" data-test="dialog-remove-button">Remove</v-btn>
+          <v-btn large color="default" @click="cancelConfirmDelete()" data-test="dialog-cancel-button">Cancel</v-btn>
+        </template>
+      </ModalDialog>
+    </v-container>
+  </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import AddBusinessForm from '@/components/auth/AddBusinessForm.vue'
 import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
@@ -108,11 +117,12 @@ import { mapActions } from 'vuex'
   }
 })
 export default class EntityManagement extends Vue {
-  private businessStore = getModule(BusinessModule, this.$store)
+  @Prop({ default: '' }) private orgId: string;
   private removeBusinessPayload = null
   private dialogTitle = ''
   private dialogText = ''
-  private messageTextList = i18n.messages[i18n.locale];
+  private messageTextList = i18n.messages[i18n.locale]
+  private isLoading = true
 
   private readonly syncBusinesses!: (organization?: Organization) => Promise<Business[]>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
@@ -126,6 +136,7 @@ export default class EntityManagement extends Vue {
 
   async mounted () {
     await this.syncBusinesses()
+    this.isLoading = false
   }
 
   async showAddSuccessModal () {
@@ -202,6 +213,8 @@ export default class EntityManagement extends Vue {
 </script>
 
 <style lang="scss" scoped>
+  @import '$assets/scss/theme.scss';
+
   .view-header {
     justify-content: space-between;
 
@@ -226,5 +239,18 @@ export default class EntityManagement extends Vue {
       display: block;
       font-weight: 700;
     }
+  }
+
+  .loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 2;
+    background: $gray2;
   }
 </style>

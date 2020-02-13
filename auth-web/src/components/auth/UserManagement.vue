@@ -131,7 +131,7 @@
 
 <script lang="ts">
 import { ActiveUserRecord, Member, MembershipStatus, MembershipType, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import MemberDataTable, { ChangeRolePayload } from '@/components/auth/MemberDataTable.vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { Business } from '@/models/business'
@@ -167,7 +167,6 @@ import { getModule } from 'vuex-module-decorators'
       'updateMember',
       'approveMember',
       'leaveTeam',
-      'syncOrganizations',
       'syncActiveOrgMembers',
       'syncPendingOrgInvitations',
       'syncPendingOrgMembers'
@@ -176,6 +175,7 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class UserManagement extends Vue {
+  @Prop({ default: '' }) private orgId: string;
   private orgStore = getModule(OrgModule, this.$store)
   private successTitle: string = ''
   private successText: string = ''
@@ -203,7 +203,6 @@ export default class UserManagement extends Vue {
   private readonly updateMember!: (updateMemberPayload: UpdateMemberPayload) => void
   private readonly approveMember!: (memberId: number) => void
   private readonly leaveTeam!: (memberId: number) => void
-  private readonly syncOrganizations!: () => Promise<Organization[]>
   private readonly syncPendingOrgMembers!: () => Member[]
   private readonly syncPendingOrgInvitations!: () => Invitation[]
   private readonly syncActiveOrgMembers!: () => Member[]
@@ -342,7 +341,6 @@ export default class UserManagement extends Vue {
       notifyUser: this.notifyUser
     })
     this.$refs.confirmActionDialogWithQuestion.close()
-    await this.syncOrganizations()
   }
 
   private async removeInvite () {
@@ -371,6 +369,7 @@ export default class UserManagement extends Vue {
   private async leave () {
     await this.leaveTeam(this.myOrgMembership.id)
     this.$refs.confirmActionDialog.close()
+    this.$store.commit('updateHeader')
     this.$router.push('/leaveteam')
   }
 

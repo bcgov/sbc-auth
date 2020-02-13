@@ -57,6 +57,10 @@ class Org:
     def create_org(org_info: dict, user_id):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
+        count = OrgModel.get_count_of_org_created_by_user_id(user_id)
+        if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
+            raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
+
         existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'])
         if existing_similar__org is not None:
             raise BusinessException(Error.DATA_CONFLICT, None)
