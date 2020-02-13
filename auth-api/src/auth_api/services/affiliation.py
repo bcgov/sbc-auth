@@ -97,10 +97,12 @@ class Affiliation:
         entity_id = entity.identifier
 
         authorized = True
+        already_claimed = False
 
         # Authorized if the entity has been claimed
         if entity.as_dict()['passCodeClaimed']:
             authorized = False
+            already_claimed = True
 
         # If a passcode was provided...
         elif pass_code:
@@ -113,6 +115,10 @@ class Affiliation:
                 authorized = False
 
         if not authorized:
+            # show a different message when the passcode is already claimed
+            if already_claimed:
+                current_app.logger.debug('<create_affiliation passcode already claimed')
+                raise BusinessException(Error.ALREADY_CLAIMED_PASSCODE, None)
             current_app.logger.debug('<create_affiliation not authorized')
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
         current_app.logger.debug('<create_affiliation find affiliation')
