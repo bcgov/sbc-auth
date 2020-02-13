@@ -141,7 +141,7 @@ def test_create_affiliation_exists(session, auth_mock):  # pylint:disable=unused
 
     with pytest.raises(BusinessException) as exception:
         AffiliationService.create_affiliation(org_id, business_identifier1, pass_code, {})
-    assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
+    assert exception.value.code == Error.ALREADY_CLAIMED_PASSCODE.name
 
 
 def test_find_affiliated_entities_by_org_id(session, auth_mock):  # pylint:disable=unused-argument
