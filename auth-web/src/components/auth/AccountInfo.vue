@@ -64,7 +64,6 @@ export default class AccountInfo extends Vue {
   }
 
   private async mounted () {
-    this.orgStore.setOrgCreateMessage('success') // reset
     this.orgName = this.currentOrganization?.name || ''
   }
 
@@ -85,7 +84,6 @@ export default class AccountInfo extends Vue {
   private enableBtn () {
     this.btnLabel = 'Save'
     this.touched = true
-    this.orgStore.setOrgCreateMessage('success') // reset
   }
 
   private async updateOrgName () {

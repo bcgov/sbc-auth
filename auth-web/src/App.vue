@@ -19,12 +19,13 @@
 </template>
 
 <script lang="ts">
+import { Component, Mixins } from 'vue-property-decorator'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import BusinessModule from '@/store/modules/business'
-import { Component } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
+import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.vue'
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
@@ -50,9 +51,8 @@ import { getModule } from 'vuex-module-decorators'
     ...mapMutations('org', ['setCurrentAccountSettings'])
   }
 })
-export default class App extends Vue {
+export default class App extends Mixins(NextPageMixin) {
   private orgStore = getModule(OrgModule, this.$store)
-  private readonly currentAccountSettings!: AccountSettings
   private readonly syncMembership!: (currentAccountId: string) => Promise<Member>
   private readonly syncOrganization!: (currentAccountId: string) => Promise<Organization>
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
@@ -61,31 +61,39 @@ export default class App extends Vue {
   notificationText = ''
   showLoading = true
 
+  get signingIn (): boolean {
+    return this.$route.name === 'signin' || this.$route.name === 'signin-redirect'
+  }
+
   private async mounted (): Promise<void> {
     this.showLoading = false
+    this.$root.$on('accountSyncStarted', async () => {
+      this.showLoading = true
+    })
     if (ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)) {
-      this.$root.$on('accountSyncStarted', async () => {
-        this.showLoading = true
-      })
-
       let tokenService = new TokenService()
       await tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
       tokenService.scheduleRefreshTimer()
-
-      this.$root.$on('accountSyncReady', async (currentAccount: AccountSettings) => {
-        if (currentAccount) {
-          const switchingToNewAccount = !this.currentAccountSettings || this.currentAccountSettings.id !== currentAccount.id
-          this.setCurrentAccountSettings(currentAccount)
-          const membership = await this.syncMembership(currentAccount.id)
-          if (membership.membershipStatus === MembershipStatus.Active) {
-            await this.syncOrganization(currentAccount.id)
+    }
+    this.$root.$on('accountSyncReady', async (currentAccount: AccountSettings) => {
+      if (currentAccount) {
+        const switchingToNewAccount = !this.currentAccountSettings || this.currentAccountSettings.id !== currentAccount.id
+        this.setCurrentAccountSettings(currentAccount)
+        const membership = await this.syncMembership(currentAccount.id)
+        if (membership.membershipStatus === MembershipStatus.Active) {
+          await this.syncOrganization(currentAccount.id)
+          if (!this.signingIn) {
             this.notificationText = `Switched to account '${currentAccount.label}'`
             this.showNotification = switchingToNewAccount
-            this.showLoading = false
           }
+          this.showLoading = false
         }
-      })
-    }
+      }
+
+      if (this.signingIn) {
+        this.redirectAfterLogin()
+      }
+    })
   }
 }
 
