@@ -124,7 +124,11 @@ export default class OrgModule extends VuexModule {
           this.context.commit('setOrgCreateMessage', 'An account with this name already exists. Try a different account name.')
           break
         case 400:
-          this.context.commit('setOrgCreateMessage', 'Invalid account name')
+          if (err.response.data.code === 'MAX_NUMBER_OF_ORGS_LIMIT') {
+            this.context.commit('setOrgCreateMessage', 'Maximum number of accounts reached')
+          } else {
+            this.context.commit('setOrgCreateMessage', 'Invalid account name')
+          }
           break
         default:
           this.context.commit('setOrgCreateMessage', 'An error occurred while attempting to create your account.')
