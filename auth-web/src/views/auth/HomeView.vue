@@ -261,7 +261,7 @@ export default class HomeView extends Vue {
   }
 
   private login () {
-    window.location.assign('/cooperatives/auth/signin/bcsc')
+    this.$router.push('/signin/bcsc/createaccount')
   }
 }
 </script>
