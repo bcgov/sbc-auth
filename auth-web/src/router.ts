@@ -85,6 +85,7 @@ export function getRoutes () {
     { path: '/confirmtoken/:token', name: 'confirmtoken', component: AcceptInviteView, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } },
     { path: '/signin/:idpHint', name: 'signin', component: SigninView, props: true, meta: { requiresAuth: false } },
     { path: '/signin/:idpHint/:redirectUrl', name: 'signin-redirect', component: SigninView, props: true, meta: { requiresAuth: false } },
+    { path: '/signin/:idpHint/:redirectUrl/:redirectUrlLoginFail', name: 'signin-redirect-full', component: SigninView, props: true, meta: { requiresAuth: false } },
     { path: '/signout', name: 'signout', component: SignoutView, props: true, meta: { requiresAuth: true } },
     { path: '/signout/:redirectUrl', name: 'signout-redirect', component: SignoutView, props: true, meta: { requiresAuth: true } },
     { path: '/businessprofile', name: 'businessprofile', component: BusinessProfileView, meta: { requiresAuth: true } },
