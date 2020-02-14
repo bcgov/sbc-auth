@@ -10,15 +10,53 @@ on:
 jobs:
   auth-api-pr:
     runs-on: ubuntu-latest
+
+    env:
+      FLASK_ENV: "testing"
+      DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+      JWT_OIDC_ISSUER: "http://localhost:8081/auth/realms/demo"
+      JWT_OIDC_WELL_KNOWN_CONFIG: "http://localhost:8081/auth/realms/demo/.well-known/openid-configuration"
+      JWT_OIDC_ALGORITHMS: "RS256"
+      JWT_OIDC_AUDIENCE: "sbc-auth-web"
+      JWT_OIDC_CLIENT_SECRET: "1111111111"
+      JWT_OIDC_JWKS_CACHE_TIMEOUT: "6000"
+
+      KEYCLOAK_ADMIN_CLIENTID: "sbc-auth-admin"
+      KEYCLOAK_ADMIN_SECRET: "2222222222"
+      KEYCLOAK_AUTH_AUDIENCE: "sbc-auth-web"
+      KEYCLOAK_AUTH_CLIENT_SECRET: "1111111111"
+      KEYCLOAK_BASE_URL: "http://localhost:8081"
+      KEYCLOAK_REALMNAME: "demo"
+
+      TOKEN_EXPIRY_PERIOD: 7
+      EMAIL_SECURITY_PASSWORD_SALT: "my_pwd_salt"
+      EMAIL_TOKEN_SECRET_KEY: "mySecretKey"
+
     strategy:
       matrix:
         python-version: [3.7]
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Set up a Demo realm of Keycloak
+        working-directory: ./auth-api/tests/docker
+        run: |
+          ./run.sh
       - name: Install dependencies
         working-directory: ./auth-api
         run: |
@@ -33,3 +71,13 @@ jobs:
         working-directory: ./auth-api
         run: |
           flake8 src/auth_api tests
+      - name: Test with pytest
+        working-directory: ./auth-api
+        run: |
+          pip install .
+          export PYTHONPATH=./src/
+          pytest --strict -p no:warnings --cov=src/auth_api --cov-report xml --cov-report term
+      - name: Shutdown docker-compose
+        working-directory: ./auth-api/tests/docker
+        run: |
+          docker-compose down
