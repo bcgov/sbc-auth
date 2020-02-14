@@ -54,7 +54,11 @@ export default class Signin extends Mixins(NextPageMixin) {
   @Prop({ default: '' }) redirectUrl: string
 
   private async mounted () {
-    this.setRedirectAfterLoginUrl(this.redirectUrl || this.idpHint === 'idir' ? '/searchbusiness' : '')
+    if (this.redirectUrl) {
+      this.setRedirectAfterLoginUrl(`/${this.redirectUrl}`)
+    } else {
+      this.setRedirectAfterLoginUrl(this.idpHint === 'idir' ? '/searchbusiness' : '')
+    }
 
     // Initialize keycloak session
     const kcInit = await this.userStore.initKeycloak(this.idpHint)
