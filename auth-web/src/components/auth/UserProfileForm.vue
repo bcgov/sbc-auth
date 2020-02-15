@@ -146,7 +146,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { User, UserTerms } from '@/models/user'
 import { Contact } from '@/models/contact'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
@@ -199,6 +199,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     private editing = false
     private deactivateProfileDialog = false
     private isDeactivating = false
+    @Prop() token: string
 
     $refs: {
       deactivateUserConfirmationDialog: ModalDialog,
@@ -272,6 +273,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
           await this.updateUserContact(contact)
         }
         await this.getUserProfile('@me')
+        if (this.token) {
+          this.$router.push('/confirmtoken/' + this.token)
+          return
+        }
         this.redirectToNext()
       }
     }
