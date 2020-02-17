@@ -273,6 +273,8 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
           await this.updateUserContact(contact)
         }
         await this.getUserProfile('@me')
+        // If a token was provided, that means we are in the accept invitation flow
+        // so redirect to /confirmtoken
         if (this.token) {
           this.$router.push('/confirmtoken/' + this.token)
           return

@@ -88,14 +88,13 @@ export default class App extends Mixins(NextPageMixin) {
             this.showNotification = switchingToNewAccount
           }
           this.showLoading = false
-          // if user was in a pending approval page and switched to an active account , take him to home page
+          // if user was in a pending approval page and switched to an active account, take him to home page
           if (this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
             this.$router.push(`/home`)
           }
         } else if (membership.membershipStatus === MembershipStatus.Pending) {
           this.setCurrentOrganization({ id: +currentAccount.id, name: currentAccount.label })
-          // pending member..always take him to pending page
-          this.$router.push(`/${Pages.PENDING_APPROVAL}/${currentAccount?.label}`)
+          this.$router.push(`/${Pages.PENDING_APPROVAL}/${currentAccount.label}`)
           this.showLoading = false
           return
         }

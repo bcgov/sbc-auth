@@ -8,13 +8,14 @@
 <script lang="ts">
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
+import { Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapGetters, mapState } from 'vuex'
+import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import InterimLanding from '@/components/auth/InterimLanding.vue'
 import { Invitation } from '@/models/Invitation'
 import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
-import { Pages } from '@/util/constants'
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
@@ -48,21 +49,19 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
   }
 
   /**
-   * do they have a user profile already : accept invitation ; set orgid to sessionstorage ; reset header
-   * no user profile :  do nothing; redirect to user profile
-   *
+   * User profile filled out?: Accept invitation, set orgid in sessionstorage, update header
+   * User profile incomplete?:  Redirect to user profile, user profile will direct here after
    */
   private async accept () {
     try {
       if (!this.userContact || !this.userProfile.userTerms.isTermsOfUseAccepted) {
-        // or simply go to user profile
+        // Go to user profile, with the token, so that we can continue acceptance flow afterwards
         this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
         return
       } else {
         const invitation = await this.acceptInvitation(this.token)
-        sessionStorage.setItem('CURRENT_ACCOUNT', JSON.stringify({ id: invitation.membership[0].org.id }))
+        ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify({ id: invitation.membership[0].org.id }))
         this.$store.commit('updateHeader')
-        // this.$router.push(this.getNextPageUrl())
       }
 
       const invitation = await this.acceptInvitation(this.token)
