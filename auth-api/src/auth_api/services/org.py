@@ -30,8 +30,6 @@ from auth_api.utils.util import camelback2snake
 
 from .authorization import check_auth
 from .contact import Contact as ContactService
-from .invitation import Invitation as InvitationService
-
 
 class Org:
     """Manages all aspects of Org data.
@@ -195,10 +193,6 @@ class Org:
                 contact.delete()
                 return contact
         return None
-
-    def get_invitations(self, status='ALL', token_info: Dict = None):
-        """Return the unresolved (pending or failed) invitations for this org."""
-        return {'invitations': InvitationService.get_invitations_for_org(self._model.id, status, token_info)}
 
     def get_owner_count(self):
         """Get the number of owners for the specified org."""
