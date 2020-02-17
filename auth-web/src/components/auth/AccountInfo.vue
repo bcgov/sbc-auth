@@ -42,7 +42,7 @@ import { getModule } from 'vuex-module-decorators'
   components: {
   },
   computed: {
-    ...mapState('org', ['currentOrganization', 'orgCreateMessage']),
+    ...mapState('org', ['currentOrganization']),
     ...mapGetters('org', ['myOrgMembership'])
   },
   methods: {
@@ -56,7 +56,6 @@ export default class AccountInfo extends Vue {
   private readonly updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
   private readonly myOrgMembership!: Member
   private orgName = ''
-  private readonly orgCreateMessage
   private touched = false
   private errorMessage: string = ''
 
