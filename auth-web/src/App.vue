@@ -63,7 +63,9 @@ export default class App extends Mixins(NextPageMixin) {
   showLoading = true
 
   get signingIn (): boolean {
-    return this.$route.name === 'signin' || this.$route.name === 'signin-redirect'
+    return this.$route.name === 'signin' ||
+           this.$route.name === 'signin-redirect' ||
+           this.$route.name === 'signin-redirect-full'
   }
 
   private async mounted (): Promise<void> {
