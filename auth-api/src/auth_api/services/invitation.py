@@ -36,6 +36,7 @@ from config import get_named_config
 
 from .authorization import check_auth
 from .notification import send_email
+from .membership import Membership as MembershipService
 
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -249,12 +250,20 @@ class Invitation:
             raise BusinessException(Error.ACTIONED_INVITATION, None)
         if invitation.invitation_status_code == 'EXPIRED':
             raise BusinessException(Error.EXPIRED_INVITATION, None)
-        # TODO : isnt this only one?remove for loop
+
         for membership in invitation.membership:
             membership_model = MembershipModel()
             membership_model.org_id = membership.org_id
             membership_model.user_id = user.identifier
             membership_model.membership_type = membership.membership_type
+
+            # check to ensure an invitation for this user/org has not already been processed
+            existing_membership = MembershipService \
+                .get_membership_for_org_and_user(org_id=membership_model.org_id, user_id=membership_model.user_id)
+
+            if existing_membership:
+                raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+
             # user needs to get approval
             is_auto_approval = OrgSettingsModel.is_admin_auto_approved_invitees(membership.org_id)
             if is_auto_approval:

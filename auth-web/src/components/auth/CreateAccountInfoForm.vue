@@ -47,7 +47,7 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
-    ...mapState('org', ['currentOrganization', 'orgCreateMessage'])
+    ...mapState('org', ['currentOrganization'])
   },
   methods: {
     ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization'])
@@ -62,7 +62,6 @@ export default class CreateAccountInfoForm extends Vue {
     private readonly createOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
     private readonly syncMembership!: (orgId: number) => Promise<Member>
     private readonly syncOrganization!: (orgId: number) => Promise<Organization>
-    private readonly orgCreateMessage: string
     private readonly currentOrganization!: Organization
 
     $refs: {

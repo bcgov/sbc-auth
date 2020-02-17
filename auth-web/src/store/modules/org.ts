@@ -114,23 +114,9 @@ export default class OrgModule extends VuexModule {
 
   @Action({ rawError: true })
   public async updateOrg (createRequestBody: CreateOrgRequestBody) {
-    try {
-      const response = await OrgService.updateOrg(this.context.state['currentOrganization'].id, createRequestBody)
-      this.context.commit('setOrgCreateMessage', 'success')
-      this.context.commit('setCurrentOrganization', response.data)
-    } catch (err) {
-      switch (err.response.status) {
-        case 409:
-          this.context.commit('setOrgCreateMessage', 'An account with this name already exists.')
-          break
-        case 400:
-          this.context.commit('setOrgCreateMessage', 'Invalid account name')
-          break
-        default:
-          this.context.commit('setOrgCreateMessage', 'An error occurred while updating your account name.')
-          break
-      }
-    }
+    const response = await OrgService.updateOrg(this.context.state['currentOrganization'].id, createRequestBody)
+    this.context.commit('setCurrentOrganization', response.data)
+    return response?.data
   }
 
   @Action({ rawError: true })

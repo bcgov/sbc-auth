@@ -50,7 +50,7 @@ export default class NextPageMixin extends Vue {
       if (CommonUtils.isUrl(this.redirectAfterLoginUrl)) {
         window.location.href = decodeURIComponent(this.redirectAfterLoginUrl)
       } else {
-        this.$router.push(this.redirectAfterLoginUrl)
+        this.$router.push(`/${this.redirectAfterLoginUrl}`)
       }
     } else {
       this.$router.push(this.getNextPageUrl())

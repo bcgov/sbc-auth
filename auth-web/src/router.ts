@@ -78,7 +78,7 @@ export function getRoutes () {
         }
       ]
     },
-    { path: '/userprofile', name: 'userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
+    { path: '/userprofile/:token?', name: 'userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
     { path: '/createaccount', name: 'createaccount', component: CreateAccountView, meta: { requiresAuth: true } },
     { path: '/duplicateteam', name: 'duplicateteam', component: DuplicateTeamWarningView, meta: { requiresAuth: true } },
     { path: '/validatetoken/:token', name: 'validatetoken', component: AcceptInviteLandingView, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
