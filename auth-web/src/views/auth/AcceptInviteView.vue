@@ -8,7 +8,10 @@
 <script lang="ts">
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { Pages, SessionStorageKeys } from '@/util/constants'
+import { mapActions, mapGetters, mapState } from 'vuex'
+import ConfigHelper from '@/util/config-helper'
+import { Contact } from '@/models/contact'
 import InterimLanding from '@/components/auth/InterimLanding.vue'
 import { Invitation } from '@/models/Invitation'
 import NextPageMixin from '@/components/auth/NextPageMixin.vue'
@@ -18,6 +21,11 @@ import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
+  computed: {
+    ...mapState('user', ['userProfile', 'userContact', 'redirectAfterLoginUrl']),
+    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings']),
+    ...mapGetters('org', ['myOrgMembership'])
+  },
   methods: {
     ...mapActions('org', ['acceptInvitation']),
     ...mapActions('user', ['getUserProfile'])
@@ -29,6 +37,8 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
   private userStore = getModule(UserModule, this.$store)
   private readonly acceptInvitation!: (token: string) => Promise<Invitation>
   private readonly getUserProfile!: (identifier: string) => Promise<User>
+  protected readonly userContact!: Contact
+  protected readonly userProfile!: User
 
   @Prop() token: string
   private inviteError: boolean = false
@@ -38,8 +48,22 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
     await this.accept()
   }
 
+  /**
+   * User profile filled out?: Accept invitation, set orgid in sessionstorage, update header
+   * User profile incomplete?:  Redirect to user profile, user profile will direct here after
+   */
   private async accept () {
     try {
+      if (!this.userContact || !this.userProfile.userTerms.isTermsOfUseAccepted) {
+        // Go to user profile, with the token, so that we can continue acceptance flow afterwards
+        this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
+        return
+      } else {
+        const invitation = await this.acceptInvitation(this.token)
+        ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify({ id: invitation.membership[0].org.id }))
+        this.$store.commit('updateHeader')
+      }
+
       const invitation = await this.acceptInvitation(this.token)
       this.$store.commit('updateHeader')
       this.$router.push(this.getNextPageUrl())

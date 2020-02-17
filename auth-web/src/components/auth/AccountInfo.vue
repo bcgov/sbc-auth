@@ -5,8 +5,8 @@
     </header>
     <v-form ref="editAccountForm">
       <v-alert type="error" class="mb-6"
-        v-show="orgCreateMessage !== 'success'">
-        {{orgCreateMessage}}
+        v-show="errorMessage">
+        {{errorMessage}}
       </v-alert>
       <v-text-field filled clearable required label="Account Name" :disabled="!canChangeAccountName()"
         :rules="accountNameRules"
@@ -42,7 +42,7 @@ import { getModule } from 'vuex-module-decorators'
   components: {
   },
   computed: {
-    ...mapState('org', ['currentOrganization', 'orgCreateMessage']),
+    ...mapState('org', ['currentOrganization']),
     ...mapGetters('org', ['myOrgMembership'])
   },
   methods: {
@@ -56,8 +56,8 @@ export default class AccountInfo extends Vue {
   private readonly updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
   private readonly myOrgMembership!: Member
   private orgName = ''
-  private readonly orgCreateMessage
   private touched = false
+  private errorMessage: string = ''
 
   private isFormValid (): boolean {
     return !!this.orgName || this.orgName === this.currentOrganization?.name
@@ -91,14 +91,24 @@ export default class AccountInfo extends Vue {
     const createRequestBody: CreateRequestBody = {
       name: this.orgName
     }
-    await this.updateOrg(createRequestBody)
-    if (this.orgCreateMessage === 'success') {
+    try {
+      await this.updateOrg(createRequestBody)
       this.$store.commit('updateHeader')
       this.btnLabel = 'Saved'
-    } else {
-      this.btnLabel = 'Save'
+    } catch (err) {
+      this.btnLable = 'Save'
+      this.touched = false
+      switch (err.response.status) {
+        case 409:
+          this.errorMessage = 'An account with this name already exists. Try a different account name.'
+          break
+        case 400:
+          this.errorMessage = 'Invalid account name'
+          break
+        default:
+          this.errorMessage = 'An error occurred while attempting to create your account.'
+      }
     }
-    this.touched = false
   }
 
   private readonly accountNameRules = [

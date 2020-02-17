@@ -21,6 +21,7 @@
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
+import { Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import BusinessModule from '@/store/modules/business'
@@ -31,7 +32,6 @@ import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
-import { SessionStorageKeys } from '@/util/constants'
 import TokenService from 'sbc-common-components/src/services/token.services'
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
@@ -48,7 +48,7 @@ import { getModule } from 'vuex-module-decorators'
   },
   methods: {
     ...mapActions('org', ['syncMembership', 'syncOrganization']),
-    ...mapMutations('org', ['setCurrentAccountSettings'])
+    ...mapMutations('org', ['setCurrentAccountSettings', 'setCurrentOrganization'])
   }
 })
 export default class App extends Mixins(NextPageMixin) {
@@ -56,13 +56,16 @@ export default class App extends Mixins(NextPageMixin) {
   private readonly syncMembership!: (currentAccountId: string) => Promise<Member>
   private readonly syncOrganization!: (currentAccountId: string) => Promise<Organization>
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
+  private readonly setCurrentOrganization!: (org: Organization) => void
   private businessStore = getModule(BusinessModule, this.$store)
   showNotification = false
   notificationText = ''
   showLoading = true
 
   get signingIn (): boolean {
-    return this.$route.name === 'signin' || this.$route.name === 'signin-redirect'
+    return this.$route.name === 'signin' ||
+           this.$route.name === 'signin-redirect' ||
+           this.$route.name === 'signin-redirect-full'
   }
 
   private async mounted (): Promise<void> {
@@ -87,6 +90,15 @@ export default class App extends Mixins(NextPageMixin) {
             this.showNotification = switchingToNewAccount
           }
           this.showLoading = false
+          // if user was in a pending approval page and switched to an active account, take him to home page
+          if (this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
+            this.$router.push(`/home`)
+          }
+        } else if (membership.membershipStatus === MembershipStatus.Pending) {
+          this.setCurrentOrganization({ id: +currentAccount.id, name: currentAccount.label })
+          this.$router.push(`/${Pages.PENDING_APPROVAL}/${currentAccount.label}`)
+          this.showLoading = false
+          return
         }
       }
 
