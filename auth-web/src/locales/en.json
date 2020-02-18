@@ -52,5 +52,7 @@
   "profileDeactivatedTitle": "Your profile has been deactivated.",
   "profileDeactivatedMsg": "Your contact information, account associations and business affiliations have been removed.",
   "leaveTeamTitle": "You have been removed from this account.",
-  "leaveTeamMsg": "If you want to regain access to this account, you will need a new invitation from the account owner."
+  "leaveTeamMsg": "If you want to regain access to this account, you will need a new invitation from the account owner.",
+  "confirmLDissolveTeamTitle": "Confirm Dissolve account",
+  "confirmDissolveTeamText": "Are you sure you wish to dissolve the account?"
 }

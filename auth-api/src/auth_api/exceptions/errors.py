@@ -41,6 +41,7 @@ class Error(Enum):
     OWNER_CANNOT_BE_REMOVED = 'Owner cannot be removed by anyone', http_status.HTTP_400_BAD_REQUEST
     MAX_NUMBER_OF_ORGS_LIMIT = 'Maximum number of organisations reached', http_status.HTTP_400_BAD_REQUEST
     ALREADY_CLAIMED_PASSCODE = 'Passcode you entered has already been claimed', http_status.HTTP_406_NOT_ACCEPTABLE
+    ORG_CANNOT_BE_DISSOLVED = 'Organsiation cannot be dissolved', http_status.HTTP_406_NOT_ACCEPTABLE
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""

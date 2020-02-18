@@ -31,7 +31,6 @@ from auth_api.utils.enums import NotificationType
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, MEMBER, Role, Status
 from auth_api.utils.util import cors_preflight
 
-
 API = Namespace('orgs', description='Endpoints for organization management')
 
 TRACER = Tracer.get_instance()
@@ -71,8 +70,8 @@ class Orgs(Resource):
         return response, status
 
 
-@cors_preflight('GET,PUT,OPTIONS')
-@API.route('/<string:org_id>', methods=['GET', 'PUT', 'OPTIONS'])
+@cors_preflight('GET,PUT,OPTIONS,DELETE')
+@API.route('/<string:org_id>', methods=['GET', 'PUT','DELETE', 'OPTIONS'])
 class Org(Resource):
     """Resource for managing a single org."""
 
@@ -108,6 +107,20 @@ class Org(Resource):
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def delete(org_id):
+        """Inactivates the org if it has no active members or affiliations."""
+        token = g.jwt_oidc_token_info
+        try:
+            OrgService.delete_org(org_id, token)
+            response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -298,7 +311,7 @@ class OrgMember(Resource):
                     MembershipService.get_membership_status_by_code(membership_status)
             membership = MembershipService.find_membership_by_id(membership_id, token)
             is_own_membership = membership.as_dict()['user']['username'] == \
-                UserService.find_by_jwt_token(token).as_dict()['username']
+                                UserService.find_by_jwt_token(token).as_dict()['username']
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
