@@ -58,7 +58,7 @@ export default class Signin extends Mixins(NextPageMixin) {
     if (this.redirectUrl) {
       this.setRedirectAfterLoginUrl(decodeURIComponent(this.redirectUrl))
     } else {
-      this.setRedirectAfterLoginUrl(this.idpHint === 'idir' ? '/searchbusiness' : '')
+      this.setRedirectAfterLoginUrl(this.idpHint === 'idir' ? 'searchbusiness' : '')
     }
 
     // Initialize keycloak session
