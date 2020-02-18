@@ -31,6 +31,7 @@ from auth_api.utils.util import camelback2snake
 from .authorization import check_auth
 from .contact import Contact as ContactService
 
+
 class Org:
     """Manages all aspects of Org data.
 
