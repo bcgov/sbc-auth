@@ -61,12 +61,9 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
       } else {
         const invitation = await this.acceptInvitation(this.token)
         ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify({ id: invitation.membership[0].org.id }))
-        this.$store.commit('updateHeader')
+        this.$store.commit('updateHeader') // this event eventually redirects to Pending approval page.No extra navigation needed
+        return
       }
-
-      const invitation = await this.acceptInvitation(this.token)
-      this.$store.commit('updateHeader')
-      this.$router.push(this.getNextPageUrl())
     } catch (exception) {
       this.inviteError = true
     }
