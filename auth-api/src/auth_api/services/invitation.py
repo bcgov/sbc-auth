@@ -35,8 +35,8 @@ from auth_api.utils.roles import ADMIN, MEMBER, OWNER, Status
 from config import get_named_config
 
 from .authorization import check_auth
-from .notification import send_email
 from .membership import Membership as MembershipService
+from .notification import send_email
 
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)

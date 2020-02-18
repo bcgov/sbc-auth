@@ -96,7 +96,7 @@ export default class AccountInfo extends Vue {
       this.$store.commit('updateHeader')
       this.btnLabel = 'Saved'
     } catch (err) {
-      this.btnLable = 'Save'
+      this.btnLabel = 'Save'
       this.touched = false
       switch (err.response.status) {
         case 409:
