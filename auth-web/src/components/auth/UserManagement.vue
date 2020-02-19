@@ -136,12 +136,16 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import MemberDataTable, { ChangeRolePayload } from '@/components/auth/MemberDataTable.vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { Business } from '@/models/business'
+import ConfigHelper from '@/util/config-helper'
+import { Event } from '@/models/event'
+import { EventBus } from '../../event-bus'
 import { Invitation } from '@/models/Invitation'
 import InvitationsDataTable from '@/components/auth/InvitationsDataTable.vue'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import PendingMemberDataTable from '@/components/auth/PendingMemberDataTable.vue'
+import { SessionStorageKeys } from '@/util/constants'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -389,8 +393,10 @@ export default class UserManagement extends Vue {
     await this.leaveTeam(this.myOrgMembership.id)
     this.$refs.confirmActionDialog.close()
     this.$store.commit('updateHeader')
+    const event:Event = { message: 'Dissolved the account', type: 'error', timeout: 1000 }
+    EventBus.$emit('show-toast', event)
+    ConfigHelper.removeFromSession(SessionStorageKeys.CurrentAccount)
     this.$router.push('/')
-
   }
 
   private close () {
