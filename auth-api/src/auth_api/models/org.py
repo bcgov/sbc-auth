@@ -91,4 +91,3 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     def delete(self):
         self.status_code = OrgStatusEnum.INACTIVE.value
         self.save()
-
