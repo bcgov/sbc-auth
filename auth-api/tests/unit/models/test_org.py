@@ -20,8 +20,8 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
-from tests.utilities.factory_utils import factory_user_model
 from auth_api.utils.roles import OrgStatus as OrgStatusEnum
+from tests.utilities.factory_utils import factory_user_model
 
 
 def factory_org_model(name, session):
@@ -117,6 +117,7 @@ def test_create_from_dict_no_schema(session):  # pylint:disable=unused-argument
     result_org = OrgModel.create_from_dict(None)
 
     assert result_org is None
+
 
 def test_delete(session):  # pylint:disable=unused-argument
     """Assert that an Org can be updated from a dictionary."""

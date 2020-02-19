@@ -21,6 +21,7 @@ from sqlalchemy import Column, ForeignKey, Integer, String, and_, func
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.roles import OrgStatus as OrgStatusEnum
+
 from .base_model import BaseModel
 from .org_status import OrgStatus
 from .org_type import OrgType
@@ -89,5 +90,6 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
         self.save()
 
     def delete(self):
+        """Deletes/Inactivates an org."""
         self.status_code = OrgStatusEnum.INACTIVE.value
         self.save()

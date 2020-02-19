@@ -22,16 +22,16 @@ import pytest
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
+from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
-from auth_api.services import Affiliation as AffiliationService
-from tests.utilities.factory_scenarios import TestContactInfo, TestJwtClaims, TestOrgInfo, TestUserInfo, TestEntityInfo
+from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
-    factory_contact_model, factory_entity_model, factory_invitation, factory_membership_model, factory_org_service,
-    factory_user_model, factory_entity_service)
+    factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
+    factory_org_service, factory_user_model)
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -197,7 +197,7 @@ def test_get_owner_count_two_owner_with_admins(session):  # pylint:disable=unuse
 
 
 def test_delete_org_with_members_fail(session, auth_mock):  # pylint:disable=unused-argument
-    """Assert that an org can be deleted"""
+    """Assert that an org cannot be deleted."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
     user = factory_user_model(user_info=user_with_token)
@@ -212,8 +212,9 @@ def test_delete_org_with_members_fail(session, auth_mock):  # pylint:disable=unu
 
     assert exception.value.code == Error.ORG_CANNOT_BE_DISSOLVED.name
 
+
 def test_delete_org_with_affiliation_fail(session, auth_mock):  # pylint:disable=unused-argument
-    """Assert that an org can be deleted"""
+    """Assert that an org cannot be deleted."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
     user = factory_user_model(user_info=user_with_token)
@@ -224,8 +225,8 @@ def test_delete_org_with_affiliation_fail(session, auth_mock):  # pylint:disable
     entity_dictionary = entity_service.as_dict()
     business_identifier = entity_dictionary['businessIdentifier']
     AffiliationService.create_affiliation(org_id, business_identifier,
-                                                        TestEntityInfo.entity_lear_mock['passCode'],
-                                                        {})
+                                          TestEntityInfo.entity_lear_mock['passCode'],
+                                          {})
 
     with pytest.raises(BusinessException) as exception:
         OrgService.delete_org(org_id, TestJwtClaims.edit_role)
@@ -233,13 +234,14 @@ def test_delete_org_with_affiliation_fail(session, auth_mock):  # pylint:disable
     assert exception.value.code == Error.ORG_CANNOT_BE_DISSOLVED.name
 
     AffiliationService.delete_affiliation(org_id, business_identifier,
-                                                        TestEntityInfo.entity_lear_mock['passCode'])
+                                          TestEntityInfo.entity_lear_mock['passCode'])
     OrgService.delete_org(org.as_dict()['id'])
     org_inactive = OrgService.find_by_org_id(org.as_dict()['id'])
     assert org_inactive.as_dict()['org_status'] == 'INACTIVE'
 
+
 def test_delete_org_with_members_success(session, auth_mock):  # pylint:disable=unused-argument
-    """Assert that an org can be deleted"""
+    """Assert that an org can be deleted."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
     user = factory_user_model(user_info=user_with_token)
