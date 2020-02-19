@@ -395,6 +395,7 @@ export default class UserManagement extends Vue {
     this.$store.commit('updateHeader')
     const event:Event = { message: 'Dissolved the account', type: 'error', timeout: 1000 }
     EventBus.$emit('show-toast', event)
+    // remove this account from the current account session storage.Header will automatically get the next valid account
     ConfigHelper.removeFromSession(SessionStorageKeys.CurrentAccount)
     this.$router.push('/')
   }
