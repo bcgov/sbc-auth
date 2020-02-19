@@ -31,8 +31,8 @@ from auth_api.utils.enums import NotificationType
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, MEMBER, Role, Status
 from auth_api.utils.util import cors_preflight
 
-API = Namespace('orgs', description='Endpoints for organization management')
 
+API = Namespace('orgs', description='Endpoints for organization management')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
 
