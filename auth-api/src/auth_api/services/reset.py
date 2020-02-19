@@ -36,6 +36,9 @@ class ResetTestData:  # pylint:disable=too-few-public-methods
                     if hasattr(model_class, 'created_by_id'):
                         for model in model_class.query.filter_by(created_by_id=user.id).all():
                             model.delete()
+                    if hasattr(model_class, 'modified_by_id'):
+                        for model in model_class.query.filter_by(modified_by_id=user.id).all():
+                            model.delete()
 
                 user.modified_by = None
                 user.modified_by_id = None
