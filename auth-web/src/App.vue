@@ -3,7 +3,7 @@
     <div class="header-group" ref="headerGroup">
       <sbc-loader :show="showLoading"></sbc-loader>
       <sbc-header :key="$store.state.refreshKey" in-auth=true></sbc-header>
-      <v-snackbar top color="primary" v-model="showNotification">
+       <v-snackbar top :color="toastType" v-model="showNotification" :timeout="toastTimeout">
         <span v-html="notificationText"></span>
         <v-btn icon @click="showNotification = false">
           <v-icon class="white--text">mdi-close</v-icon>
@@ -26,6 +26,8 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import BusinessModule from '@/store/modules/business'
 import ConfigHelper from '@/util/config-helper'
+import { Event } from '@/models/event'
+import { EventBus } from '@/event-bus'
 import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.vue'
@@ -61,6 +63,8 @@ export default class App extends Mixins(NextPageMixin) {
   showNotification = false
   notificationText = ''
   showLoading = true
+  toastType = 'primary'
+  toastTimeout = 6000
 
   get signingIn (): boolean {
     return this.$route.name === 'signin' ||
@@ -70,6 +74,13 @@ export default class App extends Mixins(NextPageMixin) {
 
   private async mounted (): Promise<void> {
     this.showLoading = false
+
+    EventBus.$on('show-toast', (eventInfo:Event) => {
+      this.showNotification = true
+      this.notificationText = eventInfo.message
+      this.toastType = eventInfo.type
+      this.toastTimeout = eventInfo.timeout
+    })
     this.$root.$on('accountSyncStarted', async () => {
       this.showLoading = true
     })
@@ -86,6 +97,7 @@ export default class App extends Mixins(NextPageMixin) {
         if (membership.membershipStatus === MembershipStatus.Active) {
           await this.syncOrganization(currentAccount.id)
           if (!this.signingIn) {
+            this.toastType = 'primary'
             this.notificationText = `Switched to account '${currentAccount.label}'`
             this.showNotification = switchingToNewAccount
           }
