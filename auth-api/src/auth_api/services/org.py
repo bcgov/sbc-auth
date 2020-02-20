@@ -86,11 +86,26 @@ class Org:
         current_app.logger.debug('>update_org ')
         return self
 
-    def delete_org(self):
-        """Delete this org."""
-        current_app.logger.debug('>delete_org ')
-        self._model.delete()
-        current_app.logger.debug('<delete_org ')
+    @staticmethod
+    def delete_org(org_id, token_info: Dict = None,):
+        """Soft-Deletes an Org.
+
+        It should not be deletable if there are members or business associated with the org
+        """
+        # Check authorization for the user
+        current_app.logger.debug('<org Inactivated')
+        check_auth(token_info, one_of_roles=OWNER, org_id=org_id)
+
+        org: OrgModel = OrgModel.find_by_org_id(org_id)
+        if not org:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        count_members = len([member for member in org.members if member.status in VALID_STATUSES])
+        if count_members > 1 or len(org.affiliated_entities) >= 1:
+            raise BusinessException(Error.ORG_CANNOT_BE_DISSOLVED, None)
+
+        org.delete()
+        current_app.logger.debug('org Inactivated>')
 
     @staticmethod
     def find_by_org_id(org_id, token_info: Dict = None, allowed_roles: Tuple = None):

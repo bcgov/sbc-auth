@@ -445,6 +445,92 @@ def test_get_members(client, jwt, session):  # pylint:disable=unused-argument
     assert dictionary['members'][0]['membershipTypeCode'] == 'OWNER'
 
 
+def test_delete_org(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an org can be deleted."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    rv = client.delete('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+
+def test_delete_org_failure_affiliation(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an org cannnot be deleted with valid affiliation."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
+                     headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers,
+                     data=json.dumps(TestAffliationInfo.affiliation3), content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    rv = client.delete('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_406_NOT_ACCEPTABLE
+
+
+def test_delete_org_failure_members(client, jwt, session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that a member of an org can have their role updated."""
+    # Set up: create/login user, create org
+    headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers_invitee, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers_invitee, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    # Invite a user to the org
+    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation(org_id, 'abc123@email.com')),
+                     headers=headers_invitee, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    invitation_id = dictionary['id']
+    invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
+
+    # Create/login as invited user
+    headers_invited = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role_2)
+    rv = client.post('/api/v1/users', headers=headers_invited, content_type='application/json')
+
+    # Accept invite as invited user
+    rv = client.put('/api/v1/invitations/tokens/{}'.format(invitation_id_token),
+                    headers=headers_invited, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['status'] == 'ACCEPTED'
+
+    # Get pending members for the org as invitee and assert length of 1
+    rv = client.get('/api/v1/orgs/{}/members?status=PENDING_APPROVAL'.format(org_id), headers=headers_invitee)
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['members']
+    assert len(dictionary['members']) == 1
+
+    # Find the pending member
+    new_member = dictionary['members'][0]
+    assert new_member['membershipTypeCode'] == 'MEMBER'
+    member_id = new_member['id']
+
+    # Update the new member
+    rv = client.patch('/api/v1/orgs/{}/members/{}'.format(org_id, member_id), headers=headers_invitee,
+                      data=json.dumps({'role': 'ADMIN'}), content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['membershipTypeCode'] == 'ADMIN'
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.delete('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_406_NOT_ACCEPTABLE
+
+
 def test_get_invitations(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a list of invitations for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
