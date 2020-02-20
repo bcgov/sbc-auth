@@ -150,7 +150,7 @@ export default class EntityManagement extends Vue {
   showInvalidCodeModal () {
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Invalid Passcode'
-    this.dialogText = 'Unable to add the business. The provided Passcode is invalid or already in use.'
+    this.dialogText = 'Unable to add the business. The provided Passcode is invalid.'
     this.$refs.errorDialog.open()
   }
 
