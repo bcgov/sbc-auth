@@ -68,5 +68,5 @@ jobs:
       - name: Rollout new deployment
         working-directory: ./auth-api
         run: |
-          oc rollout latest dc/$IMAGE_NAME
-          oc rollout status dc/$IMAGE_NAME -w
+          oc rollout latest dc/$IMAGE_NAME-${TAG_NAME}
+          oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -w

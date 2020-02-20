@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - development
-
+    paths:
+      - "notify-api/**"
 env:
   IMAGE_NAME: notify-api-gh
   TAG_NAME: dev
