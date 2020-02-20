@@ -316,7 +316,11 @@ export default class MemberDataTable extends Vue {
       !this.canDissolve()) {
       this.$emit('single-owner-error')
     } else {
-      this.$emit('confirm-leave-team')
+      if (this.canDissolve()) {
+        this.$emit('confirm-dissolve-team')
+      } else {
+        this.$emit('confirm-leave-team')
+      }
     }
   }
 
