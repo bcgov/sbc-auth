@@ -101,10 +101,7 @@ class Org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         count_members = len([member for member in org.members if member.status in VALID_STATUSES])
-        if count_members > 1:
-            raise BusinessException(Error.ORG_CANNOT_BE_DISSOLVED, None)
-
-        if len(org.affiliated_entities) >= 1:
+        if count_members > 1 or len(org.affiliated_entities) >= 1:
             raise BusinessException(Error.ORG_CANNOT_BE_DISSOLVED, None)
 
         org.delete()
