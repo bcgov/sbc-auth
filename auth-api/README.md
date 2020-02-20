@@ -30,7 +30,7 @@ To prepare your local database:
 2. In your `venv` environment: `python manage.py db upgrade`
 
 
-Note: 
+Note:
 
 **[Mac Users]**
 : You might get an error regarding the SSL certificate verification failed.
@@ -42,7 +42,7 @@ pip install certifi /Applications/Python\ <version of your python>/Install\ Cert
 ```
 
 eg: if your python version is 3.7,
-then, run 
+then, run
 
 ```
 pip install certifi /Applications/Python\ 3.7/Install\ Certificates.command
@@ -74,3 +74,5 @@ pip install certifi /Applications/Python\ 3.7/Install\ Certificates.command
 ## Openshift Environment
 
 View the [document](../docs/build-deploy.md).
+
+## Github Actions
