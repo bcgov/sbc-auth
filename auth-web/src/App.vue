@@ -2,7 +2,7 @@
   <v-app id="app">
     <div class="header-group" ref="headerGroup">
       <sbc-loader :show="showLoading"></sbc-loader>
-      <sbc-header :key="$store.state.refreshKey"></sbc-header>
+      <sbc-header :key="$store.state.refreshKey" in-auth=true></sbc-header>
       <v-snackbar top color="primary" v-model="showNotification">
         <span v-html="notificationText"></span>
         <v-btn icon @click="showNotification = false">
