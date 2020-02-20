@@ -40,7 +40,7 @@
                     "name": "DATABASE_ADMIN_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-secret",
+                        "name": "${NAME}-${TAG_NAME}-secret",
                         "key": "DATABASE_ADMIN_PASSWORD"
                       }
                     }
@@ -48,8 +48,8 @@
                   {
                     "name": "DATABASE_USERNAME",
                     "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
+                      "secretKeyRef": {
+                        "name": "${NAME}-${TAG_NAME}-secret",
                         "key": "DATABASE_USER"
                       }
                     }
@@ -58,7 +58,7 @@
                     "name": "DATABASE_PASSWORD",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-secret",
+                        "name": "${NAME}-${TAG_NAME}-secret",
                         "key": "DATABASE_PASSWORD"
                       }
                     }
@@ -66,8 +66,8 @@
                   {
                     "name": "DATABASE_NAME",
                     "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
+                      "secretKeyRef": {
+                        "name": "${NAME}-${TAG_NAME}-secret",
                         "key": "DATABASE_NAME"
                       }
                     }
@@ -76,7 +76,7 @@
                     "name": "DATABASE_HOST",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
+                        "name": "${NAME}-${TAG_NAME}-secret",
                         "key": "DATABASE_HOST"
                       }
                     }
@@ -85,7 +85,7 @@
                     "name": "DATABASE_PORT",
                     "valueFrom": {
                       "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
+                        "name": "${NAME}-${TAG_NAME}-secret",
                         "key": "DATABASE_PORT"
                       }
                     }
@@ -139,159 +139,6 @@
                   {
                     "containerPort": 8080,
                     "protocol": "TCP"
-                  }
-                ],
-                "envFrom": [
-                  {
-                    "configMapRef": {
-                      "name": "api-${TAG_NAME}-config"
-                    }
-                  }
-                ],
-                "env": [
-                  {
-                    "name": "DATABASE_USERNAME",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
-                        "key": "DATABASE_USER"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DATABASE_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-secret",
-                        "key": "DATABASE_PASSWORD"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DATABASE_NAME",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
-                        "key": "DATABASE_NAME"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DATABASE_HOST",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
-                        "key": "DATABASE_HOST"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DATABASE_PORT",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
-                        "key": "DATABASE_PORT"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DATABASE_TEST_USERNAME",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
-                        "key": "DATABASE_TEST_USER"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DATABASE_TEST_PASSWORD",
-                    "valueFrom": {
-                      "secretKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-secret",
-                        "key": "DATABASE_TEST_PASSWORD"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DATABASE_TEST_NAME",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
-                        "key": "DATABASE_TEST_NAME"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DATABASE_TEST_HOST",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
-                        "key": "DATABASE_TEST_HOST"
-                      }
-                    }
-                  },
-                  {
-                    "name": "DATABASE_TEST_PORT",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "${DATABASE_NAME}-${TAG_NAME}-config",
-                        "key": "DATABASE_TEST_PORT"
-                      }
-                    }
-                  },
-                  {
-                    "name": "KEYCLOAK_BASE_URL",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "api-${TAG_NAME}-config",
-                        "key": "KEYCLOAK_BASE_URL"
-                      }
-                    }
-                  },
-                  {
-                    "name": "KEYCLOAK_REALMNAME",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "api-${TAG_NAME}-config",
-                        "key": "KEYCLOAK_REALMNAME"
-                      }
-                    }
-                  },
-                  {
-                    "name": "KEYCLOAK_ADMIN_CLIENTID",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "api-${TAG_NAME}-config",
-                        "key": "KEYCLOAK_ADMIN_CLIENTID"
-                      }
-                    }
-                  },
-                  {
-                    "name": "KEYCLOAK_ADMIN_SECRET",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "api-${TAG_NAME}-config",
-                        "key": "KEYCLOAK_ADMIN_SECRET"
-                      }
-                    }
-                  },
-                  {
-                    "name": "KEYCLOAK_AUTH_AUDIENCE",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "api-${TAG_NAME}-config",
-                        "key": "KEYCLOAK_AUTH_AUDIENCE"
-                      }
-                    }
-                  },
-                  {
-                    "name": "KEYCLOAK_AUTH_CLIENT_SECRET",
-                    "valueFrom": {
-                      "configMapKeyRef": {
-                        "name": "api-${TAG_NAME}-config",
-                        "key": "KEYCLOAK_AUTH_CLIENT_SECRET"
-                      }
-                    }
                   }
                 ],
                 "resources": {

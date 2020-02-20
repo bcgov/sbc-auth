@@ -1,44 +1,44 @@
-name: Auth API BUILD CI
+name: Notify API BUILD/DEPLOY CI/CD
 
 on:
   push:
     branches:
       - development
-    paths:
-      - "auth-api/**"
 
 env:
-  IMAGE_NAME: auth-api-gh
+  IMAGE_NAME: notify-api-gh
   TAG_NAME: dev
 
 jobs:
-  auth-api-build:
+  notify-api-build-depoly:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.7]
     steps:
       - uses: actions/checkout@v2
       - name: Log into registry
         run: echo "${{ secrets.OPENSHIFT_TOKEN }}" | docker login ${{ secrets.OPENSHIFT_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
-      - name: Pull image
-        working-directory: ./auth-api
-        run: docker pull ${{ secrets.OPENSHIFT_REGISTRY }}/d7eovc-tools/python:3.7
+
       - name: Build image
-        uses: vrutkovs/action-s2i@master
-        with:
-          path: ./auth-api
-          base: ${{ secrets.OPENSHIFT_REGISTRY }}/d7eovc-tools/python:3.7
-          image: ${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/${{env.IMAGE_NAME}}
+        working-directory: ./notify-api
+        run: docker build . --file Dockerfile --tag image
+
       - name: Push image
-        working-directory: ./auth-api
+        working-directory: ./notify-api
         run: |
           IMAGE_ID=${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME
-          docker push $ IMAGE_ID:latest
-          docker image tag $IMAGE_ID:latest $IMAGE_ID:$TAG_NAME
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "gh-test" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag image $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+          docker image tag $IMAGE_ID:$VERSION $IMAGE_ID:$TAG_NAME
           docker push $IMAGE_ID:$TAG_NAME
       - name: Install openshift cli
-        working-directory: ./auth-api
+        working-directory: ./notify-api
         run: |
           sudo curl -sLo /tmp/oc.tar.gz https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz
           sudo tar xzvf /tmp/oc.tar.gz -C /tmp/
@@ -47,7 +47,7 @@ jobs:
           sudo chmod +x /usr/local/bin/oc
           oc version
       - name: Login Openshift
-        working-directory: ./auth-api
+        working-directory: ./notify-api
         run: |
           oc ${{ secrets.oc_parameters }}
           oc project ${{ secrets.OPENSHIFT_REPOSITORY_DEV }}
@@ -63,10 +63,10 @@ jobs:
         working-directory: .
         run: |
           op --version
-          vaults='[{ "vault": "shared", "application": ["keycloak"]}, {"vault": "relationship","application": ["postgres-auth", "auth-api"]}]'
-          ./setenv_secret.sh ${{ secrets.op_parameters }} -e "dev" -v "${vaults}" -a "${IMAGE_NAME}-${TAG_NAME}"
+          vaults='[{ "vault": "shared", "application": ["email"]}, {"vault": "relationship","application": ["postgres-notify", "notify-api"]}]'
+          ./setenv_deploy.sh ${{ secrets.op_parameters }} -e "dev" -v "${vaults}" -c "dc/notify-api-gh-dev"
       - name: Rollout new deployment
-        working-directory: ./auth-api
+        working-directory: ./notify-api
         run: |
-          oc rollout latest dc/$IMAGE_NAME
-          oc rollout status dc/$IMAGE_NAME -w
+          oc rollout latest dc/$IMAGE_NAME-$TAG_NAME
+          oc rollout status dc/$IMAGE_NAME-$TAG_NAME -w
