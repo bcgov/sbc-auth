@@ -34,7 +34,7 @@ jobs:
         working-directory: ./auth-api
         run: |
           IMAGE_ID=${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME
-          docker push $ IMAGE_ID:latest
+          docker push $IMAGE_ID:latest
           docker image tag $IMAGE_ID:latest $IMAGE_ID:$TAG_NAME
           docker push $IMAGE_ID:$TAG_NAME
       - name: Install openshift cli

@@ -7,7 +7,7 @@ on:
       - master
 
 jobs:
-  test-pr:
+  move-to-test-pr:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
