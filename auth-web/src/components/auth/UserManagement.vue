@@ -138,7 +138,7 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import { Business } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
-import { EventBus } from '../../event-bus'
+import { EventBus } from '@/event-bus'
 import { Invitation } from '@/models/Invitation'
 import InvitationsDataTable from '@/components/auth/InvitationsDataTable.vue'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
@@ -302,7 +302,7 @@ export default class UserManagement extends Vue {
   }
 
   private showConfirmDissolveModal () {
-    this.confirmActionTitle = this.$t('confirmLDissolveTeamTitle').toString()
+    this.confirmActionTitle = this.$t('confirmDissolveTeamTitle').toString()
     this.confirmActionText = this.$t('confirmDissolveTeamText').toString()
     this.confirmHandler = this.dissolve
     this.primaryActionText = 'Dissolve'
