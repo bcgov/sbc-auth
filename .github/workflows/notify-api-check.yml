@@ -1,7 +1,7 @@
 name: Notify API PR CI
 
 on:
-  pull_request:
+  push:
     branches:
       - development
     paths:
@@ -13,6 +13,22 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7]
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      nats:
+        image: nats-streaming
+        ports:
+          - 4222:4222
+          - 8222:8222
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -33,3 +49,9 @@ jobs:
         working-directory: ./notify-api
         run: |
           flake8 src/notify_api tests
+      - name: Test with pytest
+        working-directory: ./notify-api
+        run: |
+          pip install .
+          export PYTHONPATH=./src/
+          pytest

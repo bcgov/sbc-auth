@@ -33,3 +33,9 @@ jobs:
         working-directory: ./status-api
         run: |
           flake8 src/status_api tests
+      - name: Test with pytest
+        working-directory: ./status-api
+        run: |
+          pip install .
+          export PYTHONPATH=./src/
+          pytest
