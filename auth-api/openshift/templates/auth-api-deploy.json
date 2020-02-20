@@ -75,7 +75,7 @@
                   {
                     "name": "DATABASE_HOST",
                     "valueFrom": {
-                      "configMapKeyRef": {
+                      "secretKeyRef": {
                         "name": "${NAME}-${TAG_NAME}-secret",
                         "key": "DATABASE_HOST"
                       }
@@ -84,7 +84,7 @@
                   {
                     "name": "DATABASE_PORT",
                     "valueFrom": {
-                      "configMapKeyRef": {
+                      "secretKeyRef": {
                         "name": "${NAME}-${TAG_NAME}-secret",
                         "key": "DATABASE_PORT"
                       }
@@ -96,25 +96,7 @@
             }
           }
         },
-        "triggers": [
-          {
-            "type": "ImageChange",
-            "imageChangeParams": {
-              "automatic": true,
-              "containerNames": [
-                "${NAME}-${TAG_NAME}"
-              ],
-              "from": {
-                "kind": "ImageStreamTag",
-                "namespace": "${IMAGE_NAMESPACE}",
-                "name": "${NAME}:${TAG_NAME}"
-              }
-            }
-          },
-          {
-            "type": "ConfigChange"
-          }
-        ],
+        "triggers": [],
         "replicas": "${REPLICAS}",
         "test": false,
         "selector": {
@@ -369,7 +351,7 @@
       "displayName": "Jaeger Tracing collector address",
       "description": "Jaeger Tracing collector address.",
       "required": true,
-      "value": "--collector.host-port=jaeger-collector.d7eovc-${TAG_NAME}.svc:14267"
+      "value": "--collector.host-port=jaeger-collector.d7eovc-dev.svc:14267"
     }
   ]
 }

@@ -7,17 +7,19 @@
 usage() {
   cat <<-EOF
   A helper script to get the secrcts from 1password' vault and set it to environment.
-  Usage: ./setenv_secret.sh [-h -d <subdomainName> -u <accountName>]
-                             -k <secretKey>
-                             -p <masterPassword>
-                             -e <environment>
-                             -v <vaultDetails>
-                             -a <appName>
+  Usage: ./dc.sh [-h -d <subdomainName> -u <accountName>]
+                  -k <secretKey>
+                  -p <masterPassword>
+                  -e <environment>
+                  -v <vaultDetails>
+                  -a <appName>
+                  -t <appVersion>
 
   OPTIONS:
   ========
     -h prints the usage for the script.
-    -a Openshift application name, for example: auth-api-dev
+    -a Openshift application name, for example: auth-api
+    -t application version, for example: dev
     -d The subdomain name of the 1password account, default is registries.1password.ca.
     -u The account name of the 1password account, default is bcregistries.devops@gmail.com.
     -k The secret key of the 1password account.
@@ -49,7 +51,7 @@ exit
 # -----------------------------------------------------------------------------------------------------------------
 # Initialization:
 # -----------------------------------------------------------------------------------------------------------------
-while getopts h:a:d:u:k:p:v:e: FLAG; do
+while getopts h:a:d:u:k:p:v:e:t: FLAG; do
   case $FLAG in
     h ) usage ;;
     a ) APP_NAME=$OPTARG ;;
@@ -59,6 +61,7 @@ while getopts h:a:d:u:k:p:v:e: FLAG; do
     p ) MASTER_PASSWORD=$OPTARG ;;
     v ) VAULT=$OPTARG ;;
     e ) ENVIRONMENT=$OPTARG ;;
+    t ) VERSION=$OPTARG ;;
     \? ) #unrecognized option - show help
       echo -e \\n"Invalid script option: -${OPTARG}"\\n
       usage
@@ -78,7 +81,7 @@ if [ -z "${USERNAME}" ]; then
   USERNAME=bcregistries.devops@gmail.com
 fi
 
-if [ -z "${APP_NAME}" ] || [ -z "${SECRET_KEY}" ] || [ -z "${MASTER_PASSWORD}" ] || [ -z "${VAULT}" ]  ||  [ -z "${ENVIRONMENT}" ]; then
+if [ -z "${APP_NAME}" ] || [ -z "${VERSION}" ] ||  [ -z "${SECRET_KEY}" ] || [ -z "${MASTER_PASSWORD}" ] || [ -z "${VAULT}" ]  ||  [ -z "${ENVIRONMENT}" ]; then
   echo -e \\n"Missing parameters - secret key, master password, vault or environment"\\n
   usage
 fi
@@ -88,8 +91,11 @@ fi
 # For more details see https://support.1password.com/command-line-getting-started/
 eval $(echo "${MASTER_PASSWORD}" | op signin ${DOMAIN_NAME} ${USERNAME} ${SECRET_KEY})
 
+oc delete all,templates,configmap,secret -l app=${APP_NAME} -l version=${VERSION}
+
 # create application secrets
-oc create secret generic ${APP_NAME}-secret > /dev/null 2>&1 &
+oc create secret generic ${APP_NAME}-${VERSION}-secret
+oc label secret ${APP_NAME}-${VERSION}-secret --overwrite app=${APP_NAME} version=${VERSION} app-group=sbc-auth
 
 for vault_name in $(echo "${VAULT}" | jq -r '.[] | @base64' ); do
   _jq() {
@@ -113,13 +119,22 @@ for vault_name in $(echo "${VAULT}" | jq -r '.[] | @base64' ); do
         }
 
         # Set secret key and value from 1password
-        oc get secret ${APP_NAME}-secret -o json \
-          | jq ". * $(oc create secret generic ${APP_NAME}-secret --from-literal=$(_envvars '.t')=$(_envvars '.v') --dry-run -o json)" \
+        oc get secret ${APP_NAME}-${VERSION}-secret -o json \
+          | jq ". * $(oc create secret generic ${APP_NAME}-${VERSION}-secret --from-literal=$(_envvars '.t')=$(_envvars '.v') --dry-run -o json)" \
           | oc apply -f -
 
     done
   done
 done
 
+oc process -f auth-api/openshift/templates/auth-api-deploy.json \
+     -p NAME=${APP_NAME} \
+     -p TAG_NAME=${VERSION} \
+ | oc apply -f -
+
+oc label dc ${APP_NAME}-${VERSION} --overwrite app=${APP_NAME} version=${VERSION} app-group=sbc-auth
+oc label service ${APP_NAME}-${VERSION} --overwrite app=${APP_NAME} version=${VERSION} app-group=sbc-auth
+oc label route ${APP_NAME}-${VERSION} --overwrite app=${APP_NAME} version=${VERSION} app-group=sbc-auth
+
 # Set environment variable of deployment config
-oc set env dc/${APP_NAME} --overwrite --from=secret/${APP_NAME}-secret --containers=${APP_NAME} ENV-  > /dev/null 2>&1 &
+oc set env dc/${APP_NAME}-${VERSION} --overwrite --from=secret/${APP_NAME}-${VERSION}-secret --containers=${APP_NAME}-${VERSION} ENV-  > /dev/null 2>&1 &
