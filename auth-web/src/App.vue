@@ -2,8 +2,8 @@
   <v-app id="app">
     <div class="header-group" ref="headerGroup">
       <sbc-loader :show="showLoading"></sbc-loader>
-      <sbc-header :key="$store.state.refreshKey"></sbc-header>
-      <v-snackbar top :color="toastType" v-model="showNotification" :timeout="toastTimeout">
+      <sbc-header :key="$store.state.refreshKey" in-auth=true></sbc-header>
+       <v-snackbar top :color="toastType" v-model="showNotification" :timeout="toastTimeout">
         <span v-html="notificationText"></span>
         <v-btn icon @click="showNotification = false">
           <v-icon class="white--text">mdi-close</v-icon>
