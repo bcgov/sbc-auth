@@ -16,7 +16,7 @@
 <script lang="ts">
 import { Component } from 'vue-property-decorator'
 import { Role } from '@/util/constants'
-import { UserInfo } from '@/models/userInfo'
+import { UserInfo } from 'sbc-common-components/src/models/userInfo'
 import Vue from 'vue'
 import { mapState } from 'vuex'
 

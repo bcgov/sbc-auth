@@ -1,5 +1,5 @@
 import Axios from 'axios'
-import KeycloakServices from '../../../src/services/keycloak.services'
+import KeycloakService from 'sbc-common-components/src/services/keycloak.services'
 
 jest.mock('axios', () => ({
   get: jest.fn(),

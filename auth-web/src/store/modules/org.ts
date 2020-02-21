@@ -5,7 +5,7 @@ import { AccountSettings } from '@/models/account-settings'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
-import { UserInfo } from '@/models/userInfo'
+import { UserInfo } from 'sbc-common-components/src/models/userInfo'
 import UserService from '@/services/user.services'
 
 @Module({
