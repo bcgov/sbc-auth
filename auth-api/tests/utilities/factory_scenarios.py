@@ -19,7 +19,6 @@ import os
 import uuid
 from enum import Enum
 
-
 JWT_HEADER = {
     'alg': os.getenv('JWT_OIDC_ALGORITHMS'),
     'typ': 'JWT',
@@ -335,3 +334,59 @@ class TestUserInfo(dict, Enum):
         'roles': '{edit, uma_authorization, tester}',
         'keycloak_guid': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
+
+    @staticmethod
+    def get_user_with_kc_guid(kc_guid: str):
+        """Return user with keycloak guid."""
+        return {
+            'username': 'tester',
+            'firstname': 'Test',
+            'lastname': 'User',
+            'roles': '{edit, uma_authorization, staff}',
+            'keycloak_guid': kc_guid
+        }
+
+
+class KeycloakScenario(dict):
+    """Keycloak scenario."""
+
+    create_user_request = {
+        'username': 'test11',
+        'password': '1111',
+        'firstname': '111',
+        'lastname': 'test',
+        'email': 'test11@gov.bc.ca',
+        'enabled': True,
+        'user_type': [
+            '/test'
+        ],
+        'corp_type': 'CP',
+        'source': 'BCSC'
+    }
+
+    create_user_request_2 = {
+        'username': 'test12',
+        'password': '1111',
+        'firstname': '2222',
+        'lastname': 'test',
+        'email': 'test12@gov.bc.ca',
+        'enabled': True,
+        'user_type': [
+            '/test'
+        ],
+        'corp_type': 'CP',
+        'source': 'BCSC'
+    }
+
+    # Patch token info
+    @staticmethod
+    def token_info(kc_guid: str):  # pylint: disable=unused-argument; mocks of library methods
+        """Return token info for test."""
+        return {
+            'sub': kc_guid,
+            'username': 'public user',
+            'realm_access': {
+                'roles': [
+                ]
+            }
+        }

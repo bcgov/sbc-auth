@@ -24,7 +24,7 @@ from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUs
 from tests.utilities.factory_utils import factory_user_model
 
 
-def test_user_settings(session, auth_mock):  # pylint:disable=unused-argument
+def test_user_settings(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a contact can not be deleted if contact link exists."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
