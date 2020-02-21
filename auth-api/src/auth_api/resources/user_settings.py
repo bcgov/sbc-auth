@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """API endpoints for managing a User resource."""
+import json
 
 from flask import g
 from flask_restplus import Namespace, Resource, cors
@@ -54,11 +55,11 @@ class SettingsResource(Resource):  # pylint: disable=too-few-public-methods
         try:
             user = UserService.find_by_jwt_token(token)
             if not user:
-                response, status = {'message': 'User not found.'}, http_status.HTTP_404_NOT_FOUND
+                response, status = json.dumps([]), http_status.HTTP_200_OK
             else:
                 all_settings = UserSettingsService.fetch_user_settings(user.identifier)
                 response, status = UserSettingsSchema(many=True).dumps(all_settings), http_status.HTTP_200_OK
 
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        except BusinessException:
+            response, status = json.dumps([]), http_status.HTTP_200_OK
         return response, status
