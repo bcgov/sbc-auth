@@ -1,5 +1,5 @@
 <template>
-  <sbc-signin></sbc-signin>
+  <sbc-signin :idp-hint="idpHint"></sbc-signin>
 </template>
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
@@ -34,7 +34,6 @@ import { getModule } from 'vuex-module-decorators'
 export default class Signin extends Mixins(NextPageMixin) {
   private userStore = getModule(UserModule, this.$store)
   private orgStore = getModule(OrgModule, this.$store)
-  private isLoading = true
   private readonly syncUserProfile!: () => User
   private readonly syncOrganization!: (currentAccount: string) => Promise<Organization>
   private readonly syncMembership!: (currentAccount: string) => Promise<Member>
