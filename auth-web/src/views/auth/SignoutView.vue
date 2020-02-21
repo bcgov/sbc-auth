@@ -1,34 +1,24 @@
 <template>
-  <div>
-    <v-fade-transition>
-      <div class="loading-container" v-if="isLoading">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
-      </div>
-    </v-fade-transition>
-  </div>
+  <sbc-signout :redirect-url="redirectUrl"></sbc-signout>
 </template>
+
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { User } from '@/models/user'
-import UserModule from '@/store/modules/user'
-import { getModule } from 'vuex-module-decorators'
-import { mapActions } from 'vuex'
+import SbcSignout from 'sbc-common-components/src/components/SbcSignout.vue'
 
 @Component({
   methods: {
-    ...mapActions('user', ['logout'])
+  },
+  components: {
+    SbcSignout
   }
 })
-export default class SignoutView extends Vue {
-  private userStore = getModule(UserModule, this.$store)
-  private isLoading = true
-  private readonly logout!: (redirectUrl: string) => Promise<void>
 
+export default class SignoutView extends Vue {
   @Prop() redirectUrl: string
 
   async mounted () {
     this.$store.replaceState({})
-    await this.logout(this.redirectUrl ? decodeURIComponent(this.redirectUrl) : null)
   }
 }
 </script>
