@@ -24,12 +24,14 @@ from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
+from auth_api.models import User as UserModel
 from auth_api.schemas import OrgSchema
 from auth_api.utils.roles import OWNER, VALID_STATUSES, Status
 from auth_api.utils.util import camelback2snake
 
 from .authorization import check_auth
 from .contact import Contact as ContactService
+from .keycloak import KeycloakService
 
 
 class Org:
@@ -72,6 +74,9 @@ class Org:
                                      membership_type_status=Status.ACTIVE.value)
         membership.save()
 
+        # Add the user to account_holders group
+        KeycloakService.join_account_holders_group()
+
         return Org(org)
 
     def update_org(self, org_info):
@@ -105,6 +110,11 @@ class Org:
             raise BusinessException(Error.ORG_CANNOT_BE_DISSOLVED, None)
 
         org.delete()
+
+        # Remove user from thr group if the user doesn't have any other orgs membership
+        user = UserModel.find_by_jwt_token(token=token_info)
+        if len(MembershipModel.find_orgs_for_user(user.id)) == 0:
+            KeycloakService.remove_from_account_holders_group(user.keycloak_guid)
         current_app.logger.debug('org Inactivated>')
 
     @staticmethod

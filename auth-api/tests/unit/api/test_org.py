@@ -32,7 +32,7 @@ from tests.utilities.factory_scenarios import (
 from tests.utilities.factory_utils import factory_auth_header, factory_invitation
 
 
-def test_add_org(client, jwt, session):  # pylint:disable=unused-argument
+def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -41,7 +41,7 @@ def test_add_org(client, jwt, session):  # pylint:disable=unused-argument
     assert rv.status_code == http_status.HTTP_201_CREATED
 
 
-def test_add_org_multiple(client, jwt, session):  # pylint:disable=unused-argument
+def test_add_org_multiple(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed.But in limited number."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -60,7 +60,7 @@ def test_add_org_multiple(client, jwt, session):  # pylint:disable=unused-argume
     assert rv4.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
-def test_add_same_org_409(client, jwt, session):  # pylint:disable=unused-argument
+def test_add_same_org_409(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -141,7 +141,7 @@ def test_add_org_invalid_returns_exception(client, jwt, session):  # pylint:disa
         assert rv.status_code == 400
 
 
-def test_get_org(client, jwt, session):  # pylint:disable=unused-argument
+def test_get_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be retrieved via GET."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -157,7 +157,7 @@ def test_get_org(client, jwt, session):  # pylint:disable=unused-argument
     assert dictionary['id'] == org_id
 
 
-def test_get_org_no_auth_returns_401(client, jwt, session):  # pylint:disable=unused-argument
+def test_get_org_no_auth_returns_401(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org cannot be retrieved without an authorization header."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -178,7 +178,7 @@ def test_get_org_no_org_returns_404(client, jwt, session):  # pylint:disable=unu
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
-def test_update_org(client, jwt, session):  # pylint:disable=unused-argument
+def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -198,7 +198,7 @@ def test_update_org(client, jwt, session):  # pylint:disable=unused-argument
     assert rv.status_code == http_status.HTTP_409_CONFLICT
 
 
-def test_update_org_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+def test_update_org_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can not be updated and return 400 error via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -220,7 +220,7 @@ def test_update_org_no_org_returns_404(client, jwt, session):  # pylint:disable=
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
-def test_update_org_returns_exception(client, jwt, session):  # pylint:disable=unused-argument
+def test_update_org_returns_exception(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that attempting to update a non-existent org returns an exception."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -235,7 +235,7 @@ def test_update_org_returns_exception(client, jwt, session):  # pylint:disable=u
         assert rv.status_code == 400
 
 
-def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
+def test_add_contact(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -251,7 +251,7 @@ def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
     assert dictionary['email'] == TestContactInfo.contact1['email']
 
 
-def test_add_contact_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+def test_add_contact_invalid_format_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that adding an invalidly formatted contact returns a 400."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -265,7 +265,7 @@ def test_add_contact_invalid_format_returns_400(client, jwt, session):  # pylint
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
-def test_add_contact_valid_email_returns_201(client, jwt, session):  # pylint:disable=unused-argument
+def test_add_contact_valid_email_returns_201(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that adding an valid formatted contact with special characters in email returns a 201."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -287,7 +287,7 @@ def test_add_contact_no_org_returns_404(client, jwt, session):  # pylint:disable
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
-def test_add_contact_duplicate_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+def test_add_contact_duplicate_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that adding a duplicate contact to an org returns 400."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -303,7 +303,7 @@ def test_add_contact_duplicate_returns_400(client, jwt, session):  # pylint:disa
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
-def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
+def test_update_contact(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a contact can be updated on an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -324,7 +324,8 @@ def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
     assert dictionary['email'] == TestContactInfo.contact2['email']
 
 
-def test_update_contact_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+def test_update_contact_invalid_format_returns_400(client, jwt, session,
+                                                   keycloak_mock):  # pylint:disable=unused-argument
     """Assert that updating with an invalidly formatted contact returns a 400."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -340,7 +341,8 @@ def test_update_contact_invalid_format_returns_400(client, jwt, session):  # pyl
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
-def test_update_contact_valid_email_format_returns_200(client, jwt, session):  # pylint:disable=unused-argument
+def test_update_contact_valid_email_format_returns_200(client, jwt, session,
+                                                       keycloak_mock):  # pylint:disable=unused-argument
     """Assert that updating with an validly formatted contact with special characters in email returns a 200."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -364,7 +366,7 @@ def test_update_contact_no_org_returns_404(client, jwt, session):  # pylint:disa
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
-def test_update_contact_missing_returns_404(client, jwt, session):  # pylint:disable=unused-argument
+def test_update_contact_missing_returns_404(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that updating a non-existant contact returns 404."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -378,7 +380,7 @@ def test_update_contact_missing_returns_404(client, jwt, session):  # pylint:dis
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
-def test_delete_contact(client, jwt, session):  # pylint:disable=unused-argument
+def test_delete_contact(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a contact can be deleted on an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -412,7 +414,7 @@ def test_delete_contact_no_org_returns_404(client, jwt, session):  # pylint:disa
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
-def test_delete_contact_returns_exception(client, jwt, session):  # pylint:disable=unused-argument
+def test_delete_contact_returns_exception(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that attempting to delete an org returns an exception."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -426,7 +428,7 @@ def test_delete_contact_returns_exception(client, jwt, session):  # pylint:disab
         assert rv.status_code == 400
 
 
-def test_get_members(client, jwt, session):  # pylint:disable=unused-argument
+def test_get_members(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a list of members for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -445,7 +447,7 @@ def test_get_members(client, jwt, session):  # pylint:disable=unused-argument
     assert dictionary['members'][0]['membershipTypeCode'] == 'OWNER'
 
 
-def test_delete_org(client, jwt, session):  # pylint:disable=unused-argument
+def test_delete_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be deleted."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -458,7 +460,7 @@ def test_delete_org(client, jwt, session):  # pylint:disable=unused-argument
     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
 
 
-def test_delete_org_failure_affiliation(client, jwt, session):  # pylint:disable=unused-argument
+def test_delete_org_failure_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org cannnot be deleted with valid affiliation."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
@@ -478,7 +480,7 @@ def test_delete_org_failure_affiliation(client, jwt, session):  # pylint:disable
     assert rv.status_code == http_status.HTTP_406_NOT_ACCEPTABLE
 
 
-def test_delete_org_failure_members(client, jwt, session, auth_mock):  # pylint:disable=unused-argument
+def test_delete_org_failure_members(client, jwt, session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a member of an org can have their role updated."""
     # Set up: create/login user, create org
     headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
@@ -531,7 +533,7 @@ def test_delete_org_failure_members(client, jwt, session, auth_mock):  # pylint:
     assert rv.status_code == http_status.HTTP_406_NOT_ACCEPTABLE
 
 
-def test_get_invitations(client, jwt, session):  # pylint:disable=unused-argument
+def test_get_invitations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a list of invitations for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -557,7 +559,7 @@ def test_get_invitations(client, jwt, session):  # pylint:disable=unused-argumen
     assert dictionary['invitations'][1]['recipientEmail'] == 'xyz456@email.com'
 
 
-def test_update_member(client, jwt, session, auth_mock):  # pylint:disable=unused-argument
+def test_update_member(client, jwt, session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a member of an org can have their role updated."""
     # Set up: create/login user, create org
     headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
@@ -606,7 +608,7 @@ def test_update_member(client, jwt, session, auth_mock):  # pylint:disable=unuse
     assert dictionary['membershipTypeCode'] == 'ADMIN'
 
 
-def test_add_affiliation(client, jwt, session):  # pylint:disable=unused-argument
+def test_add_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
@@ -625,7 +627,8 @@ def test_add_affiliation(client, jwt, session):  # pylint:disable=unused-argumen
     assert dictionary['organization']['id'] == org_id
 
 
-def test_add_affiliation_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+def test_add_affiliation_invalid_format_returns_400(client, jwt, session,
+                                                    keycloak_mock):  # pylint:disable=unused-argument
     """Assert that adding an invalidly formatted affiliations returns a 400."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -647,7 +650,7 @@ def test_add_affiliation_no_org_returns_404(client, jwt, session):  # pylint:dis
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
-def test_add_affiliation_returns_exception(client, jwt, session):  # pylint:disable=unused-argument
+def test_add_affiliation_returns_exception(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that attempting to delete an affiliation returns an exception."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
@@ -668,7 +671,7 @@ def test_add_affiliation_returns_exception(client, jwt, session):  # pylint:disa
         assert rv.status_code == 400
 
 
-def test_get_affiliations(client, jwt, session):  # pylint:disable=unused-argument
+def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a list of affiliation for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),

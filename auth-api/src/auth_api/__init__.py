@@ -64,7 +64,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     if os.getenv('FLASK_ENV', 'production') in ['development', 'testing']:
         app.register_blueprint(TEST_BLUEPRINT)
 
-    setup_jwt_manager(app, JWT)
+    if os.getenv('FLASK_ENV', 'production') != 'testing':
+        setup_jwt_manager(app, JWT)
 
     ExceptionHandler(app)
 
