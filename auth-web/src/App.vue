@@ -25,6 +25,7 @@ import { AccountSettings } from '@/models/account-settings'
 import BusinessModule from '@/store/modules/business'
 import { Component } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
+import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import OrgModule from '@/store/modules/org'
 import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.vue'
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
@@ -56,21 +57,22 @@ export default class App extends Vue {
   private readonly syncMembership!: (currentAccountId: string) => Promise<Member>
   private readonly syncOrganization!: (currentAccountId: string) => Promise<Organization>
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
+  private tokenService = new TokenService()
   private businessStore = getModule(BusinessModule, this.$store)
   showNotification = false
   notificationText = ''
   showLoading = true
 
   private async mounted (): Promise<void> {
+    // set keycloak config file's location to the sbc-common-components
+    await KeyCloakService.setKeycloakConfigUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
     this.showLoading = false
     if (ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)) {
       this.$root.$on('accountSyncStarted', async () => {
         this.showLoading = true
       })
-
-      let tokenService = new TokenService()
-      await tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
-      tokenService.scheduleRefreshTimer()
+      await this.tokenService.init()
+      this.tokenService.scheduleRefreshTimer()
 
       this.$root.$on('accountSyncReady', async (currentAccount: AccountSettings) => {
         if (currentAccount) {
