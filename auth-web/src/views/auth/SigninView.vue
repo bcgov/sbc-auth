@@ -12,6 +12,7 @@ import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import SbcSignin from 'sbc-common-components/src/components/SbcSignin.vue'
 import { User } from '@/models/user'
+import { UserInfo } from 'sbc-common-components/src/models/userInfo'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 
@@ -20,6 +21,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapMutations('org', ['setCurrentAccountSettings']),
     ...mapActions('user',
       [
+        'loadUserInfo',
         'syncUserProfile'
       ]
     ),
@@ -37,14 +39,16 @@ export default class Signin extends Mixins(NextPageMixin) {
   private readonly syncOrganization!: (currentAccount: string) => Promise<Organization>
   private readonly syncMembership!: (currentAccount: string) => Promise<Member>
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
+  private readonly loadUserInfo!: () => UserInfo
 
   @Prop({ default: 'bcsc' }) idpHint: string
   @Prop() redirectUrl: string
 
   private async mounted () {
     // refreshing the header once the token is receieved from the common component
-    this.$root.$on('updateHeaderReady', async () => {
+    this.$root.$on('keycloakSessionReady', async () => {
       this.$store.commit('updateHeader')
+      this.loadUserInfo()
     })
     // Set up a listener for the account sync event from SbcHeader
     // This event signals that the current account has been loaded, and we are ready to sync against it
