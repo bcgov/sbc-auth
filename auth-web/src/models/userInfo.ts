@@ -6,4 +6,5 @@ export interface UserInfo {
     roles: string[];
     email: string;
     fullName: string;
+    loginSource: string;
 }
