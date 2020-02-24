@@ -12,36 +12,54 @@
       Loading...
     </template>
     <template v-slot:item.name="{ item }">
-      <v-list-item-title class="user-name" :data-test="getIndexedTag('user-name', item.index)">{{ item.user.firstname }} {{ item.user.lastname }}</v-list-item-title>
-      <v-list-item-subtitle :data-test="getIndexedTag('business-id', item.index)" v-if="item.user.contacts && item.user.contacts.length > 0">{{ item.user.contacts[0].email }}</v-list-item-subtitle>
+      <v-list-item-title
+        class="user-name"
+        :data-test="getIndexedTag('user-name', item.index)"
+      >{{ item.user.firstname }} {{ item.user.lastname }}</v-list-item-title>
+      <v-list-item-subtitle
+        :data-test="getIndexedTag('business-id', item.index)"
+        v-if="item.user.contacts && item.user.contacts.length > 0"
+      >{{ item.user.contacts[0].email }}</v-list-item-subtitle>
     </template>
     <template v-slot:item.role="{ item }">
       <v-menu>
         <template v-slot:activator="{ on }">
-          <v-btn :disabled="!canChangeRole(item)" class="role-selector" small depressed v-on="on" :data-test="getIndexedTag('role-selector', item.index)">
+          <v-btn
+            :disabled="!canChangeRole(item)"
+            class="role-selector"
+            small
+            depressed
+            v-on="on"
+            :data-test="getIndexedTag('role-selector', item.index)"
+          >
             {{ item.membershipTypeCode }}
-            <v-icon small depressed class="ml-1">mdi-chevron-down</v-icon>
+            <v-icon
+              small
+              depressed
+              class="ml-1"
+            >mdi-chevron-down</v-icon>
           </v-btn>
         </template>
-        <v-list dense class="role-list">
+        <v-list
+          dense
+          class="role-list"
+        >
           <v-item-group>
-            <v-list-item three-line
+            <v-list-item
+              three-line
               v-for="(role, index) in availableRoles"
               :key="index"
               @click="item.membershipTypeCode.toUpperCase() !== role.name.toUpperCase()? confirmChangeRole(item, role.name): ''"
               :disabled="!isRoleEnabled(role)"
-              v-bind:class="{'primary--text v-item--active v-list-item--active': item.membershipTypeCode.toUpperCase() === role.name.toUpperCase()}">
+              v-bind:class="{'primary--text v-item--active v-list-item--active': item.membershipTypeCode.toUpperCase() === role.name.toUpperCase()}"
+            >
               <v-list-item-icon>
                 <v-icon v-text="role.icon" />
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title
-                  v-text="role.name"
-                >
+                <v-list-item-title v-text="role.name">
                 </v-list-item-title>
-                <v-list-item-subtitle
-                  v-text="role.desc"
-                >
+                <v-list-item-subtitle v-text="role.desc">
                 </v-list-item-subtitle>
                 <v-divider></v-divider>
               </v-list-item-content>
@@ -51,12 +69,27 @@
       </v-menu>
 
     </template>
-    <template v-slot:item.lastActive="{ item }" :data-test="getIndexedTag('last-active', item.index)">
+    <template
+      v-slot:item.lastActive="{ item }"
+      :data-test="getIndexedTag('last-active', item.index)"
+    >
       {{ formatDate(item.user.modified) }}
     </template>
     <template v-slot:item.action="{ item }">
-      <v-btn :data-test="getIndexedTag('remove-user-button', item.index)" v-show="canRemove(item)" depressed small @click="confirmRemoveMember(item)">Remove</v-btn>
-      <v-btn :data-test="getIndexedTag('leave-team-button', item.index)" v-show="canLeave(item)" depressed small @click="confirmLeaveTeam(item)">
+      <v-btn
+        :data-test="getIndexedTag('remove-user-button', item.index)"
+        v-show="canRemove(item)"
+        depressed
+        small
+        @click="confirmRemoveMember(item)"
+      >Remove</v-btn>
+      <v-btn
+        :data-test="getIndexedTag('leave-team-button', item.index)"
+        v-show="canLeave(item)"
+        depressed
+        small
+        @click="confirmLeaveTeam(item)"
+      >
         <span v-if="!canDissolve()">Leave</span>
         <span v-if="canDissolve()">Dissolve</span>
       </v-btn>
@@ -72,8 +105,8 @@ import { Business } from '@/models/business'
 import moment from 'moment'
 
 export interface ChangeRolePayload {
-  member: Member;
-  targetRole: string;
+  member: Member
+  targetRole: string
 }
 
 @Component({
@@ -201,6 +234,12 @@ export default class MemberDataTable extends Vue {
       return false
     }
 
+    // Can't remove Admin unless Owner
+    if (this.myOrgMembership.membershipTypeCode === MembershipType.Admin &&
+      memberToRemove.membershipTypeCode === MembershipType.Admin) {
+      return false
+    }
+
     // No one can change an OWNER's status, only option is OWNER to leave the team. #2319
     if (memberToRemove.membershipTypeCode === MembershipType.Owner) {
       return false
@@ -261,7 +300,7 @@ export default class MemberDataTable extends Vue {
   }
 
   @Emit()
-  private confirmRemoveMember (member: Member) {}
+  private confirmRemoveMember (member: Member) { }
 
   @Emit()
   private confirmChangeRole (member: Member, targetRole: string): ChangeRolePayload {
@@ -273,11 +312,15 @@ export default class MemberDataTable extends Vue {
 
   private confirmLeaveTeam (member: Member) {
     if (member.membershipTypeCode === MembershipType.Owner &&
-        this.ownerCount() === 1 &&
-        !this.canDissolve()) {
+      this.ownerCount() === 1 &&
+      !this.canDissolve()) {
       this.$emit('single-owner-error')
     } else {
-      this.$emit('confirm-leave-team')
+      if (this.canDissolve()) {
+        this.$emit('confirm-dissolve-team')
+      } else {
+        this.$emit('confirm-leave-team')
+      }
     }
   }
 
@@ -288,21 +331,21 @@ export default class MemberDataTable extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import "$assets/scss/theme.scss";
+@import '$assets/scss/theme.scss';
 
-  .v-list--dense {
-    .v-list-item {
-      padding-top: 0.25rem;
-      padding-bottom: 0.25rem;
-    }
-
-    .v-list-item .v-list-item__title {
-      margin-bottom: 0.25rem;
-      font-weight: 700;
-    }
+.v-list--dense {
+  .v-list-item {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
   }
 
-  .role-list {
-    width: 20rem;
+  .v-list-item .v-list-item__title {
+    margin-bottom: 0.25rem;
+    font-weight: 700;
   }
+}
+
+.role-list {
+  width: 20rem;
+}
 </style>

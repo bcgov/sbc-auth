@@ -7,7 +7,6 @@
         <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
       </div>
     </v-fade-transition>
-
     <div class="user-profile-container" v-if="!isLoading">
       <v-row justify="center">
         <v-col lg="8" class="pt-0 pb-0">
@@ -16,7 +15,7 @@
             <p class="mb-0">Enter your contact information to complete your profile.</p>
           </div>
           <div class="view-header" v-if="editing">
-            <v-btn large icon color="secondary" class="back-btn mr-3" to="/main">
+            <v-btn large icon color="secondary" class="back-btn mr-3" @click="navigateBack()">
               <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
             <div>
@@ -27,10 +26,10 @@
           <v-card class="profile-card">
             <v-container>
               <v-card-title class="mb-4">
-                {{ userProfile.firstname }} {{ userProfile.lastname}}
+                {{ userProfile.firstname }} {{ userProfile.lastname }}
               </v-card-title>
               <v-card-text>
-                <UserProfileForm/>
+                <UserProfileForm v-bind:token="token"> </UserProfileForm>
               </v-card-text>
             </v-container>
           </v-card>
@@ -41,7 +40,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from 'vue-property-decorator'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import { Contact } from '@/models/contact'
 import NextPageMixin from '@/components/auth/NextPageMixin.vue'
@@ -64,10 +63,19 @@ import { getModule } from 'vuex-module-decorators'
 export default class UserProfileView extends Mixins(NextPageMixin) {
   private userStore = getModule(UserModule, this.$store)
   private readonly getUserProfile!: (identifier: string) => User
+  @Prop() token: string
   private editing = false
   private isLoading = true
 
-  async mounted () {
+  private navigateBack (): void {
+    if (this.currentOrganization) {
+      this.$router.push(`/account/${this.currentOrganization.id}`)
+    } else {
+      this.$router.push('/home')
+    }
+  }
+
+  private async mounted () {
     if (this.userContact) {
       this.editing = true
     }

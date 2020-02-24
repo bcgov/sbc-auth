@@ -1,0 +1,67 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/user_settings_response",
+    "type": "object",
+    "title": "Response for user settings",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "urlpath",
+      "urlorigin",
+      "label",
+      "type"
+    ],
+    "properties": {
+      "id": {
+        "$id": "#/properties/id",
+        "type": "string",
+        "title": "Id of the entity",
+        "default": "",
+        "examples": [
+          "1"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "urlpath": {
+        "$id": "#/properties/urlpath",
+        "type": "string",
+        "title": "context path of the resource.Must start with a backslash.No ending slash",
+        "default": "",
+        "examples": [
+          "/createaccount"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "urlorigin": {
+        "$id": "#/properties/urlorigin",
+        "type": "string",
+        "title": "Url origin.Full url",
+        "default": "",
+        "examples": [
+          "https://dev.bcregistry.ca/cooperatives/auth/"
+        ],
+        "pattern": "^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$"
+      },
+      "label": {
+        "$id": "#/properties/label",
+        "type": "string",
+        "title": "Label which can be used to display to user",
+        "default": "",
+        "examples": [
+          "Create Profile"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "type": {
+        "$id": "#/properties/type",
+        "type": "string",
+        "title": "Type of the resource.Like ACCOUNT",
+        "default": "",
+        "examples": [
+          "ACCOUNT"
+        ],
+        "pattern": "^(.*)$"
+      }
+    }
+  }

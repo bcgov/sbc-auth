@@ -20,6 +20,8 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
+from auth_api.utils.roles import OrgStatus as OrgStatusEnum
+from tests.utilities.factory_utils import factory_user_model
 
 
 def factory_org_model(name, session):
@@ -35,10 +37,9 @@ def factory_org_model(name, session):
     preferred_payment = PaymentTypeModel(code='TEST', desc='Test')
     session.add(preferred_payment)
     session.commit()
-
     org = OrgModel(name=name)
     org.org_type = org_type
-    org.org_status = org_status
+    org.org_status = OrgStatusModel.get_default_status()
     org.preferred_payment = preferred_payment
     org.save()
 
@@ -90,6 +91,16 @@ def test_update_org_from_dict(session):  # pylint:disable=unused-argument
     assert org.name == update_dictionary['name']
 
 
+def test_count_org_from_dict(session):  # pylint:disable=unused-argument
+    """Assert that an Org can be updated from a dictionary."""
+    user = factory_user_model()
+    org = factory_org_model(name='My Test Org', session=session)
+    org.created_by_id = user.id
+    session.add(org)
+    session.commit()
+    assert OrgModel.get_count_of_org_created_by_user_id(user.id) == 1
+
+
 def test_create_from_dict(session):  # pylint:disable=unused-argument
     """Assert that an Org can be created from schema."""
     org_info = {
@@ -106,3 +117,15 @@ def test_create_from_dict_no_schema(session):  # pylint:disable=unused-argument
     result_org = OrgModel.create_from_dict(None)
 
     assert result_org is None
+
+
+def test_delete(session):  # pylint:disable=unused-argument
+    """Assert that an Org can be updated from a dictionary."""
+    org = factory_org_model(name='My Test Org', session=session)
+    session.add(org)
+    session.commit()
+    assert org.status_code == OrgStatusEnum.ACTIVE.value
+
+    org.delete()
+    assert org
+    assert org.status_code == OrgStatusEnum.INACTIVE.value

@@ -7,19 +7,27 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { Member, Organization } from '@/models/Organization'
+import { Pages, SessionStorageKeys } from '@/util/constants'
+import { mapActions, mapGetters, mapState } from 'vuex'
+import ConfigHelper from '@/util/config-helper'
+import { Contact } from '@/models/contact'
 import InterimLanding from '@/components/auth/InterimLanding.vue'
 import { Invitation } from '@/models/Invitation'
 import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
-import { Organization } from '@/models/Organization'
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
+  computed: {
+    ...mapState('user', ['userProfile', 'userContact', 'redirectAfterLoginUrl']),
+    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings']),
+    ...mapGetters('org', ['myOrgMembership'])
+  },
   methods: {
-    ...mapActions('org', ['acceptInvitation', 'syncOrganizations']),
+    ...mapActions('org', ['acceptInvitation']),
     ...mapActions('user', ['getUserProfile'])
   },
   components: { InterimLanding }
@@ -27,30 +35,35 @@ import { getModule } from 'vuex-module-decorators'
 export default class AcceptInviteView extends Mixins(NextPageMixin) {
   private orgStore = getModule(OrgModule, this.$store)
   private userStore = getModule(UserModule, this.$store)
-  private readonly acceptInvitation!: (token: string) => Invitation
-  private readonly syncOrganizations!: () => Organization[]
-  private readonly getUserProfile!: (identifier: string) => User
+  private readonly acceptInvitation!: (token: string) => Promise<Invitation>
+  private readonly getUserProfile!: (identifier: string) => Promise<User>
+  protected readonly userContact!: Contact
+  protected readonly userProfile!: User
 
   @Prop() token: string
   private inviteError: boolean = false
 
   private async mounted () {
     await this.getUserProfile('@me')
-    await this.syncOrganizations()
-    // Check to make sure this user is not already a member of a team
-    if (this.organizations.length > 0) {
-      this.$router.push('/duplicateteam')
-    } else {
-      this.accept()
-    }
+    await this.accept()
   }
 
+  /**
+   * User profile filled out?: Accept invitation, set orgid in sessionstorage, update header
+   * User profile incomplete?:  Redirect to user profile, user profile will direct here after
+   */
   private async accept () {
     try {
-      await this.acceptInvitation(this.token)
-      // the accept invitation creates a new org
-      await this.syncOrganizations()
-      this.$router.push(this.getNextPageUrl())
+      if (!this.userContact || !this.userProfile.userTerms.isTermsOfUseAccepted) {
+        // Go to user profile, with the token, so that we can continue acceptance flow afterwards
+        this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
+        return
+      } else {
+        const invitation = await this.acceptInvitation(this.token)
+        ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify({ id: invitation.membership[0].org.id }))
+        this.$store.commit('updateHeader') // this event eventually redirects to Pending approval page.No extra navigation needed
+        return
+      }
     } catch (exception) {
       this.inviteError = true
     }

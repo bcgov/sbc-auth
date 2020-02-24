@@ -75,6 +75,7 @@ class _Config(object):  # pylint: disable=too-few-public-methods
         port=int(DB_PORT),
         name=DB_NAME,
     )
+    SQLALCHEMY_ECHO = False
 
     # JWT_OIDC Settings
     JWT_OIDC_WELL_KNOWN_CONFIG = os.getenv('JWT_OIDC_WELL_KNOWN_CONFIG')
@@ -128,6 +129,15 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     # front end serves this image in this name.can be moved to openshift config as well..
     REGISTRIES_LOGO_IMAGE_NAME = 'bc_logo_for_email.png'
 
+    # url for the front end app
+    WEB_APP_URL = os.getenv('WEB_APP_URL')
+
+    try:
+        MAX_NUMBER_OF_ORGS = int(os.getenv('MAX_NUMBER_OF_ORGS'))
+    except:
+        MAX_NUMBER_OF_ORGS = 3
+
+
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False
     DEBUG = True
@@ -140,10 +150,10 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     DEBUG = True
     TESTING = True
     # POSTGRESQL
-    DB_USER = os.getenv('DATABASE_TEST_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', '')
-    DB_NAME = os.getenv('DATABASE_TEST_NAME', '')
-    DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
+    DB_USER = os.getenv('DATABASE_TEST_USERNAME', 'postgres')
+    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', 'postgres')
+    DB_NAME = os.getenv('DATABASE_TEST_NAME', 'postgres')
+    DB_HOST = os.getenv('DATABASE_TEST_HOST', 'localhost')
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_TEST_URL', 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
         user=DB_USER,

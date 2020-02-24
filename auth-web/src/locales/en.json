@@ -22,7 +22,7 @@
   "invitationProcessingErrorMsg": "An error has occured while processing this invitation. Please try again later.",
   "staffUnauthorizedMsg": "You are not authorized to access this page.",
   "clientUnauthorizedMsg": "You are not authorized to access this page. If you having trouble, or require access to this application, please contact support.",
-  "confirmRemoveMemberTitle": "Confirm Member Removal",
+  "confirmRemoveMemberTitle": "Remove Team Member",
   "confirmRoleChangeTitle": "Confirm Role Change",
   "confirmRemoveInviteTitle": "Confirm Invite Removal",
   "confirmApproveMemberTitle": "Confirm Member Approval",
@@ -52,5 +52,7 @@
   "profileDeactivatedTitle": "Your profile has been deactivated.",
   "profileDeactivatedMsg": "Your contact information, account associations and business affiliations have been removed.",
   "leaveTeamTitle": "You have been removed from this account.",
-  "leaveTeamMsg": "If you want to regain access to this account, you will need a new invitation from the account owner."
+  "leaveTeamMsg": "If you want to regain access to this account, you will need a new invitation from the account owner.",
+  "confirmDissolveTeamTitle": "Confirm Dissolve Account",
+  "confirmDissolveTeamText": "Are you sure you wish to dissolve the account?"
 }

@@ -1,14 +1,12 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
-import { CreateRequestBody as CreateOrgRequestBody, Member, MembershipStatus, MembershipType, Organization, UpdateMemberPayload } from '@/models/Organization'
-import ConfigHelper from '@/util/config-helper'
+import { CreateRequestBody as CreateOrgRequestBody, Member, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { AccountSettings } from '@/models/account-settings'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
-import { SessionStorageKeys } from '@/util/constants'
 import { UserInfo } from '@/models/userInfo'
 import UserService from '@/services/user.services'
-import _ from 'lodash'
 
 @Module({
   name: 'org',
@@ -19,12 +17,12 @@ export default class OrgModule extends VuexModule {
   resending = false
   sentInvitations: Invitation[] = []
   failedInvitations: Invitation[] = []
-  organizations: Organization[] = []
+  currentAccountSettings: AccountSettings = undefined
   currentOrganization: Organization = undefined
+  currentMembership: Member = undefined
   activeOrgMembers: Member[] = []
   pendingOrgMembers: Member[] = []
   pendingOrgInvitations: Invitation[] = []
-  orgCreateMessage = 'success'
   invalidInvitationToken = false
   tokenError = false
 
@@ -53,15 +51,8 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
-  public addOrganization (org: Organization) {
-    this.organizations.push(org)
-  }
-
-  @Mutation
-  public updateOrganization (org: Organization) {
-    ConfigHelper.addToSession(SessionStorageKeys.AccountName, org.name)
-    const index = this.organizations.findIndex(item => item.id === org.id)
-    this.organizations.splice(index, 1, org)
+  public setCurrentAccountSettings (accountSettings: AccountSettings) {
+    this.currentAccountSettings = accountSettings
   }
 
   @Mutation
@@ -87,70 +78,45 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
-  public setOrganizations (organizations: Organization[]) {
-    this.organizations = organizations
-  }
-
-  @Mutation
-  public setOrgCreateMessage (message: string) {
-    this.orgCreateMessage = message
-  }
-
-  @Mutation
   public setCurrentOrganization (organization: Organization) {
     this.currentOrganization = organization
   }
 
+  @Mutation
+  public setCurrentMembership (membership: Member) {
+    this.currentMembership = membership
+  }
+
   @Action({ rawError: true })
-  public async syncCurrentOrganization (organization: Organization): Promise<void> {
+  public async syncOrganization (orgId: number): Promise<Organization> {
+    const response = await OrgService.getOrganization(orgId)
+    const organization = response?.data
     this.context.commit('setCurrentOrganization', organization)
     await this.context.dispatch('syncActiveOrgMembers')
     await this.context.dispatch('syncPendingOrgMembers')
     await this.context.dispatch('syncPendingOrgInvitations')
-    ConfigHelper.addToSession(SessionStorageKeys.AccountName, organization.name)
+    await this.context.dispatch('business/syncBusinesses', null, { root: true })
+    return organization
+  }
+
+  @Action({ rawError: true, commit: 'setCurrentMembership' })
+  public async syncMembership (orgId: number): Promise<Member> {
+    const response = await UserService.getMembership(orgId)
+    return response?.data
   }
 
   @Action({ rawError: true })
-  public async createOrg (createRequestBody: CreateOrgRequestBody) {
-    try {
-      const response = await OrgService.createOrg(createRequestBody)
-      this.context.commit('setOrgCreateMessage', 'success')
-      this.context.commit('addOrganization', response.data)
-    } catch (err) {
-      switch (err.response.status) {
-        case 409:
-          this.context.commit('setOrgCreateMessage', 'An account with this name already exists. Try a different account name.')
-          break
-        case 400:
-          this.context.commit('setOrgCreateMessage', 'Invalid account name')
-          break
-        default:
-          this.context.commit('setOrgCreateMessage', 'An error occurred while attempting to create your account.')
-          break
-      }
-    }
+  public async createOrg (createRequestBody: CreateOrgRequestBody): Promise<Organization> {
+    const response = await OrgService.createOrg(createRequestBody)
+    this.context.commit('setCurrentOrganization', response?.data)
+    return response?.data
   }
 
   @Action({ rawError: true })
   public async updateOrg (createRequestBody: CreateOrgRequestBody) {
-    try {
-      const response = await OrgService.updateOrg(this.context.state['currentOrganization'].id, createRequestBody)
-      this.context.commit('setOrgCreateMessage', 'success')
-      this.context.commit('updateOrganization', response.data)
-      this.context.commit('setCurrentOrganization', response.data)
-    } catch (err) {
-      switch (err.response.status) {
-        case 409:
-          this.context.commit('setOrgCreateMessage', 'An account with this name already exists.')
-          break
-        case 400:
-          this.context.commit('setOrgCreateMessage', 'Invalid account name')
-          break
-        default:
-          this.context.commit('setOrgCreateMessage', 'An error occurred while updating your account name.')
-          break
-      }
-    }
+    const response = await OrgService.updateOrg(this.context.state['currentOrganization'].id, createRequestBody)
+    this.context.commit('setCurrentOrganization', response.data)
+    return response?.data
   }
 
   @Action({ rawError: true })
@@ -223,6 +189,17 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
+  public async dissolveTeam () {
+    // Send request to remove member on server and get result
+    const response = await OrgService.deactivateOrg(this.context.state['currentOrganization'].id)
+
+    // If no response, or error code, throw exception to be caught
+    if (!response || response.status !== 204) {
+      throw Error('Unable to dissolve organisation')
+    }
+  }
+
+  @Action({ rawError: true })
   public async leaveTeam (memberId: number) {
     // Send request to remove member on server and get result
     const response = await OrgService.leaveOrg(this.context.state['currentOrganization'].id, memberId)
@@ -246,17 +223,6 @@ export default class OrgModule extends VuexModule {
     } else {
       this.context.dispatch('syncActiveOrgMembers')
       this.context.dispatch('syncPendingOrgMembers')
-    }
-  }
-
-  @Action({ rawError: true })
-  public async syncOrganizations () {
-    const response = await UserService.getOrganizations()
-    if (response && response.data && response.status === 200) {
-      this.context.commit('setOrganizations', response.data.orgs)
-      if (response.data.orgs && response.data.orgs.length > 0) {
-        await this.context.dispatch('syncCurrentOrganization', response.data.orgs[0])
-      }
     }
   }
 

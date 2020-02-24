@@ -2,6 +2,8 @@
 <script lang="ts">
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapGetters, mapState } from 'vuex'
+import { AccountSettings } from '@/models/account-settings'
+import CommonUtils from '@/util/common-util'
 import Component from 'vue-class-component'
 import { Contact } from '@/models/contact'
 import { Pages } from '@/util/constants'
@@ -10,17 +12,18 @@ import Vue from 'vue'
 
 @Component({
   computed: {
-    ...mapState('user', ['userProfile', 'userContact']),
-    ...mapState('org', ['organizations', 'currentOrganization']),
+    ...mapState('user', ['userProfile', 'userContact', 'redirectAfterLoginUrl']),
+    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings']),
     ...mapGetters('org', ['myOrgMembership'])
   }
 })
 export default class NextPageMixin extends Vue {
   protected readonly userProfile!: User
   protected readonly userContact!: Contact
-  protected readonly myOrgMembership!: Member
-  protected readonly organizations!: Organization[]
+  protected readonly redirectAfterLoginUrl: string
   protected readonly currentOrganization!: Organization
+  protected readonly currentMembership!: Member
+  protected readonly currentAccountSettings!: AccountSettings
 
   protected getNextPageUrl (): string {
     let nextStep = '/'
@@ -29,16 +32,29 @@ export default class NextPageMixin extends Vue {
     // Redirect to dashboard otherwise
     if (!this.userContact || !this.userProfile.userTerms.isTermsOfUseAccepted) {
       nextStep = Pages.USER_PROFILE
-    } else if (!this.currentOrganization) {
+    } else if (!this.currentOrganization && !this.currentMembership) {
       nextStep = Pages.CREATE_ACCOUNT
-    } else if (this.myOrgMembership.membershipStatus === MembershipStatus.Active) {
-      nextStep = Pages.MAIN
-    } else if (this.myOrgMembership.membershipStatus === MembershipStatus.Pending) {
-      nextStep = Pages.PENDING_APPROVAL + '/' + this.currentOrganization.name
+    } else if (this.currentMembership.membershipStatus === MembershipStatus.Active) {
+      nextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
+    } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
+      nextStep = `${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}`
     } else {
-      nextStep = Pages.MAIN
+      nextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
     }
     return '/' + nextStep
+  }
+
+  protected redirectAfterLogin () {
+    // If a redirect url is given, redirect to that page else continue to dashboard or userprofile
+    if (this.redirectAfterLoginUrl) {
+      if (CommonUtils.isUrl(this.redirectAfterLoginUrl)) {
+        window.location.href = decodeURIComponent(this.redirectAfterLoginUrl)
+      } else {
+        this.$router.push(`/${this.redirectAfterLoginUrl}`)
+      }
+    } else {
+      this.$router.push(this.getNextPageUrl())
+    }
   }
 }
 </script>

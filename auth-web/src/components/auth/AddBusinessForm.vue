@@ -86,15 +86,19 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 import BusinessModule from '@/store/modules/business'
 import ConfigHelper from '@/util/config-helper'
 import { LoginPayload } from '@/models/business'
+import { Organization } from '@/models/Organization'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
+  computed: {
+    ...mapState('org', ['currentOrganization'])
+  },
   methods: {
     ...mapActions('business', ['addBusiness'])
   }
 })
 export default class AddBusinessForm extends Vue {
-  private businessStore = getModule(BusinessModule, this.$store)
+  private readonly currentOrganization!: Organization
   private readonly addBusiness!: (loginPayload: LoginPayload) => void
   private validationError = ''
   private entityNumRules = [v => !!v || 'Incorporation Number is required']
@@ -116,7 +120,7 @@ export default class AddBusinessForm extends Vue {
   }
 
   private redirectToNext (): void {
-    this.$router.push('/main')
+    this.$router.push(`/account/${this.currentOrganization.id}`)
   }
 
   async add () {
@@ -135,6 +139,8 @@ export default class AddBusinessForm extends Vue {
           this.$emit('add-failed-invalid-code')
         } else if (exception.response && exception.response.status === 404) {
           this.$emit('add-failed-no-entity')
+        } else if (exception.response && exception.response.status === 406) {
+          this.$emit('add-failed-passcode-claimed')
         } else {
           this.$emit('add-unknown-error')
         }

@@ -5855,15 +5855,12 @@ paths:
       tags:
         - entities
       description: Delete the business contact for the Entity identified by the provided id
-  '/entities/{business_identifier}/authorizations':
-    parameters:
-      - name: business_identifier
-        in: path
-        required: true
-        type: string
-        schema:
-          type: string
+  '/entities/{businessIdentifier}/authorizations':
     get:
+      summary: Get authorizations for the entity
+      operationId: getAuthorizations
+      tags:
+        - authorization
       responses:
         '200':
           description: Success
@@ -5872,76 +5869,213 @@ paths:
               schema:
                 type: string
               description: X-Application-Context
+              examples:
+                owner:
+                  value: 'application:prod'
+                admin:
+                  value: 'application:prod'
+                member:
+                  value: 'application:prod'
+                staff:
+                  value: 'application:prod'
             Access-Control-Allow-Origin:
               schema:
                 type: string
               description: Access-Control-Allow-Origin
+              examples:
+                owner:
+                  value: '*'
+                admin:
+                  value: '*'
+                member:
+                  value: '*'
+                staff:
+                  value: '*'
+                unauthorized:
+                  value: '*'
+                expanded_premium:
+                  value: '*'
+                expanded_cc:
+                  value: '*'
             Access-Control-Allow-Methods:
               schema:
                 type: string
               description: Access-Control-Allow-Methods
+              examples:
+                owner:
+                  value: 'GET, OPTIONS'
+                admin:
+                  value: 'GET, OPTIONS'
+                member:
+                  value: 'GET, OPTIONS'
+                staff:
+                  value: 'GET, OPTIONS'
+                unauthorized:
+                  value: 'GET, OPTIONS'
+                expanded_premium:
+                  value: 'GET, OPTIONS'
+                expanded_cc:
+                  value: 'GET, OPTIONS'
             Access-Control-Allow-Headers:
               schema:
                 type: string
               description: Access-Control-Allow-Headers
+              examples:
+                owner:
+                  value: 'Content-Type, api_key, Authorization'
+                admin:
+                  value: 'Content-Type, api_key, Authorization'
+                member:
+                  value: 'Content-Type, api_key, Authorization'
+                staff:
+                  value: 'Content-Type, api_key, Authorization'
+                unauthorized:
+                  value: 'Content-Type, api_key, Authorization'
+                expanded_premium:
+                  value: 'Content-Type, api_key, Authorization'
+                expanded_cc:
+                  value: 'Content-Type, api_key, Authorization'
           content:
             application/json:
               schema:
-                title: authorizations
-                type: object
-                properties:
-                  corp_type_code:
-                    $id: '#/properties/corp_type_code'
-                    type: string
-                    title: The Corp_type_code Schema
-                    default: ''
-                    examples:
-                      - CP
-                    pattern: '^(.*)$'
-                  orgMembership:
-                    $id: '#/properties/orgMembership'
-                    type: string
-                    title: The Orgmembership Schema
-                    default: ''
-                    examples:
-                      - OWNER
-                    pattern: '^(.*)$'
-                  roles:
-                    $id: '#/properties/roles'
-                    type: array
-                    title: The Roles Schema
-                    items:
-                      $id: '#/properties/roles/items'
-                      type: string
-                      title: The Items Schema
-                      default: ''
-                      examples:
-                        - edit
-                        - view
-                      pattern: '^(.*)$'
-                required:
-                  - corp_type_code
-                  - orgMembership
-                  - roles
-        '404':
-          description: Not Found
+                $ref: '#/components/schemas/Authorization'
+              examples:
+                owner:
+                  value: '{
+                            "orgMembership": "OWNER",
+                            "roles": [
+                              "view",
+                              "edit"
+                            ],
+                            "business": {
+                              "folioNumber": "MOCK1234",
+                              "name": "Mock Business"
+                            },
+                            "account": {
+                                "id": "1234",
+                                "name": "Mock Account",
+                                "paymentPreference": {
+                                    "methodOfPayment": "CC",
+                                    "bcOnlineUserId": "PB25020",
+                                    "bcOnlineAccountId": ""
+                                }
+                            }
+                          }'
+                admin:
+                  value: '{
+                          "orgMembership": "ADMIN",
+                          "roles": [
+                            "view",
+                            "edit"
+                          ],
+                          "account": {
+                              "id": "1234",
+                              "name": "Mock Account",
+                              "paymentPreference": {
+                                  "methodOfPayment": "CC",
+                                  "bcOnlineUserId": "PB25020",
+                                  "bcOnlineAccountId": ""
+                              }
+                          }
+                        }'
+                member:
+                  value: '{
+                            "orgMembership": "MEMBER",
+                            "roles": [
+                              "view",
+                              "edit"
+                            ],
+                            "account": {
+                              "id": "1234",
+                              "name": "Mock Account",
+                              "paymentPreference": {
+                                  "methodOfPayment": "CC",
+                                  "bcOnlineUserId": "PB25020",
+                                  "bcOnlineAccountId": ""
+                              }
+                            }
+                          }'
+                staff:
+                  value: '{
+                            "roles": [
+                              "view",
+                              "edit"
+                            ]
+                          }'
+                unauthorized:
+                  value: '{}'
+                expanded_premium:
+                  value: '{
+                            "orgMembership": "OWNER",
+                            "roles": [
+                              "view",
+                              "edit"
+                            ],
+                            "business": {
+                              "folioNumber": "MOCK1234",
+                              "name": "Mock Business"
+                            },
+                            "account": {
+                                "id": "1234",
+                                "name": "Mock Account",
+                                "paymentPreference": {
+                                    "methodOfPayment": "PREMIUM",
+                                    "bcOnlineUserId": "PB25020",
+                                    "bcOnlineAccountId": ""
+                                }
+                            }
+                          }'
+                expanded_cc:
+                  value: '{
+                            "orgMembership": "OWNER",
+                            "roles": [
+                              "view",
+                              "edit"
+                            ],
+                            "business": {
+                              "folioNumber": "MOCK1234",
+                              "name": "Mock Business"
+                            },
+                            "account": {
+                                "id": "1234",
+                                "name": "Mock Account",
+                                "paymentPreference": {
+                                    "methodOfPayment": "CC",
+                                    "bcOnlineUserId": "",
+                                    "bcOnlineAccountId": ""
+                                }
+                            }
+                          }'
+        default:
+          description: unexpected error
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    description: Identifier representing the type of error that occurred.
-                  message:
-                    type: string
-                    description: Description of the error.
-                description: Contains details of an error that was encountered.
-      summary: Get the authorization for the user for the provided business identifier
-      operationId: get_authorization_resource
-      tags:
-        - entities
-      description: Get the authorization for the user for the provided business identifier
+                $ref: '#/components/schemas/ErrorResponse'
+      description: Get authorizations endpoint for the entity by business indentifier
+    parameters:
+      - schema:
+          type: string
+        name: businessIdentifier
+        in: path
+        required: true
+        description: Corp Num/Incorporation Number of the entity
+        examples:
+          owner:
+            value: CP0001234
+          admin:
+            value: CP0001235
+          member:
+            value: CP0001236
+          staff:
+            value: CP0001237
+          unauthorized:
+            value: CP0000000
+          expanded_cc:
+            value: CP0001238
+          expanded_premium:
+            value: CP0002000
+
   '/entities/{business_identifier}':
     parameters:
       - name: business_identifier

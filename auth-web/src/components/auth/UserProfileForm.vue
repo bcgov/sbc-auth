@@ -146,9 +146,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { User, UserTerms } from '@/models/user'
-import { mapActions, mapState } from 'vuex'
 import { Contact } from '@/models/contact'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/NextPageMixin.vue'
@@ -159,6 +158,7 @@ import UserModule from '@/store/modules/user'
 import UserService from '@/services/user.services'
 import configHelper from '@/util/config-helper'
 import { getModule } from 'vuex-module-decorators'
+import { mapActions } from 'vuex'
 import { mask } from 'vue-the-mask'
 
 @Component({
@@ -178,8 +178,7 @@ import { mask } from 'vue-the-mask'
         'getUserProfile',
         'updateCurrentUserTerms'
       ]
-    ),
-    ...mapActions('org', ['syncOrganizations'])
+    )
   }
 })
 export default class UserProfileForm extends Mixins(NextPageMixin) {
@@ -189,7 +188,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     private readonly updateUserContact!: (contact: Contact) => Contact
     private readonly saveUserTerms!: () => Promise<User>
     private readonly getUserProfile!: (identifer: string) => User
-    private readonly syncOrganizations!: () => Organization[]
     private readonly updateCurrentUserTerms!: (UserTerms) => void
     private firstName = ''
     private lastName = ''
@@ -201,6 +199,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     private editing = false
     private deactivateProfileDialog = false
     private isDeactivating = false
+    @Prop() token: string
 
     $refs: {
       deactivateUserConfirmationDialog: ModalDialog,
@@ -241,10 +240,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
         await this.getUserProfile('@me')
       }
 
-      if (!this.organizations || this.organizations.length < 1) {
-        await this.syncOrganizations()
-      }
-
       this.firstName = this.userProfile.firstname
       this.lastName = this.userProfile.lastname
       if (this.userContact) {
@@ -278,6 +273,12 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
           await this.updateUserContact(contact)
         }
         await this.getUserProfile('@me')
+        // If a token was provided, that means we are in the accept invitation flow
+        // so redirect to /confirmtoken
+        if (this.token) {
+          this.$router.push('/confirmtoken/' + this.token)
+          return
+        }
         this.redirectToNext()
       }
     }

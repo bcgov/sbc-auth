@@ -22,3 +22,4 @@ from .membership import Membership
 from .org import Org
 from .reset import ResetTestData
 from .user import User
+from .user_settings import UserSettings

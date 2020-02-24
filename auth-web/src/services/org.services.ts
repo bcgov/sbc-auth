@@ -21,6 +21,10 @@ export default class OrgService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/invitations?status=${status}`)
   }
 
+  public static async deactivateOrg (orgId: number): Promise<AxiosResponse<void>> {
+    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`)
+  }
+
   public static async leaveOrg (orgId: number, memberId: number): Promise<AxiosResponse<Member>> {
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/members/${memberId}`)
   }

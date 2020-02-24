@@ -35,6 +35,7 @@ from auth_api.utils.roles import ADMIN, MEMBER, OWNER, Status
 from config import get_named_config
 
 from .authorization import check_auth
+from .membership import Membership as MembershipService
 from .notification import send_email
 
 
@@ -177,7 +178,7 @@ class Invitation:
         """Send the email notification."""
         current_app.logger.debug('<send_invitation')
         subject = '[BC Registries & Online Services] {} {} has invited you to join an account'.format(user['firstname'],
-                                                                                                  user['lastname'])
+                                                                                                      user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
         token_confirm_url = '{}/validatetoken/{}'.format(app_url, invitation.token)
@@ -249,12 +250,20 @@ class Invitation:
             raise BusinessException(Error.ACTIONED_INVITATION, None)
         if invitation.invitation_status_code == 'EXPIRED':
             raise BusinessException(Error.EXPIRED_INVITATION, None)
-        # TODO : isnt this only one?remove for loop
+
         for membership in invitation.membership:
             membership_model = MembershipModel()
             membership_model.org_id = membership.org_id
             membership_model.user_id = user.identifier
             membership_model.membership_type = membership.membership_type
+
+            # check to ensure an invitation for this user/org has not already been processed
+            existing_membership = MembershipService \
+                .get_membership_for_org_and_user(org_id=membership_model.org_id, user_id=membership_model.user_id)
+
+            if existing_membership:
+                raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+
             # user needs to get approval
             is_auto_approval = OrgSettingsModel.is_admin_auto_approved_invitees(membership.org_id)
             if is_auto_approval:

@@ -25,6 +25,7 @@ from flask import Blueprint, current_app
 # noqa: I001, I003, I004
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
 
+from .account import API as ACCOUNTS_API
 from .apihelper import Api
 from .codes import API as CODES_API
 from .documents import API as DOCUMENTS_API
@@ -37,6 +38,7 @@ from .org import API as ORG_API
 from .reset import API as RESET_API
 from .token import API as TOKEN_API
 from .user import API as USER_API
+from .user_settings import API as USER_SETTINGS_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
@@ -74,12 +76,14 @@ HANDLER = ExceptionHandler(API)
 API.add_namespace(META_API, path='/meta')
 API.add_namespace(TOKEN_API, path='/token')
 API.add_namespace(USER_API, path='/users')
+API.add_namespace(USER_SETTINGS_API, path='/users/<string:user_id>/settings')
 API.add_namespace(LOGOUT_API, path='/logout')
 API.add_namespace(ENTITY_API, path='/entities')
 API.add_namespace(ORG_API, path='/orgs')
 API.add_namespace(INVITATION_API, path='/invitations')
 API.add_namespace(DOCUMENTS_API, path='/documents')
 API.add_namespace(CODES_API, path='/codes')
+API.add_namespace(ACCOUNTS_API, path='/accounts')
 
 TEST_BLUEPRINT = Blueprint('TEST', __name__, url_prefix='/test')
 

@@ -155,10 +155,11 @@ def test_validate_token_accepted(session, auth_mock):  # pylint:disable=unused-a
         user = factory_user_model(TestUserInfo.user_test)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
+        user_invitee = factory_user_model(TestUserInfo.user1)
         invitation_info = factory_invitation(org_dictionary['id'])
-        new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '').as_dict()
+        new_invitation = InvitationService.create_invitation(invitation_info, User(user_invitee), {}, '').as_dict()
         confirmation_token = InvitationService.generate_confirmation_token(new_invitation['id'])
-        InvitationService.accept_invitation(new_invitation['id'], User(user), '')
+        InvitationService.accept_invitation(new_invitation['id'], User(user_invitee), '')
 
         with pytest.raises(BusinessException) as exception:
             InvitationService.validate_token(confirmation_token)
@@ -185,9 +186,12 @@ def test_accept_invitation(session, auth_mock):  # pylint:disable=unused-argumen
                 org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
                 org_dictionary = org.as_dict()
                 invitation_info = factory_invitation(org_dictionary['id'])
-                new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
+                user_with_token_invitee = TestUserInfo.user1
+                user_with_token_invitee['keycloak_guid'] = TestJwtClaims.edit_role_2['sub']
+                user_invitee = factory_user_model(user_with_token_invitee)
+                new_invitation = InvitationService.create_invitation(invitation_info, User(user_invitee), {}, '')
                 new_invitation_dict = new_invitation.as_dict()
-                InvitationService.accept_invitation(new_invitation_dict['id'], User(user), '')
+                InvitationService.accept_invitation(new_invitation_dict['id'], User(user_invitee), '')
                 members = MembershipService.get_members_for_org(org_dictionary['id'],
                                                                 'PENDING_APPROVAL',
                                                                 token_info=TestJwtClaims.edit_role)
@@ -205,17 +209,19 @@ def test_accept_invitation_exceptions(session, auth_mock):  # pylint:disable=unu
                 org_dictionary = org.as_dict()
                 invitation_info = factory_invitation(org_dictionary['id'])
 
+                user_invitee = factory_user_model(TestUserInfo.user1)
+
                 with pytest.raises(BusinessException) as exception:
-                    InvitationService.accept_invitation(None, User(user), '')
+                    InvitationService.accept_invitation(None, User(user_invitee), '')
 
                 assert exception.value.code == Error.DATA_NOT_FOUND.name
 
-                new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
+                new_invitation = InvitationService.create_invitation(invitation_info, User(user_invitee), {}, '')
                 new_invitation_dict = new_invitation.as_dict()
-                InvitationService.accept_invitation(new_invitation_dict['id'], User(user), '')
+                InvitationService.accept_invitation(new_invitation_dict['id'], User(user_invitee), '')
 
                 with pytest.raises(BusinessException) as exception:
-                    InvitationService.accept_invitation(new_invitation_dict['id'], User(user), '')
+                    InvitationService.accept_invitation(new_invitation_dict['id'], User(user_invitee), '')
 
                 assert exception.value.code == Error.ACTIONED_INVITATION.name
 
@@ -224,7 +230,7 @@ def test_accept_invitation_exceptions(session, auth_mock):  # pylint:disable=unu
                         .find_invitation_by_id(new_invitation_dict['id'])
                     expired_invitation.invitation_status = InvitationStatusModel.get_status_by_code('EXPIRED')
                     expired_invitation.save()
-                    InvitationService.accept_invitation(expired_invitation.id, User(user), '')
+                    InvitationService.accept_invitation(expired_invitation.id, User(user_invitee), '')
 
                 assert exception.value.code == Error.EXPIRED_INVITATION.name
 

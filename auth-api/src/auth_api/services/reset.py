@@ -35,7 +35,10 @@ class ResetTestData:  # pylint:disable=too-few-public-methods
                 for model_class in db.Model._decl_class_registry.values():  # pylint:disable=protected-access
                     if hasattr(model_class, 'created_by_id'):
                         for model in model_class.query.filter_by(created_by_id=user.id).all():
-                            model.delete()
+                            db.session.delete(model)
+                    if hasattr(model_class, 'modified_by_id'):
+                        for model in model_class.query.filter_by(modified_by_id=user.id).all():
+                            db.session.delete(model)
 
                 user.modified_by = None
                 user.modified_by_id = None
