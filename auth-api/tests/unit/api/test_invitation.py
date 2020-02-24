@@ -18,13 +18,14 @@ Test-Suite to ensure that the /invitations endpoint is working as expected.
 """
 import json
 
-from auth_api import status as http_status
-from auth_api.services import Invitation as InvitationService
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header, factory_invitation
 
+from auth_api import status as http_status
+from auth_api.services import Invitation as InvitationService
 
-def test_add_invitation(client, jwt, session):  # pylint:disable=unused-argument
+
+def test_add_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an invitation can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -47,7 +48,7 @@ def test_add_invitation_invalid(client, jwt, session):  # pylint:disable=unused-
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
-def test_get_invitations_by_id(client, jwt, session):  # pylint:disable=unused-argument
+def test_get_invitations_by_id(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an invitation can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -63,7 +64,7 @@ def test_get_invitations_by_id(client, jwt, session):  # pylint:disable=unused-a
     assert rv.status_code == http_status.HTTP_200_OK
 
 
-def test_delete_invitation(client, jwt, session):  # pylint:disable=unused-argument
+def test_delete_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an invitation can be deleted."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -83,7 +84,7 @@ def test_delete_invitation(client, jwt, session):  # pylint:disable=unused-argum
     assert dictionary['message'] == 'The requested invitation could not be found.'
 
 
-def test_update_invitation(client, jwt, session):  # pylint:disable=unused-argument
+def test_update_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an invitation can be updated."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -103,7 +104,7 @@ def test_update_invitation(client, jwt, session):  # pylint:disable=unused-argum
     assert dictionary['status'] == 'PENDING'
 
 
-def test_validate_token(client, jwt, session):  # pylint:disable=unused-argument
+def test_validate_token(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a token is valid."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -121,7 +122,7 @@ def test_validate_token(client, jwt, session):  # pylint:disable=unused-argument
     assert rv.status_code == http_status.HTTP_200_OK
 
 
-def test_accept_invitation(client, jwt, session):  # pylint:disable=unused-argument
+def test_accept_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an invitation can be accepted."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -134,7 +135,10 @@ def test_accept_invitation(client, jwt, session):  # pylint:disable=unused-argum
     invitation_dictionary = json.loads(rv.data)
     invitation_id = invitation_dictionary['id']
     invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
-    rv = client.put('/api/v1/invitations/tokens/{}'.format(invitation_id_token), headers=headers,
+
+    headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role_2)
+    client.post('/api/v1/users', headers=headers_invitee, content_type='application/json')
+    rv = client.put('/api/v1/invitations/tokens/{}'.format(invitation_id_token), headers=headers_invitee,
                     content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     rv = client.get('/api/v1/orgs/{}/members?status=PENDING_APPROVAL'.format(org_id),

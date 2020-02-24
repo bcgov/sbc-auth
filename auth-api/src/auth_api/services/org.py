@@ -24,13 +24,14 @@ from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
+from auth_api.models import User as UserModel
 from auth_api.schemas import OrgSchema
 from auth_api.utils.roles import OWNER, VALID_STATUSES, Status
 from auth_api.utils.util import camelback2snake
 
 from .authorization import check_auth
 from .contact import Contact as ContactService
-from .invitation import Invitation as InvitationService
+from .keycloak import KeycloakService
 
 
 class Org:
@@ -73,6 +74,9 @@ class Org:
                                      membership_type_status=Status.ACTIVE.value)
         membership.save()
 
+        # Add the user to account_holders group
+        KeycloakService.join_account_holders_group()
+
         return Org(org)
 
     def update_org(self, org_info):
@@ -87,11 +91,31 @@ class Org:
         current_app.logger.debug('>update_org ')
         return self
 
-    def delete_org(self):
-        """Delete this org."""
-        current_app.logger.debug('>delete_org ')
-        self._model.delete()
-        current_app.logger.debug('<delete_org ')
+    @staticmethod
+    def delete_org(org_id, token_info: Dict = None,):
+        """Soft-Deletes an Org.
+
+        It should not be deletable if there are members or business associated with the org
+        """
+        # Check authorization for the user
+        current_app.logger.debug('<org Inactivated')
+        check_auth(token_info, one_of_roles=OWNER, org_id=org_id)
+
+        org: OrgModel = OrgModel.find_by_org_id(org_id)
+        if not org:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        count_members = len([member for member in org.members if member.status in VALID_STATUSES])
+        if count_members > 1 or len(org.affiliated_entities) >= 1:
+            raise BusinessException(Error.ORG_CANNOT_BE_DISSOLVED, None)
+
+        org.delete()
+
+        # Remove user from thr group if the user doesn't have any other orgs membership
+        user = UserModel.find_by_jwt_token(token=token_info)
+        if len(MembershipModel.find_orgs_for_user(user.id)) == 0:
+            KeycloakService.remove_from_account_holders_group(user.keycloak_guid)
+        current_app.logger.debug('org Inactivated>')
 
     @staticmethod
     def find_by_org_id(org_id, token_info: Dict = None, allowed_roles: Tuple = None):
@@ -195,10 +219,6 @@ class Org:
                 contact.delete()
                 return contact
         return None
-
-    def get_invitations(self, status='ALL', token_info: Dict = None):
-        """Return the unresolved (pending or failed) invitations for this org."""
-        return {'invitations': InvitationService.get_invitations_for_org(self._model.id, status, token_info)}
 
     def get_owner_count(self):
         """Get the number of owners for the specified org."""

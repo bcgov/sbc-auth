@@ -30,6 +30,7 @@
           @confirm-remove-member="showConfirmRemoveModal($event)"
           @confirm-change-role="showConfirmChangeRoleModal($event)"
           @confirm-leave-team="showConfirmLeaveTeamModal()"
+          @confirm-dissolve-team="showConfirmDissolveModal()"
           @single-owner-error="showSingleOwnerErrorModal()"
         />
       </v-tab-item>
@@ -135,12 +136,16 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import MemberDataTable, { ChangeRolePayload } from '@/components/auth/MemberDataTable.vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { Business } from '@/models/business'
+import ConfigHelper from '@/util/config-helper'
+import { Event } from '@/models/event'
+import { EventBus } from '@/event-bus'
 import { Invitation } from '@/models/Invitation'
 import InvitationsDataTable from '@/components/auth/InvitationsDataTable.vue'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import PendingMemberDataTable from '@/components/auth/PendingMemberDataTable.vue'
+import { SessionStorageKeys } from '@/util/constants'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -167,6 +172,7 @@ import { getModule } from 'vuex-module-decorators'
       'updateMember',
       'approveMember',
       'leaveTeam',
+      'dissolveTeam',
       'syncActiveOrgMembers',
       'syncPendingOrgInvitations',
       'syncPendingOrgMembers'
@@ -203,6 +209,7 @@ export default class UserManagement extends Vue {
   private readonly updateMember!: (updateMemberPayload: UpdateMemberPayload) => void
   private readonly approveMember!: (memberId: number) => void
   private readonly leaveTeam!: (memberId: number) => void
+  private readonly dissolveTeam!: () => void
   private readonly syncPendingOrgMembers!: () => Member[]
   private readonly syncPendingOrgInvitations!: () => Invitation[]
   private readonly syncActiveOrgMembers!: () => Member[]
@@ -294,6 +301,14 @@ export default class UserManagement extends Vue {
     this.$refs.confirmActionDialog.open()
   }
 
+  private showConfirmDissolveModal () {
+    this.confirmActionTitle = this.$t('confirmDissolveTeamTitle').toString()
+    this.confirmActionText = this.$t('confirmDissolveTeamText').toString()
+    this.confirmHandler = this.dissolve
+    this.primaryActionText = 'Dissolve'
+    this.$refs.confirmActionDialog.open()
+  }
+
   private showSingleOwnerErrorModal () {
     this.errorTitle = this.$t('singleOwnerErrorTitle').toString()
     this.errorText = this.$t('singleOwnerErrorText').toString()
@@ -371,6 +386,18 @@ export default class UserManagement extends Vue {
     this.$refs.confirmActionDialog.close()
     this.$store.commit('updateHeader')
     this.$router.push('/leaveteam')
+  }
+
+  private async dissolve () {
+    await this.dissolveTeam()
+    await this.leaveTeam(this.myOrgMembership.id)
+    this.$refs.confirmActionDialog.close()
+    this.$store.commit('updateHeader')
+    const event:Event = { message: 'Dissolved the account', type: 'error', timeout: 1000 }
+    EventBus.$emit('show-toast', event)
+    // remove this account from the current account session storage.Header will automatically get the next valid account
+    ConfigHelper.removeFromSession(SessionStorageKeys.CurrentAccount)
+    this.$router.push('/')
   }
 
   private close () {

@@ -95,4 +95,11 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     @classmethod
     def find_membership_by_user_and_org(cls, user_id, org_id):
         """Get the membership for the specified user and org."""
-        return cls.query.filter_by(user_id=user_id, org_id=org_id).order_by(desc(Membership.created)).first()
+        records = cls.query \
+            .filter(cls.user_id == user_id) \
+            .filter(cls.org_id == org_id) \
+            .filter(cls.status.in_(VALID_STATUSES)) \
+            .order_by(desc(Membership.created)) \
+            .first()
+
+        return records

@@ -150,10 +150,10 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     DEBUG = True
     TESTING = True
     # POSTGRESQL
-    DB_USER = os.getenv('DATABASE_TEST_USERNAME', '')
-    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', '')
-    DB_NAME = os.getenv('DATABASE_TEST_NAME', '')
-    DB_HOST = os.getenv('DATABASE_TEST_HOST', '')
+    DB_USER = os.getenv('DATABASE_TEST_USERNAME', 'postgres')
+    DB_PASSWORD = os.getenv('DATABASE_TEST_PASSWORD', 'postgres')
+    DB_NAME = os.getenv('DATABASE_TEST_NAME', 'postgres')
+    DB_HOST = os.getenv('DATABASE_TEST_HOST', 'localhost')
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_TEST_URL', 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
         user=DB_USER,
@@ -222,6 +222,9 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     LEGAL_API_URL = 'https://mock-lear-tools.pathfinder.gov.bc.ca/rest/legal-api/0.82/api/v1'
 
     NOTIFY_API_URL = 'https://mock-lear-tools.pathfinder.gov.bc.ca/rest/SBC+Notify+API+Reference/2.0.0/api/v1'
+
+    # If any value is present in this flag, starts up a keycloak docker
+    USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods

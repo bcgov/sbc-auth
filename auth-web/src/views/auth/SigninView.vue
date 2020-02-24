@@ -23,6 +23,7 @@ import { getModule } from 'vuex-module-decorators'
 @Component({
   methods: {
     ...mapMutations('org', ['setCurrentAccountSettings']),
+    ...mapMutations('user', ['setRedirectAfterLoginUrl']),
     ...mapActions('user',
       [
         'loadUserInfo',
@@ -42,50 +43,53 @@ export default class Signin extends Mixins(NextPageMixin) {
   private readonly syncOrganization!: (currentAccount: string) => Promise<Organization>
   private readonly syncMembership!: (currentAccount: string) => Promise<Member>
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
+  private readonly setRedirectAfterLoginUrl!: (url: string) => void
   private readonly loadUserInfo!: () => UserInfo
 
   @Prop({ default: 'bcsc' }) idpHint: string
-  @Prop() redirectUrl: string
+  @Prop({ default: '' }) redirectUrl: string
+  @Prop({ default: '' }) redirectUrlLoginFail: string
 
   private async mounted () {
-    // Set up a listener for the account sync event from SbcHeader
-    // This event signals that the current account has been loaded, and we are ready to sync against it
-    this.$root.$on('accountSyncReady', async (currentAccount: AccountSettings) => {
-      if (currentAccount) {
-        this.setCurrentAccountSettings(currentAccount)
-        const membership = await this.syncMembership(currentAccount.id)
-        if (membership.membershipStatus === MembershipStatus.Active) {
-          await this.syncOrganization(currentAccount.id)
-        }
-      }
-      if (this.$route.name === 'signin' || this.$route.name === 'signin-redirect') {
-        this.redirectToNext()
-      }
-    })
-  }
-
-  redirectToNext () {
-    // If a redirect url is given, redirect to that page else continue to dashboard or userprofile
     if (this.redirectUrl) {
-      if (CommonUtils.isUrl(this.redirectUrl)) {
-        window.location.href = decodeURIComponent(this.redirectUrl)
-      } else {
-        this.$router.push('/' + this.redirectUrl)
-      }
+      this.setRedirectAfterLoginUrl(decodeURIComponent(this.redirectUrl))
     } else {
-      if (this.idpHint === 'idir') {
-        this.$router.push('/searchbusiness')
-      } else {
-        this.$router.push(this.getNextPageUrl())
-      }
+      this.setRedirectAfterLoginUrl(this.idpHint === 'idir' ? 'searchbusiness' : '')
     }
-  }
 
+    // Initialize keycloak session
+    const kcInit = await this.userStore.initKeycloak(this.idpHint)
+    await new Promise((resolve, reject) => {
+      kcInit
+        .success(async authenticated => {
+          if (authenticated) {
+            this.initializeSession()
+            // Make a POST to the users endpoint if it's bcsc (only need for BCSC)
+            if (this.idpHint === 'bcsc') {
+              await this.syncUserProfile()
+              // eslint-disable-next-line no-console
+              console.info('[SignIn.vue]Logged in User.Starting refreshTimer')
+              var self = this
+              let tokenService = new TokenService()
+              tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`).then(function (success) {
+                tokenService.scheduleRefreshTimer()
+              })
+            }
+            resolve()
+          }
+        })
+        .error(() => {
+          if (this.redirectUrlLoginFail) {
+            window.location.assign(decodeURIComponent(this.redirectUrlLoginFail))
+          }
+        })
+    })
+    this.$store.commit('updateHeader') // Force a remount of header so it can retrieve account (now that is has token)
+  }
   updateHeader () {
     // refreshing the header once the token is receieved from the common component
     this.$store.commit('updateHeader')
     this.loadUserInfo()
-  }
 }
 </script>
 

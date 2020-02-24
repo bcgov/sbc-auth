@@ -1,0 +1,143 @@
+{
+	"info": {
+		"_postman_id": "7415e2a2-8709-42c6-8426-4e75da7dd1b6",
+		"name": "Keycloak SSO Client Creation",
+		"description": "Script to create a keycloak client which can be used by the partner applications to integrate their application with Keycloak.\n\nBelow are the values needed in environment (example from DEV);\n\nkeycloak-base-url\t\t: https://sso-dev.pathfinder.gov.bc.ca/\nservice-account-id\t\t: keycloak-sa\nservice-account-secret\t: <secret> \nclient-id\t\t\t\t: <preferred client id> E.g, bca-web, vitalstats-web etc.\nroot-url\t\t\t\t: Root Url for the application (E.g, https://dev.bcregistry.ca/)\nvalid-redirect-urls\t\t: Comma separated Redirect URLs for the client application (E.g,                                 \t\t\t https://dev.bcregistry.ca/*,http://localhost:8080/*,\nweb-origins\t\t\t\t: Comma separated web origins (defaults to *)\n",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Client",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "bf48df98-d820-41bc-a5b1-9b018c20223e",
+						"exec": [
+							"function getvar(variableName) {",
+							"    let value = pm.variables.get(variableName);",
+							"    return value;",
+							"}",
+							"let redirectUrls = getvar('valid-redirect-urls')",
+							"let webOrigins = getvar('web-origins')",
+							"pm.expect(redirectUrls).to.be.not.empty;",
+							"",
+							"if (redirectUrls) {",
+							"    redirectUrlsplit = redirectUrls.split(',')",
+							"    pm.environment.set('valid-redirect-urls-array', JSON.stringify(redirectUrls.split(',')))",
+							"",
+							"} ",
+							"",
+							"if (webOrigins) {",
+							"    pm.environment.set('web-origins-array', JSON.stringify(webOrigins.split(',')))",
+							"} else {",
+							"    pm.environment.set('web-origins-array', JSON.stringify(['*']))",
+							"}",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"clientId\": \"{{client-id}}\",\n  \"rootUrl\": \"{{root-url}}\",\n  \"adminUrl\": \"/\",\n  \"baseUrl\": \"/*\",\n  \"surrogateAuthRequired\": false,\n  \"enabled\": true,\n  \"clientAuthenticatorType\": \"client-secret\",\n  \"redirectUris\": \n    {{valid-redirect-urls-array}}\n  ,\n  \"webOrigins\": \n    {{web-origins-array}}\n  ,\n  \"notBefore\": 0,\n  \"bearerOnly\": false,\n  \"consentRequired\": false,\n  \"standardFlowEnabled\": true,\n  \"implicitFlowEnabled\": false,\n  \"directAccessGrantsEnabled\": true,\n  \"serviceAccountsEnabled\": false,\n  \"publicClient\": false,\n  \"frontchannelLogout\": false,\n  \"protocol\": \"openid-connect\",\n  \"attributes\": {\n    \"saml.assertion.signature\": \"false\",\n    \"saml.multivalued.roles\": \"false\",\n    \"saml.force.post.binding\": \"false\",\n    \"saml.encrypt\": \"false\",\n    \"saml.server.signature\": \"false\",\n    \"saml.server.signature.keyinfo.ext\": \"false\",\n    \"exclude.session.state.from.auth.response\": \"false\",\n    \"saml_force_name_id_format\": \"false\",\n    \"saml.client.signature\": \"false\",\n    \"tls.client.certificate.bound.access.tokens\": \"false\",\n    \"saml.authnstatement\": \"false\",\n    \"display.on.consent.screen\": \"false\",\n    \"saml.onetimeuse.condition\": \"false\"\n  },\n  \"authenticationFlowBindingOverrides\": {},\n  \"fullScopeAllowed\": true,\n  \"nodeReRegistrationTimeout\": -1,\n  \"protocolMappers\": [\n    {\n      \"name\": \"role list\",\n      \"protocol\": \"saml\",\n      \"protocolMapper\": \"saml-role-list-mapper\",\n      \"consentRequired\": false,\n      \"config\": {\n        \"single\": \"false\",\n        \"attribute.nameformat\": \"Basic\",\n        \"attribute.name\": \"Role\"\n      }\n    },\n    {\n      \"name\": \"preferred_username\",\n      \"protocol\": \"openid-connect\",\n      \"protocolMapper\": \"oidc-usermodel-property-mapper\",\n      \"consentRequired\": false,\n      \"config\": {\n        \"userinfo.token.claim\": \"true\",\n        \"user.attribute\": \"username\",\n        \"id.token.claim\": \"true\",\n        \"access.token.claim\": \"true\",\n        \"claim.name\": \"preferred_username\",\n        \"jsonType.label\": \"String\"\n      }\n    },\n    {\n      \"name\": \"given name\",\n      \"protocol\": \"openid-connect\",\n      \"protocolMapper\": \"oidc-usermodel-property-mapper\",\n      \"consentRequired\": false,\n      \"config\": {\n        \"userinfo.token.claim\": \"true\",\n        \"user.attribute\": \"firstName\",\n        \"id.token.claim\": \"true\",\n        \"access.token.claim\": \"true\",\n        \"claim.name\": \"firstname\",\n        \"jsonType.label\": \"String\"\n      }\n    },\n    {\n      \"name\": \"family name\",\n      \"protocol\": \"openid-connect\",\n      \"protocolMapper\": \"oidc-usermodel-property-mapper\",\n      \"consentRequired\": false,\n      \"config\": {\n        \"userinfo.token.claim\": \"true\",\n        \"user.attribute\": \"lastName\",\n        \"id.token.claim\": \"true\",\n        \"access.token.claim\": \"true\",\n        \"claim.name\": \"lastname\",\n        \"jsonType.label\": \"String\"\n      }\n    },\n    {\n      \"name\": \"Source Mapper\",\n      \"protocol\": \"openid-connect\",\n      \"protocolMapper\": \"oidc-usermodel-attribute-mapper\",\n      \"consentRequired\": false,\n      \"config\": {\n        \"userinfo.token.claim\": \"true\",\n        \"user.attribute\": \"source\",\n        \"id.token.claim\": \"true\",\n        \"access.token.claim\": \"true\",\n        \"claim.name\": \"loginSource\",\n        \"jsonType.label\": \"String\"\n      }\n    },\n    {\n      \"name\": \"username\",\n      \"protocol\": \"openid-connect\",\n      \"protocolMapper\": \"oidc-usermodel-property-mapper\",\n      \"consentRequired\": false,\n      \"config\": {\n        \"userinfo.token.claim\": \"true\",\n        \"user.attribute\": \"username\",\n        \"id.token.claim\": \"true\",\n        \"access.token.claim\": \"true\",\n        \"claim.name\": \"username\",\n        \"jsonType.label\": \"String\"\n      }\n    },\n    {\n      \"name\": \"full name\",\n      \"protocol\": \"openid-connect\",\n      \"protocolMapper\": \"oidc-full-name-mapper\",\n      \"consentRequired\": false,\n      \"config\": {\n        \"id.token.claim\": \"true\",\n        \"access.token.claim\": \"true\"\n      }\n    },\n    {\n      \"name\": \"email\",\n      \"protocol\": \"openid-connect\",\n      \"protocolMapper\": \"oidc-usermodel-property-mapper\",\n      \"consentRequired\": false,\n      \"config\": {\n        \"userinfo.token.claim\": \"true\",\n        \"user.attribute\": \"email\",\n        \"id.token.claim\": \"true\",\n        \"access.token.claim\": \"true\",\n        \"claim.name\": \"email\",\n        \"jsonType.label\": \"String\"\n      }\n    },\n    {\n      \"name\": \"aud-mapper\",\n      \"protocol\": \"openid-connect\",\n      \"protocolMapper\": \"oidc-audience-mapper\",\n      \"consentRequired\": false,\n      \"config\": {\n        \"included.client.audience\": \"sbc-auth-web\",\n        \"id.token.claim\": \"false\",\n        \"access.token.claim\": \"true\"\n      }\n    },\n    {\n      \"name\": \"realm roles\",\n      \"protocol\": \"openid-connect\",\n      \"protocolMapper\": \"oidc-usermodel-realm-role-mapper\",\n      \"consentRequired\": false,\n      \"config\": {\n        \"multivalued\": \"true\",\n        \"userinfo.token.claim\": \"false\",\n        \"id.token.claim\": \"false\",\n        \"access.token.claim\": \"true\",\n        \"claim.name\": \"roles\",\n        \"jsonType.label\": \"String\"\n      }\n    },\n    {\n      \"name\": \"name\",\n      \"protocol\": \"openid-connect\",\n      \"protocolMapper\": \"oidc-usermodel-attribute-mapper\",\n      \"consentRequired\": false,\n      \"config\": {\n        \"userinfo.token.claim\": \"true\",\n        \"user.attribute\": \"displayName\",\n        \"id.token.claim\": \"true\",\n        \"access.token.claim\": \"true\",\n        \"claim.name\": \"name\",\n        \"jsonType.label\": \"String\"\n      }\n    }\n  ],\n  \"defaultClientScopes\": [\n    \"web-origins\",\n    \"roles\"\n  ],\n  \"optionalClientScopes\": [\n    \"offline_access\"\n  ]\n}"
+				},
+				"url": {
+					"raw": "{{keycloak-base-url}}auth/admin/realms/fcf0kpqr/clients",
+					"host": [
+						"{{keycloak-base-url}}auth"
+					],
+					"path": [
+						"admin",
+						"realms",
+						"fcf0kpqr",
+						"clients"
+					]
+				},
+				"description": "Create a new keycloak Client"
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessToken",
+				"value": "{{accessToken}}",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "93c37677-90a1-440a-b394-b48545a1a0df",
+				"type": "text/javascript",
+				"exec": [
+					"function getvar(variableName) {",
+					"    let value = pm.variables.get(variableName);",
+					"    if (!value) throw new Error(",
+					"        `Variable '${variableName}' is not defined.`);",
+					"    return value;",
+					"}",
+					"",
+					"let tokenUrl = getvar('keycloak-base-url')+'auth/realms/fcf0kpqr/protocol/openid-connect/token';",
+					"let accountId = getvar('service-account-id');",
+					"let accountSecret = getvar('service-account-secret');",
+					"",
+					"let getTokenRequest = {",
+					"    method: 'POST',",
+					"    url: tokenUrl,",
+					"    header: {",
+					"        'content-type': 'application/x-www-form-urlencoded',",
+					"        'Authorization': 'Basic '+ btoa(accountId+':'+accountSecret)",
+					"    },",
+					" ",
+					"    body: 'grant_type=client_credentials'",
+					"    ",
+					"};",
+					"",
+					"pm.sendRequest(getTokenRequest, (err, response) => {",
+					"    let jsonResponse = response.json(),",
+					"        newAccessToken = jsonResponse.access_token;",
+					"",
+					"    console.log({ err, jsonResponse, newAccessToken })",
+					"",
+					"    pm.environment.set('accessToken', newAccessToken);",
+					"    pm.variables.set('accessToken', newAccessToken);",
+					"});",
+					"",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "2e876258-fae3-4b67-a809-f38fdd598e17",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
