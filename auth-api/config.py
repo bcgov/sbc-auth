@@ -223,6 +223,9 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
 
     NOTIFY_API_URL = 'https://mock-lear-tools.pathfinder.gov.bc.ca/rest/SBC+Notify+API+Reference/2.0.0/api/v1'
 
+    # If any value is present in this flag, starts up a keycloak docker
+    USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)
+
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
     """Production environment configuration."""

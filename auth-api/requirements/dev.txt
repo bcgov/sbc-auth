@@ -20,3 +20,4 @@ pep8-naming
 autopep8
 pydocstyle
 FreezeGun
+lovely-pytest-docker

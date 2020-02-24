@@ -342,7 +342,7 @@ def test_delete_contact_no_contact_returns_404(client, jwt, session):  # pylint:
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
-def test_get_orgs_for_user(client, jwt, session):  # pylint:disable=unused-argument
+def test_get_orgs_for_user(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that retrieving a list of orgs for a user functions."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -387,7 +387,7 @@ def test_user_authorizations_returns_200(client, jwt, session):  # pylint:disabl
     assert len(rv.json.get('authorizations')) == 0
 
 
-def test_delete_user_with_no_orgs_returns_204(client, jwt, session):  # pylint:disable=unused-argument
+def test_delete_user_with_no_orgs_returns_204(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Test if the user doesn't have any teams/orgs assert status is 204."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -400,7 +400,7 @@ def test_delete_user_with_no_orgs_returns_204(client, jwt, session):  # pylint:d
     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
 
 
-def test_delete_inactive_user_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+def test_delete_inactive_user_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Test if the user doesn't have any teams/orgs assert status is 204."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -425,7 +425,7 @@ def test_delete_unknown_user_returns_404(client, jwt, session):  # pylint:disabl
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
-def test_delete_user_as_only_admin_returns_400(client, jwt, session):  # pylint:disable=unused-argument
+def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Test if the user is the only owner of a team assert status is 400."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
     contact = factory_contact_model()
@@ -452,7 +452,7 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session):  # pylint:
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
-def test_delete_user_is_member_returns_204(client, jwt, session):  # pylint:disable=unused-argument
+def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Test if the user is the member of a team assert status is 204."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
     contact = factory_contact_model()
@@ -489,7 +489,7 @@ def test_delete_user_is_member_returns_204(client, jwt, session):  # pylint:disa
     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
 
 
-def test_delete_user_with_tester_role(client, jwt, session):  # pylint:disable=unused-argument
+def test_delete_user_with_tester_role(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Test delete the user by tester role assert status is 204."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.tester_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')

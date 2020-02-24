@@ -234,7 +234,7 @@ def test_user_find_by_username_missing_username(session):  # pylint: disable=unu
     assert user is None
 
 
-def test_delete_contact_user_link(session, auth_mock):  # pylint:disable=unused-argument
+def test_delete_contact_user_link(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a contact can not be deleted if contact link exists."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
@@ -265,7 +265,7 @@ def test_delete_contact_user_link(session, auth_mock):  # pylint:disable=unused-
     assert exist_contact_link
 
 
-def test_delete_user(session, auth_mock):  # pylint:disable=unused-argument
+def test_delete_user(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
@@ -287,7 +287,7 @@ def test_delete_user(session, auth_mock):  # pylint:disable=unused-argument
         assert org.status_code == 'INACTIVE'
 
 
-def test_delete_user_where_org_has_affiliations(session, auth_mock):  # pylint:disable=unused-argument
+def test_delete_user_where_org_has_affiliations(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
     contact = factory_contact_model()
@@ -317,7 +317,7 @@ def test_delete_user_where_org_has_affiliations(session, auth_mock):  # pylint:d
         assert org.status_code == 'ACTIVE'
 
 
-def test_delete_user_where_user_is_member_on_org(session, auth_mock):  # pylint:disable=unused-argument
+def test_delete_user_where_user_is_member_on_org(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
     # Create a user and org
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
@@ -357,7 +357,7 @@ def test_delete_user_where_user_is_member_on_org(session, auth_mock):  # pylint:
         assert org.status_code == 'INACTIVE'
 
 
-def test_delete_user_where_org_has_another_owner(session, auth_mock):  # pylint:disable=unused-argument
+def test_delete_user_where_org_has_another_owner(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
     # Create a user and org
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
