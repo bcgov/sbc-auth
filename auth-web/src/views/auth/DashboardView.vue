@@ -23,19 +23,20 @@ import { VueConstructor } from 'vue'
     },
     computed: {
       ...mapState('user', ['userProfile']),
-      ...mapState('org', ['currentOrganization']),
-      ...mapGetters('org', ['myOrgMembership'])
+      ...mapState('org', ['currentOrganization', 'currentMembership'])
     },
     methods: {
-      ...mapActions('user', ['getUserProfile'])
+      ...mapActions('user', ['getUserProfile']),
+      ...mapActions('org', ['syncMembership'])
     }
   })
 export default class DashboardView extends Vue {
   private selectedComponent = null
   private readonly userProfile!: User
   private readonly currentOrganization!: Organization
-  private readonly myOrgMembership!: Member
+  private readonly currentMembership!: Member
   private readonly getUserProfile!: (identifier: string) => User
+  private readonly syncMembership!: (orgId: number) => Member
 
   private menu = [
     {
@@ -54,21 +55,24 @@ export default class DashboardView extends Vue {
 
     // Check the current user's team status
     // TODO: For now this means checking their single team, later it will mean checking the active team.
-    this.redirectBasedOnTeamStatus()
+    await this.redirectBasedOnTeamStatus()
   }
 
   setSelectedComponent (selectedComponent: VueConstructor) {
     this.selectedComponent = selectedComponent
   }
 
-  private redirectBasedOnTeamStatus (): void {
+  private async redirectBasedOnTeamStatus (): Promise<void> {
+    // Sync membership first since it may have changed since they signed in (#2483)
+    await this.syncMembership(this.currentOrganization.id)
+
     // If user is pending approval by an admin, redirect to pending approval page
-    if (this.myOrgMembership && this.myOrgMembership.membershipStatus === MembershipStatus.Pending) {
+    if (this.currentMembership && this.currentMembership.membershipStatus === MembershipStatus.Pending) {
       this.$router.push(`/pendingapproval/${this.currentOrganization.name}`)
     }
 
     // If user is not an active member of a team at all, redirect to create team page
-    if (!this.myOrgMembership) {
+    if (!this.currentMembership) {
       this.$router.push('/createaccount')
     }
   }

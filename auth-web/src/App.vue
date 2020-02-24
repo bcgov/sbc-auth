@@ -2,8 +2,8 @@
   <v-app id="app">
     <div class="header-group" ref="headerGroup">
       <sbc-loader :show="showLoading"></sbc-loader>
-      <sbc-header :key="$store.state.refreshKey"></sbc-header>
-      <v-snackbar top color="primary" v-model="showNotification">
+      <sbc-header :key="$store.state.refreshKey" in-auth=true></sbc-header>
+       <v-snackbar top :color="toastType" v-model="showNotification" :timeout="toastTimeout">
         <span v-html="notificationText"></span>
         <v-btn icon @click="showNotification = false">
           <v-icon class="white--text">mdi-close</v-icon>
@@ -19,19 +19,22 @@
 </template>
 
 <script lang="ts">
+import { Component, Mixins } from 'vue-property-decorator'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
+import { Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import BusinessModule from '@/store/modules/business'
-import { Component } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
+import { Event } from '@/models/event'
+import { EventBus } from '@/event-bus'
+import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.vue'
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
-import { SessionStorageKeys } from '@/util/constants'
 import TokenService from 'sbc-common-components/src/services/token.services'
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
@@ -48,46 +51,76 @@ import { getModule } from 'vuex-module-decorators'
   },
   methods: {
     ...mapActions('org', ['syncMembership', 'syncOrganization']),
-    ...mapMutations('org', ['setCurrentAccountSettings'])
+    ...mapMutations('org', ['setCurrentAccountSettings', 'setCurrentOrganization'])
   }
 })
-export default class App extends Vue {
+export default class App extends Mixins(NextPageMixin) {
   private orgStore = getModule(OrgModule, this.$store)
-  private readonly currentAccountSettings!: AccountSettings
   private readonly syncMembership!: (currentAccountId: string) => Promise<Member>
   private readonly syncOrganization!: (currentAccountId: string) => Promise<Organization>
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
+  private readonly setCurrentOrganization!: (org: Organization) => void
   private tokenService = new TokenService()
   private businessStore = getModule(BusinessModule, this.$store)
   showNotification = false
   notificationText = ''
   showLoading = true
+  toastType = 'primary'
+  toastTimeout = 6000
+
+  get signingIn (): boolean {
+    return this.$route.name === 'signin' ||
+           this.$route.name === 'signin-redirect' ||
+           this.$route.name === 'signin-redirect-full'
+  }
 
   private async mounted (): Promise<void> {
     // set keycloak config file's location to the sbc-common-components
     await KeyCloakService.setKeycloakConfigUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
     this.showLoading = false
+
+    EventBus.$on('show-toast', (eventInfo:Event) => {
+      this.showNotification = true
+      this.notificationText = eventInfo.message
+      this.toastType = eventInfo.type
+      this.toastTimeout = eventInfo.timeout
+    })
+    this.$root.$on('accountSyncStarted', async () => {
+      this.showLoading = true
+    })
     if (ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)) {
-      this.$root.$on('accountSyncStarted', async () => {
-        this.showLoading = true
-      })
       await this.tokenService.init()
       this.tokenService.scheduleRefreshTimer()
-
-      this.$root.$on('accountSyncReady', async (currentAccount: AccountSettings) => {
-        if (currentAccount) {
-          const switchingToNewAccount = !this.currentAccountSettings || this.currentAccountSettings.id !== currentAccount.id
-          this.setCurrentAccountSettings(currentAccount)
-          const membership = await this.syncMembership(currentAccount.id)
-          if (membership.membershipStatus === MembershipStatus.Active) {
-            await this.syncOrganization(currentAccount.id)
+    }
+    this.$root.$on('accountSyncReady', async (currentAccount: AccountSettings) => {
+      if (currentAccount) {
+        const switchingToNewAccount = !this.currentAccountSettings || this.currentAccountSettings.id !== currentAccount.id
+        this.setCurrentAccountSettings(currentAccount)
+        const membership = await this.syncMembership(currentAccount.id)
+        if (membership.membershipStatus === MembershipStatus.Active) {
+          await this.syncOrganization(currentAccount.id)
+          if (!this.signingIn) {
+            this.toastType = 'primary'
             this.notificationText = `Switched to account '${currentAccount.label}'`
             this.showNotification = switchingToNewAccount
-            this.showLoading = false
           }
+          this.showLoading = false
+          // if user was in a pending approval page and switched to an active account, take him to home page
+          if (this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
+            this.$router.push(`/home`)
+          }
+        } else if (membership.membershipStatus === MembershipStatus.Pending) {
+          this.setCurrentOrganization({ id: +currentAccount.id, name: currentAccount.label })
+          this.$router.push(`/${Pages.PENDING_APPROVAL}/${currentAccount.label}`)
+          this.showLoading = false
+          return
         }
-      })
-    }
+      }
+
+      if (this.signingIn) {
+        this.redirectAfterLogin()
+      }
+    })
   }
 }
 

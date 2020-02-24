@@ -16,19 +16,19 @@ attrs==19.3.0
 bcrypt==3.1.7
 blinker==1.4
 certifi==2019.11.28
-cffi==1.13.2
+cffi==1.14.0
 chardet==3.0.4
 ecdsa==0.15
 flask-jwt-oidc==0.1.5
-flask-marshmallow==0.10.1
+flask-marshmallow==0.11.0
 flask-restplus==0.13.0
 gunicorn==20.0.4
-idna==2.8
+idna==2.9
 importlib-metadata==1.5.0
 itsdangerous==1.1.0
 jaeger-client==4.3.0
 jsonschema==3.2.0
-marshmallow-sqlalchemy==0.21.0
+marshmallow-sqlalchemy==0.22.2
 marshmallow==3.0.0rc7
 opentracing==2.3.0
 psycopg2-binary==2.8.4
@@ -36,12 +36,12 @@ pyasn1==0.4.8
 pycparser==2.19
 pyrsistent==0.15.7
 python-dateutil==2.8.1
-python-dotenv==0.10.5
+python-dotenv==0.11.0
 python-editor==1.0.4
 python-jose==3.1.0
 python-keycloak==0.18.0
 pytz==2019.3
-requests==2.22.0
+requests==2.23.0
 rsa==4.0
 sentry-sdk==0.14.1
 six==1.14.0
@@ -49,5 +49,5 @@ threadloop==1.0.2
 thrift==0.13.0
 tornado==6.0.3
 urllib3==1.25.8
-zipp==2.1.0
+zipp==3.0.0
 -e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components-2.0.0&subdirectory=python
