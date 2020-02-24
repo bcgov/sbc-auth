@@ -26,7 +26,7 @@ from tests.utilities.factory_utils import (
     factory_product_model, factory_user_model)
 
 
-def test_authorizations_for_account_returns_200(client, jwt, session):  # pylint:disable=unused-argument
+def test_authorizations_for_account_returns_200(app, client, jwt, session):  # pylint:disable=unused-argument
     """Assert authorizations for product returns 200."""
     product_code = 'PPR'
     user = factory_user_model()
