@@ -1,27 +1,24 @@
-name: Auth API BUILD CI
+#Deploy to Test environment after the PR get merged
+name: Auth API CD - deploy to Test
 
 on:
   push:
     branches:
-      - development
+      - master
     paths:
       - "auth-api/**"
 
 env:
   IMAGE_NAME: auth-api-gh
-  TAG_NAME: dev
+  TAG_NAME: test
 
 jobs:
-  auth-api-build:
+  auth-api-test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.7]
     steps:
-      - uses: actions/checkout@v2
       - name: Log into registry
         run: echo "${{ secrets.OPENSHIFT_TOKEN }}" | docker login ${{ secrets.OPENSHIFT_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
-      - name: Pull image
+      - name: Pull base image
         working-directory: ./auth-api
         run: docker pull ${{ secrets.OPENSHIFT_REGISTRY }}/d7eovc-tools/python:3.7
       - name: Build image
@@ -33,10 +30,7 @@ jobs:
       - name: Push image
         working-directory: ./auth-api
         run: |
-          IMAGE_ID=${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME
-          docker push $IMAGE_ID:latest
-          docker image tag $IMAGE_ID:latest $IMAGE_ID:$TAG_NAME
-          docker push $IMAGE_ID:$TAG_NAME
+          docker push ${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME:$TAG_NAME
       - name: Install openshift cli
         working-directory: ./auth-api
         run: |
@@ -50,7 +44,7 @@ jobs:
         working-directory: ./auth-api
         run: |
           oc ${{ secrets.oc_parameters }}
-          oc project ${{ secrets.OPENSHIFT_REPOSITORY_DEV }}
+          oc project ${{ secrets.OPENSHIFT_REPOSITORY_TEST }}
       - name: Install Jq and 1password cli
         working-directory: .
         run: |
@@ -68,5 +62,5 @@ jobs:
       - name: Rollout new deployment
         working-directory: ./auth-api
         run: |
-          oc rollout latest dc/$IMAGE_NAME-${TAG_NAME}
-          oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -w
+          oc rollout latest dc/$IMAGE_NAME-TAG_NAME
+          oc rollout status dc/$IMAGE_NAME-TAG_NAME -w

@@ -3,13 +3,13 @@ init:
     repository: busybox
     tag: 1.31
     pullPolicy: IfNotPresent
-  resources: {}
-    # limits:
-    #   cpu: "10m"
-    #   memory: "32Mi"
-    # requests:
-    #   cpu: "10m"
-    #   memory: "32Mi"
+  resources:
+    limits:
+      cpu: "10m"
+      memory: "3Gi"
+    requests:
+      cpu: "100m"
+      memory: "500mi"
 
 clusterDomain: cluster.local
 

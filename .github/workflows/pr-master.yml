@@ -5,6 +5,11 @@ on:
   pull_request:
     branches:
       - master
+    paths:
+      - "auth-api/**"
+      - "notify-api/**"
+      - "status-api/**"
+      - "auth-web/**"
 
 jobs:
   move-to-test-pr:
