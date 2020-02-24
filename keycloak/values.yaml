@@ -1,0 +1,275 @@
+init:
+  image:
+    repository: busybox
+    tag: 1.31
+    pullPolicy: IfNotPresent
+  resources: {}
+    # limits:
+    #   cpu: "10m"
+    #   memory: "32Mi"
+    # requests:
+    #   cpu: "10m"
+    #   memory: "32Mi"
+
+clusterDomain: cluster.local
+
+## Optionally override the fully qualified name
+# fullnameOverride: keycloak
+
+## Optionally override the name
+# nameOverride: keycloak
+
+keycloak:
+  replicas: 1
+
+  image:
+    repository: jboss/keycloak
+    tag: 7.0.1
+    pullPolicy: IfNotPresent
+
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ##
+    pullSecrets: []
+    # - myRegistrKeySecretName
+
+  hostAliases: []
+  #  - ip: "1.2.3.4"
+  #    hostnames:
+  #      - "my.host.com"
+
+  enableServiceLinks: false
+
+  restartPolicy: Always
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: false
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name:
+
+  securityContext:
+
+  containerSecurityContext:
+    runAsUser: 1003970050
+    runAsNonRoot: true
+
+  ## The path keycloak will be served from. To serve keycloak from the root path, use two quotes (e.g. "").
+  basepath: auth
+
+  ## Additional init containers, e. g. for providing custom themes
+  extraInitContainers: |
+
+  ## Additional sidecar containers, e. g. for a database proxy, such as Google's cloudsql-proxy
+  extraContainers: |
+
+  ## lifecycleHooks defines the container lifecycle hooks
+  lifecycleHooks: |
+    # postStart:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "ls"]
+
+  ## Additional arguments to start command e.g. -Dkeycloak.import= to load a realm
+  extraArgs: ""
+
+  ## Username for the initial Keycloak admin user
+  username: keycloak
+
+  ## Password for the initial Keycloak admin user. Applicable only if existingSecret is not set.
+  ## If not set, a random 10 characters password will be used
+  password: ""
+
+  # Specifies an existing secret to be used for the admin password
+  existingSecret: ""
+
+  # The key in the existing secret that stores the password
+  existingSecretKey: password
+
+  ## jGroups configuration (only for HA deployment)
+  jgroups:
+    discoveryProtocol: dns.DNS_PING
+    discoveryProperties: >
+      "dns_query={{ template "keycloak.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}"
+
+  ## Allows the specification of additional environment variables for Keycloak
+  extraEnv: |
+    - name: PROXY_ADDRESS_FORWARDING
+      value: "true"
+    # - name: KEYCLOAK_LOGLEVEL
+    #   value: DEBUG
+    # - name: WILDFLY_LOGLEVEL
+    #   value: DEBUG
+    # - name: CACHE_OWNERS
+    #   value: "2"
+    # - name: DB_QUERY_TIMEOUT
+    #   value: "60"
+    # - name: DB_VALIDATE_ON_MATCH
+    #   value: true
+    # - name: DB_USE_CAST_FAIL
+    #   value: false
+
+  affinity: |
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              {{- include "keycloak.selectorLabels" . | nindent 10 }}
+            matchExpressions:
+              - key: role
+                operator: NotIn
+                values:
+                  - test
+          topologyKey: kubernetes.io/hostname
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                {{- include "keycloak.selectorLabels" . | nindent 12 }}
+              matchExpressions:
+                - key: role
+                  operator: NotIn
+                  values:
+                    - test
+            topologyKey: failure-domain.beta.kubernetes.io/zone
+
+  nodeSelector: {}
+  priorityClassName: ""
+  tolerations: []
+
+  ## Additional pod labels
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  podLabels: {}
+
+  ## Extra Annotations to be added to pod
+  podAnnotations: {}
+
+  #livenessProbe: |
+   # httpGet:
+   #   path: {{ if ne .Values.keycloak.basepath "" }}/{{ .Values.keycloak.basepath }}{{ end }}/
+   #   port: http
+   # initialDelaySeconds: 300
+   # timeoutSeconds: 5
+  #readinessProbe: |
+   # httpGet:
+   #   path: {{ if ne .Values.keycloak.basepath "" }}/{{ .Values.keycloak.basepath }}{{ end }}/realms/master
+   #  port: http
+   # initialDelaySeconds: 30
+   # timeoutSeconds: 1
+
+  resources: {}
+    # limits:
+    #   cpu: "100m"
+    #   memory: "1024Mi"
+    # requests:
+    #   cpu: "100m"
+    #   memory: "1024Mi"
+
+  ## WildFly CLI configurations. They all end up in the file 'keycloak.cli' configured in the configmap which is
+  ## executed on server startup.
+  cli:
+    enabled: true
+    nodeIdentifier: |
+      {{ .Files.Get "scripts/node-identifier.cli" }}
+
+    logging: |
+      {{ .Files.Get "scripts/logging.cli" }}
+
+    ha: |
+      {{ .Files.Get "scripts/ha.cli" }}
+
+    datasource: |
+      {{ .Files.Get "scripts/datasource.cli" }}
+
+    # Custom CLI script
+    custom: |
+
+  ## Custom startup scripts to run before Keycloak starts up
+  startupScripts: {}
+    # mystartup.sh: |
+    #   #!/bin/sh
+    #
+    #   echo 'Hello from my custom startup script!'
+
+  ## Add additional volumes and mounts, e. g. for custom themes
+  extraVolumes: |
+
+  extraVolumeMounts: |
+
+  ## Add additional ports, eg. for custom admin console
+  extraPorts: |
+
+  podDisruptionBudget: {}
+    # maxUnavailable: 1
+    # minAvailable: 1
+
+  service:
+    annotations: {}
+    # service.beta.kubernetes.io/aws-load-balancer-internal: "0.0.0.0/0"
+
+    labels: {}
+    # key: value
+
+    ## ServiceType
+    ## ref: https://kubernetes.io/docs/user-guide/services/#publishing-services---service-types
+    type: ClusterIP
+
+    ## Optional static port assignment for service type NodePort.
+    # nodePort: 30000
+
+    httpPort: 8080
+    httpNodePort: ""
+
+    httpsPort: 8443
+    httpsNodePort: ""
+
+    # Optional: jGroups port for high availability clustering
+    jgroupsPort: 7600
+
+  ## OpenShift route configuration.
+  ## ref: https://docs.openshift.com/container-platform/3.11/architecture/networking/routes.html
+  route:
+    enabled: true
+    path: /
+
+    annotations:
+      kubernetes.io/tls-acme: "true"
+      haproxy.router.openshift.io/disable_cookies: "true"
+      haproxy.router.openshift.io/balance: roundrobin
+
+    labels: {}
+      # key: value
+
+    # Host name for the route
+    host:
+      auth-keycloak-dev.pathfinder.gov.bc.ca
+
+    # TLS configuration
+    tls:
+      enabled: true
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+
+  ## Persistence configuration
+  persistence:
+    # If true, the Postgres chart is deployed
+    deployPostgres: false
+
+    # The database vendor. Can be either "postgres", "mysql", "mariadb", or "h2"
+    dbVendor: postgres
+
+    ## The following values only apply if "deployPostgres" is set to "false"
+    dbName: keycloak
+    dbHost: postgresql-keycloak-dev
+    dbPort: 5432
+
+    ## Database Credentials are loaded from a Secret residing in the same Namespace as keycloak.
+    ## The Chart can read credentials from an existing Secret OR it can provision its own Secret.
+
+    ## Specify existing Secret
+    # If set, specifies the Name of an existing Secret to read db credentials from.
+    existingSecret: "postgresql-keycloak-dev-secret"
+    existingSecretPasswordKey: "DATABASE_PASSWORD"  # read keycloak db password from existingSecret under this Key
+    existingSecretUsernameKey: "DATABASE_USER"  # read keycloak db user from existingSecret under this Key
