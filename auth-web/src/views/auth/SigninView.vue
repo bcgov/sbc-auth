@@ -1,5 +1,9 @@
 <template>
-  <sbc-signin :idp-hint="idpHint"></sbc-signin>
+  <sbc-signin
+    :idp-hint="idpHint"
+    @keycloak-session-ready="updateHeader()"
+    @sync-user-profile-ready="syncUserProfile()"
+  ></sbc-signin>
 </template>
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
@@ -44,11 +48,6 @@ export default class Signin extends Mixins(NextPageMixin) {
   @Prop() redirectUrl: string
 
   private async mounted () {
-    // refreshing the header once the token is receieved from the common component
-    this.$root.$on('keycloakSessionReady', async () => {
-      this.$store.commit('updateHeader')
-      this.loadUserInfo()
-    })
     // Set up a listener for the account sync event from SbcHeader
     // This event signals that the current account has been loaded, and we are ready to sync against it
     this.$root.$on('accountSyncReady', async (currentAccount: AccountSettings) => {
@@ -62,11 +61,6 @@ export default class Signin extends Mixins(NextPageMixin) {
       if (this.$route.name === 'signin' || this.$route.name === 'signin-redirect') {
         this.redirectToNext()
       }
-    })
-
-    // sync user profile once the signin completed from sbc-common-component
-    this.$root.$on('syncUserProfileReady', async () => {
-      await this.syncUserProfile()
     })
   }
 
@@ -85,6 +79,12 @@ export default class Signin extends Mixins(NextPageMixin) {
         this.$router.push(this.getNextPageUrl())
       }
     }
+  }
+
+  updateHeader () {
+    // refreshing the header once the token is receieved from the common component
+    this.$store.commit('updateHeader')
+    this.loadUserInfo()
   }
 }
 </script>
