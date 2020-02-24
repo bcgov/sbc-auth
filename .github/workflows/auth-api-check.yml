@@ -14,6 +14,9 @@ jobs:
     env:
       FLASK_ENV: "testing"
       DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+
+      USE_TEST_KEYCLOAK_DOCKER: "YES"
+
       JWT_OIDC_ISSUER: "http://localhost:8081/auth/realms/demo"
       JWT_OIDC_WELL_KNOWN_CONFIG: "http://localhost:8081/auth/realms/demo/.well-known/openid-configuration"
       JWT_OIDC_ALGORITHMS: "RS256"
@@ -53,10 +56,6 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Set up a Demo realm of Keycloak
-        working-directory: ./auth-api/tests/docker
-        run: |
-          ./run.sh
       - name: Install dependencies
         working-directory: ./auth-api
         run: |
@@ -77,7 +76,3 @@ jobs:
           pip install .
           export PYTHONPATH=./src/
           pytest --strict -p no:warnings --cov=src/auth_api --cov-report xml --cov-report term
-      - name: Shutdown docker-compose
-        working-directory: ./auth-api/tests/docker
-        run: |
-          docker-compose down
