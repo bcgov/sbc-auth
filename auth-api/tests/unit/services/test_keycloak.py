@@ -63,6 +63,7 @@ def test_keycloak_add_user(app):
         assert user.get('username') == ADD_USER_REQUEST.get('username')
         KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
 
+
 def test_keycloak_add_user_duplicate_email():
     """Add user with duplicate email. Assert response is None, error code is data conflict."""
     # First delete the user if it exists
@@ -198,7 +199,9 @@ def test_join_public_users_group(app, session):
         KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
         user = KEYCLOAK_SERVICE.get_user_by_username(ADD_USER_REQUEST.get('username'))
         user_id = user.get('id')
-        KEYCLOAK_SERVICE.join_public_users_group({'sub': user_id, 'loginSource': PASSCODE, 'realm_access': {'roles': []}})
+        KEYCLOAK_SERVICE.join_public_users_group({'sub': user_id,
+                                                  'loginSource': PASSCODE,
+                                                  'realm_access': {'roles': []}})
         # Get the user groups and verify the public_users group is in the list
         user_groups = KeycloakConfig().get_keycloak_admin().get_user_groups(user_id=user_id)
         groups = []
