@@ -13,11 +13,11 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import SbcSignin from 'sbc-common-components/src/components/SbcSignin.vue'
 import { User } from '@/models/user'
-import { UserInfo } from 'sbc-common-components/src/models/userInfo'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 
@@ -45,7 +45,7 @@ export default class Signin extends Mixins(NextPageMixin) {
   private readonly syncMembership!: (currentAccount: string) => Promise<Member>
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
   private readonly setRedirectAfterLoginUrl!: (url: string) => void
-  private readonly loadUserInfo!: () => UserInfo
+  private readonly loadUserInfo!: () => KCUserProfile
 
   @Prop({ default: 'bcsc' }) idpHint: string
   @Prop({ default: '' }) redirectUrl: string

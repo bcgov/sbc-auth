@@ -1,9 +1,9 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import { User } from '@/models/user'
-import { UserInfo } from 'sbc-common-components/src/models/userInfo'
 import UserService from '@/services/user.services'
 
 export interface UserTerms {
@@ -16,7 +16,7 @@ export interface UserTerms {
   namespaced: true
 })
 export default class UserModule extends VuexModule {
-  currentUser: UserInfo = undefined
+  currentUser: KCUserProfile = undefined
   userProfile: User = undefined
   userContact: Contact = undefined
   redirectAfterLoginUrl: string = ''
@@ -40,7 +40,7 @@ export default class UserModule extends VuexModule {
   }
 
   @Mutation
-  public setCurrentUser (currentUser: UserInfo) {
+  public setCurrentUser (currentUser: KCUserProfile) {
     this.currentUser = currentUser
   }
 
