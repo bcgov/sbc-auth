@@ -135,7 +135,6 @@ class KeycloakService:
         # Delete User
         if user_id_keycloak is not None:
             try:
-                print('-----', KeycloakConfig().get_keycloak_admin(), user_id_keycloak)
                 response = KeycloakConfig().get_keycloak_admin().delete_user(user_id_keycloak)
                 return response
             except Exception as err:

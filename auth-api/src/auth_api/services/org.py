@@ -20,6 +20,7 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
@@ -239,4 +240,15 @@ class Org:
             # fix for https://github.com/bcgov/entity/issues/1951   # noqa:E501
             org.members = list(
                 filter(lambda member: (member.user_id == user_id and (member.status in VALID_STATUSES)), org.members))
+        return orgs
+
+    @staticmethod
+    def search_orgs(**kwargs):
+        """Search for orgs based on input parameters."""
+        orgs = {'orgs': []}
+        if kwargs.get('business_identifier', None):
+            affiliation: AffiliationModel = AffiliationModel.\
+                find_affiliations_by_business_identifier(kwargs.get('business_identifier'))
+            if affiliation:
+                orgs['orgs'].append(Org(OrgModel.find_by_org_id(affiliation.org_id)).as_dict())
         return orgs
