@@ -15,8 +15,8 @@
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Role } from '@/util/constants'
-import { UserInfo } from '@/models/userInfo'
 import Vue from 'vue'
 import { mapState } from 'vuex'
 
@@ -26,7 +26,7 @@ import { mapState } from 'vuex'
   }
 })
 export default class UnauthorizedView extends Vue {
-  readonly currentUser!: UserInfo
+  readonly currentUser!: KCUserProfile
   errorMessage : string = ''
   isStaff: boolean = false
 

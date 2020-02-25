@@ -56,11 +56,12 @@ ADD_USER_REQUEST_SAME_EMAIL = {
 KEYCLOAK_SERVICE = KeycloakService()
 
 
-def test_keycloak_add_user():
+def test_keycloak_add_user(app):
     """Add user to Keycloak. Assert return a user with the same username as the username in request."""
-    user = KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
-    assert user.get('username') == ADD_USER_REQUEST.get('username')
-    KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
+    with app.app_context():
+        user = KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
+        assert user.get('username') == ADD_USER_REQUEST.get('username')
+        KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
 
 
 def test_keycloak_add_user_duplicate_email():
@@ -192,20 +193,23 @@ def test_keycloak_logout_wrong_refresh_token(session):
     KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
 
 
-def test_join_public_users_group(session):
+def test_join_public_users_group(app, session):
     """Test the public_users group membership for public users."""
-    KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
-    user = KEYCLOAK_SERVICE.get_user_by_username(ADD_USER_REQUEST.get('username'))
-    user_id = user.get('id')
-    KEYCLOAK_SERVICE.join_public_users_group({'sub': user_id, 'loginSource': PASSCODE, 'realm_access': {'roles': []}})
-    # Get the user groups and verify the public_users group is in the list
-    user_groups = KeycloakConfig().get_keycloak_admin().get_user_groups(user_id=user_id)
-    groups = []
-    for group in user_groups:
-        groups.append(group.get('name'))
-    assert GROUP_PUBLIC_USERS in groups
+    with app.app_context():
+        KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
+        user = KEYCLOAK_SERVICE.get_user_by_username(ADD_USER_REQUEST.get('username'))
+        user_id = user.get('id')
+        KEYCLOAK_SERVICE.join_public_users_group({'sub': user_id,
+                                                  'loginSource': PASSCODE,
+                                                  'realm_access': {'roles': []}})
+        # Get the user groups and verify the public_users group is in the list
+        user_groups = KeycloakConfig().get_keycloak_admin().get_user_groups(user_id=user_id)
+        groups = []
+        for group in user_groups:
+            groups.append(group.get('name'))
+        assert GROUP_PUBLIC_USERS in groups
 
-    KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
+        KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
 
 
 def test_join_public_users_group_for_staff_users(session):

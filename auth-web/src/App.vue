@@ -64,6 +64,7 @@ export default class App extends Mixins(NextPageMixin) {
   private readonly syncOrganization!: (currentAccountId: string) => Promise<Organization>
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
   private readonly setCurrentOrganization!: (org: Organization) => void
+  private tokenService = new TokenService()
   private businessStore = getModule(BusinessModule, this.$store)
   private showNotification = false
   private notificationText = ''
@@ -104,6 +105,8 @@ export default class App extends Mixins(NextPageMixin) {
   }
 
   private async mounted (): Promise<void> {
+    // set keycloak config file's location to the sbc-common-components
+    await KeyCloakService.setKeycloakConfigUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
     this.showLoading = false
 
     this.setupNavigationBar()
@@ -118,9 +121,8 @@ export default class App extends Mixins(NextPageMixin) {
       this.showLoading = true
     })
     if (ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)) {
-      let tokenService = new TokenService()
-      await tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
-      tokenService.scheduleRefreshTimer()
+      await this.tokenService.init()
+      this.tokenService.scheduleRefreshTimer()
     }
     this.$root.$on('accountSyncReady', async (currentAccount: AccountSettings) => {
       if (currentAccount) {
