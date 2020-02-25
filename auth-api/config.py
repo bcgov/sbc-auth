@@ -166,9 +166,9 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     # JWT OIDC settings
     # JWT_OIDC_TEST_MODE will set jwt_manager to use
     JWT_OIDC_TEST_MODE = True
-    JWT_OIDC_TEST_AUDIENCE = os.getenv('JWT_OIDC_AUDIENCE')
-    JWT_OIDC_TEST_CLIENT_SECRET = os.getenv('JWT_OIDC_CLIENT_SECRET')
-    JWT_OIDC_TEST_ISSUER = os.getenv('JWT_OIDC_ISSUER')
+    JWT_OIDC_TEST_AUDIENCE = os.getenv('JWT_OIDC_TEST_AUDIENCE')
+    JWT_OIDC_TEST_CLIENT_SECRET = os.getenv('JWT_OIDC_TEST_CLIENT_SECRET')
+    JWT_OIDC_TEST_ISSUER = os.getenv('JWT_OIDC_TEST_ISSUER')
     JWT_OIDC_TEST_KEYS = {
         "keys": [
             {
@@ -217,6 +217,13 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     NrQw+2OdQACBJiEHsdZzAkBcsTk7frTH4yGx0VfHxXDPjfTj4wmD6gZIlcIr9lZg
     4H8UZcVFN95vEKxJiLRjAmj6g273pu9kK4ymXNEjWWJn
     -----END RSA PRIVATE KEY-----"""
+
+    KEYCLOAK_ADMIN_USERNAME = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')
+    KEYCLOAK_ADMIN_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
+    KEYCLOAK_AUTH_AUDIENCE = os.getenv('KEYCLOAK_TEST_AUTH_AUDIENCE')
+    KEYCLOAK_AUTH_CLIENT_SECRET = os.getenv('KEYCLOAK_TEST_AUTH_CLIENT_SECRET')
+    KEYCLOAK_BASE_URL = os.getenv('KEYCLOAK_TEST_BASE_URL')
+    KEYCLOAK_REALMNAME = os.getenv('KEYCLOAK_TEST_REALMNAME')
 
     # Legal-API URL
     LEGAL_API_URL = 'https://mock-lear-tools.pathfinder.gov.bc.ca/rest/legal-api/0.82/api/v1'
