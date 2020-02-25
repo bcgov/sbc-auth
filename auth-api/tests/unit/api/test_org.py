@@ -699,3 +699,47 @@ def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disabl
     affiliations = json.loads(rv.data)
     assert affiliations['entities'][0]['businessIdentifier'] == TestEntityInfo.entity_lear_mock['businessIdentifier']
     assert affiliations['entities'][1]['businessIdentifier'] == TestEntityInfo.entity_lear_mock2['businessIdentifier']
+
+
+def test_search_orgs_for_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that search org with affiliation works."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
+                headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    client.post('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers,
+                data=json.dumps(TestAffliationInfo.affiliation3), content_type='application/json')
+    # Create a system token
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.get('/api/v1/orgs?affiliation={}'.format(TestAffliationInfo.affiliation3.get('businessIdentifier')),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
+
+
+def test_unauthorized_search_orgs_for_affiliation(client, jwt, session,
+                                                  keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that search org with affiliation works."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
+                headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    client.post('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers,
+                data=json.dumps(TestAffliationInfo.affiliation3), content_type='application/json')
+    # Create a system token
+    rv = client.get('/api/v1/orgs?affiliation={}'.format(TestAffliationInfo.affiliation3.get('businessIdentifier')),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
