@@ -1,6 +1,7 @@
 <template>
   <sbc-signin
     :idp-hint="idpHint"
+    :iredirect-url-login-fail="redirectUrlLoginFail"
     @keycloak-session-ready="updateHeader()"
     @sync-user-profile-ready="syncUserProfile()"
   ></sbc-signin>
@@ -56,40 +57,13 @@ export default class Signin extends Mixins(NextPageMixin) {
     } else {
       this.setRedirectAfterLoginUrl(this.idpHint === 'idir' ? 'searchbusiness' : '')
     }
-
-    // Initialize keycloak session
-    const kcInit = await this.userStore.initKeycloak(this.idpHint)
-    await new Promise((resolve, reject) => {
-      kcInit
-        .success(async authenticated => {
-          if (authenticated) {
-            this.initializeSession()
-            // Make a POST to the users endpoint if it's bcsc (only need for BCSC)
-            if (this.idpHint === 'bcsc') {
-              await this.syncUserProfile()
-              // eslint-disable-next-line no-console
-              console.info('[SignIn.vue]Logged in User.Starting refreshTimer')
-              var self = this
-              let tokenService = new TokenService()
-              tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`).then(function (success) {
-                tokenService.scheduleRefreshTimer()
-              })
-            }
-            resolve()
-          }
-        })
-        .error(() => {
-          if (this.redirectUrlLoginFail) {
-            window.location.assign(decodeURIComponent(this.redirectUrlLoginFail))
-          }
-        })
-    })
-    this.$store.commit('updateHeader') // Force a remount of header so it can retrieve account (now that is has token)
   }
+
   updateHeader () {
     // refreshing the header once the token is receieved from the common component
     this.$store.commit('updateHeader')
     this.loadUserInfo()
+  }
 }
 </script>
 
