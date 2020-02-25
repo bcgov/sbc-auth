@@ -28,6 +28,7 @@ import BusinessModule from '@/store/modules/business'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
+import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.vue'
@@ -59,6 +60,7 @@ export default class App extends Mixins(NextPageMixin) {
   private readonly syncOrganization!: (currentAccountId: string) => Promise<Organization>
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
   private readonly setCurrentOrganization!: (org: Organization) => void
+  private tokenService = new TokenService()
   private businessStore = getModule(BusinessModule, this.$store)
   showNotification = false
   notificationText = ''
@@ -73,6 +75,8 @@ export default class App extends Mixins(NextPageMixin) {
   }
 
   private async mounted (): Promise<void> {
+    // set keycloak config file's location to the sbc-common-components
+    await KeyCloakService.setKeycloakConfigUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
     this.showLoading = false
 
     EventBus.$on('show-toast', (eventInfo:Event) => {
@@ -85,9 +89,8 @@ export default class App extends Mixins(NextPageMixin) {
       this.showLoading = true
     })
     if (ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)) {
-      let tokenService = new TokenService()
-      await tokenService.initUsingUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
-      tokenService.scheduleRefreshTimer()
+      await this.tokenService.init()
+      this.tokenService.scheduleRefreshTimer()
     }
     this.$root.$on('accountSyncReady', async (currentAccount: AccountSettings) => {
       if (currentAccount) {
