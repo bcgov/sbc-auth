@@ -20,6 +20,7 @@ from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
+from .entity import Entity as EntityModel
 
 
 class Affiliation(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
@@ -48,3 +49,8 @@ class Affiliation(BaseModel):  # pylint: disable=too-few-public-methods # Tempor
     def find_affiliations_by_org_id(cls, org_id: int):
         """Return the affiliations with the provided org id."""
         return cls.query.filter_by(org_id=org_id).all()
+
+    @classmethod
+    def find_affiliations_by_business_identifier(cls, business_identifier: str):
+        """Return the affiliation with the provided business identifier."""
+        return cls.query.join(EntityModel).filter(EntityModel.business_identifier == business_identifier).one_or_none()
