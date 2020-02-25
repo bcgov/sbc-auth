@@ -1,9 +1,9 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
-import KeycloakService from '@/services/keycloak.services'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import { User } from '@/models/user'
-import { UserInfo } from '@/models/userInfo'
 import UserService from '@/services/user.services'
 
 export interface UserTerms {
@@ -16,7 +16,7 @@ export interface UserTerms {
   namespaced: true
 })
 export default class UserModule extends VuexModule {
-  currentUser: UserInfo = undefined
+  currentUser: KCUserProfile = undefined
   userProfile: User = undefined
   userContact: Contact = undefined
   redirectAfterLoginUrl: string = ''
@@ -40,7 +40,7 @@ export default class UserModule extends VuexModule {
   }
 
   @Mutation
-  public setCurrentUser (currentUser: UserInfo) {
+  public setCurrentUser (currentUser: KCUserProfile) {
     this.currentUser = currentUser
   }
 
@@ -49,17 +49,10 @@ export default class UserModule extends VuexModule {
     this.userContact = userContact
   }
 
-  @Action({ rawError: true })
-  public async initKeycloak (idpHint:string) {
-    return KeycloakService.init(idpHint)
-  }
-
   @Action({ commit: 'setCurrentUser' })
-  public initializeSession () {
-    // Set values to session storage
-    KeycloakService.initSession()
+  public loadUserInfo () {
     // Load User Info
-    return KeycloakService.getUserInfo()
+    return KeyCloakService.getUserInfo()
   }
 
   @Action({ commit: 'setUserProfile' })
@@ -75,7 +68,7 @@ export default class UserModule extends VuexModule {
     const userResponse = await UserService.syncUserProfile()
     if (userResponse && userResponse.data && (userResponse.status === 200 || userResponse.status === 201)) {
       // Refresh token to get the new token with additional roles
-      KeycloakService.refreshToken()
+      KeyCloakService.refreshToken()
       this.context.commit('setUserProfile', userResponse.data)
     }
 
@@ -117,7 +110,7 @@ export default class UserModule extends VuexModule {
 
   @Action({ rawError: true })
   public async logout (redirectUrl: string) {
-    await KeycloakService.logout(redirectUrl)
+    await KeyCloakService.logout(redirectUrl)
   }
 
   @Action({})
