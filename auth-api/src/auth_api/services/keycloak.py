@@ -13,11 +13,10 @@
 # limitations under the License.
 """Utils for keycloak administration."""
 
-import os
 from typing import Dict
 
 import requests
-from flask import g
+from flask import g, current_app
 from keycloak import KeycloakAdmin, KeycloakOpenID
 from keycloak.exceptions import KeycloakGetError
 
@@ -44,18 +43,19 @@ class KeycloakConfig(metaclass=Singleton):  # pylint: disable=too-few-public-met
 
     def __init__(self):
         """Private constructor."""
-        self.__keycloak_admin = KeycloakAdmin(server_url=os.getenv('KEYCLOAK_BASE_URL') + '/auth/',
-                                              username=os.getenv('KEYCLOAK_ADMIN_CLIENTID'),
-                                              password=os.getenv('KEYCLOAK_ADMIN_SECRET'),
-                                              realm_name=os.getenv('KEYCLOAK_REALMNAME'),
-                                              client_id=os.getenv('KEYCLOAK_ADMIN_CLIENTID'),
-                                              client_secret_key=os.getenv('KEYCLOAK_ADMIN_SECRET'),
+        config = current_app.config
+        self.__keycloak_admin = KeycloakAdmin(server_url=config.get('KEYCLOAK_BASE_URL') + '/auth/',
+                                              username=config.get('KEYCLOAK_ADMIN_USERNAME'),
+                                              password=config.get('KEYCLOAK_ADMIN_SECRET'),
+                                              realm_name=config.get('KEYCLOAK_REALMNAME'),
+                                              client_id=config.get('KEYCLOAK_ADMIN_USERNAME'),
+                                              client_secret_key=config.get('KEYCLOAK_ADMIN_SECRET'),
                                               verify=True)
 
-        self.__keycloak_openid = KeycloakOpenID(server_url=os.getenv('KEYCLOAK_BASE_URL') + '/auth/',
-                                                realm_name=os.getenv('KEYCLOAK_REALMNAME'),
-                                                client_id=os.getenv('KEYCLOAK_AUTH_AUDIENCE'),
-                                                client_secret_key=os.getenv('KEYCLOAK_AUTH_CLIENT_SECRET'),
+        self.__keycloak_openid = KeycloakOpenID(server_url=config.get('KEYCLOAK_BASE_URL') + '/auth/',
+                                                realm_name=config.get('KEYCLOAK_REALMNAME'),
+                                                client_id=config.get('KEYCLOAK_AUTH_AUDIENCE'),
+                                                client_secret_key=config.get('KEYCLOAK_AUTH_CLIENT_SECRET'),
                                                 verify=True)
 
 
@@ -205,8 +205,9 @@ class KeycloakService:
     @staticmethod
     def _add_user_to_group(user_id: str, group_name: str):
         """Add user to the keycloak group."""
-        base_url = os.getenv('KEYCLOAK_BASE_URL')
-        realm = os.getenv('KEYCLOAK_REALMNAME')
+        config = current_app.config
+        base_url = config.get('KEYCLOAK_BASE_URL')
+        realm = config.get('KEYCLOAK_REALMNAME')
         # Create an admin token
         admin_token = KeycloakService._get_admin_token()
         # Get the '$group_name' group
@@ -224,8 +225,9 @@ class KeycloakService:
     @staticmethod
     def _remove_user_from_group(user_id: str, group_name: str):
         """Remove user from the keycloak group."""
-        base_url = os.getenv('KEYCLOAK_BASE_URL')
-        realm = os.getenv('KEYCLOAK_REALMNAME')
+        config = current_app.config
+        base_url = config.get('KEYCLOAK_BASE_URL')
+        realm = config.get('KEYCLOAK_REALMNAME')
         # Create an admin token
         admin_token = KeycloakService._get_admin_token()
         # Get the '$group_name' group
@@ -243,21 +245,23 @@ class KeycloakService:
     @staticmethod
     def _get_admin_token():
         """Create an admin token."""
-        base_url = os.getenv('KEYCLOAK_BASE_URL')
-        realm = os.getenv('KEYCLOAK_REALMNAME')
+        config = current_app.config
+        base_url = config.get('KEYCLOAK_BASE_URL')
+        realm = config.get('KEYCLOAK_REALMNAME')
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
         token_url = f'{base_url}/auth/realms/{realm}/protocol/openid-connect/token'
         response = requests.post(token_url, data='client_id={}&grant_type=client_credentials&client_secret={}'.format(
-            os.getenv('KEYCLOAK_ADMIN_CLIENTID'), os.getenv('KEYCLOAK_ADMIN_SECRET')), headers=headers)
+            config.get('KEYCLOAK_ADMIN_USERNAME'), config.get('KEYCLOAK_ADMIN_SECRET')), headers=headers)
         return response.json().get('access_token')
 
     @staticmethod
     def _get_group_id(admin_token: str, group_name: str):
         """Get a group id for the group name."""
-        base_url = os.getenv('KEYCLOAK_BASE_URL')
-        realm = os.getenv('KEYCLOAK_REALMNAME')
+        config = current_app.config
+        base_url = config.get('KEYCLOAK_BASE_URL')
+        realm = config.get('KEYCLOAK_REALMNAME')
         get_group_url = f'{base_url}/auth/admin/realms/{realm}/groups?search={group_name}'
         headers = {
             'Content-Type': 'application/json',

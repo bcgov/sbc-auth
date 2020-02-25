@@ -15,14 +15,17 @@
 
 Test Utility for creating test scenarios.
 """
-import os
 import uuid
 from enum import Enum
 
+from config import get_named_config
+
+CONFIG = get_named_config('testing')
+
 JWT_HEADER = {
-    'alg': os.getenv('JWT_OIDC_ALGORITHMS'),
+    'alg': CONFIG.JWT_OIDC_ALGORITHMS,
     'typ': 'JWT',
-    'kid': os.getenv('JWT_OIDC_AUDIENCE')
+    'kid': CONFIG.JWT_OIDC_AUDIENCE
 }
 
 
@@ -30,7 +33,7 @@ class TestJwtClaims(dict, Enum):
     """Test scenarios of jwt claims."""
 
     no_role = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302065',
         'firstname': 'Test',
         'lastname': 'User 2',
@@ -49,7 +52,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     edit_role = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',
         'lastname': 'User',
@@ -62,7 +65,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     edit_role_2 = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302075',
         'firstname': 'Test',
         'lastname': 'User 2',
@@ -75,7 +78,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     view_role = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',
         'lastname': 'User',
@@ -88,7 +91,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     staff_role = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',
         'lastname': 'User',
@@ -101,7 +104,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     system_role = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',
         'lastname': 'User',
@@ -115,7 +118,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     passcode = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',
         'lastname': 'User',
@@ -130,7 +133,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     updated_test = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Updated_Test',
         'lastname': 'User',
@@ -141,7 +144,7 @@ class TestJwtClaims(dict, Enum):
         }
     }
     user_test = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04',
         'firstname': 'Test',
         'lastname': 'User',
@@ -156,7 +159,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     tester_role = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',
         'lastname': 'User',
@@ -172,7 +175,7 @@ class TestJwtClaims(dict, Enum):
     def get_test_user(sub):
         """Return test user with subject from argument."""
         return {
-            'iss': os.getenv('JWT_OIDC_ISSUER'),
+            'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
             'sub': sub,
             'firstname': 'Test',
             'lastname': 'User',
