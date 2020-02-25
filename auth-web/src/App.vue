@@ -1,15 +1,16 @@
 <template>
   <v-app id="app">
     <div class="header-group" ref="headerGroup">
-      <sbc-loader :show="showLoading"></sbc-loader>
-      <sbc-header :key="$store.state.refreshKey" in-auth=true></sbc-header>
+      <sbc-loader :show="showLoading" />
+      <sbc-header :key="$store.state.refreshKey" in-auth=true />
        <v-snackbar top :color="toastType" v-model="showNotification" :timeout="toastTimeout">
         <span v-html="notificationText"></span>
         <v-btn icon @click="showNotification = false">
           <v-icon class="white--text">mdi-close</v-icon>
         </v-btn>
       </v-snackbar>
-      <pay-system-alert></pay-system-alert>
+      <navigation-bar :configuration="navigationBarConfig" />
+      <pay-system-alert />
     </div>
     <div class="app-body">
       <router-view/>
@@ -28,6 +29,9 @@ import BusinessModule from '@/store/modules/business'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
+import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
+import NavigationBar from 'sbc-common-components/src/components/NavigationBar.vue'
+import { NavigationBarConfig } from 'sbc-common-components/src/models/NavigationBarConfig'
 import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.vue'
@@ -43,7 +47,8 @@ import { getModule } from 'vuex-module-decorators'
     SbcHeader,
     SbcFooter,
     SbcLoader,
-    PaySystemAlert
+    PaySystemAlert,
+    NavigationBar
   },
   computed: {
     ...mapState('org', ['currentAccountSettings'])
@@ -60,11 +65,18 @@ export default class App extends Mixins(NextPageMixin) {
   private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
   private readonly setCurrentOrganization!: (org: Organization) => void
   private businessStore = getModule(BusinessModule, this.$store)
-  showNotification = false
-  notificationText = ''
-  showLoading = true
-  toastType = 'primary'
-  toastTimeout = 6000
+  private showNotification = false
+  private notificationText = ''
+  private showLoading = true
+  private toastType = 'primary'
+  private toastTimeout = 6000
+  private navigationBarConfig: NavigationBarConfig = {
+    titleItem: {
+      name: '',
+      url: ''
+    },
+    menuItems: []
+  }
 
   get signingIn (): boolean {
     return this.$route.name === 'signin' ||
@@ -72,8 +84,29 @@ export default class App extends Mixins(NextPageMixin) {
            this.$route.name === 'signin-redirect-full'
   }
 
+  private setupNavigationBar (): void {
+    this.navigationBarConfig = {
+      titleItem: {
+        name: 'Business Registries',
+        url: `/home`
+      },
+      menuItems: [
+        {
+          name: 'Manage Businesses',
+          url: `/account/${this.currentOrganization.id || ''}/business`
+        },
+        {
+          name: 'Start a Business',
+          url: `/tbd`
+        }
+      ]
+    }
+  }
+
   private async mounted (): Promise<void> {
     this.showLoading = false
+
+    this.setupNavigationBar()
 
     EventBus.$on('show-toast', (eventInfo:Event) => {
       this.showNotification = true
