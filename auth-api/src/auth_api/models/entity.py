@@ -45,7 +45,7 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods
     @classmethod
     def find_by_business_identifier(cls, business_identifier):
         """Return the first entity with the provided business identifier."""
-        return cls.query.filter_by(business_identifier=business_identifier).first()
+        return cls.query.filter_by(business_identifier=business_identifier).one_or_none()
 
     @classmethod
     def create_from_dict(cls, entity_info: dict):
