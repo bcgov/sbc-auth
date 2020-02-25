@@ -4,8 +4,8 @@ import { CreateRequestBody as CreateOrgRequestBody, Member, Organization, Update
 import { AccountSettings } from '@/models/account-settings'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import OrgService from '@/services/org.services'
-import { UserInfo } from 'sbc-common-components/src/models/userInfo'
 import UserService from '@/services/user.services'
 
 @Module({
@@ -27,7 +27,7 @@ export default class OrgModule extends VuexModule {
   tokenError = false
 
   get myOrgMembership (): Member {
-    const currentUser: UserInfo = this.context.rootState.user.currentUser
+    const currentUser: KCUserProfile = this.context.rootState.user.currentUser
     const orgMembers: Member[] = [...this.context.rootState.org.activeOrgMembers, ...this.context.rootState.org.pendingOrgMembers]
     if (orgMembers && currentUser) {
       return orgMembers.find(member => member.user.username === currentUser.userName)
