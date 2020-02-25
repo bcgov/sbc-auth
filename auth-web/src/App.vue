@@ -109,8 +109,6 @@ export default class App extends Mixins(NextPageMixin) {
     await KeyCloakService.setKeycloakConfigUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
     this.showLoading = false
 
-    this.setupNavigationBar()
-
     EventBus.$on('show-toast', (eventInfo:Event) => {
       this.showNotification = true
       this.notificationText = eventInfo.message
@@ -148,6 +146,7 @@ export default class App extends Mixins(NextPageMixin) {
           return
         }
       }
+      this.setupNavigationBar()
 
       if (this.signingIn) {
         this.redirectAfterLogin()
