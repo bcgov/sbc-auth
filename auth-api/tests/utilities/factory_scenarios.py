@@ -23,9 +23,9 @@ from config import get_named_config
 CONFIG = get_named_config('testing')
 
 JWT_HEADER = {
-    'alg': CONFIG.JWT_OIDC_ALGORITHMS,
+    'alg': CONFIG.JWT_OIDC_TEST_ALGORITHMS,
     'typ': 'JWT',
-    'kid': CONFIG.JWT_OIDC_AUDIENCE
+    'kid': CONFIG.JWT_OIDC_TEST_AUDIENCE
 }
 
 
