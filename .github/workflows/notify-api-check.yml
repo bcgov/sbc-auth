@@ -8,8 +8,12 @@ on:
       - "notify-api/**"
 
 jobs:
-  notify-api-pr:
+  notify-api-check:
     runs-on: ubuntu-latest
+
+    env:
+      DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+
     strategy:
       matrix:
         python-version: [3.7]
