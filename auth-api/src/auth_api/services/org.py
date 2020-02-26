@@ -13,7 +13,7 @@
 # limitations under the License.
 """Service for managing Organization data."""
 
-from typing import Dict, Tuple
+from typing import Any, Dict, Tuple
 
 from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
@@ -22,10 +22,14 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
+from auth_api.models import ProductCode as ProductCodeModel
+from auth_api.models import ProductRoleCode as ProductRoleCodeModel
+from auth_api.models import ProductRole as ProductRoleModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
+from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.schemas import OrgSchema
 from auth_api.utils.roles import OWNER, VALID_STATUSES, Status
 from auth_api.utils.util import camelback2snake
@@ -80,6 +84,32 @@ class Org:
 
         return Org(org)
 
+    @staticmethod
+    def create_product_subscription(subscription_data: Tuple[Dict[str, Any]], org_id):
+        """creates product subscription for the user
+
+        create product subscription first
+        create the product role next if roles are given
+        """
+        org = OrgModel.find_by_org_id(org_id)
+        if not org:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        subscriptions_list = subscription_data.get('subscriptions')
+        for subscription in subscriptions_list:
+            product_code = subscription.get('product_code')
+            product = ProductCodeModel.find_by_code(product_code)
+            if product:
+                product_subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code).save()
+            else:
+                raise BusinessException(Error.DATA_NOT_FOUND, None)
+            for role in subscription.get('product_roles'):
+                product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role, product_code)
+                if product_role_code:
+                    ProductRoleModel(product_subscription_id=product_subscription.id,
+                                     product_role_id=product_role_code.id).save()
+        # TODO return the whole model
+        return str(product_subscription.id)
+
     def update_org(self, org_info):
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
@@ -93,7 +123,7 @@ class Org:
         return self
 
     @staticmethod
-    def delete_org(org_id, token_info: Dict = None,):
+    def delete_org(org_id, token_info: Dict = None, ):
         """Soft-Deletes an Org.
 
         It should not be deletable if there are members or business associated with the org
