@@ -28,6 +28,8 @@ class InvitationSchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, 
         """Maps all of the invitation fields to a default schema."""
 
         model = InvitationModel
-        fields = ('id', 'recipient_email', 'sent_date', 'expires_on', 'accepted_date', 'status', 'membership', 'token')
+        fields = (
+            'id', 'recipient_email', 'sent_date', 'expires_on', 'accepted_date', 'status', 'membership', 'token',
+            'type')
 
     membership = fields.Nested(InvitationMembershipSchema, many=True)

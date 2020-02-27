@@ -31,7 +31,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.schemas import OrgSchema
-from auth_api.utils.roles import OWNER, VALID_STATUSES, Status
+from auth_api.utils.roles import OWNER, VALID_STATUSES, Status, AccessType
 from auth_api.utils.util import camelback2snake
 
 from .authorization import check_auth
@@ -60,12 +60,14 @@ class Org:
         return obj
 
     @staticmethod
-    def create_org(org_info: dict, user_id):
+    def create_org(org_info: dict, user_id, token_info: Dict = None):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
-        count = OrgModel.get_count_of_org_created_by_user_id(user_id)
-        if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
-            raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
+        is_staff = 'staff' in token_info.get('realm_access').get('roles')
+        if not is_staff:  # staff can create any number of orgs
+            count = OrgModel.get_count_of_org_created_by_user_id(user_id)
+            if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
+                raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
 
         existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'])
         if existing_similar__org is not None:
@@ -74,13 +76,14 @@ class Org:
         org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.save()
         current_app.logger.info(f'<created_org org_id:{org.id}')
-        # create the membership record for this user
-        membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='OWNER',
-                                     membership_type_status=Status.ACTIVE.value)
-        membership.save()
+        # create the membership record for this user if its not created by staff and access_type is anonymous
+        if not is_staff and org_info.get('access_type') != AccessType.ANONYMOUS:
+            membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='OWNER',
+                                         membership_type_status=Status.ACTIVE.value)
+            membership.save()
 
-        # Add the user to account_holders group
-        KeycloakService.join_account_holders_group()
+            # Add the user to account_holders group
+            KeycloakService.join_account_holders_group()
 
         return Org(org)
 
