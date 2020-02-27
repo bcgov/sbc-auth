@@ -50,7 +50,7 @@
                     "valueFrom": {
                       "secretKeyRef": {
                         "name": "${NAME}-${TAG_NAME}-secret",
-                        "key": "DATABASE_USER"
+                        "key": "DATABASE_USERNAME"
                       }
                     }
                   },
