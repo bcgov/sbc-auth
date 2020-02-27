@@ -1,7 +1,7 @@
 <template>
   <sbc-signin
     :idp-hint="idpHint"
-    :iredirect-url-login-fail="redirectUrlLoginFail"
+    :redirect-url-login-fail="redirectUrlLoginFail"
     @keycloak-session-ready="updateHeader()"
     @sync-user-profile-ready="syncUserProfile()"
   ></sbc-signin>
