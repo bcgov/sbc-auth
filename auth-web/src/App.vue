@@ -95,10 +95,6 @@ export default class App extends Mixins(NextPageMixin) {
         {
           name: 'Manage Businesses',
           url: `/account/${this.currentOrganization?.id || ''}/business`
-        },
-        {
-          name: 'Start a Business',
-          url: `/tbd`
         }
       ]
     }
