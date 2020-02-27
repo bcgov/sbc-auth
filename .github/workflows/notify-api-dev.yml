@@ -56,7 +56,7 @@ jobs:
       - name: Set Deployment Environement Variables
         working-directory: .
         run: |
-          vaults='[{ "vault": "shared", "application": ["email"]}, {"vault": "relationship","application": ["postgres-notify", "notify-api"]}]'
+          vaults='[{ "vault": "shared", "application": ["email"]}, {"vault": "relationship","application": ["postgres-notify", "notify-api", "sentry"]}]'
           ./setenv_deploy.sh ${{ secrets.op_parameters }} -e "dev" -v "${vaults}" -a "${IMAGE_NAME}-${TAG_NAME}"
       - name: Rollout new deployment
         working-directory: ./notify-api

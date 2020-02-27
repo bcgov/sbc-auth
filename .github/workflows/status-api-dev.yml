@@ -63,7 +63,7 @@ jobs:
       - name: Set Deployment Environement Variables
         working-directory: .
         run: |
-          vaults='[{ "vault": "shared", "application": ["keycloak"]}, {"vault": "relationship","application": ["status-api"]}]'
+          vaults='[{ "vault": "shared", "application": ["keycloak"]}, {"vault": "relationship","application": ["status-api", "sentry"]}]'
           ./scripts/1pass_secret.sh ${{ secrets.op_parameters }} -e "dev" -v "${vaults}" -a "${IMAGE_NAME}-${TAG_NAME}"
       - name: Rollout new deployment
         working-directory: ./status-api
