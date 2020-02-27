@@ -13,22 +13,6 @@ jobs:
 
     env:
       FLASK_ENV: "testing"
-      SERVICE_SCHEDULE: '[
-        {
-        "service_name": "PAYBC",
-        "available": [
-        {"dayofweek": "1", "from": "6:00", "to": "21:00"},
-        {"dayofweek": "2", "from": "15:05", "to": "21:00"},
-        {"dayofweek": "3", "from": "6:00", "to": "21:00"},
-        {"dayofweek": "4", "from": "15:05", "to": "21:00"},
-        {"dayofweek": "5", "from": "6:00", "to": "21:00"},
-        {"dayofweek": "6", "from": "6:30", "to": "21:00"},
-        {"dayofweek": "7", "from": "6:30", "to": "21:00"}
-        ],
-        "outage": [
-        ]
-        }
-        ]'
 
     strategy:
       matrix:
