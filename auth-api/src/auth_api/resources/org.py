@@ -31,7 +31,6 @@ from auth_api.utils.enums import NotificationType
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, MEMBER, Role, Status
 from auth_api.utils.util import cors_preflight
 
-
 API = Namespace('orgs', description='Endpoints for organization management')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
@@ -45,7 +44,7 @@ class Orgs(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.EDITOR.value])
+    @_JWT.has_one_of_roles([Role.EDITOR.value, Role.STAFF_ADMIN.value])
     def post():
         """Post a new org using the request body.
 
@@ -63,7 +62,7 @@ class Orgs(Resource):
                 response, status = {'message': 'Not authorized to perform this action'}, \
                                    http_status.HTTP_401_UNAUTHORIZED
             else:
-                response, status = OrgService.create_org(request_json, user.identifier).as_dict(), \
+                response, status = OrgService.create_org(request_json, user.identifier, token).as_dict(), \
                                    http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -311,7 +310,7 @@ class OrgMember(Resource):
                     MembershipService.get_membership_status_by_code(membership_status)
             membership = MembershipService.find_membership_by_id(membership_id, token)
             is_own_membership = membership.as_dict()['user']['username'] == \
-                UserService.find_by_jwt_token(token).as_dict()['username']
+                                UserService.find_by_jwt_token(token).as_dict()['username']
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND

@@ -28,6 +28,15 @@
           "IMPLICIT", "EXPLICIT"
         ],
         "pattern": "^(.*)$"
+      },
+      "accessType": {
+        "$id": "#/properties/accessType",
+        "type": "string",
+        "title": "Access Type",
+        "examples": [
+          "ANONYMOUS"
+        ],
+        "pattern": "^(.*)$"
       }
     }
   }
