@@ -63,7 +63,7 @@ class Org:
     def create_org(org_info: dict, user_id, token_info: Dict = None):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
-        is_staff = 'staff' in token_info.get('realm_access').get('roles')
+        is_staff = token_info and 'staff' in token_info.get('realm_access').get('roles')
         if not is_staff:  # staff can create any number of orgs
             count = OrgModel.get_count_of_org_created_by_user_id(user_id)
             if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
