@@ -3,7 +3,7 @@ name: status API DEV CD
 on:
   push:
     branches:
-      - development
+      - master
     paths:
       - "status-api/**"
 
@@ -72,7 +72,7 @@ jobs:
         if: always()
         with:
           type: ${{ job.status }}
-          job_name: "*Status API Build and Deploy to ${{TAG_NAME}}*"
+          job_name: "*Status API Build and Deploy to ${{env.TAG_NAME}}*"
           channel: "#relationship-developers"
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           commit: true
