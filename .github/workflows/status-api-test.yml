@@ -1,0 +1,79 @@
+name: status API DEV CD
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - "status-api/**"
+
+env:
+  IMAGE_NAME: status-api
+  TAG_NAME: test
+
+jobs:
+  status-api-dev:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Log into registry
+        run: echo "${{ secrets.OPENSHIFT_TOKEN }}" | docker login ${{ secrets.OPENSHIFT_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
+      - name: Pull image
+        working-directory: ./status-api
+        run: docker pull ${{ secrets.OPENSHIFT_REGISTRY }}/d7eovc-tools/python:3.7
+      - name: Build image
+        uses: vrutkovs/action-s2i@master
+        with:
+          path: ./status-api
+          base: ${{ secrets.OPENSHIFT_REGISTRY }}/d7eovc-tools/python:3.7
+          image: ${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/${{env.IMAGE_NAME}}
+      - name: Push image
+        working-directory: ./status-api
+        run: |
+          docker push ${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME:$TAG_NAME
+      - name: Install openshift cli
+        working-directory: ./status-api
+        run: |
+          sudo curl -sLo /tmp/oc.tar.gz https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz
+          sudo tar xzvf /tmp/oc.tar.gz -C /tmp/
+          sudo mv /tmp/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit/oc /usr/local/bin/
+          sudo rm -rf /tmp/oc.tar.gz /tmp/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit
+          sudo chmod +x /usr/local/bin/oc
+          oc version
+      - name: Login Openshift
+        working-directory: ./status-api
+        run: |
+          oc ${{ secrets.oc_parameters }}
+          oc project ${{ secrets.OPENSHIFT_REPOSITORY_DEV }}
+      - name: Install Jq and 1password cli
+        working-directory: .
+        run: |
+          sudo apt install curl unzip jq --yes
+          sudo curl -o 1password.zip https://cache.agilebits.com/dist/1P/op/pkg/v0.8.0/op_linux_amd64_v0.8.0.zip
+          sudo unzip 1password.zip -d /usr/local/bin
+          sudo rm 1password.zip
+          sudo chmod +x /usr/local/bin/op
+          op --version
+      - name: Set Deployment Environement Variables
+        working-directory: .
+        run: |
+          vaults='[{ "vault": "shared", "application": ["jwt"]}, {"vault": "relationship","application": ["status-api", "sentry"]}]'
+          ./scripts/1pass_secret.sh ${{ secrets.op_parameters }} -e "${TAG_NAME}" -v "${vaults}" -a "${IMAGE_NAME}-${TAG_NAME}"
+      - name: Rollout new deployment
+        working-directory: ./status-api
+        run: |
+          oc rollout latest dc/$IMAGE_NAME-${TAG_NAME}
+          oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -w
+      - name: Rocket.Chat Notification
+        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+        if: always()
+        with:
+          type: ${{ job.status }}
+          job_name: "*Status API Build and Deploy to ${{TAG_NAME}}*"
+          channel: "#relationship-developers"
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          commit: true
+          token: ${{ secrets.GITHUB_TOKEN }}

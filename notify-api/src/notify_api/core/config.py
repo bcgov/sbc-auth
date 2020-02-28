@@ -32,10 +32,10 @@ DEBUG = False
 
 
 # POSTGRESQL
-DATABASE_USER = CONFIG('DATABASE_USERNAME', cast=str)
-DATABASE_PASSWORD = CONFIG('DATABASE_PASSWORD', cast=Secret)
-DATABASE_NAME = CONFIG('DATABASE_NAME', cast=str)
-DATABASE_HOST = CONFIG('DATABASE_HOST', cast=str)
+DATABASE_USER = CONFIG('DATABASE_USERNAME', cast=str, default='')
+DATABASE_PASSWORD = CONFIG('DATABASE_PASSWORD', cast=Secret, default='')
+DATABASE_NAME = CONFIG('DATABASE_NAME', cast=str, default='')
+DATABASE_HOST = CONFIG('DATABASE_HOST', cast=str, default='')
 DATABASE_PORT = CONFIG('DATABASE_PORT', cast=int, default=5432)
 SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
     user=DATABASE_USER,
@@ -47,23 +47,23 @@ SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.
 
 
 # email server
-MAIL_SERVER = CONFIG('MAIL_SERVER', cast=str)
-MAIL_PORT = CONFIG('MAIL_PORT', cast=int)
+MAIL_SERVER = CONFIG('MAIL_SERVER', cast=str, default='abcdabcd..smtp')
+MAIL_PORT = CONFIG('MAIL_PORT', cast=int, default=25)
 MAIL_USE_TLS = CONFIG('MAIL_USE_TLS', cast=str, default=False)
 MAIL_USE_SSL = CONFIG('MAIL_USE_SSL', cast=str, default=False)
-MAIL_USERNAME = CONFIG('MAIL_USERNAME', cast=str)
-MAIL_PASSWORD = CONFIG('MAIL_PASSWORD', cast=str)
-MAIL_FROM_ID = CONFIG('MAIL_FROM_ID', cast=str)
+MAIL_USERNAME = CONFIG('MAIL_USERNAME', cast=str, default='')
+MAIL_PASSWORD = CONFIG('MAIL_PASSWORD', cast=str, default='')
+MAIL_FROM_ID = CONFIG('MAIL_FROM_ID', cast=str, default='abcabc@abcdabcd.com')
 
 
 # Sentry Config
 SENTRY_DSN = CONFIG('SENTRY_DSN', cast=str, default=None)
 
-NATS_CLIENT_NAME = CONFIG('NATS_CLIENT_NAME', cast=str)
-NATS_CLUSTER_ID = CONFIG('NATS_CLUSTER_ID', cast=str)
-NATS_QUEUE = CONFIG('NATS_QUEUE', cast=str)
-NATS_SERVERS = CONFIG('NATS_SERVERS', cast=str)
-NATS_SUBJECT = CONFIG('NATS_SUBJECT', cast=str)
+NATS_CLIENT_NAME = CONFIG('NATS_CLIENT_NAME', cast=str, default='entity.notifiation.worker')
+NATS_CLUSTER_ID = CONFIG('NATS_CLUSTER_ID', cast=str, default='test-cluster')
+NATS_QUEUE = CONFIG('NATS_QUEUE', cast=str, default='notifiation-worker')
+NATS_SERVERS = CONFIG('NATS_SERVERS', cast=str, default='nats://127.0.0.1:4222')
+NATS_SUBJECT = CONFIG('NATS_SUBJECT', cast=str, default='entity.notifiations')
 
 NATS_CONNECTION_OPTIONS = {
     'servers': NATS_SERVERS.split(','),
@@ -83,14 +83,14 @@ SUBSCRIPTION_OPTIONS = {
     'durable_name': NATS_QUEUE + '_durable',
 }
 
-DELIVERY_FAILURE_RETRY_TIME_FRAME = CONFIG('DELIVERY_FAILURE_RETRY_TIME_FRAME', cast=int)
-PENDING_EMAIL_TIME_FRAME = CONFIG('PENDING_EMAIL_TIME_FRAME', cast=int)
-FAILURE_EMAIL_TIME_FRAME = CONFIG('FAILURE_EMAIL_TIME_FRAME', cast=int)
+DELIVERY_FAILURE_RETRY_TIME_FRAME = CONFIG('DELIVERY_FAILURE_RETRY_TIME_FRAME', cast=int, default=2)
+PENDING_EMAIL_TIME_FRAME = CONFIG('PENDING_EMAIL_TIME_FRAME', cast=int, default=300)
+FAILURE_EMAIL_TIME_FRAME = CONFIG('FAILURE_EMAIL_TIME_FRAME', cast=int, default=600)
 
-DB_USER = CONFIG('DATABASE_TEST_USERNAME', cast=str)
-DB_PASSWORD = CONFIG('DATABASE_TEST_PASSWORD', cast=Secret)
-DB_NAME = CONFIG('DATABASE_TEST_NAME', cast=str)
-DB_HOST = CONFIG('DATABASE_TEST_HOST', cast=str)
+DB_USER = CONFIG('DATABASE_TEST_USERNAME', cast=str, default='postgres')
+DB_PASSWORD = CONFIG('DATABASE_TEST_PASSWORD', cast=Secret, default='postgres')
+DB_NAME = CONFIG('DATABASE_TEST_NAME', cast=str, default='postgres')
+DB_HOST = CONFIG('DATABASE_TEST_HOST', cast=str, default='localhost')
 DB_PORT = CONFIG('DATABASE_TEST_PORT', cast=int, default=5432)
 SQLALCHEMY_TEST_DATABASE_URI = CONFIG(
     'DATABASE_TEST_URL',
