@@ -87,7 +87,7 @@ class Org:
         return Org(org)
 
     @staticmethod
-    def create_product_subscription(org_id, subscription_data: Tuple[Dict[str, Any]] ):
+    def create_product_subscription(org_id, subscription_data: Tuple[Dict[str, Any]]):
         """creates product subscription for the user
 
         create product subscription first
@@ -97,7 +97,7 @@ class Org:
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         subscriptions_list = subscription_data.get('subscriptions')
-        subscriptions_model_list = []   # just used for returning all the models.. not ideal..todo remove this and may be return the subscriptions from db
+        subscriptions_model_list = []  # just used for returning all the models.. not ideal..todo remove this and may be return the subscriptions from db
         for subscription in subscriptions_list:
             product_code = subscription.get('product_code')
             product = ProductCodeModel.find_by_code(product_code)

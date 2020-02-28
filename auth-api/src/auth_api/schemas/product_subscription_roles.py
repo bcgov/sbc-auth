@@ -13,8 +13,6 @@
 # limitations under the License.
 """Manager for org schema and export."""
 
-from marshmallow import fields
-
 from auth_api.models import ProductSubscriptionRole as ProductSubscriptionRoleModel
 
 from .base_schema import BaseSchema

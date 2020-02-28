@@ -13,7 +13,7 @@
 # limitations under the License.
 """API endpoints for managing an Org resource."""
 
-from flask import g, jsonify, request
+from flask import request
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
@@ -21,13 +21,9 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import ProductSubscriptionSchema
 from auth_api.schemas import utils as schema_utils
-from auth_api.services import Invitation as InvitationService
-from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
-from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import NotificationType
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, MEMBER, Role, Status
+from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('orgs', description='Endpoints for organization products management')
@@ -51,7 +47,6 @@ class OrgProducts(Resource):
         valid_format, errors = schema_utils.validate(request_json, 'org_product_subscription')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
-
 
         try:
             subscriptions = OrgService.create_product_subscription(request_json, org_id)
