@@ -23,6 +23,6 @@ jobs:
         with:
           type: ${{ job.status }}
           job_name: "*This Relationship team PR will deploy to Test*: ${{ github.event.pull_request.title }}"
-          channel: "#relationship-developers"
+          channel: "#registries"
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           token: ${{ secrets.GITHUB_TOKEN }}

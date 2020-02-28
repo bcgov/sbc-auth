@@ -63,8 +63,8 @@ jobs:
       - name: Set Deployment Environement Variables
         working-directory: .
         run: |
-          vaults='[{ "vault": "shared", "application": ["keycloak"]}, {"vault": "relationship","application": ["status-api", "sentry"]}]'
-          ./scripts/1pass_secret.sh ${{ secrets.op_parameters }} -e "dev" -v "${vaults}" -a "${IMAGE_NAME}-${TAG_NAME}"
+          vaults='[{ "vault": "shared", "application": ["jwt"]}, {"vault": "relationship","application": ["status-api", "sentry"]}]'
+          ./scripts/1pass_secret.sh ${{ secrets.op_parameters }} -e "${TAG_NAME}" -v "${vaults}" -a "${IMAGE_NAME}-${TAG_NAME}"
       - name: Rollout new deployment
         working-directory: ./status-api
         run: |
@@ -75,7 +75,7 @@ jobs:
         if: always()
         with:
           type: ${{ job.status }}
-          job_name: "*Status API Build and Deploy to ${TAG_NAME}*"
+          job_name: "*Status API Build and Deploy to ${{TAG_NAME}}*"
           channel: "#relationship-developers"
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           commit: true

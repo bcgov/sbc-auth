@@ -52,8 +52,8 @@ jobs:
       - name: Set Deployment Environement Variables
         working-directory: .
         run: |
-          vaults='[{ "vault": "shared", "application": ["email"]}, {"vault": "relationship","application": ["postgres-notify", "notify-api", "sentry"]}]'
-          ./setenv_deploy.sh ${{ secrets.op_parameters }} -e "test" -v "${vaults}" -a "${IMAGE_NAME}-${TAG_NAME}"
+          vaults='[{ "vault": "shared", "application": ["email", "nats"]}, {"vault": "relationship","application": ["postgres-notify", "notify-api", "sentry"]}]'
+          ./setenv_deploy.sh ${{ secrets.op_parameters }} -e "${TAG_NAME}" -v "${vaults}" -a "${IMAGE_NAME}-${TAG_NAME}"
       - name: Rollout new deployment
         working-directory: ./notify-api
         run: |
@@ -64,7 +64,7 @@ jobs:
         if: always()
         with:
           type: ${{ job.status }}
-          job_name: "*Notify API Build and Deploy to ${TAG_NAME}*"
+          job_name: "*Notify API Build and Deploy to ${{TAG_NAME}}*"
           channel: "#relationship-developers"
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           commit: true
