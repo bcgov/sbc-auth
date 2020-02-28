@@ -241,7 +241,8 @@ class TestOrgInfo(dict, Enum):
 class TestOrgProductsInfo(dict, Enum):
     """Test scenarios of attaching products to org."""
 
-    org_products1 = {"subscriptions": [{"product_code": "PPR", "product_roles": ["search", "File"]},
+    org_products1 = {"subscriptions": [{"product_code": "PPR"}]}
+    org_products2 = {"subscriptions": [{"product_code": "PPR", "product_roles": ["search", "File"]},
                                        {"product_code": "DIR_SEARCH", "product_roles": ["search"]}]}
 
 
