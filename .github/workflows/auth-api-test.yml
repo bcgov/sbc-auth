@@ -15,6 +15,9 @@ env:
 jobs:
   auth-api-deploy-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
     steps:
       - name: Log into registry
         run: echo "${{ secrets.OPENSHIFT_TOKEN }}" | docker login ${{ secrets.OPENSHIFT_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
@@ -30,7 +33,9 @@ jobs:
       - name: Push image
         working-directory: ./auth-api
         run: |
-          docker push ${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME:$TAG_NAME
+          IMAGE_ID=${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME
+          docker image tag $IMAGE_ID:latest $IMAGE_ID:$TAG_NAME
+          docker push $IMAGE_ID:$TAG_NAME
       - name: Install openshift cli
         working-directory: ./auth-api
         run: |
@@ -71,5 +76,4 @@ jobs:
           job_name: "*Auth API Build and Deploy to ${{env.TAG_NAME}}*"
           channel: "#relationship-developers"
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-          commit: true
           token: ${{ secrets.GITHUB_TOKEN }}
