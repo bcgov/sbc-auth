@@ -15,7 +15,7 @@
 are loaded into the Flask configuration. All modules and lookups get their configuration from the Flask config, rather
 than reading environment variables directly or by accessing this configuration directly.
 """
-
+import json
 import os
 import sys
 
@@ -88,6 +88,8 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
             ]
         }
     ]
+
+    SERVICE_SCHEDULE = json.dumps(schedule_json)
 
     DEBUG = True
     TESTING = True

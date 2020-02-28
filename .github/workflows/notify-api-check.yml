@@ -1,0 +1,61 @@
+name: Notify API PR CI
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - "notify-api/**"
+
+jobs:
+  notify-api-check:
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+
+    strategy:
+      matrix:
+        python-version: [3.7]
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      nats:
+        image: nats-streaming
+        ports:
+          - 4222:4222
+          - 8222:8222
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        working-directory: ./notify-api
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements/dev.txt
+      - name: Lint with pylint
+        working-directory: ./notify-api
+        run: |
+          pylint --rcfile=setup.cfg --disable=C0301,W0511 src/notify_api tests
+      - name: Lint with flake8
+        working-directory: ./notify-api
+        run: |
+          flake8 src/notify_api tests
+      - name: Test with pytest
+        working-directory: ./notify-api
+        run: |
+          pip install .
+          export PYTHONPATH=./src/
+          pytest
