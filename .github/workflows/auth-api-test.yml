@@ -19,6 +19,7 @@ jobs:
       matrix:
         python-version: [3.7]
     steps:
+      - uses: actions/checkout@v2
       - name: Log into registry
         run: echo "${{ secrets.OPENSHIFT_TOKEN }}" | docker login ${{ secrets.OPENSHIFT_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
       - name: Pull base image
