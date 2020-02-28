@@ -103,6 +103,19 @@ class TestJwtClaims(dict, Enum):
         }
     }
 
+    staff_admin_role = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'preferred_username': 'testuser',
+        'realm_access': {
+            'roles': [
+                'staff', 'staff_admin'
+            ]
+        }
+    }
+
     system_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
@@ -217,11 +230,19 @@ class TestOrgInfo(dict, Enum):
     org3 = {'name': 'Third Orgs'}
     org4 = {'name': 'fourth Orgs'}
     org5 = {'name': 'fifth Orgs'}
+    org_anonymous = {'name': 'My Test Org', 'accessType': 'ANONYMOUS'}
     invalid = {'foo': 'bar'}
     invalid_name_space = {'name': ''}
     invalid_name_spaces = {'name': '    '}
     invalid_name_start_space = {'name': '  helo'}
     invalid_name_end_space = {'name': '  helo   '}
+
+
+class TestOrgProductsInfo(dict, Enum):
+    """Test scenarios of attaching products to org."""
+
+    org_products1 = {"subscriptions": [{"product_code": "PPR", "product_roles": ["search", "File"]},
+                                       {"product_code": "DIR_SEARCH", "product_roles": ["search"]}]}
 
 
 class TestEntityInfo(dict, Enum):

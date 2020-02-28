@@ -22,10 +22,10 @@ from sqlalchemy.orm import relationship
 from .base_model import BaseModel
 
 
-class ProductRole(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class ProductSubscriptionRole(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """Model for a Product Role model."""
 
-    __tablename__ = 'product_role'
+    __tablename__ = 'product_subscription_role'
 
     id = Column(Integer, primary_key=True)
     product_subscription_id = Column(ForeignKey('product_subscription.id'), nullable=False)

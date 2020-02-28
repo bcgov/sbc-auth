@@ -36,6 +36,7 @@ def upgrade():
                    [{'code': "PUBLIC", 'desc': 'PUBLIC', 'default': False}])
     op.add_column('org', sa.Column('access_type', sa.String(length=250), nullable=True))
     op.add_column('invitation', sa.Column('invitation_type', sa.String(length=100), nullable=True))
+    op.rename_table('product_role', 'product_subscription_role')
 
 
 def downgrade():

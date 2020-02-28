@@ -19,7 +19,7 @@ from flask_restplus import Namespace, Resource, cors
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
-from auth_api.schemas import InvitationSchema, MembershipSchema
+from auth_api.schemas import ProductSubscriptionSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
@@ -43,7 +43,7 @@ class OrgProducts(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    # @_JWT.has_one_of_roles([Role.STAFF.value])
+    #@_JWT.has_one_of_roles([Role.STAFF_ADMIN.value])
     def post(org_id):
         """Post a new product subscription to the org using the request body.
         """
@@ -52,13 +52,14 @@ class OrgProducts(Resource):
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
+
         try:
-            subs_id = OrgService.create_product_subscription(request_json, org_id)
-            if subs_id is None:
+            subscriptions = OrgService.create_product_subscription(request_json, org_id)
+            if subscriptions is None:
                 response, status = {'message': 'Not authorized to perform this action'}, \
                                    http_status.HTTP_401_UNAUTHORIZED
             else:
-                response, status = subs_id, \
+                response, status = {'subscriptions': ProductSubscriptionSchema().dump(subscriptions, many=True)}, \
                                    http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
