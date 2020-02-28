@@ -18,8 +18,10 @@ Test suite to ensure that the Org service routines are working as expected.
 from unittest.mock import patch
 
 import pytest
+from flask import jsonify
+
 from tests.utilities.factory_scenarios import (
-    KeycloakScenario, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo)
+    KeycloakScenario, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo, TestOrgProductsInfo)
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
     factory_org_service, factory_user_model)
@@ -53,6 +55,31 @@ def test_create_org(session, keycloak_mock):  # pylint:disable=unused-argument
     assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
+
+
+def test_create_product_single_subscription(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org can be created."""
+    user = factory_user_model()
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+    assert org
+    dictionary = org.as_dict()
+    assert dictionary['name'] == TestOrgInfo.org1['name']
+    subscriptions = OrgService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products1, )
+    assert len(subscriptions) == 1
+    assert subscriptions[0].product_code == TestOrgProductsInfo.org_products1['subscriptions'][0]['product_code']
+
+
+def test_create_product_multiple_subscription(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org can be created."""
+    user = factory_user_model()
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+    assert org
+    dictionary = org.as_dict()
+    assert dictionary['name'] == TestOrgInfo.org1['name']
+    subscriptions = OrgService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products2, )
+    assert len(subscriptions) == 2
+    assert subscriptions[0].product_code == TestOrgProductsInfo.org_products2['subscriptions'][0]['product_code']
+    assert subscriptions[1].product_code == TestOrgProductsInfo.org_products2['subscriptions'][1]['product_code']
 
 
 def test_update_org(session):  # pylint:disable=unused-argument

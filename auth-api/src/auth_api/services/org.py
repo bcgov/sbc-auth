@@ -87,7 +87,7 @@ class Org:
         return Org(org)
 
     @staticmethod
-    def create_product_subscription(subscription_data: Tuple[Dict[str, Any]], org_id):
+    def create_product_subscription(org_id, subscription_data: Tuple[Dict[str, Any]] ):
         """creates product subscription for the user
 
         create product subscription first
@@ -97,7 +97,7 @@ class Org:
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         subscriptions_list = subscription_data.get('subscriptions')
-        subscriptions_model_list = []
+        subscriptions_model_list = []   # just used for returning all the models.. not ideal..todo remove this and may be return the subscriptions from db
         for subscription in subscriptions_list:
             product_code = subscription.get('product_code')
             product = ProductCodeModel.find_by_code(product_code)
@@ -111,7 +111,7 @@ class Org:
                 if product_role_code:
                     ProductSubscriptionRoleModel(product_subscription_id=product_subscription.id,
                                                  product_role_id=product_role_code.id).save()
-        # TODO return the whole model
+        # TODO return something better/useful.may be return the whole model from db
         return subscriptions_model_list
 
     def update_org(self, org_info):
