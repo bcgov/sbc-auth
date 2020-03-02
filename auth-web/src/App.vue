@@ -88,7 +88,7 @@ export default class App extends Mixins(NextPageMixin) {
   private setupNavigationBar (): void {
     this.navigationBarConfig = {
       titleItem: {
-        name: 'Business Registries',
+        name: 'Cooperatives Online',
         url: `/home`
       },
       menuItems: [
