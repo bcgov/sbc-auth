@@ -204,14 +204,14 @@ class Invitation:
     def get_invitation_configs(invitation_type):
         """Gets the config for different email types."""
         director_search_configs = {
-            "token_confirm_path": "dirsearch/validatetoken",
-            "template_name": "dirsearch_business_invitation_email",
-            "subject": "[BC Registries & Online Services] {} {} has invited you to setup an account",
+            'token_confirm_path': 'dirsearch/validatetoken',
+            'template_name': 'dirsearch_business_invitation_email',
+            'subject': '[BC Registries & Online Services] {} {} has invited you to setup an account',
         }
         default_configs = {
-            "token_confirm_path": "validatetoken",
-            "template_name": "business_invitation_email",
-            "subject": "[BC Registries & Online Services] {} {} has invited you to join an account",
+            'token_confirm_path': 'validatetoken',
+            'template_name': 'business_invitation_email',
+            'subject': '[BC Registries & Online Services] {} {} has invited you to join an account',
 
         }
         mail_configs = {
