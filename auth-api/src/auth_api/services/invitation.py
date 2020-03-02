@@ -202,7 +202,7 @@ class Invitation:
 
     @staticmethod
     def get_invitation_configs(invitation_type):
-
+        """Gets the config for different email types."""
         director_search_configs = {
             "token_confirm_path": "dirsearch/validatetoken",
             "template_name": "dirsearch_business_invitation_email",

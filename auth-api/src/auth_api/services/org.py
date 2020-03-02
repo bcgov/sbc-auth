@@ -106,11 +106,12 @@ class Org:
                 subscriptions_model_list.append(product_subscription)
             else:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)
-            for role in [roles for roles in (subscription.get('product_roles') or [])]:
-                product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role, product_code)
-                if product_role_code:
-                    ProductSubscriptionRoleModel(product_subscription_id=product_subscription.id,
-                                                 product_role_id=product_role_code.id).save()
+            if subscription.get('product_roles') is not None:
+                for role in subscription.get('product_roles'):
+                    product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role, product_code)
+                    if product_role_code:
+                        ProductSubscriptionRoleModel(product_subscription_id=product_subscription.id,
+                                                     product_role_id=product_role_code.id).save()
         # TODO return something better/useful.may be return the whole model from db
         return subscriptions_model_list
 

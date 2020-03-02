@@ -32,5 +32,5 @@ class ProductSubscription(BaseModel):  # pylint: disable=too-few-public-methods
     product_code = Column(ForeignKey('product_code.code'), nullable=False)
 
     product = relationship('ProductCode', foreign_keys=[product_code], lazy='select')
-    product_subscriptipn_roles = relationship('ProductSubscriptionRole', cascade='all,delete,delete-orphan', lazy='select')
-
+    product_subscription_roles = relationship('ProductSubscriptionRole', cascade='all,delete,delete-orphan',
+                                              lazy='select')

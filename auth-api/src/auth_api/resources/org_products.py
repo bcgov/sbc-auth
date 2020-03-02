@@ -49,7 +49,7 @@ class OrgProducts(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            subscriptions = OrgService.create_product_subscription(request_json, org_id)
+            subscriptions = OrgService.create_product_subscription(org_id, request_json)
             if subscriptions is None:
                 response, status = {'message': 'Not authorized to perform this action'}, \
                                    http_status.HTTP_401_UNAUTHORIZED
