@@ -33,7 +33,7 @@
                   <v-card-title>Create a BC Registries Account</v-card-title>
                   <v-card-text>
                     <p class="mb-7">To access this service, you must securely log in with your BC Services Card, government’s trusted way to access online services. It typically takes five minutes or less to set up your mobile card, and the only information BC Registries can access from your card is your legal name.</p>
-                    <a rel="noopener noreferrer" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card"
+                    <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card" rel="noopener noreferrer"
                       target="_blank">
                       <v-icon small class="mr-2">mdi-open-in-new</v-icon>
                       <span>Learn how to set up and use your BC Services Card</span>
@@ -63,25 +63,25 @@
                     </div>
                     <div class="section-card__text">
                       <h3>1. &nbsp;Log in with your BC Services Card</h3>
-                      <p class="mb-0">You must securely log in with your BC Services Card, government’s trusted way to access online services. It typically takes five minutes or less to <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card/mobile-card/set-up-mobile-card" target="_blank">set up</a> your mobile card, and the only information BC Registries can access from your card is your legal name.</p>
+                      <p class="mb-0">You must securely log in with your BC Services Card, government’s trusted way to access online services. It typically takes five minutes or less to <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card/mobile-card/set-up-mobile-card" target="_blank" rel="noopener noreferrer">set up</a> your mobile card, and the only information BC Registries can access from your card is your legal name.</p>
                     </div>
                   </v-col>
                   <v-col sm="12" md="4" class="section-card__links">
                     <ul class="mb-0">
                       <li>
-                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank" rel="noopener">
+                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank" rel="noopener noreferrer">
                           <v-icon small>mdi-open-in-new</v-icon>
                           <span>What is a BC <span class="nobr">Services Card?</span></span>
                         </v-btn>
                       </li>
                       <li>
-                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card" target="_blank" rel="noopener">
+                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card" target="_blank" rel="noopener noreferrer">
                           <v-icon small>mdi-open-in-new</v-icon>
                           <span>How do I log in with my BC <span class="nobr">Services Card?</span></span>
                         </v-btn>
                       </li>
                       <li>
-                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/get-a-card" target="_blank" rel="noopener">
+                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/get-a-card" target="_blank" rel="noopener noreferrer">
                           <v-icon small>mdi-open-in-new</v-icon>
                           <span>I don't have a BC <span class="nobr">Services Card</span></span>
                         </v-btn>
@@ -136,13 +136,16 @@
                               <span>Email:</span> <a v-bind:href="'mailto:' + $t('techSupportEmail') + '?subject=' + $t('techSupportEmailSubject')">{{ $t('techSupportEmail') }}</a>
                             </li>
                           </ul>
-                          <div>
-                            <p class="mb-0"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
-                          </div>
+                          <p class="mb-7"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
+                          <a class="link-w-icon" href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card"
+                            target="_blank" rel="noopener noreferrer">
+                            <v-icon small class="mr-2">mdi-open-in-new</v-icon>
+                            <span>Frequently Asked Questions</span>
+                          </a>
                         </v-card-text>
                         <v-card-actions>
                           <v-spacer></v-spacer>
-                          <v-btn large depressed color="primary" @click="noPasscodeDialog = false">OK</v-btn>
+                          <v-btn large color="primary" @click="noPasscodeDialog = false">OK</v-btn>
                         </v-card-actions>
                       </v-card>
                     </v-dialog>
@@ -197,6 +200,11 @@
             <v-col sm="12" md="8">
               <h3 class="mb-6">Need more information?</h3>
               <p class="mb-4">To learn more about Cooperative Associations in British Columbia, please visit the Cooperative Associations information page on the <a href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations" target="_blank" rel="noopener">BC Government website</a>.</p>
+              <a class="link-w-icon" href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card"
+                target="_blank" rel="noopener noreferrer">
+                <v-icon small class="mr-2">mdi-open-in-new</v-icon>
+                <span>Frequently Asked Questions</span>
+              </a>
             </v-col>
 
             <v-col sm="12" md="4">
@@ -512,7 +520,6 @@ export default class HomeView extends Vue {
   }
 
   a {
-    text-decoration: none;
     font-weight: 700;
     font-size: 0.875rem;
 
@@ -524,4 +531,13 @@ export default class HomeView extends Vue {
       text-decoration: underline;
     }
   }
+
+  .link-w-icon {
+    text-decoration: none;
+
+    span {
+      text-decoration: underline;
+    }
+  }
+
 </style>
