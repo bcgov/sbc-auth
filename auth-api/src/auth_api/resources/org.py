@@ -55,15 +55,19 @@ class Orgs(Resource):
         valid_format, errors = schema_utils.validate(request_json, 'org')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
-
+        is_staff = token and 'staff' in token.get('realm_access').get('roles')
         try:
-            user = UserService.find_by_jwt_token(token)
-            if user is None:
-                response, status = {'message': 'Not authorized to perform this action'}, \
-                                   http_status.HTTP_401_UNAUTHORIZED
-            else:
-                response, status = OrgService.create_org(request_json, user.identifier, token).as_dict(), \
-                                   http_status.HTTP_201_CREATED
+            user_identifier = None
+            if not is_staff:
+                user = UserService.find_by_jwt_token(token)
+                if user is None:
+                    response, status = {'message': 'Not authorized to perform this action'}, \
+                                       http_status.HTTP_401_UNAUTHORIZED
+                    return response, status
+                else:
+                    user_identifier =  user.identifier
+            response, status = OrgService.create_org(request_json, user_identifier, token).as_dict(), \
+                                http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -324,7 +328,7 @@ class OrgMember(Resource):
                     MembershipService.get_membership_status_by_code(membership_status)
             membership = MembershipService.find_membership_by_id(membership_id, token)
             is_own_membership = membership.as_dict()['user']['username'] == \
-                UserService.find_by_jwt_token(token).as_dict()['username']
+                                UserService.find_by_jwt_token(token).as_dict()['username']
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
