@@ -39,6 +39,7 @@ class OrgProducts(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
+    @_JWT.has_one_of_roles([Role.STAFF_ADMIN.value])
     def post(org_id):
         """Post a new product subscription to the org using the request body."""
         request_json = request.get_json()
