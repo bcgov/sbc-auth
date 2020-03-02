@@ -21,4 +21,5 @@ class BaseCodeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps fields to a default schema."""
+
         fields = ('code', 'desc', 'default')

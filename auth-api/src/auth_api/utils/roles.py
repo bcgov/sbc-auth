@@ -69,7 +69,7 @@ ALL_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF)
 
 
 class InvitationType(Enum):
-    """Invitation type"""
+    """Invitation type."""
 
     DIRECTOR_SEARCH = 'DIRECTOR_SEARCH'
 

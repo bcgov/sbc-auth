@@ -41,8 +41,7 @@ class OrgProducts(Resource):
     @cors.crossdomain(origin='*')
     @_JWT.has_one_of_roles([Role.STAFF_ADMIN.value])
     def post(org_id):
-        """Post a new product subscription to the org using the request body.
-        """
+        """Post a new product subscription to the org using the request body."""
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'org_product_subscription')
         if not valid_format:

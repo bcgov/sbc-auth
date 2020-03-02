@@ -202,7 +202,7 @@ class Invitation:
 
     @staticmethod
     def get_invitation_configs(invitation_type):
-        """Gets the config for different email types."""
+        """Get the config for different email types."""
         director_search_configs = {
             'token_confirm_path': 'dirsearch/validatetoken',
             'template_name': 'dirsearch_business_invitation_email',
@@ -223,7 +223,7 @@ class Invitation:
     def generate_confirmation_token(invitation_id, invitation_type=''):
         """Generate the token to be sent in the email."""
         serializer = URLSafeTimedSerializer(CONFIG.EMAIL_TOKEN_SECRET_KEY)
-        token = {"id": invitation_id, "type": invitation_type}
+        token = {'id': invitation_id, 'type': invitation_type}
         return serializer.dumps(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT)
 
     @staticmethod

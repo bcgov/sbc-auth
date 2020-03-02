@@ -18,13 +18,6 @@ Test suite to ensure that the Org service routines are working as expected.
 from unittest.mock import patch
 
 import pytest
-from flask import jsonify
-
-from tests.utilities.factory_scenarios import (
-    KeycloakScenario, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo, TestOrgProductsInfo)
-from tests.utilities.factory_utils import (
-    factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
-    factory_org_service, factory_user_model)
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -37,6 +30,11 @@ from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakConfig, KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
+from tests.utilities.factory_scenarios import (
+    KeycloakScenario, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo, TestOrgProductsInfo)
+from tests.utilities.factory_utils import (
+    factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
+    factory_org_service, factory_user_model)
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
