@@ -64,10 +64,9 @@ class Orgs(Resource):
                     response, status = {'message': 'Not authorized to perform this action'}, \
                                        http_status.HTTP_401_UNAUTHORIZED
                     return response, status
-                else:
-                    user_identifier =  user.identifier
+                user_identifier = user.identifier
             response, status = OrgService.create_org(request_json, user_identifier, token).as_dict(), \
-                                http_status.HTTP_201_CREATED
+                               http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

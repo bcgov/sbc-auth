@@ -101,7 +101,7 @@ class Org:
         # todo remove this and may be return the subscriptions from db
         subscriptions_model_list = []
         for subscription in subscriptions_list:
-            product_code = subscription.get('product_code')
+            product_code = subscription.get('productCode')
             product = ProductCodeModel.find_by_code(product_code)
             if product:
                 product_subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code).save()
@@ -109,7 +109,7 @@ class Org:
             else:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)
             if subscription.get('product_roles') is not None:
-                for role in subscription.get('product_roles'):
+                for role in subscription.get('productRoles'):
                     product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role, product_code)
                     if product_role_code:
                         ProductSubscriptionRoleModel(product_subscription_id=product_subscription.id,

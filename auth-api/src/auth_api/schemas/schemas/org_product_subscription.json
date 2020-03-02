@@ -8,7 +8,7 @@
       "type": "object",
       "title": "The product subscriptions Schema",
       "properties": {
-        "product_code": {
+        "productCode": {
           "type": "string",
           "title": "Product Code",
           "default": "",
@@ -17,7 +17,7 @@
           ],
           "pattern": "^(.*)$"
         },
-        "product_roles": {
+        "productRoles": {
           "type": "array",
           "title": "The Product Roles Schema",
           "items": {
@@ -31,7 +31,7 @@
         }
       },
       "required": [
-        "product_code"
+        "productCode"
       ]
     }
   },

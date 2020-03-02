@@ -64,7 +64,7 @@ def test_create_product_single_subscription(session, keycloak_mock):  # pylint:d
     assert dictionary['name'] == TestOrgInfo.org1['name']
     subscriptions = OrgService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products1, )
     assert len(subscriptions) == 1
-    assert subscriptions[0].product_code == TestOrgProductsInfo.org_products1['subscriptions'][0]['product_code']
+    assert subscriptions[0].product_code == TestOrgProductsInfo.org_products1['subscriptions'][0]['productCode']
 
 
 def test_create_product_multiple_subscription(session, keycloak_mock):  # pylint:disable=unused-argument
@@ -76,8 +76,8 @@ def test_create_product_multiple_subscription(session, keycloak_mock):  # pylint
     assert dictionary['name'] == TestOrgInfo.org1['name']
     subscriptions = OrgService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products2, )
     assert len(subscriptions) == 2
-    assert subscriptions[0].product_code == TestOrgProductsInfo.org_products2['subscriptions'][0]['product_code']
-    assert subscriptions[1].product_code == TestOrgProductsInfo.org_products2['subscriptions'][1]['product_code']
+    assert subscriptions[0].product_code == TestOrgProductsInfo.org_products2['subscriptions'][0]['productCode']
+    assert subscriptions[1].product_code == TestOrgProductsInfo.org_products2['subscriptions'][1]['productCode']
 
 
 def test_update_org(session):  # pylint:disable=unused-argument
