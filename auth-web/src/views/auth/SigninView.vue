@@ -61,7 +61,7 @@ export default class Signin extends Mixins(NextPageMixin) {
 
   private async syncUser () {
     await this.syncUserProfile()
-    this.redirectAfterLogin()
+    this.$store.commit('updateHeader')
   }
 
   updateHeader () {
