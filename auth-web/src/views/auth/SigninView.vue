@@ -2,7 +2,7 @@
   <sbc-signin
     :idp-hint="idpHint"
     :redirect-url-login-fail="redirectUrlLoginFail"
-    @keycloak-session-ready="updateHeader()"
+    @keycloak-session-ready="loadUserInfo()"
     @sync-user-profile-ready="syncUser()"
   ></sbc-signin>
 </template>
@@ -62,12 +62,6 @@ export default class Signin extends Mixins(NextPageMixin) {
   private async syncUser () {
     await this.syncUserProfile()
     this.$store.commit('updateHeader')
-  }
-
-  updateHeader () {
-    // refreshing the header once the token is receieved from the common component
-    this.$store.commit('updateHeader')
-    this.loadUserInfo()
   }
 }
 </script>
