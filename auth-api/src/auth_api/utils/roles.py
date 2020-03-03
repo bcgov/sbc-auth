@@ -26,6 +26,8 @@ class Role(Enum):
     ADMIN = 'admin'
     SYSTEM = 'system'
     TESTER = 'tester'
+    ACCOUNT_HOLDER = 'account_holder'
+    PUBLIC_USER = 'public_user'
 
 
 # Membership types

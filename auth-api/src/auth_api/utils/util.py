@@ -50,3 +50,15 @@ def snake2camelback(snake_dict: dict):
         converted_key = re.sub(r'_([a-z])', lambda x: x.group(1).upper(), key)
         converted_obj[converted_key] = snake_dict[key]
     return converted_obj
+
+
+class Singleton(type):
+    """Singleton meta."""
+
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        """Call for meta."""
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]

@@ -19,8 +19,8 @@ Test-Suite to ensure that the Business Service is working as expected.
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.services.keycloak import KEYCLOAK_ADMIN, KeycloakService
-from auth_api.utils.constants import GROUP_PUBLIC_USERS, PASSCODE, STAFF
+from auth_api.services.keycloak import KeycloakConfig, KeycloakService
+from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_PUBLIC_USERS, PASSCODE, STAFF
 from auth_api.utils.roles import Role
 
 
@@ -56,23 +56,30 @@ ADD_USER_REQUEST_SAME_EMAIL = {
 KEYCLOAK_SERVICE = KeycloakService()
 
 
-def test_keycloak_add_user():
+def test_keycloak_add_user(app):
     """Add user to Keycloak. Assert return a user with the same username as the username in request."""
-    user = KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
-    assert user.get('username') == ADD_USER_REQUEST.get('username')
-    KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
+    with app.app_context():
+        user = KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
+        assert user.get('username') == ADD_USER_REQUEST.get('username')
+        KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
 
 
 def test_keycloak_add_user_duplicate_email():
     """Add user with duplicate email. Assert response is None, error code is data conflict."""
-    KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
-    response = None
+    # First delete the user if it exists
     try:
-        response = KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST_SAME_EMAIL)
+        if KEYCLOAK_SERVICE.get_user_by_username(ADD_USER_REQUEST.get('username')):
+            KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
+    except Exception:
+        pass
+
+    KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
+    try:
+        KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST_SAME_EMAIL)
     except BusinessException as err:
         assert err.code == Error.DATA_CONFLICT.name
-    assert response is None
-    KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
+    finally:
+        KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
 
 
 def test_keycloak_get_user_by_username():
@@ -145,6 +152,13 @@ def test_keycloak_delete_user_by_username():
 
 def test_keycloak_delete_user_by_username_user_not_exist():
     """Delete user by invalid username. Assert response is None, error code data not found."""
+    # First delete the user if it exists
+    try:
+        if KEYCLOAK_SERVICE.get_user_by_username(ADD_USER_REQUEST_SAME_EMAIL.get('username')):
+            KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST_SAME_EMAIL.get('username'))
+    except Exception:
+        pass
+
     response = None
     try:
         response = KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST_SAME_EMAIL.get('username'))
@@ -179,20 +193,23 @@ def test_keycloak_logout_wrong_refresh_token(session):
     KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
 
 
-def test_join_public_users_group(session):
+def test_join_public_users_group(app, session):
     """Test the public_users group membership for public users."""
-    KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
-    user = KEYCLOAK_SERVICE.get_user_by_username(ADD_USER_REQUEST.get('username'))
-    user_id = user.get('id')
-    KEYCLOAK_SERVICE.join_public_users_group({'sub': user_id, 'loginSource': PASSCODE, 'realm_access': {'roles': []}})
-    # Get the user groups and verify the public_users group is in the list
-    user_groups = KEYCLOAK_ADMIN.get_user_groups(user_id=user_id)
-    groups = []
-    for group in user_groups:
-        groups.append(group.get('name'))
-    assert GROUP_PUBLIC_USERS in groups
+    with app.app_context():
+        KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
+        user = KEYCLOAK_SERVICE.get_user_by_username(ADD_USER_REQUEST.get('username'))
+        user_id = user.get('id')
+        KEYCLOAK_SERVICE.join_public_users_group({'sub': user_id,
+                                                  'loginSource': PASSCODE,
+                                                  'realm_access': {'roles': []}})
+        # Get the user groups and verify the public_users group is in the list
+        user_groups = KeycloakConfig().get_keycloak_admin().get_user_groups(user_id=user_id)
+        groups = []
+        for group in user_groups:
+            groups.append(group.get('name'))
+        assert GROUP_PUBLIC_USERS in groups
 
-    KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
+        KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
 
 
 def test_join_public_users_group_for_staff_users(session):
@@ -202,7 +219,7 @@ def test_join_public_users_group_for_staff_users(session):
     user_id = user.get('id')
     KEYCLOAK_SERVICE.join_public_users_group({'sub': user_id, 'loginSource': STAFF, 'realm_access': {'roles': []}})
     # Get the user groups and verify the public_users group is in the list
-    user_groups = KEYCLOAK_ADMIN.get_user_groups(user_id=user_id)
+    user_groups = KeycloakConfig().get_keycloak_admin().get_user_groups(user_id=user_id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
@@ -219,10 +236,78 @@ def test_join_public_users_group_for_existing_users(session):
     KEYCLOAK_SERVICE.join_public_users_group(
         {'sub': user_id, 'loginSource': PASSCODE, 'realm_access': {'roles': [Role.EDITOR.value]}})
     # Get the user groups and verify the public_users group is in the list
-    user_groups = KEYCLOAK_ADMIN.get_user_groups(user_id=user_id)
+    user_groups = KeycloakConfig().get_keycloak_admin().get_user_groups(user_id=user_id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
     assert GROUP_PUBLIC_USERS not in groups
+
+    KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
+
+
+def test_join_account_holders_group(session):
+    """Assert that the account_holders group is getting added to the user."""
+    KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
+    user = KEYCLOAK_SERVICE.get_user_by_username(ADD_USER_REQUEST.get('username'))
+    user_id = user.get('id')
+    KEYCLOAK_SERVICE.join_account_holders_group(keycloak_guid=user_id)
+    # Get the user groups and verify the public_users group is in the list
+    user_groups = KeycloakConfig().get_keycloak_admin().get_user_groups(user_id=user_id)
+    groups = []
+    for group in user_groups:
+        groups.append(group.get('name'))
+    assert GROUP_ACCOUNT_HOLDERS in groups
+
+    KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
+
+
+def test_join_account_holders_group_from_token(session, monkeypatch):
+    """Assert that the account_holders group is getting added to the user."""
+    KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
+    user = KEYCLOAK_SERVICE.get_user_by_username(ADD_USER_REQUEST.get('username'))
+    user_id = user.get('id')
+
+    # Patch token info
+    def token_info():  # pylint: disable=unused-argument; mocks of library methods
+        return {
+            'sub': str(user_id),
+            'username': 'public user',
+            'realm_access': {
+                'roles': [
+                ]
+            }
+        }
+
+    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', token_info)
+
+    KEYCLOAK_SERVICE.join_account_holders_group()
+    # Get the user groups and verify the public_users group is in the list
+    user_groups = KeycloakConfig().get_keycloak_admin().get_user_groups(user_id=user_id)
+    groups = []
+    for group in user_groups:
+        groups.append(group.get('name'))
+    assert GROUP_ACCOUNT_HOLDERS in groups
+
+    KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))
+
+
+def test_remove_from_account_holders_group(session):
+    """Assert that the account_holders group is removed from the user."""
+    KEYCLOAK_SERVICE.add_user(ADD_USER_REQUEST)
+    user = KEYCLOAK_SERVICE.get_user_by_username(ADD_USER_REQUEST.get('username'))
+    user_id = user.get('id')
+    KEYCLOAK_SERVICE.join_account_holders_group(keycloak_guid=user_id)
+    # Get the user groups and verify the public_users group is in the list
+    user_groups = KeycloakConfig().get_keycloak_admin().get_user_groups(user_id=user_id)
+    groups = []
+    for group in user_groups:
+        groups.append(group.get('name'))
+    assert GROUP_ACCOUNT_HOLDERS in groups
+    KEYCLOAK_SERVICE.remove_from_account_holders_group(keycloak_guid=user_id)
+    user_groups = KeycloakConfig().get_keycloak_admin().get_user_groups(user_id=user_id)
+    groups = []
+    for group in user_groups:
+        groups.append(group.get('name'))
+    assert GROUP_ACCOUNT_HOLDERS not in groups
 
     KEYCLOAK_SERVICE.delete_user_by_username(ADD_USER_REQUEST.get('username'))

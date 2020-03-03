@@ -15,15 +15,17 @@
 
 Test Utility for creating test scenarios.
 """
-import os
 import uuid
 from enum import Enum
 
+from config import get_named_config
+
+CONFIG = get_named_config('testing')
 
 JWT_HEADER = {
-    'alg': os.getenv('JWT_OIDC_ALGORITHMS'),
+    'alg': CONFIG.JWT_OIDC_TEST_ALGORITHMS,
     'typ': 'JWT',
-    'kid': os.getenv('JWT_OIDC_AUDIENCE')
+    'kid': CONFIG.JWT_OIDC_TEST_AUDIENCE
 }
 
 
@@ -31,7 +33,7 @@ class TestJwtClaims(dict, Enum):
     """Test scenarios of jwt claims."""
 
     no_role = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302065',
         'firstname': 'Test',
         'lastname': 'User 2',
@@ -50,7 +52,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     edit_role = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',
         'lastname': 'User',
@@ -63,7 +65,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     edit_role_2 = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302075',
         'firstname': 'Test',
         'lastname': 'User 2',
@@ -76,7 +78,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     view_role = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',
         'lastname': 'User',
@@ -89,7 +91,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     staff_role = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',
         'lastname': 'User',
@@ -102,7 +104,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     system_role = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',
         'lastname': 'User',
@@ -116,7 +118,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     passcode = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',
         'lastname': 'User',
@@ -131,7 +133,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     updated_test = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Updated_Test',
         'lastname': 'User',
@@ -142,7 +144,7 @@ class TestJwtClaims(dict, Enum):
         }
     }
     user_test = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04',
         'firstname': 'Test',
         'lastname': 'User',
@@ -157,7 +159,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     tester_role = {
-        'iss': os.getenv('JWT_OIDC_ISSUER'),
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',
         'lastname': 'User',
@@ -173,7 +175,7 @@ class TestJwtClaims(dict, Enum):
     def get_test_user(sub):
         """Return test user with subject from argument."""
         return {
-            'iss': os.getenv('JWT_OIDC_ISSUER'),
+            'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
             'sub': sub,
             'firstname': 'Test',
             'lastname': 'User',
@@ -335,3 +337,59 @@ class TestUserInfo(dict, Enum):
         'roles': '{edit, uma_authorization, tester}',
         'keycloak_guid': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
+
+    @staticmethod
+    def get_user_with_kc_guid(kc_guid: str):
+        """Return user with keycloak guid."""
+        return {
+            'username': 'tester',
+            'firstname': 'Test',
+            'lastname': 'User',
+            'roles': '{edit, uma_authorization, staff}',
+            'keycloak_guid': kc_guid
+        }
+
+
+class KeycloakScenario(dict):
+    """Keycloak scenario."""
+
+    create_user_request = {
+        'username': 'test11',
+        'password': '1111',
+        'firstname': '111',
+        'lastname': 'test',
+        'email': 'test11@gov.bc.ca',
+        'enabled': True,
+        'user_type': [
+            '/test'
+        ],
+        'corp_type': 'CP',
+        'source': 'BCSC'
+    }
+
+    create_user_request_2 = {
+        'username': 'test12',
+        'password': '1111',
+        'firstname': '2222',
+        'lastname': 'test',
+        'email': 'test12@gov.bc.ca',
+        'enabled': True,
+        'user_type': [
+            '/test'
+        ],
+        'corp_type': 'CP',
+        'source': 'BCSC'
+    }
+
+    # Patch token info
+    @staticmethod
+    def token_info(kc_guid: str):  # pylint: disable=unused-argument; mocks of library methods
+        """Return token info for test."""
+        return {
+            'sub': kc_guid,
+            'username': 'public user',
+            'realm_access': {
+                'roles': [
+                ]
+            }
+        }

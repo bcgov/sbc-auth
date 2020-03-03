@@ -32,6 +32,7 @@ from auth_api.utils.roles import CLIENT_ADMIN_ROLES, OWNER, OrgStatus, Status, U
 from auth_api.utils.util import camelback2snake
 
 from .contact import Contact as ContactService
+from .keycloak import KeycloakService
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -263,6 +264,10 @@ class User:  # pylint: disable=too-many-instance-attributes
         user.is_terms_of_use_accepted = False
 
         user.save()
+
+        # Remove user from account_holders group
+        KeycloakService.remove_from_account_holders_group(user.keycloak_guid)
+
         current_app.logger.debug('<delete_user')
 
     @staticmethod

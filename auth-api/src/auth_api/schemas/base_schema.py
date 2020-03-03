@@ -18,7 +18,7 @@ from marshmallow import fields, post_dump
 from auth_api.models import ma
 
 
-class BaseSchema(ma.ModelSchema):
+class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
     """Base Schema."""
 
     created_by = fields.Function(lambda obj: '{} {}'.format(obj.created_by.firstname, obj.created_by.lastname)

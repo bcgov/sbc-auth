@@ -13,10 +13,11 @@
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
 import pytest
+
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
 
-from auth_api import create_app
+from auth_api import create_app, setup_jwt_manager
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.models import db as _db
 
@@ -127,6 +128,25 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         conn.close()
 
 
+@pytest.fixture(scope='session', autouse=True)
+def keycloak(docker_services, app):
+    """Spin up a keycloak instance and initialize jwt."""
+    if app.config['USE_TEST_KEYCLOAK_DOCKER']:
+        docker_services.start('keycloak')
+        docker_services.wait_for_service('keycloak', 8081)
+
+    setup_jwt_manager(app, _JWT)
+
+
+@pytest.fixture(scope='session')
+def docker_compose_files(pytestconfig):
+    """Get the docker-compose.yml absolute path."""
+    import os
+    return [
+        os.path.join(str(pytestconfig.rootdir), 'tests/docker', 'docker-compose.yml')
+    ]
+
+
 @pytest.fixture()
 def auth_mock(monkeypatch):
     """Mock check_auth."""
@@ -139,3 +159,12 @@ def auth_mock(monkeypatch):
 def notify_mock(monkeypatch):
     """Mock send_email."""
     monkeypatch.setattr('auth_api.services.invitation.send_email', lambda *args, **kwargs: None)
+
+
+@pytest.fixture()
+def keycloak_mock(monkeypatch):
+    """Mock keycloak services."""
+    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.join_account_holders_group',
+                        lambda *args, **kwargs: None)
+    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.remove_from_account_holders_group',
+                        lambda *args, **kwargs: None)

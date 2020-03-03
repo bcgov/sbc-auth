@@ -33,6 +33,7 @@ from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, OWNER, Status
 from config import get_named_config
 
 from .authorization import check_auth
+from .keycloak import KeycloakService
 from .notification import send_email
 from .org import Org as OrgService
 from .user import User as UserService
@@ -188,6 +189,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 setattr(self._model, key, value)
         self._model.save()
         self._model.commit()
+        # Add to account_holders group in keycloak
+        Membership._add_or_remove_group(self._model)
         current_app.logger.debug('>update_membership')
         return self
 
@@ -206,8 +209,21 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         current_app.logger.info(f'<deactivate_membership for {self._model.user.username}')
         self._model.save()
         self._model.commit()
+        # Remove from account_holders group in keycloak
+        Membership._add_or_remove_group(self._model)
+
         current_app.logger.debug('>deactivate_membership')
         return self
+
+    @staticmethod
+    def _add_or_remove_group(model: MembershipModel):
+        """Add or remove the user from/to account holders group."""
+        if model.membership_status.id == Status.ACTIVE.value:
+            KeycloakService.join_account_holders_group(model.user.keycloak_guid)
+        elif model.membership_status.id == Status.INACTIVE.value and len(
+                MembershipModel.find_orgs_for_user(model.user.id)) == 0:
+            # Check if the user has any other active org membership, if none remove from the group
+            KeycloakService.remove_from_account_holders_group(model.user.keycloak_guid)
 
     @staticmethod
     def get_membership_for_org_and_user(org_id, user_id):

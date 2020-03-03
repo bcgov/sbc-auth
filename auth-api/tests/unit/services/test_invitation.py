@@ -35,7 +35,7 @@ from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUs
 from tests.utilities.factory_utils import factory_invitation, factory_user_model
 
 
-def test_as_dict(session, auth_mock):  # pylint:disable=unused-argument
+def test_as_dict(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that the Invitation is exported correctly as a dictionary."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model()
@@ -47,7 +47,7 @@ def test_as_dict(session, auth_mock):  # pylint:disable=unused-argument
         assert invitation_dictionary['recipientEmail'] == invitation_info['recipientEmail']
 
 
-def test_create_invitation(session, auth_mock):  # pylint:disable=unused-argument
+def test_create_invitation(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an Invitation can be created."""
     with patch.object(InvitationService, 'send_invitation', return_value=None) as mock_notify:
         user = factory_user_model(TestUserInfo.user_test)
@@ -61,7 +61,7 @@ def test_create_invitation(session, auth_mock):  # pylint:disable=unused-argumen
         mock_notify.assert_called()
 
 
-def test_find_invitation_by_id(session, auth_mock):  # pylint:disable=unused-argument
+def test_find_invitation_by_id(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided id."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -80,7 +80,7 @@ def test_find_invitation_by_id_exception(session, auth_mock):  # pylint:disable=
     assert invitation is None
 
 
-def test_delete_invitation(session, auth_mock):  # pylint:disable=unused-argument
+def test_delete_invitation(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Delete the specified invitation."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -101,7 +101,7 @@ def test_delete_invitation_exception(session, auth_mock):  # pylint:disable=unus
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
 
-def test_update_invitation(session, auth_mock):  # pylint:disable=unused-argument
+def test_update_invitation(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Update the specified invitation with new data."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -113,7 +113,7 @@ def test_update_invitation(session, auth_mock):  # pylint:disable=unused-argumen
         assert updated_invitation['status'] == 'PENDING'
 
 
-def test_update_invitation_verify_different_tokens(session, auth_mock):  # pylint:disable=unused-argument
+def test_update_invitation_verify_different_tokens(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Update the specified invitation with new data."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -136,7 +136,7 @@ def test_generate_confirmation_token(session):  # pylint:disable=unused-argument
     assert confirmation_token is not None
 
 
-def test_validate_token_valid(session, auth_mock):  # pylint:disable=unused-argument
+def test_validate_token_valid(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Validate the invitation token."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -149,7 +149,7 @@ def test_validate_token_valid(session, auth_mock):  # pylint:disable=unused-argu
         assert invitation_id == new_invitation['id']
 
 
-def test_validate_token_accepted(session, auth_mock):  # pylint:disable=unused-argument
+def test_validate_token_accepted(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Validate invalid invitation token."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -175,7 +175,7 @@ def test_validate_token_exception(session):  # pylint:disable=unused-argument
     assert exception.value.code == Error.EXPIRED_INVITATION.name
 
 
-def test_accept_invitation(session, auth_mock):  # pylint:disable=unused-argument
+def test_accept_invitation(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Accept the invitation and add membership from the invitation to the org."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         with patch.object(auth, 'check_auth', return_value=True):
@@ -199,7 +199,7 @@ def test_accept_invitation(session, auth_mock):  # pylint:disable=unused-argumen
                 assert len(members) == 1
 
 
-def test_accept_invitation_exceptions(session, auth_mock):  # pylint:disable=unused-argument
+def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Accept the invitation and add membership from the invitation to the org."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         with patch.object(auth, 'check_auth', return_value=True):
@@ -235,7 +235,7 @@ def test_accept_invitation_exceptions(session, auth_mock):  # pylint:disable=unu
                 assert exception.value.code == Error.EXPIRED_INVITATION.name
 
 
-def test_get_invitations_by_org_id(session, auth_mock):  # pylint:disable=unused-argument
+def test_get_invitations_by_org_id(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided org id."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user_with_token = TestUserInfo.user_test
@@ -253,7 +253,7 @@ def test_get_invitations_by_org_id(session, auth_mock):  # pylint:disable=unused
         assert len(invitations) == 1
 
 
-def test_send_invitation_exception(session, notify_mock):  # pylint:disable=unused-argument
+def test_send_invitation_exception(session, notify_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Send an existing invitation with exception."""
     user = factory_user_model(TestUserInfo.user_test)
     user_dictionary = User(user).as_dict()

@@ -17,6 +17,7 @@ from enum import Enum
 
 # Group names
 GROUP_PUBLIC_USERS = 'public_users'
+GROUP_ACCOUNT_HOLDERS = 'account_holders'
 
 # Login Sources
 PASSCODE = 'PASSCODE'

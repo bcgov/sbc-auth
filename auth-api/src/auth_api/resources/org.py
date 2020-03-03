@@ -69,6 +69,20 @@ class Orgs(Resource):
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
 
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
+    def get():
+        """Search orgs."""
+        # Search based on request arguments
+        business_identifier = request.args.get('affiliation', None)
+        try:
+            response, status = OrgService.search_orgs(business_identifier=business_identifier), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
 
 @cors_preflight('GET,PUT,OPTIONS,DELETE')
 @API.route('/<string:org_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])

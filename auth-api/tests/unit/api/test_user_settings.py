@@ -26,7 +26,7 @@ from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUs
 from tests.utilities.factory_utils import factory_auth_header, factory_contact_model, factory_user_model
 
 
-def test_get_user_settings(client, jwt, session):  # pylint:disable=unused-argument
+def test_get_user_settings(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that get works and adhere to schema."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
     contact = factory_contact_model()
