@@ -57,7 +57,7 @@
             <v-btn
               large
               color="primary"
-              class="mr-2 submit-form-btn"
+              class="mr-2"
               :loading="saving"
               :disabled="!isFormValid() || saving"
               @click="save"
@@ -66,7 +66,6 @@
             <v-btn
               large
               depressed
-              class="cancel-btn"
               color="default"
               :disable="saving"
               @click="cancel"
