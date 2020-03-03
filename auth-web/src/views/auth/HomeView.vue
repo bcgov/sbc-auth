@@ -1,53 +1,49 @@
 <template>
   <div>
     <article>
-      <header class="hero-banner light">
+      <header class="hero-banner">
         <v-container>
-          <v-row>
-            <v-col cols="12" lg="8">
-              <h1>Welcome to Cooperatives Online<sup>Beta</sup></h1>
-              <p>File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
+          <h1>Welcome to Cooperatives Online<sup>Beta</sup></h1>
+          <p>File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
 
-              <div class="hero-banner__cta-btns">
-                <!-- Authenticated -->
-                <div v-if="userProfile">
-                  <v-btn large color="#fcba19" class="cta-btn"
-                    @click="goToManageBusinesses()">
-                    Manage Businesses
-                  </v-btn>
-                  <v-btn large color="#fcba19" class="cta-btn" @click="createAccount()">
-                    Create a New BC Registries Account
-                  </v-btn>
-                </div>
+          <div class="hero-banner__cta-btns">
+            <!-- Authenticated -->
+            <div v-if="userProfile">
+              <v-btn large color="#fcba19" class="cta-btn"
+                @click="goToManageBusinesses()">
+                Manage Businesses
+              </v-btn>
+              <v-btn large outlined color="#ffffff" class="cta-btn" @click="createAccount()">
+                Create a new BC Registries Account
+              </v-btn>
+            </div>
 
-                <!-- Non-authenticated -->
-                <v-btn large color="#fcba19" class="cta-btn"
-                  v-if="!userProfile"
-                  @click="accountDialog = true">
-                  Create a BC Registries Account
-                </v-btn>
-              </div>
+            <!-- Non-authenticated -->
+            <v-btn large color="#fcba19" class="cta-btn"
+              v-if="!userProfile"
+              @click="accountDialog = true">
+              Create a BC Registries Account
+            </v-btn>
+          </div>
 
-              <v-dialog v-model="accountDialog" max-width="640">
-                <v-card>
-                  <v-card-title>Create a BC Registries Account</v-card-title>
-                  <v-card-text>
-                    <p class="mb-7">To access this service, you must securely log in with your BC Services Card, government’s trusted way to access online services. It typically takes five minutes or less to set up your mobile card, and the only information BC Registries can access from your card is your legal name.</p>
-                    <a rel="noopener noreferrer" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card"
-                      target="_blank">
-                      <v-icon small class="mr-2">mdi-open-in-new</v-icon>
-                      <span>Learn how to set up and use your BC Services Card</span>
-                    </a>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn large color="primary" @click="login()">Log in</v-btn>
-                    <v-btn large depressed color="default" @click="accountDialog = false">Cancel</v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-            </v-col>
-          </v-row>
+          <v-dialog v-model="accountDialog" max-width="640">
+            <v-card>
+              <v-card-title>Create a BC Registries Account</v-card-title>
+              <v-card-text>
+                <p class="mb-7">To access this service, you must securely log in with your BC Services Card, government’s trusted way to access online services. It typically takes five minutes or less to set up your mobile card, and the only information BC Registries can access from your card is your legal name.</p>
+                <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card" rel="noopener noreferrer"
+                  target="_blank">
+                  <v-icon small class="mr-2">mdi-open-in-new</v-icon>
+                  <span>Learn how to set up and use your BC Services Card</span>
+                </a>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn large color="primary" @click="login()">Log in</v-btn>
+                <v-btn large depressed color="default" @click="accountDialog = false">Cancel</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-container>
       </header>
       <div class="how-to-container">
@@ -63,25 +59,25 @@
                     </div>
                     <div class="section-card__text">
                       <h3>1. &nbsp;Log in with your BC Services Card</h3>
-                      <p class="mb-0">You must securely log in with your BC Services Card, government’s trusted way to access online services. It typically takes five minutes or less to <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card/mobile-card/set-up-mobile-card" target="_blank">set up</a> your mobile card, and the only information BC Registries can access from your card is your legal name.</p>
+                      <p class="mb-0">You must securely log in with your BC Services Card, government’s trusted way to access online services. It typically takes five minutes or less to <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card/mobile-card/set-up-mobile-card" target="_blank" rel="noopener noreferrer">set up</a> your mobile card, and the only information BC Registries can access from your card is your legal name.</p>
                     </div>
                   </v-col>
                   <v-col sm="12" md="4" class="section-card__links">
                     <ul class="mb-0">
                       <li>
-                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank" rel="noopener">
+                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank" rel="noopener noreferrer">
                           <v-icon small>mdi-open-in-new</v-icon>
                           <span>What is a BC <span class="nobr">Services Card?</span></span>
                         </v-btn>
                       </li>
                       <li>
-                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card" target="_blank" rel="noopener">
+                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card" target="_blank" rel="noopener noreferrer">
                           <v-icon small>mdi-open-in-new</v-icon>
                           <span>How do I log in with my BC <span class="nobr">Services Card?</span></span>
                         </v-btn>
                       </li>
                       <li>
-                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/get-a-card" target="_blank" rel="noopener">
+                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/get-a-card" target="_blank" rel="noopener noreferrer">
                           <v-icon small>mdi-open-in-new</v-icon>
                           <span>I don't have a BC <span class="nobr">Services Card</span></span>
                         </v-btn>
@@ -136,13 +132,16 @@
                               <span>Email:</span> <a v-bind:href="'mailto:' + $t('techSupportEmail') + '?subject=' + $t('techSupportEmailSubject')">{{ $t('techSupportEmail') }}</a>
                             </li>
                           </ul>
-                          <div>
-                            <p class="mb-0"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
-                          </div>
+                          <p class="mb-7"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
+                          <a class="link-w-icon" href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card"
+                            target="_blank" rel="noopener noreferrer">
+                            <v-icon small class="mr-2">mdi-open-in-new</v-icon>
+                            <span>Frequently Asked Questions</span>
+                          </a>
                         </v-card-text>
                         <v-card-actions>
                           <v-spacer></v-spacer>
-                          <v-btn large depressed color="primary" @click="noPasscodeDialog = false">OK</v-btn>
+                          <v-btn large color="primary" @click="noPasscodeDialog = false">OK</v-btn>
                         </v-card-actions>
                       </v-card>
                     </v-dialog>
@@ -191,15 +190,20 @@
           </section>
         </v-container>
       </div>
-      <div class="contact-info-container light">
+      <div class="contact-info-container">
         <v-container>
           <v-row>
-            <v-col sm="12" md="8">
+            <v-col cols="12" md="8">
               <h3 class="mb-6">Need more information?</h3>
               <p class="mb-4">To learn more about Cooperative Associations in British Columbia, please visit the Cooperative Associations information page on the <a href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations" target="_blank" rel="noopener">BC Government website</a>.</p>
+              <a class="link-w-icon" href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card"
+                target="_blank" rel="noopener noreferrer">
+                <v-icon small class="mr-2">mdi-open-in-new</v-icon>
+                <span>Frequently Asked Questions</span>
+              </a>
             </v-col>
 
-            <v-col sm="12" md="4">
+            <v-col cols="12" md="4">
               <h3 class="mb-6">Contact Us</h3>
               <p class="mb-5">For support or questions about this application, contact us at:</p>
               <ul class="contact-info__list mb-5">
@@ -284,17 +288,21 @@ export default class HomeView extends Vue {
 
   // Hero Banner
   .hero-banner {
+    color: #ffffff;
+    background-color: $BCgovBlue5;
+
     h1 {
       margin-bottom: 1.5rem;
-      letter-spacing: -0.06rem;
+      color: inherit;
+      letter-spacing: -0.02rem;
       line-height: 1.25;
-      font-size: 2.75rem;
+      font-size: 2.5rem;
 
       sup {
         top: -0.9rem;
         margin-left: 0.25rem;
         vertical-align: middle;
-        color: $gray7;
+        color: $BCgovGold5;
         text-transform: uppercase;
         letter-spacing: 0.05rem;
         font-size: .875rem;
@@ -302,13 +310,14 @@ export default class HomeView extends Vue {
     }
 
     p {
+      max-width: 40rem;
       margin-bottom: 2.5rem;
-      font-size: 1.125rem;
+      font-size: 1rem;
     }
 
     .container {
-      padding-top: 2.25rem;
-      padding-bottom: 3.25rem;
+      padding-top: 3rem;
+      padding-bottom: 3.75rem;
     }
   }
 
@@ -318,21 +327,9 @@ export default class HomeView extends Vue {
     }
   }
 
-  @media (max-width: 1200px) {
-    .hero-banner {
-      text-align: center;
-
-      p {
-        margin: 0 auto;
-        max-width: 40rem;
-      }
-    }
-  }
-
   // How to Section
   .how-to-container {
-    background: rgb(248,249,250);
-    background: radial-gradient(circle, $gray1 25%, $gray3 100%);
+    background: $gray2;
 
     .container {
       padding-top: 2.5rem;
@@ -410,6 +407,7 @@ export default class HomeView extends Vue {
       display: inline-block;
       padding: 0.5rem 1rem !important;
       white-space: normal;
+      text-align: left;
       font-weight: 700;
 
       .v-icon {
@@ -452,6 +450,9 @@ export default class HomeView extends Vue {
 
   // Contact Section
   .contact-info-container {
+    color: #ffffff;
+    background-color: $BCgovBlue5;
+
     .container {
       padding-top: 2rem;
       padding-bottom: 2.5rem;
@@ -460,8 +461,13 @@ export default class HomeView extends Vue {
     h3 {
       margin-bottom: 1rem;
       padding-bottom: 0.5rem;
-      border-bottom: 2px solid $gray3;
-      font-size: 1.5rem;
+      color: inherit;
+      border-bottom: 1px solid $BCgovBlue3;
+      font-size: 1.25rem;
+    }
+
+    a {
+      color: $BCgovGold5;
     }
   }
 
@@ -493,26 +499,12 @@ export default class HomeView extends Vue {
     font-weight: 700;
   }
 
-  // Helper Classes
-  .dark {
-    background-color: $BCgovBlue5;
-
-    h1, p {
-      color: $gray0;
-    }
-  }
-
-  .light {
-    background-color: #ffffff;
-  }
-
   // Fix initial display of the dialog container
   .v-dialog__container {
     display: none;
   }
 
   a {
-    text-decoration: none;
     font-weight: 700;
     font-size: 0.875rem;
 
@@ -524,4 +516,17 @@ export default class HomeView extends Vue {
       text-decoration: underline;
     }
   }
+
+  .link-w-icon {
+    text-decoration: none;
+
+    span {
+      text-decoration: underline;
+    }
+  }
+
+  .app-footer {
+    border-bottom: none !important;
+  }
+
 </style>
