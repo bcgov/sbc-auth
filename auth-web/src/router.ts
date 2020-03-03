@@ -17,6 +17,7 @@ import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
 import Router from 'vue-router'
 import SearchBusinessView from '@/views/auth/SearchBusinessView.vue'
+import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
@@ -96,6 +97,7 @@ export function getRoutes () {
     { path: '/unauthorized', name: 'unauthorized', component: UnauthorizedView, props: true, meta: { requiresAuth: false } },
     { path: '/pendingapproval/:team_name?', name: 'pendingapproval', component: PendingApprovalView, props: true, meta: { requiresAuth: false } },
     { path: '/leaveteam', name: 'leaveteam', component: LeaveTeamLandingView, props: true, meta: { requiresAuth: true } },
+    { path: '/setupaccount', name: 'setupaccount', component: SetupAccountView, props: true, meta: { requiresAuth: true } },
     { path: '*', name: 'notfound', component: PageNotFound }
   ]
 
