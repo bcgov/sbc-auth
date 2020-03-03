@@ -72,7 +72,7 @@ class Orgs(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value])
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
     def get():
         """Search orgs."""
         # Search based on request arguments
