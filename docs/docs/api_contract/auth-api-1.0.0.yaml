@@ -3594,12 +3594,16 @@ paths:
         - orgs
       summary: Get all affiliated entities for the given org.
       description: Get all affiliated entities for the given org.
+  
   '/orgs/{org_id}':
     parameters:
       - name: org_id
         in: path
         required: true
         type: string
+        examples:
+          example1:
+            value: "1234"
     put:
       responses:
         '200':
@@ -3701,6 +3705,7 @@ paths:
                   - orgType
                   - org_status
                   - preferred_payment
+
         '400':
           description: Bad Request
           content:
@@ -3861,6 +3866,14 @@ paths:
                   - orgType
                   - org_status
                   - preferred_payment
+              examples:
+                example1:
+                  value: '{
+                            "id": "1234",
+                            "name": "Mock Account",
+                            "preferred_payment": "CC"
+                          }'
+
         '404':
           description: Not Found
           content:
@@ -4027,6 +4040,168 @@ paths:
                   pattern: '^(.*)$'
               required:
                 - name
+    get:
+      summary: Search orgs
+      operationId: getAuthorizations
+      parameters:
+        - name: affiliation
+          in: query
+          description: Business Identifier
+          required: true
+          schema:
+            type: string
+          examples:
+            example1:
+              value: 'CP0001234'
+            example2:
+              value: 'CP0002000'
+      tags:
+        - authorization
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+              examples:
+                example1:
+                  value: 'application:prod'
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+              examples:
+                example1:
+                  value: '*'
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+              examples:
+                example1:
+                  value: 'GET, OPTIONS'
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+              examples:
+                example1:
+                  value: 'Content-Type, api_key, Authorization'
+          content:
+            application/json:
+              schema:
+                title: org
+                type: object
+                properties:
+                  created:
+                    $id: '#/properties/created'
+                    type: string
+                    title: The Created Schema
+                    default: ''
+                    examples:
+                      - '2020-01-09T13:49:45.244134+00:00'
+                    pattern: '^(.*)$'
+                  created_by:
+                    $id: '#/properties/created_by'
+                    type: string
+                    title: The Created_by Schema
+                    default: ''
+                    examples:
+                      - sbc-auth admin
+                    pattern: '^(.*)$'
+                  id:
+                    $id: '#/properties/id'
+                    type: integer
+                    title: The Id Schema
+                    default: 0
+                    examples:
+                      - 103
+                  modified:
+                    $id: '#/properties/modified'
+                    type: string
+                    title: The Modified Schema
+                    default: ''
+                    examples:
+                      - '2020-01-09T13:49:45.244148+00:00'
+                    pattern: '^(.*)$'
+                  name:
+                    $id: '#/properties/name'
+                    type: string
+                    title: The Name Schema
+                    default: ''
+                    examples:
+                      - AOT
+                    pattern: '^(.*)$'
+                  orgType:
+                    $id: '#/properties/orgType'
+                    type: string
+                    title: The Orgtype Schema
+                    default: ''
+                    examples:
+                      - IMPLICIT
+                    pattern: '^(.*)$'
+                  org_status:
+                    $id: '#/properties/org_status'
+                    type: string
+                    title: The Org_status Schema
+                    default: ''
+                    examples:
+                      - ACTIVE
+                    pattern: '^(.*)$'
+                  preferred_payment:
+                    $id: '#/properties/preferred_payment'
+                    type: string
+                    title: The Preferred_payment Schema
+                    default: ''
+                    examples:
+                      - CC
+                    pattern: '^(.*)$'
+                  modified_by:
+                    type: string
+                required:
+                  - created
+                  - created_by
+                  - id
+                  - modified
+                  - name
+                  - orgType
+                  - org_status
+                  - preferred_payment
+              examples:
+                example1:
+                  value: '{
+                              "id": "1234",
+                              "name": "Mock Account",
+                              "preferred_payment": "CC"
+                          }'
+                example2:
+                  value: '{
+                              "id": "2000",
+                              "name": "Mock Account",
+                              "preferred_payment": "PREMIUM",
+                              "bc_online_user_id": "PB25020"
+                          }'
+
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      description: Get authorizations endpoint for the entity by business indentifier
+    parameters:
+      - schema:
+          type: string
+        name: affiliation
+        in: query
+        required: true
+        description: Corp Num/Incorporation Number of the entity
+        examples:
+          example1:
+            value: 'CP0001234'
+
   /logout:
     post:
       responses:
@@ -6075,7 +6250,84 @@ paths:
             value: CP0001238
           expanded_premium:
             value: CP0002000
+  '/accounts/{account_id}/products/{product_code}/authorizations':
+    get:
+      summary: Get authorizations for the account per product
+      operationId: getAccAuthorizations
+      tags:
+        - authorization
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+              examples:
+                example1:
+                  value: 'application:prod'
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+              examples:
+                example1:
+                  value: '*'
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+              examples:
+                example1:
+                  value: 'GET, OPTIONS'
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+              examples:
+                example1:
+                  value: 'Content-Type, api_key, Authorization'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Authorization'
+              examples:
+                example1:
+                  value: '{
+                            "roles": [
+                              "search",
+                              "edit"
+                            ]
+                          }'
 
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      description: Get authorizations endpoint for the entity by business indentifier
+    parameters:
+      - schema:
+          type: string
+        name: account_id
+        in: path
+        required: true
+        description: Corp Num/Incorporation Number of the entity
+        examples:
+          example1:
+            value: 1234
+      - schema:
+          type: string
+        name: product_code
+        in: path
+        required: true
+        description: Corp Num/Incorporation Number of the entity
+        examples:
+          example1:
+            value: PPR
+  
   '/entities/{business_identifier}':
     parameters:
       - name: business_identifier
