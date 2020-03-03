@@ -1,123 +1,80 @@
 <template>
   <div>
-    <v-form ref="directorSearchForm">
-      <!-- Name of Account -->
-      <v-row>
-        <v-col cols="12" class="pb-0 mb-2">
-          <h4 class="mb-2">Enter a name for this account</h4>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" class="">
-          <v-text-field
-            filled
-            label="Account Name"
-            v-model.trim="accountName"
-            :rules="accountNameRules"
-            persistent-hint
-            :disabled="saving"
-            data-test="account-name"
-          >
-          </v-text-field>
-        </v-col>
-      </v-row>
-      <!-- Email/Confirm Email -->
-      <v-row>
-        <v-col cols="12" class="pb-0">
-          <h4 class="mb-2">Account Owner Contact</h4>
-          <p class="mb-6">Enter the email address of the user who will be managing this account. An email will be sent to this user to verify and activate this account</p>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" class="pt-0 pb-0">
-          <v-text-field
-            filled
-            label="Email Address"
-            v-model.trim="email"
-            :rules="emailRules"
-            persistent-hint
-            :disabled="saving"
-            data-test="email-address"
-          >
-          </v-text-field>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" class="pt-0 pb-0">
-          <v-text-field
-            filled
-            label="Confirm Email Address"
-            v-model.trim="emailConfirm"
-            :rules="emailRules"
-            persistent-hint
-            :error-messages="emailMatchError()"
-            :disabled="saving"
-            data-test="confirm-email-address"
-          >
-          </v-text-field>
-        </v-col>
-      </v-row>
-      <!-- Select Products -->
-      <v-row>
-        <v-col cols="12" class="pb-0">
-          <h4 class="mb-2">Select Product(s)</h4>
-          <p class="mb-4">Which products will this account have access to?</p>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" class="pt-0 pb-0">
-          <v-treeview
-            selectable
-            open-all
-            return-object
-            :items="products"
-            :item-text="'desc'"
-            :item-key="'code'"
-            :item-children="'subProducts'"
-            v-model="selectedProducts"
-            :disabled="saving"
-            data-test="product-select"
-          ></v-treeview>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" class="form__btns pb-0">
-          <v-btn
-            large
-            color="primary"
-            class="mr-2 submit-form-btn"
-            :loading="saving"
-            :disabled="!isFormValid() || saving"
-            @click="save"
-            data-test="save-button"
-          >Create Account</v-btn>
-          <v-btn
-            large
-            depressed
-            class="cancel-btn"
-            color="default"
-            :disable="saving"
-            @click="cancel"
-            data-test="cancel-button"
-          >Cancel</v-btn>
-        </v-col>
-      </v-row>
-    </v-form>
-    <!-- Error Dialog -->
-    <ModalDialog
-      ref="errorDialog"
-      :title="dialogTitle"
-      :text="dialogText"
-      dialog-class="notify-dialog"
-      max-width="640"
-    >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-      </template>
-      <template v-slot:actions>
-        <v-btn large color="error" @click="close()" data-test="dialog-ok-button">OK</v-btn>
-      </template>
-    </ModalDialog>
+    <div>
+      <v-form ref="directorSearchForm">
+        <v-alert type="error" v-show="errorMessage">{{errorMessage}}</v-alert>
+
+        <v-row>
+            <v-col class="d-flex" cols="12" xl="6">
+                <v-text-field
+                filled
+                label="Account Name"
+                v-model.trim="accountName"
+                :rules="accountNameRules"
+                persistent-hint
+                :disabled="saving"
+                />
+            </v-col>
+            <v-col class="d-flex" cols="12" xl="6">
+                <v-select
+                :items="accountTypes"
+                filled
+                item-text="desc"
+                item-value="code"
+                label="Account Type"
+                v-model="accountType"
+                />
+            </v-col>
+            <v-col cols="12" xl="12">
+                <v-label>
+                    <h4>Products</h4>
+                </v-label>
+                <v-treeview
+                selectable
+                open-all
+                return-object
+                :items="products"
+                :item-text="'desc'"
+                :item-key="'code'"
+                :item-children="'subProducts'"
+                v-model="selectedProducts"
+                :disabled="saving"
+                ></v-treeview>
+            </v-col>
+            <v-col class="d-flex" cols="12" xl="6">
+                <v-text-field
+                filled
+                label="Email"
+                v-model.trim="email"
+                :rules="emailRules"
+                persistent-hint
+                :disabled="saving"
+                />
+            </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" class="form__btns pb-0">
+            <v-btn
+              large
+              color="primary"
+              class="mr-2"
+              :loading="saving"
+              :disabled="!isFormValid() || saving"
+              @click="save"
+              data-test="save-button"
+            >Submit</v-btn>
+            <v-btn
+              large
+              depressed
+              color="default"
+              :disable="saving"
+              @click="cancel"
+              data-test="cancel-button"
+            >Cancel</v-btn>
+          </v-col>
+        </v-row>
+      </v-form>
+    </div>
   </div>
 </template>
 
@@ -127,7 +84,6 @@ import { Component, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import { CreateRequestBody as InvitationRequestBody } from '@/models/Invitation'
-import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import StaffModule from '@/store/modules/staff'
 import { getModule } from 'vuex-module-decorators'
@@ -138,11 +94,8 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('staff', ['products', 'accountTypes'])
   },
   methods: {
-    ...mapActions('org', ['createOrg', 'addProductsToOrg', 'syncOrganization', 'createInvitation']),
+    ...mapActions('org', ['createOrg', 'addOrgProducts', 'syncOrganization', 'createInvitation']),
     ...mapActions('staff', ['getProducts', 'getAccountTypes'])
-  },
-  components: {
-    ModalDialog
   }
 })
 export default class SetupAccountForm extends Vue {
@@ -152,16 +105,12 @@ export default class SetupAccountForm extends Vue {
   private accountType: string = ''
   private errorMessage: string = ''
   private saving = false
-  private loader = false
   private selectedProducts: ProductCode[] = []
   private email = ''
-  private emailConfirm = ''
-  private dialogTitle = ''
-  private dialogText = ''
   private readonly createOrg!: (
     requestBody: CreateRequestBody
   ) => Promise<Organization>
-  private readonly addProductsToOrg!: (productsRequestBody: ProductsRequestBody) => Promise<Products>
+  private readonly addOrgProducts!: (productsRequestBody: ProductsRequestBody) => Promise<Products>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
   private readonly getProducts!: () => Promise<ProductCode[]>
   private readonly getAccountTypes!: () => Promise<AccountType[]>
@@ -170,8 +119,7 @@ export default class SetupAccountForm extends Vue {
   private readonly accountTypes!: AccountType[]
 
   $refs: {
-    directorSearchForm: HTMLFormElement,
-    errorDialog: ModalDialog
+    directorSearchForm: HTMLFormElement
   }
 
   private readonly accountNameRules = [
@@ -179,18 +127,13 @@ export default class SetupAccountForm extends Vue {
   ]
 
   private readonly emailRules = [
-    v => !!v || 'An email address is required',
-    v => /.+@.+\..+/.test(v) || 'Invalid Email Address'
+    v => !!v || 'An email is required',
+    v => /.+@.+\..+/.test(v) || 'email must be valid'
   ]
-
-  private emailMatchError () {
-    return (this.email === this.emailConfirm) ? null : 'Email Address does not match'
-  }
 
   private isFormValid (): boolean {
     return !!this.accountName &&
       this.selectedProducts.length &&
-      !this.emailMatchError() &&
       this.$refs.directorSearchForm.validate()
   }
 
@@ -204,7 +147,7 @@ export default class SetupAccountForm extends Vue {
   }
 
   private async save () {
-    this.loader = this.saving
+    // Validate form, and then create an team with this user a member
     if (this.isFormValid()) {
       const createRequestBody: CreateRequestBody = {
         name: this.accountName,
@@ -223,15 +166,15 @@ export default class SetupAccountForm extends Vue {
         this.saving = true
         const organization = await this.createOrg(createRequestBody)
         await this.syncOrganization(organization.id)
-        await this.addProductsToOrg(addProductsRequestBody)
+        await this.addOrgProducts(addProductsRequestBody)
         await this.createInvitation({
           recipientEmail: this.email,
           sentDate: new Date(),
           membership: [{ membershipType: 'ADMIN', orgId: organization.id }]
         })
+        this.$store.commit('updateHeader')
         this.saving = false
-        this.loader = this.saving
-        this.$router.push({ path: '/staff-setup-account-success' })
+        // TODO: Redirect/Show success message once the proper design comes
       } catch (err) {
         this.saving = false
         switch (err.response.status) {
@@ -248,26 +191,18 @@ export default class SetupAccountForm extends Vue {
             break
           default:
             this.errorMessage =
-              'Something went wrong while attempting to create this account. Please try again later.'
+              'An error occurred while attempting to create your account.'
         }
-        this.showEntityNotFoundModal(this.errorMessage)
-        this.loader = this.saving
       }
     }
   }
 
   private cancel () {
-    this.$router.push({ path: '/searchbusiness' })
+    this.$router.push({ path: '/home' })
   }
 
-  showEntityNotFoundModal (msg?) {
-    this.dialogTitle = 'An error has occured'
-    this.dialogText = msg || 'Something went wrong while attempting to create this account. Please try again later.'
-    this.$refs.errorDialog.open()
-  }
-
-  close () {
-    this.$refs.errorDialog.close()
+  private redirectToNext (organization?: Organization) {
+    this.$router.push({ path: `/account/${organization.id}/` })
   }
 }
 </script>

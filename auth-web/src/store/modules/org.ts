@@ -97,6 +97,7 @@ export default class OrgModule extends VuexModule {
     await this.context.dispatch('syncActiveOrgMembers')
     await this.context.dispatch('syncPendingOrgMembers')
     await this.context.dispatch('syncPendingOrgInvitations')
+    await this.context.dispatch('business/syncBusinesses', null, { root: true })
     return organization
   }
 
@@ -131,7 +132,6 @@ export default class OrgModule extends VuexModule {
       this.context.dispatch('syncPendingOrgInvitations')
     } catch (exception) {
       this.context.commit('addFailedInvitation', invitation)
-      throw exception
     }
   }
 
@@ -247,7 +247,7 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async addProductsToOrg (productsRequestBody: ProductsRequestBody): Promise<Products> {
+  public async addOrgProducts (productsRequestBody: ProductsRequestBody): Promise<Products> {
     const response = await StaffService.addProducts(this.context.state['currentOrganization'].id, productsRequestBody)
     return response?.data
   }
