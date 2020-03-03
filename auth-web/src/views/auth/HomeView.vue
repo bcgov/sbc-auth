@@ -259,9 +259,7 @@ export default class HomeView extends Vue {
   }
 
   private createAccount (): void {
-    if (this.currentAccountSettings) {
-      this.$router.push(`/${Pages.CREATE_ACCOUNT}`)
-    }
+    this.$router.push(`/${Pages.CREATE_ACCOUNT}`)
   }
 
   private login () {
