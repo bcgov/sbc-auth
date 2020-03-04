@@ -48,42 +48,43 @@ async def process_notification(notification_id: int, db_session):
     """Send the notification to smtp server."""
     try:
         notification: Notification = await NotifyService.find_notification(db_session, notification_id)
-        sender: str = app_config.MAIL_FROM_ID
-        recipients: [] = [s.strip() for s in notification.recipients.split(',')]
+        if not notification.status_code == NotificationStatusEnum.DELIVERED:
+            sender: str = app_config.MAIL_FROM_ID
+            recipients: [] = [s.strip() for s in notification.recipients.split(',')]
 
-        encoding = 'utf-8'
-        message = MIMEMultipart()
-        message['Subject'] = notification.contents.subject
-        message['From'] = sender
-        message['To'] = notification.recipients
-        message.attach(MIMEText(notification.contents.body, 'html', encoding))
+            encoding = 'utf-8'
+            message = MIMEMultipart()
+            message['Subject'] = notification.contents.subject
+            message['From'] = sender
+            message['To'] = notification.recipients
+            message.attach(MIMEText(notification.contents.body, 'html', encoding))
 
-        if notification.contents.attachment:
-            part = MIMEBase('application', 'octet-stream')
-            part.set_payload(notification.contents.attachment)
-            encode_base64(part)
+            if notification.contents.attachment:
+                part = MIMEBase('application', 'octet-stream')
+                part.set_payload(notification.contents.attachment)
+                encode_base64(part)
 
-            spaces = re.compile(r'[\s]+', re.UNICODE)
-            filename = unicodedata.normalize('NFKD', notification.contents.attachment_name)
-            filename = filename.encode('ascii', 'ignore').decode('ascii')
-            filename = spaces.sub(u' ', filename).strip()
+                spaces = re.compile(r'[\s]+', re.UNICODE)
+                filename = unicodedata.normalize('NFKD', notification.contents.attachment_name)
+                filename = filename.encode('ascii', 'ignore').decode('ascii')
+                filename = spaces.sub(u' ', filename).strip()
 
-            try:
-                filename and filename.encode('ascii')
-            except UnicodeEncodeError:
-                filename = ('UTF8', '', filename)
+                try:
+                    filename and filename.encode('ascii')
+                except UnicodeEncodeError:
+                    filename = ('UTF8', '', filename)
 
-            part.add_header('Content-Disposition', 'attachment; filename=' + filename)
+                part.add_header('Content-Disposition', 'attachment; filename=' + filename)
 
-            message.attach(part)
+                message.attach(part)
 
-        await send_with_send_message(message, recipients)
+            await send_with_send_message(message, recipients)
 
-        update_notification: NotificationUpdate = NotificationUpdate(id=notification_id,
-                                                                     sent_date=datetime.utcnow(),
-                                                                     notify_status=NotificationStatusEnum.DELIVERED)
+            update_notification: NotificationUpdate = NotificationUpdate(id=notification_id,
+                                                                         sent_date=datetime.utcnow(),
+                                                                         notify_status=NotificationStatusEnum.DELIVERED)
 
-        await NotifyService.update_notification_status(db_session, update_notification)
+            await NotifyService.update_notification_status(db_session, update_notification)
     except Exception as err:  # pylint: disable=broad-except, unused-variable # noqa F841;
         logger.info('Notify Job (process_notification) Error: %s', exc_info=True)
         update_notification: NotificationUpdate = NotificationUpdate(id=notification_id,
