@@ -112,9 +112,11 @@ for vault_name in $(echo "${VAULT}" | jq -r '.[] | @base64' ); do
             echo ${row} | base64 --decode | jq -r ${1}
         }
 
+        secret_json=$(oc create secret generic ${APP_NAME}-secret --from-literal="$(_envvars '.t')=$(_envvars '.v')" --dry-run -o json)
+
         # Set secret key and value from 1password
         oc get secret ${APP_NAME}-secret -o json \
-          | jq ". * $(oc create secret generic ${APP_NAME}-secret --from-literal=$(_envvars '.t')=$(_envvars '.v') --dry-run -o json)" \
+          | jq ". * $secret_json" \
           | oc apply -f -
 
     done
