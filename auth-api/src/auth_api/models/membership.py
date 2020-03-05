@@ -16,10 +16,10 @@
 The Membership object connects User models to one or more Org models.
 """
 
-from sqlalchemy import Column, ForeignKey, Integer, and_, desc
+from sqlalchemy import Column, ForeignKey, Integer, and_, desc, func
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.roles import VALID_STATUSES, Status
+from auth_api.utils.roles import VALID_STATUSES, Status, Role, ADMIN, OWNER
 
 from .base_model import BaseModel
 from .db import db
@@ -74,6 +74,16 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         return cls.query.filter_by(org_id=org_id).all()
 
     @classmethod
+    def get_pending_members_count_by_org_id(cls, org_id):
+        """Returns the count of pending members."""
+        query = db.session.query(Membership).filter(
+            and_(Membership.status == Status.PENDING_APPROVAL.value)). \
+            join(OrgModel).filter(OrgModel.id == org_id)
+        count_q = query.statement.with_only_columns([func.count()]).order_by(None)
+        count = query.session.execute(count_q).scalar()
+        return count
+
+    @classmethod
     def find_members_by_org_id_by_status_by_roles(cls, org_id, roles, status=Status.ACTIVE.value):
         """Return all members of the org with a status."""
         return db.session.query(Membership).filter(
@@ -103,3 +113,14 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
             .first()
 
         return records
+
+    @classmethod
+    def check_if_active_admin_or_owner_org_id(cls, org_id, user_id):
+        """Returns the count of pending members."""
+        query = db.session.query(Membership).filter(
+            and_(Membership.user_id == user_id, Membership.org_id == org_id, Membership.status == Status.ACTIVE.value,
+                 Membership.membership_type_code.in_((OWNER, ADMIN)))). \
+            join(OrgModel).filter(OrgModel.id == org_id)
+        count_q = query.statement.with_only_columns([func.count()]).order_by(None)
+        count = query.session.execute(count_q).scalar()
+        return count
