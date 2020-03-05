@@ -71,10 +71,11 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
     @staticmethod
     def get_pending_member_count_for_org(org_id, token_info: Dict = None):
+        """Return the number of pending notification for a user."""
         default_count = 0
         try:
             current_user: UserService = UserService.find_by_jwt_token(token_info)
-        except BusinessException as exception:
+        except BusinessException:
             return default_count
         is_active_admin_or_owner = MembershipModel.check_if_active_admin_or_owner_org_id(org_id, current_user.identifier)
         if is_active_admin_or_owner < 1:
