@@ -24,6 +24,7 @@ from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
+from auth_api.utils.enums import CorpType
 from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.util import camelback2snake
 
@@ -51,6 +52,11 @@ class Entity:
     def pass_code(self):
         """Return the pass_code for this entity."""
         return self._model.pass_code
+
+    @property
+    def corp_type(self):
+        """Return the corp_type_code for this entity."""
+        return self._model.corp_type_code
 
     def set_pass_code_claimed(self, pass_code_claimed):
         """Set the pass_code_claimed status."""
@@ -201,12 +207,15 @@ class Entity:
     def sync_name(self):
         """Sync this entity's name with the name used in the LEAR database."""
         current_app.logger.info(f'<entity sync_name {self._model.business_identifier}')
-        legal_url = current_app.config.get('LEGAL_API_URL') + f'/businesses/{self._model.business_identifier}'
-        legal_response = RestService.get(legal_url)
-        current_app.logger.debug('<entity legal_response')
+        if self.corp_type == CorpType.NR.value:
+            pass  # TODO Later call Names API to verify the details
+        else:
+            legal_url = current_app.config.get('LEGAL_API_URL') + f'/businesses/{self._model.business_identifier}'
+            legal_response = RestService.get(legal_url)
+            current_app.logger.debug('<entity legal_response')
 
-        if legal_response:
-            entity_json = legal_response.json()
-            entity_name = entity_json.get('business').get('legalName')
-            self._model.name = entity_name
-            self._model.save()
+            if legal_response:
+                entity_json = legal_response.json()
+                entity_name = entity_json.get('business').get('legalName')
+                self._model.name = entity_name
+                self._model.save()
