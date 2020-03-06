@@ -131,6 +131,7 @@ export default class OrgModule extends VuexModule {
       this.context.dispatch('syncPendingOrgInvitations')
     } catch (exception) {
       this.context.commit('addFailedInvitation', invitation)
+      throw exception
     }
   }
 
