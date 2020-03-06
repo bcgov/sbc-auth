@@ -14,7 +14,7 @@
           class="mt-3 font-weight-medium"
           @click="goToDashboard"
           data-test="ok-button"
-        >Back to Staff Dashboard</v-btn>
+        >Back to Dashboard</v-btn>
       </article>
     </div>
   </v-container>
@@ -41,8 +41,8 @@ export default class SetupAccountSuccessView extends Vue {
   private accountEmail: string = ''
 
   private async mounted () {
-    this.accountName = this.currentOrganization?.name || ''
-    this.accountEmail = (this.sentInvitations?.length && this.sentInvitations[0].recipientEmail) ? this.sentInvitations[0].recipientEmail : ''
+    this.accountName = (this.currentOrganization && this.currentOrganization.name) ? this.currentOrganization.name : ''
+    this.accountEmail = (this.sentInvitations && this.sentInvitations.length && this.sentInvitations[0].recipientEmail) ? this.sentInvitations[0].recipientEmail : ''
   }
 
   goToDashboard () {
