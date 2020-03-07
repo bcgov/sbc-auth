@@ -16,7 +16,7 @@
             </v-col>
             <v-col class="flex pb-0" cols="12">
               <h4 class="pb-1">Account Owner Contact</h4>
-              <p class="body-2 pb-2">Enter the email address of the user who will be managing this account. An email will be sent to this user to verify and activate this account</p>
+              <p class="body-1 pb-2">Enter the email address of the user who will be managing this account. An email will be sent to this user to verify and activate this account</p>
               <v-text-field
               filled
               label="Email Address"
@@ -37,7 +37,7 @@
             </v-col>
             <v-col class="flex" cols="12">
               <h4 class="pb-1">Select Product(s)</h4>
-              <p class="body-2 pb-2">Which products will this account have access to?</p>
+              <p class="body-1 pb-2">Which products will this account have access to?</p>
               <v-treeview
               selectable
               open-all
@@ -50,16 +50,6 @@
               :disabled="saving"
               ></v-treeview>
             </v-col>
-            <!-- <v-col class="d-flex" cols="12">
-                <v-select
-                :items="accountTypes"
-                filled
-                item-text="desc"
-                item-value="code"
-                label="Account Type"
-                v-model="accountType"
-                />
-            </v-col> -->
         </v-row>
         <v-row>
           <v-col cols="12" class="form__btns pb-0">
@@ -213,7 +203,6 @@ export default class SetupAccountForm extends Vue {
         })
         this.saving = false
         this.loader = this.saving
-        // TODO: Redirect/Show success message once the proper design comes
         this.$router.push({ path: '/setupaccountsuccess' })
       } catch (err) {
         this.saving = false
@@ -240,7 +229,7 @@ export default class SetupAccountForm extends Vue {
   }
 
   private cancel () {
-    this.$router.push({ path: '/home' })
+    this.$router.push({ path: '/searchbusiness' })
   }
 
   showEntityNotFoundModal (msg?) {
