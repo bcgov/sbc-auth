@@ -14,7 +14,7 @@
           class="mt-3 font-weight-medium"
           @click="goToDashboard"
           data-test="ok-button"
-        >Back to Dashboard</v-btn>
+        >Back to Staff Dashboard</v-btn>
       </article>
     </div>
   </v-container>

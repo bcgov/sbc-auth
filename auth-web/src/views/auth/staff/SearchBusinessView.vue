@@ -14,11 +14,11 @@
       </div>
     </v-expand-transition>
 
-    <v-card class="mb-4" flat>
+    <v-card class="mb-4">
       <v-container>
         <v-card-title class="d-flex flex-column justify-start align-start">
-          <h3 class="mb-3">Search Cooperatives</h3>
-          <p class="intro-text">Enter the cooperative's Incorporation Number below to access their dashboard.</p>
+          <h3 class="mb-4">Search Cooperatives</h3>
+          <p class="subtitle-1">Enter the cooperative's Incorporation Number below to access their dashboard.</p>
         </v-card-title>
         <v-card-text>
           <v-form ref="form" v-on:submit.prevent="searchBusiness">
@@ -39,11 +39,11 @@
     </v-card>
 
     <!-- Director search -->
-    <v-card class="mb-4" flat>
+    <v-card class="mb-4">
       <v-container>
         <v-card-title class="d-flex flex-column justify-start align-start">
-          <h3 class="mb-3">Create a Director Search Account</h3>
-          <p class="intro-text">Create a Director Search Account to access to custom BC Registry functionality.</p>
+          <h3 class="mb-4">Create a Director Search Account</h3>
+          <p class="subtitle-1">Create a Director Search Account to access to custom BC Registry functionality.</p>
         </v-card-title>
         <v-card-text>
           <v-btn
@@ -118,7 +118,7 @@ export default class SearchBusinessView extends Vue {
   }
 
   gotToCreateAccount () {
-    this.$router.push({ path: '/staff-setup-account' })
+    this.$router.push({ path: '/setupaccount' })
   }
 }
 </script>
