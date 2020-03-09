@@ -34,3 +34,9 @@ class NotificationType(Enum):
 
     ROLE_CHANGED = 'ROLE_CHANGED'
     MEMBERSHIP_APPROVED = 'MEMBERSHIP_APPROVED'
+
+
+class CorpType(Enum):
+    """Corp Types."""
+
+    NR = 'NR'

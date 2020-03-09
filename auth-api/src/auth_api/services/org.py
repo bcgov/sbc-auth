@@ -263,21 +263,9 @@ class Org:
         return len([x for x in self._model.members if x.membership_type_code == OWNER])
 
     @staticmethod
-    def get_orgs(user_id):
+    def get_orgs(user_id, valid_statuses=VALID_STATUSES):
         """Return the orgs associated with this user."""
-        # TODO DO_NOT_USE this def if there is a database transaction involved,
-        # as the below logic removes object from model
-        orgs = MembershipModel.find_orgs_for_user(user_id)
-        # because members are fetched using backpopulates,cant add these conditions programmatically.
-        # so resorting to manually looping   # noqa:E501
-
-        for org in orgs:
-            # user can have multiple memberships.if the user getting denied first and added again,
-            # it will be multiple memberships..filter out denied records # noqa:E501
-            # fix for https://github.com/bcgov/entity/issues/1951   # noqa:E501
-            org.members = list(
-                filter(lambda member: (member.user_id == user_id and (member.status in VALID_STATUSES)), org.members))
-        return orgs
+        return MembershipModel.find_orgs_for_user(user_id, valid_statuses)
 
     @staticmethod
     def search_orgs(**kwargs):

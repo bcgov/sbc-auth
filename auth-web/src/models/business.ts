@@ -10,6 +10,7 @@ export interface Business {
     businessNumber?: string
     name?: string
     contacts?: Contact[]
+    corpType: string
 }
 
 export interface Businesses {

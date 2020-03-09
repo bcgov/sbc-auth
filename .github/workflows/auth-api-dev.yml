@@ -1,0 +1,61 @@
+name: Auth API DEV CD
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - "auth-api/**"
+
+env:
+  IMAGE_NAME: auth-api
+  TAG_NAME: dev
+
+jobs:
+  auth-api-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install tools
+        run: |
+          ./scripts/install_tools.sh
+          oc version
+          op --version
+
+  auth-api-postman-test:
+    needs: auth-api-dev
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install tools
+        run: |
+          ./scripts/install_tools.sh
+          oc version
+          op --version
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: install
+        run: |
+          npm install -g newman
+      - name: run
+        working-directory: ./auth-api/tests/postman
+        run: |
+          newman --version
+          vaults='[{"vault": "relationship","application": ["auth-api"]}]'
+          newman run auth-api.postman_collection.json -e auth-api.postman_environment.json `./get_globals.sh ${{ secrets.op_parameters }} -e "postman" -v "${vaults}"`
+      - name: Rocket.Chat Notification
+        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+        if: failure()
+        with:
+          type: ${{ job.status }}
+          job_name: "*Auth API Postman test failed*"
+          channel: "#relationship-developers"
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          commit: false
+          token: ${{ secrets.GITHUB_TOKEN }}

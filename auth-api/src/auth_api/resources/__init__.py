@@ -40,6 +40,7 @@ from .token import API as TOKEN_API
 from .user import API as USER_API
 from .user_settings import API as USER_SETTINGS_API
 from .org_products import API as ORG_PRODUCTS_API
+from .notifications import API as NOTIFICATIONS_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
@@ -86,6 +87,8 @@ API.add_namespace(DOCUMENTS_API, path='/documents')
 API.add_namespace(CODES_API, path='/codes')
 API.add_namespace(ACCOUNTS_API, path='/accounts')
 API.add_namespace(ORG_PRODUCTS_API, path='/orgs/<string:org_id>/products')
+API.add_namespace(NOTIFICATIONS_API, path='/users/<string:user_id>/org/<string:org_id>/notifications')
+
 
 TEST_BLUEPRINT = Blueprint('TEST', __name__, url_prefix='/test')
 

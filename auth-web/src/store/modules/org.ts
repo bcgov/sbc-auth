@@ -95,7 +95,6 @@ export default class OrgModule extends VuexModule {
     await this.context.dispatch('syncActiveOrgMembers')
     await this.context.dispatch('syncPendingOrgMembers')
     await this.context.dispatch('syncPendingOrgInvitations')
-    await this.context.dispatch('business/syncBusinesses', null, { root: true })
     return organization
   }
 

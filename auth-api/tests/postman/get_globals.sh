@@ -6,15 +6,16 @@
 # -----------------------------------------------------------------------------------------------------------------
 usage() {
   cat <<-EOF
-  A helper script to get the secrcts from 1password' vault and set it to environment.
-  Usage: . ./setenv_1pass.sh [-h -d <subdomainName> -u <accountName>]
+  A helper script to get the secrcts from 1password' vault and set it to openshift secret.
+  Usage: ./1pass_secret.sh [-h -d <subdomainName> -u <accountName>]
                              -k <secretKey>
                              -p <masterPassword>
                              -e <environment>
                              -v <vaultDetails>
+
   OPTIONS:
   ========
-    -h prints the usage for the script
+    -h prints the usage for the script.
     -d The subdomain name of the 1password account, default is registries.1password.ca.
     -u The account name of the 1password account, default is bcregistries.devops@gmail.com.
     -k The secret key of the 1password account.
@@ -84,7 +85,6 @@ fi
 # For more details see https://support.1password.com/command-line-getting-started/
 eval $(echo "${MASTER_PASSWORD}" | op signin ${DOMAIN_NAME} ${USERNAME} ${SECRET_KEY})
 
-
 for vault_name in $(echo "${VAULT}" | jq -r '.[] | @base64' ); do
   _jq() {
      echo ${vault_name} | base64 --decode | jq -r ${1}
@@ -94,19 +94,20 @@ for vault_name in $(echo "${VAULT}" | jq -r '.[] | @base64' ); do
       echo ${application_name} | base64 --decode
     }
 
-    echo $(_jq .vault) $(_jq_app)
     # My setup uses a 1Password type of 'Password' and stores all records within a
     # single section. The label is the key, and the value is the value.
     ev=`op get item --vault=$(_jq .vault) ${ENVIRONMENT}`
 
     # Convert to base64 for multi-line secrets.
     # The schema for the 1Password type uses t as the label, and v as the value.
+    # Set secrets to secret in Openshift
     for row in $(echo ${ev} | jq -r -c '.details.sections[] | select(.title=='\"$(_jq_app)\"') | .fields[] | @base64'); do
         _envvars() {
             echo ${row} | base64 --decode | jq -r ${1}
         }
-        echo "Setting environment variable $(_envvars '.t')"
-        echo ::set-env name=$(_envvars '.t')::$(_envvars '.v')
+
+        echo $(_envvars '.v')
+
     done
   done
 done
