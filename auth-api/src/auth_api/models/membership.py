@@ -75,7 +75,7 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
 
     @classmethod
     def get_pending_members_count_by_org_id(cls, org_id):
-        """Returns the count of pending members."""
+        """Return the count of pending members."""
         query = db.session.query(Membership).filter(
             and_(Membership.status == Status.PENDING_APPROVAL.value)). \
             join(OrgModel).filter(OrgModel.id == org_id)
@@ -91,12 +91,12 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
             join(OrgModel).filter(OrgModel.id == org_id).all()
 
     @classmethod
-    def find_orgs_for_user(cls, user_id):
+    def find_orgs_for_user(cls, user_id, valid_statuses=VALID_STATUSES):
         """Find the orgs for a user."""
         records = cls.query \
             .join(OrgModel) \
             .filter(cls.user_id == user_id) \
-            .filter(cls.status.in_(VALID_STATUSES)) \
+            .filter(cls.status.in_(valid_statuses)) \
             .filter(OrgModel.status_code == 'ACTIVE') \
             .all()
 
@@ -116,7 +116,7 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
 
     @classmethod
     def check_if_active_admin_or_owner_org_id(cls, org_id, user_id):
-        """Returns the count of pending members."""
+        """Return the count of pending members."""
         query = db.session.query(Membership).filter(
             and_(Membership.user_id == user_id, Membership.org_id == org_id, Membership.status == Status.ACTIVE.value,
                  Membership.membership_type_code.in_((OWNER, ADMIN)))). \
