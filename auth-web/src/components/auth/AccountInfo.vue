@@ -34,7 +34,7 @@
 
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
 
@@ -42,8 +42,7 @@ import { getModule } from 'vuex-module-decorators'
   components: {
   },
   computed: {
-    ...mapState('org', ['currentOrganization']),
-    ...mapGetters('org', ['myOrgMembership'])
+    ...mapState('org', ['currentOrganization', 'currentMembership'])
   },
   methods: {
     ...mapActions('org', ['updateOrg'])
@@ -53,8 +52,8 @@ export default class AccountInfo extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
   private btnLabel = 'Save'
   private readonly currentOrganization!: Organization
+  private readonly currentMembership!: Member
   private readonly updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
-  private readonly myOrgMembership!: Member
   private orgName = ''
   private touched = false
   private errorMessage: string = ''
@@ -73,7 +72,7 @@ export default class AccountInfo extends Vue {
   }
 
   private canChangeAccountName (): boolean {
-    switch (this.myOrgMembership.membershipTypeCode) {
+    switch (this.currentMembership?.membershipTypeCode) {
       case MembershipType.Owner:
         return true
       default:

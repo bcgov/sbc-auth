@@ -200,6 +200,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     private deactivateProfileDialog = false
     private isDeactivating = false
     @Prop() token: string
+    @Prop({ default: true }) redirectOnSave!: boolean
 
     $refs: {
       deactivateUserConfirmationDialog: ModalDialog,
@@ -279,7 +280,12 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
           this.$router.push('/confirmtoken/' + this.token)
           return
         }
-        this.redirectToNext()
+
+        if (this.redirectOnSave) {
+          this.redirectToNext()
+        }
+        // If we didn't redirect, emit an event so that the parent component knows the save is complete
+        this.$emit('profile-saved')
       }
     }
 
