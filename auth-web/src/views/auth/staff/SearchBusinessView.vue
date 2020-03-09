@@ -21,18 +21,28 @@
           <p class="intro-text">Enter the cooperative's Incorporation Number below to access their dashboard.</p>
         </v-card-title>
         <v-card-text>
-          <v-form ref="form" v-on:submit.prevent="searchBusiness">
+          <v-form ref="searchBusinessForm" v-on:submit.prevent="searchBusiness">
             <v-text-field
               filled
               label="Incorporation Number"
               hint="example: CP0001234"
               persistent-hint
               req
+              @blur="incorpNumFormat"
+              :rules="incorpNumRules"
               v-model="businessNumber"
               id="txtBusinessNumber"
             >
             </v-text-field>
-            <v-btn large color="primary" class="search-btn mt-0" type="submit" @click="search" :disabled="!businessNumber" :loading="searchActive">Search</v-btn>
+            <v-btn
+              large
+              color="primary"
+              class="search-btn mt-0"
+              type="submit"
+              @click="search"
+              :disabled="!isFormValid()"
+              :loading="searchActive"
+            >Search</v-btn>
           </v-form>
         </v-card-text>
       </v-container>
@@ -64,6 +74,7 @@
 import { Component, Emit, Prop } from 'vue-property-decorator'
 
 import BusinessModule from '@/store/modules/business'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import Vue from 'vue'
@@ -86,12 +97,17 @@ export default class SearchBusinessView extends Vue {
 
   private readonly searchBusiness!: (businessNumber: string) => void
 
+  private incorpNumRules = [
+    v => !!v || 'Incorporation Number is required',
+    v => CommonUtils.validateIncorporationNumber(v) || 'Incorporation Number in invalid'
+  ]
+
   $refs: {
-    form: HTMLFormElement
+    searchBusinessForm: HTMLFormElement
   }
 
   private isFormValid (): boolean {
-    return this.$refs.form.validate()
+    return !!this.businessNumber && this.$refs.searchBusinessForm.validate()
   }
 
   private clearError () {
@@ -119,6 +135,10 @@ export default class SearchBusinessView extends Vue {
 
   gotToCreateAccount () {
     this.$router.push({ path: '/staff-setup-account' })
+  }
+
+  incorpNumFormat () {
+    this.businessNumber = CommonUtils.formatIncorporationNumber(this.businessNumber)
   }
 }
 </script>
