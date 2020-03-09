@@ -3594,7 +3594,6 @@ paths:
         - orgs
       summary: Get all affiliated entities for the given org.
       description: Get all affiliated entities for the given org.
-  
   '/orgs/{org_id}':
     parameters:
       - name: org_id
@@ -3603,7 +3602,7 @@ paths:
         type: string
         examples:
           example1:
-            value: "1234"
+            value: '1234'
     put:
       responses:
         '200':
@@ -3705,7 +3704,6 @@ paths:
                   - orgType
                   - org_status
                   - preferred_payment
-
         '400':
           description: Bad Request
           content:
@@ -3868,12 +3866,10 @@ paths:
                   - preferred_payment
               examples:
                 example1:
-                  value: '{
-                            "id": "1234",
-                            "name": "Mock Account",
-                            "preferred_payment": "CC"
-                          }'
-
+                  value:
+                    id: '1234'
+                    name: Mock Account
+                    preferred_payment: CC
         '404':
           description: Not Found
           content:
@@ -4052,9 +4048,9 @@ paths:
             type: string
           examples:
             example1:
-              value: 'CP0001234'
+              value: CP0001234
             example2:
-              value: 'CP0002000'
+              value: CP0002000
       tags:
         - authorization
       responses:
@@ -4171,19 +4167,16 @@ paths:
                   - preferred_payment
               examples:
                 example1:
-                  value: '{
-                              "id": "1234",
-                              "name": "Mock Account",
-                              "preferred_payment": "CC"
-                          }'
+                  value:
+                    id: '1234'
+                    name: Mock Account
+                    preferred_payment: CC
                 example2:
-                  value: '{
-                              "id": "2000",
-                              "name": "Mock Account",
-                              "preferred_payment": "PREMIUM",
-                              "bc_online_user_id": "PB25020"
-                          }'
-
+                  value:
+                    id: '2000'
+                    name: Mock Account
+                    preferred_payment: PREMIUM
+                    bc_online_user_id: PB25020
         default:
           description: unexpected error
           content:
@@ -4200,8 +4193,7 @@ paths:
         description: Corp Num/Incorporation Number of the entity
         examples:
           example1:
-            value: 'CP0001234'
-
+            value: CP0001234
   /logout:
     post:
       responses:
@@ -6116,111 +6108,86 @@ paths:
                 $ref: '#/components/schemas/Authorization'
               examples:
                 owner:
-                  value: '{
-                            "orgMembership": "OWNER",
-                            "roles": [
-                              "view",
-                              "edit"
-                            ],
-                            "business": {
-                              "folioNumber": "MOCK1234",
-                              "name": "Mock Business"
-                            },
-                            "account": {
-                                "id": "1234",
-                                "name": "Mock Account",
-                                "paymentPreference": {
-                                    "methodOfPayment": "CC",
-                                    "bcOnlineUserId": "PB25020",
-                                    "bcOnlineAccountId": ""
-                                }
-                            }
-                          }'
+                  value:
+                    orgMembership: OWNER
+                    roles:
+                      - view
+                      - edit
+                    business:
+                      folioNumber: MOCK1234
+                      name: Mock Business
+                    account:
+                      id: '1234'
+                      name: Mock Account
+                      paymentPreference:
+                        methodOfPayment: CC
+                        bcOnlineUserId: PB25020
+                        bcOnlineAccountId: ''
                 admin:
-                  value: '{
-                          "orgMembership": "ADMIN",
-                          "roles": [
-                            "view",
-                            "edit"
-                          ],
-                          "account": {
-                              "id": "1234",
-                              "name": "Mock Account",
-                              "paymentPreference": {
-                                  "methodOfPayment": "CC",
-                                  "bcOnlineUserId": "PB25020",
-                                  "bcOnlineAccountId": ""
-                              }
-                          }
-                        }'
+                  value:
+                    orgMembership: ADMIN
+                    roles:
+                      - view
+                      - edit
+                    account:
+                      id: '1234'
+                      name: Mock Account
+                      paymentPreference:
+                        methodOfPayment: CC
+                        bcOnlineUserId: PB25020
+                        bcOnlineAccountId: ''
                 member:
-                  value: '{
-                            "orgMembership": "MEMBER",
-                            "roles": [
-                              "view",
-                              "edit"
-                            ],
-                            "account": {
-                              "id": "1234",
-                              "name": "Mock Account",
-                              "paymentPreference": {
-                                  "methodOfPayment": "CC",
-                                  "bcOnlineUserId": "PB25020",
-                                  "bcOnlineAccountId": ""
-                              }
-                            }
-                          }'
+                  value:
+                    orgMembership: MEMBER
+                    roles:
+                      - view
+                      - edit
+                    account:
+                      id: '1234'
+                      name: Mock Account
+                      paymentPreference:
+                        methodOfPayment: CC
+                        bcOnlineUserId: PB25020
+                        bcOnlineAccountId: ''
                 staff:
-                  value: '{
-                            "roles": [
-                              "view",
-                              "edit"
-                            ]
-                          }'
+                  value:
+                    roles:
+                      - view
+                      - edit
                 unauthorized:
-                  value: '{}'
+                  value: {}
                 expanded_premium:
-                  value: '{
-                            "orgMembership": "OWNER",
-                            "roles": [
-                              "view",
-                              "edit"
-                            ],
-                            "business": {
-                              "folioNumber": "MOCK1234",
-                              "name": "Mock Business"
-                            },
-                            "account": {
-                                "id": "1234",
-                                "name": "Mock Account",
-                                "paymentPreference": {
-                                    "methodOfPayment": "PREMIUM",
-                                    "bcOnlineUserId": "PB25020",
-                                    "bcOnlineAccountId": ""
-                                }
-                            }
-                          }'
+                  value:
+                    orgMembership: OWNER
+                    roles:
+                      - view
+                      - edit
+                    business:
+                      folioNumber: MOCK1234
+                      name: Mock Business
+                    account:
+                      id: '1234'
+                      name: Mock Account
+                      paymentPreference:
+                        methodOfPayment: PREMIUM
+                        bcOnlineUserId: PB25020
+                        bcOnlineAccountId: ''
                 expanded_cc:
-                  value: '{
-                            "orgMembership": "OWNER",
-                            "roles": [
-                              "view",
-                              "edit"
-                            ],
-                            "business": {
-                              "folioNumber": "MOCK1234",
-                              "name": "Mock Business"
-                            },
-                            "account": {
-                                "id": "1234",
-                                "name": "Mock Account",
-                                "paymentPreference": {
-                                    "methodOfPayment": "CC",
-                                    "bcOnlineUserId": "",
-                                    "bcOnlineAccountId": ""
-                                }
-                            }
-                          }'
+                  value:
+                    orgMembership: OWNER
+                    roles:
+                      - view
+                      - edit
+                    business:
+                      folioNumber: MOCK1234
+                      name: Mock Business
+                    account:
+                      id: '1234'
+                      name: Mock Account
+                      paymentPreference:
+                        methodOfPayment: CC
+                        bcOnlineUserId: ''
+                        bcOnlineAccountId: ''
         default:
           description: unexpected error
           content:
@@ -6294,13 +6261,10 @@ paths:
                 $ref: '#/components/schemas/Authorization'
               examples:
                 example1:
-                  value: '{
-                            "roles": [
-                              "search",
-                              "edit"
-                            ]
-                          }'
-
+                  value:
+                    roles:
+                      - search
+                      - edit
         default:
           description: unexpected error
           content:
@@ -6327,7 +6291,6 @@ paths:
         examples:
           example1:
             value: PPR
-  
   '/entities/{business_identifier}':
     parameters:
       - name: business_identifier
