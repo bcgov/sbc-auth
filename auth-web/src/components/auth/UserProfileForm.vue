@@ -240,8 +240,8 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
         await this.getUserProfile('@me')
       }
 
-      this.firstName = this.userProfile.firstname
-      this.lastName = this.userProfile.lastname
+      this.firstName = this.userProfile?.firstname
+      this.lastName = this.userProfile?.lastname
       if (this.userContact) {
         this.emailAddress = this.confirmedEmailAddress = this.userContact.email
         this.phoneNumber = this.userContact.phone

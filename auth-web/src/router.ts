@@ -1,11 +1,11 @@
 import { Role, SessionStorageKeys } from '@/util/constants'
-import Router, { Location } from 'vue-router'
+import Router, { RouteConfig } from 'vue-router'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
+import AccountSetupView from '@/views/auth/AccountSetupView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
-import CreateAccountView from '@/views/auth/CreateAccountView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
@@ -36,7 +36,7 @@ function mapReturnPayVars (route: any) {
   }
 }
 
-export function getRoutes () {
+export function getRoutes (): RouteConfig[] {
   const accountSettings = () => import(/* webpackChunkName: "account-settings" */ './views/auth/AccountSettings.vue')
   const accountInfo = () => import(/* webpackChunkName: "account-settings" */ './components/auth/AccountInfo.vue')
   const userManagement = () => import(/* webpackChunkName: "account-settings" */ './components/auth/UserManagement.vue')
@@ -82,7 +82,7 @@ export function getRoutes () {
       ]
     },
     { path: '/userprofile/:token?', name: 'userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
-    { path: '/createaccount', name: 'createaccount', component: CreateAccountView, meta: { requiresAuth: true, requiresProfile: true } },
+    { path: '/createaccount', name: 'createaccount', component: AccountSetupView, meta: { requiresAuth: false, requiresProfile: false }, props: true },
     { path: '/duplicateteam', name: 'duplicateteam', component: DuplicateTeamWarningView, meta: { requiresAuth: true } },
     { path: '/validatetoken/:token', name: 'validatetoken', component: AcceptInviteLandingView, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
     { path: '/confirmtoken/:token', name: 'confirmtoken', component: AcceptInviteView, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } },
