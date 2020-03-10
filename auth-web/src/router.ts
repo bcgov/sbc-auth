@@ -101,8 +101,8 @@ export function getRoutes () {
     { path: '/unauthorized', name: 'unauthorized', component: UnauthorizedView, props: true, meta: { requiresAuth: false } },
     { path: '/pendingapproval/:team_name?', name: 'pendingapproval', component: PendingApprovalView, props: true, meta: { requiresAuth: false, requiresProfile: true } },
     { path: '/leaveteam', name: 'leaveteam', component: LeaveTeamLandingView, props: true, meta: { requiresAuth: true } },
-    { path: '/setupaccount', name: 'setupaccount', component: SetupAccountView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
-    { path: '/setupaccountsuccess', name: 'setupaccountsuccess', component: SetupAccountSuccessView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
+    { path: '/staff-setup-account', name: 'staffsetupaccount', component: SetupAccountView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
+    { path: '/staff-setup-account-success', name: 'staffsetupaccountsuccess', component: SetupAccountSuccessView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
     { path: '*', name: 'notfound', component: PageNotFound }
   ]
 
