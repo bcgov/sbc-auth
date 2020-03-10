@@ -55,17 +55,13 @@ class Orgs(Resource):
         valid_format, errors = schema_utils.validate(request_json, 'org')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
-        is_staff = token and 'staff' in token.get('realm_access').get('roles')
         try:
-            user_identifier = None
-            if not is_staff:
-                user = UserService.find_by_jwt_token(token)
-                if user is None:
-                    response, status = {'message': 'Not authorized to perform this action'}, \
-                                       http_status.HTTP_401_UNAUTHORIZED
-                    return response, status
-                user_identifier = user.identifier
-            response, status = OrgService.create_org(request_json, user_identifier, token).as_dict(), \
+            user = UserService.find_by_jwt_token(token)
+            if user is None:
+                response, status = {'message': 'Not authorized to perform this action'}, \
+                                   http_status.HTTP_401_UNAUTHORIZED
+                return response, status
+            response, status = OrgService.create_org(request_json, user.identifier, token).as_dict(), \
                 http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
