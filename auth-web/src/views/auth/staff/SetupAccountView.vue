@@ -2,15 +2,13 @@
   <v-container>
     <div class="view-container">
       <article>
-        <div class="d-flex flex-row">
+        <div class="view-header">
+          <v-btn large icon color="secondary" class="mr-2" @click="handleBackButton()" data-test="account-settings-back-button">
+            <v-icon class="font-weight-bold">mdi-arrow-left</v-icon>
+          </v-btn>
           <div>
-            <v-btn x-large icon color="secondary" class="mr-2" @click="handleBackButton()" data-test="account-settings-back-button">
-              <v-icon class="font-weight-bold">mdi-arrow-left</v-icon>
-            </v-btn>
-          </div>
-          <div>
-            <h1 class="mb-3">Create a Director Search Account</h1>
-            <p class="intro-text pb-3">Enter the name and contact information for this account, and indicate which products this account will have access to.</p>
+            <h1 class="view-header__title">Create a Director Search Account</h1>
+            <p class="mb-0">Enter the name and contact information for this account, and indicate which products this account will have access to.</p>
           </div>
         </div>
         <v-card class="profile-card py-4 px-6">
