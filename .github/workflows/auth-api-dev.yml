@@ -14,11 +14,13 @@ env:
 jobs:
   auth-api-dev:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.7]
     steps:
       - uses: actions/checkout@v2
+      - name: Install tools
+        run: |
+          ./scripts/install_tools.sh
+          oc version
+          op --version
       - name: Log into registry
         run: echo "${{ secrets.OPENSHIFT_TOKEN }}" | docker login ${{ secrets.OPENSHIFT_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
       - name: Pull image
@@ -37,29 +39,11 @@ jobs:
           docker push $IMAGE_ID:latest
           docker image tag $IMAGE_ID:latest $IMAGE_ID:$TAG_NAME
           docker push $IMAGE_ID:$TAG_NAME
-      - name: Install openshift cli
-        working-directory: ./auth-api
-        run: |
-          sudo curl -sLo /tmp/oc.tar.gz https://github.com/openshift/origin/releases/download/v3.11.0/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit.tar.gz
-          sudo tar xzvf /tmp/oc.tar.gz -C /tmp/
-          sudo mv /tmp/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit/oc /usr/local/bin/
-          sudo rm -rf /tmp/oc.tar.gz /tmp/openshift-origin-client-tools-v3.11.0-0cbc58b-linux-64bit
-          sudo chmod +x /usr/local/bin/oc
-          oc version
       - name: Login Openshift
         working-directory: ./auth-api
         run: |
           oc ${{ secrets.oc_parameters }}
           oc project ${{ secrets.OPENSHIFT_REPOSITORY_DEV }}
-      - name: Install Jq and 1password cli
-        working-directory: .
-        run: |
-          sudo apt install curl unzip jq --yes
-          sudo curl -o 1password.zip https://cache.agilebits.com/dist/1P/op/pkg/v0.8.0/op_linux_amd64_v0.8.0.zip
-          sudo unzip 1password.zip -d /usr/local/bin
-          sudo rm 1password.zip
-          sudo chmod +x /usr/local/bin/op
-          op --version
       - name: Set Deployment Environement Variables
         working-directory: .
         run: |
@@ -79,4 +63,42 @@ jobs:
           channel: "#relationship-developers"
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           commit: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+  
+  auth-api-postman-test:
+    needs: auth-api-dev
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install tools
+        run: |
+          ./scripts/install_tools.sh
+          oc version
+          op --version
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: install
+        run: |
+          npm install -g newman
+      - name: run
+        working-directory: ./auth-api/tests/postman
+        run: |
+          newman --version
+          vaults='[{"vault": "relationship","application": ["auth-api"]}]'
+          newman run auth-api.postman_collection.json -e auth-api.postman_environment.json `./get_globals.sh ${{ secrets.op_parameters }} -e "postman" -v "${vaults}"`
+      - name: Rocket.Chat Notification
+        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+        if: failure()
+        with:
+          type: ${{ job.status }}
+          job_name: "*Auth API Postman test failed*"
+          channel: "#relationship-developers"
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          commit: false
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -12,12 +12,10 @@ usage() {
                              -p <masterPassword>
                              -e <environment>
                              -v <vaultDetails>
-                             -a <appName>
 
   OPTIONS:
   ========
     -h prints the usage for the script.
-    -a Openshift application name, for example: auth-api-dev
     -d The subdomain name of the 1password account, default is registries.1password.ca.
     -u The account name of the 1password account, default is bcregistries.devops@gmail.com.
     -k The secret key of the 1password account.
@@ -49,10 +47,9 @@ exit
 # -----------------------------------------------------------------------------------------------------------------
 # Initialization:
 # -----------------------------------------------------------------------------------------------------------------
-while getopts h:a:d:u:k:p:v:e: FLAG; do
+while getopts h:d:u:k:p:v:e: FLAG; do
   case $FLAG in
     h ) usage ;;
-    a ) APP_NAME=$OPTARG ;;
     d ) DOMAIN_NAME=$OPTARG ;;
     u ) USERNAME=$OPTARG ;;
     k ) SECRET_KEY=$OPTARG ;;
@@ -78,7 +75,7 @@ if [ -z "${USERNAME}" ]; then
   USERNAME=bcregistries.devops@gmail.com
 fi
 
-if [ -z "${APP_NAME}" ] || [ -z "${SECRET_KEY}" ] || [ -z "${MASTER_PASSWORD}" ] || [ -z "${VAULT}" ]  ||  [ -z "${ENVIRONMENT}" ]; then
+if [ -z "${SECRET_KEY}" ] || [ -z "${MASTER_PASSWORD}" ] || [ -z "${VAULT}" ]  ||  [ -z "${ENVIRONMENT}" ]; then
   echo -e \\n"Missing parameters - secret key, master password, vault or environment"\\n
   usage
 fi
@@ -87,9 +84,6 @@ fi
 # Assumes you have installed the OP CLI and performed the initial configuration
 # For more details see https://support.1password.com/command-line-getting-started/
 eval $(echo "${MASTER_PASSWORD}" | op signin ${DOMAIN_NAME} ${USERNAME} ${SECRET_KEY})
-
-# create application secrets
-oc create secret generic ${APP_NAME}-secret > /dev/null 2>&1 &
 
 for vault_name in $(echo "${VAULT}" | jq -r '.[] | @base64' ); do
   _jq() {
@@ -112,16 +106,8 @@ for vault_name in $(echo "${VAULT}" | jq -r '.[] | @base64' ); do
             echo ${row} | base64 --decode | jq -r ${1}
         }
 
-        secret_json=$(oc create secret generic ${APP_NAME}-secret --from-literal="$(_envvars '.t')=$(_envvars '.v')" --dry-run -o json)
-
-        # Set secret key and value from 1password
-        oc get secret ${APP_NAME}-secret -o json \
-          | jq ". * $secret_json" \
-          | oc apply -f -
+        echo $(_envvars '.v')
 
     done
   done
 done
-
-# Set environment variable of deployment config
-oc set env dc/${APP_NAME} --overwrite --from=secret/${APP_NAME}-secret --containers=${APP_NAME} ENV-  > /dev/null 2>&1 &

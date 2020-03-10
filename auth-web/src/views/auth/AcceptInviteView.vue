@@ -27,7 +27,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapGetters('org', ['myOrgMembership'])
   },
   methods: {
-    ...mapActions('org', ['acceptInvitation']),
+    ...mapActions('org', ['acceptInvitation', 'syncMembership']),
     ...mapActions('user', ['getUserProfile'])
   },
   components: { InterimLanding }
@@ -36,6 +36,8 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
   private orgStore = getModule(OrgModule, this.$store)
   private userStore = getModule(UserModule, this.$store)
   private readonly acceptInvitation!: (token: string) => Promise<Invitation>
+  private readonly syncMembership!: (currentAccountId: number) => Promise<Member>
+
   private readonly getUserProfile!: (identifier: string) => Promise<User>
   protected readonly userContact!: Contact
   protected readonly userProfile!: User
@@ -61,7 +63,9 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
       } else {
         const invitation = await this.acceptInvitation(this.token)
         ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify({ id: invitation.membership[0].org.id }))
+        await this.syncMembership(invitation?.membership[0]?.org?.id)
         this.$store.commit('updateHeader') // this event eventually redirects to Pending approval page.No extra navigation needed
+        this.$router.push(this.getNextPageUrl())
         return
       }
     } catch (exception) {
