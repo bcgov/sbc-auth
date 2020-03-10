@@ -26,7 +26,7 @@ from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.models.membership import Membership as MembershipModel
-from auth_api.models.product_role import ProductRole as ProductRoleModel
+from auth_api.models.product_subscription_role import ProductSubscriptionRole as ProductSubscriptionRoleModel
 from auth_api.models.product_role_code import ProductRoleCode as ProductRoleCodeModel
 from auth_api.models.product_subscription import ProductSubscription as ProductSubscriptionModel
 from auth_api.models.user import User as UserModel
@@ -188,7 +188,8 @@ def factory_product_model(org_id: str,
     # Save product roles
     for role_code in product_role_codes:
         product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role_code, product_code)
-        product_role = ProductRoleModel(product_subscription_id=subscription.id, product_role_id=product_role_code.id)
+        product_role = ProductSubscriptionRoleModel(product_subscription_id=subscription.id,
+                                                    product_role_id=product_role_code.id)
         product_role.save()
 
     return subscription

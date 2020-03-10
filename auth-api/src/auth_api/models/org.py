@@ -47,6 +47,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     affiliated_entities = relationship('Affiliation', lazy='select')
     invitations = relationship('InvitationMembership', cascade='all,delete,delete-orphan', lazy='select')
     products = relationship('ProductSubscription', cascade='all,delete,delete-orphan', lazy='select')
+    access_type = Column(String(250), index=True, nullable=True)  # for ANONYMOUS ACCESS
 
     @classmethod
     def create_from_dict(cls, org_info: dict):

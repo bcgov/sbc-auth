@@ -27,6 +27,7 @@ class Role(Enum):
     SYSTEM = 'system'
     TESTER = 'tester'
     ACCOUNT_HOLDER = 'account_holder'
+    STAFF_ADMIN = 'staff_admin'
     PUBLIC_USER = 'public_user'
 
 
@@ -66,3 +67,15 @@ VALID_STATUSES = (Status.ACTIVE.value, Status.PENDING_APPROVAL.value)
 CLIENT_ADMIN_ROLES = (ADMIN, OWNER)
 CLIENT_AUTH_ROLES = (*CLIENT_ADMIN_ROLES, MEMBER)
 ALL_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF)
+
+
+class InvitationType(Enum):
+    """Invitation type."""
+
+    DIRECTOR_SEARCH = 'DIRECTOR_SEARCH'
+
+
+class AccessType(Enum):
+    """Access Type."""
+
+    ANONYMOUS = 'ANONYMOUS'
