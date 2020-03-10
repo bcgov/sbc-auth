@@ -110,7 +110,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('staff', ['products', 'accountTypes'])
   },
   methods: {
-    ...mapActions('org', ['createOrg', 'addOrgProducts', 'syncOrganization', 'createInvitation']),
+    ...mapActions('org', ['createOrg', 'addProductsToOrg', 'syncOrganization', 'createInvitation']),
     ...mapActions('staff', ['getProducts', 'getAccountTypes'])
   },
   components: {
@@ -133,7 +133,7 @@ export default class SetupAccountForm extends Vue {
   private readonly createOrg!: (
     requestBody: CreateRequestBody
   ) => Promise<Organization>
-  private readonly addOrgProducts!: (productsRequestBody: ProductsRequestBody) => Promise<Products>
+  private readonly addProductsToOrg!: (productsRequestBody: ProductsRequestBody) => Promise<Products>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
   private readonly getProducts!: () => Promise<ProductCode[]>
   private readonly getAccountTypes!: () => Promise<AccountType[]>
@@ -195,7 +195,7 @@ export default class SetupAccountForm extends Vue {
         this.saving = true
         const organization = await this.createOrg(createRequestBody)
         await this.syncOrganization(organization.id)
-        await this.addOrgProducts(addProductsRequestBody)
+        await this.addProductsToOrg(addProductsRequestBody)
         await this.createInvitation({
           recipientEmail: this.email,
           sentDate: new Date(),
