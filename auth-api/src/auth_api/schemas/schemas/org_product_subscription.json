@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/org_product_subscription",
+  "type": "object",
+  "title": "Product subscription for organization",
+  "definitions": {
+    "productSubscriptions": {
+      "type": "object",
+      "title": "The product subscriptions Schema",
+      "properties": {
+        "productCode": {
+          "type": "string",
+          "title": "Product Code",
+          "default": "",
+          "examples": [
+            "PPR"
+          ],
+          "pattern": "^(.*)$"
+        },
+        "productRoles": {
+          "type": "array",
+          "title": "The Product Roles Schema",
+          "items": {
+            "type": "string",
+            "default": "",
+            "examples": [
+              "Search",
+              "File"
+            ]
+          }
+        }
+      },
+      "required": [
+        "productCode"
+      ]
+    }
+  },
+    "properties": {
+      "subscriptions": {
+        "type": "array",
+        "title": "The Subscriptions Array",
+        "items": {
+          "$ref": "#/definitions/productSubscriptions"
+        }
+      }
+    },
+    "required": [
+        "subscriptions"
+    ]
+}
+
+
+
