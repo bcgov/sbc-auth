@@ -142,11 +142,11 @@ export default class App extends Mixins(NextPageMixin) {
           return
         }
       }
-      this.setupNavigationBar()
       if (this.signingIn) {
         this.redirectAfterLogin()
       }
     })
+    this.setupNavigationBar()
   }
 }
 
