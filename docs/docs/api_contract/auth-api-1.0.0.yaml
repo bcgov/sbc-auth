@@ -1177,7 +1177,7 @@ paths:
           required: true
           schema:
             type: string
-          example:
+          examples:
             example1:
               value: CP0001234
             example2:
@@ -1296,7 +1296,7 @@ paths:
                   - orgType
                   - org_status
                   - preferred_payment
-              example:
+              examples:
                 example1:
                   value:
                     id: '1234'
@@ -1322,7 +1322,7 @@ paths:
         in: query
         required: true
         description: Corp Num/Incorporation Number of the entity
-        example:
+        examples:
           example1:
             value: CP0001234
   /logout:
@@ -3137,7 +3137,7 @@ paths:
               schema:
                 type: string
               description: X-Application-Context
-              example:
+              examples:
                 owner:
                   value: 'application:prod'
                 admin:
@@ -3150,7 +3150,7 @@ paths:
               schema:
                 type: string
               description: Access-Control-Allow-Origin
-              example:
+              examples:
                 owner:
                   value: '*'
                 admin:
@@ -3169,7 +3169,7 @@ paths:
               schema:
                 type: string
               description: Access-Control-Allow-Methods
-              example:
+              examples:
                 owner:
                   value: 'GET, OPTIONS'
                 admin:
@@ -3188,7 +3188,7 @@ paths:
               schema:
                 type: string
               description: Access-Control-Allow-Headers
-              example:
+              examples:
                 owner:
                   value: 'Content-Type, api_key, Authorization'
                 admin:
@@ -3207,7 +3207,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/authorizations'
-              example:
+              examples:
                 owner:
                   value:
                     orgMembership: OWNER
@@ -3303,7 +3303,7 @@ paths:
         in: path
         required: true
         description: Corp Num/Incorporation Number of the entity
-        example:
+        examples:
           owner:
             value: CP0001234
           admin:
@@ -3332,35 +3332,35 @@ paths:
               schema:
                 type: string
               description: X-Application-Context
-              example:
+              examples:
                 example1:
                   value: 'application:prod'
             Access-Control-Allow-Origin:
               schema:
                 type: string
               description: Access-Control-Allow-Origin
-              example:
+              examples:
                 example1:
                   value: '*'
             Access-Control-Allow-Methods:
               schema:
                 type: string
               description: Access-Control-Allow-Methods
-              example:
+              examples:
                 example1:
                   value: 'GET, OPTIONS'
             Access-Control-Allow-Headers:
               schema:
                 type: string
               description: Access-Control-Allow-Headers
-              example:
+              examples:
                 example1:
                   value: 'Content-Type, api_key, Authorization'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/authorizations'
-              example:
+              examples:
                 example1:
                   value:
                     roles:
