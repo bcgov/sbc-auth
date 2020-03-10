@@ -1,11 +1,13 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { CreateRequestBody as CreateOrgRequestBody, Member, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { Products, ProductsRequestBody } from '@/models/Staff'
 import { AccountSettings } from '@/models/account-settings'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import OrgService from '@/services/org.services'
+import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
 
 @Module({
@@ -129,6 +131,7 @@ export default class OrgModule extends VuexModule {
       this.context.dispatch('syncPendingOrgInvitations')
     } catch (exception) {
       this.context.commit('addFailedInvitation', invitation)
+      throw exception
     }
   }
 
@@ -241,5 +244,11 @@ export default class OrgModule extends VuexModule {
   public async syncPendingOrgInvitations () {
     const response = await OrgService.getOrgInvitations(this.context.state['currentOrganization'].id, 'PENDING')
     return response.data && response.data.invitations ? response.data.invitations : []
+  }
+
+  @Action({ rawError: true })
+  public async addProductsToOrg (productsRequestBody: ProductsRequestBody): Promise<Products> {
+    const response = await StaffService.addProducts(this.context.state['currentOrganization'].id, productsRequestBody)
+    return response?.data
   }
 }
