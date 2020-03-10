@@ -9,7 +9,7 @@
           <v-icon class="white--text">mdi-close</v-icon>
         </v-btn>
       </v-snackbar>
-      <navigation-bar :configuration="navigationBarConfig" />
+      <navigation-bar :configuration="navigationBarConfig" :hide="!showNavigationBar" />
       <pay-system-alert />
     </div>
     <div class="app-body">
@@ -74,7 +74,11 @@ export default class App extends Mixins(NextPageMixin) {
   private navigationBarConfig: NavigationBarConfig = {
     titleItem: {
       name: '',
-      url: ''
+      url: '',
+      meta: {
+        requiresAuth: false,
+        requiresAccount: false
+      }
     },
     menuItems: []
   }
@@ -85,16 +89,28 @@ export default class App extends Mixins(NextPageMixin) {
            this.$route.name === 'signin-redirect-full'
   }
 
+  get showNavigationBar (): boolean {
+    return this.$route.meta.showNavBar
+  }
+
   private setupNavigationBar (): void {
     this.navigationBarConfig = {
       titleItem: {
         name: 'Cooperatives Online',
-        url: `/home`
+        url: `/home`,
+        meta: {
+          requiresAuth: false,
+          requiresAccount: false
+        }
       },
       menuItems: [
         {
           name: 'Manage Businesses',
-          url: `/account/${this.currentOrganization?.id || ''}/business`
+          url: `/account/${this.currentOrganization?.id || ''}/business`,
+          meta: {
+            requiresAuth: true,
+            requiresAccount: true
+          }
         }
       ]
     }
@@ -143,10 +159,13 @@ export default class App extends Mixins(NextPageMixin) {
         }
       }
       if (this.signingIn) {
+        this.setupNavigationBar()
         this.redirectAfterLogin()
       }
     })
-    this.setupNavigationBar()
+    if (ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)) {
+      this.setupNavigationBar()
+    }
   }
 }
 
