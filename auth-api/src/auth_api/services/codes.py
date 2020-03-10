@@ -59,7 +59,11 @@ class Codes:
                     for entry in codes:
                         module_name = f'auth_api.schemas.{entry.__tablename__}'
                         class_name = f'{entry.__class__.__name__}Schema'
-                        schema = getattr(importlib.import_module(module_name), class_name)
+                        try:
+                            schema = getattr(importlib.import_module(module_name), class_name)
+                        except ModuleNotFoundError:
+                            schema = getattr(importlib.import_module('auth_api.schemas.basecode_type'),
+                                             'BaseCodeSchema')
                         code_schema = schema()
                         data.append(code_schema.dump(entry, many=False))
                 return data
