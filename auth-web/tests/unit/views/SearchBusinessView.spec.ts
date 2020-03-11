@@ -1,6 +1,6 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import BusinessModule from '@/store/modules/business'
-import SearchBusinessView from '@/views/auth/SearchBusinessView.vue'
+import SearchBusinessView from '@/views/auth/staff/SearchBusinessView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'

@@ -38,7 +38,6 @@ from .notification import send_email
 from .org import Org as OrgService
 from .user import User as UserService
 
-
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
 
@@ -69,6 +68,21 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
     def get_membership_type_by_code(type_code):
         """Get a membership type by the given code."""
         return MembershipTypeModel.get_membership_type_by_code(type_code=type_code)
+
+    @staticmethod
+    def get_pending_member_count_for_org(org_id, token_info: Dict = None):
+        """Return the number of pending notification for a user."""
+        default_count = 0
+        try:
+            current_user: UserService = UserService.find_by_jwt_token(token_info)
+        except BusinessException:
+            return default_count
+        is_active_admin_or_owner = MembershipModel.check_if_active_admin_or_owner_org_id(org_id,
+                                                                                         current_user.identifier)
+        if is_active_admin_or_owner < 1:
+            return default_count
+        pending_member_count = MembershipModel.get_pending_members_count_by_org_id(org_id)
+        return pending_member_count
 
     @staticmethod
     def get_members_for_org(org_id, status=Status.ACTIVE,  # pylint:disable=too-many-return-statements

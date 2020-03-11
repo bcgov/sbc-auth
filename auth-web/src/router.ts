@@ -17,7 +17,9 @@ import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
 import PaymentView from '@/views/pay/PaymentView.vue'
 import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
-import SearchBusinessView from '@/views/auth/SearchBusinessView.vue'
+import SearchBusinessView from '@/views/auth/staff/SearchBusinessView.vue'
+import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
+import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
@@ -41,11 +43,11 @@ export function getRoutes () {
   const accountInfo = () => import(/* webpackChunkName: "account-settings" */ './components/auth/AccountInfo.vue')
   const userManagement = () => import(/* webpackChunkName: "account-settings" */ './components/auth/UserManagement.vue')
   const routes = [
-    { path: '/', name: 'root', component: HomeView },
-    { path: '/home', name: 'home', component: HomeView },
+    { path: '/', name: 'root', component: HomeView, meta: { showNavBar: true } },
+    { path: '/home', name: 'home', component: HomeView, meta: { showNavBar: true } },
     { path: '/business',
       name: 'business-root',
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, showNavBar: true },
       redirect: `/account/${JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}').id || 0}/business`
     },
     { path: '/account/:orgId',
@@ -59,7 +61,10 @@ export function getRoutes () {
           path: 'business',
           name: 'business',
           component: EntityManagement,
-          props: true
+          props: true,
+          meta: {
+            showNavBar: true
+          }
         }]
     },
     { path: '/account/:orgId/settings',
@@ -91,7 +96,7 @@ export function getRoutes () {
     { path: '/signin/:idpHint/:redirectUrl/:redirectUrlLoginFail', name: 'signin-redirect-full', component: SigninView, props: true, meta: { requiresAuth: false } },
     { path: '/signout', name: 'signout', component: SignoutView, props: true, meta: { requiresAuth: true } },
     { path: '/signout/:redirectUrl', name: 'signout-redirect', component: SignoutView, props: true, meta: { requiresAuth: true } },
-    { path: '/businessprofile', name: 'businessprofile', component: BusinessProfileView, meta: { requiresAuth: true, requiresProfile: true } },
+    { path: '/businessprofile', name: 'businessprofile', component: BusinessProfileView, meta: { requiresAuth: true, requiresProfile: true, showNavBar: true } },
     { path: '/makepayment/:paymentId/:redirectUrl', name: 'makepayment', component: PaymentView, props: true, meta: { requiresAuth: false, requiresProfile: true } },
     { path: '/profiledeactivated', name: 'profiledeactivated', component: ProfileDeactivatedView, props: true, meta: { requiresAuth: false } },
     { path: '/returnpayment/:paymentId/transaction/:transactionId', name: 'returnpayment', component: PaymentReturnView, props: mapReturnPayVars, meta: { requiresAuth: false, requiresProfile: true } },
@@ -99,6 +104,8 @@ export function getRoutes () {
     { path: '/unauthorized', name: 'unauthorized', component: UnauthorizedView, props: true, meta: { requiresAuth: false } },
     { path: '/pendingapproval/:team_name?', name: 'pendingapproval', component: PendingApprovalView, props: true, meta: { requiresAuth: false, requiresProfile: true } },
     { path: '/leaveteam', name: 'leaveteam', component: LeaveTeamLandingView, props: true, meta: { requiresAuth: true } },
+    { path: '/staff-setup-account', name: 'staffsetupaccount', component: SetupAccountView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
+    { path: '/staff-setup-account-success', name: 'staffsetupaccountsuccess', component: SetupAccountSuccessView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
     { path: '*', name: 'notfound', component: PageNotFound }
   ]
 
