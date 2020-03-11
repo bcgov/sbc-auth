@@ -8,6 +8,3121 @@ info:
     url: http://www.example.com/support
     email: support@example.com
 paths:
+  '/users/{username}':
+    parameters:
+      - name: username
+        in: path
+        description: Corp Type
+        required: true
+        schema:
+          type: string
+    get:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      operationId: get_user_staff
+      tags:
+        - users
+      summary: Return the user profile associated with the provided username.
+      description: Return the user profile associated with the provided username.
+  /users/orgs:
+    get:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/org'
+
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      operationId: get_user_orgs
+      tags:
+        - users
+      summary: Get a list of orgs that the current user is associated with.
+      description: Get a list of orgs that the current user is associated with.
+  /users/contacts:
+    put:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contact'
+
+      operationId: put_user_contacts
+      tags:
+        - users
+      summary: Update an existing contact for the user associated with the JWT in the authorization header.
+      description: Update an existing contact for the user associated with the JWT in the authorization header.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/contact'
+
+    post:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+
+      operationId: post_user_contacts
+      tags:
+        - users
+      summary: 'Create a new contact for the user associated with the JWT in the authorization header."'
+      description: 'Create a new contact for the user associated with the JWT in the authorization header."'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+
+    delete:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+      operationId: delete_user_contacts
+      tags:
+        - users
+      summary: Delete the contact info for the user associated with the JWT in the authorization header.
+      description: Delete the contact info for the user associated with the JWT in the authorization header.
+    get:
+      summary: Retrieve the set of contacts asociated with the current user identifier by the JWT in the header.
+      operationId: get-users-contacts
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contact'
+
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      description: Retrieve the set of contacts asociated with the current user identifier by the JWT in the header.
+  /users/authorizations:
+    get:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authorizations:
+                    type: array
+                    items: {}
+      summary: Get the authorizations for the user
+      operationId: get_authorization_resource
+      tags:
+        - users
+      description: 'Get the authorizations for the user '
+  /users/@me:
+    patch:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contact'
+
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      operationId: patch_user
+      tags:
+        - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: userTerms
+              type: object
+              properties:
+                isTermsOfUseAccepted:
+                  type: boolean
+                termsOfUseAcceptedVersion:
+                  type: string
+      summary: Update terms of service for the user.
+      description: Update terms of service for the user.
+    delete:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+      operationId: delete_user
+      tags:
+        - users
+      summary: Delete the user profile.
+      description: Delete the user profile.
+    get:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+
+      operationId: get_user
+      tags:
+        - users
+      summary: Return the user profile associated with the JWT in the authorization header.
+      description: Return the user profile associated with the JWT in the authorization header.
+  /users:
+    post:
+      responses:
+        '201':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+
+      operationId: post_users
+      tags:
+        - users
+      description: 'Create a new user using the request body (which will contain a JWT). If the user already exists, update the name.'
+      summary: Create a new user
+    get:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+
+      operationId: get_users
+      tags:
+        - users
+      summary: Return a set of users based on search query parameters (staff only).
+      description: Return a set of users based on search query parameters (staff only).
+
+  '/orgs/{org_id}/members/{membership_id}':
+    parameters:
+      - name: org_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: membership_id
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/membership'
+
+      operationId: patch_org_member
+      tags:
+        - orgs
+      summary: Update a membership record with new member role.
+      description: Update a membership record with new member role.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: orgMembershipRequest
+              type: object
+              properties:
+                role:
+                  type: string
+                status:
+                  type: string
+                notifyUser:
+                  type: string
+    delete:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/membership'
+
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      operationId: delete_org_member
+      tags:
+        - orgs
+      summary: Mark a membership record as inactive.  Membership must match current user token.
+      description: Mark a membership record as inactive. Membership must match current user token.
+  '/orgs/{org_id}/members':
+    parameters:
+      - name: org_id
+        in: path
+        required: true
+        schema: 
+          type: string
+    get:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/membership'
+
+      operationId: get_org_members
+      tags:
+        - orgs
+
+      summary: Retrieve the set of members for the given org.
+      description: Retrieve the set of members for the given org.
+  '/orgs/{org_id}/invitations':
+    parameters:
+      - name: org_id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/invitation'
+
+      operationId: get_org_invitations
+      tags:
+        - orgs
+      summary: Retrieve the set of invitations for the given org
+      description: Retrieve the set of invitations for the given org.
+  '/orgs/{org_id}/contacts':
+    parameters:
+      - name: org_id
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contact'
+
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      operationId: put_org_contacts
+      tags:
+        - orgs
+      summary: Update an existing contact for the specified org.
+      description: Update an existing contact for the specified org.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/contact'
+
+    post:
+      responses:
+        '201':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contact'
+
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      operationId: post_org_contacts
+      tags:
+        - orgs
+      description: Create a new contact for the specified org.
+      summary: Create a new contact for the specified org.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/contact'
+
+        description: ''
+    delete:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contact'
+
+      operationId: delete_org_contacts
+      tags:
+        - orgs
+      summary: Delete the contact info for the specified org.
+      description: Delete the contact info for the specified org.
+    get:
+      summary: Retrieve the set of contacts associated with the specified org.
+      operationId: get-orgs-org_id-contacts
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contact'
+
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+      description: Retrieve the set of contacts associated with the specified org.
+  '/orgs/{org_id}/affiliations/{business_identifier}':
+    parameters:
+      - name: org_id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: business_identifier
+        in: path
+        required: true
+        schema:
+          type: string
+    delete:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+      operationId: delete_org_affiliation
+      tags:
+        - orgs
+      summary: Delete an affiliation between an org and an entity.
+      description: Delete an affiliation between an org and an entity.
+  '/orgs/{org_id}/affiliations':
+    parameters:
+      - name: org_id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      responses:
+        '201':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/affiliation'
+
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      operationId: post_org_affiliations
+      tags:
+        - orgs
+      summary: Post a new Affiliation for an org using the request body.
+      description: Post a new Affiliation for an org using the request body.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: affiliationRequest
+              properties:
+                businessIdentifier:
+                  #$id: '#/properties/businessIdentifier'
+                  type: string
+                  title: Business Identifier
+                  default: ''
+                  example:
+                    - CP1234567
+                  pattern: '^(.*)$'
+                passCode:
+                  #$id: '#/properties/passCode'
+                  type: string
+                  title: Passcode
+                  default: ''
+                  example:
+                    - '12345'
+                  pattern: '^(.*)$'
+              required:
+                - businessIdentifier
+    get:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/affiliation'
+
+      operationId: get_org_affiliations
+      tags:
+        - orgs
+      summary: Get all affiliated entities for the given org.
+      description: Get all affiliated entities for the given org.
+  '/orgs/{org_id}':
+    parameters:
+      - name: org_id
+        in: path
+        required: true
+        schema:
+          type: string
+        example:
+          example1:
+            value: '1234'
+    put:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/org'
+
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      operationId: put_org
+      tags:
+        - orgs
+      summary: Update the org specified by the provided id with the request body.
+      description: Update the org specified by the provided id with the request body.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: orgRequest
+              type: object
+              properties:
+                name:
+                  #$id: '#/properties/name'
+                  type: string
+                  title: Organization Name
+                  default: ''
+                  example:
+                    - Foobar Inc.
+                  pattern: "^[^\\s]+(\\s+[^\\s]+)*$"
+                typeCode:
+                  #$id: '#/properties/orgType'
+                  type: string
+                  title: Organizational Type
+                  default: IMPLICIT
+                  example:
+                    - IMPLICIT
+                    - EXPLICIT
+                  pattern: '^(.*)$'
+              required:
+                - name
+    get:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/org'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      operationId: get_org
+      tags:
+        - orgs
+      summary: Get the org specified by the provided id.
+      description: Get the org specified by the provided id.
+  /orgs:
+    post:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/org'
+
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      operationId: post_orgs
+      tags:
+        - orgs
+      description: 'Create a new org using the request body. If the org already exists, update the attributes.'
+      summary: Create a new org.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: orgRequest
+              type: object
+              properties:
+                name:
+                  #$id: '#/properties/name'
+                  type: string
+                  title: Organization Name
+                  default: ''
+                  example:
+                    - Foobar Inc.
+                  pattern: "^[^\\s]+(\\s+[^\\s]+)*$"
+                typeCode:
+                  #$id: '#/properties/orgType'
+                  type: string
+                  title: Organizational Type
+                  default: IMPLICIT
+                  example:
+                    - IMPLICIT
+                    - EXPLICIT
+                  pattern: '^(.*)$'
+              required:
+                - name
+    get:
+      summary: Search orgs
+      operationId: searchOrgs
+      parameters:
+        - name: affiliation
+          in: query
+          description: Business Identifier
+          required: true
+          schema:
+            type: string
+          examples:
+            example1:
+              value: CP0001234
+            example2:
+              value: CP0002000
+      tags:
+        - authorization
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+              example:
+                example1:
+                  value: 'application:prod'
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+              example:
+                example1:
+                  value: '*'
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+              example:
+                example1:
+                  value: 'GET, OPTIONS'
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+              example:
+                example1:
+                  value: 'Content-Type, api_key, Authorization'
+          content:
+            application/json:
+              schema:
+                title: org
+                type: object
+                properties:
+                  created:
+                    #$id: '#/properties/created'
+                    type: string
+                    title: The Created Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T13:49:45.244134+00:00'
+                    pattern: '^(.*)$'
+                  created_by:
+                    #$id: '#/properties/created_by'
+                    type: string
+                    title: The Created_by Schema
+                    default: ''
+                    example:
+                      - sbc-auth admin
+                    pattern: '^(.*)$'
+                  id:
+                    #$id: '#/properties/id'
+                    type: integer
+                    title: The Id Schema
+                    default: 0
+                    example:
+                      - 103
+                  modified:
+                    #$id: '#/properties/modified'
+                    type: string
+                    title: The Modified Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T13:49:45.244148+00:00'
+                    pattern: '^(.*)$'
+                  name:
+                    #$id: '#/properties/name'
+                    type: string
+                    title: The Name Schema
+                    default: ''
+                    example:
+                      - AOT
+                    pattern: '^(.*)$'
+                  orgType:
+                    #$id: '#/properties/orgType'
+                    type: string
+                    title: The Orgtype Schema
+                    default: ''
+                    example:
+                      - IMPLICIT
+                    pattern: '^(.*)$'
+                  org_status:
+                    #$id: '#/properties/org_status'
+                    type: string
+                    title: The Org_status Schema
+                    default: ''
+                    example:
+                      - ACTIVE
+                    pattern: '^(.*)$'
+                  preferred_payment:
+                    #$id: '#/properties/preferred_payment'
+                    type: string
+                    title: The Preferred_payment Schema
+                    default: ''
+                    example:
+                      - CC
+                    pattern: '^(.*)$'
+                  modified_by:
+                    type: string
+                required:
+                  - created
+                  - created_by
+                  - id
+                  - modified
+                  - name
+                  - orgType
+                  - org_status
+                  - preferred_payment
+              examples:
+                example1:
+                  value:
+                    id: '1234'
+                    name: Mock Account
+                    preferred_payment: CC
+                example2:
+                  value:
+                    id: '2000'
+                    name: Mock Account
+                    preferred_payment: PREMIUM
+                    bc_online_user_id: PB25020
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      description: Get authorizations endpoint for the entity by business indentifier
+    parameters:
+      - schema:
+          type: string
+        name: affiliation
+        in: query
+        required: true
+        description: Corp Num/Incorporation Number of the entity
+        examples:
+          example1:
+            value: CP0001234
+  /logout:
+    post:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+      operationId: post_logout
+      tags:
+        - logout
+      summary: Logout user from keycloak by refresh token.
+      description: Logout user from keycloak by refresh token.
+  '/invitations/{invitation_id}':
+    parameters:
+      - name: invitation_id
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+      operationId: patch_invitation
+      tags:
+        - invitations
+    delete:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+      operationId: delete_invitation
+      tags:
+        - invitations
+      summary: Delete the specified invitation.
+      description: Delete the specified invitation.
+    get:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                title: invitation
+                type: object
+                properties:
+                  expiresOn:
+                    #$id: '#/properties/expiresOn'
+                    type: string
+                    title: The Expireson Schema
+                    default: ''
+                    example:
+                      - '2020-01-16T13:55:05.960809+00:00'
+                    pattern: '^(.*)$'
+                  id:
+                    #$id: '#/properties/id'
+                    type: integer
+                    title: The Id Schema
+                    default: 0
+                    example:
+                      - 30
+                  membership:
+                    type: array
+                    title: The Membership Schema
+                    items:
+                      title: membership
+                      type: object
+                      properties:
+                        user:
+                          title: user
+                          type: object
+                          properties:
+                            created:
+                              #$id: '#/properties/created'
+                              type: string
+                              title: The Created Schema
+                              default: ''
+                              example:
+                                - '2020-01-09T11:13:59.293603+00:00'
+                              pattern: '^(.*)$'
+                            email:
+                              #$id: '#/properties/email'
+                              type: string
+                              title: The Email Schema
+                              default: ''
+                              example:
+                                - service-account-sbc-auth-admin@placeholder.org
+                              pattern: '^(.*)$'
+                            firstname:
+                              #$id: '#/properties/firstname'
+                              type: string
+                              title: The Firstname Schema
+                              default: ''
+                              example:
+                                - sbc-auth
+                              pattern: '^(.*)$'
+                            keycloakGuid:
+                              #$id: '#/properties/keycloakGuid'
+                              type: string
+                              title: The Keycloakguid Schema
+                              default: ''
+                              example:
+                                - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
+                              pattern: '^(.*)$'
+                            lastname:
+                              #$id: '#/properties/lastname'
+                              type: string
+                              title: The Lastname Schema
+                              default: ''
+                              example:
+                                - admin
+                              pattern: '^(.*)$'
+                            modified:
+                              #$id: '#/properties/modified'
+                              type: string
+                              title: The Modified Schema
+                              default: ''
+                              example:
+                                - '2020-01-09T11:13:59.295264+00:00'
+                              pattern: '^(.*)$'
+                            userStatus:
+                              #$id: '#/properties/userStatus'
+                              type: integer
+                              title: The Userstatus Schema
+                              default: 0
+                              example:
+                                - 1
+                            userTerms:
+                              title: userTerms
+                              type: object
+                              properties:
+                                isTermsOfUseAccepted:
+                                  type: boolean
+                                termsOfUseAcceptedVersion:
+                                  type: string
+                            username:
+                              #$id: '#/properties/username'
+                              type: string
+                              title: The Username Schema
+                              default: ''
+                              example:
+                                - service-account-sbc-auth-admin
+                              pattern: '^(.*)$'
+                          required:
+                            - created
+                            - email
+                            - firstname
+                            - keycloakGuid
+                            - lastname
+                            - modified
+                            - userStatus
+                            - userTerms
+                            - username
+                        org:
+                          title: org
+                          type: object
+                          properties:
+                            created:
+                              #$id: '#/properties/created'
+                              type: string
+                              title: The Created Schema
+                              default: ''
+                              example:
+                                - '2020-01-09T13:49:45.244134+00:00'
+                              pattern: '^(.*)$'
+                            created_by:
+                              #$id: '#/properties/created_by'
+                              type: string
+                              title: The Created_by Schema
+                              default: ''
+                              example:
+                                - sbc-auth admin
+                              pattern: '^(.*)$'
+                            id:
+                              #$id: '#/properties/id'
+                              type: integer
+                              title: The Id Schema
+                              default: 0
+                              example:
+                                - 103
+                            modified:
+                              #$id: '#/properties/modified'
+                              type: string
+                              title: The Modified Schema
+                              default: ''
+                              example:
+                                - '2020-01-09T13:49:45.244148+00:00'
+                              pattern: '^(.*)$'
+                            name:
+                              #$id: '#/properties/name'
+                              type: string
+                              title: The Name Schema
+                              default: ''
+                              example:
+                                - AOT
+                              pattern: '^(.*)$'
+                            orgType:
+                              #$id: '#/properties/orgType'
+                              type: string
+                              title: The Orgtype Schema
+                              default: ''
+                              example:
+                                - IMPLICIT
+                              pattern: '^(.*)$'
+                            org_status:
+                              #$id: '#/properties/org_status'
+                              type: string
+                              title: The Org_status Schema
+                              default: ''
+                              example:
+                                - ACTIVE
+                              pattern: '^(.*)$'
+                            preferred_payment:
+                              #$id: '#/properties/preferred_payment'
+                              type: string
+                              title: The Preferred_payment Schema
+                              default: ''
+                              example:
+                                - CC
+                              pattern: '^(.*)$'
+                            modified_by:
+                              type: string
+                          required:
+                            - created
+                            - created_by
+                            - id
+                            - modified
+                            - name
+                            - orgType
+                            - org_status
+                            - preferred_payment
+                        membershipType:
+                          type: string
+                        membershipStatus:
+                          type: string
+                        id:
+                          type: string
+                  recipientEmail:
+                    #$id: '#/properties/recipientEmail'
+                    type: string
+                    title: The Recipientemail Schema
+                    default: ''
+                    example:
+                      - saravanpa@gmai.com
+                    pattern: '^(.*)$'
+                  sentDate:
+                    #$id: '#/properties/sentDate'
+                    type: string
+                    title: The Sentdate Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T13:55:05.960809+00:00'
+                    pattern: '^(.*)$'
+                  status:
+                    #$id: '#/properties/status'
+                    type: string
+                    title: The Status Schema
+                    default: ''
+                    example:
+                      - PENDING
+                    pattern: '^(.*)$'
+                  token:
+                    #$id: '#/properties/token'
+                    type: string
+                    title: The Token Schema
+                    default: ''
+                    example:
+                      - MzA.XhehOQ._bPUJGr5f7-5NLjUqJ39OeUPtjQ
+                    pattern: '^(.*)$'
+                required:
+                  - expiresOn
+                  - id
+                  - membership
+                  - recipientEmail
+                  - sentDate
+                  - status
+                  - token
+      operationId: get_invitation
+      tags:
+        - invitations
+      summary: Update the invitation specified by the provided id as retried.
+      description: Update the invitation specified by the provided id as retried.
+  '/invitations/tokens/{invitation_token}':
+    parameters:
+      - name: invitation_token
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                title: invitation
+                type: object
+                properties:
+                  expiresOn:
+                    #$id: '#/properties/expiresOn'
+                    type: string
+                    title: The Expireson Schema
+                    default: ''
+                    example:
+                      - '2020-01-16T13:55:05.960809+00:00'
+                    pattern: '^(.*)$'
+                  id:
+                    #$id: '#/properties/id'
+                    type: integer
+                    title: The Id Schema
+                    default: 0
+                    example:
+                      - 30
+                  membership:
+                    type: array
+                    title: The Membership Schema
+                    items:
+                      title: membership
+                      type: object
+                      properties:
+                        user:
+                          title: user
+                          type: object
+                          properties:
+                            created:
+                              #$id: '#/properties/created'
+                              type: string
+                              title: The Created Schema
+                              default: ''
+                              example:
+                                - '2020-01-09T11:13:59.293603+00:00'
+                              pattern: '^(.*)$'
+                            email:
+                              #$id: '#/properties/email'
+                              type: string
+                              title: The Email Schema
+                              default: ''
+                              example:
+                                - service-account-sbc-auth-admin@placeholder.org
+                              pattern: '^(.*)$'
+                            firstname:
+                              #$id: '#/properties/firstname'
+                              type: string
+                              title: The Firstname Schema
+                              default: ''
+                              example:
+                                - sbc-auth
+                              pattern: '^(.*)$'
+                            keycloakGuid:
+                              #$id: '#/properties/keycloakGuid'
+                              type: string
+                              title: The Keycloakguid Schema
+                              default: ''
+                              example:
+                                - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
+                              pattern: '^(.*)$'
+                            lastname:
+                              #$id: '#/properties/lastname'
+                              type: string
+                              title: The Lastname Schema
+                              default: ''
+                              example:
+                                - admin
+                              pattern: '^(.*)$'
+                            modified:
+                              #$id: '#/properties/modified'
+                              type: string
+                              title: The Modified Schema
+                              default: ''
+                              example:
+                                - '2020-01-09T11:13:59.295264+00:00'
+                              pattern: '^(.*)$'
+                            userStatus:
+                              #$id: '#/properties/userStatus'
+                              type: integer
+                              title: The Userstatus Schema
+                              default: 0
+                              example:
+                                - 1
+                            userTerms:
+                              title: userTerms
+                              type: object
+                              properties:
+                                isTermsOfUseAccepted:
+                                  type: boolean
+                                termsOfUseAcceptedVersion:
+                                  type: string
+                            username:
+                              #$id: '#/properties/username'
+                              type: string
+                              title: The Username Schema
+                              default: ''
+                              example:
+                                - service-account-sbc-auth-admin
+                              pattern: '^(.*)$'
+                          required:
+                            - created
+                            - email
+                            - firstname
+                            - keycloakGuid
+                            - lastname
+                            - modified
+                            - userStatus
+                            - userTerms
+                            - username
+                        org:
+                          title: org
+                          type: object
+                          properties:
+                            created:
+                              #$id: '#/properties/created'
+                              type: string
+                              title: The Created Schema
+                              default: ''
+                              example:
+                                - '2020-01-09T13:49:45.244134+00:00'
+                              pattern: '^(.*)$'
+                            created_by:
+                              #$id: '#/properties/created_by'
+                              type: string
+                              title: The Created_by Schema
+                              default: ''
+                              example:
+                                - sbc-auth admin
+                              pattern: '^(.*)$'
+                            id:
+                              #$id: '#/properties/id'
+                              type: integer
+                              title: The Id Schema
+                              default: 0
+                              example:
+                                - 103
+                            modified:
+                              #$id: '#/properties/modified'
+                              type: string
+                              title: The Modified Schema
+                              default: ''
+                              example:
+                                - '2020-01-09T13:49:45.244148+00:00'
+                              pattern: '^(.*)$'
+                            name:
+                              #$id: '#/properties/name'
+                              type: string
+                              title: The Name Schema
+                              default: ''
+                              example:
+                                - AOT
+                              pattern: '^(.*)$'
+                            orgType:
+                              #$id: '#/properties/orgType'
+                              type: string
+                              title: The Orgtype Schema
+                              default: ''
+                              example:
+                                - IMPLICIT
+                              pattern: '^(.*)$'
+                            org_status:
+                              #$id: '#/properties/org_status'
+                              type: string
+                              title: The Org_status Schema
+                              default: ''
+                              example:
+                                - ACTIVE
+                              pattern: '^(.*)$'
+                            preferred_payment:
+                              #$id: '#/properties/preferred_payment'
+                              type: string
+                              title: The Preferred_payment Schema
+                              default: ''
+                              example:
+                                - CC
+                              pattern: '^(.*)$'
+                            modified_by:
+                              type: string
+                          required:
+                            - created
+                            - created_by
+                            - id
+                            - modified
+                            - name
+                            - orgType
+                            - org_status
+                            - preferred_payment
+                        membershipType:
+                          type: string
+                        membershipStatus:
+                          type: string
+                        id:
+                          type: string
+                  recipientEmail:
+                    #$id: '#/properties/recipientEmail'
+                    type: string
+                    title: The Recipientemail Schema
+                    default: ''
+                    example:
+                      - saravanpa@gmai.com
+                    pattern: '^(.*)$'
+                  sentDate:
+                    #$id: '#/properties/sentDate'
+                    type: string
+                    title: The Sentdate Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T13:55:05.960809+00:00'
+                    pattern: '^(.*)$'
+                  status:
+                    #$id: '#/properties/status'
+                    type: string
+                    title: The Status Schema
+                    default: ''
+                    example:
+                      - PENDING
+                    pattern: '^(.*)$'
+                  token:
+                    #$id: '#/properties/token'
+                    type: string
+                    title: The Token Schema
+                    default: ''
+                    example:
+                      - MzA.XhehOQ._bPUJGr5f7-5NLjUqJ39OeUPtjQ
+                    pattern: '^(.*)$'
+                required:
+                  - expiresOn
+                  - id
+                  - membership
+                  - recipientEmail
+                  - sentDate
+                  - status
+                  - token
+      operationId: put_invitation_action
+      tags:
+        - invitations
+      summary: 'Check whether the passed token is valid and add user, role and org from invitation to membership.'
+      description: 'Check whether the passed token is valid and add user, role and org from invitation to membership.'
+    get:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+      operationId: get_invitation_action
+      tags:
+        - invitations
+      summary: Check whether the passed token is valid
+      description: Check whether the passed token is valid
+  /invitations:
+    post:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                title: invitation
+                type: object
+                properties:
+                  expiresOn:
+                    #$id: '#/properties/expiresOn'
+                    type: string
+                    title: The Expireson Schema
+                    default: ''
+                    example:
+                      - '2020-01-16T13:55:05.960809+00:00'
+                    pattern: '^(.*)$'
+                  id:
+                    #$id: '#/properties/id'
+                    type: integer
+                    title: The Id Schema
+                    default: 0
+                    example:
+                      - 30
+                  membership:
+                    type: array
+                    title: The Membership Schema
+                    items:
+                      title: membership
+                      type: object
+                      properties:
+                        user:
+                          title: user
+                          type: object
+                          properties:
+                            created:
+                              #$id: '#/properties/created'
+                              type: string
+                              title: The Created Schema
+                              default: ''
+                              example:
+                                - '2020-01-09T11:13:59.293603+00:00'
+                              pattern: '^(.*)$'
+                            email:
+                              #$id: '#/properties/email'
+                              type: string
+                              title: The Email Schema
+                              default: ''
+                              example:
+                                - service-account-sbc-auth-admin@placeholder.org
+                              pattern: '^(.*)$'
+                            firstname:
+                              #$id: '#/properties/firstname'
+                              type: string
+                              title: The Firstname Schema
+                              default: ''
+                              example:
+                                - sbc-auth
+                              pattern: '^(.*)$'
+                            keycloakGuid:
+                              #$id: '#/properties/keycloakGuid'
+                              type: string
+                              title: The Keycloakguid Schema
+                              default: ''
+                              example:
+                                - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
+                              pattern: '^(.*)$'
+                            lastname:
+                              #$id: '#/properties/lastname'
+                              type: string
+                              title: The Lastname Schema
+                              default: ''
+                              example:
+                                - admin
+                              pattern: '^(.*)$'
+                            modified:
+                              #$id: '#/properties/modified'
+                              type: string
+                              title: The Modified Schema
+                              default: ''
+                              example:
+                                - '2020-01-09T11:13:59.295264+00:00'
+                              pattern: '^(.*)$'
+                            userStatus:
+                              #$id: '#/properties/userStatus'
+                              type: integer
+                              title: The Userstatus Schema
+                              default: 0
+                              example:
+                                - 1
+                            userTerms:
+                              title: userTerms
+                              type: object
+                              properties:
+                                isTermsOfUseAccepted:
+                                  type: boolean
+                                termsOfUseAcceptedVersion:
+                                  type: string
+                            username:
+                              #$id: '#/properties/username'
+                              type: string
+                              title: The Username Schema
+                              default: ''
+                              example:
+                                - service-account-sbc-auth-admin
+                              pattern: '^(.*)$'
+                          required:
+                            - created
+                            - email
+                            - firstname
+                            - keycloakGuid
+                            - lastname
+                            - modified
+                            - userStatus
+                            - userTerms
+                            - username
+                        org:
+                          title: org
+                          type: object
+                          properties:
+                            created:
+                              #$id: '#/properties/created'
+                              type: string
+                              title: The Created Schema
+                              default: ''
+                              example:
+                                - '2020-01-09T13:49:45.244134+00:00'
+                              pattern: '^(.*)$'
+                            created_by:
+                              #$id: '#/properties/created_by'
+                              type: string
+                              title: The Created_by Schema
+                              default: ''
+                              example:
+                                - sbc-auth admin
+                              pattern: '^(.*)$'
+                            id:
+                              #$id: '#/properties/id'
+                              type: integer
+                              title: The Id Schema
+                              default: 0
+                              example:
+                                - 103
+                            modified:
+                              #$id: '#/properties/modified'
+                              type: string
+                              title: The Modified Schema
+                              default: ''
+                              example:
+                                - '2020-01-09T13:49:45.244148+00:00'
+                              pattern: '^(.*)$'
+                            name:
+                              #$id: '#/properties/name'
+                              type: string
+                              title: The Name Schema
+                              default: ''
+                              example:
+                                - AOT
+                              pattern: '^(.*)$'
+                            orgType:
+                              #$id: '#/properties/orgType'
+                              type: string
+                              title: The Orgtype Schema
+                              default: ''
+                              example:
+                                - IMPLICIT
+                              pattern: '^(.*)$'
+                            org_status:
+                              #$id: '#/properties/org_status'
+                              type: string
+                              title: The Org_status Schema
+                              default: ''
+                              example:
+                                - ACTIVE
+                              pattern: '^(.*)$'
+                            preferred_payment:
+                              #$id: '#/properties/preferred_payment'
+                              type: string
+                              title: The Preferred_payment Schema
+                              default: ''
+                              example:
+                                - CC
+                              pattern: '^(.*)$'
+                            modified_by:
+                              type: string
+                          required:
+                            - created
+                            - created_by
+                            - id
+                            - modified
+                            - name
+                            - orgType
+                            - org_status
+                            - preferred_payment
+                        membershipType:
+                          type: string
+                        membershipStatus:
+                          type: string
+                        id:
+                          type: string
+                          
+                  recipientEmail:
+                    #$id: '#/properties/recipientEmail'
+                    type: string
+                    title: The Recipientemail Schema
+                    default: ''
+                    example:
+                      - saravanpa@gmai.com
+                    pattern: '^(.*)$'
+                  sentDate:
+                    #$id: '#/properties/sentDate'
+                    type: string
+                    title: The Sentdate Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T13:55:05.960809+00:00'
+                    pattern: '^(.*)$'
+                  status:
+                    #$id: '#/properties/status'
+                    type: string
+                    title: The Status Schema
+                    default: ''
+                    example:
+                      - PENDING
+                    pattern: '^(.*)$'
+                  token:
+                    #$id: '#/properties/token'
+                    type: string
+                    title: The Token Schema
+                    default: ''
+                    example:
+                      - MzA.XhehOQ._bPUJGr5f7-5NLjUqJ39OeUPtjQ
+                    pattern: '^(.*)$'
+                required:
+                  - expiresOn
+                  - id
+                  - membership
+                  - recipientEmail
+                  - sentDate
+                  - status
+                  - token
+      operationId: post_invitations
+      tags:
+        - invitations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: invitationRequest
+              type: object
+              required:
+                - recipientEmail
+                - membership
+              properties:
+                recipientEmail:
+                  type: string
+                  title: The recipient email id.
+                sentDate:
+                  type: string
+                  format: datetime
+                  title: The date invitation is sent.
+
+      summary: Send a new invitation using the details in request and saves the invitation.
+      description: Send a new invitation using the details in request and saves the invitation.
+  '/entities/{business_identifier}/contacts':
+    parameters:
+      - name: business_identifier
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                title: entity
+                type: object
+                properties:
+                  businessIdentifier:
+                    #$id: '#/properties/businessIdentifier'
+                    type: string
+                    title: The Businessidentifier Schema
+                    default: ''
+                    example:
+                      - CP0001578
+                    pattern: '^(.*)$'
+                  businessNumber:
+                    #$id: '#/properties/businessNumber'
+                    type: string
+                    title: The Businessnumber Schema
+                    default: ''
+                    example:
+                      - CP0001847
+                    pattern: '^(.*)$'
+                  contacts:
+                    type: array
+                    title: The Contacts Schema
+                    items:
+                      title: contact
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          title: Email
+                          default: ''
+                          example:
+                            - abc123@mail.com
+                          pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                        phoneExtension:
+                          type: string
+                          title: Phone Extension
+                          default: ''
+                          example:
+                            - '123'
+                          pattern: '^(.*)$'
+                        phone:
+                          type: string
+                          title: Phone
+                          default: ''
+                          example:
+                            - 111-222-3333
+                          pattern: '^(.*)$'
+                        deliveryInstructions:
+                          type: string
+                          title: Delivery Instructions
+                          default: ''
+                          example:
+                            - Ring buzzer 123
+                          pattern: '^(.*)$'
+                        postalCode:
+                          #$id: '#/properties/postal_code'
+                          type: string
+                          title: Postal Code
+                          default: ''
+                          example:
+                            - V1A 1A1
+                          pattern: '^(.*)$'
+                        country:
+                          type: string
+                          title: Country
+                          default: ''
+                          example:
+                            - CA
+                          pattern: '^(.*)$'
+                        region:
+                          #$id: '#/properties/region'
+                          type: string
+                          title: Region
+                          default: ''
+                          example:
+                            - British Columbia
+                          pattern: '^(.*)$'
+                        city:
+                          type: string
+                          title: City
+                          default: ''
+                          example:
+                            - Victoria
+                          pattern: '^(.*)$'
+                        streetAdditional:
+                          type: string
+                          title: Street Additional
+                          default: ''
+                          example:
+                            - Unit 1
+                          pattern: '^(.*)$'
+                        street:
+                          type: string
+                          title: Street
+                          default: ''
+                          example:
+                            - 123 Roundabout Lane
+                          pattern: '^(.*)$'
+                  corpType:
+                    #$id: '#/properties/corpType'
+                    type: string
+                    title: The Corptype Schema
+                    default: ''
+                    example:
+                      - CP
+                    pattern: '^(.*)$'
+                  created:
+                    #$id: '#/properties/created'
+                    type: string
+                    title: The Created Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T11:11:31.303521+00:00'
+                    pattern: '^(.*)$'
+                  modified:
+                    #$id: '#/properties/modified'
+                    type: string
+                    title: The Modified Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T11:14:06.560862+00:00'
+                    pattern: '^(.*)$'
+                  modifiedBy:
+                    #$id: '#/properties/modifiedBy'
+                    type: string
+                    title: The Modifiedby Schema
+                    default: ''
+                    example:
+                      - sbc-auth admin
+                    pattern: '^(.*)$'
+                  name:
+                    #$id: '#/properties/name'
+                    type: string
+                    title: The Name Schema
+                    default: ''
+                    example:
+                      - Business
+                    pattern: '^(.*)$'
+                  passCodeClaimed:
+                    #$id: '#/properties/passCodeClaimed'
+                    type: boolean
+                    title: The Passcodeclaimed Schema
+                    default: false
+                    example:
+                      - false
+                required:
+                  - businessIdentifier
+                  - businessNumber
+                  - contacts
+                  - corpType
+                  - created
+                  - modified
+                  - modifiedBy
+                  - name
+                  - passCodeClaimed
+                x-example:
+                  CP0001578:
+                    businessIdentifier: CP0001578
+                    businessNumber: CP0001847
+                    contacts:
+                      - created: '2020-01-09T11:11:41.353569+00:00'
+                        email: saravanpa@gmail.com
+                        modified: '2020-01-09T11:11:41.353578+00:00'
+                        phone: '1111'
+                        phoneExtension: '11111'
+                    corpType: CP
+                    created: '2020-01-09T11:11:31.303521+00:00'
+                    modified: '2020-01-09T11:14:06.560862+00:00'
+                    modifiedBy: sbc-auth admin
+                    name: Business
+                    passCodeClaimed: false
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      summary: Update the business contact for the Entity identified by the provided id
+      operationId: put_contact_resource
+      tags:
+        - entities
+      description: Update the business contact for the Entity identified by the provided id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: contact
+              type: object
+              properties:
+                email:
+                  type: string
+                  title: Email
+                  default: ''
+                  example:
+                    - abc123@mail.com
+                  pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                phoneExtension:
+                  type: string
+                  title: Phone Extension
+                  default: ''
+                  example:
+                    - '123'
+                  pattern: '^(.*)$'
+                phone:
+                  type: string
+                  title: Phone
+                  default: ''
+                  example:
+                    - 111-222-3333
+                  pattern: '^(.*)$'
+                deliveryInstructions:
+                  type: string
+                  title: Delivery Instructions
+                  default: ''
+                  example:
+                    - Ring buzzer 123
+                  pattern: '^(.*)$'
+                postalCode:
+                  #$id: '#/properties/postal_code'
+                  type: string
+                  title: Postal Code
+                  default: ''
+                  example:
+                    - V1A 1A1
+                  pattern: '^(.*)$'
+                country:
+                  type: string
+                  title: Country
+                  default: ''
+                  example:
+                    - CA
+                  pattern: '^(.*)$'
+                region:
+                  #$id: '#/properties/region'
+                  type: string
+                  title: Region
+                  default: ''
+                  example:
+                    - British Columbia
+                  pattern: '^(.*)$'
+                city:
+                  type: string
+                  title: City
+                  default: ''
+                  example:
+                    - Victoria
+                  pattern: '^(.*)$'
+                streetAdditional:
+                  type: string
+                  title: Street Additional
+                  default: ''
+                  example:
+                    - Unit 1
+                  pattern: '^(.*)$'
+                street:
+                  type: string
+                  title: Street
+                  default: ''
+                  example:
+                    - 123 Roundabout Lane
+                  pattern: '^(.*)$'
+    post:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                title: entity
+                type: object
+                properties:
+                  businessIdentifier:
+                    #$id: '#/properties/businessIdentifier'
+                    type: string
+                    title: The Businessidentifier Schema
+                    default: ''
+                    example:
+                      - CP0001578
+                    pattern: '^(.*)$'
+                  businessNumber:
+                    #$id: '#/properties/businessNumber'
+                    type: string
+                    title: The Businessnumber Schema
+                    default: ''
+                    example:
+                      - CP0001847
+                    pattern: '^(.*)$'
+                  contacts:
+                    type: array
+                    title: The Contacts Schema
+                    items:
+                      title: contact
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          title: Email
+                          default: ''
+                          example:
+                            - abc123@mail.com
+                          pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                        phoneExtension:
+                          type: string
+                          title: Phone Extension
+                          default: ''
+                          example:
+                            - '123'
+                          pattern: '^(.*)$'
+                        phone:
+                          type: string
+                          title: Phone
+                          default: ''
+                          example:
+                            - 111-222-3333
+                          pattern: '^(.*)$'
+                        deliveryInstructions:
+                          type: string
+                          title: Delivery Instructions
+                          default: ''
+                          example:
+                            - Ring buzzer 123
+                          pattern: '^(.*)$'
+                        postalCode:
+                          #$id: '#/properties/postal_code'
+                          type: string
+                          title: Postal Code
+                          default: ''
+                          example:
+                            - V1A 1A1
+                          pattern: '^(.*)$'
+                        country:
+                          type: string
+                          title: Country
+                          default: ''
+                          example:
+                            - CA
+                          pattern: '^(.*)$'
+                        region:
+                          #$id: '#/properties/region'
+                          type: string
+                          title: Region
+                          default: ''
+                          example:
+                            - British Columbia
+                          pattern: '^(.*)$'
+                        city:
+                          type: string
+                          title: City
+                          default: ''
+                          example:
+                            - Victoria
+                          pattern: '^(.*)$'
+                        streetAdditional:
+                          type: string
+                          title: Street Additional
+                          default: ''
+                          example:
+                            - Unit 1
+                          pattern: '^(.*)$'
+                        street:
+                          type: string
+                          title: Street
+                          default: ''
+                          example:
+                            - 123 Roundabout Lane
+                          pattern: '^(.*)$'
+                  corpType:
+                    #$id: '#/properties/corpType'
+                    type: string
+                    title: The Corptype Schema
+                    default: ''
+                    example:
+                      - CP
+                    pattern: '^(.*)$'
+                  created:
+                    #$id: '#/properties/created'
+                    type: string
+                    title: The Created Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T11:11:31.303521+00:00'
+                    pattern: '^(.*)$'
+                  modified:
+                    #$id: '#/properties/modified'
+                    type: string
+                    title: The Modified Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T11:14:06.560862+00:00'
+                    pattern: '^(.*)$'
+                  modifiedBy:
+                    #$id: '#/properties/modifiedBy'
+                    type: string
+                    title: The Modifiedby Schema
+                    default: ''
+                    example:
+                      - sbc-auth admin
+                    pattern: '^(.*)$'
+                  name:
+                    #$id: '#/properties/name'
+                    type: string
+                    title: The Name Schema
+                    default: ''
+                    example:
+                      - Business
+                    pattern: '^(.*)$'
+                  passCodeClaimed:
+                    #$id: '#/properties/passCodeClaimed'
+                    type: boolean
+                    title: The Passcodeclaimed Schema
+                    default: false
+                    example:
+                      - false
+                required:
+                  - businessIdentifier
+                  - businessNumber
+                  - contacts
+                  - corpType
+                  - created
+                  - modified
+                  - modifiedBy
+                  - name
+                  - passCodeClaimed
+                x-example:
+                  CP0001578:
+                    businessIdentifier: CP0001578
+                    businessNumber: CP0001847
+                    contacts:
+                      - created: '2020-01-09T11:11:41.353569+00:00'
+                        email: saravanpa@gmail.com
+                        modified: '2020-01-09T11:11:41.353578+00:00'
+                        phone: '1111'
+                        phoneExtension: '11111'
+                    corpType: CP
+                    created: '2020-01-09T11:11:31.303521+00:00'
+                    modified: '2020-01-09T11:14:06.560862+00:00'
+                    modifiedBy: sbc-auth admin
+                    name: Business
+                    passCodeClaimed: false
+              example: {}
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+      summary: Add the business contact for the Entity identified by the provided id
+      operationId: post_contact_resource
+      tags:
+        - entities
+      description: Add a new business contact for the Entity identified by the provided id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: contact
+              type: object
+              properties:
+                email:
+                  type: string
+                  title: Email
+                  default: ''
+                  example:
+                    - abc123@mail.com
+                  pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                phoneExtension:
+                  type: string
+                  title: Phone Extension
+                  default: ''
+                  example:
+                    - '123'
+                  pattern: '^(.*)$'
+                phone:
+                  type: string
+                  title: Phone
+                  default: ''
+                  example:
+                    - 111-222-3333
+                  pattern: '^(.*)$'
+                deliveryInstructions:
+                  type: string
+                  title: Delivery Instructions
+                  default: ''
+                  example:
+                    - Ring buzzer 123
+                  pattern: '^(.*)$'
+                postalCode:
+                  #$id: '#/properties/postal_code'
+                  type: string
+                  title: Postal Code
+                  default: ''
+                  example:
+                    - V1A 1A1
+                  pattern: '^(.*)$'
+                country:
+                  type: string
+                  title: Country
+                  default: ''
+                  example:
+                    - CA
+                  pattern: '^(.*)$'
+                region:
+                  #$id: '#/properties/region'
+                  type: string
+                  title: Region
+                  default: ''
+                  example:
+                    - British Columbia
+                  pattern: '^(.*)$'
+                city:
+                  type: string
+                  title: City
+                  default: ''
+                  example:
+                    - Victoria
+                  pattern: '^(.*)$'
+                streetAdditional:
+                  type: string
+                  title: Street Additional
+                  default: ''
+                  example:
+                    - Unit 1
+                  pattern: '^(.*)$'
+                street:
+                  type: string
+                  title: Street
+                  default: ''
+                  example:
+                    - 123 Roundabout Lane
+                  pattern: '^(.*)$'
+          application/xml:
+            schema:
+              title: contact
+              type: object
+              properties:
+                email:
+                  type: string
+                  title: Email
+                  default: ''
+                  example:
+                    - abc123@mail.com
+                  pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                phoneExtension:
+                  type: string
+                  title: Phone Extension
+                  default: ''
+                  example:
+                    - '123'
+                  pattern: '^(.*)$'
+                phone:
+                  type: string
+                  title: Phone
+                  default: ''
+                  example:
+                    - 111-222-3333
+                  pattern: '^(.*)$'
+                deliveryInstructions:
+                  type: string
+                  title: Delivery Instructions
+                  default: ''
+                  example:
+                    - Ring buzzer 123
+                  pattern: '^(.*)$'
+                postalCode:
+                  #$id: '#/properties/postal_code'
+                  type: string
+                  title: Postal Code
+                  default: ''
+                  example:
+                    - V1A 1A1
+                  pattern: '^(.*)$'
+                country:
+                  type: string
+                  title: Country
+                  default: ''
+                  example:
+                    - CA
+                  pattern: '^(.*)$'
+                region:
+                  #$id: '#/properties/region'
+                  type: string
+                  title: Region
+                  default: ''
+                  example:
+                    - British Columbia
+                  pattern: '^(.*)$'
+                city:
+                  type: string
+                  title: City
+                  default: ''
+                  example:
+                    - Victoria
+                  pattern: '^(.*)$'
+                streetAdditional:
+                  type: string
+                  title: Street Additional
+                  default: ''
+                  example:
+                    - Unit 1
+                  pattern: '^(.*)$'
+                street:
+                  type: string
+                  title: Street
+                  default: ''
+                  example:
+                    - 123 Roundabout Lane
+                  pattern: '^(.*)$'
+        description: ''
+    delete:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                title: entity
+                type: object
+                properties:
+                  businessIdentifier:
+                    #$id: '#/properties/businessIdentifier'
+                    type: string
+                    title: The Businessidentifier Schema
+                    default: ''
+                    example:
+                      - CP0001578
+                    pattern: '^(.*)$'
+                  businessNumber:
+                    #$id: '#/properties/businessNumber'
+                    type: string
+                    title: The Businessnumber Schema
+                    default: ''
+                    example:
+                      - CP0001847
+                    pattern: '^(.*)$'
+                  contacts:
+                    type: array
+                    title: The Contacts Schema
+                    items:
+                      title: contact
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          title: Email
+                          default: ''
+                          example:
+                            - abc123@mail.com
+                          pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                        phoneExtension:
+                          type: string
+                          title: Phone Extension
+                          default: ''
+                          example:
+                            - '123'
+                          pattern: '^(.*)$'
+                        phone:
+                          type: string
+                          title: Phone
+                          default: ''
+                          example:
+                            - 111-222-3333
+                          pattern: '^(.*)$'
+                        deliveryInstructions:
+                          type: string
+                          title: Delivery Instructions
+                          default: ''
+                          example:
+                            - Ring buzzer 123
+                          pattern: '^(.*)$'
+                        postalCode:
+                          #$id: '#/properties/postal_code'
+                          type: string
+                          title: Postal Code
+                          default: ''
+                          example:
+                            - V1A 1A1
+                          pattern: '^(.*)$'
+                        country:
+                          type: string
+                          title: Country
+                          default: ''
+                          example:
+                            - CA
+                          pattern: '^(.*)$'
+                        region:
+                          #$id: '#/properties/region'
+                          type: string
+                          title: Region
+                          default: ''
+                          example:
+                            - British Columbia
+                          pattern: '^(.*)$'
+                        city:
+                          type: string
+                          title: City
+                          default: ''
+                          example:
+                            - Victoria
+                          pattern: '^(.*)$'
+                        streetAdditional:
+                          type: string
+                          title: Street Additional
+                          default: ''
+                          example:
+                            - Unit 1
+                          pattern: '^(.*)$'
+                        street:
+                          type: string
+                          title: Street
+                          default: ''
+                          example:
+                            - 123 Roundabout Lane
+                          pattern: '^(.*)$'
+                  corpType:
+                    #$id: '#/properties/corpType'
+                    type: string
+                    title: The Corptype Schema
+                    default: ''
+                    example:
+                      - CP
+                    pattern: '^(.*)$'
+                  created:
+                    #$id: '#/properties/created'
+                    type: string
+                    title: The Created Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T11:11:31.303521+00:00'
+                    pattern: '^(.*)$'
+                  modified:
+                    #$id: '#/properties/modified'
+                    type: string
+                    title: The Modified Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T11:14:06.560862+00:00'
+                    pattern: '^(.*)$'
+                  modifiedBy:
+                    #$id: '#/properties/modifiedBy'
+                    type: string
+                    title: The Modifiedby Schema
+                    default: ''
+                    example:
+                      - sbc-auth admin
+                    pattern: '^(.*)$'
+                  name:
+                    #$id: '#/properties/name'
+                    type: string
+                    title: The Name Schema
+                    default: ''
+                    example:
+                      - Business
+                    pattern: '^(.*)$'
+                  passCodeClaimed:
+                    #$id: '#/properties/passCodeClaimed'
+                    type: boolean
+                    title: The Passcodeclaimed Schema
+                    default: false
+                    example:
+                      - false
+                required:
+                  - businessIdentifier
+                  - businessNumber
+                  - contacts
+                  - corpType
+                  - created
+                  - modified
+                  - modifiedBy
+                  - name
+                  - passCodeClaimed
+                x-example:
+                  CP0001578:
+                    businessIdentifier: CP0001578
+                    businessNumber: CP0001847
+                    contacts:
+                      - created: '2020-01-09T11:11:41.353569+00:00'
+                        email: saravanpa@gmail.com
+                        modified: '2020-01-09T11:11:41.353578+00:00'
+                        phone: '1111'
+                        phoneExtension: '11111'
+                    corpType: CP
+                    created: '2020-01-09T11:11:31.303521+00:00'
+                    modified: '2020-01-09T11:14:06.560862+00:00'
+                    modifiedBy: sbc-auth admin
+                    name: Business
+                    passCodeClaimed: false
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      summary: Delete the business contact for the Entity identified by the provided id
+      operationId: delete_contact_resource
+      tags:
+        - entities
+      description: Delete the business contact for the Entity identified by the provided id
   '/entities/{businessIdentifier}/authorizations':
     get:
       summary: Get authorizations for the entity
@@ -203,13 +3318,743 @@ paths:
             value: CP0001238
           expanded_premium:
             value: CP0002000
+  '/accounts/{account_id}/products/{product_code}/authorizations':
+    get:
+      summary: Get authorizations for the account per product
+      operationId: getAccAuthorizations
+      tags:
+        - authorization
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+              examples:
+                example1:
+                  value: 'application:prod'
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+              examples:
+                example1:
+                  value: '*'
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+              examples:
+                example1:
+                  value: 'GET, OPTIONS'
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+              examples:
+                example1:
+                  value: 'Content-Type, api_key, Authorization'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/authorizations'
+              examples:
+                example1:
+                  value:
+                    roles:
+                      - search
+                      - edit
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      description: Get authorizations endpoint for the entity by business indentifier
+    parameters:
+      - schema:
+          type: string
+        name: account_id
+        in: path
+        required: true
+        description: Corp Num/Incorporation Number of the entity
+        example:
+          example1:
+            value: 1234
+      - schema:
+          type: string
+        name: product_code
+        in: path
+        required: true
+        description: Corp Num/Incorporation Number of the entity
+        example:
+          example1:
+            value: PPR
+  '/entities/{business_identifier}':
+    parameters:
+      - name: business_identifier
+        in: path
+        required: true
+        schema:
+         type: string
+    get:
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+          content:
+            application/json:
+              schema:
+                title: entity
+                type: object
+                properties:
+                  businessIdentifier:
+                    #$id: '#/properties/businessIdentifier'
+                    type: string
+                    title: The Businessidentifier Schema
+                    default: ''
+                    example:
+                      - CP0001578
+                    pattern: '^(.*)$'
+                  businessNumber:
+                    #$id: '#/properties/businessNumber'
+                    type: string
+                    title: The Businessnumber Schema
+                    default: ''
+                    example:
+                      - CP0001847
+                    pattern: '^(.*)$'
+                  contacts:
+                    type: array
+                    title: The Contacts Schema
+                    items:
+                      title: contact
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          title: Email
+                          default: ''
+                          example:
+                            - abc123@mail.com
+                          pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                        phoneExtension:
+                          type: string
+                          title: Phone Extension
+                          default: ''
+                          example:
+                            - '123'
+                          pattern: '^(.*)$'
+                        phone:
+                          type: string
+                          title: Phone
+                          default: ''
+                          example:
+                            - 111-222-3333
+                          pattern: '^(.*)$'
+                        deliveryInstructions:
+                          type: string
+                          title: Delivery Instructions
+                          default: ''
+                          example:
+                            - Ring buzzer 123
+                          pattern: '^(.*)$'
+                        postalCode:
+                          #$id: '#/properties/postal_code'
+                          type: string
+                          title: Postal Code
+                          default: ''
+                          example:
+                            - V1A 1A1
+                          pattern: '^(.*)$'
+                        country:
+                          type: string
+                          title: Country
+                          default: ''
+                          example:
+                            - CA
+                          pattern: '^(.*)$'
+                        region:
+                          #$id: '#/properties/region'
+                          type: string
+                          title: Region
+                          default: ''
+                          example:
+                            - British Columbia
+                          pattern: '^(.*)$'
+                        city:
+                          type: string
+                          title: City
+                          default: ''
+                          example:
+                            - Victoria
+                          pattern: '^(.*)$'
+                        streetAdditional:
+                          type: string
+                          title: Street Additional
+                          default: ''
+                          example:
+                            - Unit 1
+                          pattern: '^(.*)$'
+                        street:
+                          type: string
+                          title: Street
+                          default: ''
+                          example:
+                            - 123 Roundabout Lane
+                          pattern: '^(.*)$'
+                  corpType:
+                    #$id: '#/properties/corpType'
+                    type: string
+                    title: The Corptype Schema
+                    default: ''
+                    example:
+                      - CP
+                    pattern: '^(.*)$'
+                  created:
+                    #$id: '#/properties/created'
+                    type: string
+                    title: The Created Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T11:11:31.303521+00:00'
+                    pattern: '^(.*)$'
+                  modified:
+                    #$id: '#/properties/modified'
+                    type: string
+                    title: The Modified Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T11:14:06.560862+00:00'
+                    pattern: '^(.*)$'
+                  modifiedBy:
+                    #$id: '#/properties/modifiedBy'
+                    type: string
+                    title: The Modifiedby Schema
+                    default: ''
+                    example:
+                      - sbc-auth admin
+                    pattern: '^(.*)$'
+                  name:
+                    #$id: '#/properties/name'
+                    type: string
+                    title: The Name Schema
+                    default: ''
+                    example:
+                      - Business
+                    pattern: '^(.*)$'
+                  passCodeClaimed:
+                    #$id: '#/properties/passCodeClaimed'
+                    type: boolean
+                    title: The Passcodeclaimed Schema
+                    default: false
+                    example:
+                      - false
+                required:
+                  - businessIdentifier
+                  - businessNumber
+                  - contacts
+                  - corpType
+                  - created
+                  - modified
+                  - modifiedBy
+                  - name
+                  - passCodeClaimed
+                x-example:
+                  CP0001578:
+                    businessIdentifier: CP0001578
+                    businessNumber: CP0001847
+                    contacts:
+                      - created: '2020-01-09T11:11:41.353569+00:00'
+                        email: saravanpa@gmail.com
+                        modified: '2020-01-09T11:11:41.353578+00:00'
+                        phone: '1111'
+                        phoneExtension: '11111'
+                    corpType: CP
+                    created: '2020-01-09T11:11:31.303521+00:00'
+                    modified: '2020-01-09T11:14:06.560862+00:00'
+                    modifiedBy: sbc-auth admin
+                    name: Business
+                    passCodeClaimed: false
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      operationId: get_entity_resource
+      tags:
+        - entities
+      description: Get the entity for the provided business identifier
+      summary: Get the entity for the provided business identifier
+  /entities:
+    post:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                title: entity
+                type: object
+                properties:
+                  businessIdentifier:
+                    #$id: '#/properties/businessIdentifier'
+                    type: string
+                    title: The Businessidentifier Schema
+                    default: ''
+                    example:
+                      - CP0001578
+                    pattern: '^(.*)$'
+                  businessNumber:
+                    #$id: '#/properties/businessNumber'
+                    type: string
+                    title: The Businessnumber Schema
+                    default: ''
+                    example:
+                      - CP0001847
+                    pattern: '^(.*)$'
+                  contacts:
+                    type: array
+                    title: The Contacts Schema
+                    items:
+                      title: contact
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          title: Email
+                          default: ''
+                          example:
+                            - abc123@mail.com
+                          pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                        phoneExtension:
+                          type: string
+                          title: Phone Extension
+                          default: ''
+                          example:
+                            - '123'
+                          pattern: '^(.*)$'
+                        phone:
+                          type: string
+                          title: Phone
+                          default: ''
+                          example:
+                            - 111-222-3333
+                          pattern: '^(.*)$'
+                        deliveryInstructions:
+                          type: string
+                          title: Delivery Instructions
+                          default: ''
+                          example:
+                            - Ring buzzer 123
+                          pattern: '^(.*)$'
+                        postalCode:
+                          #$id: '#/properties/postal_code'
+                          type: string
+                          title: Postal Code
+                          default: ''
+                          example:
+                            - V1A 1A1
+                          pattern: '^(.*)$'
+                        country:
+                          type: string
+                          title: Country
+                          default: ''
+                          example:
+                            - CA
+                          pattern: '^(.*)$'
+                        region:
+                          #$id: '#/properties/region'
+                          type: string
+                          title: Region
+                          default: ''
+                          example:
+                            - British Columbia
+                          pattern: '^(.*)$'
+                        city:
+                          type: string
+                          title: City
+                          default: ''
+                          example:
+                            - Victoria
+                          pattern: '^(.*)$'
+                        streetAdditional:
+                          type: string
+                          title: Street Additional
+                          default: ''
+                          example:
+                            - Unit 1
+                          pattern: '^(.*)$'
+                        street:
+                          type: string
+                          title: Street
+                          default: ''
+                          example:
+                            - 123 Roundabout Lane
+                          pattern: '^(.*)$'
+                  corpType:
+                    #$id: '#/properties/corpType'
+                    type: string
+                    title: The Corptype Schema
+                    default: ''
+                    example:
+                      - CP
+                    pattern: '^(.*)$'
+                  created:
+                    #$id: '#/properties/created'
+                    type: string
+                    title: The Created Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T11:11:31.303521+00:00'
+                    pattern: '^(.*)$'
+                  modified:
+                    #$id: '#/properties/modified'
+                    type: string
+                    title: The Modified Schema
+                    default: ''
+                    example:
+                      - '2020-01-09T11:14:06.560862+00:00'
+                    pattern: '^(.*)$'
+                  modifiedBy:
+                    #$id: '#/properties/modifiedBy'
+                    type: string
+                    title: The Modifiedby Schema
+                    default: ''
+                    example:
+                      - sbc-auth admin
+                    pattern: '^(.*)$'
+                  name:
+                    #$id: '#/properties/name'
+                    type: string
+                    title: The Name Schema
+                    default: ''
+                    example:
+                      - Business
+                    pattern: '^(.*)$'
+                  passCodeClaimed:
+                    #$id: '#/properties/passCodeClaimed'
+                    type: boolean
+                    title: The Passcodeclaimed Schema
+                    default: false
+                    example:
+                      - false
+                required:
+                  - businessIdentifier
+                  - businessNumber
+                  - contacts
+                  - corpType
+                  - created
+                  - modified
+                  - modifiedBy
+                  - name
+                  - passCodeClaimed
+                x-example:
+                  CP0001578:
+                    businessIdentifier: CP0001578
+                    businessNumber: CP0001847
+                    contacts:
+                      - created: '2020-01-09T11:11:41.353569+00:00'
+                        email: saravanpa@gmail.com
+                        modified: '2020-01-09T11:11:41.353578+00:00'
+                        phone: '1111'
+                        phoneExtension: '11111'
+                    corpType: CP
+                    created: '2020-01-09T11:11:31.303521+00:00'
+                    modified: '2020-01-09T11:14:06.560862+00:00'
+                    modifiedBy: sbc-auth admin
+                    name: Business
+                    passCodeClaimed: false
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      operationId: post_entity_resources
+      tags:
+        - entities
+      requestBody:
+        content:
+          application/json:
+            schema:
+              title: entityRequest
+              type: object
+              properties:
+                businessIdentifier:
+                  #$id: '#/properties/businessIdentifier'
+                  type: string
+                  title: Business Identifier
+                  default: ''
+                  example:
+                    - CP1234567
+                  pattern: '^(.*)$'
+                businessNumber:
+                  #$id: '#/properties/businessNumber'
+                  type: string
+                  title: Business Number
+                  default: ''
+                  example:
+                    - 791861073BC0001
+                  pattern: '^(.*)$'
+                name:
+                  #$id: '#/properties/name'
+                  type: string
+                  title: Business Name
+                  default: ''
+                  example:
+                    - 'Foobar, Inc.'
+                  pattern: '^(.*)$'
+                passCode:
+                  #$id: '#/properties/passCode'
+                  type: string
+                  title: Passcode
+                  default: ''
+                  example:
+                    - '12345'
+                  pattern: '^(.*)$'
+                corpTypeCode:
+                  #$id: '#/properties/corpTypeCode'
+                  type: string
+                  title: corpTypeCode
+                  default: ''
+                  example:
+                    - '12345'
+                  pattern: '^(.*)$'
+              required:
+                - businessIdentifier
+        description: ''
+      summary: Create a new entity for the provided information
+      description: Create a new entity for the provided information
+  '/api/v1/documents/{document_type}':
+    parameters:
+      - name: document_type
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                title: document
+                type: object
+                properties:
+                  content:
+                    type: string
+                  type:
+                    type: string
+                  version_id:
+                    type: string
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      operationId: get_documents
+      tags:
+        - documents
+      description: Endpoint for get the latest terms of use document.
+      summary: Get document by type
+  '/api/v1/codes/{code_type}':
+    parameters:
+      - name: code_type
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                title: codes
+                type: object
+                x-example: {}
+                properties:
+                  code:
+                    type: string
+                  desc:
+                    type: string
+                  defaut:
+                    type: string
+              example:
+                membership_type:
+                  value:
+                    - code: MEMBER
+                      default: true
+                      desc: Member of the organization
+                      icon: mdi-account
+                      label: 'Can add businesses, and file for a business.'
+                    - code: ADMIN
+                      default: false
+                      desc: Admin for the organization
+                      icon: mdi-settings
+                      label: 'Can add/remove team members, add businesses, and file for a business.'
+                    - code: OWNER
+                      default: false
+                      desc: Owner (super-admin) of the organization
+                      icon: mdi-shield-key
+                      label: 'Can add/remove team members and businesses, and file for a business.'
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+            application/xml:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Identifier representing the type of error that occurred.
+                  message:
+                    type: string
+                    description: Description of the error.
+                description: Contains details of an error that was encountered.
+      summary: "Return the code table values by giving code's name"
+      operationId: get_codes
+      tags:
+        - codes
+      description: Endpoints for get codes from database
+servers:
+  - url: 'https://auth-api-dev.pathfinder.gov.bc.ca/'
+    description: Dev
+tags:
+  - name: Meta
+    description: Metadata
+  - name: token
+    description: Authentication System - Passcode login
+  - name: users
+    description: Endpoints for user profile management
+  - name: logout
+    description: Authentication System - Logout User
+  - name: entities
+    description: Entities
+  - name: orgs
+    description: Endpoints for organization management
+  - name: invitations
+    description: Endpoints for invitations management
+  - name: documents
+    description: Endpoints for document management
+  - name: codes
+    description: Endpoints for get codes from database
 
 components:
   schemas:
     codes:
       title: codes
       type: object
-      x-x-example: {}
+      x-example: {}
       properties:
         code:
           type: string
@@ -245,28 +4090,28 @@ components:
           type: string
           title: Email
           default: ''
-          x-x-example:
+          example:
             - abc123@mail.com
           pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
         phoneExtension:
           type: string
           title: Phone Extension
           default: ''
-          x-x-example:
+          example:
             - '123'
           pattern: '^(.*)$'
         phone:
           type: string
           title: Phone
           default: ''
-          x-x-example:
+          example:
             - 111-222-3333
           pattern: '^(.*)$'
         deliveryInstructions:
           type: string
           title: Delivery Instructions
           default: ''
-          x-x-example:
+          example:
             - Ring buzzer 123
           pattern: '^(.*)$'
         postalCode:
@@ -274,14 +4119,14 @@ components:
           type: string
           title: Postal Code
           default: ''
-          x-x-example:
+          example:
             - V1A 1A1
           pattern: '^(.*)$'
         country:
           type: string
           title: Country
           default: ''
-          x-x-example:
+          example:
             - CA
           pattern: '^(.*)$'
         region:
@@ -289,28 +4134,28 @@ components:
           type: string
           title: Region
           default: ''
-          x-x-example:
+          example:
             - British Columbia
           pattern: '^(.*)$'
         city:
           type: string
           title: City
           default: ''
-          x-x-example:
+          example:
             - Victoria
           pattern: '^(.*)$'
         streetAdditional:
           type: string
           title: Street Additional
           default: ''
-          x-x-example:
+          example:
             - Unit 1
           pattern: '^(.*)$'
         street:
           type: string
           title: Street
           default: ''
-          x-x-example:
+          example:
             - 123 Roundabout Lane
           pattern: '^(.*)$'
     entity:
@@ -322,7 +4167,7 @@ components:
           type: string
           title: The Businessidentifier Schema
           default: ''
-          x-x-example:
+          example:
             - CP0001578
           pattern: '^(.*)$'
         businessNumber:
@@ -330,7 +4175,7 @@ components:
           type: string
           title: The Businessnumber Schema
           default: ''
-          x-x-example:
+          example:
             - CP0001847
           pattern: '^(.*)$'
         contacts:
@@ -344,28 +4189,28 @@ components:
                 type: string
                 title: Email
                 default: ''
-                x-x-example:
+                example:
                   - abc123@mail.com
                 pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
               phoneExtension:
                 type: string
                 title: Phone Extension
                 default: ''
-                x-x-example:
+                example:
                   - '123'
                 pattern: '^(.*)$'
               phone:
                 type: string
                 title: Phone
                 default: ''
-                x-x-example:
+                example:
                   - 111-222-3333
                 pattern: '^(.*)$'
               deliveryInstructions:
                 type: string
                 title: Delivery Instructions
                 default: ''
-                x-x-example:
+                example:
                   - Ring buzzer 123
                 pattern: '^(.*)$'
               postalCode:
@@ -373,14 +4218,14 @@ components:
                 type: string
                 title: Postal Code
                 default: ''
-                x-x-example:
+                example:
                   - V1A 1A1
                 pattern: '^(.*)$'
               country:
                 type: string
                 title: Country
                 default: ''
-                x-x-example:
+                example:
                   - CA
                 pattern: '^(.*)$'
               region:
@@ -388,28 +4233,28 @@ components:
                 type: string
                 title: Region
                 default: ''
-                x-x-example:
+                example:
                   - British Columbia
                 pattern: '^(.*)$'
               city:
                 type: string
                 title: City
                 default: ''
-                x-x-example:
+                example:
                   - Victoria
                 pattern: '^(.*)$'
               streetAdditional:
                 type: string
                 title: Street Additional
                 default: ''
-                x-x-example:
+                example:
                   - Unit 1
                 pattern: '^(.*)$'
               street:
                 type: string
                 title: Street
                 default: ''
-                x-x-example:
+                example:
                   - 123 Roundabout Lane
                 pattern: '^(.*)$'
         corpType:
@@ -417,7 +4262,7 @@ components:
           type: string
           title: The Corptype Schema
           default: ''
-          x-x-example:
+          example:
             - CP
           pattern: '^(.*)$'
         created:
@@ -425,7 +4270,7 @@ components:
           type: string
           title: The Created Schema
           default: ''
-          x-x-example:
+          example:
             - '2020-01-09T11:11:31.303521+00:00'
           pattern: '^(.*)$'
         modified:
@@ -433,7 +4278,7 @@ components:
           type: string
           title: The Modified Schema
           default: ''
-          x-x-example:
+          example:
             - '2020-01-09T11:14:06.560862+00:00'
           pattern: '^(.*)$'
         modifiedBy:
@@ -441,7 +4286,7 @@ components:
           type: string
           title: The Modifiedby Schema
           default: ''
-          x-x-example:
+          example:
             - sbc-auth admin
           pattern: '^(.*)$'
         name:
@@ -449,7 +4294,7 @@ components:
           type: string
           title: The Name Schema
           default: ''
-          x-x-example:
+          example:
             - Business
           pattern: '^(.*)$'
         passCodeClaimed:
@@ -457,7 +4302,7 @@ components:
           type: boolean
           title: The Passcodeclaimed Schema
           default: false
-          x-x-example:
+          example:
             - false
       required:
         - businessIdentifier
@@ -469,7 +4314,7 @@ components:
         - modifiedBy
         - name
         - passCodeClaimed
-      x-x-example:
+      x-example:
         CP0001578:
           businessIdentifier: CP0001578
           businessNumber: CP0001847
@@ -494,7 +4339,7 @@ components:
           type: string
           title: Business Identifier
           default: ''
-          x-x-example:
+          example:
             - CP1234567
           pattern: '^(.*)$'
         businessNumber:
@@ -502,7 +4347,7 @@ components:
           type: string
           title: Business Number
           default: ''
-          x-x-example:
+          example:
             - 791861073BC0001
           pattern: '^(.*)$'
         name:
@@ -510,7 +4355,7 @@ components:
           type: string
           title: Business Name
           default: ''
-          x-x-example:
+          example:
             - 'Foobar, Inc.'
           pattern: '^(.*)$'
         passCode:
@@ -518,7 +4363,7 @@ components:
           type: string
           title: Passcode
           default: ''
-          x-x-example:
+          example:
             - '12345'
           pattern: '^(.*)$'
         corpTypeCode:
@@ -526,7 +4371,7 @@ components:
           type: string
           title: corpTypeCode
           default: ''
-          x-x-example:
+          example:
             - '12345'
           pattern: '^(.*)$'
       required:
@@ -539,7 +4384,7 @@ components:
           type: string
           title: Business Identifier
           default: ''
-          x-x-example:
+          example:
             - CP1234567
           pattern: '^(.*)$'
         passCode:
@@ -547,7 +4392,7 @@ components:
           type: string
           title: Passcode
           default: ''
-          x-x-example:
+          example:
             - '12345'
           pattern: '^(.*)$'
       required:
@@ -572,7 +4417,7 @@ components:
             type: string
             title: The Items Schema
             default: ''
-            x-x-example:
+            example:
               - edit
               - view
             pattern: '^(.*)$'
@@ -585,7 +4430,7 @@ components:
           type: string
           title: Organization Name
           default: ''
-          x-x-example:
+          example:
             - Foobar Inc.
           pattern: "^[^\\s]+(\\s+[^\\s]+)*$"
         typeCode:
@@ -593,7 +4438,7 @@ components:
           type: string
           title: Organizational Type
           default: IMPLICIT
-          x-x-example:
+          example:
             - IMPLICIT
             - EXPLICIT
           pattern: '^(.*)$'
@@ -616,7 +4461,7 @@ components:
           type: string
           title: The Created Schema
           default: ''
-          x-x-example:
+          example:
             - '2020-01-09T11:13:59.293603+00:00'
           pattern: '^(.*)$'
         email:
@@ -624,7 +4469,7 @@ components:
           type: string
           title: The Email Schema
           default: ''
-          x-x-example:
+          example:
             - service-account-sbc-auth-admin@placeholder.org
           pattern: '^(.*)$'
         firstname:
@@ -632,7 +4477,7 @@ components:
           type: string
           title: The Firstname Schema
           default: ''
-          x-x-example:
+          example:
             - sbc-auth
           pattern: '^(.*)$'
         keycloakGuid:
@@ -640,7 +4485,7 @@ components:
           type: string
           title: The Keycloakguid Schema
           default: ''
-          x-x-example:
+          example:
             - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
           pattern: '^(.*)$'
         lastname:
@@ -648,7 +4493,7 @@ components:
           type: string
           title: The Lastname Schema
           default: ''
-          x-x-example:
+          example:
             - admin
           pattern: '^(.*)$'
         modified:
@@ -656,7 +4501,7 @@ components:
           type: string
           title: The Modified Schema
           default: ''
-          x-x-example:
+          example:
             - '2020-01-09T11:13:59.295264+00:00'
           pattern: '^(.*)$'
         userStatus:
@@ -664,7 +4509,7 @@ components:
           type: integer
           title: The Userstatus Schema
           default: 0
-          x-x-example:
+          example:
             - 1
         userTerms:
           title: userTerms
@@ -679,7 +4524,7 @@ components:
           type: string
           title: The Username Schema
           default: ''
-          x-x-example:
+          example:
             - service-account-sbc-auth-admin
           pattern: '^(.*)$'
       required:
@@ -705,7 +4550,7 @@ components:
               type: string
               title: The Created Schema
               default: ''
-              x-example:
+              example:
                 - '2020-01-09T11:13:59.293603+00:00'
               pattern: '^(.*)$'
             email:
@@ -713,7 +4558,7 @@ components:
               type: string
               title: The Email Schema
               default: ''
-              x-example:
+              example:
                 - service-account-sbc-auth-admin@placeholder.org
               pattern: '^(.*)$'
             firstname:
@@ -721,7 +4566,7 @@ components:
               type: string
               title: The Firstname Schema
               default: ''
-              x-example:
+              example:
                 - sbc-auth
               pattern: '^(.*)$'
             keycloakGuid:
@@ -729,7 +4574,7 @@ components:
               type: string
               title: The Keycloakguid Schema
               default: ''
-              x-example:
+              example:
                 - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
               pattern: '^(.*)$'
             lastname:
@@ -737,7 +4582,7 @@ components:
               type: string
               title: The Lastname Schema
               default: ''
-              x-example:
+              example:
                 - admin
               pattern: '^(.*)$'
             modified:
@@ -745,7 +4590,7 @@ components:
               type: string
               title: The Modified Schema
               default: ''
-              x-example:
+              example:
                 - '2020-01-09T11:13:59.295264+00:00'
               pattern: '^(.*)$'
             userStatus:
@@ -753,7 +4598,7 @@ components:
               type: integer
               title: The Userstatus Schema
               default: 0
-              x-example:
+              example:
                 - 1
             userTerms:
               title: userTerms
@@ -768,7 +4613,7 @@ components:
               type: string
               title: The Username Schema
               default: ''
-              x-example:
+              example:
                 - service-account-sbc-auth-admin
               pattern: '^(.*)$'
           required:
@@ -790,7 +4635,7 @@ components:
               type: string
               title: The Created Schema
               default: ''
-              x-example:
+              example:
                 - '2020-01-09T13:49:45.244134+00:00'
               pattern: '^(.*)$'
             created_by:
@@ -798,7 +4643,7 @@ components:
               type: string
               title: The Created_by Schema
               default: ''
-              x-example:
+              example:
                 - sbc-auth admin
               pattern: '^(.*)$'
             id:
@@ -806,14 +4651,14 @@ components:
               type: integer
               title: The Id Schema
               default: 0
-              x-example:
+              example:
                 - 103
             modified:
               #$id: '#/properties/modified'
               type: string
               title: The Modified Schema
               default: ''
-              x-example:
+              example:
                 - '2020-01-09T13:49:45.244148+00:00'
               pattern: '^(.*)$'
             name:
@@ -821,7 +4666,7 @@ components:
               type: string
               title: The Name Schema
               default: ''
-              x-example:
+              example:
                 - AOT
               pattern: '^(.*)$'
             orgType:
@@ -829,7 +4674,7 @@ components:
               type: string
               title: The Orgtype Schema
               default: ''
-              x-example:
+              example:
                 - IMPLICIT
               pattern: '^(.*)$'
             org_status:
@@ -837,7 +4682,7 @@ components:
               type: string
               title: The Org_status Schema
               default: ''
-              x-example:
+              example:
                 - ACTIVE
               pattern: '^(.*)$'
             preferred_payment:
@@ -845,7 +4690,7 @@ components:
               type: string
               title: The Preferred_payment Schema
               default: ''
-              x-example:
+              example:
                 - CC
               pattern: '^(.*)$'
             modified_by:
@@ -874,7 +4719,7 @@ components:
           type: string
           title: The Created Schema
           default: ''
-          x-example:
+          example:
             - '2020-01-09T13:49:45.244134+00:00'
           pattern: '^(.*)$'
         created_by:
@@ -882,7 +4727,7 @@ components:
           type: string
           title: The Created_by Schema
           default: ''
-          x-example:
+          example:
             - sbc-auth admin
           pattern: '^(.*)$'
         id:
@@ -890,14 +4735,14 @@ components:
           type: integer
           title: The Id Schema
           default: 0
-          x-example:
+          example:
             - 103
         modified:
           #$id: '#/properties/modified'
           type: string
           title: The Modified Schema
           default: ''
-          x-example:
+          example:
             - '2020-01-09T13:49:45.244148+00:00'
           pattern: '^(.*)$'
         name:
@@ -905,7 +4750,7 @@ components:
           type: string
           title: The Name Schema
           default: ''
-          x-example:
+          example:
             - AOT
           pattern: '^(.*)$'
         orgType:
@@ -913,7 +4758,7 @@ components:
           type: string
           title: The Orgtype Schema
           default: ''
-          x-example:
+          example:
             - IMPLICIT
           pattern: '^(.*)$'
         org_status:
@@ -921,7 +4766,7 @@ components:
           type: string
           title: The Org_status Schema
           default: ''
-          x-example:
+          example:
             - ACTIVE
           pattern: '^(.*)$'
         preferred_payment:
@@ -929,7 +4774,7 @@ components:
           type: string
           title: The Preferred_payment Schema
           default: ''
-          x-example:
+          example:
             - CC
           pattern: '^(.*)$'
         modified_by:
@@ -952,7 +4797,7 @@ components:
           type: string
           title: The Corp_type_code Schema
           default: ''
-          x-example:
+          example:
             - CP
           pattern: '^(.*)$'
         orgMembership:
@@ -960,7 +4805,7 @@ components:
           type: string
           title: The Orgmembership Schema
           default: ''
-          x-example:
+          example:
             - OWNER
           pattern: '^(.*)$'
         roles:
@@ -972,7 +4817,7 @@ components:
             type: string
             title: The Items Schema
             default: ''
-            x-example:
+            example:
               - edit
               - view
             pattern: '^(.*)$'
@@ -993,7 +4838,7 @@ components:
               type: string
               title: The Businessidentifier Schema
               default: ''
-              x-example:
+              example:
                 - CP0001578
               pattern: '^(.*)$'
             businessNumber:
@@ -1001,7 +4846,7 @@ components:
               type: string
               title: The Businessnumber Schema
               default: ''
-              x-example:
+              example:
                 - CP0001847
               pattern: '^(.*)$'
             contacts:
@@ -1015,28 +4860,28 @@ components:
                     type: string
                     title: Email
                     default: ''
-                    x-example:
+                    example:
                       - abc123@mail.com
                     pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
                   phoneExtension:
                     type: string
                     title: Phone Extension
                     default: ''
-                    x-example:
+                    example:
                       - '123'
                     pattern: '^(.*)$'
                   phone:
                     type: string
                     title: Phone
                     default: ''
-                    x-example:
+                    example:
                       - 111-222-3333
                     pattern: '^(.*)$'
                   deliveryInstructions:
                     type: string
                     title: Delivery Instructions
                     default: ''
-                    x-example:
+                    example:
                       - Ring buzzer 123
                     pattern: '^(.*)$'
                   postalCode:
@@ -1044,14 +4889,14 @@ components:
                     type: string
                     title: Postal Code
                     default: ''
-                    x-example:
+                    example:
                       - V1A 1A1
                     pattern: '^(.*)$'
                   country:
                     type: string
                     title: Country
                     default: ''
-                    x-example:
+                    example:
                       - CA
                     pattern: '^(.*)$'
                   region:
@@ -1059,28 +4904,28 @@ components:
                     type: string
                     title: Region
                     default: ''
-                    x-example:
+                    example:
                       - British Columbia
                     pattern: '^(.*)$'
                   city:
                     type: string
                     title: City
                     default: ''
-                    x-example:
+                    example:
                       - Victoria
                     pattern: '^(.*)$'
                   streetAdditional:
                     type: string
                     title: Street Additional
                     default: ''
-                    x-example:
+                    example:
                       - Unit 1
                     pattern: '^(.*)$'
                   street:
                     type: string
                     title: Street
                     default: ''
-                    x-example:
+                    example:
                       - 123 Roundabout Lane
                     pattern: '^(.*)$'
             corpType:
@@ -1088,7 +4933,7 @@ components:
               type: string
               title: The Corptype Schema
               default: ''
-              x-example:
+              example:
                 - CP
               pattern: '^(.*)$'
             created:
@@ -1096,7 +4941,7 @@ components:
               type: string
               title: The Created Schema
               default: ''
-              x-example:
+              example:
                 - '2020-01-09T11:11:31.303521+00:00'
               pattern: '^(.*)$'
             modified:
@@ -1104,7 +4949,7 @@ components:
               type: string
               title: The Modified Schema
               default: ''
-              x-example:
+              example:
                 - '2020-01-09T11:14:06.560862+00:00'
               pattern: '^(.*)$'
             modifiedBy:
@@ -1112,7 +4957,7 @@ components:
               type: string
               title: The Modifiedby Schema
               default: ''
-              x-example:
+              example:
                 - sbc-auth admin
               pattern: '^(.*)$'
             name:
@@ -1120,7 +4965,7 @@ components:
               type: string
               title: The Name Schema
               default: ''
-              x-example:
+              example:
                 - Business
               pattern: '^(.*)$'
             passCodeClaimed:
@@ -1128,7 +4973,7 @@ components:
               type: boolean
               title: The Passcodeclaimed Schema
               default: false
-              x-example:
+              example:
                 - false
           required:
             - businessIdentifier
@@ -1140,7 +4985,7 @@ components:
             - modifiedBy
             - name
             - passCodeClaimed
-          x-x-example:
+          x-example:
             CP0001578:
               businessIdentifier: CP0001578
               businessNumber: CP0001847
@@ -1175,7 +5020,7 @@ components:
               type: string
               title: The Created Schema
               default: ''
-              x-example:
+              example:
                 - '2020-01-09T13:49:45.244134+00:00'
               pattern: '^(.*)$'
             created_by:
@@ -1183,7 +5028,7 @@ components:
               type: string
               title: The Created_by Schema
               default: ''
-              x-example:
+              example:
                 - sbc-auth admin
               pattern: '^(.*)$'
             id:
@@ -1191,14 +5036,14 @@ components:
               type: integer
               title: The Id Schema
               default: 0
-              x-example:
+              example:
                 - 103
             modified:
               #$id: '#/properties/modified'
               type: string
               title: The Modified Schema
               default: ''
-              x-example:
+              example:
                 - '2020-01-09T13:49:45.244148+00:00'
               pattern: '^(.*)$'
             name:
@@ -1206,7 +5051,7 @@ components:
               type: string
               title: The Name Schema
               default: ''
-              x-example:
+              example:
                 - AOT
               pattern: '^(.*)$'
             orgType:
@@ -1214,7 +5059,7 @@ components:
               type: string
               title: The Orgtype Schema
               default: ''
-              x-example:
+              example:
                 - IMPLICIT
               pattern: '^(.*)$'
             org_status:
@@ -1222,7 +5067,7 @@ components:
               type: string
               title: The Org_status Schema
               default: ''
-              x-example:
+              example:
                 - ACTIVE
               pattern: '^(.*)$'
             preferred_payment:
@@ -1230,7 +5075,7 @@ components:
               type: string
               title: The Preferred_payment Schema
               default: ''
-              x-example:
+              example:
                 - CC
               pattern: '^(.*)$'
             modified_by:
@@ -1253,7 +5098,7 @@ components:
           type: string
           title: The Expireson Schema
           default: ''
-          x-example:
+          example:
             - '2020-01-16T13:55:05.960809+00:00'
           pattern: '^(.*)$'
         id:
@@ -1261,7 +5106,7 @@ components:
           type: integer
           title: The Id Schema
           default: 0
-          x-example:
+          example:
             - 30
         membership:
           type: array
@@ -1279,7 +5124,7 @@ components:
                     type: string
                     title: The Created Schema
                     default: ''
-                    x-example:
+                    example:
                       - '2020-01-09T11:13:59.293603+00:00'
                     pattern: '^(.*)$'
                   email:
@@ -1287,7 +5132,7 @@ components:
                     type: string
                     title: The Email Schema
                     default: ''
-                    x-example:
+                    example:
                       - service-account-sbc-auth-admin@placeholder.org
                     pattern: '^(.*)$'
                   firstname:
@@ -1295,7 +5140,7 @@ components:
                     type: string
                     title: The Firstname Schema
                     default: ''
-                    x-example:
+                    example:
                       - sbc-auth
                     pattern: '^(.*)$'
                   keycloakGuid:
@@ -1303,7 +5148,7 @@ components:
                     type: string
                     title: The Keycloakguid Schema
                     default: ''
-                    x-example:
+                    example:
                       - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
                     pattern: '^(.*)$'
                   lastname:
@@ -1311,7 +5156,7 @@ components:
                     type: string
                     title: The Lastname Schema
                     default: ''
-                    x-example:
+                    example:
                       - admin
                     pattern: '^(.*)$'
                   modified:
@@ -1319,7 +5164,7 @@ components:
                     type: string
                     title: The Modified Schema
                     default: ''
-                    x-example:
+                    example:
                       - '2020-01-09T11:13:59.295264+00:00'
                     pattern: '^(.*)$'
                   userStatus:
@@ -1327,7 +5172,7 @@ components:
                     type: integer
                     title: The Userstatus Schema
                     default: 0
-                    x-example:
+                    example:
                       - 1
                   userTerms:
                     title: userTerms
@@ -1342,7 +5187,7 @@ components:
                     type: string
                     title: The Username Schema
                     default: ''
-                    x-example:
+                    example:
                       - service-account-sbc-auth-admin
                     pattern: '^(.*)$'
                 required:
@@ -1364,7 +5209,7 @@ components:
                     type: string
                     title: The Created Schema
                     default: ''
-                    x-example:
+                    example:
                       - '2020-01-09T13:49:45.244134+00:00'
                     pattern: '^(.*)$'
                   created_by:
@@ -1372,7 +5217,7 @@ components:
                     type: string
                     title: The Created_by Schema
                     default: ''
-                    x-example:
+                    example:
                       - sbc-auth admin
                     pattern: '^(.*)$'
                   id:
@@ -1380,14 +5225,14 @@ components:
                     type: integer
                     title: The Id Schema
                     default: 0
-                    # x-example:
+                    # example:
                     #   - 103
                   modified:
                     #$id: '#/properties/modified'
                     type: string
                     title: The Modified Schema
                     default: ''
-                    # x-example:
+                    # example:
                     #   - '2020-01-09T13:49:45.244148+00:00'
                     pattern: '^(.*)$'
                   name:
@@ -1395,7 +5240,7 @@ components:
                     type: string
                     title: The Name Schema
                     default: ''
-                    # x-example:
+                    # example:
                     #   - AOT
                     pattern: '^(.*)$'
                   orgType:
@@ -1403,7 +5248,7 @@ components:
                     type: string
                     title: The Orgtype Schema
                     default: ''
-                    # x-example:
+                    # example:
                     #   - IMPLICIT
                     pattern: '^(.*)$'
                   org_status:
@@ -1411,7 +5256,7 @@ components:
                     type: string
                     title: The Org_status Schema
                     default: ''
-                    # x-example:
+                    # example:
                     #   - ACTIVE
                     pattern: '^(.*)$'
                   preferred_payment:
@@ -1419,7 +5264,7 @@ components:
                     type: string
                     title: The Preferred_payment Schema
                     default: ''
-                    # x-example:
+                    # example:
                     #   - CC
                     pattern: '^(.*)$'
                   modified_by:
@@ -1444,7 +5289,7 @@ components:
           type: string
           title: The Recipientemail Schema
           default: ''
-          # x-example:
+          # example:
           #   - saravanpa@gmai.com
           pattern: '^(.*)$'
         sentDate:
@@ -1452,7 +5297,7 @@ components:
           type: string
           title: The Sentdate Schema
           default: ''
-          # x-example:
+          # example:
           #   - '2020-01-09T13:55:05.960809+00:00'
           pattern: '^(.*)$'
         status:
@@ -1460,7 +5305,7 @@ components:
           type: string
           title: The Status Schema
           default: ''
-          # x-example:
+          # example:
           #   - PENDING
           pattern: '^(.*)$'
         token:
@@ -1468,7 +5313,7 @@ components:
           type: string
           title: The Token Schema
           default: ''
-          # x-example:
+          # example:
           #   - MzA.XhehOQ._bPUJGr5f7-5NLjUqJ39OeUPtjQ
           pattern: '^(.*)$'
       required:
