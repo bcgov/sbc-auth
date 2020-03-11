@@ -1185,7 +1185,7 @@ paths:
           schema:
             type: string
           examples:
-            CP0001234:
+            example1:
               value: CP0001234
             CP0002000:
               value: CP0002000
