@@ -1077,7 +1077,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/org'
               examples:
-                '1234':
+                example1:
                   value:
                     orgs:
                     - id: '1234'
