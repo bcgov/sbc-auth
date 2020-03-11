@@ -1079,10 +1079,9 @@ paths:
               examples:
                 example1:
                   value:
-                    orgs:
-                    - id: '1234'
-                      name: Mock Account
-                      preferred_payment: CC
+                    id: '1234'
+                    name: Mock Account
+                    preferred_payment: CC
         '404':
           description: Not Found
           content:
@@ -1102,6 +1101,7 @@ paths:
         - orgs
       summary: Get the org specified by the provided id.
       description: Get the org specified by the provided id.
+    
   /orgs:
     post:
       responses:
