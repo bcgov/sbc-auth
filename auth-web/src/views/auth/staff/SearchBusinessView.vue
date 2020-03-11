@@ -49,7 +49,7 @@
     </v-card>
 
     <!-- Director search -->
-    <v-card class="mb-4" flat>
+    <v-card class="mb-4" flat v-if="isStaffAdmin">
       <v-container>
         <v-card-title class="d-flex flex-column justify-start align-start">
           <h3 class="mb-3">Create a Director Search Account</h3>
@@ -72,14 +72,15 @@
 <script lang="ts">
 
 import { Component, Emit, Prop } from 'vue-property-decorator'
-
+import { mapActions, mapState } from 'vuex'
 import BusinessModule from '@/store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { Role } from '@/util/constants'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
-import { mapActions } from 'vuex'
 
 @Component({
   components: {
@@ -87,6 +88,9 @@ import { mapActions } from 'vuex'
   },
   methods: {
     ...mapActions('business', ['searchBusiness'])
+  },
+  computed: {
+    ...mapState('user', ['currentUser'])
   }
 })
 export default class SearchBusinessView extends Vue {
@@ -94,6 +98,8 @@ export default class SearchBusinessView extends Vue {
   private searchedBusinessNumber = ''
   private searchActive = false
   private errorMessage = ''
+  private isStaffAdmin: boolean = false
+  readonly currentUser!: KCUserProfile
 
   private readonly searchBusiness!: (businessNumber: string) => void
 
@@ -104,6 +110,10 @@ export default class SearchBusinessView extends Vue {
 
   $refs: {
     searchBusinessForm: HTMLFormElement
+  }
+
+  async mounted () {
+    this.isStaffAdmin = this.currentUser?.roles?.includes(Role.StaffAdmin)
   }
 
   private isFormValid (): boolean {
