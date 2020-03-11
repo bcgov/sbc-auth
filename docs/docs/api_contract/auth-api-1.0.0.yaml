@@ -1315,7 +1315,7 @@ paths:
                   value:
                     - id: '2000'
                       name: Mock Account
-                      preferred_payment: PREMIUM
+                      preferred_payment: DRAWDOWN
                       bc_online_user_id: PB25020
         default:
           description: unexpected error
@@ -3279,7 +3279,7 @@ paths:
                       id: '1234'
                       name: Mock Account
                       paymentPreference:
-                        methodOfPayment: PREMIUM
+                        methodOfPayment: DRAWDOWN
                         bcOnlineUserId: PB25020
                         bcOnlineAccountId: ''
                 CP0001238:
