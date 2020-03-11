@@ -1076,6 +1076,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/org'
+              examples:
+                '1234':
+                  value:
+                    orgs:
+                    - id: '1234'
+                      name: Mock Account
+                      preferred_payment: CC
         '404':
           description: Not Found
           content:
