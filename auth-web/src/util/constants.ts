@@ -19,7 +19,8 @@ export enum Role {
     Staff = 'staff',
     Public = 'public_user',
     Edit = 'edit',
-    Basic = 'basic'
+    Basic = 'basic',
+    StaffAdmin = 'staff_admin'
 }
 
 export enum Pages {
