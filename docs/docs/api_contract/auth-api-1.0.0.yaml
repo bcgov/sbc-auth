@@ -5324,7 +5324,7 @@ components:
         - sentDate
         - status
         - token
-    orgMembershipRequest:
+    orgMembershipRequest: 
       title: orgMembershipRequest
       type: object
       properties:
