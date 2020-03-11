@@ -209,7 +209,7 @@ components:
     codes:
       title: codes
       type: object
-      x-example: {}
+      x-x-example: {}
       properties:
         code:
           type: string
@@ -245,28 +245,28 @@ components:
           type: string
           title: Email
           default: ''
-          example:
+          x-x-example:
             - abc123@mail.com
           pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
         phoneExtension:
           type: string
           title: Phone Extension
           default: ''
-          example:
+          x-x-example:
             - '123'
           pattern: '^(.*)$'
         phone:
           type: string
           title: Phone
           default: ''
-          example:
+          x-x-example:
             - 111-222-3333
           pattern: '^(.*)$'
         deliveryInstructions:
           type: string
           title: Delivery Instructions
           default: ''
-          example:
+          x-x-example:
             - Ring buzzer 123
           pattern: '^(.*)$'
         postalCode:
@@ -274,14 +274,14 @@ components:
           type: string
           title: Postal Code
           default: ''
-          example:
+          x-x-example:
             - V1A 1A1
           pattern: '^(.*)$'
         country:
           type: string
           title: Country
           default: ''
-          example:
+          x-x-example:
             - CA
           pattern: '^(.*)$'
         region:
@@ -289,28 +289,28 @@ components:
           type: string
           title: Region
           default: ''
-          example:
+          x-x-example:
             - British Columbia
           pattern: '^(.*)$'
         city:
           type: string
           title: City
           default: ''
-          example:
+          x-x-example:
             - Victoria
           pattern: '^(.*)$'
         streetAdditional:
           type: string
           title: Street Additional
           default: ''
-          example:
+          x-x-example:
             - Unit 1
           pattern: '^(.*)$'
         street:
           type: string
           title: Street
           default: ''
-          example:
+          x-x-example:
             - 123 Roundabout Lane
           pattern: '^(.*)$'
     entity:
@@ -322,7 +322,7 @@ components:
           type: string
           title: The Businessidentifier Schema
           default: ''
-          example:
+          x-x-example:
             - CP0001578
           pattern: '^(.*)$'
         businessNumber:
@@ -330,7 +330,7 @@ components:
           type: string
           title: The Businessnumber Schema
           default: ''
-          example:
+          x-x-example:
             - CP0001847
           pattern: '^(.*)$'
         contacts:
@@ -344,28 +344,28 @@ components:
                 type: string
                 title: Email
                 default: ''
-                example:
+                x-x-example:
                   - abc123@mail.com
                 pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
               phoneExtension:
                 type: string
                 title: Phone Extension
                 default: ''
-                example:
+                x-x-example:
                   - '123'
                 pattern: '^(.*)$'
               phone:
                 type: string
                 title: Phone
                 default: ''
-                example:
+                x-x-example:
                   - 111-222-3333
                 pattern: '^(.*)$'
               deliveryInstructions:
                 type: string
                 title: Delivery Instructions
                 default: ''
-                example:
+                x-x-example:
                   - Ring buzzer 123
                 pattern: '^(.*)$'
               postalCode:
@@ -373,14 +373,14 @@ components:
                 type: string
                 title: Postal Code
                 default: ''
-                example:
+                x-x-example:
                   - V1A 1A1
                 pattern: '^(.*)$'
               country:
                 type: string
                 title: Country
                 default: ''
-                example:
+                x-x-example:
                   - CA
                 pattern: '^(.*)$'
               region:
@@ -388,28 +388,28 @@ components:
                 type: string
                 title: Region
                 default: ''
-                example:
+                x-x-example:
                   - British Columbia
                 pattern: '^(.*)$'
               city:
                 type: string
                 title: City
                 default: ''
-                example:
+                x-x-example:
                   - Victoria
                 pattern: '^(.*)$'
               streetAdditional:
                 type: string
                 title: Street Additional
                 default: ''
-                example:
+                x-x-example:
                   - Unit 1
                 pattern: '^(.*)$'
               street:
                 type: string
                 title: Street
                 default: ''
-                example:
+                x-x-example:
                   - 123 Roundabout Lane
                 pattern: '^(.*)$'
         corpType:
@@ -417,7 +417,7 @@ components:
           type: string
           title: The Corptype Schema
           default: ''
-          example:
+          x-x-example:
             - CP
           pattern: '^(.*)$'
         created:
@@ -425,7 +425,7 @@ components:
           type: string
           title: The Created Schema
           default: ''
-          example:
+          x-x-example:
             - '2020-01-09T11:11:31.303521+00:00'
           pattern: '^(.*)$'
         modified:
@@ -433,7 +433,7 @@ components:
           type: string
           title: The Modified Schema
           default: ''
-          example:
+          x-x-example:
             - '2020-01-09T11:14:06.560862+00:00'
           pattern: '^(.*)$'
         modifiedBy:
@@ -441,7 +441,7 @@ components:
           type: string
           title: The Modifiedby Schema
           default: ''
-          example:
+          x-x-example:
             - sbc-auth admin
           pattern: '^(.*)$'
         name:
@@ -449,7 +449,7 @@ components:
           type: string
           title: The Name Schema
           default: ''
-          example:
+          x-x-example:
             - Business
           pattern: '^(.*)$'
         passCodeClaimed:
@@ -457,7 +457,7 @@ components:
           type: boolean
           title: The Passcodeclaimed Schema
           default: false
-          example:
+          x-x-example:
             - false
       required:
         - businessIdentifier
@@ -469,7 +469,7 @@ components:
         - modifiedBy
         - name
         - passCodeClaimed
-      x-example:
+      x-x-example:
         CP0001578:
           businessIdentifier: CP0001578
           businessNumber: CP0001847
@@ -494,7 +494,7 @@ components:
           type: string
           title: Business Identifier
           default: ''
-          example:
+          x-x-example:
             - CP1234567
           pattern: '^(.*)$'
         businessNumber:
@@ -502,7 +502,7 @@ components:
           type: string
           title: Business Number
           default: ''
-          example:
+          x-x-example:
             - 791861073BC0001
           pattern: '^(.*)$'
         name:
@@ -510,7 +510,7 @@ components:
           type: string
           title: Business Name
           default: ''
-          example:
+          x-x-example:
             - 'Foobar, Inc.'
           pattern: '^(.*)$'
         passCode:
@@ -518,7 +518,7 @@ components:
           type: string
           title: Passcode
           default: ''
-          example:
+          x-x-example:
             - '12345'
           pattern: '^(.*)$'
         corpTypeCode:
@@ -526,7 +526,7 @@ components:
           type: string
           title: corpTypeCode
           default: ''
-          example:
+          x-x-example:
             - '12345'
           pattern: '^(.*)$'
       required:
@@ -539,7 +539,7 @@ components:
           type: string
           title: Business Identifier
           default: ''
-          example:
+          x-x-example:
             - CP1234567
           pattern: '^(.*)$'
         passCode:
@@ -547,7 +547,7 @@ components:
           type: string
           title: Passcode
           default: ''
-          example:
+          x-x-example:
             - '12345'
           pattern: '^(.*)$'
       required:
@@ -572,7 +572,7 @@ components:
             type: string
             title: The Items Schema
             default: ''
-            example:
+            x-x-example:
               - edit
               - view
             pattern: '^(.*)$'
@@ -585,7 +585,7 @@ components:
           type: string
           title: Organization Name
           default: ''
-          example:
+          x-x-example:
             - Foobar Inc.
           pattern: "^[^\\s]+(\\s+[^\\s]+)*$"
         typeCode:
@@ -593,7 +593,7 @@ components:
           type: string
           title: Organizational Type
           default: IMPLICIT
-          example:
+          x-x-example:
             - IMPLICIT
             - EXPLICIT
           pattern: '^(.*)$'
@@ -616,7 +616,7 @@ components:
           type: string
           title: The Created Schema
           default: ''
-          example:
+          x-x-example:
             - '2020-01-09T11:13:59.293603+00:00'
           pattern: '^(.*)$'
         email:
@@ -624,7 +624,7 @@ components:
           type: string
           title: The Email Schema
           default: ''
-          example:
+          x-x-example:
             - service-account-sbc-auth-admin@placeholder.org
           pattern: '^(.*)$'
         firstname:
@@ -632,7 +632,7 @@ components:
           type: string
           title: The Firstname Schema
           default: ''
-          example:
+          x-x-example:
             - sbc-auth
           pattern: '^(.*)$'
         keycloakGuid:
@@ -640,7 +640,7 @@ components:
           type: string
           title: The Keycloakguid Schema
           default: ''
-          example:
+          x-x-example:
             - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
           pattern: '^(.*)$'
         lastname:
@@ -648,7 +648,7 @@ components:
           type: string
           title: The Lastname Schema
           default: ''
-          example:
+          x-x-example:
             - admin
           pattern: '^(.*)$'
         modified:
@@ -656,7 +656,7 @@ components:
           type: string
           title: The Modified Schema
           default: ''
-          example:
+          x-x-example:
             - '2020-01-09T11:13:59.295264+00:00'
           pattern: '^(.*)$'
         userStatus:
@@ -664,7 +664,7 @@ components:
           type: integer
           title: The Userstatus Schema
           default: 0
-          example:
+          x-x-example:
             - 1
         userTerms:
           title: userTerms
@@ -679,7 +679,7 @@ components:
           type: string
           title: The Username Schema
           default: ''
-          example:
+          x-x-example:
             - service-account-sbc-auth-admin
           pattern: '^(.*)$'
       required:
@@ -705,7 +705,7 @@ components:
               type: string
               title: The Created Schema
               default: ''
-              example:
+              x-example:
                 - '2020-01-09T11:13:59.293603+00:00'
               pattern: '^(.*)$'
             email:
@@ -713,7 +713,7 @@ components:
               type: string
               title: The Email Schema
               default: ''
-              example:
+              x-example:
                 - service-account-sbc-auth-admin@placeholder.org
               pattern: '^(.*)$'
             firstname:
@@ -721,7 +721,7 @@ components:
               type: string
               title: The Firstname Schema
               default: ''
-              example:
+              x-example:
                 - sbc-auth
               pattern: '^(.*)$'
             keycloakGuid:
@@ -729,7 +729,7 @@ components:
               type: string
               title: The Keycloakguid Schema
               default: ''
-              example:
+              x-example:
                 - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
               pattern: '^(.*)$'
             lastname:
@@ -737,7 +737,7 @@ components:
               type: string
               title: The Lastname Schema
               default: ''
-              example:
+              x-example:
                 - admin
               pattern: '^(.*)$'
             modified:
@@ -745,7 +745,7 @@ components:
               type: string
               title: The Modified Schema
               default: ''
-              example:
+              x-example:
                 - '2020-01-09T11:13:59.295264+00:00'
               pattern: '^(.*)$'
             userStatus:
@@ -753,7 +753,7 @@ components:
               type: integer
               title: The Userstatus Schema
               default: 0
-              example:
+              x-example:
                 - 1
             userTerms:
               title: userTerms
@@ -768,7 +768,7 @@ components:
               type: string
               title: The Username Schema
               default: ''
-              example:
+              x-example:
                 - service-account-sbc-auth-admin
               pattern: '^(.*)$'
           required:
@@ -790,7 +790,7 @@ components:
               type: string
               title: The Created Schema
               default: ''
-              example:
+              x-example:
                 - '2020-01-09T13:49:45.244134+00:00'
               pattern: '^(.*)$'
             created_by:
@@ -798,7 +798,7 @@ components:
               type: string
               title: The Created_by Schema
               default: ''
-              example:
+              x-example:
                 - sbc-auth admin
               pattern: '^(.*)$'
             id:
@@ -806,14 +806,14 @@ components:
               type: integer
               title: The Id Schema
               default: 0
-              example:
+              x-example:
                 - 103
             modified:
               #$id: '#/properties/modified'
               type: string
               title: The Modified Schema
               default: ''
-              example:
+              x-example:
                 - '2020-01-09T13:49:45.244148+00:00'
               pattern: '^(.*)$'
             name:
@@ -821,7 +821,7 @@ components:
               type: string
               title: The Name Schema
               default: ''
-              example:
+              x-example:
                 - AOT
               pattern: '^(.*)$'
             orgType:
@@ -829,7 +829,7 @@ components:
               type: string
               title: The Orgtype Schema
               default: ''
-              example:
+              x-example:
                 - IMPLICIT
               pattern: '^(.*)$'
             org_status:
@@ -837,7 +837,7 @@ components:
               type: string
               title: The Org_status Schema
               default: ''
-              example:
+              x-example:
                 - ACTIVE
               pattern: '^(.*)$'
             preferred_payment:
@@ -845,7 +845,7 @@ components:
               type: string
               title: The Preferred_payment Schema
               default: ''
-              example:
+              x-example:
                 - CC
               pattern: '^(.*)$'
             modified_by:
@@ -874,7 +874,7 @@ components:
           type: string
           title: The Created Schema
           default: ''
-          example:
+          x-example:
             - '2020-01-09T13:49:45.244134+00:00'
           pattern: '^(.*)$'
         created_by:
@@ -882,7 +882,7 @@ components:
           type: string
           title: The Created_by Schema
           default: ''
-          example:
+          x-example:
             - sbc-auth admin
           pattern: '^(.*)$'
         id:
@@ -890,14 +890,14 @@ components:
           type: integer
           title: The Id Schema
           default: 0
-          example:
+          x-example:
             - 103
         modified:
           #$id: '#/properties/modified'
           type: string
           title: The Modified Schema
           default: ''
-          example:
+          x-example:
             - '2020-01-09T13:49:45.244148+00:00'
           pattern: '^(.*)$'
         name:
@@ -905,7 +905,7 @@ components:
           type: string
           title: The Name Schema
           default: ''
-          example:
+          x-example:
             - AOT
           pattern: '^(.*)$'
         orgType:
@@ -913,7 +913,7 @@ components:
           type: string
           title: The Orgtype Schema
           default: ''
-          example:
+          x-example:
             - IMPLICIT
           pattern: '^(.*)$'
         org_status:
@@ -921,7 +921,7 @@ components:
           type: string
           title: The Org_status Schema
           default: ''
-          example:
+          x-example:
             - ACTIVE
           pattern: '^(.*)$'
         preferred_payment:
@@ -929,7 +929,7 @@ components:
           type: string
           title: The Preferred_payment Schema
           default: ''
-          example:
+          x-example:
             - CC
           pattern: '^(.*)$'
         modified_by:
@@ -952,7 +952,7 @@ components:
           type: string
           title: The Corp_type_code Schema
           default: ''
-          example:
+          x-example:
             - CP
           pattern: '^(.*)$'
         orgMembership:
@@ -960,7 +960,7 @@ components:
           type: string
           title: The Orgmembership Schema
           default: ''
-          example:
+          x-example:
             - OWNER
           pattern: '^(.*)$'
         roles:
@@ -972,7 +972,7 @@ components:
             type: string
             title: The Items Schema
             default: ''
-            example:
+            x-example:
               - edit
               - view
             pattern: '^(.*)$'
@@ -993,7 +993,7 @@ components:
               type: string
               title: The Businessidentifier Schema
               default: ''
-              example:
+              x-example:
                 - CP0001578
               pattern: '^(.*)$'
             businessNumber:
@@ -1001,7 +1001,7 @@ components:
               type: string
               title: The Businessnumber Schema
               default: ''
-              example:
+              x-example:
                 - CP0001847
               pattern: '^(.*)$'
             contacts:
@@ -1015,28 +1015,28 @@ components:
                     type: string
                     title: Email
                     default: ''
-                    example:
+                    x-example:
                       - abc123@mail.com
                     pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
                   phoneExtension:
                     type: string
                     title: Phone Extension
                     default: ''
-                    example:
+                    x-example:
                       - '123'
                     pattern: '^(.*)$'
                   phone:
                     type: string
                     title: Phone
                     default: ''
-                    example:
+                    x-example:
                       - 111-222-3333
                     pattern: '^(.*)$'
                   deliveryInstructions:
                     type: string
                     title: Delivery Instructions
                     default: ''
-                    example:
+                    x-example:
                       - Ring buzzer 123
                     pattern: '^(.*)$'
                   postalCode:
@@ -1044,14 +1044,14 @@ components:
                     type: string
                     title: Postal Code
                     default: ''
-                    example:
+                    x-example:
                       - V1A 1A1
                     pattern: '^(.*)$'
                   country:
                     type: string
                     title: Country
                     default: ''
-                    example:
+                    x-example:
                       - CA
                     pattern: '^(.*)$'
                   region:
@@ -1059,28 +1059,28 @@ components:
                     type: string
                     title: Region
                     default: ''
-                    example:
+                    x-example:
                       - British Columbia
                     pattern: '^(.*)$'
                   city:
                     type: string
                     title: City
                     default: ''
-                    example:
+                    x-example:
                       - Victoria
                     pattern: '^(.*)$'
                   streetAdditional:
                     type: string
                     title: Street Additional
                     default: ''
-                    example:
+                    x-example:
                       - Unit 1
                     pattern: '^(.*)$'
                   street:
                     type: string
                     title: Street
                     default: ''
-                    example:
+                    x-example:
                       - 123 Roundabout Lane
                     pattern: '^(.*)$'
             corpType:
@@ -1088,7 +1088,7 @@ components:
               type: string
               title: The Corptype Schema
               default: ''
-              example:
+              x-example:
                 - CP
               pattern: '^(.*)$'
             created:
@@ -1096,7 +1096,7 @@ components:
               type: string
               title: The Created Schema
               default: ''
-              example:
+              x-example:
                 - '2020-01-09T11:11:31.303521+00:00'
               pattern: '^(.*)$'
             modified:
@@ -1104,7 +1104,7 @@ components:
               type: string
               title: The Modified Schema
               default: ''
-              example:
+              x-example:
                 - '2020-01-09T11:14:06.560862+00:00'
               pattern: '^(.*)$'
             modifiedBy:
@@ -1112,7 +1112,7 @@ components:
               type: string
               title: The Modifiedby Schema
               default: ''
-              example:
+              x-example:
                 - sbc-auth admin
               pattern: '^(.*)$'
             name:
@@ -1120,7 +1120,7 @@ components:
               type: string
               title: The Name Schema
               default: ''
-              example:
+              x-example:
                 - Business
               pattern: '^(.*)$'
             passCodeClaimed:
@@ -1128,7 +1128,7 @@ components:
               type: boolean
               title: The Passcodeclaimed Schema
               default: false
-              example:
+              x-example:
                 - false
           required:
             - businessIdentifier
@@ -1140,7 +1140,7 @@ components:
             - modifiedBy
             - name
             - passCodeClaimed
-          x-example:
+          x-x-example:
             CP0001578:
               businessIdentifier: CP0001578
               businessNumber: CP0001847
@@ -1175,7 +1175,7 @@ components:
               type: string
               title: The Created Schema
               default: ''
-              example:
+              x-example:
                 - '2020-01-09T13:49:45.244134+00:00'
               pattern: '^(.*)$'
             created_by:
@@ -1183,7 +1183,7 @@ components:
               type: string
               title: The Created_by Schema
               default: ''
-              example:
+              x-example:
                 - sbc-auth admin
               pattern: '^(.*)$'
             id:
@@ -1191,14 +1191,14 @@ components:
               type: integer
               title: The Id Schema
               default: 0
-              example:
+              x-example:
                 - 103
             modified:
               #$id: '#/properties/modified'
               type: string
               title: The Modified Schema
               default: ''
-              example:
+              x-example:
                 - '2020-01-09T13:49:45.244148+00:00'
               pattern: '^(.*)$'
             name:
@@ -1206,7 +1206,7 @@ components:
               type: string
               title: The Name Schema
               default: ''
-              example:
+              x-example:
                 - AOT
               pattern: '^(.*)$'
             orgType:
@@ -1214,7 +1214,7 @@ components:
               type: string
               title: The Orgtype Schema
               default: ''
-              example:
+              x-example:
                 - IMPLICIT
               pattern: '^(.*)$'
             org_status:
@@ -1222,7 +1222,7 @@ components:
               type: string
               title: The Org_status Schema
               default: ''
-              example:
+              x-example:
                 - ACTIVE
               pattern: '^(.*)$'
             preferred_payment:
@@ -1230,7 +1230,7 @@ components:
               type: string
               title: The Preferred_payment Schema
               default: ''
-              example:
+              x-example:
                 - CC
               pattern: '^(.*)$'
             modified_by:
@@ -1253,7 +1253,7 @@ components:
           type: string
           title: The Expireson Schema
           default: ''
-          example:
+          x-example:
             - '2020-01-16T13:55:05.960809+00:00'
           pattern: '^(.*)$'
         id:
@@ -1261,7 +1261,7 @@ components:
           type: integer
           title: The Id Schema
           default: 0
-          example:
+          x-example:
             - 30
         membership:
           type: array
@@ -1279,7 +1279,7 @@ components:
                     type: string
                     title: The Created Schema
                     default: ''
-                    example:
+                    x-example:
                       - '2020-01-09T11:13:59.293603+00:00'
                     pattern: '^(.*)$'
                   email:
@@ -1287,7 +1287,7 @@ components:
                     type: string
                     title: The Email Schema
                     default: ''
-                    example:
+                    x-example:
                       - service-account-sbc-auth-admin@placeholder.org
                     pattern: '^(.*)$'
                   firstname:
@@ -1295,7 +1295,7 @@ components:
                     type: string
                     title: The Firstname Schema
                     default: ''
-                    example:
+                    x-example:
                       - sbc-auth
                     pattern: '^(.*)$'
                   keycloakGuid:
@@ -1303,7 +1303,7 @@ components:
                     type: string
                     title: The Keycloakguid Schema
                     default: ''
-                    example:
+                    x-example:
                       - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
                     pattern: '^(.*)$'
                   lastname:
@@ -1311,7 +1311,7 @@ components:
                     type: string
                     title: The Lastname Schema
                     default: ''
-                    example:
+                    x-example:
                       - admin
                     pattern: '^(.*)$'
                   modified:
@@ -1319,7 +1319,7 @@ components:
                     type: string
                     title: The Modified Schema
                     default: ''
-                    example:
+                    x-example:
                       - '2020-01-09T11:13:59.295264+00:00'
                     pattern: '^(.*)$'
                   userStatus:
@@ -1327,7 +1327,7 @@ components:
                     type: integer
                     title: The Userstatus Schema
                     default: 0
-                    example:
+                    x-example:
                       - 1
                   userTerms:
                     title: userTerms
@@ -1342,7 +1342,7 @@ components:
                     type: string
                     title: The Username Schema
                     default: ''
-                    example:
+                    x-example:
                       - service-account-sbc-auth-admin
                     pattern: '^(.*)$'
                 required:
@@ -1364,7 +1364,7 @@ components:
                     type: string
                     title: The Created Schema
                     default: ''
-                    example:
+                    x-example:
                       - '2020-01-09T13:49:45.244134+00:00'
                     pattern: '^(.*)$'
                   created_by:
@@ -1372,7 +1372,7 @@ components:
                     type: string
                     title: The Created_by Schema
                     default: ''
-                    example:
+                    x-example:
                       - sbc-auth admin
                     pattern: '^(.*)$'
                   id:
@@ -1380,14 +1380,14 @@ components:
                     type: integer
                     title: The Id Schema
                     default: 0
-                    # example:
+                    # x-example:
                     #   - 103
                   modified:
                     #$id: '#/properties/modified'
                     type: string
                     title: The Modified Schema
                     default: ''
-                    # example:
+                    # x-example:
                     #   - '2020-01-09T13:49:45.244148+00:00'
                     pattern: '^(.*)$'
                   name:
@@ -1395,7 +1395,7 @@ components:
                     type: string
                     title: The Name Schema
                     default: ''
-                    # example:
+                    # x-example:
                     #   - AOT
                     pattern: '^(.*)$'
                   orgType:
@@ -1403,7 +1403,7 @@ components:
                     type: string
                     title: The Orgtype Schema
                     default: ''
-                    # example:
+                    # x-example:
                     #   - IMPLICIT
                     pattern: '^(.*)$'
                   org_status:
@@ -1411,7 +1411,7 @@ components:
                     type: string
                     title: The Org_status Schema
                     default: ''
-                    # example:
+                    # x-example:
                     #   - ACTIVE
                     pattern: '^(.*)$'
                   preferred_payment:
@@ -1419,7 +1419,7 @@ components:
                     type: string
                     title: The Preferred_payment Schema
                     default: ''
-                    # example:
+                    # x-example:
                     #   - CC
                     pattern: '^(.*)$'
                   modified_by:
@@ -1444,7 +1444,7 @@ components:
           type: string
           title: The Recipientemail Schema
           default: ''
-          # example:
+          # x-example:
           #   - saravanpa@gmai.com
           pattern: '^(.*)$'
         sentDate:
@@ -1452,7 +1452,7 @@ components:
           type: string
           title: The Sentdate Schema
           default: ''
-          # example:
+          # x-example:
           #   - '2020-01-09T13:55:05.960809+00:00'
           pattern: '^(.*)$'
         status:
@@ -1460,7 +1460,7 @@ components:
           type: string
           title: The Status Schema
           default: ''
-          # example:
+          # x-example:
           #   - PENDING
           pattern: '^(.*)$'
         token:
@@ -1468,7 +1468,7 @@ components:
           type: string
           title: The Token Schema
           default: ''
-          # example:
+          # x-example:
           #   - MzA.XhehOQ._bPUJGr5f7-5NLjUqJ39OeUPtjQ
           pattern: '^(.*)$'
       required:
