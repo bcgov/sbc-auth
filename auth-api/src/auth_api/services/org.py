@@ -13,7 +13,7 @@
 # limitations under the License.
 """Service for managing Organization data."""
 
-from typing import Dict, Tuple
+from typing import Any, Dict, Tuple
 
 from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
@@ -22,12 +22,16 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
+from auth_api.models import ProductCode as ProductCodeModel
+from auth_api.models import ProductRoleCode as ProductRoleCodeModel
+from auth_api.models import ProductSubscriptionRole as ProductSubscriptionRoleModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
+from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.schemas import OrgSchema
-from auth_api.utils.roles import OWNER, VALID_STATUSES, Status
+from auth_api.utils.roles import OWNER, VALID_STATUSES, Status, AccessType
 from auth_api.utils.util import camelback2snake
 
 from .authorization import check_auth
@@ -56,29 +60,62 @@ class Org:
         return obj
 
     @staticmethod
-    def create_org(org_info: dict, user_id):
+    def create_org(org_info: dict, user_id, token_info: Dict = None):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
-        count = OrgModel.get_count_of_org_created_by_user_id(user_id)
-        if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
-            raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
+        is_staff = token_info and 'staff' in token_info.get('realm_access').get('roles')
+        if not is_staff:  # staff can create any number of orgs
+            count = OrgModel.get_count_of_org_created_by_user_id(user_id)
+            if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
+                raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
 
         existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'])
         if existing_similar__org is not None:
             raise BusinessException(Error.DATA_CONFLICT, None)
-
         org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.save()
         current_app.logger.info(f'<created_org org_id:{org.id}')
-        # create the membership record for this user
-        membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='OWNER',
-                                     membership_type_status=Status.ACTIVE.value)
-        membership.save()
+        # create the membership record for this user if its not created by staff and access_type is anonymous
+        if not is_staff and org_info.get('access_type') != AccessType.ANONYMOUS:
+            membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='OWNER',
+                                         membership_type_status=Status.ACTIVE.value)
+            membership.save()
 
-        # Add the user to account_holders group
-        KeycloakService.join_account_holders_group()
+            # Add the user to account_holders group
+            KeycloakService.join_account_holders_group()
 
         return Org(org)
+
+    @staticmethod
+    def create_product_subscription(org_id, subscription_data: Tuple[Dict[str, Any]]):
+        """Create product subscription for the user.
+
+        create product subscription first
+        create the product role next if roles are given
+        """
+        org = OrgModel.find_by_org_id(org_id)
+        if not org:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        subscriptions_list = subscription_data.get('subscriptions')
+        # just used for returning all the models.. not ideal..
+        # todo remove this and may be return the subscriptions from db
+        subscriptions_model_list = []
+        for subscription in subscriptions_list:
+            product_code = subscription.get('productCode')
+            product = ProductCodeModel.find_by_code(product_code)
+            if product:
+                product_subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code).save()
+                subscriptions_model_list.append(product_subscription)
+            else:
+                raise BusinessException(Error.DATA_NOT_FOUND, None)
+            if subscription.get('product_roles') is not None:
+                for role in subscription.get('productRoles'):
+                    product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role, product_code)
+                    if product_role_code:
+                        ProductSubscriptionRoleModel(product_subscription_id=product_subscription.id,
+                                                     product_role_id=product_role_code.id).save()
+        # TODO return something better/useful.may be return the whole model from db
+        return subscriptions_model_list
 
     def update_org(self, org_info):
         """Update the passed organization with the new info."""
@@ -93,7 +130,7 @@ class Org:
         return self
 
     @staticmethod
-    def delete_org(org_id, token_info: Dict = None,):
+    def delete_org(org_id, token_info: Dict = None, ):
         """Soft-Deletes an Org.
 
         It should not be deletable if there are members or business associated with the org
@@ -235,7 +272,7 @@ class Org:
         """Search for orgs based on input parameters."""
         orgs = {'orgs': []}
         if kwargs.get('business_identifier', None):
-            affiliation: AffiliationModel = AffiliationModel.\
+            affiliation: AffiliationModel = AffiliationModel. \
                 find_affiliations_by_business_identifier(kwargs.get('business_identifier'))
             if affiliation:
                 orgs['orgs'].append(Org(OrgModel.find_by_org_id(affiliation.org_id)).as_dict())

@@ -2,6 +2,7 @@ import Vuex, { StoreOptions } from 'vuex'
 import BusinessModule from './modules/business'
 import OrgModule from '@/store/modules/org'
 import { RootState } from './types'
+import StaffModule from '@/store/modules/staff'
 import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 import VuexPersistance from 'vuex-persist'
@@ -27,7 +28,8 @@ const storeOptions: StoreOptions<RootState> = {
   modules: {
     business: BusinessModule,
     user: UserModule,
-    org: OrgModule
+    org: OrgModule,
+    staff: StaffModule
   },
   plugins: [vuexSession.plugin]
 }

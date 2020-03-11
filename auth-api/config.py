@@ -103,7 +103,6 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     KEYCLOAK_AUTH_AUDIENCE = os.getenv('KEYCLOAK_AUTH_AUDIENCE')
     KEYCLOAK_AUTH_CLIENT_SECRET = os.getenv('KEYCLOAK_AUTH_CLIENT_SECRET')
 
-
     # Config to skip migrations when alembic migrate is used
     SKIPPED_MIGRATIONS = ['authorizations_view']
 
@@ -230,9 +229,9 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     KEYCLOAK_REALMNAME = os.getenv('KEYCLOAK_TEST_REALMNAME')
 
     # Legal-API URL
-    LEGAL_API_URL = 'https://mock-lear-tools.pathfinder.gov.bc.ca/rest/legal-api/0.82/api/v1'
+    LEGAL_API_URL = 'https://mock-auth-tools.pathfinder.gov.bc.ca/rest/legal-api/2.7/api/v1'
 
-    NOTIFY_API_URL = 'https://mock-lear-tools.pathfinder.gov.bc.ca/rest/SBC+Notify+API+Reference/2.0.0/api/v1'
+    NOTIFY_API_URL = 'https://mock-auth-tools.pathfinder.gov.bc.ca/rest/SBC+Notify+API+Reference/2.0.0/api/v1'
 
     # If any value is present in this flag, starts up a keycloak docker
     USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)

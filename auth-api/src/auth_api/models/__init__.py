@@ -38,7 +38,7 @@ from .org_status import OrgStatus
 from .org_type import OrgType
 from .payment_type import PaymentType
 from .product_code import ProductCode
-from .product_role import ProductRole
+from .product_subscription_role import ProductSubscriptionRole
 from .product_role_code import ProductRoleCode
 from .product_subscription import ProductSubscription
 from .user import User

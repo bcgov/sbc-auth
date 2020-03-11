@@ -77,7 +77,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             current_user: UserService = UserService.find_by_jwt_token(token_info)
         except BusinessException:
             return default_count
-        is_active_admin_or_owner = MembershipModel.check_if_active_admin_or_owner_org_id(org_id, current_user.identifier)
+        is_active_admin_or_owner = MembershipModel.check_if_active_admin_or_owner_org_id(org_id,
+                                                                                         current_user.identifier)
         if is_active_admin_or_owner < 1:
             return default_count
         pending_member_count = MembershipModel.get_pending_members_count_by_org_id(org_id)
