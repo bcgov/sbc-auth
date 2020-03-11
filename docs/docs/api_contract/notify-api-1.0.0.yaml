@@ -149,7 +149,7 @@ paths:
                       type: string
                       description: attachment link
             examples:
-              notify_post_1:
+              notify_post_1: 
                 value: 
                   recipients: test@abc.com
                   contents:
