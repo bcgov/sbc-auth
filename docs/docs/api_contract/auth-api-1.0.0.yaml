@@ -963,7 +963,7 @@ paths:
         required: true
         schema:
           type: string
-        example:
+        examples:
           example1:
             value: '1234'
     put:
