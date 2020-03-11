@@ -1304,7 +1304,7 @@ paths:
                   - org_status
                   - preferred_payment
               examples:
-                CP0001234:
+                example1:
                   value:
                     orgs:
                     - id: '1234'
