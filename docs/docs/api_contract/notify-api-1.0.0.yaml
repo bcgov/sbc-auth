@@ -11,13 +11,6 @@ paths:
       summary: Get Notification details
       description: Get Notification details
       operationId: Get_Notification
-      parameters:
-        - name: notification_id
-          in: path
-          description: Notification Id
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: Success
@@ -240,7 +233,7 @@ paths:
         - name: status
           in: path
           description: Notification status
-          required: true
+          required: true 
           schema:
             type: string
       responses:
@@ -302,7 +295,21 @@ paths:
                           description: email subject
               examples:
                 notify_1:
-                  value: '{ "id": 1, "recipients": "test@abc.com", "requestDate": "2019-09-25T09:08:57.515479+00:00", "sentDate": "2019-09-26T09:34:34.792527+00:00", "recipients": "string", "notifyType": { "code": "EMAIL", "desc": "The Email type of notification" }, "notifyStatus": { "code": "DELIVERED", "desc": "Status for the notification sent successful" }, "contents": { "subject": "test notify", "body": "hello world!" } }'
+                  value: 
+                  	id: 1
+					recipients: string
+					requestDate: '2019-09-25T09:08:57.515479+00:00'
+					sentDate: '2019-09-26T09:34:34.792527+00:00'
+					notifyType:
+					  code: EMAIL
+					  desc: The Email type of notification
+					notifyStatus:
+					  code: DELIVERED
+					  desc: Status for the notification sent successful
+					contents:
+					  subject: test notify
+					  body: hello world!
+
         '400':
           description: BadRequest
           content:
