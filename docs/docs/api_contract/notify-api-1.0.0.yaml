@@ -150,7 +150,15 @@ paths:
                       description: attachment link
             examples:
               notify_post_1:
-                value: '{ "recipients": "test@abc.com", "contents": { "subject": "test notify", "body": "hello world!", "attachmentName": "", "attachmentBytes": "", "attachmentUrl": "" } }'
+                value: 
+                  recipients: test@abc.com
+                  contents:
+                    subject: test notify
+                    body: hello world!
+                    attachmentName: ''
+                    attachmentBytes: ''
+                    attachmentUrl: ''
+
         required: true
       responses:
         '201':
