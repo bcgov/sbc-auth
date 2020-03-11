@@ -129,13 +129,17 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
 
 
 @pytest.fixture(scope='session', autouse=True)
-def keycloak(docker_services, app):
+def auto(docker_services, app):
     """Spin up a keycloak instance and initialize jwt."""
     if app.config['USE_TEST_KEYCLOAK_DOCKER']:
         docker_services.start('keycloak')
         docker_services.wait_for_service('keycloak', 8081)
 
     setup_jwt_manager(app, _JWT)
+
+    if app.config['USE_DOCKER_MOCK']:
+        docker_services.start('notify')
+        docker_services.start('proxy')
 
 
 @pytest.fixture(scope='session')
