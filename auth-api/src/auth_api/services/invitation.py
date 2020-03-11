@@ -31,7 +31,7 @@ from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
 from auth_api.utils.constants import InvitationStatus
-from auth_api.utils.roles import ADMIN, MEMBER, OWNER, Status, Role, InvitationType
+from auth_api.utils.roles import ADMIN, MEMBER, OWNER, Status, Role, InvitationType, STAFF
 from config import get_named_config
 
 from .authorization import check_auth
@@ -66,8 +66,8 @@ class Invitation:
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         for membership in invitation_info['membership']:
             org_id = membership['orgId']
-            if invitation_info.get('type') == InvitationType.DIRECTOR_SEARCH:
-                check_auth(token_info, org_id=org_id, one_of_roles=Role.STAFF_ADMIN)
+            if invitation_info.get('type') == InvitationType.DIRECTOR_SEARCH.value:
+                check_auth(token_info, org_id=org_id, equals_role=STAFF)
             else:
                 check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
         # TODO doesnt work when invited to multiple teams.. Re-work the logic when multiple teams introduced

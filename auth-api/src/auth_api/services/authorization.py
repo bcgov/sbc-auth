@@ -21,7 +21,7 @@ from flask import abort
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.schemas.authorization import AuthorizationSchema
-from auth_api.utils.roles import OWNER, STAFF, Role
+from auth_api.utils.roles import OWNER, STAFF, Role, STAFF_ADMIN
 
 
 class Authorization:
@@ -101,7 +101,15 @@ class Authorization:
 
 def check_auth(token_info: Dict, **kwargs):
     """Check if user is authorized to perform action on the service."""
-    if 'staff' in token_info.get('realm_access').get('roles'):
+    if 'staff_admin' in token_info.get('realm_access').get('roles'):
+        # Staff admin should get all access as of Staff
+        if STAFF in kwargs.get('one_of_roles', []) and STAFF_ADMIN not in kwargs.get('one_of_roles', None):
+            kwargs.get('one_of_roles').append(STAFF_ADMIN)
+        if kwargs.get('equals_role', None) == STAFF:
+            kwargs.pop('equals_role', None)
+            kwargs['one_of_roles'] = (STAFF, STAFF_ADMIN)
+        _check_for_roles(STAFF_ADMIN, kwargs)
+    elif 'staff' in token_info.get('realm_access').get('roles'):
         _check_for_roles(STAFF, kwargs)
     elif Role.SYSTEM.value in token_info.get('realm_access').get('roles') \
             and not token_info.get('loginSource', None) == 'PASSCODE':
