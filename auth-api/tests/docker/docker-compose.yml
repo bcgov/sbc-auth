@@ -60,4 +60,4 @@ services:
     image: stoplight/prism:3.3.0
     command: >
       mock -p 4010 --host 0.0.0.0
-      https://raw.githubusercontent.com/sumesh-aot/sbc-auth/contract/docs/docs/api_contract/notify-api-1.0.0.yaml
+      https://raw.githubusercontent.com/bcgov/sbc-auth/development/docs/docs/api_contract/notify-api-1.0.0.yaml
