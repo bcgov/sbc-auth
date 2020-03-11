@@ -39,7 +39,6 @@ MEMBER = 'MEMBER'
 STAFF_ADMIN = 'STAFF_ADMIN'
 
 
-
 class Status(Enum):
     """User Membership status."""
 
@@ -68,7 +67,7 @@ VALID_STATUSES = (Status.ACTIVE.value, Status.PENDING_APPROVAL.value)
 
 CLIENT_ADMIN_ROLES = (ADMIN, OWNER)
 CLIENT_AUTH_ROLES = (*CLIENT_ADMIN_ROLES, MEMBER)
-ALL_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF,Role.STAFF_ADMIN.value)
+ALL_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF, Role.STAFF_ADMIN.value)
 
 
 class InvitationType(Enum):
