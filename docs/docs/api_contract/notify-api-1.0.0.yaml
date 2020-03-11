@@ -4,7 +4,7 @@ info:
   description: BC Registries Notify API reference documentation
   version: 1.0.0
 paths:
-  /api/v1/notify:
+  /api/v1/notify/:
     get:
       tags:
         - Notification
