@@ -1185,9 +1185,9 @@ paths:
           schema:
             type: string
           examples:
-            example1:
+            CP0001234:
               value: CP0001234
-            example2:
+            CP0002000:
               value: CP0002000
       tags:
         - authorization
@@ -1304,14 +1304,14 @@ paths:
                   - org_status
                   - preferred_payment
               examples:
-                example1:
+                CP0001234:
                   value:
                     orgs:
                     - id: '1234'
                       name: Mock Account
                       preferred_payment: CC
 
-                example2:
+                CP0002000:
                   value:
                     - id: '2000'
                       name: Mock Account
