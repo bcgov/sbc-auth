@@ -161,7 +161,7 @@ export default class SetupAccountForm extends Vue {
   private readonly createOrg!: (
     requestBody: CreateRequestBody
   ) => Promise<Organization>
-  private readonly addProductsToOrg!: (productsRequestBody: ProductsRequestBody) => Promise<Products>
+  private readonly addProductsToOrg!: (productsRequestBody: ProductsRequestBody, organizationId: number) => Promise<Products>
   private readonly getProducts!: () => Promise<ProductCode[]>
   private readonly getAccountTypes!: () => Promise<AccountType[]>
   private readonly createInvitation!: (Invitation) => Promise<void>
