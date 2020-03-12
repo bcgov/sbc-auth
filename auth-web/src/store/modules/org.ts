@@ -248,8 +248,8 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async addProductsToOrg (productsRequestBody: ProductsRequestBody): Promise<Products> {
-    const response = await StaffService.addProducts(this.context.state['currentOrganization'].id, productsRequestBody)
+  public async addProductsToOrg (productsRequestBody: ProductsRequestBody, organizationId: number): Promise<Products> {
+    const response = await StaffService.addProducts(organizationId, productsRequestBody)
     return response?.data
   }
 }
