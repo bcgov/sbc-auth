@@ -161,7 +161,7 @@ export default class SetupAccountForm extends Vue {
   private readonly createOrg!: (
     requestBody: CreateRequestBody
   ) => Promise<Organization>
-  private readonly addProductsToOrg!: (productsRequestBody: ProductsRequestBody) => Promise<Products>
+  private readonly addProductsToOrg!: (productsRequestBody: ProductsRequestBody, organizationId: number) => Promise<Products>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
   private readonly getProducts!: () => Promise<ProductCode[]>
   private readonly getAccountTypes!: () => Promise<AccountType[]>
@@ -222,8 +222,7 @@ export default class SetupAccountForm extends Vue {
       try {
         this.saving = true
         const organization = await this.createOrg(createRequestBody)
-        await this.syncOrganization(organization.id)
-        await this.addProductsToOrg(addProductsRequestBody)
+        await this.addProductsToOrg(addProductsRequestBody, organization.id)
         await this.createInvitation({
           recipientEmail: this.email,
           sentDate: new Date(),
