@@ -963,7 +963,7 @@ paths:
         required: true
         schema:
           type: string
-        example:
+        examples:
           example1:
             value: '1234'
     put:
@@ -1076,6 +1076,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/org'
+              examples:
+                example1:
+                  value:
+                    id: '1234'
+                    name: Mock Account
+                    preferred_payment: CC
         '404':
           description: Not Found
           content:
@@ -1095,6 +1101,7 @@ paths:
         - orgs
       summary: Get the org specified by the provided id.
       description: Get the org specified by the provided id.
+    
   /orgs:
     post:
       responses:
@@ -1178,9 +1185,9 @@ paths:
           schema:
             type: string
           examples:
-            example1:
+            CP0001234:
               value: CP0001234
-            example2:
+            CP0002000:
               value: CP0002000
       tags:
         - authorization
@@ -1297,17 +1304,19 @@ paths:
                   - org_status
                   - preferred_payment
               examples:
-                example1:
+                CP0001234:
                   value:
-                    id: '1234'
-                    name: Mock Account
-                    preferred_payment: CC
-                example2:
+                    orgs:
+                    - id: '1234'
+                      name: Mock Account
+                      preferred_payment: CC
+
+                CP0002000:
                   value:
-                    id: '2000'
-                    name: Mock Account
-                    preferred_payment: PREMIUM
-                    bc_online_user_id: PB25020
+                    - id: '2000'
+                      name: Mock Account
+                      preferred_payment: DRAWDOWN
+                      bc_online_user_id: PB25020
         default:
           description: unexpected error
           content:
@@ -1323,8 +1332,10 @@ paths:
         required: true
         description: Corp Num/Incorporation Number of the entity
         examples:
-          example1:
+          CP0001234:
             value: CP0001234
+          CP0002000:
+            value: CP0002000
   /logout:
     post:
       responses:
@@ -3138,13 +3149,13 @@ paths:
                 type: string
               description: X-Application-Context
               examples:
-                owner:
+                CP0001234:
                   value: 'application:prod'
-                admin:
+                CP0001235:
                   value: 'application:prod'
-                member:
+                CP0001236:
                   value: 'application:prod'
-                staff:
+                CP0001237:
                   value: 'application:prod'
             Access-Control-Allow-Origin:
               schema:
@@ -3208,7 +3219,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/authorizations'
               examples:
-                owner:
+                CP0001234:
                   value:
                     orgMembership: OWNER
                     roles:
@@ -3224,7 +3235,7 @@ paths:
                         methodOfPayment: CC
                         bcOnlineUserId: PB25020
                         bcOnlineAccountId: ''
-                admin:
+                CP0001235:
                   value:
                     orgMembership: ADMIN
                     roles:
@@ -3237,7 +3248,7 @@ paths:
                         methodOfPayment: CC
                         bcOnlineUserId: PB25020
                         bcOnlineAccountId: ''
-                member:
+                CP0001236:
                   value:
                     orgMembership: MEMBER
                     roles:
@@ -3250,14 +3261,14 @@ paths:
                         methodOfPayment: CC
                         bcOnlineUserId: PB25020
                         bcOnlineAccountId: ''
-                staff:
+                CP0001237:
                   value:
                     roles:
                       - view
                       - edit
-                unauthorized:
+                CP0000000:
                   value: {}
-                expanded_premium:
+                CP0002000:
                   value:
                     orgMembership: OWNER
                     roles:
@@ -3270,10 +3281,10 @@ paths:
                       id: '1234'
                       name: Mock Account
                       paymentPreference:
-                        methodOfPayment: PREMIUM
+                        methodOfPayment: DRAWDOWN
                         bcOnlineUserId: PB25020
                         bcOnlineAccountId: ''
-                expanded_cc:
+                CP0001238:
                   value:
                     orgMembership: OWNER
                     roles:
@@ -3304,19 +3315,19 @@ paths:
         required: true
         description: Corp Num/Incorporation Number of the entity
         examples:
-          owner:
+          CP0001234:
             value: CP0001234
-          admin:
+          CP0001235:
             value: CP0001235
-          member:
+          CP0001236:
             value: CP0001236
-          staff:
+          CP0001237:
             value: CP0001237
-          unauthorized:
+          CP0000000:
             value: CP0000000
-          expanded_cc:
+          CP0001238:
             value: CP0001238
-          expanded_premium:
+          CP0002000:
             value: CP0002000
   '/accounts/{account_id}/products/{product_code}/authorizations':
     get:
@@ -3578,7 +3589,7 @@ paths:
                   - modifiedBy
                   - name
                   - passCodeClaimed
-                x-example:
+                examples:
                   CP0001578:
                     businessIdentifier: CP0001578
                     businessNumber: CP0001847
@@ -5324,7 +5335,7 @@ components:
         - sentDate
         - status
         - token
-    orgMembershipRequest:
+    orgMembershipRequest: 
       title: orgMembershipRequest
       type: object
       properties:
