@@ -138,7 +138,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('staff', ['products', 'accountTypes'])
   },
   methods: {
-    ...mapActions('org', ['createOrg', 'addProductsToOrg', 'syncOrganization', 'createInvitation']),
+    ...mapActions('org', ['createOrg', 'addProductsToOrg', 'createInvitation']),
     ...mapActions('staff', ['getProducts', 'getAccountTypes'])
   },
   components: {
@@ -161,8 +161,7 @@ export default class SetupAccountForm extends Vue {
   private readonly createOrg!: (
     requestBody: CreateRequestBody
   ) => Promise<Organization>
-  private readonly addProductsToOrg!: (productsRequestBody: ProductsRequestBody, organizationId: number) => Promise<Products>
-  private readonly syncOrganization!: (orgId: number) => Promise<Organization>
+  private readonly addProductsToOrg!: (productsRequestBody: ProductsRequestBody) => Promise<Products>
   private readonly getProducts!: () => Promise<ProductCode[]>
   private readonly getAccountTypes!: () => Promise<AccountType[]>
   private readonly createInvitation!: (Invitation) => Promise<void>
@@ -222,10 +221,11 @@ export default class SetupAccountForm extends Vue {
       try {
         this.saving = true
         const organization = await this.createOrg(createRequestBody)
-        await this.addProductsToOrg(addProductsRequestBody, organization.id)
+        await this.addProductsToOrg(addProductsRequestBody)
         await this.createInvitation({
           recipientEmail: this.email,
           sentDate: new Date(),
+          type: 'DIRECTOR_SEARCH',
           membership: [{ membershipType: 'ADMIN', orgId: organization.id }]
         })
         this.saving = false
