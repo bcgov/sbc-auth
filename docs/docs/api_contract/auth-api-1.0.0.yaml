@@ -1185,7 +1185,7 @@ paths:
           schema:
             type: string
           examples:
-            CP0001234:
+            example1:
               value: CP0001234
             CP0002000:
               value: CP0002000
@@ -1304,7 +1304,7 @@ paths:
                   - org_status
                   - preferred_payment
               examples:
-                CP0001234:
+                example1:
                   value:
                     orgs:
                     - id: '1234'
@@ -1332,7 +1332,7 @@ paths:
         required: true
         description: Corp Num/Incorporation Number of the entity
         examples:
-          CP0001234:
+          example1:
             value: CP0001234
           CP0002000:
             value: CP0002000
