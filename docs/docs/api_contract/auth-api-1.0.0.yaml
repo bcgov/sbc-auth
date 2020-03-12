@@ -963,7 +963,7 @@ paths:
         required: true
         schema:
           type: string
-        examples:
+        example:
           example1:
             value: '1234'
     put:
@@ -1076,12 +1076,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/org'
-              examples:
-                example1:
-                  value:
-                    id: '1234'
-                    name: Mock Account
-                    preferred_payment: CC
         '404':
           description: Not Found
           content:
@@ -1101,7 +1095,6 @@ paths:
         - orgs
       summary: Get the org specified by the provided id.
       description: Get the org specified by the provided id.
-    
   /orgs:
     post:
       responses:
@@ -1187,7 +1180,7 @@ paths:
           examples:
             example1:
               value: CP0001234
-            CP0002000:
+            example2:
               value: CP0002000
       tags:
         - authorization
@@ -1306,17 +1299,15 @@ paths:
               examples:
                 example1:
                   value:
-                    orgs:
-                    - id: '1234'
-                      name: Mock Account
-                      preferred_payment: CC
-
-                CP0002000:
+                    id: '1234'
+                    name: Mock Account
+                    preferred_payment: CC
+                example2:
                   value:
-                    - id: '2000'
-                      name: Mock Account
-                      preferred_payment: DRAWDOWN
-                      bc_online_user_id: PB25020
+                    id: '2000'
+                    name: Mock Account
+                    preferred_payment: PREMIUM
+                    bc_online_user_id: PB25020
         default:
           description: unexpected error
           content:
@@ -3147,13 +3138,13 @@ paths:
                 type: string
               description: X-Application-Context
               examples:
-                CP0001234:
+                owner:
                   value: 'application:prod'
-                CP0001235:
+                admin:
                   value: 'application:prod'
-                CP0001236:
+                member:
                   value: 'application:prod'
-                CP0001237:
+                staff:
                   value: 'application:prod'
             Access-Control-Allow-Origin:
               schema:
@@ -3217,7 +3208,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/authorizations'
               examples:
-                CP0001234:
+                owner:
                   value:
                     orgMembership: OWNER
                     roles:
@@ -3233,7 +3224,7 @@ paths:
                         methodOfPayment: CC
                         bcOnlineUserId: PB25020
                         bcOnlineAccountId: ''
-                CP0001235:
+                admin:
                   value:
                     orgMembership: ADMIN
                     roles:
@@ -3246,7 +3237,7 @@ paths:
                         methodOfPayment: CC
                         bcOnlineUserId: PB25020
                         bcOnlineAccountId: ''
-                CP0001236:
+                member:
                   value:
                     orgMembership: MEMBER
                     roles:
@@ -3259,14 +3250,14 @@ paths:
                         methodOfPayment: CC
                         bcOnlineUserId: PB25020
                         bcOnlineAccountId: ''
-                CP0001237:
+                staff:
                   value:
                     roles:
                       - view
                       - edit
-                CP0000000:
+                unauthorized:
                   value: {}
-                CP0002000:
+                expanded_premium:
                   value:
                     orgMembership: OWNER
                     roles:
@@ -3279,10 +3270,10 @@ paths:
                       id: '1234'
                       name: Mock Account
                       paymentPreference:
-                        methodOfPayment: DRAWDOWN
+                        methodOfPayment: PREMIUM
                         bcOnlineUserId: PB25020
                         bcOnlineAccountId: ''
-                CP0001238:
+                expanded_cc:
                   value:
                     orgMembership: OWNER
                     roles:
@@ -3313,19 +3304,19 @@ paths:
         required: true
         description: Corp Num/Incorporation Number of the entity
         examples:
-          CP0001234:
+          owner:
             value: CP0001234
-          CP0001235:
+          admin:
             value: CP0001235
-          CP0001236:
+          member:
             value: CP0001236
-          CP0001237:
+          staff:
             value: CP0001237
-          CP0000000:
+          unauthorized:
             value: CP0000000
-          CP0001238:
+          expanded_cc:
             value: CP0001238
-          CP0002000:
+          expanded_premium:
             value: CP0002000
   '/accounts/{account_id}/products/{product_code}/authorizations':
     get:
@@ -3587,7 +3578,7 @@ paths:
                   - modifiedBy
                   - name
                   - passCodeClaimed
-                examples:
+                x-example:
                   CP0001578:
                     businessIdentifier: CP0001578
                     businessNumber: CP0001847
@@ -5333,7 +5324,7 @@ components:
         - sentDate
         - status
         - token
-    orgMembershipRequest: 
+    orgMembershipRequest:
       title: orgMembershipRequest
       type: object
       properties:
