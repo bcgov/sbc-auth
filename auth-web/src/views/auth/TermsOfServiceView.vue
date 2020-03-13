@@ -75,8 +75,7 @@ export default class TermsOfServiceView extends Vue {
   }
 
   private clickDecline () {
-    // eslint-disable-next-line no-console
-    console.log('clickDecline')
+    this.$router.push('/unauthorizedtermsdecline')
   }
 }
 </script>
