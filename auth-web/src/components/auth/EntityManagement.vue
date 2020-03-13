@@ -241,16 +241,4 @@ export default class EntityManagement extends Vue {
     }
   }
 
-  .loading-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    z-index: 2;
-    background: $gray2;
-  }
 </style>
