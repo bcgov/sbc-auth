@@ -1,5 +1,12 @@
 <template>
-  <p v-html="content" class="terms-container"></p>
+  <div>
+    <v-fade-transition>
+      <div class="loading-container" v-if="!termsContent">
+        <v-progress-circular size="50" width="5" color="primary" :indeterminate="termsContent"/>
+      </div>
+    </v-fade-transition>
+    <p v-html="termsContent" class="terms-container"></p>
+  </div>
 </template>
 
 <script lang="ts">
@@ -7,16 +14,18 @@ import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import documentService from '@/services/document.services.ts'
 
 @Component({
-  computed: {
-  }
 })
+
 export default class TermsOfUse extends Vue {
   @Prop({ default: '' }) private content: string
+  private termsContent = ''
 
   async mounted () {
     if (!this.content) {
       const response = await documentService.getTermsOfService('termsofuse')
-      this.content = response.data.content
+      this.termsContent = response.data.content
+    } else {
+      this.termsContent = this.content
     }
   }
 }
