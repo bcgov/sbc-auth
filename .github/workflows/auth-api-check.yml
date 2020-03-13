@@ -16,8 +16,6 @@ jobs:
       FLASK_ENV: "testing"
       DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
 
-      USE_TEST_KEYCLOAK_DOCKER: ""
-
       JWT_OIDC_TEST_ISSUER: "http://localhost:8081/auth/realms/demo"
       JWT_OIDC_TEST_WELL_KNOWN_CONFIG: "http://localhost:8081/auth/realms/demo/.well-known/openid-configuration"
       JWT_OIDC_TEST_ALGORITHMS: "RS256"
