@@ -246,7 +246,7 @@ class Invitation:
         if invitation.invitation_status_code == 'EXPIRED':
             raise BusinessException(Error.EXPIRED_INVITATION, None)
 
-        return invitation_id
+        return Invitation(invitation)
 
     @staticmethod
     def notify_admin(user, invitation_id, membership_id, invitation_origin):
