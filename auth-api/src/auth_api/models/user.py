@@ -66,6 +66,9 @@ class User(BaseModel):
     )
     user_status = relationship('UserStatusCode', foreign_keys=[status], lazy='subquery')
 
+    # a type for the user to identify what kind of user it is..ie anonymous , bcsc etc ..similar to login source
+    type = Column('type', String(200), nullable=True)
+
     @classmethod
     def find_by_username(cls, username):
         """Return the first user with the provided username."""

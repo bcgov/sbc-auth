@@ -145,7 +145,7 @@ def test_validate_token_valid(session, auth_mock, keycloak_mock):  # pylint:disa
         invitation_info = factory_invitation(org_dictionary['id'])
         new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '').as_dict()
         confirmation_token = InvitationService.generate_confirmation_token(new_invitation['id'])
-        invitation_id = InvitationService.validate_token(confirmation_token)
+        invitation_id = InvitationService.validate_token(confirmation_token).as_dict().get('id')
         assert invitation_id == new_invitation['id']
 
 
