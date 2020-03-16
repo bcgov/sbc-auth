@@ -1,5 +1,5 @@
 export interface AccountSettings {
-  id: string
+  id: number
   label: string
   type: string
   urlpath: string

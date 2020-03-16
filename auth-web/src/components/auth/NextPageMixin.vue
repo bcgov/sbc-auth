@@ -1,29 +1,48 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
-import { mapGetters, mapState } from 'vuex'
+import { Pages, SessionStorageKeys } from '@/util/constants'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
 import Component from 'vue-class-component'
+import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
-import { Pages } from '@/util/constants'
+import OrgModule from '@/store/modules/org'
 import { User } from '@/models/user'
+import UserModule from '@/store/modules/user'
 import Vue from 'vue'
+import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
     ...mapState('user', ['userProfile', 'userContact', 'redirectAfterLoginUrl']),
-    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings']),
-    ...mapGetters('org', ['myOrgMembership'])
+    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings'])
+  },
+  methods: {
+    ...mapActions('user', ['loadUserInfo', 'syncUserProfile', 'getUserProfile']),
+    ...mapActions('org', ['syncOrganization', 'syncMembership', 'resetCurrentOrganization']),
+    ...mapMutations('org', ['setCurrentAccountSettings'])
   }
 })
 export default class NextPageMixin extends Vue {
+  private userStore = getModule(UserModule, this.$store)
+  private orgStore = getModule(OrgModule, this.$store)
   protected readonly userProfile!: User
   protected readonly userContact!: Contact
   protected readonly redirectAfterLoginUrl: string
   protected readonly currentOrganization!: Organization
   protected readonly currentMembership!: Member
   protected readonly currentAccountSettings!: AccountSettings
+  protected readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
+  protected readonly syncUserProfile!: () => void
+  protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
+  protected readonly syncMembership!: (currentAccount: number) => Promise<Member>
+  protected readonly resetCurrentOrganization!: () => Promise<void>
+
+  protected getAccountFromSession (): AccountSettings {
+    return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
+  }
 
   protected getNextPageUrl (): string {
     let nextStep = '/'
@@ -54,6 +73,28 @@ export default class NextPageMixin extends Vue {
       }
     } else {
       this.$router.push(this.getNextPageUrl())
+    }
+  }
+
+  protected redirectTo (target: string): void {
+    if (CommonUtils.isUrl(target)) {
+      window.location.assign(target)
+    } else {
+      this.$router.push(target)
+    }
+  }
+
+  protected async syncUser () {
+    this.setCurrentAccountSettings(this.getAccountFromSession())
+    await this.syncUserProfile()
+    if (this.currentAccountSettings) {
+      await this.syncMembership(this.currentAccountSettings.id)
+      if (this.currentMembership.membershipStatus === MembershipStatus.Active) {
+        await this.syncOrganization(this.currentAccountSettings.id)
+      } else {
+        // Set current org to blank state if not active in the current org
+        await this.resetCurrentOrganization()
+      }
     }
   }
 }

@@ -75,7 +75,7 @@
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import { Member, MembershipType, Organization, RoleInfo } from '@/models/Organization'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import { Invitation } from '@/models/Invitation'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
@@ -88,8 +88,7 @@ interface InvitationInfo {
 
 @Component({
   computed: {
-    ...mapState('org', ['currentOrganization', 'pendingOrgInvitations']),
-    ...mapGetters('org', ['myOrgMembership'])
+    ...mapState('org', ['currentOrganization', 'currentMembership', 'pendingOrgInvitations'])
   },
   methods: {
     ...mapMutations('org', ['resetInvitations']),
@@ -100,7 +99,7 @@ export default class InviteUsersForm extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
   private loading = false
   private readonly currentOrganization!: Organization
-  private readonly myOrgMembership!: Member
+  private readonly currentMembership!: Member
   private readonly pendingOrgInvitations!: Invitation[]
   private readonly resetInvitations!: () => void
   private readonly createInvitation!: (Invitation) => Promise<void>
@@ -111,7 +110,7 @@ export default class InviteUsersForm extends Vue {
   }
 
   private get availableRoles () {
-    if (this.myOrgMembership.membershipTypeCode !== MembershipType.Owner) {
+    if (this.currentMembership.membershipTypeCode !== MembershipType.Owner) {
       return this.roles.filter(role => role.name !== 'Owner')
     }
     return this.roles
