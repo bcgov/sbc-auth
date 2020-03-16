@@ -14,6 +14,7 @@ env:
 jobs:
   auth-api-dev:
     runs-on: ubuntu-latest
+    if: github.repository == 'bcgov/sbc-auth'
     steps:
       - uses: actions/checkout@v2
       - name: Install tools
@@ -64,10 +65,11 @@ jobs:
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           commit: true
           token: ${{ secrets.GITHUB_TOKEN }}
-  
+
   auth-api-postman-test:
     needs: auth-api-dev
     runs-on: ubuntu-latest
+    if: github.repository == 'bcgov/sbc-auth'
     strategy:
       matrix:
         node-version: [12.x]

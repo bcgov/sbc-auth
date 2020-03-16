@@ -10,7 +10,7 @@ on:
 jobs:
   status-api-check:
     runs-on: ubuntu-latest
-
+    if: github.repository == 'bcgov/sbc-auth'
     env:
       FLASK_ENV: "testing"
 
