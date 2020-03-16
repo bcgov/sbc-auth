@@ -110,7 +110,7 @@ export default class AddBusinessForm extends Vue {
   private validationError = ''
   private entityNumRules = [
     v => !!v || 'Incorporation Number is required',
-    v => CommonUtils.validateIncorporationNumber(v) || 'Incorporation Number in invalid'
+    v => CommonUtils.validateIncorporationNumber(v) || 'Incorporation Number is invalid'
   ]
   private entityPasscodeRules = [
     v => !!v || 'Passcode is required',

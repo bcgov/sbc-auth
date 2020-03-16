@@ -105,7 +105,7 @@ export default class SearchBusinessView extends Vue {
 
   private incorpNumRules = [
     v => !!v || 'Incorporation Number is required',
-    v => CommonUtils.validateIncorporationNumber(v) || 'Incorporation Number in invalid'
+    v => CommonUtils.validateIncorporationNumber(v) || 'Incorporation Number is invalid'
   ]
 
   $refs: {
