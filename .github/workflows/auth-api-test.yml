@@ -15,6 +15,7 @@ env:
 jobs:
   auth-api-deploy-test:
     runs-on: ubuntu-latest
+    if: github.repository == 'bcgov/sbc-auth'
     strategy:
       matrix:
         python-version: [3.7]
