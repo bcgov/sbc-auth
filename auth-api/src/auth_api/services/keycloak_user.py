@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Object to hold keycloak user information."""
-from typing import Dict
 import json
+from typing import Dict
 
 from auth_api.utils.enums import RequiredAction
 
@@ -44,7 +44,6 @@ class KeycloakUser:  # pylint: disable=too-many-instance-attributes
     def email(self, value: str):
         """Set the email."""
         self._user['email'] = value
-
 
     @property
     def enabled(self):
@@ -104,11 +103,12 @@ class KeycloakUser:  # pylint: disable=too-many-instance-attributes
         return self._user.get('attributes')
 
     @attributes.setter
-    def attributes(self, value: dict = {}):
+    def attributes(self, value: dict = None):
         """Set the attributes."""
         self._user['attributes'] = {}
-        for key in value.keys():
-            self._user['attributes'][key] = value[key]
+        if value:
+            for key in value.keys():
+                self._user['attributes'][key] = value[key]
 
     def update_password_on_login(self):
         """Set the required_actions."""
@@ -122,9 +122,6 @@ class KeycloakUser:  # pylint: disable=too-many-instance-attributes
             self._user['requiredActions'] = []
         self._user['requiredActions'].append(RequiredAction.CONFIGURE_TOTP.value)
 
-
     def value(self) -> Dict:
         """Return dict value."""
         return json.dumps(self._user)
-
-

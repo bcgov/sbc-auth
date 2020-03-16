@@ -80,6 +80,7 @@ def test_keycloak_get_token_user_not_exist(session):
         assert err.code == Error.INVALID_USER_CREDENTIALS.name
     assert response is None
 
+
 def test_keycloak_delete_user_by_username(session):
     """Delete user by username.Assert response is not None."""
     # with app.app_context():
@@ -113,8 +114,8 @@ def test_join_public_users_group(app, session):
     user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name)
     user_id = user.id
     KEYCLOAK_SERVICE.join_public_users_group({'sub': user_id,
-                                                'loginSource': PASSCODE,
-                                                'realm_access': {'roles': []}})
+                                              'loginSource': PASSCODE,
+                                              'realm_access': {'roles': []}})
     # Get the user groups and verify the public_users group is in the list
     user_groups = KEYCLOAK_SERVICE.get_user_groups(id=user_id)
     groups = []

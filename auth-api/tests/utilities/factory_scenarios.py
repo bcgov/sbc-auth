@@ -379,7 +379,7 @@ class KeycloakScenario:
 
     @staticmethod
     def create_user_request():
-        """Return create user request.""" 
+        """Return create user request."""
         create_user_request = KeycloakUser()
         create_user_request.user_name = 'testuser1'
         create_user_request.password = '1111'
@@ -390,10 +390,9 @@ class KeycloakScenario:
         create_user_request.enabled = True
         return create_user_request
 
-
     @staticmethod
     def create_user_request_2():
-        """Return create user request.""" 
+        """Return create user request."""
         create_user_request = KeycloakUser()
         create_user_request.user_name = 'testuser2'
         create_user_request.password = '1111'

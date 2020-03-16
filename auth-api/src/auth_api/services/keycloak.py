@@ -21,20 +21,18 @@ from flask import g, current_app
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.utils.constants import BCSC, GROUP_ACCOUNT_HOLDERS, GROUP_PUBLIC_USERS, PASSCODE
-from auth_api.utils.roles import Role
-from auth_api.utils.util import Singleton
 from auth_api.utils.enums import ContentType
-
+from auth_api.utils.roles import Role
 from .keycloak_user import KeycloakUser
+
 
 class KeycloakService:
     """For Keycloak services."""
 
     @staticmethod
-    def add_user(user: KeycloakUser, return_if_exists:bool = False):
+    def add_user(user: KeycloakUser, return_if_exists: bool = False):
         """Add user to Keycloak."""
         config = current_app.config
-        admin_token = None
         # Add user and set password
         admin_token = KeycloakService._get_admin_token(upstream=True)
 
@@ -59,7 +57,7 @@ class KeycloakService:
         return KeycloakService.get_user_by_username(user.user_name, admin_token)
 
     @staticmethod
-    def get_user_by_username(username, admin_token = None) -> KeycloakUser:
+    def get_user_by_username(username, admin_token=None) -> KeycloakUser:
         """Get user from Keycloak by username."""
         user = None
         base_url = current_app.config.get('KEYCLOAK_BCROS_BASE_URL')
@@ -80,11 +78,12 @@ class KeycloakService:
         return user
 
     @staticmethod
-    def get_user_groups(id, upstream:bool=False) -> KeycloakUser:
+    def get_user_groups(user_id, upstream: bool = False) -> KeycloakUser:
         """Get user from Keycloak by username."""
-        user = None
-        base_url = current_app.config.get('KEYCLOAK_BCROS_BASE_URL') if upstream else current_app.config.get('KEYCLOAK_BASE_URL')
-        realm = current_app.config.get('KEYCLOAK_BCROS_REALMNAME') if upstream else current_app.config.get('KEYCLOAK_REALMNAME')
+        base_url = current_app.config.get('KEYCLOAK_BCROS_BASE_URL') if upstream else current_app.config.get(
+            'KEYCLOAK_BASE_URL')
+        realm = current_app.config.get('KEYCLOAK_BCROS_REALMNAME') if upstream else current_app.config.get(
+            'KEYCLOAK_REALMNAME')
         admin_token = KeycloakService._get_admin_token(upstream=upstream)
         headers = {
             'Content-Type': ContentType.JSON.value,
@@ -92,7 +91,7 @@ class KeycloakService:
         }
 
         # Get the user and return
-        query_user_url = f'{base_url}/auth/admin/realms/{realm}/users/{id}/groups'
+        query_user_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/groups'
         response = requests.get(query_user_url, headers=headers)
         response.raise_for_status()
         return response.json()
@@ -133,14 +132,13 @@ class KeycloakService:
             headers = {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
-            token_url =  f'{base_url}/auth/realms/{realm}/protocol/openid-connect/token'
+            token_url = f'{base_url}/auth/realms/{realm}/protocol/openid-connect/token'
             response = requests.post(token_url, data=token_request, headers=headers)
 
             response.raise_for_status()
             return response.json()
         except Exception as err:
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, err)
-
 
     @staticmethod
     def join_public_users_group(token_info: Dict):
@@ -220,7 +218,8 @@ class KeycloakService:
         config = current_app.config
         base_url = config.get('KEYCLOAK_BCROS_BASE_URL') if upstream else config.get('KEYCLOAK_BASE_URL')
         realm = config.get('KEYCLOAK_BCROS_REALMNAME') if upstream else config.get('KEYCLOAK_REALMNAME')
-        admin_client_id = config.get('KEYCLOAK_BCROS_ADMIN_CLIENTID') if upstream else config.get('KEYCLOAK_ADMIN_USERNAME')
+        admin_client_id = config.get('KEYCLOAK_BCROS_ADMIN_CLIENTID') if upstream else config.get(
+            'KEYCLOAK_ADMIN_USERNAME')
         admin_secret = config.get('KEYCLOAK_BCROS_ADMIN_SECRET') if upstream else config.get('KEYCLOAK_ADMIN_SECRET')
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
