@@ -8,7 +8,12 @@
         @account-switch-started="startAccountSwitch"
         @account-switch-completed="completeAccountSwitch"
         @hook:mounted="setup"
-        ref="header" />
+        idpHint="bcsc"
+        ref="header">
+        <template v-slot:login-button-text>
+          Log in with BC Services Card
+        </template>
+      </sbc-header>
        <v-snackbar top :color="toastType" v-model="showNotification" :timeout="toastTimeout">
         <span v-html="notificationText"></span>
         <v-btn icon @click="showNotification = false">
