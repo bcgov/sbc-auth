@@ -1,7 +1,9 @@
-import { Role, SessionStorageKeys } from '@/util/constants'
-import Router, { Location } from 'vue-router'
+import { Member, MembershipStatus, Organization } from '@/models/Organization'
+import { Pages, Role, SessionStorageKeys } from '@/util/constants'
+import Router, { Route } from 'vue-router'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
+import { AccountSettings } from '@/models/account-settings'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -72,7 +74,7 @@ export function getRoutes () {
     { path: '/account/:orgId/settings',
       name: 'account-settings',
       component: accountSettings,
-      meta: { requiresAuth: true, requiresProfile: true },
+      meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true },
       redirect: '/account/:orgId/settings/account-info',
       props: true,
       children: [
@@ -98,7 +100,7 @@ export function getRoutes () {
     { path: '/signin/:idpHint/:redirectUrl/:redirectUrlLoginFail', name: 'signin-redirect-full', component: SigninView, props: true, meta: { requiresAuth: false } },
     { path: '/signout', name: 'signout', component: SignoutView, props: true, meta: { requiresAuth: true } },
     { path: '/signout/:redirectUrl', name: 'signout-redirect', component: SignoutView, props: true, meta: { requiresAuth: true } },
-    { path: '/businessprofile', name: 'businessprofile', component: BusinessProfileView, meta: { requiresAuth: true, requiresProfile: true, showNavBar: true } },
+    { path: '/businessprofile', name: 'businessprofile', component: BusinessProfileView, meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true, showNavBar: true } },
     { path: '/makepayment/:paymentId/:redirectUrl', name: 'makepayment', component: PaymentView, props: true, meta: { requiresAuth: false, requiresProfile: true } },
     { path: '/profiledeactivated', name: 'profiledeactivated', component: ProfileDeactivatedView, props: true, meta: { requiresAuth: false } },
     { path: '/returnpayment/:paymentId/transaction/:transactionId', name: 'returnpayment', component: PaymentReturnView, props: mapReturnPayVars, meta: { requiresAuth: false, requiresProfile: true } },
@@ -121,6 +123,7 @@ const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL
 })
+
 router.beforeEach((to, from, next) => {
   // If the user is authenticated;
   //    If there are allowed or disabled roles specified on the route check if the user has those roles else route to unauthorized
@@ -144,17 +147,42 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-  // Enforce user profile and terms if attempts are made to navigate anywhere else
-  const userContact: Contact = (store.state as any)?.user?.userContact
-  const userProfile: User = (store.state as any)?.user?.userProfile
-  if (to.matched.some(record => record.meta.requiresProfile) &&
-     (!userContact || !userProfile?.userTerms?.isTermsOfUseAccepted)) {
-    return next({
-      path: '/userprofile'
-    })
+  // Enforce navigation guards are checked before navigating anywhere else
+  // If store is not ready, we place a watch on it, then proceed when ready
+  if (store.getters.loading) {
+    store.watch(
+      (state, getters) => getters.loading,
+      value => {
+        if (value === false) {
+          proceed(to)
+        }
+      })
+  } else {
+    proceed()
   }
 
-  next()
+  function proceed (originalTarget?: Route) {
+    const userContact: Contact = (store.state as any)?.user?.userContact
+    const userProfile: User = (store.state as any)?.user?.userProfile
+    const currentAccountSettings: AccountSettings = (store.state as any)?.org.currentAccountSettings
+    const currentOrganization: Organization = (store.state as any)?.org?.currentOrganization
+    const currentMembership: Member = (store.state as any)?.org?.currentMembership
+    if (to.matched.some(record => record.meta.requiresProfile) &&
+      (!userContact || !userProfile?.userTerms?.isTermsOfUseAccepted)) {
+      return next({
+        path: `/${Pages.USER_PROFILE}`
+      })
+    }
+
+    if (to.matched.some(record => record.meta.requiresActiveAccount)) {
+      if (currentAccountSettings && currentMembership.membershipStatus === MembershipStatus.Pending) {
+        return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}` })
+      } else if (!currentOrganization || currentMembership.membershipStatus !== MembershipStatus.Active) {
+        return next({ path: `/${Pages.CREATE_ACCOUNT}` })
+      }
+    }
+    originalTarget ? next(originalTarget) : next()
+  }
 })
 
 export default router

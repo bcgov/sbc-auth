@@ -61,7 +61,6 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class UserProfileView extends Mixins(NextPageMixin) {
-  private userStore = getModule(UserModule, this.$store)
   private readonly getUserProfile!: (identifier: string) => User
   @Prop() token: string
   private editing = false

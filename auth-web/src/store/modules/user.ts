@@ -32,11 +32,11 @@ export default class UserModule extends VuexModule {
   }
 
   get termsOfUseVersion () {
-    return this.userProfile.userTerms.termsOfUseAcceptedVersion
+    return this.userProfile?.userTerms?.termsOfUseAcceptedVersion
   }
 
   get isTermsAccepted () {
-    return this.userProfile.userTerms.isTermsOfUseAccepted
+    return this.userProfile?.userTerms?.isTermsOfUseAccepted
   }
 
   @Mutation

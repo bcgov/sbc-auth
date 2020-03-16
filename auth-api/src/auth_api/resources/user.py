@@ -284,7 +284,7 @@ class MembershipResource(Resource):
             else:
                 membership = MembershipService \
                     .get_membership_for_org_and_user(org_id=org_id, user_id=user.identifier)
-                response, status = MembershipSchema(exclude=['user', 'org']).dump(membership), http_status.HTTP_200_OK
+                response, status = MembershipSchema(exclude=['org']).dump(membership), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

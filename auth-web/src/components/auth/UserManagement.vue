@@ -134,7 +134,7 @@
 import { ActiveUserRecord, Member, MembershipStatus, MembershipType, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import MemberDataTable, { ChangeRolePayload } from '@/components/auth/MemberDataTable.vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import { Business } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
@@ -160,10 +160,10 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('org', [
       'resending',
       'sentInvitations',
-      'pendingOrgMembers'
+      'pendingOrgMembers',
+      'currentMembership'
     ]),
-    ...mapState('business', ['currentBusiness']),
-    ...mapGetters('org', ['myOrgMembership'])
+    ...mapState('business', ['currentBusiness'])
   },
   methods: {
     ...mapActions('org', [
@@ -203,7 +203,7 @@ export default class UserManagement extends Vue {
   private readonly currentBusiness!: Business
   private readonly resending!: boolean
   private readonly sentInvitations!: Invitation[]
-  private readonly myOrgMembership!: Member
+  private readonly currentMembership!: Member
   private readonly resendInvitation!: (invitation: Invitation) => void
   private readonly deleteInvitation!: (invitationId: number) => void
   private readonly updateMember!: (updateMemberPayload: UpdateMemberPayload) => void
@@ -239,10 +239,10 @@ export default class UserManagement extends Vue {
   }
 
   private canInvite (): boolean {
-    return this.myOrgMembership &&
-            this.myOrgMembership.membershipStatus === MembershipStatus.Active &&
-            (this.myOrgMembership.membershipTypeCode === MembershipType.Owner ||
-             this.myOrgMembership.membershipTypeCode === MembershipType.Admin)
+    return this.currentMembership &&
+            this.currentMembership.membershipStatus === MembershipStatus.Active &&
+            (this.currentMembership.membershipTypeCode === MembershipType.Owner ||
+             this.currentMembership.membershipTypeCode === MembershipType.Admin)
   }
 
   private showInviteUsersModal () {
@@ -382,7 +382,7 @@ export default class UserManagement extends Vue {
   }
 
   private async leave () {
-    await this.leaveTeam(this.myOrgMembership.id)
+    await this.leaveTeam(this.currentMembership.id)
     this.$refs.confirmActionDialog.close()
     this.$store.commit('updateHeader')
     this.$router.push('/leaveteam')
@@ -390,7 +390,7 @@ export default class UserManagement extends Vue {
 
   private async dissolve () {
     await this.dissolveTeam()
-    await this.leaveTeam(this.myOrgMembership.id)
+    await this.leaveTeam(this.currentMembership.id)
     this.$refs.confirmActionDialog.close()
     this.$store.commit('updateHeader')
     const event:Event = { message: 'Dissolved the account', type: 'error', timeout: 1000 }

@@ -47,9 +47,6 @@ describe('DashboardView.vue', () => {
       actions: {
         syncOrganizations: jest.fn(),
         syncCurrentOrganization: jest.fn()
-      },
-      getters: {
-        myOrgMembership: jest.fn()
       }
     }
     const store = new Vuex.Store({

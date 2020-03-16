@@ -5,7 +5,6 @@ import { Products, ProductsRequestBody } from '@/models/Staff'
 import { AccountSettings } from '@/models/account-settings'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import OrgService from '@/services/org.services'
 import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
@@ -27,15 +26,6 @@ export default class OrgModule extends VuexModule {
   pendingOrgInvitations: Invitation[] = []
   invalidInvitationToken = false
   tokenError = false
-
-  get myOrgMembership (): Member {
-    const currentUser: KCUserProfile = this.context.rootState.user.currentUser
-    const orgMembers: Member[] = [...this.context.rootState.org.activeOrgMembers, ...this.context.rootState.org.pendingOrgMembers]
-    if (orgMembers && currentUser) {
-      return orgMembers.find(member => member.user.username === currentUser.userName)
-    }
-    return undefined
-  }
 
   @Mutation
   public setActiveOrgMembers (activeMembers: Member[]) {
@@ -80,13 +70,21 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
-  public setCurrentOrganization (organization: Organization) {
+  public setCurrentOrganization (organization: Organization | undefined) {
     this.currentOrganization = organization
   }
 
   @Mutation
   public setCurrentMembership (membership: Member) {
     this.currentMembership = membership
+  }
+
+  @Action({ rawError: true })
+  public async resetCurrentOrganization (): Promise<void> {
+    this.context.commit('setCurrentOrganization', undefined)
+    this.context.commit('setActiveOrgMembers', [])
+    this.context.commit('setPendingOrgMembers', [])
+    this.context.commit('setPendingOrgInvitations', [])
   }
 
   @Action({ rawError: true })
