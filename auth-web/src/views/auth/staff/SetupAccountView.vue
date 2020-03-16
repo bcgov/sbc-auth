@@ -11,7 +11,7 @@
             <p class="mb-0">Enter the name and contact information for this account, and indicate which products this account will have access to.</p>
           </div>
         </div>
-        <v-card class="profile-card py-4 px-6">
+        <v-card class="profile-card py-4 px-6" flat>
           <v-container>
             <v-card-title>Account Details</v-card-title>
             <v-card-text>

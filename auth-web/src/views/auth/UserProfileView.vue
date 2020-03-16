@@ -93,19 +93,6 @@ export default class UserProfileView extends Mixins(NextPageMixin) {
     letter-spacing: -0.02rem;
   }
 
-  .loading-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    z-index: 2;
-    background: $gray2;
-  }
-
   .user-profile-header {
     flex-direction: column;
   }
