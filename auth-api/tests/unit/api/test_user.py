@@ -527,7 +527,7 @@ def test_add_user_adds_to_account_holders_group(client, jwt, session):  # pylint
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source='BCSC'))
     client.post('/api/v1/users', headers=headers, content_type='application/json')
 
-    user_groups = KEYCLOAK_SERVICE.get_user_groups(id=user_id)
+    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))

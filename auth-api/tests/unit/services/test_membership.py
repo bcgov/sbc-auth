@@ -64,7 +64,7 @@ def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:d
     updated_fields = {'membership_status': active_membership_status}
     MembershipService(membership).update_membership(updated_fields=updated_fields, token_info=token_info())
 
-    user_groups = keycloak_service.get_user_groups(id=kc_user2.id)
+    user_groups = keycloak_service.get_user_groups(user_id=kc_user2.id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
@@ -106,7 +106,7 @@ def test_remove_member_removes_group_to_the_user(session, monkeypatch):  # pylin
     updated_fields = {'membership_status': active_membership_status}
     MembershipService(membership).update_membership(updated_fields=updated_fields, token_info=token_info())
 
-    user_groups = keycloak_service.get_user_groups(id=kc_user2.id)
+    user_groups = keycloak_service.get_user_groups(user_id=kc_user2.id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
@@ -117,7 +117,7 @@ def test_remove_member_removes_group_to_the_user(session, monkeypatch):  # pylin
     updated_fields = {'membership_status': active_membership_status}
     MembershipService(membership).update_membership(updated_fields=updated_fields, token_info=token_info())
 
-    user_groups = keycloak_service.get_user_groups(id=kc_user2.id)
+    user_groups = keycloak_service.get_user_groups(user_id=kc_user2.id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))

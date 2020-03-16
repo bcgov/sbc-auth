@@ -117,7 +117,7 @@ def test_join_public_users_group(app, session):
                                               'loginSource': PASSCODE,
                                               'realm_access': {'roles': []}})
     # Get the user groups and verify the public_users group is in the list
-    user_groups = KEYCLOAK_SERVICE.get_user_groups(id=user_id)
+    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
@@ -134,7 +134,7 @@ def test_join_public_users_group_for_staff_users(session, app):
     user_id = user.id
     KEYCLOAK_SERVICE.join_public_users_group({'sub': user_id, 'loginSource': STAFF, 'realm_access': {'roles': []}})
     # Get the user groups and verify the public_users group is in the list
-    user_groups = KEYCLOAK_SERVICE.get_user_groups(id=user_id)
+    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
@@ -151,7 +151,7 @@ def test_join_public_users_group_for_existing_users(session):
     KEYCLOAK_SERVICE.join_public_users_group(
         {'sub': user_id, 'loginSource': PASSCODE, 'realm_access': {'roles': [Role.EDITOR.value]}})
     # Get the user groups and verify the public_users group is in the list
-    user_groups = KEYCLOAK_SERVICE.get_user_groups(id=user_id)
+    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
@@ -167,7 +167,7 @@ def test_join_account_holders_group(session):
     user_id = user.id
     KEYCLOAK_SERVICE.join_account_holders_group(keycloak_guid=user_id)
     # Get the user groups and verify the public_users group is in the list
-    user_groups = KEYCLOAK_SERVICE.get_user_groups(id=user_id)
+    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
@@ -197,7 +197,7 @@ def test_join_account_holders_group_from_token(session, monkeypatch):
 
     KEYCLOAK_SERVICE.join_account_holders_group()
     # Get the user groups and verify the public_users group is in the list
-    user_groups = KEYCLOAK_SERVICE.get_user_groups(id=user_id)
+    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
@@ -213,13 +213,13 @@ def test_remove_from_account_holders_group(session):
     user_id = user.id
     KEYCLOAK_SERVICE.join_account_holders_group(keycloak_guid=user_id)
     # Get the user groups and verify the public_users group is in the list
-    user_groups = KEYCLOAK_SERVICE.get_user_groups(id=user_id)
+    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
     assert GROUP_ACCOUNT_HOLDERS in groups
     KEYCLOAK_SERVICE.remove_from_account_holders_group(keycloak_guid=user_id)
-    user_groups = KEYCLOAK_SERVICE.get_user_groups(id=user_id)
+    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))

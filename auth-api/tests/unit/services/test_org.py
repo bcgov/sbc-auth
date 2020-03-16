@@ -345,7 +345,7 @@ def test_create_org_adds_user_to_account_holders_group(session, monkeypatch):  #
     monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', token_info)
     OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
 
-    user_groups = keycloak_service.get_user_groups(id=kc_user.id)
+    user_groups = keycloak_service.get_user_groups(user_id=kc_user.id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
@@ -376,7 +376,7 @@ def test_delete_org_removes_user_from_account_holders_group(session, monkeypatch
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     org = OrgService.delete_org(org.as_dict().get('id'), token_info())
 
-    user_groups = keycloak_service.get_user_groups(id=kc_user.id)
+    user_groups = keycloak_service.get_user_groups(user_id=kc_user.id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
@@ -408,7 +408,7 @@ def test_delete_does_not_remove_user_from_account_holder_group(session, monkeypa
     OrgService.create_org(TestOrgInfo.org2, user_id=user.id)
     OrgService.delete_org(org1.as_dict().get('id'), token_info())
 
-    user_groups = keycloak_service.get_user_groups(id=kc_user.id)
+    user_groups = keycloak_service.get_user_groups(user_id=kc_user.id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
