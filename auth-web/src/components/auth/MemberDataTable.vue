@@ -100,7 +100,7 @@
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import { Business } from '@/models/business'
 import moment from 'moment'
 
@@ -112,14 +112,13 @@ export interface ChangeRolePayload {
 @Component({
   computed: {
     ...mapState('business', ['businesses']),
-    ...mapState('org', ['activeOrgMembers']),
-    ...mapGetters('org', ['myOrgMembership'])
+    ...mapState('org', ['activeOrgMembers', 'currentMembership'])
   }
 })
 export default class MemberDataTable extends Vue {
   private readonly businesses!: Business[]
   private readonly activeOrgMembers!: Member[]
-  private readonly myOrgMembership!: Member
+  private readonly currentMembership!: Member
 
   private readonly availableRoles: RoleInfo[] = [
     {
@@ -183,7 +182,7 @@ export default class MemberDataTable extends Vue {
   }
 
   private isRoleEnabled (role: RoleInfo): boolean {
-    switch (this.myOrgMembership.membershipTypeCode) {
+    switch (this.currentMembership.membershipTypeCode) {
       case MembershipType.Owner:
         return true
       case MembershipType.Admin:
@@ -197,11 +196,11 @@ export default class MemberDataTable extends Vue {
   }
 
   private canChangeRole (memberBeingChanged: Member): boolean {
-    if (this.myOrgMembership.membershipStatus !== MembershipStatus.Active) {
+    if (this.currentMembership.membershipStatus !== MembershipStatus.Active) {
       return false
     }
 
-    switch (this.myOrgMembership.membershipTypeCode) {
+    switch (this.currentMembership.membershipTypeCode) {
       case MembershipType.Owner:
         // Owners can change roles of other users who are not owners
         if (!this.isOwnMembership(memberBeingChanged) && memberBeingChanged.membershipTypeCode !== MembershipType.Owner) {
@@ -225,17 +224,17 @@ export default class MemberDataTable extends Vue {
 
   private canRemove (memberToRemove: Member): boolean {
     // Can't remove yourself
-    if (this.myOrgMembership.user.username === memberToRemove.user.username) {
+    if (this.currentMembership.user.username === memberToRemove.user.username) {
       return false
     }
 
     // Can't remove unless Admin/Owner
-    if (this.myOrgMembership.membershipTypeCode === MembershipType.Member) {
+    if (this.currentMembership.membershipTypeCode === MembershipType.Member) {
       return false
     }
 
     // Can't remove Admin unless Owner
-    if (this.myOrgMembership.membershipTypeCode === MembershipType.Admin &&
+    if (this.currentMembership.membershipTypeCode === MembershipType.Admin &&
       memberToRemove.membershipTypeCode === MembershipType.Admin) {
       return false
     }
@@ -249,7 +248,7 @@ export default class MemberDataTable extends Vue {
   }
 
   private canLeave (member: Member): boolean {
-    if (this.myOrgMembership.user.username !== member.user.username) {
+    if (this.currentMembership.user.username !== member.user.username) {
       return false
     }
     return true
@@ -325,7 +324,7 @@ export default class MemberDataTable extends Vue {
   }
 
   private isOwnMembership (member: Member) {
-    return !!this.myOrgMembership && this.myOrgMembership.user.username === member.user.username
+    return this.currentMembership?.user?.username === member.user.username || false
   }
 }
 </script>

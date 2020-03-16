@@ -5,24 +5,26 @@ import { RootState } from './types'
 import StaffModule from '@/store/modules/staff'
 import UserModule from '@/store/modules/user'
 import Vue from 'vue'
-import VuexPersistance from 'vuex-persist'
 
 Vue.use(Vuex)
 
 const debug = process.env.NODE_ENV !== 'production'
 
-const vuexSession = new VuexPersistance<RootState>({
-  storage: window.sessionStorage
-})
-
 const storeOptions: StoreOptions<RootState> = {
   strict: debug,
   state: () => ({
-    refreshKey: 0
+    refreshKey: 0,
+    loading: true
   }),
+  getters: {
+    loading: (state) => state.loading
+  },
   mutations: {
     updateHeader (state) {
       state.refreshKey++
+    },
+    loadComplete (state) {
+      state.loading = false
     }
   },
   modules: {
@@ -30,8 +32,7 @@ const storeOptions: StoreOptions<RootState> = {
     user: UserModule,
     org: OrgModule,
     staff: StaffModule
-  },
-  plugins: [vuexSession.plugin]
+  }
 }
 
 export default new Vuex.Store<RootState>(storeOptions)
