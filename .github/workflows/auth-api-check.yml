@@ -10,12 +10,11 @@ on:
 jobs:
   auth-api-check:
     runs-on: ubuntu-latest
+    if: github.repository == 'bcgov/sbc-auth'
 
     env:
       FLASK_ENV: "testing"
       DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
-
-      USE_TEST_KEYCLOAK_DOCKER: "YES"
 
       JWT_OIDC_TEST_ISSUER: "http://localhost:8081/auth/realms/demo"
       JWT_OIDC_TEST_WELL_KNOWN_CONFIG: "http://localhost:8081/auth/realms/demo/.well-known/openid-configuration"
@@ -70,9 +69,17 @@ jobs:
         working-directory: ./auth-api
         run: |
           flake8 src/auth_api tests
+      - name: Start docker with docker-compose
+        working-directory: ./auth-api/tests/docker
+        run: |
+          ./run.sh
       - name: Test with pytest
         working-directory: ./auth-api
         run: |
           pip install .
           export PYTHONPATH=./src/
           pytest
+      - name: Shutdown docker-compose
+        working-directory: ./auth-api/tests/docker
+        run: |
+          docker-compose down
