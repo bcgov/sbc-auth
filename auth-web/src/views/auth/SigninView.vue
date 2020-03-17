@@ -42,10 +42,10 @@ export default class Signin extends Mixins(NextPageMixin) {
     // or fallback to default route for their login source
     await this.syncUser()
     if (this.$store.getters['auth/isAuthenticated']) {
+      this.$root.$emit('signin-complete')
       if (this.redirectUrl) {
-        this.redirectTo(decodeURIComponent(this.redirectUrl))
+        this.redirectTo(decodeURIComponent(CommonUtils.isUrl(this.redirectUrl) ? this.redirectUrl : `/${this.redirectUrl}`))
       } else {
-        this.$root.$emit('signin-complete')
         switch (this.idpHint) {
           case 'bcsc':
             this.redirectTo(this.getNextPageUrl())
