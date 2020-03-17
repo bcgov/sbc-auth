@@ -40,3 +40,12 @@ class CorpType(Enum):
     """Corp Types."""
 
     NR = 'NR'
+
+
+class RequiredAction(Enum):
+    """Keycloak required actions."""
+
+    VERIFY_EMAIL = 'VERIFY_EMAIL'
+    UPDATE_PROFILE = 'UPDATE_PROFILE'
+    CONFIGURE_TOTP = 'CONFIGURE_TOTP'
+    UPDATE_PASSWORD = 'UPDATE_PASSWORD'

@@ -57,6 +57,10 @@
         "DELIVERY_FAILURE_RETRY_TIME_FRAME": "",
         "FAILURE_EMAIL_TIME_FRAME": "",
         "PENDING_EMAIL_TIME_FRAME": "",
+        "KEYCLOAK_BCROS_BASE_URL":"",
+        "KEYCLOAK_BCROS_REALMNAME":"",
+        "KEYCLOAK_BCROS_ADMIN_CLIENTID":"",
+        "KEYCLOAK_BCROS_ADMIN_SECRET":"",
         "FLASK_ENV": ""
       }
     }
