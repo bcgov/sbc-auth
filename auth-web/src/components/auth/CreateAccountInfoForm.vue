@@ -1,6 +1,4 @@
 <template>
-  <div>
-    <div>
       <v-form ref="createAccountInfoForm">
         <v-radio-group class="mt-0 mb-4 pt-0" v-model="teamType" :mandatory="true">
           <v-radio color="primary" class="mb-3" label="I manage my own business" value="BASIC" data-test="select-manage-own-business" />
@@ -34,12 +32,10 @@
           </v-col>
         </v-row>
       </v-form>
-    </div>
-  </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import OrgModule from '@/store/modules/org'
@@ -63,6 +59,7 @@ export default class CreateAccountInfoForm extends Vue {
     private readonly syncMembership!: (orgId: number) => Promise<Member>
     private readonly syncOrganization!: (orgId: number) => Promise<Organization>
     private readonly currentOrganization!: Organization
+    @Prop({ default: true }) redirectOnSave!: boolean
 
     $refs: {
       createAccountInfoForm: HTMLFormElement
@@ -88,7 +85,10 @@ export default class CreateAccountInfoForm extends Vue {
           await this.syncOrganization(organization.id)
           await this.syncMembership(organization.id)
           this.$store.commit('updateHeader')
-          this.redirectToNext(organization)
+          if (this.redirectOnSave) {
+            this.redirectToNext(organization)
+          }
+          this.$emit('account-saved')
         } catch (err) {
           this.saving = false
           switch (err.response.status) {
