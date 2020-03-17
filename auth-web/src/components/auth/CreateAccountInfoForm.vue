@@ -1,6 +1,4 @@
 <template>
-  <div>
-    <div>
       <v-form ref="createAccountInfoForm">
         <v-radio-group class="mt-0 mb-4 pt-0" v-model="teamType" :mandatory="true">
           <v-radio color="primary" class="mb-3" label="I manage my own business" value="BASIC" data-test="select-manage-own-business" />
@@ -34,8 +32,6 @@
           </v-col>
         </v-row>
       </v-form>
-    </div>
-  </div>
 </template>
 
 <script lang="ts">

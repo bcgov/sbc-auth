@@ -5,7 +5,7 @@
         <h1 class="mb-5">Create Account</h1>
         <p class="intro-text">Please follow the steps below to create your account.</p>
         <v-card class="profile-card">
-          <v-stepper vertical v-model="currentStepNumber">
+          <v-stepper v-model="currentStepNumber">
             <v-row>
               <v-col :cols="2">
                 <v-stepper-step
@@ -17,15 +17,16 @@
                 </v-stepper-step>
               </v-col>
               <v-col>
-                <v-stepper-content :step="currentStepNumber">
+                <div v-for="step in steps" :key="step.title" class="stepper-content">
                   <component
-                    :is="currentStep.component"
-                    v-bind="currentStep.componentProps"
-                    v-dynamic-events="currentStep.eventsToListenFor"
+                    v-if="step.order === currentStepNumber"
+                    :is="step.component"
+                    v-bind="step.componentProps"
+                    v-dynamic-events="step.eventsToListenFor"
                     keep-alive
                     transition="fade"
                     mode="out-in" />
-                </v-stepper-content>
+                </div>
               </v-col>
             </v-row>
           </v-stepper>
@@ -41,6 +42,7 @@ import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/CreateAccountInfoForm.vue'
+import HomeView from '@/views/auth/HomeView.vue'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
 import { Organization } from '@/models/Organization'
 import { RouteConfig } from 'vue-router'
@@ -48,11 +50,12 @@ import { SessionStorageKeys } from '@/util/constants'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/UserProfileForm.vue'
 import { getRoutes } from '@/router'
+import { mount } from '@vue/test-utils'
 
 export interface StepConfiguration {
-  title: string;
-  order: number;
-  component: string
+  title: string
+  order: number
+  component: Vue.Component
   componentProps: Record<string, any>
   skipIf?: () => boolean
   eventsToListenFor?: string[]
@@ -76,7 +79,8 @@ const DynamicEvents = {
   components: {
     CreateAccountInfoForm,
     LoginBCSC,
-    UserProfileForm
+    UserProfileForm,
+    HomeView
   },
   computed: {
     ...mapState('user', ['userProfile', 'userContact']),
@@ -98,14 +102,15 @@ export default class AccountSetupView extends Vue {
       {
         title: 'Log In',
         order: 1,
-        component: 'LoginBCSC',
+        component: LoginBCSC,
         componentProps: {},
-        skipIf: () => { return !!ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken) }
+        skipIf: () => { return !!ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken) },
+        eventsToListenFor: []
       },
       {
         title: 'User Profile',
         order: 2,
-        component: 'UserProfileForm',
+        component: UserProfileForm,
         componentProps: { redirectOnSave: false }, // We want to stay on the stepper view after save
         skipIf: () => { return (this.userContact && this.userProfile?.userTerms?.isTermsOfUseAccepted) },
         eventsToListenFor: ['profile-saved']
@@ -113,10 +118,11 @@ export default class AccountSetupView extends Vue {
       {
         title: 'Account Settings',
         order: 3,
-        component: 'CreateAccountInfoForm',
+        component: CreateAccountInfoForm,
         componentProps: {},
         eventsToListenFor: ['account-saved']
       }
+
     ]
   }
 
@@ -151,7 +157,7 @@ export default class AccountSetupView extends Vue {
 <style lang="scss" scoped>
   @import "$assets/scss/theme.scss";
 
-  article {
-    padding: 0;
+  .stepper-content {
+    padding: 1em;
   }
 </style>
