@@ -3,6 +3,7 @@ name: Test Check CI
 
 on:
   pull_request:
+    types: [opened]
     branches:
       - master
     paths:
@@ -14,7 +15,7 @@ on:
 jobs:
   master-pr-notify:
     runs-on: ubuntu-latest
-
+    if: github.repository == 'bcgov/sbc-auth'
     steps:
       - uses: actions/checkout@v2
       - name: Rocket.Chat Notification

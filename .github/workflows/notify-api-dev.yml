@@ -13,6 +13,7 @@ env:
 jobs:
   notify-api-build-depoly:
     runs-on: ubuntu-latest
+    if: github.repository == 'bcgov/sbc-auth'
     steps:
       - uses: actions/checkout@v2
       - name: Install tools

@@ -45,10 +45,7 @@ class Token(Resource):
         if not data:
             data = request.values
         try:
-            if 'refresh_token' in data:
-                response = KEYCLOAK_SERVICE.refresh_token(data.get('refresh_token'))
-            else:
-                response = KEYCLOAK_SERVICE.get_token(data.get('username'), data.get('password'))
+            response = KEYCLOAK_SERVICE.get_token(data.get('username'), data.get('password'))
 
             current_span = TRACER.tracer.active_span
 

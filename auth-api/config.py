@@ -96,13 +96,14 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     # Keycloak auth config baseurl
     KEYCLOAK_BASE_URL = os.getenv("KEYCLOAK_BASE_URL")
     KEYCLOAK_REALMNAME = os.getenv("KEYCLOAK_REALMNAME")
-
-    # Keycloak admin config
     KEYCLOAK_ADMIN_USERNAME = os.getenv("KEYCLOAK_ADMIN_CLIENTID")
     KEYCLOAK_ADMIN_SECRET = os.getenv("KEYCLOAK_ADMIN_SECRET")
-    KEYCLOAK_AUTH_AUDIENCE = os.getenv('KEYCLOAK_AUTH_AUDIENCE')
-    KEYCLOAK_AUTH_CLIENT_SECRET = os.getenv('KEYCLOAK_AUTH_CLIENT_SECRET')
 
+    # Upstream Keycloak settings
+    KEYCLOAK_BCROS_BASE_URL = os.getenv("KEYCLOAK_BCROS_BASE_URL")
+    KEYCLOAK_BCROS_REALMNAME = os.getenv("KEYCLOAK_BCROS_REALMNAME")
+    KEYCLOAK_BCROS_ADMIN_CLIENTID = os.getenv("KEYCLOAK_BCROS_ADMIN_CLIENTID")
+    KEYCLOAK_BCROS_ADMIN_SECRET = os.getenv("KEYCLOAK_BCROS_ADMIN_SECRET")
 
     # Config to skip migrations when alembic migrate is used
     SKIPPED_MIGRATIONS = ['authorizations_view']
@@ -222,20 +223,21 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     4H8UZcVFN95vEKxJiLRjAmj6g273pu9kK4ymXNEjWWJn
     -----END RSA PRIVATE KEY-----"""
 
-    KEYCLOAK_ADMIN_USERNAME = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')
-    KEYCLOAK_ADMIN_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
-    KEYCLOAK_AUTH_AUDIENCE = os.getenv('KEYCLOAK_TEST_AUTH_AUDIENCE')
-    KEYCLOAK_AUTH_CLIENT_SECRET = os.getenv('KEYCLOAK_TEST_AUTH_CLIENT_SECRET')
-    KEYCLOAK_BASE_URL = os.getenv('KEYCLOAK_TEST_BASE_URL')
-    KEYCLOAK_REALMNAME = os.getenv('KEYCLOAK_TEST_REALMNAME')
+    KEYCLOAK_ADMIN_USERNAME = KEYCLOAK_BCROS_ADMIN_CLIENTID = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')
+    KEYCLOAK_ADMIN_SECRET = KEYCLOAK_BCROS_ADMIN_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
+    KEYCLOAK_BASE_URL = KEYCLOAK_BCROS_BASE_URL = os.getenv('KEYCLOAK_TEST_BASE_URL')
+    KEYCLOAK_REALMNAME = KEYCLOAK_BCROS_REALMNAME = os.getenv('KEYCLOAK_TEST_REALMNAME')
+    JWT_OIDC_AUDIENCE = os.getenv('JWT_OIDC_TEST_AUDIENCE')
+    JWT_OIDC_CLIENT_SECRET = os.getenv('JWT_OIDC_TEST_CLIENT_SECRET')
 
     # Legal-API URL
-    LEGAL_API_URL = 'https://mock-lear-tools.pathfinder.gov.bc.ca/rest/legal-api/0.82/api/v1'
+    LEGAL_API_URL = 'https://mock-auth-tools.pathfinder.gov.bc.ca/rest/legal-api/2.7/api/v1'
 
-    NOTIFY_API_URL = 'https://mock-lear-tools.pathfinder.gov.bc.ca/rest/SBC+Notify+API+Reference/2.0.0/api/v1'
+    NOTIFY_API_URL = 'http://localhost:8080/notify-api/api/v1'
 
     # If any value is present in this flag, starts up a keycloak docker
     USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)
+    USE_DOCKER_MOCK = os.getenv('USE_DOCKER_MOCK', None)
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods

@@ -2,28 +2,39 @@
   <v-app id="app">
     <div class="header-group" ref="headerGroup">
       <sbc-loader :show="showLoading" />
-      <sbc-header :key="$store.state.refreshKey" in-auth=true />
+      <sbc-header
+        :key="$store.state.refreshKey"
+        in-auth=true
+        @account-switch-started="startAccountSwitch"
+        @account-switch-completed="completeAccountSwitch"
+        @hook:mounted="setup"
+        idpHint="bcsc"
+        ref="header">
+        <template v-slot:login-button-text>
+          Log in with BC Services Card
+        </template>
+      </sbc-header>
        <v-snackbar top :color="toastType" v-model="showNotification" :timeout="toastTimeout">
         <span v-html="notificationText"></span>
         <v-btn icon @click="showNotification = false">
           <v-icon class="white--text">mdi-close</v-icon>
         </v-btn>
       </v-snackbar>
-      <navigation-bar :configuration="navigationBarConfig" />
+      <navigation-bar :configuration="navigationBarConfig" :hide="!showNavigationBar" />
       <pay-system-alert />
     </div>
     <div class="app-body">
-      <router-view/>
+      <router-view  />
     </div>
     <sbc-footer></sbc-footer>
   </v-app>
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from 'vue-property-decorator'
+import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { Pages, SessionStorageKeys } from '@/util/constants'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import BusinessModule from '@/store/modules/business'
 import ConfigHelper from '@/util/config-helper'
@@ -54,16 +65,12 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('org', ['currentAccountSettings'])
   },
   methods: {
-    ...mapActions('org', ['syncMembership', 'syncOrganization']),
-    ...mapMutations('org', ['setCurrentAccountSettings', 'setCurrentOrganization'])
+    ...mapMutations('org', ['setCurrentOrganization'])
   }
 })
 export default class App extends Mixins(NextPageMixin) {
-  private orgStore = getModule(OrgModule, this.$store)
-  private readonly syncMembership!: (currentAccountId: string) => Promise<Member>
-  private readonly syncOrganization!: (currentAccountId: string) => Promise<Organization>
-  private readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
   private readonly setCurrentOrganization!: (org: Organization) => void
+  private readonly isAuthenticated!: boolean
   private tokenService = new TokenService()
   private businessStore = getModule(BusinessModule, this.$store)
   private showNotification = false
@@ -74,9 +81,17 @@ export default class App extends Mixins(NextPageMixin) {
   private navigationBarConfig: NavigationBarConfig = {
     titleItem: {
       name: '',
-      url: ''
+      url: '',
+      meta: {
+        requiresAuth: false,
+        requiresAccount: false
+      }
     },
     menuItems: []
+  }
+
+  $refs: {
+    header: SbcHeader
   }
 
   get signingIn (): boolean {
@@ -85,18 +100,51 @@ export default class App extends Mixins(NextPageMixin) {
            this.$route.name === 'signin-redirect-full'
   }
 
+  get showNavigationBar (): boolean {
+    return this.$route.meta.showNavBar
+  }
+
   private setupNavigationBar (): void {
     this.navigationBarConfig = {
       titleItem: {
         name: 'Cooperatives Online',
-        url: `/home`
+        url: `/home`,
+        meta: {
+          requiresAuth: false,
+          requiresAccount: false
+        }
       },
       menuItems: [
         {
           name: 'Manage Businesses',
-          url: `/account/${this.currentOrganization?.id || ''}/business`
+          url: `/account/${this.currentAccountSettings?.id || '0'}/business`,
+          meta: {
+            requiresAuth: true,
+            requiresAccount: true
+          }
         }
       ]
+    }
+  }
+
+  private startAccountSwitch () {
+    this.showLoading = true
+  }
+
+  private async completeAccountSwitch () {
+    await this.syncUser()
+    this.showLoading = false
+    this.toastType = 'primary'
+    this.notificationText = `Switched to account '${this.currentAccountSettings.label}'`
+    this.showNotification = true
+
+    // Some edge cases where user needs to be redirected based on their account status and current location
+    if (this.currentMembership.membershipStatus === MembershipStatus.Active && this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
+      // 1. If user was in a pending approval page and switched to an active account, take them to the home page
+      this.$router.push(`/home`)
+    } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
+      // 2. If user has a pending account status, take them to pending approval page
+      this.$router.push(`/${Pages.PENDING_APPROVAL}/${this.currentAccountSettings.label}`)
     }
   }
 
@@ -105,48 +153,28 @@ export default class App extends Mixins(NextPageMixin) {
     await KeyCloakService.setKeycloakConfigUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
     this.showLoading = false
 
-    EventBus.$on('show-toast', (eventInfo:Event) => {
+    EventBus.$on('show-toast', (eventInfo: Event) => {
       this.showNotification = true
       this.notificationText = eventInfo.message
       this.toastType = eventInfo.type
       this.toastTimeout = eventInfo.timeout
     })
-    this.$root.$on('accountSyncStarted', async () => {
-      this.showLoading = true
+
+    // Listen for event from signin component so it can initiate setup
+    this.$root.$on('signin-complete', async () => {
+      await this.setup()
     })
-    if (ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)) {
+  }
+
+  private async setup () {
+    // Header added modules to store so can access mapped actions now
+    if (this.$store.getters['auth/isAuthenticated']) {
+      await this.syncUser()
+      this.setupNavigationBar()
       await this.tokenService.init()
       this.tokenService.scheduleRefreshTimer()
     }
-    this.$root.$on('accountSyncReady', async (currentAccount: AccountSettings) => {
-      if (currentAccount) {
-        const switchingToNewAccount = !this.currentAccountSettings || this.currentAccountSettings.id !== currentAccount.id
-        this.setCurrentAccountSettings(currentAccount)
-        const membership = await this.syncMembership(currentAccount.id)
-        if (membership.membershipStatus === MembershipStatus.Active) {
-          await this.syncOrganization(currentAccount.id)
-          if (!this.signingIn) {
-            this.toastType = 'primary'
-            this.notificationText = `Switched to account '${currentAccount.label}'`
-            this.showNotification = switchingToNewAccount
-          }
-          this.showLoading = false
-          // if user was in a pending approval page and switched to an active account, take him to home page
-          if (this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
-            this.$router.push(`/home`)
-          }
-        } else if (membership.membershipStatus === MembershipStatus.Pending) {
-          this.setCurrentOrganization({ id: +currentAccount.id, name: currentAccount.label })
-          this.$router.push(`/${Pages.PENDING_APPROVAL}/${currentAccount.label}`)
-          this.showLoading = false
-          return
-        }
-      }
-      this.setupNavigationBar()
-      if (this.signingIn) {
-        this.redirectAfterLogin()
-      }
-    })
+    this.$store.commit('loadComplete')
   }
 }
 

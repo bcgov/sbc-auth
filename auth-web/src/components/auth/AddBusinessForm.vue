@@ -1,6 +1,6 @@
 <template>
   <div class="passcode-form">
-    <v-form ref="form" lazy-validation>
+    <v-form ref="addBusinessForm" lazy-validation>
       <v-expand-transition>
         <div class="passcode-form__alert-container" v-show="validationError">
           <v-alert
@@ -20,6 +20,7 @@
           persistent-hint
           :rules="entityNumRules"
           v-model="businessIdentifier"
+          @blur="incorpNumFormat"
           data-test="business-identifier"
         ></v-text-field>
       </div>
@@ -42,7 +43,12 @@
           <span>I lost or forgot my passcode</span>
         </v-btn>
         <div>
-          <v-btn data-test="add-business-button" large color="primary" @click="add">
+          <v-btn
+            data-test="add-business-button"
+            large color="primary"
+            :disabled="!isFormValid()"
+            @click="add"
+          >
             <span>Add Business</span>
           </v-btn>
           <v-btn data-test="cancel-button" large depressed color="default" class="ml-2" @click="cancel">
@@ -84,6 +90,7 @@
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import BusinessModule from '@/store/modules/business'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { LoginPayload } from '@/models/business'
 import { Organization } from '@/models/Organization'
@@ -101,7 +108,10 @@ export default class AddBusinessForm extends Vue {
   private readonly currentOrganization!: Organization
   private readonly addBusiness!: (loginPayload: LoginPayload) => void
   private validationError = ''
-  private entityNumRules = [v => !!v || 'Incorporation Number is required']
+  private entityNumRules = [
+    v => !!v || 'Incorporation Number is required',
+    v => CommonUtils.validateIncorporationNumber(v) || 'Incorporation Number is invalid'
+  ]
   private entityPasscodeRules = [
     v => !!v || 'Passcode is required',
     v => v.length >= 9 || 'Passcode must be exactly 9 digits'
@@ -112,11 +122,13 @@ export default class AddBusinessForm extends Vue {
   private helpDialog = false
 
   $refs: {
-    form: HTMLFormElement
+    addBusinessForm: HTMLFormElement
   }
 
   private isFormValid (): boolean {
-    return this.$refs.form.validate()
+    return !!this.businessIdentifier &&
+      !!this.passcode &&
+      this.$refs.addBusinessForm.validate()
   }
 
   private redirectToNext (): void {
@@ -156,7 +168,11 @@ export default class AddBusinessForm extends Vue {
   resetForm () {
     this.businessIdentifier = ''
     this.passcode = ''
-    this.$refs.form.resetValidation()
+    this.$refs.addBusinessForm.resetValidation()
+  }
+
+  incorpNumFormat () {
+    this.businessIdentifier = CommonUtils.formatIncorporationNumber(this.businessIdentifier)
   }
 }
 </script>

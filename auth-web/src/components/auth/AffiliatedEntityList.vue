@@ -48,7 +48,7 @@
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
 import { Business } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
@@ -59,8 +59,7 @@ import { getModule } from 'vuex-module-decorators'
 @Component({
   computed: {
     ...mapState('business', ['businesses']),
-    ...mapState('org', ['currentOrganization']),
-    ...mapGetters('org', ['myOrgMembership'])
+    ...mapState('org', ['currentOrganization', 'currentMembership'])
   },
   methods: {
     ...mapMutations('business', ['setCurrentBusiness'])
@@ -72,7 +71,7 @@ export default class AffiliatedEntityList extends Vue {
   private isLoading = true
   private readonly businesses!: Business[]
   private readonly currentOrganization!: Organization
-  private readonly myOrgMembership!: Member
+  private readonly currentMembership!: Member
   private readonly setCurrentBusiness!: (business: Business) => void
 
   private get tableHeaders () {
@@ -94,9 +93,9 @@ export default class AffiliatedEntityList extends Vue {
   }
 
   private canRemove (): boolean {
-    return this.myOrgMembership &&
-            this.myOrgMembership.membershipStatus === MembershipStatus.Active &&
-            this.myOrgMembership.membershipTypeCode === MembershipType.Owner
+    return this.currentMembership &&
+            this.currentMembership.membershipStatus === MembershipStatus.Active &&
+            this.currentMembership.membershipTypeCode === MembershipType.Owner
   }
 
   private isNameRequest (corpType: string): boolean {

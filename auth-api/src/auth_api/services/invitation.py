@@ -31,13 +31,12 @@ from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
 from auth_api.utils.constants import InvitationStatus
-from auth_api.utils.roles import ADMIN, MEMBER, OWNER, Status
+from auth_api.utils.roles import ADMIN, MEMBER, OWNER, Status, InvitationType, STAFF_ADMIN
 from config import get_named_config
 
 from .authorization import check_auth
 from .membership import Membership as MembershipService
 from .notification import send_email
-
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -67,12 +66,15 @@ class Invitation:
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         for membership in invitation_info['membership']:
             org_id = membership['orgId']
-            check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
+            if invitation_info.get('type') == InvitationType.DIRECTOR_SEARCH.value:
+                check_auth(token_info, org_id=org_id, equals_role=STAFF_ADMIN)
+            else:
+                check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
         # TODO doesnt work when invited to multiple teams.. Re-work the logic when multiple teams introduced
         org_name = OrgModel.find_by_org_id(invitation_info['membership'][0]['orgId']).name
 
         invitation = InvitationModel.create_from_dict(invitation_info, user.identifier)
-        confirmation_token = Invitation.generate_confirmation_token(invitation.id)
+        confirmation_token = Invitation.generate_confirmation_token(invitation.id, invitation.type)
         invitation.token = confirmation_token
         invitation.save()
         Invitation.send_invitation(invitation, org_name, user.as_dict(),
@@ -88,7 +90,7 @@ class Invitation:
             check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
 
         # TODO doesnt work when invited to multiple teams.. Re-work the logic when multiple teams introduced
-        confirmation_token = Invitation.generate_confirmation_token(self._model.id)
+        confirmation_token = Invitation.generate_confirmation_token(self._model.id, self._model.type)
         self._model.token = confirmation_token
         updated_invitation = self._model.update_invitation_as_retried()
         org_name = OrgModel.find_by_org_id(self._model.membership[0].org_id).name
@@ -177,12 +179,12 @@ class Invitation:
     def send_invitation(invitation: InvitationModel, org_name, user, app_url):
         """Send the email notification."""
         current_app.logger.debug('<send_invitation')
-        subject = '[BC Registries & Online Services] {} {} has invited you to join an account'.format(user['firstname'],
-                                                                                                      user['lastname'])
+        mail_configs = Invitation.get_invitation_configs(invitation.type)
+        subject = mail_configs.get('subject').format(user['firstname'], user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
-        token_confirm_url = '{}/validatetoken/{}'.format(app_url, invitation.token)
-        template = ENV.get_template('email_templates/business_invitation_email.html')
+        token_confirm_url = '{}/{}/{}'.format(app_url, mail_configs.get('token_confirm_path'), invitation.token)
+        template = ENV.get_template(f"email_templates/{mail_configs.get('template_name')}.html")
 
         sent_response = send_email(subject, sender, recipient,
                                    template.render(invitation=invitation,
@@ -198,10 +200,30 @@ class Invitation:
         current_app.logger.debug('>send_invitation')
 
     @staticmethod
-    def generate_confirmation_token(invitation_id):
+    def get_invitation_configs(invitation_type):
+        """Get the config for different email types."""
+        director_search_configs = {
+            'token_confirm_path': 'dirsearch/validatetoken',
+            'template_name': 'dirsearch_business_invitation_email',
+            'subject': '[BC Registries & Online Services] {} {} has invited you to setup an account',
+        }
+        default_configs = {
+            'token_confirm_path': 'validatetoken',
+            'template_name': 'business_invitation_email',
+            'subject': '[BC Registries & Online Services] {} {} has invited you to join an account',
+
+        }
+        mail_configs = {
+            'DIRECTOR_SEARCH': director_search_configs
+        }
+        return mail_configs.get(invitation_type, default_configs)
+
+    @staticmethod
+    def generate_confirmation_token(invitation_id, invitation_type=''):
         """Generate the token to be sent in the email."""
         serializer = URLSafeTimedSerializer(CONFIG.EMAIL_TOKEN_SECRET_KEY)
-        return serializer.dumps(invitation_id, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT)
+        token = {'id': invitation_id, 'type': invitation_type}
+        return serializer.dumps(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT)
 
     @staticmethod
     def validate_token(token):
@@ -209,7 +231,8 @@ class Invitation:
         serializer = URLSafeTimedSerializer(CONFIG.EMAIL_TOKEN_SECRET_KEY)
         token_valid_for = int(CONFIG.TOKEN_EXPIRY_PERIOD) * 3600 * 24 if CONFIG.TOKEN_EXPIRY_PERIOD else 3600 * 24 * 7
         try:
-            invitation_id = serializer.loads(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT, max_age=token_valid_for)
+            invitation_id = serializer.loads(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT,
+                                             max_age=token_valid_for).get('id')
         except:  # noqa: E722
             raise BusinessException(Error.EXPIRED_INVITATION, None)
 
@@ -222,7 +245,7 @@ class Invitation:
         if invitation.invitation_status_code == 'EXPIRED':
             raise BusinessException(Error.EXPIRED_INVITATION, None)
 
-        return invitation_id
+        return Invitation(invitation)
 
     @staticmethod
     def notify_admin(user, invitation_id, membership_id, invitation_origin):

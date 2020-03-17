@@ -61,7 +61,6 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class UserProfileView extends Mixins(NextPageMixin) {
-  private userStore = getModule(UserModule, this.$store)
   private readonly getUserProfile!: (identifier: string) => User
   @Prop() token: string
   private editing = false
@@ -91,19 +90,6 @@ export default class UserProfileView extends Mixins(NextPageMixin) {
   .v-card__title {
     font-weight: 700;
     letter-spacing: -0.02rem;
-  }
-
-  .loading-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    z-index: 2;
-    background: $gray2;
   }
 
   .user-profile-header {

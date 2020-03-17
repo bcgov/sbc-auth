@@ -94,13 +94,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { Organization, RemoveBusinessPayload } from '@/models/Organization'
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
 import AddBusinessForm from '@/components/auth/AddBusinessForm.vue'
 import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
 import { Business } from '@/models/business'
 import BusinessModule from '@/store/modules/business'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
+import NextPageMixin from '@/components/auth/NextPageMixin.vue'
+import { Pages } from '@/util/constants'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 import i18n from '@/plugins/i18n'
@@ -116,7 +118,7 @@ import { mapActions } from 'vuex'
     ...mapActions('business', ['syncBusinesses', 'removeBusiness'])
   }
 })
-export default class EntityManagement extends Vue {
+export default class EntityManagement extends Mixins(NextPageMixin) {
   @Prop({ default: '' }) private orgId: string;
   private removeBusinessPayload = null
   private dialogTitle = ''
@@ -135,6 +137,10 @@ export default class EntityManagement extends Vue {
   }
 
   async mounted () {
+    // If pending approval on current account, redirect away
+    if (this.currentMembership?.membershipStatus !== MembershipStatus.Active) {
+      this.$router.push(this.getNextPageUrl())
+    }
     await this.syncBusinesses()
     this.isLoading = false
   }
@@ -241,16 +247,4 @@ export default class EntityManagement extends Vue {
     }
   }
 
-  .loading-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    z-index: 2;
-    background: $gray2;
-  }
 </style>

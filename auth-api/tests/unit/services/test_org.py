@@ -18,11 +18,6 @@ Test suite to ensure that the Org service routines are working as expected.
 from unittest.mock import patch
 
 import pytest
-from tests.utilities.factory_scenarios import (
-    KeycloakScenario, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo)
-from tests.utilities.factory_utils import (
-    factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
-    factory_org_service, factory_user_model)
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -33,8 +28,13 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
-from auth_api.services.keycloak import KeycloakConfig, KeycloakService
+from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
+from tests.utilities.factory_scenarios import (
+    KeycloakScenario, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo, TestOrgProductsInfo)
+from tests.utilities.factory_utils import (
+    factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
+    factory_org_service, factory_user_model)
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -53,6 +53,31 @@ def test_create_org(session, keycloak_mock):  # pylint:disable=unused-argument
     assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
+
+
+def test_create_product_single_subscription(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org can be created."""
+    user = factory_user_model()
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+    assert org
+    dictionary = org.as_dict()
+    assert dictionary['name'] == TestOrgInfo.org1['name']
+    subscriptions = OrgService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products1, )
+    assert len(subscriptions) == 1
+    assert subscriptions[0].product_code == TestOrgProductsInfo.org_products1['subscriptions'][0]['productCode']
+
+
+def test_create_product_multiple_subscription(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org can be created."""
+    user = factory_user_model()
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+    assert org
+    dictionary = org.as_dict()
+    assert dictionary['name'] == TestOrgInfo.org1['name']
+    subscriptions = OrgService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products2, )
+    assert len(subscriptions) == 2
+    assert subscriptions[0].product_code == TestOrgProductsInfo.org_products2['subscriptions'][0]['productCode']
+    assert subscriptions[1].product_code == TestOrgProductsInfo.org_products2['subscriptions'][1]['productCode']
 
 
 def test_update_org(session):  # pylint:disable=unused-argument
@@ -302,14 +327,14 @@ def test_create_org_adds_user_to_account_holders_group(session, monkeypatch):  #
     """Assert that an Org creation adds the user to account holders group."""
     # Create a user in keycloak
     keycloak_service = KeycloakService()
-    keycloak_service.add_user(KeycloakScenario.create_user_request)
-    kc_user = keycloak_service.get_user_by_username(KeycloakScenario.create_user_request.get('username'))
-    user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.get('id')))
+    keycloak_service.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
+    kc_user = keycloak_service.get_user_by_username(KeycloakScenario.create_user_request().user_name)
+    user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.id))
 
     # Patch token info
     def token_info():  # pylint: disable=unused-argument; mocks of library methods
         return {
-            'sub': str(kc_user.get('id')),
+            'sub': str(kc_user.id),
             'username': 'public user',
             'realm_access': {
                 'roles': [
@@ -320,7 +345,7 @@ def test_create_org_adds_user_to_account_holders_group(session, monkeypatch):  #
     monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', token_info)
     OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
 
-    user_groups = KeycloakConfig().get_keycloak_admin().get_user_groups(user_id=kc_user.get('id'))
+    user_groups = keycloak_service.get_user_groups(user_id=kc_user.id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
@@ -332,14 +357,14 @@ def test_delete_org_removes_user_from_account_holders_group(session, monkeypatch
     """Assert that an Org deletion removes the user from account holders group."""
     # Create a user in keycloak
     keycloak_service = KeycloakService()
-    keycloak_service.add_user(KeycloakScenario.create_user_request)
-    kc_user = keycloak_service.get_user_by_username(KeycloakScenario.create_user_request.get('username'))
-    user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.get('id')))
+    keycloak_service.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
+    kc_user = keycloak_service.get_user_by_username(KeycloakScenario.create_user_request().user_name)
+    user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.id))
 
     # Patch token info
     def token_info():  # pylint: disable=unused-argument; mocks of library methods
         return {
-            'sub': str(kc_user.get('id')),
+            'sub': str(kc_user.id),
             'username': 'public user',
             'realm_access': {
                 'roles': [
@@ -351,7 +376,7 @@ def test_delete_org_removes_user_from_account_holders_group(session, monkeypatch
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     org = OrgService.delete_org(org.as_dict().get('id'), token_info())
 
-    user_groups = KeycloakConfig().get_keycloak_admin().get_user_groups(user_id=kc_user.get('id'))
+    user_groups = keycloak_service.get_user_groups(user_id=kc_user.id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
@@ -363,14 +388,14 @@ def test_delete_does_not_remove_user_from_account_holder_group(session, monkeypa
     """Assert that if the user has multiple Orgs, and deleting one doesn't remove account holders group."""
     # Create a user in keycloak
     keycloak_service = KeycloakService()
-    keycloak_service.add_user(KeycloakScenario.create_user_request)
-    kc_user = keycloak_service.get_user_by_username(KeycloakScenario.create_user_request.get('username'))
-    user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.get('id')))
+    keycloak_service.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
+    kc_user = keycloak_service.get_user_by_username(KeycloakScenario.create_user_request().user_name)
+    user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.id))
 
     # Patch token info
     def token_info():  # pylint: disable=unused-argument; mocks of library methods
         return {
-            'sub': str(kc_user.get('id')),
+            'sub': str(kc_user.id),
             'username': 'public user',
             'realm_access': {
                 'roles': [
@@ -383,7 +408,7 @@ def test_delete_does_not_remove_user_from_account_holder_group(session, monkeypa
     OrgService.create_org(TestOrgInfo.org2, user_id=user.id)
     OrgService.delete_org(org1.as_dict().get('id'), token_info())
 
-    user_groups = KeycloakConfig().get_keycloak_admin().get_user_groups(user_id=kc_user.get('id'))
+    user_groups = keycloak_service.get_user_groups(user_id=kc_user.id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))

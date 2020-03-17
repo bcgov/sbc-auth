@@ -10,7 +10,7 @@ on:
 jobs:
   notify-api-check:
     runs-on: ubuntu-latest
-
+    if: github.repository == 'bcgov/sbc-auth'
     env:
       DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
 

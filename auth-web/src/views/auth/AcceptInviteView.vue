@@ -9,7 +9,7 @@
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { Pages, SessionStorageKeys } from '@/util/constants'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import InterimLanding from '@/components/auth/InterimLanding.vue'
@@ -23,21 +23,16 @@ import { getModule } from 'vuex-module-decorators'
 @Component({
   computed: {
     ...mapState('user', ['userProfile', 'userContact', 'redirectAfterLoginUrl']),
-    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings']),
-    ...mapGetters('org', ['myOrgMembership'])
+    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings'])
   },
   methods: {
-    ...mapActions('org', ['acceptInvitation', 'syncMembership']),
+    ...mapActions('org', ['acceptInvitation']),
     ...mapActions('user', ['getUserProfile'])
   },
   components: { InterimLanding }
 })
 export default class AcceptInviteView extends Mixins(NextPageMixin) {
-  private orgStore = getModule(OrgModule, this.$store)
-  private userStore = getModule(UserModule, this.$store)
   private readonly acceptInvitation!: (token: string) => Promise<Invitation>
-  private readonly syncMembership!: (currentAccountId: number) => Promise<Member>
-
   private readonly getUserProfile!: (identifier: string) => Promise<User>
   protected readonly userContact!: Contact
   protected readonly userProfile!: User
@@ -62,9 +57,17 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
         return
       } else {
         const invitation = await this.acceptInvitation(this.token)
-        ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify({ id: invitation.membership[0].org.id }))
+        // ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify({ id: invitation.membership[0].org.id, label: invitation.membership[0].org.name }))
+        const invitingOrg = invitation.membership[0].org
+        this.setCurrentAccountSettings({
+          id: invitingOrg.id,
+          label: invitingOrg.name,
+          type: 'ACCOUNT',
+          urlpath: '',
+          urlorigin: ''
+        })
         await this.syncMembership(invitation?.membership[0]?.org?.id)
-        this.$store.commit('updateHeader') // this event eventually redirects to Pending approval page.No extra navigation needed
+        this.$store.commit('updateHeader')
         this.$router.push(this.getNextPageUrl())
         return
       }

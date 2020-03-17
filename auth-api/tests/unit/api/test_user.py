@@ -28,10 +28,16 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.services import Org as OrgService
 from auth_api.utils.roles import Status
 from tests import skip_in_pod
-from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
+from tests.utilities.factory_scenarios import KeycloakScenario, TestContactInfo, TestEntityInfo, TestJwtClaims, \
+    TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
     factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
     factory_membership_model, factory_org_model, factory_user_model)
+
+from auth_api.services.keycloak import KeycloakService
+from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
+
+KEYCLOAK_SERVICE = KeycloakService()
 
 
 def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
@@ -503,3 +509,26 @@ def test_delete_user_with_tester_role(client, jwt, session, keycloak_mock):  # p
 
     rv = client.get('/api/v1/users/@me', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+
+
+def test_add_user_adds_to_account_holders_group(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a user gets added to account_holders group if the user has any active account."""
+    # Create a user in keycloak
+    KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
+    user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name)
+    user_id = user.id
+
+    # Create user, org and membserhip in DB
+    user = factory_user_model(TestUserInfo.get_user_with_kc_guid(user_id))
+    org = factory_org_model(org_status_info=None)
+    factory_membership_model(user.id, org.id)
+
+    # Login as that user
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source='BCSC'))
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+
+    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
+    groups = []
+    for group in user_groups:
+        groups.append(group.get('name'))
+    assert GROUP_ACCOUNT_HOLDERS in groups

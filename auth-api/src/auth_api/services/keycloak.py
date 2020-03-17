@@ -17,157 +17,128 @@ from typing import Dict
 
 import requests
 from flask import g, current_app
-from keycloak import KeycloakAdmin, KeycloakOpenID
-from keycloak.exceptions import KeycloakGetError
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.utils.constants import BCSC, GROUP_ACCOUNT_HOLDERS, GROUP_PUBLIC_USERS, PASSCODE
+from auth_api.utils.enums import ContentType
 from auth_api.utils.roles import Role
-from auth_api.utils.util import Singleton
-
-
-class KeycloakConfig(metaclass=Singleton):  # pylint: disable=too-few-public-methods
-    """Singleton wrapper for Keycloak Config."""
-
-    __keycloak_admin = None
-    __keycloak_openid = None
-
-    def get_keycloak_admin(self):
-        """Retrieve singleton keycloak_admin."""
-        return self.__keycloak_admin
-
-    def get_keycloak_openid(self):
-        """Retrieve singleton keycloak_openid."""
-        return self.__keycloak_openid
-
-    def __init__(self):
-        """Private constructor."""
-        config = current_app.config
-        self.__keycloak_admin = KeycloakAdmin(server_url=config.get('KEYCLOAK_BASE_URL') + '/auth/',
-                                              username=config.get('KEYCLOAK_ADMIN_USERNAME'),
-                                              password=config.get('KEYCLOAK_ADMIN_SECRET'),
-                                              realm_name=config.get('KEYCLOAK_REALMNAME'),
-                                              client_id=config.get('KEYCLOAK_ADMIN_USERNAME'),
-                                              client_secret_key=config.get('KEYCLOAK_ADMIN_SECRET'),
-                                              verify=True)
-
-        self.__keycloak_openid = KeycloakOpenID(server_url=config.get('KEYCLOAK_BASE_URL') + '/auth/',
-                                                realm_name=config.get('KEYCLOAK_REALMNAME'),
-                                                client_id=config.get('KEYCLOAK_AUTH_AUDIENCE'),
-                                                client_secret_key=config.get('KEYCLOAK_AUTH_CLIENT_SECRET'),
-                                                verify=True)
+from .keycloak_user import KeycloakUser
 
 
 class KeycloakService:
     """For Keycloak services."""
 
-    def __init__(self):
-        """Create Constructor."""
-        super()
-
-    # Add user to Keycloak
-    def add_user(self, user_request):
+    @staticmethod
+    def add_user(user: KeycloakUser, return_if_exists: bool = False):
         """Add user to Keycloak."""
-        # New user default to enabled.
-        enabled = user_request.get('enabled')
-        if enabled is None:
-            enabled = True
-
+        config = current_app.config
         # Add user and set password
-        try:
-            KeycloakConfig().get_keycloak_admin().create_user(
-                {
-                    'email': user_request.get('email'),
-                    'username': user_request.get('username'),
-                    'enabled': enabled,
-                    'firstName': user_request.get('firstname'),
-                    'lastName': user_request.get('lastname'),
-                    'credentials': [{'value': user_request.get('password'), 'type': 'password'}],
-                    'groups': user_request.get('user_type'),
-                    'attributes': {'corp_type': user_request.get('corp_type'), 'source': user_request.get('source')}
-                })
+        admin_token = KeycloakService._get_admin_token(upstream=True)
 
-            user_id = KeycloakConfig().get_keycloak_admin().get_user_id(user_request.get('username'))
+        base_url = config.get('KEYCLOAK_BCROS_BASE_URL')
+        realm = config.get('KEYCLOAK_BCROS_REALMNAME')
 
-            # Set user groups
-            if user_request.get('user_type'):
-                for user_type in user_request.get('user_type'):
-                    group = KeycloakConfig().get_keycloak_admin().get_group_by_path(user_type, True)
-                    if group:
-                        KeycloakConfig().get_keycloak_admin().group_user_add(user_id, group['id'])
+        # Check if the user exists
+        if return_if_exists:
+            existing_user = KeycloakService.get_user_by_username(user.user_name, admin_token=admin_token)
+            if existing_user:
+                return existing_user
+        # Add user to the keycloak group '$group_name'
+        headers = {
+            'Content-Type': ContentType.JSON.value,
+            'Authorization': f'Bearer {admin_token}'
+        }
 
-            user = self.get_user_by_username(user_request.get('username'))
+        add_user_url = f'{base_url}/auth/admin/realms/{realm}/users'
+        response = requests.post(add_user_url, data=user.value(), headers=headers)
+        response.raise_for_status()
 
-            return user
-        except KeycloakGetError as err:
-            if err.response_code == 409:
-                raise BusinessException(Error.DATA_CONFLICT, err)
-        except Exception as err:
-            raise BusinessException(Error.UNDEFINED_ERROR, err)
+        return KeycloakService.get_user_by_username(user.user_name, admin_token)
 
     @staticmethod
-    def get_user_by_username(username):
+    def get_user_by_username(username, admin_token=None) -> KeycloakUser:
         """Get user from Keycloak by username."""
-        try:
-            # Get user id
-            user_id_keycloak = KeycloakConfig().get_keycloak_admin().get_user_id(username)
-        except Exception as err:
-            raise BusinessException(Error.UNDEFINED_ERROR, err)
-        # Get User
-        if user_id_keycloak is not None:
-            try:
-                user = KeycloakConfig().get_keycloak_admin().get_user(user_id_keycloak)
-                return user
-            except Exception as err:
-                raise BusinessException(Error.UNDEFINED_ERROR, err)
-        else:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        user = None
+        base_url = current_app.config.get('KEYCLOAK_BCROS_BASE_URL')
+        realm = current_app.config.get('KEYCLOAK_BCROS_REALMNAME')
+        if not admin_token:
+            admin_token = KeycloakService._get_admin_token()
+        headers = {
+            'Content-Type': ContentType.JSON.value,
+            'Authorization': f'Bearer {admin_token}'
+        }
+
+        # Get the user and return
+        query_user_url = f'{base_url}/auth/admin/realms/{realm}/users?username={username}'
+        response = requests.get(query_user_url, headers=headers)
+        response.raise_for_status()
+        if len(response.json()) == 1:
+            user = KeycloakUser(response.json()[0])
+        return user
+
+    @staticmethod
+    def get_user_groups(user_id, upstream: bool = False) -> KeycloakUser:
+        """Get user from Keycloak by username."""
+        base_url = current_app.config.get('KEYCLOAK_BCROS_BASE_URL') if upstream else current_app.config.get(
+            'KEYCLOAK_BASE_URL')
+        realm = current_app.config.get('KEYCLOAK_BCROS_REALMNAME') if upstream else current_app.config.get(
+            'KEYCLOAK_REALMNAME')
+        admin_token = KeycloakService._get_admin_token(upstream=upstream)
+        headers = {
+            'Content-Type': ContentType.JSON.value,
+            'Authorization': f'Bearer {admin_token}'
+        }
+
+        # Get the user and return
+        query_user_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/groups'
+        response = requests.get(query_user_url, headers=headers)
+        response.raise_for_status()
+        return response.json()
 
     @staticmethod
     def delete_user_by_username(username):
         """Delete user from Keycloak by username."""
-        try:
-            # Get user id
-            user_id_keycloak = KeycloakConfig().get_keycloak_admin().get_user_id(username)
-        except Exception as err:
-            raise BusinessException(Error.UNDEFINED_ERROR, err)
-        # Delete User
-        if user_id_keycloak is not None:
-            try:
-                response = KeycloakConfig().get_keycloak_admin().delete_user(user_id_keycloak)
-                return response
-            except Exception as err:
-                raise BusinessException(Error.UNDEFINED_ERROR, err)
-        else:
+        admin_token = KeycloakService._get_admin_token(upstream=True)
+        headers = {
+            'Content-Type': ContentType.JSON.value,
+            'Authorization': f'Bearer {admin_token}'
+        }
+
+        base_url = current_app.config.get('KEYCLOAK_BCROS_BASE_URL')
+        realm = current_app.config.get('KEYCLOAK_BCROS_REALMNAME')
+        user = KeycloakService.get_user_by_username(username)
+
+        if not user:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # Delete the user
+        delete_user_url = f'{base_url}/auth/admin/realms/{realm}/users/{user.id}'
+        response = requests.delete(delete_user_url, headers=headers)
+        response.raise_for_status()
 
     @staticmethod
     def get_token(username, password):
         """Get user access token by username and password."""
         try:
-            response = KeycloakConfig().get_keycloak_openid().token(username, password)
-            return response
+            base_url = current_app.config.get('KEYCLOAK_BASE_URL')
+            realm = current_app.config.get('KEYCLOAK_REALMNAME')
+            token_request = 'client_id={}&client_secret={}&username={}&password={}&grant_type=password'.format(
+                current_app.config.get('JWT_OIDC_AUDIENCE'),
+                current_app.config.get('JWT_OIDC_CLIENT_SECRET'),
+                username,
+                password)
+
+            headers = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+            token_url = f'{base_url}/auth/realms/{realm}/protocol/openid-connect/token'
+            response = requests.post(token_url, data=token_request, headers=headers)
+
+            response.raise_for_status()
+            return response.json()
         except Exception as err:
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, err)
-
-    @staticmethod
-    def refresh_token(refresh_token):
-        """Refresh user token."""
-        try:
-            response = KeycloakConfig().get_keycloak_openid().refresh_token(refresh_token, ['refresh_token'])
-            return response
-        except Exception as err:
-            raise BusinessException(Error.INVALID_REFRESH_TOKEN, err)
-
-    @staticmethod
-    def logout(refresh_token):
-        """Logout user by refresh-token."""
-        try:
-            response = KeycloakConfig().get_keycloak_openid().logout(refresh_token)
-            return response
-        except Exception as err:
-            raise BusinessException(Error.INVALID_REFRESH_TOKEN, err)
 
     @staticmethod
     def join_public_users_group(token_info: Dict):
@@ -214,7 +185,7 @@ class KeycloakService:
 
         # Add user to the keycloak group '$group_name'
         headers = {
-            'Content-Type': 'application/json',
+            'Content-Type': ContentType.JSON.value,
             'Authorization': f'Bearer {admin_token}'
         }
         add_to_group_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/groups/{group_id}'
@@ -234,7 +205,7 @@ class KeycloakService:
 
         # Add user to the keycloak group '$group_name'
         headers = {
-            'Content-Type': 'application/json',
+            'Content-Type': ContentType.JSON.value,
             'Authorization': f'Bearer {admin_token}'
         }
         remove_group_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/groups/{group_id}'
@@ -242,17 +213,21 @@ class KeycloakService:
         response.raise_for_status()
 
     @staticmethod
-    def _get_admin_token():
+    def _get_admin_token(upstream: bool = False):
         """Create an admin token."""
         config = current_app.config
-        base_url = config.get('KEYCLOAK_BASE_URL')
-        realm = config.get('KEYCLOAK_REALMNAME')
+        base_url = config.get('KEYCLOAK_BCROS_BASE_URL') if upstream else config.get('KEYCLOAK_BASE_URL')
+        realm = config.get('KEYCLOAK_BCROS_REALMNAME') if upstream else config.get('KEYCLOAK_REALMNAME')
+        admin_client_id = config.get('KEYCLOAK_BCROS_ADMIN_CLIENTID') if upstream else config.get(
+            'KEYCLOAK_ADMIN_USERNAME')
+        admin_secret = config.get('KEYCLOAK_BCROS_ADMIN_SECRET') if upstream else config.get('KEYCLOAK_ADMIN_SECRET')
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
         token_url = f'{base_url}/auth/realms/{realm}/protocol/openid-connect/token'
+
         response = requests.post(token_url, data='client_id={}&grant_type=client_credentials&client_secret={}'.format(
-            config.get('KEYCLOAK_ADMIN_USERNAME'), config.get('KEYCLOAK_ADMIN_SECRET')), headers=headers)
+            admin_client_id, admin_secret), headers=headers)
         return response.json().get('access_token')
 
     @staticmethod
@@ -263,7 +238,7 @@ class KeycloakService:
         realm = config.get('KEYCLOAK_REALMNAME')
         get_group_url = f'{base_url}/auth/admin/realms/{realm}/groups?search={group_name}'
         headers = {
-            'Content-Type': 'application/json',
+            'Content-Type': ContentType.JSON.value,
             'Authorization': f'Bearer {admin_token}'
         }
         response = requests.get(get_group_url, headers=headers)

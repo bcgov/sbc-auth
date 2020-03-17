@@ -28,7 +28,8 @@ from auth_api.services.membership import Membership as MembershipService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.roles import Role
+from auth_api.utils.constants import BCSC
+from auth_api.utils.roles import Role, Status
 from auth_api.utils.util import cors_preflight
 
 
@@ -54,8 +55,16 @@ class Users(Resource):
         token = g.jwt_oidc_token_info
 
         try:
-            response, status = UserService.save_from_jwt_token(token).as_dict(), http_status.HTTP_201_CREATED
+            user = UserService.save_from_jwt_token(token)
+            response, status = user.as_dict(), http_status.HTTP_201_CREATED
+            # Add the user to public_users group if the user doesn't have public_user group
             KeycloakService.join_public_users_group(g.jwt_oidc_token_info)
+            # If the user doesn't have account_holder role check if user is part of any orgs and add to the group
+            if token.get('loginSource', None) == BCSC \
+                    and Role.ACCOUNT_HOLDER.value not in token.get('roles') \
+                    and len(OrgService.get_orgs(user.identifier, [Status.ACTIVE.value])) > 0:
+                KeycloakService.join_account_holders_group()
+
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -275,7 +284,7 @@ class MembershipResource(Resource):
             else:
                 membership = MembershipService \
                     .get_membership_for_org_and_user(org_id=org_id, user_id=user.identifier)
-                response, status = MembershipSchema(exclude=['user', 'org']).dump(membership), http_status.HTTP_200_OK
+                response, status = MembershipSchema(exclude=['org']).dump(membership), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

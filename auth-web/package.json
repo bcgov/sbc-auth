@@ -20,15 +20,14 @@
     "moment": "^2.24.0",
     "regenerator-runtime": "^0.13.3",
     "register-service-worker": "^1.6.2",
-    "sbc-common-components": "^2.1.13",
+    "sbc-common-components": "^2.1.16",
     "vue": "^2.6.11",
     "vue-i18n": "^8.0.0",
     "vue-property-decorator": "^8.3.0",
     "vue-router": "^3.0.3",
     "vue-the-mask": "^0.11.1",
     "vuetify": "2.2.7",
-    "vuex": "^3.0.1",
-    "vuex-persist": "^2.1.1"
+    "vuex": "^3.0.1"
   },
   "devDependencies": {
     "@kazupon/vue-i18n-loader": "^0.3.0",

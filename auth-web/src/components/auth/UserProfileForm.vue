@@ -182,8 +182,6 @@ import { mask } from 'vue-the-mask'
   }
 })
 export default class UserProfileForm extends Mixins(NextPageMixin) {
-    private userStore = getModule(UserModule, this.$store)
-    private orgStore = getModule(OrgModule, this.$store)
     private readonly createUserContact!: (contact: Contact) => Contact
     private readonly updateUserContact!: (contact: Contact) => Contact
     private readonly saveUserTerms!: () => Promise<User>
