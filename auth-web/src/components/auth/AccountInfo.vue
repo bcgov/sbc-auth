@@ -72,7 +72,7 @@ export default class AccountInfo extends Vue {
   }
 
   private canChangeAccountName (): boolean {
-    switch (this.currentMembership.membershipTypeCode) {
+    switch (this.currentMembership?.membershipTypeCode) {
       case MembershipType.Owner:
         return true
       default:
