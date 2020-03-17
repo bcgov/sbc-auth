@@ -34,7 +34,7 @@ from tests.utilities.factory_utils import (
     factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
     factory_membership_model, factory_org_model, factory_user_model)
 
-from auth_api.services.keycloak import KeycloakConfig, KeycloakService
+from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
 
 KEYCLOAK_SERVICE = KeycloakService()
@@ -514,9 +514,9 @@ def test_delete_user_with_tester_role(client, jwt, session, keycloak_mock):  # p
 def test_add_user_adds_to_account_holders_group(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a user gets added to account_holders group if the user has any active account."""
     # Create a user in keycloak
-    KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request)
-    user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request.get('username'))
-    user_id = user.get('id')
+    KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
+    user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name)
+    user_id = user.id
 
     # Create user, org and membserhip in DB
     user = factory_user_model(TestUserInfo.get_user_with_kc_guid(user_id))
@@ -527,7 +527,7 @@ def test_add_user_adds_to_account_holders_group(client, jwt, session):  # pylint
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source='BCSC'))
     client.post('/api/v1/users', headers=headers, content_type='application/json')
 
-    user_groups = KeycloakConfig().get_keycloak_admin().get_user_groups(user_id=user_id)
+    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))

@@ -180,7 +180,6 @@ class Invitation:
         """Send the email notification."""
         current_app.logger.debug('<send_invitation')
         mail_configs = Invitation.get_invitation_configs(invitation.type)
-        print('mail_configs', mail_configs)
         subject = mail_configs.get('subject').format(user['firstname'], user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email

@@ -31,7 +31,6 @@ from .codes import API as CODES_API
 from .documents import API as DOCUMENTS_API
 from .entity import API as ENTITY_API
 from .invitation import API as INVITATION_API
-from .logout import API as LOGOUT_API
 from .meta import API as META_API
 from .ops import API as OPS_API
 from .org import API as ORG_API
@@ -79,7 +78,6 @@ API.add_namespace(META_API, path='/meta')
 API.add_namespace(TOKEN_API, path='/token')
 API.add_namespace(USER_API, path='/users')
 API.add_namespace(USER_SETTINGS_API, path='/users/<string:user_id>/settings')
-API.add_namespace(LOGOUT_API, path='/logout')
 API.add_namespace(ENTITY_API, path='/entities')
 API.add_namespace(ORG_API, path='/orgs')
 API.add_namespace(INVITATION_API, path='/invitations')

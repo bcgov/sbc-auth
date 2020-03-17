@@ -17,6 +17,7 @@ Test Utility for creating test scenarios.
 """
 import uuid
 from enum import Enum
+from auth_api.services.keycloak_user import KeycloakUser
 
 from config import get_named_config
 
@@ -373,36 +374,35 @@ class TestUserInfo(dict, Enum):
         }
 
 
-class KeycloakScenario(dict):
+class KeycloakScenario:
     """Keycloak scenario."""
 
-    create_user_request = {
-        'username': 'test11',
-        'password': '1111',
-        'firstname': '111',
-        'lastname': 'test',
-        'email': 'test11@gov.bc.ca',
-        'enabled': True,
-        'user_type': [
-            '/test'
-        ],
-        'corp_type': 'CP',
-        'source': 'BCSC'
-    }
+    @staticmethod
+    def create_user_request():
+        """Return create user request."""
+        create_user_request = KeycloakUser()
+        create_user_request.user_name = 'testuser1'
+        create_user_request.password = '1111'
+        create_user_request.first_name = 'test_first'
+        create_user_request.last_name = 'test_last'
+        create_user_request.email = 'testuser1@gov.bc.ca'
+        create_user_request.attributes = {'corp_type': 'CP', 'source': 'BCSC'}
+        create_user_request.enabled = True
+        return create_user_request
 
-    create_user_request_2 = {
-        'username': 'test12',
-        'password': '1111',
-        'firstname': '2222',
-        'lastname': 'test',
-        'email': 'test12@gov.bc.ca',
-        'enabled': True,
-        'user_type': [
-            '/test'
-        ],
-        'corp_type': 'CP',
-        'source': 'BCSC'
-    }
+    @staticmethod
+    def create_user_request_2():
+        """Return create user request."""
+        create_user_request = KeycloakUser()
+        create_user_request.user_name = 'testuser2'
+        create_user_request.password = '1111'
+        create_user_request.first_name = 'test_first'
+        create_user_request.last_name = 'test_last'
+        create_user_request.email = 'testuser2@gov.bc.ca'
+        create_user_request.attributes = {'corp_type': 'CP', 'source': 'BCSC'}
+        create_user_request.enabled = True
+
+        return create_user_request
 
     # Patch token info
     @staticmethod
