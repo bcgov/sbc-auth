@@ -63,8 +63,8 @@ class Org:
     def create_org(org_info: dict, user_id, token_info: Dict = None):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
-        is_staff = token_info and 'staff' in token_info.get('realm_access').get('roles')
-        if not is_staff:  # staff can create any number of orgs
+        is_staff_admin = token_info and 'staff_admin' in token_info.get('realm_access').get('roles')
+        if not is_staff_admin:  # staff can create any number of orgs
             count = OrgModel.get_count_of_org_created_by_user_id(user_id)
             if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
                 raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
@@ -73,10 +73,12 @@ class Org:
         if existing_similar__org is not None:
             raise BusinessException(Error.DATA_CONFLICT, None)
         org = OrgModel.create_from_dict(camelback2snake(org_info))
+        if is_staff_admin:
+            org.access_type = AccessType.ANONYMOUS.value
         org.save()
         current_app.logger.info(f'<created_org org_id:{org.id}')
         # create the membership record for this user if its not created by staff and access_type is anonymous
-        if not is_staff and org_info.get('access_type') != AccessType.ANONYMOUS:
+        if not is_staff_admin and org_info.get('access_type') != AccessType.ANONYMOUS:
             membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='OWNER',
                                          membership_type_status=Status.ACTIVE.value)
             membership.save()
