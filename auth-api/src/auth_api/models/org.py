@@ -17,7 +17,7 @@ Basic users will have an internal Org that is not created explicitly, but implic
 """
 
 from flask import current_app
-from sqlalchemy import Column, ForeignKey, Integer, String, and_, func
+from sqlalchemy import Column, ForeignKey, Integer, String, and_, func, Boolean
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.roles import OrgStatus as OrgStatusEnum
@@ -48,6 +48,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     invitations = relationship('InvitationMembership', cascade='all,delete,delete-orphan', lazy='select')
     products = relationship('ProductSubscription', cascade='all,delete,delete-orphan', lazy='select')
     access_type = Column(String(250), index=True, nullable=True)  # for ANONYMOUS ACCESS
+    billable = Column('billable', Boolean(), default=True, nullable=False)
 
     @classmethod
     def create_from_dict(cls, org_info: dict):

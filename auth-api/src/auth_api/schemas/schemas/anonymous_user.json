@@ -1,0 +1,34 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/anonymous_user",
+    "type": "object",
+    "title": "Anonymous user",
+    "additionalProperties": false,
+    "required": [
+      "username",
+      "password"
+    ],
+    "properties": {
+      "username": {
+        "$id": "#/properties/username",
+        "type": "string",
+        "title": "User Name",
+        "default": "",
+        "examples": [
+          "Foobar"
+        ],
+        "pattern": "^[^\\s]+(\\s+[^\\s]+)*$"
+      },
+      "password": {
+        "$id": "#/properties/password",
+        "type": "string",
+        "title": "password for the user",
+        "examples": [
+          "mysecretcode@1234"
+        ],
+        "pattern": "^(.*)$"
+      }
+    }
+  }
+  
