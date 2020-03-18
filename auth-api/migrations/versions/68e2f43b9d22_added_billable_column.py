@@ -18,7 +18,7 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column('org', sa.Column('billable', sa.Boolean(), nullable=True))
+    op.add_column('org', sa.Column('billable', sa.Boolean(), server_default=sa.schema.DefaultClause("1"), nullable=False))
 
 
 def downgrade():

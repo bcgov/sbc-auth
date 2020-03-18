@@ -94,6 +94,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             username = membership['username']
             create_user_request.user_name = username
             create_user_request.password = membership['password']
+            create_user_request.update_password_on_login()
             try:
                 # TODO may be this method itself throw the business exception
                 kc_user = KeycloakService.add_user(create_user_request)
@@ -110,8 +111,6 @@ class User:  # pylint: disable=too-many-instance-attributes
             user_model.status = Status.ACTIVE.value
             user_model.type = AccessType.ANONYMOUS.value
             user_model.email = membership.get('email', None)
-            # TODO see how to get roles
-            # user_model.roles = kc_user.
             user_model.save()
             User._add_org_membership(org_id, user_model.id, membership['membershipType'])
             users.append(User(user_model).as_dict())
