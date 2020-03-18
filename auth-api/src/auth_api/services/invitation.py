@@ -262,7 +262,7 @@ class Invitation:
         return Invitation(invitation)
 
     @staticmethod
-    def accept_invitation(invitation_id, user, origin):
+    def accept_invitation(invitation_id, user, origin, add_membership: bool = True):
         """Add user, role and org from the invitation to membership."""
         current_app.logger.debug('>accept_invitation')
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
@@ -274,31 +274,32 @@ class Invitation:
         if invitation.invitation_status_code == 'EXPIRED':
             raise BusinessException(Error.EXPIRED_INVITATION, None)
 
-        for membership in invitation.membership:
-            membership_model = MembershipModel()
-            membership_model.org_id = membership.org_id
-            membership_model.user_id = user.identifier
-            membership_model.membership_type = membership.membership_type
+        if add_membership:
+            for membership in invitation.membership:
+                membership_model = MembershipModel()
+                membership_model.org_id = membership.org_id
+                membership_model.user_id = user.identifier
+                membership_model.membership_type = membership.membership_type
 
-            # check to ensure an invitation for this user/org has not already been processed
-            existing_membership = MembershipService \
-                .get_membership_for_org_and_user(org_id=membership_model.org_id, user_id=membership_model.user_id)
+                # check to ensure an invitation for this user/org has not already been processed
+                existing_membership = MembershipService \
+                    .get_membership_for_org_and_user(org_id=membership_model.org_id, user_id=membership_model.user_id)
 
-            if existing_membership:
-                raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+                if existing_membership:
+                    raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
-            # user needs to get approval
-            is_auto_approval = OrgSettingsModel.is_admin_auto_approved_invitees(membership.org_id)
-            if is_auto_approval:
-                membership_model.status = Status.ACTIVE.value
-            else:
-                membership_model.status = Status.PENDING_APPROVAL.value
-            membership_model.save()
-            if not is_auto_approval:
-                try:
-                    Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
-                except BusinessException as exception:
-                    current_app.logger.error('<send_notification_to_admin failed', exception.message)
+                # user needs to get approval
+                is_auto_approval = OrgSettingsModel.is_admin_auto_approved_invitees(membership.org_id)
+                if is_auto_approval:
+                    membership_model.status = Status.ACTIVE.value
+                else:
+                    membership_model.status = Status.PENDING_APPROVAL.value
+                membership_model.save()
+                if not is_auto_approval:
+                    try:
+                        Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
+                    except BusinessException as exception:
+                        current_app.logger.error('<send_notification_to_admin failed', exception.message)
         invitation.accepted_date = datetime.now()
         invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')
         invitation.save()
