@@ -75,6 +75,7 @@ class Org:
         org = OrgModel.create_from_dict(camelback2snake(org_info))
         if is_staff_admin:
             org.access_type = AccessType.ANONYMOUS.value
+            org.billable = True
         org.save()
         current_app.logger.info(f'<created_org org_id:{org.id}')
         # create the membership record for this user if its not created by staff and access_type is anonymous

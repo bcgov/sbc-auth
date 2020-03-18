@@ -15,9 +15,10 @@
 
 This module manages the User Information.
 """
-from typing import List
+from typing import List, Dict
 
 from flask import current_app
+from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.exceptions import BusinessException
@@ -28,10 +29,13 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import UserSchema
-from auth_api.utils.roles import CLIENT_ADMIN_ROLES, OWNER, OrgStatus, Status, UserStatus
+from auth_api.services.authorization import check_auth
+from auth_api.services.keycloak_user import KeycloakUser
+from auth_api.utils.roles import CLIENT_ADMIN_ROLES, OWNER, OrgStatus, Status, UserStatus, ADMIN, AccessType
 from auth_api.utils.util import camelback2snake
 
 from .contact import Contact as ContactService
+
 from .keycloak import KeycloakService
 
 
@@ -62,6 +66,64 @@ class User:  # pylint: disable=too-many-instance-attributes
         user_schema = UserSchema()
         obj = user_schema.dump(self._model, many=False)
         return obj
+
+    @staticmethod
+    def create_user_and_add_membership(memberships: List[dict], org_id, token_info: Dict = None,
+                                       skip_auth: bool = False):
+        """Save a user to database and keycloak.
+
+           First add the user to keycloak
+           save the user to DB
+           create membership
+        """
+        if skip_auth:  # make sure no bulk operation and only owner is created using if no auth
+            if len(memberships) > 1 or memberships[0].get('membershipType') not in [OWNER, ADMIN]:
+                raise BusinessException(Error.INVALID_INPUT, None)
+        else:
+            check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
+
+        org = OrgModel.find_by_org_id(org_id)
+        if not org or org.access_type != AccessType.ANONYMOUS.value:
+            raise BusinessException(Error.INVALID_INPUT, None)
+
+        current_app.logger.debug('create_user')
+        users = []
+        for membership in memberships:
+            create_user_request = KeycloakUser()
+            username = membership['username']
+            create_user_request.user_name = username
+            create_user_request.password = membership['password']
+            try:
+                # TODO may be this method itself throw the business exception
+                kc_user = KeycloakService.add_user(create_user_request)
+            except HTTPError:
+                raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+
+            existing_user = UserModel.find_by_username(username)
+            if existing_user:
+                raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+            user_model: UserModel = UserModel()
+            user_model.username = username
+            user_model.keycloak_guid = kc_user.id
+            user_model.is_terms_of_use_accepted = False
+            user_model.status = Status.ACTIVE.value
+            user_model.type = AccessType.ANONYMOUS.value
+            user_model.email = membership.get('email', None)
+            # TODO see how to get roles
+            # user_model.roles = kc_user.
+            user_model.save()
+            User._add_org_membership(org_id, user_model.id, membership['membershipType'])
+            users.append(User(user_model).as_dict())
+        return {'users': users}
+
+    @staticmethod
+    def _add_org_membership(org_id, user_id, membership_type):
+        user_membership: MembershipModel = MembershipModel()
+        user_membership.user_id = user_id
+        user_membership.org_id = org_id
+        user_membership.membership_type_code = membership_type
+        user_membership.status = Status.ACTIVE.value
+        user_membership.save()
 
     @classmethod
     def save_from_jwt_token(cls, token: dict = None):
