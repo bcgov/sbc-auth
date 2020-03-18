@@ -70,7 +70,8 @@ class User:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def create_user_and_add_membership(memberships: List[dict], org_id, token_info: Dict = None,
                                        skip_auth: bool = False):
-        """Save a user to database and keycloak.
+        """
+        Save a user to database and keycloak.
 
            First add the user to keycloak
            save the user to DB
