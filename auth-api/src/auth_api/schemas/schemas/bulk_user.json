@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/bulk_user",
+  "type": "object",
+  "title": "Bulk user",
+  "additionalProperties": false,
+  "definitions": {
+    "user": {
+      "type": "object",
+      "title": "The User  Schema",
+      "properties": {
+        "username": {
+          "$id": "#/properties/username",
+          "type": "string",
+          "title": "User Name",
+          "default": "",
+          "examples": [
+            "Foobar"
+          ],
+          "pattern": "^[^\\s]+(\\s+[^\\s]+)*$"
+        },
+        "password": {
+          "$id": "#/properties/password",
+          "type": "string",
+          "title": "password for the user",
+          "examples": [
+            "mysecretcode@1234"
+          ],
+          "pattern": "^(.*)$"
+        }
+      },
+      "required": [
+        "username",
+        "password"
+      ]
+    }
+  },
+  "required": [
+    "orgId",
+    "users"
+  ],
+  "properties": {
+    "orgId": {
+      "$id": "#/properties/orgId",
+      "type": "number",
+      "title": "Org Name",
+      "default": "",
+      "examples": [
+        10
+      ]
+    },
+    "users": {
+      "type": "array",
+      "title": "The Users Array",
+      "items": {
+        "$ref": "#/definitions/user"
+      }
+    }
+  }
+}
+  

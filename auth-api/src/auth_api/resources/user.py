@@ -21,6 +21,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import MembershipSchema, OrgSchema
 from auth_api.schemas import utils as schema_utils
+from auth_api.services import Invitation as InvitationService
 from auth_api.services import ResetTestData as ResetService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.keycloak import KeycloakService
@@ -32,10 +33,66 @@ from auth_api.utils.constants import BCSC
 from auth_api.utils.roles import Role, Status
 from auth_api.utils.util import cors_preflight
 
-
 API = Namespace('users', description='Endpoints for user profile management')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
+
+
+@cors_preflight('POST,OPTIONS')
+@API.route('/<invitation_token>', methods=['POST', 'OPTIONS'])
+class AnonymousUser(Resource):
+    """Resource for managing anonymous users."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    def post(invitation_token):
+        """Post a new user using the request body who has a proper invitation."""
+        try:
+            invitation = InvitationService.validate_token(invitation_token).as_dict()
+
+            valid_format, errors = schema_utils.validate(request.get_json(), 'anonymous_user')
+            if not valid_format:
+                return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+
+            membership_details = {
+                'email': invitation['recipientEmail'],
+                'membershipType': invitation['membership'][0]['membershipType']
+            }
+            membership_details.update(request.get_json())
+            user = UserService.create_user_and_add_membership([membership_details],
+                                                              invitation['membership'][0]['org']['id'], skip_auth=True)
+            InvitationService.accept_invitation(invitation['id'], None, None, False)
+            response, status = user, http_status.HTTP_201_CREATED
+
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+
+@cors_preflight('POST,OPTIONS')
+@API.route('/bulk', methods=['POST', 'OPTIONS'])
+class BulkUser(Resource):
+    """Resource for managing bulk  users post."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def post():
+        """Admin users can post multiple users to his org.Use it for anonymous purpose only."""
+        try:
+
+            valid_format, errors = schema_utils.validate(request.get_json(), 'bulk_user')
+            if not valid_format:
+                return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+
+            users = UserService.create_user_and_add_membership(request.get_json()['users'],
+                                                               request.get_json()['orgId'], )
+            response, status = users, http_status.HTTP_201_CREATED
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
 
 
 @cors_preflight('GET,POST,OPTIONS')
@@ -142,7 +199,7 @@ class User(Resource):
         is_terms_accepted = request_json['istermsaccepted']
         try:
             response, status = UserService.update_terms_of_use(token, is_terms_accepted, version).as_dict(), \
-                http_status.HTTP_200_OK
+                               http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
