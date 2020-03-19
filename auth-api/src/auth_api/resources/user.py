@@ -49,10 +49,11 @@ class AnonymousUser(Resource):
     def post():
         """Post a new user using the request body who has a proper invitation."""
         try:
-            invitation_token = request.headers.get("invitation_token", None)
+            request_json = request.get_json()
+            invitation_token = request.headers.get('invitation_token', None)
             invitation = InvitationService.validate_token(invitation_token).as_dict()
 
-            valid_format, errors = schema_utils.validate(request.get_json(), 'anonymous_user')
+            valid_format, errors = schema_utils.validate(request_json, 'anonymous_user')
             if not valid_format:
                 return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
@@ -60,7 +61,7 @@ class AnonymousUser(Resource):
                 'email': invitation['recipientEmail'],
                 'membershipType': invitation['membership'][0]['membershipType']
             }
-            membership_details.update(request.get_json())
+            membership_details.update(request_json)
             user = UserService.create_user_and_add_membership([membership_details],
                                                               invitation['membership'][0]['org']['id'], skip_auth=True)
             InvitationService.accept_invitation(invitation['id'], None, None, False)
