@@ -52,7 +52,7 @@ export default class UnauthorizedView extends Vue {
 
   beforeMount () {
     // TODO: Replace the login source check with whatever value for director search account.
-    this.isDirSearchUser = (this.currentUser?.loginSource === 'BCSC')
+    this.isDirSearchUser = (this.currentUser?.loginSource === 'BCROS')
   }
 
   mounted () {

@@ -71,6 +71,8 @@ import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import { Organization } from '@/models/Organization'
+import { UserProfileRequestBody } from '@/models/user'
+import UserService from '@/services/user.services'
 
 @Component({
   components: {
@@ -83,6 +85,8 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
     private confirmPassword = ''
     private formError = ''
     private editing = false
+
+    @Prop() token: string
 
     $refs: {
       form: HTMLFormElement
@@ -111,7 +115,14 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
 
     private async nextStep () {
       if (this.isFormValid()) {
-        this.redirectToNext()
+        const requestBody: UserProfileRequestBody = {
+          username: this.username,
+          password: this.password
+        }
+        const response = UserService.createUserProfile(this.token, requestBody)
+        // eslint-disable-next-line no-console
+        console.log(response)
+        // this.redirectToNext()
       }
     }
 
