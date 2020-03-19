@@ -112,7 +112,7 @@ class KeycloakUser:  # pylint: disable=too-many-instance-attributes
 
     def update_password_on_login(self):
         """Set the required_actions."""
-        if not self._user['requiredActions']:
+        if not self._user.get('requiredActions', None):
             self._user['requiredActions'] = []
         self._user['requiredActions'].append(RequiredAction.UPDATE_PASSWORD.value)
 
