@@ -20,7 +20,9 @@
                 Create your User Profile
               </v-card-title>
               <v-card-text>
-                <CreateUserProfileForm> </CreateUserProfileForm>
+                <create-user-profile-form
+                  :token="token"
+                ></create-user-profile-form>
               </v-card-text>
             </v-container>
           </v-card>
@@ -43,6 +45,8 @@ import Vue from 'vue'
 })
 export default class CreateUserProfileView extends Vue {
   private isLoading = true
+
+  @Prop() token: string
 
   private async mounted () {
     this.isLoading = false
