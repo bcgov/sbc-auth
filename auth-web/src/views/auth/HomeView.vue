@@ -21,28 +21,18 @@
             <!-- Non-authenticated -->
             <v-btn large color="#fcba19" class="cta-btn"
               v-if="!userProfile"
-              @click="accountDialog = true">
+              @click="createAccount()">
               Create a BC Registries Account
             </v-btn>
           </div>
 
           <v-dialog v-model="accountDialog" max-width="640">
-            <v-card>
-              <v-card-title>Create a BC Registries Account</v-card-title>
-              <v-card-text>
-                <p class="mb-7">To access this service, you must securely log in with your BC Services Card, government’s trusted way to access online services. It typically takes five minutes or less to set up your mobile card, and the only information BC Registries can access from your card is your legal name.</p>
-                <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/login-with-card" rel="noopener noreferrer"
-                  target="_blank">
-                  <v-icon small class="mr-2">mdi-open-in-new</v-icon>
-                  <span>Learn how to set up and use your BC Services Card</span>
-                </a>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
+            <LoginBCSC>
+              <template v-slot:actions>
                 <v-btn large color="primary" @click="login()">Log in</v-btn>
                 <v-btn large depressed color="default" @click="accountDialog = false">Cancel</v-btn>
-              </v-card-actions>
-            </v-card>
+              </template>
+            </LoginBCSC>
           </v-dialog>
         </v-container>
       </header>
@@ -227,11 +217,15 @@ import { Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
+import LoginBCSC from '@/components/auth/LoginBCSC.vue'
 import { User } from '@/models/user'
 import { VueConstructor } from 'vue'
 
 @Component({
   name: 'Home',
+  components: {
+    LoginBCSC
+  },
   computed: {
     ...mapState('user', ['userProfile']),
     ...mapState('org', ['currentAccountSettings', 'currentMembership'])
