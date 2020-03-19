@@ -37,6 +37,7 @@ from .org import API as ORG_API
 from .reset import API as RESET_API
 from .token import API as TOKEN_API
 from .user import API as USER_API
+from .bulk_user import API as BULK_USER_API
 from .user_settings import API as USER_SETTINGS_API
 from .org_products import API as ORG_PRODUCTS_API
 from .notifications import API as NOTIFICATIONS_API
@@ -77,6 +78,7 @@ HANDLER = ExceptionHandler(API)
 API.add_namespace(META_API, path='/meta')
 API.add_namespace(TOKEN_API, path='/token')
 API.add_namespace(USER_API, path='/users')
+API.add_namespace(BULK_USER_API, path='/bulk/users')
 API.add_namespace(USER_SETTINGS_API, path='/users/<string:user_id>/settings')
 API.add_namespace(ENTITY_API, path='/entities')
 API.add_namespace(ORG_API, path='/orgs')

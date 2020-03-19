@@ -79,7 +79,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         """
         if skip_auth:  # make sure no bulk operation and only owner is created using if no auth
             if len(memberships) > 1 or memberships[0].get('membershipType') not in [OWNER, ADMIN]:
-                raise BusinessException(Error.INVALID_INPUT, None)
+                raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
         else:
             check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
 
