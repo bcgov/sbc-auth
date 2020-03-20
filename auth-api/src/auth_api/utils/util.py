@@ -27,7 +27,8 @@ def cors_preflight(methods):
             return {'Allow': 'GET'}, 200, \
                    {'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': methods,
-                    'Access-Control-Allow-Headers': 'Authorization, Content-Type, registries-trace-id, invitation_token'}
+                    'Access-Control-Allow-Headers': 'Authorization, Content-Type, registries-trace-id, '
+                                                    'invitation_token'}
 
         setattr(f, 'options', options)
         return f
