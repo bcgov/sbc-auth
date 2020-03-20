@@ -32,7 +32,7 @@ from tests.utilities.factory_scenarios import KeycloakScenario, TestContactInfo,
     TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
     factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
-    factory_membership_model, factory_org_model, factory_user_model)
+    factory_membership_model, factory_org_model, factory_user_model, factory_invitation_anonymous)
 
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
@@ -45,6 +45,28 @@ def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+
+
+def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an anonymous admin can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_anonymous),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation_anonymous(org_id=org_id)),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    assert dictionary.get('token') is not None
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    rv = client.post('/api/v1/users/bcros', data=json.dumps(TestUserInfo.user_anonymous_1),
+                     headers={'invitation_token': dictionary.get('token')}, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert dictionary['users'][0].get('username') == TestUserInfo.user_anonymous_1['username']
+    assert dictionary['users'][0].get('password') is None
+    assert dictionary['users'][0].get('type') == 'ANONYMOUS'
 
 
 def test_add_user_no_token_returns_401(client, session):  # pylint:disable=unused-argument

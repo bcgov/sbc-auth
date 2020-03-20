@@ -92,6 +92,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         for membership in memberships:
             create_user_request = KeycloakUser()
             username = membership['username']
+            current_app.logger.debug(f'create user username: {username}')
             create_user_request.user_name = username
             create_user_request.password = membership['password']
             create_user_request.update_password_on_login()
@@ -99,10 +100,12 @@ class User:  # pylint: disable=too-many-instance-attributes
                 # TODO may be this method itself throw the business exception
                 kc_user = KeycloakService.add_user(create_user_request)
             except HTTPError:
+                current_app.logger.debug('create_user in keyclaok failed:Duplicate user')
                 raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
             existing_user = UserModel.find_by_username(username)
             if existing_user:
+                current_app.logger.debug('Existing users found in DB')
                 raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
             user_model: UserModel = UserModel()
             user_model.username = username
@@ -118,12 +121,9 @@ class User:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def _add_org_membership(org_id, user_id, membership_type):
-        user_membership: MembershipModel = MembershipModel()
-        user_membership.user_id = user_id
-        user_membership.org_id = org_id
-        user_membership.membership_type_code = membership_type
-        user_membership.status = Status.ACTIVE.value
-        user_membership.save()
+        membership = MembershipModel(org_id=org_id, user_id=user_id, membership_type_code=membership_type,
+                                     membership_type_status=Status.ACTIVE.value)
+        membership.save()
 
     @classmethod
     def save_from_jwt_token(cls, token: dict = None):
