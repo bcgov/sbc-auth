@@ -33,6 +33,8 @@ from auth_api.models.user import User as UserModel
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
+from auth_api.utils.roles import InvitationType
+
 from tests.utilities.factory_scenarios import (
     JWT_HEADER, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgStatusInfo, TestOrgTypeInfo, TestPaymentTypeInfo,
     TestUserInfo)
@@ -158,6 +160,24 @@ def factory_invitation(org_id,
     return {
         'recipientEmail': email,
         'sentDate': sent_date,
+        'membership': [
+            {
+                'membershipType': membership_type,
+                'orgId': org_id
+            }
+        ]
+    }
+
+
+def factory_invitation_anonymous(org_id,
+                                 email='abc123@email.com',
+                                 sent_date=datetime.datetime.now().strftime('Y-%m-%d %H:%M:%S'),
+                                 membership_type='OWNER'):
+    """Produce an invite for the given org and email."""
+    return {
+        'recipientEmail': email,
+        'sentDate': sent_date,
+        'type': InvitationType.DIRECTOR_SEARCH.value,
         'membership': [
             {
                 'membershipType': membership_type,
