@@ -49,6 +49,12 @@ export default class UserService {
   }
 
   static async createUserProfile (token: string, userProfile: UserProfileRequestBody): Promise<AxiosResponse<any>> {
-    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/users/${token}`, userProfile)
+    const headers = {
+      'Content-Type': 'application/json',
+      'invitation_token': token
+    }
+    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/users/bcros`, userProfile, {
+      headers: headers
+    })
   }
 }

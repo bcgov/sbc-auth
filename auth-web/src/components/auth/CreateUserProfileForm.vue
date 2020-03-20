@@ -44,7 +44,7 @@
       <v-col cols="12" class="pt-0 pb-0">
         <v-text-field
             filled
-            label="Confirm Email Address"
+            label="Confirm Password"
             req
             persistent-hint
             :error-messages="passwordMustMatch()"
@@ -68,6 +68,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import ConfigHelper from '@/util/config-helper'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/NextPageMixin.vue'
 import { Organization } from '@/models/Organization'
@@ -122,12 +123,17 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
         const response = UserService.createUserProfile(this.token, requestBody)
         // eslint-disable-next-line no-console
         console.log(response)
-        // this.redirectToNext()
+        // this.redirectToSignin()
       }
     }
 
     private redirectToNext () {
       this.$router.push(this.getNextPageUrl())
+    }
+
+    private redirectToSignin () {
+      let redirectUrl = ConfigHelper.getSelfURL() + '/confirmtoken/' + this.token
+      this.$router.push('/signin/bcsc/' + encodeURIComponent(redirectUrl))
     }
 
     private cancel () {
