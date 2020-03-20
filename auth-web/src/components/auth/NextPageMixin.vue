@@ -49,7 +49,9 @@ export default class NextPageMixin extends Vue {
     // Redirect to user profile if no contact info or terms not accepted
     // Redirect to create team if no orgs
     // Redirect to dashboard otherwise
-    if (!this.userContact || !this.userProfile?.userTerms?.isTermsOfUseAccepted || (!this.currentOrganization && !this.currentMembership)) {
+    if (!this.userContact || !this.userProfile?.userTerms?.isTermsOfUseAccepted) {
+      nextStep = Pages.USER_PROFILE
+    } else if (!this.currentOrganization && !this.currentMembership) {
       nextStep = Pages.CREATE_ACCOUNT
     } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
       nextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
