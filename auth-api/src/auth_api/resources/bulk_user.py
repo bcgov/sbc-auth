@@ -13,7 +13,7 @@
 # limitations under the License.
 """API endpoints for managing a User resource."""
 
-from flask import request
+from flask import request, g
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
@@ -23,7 +23,6 @@ from auth_api.schemas import utils as schema_utils
 from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
-
 
 API = Namespace('bulk users', description='Endpoints for bulk user profile management')
 TRACER = Tracer.get_instance()
@@ -44,11 +43,12 @@ class BulkUser(Resource):
         try:
             request_json = request.get_json()
             valid_format, errors = schema_utils.validate(request_json, 'bulk_user')
+            token = g.jwt_oidc_token_info
             if not valid_format:
                 return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
             users = UserService.create_user_and_add_membership(request_json['users'],
-                                                               request_json['orgId'], )
+                                                               request_json['orgId'], token)
             response, status = users, http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

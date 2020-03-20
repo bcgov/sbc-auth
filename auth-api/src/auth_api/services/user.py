@@ -121,12 +121,9 @@ class User:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def _add_org_membership(org_id, user_id, membership_type):
-        user_membership: MembershipModel = MembershipModel()
-        user_membership.user_id = user_id
-        user_membership.org_id = org_id
-        user_membership.membership_type_code = membership_type
-        user_membership.status = Status.ACTIVE.value
-        user_membership.save()
+        membership = MembershipModel(org_id=org_id, user_id=user_id, membership_type_code=membership_type,
+                                     membership_type_status=Status.ACTIVE.value)
+        membership.save()
 
     @classmethod
     def save_from_jwt_token(cls, token: dict = None):
