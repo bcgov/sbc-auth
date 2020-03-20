@@ -11,15 +11,15 @@ import { Component, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
+import TeamManagement from '@/components/auth/TeamManagement.vue'
 import { User } from '@/models/user'
-import UserManagement from '@/components/auth/UserManagement.vue'
 import { VueConstructor } from 'vue'
 
   @Component({
     name: 'Dashboard',
     components: {
       EntityManagement,
-      UserManagement
+      TeamManagement
     },
     computed: {
       ...mapState('user', ['userProfile']),

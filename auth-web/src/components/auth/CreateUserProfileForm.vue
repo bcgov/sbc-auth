@@ -69,7 +69,7 @@
 <script lang="ts">
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
-import NextPageMixin from '@/components/auth/NextPageMixin.vue'
+import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import { Organization } from '@/models/Organization'
 
 @Component({

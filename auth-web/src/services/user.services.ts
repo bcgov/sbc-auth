@@ -1,6 +1,6 @@
+import { AddUsersToOrgBody, Member, Organizations } from '@/models/Organization'
 import Axios, { AxiosResponse } from 'axios'
 import { Contact, Contacts } from '@/models/contact'
-import { Member, Organizations } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
 import { User } from '@/models/user'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
@@ -46,5 +46,9 @@ export default class UserService {
 
   static async getMembership (orgId: number): Promise<AxiosResponse<Member>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/users/orgs/${orgId}/membership`)
+  }
+
+  static async createUsers (addUsersToOrgBody: AddUsersToOrgBody): Promise<AxiosResponse<AddUsersToOrgBody>> {
+    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/bulk/users`, addUsersToOrgBody)
   }
 }

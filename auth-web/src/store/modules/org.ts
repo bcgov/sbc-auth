@@ -1,6 +1,6 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { AddUserBody, AddUsersToOrgBody, CreateRequestBody as CreateOrgRequestBody, Member, Organization, UpdateMemberPayload } from '@/models/Organization'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
-import { CreateRequestBody as CreateOrgRequestBody, Member, Organization, UpdateMemberPayload } from '@/models/Organization'
 import { Products, ProductsRequestBody } from '@/models/Staff'
 import { AccountSettings } from '@/models/account-settings'
 import { EmptyResponse } from '@/models/global'
@@ -26,6 +26,7 @@ export default class OrgModule extends VuexModule {
   pendingOrgInvitations: Invitation[] = []
   invalidInvitationToken = false
   tokenError = false
+  createdUsers: AddUserBody[] = []
 
   @Mutation
   public setActiveOrgMembers (activeMembers: Member[]) {
@@ -77,6 +78,11 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentMembership (membership: Member) {
     this.currentMembership = membership
+  }
+
+  @Mutation
+  public setCreatedUsers (users: AddUserBody[]) {
+    this.createdUsers = users
   }
 
   @Action({ rawError: true })
@@ -249,5 +255,18 @@ export default class OrgModule extends VuexModule {
   public async addProductsToOrg (productsRequestBody: ProductsRequestBody): Promise<Products> {
     const response = await StaffService.addProducts(this.context.state['currentOrganization'].id, productsRequestBody)
     return response?.data
+  }
+  @Action({ rawError: true })
+  public async createUsers (addUserBody: AddUsersToOrgBody) {
+    try {
+      const response = await UserService.createUsers(addUserBody)
+      if (!response || !response.data || response.status !== 201) {
+        throw new Error('Unable to create users')
+      }
+      this.context.commit('setCreatedUsers', addUserBody.users)
+      await this.context.dispatch('syncActiveOrgMembers')
+    } catch (exception) {
+      throw exception
+    }
   }
 }
