@@ -57,10 +57,24 @@
 
     <v-row>
       <v-col cols="12" class="form__btns pt-5">
-          <v-btn large color="primary" class="save-continue-button" :disabled='!isFormValid()' @click="nextStep" data-test="next-button">
-            Next
+          <v-btn
+            large
+            color="primary"
+            class="save-continue-button"
+            :loading="isLoading"
+            :disabled='!isFormValid()'
+            @click="nextStep"
+            data-test="next-button"
+          > Next
           </v-btn>
-          <v-btn large depressed @click="cancel" data-test="cancel-button" class="cancel-button">Cancel</v-btn>
+          <v-btn
+            large
+            depressed
+            @click="cancel"
+            data-test="cancel-button"
+            class="cancel-button"
+          > Cancel
+          </v-btn>
       </v-col>
     </v-row>
   </v-form>
@@ -85,7 +99,7 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
     private password = ''
     private confirmPassword = ''
     private formError = ''
-    private editing = false
+    private isLoading = false
 
     @Prop() token: string
 
@@ -116,24 +130,26 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
 
     private async nextStep () {
       if (this.isFormValid()) {
+        this.isLoading = true
         const requestBody: UserProfileRequestBody = {
           username: this.username,
           password: this.password
         }
-        const response = UserService.createUserProfile(this.token, requestBody)
-        // eslint-disable-next-line no-console
-        console.log(response)
-        // this.redirectToSignin()
+        try {
+          const response = await UserService.createUserProfile(this.token, requestBody)
+          if (response?.data?.users?.length) {
+            this.redirectToSignin()
+          }
+        } catch (error) {
+          this.isLoading = false
+          this.$emit('already-claimed')
+        }
       }
-    }
-
-    private redirectToNext () {
-      this.$router.push(this.getNextPageUrl())
     }
 
     private redirectToSignin () {
       let redirectUrl = ConfigHelper.getSelfURL() + '/confirmtoken/' + this.token
-      this.$router.push('/signin/bcsc/' + encodeURIComponent(redirectUrl))
+      this.$router.push('/signin/bcros/' + encodeURIComponent(redirectUrl))
     }
 
     private cancel () {
