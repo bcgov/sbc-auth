@@ -15,7 +15,7 @@
       <v-list-item-title
         class="user-name"
         :data-test="getIndexedTag('user-name', item.index)"
-      >{{ item.user.firstname }} {{ item.user.lastname }}</v-list-item-title>
+        >{{ item.user.firstname }} {{ item.user.lastname }}</v-list-item-title>
       <v-list-item-subtitle
         :data-test="getIndexedTag('business-id', item.index)"
         v-if="item.user.contacts && item.user.contacts.length > 0"

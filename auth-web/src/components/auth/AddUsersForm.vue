@@ -138,6 +138,7 @@ export default class AddUsersForm extends Vue {
   }
 
   private created () {
+    this.users = []
     for (let i = 0; i < 3; i++) {
       this.users.push(this.getDefaultRow())
     }
@@ -180,16 +181,18 @@ export default class AddUsersForm extends Vue {
     if (this.isFormValid()) {
       // set loading state
       this.loading = true
-      this.users.forEach((user, index) => {
-        if (!user.username && !user.password) {
-          this.users.splice(index, 1)
+      // Doing a reverse loop to remove empty rows, not going with reduceRight atm
+      for (let i = this.users.length - 1; i >= 0; i--) {
+        const user = this.users[i]
+        if (!user.username.trim() && !user.password.trim()) {
+          this.users.splice(i, 1)
         } else {
           user.membershipType = user.selectedRole.name.toUpperCase()
         }
-      })
+      }
       await this.createUsers({ orgId: this.currentOrganization.id, users: this.users })
 
-      this.resetForm()
+      this.created()
 
       // emit event to let parent know the invite sequence is complete
       this.$emit('add-users-complete')

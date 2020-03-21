@@ -37,6 +37,22 @@
       </template>
     </ModalDialog>
 
+    <!-- Add Users Success Modal -->
+    <ModalDialog
+      ref="addUsersSuccessDialog"
+      :title="successTitle"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template v-slot:actions>
+        <v-btn large color="error" @click="close($refs.addUsersSuccessDialog)">OK</v-btn>
+      </template>
+
+      <template v-slot:text>
+        <AddUsersSuccess/>
+      </template>
+    </ModalDialog>
+
     <!-- Confirm Action Dialog -->
     <ModalDialog
       ref="confirmActionDialog"
@@ -108,6 +124,7 @@ import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import MemberDataTable, { ChangeRolePayload } from '@/components/auth/MemberDataTable.vue'
 import { mapActions, mapState } from 'vuex'
 import AddUsersForm from '@/components/auth/AddUsersForm.vue'
+import AddUsersSuccess from '@/components/auth/AddUsersSuccess.vue'
 import { Business } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
@@ -126,7 +143,8 @@ import { getModule } from 'vuex-module-decorators'
   components: {
     MemberDataTable,
     ModalDialog,
-    AddUsersForm
+    AddUsersForm,
+    AddUsersSuccess
   },
   computed: {
     ...mapState('org', [
@@ -154,6 +172,7 @@ export default class AnonymousUserManagement extends Mixins(TeamManagementMixin)
     confirmActionDialog: ModalDialog
     confirmActionDialogWithQuestion: ModalDialog
     addAnonUsersDialog: ModalDialog
+    addUsersSuccessDialog: ModalDialog
   }
 
   private async mounted () {
@@ -171,9 +190,8 @@ export default class AnonymousUserManagement extends Mixins(TeamManagementMixin)
 
   private showSuccessModal () {
     this.$refs.addAnonUsersDialog.close()
-    this.successTitle = `Invited ${this.createdUsers.length} Team Members`
-    this.successText = 'When team members accept this invitation, you will need to approve their access to this account.'
-    this.$refs.successDialog.open()
+    this.successTitle = `Added ${this.createdUsers.length} Team Members`
+    this.$refs.addUsersSuccessDialog.open()
   }
 }
 </script>

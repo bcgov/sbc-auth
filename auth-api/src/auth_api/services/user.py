@@ -17,7 +17,7 @@ This module manages the User Information.
 """
 from typing import List, Dict
 
-from flask import current_app
+from flask import current_app, g
 from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
@@ -77,6 +77,8 @@ class User:  # pylint: disable=too-many-instance-attributes
            save the user to DB
            create membership
         """
+        if not token_info:
+            token_info = g.jwt_oidc_token_info
         if skip_auth:  # make sure no bulk operation and only owner is created using if no auth
             if len(memberships) > 1 or memberships[0].get('membershipType') not in [OWNER, ADMIN]:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
@@ -98,7 +100,8 @@ class User:  # pylint: disable=too-many-instance-attributes
             try:
                 # TODO may be this method itself throw the business exception
                 kc_user = KeycloakService.add_user(create_user_request)
-            except HTTPError:
+            except HTTPError as err:
+                current_app.logger.error(err)
                 raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
             existing_user = UserModel.find_by_username(username)
@@ -107,6 +110,8 @@ class User:  # pylint: disable=too-many-instance-attributes
             user_model: UserModel = UserModel()
             user_model.username = username
             user_model.keycloak_guid = kc_user.id
+            user_model.firstname = kc_user.first_name
+            user_model.lastname = kc_user.last_name
             user_model.is_terms_of_use_accepted = False
             user_model.status = Status.ACTIVE.value
             user_model.type = AccessType.ANONYMOUS.value
