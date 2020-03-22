@@ -190,7 +190,7 @@ class TestJwtClaims(dict, Enum):
         """Produce a created user."""
         return {
             'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
-            'sub': sub,
+            'sub': str(sub),
             'firstname': 'Test',
             'lastname': 'User',
             'preferred_username': 'testuser',

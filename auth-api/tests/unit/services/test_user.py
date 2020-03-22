@@ -32,7 +32,7 @@ from auth_api.utils.roles import Status, ADMIN, OWNER
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, \
     TestUserInfo, TestanonymousMembership
 from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_user_model, \
-    factory_org_model
+    factory_org_model, factory_membership_model
 
 
 def test_as_dict(session):  # pylint: disable=unused-argument
@@ -60,7 +60,8 @@ def test_user_save_by_token_no_token(session):  # pylint: disable=unused-argumen
     assert user is None
 
 
-def test_create_user_and_add_membership_owner_skip_auth_mode(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
+def test_create_user_and_add_membership_owner_skip_auth_mode(session, auth_mock,
+                                                             keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an owner can be added as anonymous."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestanonymousMembership.membership_owner]
@@ -76,7 +77,8 @@ def test_create_user_and_add_membership_owner_skip_auth_mode(session, auth_mock,
     assert members[0].membership_type_code == OWNER
 
 
-def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
+def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,
+                                                             keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an admin can be added as anonymous."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestanonymousMembership.membership_admin]
@@ -92,8 +94,28 @@ def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,
     assert members[0].membership_type_code == ADMIN
 
 
+def test_create_user_and_add_membership_admin_bulk_mode(session, auth_mock,
+                                                        keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an admin can be added as anonymous."""
+    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
+    user = factory_user_model()
+    factory_membership_model(user.id, org.id)
+    claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
+    membership = [TestanonymousMembership.membership_member]
+    users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
+
+    assert len(users['users']) == 1
+    assert users['users'][0]['username'] == membership[0]['username']
+    assert users['users'][0]['type'] == 'ANONYMOUS'
+
+    members = MembershipModel.find_members_by_org_id(org.id)
+
+    # only one member should be there since its a STAFF created org
+    assert len(members) == 2
+
+
 def test_create_user_and_add_membership_member_error_skip_auth_mode(session, auth_mock,
-                                                     keycloak_mock):  # pylint:disable=unused-argument
+                                                                    keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an member cannot be added as anonymous in skip_auth mode."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestanonymousMembership.membership_member]
@@ -104,7 +126,7 @@ def test_create_user_and_add_membership_member_error_skip_auth_mode(session, aut
 
 
 def test_create_user_and_add_membership_multiple_error_skip_auth_mode(session, auth_mock,
-                                                       keycloak_mock):  # pylint:disable=unused-argument
+                                                                      keycloak_mock):  # pylint:disable=unused-argument
     """Assert that multiple user cannot be created  in skip_auth mode."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestanonymousMembership.membership_member, TestanonymousMembership.membership_2]
