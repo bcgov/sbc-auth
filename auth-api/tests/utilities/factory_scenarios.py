@@ -237,9 +237,9 @@ class TestPaymentTypeInfo(dict, Enum):
 class TestanonymousMembership(dict, Enum):
     """Test scenarios of org status."""
 
-    membership_1 = {'username': 'firstuser', 'password': 'firstuser', 'membershipType': 'ADMIN'}
+    membership_admin = {'username': 'firstuser', 'password': 'firstuser', 'membershipType': 'ADMIN'}
     membership_2 = {'username': 'seconduser', 'password': 'seconduser', 'membershipType': 'ADMIN'}
-    membership_3 = {'username': 'thirduser', 'password': 'thirduser', 'membershipType': 'OWNER'}
+    membership_owner = {'username': 'thirduser', 'password': 'thirduser', 'membershipType': 'OWNER'}
     membership_member = {'username': 'memberuser', 'password': 'memberuser', 'membershipType': 'MEMBER'}
 
 
