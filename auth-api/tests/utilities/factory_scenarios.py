@@ -234,6 +234,15 @@ class TestPaymentTypeInfo(dict, Enum):
     test_type = {'code': 'TEST', 'desc': 'Test'}
 
 
+class TestanonymousMembership(dict, Enum):
+    """Test scenarios of org status."""
+
+    membership_1 = {'username': 'firstuser', 'password': 'firstuser', 'membershipType': 'ADMIN'}
+    membership_2 = {'username': 'seconduser', 'password': 'seconduser', 'membershipType': 'ADMIN'}
+    membership_3 = {'username': 'thirduser', 'password': 'thirduser', 'membershipType': 'OWNER'}
+    membership_member = {'username': 'memberuser', 'password': 'memberuser', 'membershipType': 'MEMBER'}
+
+
 class TestOrgStatusInfo(dict, Enum):
     """Test scenarios of org status."""
 
@@ -347,6 +356,13 @@ class TestUserInfo(dict, Enum):
         'firstname': 'Test',
         'lastname': 'User',
         'roles': '{edit, uma_authorization, staff}',
+        'keycloak_guid': uuid.uuid4()
+    }
+    user_staff_admin = {
+        'username': 'CP1234567',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'roles': '{edit, uma_authorization, staff_admin}',
         'keycloak_guid': uuid.uuid4()
     }
     user2 = {

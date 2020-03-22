@@ -28,8 +28,9 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import User as UserModel
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
-from auth_api.utils.roles import Status
-from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
+from auth_api.utils.roles import Status, ADMIN
+from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, \
+    TestUserInfo, TestanonymousMembership
 from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_user_model
 
 
@@ -56,6 +57,60 @@ def test_user_save_by_token_no_token(session):  # pylint: disable=unused-argumen
     """Assert that a user cannot be created from an empty token."""
     user = UserService.save_from_jwt_token(None)
     assert user is None
+
+
+def test_create_user_and_add_membership(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an admin/owner can be added as anonymous."""
+    user_with_token = TestUserInfo.user_staff_admin
+    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user = factory_user_model(user_info=user_with_token)
+    org = OrgService.create_org(TestOrgInfo.org_anonymous, user.id, token_info=TestJwtClaims.staff_admin_role)
+    membership = [TestanonymousMembership.membership_1]
+    users = UserService.create_user_and_add_membership(membership, org.as_dict()['id'], skip_auth=True)
+    assert len(users['users']) == 1
+    assert users['users'][0]['username'] == membership[0]['username']
+    assert users['users'][0]['type'] == 'ANONYMOUS'
+
+    members = MembershipModel.find_members_by_org_id(org.as_dict()['id'])
+
+    # only one member shoudl be there since its a STAFF created org
+    assert len(members) == 1
+    assert members[0].membership_type_code == ADMIN
+
+    membership = [TestanonymousMembership.membership_3]
+    users = UserService.create_user_and_add_membership(membership, org.as_dict()['id'], TestJwtClaims.edit_role,
+                                                       skip_auth=True)
+    assert len(users['users']) == 1
+    assert users['users'][0]['username'] == membership[0]['username']
+    assert users['users'][0]['type'] == 'ANONYMOUS'
+
+
+def test_create_user_and_add_membership_member_error(session, auth_mock,
+                                                     keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an member can be added as anonymous."""
+    user_with_token = TestUserInfo.user_staff_admin
+    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user = factory_user_model(user_info=user_with_token)
+    org = OrgService.create_org(TestOrgInfo.org_anonymous, user.id, token_info=TestJwtClaims.staff_admin_role)
+    membership = [TestanonymousMembership.membership_member]
+    with pytest.raises(BusinessException) as exception:
+        UserService.create_user_and_add_membership(membership, org.as_dict()['id'],
+                                                   skip_auth=True)
+    assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
+
+
+def test_create_user_and_add_membership_multiple_error(session, auth_mock,
+                                                       keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a user cannot be created from an empty token."""
+    user_with_token = TestUserInfo.user_staff_admin
+    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user = factory_user_model(user_info=user_with_token)
+    org = OrgService.create_org(TestOrgInfo.org_anonymous, user.id, token_info=TestJwtClaims.staff_admin_role)
+    membership = [TestanonymousMembership.membership_member, TestanonymousMembership.membership_2]
+    with pytest.raises(BusinessException) as exception:
+        UserService.create_user_and_add_membership(membership, org.as_dict()['id'], TestJwtClaims.edit_role,
+                                                   skip_auth=True)
+    assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
 
 
 def test_user_save_by_token_fail(session):  # pylint: disable=unused-argument

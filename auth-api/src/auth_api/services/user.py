@@ -71,11 +71,12 @@ class User:  # pylint: disable=too-many-instance-attributes
     def create_user_and_add_membership(memberships: List[dict], org_id, token_info: Dict = None,
                                        skip_auth: bool = False):
         """
-        Save a user to database and keycloak.
+        Create user(s) in the  DB and upstream keycloak.
 
-           First add the user to keycloak
-           save the user to DB
-           create membership
+        accepts a list of memberships ie.a list of objects with username,password and membershipTpe
+        skip_auth can be used if called method already perfomed the authenticaiton
+        skip_auth= true is used now incase of invitation for admin users scenarion
+        other cases should be invoked with skip_auth=false
         """
         if skip_auth:  # make sure no bulk operation and only owner is created using if no auth
             if len(memberships) > 1 or memberships[0].get('membershipType') not in [OWNER, ADMIN]:
@@ -83,6 +84,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         else:
             check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
 
+        # check if anonymous org ;these actions cannot be performed on normal orgs
         org = OrgModel.find_by_org_id(org_id)
         if not org or org.access_type != AccessType.ANONYMOUS.value:
             raise BusinessException(Error.INVALID_INPUT, None)
@@ -99,9 +101,9 @@ class User:  # pylint: disable=too-many-instance-attributes
             try:
                 # TODO may be this method itself throw the business exception
                 kc_user = KeycloakService.add_user(create_user_request)
-            except HTTPError:
-                current_app.logger.debug('create_user in keyclaok failed:Duplicate user')
-                raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+            except HTTPError as err:
+                current_app.logger.error('create_user in keycloak failed', err)
+                raise BusinessException(Error.FAILED_ADDING_USER_IN_KEYCLOAK, None)
 
             existing_user = UserModel.find_by_username(username)
             if existing_user:
