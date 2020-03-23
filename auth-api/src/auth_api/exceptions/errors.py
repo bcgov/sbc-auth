@@ -42,6 +42,8 @@ class Error(Enum):
     MAX_NUMBER_OF_ORGS_LIMIT = 'Maximum number of organisations reached', http_status.HTTP_400_BAD_REQUEST
     ALREADY_CLAIMED_PASSCODE = 'Passcode you entered has already been claimed', http_status.HTTP_406_NOT_ACCEPTABLE
     ORG_CANNOT_BE_DISSOLVED = 'Organization cannot be dissolved', http_status.HTTP_406_NOT_ACCEPTABLE
+    FAILED_ADDING_USER_IN_KEYCLOAK = 'Error adding user to keycloak', http_status.HTTP_500_INTERNAL_SERVER_ERROR
+    USER_CANT_CREATE_ANONYMOUS_ORG = 'Only staff can create anonymous org', http_status.HTTP_401_UNAUTHORIZED
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""
