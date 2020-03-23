@@ -12,3 +12,8 @@ export interface UserTerms {
     isTermsOfUseAccepted: boolean
     termsOfUseAcceptedVersion: string
 }
+
+export interface UserProfileRequestBody {
+    username: string
+    password: string
+}

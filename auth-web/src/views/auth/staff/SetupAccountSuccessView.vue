@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Invitation } from '@/models/Invitation'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
@@ -37,11 +37,11 @@ export default class SetupAccountSuccessView extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
   private readonly currentOrganization!: Organization
   private readonly sentInvitations!: Invitation[]
-  private accountName: string = ''
   private accountEmail: string = ''
 
+  @Prop({ default: '' }) accountName: string
+
   private async mounted () {
-    this.accountName = this.currentOrganization?.name || ''
     this.accountEmail = (this.sentInvitations?.length && this.sentInvitations[0].recipientEmail) ? this.sentInvitations[0].recipientEmail : ''
   }
 

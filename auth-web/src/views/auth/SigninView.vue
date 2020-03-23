@@ -8,7 +8,7 @@
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
-import { mapGetters, mapMutations } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -23,7 +23,8 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   methods: {
-    ...mapMutations('user', ['setRedirectAfterLoginUrl'])
+    ...mapMutations('user', ['setRedirectAfterLoginUrl']),
+    ...mapActions('user', ['loadUserInfo'])
   },
   components: {
     SbcSignin
@@ -41,6 +42,7 @@ export default class Signin extends Mixins(NextPageMixin) {
     // Check if user is authenticated, and redirect according to specified redirect
     // or fallback to default route for their login source
     await this.syncUser()
+    this.loadUserInfo()
     if (this.$store.getters['auth/isAuthenticated']) {
       this.$root.$emit('signin-complete')
       if (this.redirectUrl) {

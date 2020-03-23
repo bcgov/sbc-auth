@@ -29,7 +29,8 @@ export enum Pages {
     DUPLICATE_TEAM_MESAGE = 'duplicateteam',
     PENDING_APPROVAL = 'pendingapproval',
     MAIN = 'account',
-    SIGNIN = 'signin'
+    SIGNIN = 'signin',
+    CREATE_USER_PROFILE = 'createuserprofile'
 }
 
 export enum Account {
