@@ -97,6 +97,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             current_app.logger.debug(f'create user username: {username}')
             create_user_request.user_name = username
             create_user_request.password = membership['password']
+            create_user_request.enabled = True
             create_user_request.update_password_on_login()
             try:
                 # TODO may be this method itself throw the business exception;can handle different exceptions?
@@ -109,13 +110,10 @@ class User:  # pylint: disable=too-many-instance-attributes
             if existing_user:
                 current_app.logger.debug('Existing users found in DB')
                 raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
-            user_model: UserModel = UserModel()
-            user_model.username = username
-            user_model.keycloak_guid = kc_user.id
-            user_model.is_terms_of_use_accepted = False
-            user_model.status = Status.ACTIVE.value
-            user_model.type = AccessType.ANONYMOUS.value
-            user_model.email = membership.get('email', None)
+            user_model: UserModel = UserModel(username=username, keycloak_guid=kc_user.id,
+                                              is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
+                                              type=AccessType.ANONYMOUS.value, email=membership.get('email', None))
+
             user_model.save()
             User._add_org_membership(org_id, user_model.id, membership['membershipType'])
             users.append(User(user_model).as_dict())
