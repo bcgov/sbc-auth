@@ -34,12 +34,13 @@
 import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { Pages, SessionStorageKeys } from '@/util/constants'
-import { mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import BusinessModule from '@/store/modules/business'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import NavigationBar from 'sbc-common-components/src/components/NavigationBar.vue'
 import { NavigationBarConfig } from 'sbc-common-components/src/models/NavigationBarConfig'
@@ -50,6 +51,7 @@ import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
 import TokenService from 'sbc-common-components/src/services/token.services'
+import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
 
@@ -62,15 +64,19 @@ import { getModule } from 'vuex-module-decorators'
     NavigationBar
   },
   computed: {
-    ...mapState('org', ['currentAccountSettings'])
+    ...mapState('org', ['currentAccountSettings']),
+    ...mapState('user', ['currentUser'])
   },
   methods: {
-    ...mapMutations('org', ['setCurrentOrganization'])
+    ...mapMutations('org', ['setCurrentOrganization']),
+    ...mapActions('user', ['loadUserInfo'])
   }
 })
 export default class App extends Mixins(NextPageMixin) {
   private readonly setCurrentOrganization!: (org: Organization) => void
   private readonly isAuthenticated!: boolean
+  private readonly loadUserInfo!: () => KCUserProfile
+  private readonly currentUser!: KCUserProfile
   private tokenService = new TokenService()
   private businessStore = getModule(BusinessModule, this.$store)
   private showNotification = false
@@ -164,6 +170,10 @@ export default class App extends Mixins(NextPageMixin) {
     this.$root.$on('signin-complete', async () => {
       await this.setup()
     })
+
+    if (ConfigHelper.getFromSession(SessionStorageKeys.UserKcId)) {
+      this.loadUserInfo()
+    }
   }
 
   private async setup () {
