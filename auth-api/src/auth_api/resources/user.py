@@ -92,7 +92,7 @@ class Users(Resource):
             user = UserService.save_from_jwt_token(token)
             response, status = user.as_dict(), http_status.HTTP_201_CREATED
             # Add the user to public_users group if the user doesn't have public_user group
-            KeycloakService.join_public_users_group(g.jwt_oidc_token_info)
+            KeycloakService.join_users_group(g.jwt_oidc_token_info)
             # If the user doesn't have account_holder role check if user is part of any orgs and add to the group
             if token.get('loginSource', None) == BCSC \
                     and Role.ACCOUNT_HOLDER.value not in token.get('roles') \
