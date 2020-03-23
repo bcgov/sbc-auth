@@ -29,10 +29,16 @@ export enum Pages {
     DUPLICATE_TEAM_MESAGE = 'duplicateteam',
     PENDING_APPROVAL = 'pendingapproval',
     MAIN = 'account',
+    SIGNIN = 'signin',
     CREATE_USER_PROFILE = 'createuserprofile'
 }
 
+export enum Account {
+    ANONYMOUS = 'ANONYMOUS'
+}
+
 export enum IdpHint {
-    BCSC = 'bcsc',
-    BCROS = 'BCROS',
+    BCROS = 'bcros',
+    IDIR = 'idir',
+    BCSC = 'bcsc'
 }

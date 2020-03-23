@@ -112,7 +112,8 @@ class User:  # pylint: disable=too-many-instance-attributes
                 raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
             user_model: UserModel = UserModel(username=username, keycloak_guid=kc_user.id,
                                               is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
-                                              type=AccessType.ANONYMOUS.value, email=membership.get('email', None))
+                                              type=AccessType.ANONYMOUS.value, email=membership.get('email', None),
+                                              firstname=kc_user.first_name, lastname=kc_user.last_name)
 
             user_model.save()
             User._add_org_membership(org_id, user_model.id, membership['membershipType'])

@@ -53,7 +53,7 @@ import { Business } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
 import { SessionStorageKeys } from '@/util/constants'
-import UserManagement from '@/components/auth/UserManagement.vue'
+import TeamManagement from '@/components/auth/TeamManagement.vue'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -152,7 +152,7 @@ export default class AffiliatedEntityList extends Vue {
     this.setCurrentBusiness(business)
     // Not ideal, as this makes the component less reusable
     // TODO: Come up with a better solution: global event bus?
-    this.$parent.$emit('change-to', UserManagement)
+    this.$parent.$emit('change-to', TeamManagement)
   }
 }
 </script>
