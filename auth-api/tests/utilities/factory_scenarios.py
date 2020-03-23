@@ -18,6 +18,8 @@ Test Utility for creating test scenarios.
 import uuid
 from enum import Enum
 from auth_api.services.keycloak_user import KeycloakUser
+from random import choice
+from string import ascii_uppercase
 
 from config import get_named_config
 
@@ -237,10 +239,11 @@ class TestPaymentTypeInfo(dict, Enum):
 class TestanonymousMembership(dict, Enum):
     """Test scenarios of org status."""
 
-    membership_admin = {'username': 'firstuser', 'password': 'firstuser', 'membershipType': 'ADMIN'}
-    membership_2 = {'username': 'seconduser', 'password': 'seconduser', 'membershipType': 'ADMIN'}
-    membership_owner = {'username': 'thirduser', 'password': 'thirduser', 'membershipType': 'OWNER'}
-    membership_member = {'username': 'memberuser', 'password': 'memberuser', 'membershipType': 'MEMBER'}
+    @staticmethod
+    def generate_random_user(membership: str):
+        """Return user with keycloak guid."""
+        return {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'firstuser',
+                'membershipType': membership}
 
 
 class TestOrgStatusInfo(dict, Enum):

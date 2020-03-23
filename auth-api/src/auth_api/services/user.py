@@ -99,7 +99,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             create_user_request.password = membership['password']
             create_user_request.update_password_on_login()
             try:
-                # TODO may be this method itself throw the business exception
+                # TODO may be this method itself throw the business exception;can handle different exceptions?
                 kc_user = KeycloakService.add_user(create_user_request)
             except HTTPError as err:
                 current_app.logger.error('create_user in keycloak failed', err)
