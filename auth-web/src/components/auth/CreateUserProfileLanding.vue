@@ -22,7 +22,7 @@
                 <v-card-text>
                   <create-user-profile-form
                     :token="token"
-                    @already-claimed="showInvitationExpired"
+                    @show-error-message="showErrorOccured"
                   ></create-user-profile-form>
                 </v-card-text>
               </v-container>
@@ -32,7 +32,7 @@
       </div>
     </template>
     <div v-else>
-      <interim-landing :summary="$t('expiredInvitationTitle')" :description="$t('expiredInvitationMessage')" iconColor="error" icon="mdi-alert-circle-outline">
+      <interim-landing :summary="$t('errorOccurredTitle')" :description="$t('invitationProcessingErrorMsg')" icon="mdi-alert-circle-outline" iconColor="error">
       </interim-landing>
     </div>
   </v-container>
@@ -61,7 +61,7 @@ export default class CreateUserProfileView extends Vue {
     this.isLoading = false
   }
 
-  private showInvitationExpired () {
+  private showErrorOccured () {
     this.inviteError = true
   }
 }

@@ -1,83 +1,100 @@
 <template>
-  <v-form ref="form" lazy-validation>
-    <v-expand-transition>
-      <div class="form_alert-container" v-show="formError">
-        <v-alert type="error" class="mb-0"
-                 :value="true"
-        >
-          {{formError}}
-        </v-alert>
-      </div>
-    </v-expand-transition>
-    <!-- Username -->
-    <v-row>
-      <v-col cols="12" class="pt-0 pb-0">
-        <v-text-field
-            filled
-            label="Username"
-            req
-            persistent-hint
-            :rules="usernameRules"
-            v-model="username"
-            data-test="username"
-        >
-        </v-text-field>
-      </v-col>
-    </v-row>
-    <!-- Password -->
-    <v-row>
-      <v-col cols="12" class="pt-0 pb-0">
-        <v-text-field
-            filled
-            label="Password"
-            req
-            persistent-hint
-            :rules="passwordRules"
-            v-model="password"
-            data-test="password"
-        >
-        </v-text-field>
-      </v-col>
-    </v-row>
-    <!-- Confirm Password -->
-    <v-row>
-      <v-col cols="12" class="pt-0 pb-0">
-        <v-text-field
-            filled
-            label="Confirm Password"
-            req
-            persistent-hint
-            :error-messages="passwordMustMatch()"
-            v-model="confirmPassword"
-            data-test="confirm-password"
-        >
-        </v-text-field>
-      </v-col>
-    </v-row>
+  <div>
+    <v-form ref="form" lazy-validation>
+      <v-expand-transition>
+        <div class="form_alert-container" v-show="formError">
+          <v-alert type="error" class="mb-0"
+                  :value="true"
+          >
+            {{formError}}
+          </v-alert>
+        </div>
+      </v-expand-transition>
+      <!-- Username -->
+      <v-row>
+        <v-col cols="12" class="pt-0 pb-0">
+          <v-text-field
+              filled
+              label="Username"
+              req
+              persistent-hint
+              :rules="usernameRules"
+              v-model="username"
+              data-test="username"
+          >
+          </v-text-field>
+        </v-col>
+      </v-row>
+      <!-- Password -->
+      <v-row>
+        <v-col cols="12" class="pt-0 pb-0">
+          <v-text-field
+              filled
+              label="Password"
+              req
+              persistent-hint
+              :rules="passwordRules"
+              v-model="password"
+              data-test="password"
+          >
+          </v-text-field>
+        </v-col>
+      </v-row>
+      <!-- Confirm Password -->
+      <v-row>
+        <v-col cols="12" class="pt-0 pb-0">
+          <v-text-field
+              filled
+              label="Confirm Password"
+              req
+              persistent-hint
+              :error-messages="passwordMustMatch()"
+              v-model="confirmPassword"
+              data-test="confirm-password"
+          >
+          </v-text-field>
+        </v-col>
+      </v-row>
 
-    <v-row>
-      <v-col cols="12" class="form__btns pt-5">
-          <v-btn
-            large
-            color="primary"
-            class="save-continue-button"
-            :loading="isLoading"
-            :disabled='!isFormValid()'
-            @click="nextStep"
-            data-test="next-button"
-          > Next
-          </v-btn>
-          <v-btn
-            large
-            depressed
-            @click="cancel"
-            data-test="cancel-button"
-            class="cancel-button"
-          > Cancel
-          </v-btn>
-      </v-col>
-    </v-row>
-  </v-form>
+      <v-row>
+        <v-col cols="12" class="form__btns pt-5">
+            <v-btn
+              large
+              color="primary"
+              class="save-continue-button"
+              :loading="isLoading"
+              :disabled='!isFormValid()'
+              @click="nextStep"
+              data-test="next-button"
+            > Next
+            </v-btn>
+            <v-btn
+              large
+              depressed
+              @click="cancel"
+              data-test="cancel-button"
+              class="cancel-button"
+            > Cancel
+            </v-btn>
+        </v-col>
+      </v-row>
+    </v-form>
+    <!-- Error Dialog -->
+    <ModalDialog
+      ref="errorDialog"
+      :title="dialogTitle"
+      :text="dialogText"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-btn large color="error" @click="close()" data-test="dialog-ok-button">OK</v-btn>
+      </template>
+    </ModalDialog>
+  </div>
 </template>
 
 <script lang="ts">
@@ -100,11 +117,14 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
     private confirmPassword = ''
     private formError = ''
     private isLoading = false
+    private dialogTitle = ''
+    private dialogText = ''
 
     @Prop() token: string
 
     $refs: {
-      form: HTMLFormElement
+      form: HTMLFormElement,
+      errorDialog: ModalDialog
     }
 
     private usernameRules = [
@@ -143,7 +163,19 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
         } catch (error) {
           this.isLoading = false
           // TODO: Handle cases according to the type of the error
-          this.$emit('already-claimed')
+          if (error?.response?.data?.code) {
+            switch (error.response.data.code) {
+              case 'FAILED_ADDING_USER_IN_KEYCLOAK':
+                this.showErrorModal('Failed to add the user, please try again')
+                break
+              case 'DATA_ALREADY_EXISTS':
+                this.showErrorModal('There is already an user existing with the given username, please try with a new one')
+                break
+              default: this.showErrorModal()
+            }
+          } else {
+            this.$emit('show-error-message')
+          }
         }
       }
     }
@@ -155,6 +187,16 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
 
     private cancel () {
       window.history.back()
+    }
+
+    close () {
+      this.$refs.errorDialog.close()
+    }
+
+    showErrorModal (msg?) {
+      this.dialogTitle = 'An error has occured'
+      this.dialogText = msg || 'Something went wrong while attempting to create this profile. Please try again later.'
+      this.$refs.errorDialog.open()
     }
 }
 </script>

@@ -1,12 +1,12 @@
 <template>
   <div>
     <template v-if="!invalidInvitationToken && !tokenError && !otherError">
-      <div v-if="isCreateAccount">
+      <div v-if="isCreateUserProfile">
         <create-user-profile-landing
           :token="token"
         ></create-user-profile-landing>
       </div>
-      <div v-if="!isCreateAccount">
+      <div v-if="!isCreateUserProfile">
         <interim-landing :summary="$t('acceptInviteLandingTitle')" :description="$t('acceptInviteLandingMessage')" icon="mdi-login-variant" showHomePageBtn="false">
           <template v-slot:actions>
             <v-btn v-if="!isUserSignedIn()" large link color="primary" @click="redirectToSignin()">{{ $t('loginBtnLabel') }}</v-btn>
@@ -56,10 +56,10 @@ export default class AcceptInviteLandingView extends Vue {
   @Prop() token: string
 
   private otherError: boolean = false
-  private isCreateAccount: boolean = false
+  private isCreateUserProfile: boolean = false
 
   private mounted () {
-    this.isCreateAccount = (this.$route?.name === Pages.CREATE_USER_PROFILE)
+    this.isCreateUserProfile = (this.$route?.name === Pages.CREATE_USER_PROFILE)
     this.validateToken()
   }
 
