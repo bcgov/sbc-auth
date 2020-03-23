@@ -236,7 +236,7 @@ class TestPaymentTypeInfo(dict, Enum):
     test_type = {'code': 'TEST', 'desc': 'Test'}
 
 
-class TestanonymousMembership(dict, Enum):
+class TestAnonymousMembership(dict, Enum):
     """Test scenarios of org status."""
 
     @staticmethod

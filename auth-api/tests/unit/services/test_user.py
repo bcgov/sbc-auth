@@ -32,7 +32,7 @@ from auth_api.utils.roles import Status, ADMIN, OWNER, MEMBER
 from werkzeug.exceptions import HTTPException
 
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, \
-    TestUserInfo, TestanonymousMembership
+    TestUserInfo, TestAnonymousMembership
 from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_user_model, \
     factory_org_model, factory_membership_model
 
@@ -66,7 +66,7 @@ def test_create_user_and_add_membership_owner_skip_auth_mode(session, auth_mock,
                                                              keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an owner can be added as anonymous."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestanonymousMembership.generate_random_user(OWNER)]
+    membership = [TestAnonymousMembership.generate_random_user(OWNER)]
     users = UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
     assert len(users['users']) == 1
     assert users['users'][0]['username'] == membership[0]['username']
@@ -83,7 +83,7 @@ def test_create_user_and_add_same_user_name_error_in_kc(session, auth_mock,
                                                         keycloak_mock):  # pylint:disable=unused-argument
     """Assert that same user name cannot be added twice."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestanonymousMembership.generate_random_user(OWNER)]
+    membership = [TestAnonymousMembership.generate_random_user(OWNER)]
     UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
     with pytest.raises(BusinessException) as exception:
         UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
@@ -97,7 +97,7 @@ def test_create_user_and_add_same_user_name_error_in_db(session, auth_mock,
     user = factory_user_model()
     factory_membership_model(user.id, org.id)
 
-    new_members = TestanonymousMembership.generate_random_user(OWNER)
+    new_members = TestAnonymousMembership.generate_random_user(OWNER)
     new_members['username'] = user.username
 
     membership = [new_members]
@@ -110,7 +110,7 @@ def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,
                                                              keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an admin can be added as anonymous."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestanonymousMembership.generate_random_user(ADMIN)]
+    membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
     users = UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
     assert len(users['users']) == 1
     assert users['users'][0]['username'] == membership[0]['username']
@@ -130,7 +130,7 @@ def test_create_user_and_add_membership_admin_bulk_mode(session, auth_mock,
     user = factory_user_model()
     factory_membership_model(user.id, org.id)
     claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
-    membership = [TestanonymousMembership.generate_random_user(MEMBER)]
+    membership = [TestAnonymousMembership.generate_random_user(MEMBER)]
     users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
 
     assert len(users['users']) == 1
@@ -149,7 +149,7 @@ def test_create_user_and_add_membership_admin_bulk_mode_unauthorised(session, au
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model()
     factory_membership_model(user.id, org.id)
-    membership = [TestanonymousMembership.generate_random_user(MEMBER)]
+    membership = [TestAnonymousMembership.generate_random_user(MEMBER)]
 
     with pytest.raises(HTTPException) as excinfo:
         UserService.create_user_and_add_membership(membership, org.id, token_info=TestJwtClaims.edit_role)
@@ -163,8 +163,8 @@ def test_create_user_and_add_membership_admin_bulk_mode_multiple(session, auth_m
     user = factory_user_model()
     factory_membership_model(user.id, org.id)
     claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
-    membership = [TestanonymousMembership.generate_random_user(MEMBER),
-                  TestanonymousMembership.generate_random_user(ADMIN)]
+    membership = [TestAnonymousMembership.generate_random_user(MEMBER),
+                  TestAnonymousMembership.generate_random_user(ADMIN)]
     users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
 
     assert len(users['users']) == 2
@@ -183,7 +183,7 @@ def test_create_user_and_add_membership_member_error_skip_auth_mode(session, aut
                                                                     keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an member cannot be added as anonymous in skip_auth mode."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestanonymousMembership.generate_random_user(MEMBER)]
+    membership = [TestAnonymousMembership.generate_random_user(MEMBER)]
     with pytest.raises(BusinessException) as exception:
         UserService.create_user_and_add_membership(membership, org.id,
                                                    skip_auth=True)
@@ -194,8 +194,8 @@ def test_create_user_and_add_membership_multiple_error_skip_auth_mode(session, a
                                                                       keycloak_mock):  # pylint:disable=unused-argument
     """Assert that multiple user cannot be created  in skip_auth mode."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestanonymousMembership.generate_random_user(MEMBER),
-                  TestanonymousMembership.generate_random_user(ADMIN)]
+    membership = [TestAnonymousMembership.generate_random_user(MEMBER),
+                  TestAnonymousMembership.generate_random_user(ADMIN)]
     with pytest.raises(BusinessException) as exception:
         UserService.create_user_and_add_membership(membership, org.id, TestJwtClaims.edit_role,
                                                    skip_auth=True)
