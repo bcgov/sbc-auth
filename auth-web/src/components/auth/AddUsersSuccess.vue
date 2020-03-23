@@ -6,7 +6,7 @@
         {{createdUsers.length}} Team Members have been provisioned temporary passwords to login and access this account.
       </p>
       <p>
-        <b>Team Members Credentials</b>
+        <strong>Team Members Credentials</strong>
       </p>
       <ul>
         <li v-for="user in createdUsers" :key="user.username">
@@ -15,7 +15,7 @@
       </ul>
       <div class="url">
         <p>
-          <b>Login URL</b>
+          <strong>Login URL</strong>
         </p>
         <ul>
           <li>
