@@ -47,7 +47,7 @@ class RestService:
 
         current_app.logger.debug('Endpoint : {}'.format(endpoint))
         current_app.logger.debug('headers : {}'.format(headers))
-        current_app.logger.debug('data : {}'.format(data))
+        # current_app.logger.debug('data : {}'.format(data))
         response = None
         try:
             response = requests.post(endpoint, data=data, headers=headers,

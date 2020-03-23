@@ -18,6 +18,8 @@ Test Utility for creating test scenarios.
 import uuid
 from enum import Enum
 from auth_api.services.keycloak_user import KeycloakUser
+from random import choice
+from string import ascii_uppercase
 
 from config import get_named_config
 
@@ -186,6 +188,22 @@ class TestJwtClaims(dict, Enum):
     }
 
     @staticmethod
+    def get_test_real_user(sub):
+        """Produce a created user."""
+        return {
+            'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+            'sub': str(sub),
+            'firstname': 'Test',
+            'lastname': 'User',
+            'preferred_username': 'testuser',
+            'realm_access': {
+                'roles': [
+                    'edit'
+                ]
+            }
+        }
+
+    @staticmethod
     def get_test_user(sub, source: str = 'PASSCODE'):
         """Return test user with subject from argument."""
         return {
@@ -216,6 +234,16 @@ class TestPaymentTypeInfo(dict, Enum):
     """Test scenarios of payment type."""
 
     test_type = {'code': 'TEST', 'desc': 'Test'}
+
+
+class TestAnonymousMembership(dict, Enum):
+    """Test scenarios of org status."""
+
+    @staticmethod
+    def generate_random_user(membership: str):
+        """Return user with keycloak guid."""
+        return {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'firstuser',
+                'membershipType': membership}
 
 
 class TestOrgStatusInfo(dict, Enum):
@@ -333,6 +361,13 @@ class TestUserInfo(dict, Enum):
         'roles': '{edit, uma_authorization, staff}',
         'keycloak_guid': uuid.uuid4()
     }
+    user_staff_admin = {
+        'username': 'CP1234567',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'roles': '{edit, uma_authorization, staff_admin}',
+        'keycloak_guid': uuid.uuid4()
+    }
     user2 = {
         'username': 'CP1234568',
         'firstname': 'Test 2',
@@ -360,6 +395,14 @@ class TestUserInfo(dict, Enum):
         'lastname': 'User',
         'roles': '{edit, uma_authorization, tester}',
         'keycloak_guid': '1b20db59-19a0-4727-affe-c6f64309fd04'
+    }
+    user_anonymous_1 = {
+        'username': 'testuser12345',
+        'password': 'testuser12345',
+    }
+    user_anonymous_2 = {
+        'username': 'testuser12345',
+        'password': 'testuser12345',
     }
 
     @staticmethod
@@ -415,4 +458,18 @@ class KeycloakScenario:
                 'roles': [
                 ]
             }
+        }
+
+
+class BulkUserTestScenario:
+    """Test scenarios of bulk users."""
+
+    @staticmethod
+    def get_bulk_user1_for_org(org_id: str):
+        """Generate a bulk user input."""
+        return {'users': [
+            {'username': 'first2user2238', 'password': 'helo', 'membershipType': 'ADMIN'},
+            {'username': 'secon2duse2r248', 'password': 'helo', 'membershipType': 'MEMBER'}
+        ],
+            'orgId': org_id
         }
