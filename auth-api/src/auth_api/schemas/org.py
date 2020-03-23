@@ -30,3 +30,4 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
         exclude = ('members', 'contacts', 'invitations', 'affiliated_entities')
 
     org_type = fields.Pluck('OrgTypeSchema', 'code', data_key='orgType')
+    access_type = fields.String(data_key='accessType')

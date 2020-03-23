@@ -40,7 +40,7 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
-    assert 'access_type' not in dictionary  # access type shouldn't be set for normal orgs
+    assert 'accessType' not in dictionary  # access type shouldn't be set for normal orgs
 
 
 def test_add_anpnymous_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -218,7 +218,6 @@ def test_get_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     assert rv.status_code == http_status.HTTP_200_OK
     dictionary = json.loads(rv.data)
     assert dictionary['id'] == org_id
-
 
 def test_get_org_no_auth_returns_401(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org cannot be retrieved without an authorization header."""

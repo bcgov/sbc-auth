@@ -19,6 +19,7 @@ export interface Organization {
   orgType?: string;
   members?: Member[];
   invitations?: Invitation[];
+  accessType: string;
 }
 
 export interface UpdateMemberPayload {
@@ -76,4 +77,16 @@ export interface RoleInfo {
   icon: string
   name: string
   desc: string
+}
+
+export interface AddUserBody {
+  username: string
+  password: string
+  selectedRole?: RoleInfo
+  membershipType: string
+}
+
+export interface AddUsersToOrgBody {
+    users: AddUserBody[]
+    orgId: string
 }
