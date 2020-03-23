@@ -32,6 +32,7 @@
 
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
+import { IdpHint, Pages } from '@/util/constants'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { AddUserBody } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
@@ -44,7 +45,7 @@ import OrgModule from '@/store/modules/org'
 })
 export default class AddUsersForm extends Vue {
   private readonly createdUsers!: AddUserBody[]
-  private loginUrl: string = ConfigHelper.getSelfURL() + '/auth/signin/bcros'
+  private loginUrl: string = ConfigHelper.getSelfURL() + `/${Pages.SIGNIN}/${IdpHint.BCROS}`
 
   @Emit()
   private close () { }

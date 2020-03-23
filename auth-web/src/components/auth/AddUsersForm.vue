@@ -138,10 +138,7 @@ export default class AddUsersForm extends Vue {
   }
 
   private created () {
-    this.users = []
-    for (let i = 0; i < 3; i++) {
-      this.users.push(this.getDefaultRow())
-    }
+    this.resetForm()
   }
 
   private getDefaultRow (): AddUserBody {
@@ -174,7 +171,10 @@ export default class AddUsersForm extends Vue {
   }
 
   private resetForm () {
-    this.users.forEach(user => this.getDefaultRow())
+    this.users = []
+    for (let i = 0; i < 3; i++) {
+      this.users.push(this.getDefaultRow())
+    }
   }
 
   private async addUsers () {
@@ -192,7 +192,7 @@ export default class AddUsersForm extends Vue {
       }
       await this.createUsers({ orgId: this.currentOrganization.id, users: this.users })
 
-      this.created()
+      this.resetForm()
 
       // emit event to let parent know the invite sequence is complete
       this.$emit('add-users-complete')

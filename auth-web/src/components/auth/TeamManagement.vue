@@ -14,13 +14,10 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
-
+import { Account } from '@/util/constants'
 import AnonymousUserManagement from '@/components/auth/AnonymousUserManagement.vue'
 import { Event } from '@/models/event'
-import MemberDataTable from '@/components/auth/MemberDataTable.vue'
-import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
-import { SessionStorageKeys } from '@/util/constants'
 import UserManagement from '@/components/auth/UserManagement.vue'
 import { getModule } from 'vuex-module-decorators'
 
@@ -57,7 +54,7 @@ export default class TeamManagement extends Vue {
 
   private isAnonymousAccount (): boolean {
     return this.currentOrganization &&
-            this.currentOrganization.access_type === 'ANONYMOUS'
+            this.currentOrganization.access_type === Account.ANONYMOUS
   }
 }
 </script>
