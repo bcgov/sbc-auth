@@ -20,7 +20,7 @@ Test-Suite to ensure that the Business Service is working as expected.
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_PUBLIC_USERS, PASSCODE, STAFF
+from auth_api.utils.constants import BCSC, BCROS, GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_PUBLIC_USERS, STAFF
 from auth_api.utils.roles import Role
 from tests.utilities.factory_scenarios import KeycloakScenario
 
@@ -107,14 +107,14 @@ def test_keycloak_delete_user_by_username_user_not_exist(session):
     assert response is None
 
 
-def test_join_public_users_group(app, session):
+def test_join_users_group(app, session):
     """Test the public_users group membership for public users."""
     # with app.app_context():
     KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
     user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name)
     user_id = user.id
-    KEYCLOAK_SERVICE.join_public_users_group({'sub': user_id,
-                                              'loginSource': PASSCODE,
+    KEYCLOAK_SERVICE.join_users_group({'sub': user_id,
+                                              'loginSource': BCSC,
                                               'realm_access': {'roles': []}})
     # Get the user groups and verify the public_users group is in the list
     user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
@@ -123,16 +123,25 @@ def test_join_public_users_group(app, session):
         groups.append(group.get('name'))
     assert GROUP_PUBLIC_USERS in groups
 
+    # BCROS
+    KEYCLOAK_SERVICE.join_users_group({'sub': user_id, 'loginSource': BCROS, 'realm_access': {'roles': []}})
+    # Get the user groups and verify the public_users group is in the list
+    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
+    groups = []
+    for group in user_groups:
+        groups.append(group.get('name'))
+    assert GROUP_ANONYMOUS_USERS in groups
+
     KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
 
 
-def test_join_public_users_group_for_staff_users(session, app):
+def test_join_users_group_for_staff_users(session, app):
     """Test the staff user account creation, and assert the public_users group is not added."""
     # with app.app_context():
     KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
     user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name)
     user_id = user.id
-    KEYCLOAK_SERVICE.join_public_users_group({'sub': user_id, 'loginSource': STAFF, 'realm_access': {'roles': []}})
+    KEYCLOAK_SERVICE.join_users_group({'sub': user_id, 'loginSource': STAFF, 'realm_access': {'roles': []}})
     # Get the user groups and verify the public_users group is in the list
     user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
@@ -143,13 +152,13 @@ def test_join_public_users_group_for_staff_users(session, app):
     KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
 
 
-def test_join_public_users_group_for_existing_users(session):
+def test_join_users_group_for_existing_users(session):
     """Test the existing user account, and assert the public_users group is not added."""
     KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
     user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name)
     user_id = user.id
-    KEYCLOAK_SERVICE.join_public_users_group(
-        {'sub': user_id, 'loginSource': PASSCODE, 'realm_access': {'roles': [Role.EDITOR.value]}})
+    KEYCLOAK_SERVICE.join_users_group(
+        {'sub': user_id, 'loginSource': BCSC, 'realm_access': {'roles': [Role.EDITOR.value]}})
     # Get the user groups and verify the public_users group is in the list
     user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
