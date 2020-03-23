@@ -20,7 +20,8 @@ Test-Suite to ensure that the Business Service is working as expected.
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.constants import BCSC, BCROS, GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_PUBLIC_USERS, STAFF
+from auth_api.utils.constants import BCSC, BCROS, GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_PUBLIC_USERS, \
+    STAFF
 from auth_api.utils.roles import Role
 from tests.utilities.factory_scenarios import KeycloakScenario
 
@@ -63,7 +64,6 @@ def test_keycloak_get_token(session):
     request = KeycloakScenario.create_user_request()
     # with app.app_context():
     KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
-    print(request.user_name, request.password)
 
     response = KEYCLOAK_SERVICE.get_token(request.user_name, request.password)
     assert response.get('access_token') is not None
@@ -114,8 +114,8 @@ def test_join_users_group(app, session):
     user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name)
     user_id = user.id
     KEYCLOAK_SERVICE.join_users_group({'sub': user_id,
-                                              'loginSource': BCSC,
-                                              'realm_access': {'roles': []}})
+                                       'loginSource': BCSC,
+                                       'realm_access': {'roles': []}})
     # Get the user groups and verify the public_users group is in the list
     user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
