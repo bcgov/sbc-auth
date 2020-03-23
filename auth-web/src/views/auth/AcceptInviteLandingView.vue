@@ -34,6 +34,7 @@ import CreateUserProfileLanding from '@/components/auth/CreateUserProfileLanding
 import { EmptyResponse } from '@/models/global'
 import InterimLanding from '@/components/auth/InterimLanding.vue'
 import OrgModule from '@/store/modules/org'
+import { Pages } from '@/util/constants'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -58,7 +59,7 @@ export default class AcceptInviteLandingView extends Vue {
   private isCreateAccount: boolean = false
 
   private mounted () {
-    this.isCreateAccount = (this.$route?.name === 'createuserprofile')
+    this.isCreateAccount = (this.$route?.name === Pages.CREATE_USER_PROFILE)
     this.validateToken()
   }
 

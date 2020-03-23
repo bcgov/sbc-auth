@@ -142,6 +142,7 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
           }
         } catch (error) {
           this.isLoading = false
+          // TODO: Handle cases according to the type of the error
           this.$emit('already-claimed')
         }
       }

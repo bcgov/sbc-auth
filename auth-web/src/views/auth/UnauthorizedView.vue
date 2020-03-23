@@ -33,9 +33,9 @@
 </template>
 
 <script lang="ts">
+import { IdpHint, Role } from '@/util/constants'
 import { Component } from 'vue-property-decorator'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import { Role } from '@/util/constants'
 import Vue from 'vue'
 import { mapState } from 'vuex'
 
@@ -52,7 +52,7 @@ export default class UnauthorizedView extends Vue {
 
   beforeMount () {
     // TODO: Replace the login source check with whatever value for director search account.
-    this.isDirSearchUser = (this.currentUser?.loginSource === 'BCROS')
+    this.isDirSearchUser = (this.currentUser?.loginSource === IdpHint.BCROS)
   }
 
   mounted () {

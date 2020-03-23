@@ -37,13 +37,11 @@ export default class SetupAccountSuccessView extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
   private readonly currentOrganization!: Organization
   private readonly sentInvitations!: Invitation[]
-  private accountName: string = ''
   private accountEmail: string = ''
 
-  @Prop({ default: '' }) accName: string
+  @Prop({ default: '' }) accountName: string
 
   private async mounted () {
-    this.accountName = this.accName || this.currentOrganization?.name || ''
     this.accountEmail = (this.sentInvitations?.length && this.sentInvitations[0].recipientEmail) ? this.sentInvitations[0].recipientEmail : ''
   }
 

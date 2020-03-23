@@ -111,7 +111,7 @@ export function getRoutes (): RouteConfig[] {
     { path: '/pendingapproval/:team_name?', name: 'pendingapproval', component: PendingApprovalView, props: true, meta: { requiresAuth: false, requiresProfile: true } },
     { path: '/leaveteam', name: 'leaveteam', component: LeaveTeamLandingView, props: true, meta: { requiresAuth: true } },
     { path: '/staff-setup-account', name: 'staffsetupaccount', component: SetupAccountView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
-    { path: '/staff-setup-account-success/:accName?', name: 'staffsetupaccountsuccess', component: SetupAccountSuccessView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
+    { path: '/staff-setup-account-success/:accountName?', name: 'staffsetupaccountsuccess', component: SetupAccountSuccessView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
     { path: '/userprofileterms', name: 'userprofileterms', component: TermsOfServiceView, meta: { } },
     { path: '*', name: 'notfound', component: PageNotFound }
   ]
