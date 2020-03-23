@@ -195,9 +195,13 @@ export default class AddUsersForm extends Vue {
       this.resetForm()
 
       // emit event to let parent know the invite sequence is complete
-      this.$emit('add-users-complete')
+      this.addUsersComplete()
       this.loading = false
     }
+  }
+
+  @Emit()
+  private addUsersComplete () {
   }
 
   @Emit()

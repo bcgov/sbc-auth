@@ -54,7 +54,7 @@ export default class TeamManagement extends Vue {
 
   private isAnonymousAccount (): boolean {
     return this.currentOrganization &&
-            this.currentOrganization.access_type === Account.ANONYMOUS
+            this.currentOrganization.accessType === Account.ANONYMOUS
   }
 }
 </script>

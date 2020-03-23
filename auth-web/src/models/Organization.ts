@@ -19,8 +19,7 @@ export interface Organization {
   orgType?: string;
   members?: Member[];
   invitations?: Invitation[];
-  // eslint-disable-next-line camelcase
-  access_type: string;
+  accessType: string;
 }
 
 export interface UpdateMemberPayload {
