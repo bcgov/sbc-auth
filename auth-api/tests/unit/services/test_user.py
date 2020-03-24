@@ -28,6 +28,7 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import User as UserModel
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
+from auth_api.utils.constants import BCROS
 from auth_api.utils.roles import Status, ADMIN, OWNER, MEMBER
 from werkzeug.exceptions import HTTPException
 
@@ -56,6 +57,29 @@ def test_user_save_by_token(session):  # pylint: disable=unused-argument
     assert dictionary['keycloakGuid'] == TestJwtClaims.user_test['sub']
 
 
+def test_bcros_user_save_by_token(session):  # pylint: disable=unused-argument
+    """Assert that a user can be created by token."""
+    user = UserService.save_from_jwt_token(TestJwtClaims.anonymous_bcros_role)
+    assert user is not None
+    dictionary = user.as_dict()
+    assert dictionary['username'] == TestJwtClaims.anonymous_bcros_role['preferred_username']
+    assert dictionary['keycloakGuid'] == TestJwtClaims.anonymous_bcros_role['sub']
+
+
+def test_bcros_user_update_by_token(session):  # pylint: disable=unused-argument
+    """Assert that a user can be created by token."""
+    user_model = factory_user_model(TestUserInfo.user_bcros)
+    user = UserService(user_model)
+    dictionary = user.as_dict()
+    assert dictionary.get('keycloakGuid', None) is None
+
+    user = UserService.save_from_jwt_token(TestJwtClaims.anonymous_bcros_role)
+    assert user is not None
+    dictionary = user.as_dict()
+    assert dictionary['username'] == TestJwtClaims.anonymous_bcros_role['preferred_username']
+    assert dictionary['keycloakGuid'] == TestJwtClaims.anonymous_bcros_role['sub']
+
+
 def test_user_save_by_token_no_token(session):  # pylint: disable=unused-argument
     """Assert that a user cannot be created from an empty token."""
     user = UserService.save_from_jwt_token(None)
@@ -69,7 +93,7 @@ def test_create_user_and_add_membership_owner_skip_auth_mode(session, auth_mock,
     membership = [TestAnonymousMembership.generate_random_user(OWNER)]
     users = UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
     assert len(users['users']) == 1
-    assert users['users'][0]['username'] == membership[0]['username']
+    assert users['users'][0]['username'] == BCROS + '/' + membership[0]['username']
     assert users['users'][0]['type'] == 'ANONYMOUS'
 
     members = MembershipModel.find_members_by_org_id(org.id)
@@ -94,12 +118,10 @@ def test_create_user_and_add_same_user_name_error_in_db(session, auth_mock,
                                                         keycloak_mock):  # pylint:disable=unused-argument
     """Assert that same user name cannot be added twice."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    user = factory_user_model()
+    user = factory_user_model(TestUserInfo.user_bcros)
     factory_membership_model(user.id, org.id)
-
     new_members = TestAnonymousMembership.generate_random_user(OWNER)
-    new_members['username'] = user.username
-
+    new_members['username'] = user.username.replace('BCROS/', '')
     membership = [new_members]
     with pytest.raises(BusinessException) as exception:
         UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
@@ -113,7 +135,7 @@ def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,
     membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
     users = UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
     assert len(users['users']) == 1
-    assert users['users'][0]['username'] == membership[0]['username']
+    assert users['users'][0]['username'] == BCROS + '/' + membership[0]['username']
     assert users['users'][0]['type'] == 'ANONYMOUS'
 
     members = MembershipModel.find_members_by_org_id(org.id)
@@ -134,7 +156,7 @@ def test_create_user_and_add_membership_admin_bulk_mode(session, auth_mock,
     users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
 
     assert len(users['users']) == 1
-    assert users['users'][0]['username'] == membership[0]['username']
+    assert users['users'][0]['username'] == BCROS + '/' + membership[0]['username']
     assert users['users'][0]['type'] == 'ANONYMOUS'
 
     members = MembershipModel.find_members_by_org_id(org.id)
@@ -168,9 +190,9 @@ def test_create_user_and_add_membership_admin_bulk_mode_multiple(session, auth_m
     users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
 
     assert len(users['users']) == 2
-    assert users['users'][0]['username'] == membership[0]['username']
+    assert users['users'][0]['username'] == BCROS + '/' + membership[0]['username']
     assert users['users'][0]['type'] == 'ANONYMOUS'
-    assert users['users'][1]['username'] == membership[1]['username']
+    assert users['users'][1]['username'] == BCROS + '/' + membership[1]['username']
     assert users['users'][1]['type'] == 'ANONYMOUS'
 
     members = MembershipModel.find_members_by_org_id(org.id)

@@ -21,6 +21,7 @@ from flask import current_app
 from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api.utils.constants import BCROS
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -93,11 +94,13 @@ class User:  # pylint: disable=too-many-instance-attributes
         users = []
         for membership in memberships:
             create_user_request = KeycloakUser()
-            username = membership['username']
+            username = BCROS + '/' + membership['username']
             current_app.logger.debug(f'create user username: {username}')
+            create_user_request.first_name = membership['username']
             create_user_request.user_name = username
             create_user_request.password = membership['password']
             create_user_request.enabled = True
+            create_user_request.attributes = {'access_type': AccessType.ANONYMOUS.value}
             create_user_request.update_password_on_login()
             try:
                 # TODO may be this method itself throw the business exception;can handle different exceptions?
@@ -110,7 +113,8 @@ class User:  # pylint: disable=too-many-instance-attributes
             if existing_user:
                 current_app.logger.debug('Existing users found in DB')
                 raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
-            user_model: UserModel = UserModel(username=username, keycloak_guid=kc_user.id,
+            user_model: UserModel = UserModel(username=username,
+                                              # BCROS is temporary value.Will be overwritten when user logs in
                                               is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
                                               type=AccessType.ANONYMOUS.value, email=membership.get('email', None),
                                               firstname=kc_user.first_name, lastname=kc_user.last_name)
@@ -132,8 +136,11 @@ class User:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('save_from_jwt_token')
         if not token:
             return None
+        if token.get('accessType', None) != AccessType.ANONYMOUS.value:
+            existing_user = UserModel.find_by_jwt_token(token)
+        else:
+            existing_user = UserModel.find_by_username(token.get('preferred_username'))
 
-        existing_user = UserModel.find_by_jwt_token(token)
         if existing_user is None:
             user_model = UserModel.create_from_jwt_token(token)
         else:
