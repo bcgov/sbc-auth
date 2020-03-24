@@ -186,6 +186,20 @@ class TestJwtClaims(dict, Enum):
             ]
         }
     }
+    anonymous_bcros_role = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'preferred_username': 'bcros/testuser',
+        'accessType': 'ANONYMOUS',
+        'loginSource': 'BCROS',
+        'realm_access': {
+            'roles': [
+                'edit'
+            ]
+        }
+    }
 
     @staticmethod
     def get_test_real_user(sub):
@@ -403,6 +417,13 @@ class TestUserInfo(dict, Enum):
     user_anonymous_2 = {
         'username': 'testuser12345',
         'password': 'testuser12345',
+    }
+    user_bcros = {
+        'username': 'BCROS/CP1234567',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'roles': '{edit, uma_authorization, staff}'
+        # dont add a kc_guid
     }
 
     @staticmethod
