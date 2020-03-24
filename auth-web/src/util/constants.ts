@@ -29,7 +29,8 @@ export enum Pages {
     DUPLICATE_TEAM_MESAGE = 'duplicateteam',
     PENDING_APPROVAL = 'pendingapproval',
     MAIN = 'account',
-    CREATE_USER_PROFILE = 'createuserprofile'
+    CREATE_USER_PROFILE = 'createuserprofile',
+    DIRSEARCH_CONFIRM_TOKEN = 'dirsearch-confirmtoken'
 }
 
 export enum IdpHint {

@@ -56,7 +56,7 @@ export default class Signin extends Mixins(NextPageMixin) {
             this.redirectTo('/searchbusiness')
             break
           case 'bcros':
-            this.redirectTo('/searchbusiness') // TEMP - need to check account and redirect based on role
+            this.redirectTo('/userprofileterms') // TEMP - need to check account and redirect based on role
         }
       }
     }

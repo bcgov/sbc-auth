@@ -52,16 +52,34 @@
 </template>
 
 <script lang="ts">
+import { mapActions, mapState } from 'vuex'
 import { Component } from 'vue-property-decorator'
 import TermsOfUse from '@/components/auth/TermsOfUse.vue'
+import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
+import { User } from '@/models/user'
+import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 
 @Component({
   components: {
     TermsOfUse
+  },
+  computed: {
+    ...mapState('user', ['termsOfUse'])
+  },
+  methods: {
+    ...mapActions('user',
+      [
+        'saveUserTerms',
+        'updateCurrentUserTerms'
+      ]
+    )
   }
 })
 export default class TermsOfServiceView extends Vue {
+  private readonly saveUserTerms!: () => Promise<User>
+  private readonly updateCurrentUserTerms!: (UserTerms) => void
+  private readonly termsOfUse!: TermsOfUseDocument
   private isLoading: boolean = false
   private atBottom = false
 
@@ -69,9 +87,15 @@ export default class TermsOfServiceView extends Vue {
     this.atBottom = (e.target.scrollHeight - e.target.scrollTop) <= (e.target.offsetHeight + 25)
   }
 
-  private clickAccepted () {
-    // eslint-disable-next-line no-console
-    console.log('clickAccepted')
+  private async clickAccepted () {
+    await this.updateCurrentUserTerms({
+      termsOfUseAcceptedVersion: this.termsOfUse.version_id,
+      isTermsOfUseAccepted: true
+    })
+    const userTerms = await this.saveUserTerms()
+    if (userTerms?.userTerms?.isTermsOfUseAccepted) {
+
+    }
   }
 
   private clickDecline () {

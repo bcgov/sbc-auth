@@ -12,7 +12,7 @@
           <v-col lg="8" class="pt-0 pb-0">
             <div class="view-header user-profile-header">
               <h1>Director Search Account Access</h1>
-              <p class="mb-0">You've been invited to administer the '@@replace@@' Director Search Account at the BC Registry. Create your user profile and log in to access this account</p>
+              <p class="mb-0">You've been invited to administer the '----replace----' Director Search Account at the BC Registry. Create your user profile and log in to access this account</p>
             </div>
             <v-card class="profile-card" flat>
               <v-container class="pa-6">
