@@ -33,6 +33,7 @@ from tests.utilities.factory_utils import factory_auth_header, factory_invitatio
 
 
 def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed with public role."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
@@ -218,8 +219,7 @@ def test_get_org_no_auth_returns_401(client, jwt, session, keycloak_mock):  # py
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
-    rv = client.get('/api/v1/orgs/{}'.format(org_id),
-                    headers=None, content_type='application/json')
+    rv = client.get('/api/v1/orgs/{}'.format(org_id), headers=None, content_type='application/json')
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
