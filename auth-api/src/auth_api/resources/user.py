@@ -59,7 +59,8 @@ class AnonymousUser(Resource):
 
             membership_details = {
                 'email': invitation['recipientEmail'],
-                'membershipType': invitation['membership'][0]['membershipType']
+                'membershipType': invitation['membership'][0]['membershipType'],
+                'update_password_on_login': False
             }
             membership_details.update(request_json)
             user = UserService.create_user_and_add_membership([membership_details],
