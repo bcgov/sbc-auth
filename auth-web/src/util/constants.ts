@@ -30,7 +30,9 @@ export enum Pages {
     PENDING_APPROVAL = 'pendingapproval',
     MAIN = 'account',
     SIGNIN = 'signin',
-    CREATE_USER_PROFILE = 'createuserprofile'
+    CREATE_USER_PROFILE = 'createuserprofile',
+    SEARCH_BUSINESS = 'searchbusiness',
+    HOME = 'home'
 }
 
 export enum Account {
@@ -41,4 +43,10 @@ export enum IdpHint {
     BCROS = 'bcros',
     IDIR = 'idir',
     BCSC = 'bcsc'
+}
+
+export enum LoginSource {
+    BCROS = 'BCROS',
+    IDIR = 'IDIR',
+    BCSC = 'BCSC'
 }

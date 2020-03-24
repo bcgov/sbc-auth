@@ -76,7 +76,6 @@ export default class App extends Mixins(NextPageMixin) {
   private readonly setCurrentOrganization!: (org: Organization) => void
   private readonly isAuthenticated!: boolean
   private readonly loadUserInfo!: () => KCUserProfile
-  private readonly currentUser!: KCUserProfile
   private tokenService = new TokenService()
   private businessStore = getModule(BusinessModule, this.$store)
   private showNotification = false

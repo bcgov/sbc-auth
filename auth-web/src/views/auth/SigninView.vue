@@ -7,6 +7,7 @@
 </template>
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { IdpHint, Pages, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
@@ -16,7 +17,6 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import SbcSignin from 'sbc-common-components/src/components/SbcSignin.vue'
-import { SessionStorageKeys } from '@/util/constants'
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
@@ -49,14 +49,14 @@ export default class Signin extends Mixins(NextPageMixin) {
         this.redirectTo(decodeURIComponent(CommonUtils.isUrl(this.redirectUrl) ? this.redirectUrl : `/${this.redirectUrl}`))
       } else {
         switch (this.idpHint) {
-          case 'bcsc':
+          case IdpHint.BCSC:
             this.redirectTo(this.getNextPageUrl())
             break
-          case 'idir':
-            this.redirectTo('/searchbusiness')
+          case IdpHint.IDIR:
+            this.redirectTo(`/${Pages.SEARCH_BUSINESS}`)
             break
-          case 'bcros':
-            this.redirectTo('/searchbusiness') // TEMP - need to check account and redirect based on role
+          case IdpHint.BCROS:
+            this.redirectTo(`/${Pages.SEARCH_BUSINESS}`) // TEMP - need to check account and redirect based on role
         }
       }
     }
