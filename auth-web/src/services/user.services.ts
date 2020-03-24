@@ -1,8 +1,8 @@
+import { AddUsersToOrgBody, Member, Organizations } from '@/models/Organization'
 import Axios, { AxiosResponse } from 'axios'
 import { Contact, Contacts } from '@/models/contact'
-import { Member, Organizations } from '@/models/Organization'
+import { User, UserProfileRequestBody } from '@/models/user'
 import ConfigHelper from '@/util/config-helper'
-import { User } from '@/models/user'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
 
 const axios = addAxiosInterceptors(Axios.create())
@@ -46,5 +46,18 @@ export default class UserService {
 
   static async getMembership (orgId: number): Promise<AxiosResponse<Member>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/users/orgs/${orgId}/membership`)
+  }
+
+  static async createUsers (addUsersToOrgBody: AddUsersToOrgBody): Promise<AxiosResponse<AddUsersToOrgBody>> {
+    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/bulk/users`, addUsersToOrgBody)
+  }
+  static async createUserProfile (token: string, userProfile: UserProfileRequestBody): Promise<AxiosResponse<any>> {
+    const headers = {
+      'Content-Type': 'application/json',
+      'invitation_token': token
+    }
+    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/users/bcros`, userProfile, {
+      headers: headers
+    })
   }
 }

@@ -1,13 +1,20 @@
 <template>
   <div>
-    <div v-if="!invalidInvitationToken && !tokenError && !otherError">
-      <interim-landing :summary="$t('acceptInviteLandingTitle')" :description="$t('acceptInviteLandingMessage')" icon="mdi-login-variant" showHomePageBtn="false">
-        <template v-slot:actions>
-          <v-btn v-if="!isUserSignedIn()" large link color="primary" @click="redirectToSignin()">{{ $t('loginBtnLabel') }}</v-btn>
-          <v-btn v-if="isUserSignedIn()" large link color="primary" @click="redirectToConfirm()">{{ $t('acceptButtonLabel') }}</v-btn>
-        </template>
-      </interim-landing>
-    </div>
+    <template v-if="!invalidInvitationToken && !tokenError && !otherError">
+      <div v-if="isCreateUserProfile">
+        <create-user-profile-landing
+          :token="token"
+        ></create-user-profile-landing>
+      </div>
+      <div v-if="!isCreateUserProfile">
+        <interim-landing :summary="$t('acceptInviteLandingTitle')" :description="$t('acceptInviteLandingMessage')" icon="mdi-login-variant" showHomePageBtn="false">
+          <template v-slot:actions>
+            <v-btn v-if="!isUserSignedIn()" large link color="primary" @click="redirectToSignin()">{{ $t('loginBtnLabel') }}</v-btn>
+            <v-btn v-if="isUserSignedIn()" large link color="primary" @click="redirectToConfirm()">{{ $t('acceptButtonLabel') }}</v-btn>
+          </template>
+        </interim-landing>
+      </div>
+    </template>
     <div v-if="invalidInvitationToken">
       <interim-landing :summary="$t('expiredInvitationTitle')" :description="$t('expiredInvitationMessage')" icon="mdi-alert-circle-outline" iconColor="error">
       </interim-landing>
@@ -23,9 +30,11 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
+import CreateUserProfileLanding from '@/components/auth/CreateUserProfileLanding.vue'
 import { EmptyResponse } from '@/models/global'
 import InterimLanding from '@/components/auth/InterimLanding.vue'
 import OrgModule from '@/store/modules/org'
+import { Pages } from '@/util/constants'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -35,7 +44,10 @@ import { getModule } from 'vuex-module-decorators'
   methods: {
     ...mapActions('org', ['validateInvitationToken'])
   },
-  components: { InterimLanding }
+  components: {
+    InterimLanding,
+    CreateUserProfileLanding
+  }
 })
 export default class AcceptInviteLandingView extends Vue {
   private orgStore = getModule(OrgModule, this.$store);
@@ -44,8 +56,10 @@ export default class AcceptInviteLandingView extends Vue {
   @Prop() token: string
 
   private otherError: boolean = false
+  private isCreateUserProfile: boolean = false
 
   private mounted () {
+    this.isCreateUserProfile = (this.$route?.name === Pages.CREATE_USER_PROFILE)
     this.validateToken()
   }
 

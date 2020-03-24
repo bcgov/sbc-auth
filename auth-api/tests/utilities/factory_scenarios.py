@@ -18,6 +18,8 @@ Test Utility for creating test scenarios.
 import uuid
 from enum import Enum
 from auth_api.services.keycloak_user import KeycloakUser
+from random import choice
+from string import ascii_uppercase
 
 from config import get_named_config
 
@@ -203,7 +205,7 @@ class TestJwtClaims(dict, Enum):
         """Produce a created user."""
         return {
             'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
-            'sub': sub,
+            'sub': str(sub),
             'firstname': 'Test',
             'lastname': 'User',
             'preferred_username': 'testuser',
@@ -245,6 +247,16 @@ class TestPaymentTypeInfo(dict, Enum):
     """Test scenarios of payment type."""
 
     test_type = {'code': 'TEST', 'desc': 'Test'}
+
+
+class TestAnonymousMembership(dict, Enum):
+    """Test scenarios of org status."""
+
+    @staticmethod
+    def generate_random_user(membership: str):
+        """Return user with keycloak guid."""
+        return {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'firstuser',
+                'membershipType': membership}
 
 
 class TestOrgStatusInfo(dict, Enum):
@@ -360,6 +372,13 @@ class TestUserInfo(dict, Enum):
         'firstname': 'Test',
         'lastname': 'User',
         'roles': '{edit, uma_authorization, staff}',
+        'keycloak_guid': uuid.uuid4()
+    }
+    user_staff_admin = {
+        'username': 'CP1234567',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'roles': '{edit, uma_authorization, staff_admin}',
         'keycloak_guid': uuid.uuid4()
     }
     user2 = {

@@ -1,5 +1,5 @@
 import { Contact } from '@/models/contact'
-
+import { RoleInfo } from '@/models/Organization'
 export interface User {
     firstname: string;
     lastname: string;
@@ -11,4 +11,9 @@ export interface User {
 export interface UserTerms {
     isTermsOfUseAccepted: boolean
     termsOfUseAcceptedVersion: string
+}
+
+export interface UserProfileRequestBody {
+    username: string
+    password: string
 }

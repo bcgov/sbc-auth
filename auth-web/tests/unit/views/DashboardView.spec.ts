@@ -64,7 +64,7 @@ describe('DashboardView.vue', () => {
       router,
       stubs: {
         ManagementMenu: true,
-        UserManagement: true,
+        TeamManagement: true,
         EntityManagement: true
       }
     })

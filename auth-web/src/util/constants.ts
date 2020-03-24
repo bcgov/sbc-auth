@@ -28,5 +28,17 @@ export enum Pages {
     CREATE_ACCOUNT = 'createaccount',
     DUPLICATE_TEAM_MESAGE = 'duplicateteam',
     PENDING_APPROVAL = 'pendingapproval',
-    MAIN = 'account'
+    MAIN = 'account',
+    SIGNIN = 'signin',
+    CREATE_USER_PROFILE = 'createuserprofile'
+}
+
+export enum Account {
+    ANONYMOUS = 'ANONYMOUS'
+}
+
+export enum IdpHint {
+    BCROS = 'bcros',
+    IDIR = 'idir',
+    BCSC = 'bcsc'
 }

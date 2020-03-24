@@ -4,10 +4,10 @@ import Router, { Route, RouteConfig } from 'vue-router'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
 import { AccountSettings } from '@/models/account-settings'
-import AccountSetupView from '@/views/auth/AccountSetupView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
+import CreateAccountView from '@/views/auth/CreateAccountView.vue'
 import CreateUserProfileView from '@/views/auth/CreateUserProfileView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
@@ -45,7 +45,7 @@ function mapReturnPayVars (route: any) {
 export function getRoutes (): RouteConfig[] {
   const accountSettings = () => import(/* webpackChunkName: "account-settings" */ './views/auth/AccountSettings.vue')
   const accountInfo = () => import(/* webpackChunkName: "account-settings" */ './components/auth/AccountInfo.vue')
-  const userManagement = () => import(/* webpackChunkName: "account-settings" */ './components/auth/UserManagement.vue')
+  const teamManagement = () => import(/* webpackChunkName: "account-settings" */ './components/auth/TeamManagement.vue')
   const routes = [
     { path: '/', name: 'root', component: HomeView, meta: { showNavBar: true } },
     { path: '/home', name: 'home', component: HomeView, meta: { showNavBar: true } },
@@ -86,15 +86,16 @@ export function getRoutes (): RouteConfig[] {
         {
           path: 'team-members',
           name: 'team-members',
-          component: userManagement
+          component: teamManagement
         }
       ]
     },
     { path: '/userprofile/:token?', name: 'userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
-    { path: '/createaccount', name: 'createaccount', component: AccountSetupView, meta: { requiresAuth: false, requiresProfile: false }, props: true },
+    { path: '/createaccount', name: 'createaccount', component: CreateAccountView, meta: { requiresAuth: false, requiresProfile: false }, props: true },
     { path: '/duplicateteam', name: 'duplicateteam', component: DuplicateTeamWarningView, meta: { requiresAuth: true } },
     { path: '/validatetoken/:token', name: 'validatetoken', component: AcceptInviteLandingView, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
     { path: '/confirmtoken/:token', name: 'confirmtoken', component: AcceptInviteView, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } },
+    { path: '/dirsearch/validatetoken/:token', name: 'createuserprofile', component: AcceptInviteLandingView, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
     { path: '/signin/:idpHint', name: 'signin', component: SigninView, props: true, meta: { requiresAuth: false } },
     { path: '/signin/:idpHint/:redirectUrl', name: 'signin-redirect', component: SigninView, props: true, meta: { requiresAuth: false } },
     { path: '/signin/:idpHint/:redirectUrl/:redirectUrlLoginFail', name: 'signin-redirect-full', component: SigninView, props: true, meta: { requiresAuth: false } },
@@ -110,8 +111,7 @@ export function getRoutes (): RouteConfig[] {
     { path: '/pendingapproval/:team_name?', name: 'pendingapproval', component: PendingApprovalView, props: true, meta: { requiresAuth: false, requiresProfile: true } },
     { path: '/leaveteam', name: 'leaveteam', component: LeaveTeamLandingView, props: true, meta: { requiresAuth: true } },
     { path: '/staff-setup-account', name: 'staffsetupaccount', component: SetupAccountView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
-    { path: '/staff-setup-account-success', name: 'staffsetupaccountsuccess', component: SetupAccountSuccessView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
-    { path: '/createuserprofile', name: 'createuserprofile', component: CreateUserProfileView, meta: { } },
+    { path: '/staff-setup-account-success/:accountName?', name: 'staffsetupaccountsuccess', component: SetupAccountSuccessView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
     { path: '/userprofileterms', name: 'userprofileterms', component: TermsOfServiceView, meta: { } },
     { path: '*', name: 'notfound', component: PageNotFound }
   ]

@@ -40,10 +40,10 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
-    assert 'access_type' not in dictionary  # access type shouldn't be set for normal orgs
+    assert 'accessType' not in dictionary  # access type shouldn't be set for normal orgs
 
 
-def test_add_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_add_anpnymous_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -52,6 +52,15 @@ def test_add_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:dis
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
     assert dictionary['access_type'] == 'ANONYMOUS'
+
+
+def test_add_anonymous_org_by_user_exception(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_anonymous),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
 def test_add_org_staff_admin_anonymous_not_passed(client, jwt, session,
@@ -210,7 +219,19 @@ def test_get_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     dictionary = json.loads(rv.data)
     assert dictionary['id'] == org_id
 
-
+def test_get_org_no_auth_returns_401(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org cannot be retrieved without an authorization header."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    rv = client.get('/api/v1/orgs/{}'.format(org_id),
+                    headers=None, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
+    
+    
 def test_get_org_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that attempting to retrieve a non-existent org returns a 404."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_role)

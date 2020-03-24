@@ -31,31 +31,7 @@ services:
           - '8080:80'
         depends_on:
           - notify
-  bcol:
-    image: stoplight/prism:3.3.0
-    command: >
-      mock -p 4010 --host 0.0.0.0
-      https://raw.githubusercontent.com/bcgov/sbc-pay/development/docs/docs/api_contract/bcol-api-1.0.0.yaml
-  pay:
-    image: stoplight/prism:3.3.0
-    command: >
-      mock -p 4010 --host 0.0.0.0
-      https://raw.githubusercontent.com/bcgov/sbc-pay/development/docs/docs/api_contract/pay-api-1.0.0.yaml
-  reports:
-    image: stoplight/prism:3.3.0
-    command: >
-      mock -p 4010 --host 0.0.0.0
-      https://raw.githubusercontent.com/bcgov/sbc-pay/development/docs/docs/api_contract/report-api-1.0.0.yaml
-  paybc:
-    image: stoplight/prism:3.3.0
-    command: >
-      mock -p 4010 --host 0.0.0.0
-      https://raw.githubusercontent.com/bcgov/sbc-pay/development/docs/docs/PayBC%20Mocking/paybc-1.0.0.yaml
-  auth:
-    image: stoplight/prism:3.3.0
-    command: >
-      mock -p 4010 --host 0.0.0.0
-      https://raw.githubusercontent.com/bcgov/sbc-auth/development/docs/docs/api_contract/auth-api-1.0.0.yaml
+
   notify:
     image: stoplight/prism:3.3.0
     command: >

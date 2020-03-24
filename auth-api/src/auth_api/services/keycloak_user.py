@@ -34,6 +34,9 @@ class KeycloakUser:  # pylint: disable=too-many-instance-attributes
     def user_name(self, value: str):
         """Set the user_name."""
         self._user['username'] = value
+        # Default first name to user name
+        if not self.first_name:
+            self.first_name = value
 
     @property
     def email(self) -> str:
