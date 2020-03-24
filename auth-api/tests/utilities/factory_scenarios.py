@@ -19,7 +19,7 @@ import uuid
 from enum import Enum
 from auth_api.services.keycloak_user import KeycloakUser
 from random import choice
-from string import ascii_lowercase
+from string import ascii_lowercase, ascii_uppercase
 
 from config import get_named_config
 

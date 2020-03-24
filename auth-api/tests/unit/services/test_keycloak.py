@@ -32,7 +32,6 @@ def test_keycloak_add_user(session):
     """Add user to Keycloak. Assert return a user with the same username as the username in request."""
     # with app.app_context():
     request = KeycloakScenario.create_user_request()
-    print("--1---",request.user_name)
     user = KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
     assert user.user_name == request.user_name
     KEYCLOAK_SERVICE.delete_user_by_username(request.user_name)
@@ -41,7 +40,6 @@ def test_keycloak_add_user(session):
 def test_keycloak_get_user_by_username(session):
     """Get user by username. Assert get a user with the same username as the username in request."""
     request = KeycloakScenario.create_user_request()
-    print("--2---", request.user_name)
     # with app.app_context():
     KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
     user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
@@ -52,7 +50,6 @@ def test_keycloak_get_user_by_username_not_exist(session):
     """Get user by a username not exists in Keycloak. Assert user is None, error code is data not found."""
     user = None
     request = KeycloakScenario.create_user_request()
-    print("--3---", request.user_name)
     # with app.app_context():
     try:
         user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
@@ -64,7 +61,6 @@ def test_keycloak_get_user_by_username_not_exist(session):
 def test_keycloak_get_token(session):
     """Get token by username and password. Assert access_token is included in response."""
     request = KeycloakScenario.create_user_request()
-    print("--4---", request.user_name)
     # with app.app_context():
     KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
 
