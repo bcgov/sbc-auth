@@ -66,7 +66,7 @@ def factory_user_model(user_info: dict = TestUserInfo.user1):
                      firstname=user_info['firstname'],
                      lastname=user_info['lastname'],
                      roles=user_info['roles'],
-                     keycloak_guid=user_info['keycloak_guid'])
+                     keycloak_guid=user_info.get('keycloak_guid', None))
 
     user.save()
     return user
