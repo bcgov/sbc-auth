@@ -8,7 +8,7 @@
       </div>
     </v-fade-transition>
 
-    <v-row justify="center">
+    <v-row justify="center" v-if="!isLoading">
       <v-col lg="8" class="pt-0 pb-0">
         <div class="view-header block">
           <h1>Edit Business Contact</h1>
