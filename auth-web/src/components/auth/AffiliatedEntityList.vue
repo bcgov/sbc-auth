@@ -143,7 +143,7 @@ export default class AffiliatedEntityList extends Vue {
       redirectURL = ConfigHelper.getNewBusinessURL() + 'create?nrNumber=' + business.businessIdentifier
     } else {
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, business.businessIdentifier)
-      redirectURL = `${ConfigHelper.getCoopsURL()}dashboard/${business.businessIdentifier}`
+      redirectURL = `${ConfigHelper.getCoopsURL()}${business.businessIdentifier}`
     }
     window.location.href = decodeURIComponent(redirectURL)
   }
