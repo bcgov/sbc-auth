@@ -101,7 +101,8 @@ class User:  # pylint: disable=too-many-instance-attributes
             create_user_request.password = membership['password']
             create_user_request.enabled = True
             create_user_request.attributes = {'access_type': AccessType.ANONYMOUS.value}
-            create_user_request.update_password_on_login()
+            if membership.get('update_password_on_login', True):  # by default , reset needed
+                create_user_request.update_password_on_login()
             try:
                 # TODO may be this method itself throw the business exception;can handle different exceptions?
                 kc_user = KeycloakService.add_user(create_user_request)
