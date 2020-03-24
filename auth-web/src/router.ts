@@ -1,5 +1,5 @@
+import { LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
-import { Pages, Role, SessionStorageKeys } from '@/util/constants'
 import Router, { Route, RouteConfig } from 'vue-router'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
@@ -13,6 +13,7 @@ import DashboardView from '@/views/auth/DashboardView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
 import HomeView from '@/views/auth/HomeView.vue'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
@@ -167,14 +168,15 @@ router.beforeEach((to, from, next) => {
     const currentAccountSettings: AccountSettings = (store.state as any)?.org.currentAccountSettings
     const currentOrganization: Organization = (store.state as any)?.org?.currentOrganization
     const currentMembership: Member = (store.state as any)?.org?.currentMembership
-    if (to.matched.some(record => record.meta.requiresProfile) &&
+    const currentUser: KCUserProfile = (store.state as any)?.user?.currentUser
+    if (to.matched.some(record => record.meta.requiresProfile && currentUser.loginSource === LoginSource.BCSC) &&
       (!userContact || !userProfile?.userTerms?.isTermsOfUseAccepted)) {
       return next({
         path: `/${Pages.USER_PROFILE}`
       })
     }
 
-    if (to.matched.some(record => record.meta.requiresActiveAccount)) {
+    if (to.matched.some(record => record.meta.requiresActiveAccount) && currentUser.loginSource === LoginSource.BCSC) {
       if (currentAccountSettings && currentMembership.membershipStatus === MembershipStatus.Pending) {
         return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}` })
       } else if (!currentOrganization || currentMembership.membershipStatus !== MembershipStatus.Active) {
