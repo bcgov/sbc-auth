@@ -94,10 +94,10 @@ class User:  # pylint: disable=too-many-instance-attributes
         users = []
         for membership in memberships:
             create_user_request = KeycloakUser()
-            username = BCROS + '/' + membership['username']
-            current_app.logger.debug(f'create user username: {username}')
+
+            current_app.logger.debug(f"create user username: {membership['username']}")
             create_user_request.first_name = membership['username']
-            create_user_request.user_name = username
+            create_user_request.user_name = membership['username']
             create_user_request.password = membership['password']
             create_user_request.enabled = True
             create_user_request.attributes = {'access_type': AccessType.ANONYMOUS.value}
@@ -108,7 +108,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             except HTTPError as err:
                 current_app.logger.error('create_user in keycloak failed', err)
                 raise BusinessException(Error.FAILED_ADDING_USER_IN_KEYCLOAK, None)
-
+            username = BCROS + '/' + membership['username']
             existing_user = UserModel.find_by_username(username)
             if existing_user:
                 current_app.logger.debug('Existing users found in DB')
