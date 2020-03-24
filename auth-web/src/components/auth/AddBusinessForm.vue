@@ -36,12 +36,28 @@
           autocomplete="off"
           data-test="business-passcode"
         ></v-text-field>
-      </div>
-      <div class="form__btns mt-8">
         <v-btn data-test="forgot-passcode-button" text color="primary" @click.stop="helpDialog = true">
           <v-icon small>mdi-open-in-new</v-icon>
           <span>I lost or forgot my passcode</span>
         </v-btn>
+      </div>
+      <div class="pt-5 pb-2">
+            <h4>Folio / Reference Number (optional)</h4>
+      </div>
+      <div class="pb-4">
+        If you file forms for a number of companies, you may want to enter a folio or reference
+    number to help you keep track of your transactions.
+      </div>
+      <div class="folioNumber-form__row">
+        <v-text-field
+          filled
+          label="Folio or Reference Number"
+          persistent-hint
+          :maxlength="50"
+          v-model="folioNumber"
+        ></v-text-field>
+      </div>
+      <div class="form__btns mt-8">
         <div>
           <v-btn
             data-test="add-business-button"
@@ -49,7 +65,7 @@
             :disabled="!isFormValid()"
             @click="add"
           >
-            <span>Add Business</span>
+            <span>Add</span>
           </v-btn>
           <v-btn data-test="cancel-button" large depressed color="default" class="ml-2" @click="cancel">
             <span>Cancel</span>
@@ -87,12 +103,12 @@
 </template>
 
 <script lang="ts">
+import { Business, FolioNumberload, LoginPayload } from '@/models/business'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import BusinessModule from '@/store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
-import { LoginPayload } from '@/models/business'
 import { Organization } from '@/models/Organization'
 import { getModule } from 'vuex-module-decorators'
 
@@ -101,12 +117,13 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('org', ['currentOrganization'])
   },
   methods: {
-    ...mapActions('business', ['addBusiness'])
+    ...mapActions('business', ['addBusiness', 'updateFolioNumber'])
   }
 })
 export default class AddBusinessForm extends Vue {
   private readonly currentOrganization!: Organization
   private readonly addBusiness!: (loginPayload: LoginPayload) => void
+  private readonly updateFolioNumber!: (folioNumberload: FolioNumberload) => void
   private validationError = ''
   private entityNumRules = [
     v => !!v || 'Incorporation Number is required',
@@ -119,6 +136,7 @@ export default class AddBusinessForm extends Vue {
   private VUE_APP_COPS_REDIRECT_URL = ConfigHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   private businessIdentifier: string = ''
   private passcode: string = ''
+  private folioNumber: string = ''
   private helpDialog = false
 
   $refs: {
@@ -143,6 +161,8 @@ export default class AddBusinessForm extends Vue {
 
         // attempt to add business
         await this.addBusiness({ businessIdentifier: this.businessIdentifier.trim().toUpperCase(), passCode: this.passcode })
+
+        await this.updateFolioNumber({ businessIdentifier: this.businessIdentifier.trim().toUpperCase(), folioNumber: this.folioNumber })
 
         // emit event to let parent know business added
         this.$emit('add-success')
@@ -182,8 +202,10 @@ export default class AddBusinessForm extends Vue {
 
   .form__btns {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: flex-end;
+
+    .v-btn + .v-btn {
+      margin-left: 0.5rem;
+    }
   }
 </style>

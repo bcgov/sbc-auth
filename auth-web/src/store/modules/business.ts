@@ -1,5 +1,5 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { Business, LoginPayload } from '@/models/business'
+import { Business, FolioNumberload, LoginPayload } from '@/models/business'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
@@ -92,5 +92,10 @@ export default class BusinessModule extends VuexModule {
     if (response && response.data && (response.status === 200 || response.status === 201)) {
       return response.data
     }
+  }
+
+  @Action({ rawError: true })
+  public async updateFolioNumber (folioNumberload: FolioNumberload) {
+    await BusinessService.updateFolioNumber(folioNumberload)
   }
 }

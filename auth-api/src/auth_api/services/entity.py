@@ -27,6 +27,7 @@ from auth_api.schemas import EntitySchema
 from auth_api.utils.enums import CorpType
 from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.util import camelback2snake
+from auth_api.utils.roles import Role
 
 from .authorization import check_auth
 from .rest_service import RestService
@@ -134,11 +135,14 @@ class Entity:
         entity = EntityModel.find_by_business_identifier(business_identifier)
         if entity is None or entity.corp_type_code is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        if entity.corp_type_code != token_info.get('corp_type', None):
-            raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
+        # if entity.corp_type_code != token_info.get('corp_type', None):
+        #    raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
 
-        if entity_info.get('passCode') is not None:
-            entity_info['passCode'] = passcode_hash(entity_info['passCode'])
+        is_system = token_info and Role.SYSTEM.value in token_info.get('realm_access').get('roles')
+        if is_system:
+            if entity_info.get('passCode') is not None:
+                entity_info['passCode'] = passcode_hash(entity_info['passCode'])
+
         entity.update_from_dict(**camelback2snake(entity_info))
         entity.commit()
 
