@@ -32,6 +32,7 @@ def test_keycloak_add_user(session):
     """Add user to Keycloak. Assert return a user with the same username as the username in request."""
     # with app.app_context():
     request = KeycloakScenario.create_user_request()
+    print("--1---",request.user_name)
     user = KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
     assert user.user_name == request.user_name
     KEYCLOAK_SERVICE.delete_user_by_username(request.user_name)
@@ -40,17 +41,18 @@ def test_keycloak_add_user(session):
 def test_keycloak_get_user_by_username(session):
     """Get user by username. Assert get a user with the same username as the username in request."""
     request = KeycloakScenario.create_user_request()
+    print("--2---", request.user_name)
     # with app.app_context():
     KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
     user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     assert user.user_name == request.user_name
-    KEYCLOAK_SERVICE.delete_user_by_username(request.user_name)
 
 
 def test_keycloak_get_user_by_username_not_exist(session):
     """Get user by a username not exists in Keycloak. Assert user is None, error code is data not found."""
     user = None
     request = KeycloakScenario.create_user_request()
+    print("--3---", request.user_name)
     # with app.app_context():
     try:
         user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
@@ -62,12 +64,12 @@ def test_keycloak_get_user_by_username_not_exist(session):
 def test_keycloak_get_token(session):
     """Get token by username and password. Assert access_token is included in response."""
     request = KeycloakScenario.create_user_request()
+    print("--4---", request.user_name)
     # with app.app_context():
     KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
 
     response = KEYCLOAK_SERVICE.get_token(request.user_name, request.password)
     assert response.get('access_token') is not None
-    KEYCLOAK_SERVICE.delete_user_by_username(request.user_name)
 
 
 def test_keycloak_get_token_user_not_exist(session):
@@ -84,21 +86,15 @@ def test_keycloak_get_token_user_not_exist(session):
 def test_keycloak_delete_user_by_username(session):
     """Delete user by username.Assert response is not None."""
     # with app.app_context():
-    KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
-    KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
+    request = KeycloakScenario.create_user_request()
+    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
+    KEYCLOAK_SERVICE.delete_user_by_username(request.create_user_request().user_name)
     assert True
 
 
 def test_keycloak_delete_user_by_username_user_not_exist(session):
     """Delete user by invalid username. Assert response is None, error code data not found."""
     # with app.app_context():
-    # First delete the user if it exists
-    try:
-        if KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name):
-            KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
-    except Exception:
-        pass
-
     response = None
     try:
         response = KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
@@ -110,8 +106,9 @@ def test_keycloak_delete_user_by_username_user_not_exist(session):
 def test_join_users_group(app, session):
     """Test the public_users group membership for public users."""
     # with app.app_context():
-    KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name)
+    request = KeycloakScenario.create_user_request()
+    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
+    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     user_id = user.id
     KEYCLOAK_SERVICE.join_users_group({'sub': user_id,
                                        'loginSource': BCSC,
@@ -132,14 +129,13 @@ def test_join_users_group(app, session):
         groups.append(group.get('name'))
     assert GROUP_ANONYMOUS_USERS in groups
 
-    KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
-
 
 def test_join_users_group_for_staff_users(session, app):
     """Test the staff user account creation, and assert the public_users group is not added."""
     # with app.app_context():
-    KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name)
+    request = KeycloakScenario.create_user_request()
+    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
+    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     user_id = user.id
     KEYCLOAK_SERVICE.join_users_group({'sub': user_id, 'loginSource': STAFF, 'realm_access': {'roles': []}})
     # Get the user groups and verify the public_users group is in the list
@@ -149,13 +145,12 @@ def test_join_users_group_for_staff_users(session, app):
         groups.append(group.get('name'))
     assert GROUP_PUBLIC_USERS not in groups
 
-    KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
-
 
 def test_join_users_group_for_existing_users(session):
     """Test the existing user account, and assert the public_users group is not added."""
-    KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name)
+    request = KeycloakScenario.create_user_request()
+    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
+    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     user_id = user.id
     KEYCLOAK_SERVICE.join_users_group(
         {'sub': user_id, 'loginSource': BCSC, 'realm_access': {'roles': [Role.EDITOR.value]}})
@@ -166,13 +161,12 @@ def test_join_users_group_for_existing_users(session):
         groups.append(group.get('name'))
     assert GROUP_PUBLIC_USERS not in groups
 
-    KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
-
 
 def test_join_account_holders_group(session):
     """Assert that the account_holders group is getting added to the user."""
-    KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name)
+    request = KeycloakScenario.create_user_request()
+    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
+    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     user_id = user.id
     KEYCLOAK_SERVICE.join_account_holders_group(keycloak_guid=user_id)
     # Get the user groups and verify the public_users group is in the list
@@ -182,13 +176,12 @@ def test_join_account_holders_group(session):
         groups.append(group.get('name'))
     assert GROUP_ACCOUNT_HOLDERS in groups
 
-    KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
-
 
 def test_join_account_holders_group_from_token(session, monkeypatch):
     """Assert that the account_holders group is getting added to the user."""
-    KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name)
+    request = KeycloakScenario.create_user_request()
+    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
+    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     user_id = user.id
 
     # Patch token info
@@ -212,13 +205,12 @@ def test_join_account_holders_group_from_token(session, monkeypatch):
         groups.append(group.get('name'))
     assert GROUP_ACCOUNT_HOLDERS in groups
 
-    KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
-
 
 def test_remove_from_account_holders_group(session):
     """Assert that the account_holders group is removed from the user."""
-    KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name)
+    request = KeycloakScenario.create_user_request()
+    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
+    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     user_id = user.id
     KEYCLOAK_SERVICE.join_account_holders_group(keycloak_guid=user_id)
     # Get the user groups and verify the public_users group is in the list
@@ -233,5 +225,3 @@ def test_remove_from_account_holders_group(session):
     for group in user_groups:
         groups.append(group.get('name'))
     assert GROUP_ACCOUNT_HOLDERS not in groups
-
-    KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
