@@ -33,7 +33,7 @@ from tests.utilities.factory_utils import factory_auth_header, factory_invitatio
 
 
 def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that an org can be POSTed with public role."""
+    """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
