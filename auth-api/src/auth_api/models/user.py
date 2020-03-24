@@ -51,7 +51,7 @@ class User(BaseModel):
     orgs = relationship('Membership',
                         primaryjoin='and_(User.id == Membership.user_id, \
                         or_(Membership.status == ' + str(Status.ACTIVE.value) +
-                                    ', Membership.status == ' + str(
+                        ', Membership.status == ' + str(
                             Status.PENDING_APPROVAL.value) + '))',
                         lazy='select')  # noqa:E127
 
