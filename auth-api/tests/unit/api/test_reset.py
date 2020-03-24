@@ -29,7 +29,7 @@ from tests.utilities.factory_utils import factory_auth_header
 
 def test_reset(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert the endpoint can reset the test data."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
@@ -40,11 +40,11 @@ def test_reset(client, jwt, session, keycloak_mock):  # pylint:disable=unused-ar
 
 def test_reset_unauthorized(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert the endpoint get a unauthorized error if don't have tester role."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_role)
     rv = client.post('/test/reset', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 

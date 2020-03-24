@@ -69,7 +69,7 @@ def test_reset_user_without_tester_role(session, auth_mock):  # pylint: disable=
     user = factory_user_model(user_info=user_with_token)
     org = factory_org_model(user_id=user.id)
 
-    response = ResetDataService.reset(TestJwtClaims.edit_role)
+    response = ResetDataService.reset(TestJwtClaims.public_role)
     assert response is None
 
     found_org = OrgService.find_by_org_id(org.id)

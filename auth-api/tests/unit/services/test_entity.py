@@ -96,7 +96,7 @@ def test_update_entity_existing_success(session):  # pylint:disable=unused-argum
         'corpTypeCode': TestEntityInfo.bc_entity_passcode4['corpTypeCode']
     }
     user_with_token = TestUserInfo.user_test
-    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_role['sub']
 
     updated_entity = EntityService.update_entity(entity.as_dict().get('businessIdentifier'), updated_entity_info,
                                                  {'loginSource': '', 'realm_access': {'roles': ['system']},
@@ -127,7 +127,7 @@ def test_update_entity_existing_failures(session):  # pylint:disable=unused-argu
         'corpTypeCode': TestEntityInfo.bc_entity_passcode4['corpTypeCode']
     }
     user_with_token = TestUserInfo.user_test
-    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_role['sub']
 
     with pytest.raises(BusinessException) as exception:
         EntityService.update_entity(entity.as_dict().get('businessIdentifier'), updated_entity_info,
@@ -163,7 +163,7 @@ def test_update_entity_existing_failures_no_cp_for_saved_entity(session):  # pyl
         'corpTypeCode': TestEntityInfo.bc_entity_passcode4['corpTypeCode']
     }
     user_with_token = TestUserInfo.user_test
-    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_role['sub']
 
     with pytest.raises(BusinessException) as exception:
         EntityService.update_entity(entity.as_dict().get('businessIdentifier'), updated_entity_info,

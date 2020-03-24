@@ -33,7 +33,7 @@ def test_authorizations_for_account_returns_200(app, client, jwt, session):  # p
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
 
-    claims = copy.deepcopy(TestJwtClaims.edit_role.value)
+    claims = copy.deepcopy(TestJwtClaims.public_role.value)
     claims['sub'] = str(user.keycloak_guid)
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
@@ -52,7 +52,7 @@ def test_authorizations_for_account_with_search_returns_200(client, jwt, session
     factory_membership_model(user.id, org.id)
     factory_product_model(org.id)
 
-    claims = copy.deepcopy(TestJwtClaims.edit_role.value)
+    claims = copy.deepcopy(TestJwtClaims.public_role.value)
     claims['sub'] = str(user.keycloak_guid)
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
@@ -75,7 +75,7 @@ def test_authorizations_with_multiple_accounts_returns_200(client, jwt, session)
                              payment_type_info=None)
     factory_membership_model(user.id, org.id)
 
-    claims = copy.deepcopy(TestJwtClaims.edit_role.value)
+    claims = copy.deepcopy(TestJwtClaims.public_role.value)
     claims['sub'] = str(user.keycloak_guid)
 
     headers = factory_auth_header(jwt=jwt, claims=claims)

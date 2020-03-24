@@ -31,7 +31,7 @@ KEYCLOAK_SERVICE = KeycloakService()
 
 def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a user can be POSTed."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 

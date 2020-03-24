@@ -237,7 +237,7 @@ def test_user_find_by_username_missing_username(session):  # pylint: disable=unu
 def test_delete_contact_user_link(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a contact can not be deleted if contact link exists."""
     user_with_token = TestUserInfo.user_test
-    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_role['sub']
     user_model = factory_user_model(user_info=user_with_token)
     user = UserService(user_model)
 
@@ -254,7 +254,7 @@ def test_delete_contact_user_link(session, auth_mock, keycloak_mock):  # pylint:
     contact_link = contact_link.flush()
     contact_link.commit()
 
-    deleted_contact = UserService.delete_contact(TestJwtClaims.edit_role)
+    deleted_contact = UserService.delete_contact(TestJwtClaims.public_role)
 
     assert deleted_contact is None
 
