@@ -35,7 +35,7 @@ from tests.utilities.factory_utils import (
     factory_membership_model, factory_org_model, factory_user_model, factory_invitation_anonymous)
 
 from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
+from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, BCROS
 
 KEYCLOAK_SERVICE = KeycloakService()
 
@@ -64,7 +64,7 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
                      headers={'invitation_token': dictionary.get('token')}, content_type='application/json')
     dictionary = json.loads(rv.data)
     assert rv.status_code == http_status.HTTP_201_CREATED
-    assert dictionary['users'][0].get('username') == TestUserInfo.user_anonymous_1['username']
+    assert dictionary['users'][0].get('username') == BCROS+'/'+TestUserInfo.user_anonymous_1['username']
     assert dictionary['users'][0].get('password') is None
     assert dictionary['users'][0].get('type') == 'ANONYMOUS'
 

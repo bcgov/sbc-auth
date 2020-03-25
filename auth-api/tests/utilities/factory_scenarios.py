@@ -427,10 +427,6 @@ class TestUserInfo(dict, Enum):
         'username': 'testuser12345',
         'password': 'testuser12345',
     }
-    user_anonymous_2 = {
-        'username': 'testuser12345',
-        'password': 'testuser12345',
-    }
     user_bcros = {
         'username': 'BCROS/CP1234567',
         'firstname': 'Test',
