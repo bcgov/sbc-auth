@@ -37,7 +37,6 @@ class BulkUser(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
     def post():
         """Admin users can post multiple users to his org.Use it for anonymous purpose only."""
         try:
