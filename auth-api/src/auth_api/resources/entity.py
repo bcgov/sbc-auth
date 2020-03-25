@@ -120,7 +120,7 @@ class ContactResource(Resource):
 
         try:
             entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
-                                                               allowed_roles=CLIENT_AUTH_ROLES)
+                                                               allowed_roles=ALL_ALLOWED_ROLES)
             if entity:
                 response, status = entity.add_contact(request_json).as_dict(), \
                                    http_status.HTTP_201_CREATED
