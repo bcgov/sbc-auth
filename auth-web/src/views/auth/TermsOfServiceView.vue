@@ -52,8 +52,10 @@
 </template>
 
 <script lang="ts">
+import { Component, Mixins } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import { Component } from 'vue-property-decorator'
+import ConfigHelper from '@/util/config-helper'
+import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import TermsOfUse from '@/components/auth/TermsOfUse.vue'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { User } from '@/models/user'
@@ -76,7 +78,7 @@ import Vue from 'vue'
     )
   }
 })
-export default class TermsOfServiceView extends Vue {
+export default class TermsOfServiceView extends Mixins(NextPageMixin) {
   private readonly saveUserTerms!: () => Promise<User>
   private readonly updateCurrentUserTerms!: (UserTerms) => void
   private readonly termsOfUse!: TermsOfUseDocument
@@ -94,7 +96,14 @@ export default class TermsOfServiceView extends Vue {
     })
     const userTerms = await this.saveUserTerms()
     if (userTerms?.userTerms?.isTermsOfUseAccepted) {
-
+      this.$store.commit('updateHeader')
+      await this.syncUser()
+      const nextPage = this.getNextPageUrl()
+      if (nextPage === 'director-search-url') {
+        window.location.replace(ConfigHelper.getValue('DIRECTOR_SEARCH_URL'))
+      } else {
+        this.$router.push(nextPage)
+      }
     }
   }
 
