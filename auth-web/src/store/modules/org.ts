@@ -98,10 +98,6 @@ export default class OrgModule extends VuexModule {
     const response = await OrgService.getOrganization(orgId)
     const organization = response?.data
     this.context.commit('setCurrentOrganization', organization)
-    await this.context.dispatch('syncActiveOrgMembers')
-    await this.context.dispatch('syncPendingOrgMembers')
-    await this.context.dispatch('syncPendingOrgInvitations')
-    await this.context.dispatch('business/syncBusinesses', null, { root: true })
     return organization
   }
 

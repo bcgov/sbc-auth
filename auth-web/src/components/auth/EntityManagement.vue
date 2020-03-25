@@ -94,7 +94,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
 import AddBusinessForm from '@/components/auth/AddBusinessForm.vue'
 import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
@@ -126,7 +126,7 @@ export default class EntityManagement extends Mixins(NextPageMixin) {
   private messageTextList = i18n.messages[i18n.locale]
   private isLoading = true
 
-  private readonly syncBusinesses!: (organization?: Organization) => Promise<Business[]>
+  private readonly syncBusinesses!: () => Promise<Business[]>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
 
   $refs: {
@@ -136,13 +136,19 @@ export default class EntityManagement extends Mixins(NextPageMixin) {
     addBusinessDialog: ModalDialog
   }
 
-  async mounted () {
+  @Watch('currentOrganization')
+  private async onCurrentAccountChange (newVal: Organization, oldVal: Organization) {
+    await this.syncBusinesses()
+  }
+
+  private async mounted () {
     // If pending approval on current account, redirect away
     if (this.currentMembership?.membershipStatus !== MembershipStatus.Active) {
       this.$router.push(this.getNextPageUrl())
+    } else {
+      await this.syncBusinesses()
+      this.isLoading = false
     }
-    await this.syncBusinesses()
-    this.isLoading = false
   }
 
   async showAddSuccessModal () {
