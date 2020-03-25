@@ -31,11 +31,14 @@
 </template>
 
 <script lang="ts">
+import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import { Business } from '@/models/business'
 import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
 import BusinessModule from '@/store/modules/business'
-import { Component } from 'vue-property-decorator'
+import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
+import { Organization } from '@/models/Organization'
+import { Pages } from '@/util/constants'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
@@ -52,7 +55,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('business', ['loadBusiness'])
   }
 })
-export default class BusinessProfileView extends Vue {
+export default class BusinessProfileView extends Mixins(NextPageMixin) {
   // TODO: Set businessType from current business in store
   private businessType = 'cooperative'
   private editing = false
@@ -60,15 +63,18 @@ export default class BusinessProfileView extends Vue {
   private readonly currentBusiness!: Business
   private readonly loadBusiness!: () => Business
 
+  @Watch('currentOrganization')
+  private onCurrentAccountChange (newVal: Organization, oldVal: Organization) {
+    this.$router.push(this.getNextPageUrl())
+  }
+
   async mounted () {
+    this.isLoading = true
     // Check if there is already contact info so that we display the appropriate copy
     await this.loadBusiness()
-    if (this.currentBusiness &&
-      this.currentBusiness.contacts &&
-      this.currentBusiness.contacts.length > 0) {
+    if ((this.currentBusiness?.contacts?.length || 0) > 0) {
       this.editing = true
     }
-
     this.isLoading = false
   }
 }
