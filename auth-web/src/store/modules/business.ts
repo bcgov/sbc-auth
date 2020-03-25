@@ -28,9 +28,10 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ commit: 'setBusinesses', rawError: true })
-  public async syncBusinesses (organization?: Organization): Promise<Business[]> {
+  public async syncBusinesses (): Promise<Business[]> {
+    const organization = this.context.rootState.org.currentOrganization
     if (!organization) {
-      organization = this.context.rootState.org.currentOrganization
+      return []
     }
     const response = await OrgService.getAffiliatiatedEntities(organization.id)
     if (response && response.data && response.status === 200) {

@@ -41,8 +41,6 @@ export default class Signin extends Mixins(NextPageMixin) {
   private async authenticationComplete () {
     // Check if user is authenticated, and redirect according to specified redirect
     // or fallback to default route for their login source
-    await this.syncUser()
-    this.loadUserInfo()
     if (this.$store.getters['auth/isAuthenticated']) {
       this.$root.$emit('signin-complete')
       if (this.redirectUrl) {

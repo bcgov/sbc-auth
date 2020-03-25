@@ -132,7 +132,7 @@
 
 <script lang="ts">
 import { ActiveUserRecord, Member, MembershipStatus, MembershipType, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import MemberDataTable, { ChangeRolePayload } from '@/components/auth/MemberDataTable.vue'
 import { mapActions, mapState } from 'vuex'
 import { Business } from '@/models/business'
@@ -208,11 +208,21 @@ export default class UserManagement extends Mixins(TeamManagementMixin) {
     return this.pendingOrgMembers.length
   }
 
+  @Watch('currentOrganization')
+  private async onCurrentAccountChange (newVal: Organization, oldVal: Organization) {
+    await this.setup()
+  }
+
   private async mounted () {
-    this.isLoading = false
+    await this.setup()
+  }
+
+  private async setup () {
+    this.isLoading = true
     await this.syncActiveOrgMembers()
     await this.syncPendingOrgInvitations()
     await this.syncPendingOrgMembers()
+    this.isLoading = false
   }
 
   private showInviteUsersModal () {
