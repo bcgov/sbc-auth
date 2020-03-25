@@ -49,15 +49,17 @@ export default class NextPageMixin extends Vue {
   protected getNextPageUrl (): string {
     switch (this.currentUser?.loginSource) {
       case LoginSource.IDIR:
+        return `${Pages.SEARCH_BUSINESS}`
       case LoginSource.BCROS:
+        let bcrosNextStep = '/'
         if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
           if (this.currentMembership.membershipTypeCode === MembershipType.Owner) {
-            return `${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`
+            bcrosNextStep = `${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`
           } else {
-            return 'director-search-url'
+            bcrosNextStep = 'director-search-url'
           }
         }
-        return '/'
+        return bcrosNextStep
       case LoginSource.BCSC:
         let nextStep = '/'
         // Redirect to user profile if no contact info or terms not accepted
