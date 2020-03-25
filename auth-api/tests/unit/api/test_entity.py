@@ -261,7 +261,7 @@ def test_update_entity_with_folio_number(client, jwt, session):  # pylint:disabl
     client.post('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1['businessIdentifier']),
                 headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
 
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.patch('/api/v1/entities/{}'.format(TestEntityInfo.entity1['businessIdentifier']),
                       data=json.dumps(TestEntityInfo.entity_folio_number),
                       headers=headers, content_type='application/json')
