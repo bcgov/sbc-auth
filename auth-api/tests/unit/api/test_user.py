@@ -64,7 +64,7 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
                      headers={'invitation_token': dictionary.get('token')}, content_type='application/json')
     dictionary = json.loads(rv.data)
     assert rv.status_code == http_status.HTTP_201_CREATED
-    assert dictionary['users'][0].get('username') == BCROS+'/'+TestUserInfo.user_anonymous_1['username']
+    assert dictionary['users'][0].get('username') == BCROS + '/' + TestUserInfo.user_anonymous_1['username']
     assert dictionary['users'][0].get('password') is None
     assert dictionary['users'][0].get('type') == 'ANONYMOUS'
 
