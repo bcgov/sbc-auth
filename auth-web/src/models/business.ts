@@ -5,12 +5,17 @@ export interface LoginPayload {
     passCode: string
 }
 
+export interface FolioNumberload {
+    businessIdentifier: string
+    folioNumber: string
+}
 export interface Business {
     businessIdentifier: string
     businessNumber?: string
     name?: string
     contacts?: Contact[]
-    corpType: string
+    corpType: string,
+    folioNumber: string
 }
 
 export interface Businesses {

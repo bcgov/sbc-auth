@@ -38,6 +38,7 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods
     business_number = Column('business_number', String(100), nullable=True)
     name = Column('name', String(250), nullable=True)
     corp_type_code = Column(String(10), ForeignKey('corp_type.code'), nullable=False)
+    folio_number = Column('folio_number', String(50), nullable=True, index=True)
 
     contacts = relationship('ContactLink', back_populates='entity')
     corp_type = relationship('CorpType', foreign_keys=[corp_type_code], lazy='joined', innerjoin=True)

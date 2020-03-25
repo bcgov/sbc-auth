@@ -9,6 +9,11 @@
       </div>
     </v-expand-transition>
     <v-row>
+      <v-col cols="12" class="mb-2">
+        <h4>Business Contact Information</h4>
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12">
         <v-text-field
           filled
@@ -58,6 +63,30 @@
         </v-text-field>
       </v-col>
     </v-row>
+
+    <v-row>
+      <v-col cols="12" class="pt-5 pb-2">
+        <h4>Folio / Reference Number (optional)</h4>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" class="pb-4">
+        If you file forms for a number of companies, you may want to enter a folio or reference
+number to help you keep track of your transactions.
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-text-field
+          filled
+          label="Folio or Reference Number"
+          persistent-hint
+          :maxlength="50"
+          v-model="folioNumber"
+        >
+        </v-text-field>
+      </v-col>
+    </v-row>
     <v-row>
       <v-col cols="12" class="form__btns pb-0">
         <v-btn large color="primary" @click="save" :disabled='!isFormValid()'>
@@ -72,9 +101,9 @@
 </template>
 
 <script lang="ts">
+import { Business, FolioNumberload } from '@/models/business'
 import { Component, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import { Business } from '@/models/business'
 import BusinessModule from '@/store/modules/business'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -92,7 +121,7 @@ import { mask } from 'vue-the-mask'
     ...mapState('org', ['currentOrganization'])
   },
   methods: {
-    ...mapActions('business', ['saveContact'])
+    ...mapActions('business', ['saveContact', 'updateFolioNumber'])
   }
 })
 export default class BusinessContactForm extends Vue {
@@ -100,10 +129,12 @@ export default class BusinessContactForm extends Vue {
   private confirmedEmailAddress = ''
   private phoneNumber = ''
   private extension = ''
+  private folioNumber = ''
   private formError = ''
   private editing = false
   private readonly currentBusiness!: Business
   private readonly saveContact!: (contact: Contact) => void
+  private readonly updateFolioNumber!: (folioNumberload: FolioNumberload) => void
   private readonly currentOrganization!: Organization
 
   private emailRules = [
@@ -146,6 +177,7 @@ export default class BusinessContactForm extends Vue {
       this.phoneNumber = contact.phone
       this.extension = contact.phoneExtension
     }
+    this.folioNumber = this.currentBusiness.folioNumber
   }
 
   async save () {
@@ -156,6 +188,7 @@ export default class BusinessContactForm extends Vue {
         phoneExtension: this.extension
       }
       await this.saveContact(contact)
+      await this.updateFolioNumber({ businessIdentifier: this.currentBusiness.businessIdentifier.trim().toUpperCase(), folioNumber: this.folioNumber })
       this.redirectToNext()
     }
   }
