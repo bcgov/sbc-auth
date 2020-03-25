@@ -29,11 +29,25 @@ export enum Pages {
     DUPLICATE_TEAM_MESAGE = 'duplicateteam',
     PENDING_APPROVAL = 'pendingapproval',
     MAIN = 'account',
+    SIGNIN = 'signin',
     CREATE_USER_PROFILE = 'createuserprofile',
-    DIRSEARCH_CONFIRM_TOKEN = 'dirsearch-confirmtoken'
+    SEARCH_BUSINESS = 'searchbusiness',
+    DIRSEARCH_CONFIRM_TOKEN = 'dirsearch-confirmtoken',
+    HOME = 'home'
+}
+
+export enum Account {
+    ANONYMOUS = 'ANONYMOUS'
 }
 
 export enum IdpHint {
-    BCSC = 'bcsc',
+    BCROS = 'bcros',
+    IDIR = 'idir',
+    BCSC = 'bcsc'
+}
+
+export enum LoginSource {
     BCROS = 'BCROS',
+    IDIR = 'IDIR',
+    BCSC = 'BCSC'
 }

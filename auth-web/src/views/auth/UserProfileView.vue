@@ -43,7 +43,7 @@
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import { Contact } from '@/models/contact'
-import NextPageMixin from '@/components/auth/NextPageMixin.vue'
+import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'

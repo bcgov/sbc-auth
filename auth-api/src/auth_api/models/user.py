@@ -23,7 +23,7 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.roles import Status, UserStatus
+from auth_api.utils.roles import Status, UserStatus, AccessType
 
 from .base_model import BaseModel
 from .db import db
@@ -43,7 +43,7 @@ class User(BaseModel):
     lastname = Column('last_name', String(200), index=True)
     email = Column('email', String(200), index=True)
     keycloak_guid = Column(
-        'keycloak_guid', UUID(as_uuid=True), unique=True, nullable=False
+        'keycloak_guid', UUID(as_uuid=True), unique=True, nullable=True  # bcros users comes with no guid
     )
     roles = Column('roles', String(1000))
 
@@ -113,6 +113,8 @@ class User(BaseModel):
                 user.email = token.get('email', user.email)
                 user.modified = datetime.datetime.now()
                 user.roles = token.get('roles', user.roles)
+                if token.get('accessType', None) == AccessType.ANONYMOUS.value:  # update kcguid for anonymous users
+                    user.keycloak_guid = token.get('sub', user.keycloak_guid)
 
                 current_app.logger.debug(
                     'Updating user from JWT:{}; User:{}'.format(token, user)

@@ -18,6 +18,8 @@ Test Utility for creating test scenarios.
 import uuid
 from enum import Enum
 from auth_api.services.keycloak_user import KeycloakUser
+from random import choice
+from string import ascii_uppercase
 
 from config import get_named_config
 
@@ -184,13 +186,27 @@ class TestJwtClaims(dict, Enum):
             ]
         }
     }
+    anonymous_bcros_role = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'preferred_username': 'bcros/testuser',
+        'accessType': 'ANONYMOUS',
+        'loginSource': 'BCROS',
+        'realm_access': {
+            'roles': [
+                'edit'
+            ]
+        }
+    }
 
     @staticmethod
     def get_test_real_user(sub):
         """Produce a created user."""
         return {
             'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
-            'sub': sub,
+            'sub': str(sub),
             'firstname': 'Test',
             'lastname': 'User',
             'preferred_username': 'testuser',
@@ -232,6 +248,16 @@ class TestPaymentTypeInfo(dict, Enum):
     """Test scenarios of payment type."""
 
     test_type = {'code': 'TEST', 'desc': 'Test'}
+
+
+class TestAnonymousMembership(dict, Enum):
+    """Test scenarios of org status."""
+
+    @staticmethod
+    def generate_random_user(membership: str):
+        """Return user with keycloak guid."""
+        return {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'firstuser',
+                'membershipType': membership}
 
 
 class TestOrgStatusInfo(dict, Enum):
@@ -349,6 +375,13 @@ class TestUserInfo(dict, Enum):
         'roles': '{edit, uma_authorization, staff}',
         'keycloak_guid': uuid.uuid4()
     }
+    user_staff_admin = {
+        'username': 'CP1234567',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'roles': '{edit, uma_authorization, staff_admin}',
+        'keycloak_guid': uuid.uuid4()
+    }
     user2 = {
         'username': 'CP1234568',
         'firstname': 'Test 2',
@@ -384,6 +417,13 @@ class TestUserInfo(dict, Enum):
     user_anonymous_2 = {
         'username': 'testuser12345',
         'password': 'testuser12345',
+    }
+    user_bcros = {
+        'username': 'BCROS/CP1234567',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'roles': '{edit, uma_authorization, staff}'
+        # dont add a kc_guid
     }
 
     @staticmethod

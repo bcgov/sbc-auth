@@ -66,7 +66,7 @@ def factory_user_model(user_info: dict = TestUserInfo.user1):
                      firstname=user_info['firstname'],
                      lastname=user_info['lastname'],
                      roles=user_info['roles'],
-                     keycloak_guid=user_info['keycloak_guid'])
+                     keycloak_guid=user_info.get('keycloak_guid', None))
 
     user.save()
     return user
@@ -109,6 +109,7 @@ def factory_org_model(org_info: dict = TestOrgInfo.org1,
 
     org = OrgModel(name=org_info['name'])
     org.org_type = org_type
+    org.access_type = org_info.get('accessType', '')
     org.org_status = org_status
     org.preferred_payment = preferred_payment
     org.created_by_id = user_id

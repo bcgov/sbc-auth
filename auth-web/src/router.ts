@@ -1,18 +1,19 @@
+import { LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
-import { Pages, Role, SessionStorageKeys } from '@/util/constants'
 import Router, { Route, RouteConfig } from 'vue-router'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
 import { AccountSettings } from '@/models/account-settings'
-import AccountSetupView from '@/views/auth/AccountSetupView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
+import CreateAccountView from '@/views/auth/CreateAccountView.vue'
 import CreateUserProfileView from '@/views/auth/CreateUserProfileView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
 import HomeView from '@/views/auth/HomeView.vue'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
@@ -45,7 +46,7 @@ function mapReturnPayVars (route: any) {
 export function getRoutes (): RouteConfig[] {
   const accountSettings = () => import(/* webpackChunkName: "account-settings" */ './views/auth/AccountSettings.vue')
   const accountInfo = () => import(/* webpackChunkName: "account-settings" */ './components/auth/AccountInfo.vue')
-  const userManagement = () => import(/* webpackChunkName: "account-settings" */ './components/auth/UserManagement.vue')
+  const teamManagement = () => import(/* webpackChunkName: "account-settings" */ './components/auth/TeamManagement.vue')
   const routes = [
     { path: '/', name: 'root', component: HomeView, meta: { showNavBar: true } },
     { path: '/home', name: 'home', component: HomeView, meta: { showNavBar: true } },
@@ -86,12 +87,12 @@ export function getRoutes (): RouteConfig[] {
         {
           path: 'team-members',
           name: 'team-members',
-          component: userManagement
+          component: teamManagement
         }
       ]
     },
     { path: '/userprofile/:token?', name: 'userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
-    { path: '/createaccount', name: 'createaccount', component: AccountSetupView, meta: { requiresAuth: false, requiresProfile: false }, props: true },
+    { path: '/createaccount', name: 'createaccount', component: CreateAccountView, meta: { requiresAuth: false, requiresProfile: false }, props: true },
     { path: '/duplicateteam', name: 'duplicateteam', component: DuplicateTeamWarningView, meta: { requiresAuth: true } },
     { path: '/validatetoken/:token', name: 'validatetoken', component: AcceptInviteLandingView, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
     { path: '/confirmtoken/:token', name: 'confirmtoken', component: AcceptInviteView, props: true, meta: { requiresAuth: true, disabledRoles: [Role.Staff] } },
@@ -168,14 +169,15 @@ router.beforeEach((to, from, next) => {
     const currentAccountSettings: AccountSettings = (store.state as any)?.org.currentAccountSettings
     const currentOrganization: Organization = (store.state as any)?.org?.currentOrganization
     const currentMembership: Member = (store.state as any)?.org?.currentMembership
-    if (to.matched.some(record => record.meta.requiresProfile) &&
+    const currentUser: KCUserProfile = (store.state as any)?.user?.currentUser
+    if (to.matched.some(record => record.meta.requiresProfile && currentUser.loginSource === LoginSource.BCSC) &&
       (!userContact || !userProfile?.userTerms?.isTermsOfUseAccepted)) {
       return next({
         path: `/${Pages.USER_PROFILE}`
       })
     }
 
-    if (to.matched.some(record => record.meta.requiresActiveAccount)) {
+    if (to.matched.some(record => record.meta.requiresActiveAccount) && currentUser.loginSource === LoginSource.BCSC) {
       if (currentAccountSettings && currentMembership.membershipStatus === MembershipStatus.Pending) {
         return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}` })
       } else if (!currentOrganization || currentMembership.membershipStatus !== MembershipStatus.Active) {

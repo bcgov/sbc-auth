@@ -68,6 +68,8 @@ class Org:
             count = OrgModel.get_count_of_org_created_by_user_id(user_id)
             if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
                 raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
+            if org_info.get('accessType', None) == AccessType.ANONYMOUS.value:
+                raise BusinessException(Error.USER_CANT_CREATE_ANONYMOUS_ORG, None)
 
         existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'])
         if existing_similar__org is not None:

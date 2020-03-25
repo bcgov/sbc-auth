@@ -40,10 +40,10 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
-    assert 'access_type' not in dictionary  # access type shouldn't be set for normal orgs
+    assert 'accessType' not in dictionary  # access type shouldn't be set for normal orgs
 
 
-def test_add_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_add_anonymous_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -51,7 +51,16 @@ def test_add_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:dis
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
-    assert dictionary['access_type'] == 'ANONYMOUS'
+    assert dictionary['accessType'] == 'ANONYMOUS'
+
+
+def test_add_anonymous_org_by_user_exception(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_anonymous),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
 def test_add_org_staff_admin_anonymous_not_passed(client, jwt, session,
@@ -63,7 +72,7 @@ def test_add_org_staff_admin_anonymous_not_passed(client, jwt, session,
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
-    assert dictionary['access_type'] == 'ANONYMOUS'
+    assert dictionary['accessType'] == 'ANONYMOUS'
 
 
 def test_add_org_staff_admin_any_number_of_orgs(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
