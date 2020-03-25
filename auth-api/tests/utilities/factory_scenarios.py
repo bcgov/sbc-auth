@@ -468,20 +468,6 @@ class KeycloakScenario:
         create_user_request.enabled = True
         return create_user_request
 
-    @staticmethod
-    def create_user_request_2():
-        """Return create user request."""
-        create_user_request = KeycloakUser()
-        create_user_request.user_name = 'testuser2'
-        create_user_request.password = '1111'
-        create_user_request.first_name = 'test_first'
-        create_user_request.last_name = 'test_last'
-        create_user_request.email = 'testuser2@gov.bc.ca'
-        create_user_request.attributes = {'corp_type': 'CP', 'source': 'BCSC'}
-        create_user_request.enabled = True
-
-        return create_user_request
-
     # Patch token info
     @staticmethod
     def token_info(kc_guid: str):  # pylint: disable=unused-argument; mocks of library methods

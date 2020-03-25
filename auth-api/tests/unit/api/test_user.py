@@ -536,8 +536,9 @@ def test_delete_user_with_tester_role(client, jwt, session, keycloak_mock):  # p
 def test_add_user_adds_to_account_holders_group(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a user gets added to account_holders group if the user has any active account."""
     # Create a user in keycloak
-    KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name)
+    request = KeycloakScenario.create_user_request()
+    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
+    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     user_id = user.id
 
     # Create user, org and membserhip in DB
