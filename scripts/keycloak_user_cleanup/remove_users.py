@@ -35,8 +35,6 @@ def run(env: str, idp_client_id: str, idp_client_secret: str, idp_realm: str, kc
     idp_token_url = f'{idp_base_url}realms/{idp_realm}/protocol/openid-connect/token'
     kc_token_url = f'{kc_base_url}realms/{kc_realm}/protocol/openid-connect/token'
 
-    # client_secret = '5c43fd13-0d5a-4b66-9226-bfb7dd01b261'
-
     response = requests.post(idp_token_url,
                              data=f'client_id={idp_client_id}&client_secret={idp_client_secret}&grant_type=client_credentials',
                              headers={'Content-Type': 'application/x-www-form-urlencoded'})
