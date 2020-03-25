@@ -174,7 +174,7 @@ def test_create_user_and_add_membership_admin_bulk_mode_unauthorised(session, au
     membership = [TestAnonymousMembership.generate_random_user(MEMBER)]
 
     with pytest.raises(HTTPException) as excinfo:
-        UserService.create_user_and_add_membership(membership, org.id, token_info=TestJwtClaims.edit_role)
+        UserService.create_user_and_add_membership(membership, org.id, token_info=TestJwtClaims.public_user_role)
     assert excinfo.value.code == 403
 
 
@@ -219,7 +219,7 @@ def test_create_user_and_add_membership_multiple_error_skip_auth_mode(session, a
     membership = [TestAnonymousMembership.generate_random_user(MEMBER),
                   TestAnonymousMembership.generate_random_user(ADMIN)]
     with pytest.raises(BusinessException) as exception:
-        UserService.create_user_and_add_membership(membership, org.id, TestJwtClaims.edit_role,
+        UserService.create_user_and_add_membership(membership, org.id, TestJwtClaims.public_user_role,
                                                    skip_auth=True)
     assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
 
@@ -403,7 +403,7 @@ def test_user_find_by_username_missing_username(session):  # pylint: disable=unu
 def test_delete_contact_user_link(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a contact can not be deleted if contact link exists."""
     user_with_token = TestUserInfo.user_test
-    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user_model = factory_user_model(user_info=user_with_token)
     user = UserService(user_model)
 
@@ -420,7 +420,7 @@ def test_delete_contact_user_link(session, auth_mock, keycloak_mock):  # pylint:
     contact_link = contact_link.flush()
     contact_link.commit()
 
-    deleted_contact = UserService.delete_contact(TestJwtClaims.edit_role)
+    deleted_contact = UserService.delete_contact(TestJwtClaims.public_user_role)
 
     assert deleted_contact is None
 

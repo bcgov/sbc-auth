@@ -44,7 +44,7 @@ class Orgs(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.EDITOR.value, Role.STAFF_ADMIN.value])
+    @_JWT.has_one_of_roles([Role.PUBLIC_USER.value, Role.STAFF_ADMIN.value])
     def post():
         """Post a new org using the request body.
 
@@ -126,7 +126,7 @@ class Org(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
     def delete(org_id):
         """Inactivates the org if it has no active members or affiliations."""
         token = g.jwt_oidc_token_info
@@ -207,7 +207,7 @@ class OrgAffiliations(Resource):
     """Resource for managing affiliations for an org."""
 
     @staticmethod
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def post(org_id):
@@ -250,7 +250,7 @@ class OrgAffiliation(Resource):
     """Resource for managing a single affiliation between an org and an entity."""
 
     @staticmethod
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def delete(org_id, business_identifier):

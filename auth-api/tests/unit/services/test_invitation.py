@@ -181,7 +181,7 @@ def test_accept_invitation(session, auth_mock, keycloak_mock):  # pylint:disable
         with patch.object(auth, 'check_auth', return_value=True):
             with patch.object(InvitationService, 'notify_admin', return_value=None):
                 user_with_token = TestUserInfo.user_test
-                user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+                user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
                 user = factory_user_model(user_with_token)
                 org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
                 org_dictionary = org.as_dict()
@@ -194,7 +194,7 @@ def test_accept_invitation(session, auth_mock, keycloak_mock):  # pylint:disable
                 InvitationService.accept_invitation(new_invitation_dict['id'], User(user_invitee), '')
                 members = MembershipService.get_members_for_org(org_dictionary['id'],
                                                                 'PENDING_APPROVAL',
-                                                                token_info=TestJwtClaims.edit_role)
+                                                                token_info=TestJwtClaims.public_user_role)
                 assert members
                 assert len(members) == 1
 
@@ -239,7 +239,7 @@ def test_get_invitations_by_org_id(session, auth_mock, keycloak_mock):  # pylint
     """Find an existing invitation with the provided org id."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user_with_token = TestUserInfo.user_test
-        user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+        user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
         user = factory_user_model(user_with_token)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
@@ -248,7 +248,7 @@ def test_get_invitations_by_org_id(session, auth_mock, keycloak_mock):  # pylint
         InvitationService.create_invitation(invitation_info, User(user), {}, '').as_dict()
         invitations: list = InvitationService.get_invitations_for_org(org_id,
                                                                       status='PENDING',
-                                                                      token_info=TestJwtClaims.edit_role)
+                                                                      token_info=TestJwtClaims.public_user_role)
         assert invitations
         assert len(invitations) == 1
 

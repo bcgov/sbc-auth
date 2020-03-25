@@ -16,6 +16,7 @@
 from flask import g, request
 from flask_restplus import Namespace, Resource, cors
 
+from auth_api.utils.roles import Role
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
@@ -39,7 +40,7 @@ class Invitations(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
     def post():
         """Send a new invitation using the details in request and saves the invitation."""
         token = g.jwt_oidc_token_info
@@ -100,7 +101,7 @@ class Invitation(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
     def delete(invitation_id):
         """Delete the specified invitation."""
         token = g.jwt_oidc_token_info

@@ -86,7 +86,7 @@ def test_get_entity_unauthorized_user_returns_403(client, jwt, session):  # pyli
     client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
                 headers=headers, content_type='application/json')
 
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
 
     rv = client.get('/api/v1/entities/{}'.format(TestEntityInfo.entity1['businessIdentifier']),
                     headers=headers, content_type='application/json')
@@ -129,7 +129,7 @@ def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
 
 def test_add_contact_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that adding an invalidly formatted contact returns a 400."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
                 headers=headers, content_type='application/json')
     rv = client.post('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1['businessIdentifier']),
@@ -177,7 +177,7 @@ def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
 
 def test_update_contact_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that updating with an invalidly formatted contact returns a 400."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
                 headers=headers, content_type='application/json')
     client.post('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1['businessIdentifier']),
