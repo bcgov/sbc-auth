@@ -54,7 +54,20 @@ class TestJwtClaims(dict, Enum):
         'preferred_username': 'troublemaker'
     }
 
-    edit_role = {
+    public_user_role = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'preferred_username': 'testuser',
+        'realm_access': {
+            'roles': [
+                'public_user'
+            ]
+        }
+    }
+
+    edit_user_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',

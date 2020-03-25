@@ -42,7 +42,7 @@ KEYCLOAK_SERVICE = KeycloakService()
 
 def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a user can be POSTed."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
@@ -85,7 +85,7 @@ def test_add_user_invalid_token_returns_401(client, jwt, session):  # pylint:dis
 
 def test_update_user(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a POST to an existing user updates that user."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     user = json.loads(rv.data)
@@ -101,7 +101,7 @@ def test_update_user(client, jwt, session):  # pylint:disable=unused-argument
 
 def test_update_user_terms_of_use(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a PATCH to an existing user updates that user."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     user = json.loads(rv.data)
@@ -119,7 +119,7 @@ def test_update_user_terms_of_use(client, jwt, session):  # pylint:disable=unuse
 
 def test_update_user_terms_of_use_invalid_input(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a PATCH to an existing user updates that user."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     user = json.loads(rv.data)
@@ -135,7 +135,7 @@ def test_update_user_terms_of_use_invalid_input(client, jwt, session):  # pylint
 
 def test_update_user_terms_of_use_no_jwt(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a PATCH to an existing user updates that user."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     user = json.loads(rv.data)
@@ -151,13 +151,13 @@ def test_update_user_terms_of_use_no_jwt(client, jwt, session):  # pylint:disabl
 def test_staff_get_user(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a staff user can GET a user by id."""
     # POST a test user
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
     # GET the test user as a staff user
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.get('/api/v1/users/{}'.format(TestJwtClaims.edit_role['preferred_username']),
+    rv = client.get('/api/v1/users/{}'.format(TestJwtClaims.public_user_role['preferred_username']),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     user = json.loads(rv.data)
@@ -174,7 +174,7 @@ def test_staff_get_user_invalid_id_returns_404(client, jwt, session):  # pylint:
 def test_staff_search_users(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a staff user can GET a list of users with search parameters."""
     # POST a test user
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
@@ -201,7 +201,7 @@ def test_staff_search_users(client, jwt, session):  # pylint:disable=unused-argu
 def test_get_user(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a user can retrieve their own profile."""
     # POST a test user
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     rv = client.get('/api/v1/users/@me', headers=headers, content_type='application/json')
@@ -218,7 +218,7 @@ def test_get_user_returns_401(client, session):  # pylint:disable=unused-argumen
 
 def test_get_user_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the endpoint returns 404 when user is not found."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.get('/api/v1/users/@me', headers=headers, content_type='application/json')
     assert rv.status_code == Error.DATA_NOT_FOUND.status_code
 
@@ -226,7 +226,7 @@ def test_get_user_returns_404(client, jwt, session):  # pylint:disable=unused-ar
 def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a contact can be added (POST) to an existing user."""
     # POST a test user
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     # POST a contact to test user
@@ -240,7 +240,7 @@ def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
 def test_add_contact_valid_email_with_special_characters(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a contact can be added (POST) to an existing user."""
     # POST a test user
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     # POST a contact to test user
@@ -261,7 +261,7 @@ def test_add_contact_no_token_returns_401(client, session):  # pylint:disable=un
 def test_add_contact_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that adding a contact in an invalid format returns a 400."""
     # POST a test user
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     rv = client.post('/api/v1/users/contacts', data=json.dumps(TestContactInfo.invalid),
@@ -272,7 +272,7 @@ def test_add_contact_invalid_format_returns_400(client, jwt, session):  # pylint
 def test_add_contact_duplicate_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that adding a contact for a user who already has a contact returns a 400."""
     # POST a test user
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     # POST a contact to test user
@@ -288,7 +288,7 @@ def test_add_contact_duplicate_returns_400(client, jwt, session):  # pylint:disa
 def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument, invalid-name
     """Assert that a contact can be updated (PUT) on an existing user."""
     # POST a test user
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     # POST a contact to test user
@@ -314,7 +314,7 @@ def test_update_contact_no_token_returns_401(client, session):  # pylint:disable
 def test_update_contact_invalid_format_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that adding a contact in an invalid format returns a 400."""
     # POST a test user
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     rv = client.put('/api/v1/users/contacts', data=json.dumps(TestContactInfo.invalid),
@@ -325,7 +325,7 @@ def test_update_contact_invalid_format_returns_400(client, jwt, session):  # pyl
 def test_update_contact_missing_contact_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that updating a contact for a non-existent user returns a 404."""
     # POST a test user
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     # PUT a contact to test user
@@ -337,7 +337,7 @@ def test_update_contact_missing_contact_returns_404(client, jwt, session):  # py
 def test_delete_contact(client, jwt, session):  # pylint:disable=unused-argument, invalid-name
     """Assert that a contact can be deleted on an existing user."""
     # POST a test user
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     # POST a contact to test user
@@ -363,7 +363,7 @@ def test_delete_contact_no_token_returns_401(client, session):  # pylint:disable
 
 def test_delete_contact_no_contact_returns_404(client, jwt, session):  # pylint:disable=unused-argument, invalid-name
     """Assert that deleting a contact that doesn't exist returns a 404."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     rv = client.delete('/api/v1/users/contacts', headers=headers, content_type='application/json')
@@ -372,7 +372,7 @@ def test_delete_contact_no_contact_returns_404(client, jwt, session):  # pylint:
 
 def test_get_orgs_for_user(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that retrieving a list of orgs for a user functions."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     # Add an org - the current user should be auto-added as an OWNER
@@ -397,7 +397,7 @@ def test_user_authorizations_returns_200(client, jwt, session):  # pylint:disabl
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
 
-    claims = copy.deepcopy(TestJwtClaims.edit_role.value)
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     claims['sub'] = str(user.keycloak_guid)
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
@@ -417,7 +417,7 @@ def test_user_authorizations_returns_200(client, jwt, session):  # pylint:disabl
 
 def test_delete_user_with_no_orgs_returns_204(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Test if the user doesn't have any teams/orgs assert status is 204."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
@@ -430,7 +430,7 @@ def test_delete_user_with_no_orgs_returns_204(client, jwt, session, keycloak_moc
 
 def test_delete_inactive_user_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Test if the user doesn't have any teams/orgs assert status is 204."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
@@ -471,7 +471,7 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mo
     affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
     affiliation.save()
 
-    claims = copy.deepcopy(TestJwtClaims.edit_role.value)
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     claims['sub'] = str(user_model.keycloak_guid)
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
@@ -508,7 +508,7 @@ def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock):
                                  membership_type_status=Status.ACTIVE.value)
     membership.save()
 
-    claims = copy.deepcopy(TestJwtClaims.edit_role.value)
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     claims['sub'] = str(user_model2.keycloak_guid)
 
     headers = factory_auth_header(jwt=jwt, claims=claims)

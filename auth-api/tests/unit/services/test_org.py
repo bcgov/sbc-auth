@@ -170,14 +170,14 @@ def test_update_contact_no_contact(session):  # pylint:disable=unused-argument
 def test_get_members(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that members for an org can be retrieved."""
     user_with_token = TestUserInfo.user_test
-    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
     org_dictionary = org.as_dict()
 
     response = MembershipService.get_members_for_org(org_dictionary['id'],
                                                      status='ACTIVE',
-                                                     token_info=TestJwtClaims.edit_role)
+                                                     token_info=TestJwtClaims.public_user_role)
     assert response
     assert len(response) == 1
     assert response[0].membership_type_code == 'OWNER'
@@ -187,7 +187,7 @@ def test_get_invitations(session, auth_mock, keycloak_mock):  # pylint:disable=u
     """Assert that invitations for an org can be retrieved."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user_with_token = TestUserInfo.user_test
-        user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+        user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
         user = factory_user_model(user_info=user_with_token)
         org = OrgService.create_org(TestOrgInfo.org1, user.id)
         org_dictionary = org.as_dict()
@@ -196,7 +196,8 @@ def test_get_invitations(session, auth_mock, keycloak_mock):  # pylint:disable=u
 
         invitation = InvitationService.create_invitation(invitation_info, UserService(user), {}, '')
 
-        response = InvitationService.get_invitations_for_org(org_dictionary['id'], 'PENDING', TestJwtClaims.edit_role)
+        response = InvitationService.get_invitations_for_org(org_dictionary['id'], 'PENDING',
+                                                             TestJwtClaims.public_user_role)
         assert response
         assert len(response) == 1
         assert response[0].recipient_email == invitation.as_dict()['recipientEmail']
@@ -205,7 +206,7 @@ def test_get_invitations(session, auth_mock, keycloak_mock):  # pylint:disable=u
 def test_get_owner_count_one_owner(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that count of owners is correct."""
     user_with_token = TestUserInfo.user_test
-    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
     assert org.get_owner_count() == 1
@@ -214,7 +215,7 @@ def test_get_owner_count_one_owner(session, keycloak_mock):  # pylint:disable=un
 def test_get_owner_count_two_owner_with_admins(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that count of owners is correct."""
     user_with_token = TestUserInfo.user_test
-    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
     user2 = factory_user_model(user_info=TestUserInfo.user2)
@@ -227,7 +228,7 @@ def test_get_owner_count_two_owner_with_admins(session, keycloak_mock):  # pylin
 def test_delete_org_with_members_fail(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org cannot be deleted."""
     user_with_token = TestUserInfo.user_test
-    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
     user2 = factory_user_model(user_info=TestUserInfo.user2)
@@ -236,7 +237,7 @@ def test_delete_org_with_members_fail(session, auth_mock, keycloak_mock):  # pyl
     factory_membership_model(user3.id, org._model.id, member_type='OWNER')
 
     with pytest.raises(BusinessException) as exception:
-        OrgService.delete_org(org.as_dict()['id'], TestJwtClaims.edit_role)
+        OrgService.delete_org(org.as_dict()['id'], TestJwtClaims.public_user_role)
 
     assert exception.value.code == Error.ORG_CANNOT_BE_DISSOLVED.name
 
@@ -244,7 +245,7 @@ def test_delete_org_with_members_fail(session, auth_mock, keycloak_mock):  # pyl
 def test_delete_org_with_affiliation_fail(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org cannot be deleted."""
     user_with_token = TestUserInfo.user_test
-    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
     org_id = org.as_dict()['id']
@@ -257,13 +258,13 @@ def test_delete_org_with_affiliation_fail(session, auth_mock, keycloak_mock):  #
                                           {})
 
     with pytest.raises(BusinessException) as exception:
-        OrgService.delete_org(org_id, TestJwtClaims.edit_role)
+        OrgService.delete_org(org_id, TestJwtClaims.public_user_role)
 
     assert exception.value.code == Error.ORG_CANNOT_BE_DISSOLVED.name
 
     AffiliationService.delete_affiliation(org_id, business_identifier,
                                           TestEntityInfo.entity_lear_mock['passCode'])
-    OrgService.delete_org(org.as_dict()['id'], TestJwtClaims.edit_role)
+    OrgService.delete_org(org.as_dict()['id'], TestJwtClaims.public_user_role)
     org_inactive = OrgService.find_by_org_id(org.as_dict()['id'])
     assert org_inactive.as_dict()['org_status'] == 'INACTIVE'
 
@@ -271,10 +272,10 @@ def test_delete_org_with_affiliation_fail(session, auth_mock, keycloak_mock):  #
 def test_delete_org_with_members_success(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be deleted."""
     user_with_token = TestUserInfo.user_test
-    user_with_token['keycloak_guid'] = TestJwtClaims.edit_role['sub']
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
-    OrgService.delete_org(org.as_dict()['id'], TestJwtClaims.edit_role)
+    OrgService.delete_org(org.as_dict()['id'], TestJwtClaims.public_user_role)
     org_inactive = OrgService.find_by_org_id(org.as_dict()['id'])
     assert org_inactive.as_dict()['org_status'] == 'INACTIVE'
 
