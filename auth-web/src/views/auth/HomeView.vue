@@ -21,7 +21,7 @@
             <!-- Non-authenticated -->
             <v-btn large color="#fcba19" class="cta-btn"
               v-if="!userProfile"
-              @click="createAccount()">
+              @click="accountDialog = true">
               Create a BC Registries Account
             </v-btn>
           </div>
@@ -172,8 +172,8 @@
               </v-card>
 
               <div class="cta-container">
-                <v-btn large color="#fcba19" class="cta-btn" active-class="cta-btn--active" to="/main" v-if="userProfile">Manage Businesses</v-btn>
-                <v-btn large color="#fcba19" class="cta-btn" active-class="cta-btn--active" to="/signin/bcsc" v-if="!userProfile">Log in with BC Services Card</v-btn>
+                <v-btn large color="#fcba19" class="cta-btn" active-class="cta-btn--active" @click="goToManageBusinesses()" v-if="userProfile">Manage Businesses</v-btn>
+                <v-btn large color="#fcba19" class="cta-btn" active-class="cta-btn--active" @click="login()" v-if="!userProfile">Log in with BC Services Card</v-btn>
               </div>
 
             </section>

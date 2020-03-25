@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Watch } from 'vue-property-decorator'
+import { Component, Mixins } from 'vue-property-decorator'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -148,7 +148,7 @@ export default class App extends Mixins(NextPageMixin) {
       // 1. If user was in a pending approval page and switched to an active account, take them to the home page
       this.$router.push(`/home`)
     } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
-      // 2. If user has a pending account status, take them to pending approval page
+      // 2. If user has a pending account status, take them to pending approval page (no matter where they are)
       this.$router.push(`/${Pages.PENDING_APPROVAL}/${this.currentAccountSettings.label}`)
     }
   }
@@ -169,15 +169,16 @@ export default class App extends Mixins(NextPageMixin) {
     this.$root.$on('signin-complete', async () => {
       await this.setup()
     })
+  }
 
-    if (ConfigHelper.getFromSession(SessionStorageKeys.UserKcId)) {
-      this.loadUserInfo()
-    }
+  private destroyed () {
+    this.$root.$off('signin-complete')
   }
 
   private async setup () {
     // Header added modules to store so can access mapped actions now
     if (this.$store.getters['auth/isAuthenticated']) {
+      this.loadUserInfo()
       await this.syncUser()
       this.setupNavigationBar()
       await this.tokenService.init()
