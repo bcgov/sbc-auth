@@ -90,20 +90,27 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
   }
 
   private async clickAccepted () {
-    await this.updateCurrentUserTerms({
-      termsOfUseAcceptedVersion: this.termsOfUse.version_id,
-      isTermsOfUseAccepted: true
-    })
-    const userTerms = await this.saveUserTerms()
-    if (userTerms?.userTerms?.isTermsOfUseAccepted) {
-      this.$store.commit('updateHeader')
-      await this.syncUser()
-      const nextPage = this.getNextPageUrl()
-      if (nextPage === 'director-search-url') {
-        window.location.replace(ConfigHelper.getValue('DIRECTOR_SEARCH_URL'))
-      } else {
-        this.$router.push(nextPage)
+    this.isLoading = true
+    try {
+      await this.updateCurrentUserTerms({
+        termsOfUseAcceptedVersion: this.termsOfUse.version_id,
+        isTermsOfUseAccepted: true
+      })
+      const userTerms = await this.saveUserTerms()
+      if (userTerms?.userTerms?.isTermsOfUseAccepted) {
+        this.$store.commit('updateHeader')
+        await this.syncUser()
+        const nextPage = this.getNextPageUrl()
+        if (nextPage === 'director-search-url') {
+          window.location.replace(ConfigHelper.getValue('DIRECTOR_SEARCH_URL'))
+        } else {
+          this.$router.push(nextPage)
+        }
       }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error)
+      this.isLoading = false
     }
   }
 

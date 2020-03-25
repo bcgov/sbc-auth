@@ -4,6 +4,7 @@
       <div v-if="isCreateUserProfile">
         <create-user-profile-landing
           :token="token"
+          :orgName="orgName"
         ></create-user-profile-landing>
       </div>
       <div v-if="!isCreateUserProfile">
@@ -54,6 +55,7 @@ export default class AcceptInviteLandingView extends Vue {
   private readonly validateInvitationToken!: (token: string) => EmptyResponse
 
   @Prop() token: string
+  @Prop({ default: '' }) orgName: string
 
   private otherError: boolean = false
   private isCreateUserProfile: boolean = false
