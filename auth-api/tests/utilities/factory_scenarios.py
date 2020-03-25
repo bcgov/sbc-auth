@@ -458,11 +458,12 @@ class KeycloakScenario:
     def create_user_request():
         """Return create user request."""
         create_user_request = KeycloakUser()
-        create_user_request.user_name = ''.join(choice(ascii_lowercase) for i in range(5))
+        user_name = ''.join(choice(ascii_lowercase) for i in range(5))
+        create_user_request.user_name = user_name
         create_user_request.password = '1111'
         create_user_request.first_name = 'test_first'
         create_user_request.last_name = 'test_last'
-        create_user_request.email = 'testuser1@gov.bc.ca'
+        create_user_request.email = f'{user_name}@gov.bc.ca'
         create_user_request.attributes = {'corp_type': 'CP', 'source': 'BCSC'}
         create_user_request.enabled = True
         return create_user_request
