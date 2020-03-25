@@ -19,7 +19,7 @@ import uuid
 from enum import Enum
 from auth_api.services.keycloak_user import KeycloakUser
 from random import choice
-from string import ascii_uppercase
+from string import ascii_uppercase, ascii_lowercase
 
 from config import get_named_config
 
@@ -458,7 +458,7 @@ class KeycloakScenario:
     def create_user_request():
         """Return create user request."""
         create_user_request = KeycloakUser()
-        create_user_request.user_name = 'testuser1'
+        create_user_request.user_name = ''.join(choice(ascii_lowercase) for i in range(5))
         create_user_request.password = '1111'
         create_user_request.first_name = 'test_first'
         create_user_request.last_name = 'test_last'

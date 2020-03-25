@@ -34,7 +34,6 @@ def test_keycloak_add_user(session):
     request = KeycloakScenario.create_user_request()
     user = KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
     assert user.user_name == request.user_name
-    KEYCLOAK_SERVICE.delete_user_by_username(request.user_name)
 
 
 def test_keycloak_get_user_by_username(session):
@@ -44,7 +43,6 @@ def test_keycloak_get_user_by_username(session):
     KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
     user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     assert user.user_name == request.user_name
-    KEYCLOAK_SERVICE.delete_user_by_username(request.user_name)
 
 
 def test_keycloak_get_user_by_username_not_exist(session):
@@ -84,8 +82,9 @@ def test_keycloak_get_token_user_not_exist(session):
 def test_keycloak_delete_user_by_username(session):
     """Delete user by username.Assert response is not None."""
     # with app.app_context():
-    KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
-    KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
+    request = KeycloakScenario.create_user_request()
+    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
+    KEYCLOAK_SERVICE.delete_user_by_username(request.user_name)
     assert True
 
 
@@ -93,12 +92,6 @@ def test_keycloak_delete_user_by_username_user_not_exist(session):
     """Delete user by invalid username. Assert response is None, error code data not found."""
     # with app.app_context():
     # First delete the user if it exists
-    try:
-        if KEYCLOAK_SERVICE.get_user_by_username(KeycloakScenario.create_user_request().user_name):
-            KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
-    except Exception:
-        pass
-
     response = None
     try:
         response = KEYCLOAK_SERVICE.delete_user_by_username(KeycloakScenario.create_user_request().user_name)
