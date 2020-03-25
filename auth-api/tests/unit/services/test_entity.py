@@ -130,13 +130,6 @@ def test_update_entity_existing_failures(session):  # pylint:disable=unused-argu
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
 
     with pytest.raises(BusinessException) as exception:
-        EntityService.update_entity(entity.as_dict().get('businessIdentifier'), updated_entity_info,
-                                    {'loginSource': '', 'realm_access': {'roles': ['system']},
-                                     'corp_type': 'INVALID_CP'})
-
-    assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
-
-    with pytest.raises(BusinessException) as exception:
         EntityService.update_entity('invalidbusinessnumber', updated_entity_info,
                                     {'loginSource': '', 'realm_access': {'roles': ['system']},
                                      'corp_type': 'INVALID_CP'})

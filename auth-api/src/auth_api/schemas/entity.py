@@ -33,3 +33,4 @@ class EntitySchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-
     business_number = fields.String(data_key='businessNumber')
     pass_code_claimed = fields.Boolean(data_key='passCodeClaimed')
     contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
+    folio_number = fields.String(data_key='folioNumber')

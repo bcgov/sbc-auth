@@ -38,7 +38,8 @@ describe('BusinessContactForm.vue', () => {
               phone: '',
               phoneExtension: ''
             }
-          ]
+          ],
+          folioNumber: '22222222222'
         }
       }
     }

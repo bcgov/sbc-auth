@@ -11,9 +11,9 @@
     <v-row justify="center" v-if="!isLoading">
       <v-col lg="8" class="pt-0 pb-0">
         <div class="view-header block">
-          <h1>Edit Business Contact</h1>
+          <h1>Edit Business Profile</h1>
           <p v-if="!editing">There is no contact information for this {{ businessType }}. You will need to provide the contact information for this {{businessType}} before you continue.</p>
-          <p v-if="editing">Edit the contact information for this {{businessType}}.</p>
+          <p v-if="editing">Edit contact information an manage folio/reference numbers for this {{ businessType }}.</p>
         </div>
         <v-card class="profile-card">
           <v-container>
