@@ -179,7 +179,7 @@ class Invitation:
     def send_invitation(invitation: InvitationModel, org_name, user, app_url):
         """Send the email notification."""
         current_app.logger.debug('<send_invitation')
-        mail_configs = Invitation.get_invitation_configs(invitation.type)
+        mail_configs = Invitation.get_invitation_configs(invitation.type, org_name)
         subject = mail_configs.get('subject').format(user['firstname'], user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
@@ -200,10 +200,10 @@ class Invitation:
         current_app.logger.debug('>send_invitation')
 
     @staticmethod
-    def get_invitation_configs(invitation_type):
+    def get_invitation_configs(invitation_type, org_name):
         """Get the config for different email types."""
         director_search_configs = {
-            'token_confirm_path': 'dirsearch/validatetoken',
+            'token_confirm_path': f'{org_name}/dirsearch/validatetoken',
             'template_name': 'dirsearch_business_invitation_email',
             'subject': '[BC Registries & Online Services] {} {} has invited you to setup an account',
         }
