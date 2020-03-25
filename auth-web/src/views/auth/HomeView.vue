@@ -21,7 +21,7 @@
             <!-- Non-authenticated -->
             <v-btn large color="#fcba19" class="cta-btn"
               v-if="!userProfile"
-              @click="createAccount()">
+              @click="accountDialog = true">
               Create a BC Registries Account
             </v-btn>
           </div>
