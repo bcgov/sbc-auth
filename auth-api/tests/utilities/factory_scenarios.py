@@ -346,6 +346,9 @@ class TestEntityInfo(dict, Enum):
                          'name': 'Foobar, Inc.',
                          'passCode': '222222222', 'corpTypeCode': 'CP'}
 
+    entity_folio_number = {'businessIdentifier': 'CP1234568',
+                           'folioNumber': '12345678'}
+
 
 class TestAffliationInfo(dict, Enum):
     """Test scenarios of affliation."""
