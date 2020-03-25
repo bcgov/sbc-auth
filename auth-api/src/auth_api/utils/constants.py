@@ -24,7 +24,7 @@ GROUP_ANONYMOUS_USERS = 'anonymous_users'
 PASSCODE = 'PASSCODE'
 BCSC = 'BCSC'
 STAFF = 'IDIR'
-BCROS = 'BCROS'
+BCROS = 'bcros'
 
 
 class InvitationStatus(Enum):
