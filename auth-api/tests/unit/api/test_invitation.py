@@ -27,7 +27,7 @@ from auth_api.services import Invitation as InvitationService
 
 def test_add_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an invitation can be POSTed."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
@@ -42,7 +42,7 @@ def test_add_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=
 
 def test_add_invitation_invalid(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that POSTing an invalid invitation returns a 400."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation(org_id=None)),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
@@ -50,7 +50,7 @@ def test_add_invitation_invalid(client, jwt, session):  # pylint:disable=unused-
 
 def test_get_invitations_by_id(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an invitation can be retrieved."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
@@ -66,7 +66,7 @@ def test_get_invitations_by_id(client, jwt, session, keycloak_mock):  # pylint:d
 
 def test_delete_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an invitation can be deleted."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
@@ -86,7 +86,7 @@ def test_delete_invitation(client, jwt, session, keycloak_mock):  # pylint:disab
 
 def test_update_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an invitation can be updated."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
@@ -106,7 +106,7 @@ def test_update_invitation(client, jwt, session, keycloak_mock):  # pylint:disab
 
 def test_validate_token(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a token is valid."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
@@ -124,7 +124,7 @@ def test_validate_token(client, jwt, session, keycloak_mock):  # pylint:disable=
 
 def test_accept_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an invitation can be accepted."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')

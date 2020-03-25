@@ -19,7 +19,7 @@ import uuid
 from enum import Enum
 from auth_api.services.keycloak_user import KeycloakUser
 from random import choice
-from string import ascii_uppercase
+from string import ascii_uppercase, ascii_lowercase
 
 from config import get_named_config
 
@@ -54,7 +54,20 @@ class TestJwtClaims(dict, Enum):
         'preferred_username': 'troublemaker'
     }
 
-    edit_role = {
+    public_user_role = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'preferred_username': 'testuser',
+        'realm_access': {
+            'roles': [
+                'public_user'
+            ]
+        }
+    }
+
+    edit_user_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': 'Test',
@@ -188,10 +201,10 @@ class TestJwtClaims(dict, Enum):
     }
     anonymous_bcros_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
-        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302069',
         'firstname': 'Test',
         'lastname': 'User',
-        'preferred_username': 'bcros/testuser',
+        'preferred_username': 'BCROS/testuser',
         'accessType': 'ANONYMOUS',
         'loginSource': 'BCROS',
         'realm_access': {
@@ -414,10 +427,6 @@ class TestUserInfo(dict, Enum):
         'username': 'testuser12345',
         'password': 'testuser12345',
     }
-    user_anonymous_2 = {
-        'username': 'testuser12345',
-        'password': 'testuser12345',
-    }
     user_bcros = {
         'username': 'BCROS/CP1234567',
         'firstname': 'Test',
@@ -445,27 +454,14 @@ class KeycloakScenario:
     def create_user_request():
         """Return create user request."""
         create_user_request = KeycloakUser()
-        create_user_request.user_name = 'testuser1'
+        user_name = ''.join(choice(ascii_lowercase) for i in range(5))
+        create_user_request.user_name = user_name
         create_user_request.password = '1111'
         create_user_request.first_name = 'test_first'
         create_user_request.last_name = 'test_last'
-        create_user_request.email = 'testuser1@gov.bc.ca'
+        create_user_request.email = f'{user_name}@gov.bc.ca'
         create_user_request.attributes = {'corp_type': 'CP', 'source': 'BCSC'}
         create_user_request.enabled = True
-        return create_user_request
-
-    @staticmethod
-    def create_user_request_2():
-        """Return create user request."""
-        create_user_request = KeycloakUser()
-        create_user_request.user_name = 'testuser2'
-        create_user_request.password = '1111'
-        create_user_request.first_name = 'test_first'
-        create_user_request.last_name = 'test_last'
-        create_user_request.email = 'testuser2@gov.bc.ca'
-        create_user_request.attributes = {'corp_type': 'CP', 'source': 'BCSC'}
-        create_user_request.enabled = True
-
         return create_user_request
 
     # Patch token info

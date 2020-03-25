@@ -22,7 +22,7 @@ from auth_api import status as http_status
 from auth_api.services.keycloak import KeycloakService
 
 from tests.utilities.factory_scenarios import BulkUserTestScenario, TestJwtClaims, \
-    TestOrgInfo, TestUserInfo
+    TestOrgInfo
 from tests.utilities.factory_utils import (
     factory_auth_header, factory_invitation_anonymous)
 
@@ -31,7 +31,7 @@ KEYCLOAK_SERVICE = KeycloakService()
 
 def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a user can be POSTed."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
@@ -49,12 +49,21 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
     dictionary = json.loads(rv.data)
     assert dictionary.get('token') is not None
     assert rv.status_code == http_status.HTTP_201_CREATED
-    rv = client.post('/api/v1/users/bcros', data=json.dumps(TestUserInfo.user_anonymous_1),
+    user = {
+        'username': 'testuser',
+        'password': 'testuser',
+    }
+    rv = client.post('/api/v1/users/bcros', data=json.dumps(user),
                      headers={'invitation_token': dictionary.get('token')}, content_type='application/json')
     dictionary = json.loads(rv.data)
 
+    # post token with updated claims
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
     headers = factory_auth_header(jwt=jwt,
-                                  claims=TestJwtClaims.get_test_real_user(dictionary['users'][0]['keycloakGuid']))
+                                  claims=TestJwtClaims.anonymous_bcros_role)
     rv = client.post('/api/v1/bulk/users', headers=headers,
                      data=json.dumps(BulkUserTestScenario.get_bulk_user1_for_org(org_id)),
                      content_type='application/json')
