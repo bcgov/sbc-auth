@@ -130,7 +130,10 @@ class TestJwtClaims(dict, Enum):
             'roles': [
                 'staff', 'staff_admin'
             ]
-        }
+        },
+        'roles': [
+            'staff', 'staff_admin'
+        ]
     }
 
     system_role = {
@@ -490,8 +493,10 @@ class BulkUserTestScenario:
     def get_bulk_user1_for_org(org_id: str):
         """Generate a bulk user input."""
         return {'users': [
-            {'username': 'first2user2238', 'password': 'helo', 'membershipType': 'ADMIN'},
-            {'username': 'secon2duse2r248', 'password': 'helo', 'membershipType': 'MEMBER'}
+            {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'helo',
+             'membershipType': 'ADMIN'},
+            {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'helo',
+             'membershipType': 'MEMBER'}
         ],
             'orgId': org_id
         }
