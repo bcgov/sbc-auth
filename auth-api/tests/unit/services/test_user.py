@@ -28,7 +28,7 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import User as UserModel
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
-from auth_api.utils.constants import BCROS
+from auth_api.utils.constants import IdpHint
 from auth_api.utils.roles import Status, ADMIN, OWNER, MEMBER
 from werkzeug.exceptions import HTTPException
 
@@ -93,7 +93,7 @@ def test_create_user_and_add_membership_owner_skip_auth_mode(session, auth_mock,
     membership = [TestAnonymousMembership.generate_random_user(OWNER)]
     users = UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
     assert len(users['users']) == 1
-    assert users['users'][0]['username'] == BCROS + '/' + membership[0]['username']
+    assert users['users'][0]['username'] == IdpHint.BCROS.value + '/' + membership[0]['username']
     assert users['users'][0]['type'] == 'ANONYMOUS'
 
     members = MembershipModel.find_members_by_org_id(org.id)
@@ -121,7 +121,7 @@ def test_create_user_and_add_same_user_name_error_in_db(session, auth_mock,
     user = factory_user_model(TestUserInfo.user_bcros)
     factory_membership_model(user.id, org.id)
     new_members = TestAnonymousMembership.generate_random_user(OWNER)
-    new_members['username'] = user.username.replace('BCROS/', '')
+    new_members['username'] = user.username.replace(f'{IdpHint.BCROS.value}/', '')
     membership = [new_members]
     with pytest.raises(BusinessException) as exception:
         UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
@@ -135,7 +135,7 @@ def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,
     membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
     users = UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
     assert len(users['users']) == 1
-    assert users['users'][0]['username'] == BCROS + '/' + membership[0]['username']
+    assert users['users'][0]['username'] == IdpHint.BCROS.value + '/' + membership[0]['username']
     assert users['users'][0]['type'] == 'ANONYMOUS'
 
     members = MembershipModel.find_members_by_org_id(org.id)
@@ -156,7 +156,7 @@ def test_create_user_and_add_membership_admin_bulk_mode(session, auth_mock,
     users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
 
     assert len(users['users']) == 1
-    assert users['users'][0]['username'] == BCROS + '/' + membership[0]['username']
+    assert users['users'][0]['username'] == IdpHint.BCROS.value + '/' + membership[0]['username']
     assert users['users'][0]['type'] == 'ANONYMOUS'
 
     members = MembershipModel.find_members_by_org_id(org.id)
@@ -190,9 +190,9 @@ def test_create_user_and_add_membership_admin_bulk_mode_multiple(session, auth_m
     users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
 
     assert len(users['users']) == 2
-    assert users['users'][0]['username'] == BCROS + '/' + membership[0]['username']
+    assert users['users'][0]['username'] == IdpHint.BCROS.value + '/' + membership[0]['username']
     assert users['users'][0]['type'] == 'ANONYMOUS'
-    assert users['users'][1]['username'] == BCROS + '/' + membership[1]['username']
+    assert users['users'][1]['username'] == IdpHint.BCROS.value + '/' + membership[1]['username']
     assert users['users'][1]['type'] == 'ANONYMOUS'
 
     members = MembershipModel.find_members_by_org_id(org.id)

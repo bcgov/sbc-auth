@@ -14,7 +14,6 @@
 """Constants definitions."""
 from enum import Enum
 
-
 # Group names
 GROUP_PUBLIC_USERS = 'public_users'
 GROUP_ACCOUNT_HOLDERS = 'account_holders'
@@ -25,6 +24,13 @@ PASSCODE = 'PASSCODE'
 BCSC = 'BCSC'
 STAFF = 'IDIR'
 BCROS = 'BCROS'
+
+
+# IdpHint
+class IdpHint(Enum):
+    """IdpHint for user login."""
+
+    BCROS = 'bcros'
 
 
 class InvitationStatus(Enum):

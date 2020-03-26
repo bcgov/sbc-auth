@@ -10,10 +10,18 @@
 
     <v-row justify="center" v-if="!isLoading">
       <v-col lg="8" class="pt-0 pb-0">
-        <div class="view-header block">
-          <h1>Edit Business Contact</h1>
-          <p v-if="!editing">There is no contact information for this {{ businessType }}. You will need to provide the contact information for this {{businessType}} before you continue.</p>
-          <p v-if="editing">Edit the contact information for this {{businessType}}.</p>
+        <div class="view-header business-profile-header" v-if="!editing">
+          <h1>Edit Business Profile</h1>
+          <p class="mb-0">There is no contact information for this {{ businessType }}. You will need to provide the contact information for this {{businessType}} before you continue.</p>
+        </div>
+        <div class="view-header" v-if="editing">
+          <v-btn large icon color="secondary" class="back-btn mr-3" @click="navigateBack()">
+            <v-icon>mdi-arrow-left</v-icon>
+          </v-btn>
+          <div>
+            <h1>Edit Business Profile</h1>
+            <p class="mb-0">Edit contact information an manage folio/reference numbers for this {{ businessType }}.</p>
+          </div>
         </div>
         <v-card class="profile-card">
           <v-container>
@@ -37,6 +45,7 @@ import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Business } from '@/models/business'
 import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
 import BusinessModule from '@/store/modules/business'
+import ConfigHelper from '@/util/config-helper'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
@@ -64,6 +73,18 @@ export default class BusinessProfileView extends Mixins(AccountChangeMixin, Next
   private readonly currentBusiness!: Business
   private readonly loadBusiness!: () => Business
 
+  private navigateBack (): void {
+    if (this.$route.query.redirect) {
+      if (this.currentOrganization) {
+        this.$router.push(`/account/${this.currentOrganization.id}`)
+      } else {
+        this.$router.push('/home')
+      }
+    } else {
+      window.location.href = `${ConfigHelper.getCoopsURL()}${this.currentBusiness.businessIdentifier}`
+    }
+  }
+
   async mounted () {
     this.isLoading = true
     // Check if there is already contact info so that we display the appropriate copy
@@ -87,5 +108,9 @@ export default class BusinessProfileView extends Mixins(AccountChangeMixin, Next
 
   .intro-text {
     margin-bottom: 3rem;
+  }
+
+  .business-profile-header {
+    flex-direction: column;
   }
 </style>

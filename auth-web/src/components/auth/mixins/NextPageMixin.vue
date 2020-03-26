@@ -1,7 +1,7 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
 import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
-import { Member, MembershipStatus, Organization } from '@/models/Organization'
+import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
@@ -49,8 +49,17 @@ export default class NextPageMixin extends Vue {
   protected getNextPageUrl (): string {
     switch (this.currentUser?.loginSource) {
       case LoginSource.IDIR:
+        return `${Pages.SEARCH_BUSINESS}`
       case LoginSource.BCROS:
-        return `/${Pages.SEARCH_BUSINESS}`
+        let bcrosNextStep = '/'
+        if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
+          if (this.currentMembership.membershipTypeCode === MembershipType.Owner) {
+            bcrosNextStep = `${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`
+          } else {
+            bcrosNextStep = 'director-search-url'
+          }
+        }
+        return bcrosNextStep
       case LoginSource.BCSC:
         let nextStep = '/'
         // Redirect to user profile if no contact info or terms not accepted

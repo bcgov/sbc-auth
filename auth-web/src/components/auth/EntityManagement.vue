@@ -13,7 +13,7 @@
         <div class="view-header__actions">
           <v-btn large color="primary" @click="showAddBusinessModal()" data-test="add-business-button">
             <v-icon small>mdi-plus</v-icon>
-            <span>Add Business</span>
+            <span>Add Existing Business</span>
           </v-btn>
         </div>
       </div>
@@ -34,7 +34,7 @@
         data-test-tag="add-business"
       >
         <template v-slot:text>
-          <p>Enter your Incorporation Number and Passcode.</p>
+          <p>Enter the Incorporation Number and Passcode to add an existing business.</p>
           <AddBusinessForm
             class="mt-7"
             @close-add-business-modal="closeAddBusinessModal()"
@@ -185,13 +185,13 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   showUnknownErrorModal () {
     this.$refs.addBusinessDialog.close()
-    this.dialogTitle = 'Error Adding Business'
+    this.dialogTitle = 'Error Adding Existing Business'
     this.dialogText = 'An error occurred adding your business. Please try again.'
     this.$refs.errorDialog.open()
   }
 
   showAddBusinessModal () {
-    this.dialogTitle = 'Add Business'
+    this.dialogTitle = 'Add Existing Business'
     this.$refs.addBusinessDialog.open()
   }
 

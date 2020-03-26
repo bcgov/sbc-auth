@@ -18,6 +18,7 @@ Test Utility for creating test scenarios.
 import uuid
 from enum import Enum
 from auth_api.services.keycloak_user import KeycloakUser
+from auth_api.utils.constants import IdpHint
 from random import choice
 from string import ascii_uppercase, ascii_lowercase
 
@@ -204,7 +205,7 @@ class TestJwtClaims(dict, Enum):
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302069',
         'firstname': 'Test',
         'lastname': 'User',
-        'preferred_username': 'BCROS/testuser',
+        'preferred_username': f'{IdpHint.BCROS.value}/testuser',
         'accessType': 'ANONYMOUS',
         'loginSource': 'BCROS',
         'realm_access': {
@@ -346,6 +347,9 @@ class TestEntityInfo(dict, Enum):
                          'name': 'Foobar, Inc.',
                          'passCode': '222222222', 'corpTypeCode': 'CP'}
 
+    entity_folio_number = {'businessIdentifier': 'CP1234568',
+                           'folioNumber': '12345678'}
+
 
 class TestAffliationInfo(dict, Enum):
     """Test scenarios of affliation."""
@@ -428,7 +432,7 @@ class TestUserInfo(dict, Enum):
         'password': 'testuser12345',
     }
     user_bcros = {
-        'username': 'BCROS/CP1234567',
+        'username': f'{IdpHint.BCROS.value}/CP1234567',
         'firstname': 'Test',
         'lastname': 'User',
         'roles': '{edit, uma_authorization, staff}'

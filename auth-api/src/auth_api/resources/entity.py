@@ -56,8 +56,8 @@ class EntityResources(Resource):
         return response, status
 
 
-@cors_preflight('GET,OPTIONS,PUT')
-@API.route('/<string:business_identifier>', methods=['GET', 'OPTIONS', 'PUT'])
+@cors_preflight('GET,OPTIONS,PATCH')
+@API.route('/<string:business_identifier>', methods=['GET', 'OPTIONS', 'PATCH'])
 class EntityResource(Resource):
     """Resource for managing entities."""
 
@@ -80,10 +80,10 @@ class EntityResource(Resource):
         return response, status
 
     @staticmethod
-    @_JWT.requires_auth
-    @_JWT.has_one_of_roles([Role.SYSTEM.value])
     @TRACER.trace()
-    def put(business_identifier):
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def patch(business_identifier):
         """Update an existing business by it's business number."""
         request_json = request.get_json()
 
@@ -120,7 +120,7 @@ class ContactResource(Resource):
 
         try:
             entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
-                                                               allowed_roles=CLIENT_AUTH_ROLES)
+                                                               allowed_roles=ALL_ALLOWED_ROLES)
             if entity:
                 response, status = entity.add_contact(request_json).as_dict(), \
                                    http_status.HTTP_201_CREATED
