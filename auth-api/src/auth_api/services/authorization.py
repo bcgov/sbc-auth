@@ -38,13 +38,14 @@ class Authorization:
     def get_user_authorizations_for_entity(token_info: Dict, business_identifier: str):
         """Get User authorizations for the entity."""
         auth_response = {}
-        if token_info.get('loginSource', None) == 'PASSCODE':
-            if token_info.get('username', None).upper() == business_identifier.upper():
-                auth_response = {
-                    'orgMembership': OWNER,
-                    'roles': ['edit', 'view']
-                }
-        elif 'staff' in token_info.get('realm_access').get('roles'):
+        # if token_info.get('loginSource', None) == 'PASSCODE':
+        #     if token_info.get('username', None).upper() == business_identifier.upper():
+        #         auth_response = {
+        #             'orgMembership': OWNER,
+        #             'roles': ['edit', 'view']
+        #         }
+        # el
+        if 'staff' in token_info.get('realm_access').get('roles'):
             auth_response = {
                 'roles': ['edit', 'view']
             }
@@ -119,8 +120,7 @@ def check_auth(token_info: Dict, **kwargs):
         _check_for_roles(STAFF_ADMIN, kwargs)
     elif 'staff' in token_info.get('realm_access').get('roles'):
         _check_for_roles(STAFF, kwargs)
-    elif Role.SYSTEM.value in token_info.get('realm_access').get('roles') \
-            and not token_info.get('loginSource', None) == 'PASSCODE':
+    elif Role.SYSTEM.value in token_info.get('realm_access').get('roles'):
         corp_type_in_jwt = token_info.get('corp_type', None)
         if corp_type_in_jwt is None:
             # corp type must be present in jwt
