@@ -14,7 +14,6 @@
 """Constants definitions."""
 from enum import Enum
 
-
 # Group names
 GROUP_PUBLIC_USERS = 'public_users'
 GROUP_ACCOUNT_HOLDERS = 'account_holders'
@@ -24,7 +23,7 @@ GROUP_ANONYMOUS_USERS = 'anonymous_users'
 PASSCODE = 'PASSCODE'
 BCSC = 'BCSC'
 STAFF = 'IDIR'
-BCROS = 'bcros'
+BCROS = 'bcros'  # this is the IDPHint.Must be in small case
 
 
 class InvitationStatus(Enum):

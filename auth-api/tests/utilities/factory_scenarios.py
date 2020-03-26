@@ -18,6 +18,7 @@ Test Utility for creating test scenarios.
 import uuid
 from enum import Enum
 from auth_api.services.keycloak_user import KeycloakUser
+from auth_api.utils.constants import BCROS
 from random import choice
 from string import ascii_uppercase, ascii_lowercase
 
@@ -204,7 +205,7 @@ class TestJwtClaims(dict, Enum):
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302069',
         'firstname': 'Test',
         'lastname': 'User',
-        'preferred_username': 'BCROS/testuser',
+        'preferred_username': f'{BCROS}/testuser',
         'accessType': 'ANONYMOUS',
         'loginSource': 'BCROS',
         'realm_access': {
@@ -431,7 +432,7 @@ class TestUserInfo(dict, Enum):
         'password': 'testuser12345',
     }
     user_bcros = {
-        'username': 'BCROS/CP1234567',
+        'username': f'{BCROS}/CP1234567',
         'firstname': 'Test',
         'lastname': 'User',
         'roles': '{edit, uma_authorization, staff}'
