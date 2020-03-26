@@ -17,16 +17,21 @@
 Test-Suite to ensure that the /users endpoint is working as expected.
 """
 import json
+import uuid
+from random import randint
 
 from auth_api import status as http_status
 from auth_api.services.keycloak import KeycloakService
-
+from config import get_named_config
 from tests.utilities.factory_scenarios import BulkUserTestScenario, TestJwtClaims, \
     TestOrgInfo
 from tests.utilities.factory_utils import (
     factory_auth_header, factory_invitation_anonymous)
 
+
 KEYCLOAK_SERVICE = KeycloakService()
+
+CONFIG = get_named_config('testing')
 
 
 def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
@@ -40,31 +45,48 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
     """Assert that an org admin can create members."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_anonymous),
                      headers=headers, content_type='application/json')
+
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
     rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation_anonymous(org_id=org_id)),
                      headers=headers, content_type='application/json')
+
     dictionary = json.loads(rv.data)
     assert dictionary.get('token') is not None
     assert rv.status_code == http_status.HTTP_201_CREATED
+
     user = {
-        'username': 'testuser',
+        'username': 'testuser{}'.format(randint(0, 1000)),
         'password': 'testuser',
     }
     rv = client.post('/api/v1/users/bcros', data=json.dumps(user),
                      headers={'invitation_token': dictionary.get('token')}, content_type='application/json')
-    dictionary = json.loads(rv.data)
 
-    # post token with updated claims
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
+    # Login as this user
+    invited_user_token = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': str(uuid.uuid4()),
+        'firstname': 'Test',
+        'lastname': 'User',
+        'preferred_username': 'bcros/{}'.format(user.get('username')),
+        'realm_access': {
+            'roles': []
+        },
+        'roles': [],
+        'accessType': 'ANONYMOUS'
+    }
+    headers = factory_auth_header(jwt=jwt, claims=invited_user_token)
+
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
-    headers = factory_auth_header(jwt=jwt,
-                                  claims=TestJwtClaims.anonymous_bcros_role)
+    # headers = factory_auth_header(jwt=jwt,
+    #                               claims=TestJwtClaims.anonymous_bcros_role)
     rv = client.post('/api/v1/bulk/users', headers=headers,
                      data=json.dumps(BulkUserTestScenario.get_bulk_user1_for_org(org_id)),
                      content_type='application/json')
+
     assert len(rv.json['users']) == 2

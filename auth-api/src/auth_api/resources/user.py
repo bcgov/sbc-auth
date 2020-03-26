@@ -96,7 +96,7 @@ class Users(Resource):
             KeycloakService.join_users_group(g.jwt_oidc_token_info)
             # If the user doesn't have account_holder role check if user is part of any orgs and add to the group
             if token.get('loginSource', '') in (BCSC, BCROS) \
-                    and Role.ACCOUNT_HOLDER.value not in token.get('roles') \
+                    and Role.ACCOUNT_HOLDER.value not in token.get('roles', []) \
                     and len(OrgService.get_orgs(user.identifier, [Status.ACTIVE.value])) > 0:
                 KeycloakService.join_account_holders_group()
 
