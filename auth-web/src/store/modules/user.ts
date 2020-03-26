@@ -3,6 +3,7 @@ import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
+import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { User } from '@/models/user'
 import UserService from '@/services/user.services'
 
@@ -19,6 +20,7 @@ export default class UserModule extends VuexModule {
   currentUser: KCUserProfile = undefined
   userProfile: User = undefined
   userContact: Contact = undefined
+  termsOfUse: TermsOfUseDocument = undefined
   redirectAfterLoginUrl: string = ''
 
   @Mutation
@@ -119,5 +121,10 @@ export default class UserModule extends VuexModule {
     if (response && response.data) {
       return response.data
     }
+  }
+
+  @Mutation
+  public setTermsOfUse (termsOfUse: TermsOfUseDocument) {
+    this.termsOfUse = termsOfUse
   }
 }

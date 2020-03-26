@@ -134,7 +134,7 @@ export default class SearchBusinessView extends Vue {
         this.errorMessage = ''
 
         // Redirect to the coops UI
-        window.location.href = ConfigHelper.getCoopsURL()
+        window.location.href = `${ConfigHelper.getCoopsURL()}${this.businessNumber}`
       } catch (exception) {
         this.searchActive = false
         this.searchedBusinessNumber = this.businessNumber

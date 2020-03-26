@@ -124,7 +124,7 @@
 <script lang="ts">
 import { AccountType, ProductCode, Products, ProductsRequestBody } from '@/models/Staff'
 import { Component, Vue } from 'vue-property-decorator'
-import { CreateRequestBody, Member, Organization } from '@/models/Organization'
+import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import { CreateRequestBody as InvitationRequestBody } from '@/models/Invitation'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
@@ -226,7 +226,7 @@ export default class SetupAccountForm extends Vue {
           recipientEmail: this.email,
           sentDate: new Date(),
           type: 'DIRECTOR_SEARCH',
-          membership: [{ membershipType: 'ADMIN', orgId: organization.id }]
+          membership: [{ membershipType: MembershipType.Owner, orgId: organization.id }]
         })
         this.saving = false
         this.loader = this.saving

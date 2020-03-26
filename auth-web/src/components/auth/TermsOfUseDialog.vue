@@ -84,7 +84,7 @@ import { mapState } from 'vuex'
     ...mapState('user', ['userProfile'])
   }
 })
-export default class TermsOfServiceDialog extends Vue {
+export default class TermsOfUseDialog extends Vue {
   private readonly userProfile!: User
   private termsDialog = false
   private termsAccepted = false
