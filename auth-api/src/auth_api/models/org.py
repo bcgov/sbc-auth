@@ -86,7 +86,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     def update_org_from_dict(self, org_info: dict):
         """Update this org with the provided dictionary."""
         # Update from provided dictionary, but specify additional fields not to update.
-        self.update_from_dict(**org_info, _exclude=('status_code', 'type_code', 'preferred_payment_code'))
+        self.update_from_dict(**org_info, _exclude=('status_code', 'type_code'))
         self.save()
 
     def delete(self):
