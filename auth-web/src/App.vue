@@ -5,6 +5,7 @@
       <sbc-header
         :key="$store.state.refreshKey"
         in-auth=true
+        showProductSelector=true
         @account-switch-started="startAccountSwitch"
         @account-switch-completed="completeAccountSwitch"
         @hook:mounted="setup"
