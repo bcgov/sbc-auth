@@ -39,6 +39,7 @@ export default class Signin extends Mixins(NextPageMixin) {
   @Prop({ default: '' }) redirectUrlLoginFail: string
 
   private async authenticationComplete () {
+    await this.loadUserInfo()
     // Check if user is authenticated, and redirect according to specified redirect
     // or fallback to default route for their login source
     if (this.$store.getters['auth/isAuthenticated']) {
@@ -46,6 +47,7 @@ export default class Signin extends Mixins(NextPageMixin) {
       if (this.redirectUrl) {
         this.redirectTo(decodeURIComponent(CommonUtils.isUrl(this.redirectUrl) ? this.redirectUrl : `/${this.redirectUrl}`))
       } else {
+        await this.syncUser()
         switch (this.idpHint) {
           case IdpHint.BCSC:
             this.redirectTo(this.getNextPageUrl())
@@ -54,7 +56,7 @@ export default class Signin extends Mixins(NextPageMixin) {
             this.redirectTo(`/${Pages.SEARCH_BUSINESS}`)
             break
           case IdpHint.BCROS:
-            this.redirectTo(`/${Pages.SEARCH_BUSINESS}`) // TEMP - need to check account and redirect based on role
+            this.redirectTo(this.getNextPageUrl())
         }
       }
     }
