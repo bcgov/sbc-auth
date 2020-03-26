@@ -21,6 +21,7 @@
               :rules="usernameRules"
               v-model="username"
               data-test="username"
+              :disabled="isLoading"
           >
           </v-text-field>
         </v-col>
@@ -36,6 +37,8 @@
               :rules="passwordRules"
               v-model="password"
               data-test="password"
+              type="password"
+              :disabled="isLoading"
           >
           </v-text-field>
         </v-col>
@@ -51,6 +54,8 @@
               :error-messages="passwordMustMatch()"
               v-model="confirmPassword"
               data-test="confirm-password"
+              type="password"
+              :disabled="isLoading"
           >
           </v-text-field>
         </v-col>
@@ -63,7 +68,7 @@
               color="primary"
               class="save-continue-button"
               :loading="isLoading"
-              :disabled='!isFormValid()'
+              :disabled='!isFormValid() || isLoading'
               @click="nextStep"
               data-test="next-button"
             > Next
@@ -181,7 +186,7 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
     }
 
     private redirectToSignin () {
-      let redirectUrl = ConfigHelper.getSelfURL() + '/confirmtoken/' + this.token
+      let redirectUrl = ConfigHelper.getSelfURL() + '/dirsearch/confirmtoken/' + this.token
       this.$router.push('/signin/bcros/' + encodeURIComponent(redirectUrl))
     }
 

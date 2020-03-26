@@ -32,6 +32,7 @@ export enum Pages {
     SIGNIN = 'signin',
     CREATE_USER_PROFILE = 'createuserprofile',
     SEARCH_BUSINESS = 'searchbusiness',
+    DIRSEARCH_CONFIRM_TOKEN = 'dirsearch-confirmtoken',
     HOME = 'home'
 }
 
