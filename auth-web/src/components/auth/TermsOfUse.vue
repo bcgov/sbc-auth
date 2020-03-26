@@ -11,19 +11,32 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { mapMutations, mapState } from 'vuex'
+import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import documentService from '@/services/document.services.ts'
 
 @Component({
+  computed: {
+    ...mapState('user', ['termsOfUse'])
+  },
+  methods: {
+    ...mapMutations('user', ['setTermsOfUse'])
+  }
 })
 
 export default class TermsOfUse extends Vue {
-  @Prop({ default: '' }) private content: string
+  private readonly setTermsOfUse!: (terms: TermsOfUseDocument) => void
   private termsContent = ''
+
+  @Prop({ default: '' }) private content: string
 
   async mounted () {
     if (!this.content) {
       const response = await documentService.getTermsOfService('termsofuse')
-      this.termsContent = response.data.content
+      if (response.data) {
+        this.termsContent = response.data.content
+        this.setTermsOfUse(response.data)
+      }
     } else {
       this.termsContent = this.content
     }

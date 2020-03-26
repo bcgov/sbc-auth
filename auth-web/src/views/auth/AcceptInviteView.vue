@@ -36,11 +36,13 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
   private readonly getUserProfile!: (identifier: string) => Promise<User>
   protected readonly userContact!: Contact
   protected readonly userProfile!: User
+  private isCreateUserProfile: boolean = false
 
   @Prop() token: string
   private inviteError: boolean = false
 
   private async mounted () {
+    this.isCreateUserProfile = (this.$route?.name === Pages.DIRSEARCH_CONFIRM_TOKEN)
     await this.getUserProfile('@me')
     await this.accept()
   }
@@ -52,8 +54,12 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
   private async accept () {
     try {
       if (!this.userContact || !this.userProfile.userTerms.isTermsOfUseAccepted) {
-        // Go to user profile, with the token, so that we can continue acceptance flow afterwards
-        this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
+        if (this.isCreateUserProfile) {
+          this.$router.push(`/userprofileterms`)
+        } else {
+          // Go to user profile, with the token, so that we can continue acceptance flow afterwards
+          this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
+        }
         return
       } else {
         const invitation = await this.acceptInvitation(this.token)
