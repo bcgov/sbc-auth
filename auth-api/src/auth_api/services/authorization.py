@@ -20,7 +20,6 @@ from typing import Dict
 from flask import abort
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
-from auth_api.schemas.authorization import AuthorizationSchema
 from auth_api.utils.roles import OWNER, STAFF, Role, STAFF_ADMIN
 
 
@@ -56,13 +55,13 @@ class Authorization:
                 auth = AuthorizationView.find_user_authorization_by_business_number_and_corp_type(business_identifier,
                                                                                                   keycloak_corp_type)
                 if auth:
-                    auth_response = Authorization(auth).as_dict(exclude=['business_identifier'])
+                    auth_response = Authorization(auth).as_dict()
                     auth_response['roles'] = ['edit', 'view']
         else:
             keycloak_guid = token_info.get('sub', None)
             auth = AuthorizationView.find_user_authorization_by_business_number(keycloak_guid, business_identifier)
             if auth:
-                auth_response = Authorization(auth).as_dict(exclude=['business_identifier'])
+                auth_response = Authorization(auth).as_dict()
                 auth_response['roles'] = ['edit', 'view']
 
         return auth_response
@@ -88,16 +87,25 @@ class Authorization:
         auth_response['roles'] = authorization.roles.split(',') if authorization and authorization.roles else []
         return auth_response
 
-    def as_dict(self, exclude: [] = None):
-        """Return the authorization as a python dictionary.
-
-        None fields are not included in the dictionary.
-        """
-        if not exclude:
-            exclude = []
-        auth_schema = AuthorizationSchema(exclude=exclude)
-        return auth_schema.dump(self._model, many=False)
-
+    def as_dict(self):
+        """Return the authorization as a python dictionary."""
+        auth_dict = {
+            'orgMembership': self._model.org_membership,
+            'business': {
+                'folioNumber': self._model.folio_number,
+                'name': self._model.entity_name
+            },
+            'account': {
+                'id': self._model.org_id,
+                'name': self._model.org_name,
+                'paymentPreference': {
+                    'methodOfPayment': self._model.preferred_payment_code,
+                    'bcOnlineUserId': self._model.bcol_user_id,
+                    'bcOnlineAccountId': self._model.bcol_account_id
+                }
+            }
+        }
+        return auth_dict
 
 def check_auth(token_info: Dict, **kwargs):
     """Check if user is authorized to perform action on the service."""

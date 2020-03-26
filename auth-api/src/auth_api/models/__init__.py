@@ -20,6 +20,7 @@ from sqlalchemy.engine import Engine  # noqa: I001, I003, I004
 from sbc_common_components.tracing.db_tracing import DBTracing  # noqa: I001, I004
 
 from .affiliation import Affiliation
+from .account_payment_settings import AccountPaymentSettings
 from .contact import Contact
 from .contact_link import ContactLink
 from .corp_type import CorpType

@@ -30,3 +30,4 @@ class AuthorizationSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
 
     org_membership = fields.String(data_key='orgMembership')
     business_identifier = fields.String(data_key='businessIdentifier')
+    business_identifier = fields.String(data_key='businessIdentifier')
