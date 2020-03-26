@@ -91,3 +91,23 @@ def test_authorizations_with_multiple_accounts_returns_200(client, jwt, session)
 
     assert rv.status_code == http_status.HTTP_200_OK
     assert rv.json.get('roles') == ['search']
+
+
+def test_authorizations_for_extended_returns_200(app, client, jwt, session):  # pylint:disable=unused-argument
+    """Assert authorizations for product returns 200."""
+    product_code = 'PPR'
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    factory_product_model(org.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
+    claims['sub'] = str(user.keycloak_guid)
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.get(f'/api/v1/accounts/{org.id}/products/{product_code}/authorizations?expanded=true',
+                    headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert len(rv.json.get('roles')) == 1
+    assert rv.json.get('account').get('name') == org.name

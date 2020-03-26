@@ -17,6 +17,7 @@ Test Utility for creating model factory.
 """
 import datetime
 
+from auth_api.models import AccountPaymentSettings as AccountPaymentModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
 from auth_api.models import Documents as DocumentsModel
@@ -111,9 +112,13 @@ def factory_org_model(org_info: dict = TestOrgInfo.org1,
     org.org_type = org_type
     org.access_type = org_info.get('accessType', '')
     org.org_status = org_status
-    org.preferred_payment = preferred_payment
     org.created_by_id = user_id
     org.save()
+
+    account_payment = AccountPaymentModel()
+    account_payment.preferred_payment = preferred_payment
+    account_payment.org = org
+    account_payment.save()
 
     return org
 

@@ -51,16 +51,6 @@ def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-a
     assert authorization is not None
     assert authorization.get('orgMembership', None) is None
 
-    # Test for passcode users
-    authorization = Authorization.get_user_authorizations_for_entity(
-        {'loginSource': 'PASSCODE', 'username': entity.business_identifier, 'realm_access': {
-            'roles': ['basic']
-        }},
-        entity.business_identifier)
-
-    assert authorization is not None
-    assert authorization.get('orgMembership', None) == 'OWNER'
-
     # Test for passcode users with invalid username
     authorization = Authorization.get_user_authorizations_for_entity(
         {'loginSource': 'PASSCODE', 'username': 'INVALID', 'realm_access': {

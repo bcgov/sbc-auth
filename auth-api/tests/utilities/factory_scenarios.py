@@ -311,7 +311,8 @@ class TestEntityInfo(dict, Enum):
                'businessNumber': '791861073BC0001',
                'name': 'Foobar, Inc.',
                'passCode': '',
-               'corpTypeCode': 'CP'}
+               'corpTypeCode': 'CP',
+               'folioNumber': '1234'}
     entity2 = {'businessIdentifier': 'CP1234568',
                'businessNumber': '791861079BC0001',
                'name': 'BarFoo, Inc.',

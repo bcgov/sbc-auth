@@ -20,7 +20,7 @@ from typing import Dict
 from flask import abort
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
-from auth_api.utils.roles import OWNER, STAFF, Role, STAFF_ADMIN
+from auth_api.utils.roles import STAFF, Role, STAFF_ADMIN
 
 
 class Authorization:
@@ -35,16 +35,9 @@ class Authorization:
         self._model = model
 
     @staticmethod
-    def get_user_authorizations_for_entity(token_info: Dict, business_identifier: str):
+    def get_user_authorizations_for_entity(token_info: Dict, business_identifier: str, expanded: bool = False):
         """Get User authorizations for the entity."""
         auth_response = {}
-        # if token_info.get('loginSource', None) == 'PASSCODE':
-        #     if token_info.get('username', None).upper() == business_identifier.upper():
-        #         auth_response = {
-        #             'orgMembership': OWNER,
-        #             'roles': ['edit', 'view']
-        #         }
-        # el
         if 'staff' in token_info.get('realm_access').get('roles'):
             auth_response = {
                 'roles': ['edit', 'view']
@@ -56,13 +49,13 @@ class Authorization:
                 auth = AuthorizationView.find_user_authorization_by_business_number_and_corp_type(business_identifier,
                                                                                                   keycloak_corp_type)
                 if auth:
-                    auth_response = Authorization(auth).as_dict()
+                    auth_response = Authorization(auth).as_dict(expanded)
                     auth_response['roles'] = ['edit', 'view']
         else:
             keycloak_guid = token_info.get('sub', None)
             auth = AuthorizationView.find_user_authorization_by_business_number(keycloak_guid, business_identifier)
             if auth:
-                auth_response = Authorization(auth).as_dict()
+                auth_response = Authorization(auth).as_dict(expanded)
                 auth_response['roles'] = ['edit', 'view']
 
         return auth_response
@@ -79,24 +72,33 @@ class Authorization:
         return authorizations_response
 
     @staticmethod
-    def get_account_authorizations_for_product(keycloak_guid: str, account_id: str, product_code: str):
+    def get_account_authorizations_for_product(keycloak_guid: str, account_id: str, product_code: str,
+                                               expanded: bool = False):
         """Get account authorizations for the product."""
-        auth_response: Dict = {'roles': []}
         authorization = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(keycloak_guid,
                                                                                                     account_id,
                                                                                                     product_code)
+        auth_response = Authorization(authorization).as_dict(expanded)
         auth_response['roles'] = authorization.roles.split(',') if authorization and authorization.roles else []
+
         return auth_response
 
-    def as_dict(self):
+    def as_dict(self, expanded: bool = False):
         """Return the authorization as a python dictionary."""
-        auth_dict = {
-            'orgMembership': self._model.org_membership,
-            'business': {
+        auth_dict = {}
+
+        if not self._model:
+            return auth_dict
+
+        auth_dict['orgMembership'] = self._model.org_membership
+
+        # If the request is for expanded authz return more info
+        if expanded:
+            auth_dict['business'] = {
                 'folioNumber': self._model.folio_number,
                 'name': self._model.entity_name
-            },
-            'account': {
+            }
+            auth_dict['account'] = {
                 'id': self._model.org_id,
                 'name': self._model.org_name,
                 'paymentPreference': {
@@ -105,8 +107,8 @@ class Authorization:
                     'bcOnlineAccountId': self._model.bcol_account_id
                 }
             }
-        }
         return auth_dict
+
 
 def check_auth(token_info: Dict, **kwargs):
     """Check if user is authorized to perform action on the service."""

@@ -90,7 +90,7 @@ class Org:
             # Add the user to account_holders group
             KeycloakService.join_account_holders_group()
 
-        #TODO Remove later, create payment settings now with default values
+        # TODO Remove later, create payment settings now with default values
         AccountPaymentModel.create_from_dict({'org_id': org.id})
 
         return Org(org)

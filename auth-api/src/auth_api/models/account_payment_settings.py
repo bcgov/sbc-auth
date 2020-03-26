@@ -17,14 +17,10 @@ Default details will be for CC payment.
 """
 
 from flask import current_app
-from sqlalchemy import Column, ForeignKey, Integer, String, and_, func, Boolean
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.roles import OrgStatus as OrgStatusEnum
-
 from .base_model import BaseModel
-from .org_status import OrgStatus
-from .org_type import OrgType
 from .payment_type import PaymentType
 
 
@@ -41,7 +37,6 @@ class AccountPaymentSettings(BaseModel):  # pylint: disable=too-few-public-metho
 
     org = relationship('Org', foreign_keys=[org_id], lazy='select')
     preferred_payment = relationship('PaymentType')
-
 
     @classmethod
     def create_from_dict(cls, payment_info: dict):
