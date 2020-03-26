@@ -121,7 +121,7 @@ def test_create_user_and_add_same_user_name_error_in_db(session, auth_mock,
     user = factory_user_model(TestUserInfo.user_bcros)
     factory_membership_model(user.id, org.id)
     new_members = TestAnonymousMembership.generate_random_user(OWNER)
-    new_members['username'] = user.username.replace('BCROS/', '')
+    new_members['username'] = user.username.replace(f'{BCROS}/', '')
     membership = [new_members]
     with pytest.raises(BusinessException) as exception:
         UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
