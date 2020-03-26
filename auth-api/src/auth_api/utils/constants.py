@@ -23,7 +23,14 @@ GROUP_ANONYMOUS_USERS = 'anonymous_users'
 PASSCODE = 'PASSCODE'
 BCSC = 'BCSC'
 STAFF = 'IDIR'
-BCROS = 'bcros'  # this is the IDPHint.Must be in small case
+BCROS = 'BCROS'
+
+
+# IdpHint
+class IdpHint(Enum):
+    """IdpHint for user login."""
+
+    BCROS = 'bcros'
 
 
 class InvitationStatus(Enum):

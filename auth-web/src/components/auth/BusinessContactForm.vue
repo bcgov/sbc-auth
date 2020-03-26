@@ -90,7 +90,7 @@ number to help you keep track of your transactions.
     <v-row>
       <v-col cols="12" class="form__btns pb-0">
         <v-btn large color="primary" @click="save" :disabled='!isFormValid()'>
-          Save
+          Update
         </v-btn>
         <v-btn large depressed color="default" @click="cancel">
           Cancel
