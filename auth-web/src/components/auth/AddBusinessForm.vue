@@ -1,64 +1,61 @@
 <template>
   <div class="passcode-form">
     <v-form ref="addBusinessForm" lazy-validation>
-      <v-expand-transition>
-        <div class="passcode-form__alert-container" v-show="validationError">
-          <v-alert
-            :value="true"
-            color="error"
-            icon="warning"
-          >{{validationError}}
-          </v-alert>
+      <fieldset>
+        <legend class="mb-4" hidden>Incorporation Number and Passcode</legend>
+        <v-expand-transition>
+          <div class="passcode-form__alert-container" v-show="validationError">
+            <v-alert
+              :value="true"
+              color="error"
+              icon="warning"
+            >{{validationError}}
+            </v-alert>
+          </div>
+        </v-expand-transition>
+          <v-text-field
+            filled
+            label="Enter your Incorporation Number"
+            hint="Example: CP1234567"
+            req
+            persistent-hint
+            :rules="entityNumRules"
+            v-model="businessIdentifier"
+            @blur="incorpNumFormat"
+            data-test="business-identifier"
+          ></v-text-field>
+          <v-text-field
+            filled
+            label="Enter your Passcode"
+            hint="Passcode must be exactly 9 digits"
+            persistent-hint
+            :rules="entityPasscodeRules"
+            :maxlength="9"
+            v-model="passcode"
+            autocomplete="off"
+            data-test="business-passcode"
+          ></v-text-field>
+
+      </fieldset>
+      <fieldset class="mt-8">
+        <legend class="mb-4">Folio / Reference Number (optional)</legend>
+        <p class="mb-8">
+          If you file forms for a number of companies, you may want to enter a folio or reference number to help you keep track of your transactions.
+        </p>
+        <div class="folioNumber-form__row">
+          <v-text-field
+            filled
+            label="Folio or Reference Number"
+            persistent-hint
+            :maxlength="50"
+            v-model="folioNumber"
+          ></v-text-field>
         </div>
-      </v-expand-transition>
-      <div class="passcode-form__row">
-        <v-text-field
-          filled
-          label="Enter your Incorporation Number"
-          hint="Example: CP1234567"
-          req
-          persistent-hint
-          :rules="entityNumRules"
-          v-model="businessIdentifier"
-          @blur="incorpNumFormat"
-          data-test="business-identifier"
-        ></v-text-field>
-      </div>
-      <div class="passcode-form__row">
-        <v-text-field
-          filled
-          label="Enter your Passcode"
-          hint="Passcode must be exactly 9 digits"
-          persistent-hint
-          :rules="entityPasscodeRules"
-          :maxlength="9"
-          v-model="passcode"
-          autocomplete="off"
-          data-test="business-passcode"
-        ></v-text-field>
-        <v-btn data-test="forgot-passcode-button" text color="primary" @click.stop="helpDialog = true">
-          <v-icon small>mdi-open-in-new</v-icon>
-          <span>I lost or forgot my passcode</span>
-        </v-btn>
-      </div>
-      <div class="pt-5 pb-2">
-            <h4>Folio / Reference Number (optional)</h4>
-      </div>
-      <div class="pb-4">
-        If you file forms for a number of companies, you may want to enter a folio or reference
-    number to help you keep track of your transactions.
-      </div>
-      <div class="folioNumber-form__row">
-        <v-text-field
-          filled
-          label="Folio or Reference Number"
-          persistent-hint
-          :maxlength="50"
-          v-model="folioNumber"
-        ></v-text-field>
-      </div>
-      <div class="form__btns mt-8">
-        <div>
+        <div class="form__btns mt-6">
+          <v-btn large text class="pl-2 pr-2 lost-passcode-btn" data-test="forgot-passcode-button" @click.stop="helpDialog = true">
+            <v-icon>mdi-help-circle-outline</v-icon>
+            <span>I lost or forgot my passcode</span>
+          </v-btn>
           <v-btn
             data-test="add-business-button"
             large color="primary"
@@ -67,13 +64,13 @@
           >
             <span>Add</span>
           </v-btn>
-          <v-btn data-test="cancel-button" large depressed color="default" class="ml-2" @click="cancel">
+          <v-btn large depressed color="default" class="ml-2" data-test="cancel-button" @click="cancel">
             <span>Cancel</span>
           </v-btn>
         </div>
-      </div>
+      </fieldset>
     </v-form>
-    <v-dialog v-model="helpDialog" hide-overlay max-width="640">
+    <v-dialog v-model="helpDialog" max-width="640">
       <v-card>
         <v-card-title>Need Assistance?</v-card-title>
         <v-card-text>
@@ -199,6 +196,9 @@ export default class AddBusinessForm extends Vue {
 
 <style lang="scss" scoped>
 @import '../../assets/scss/theme.scss';
+  .lost-passcode-btn {
+    margin-right: auto;
+  }
 
   .form__btns {
     display: flex;

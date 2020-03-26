@@ -8,26 +8,19 @@
         </v-alert>
       </div>
     </v-expand-transition>
-    <v-row>
-      <v-col cols="12" class="mb-2">
-        <h4>Business Contact Information</h4>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
-        <v-text-field
-          filled
-          label="Email Address"
-          req
-          persistent-hint
-          :rules="emailRules"
-          v-model="emailAddress"
-        >
-        </v-text-field>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
+
+    <!-- Business Contact Information Fields -->
+    <fieldset>
+      <legend class="mb-4">Business Contact Information</legend>
+      <v-text-field
+        filled
+        label="Email Address"
+        req
+        persistent-hint
+        :rules="emailRules"
+        v-model="emailAddress"
+      >
+      </v-text-field>
         <v-text-field
           filled
           label="Confirm Email Address"
@@ -37,46 +30,36 @@
           v-model="confirmedEmailAddress"
         >
         </v-text-field>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="6">
-        <v-text-field
-          filled
-          label="Phone Number"
-          persistent-hint
-          hint="Example: (555) 555-5555"
-          type="tel"
-          v-mask="['(###) ###-####']"
-          v-model="phoneNumber"
-        >
-        </v-text-field>
-      </v-col>
-      <v-col cols="4">
-        <v-text-field
-          filled label="Extension"
-          persistent-hint
-          :rules="extensionRules"
-          v-mask="'#####'"
-          v-model="extension"
-        >
-        </v-text-field>
-      </v-col>
-    </v-row>
+        <v-row>
+          <v-col cols="6">
+            <v-text-field
+              filled
+              label="Phone Number"
+              persistent-hint
+              hint="Example: (555) 555-5555"
+              type="tel"
+              v-mask="['(###) ###-####']"
+              v-model="phoneNumber"
+            >
+            </v-text-field>
+          </v-col>
+          <v-col cols="4">
+            <v-text-field
+              filled label="Extension"
+              persistent-hint
+              :rules="extensionRules"
+              v-mask="'#####'"
+              v-model="extension"
+            >
+            </v-text-field>
+          </v-col>
+        </v-row>
+      </fieldset>
 
-    <v-row>
-      <v-col cols="12" class="pt-5 pb-2">
-        <h4>Folio / Reference Number (optional)</h4>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" class="pb-4">
-        If you file forms for a number of companies, you may want to enter a folio or reference
-number to help you keep track of your transactions.
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
+      <!-- Folio / Reference Number Fields -->
+      <fieldset class="mt-9">
+        <legend class="mb-4">Folio / Reference Number (optional)</legend>
+        <p class="mb-8">If you file forms for a number of companies, you may want to enter a folio or reference number to help you keep track of your transactions.</p>
         <v-text-field
           filled
           label="Folio or Reference Number"
@@ -85,18 +68,15 @@ number to help you keep track of your transactions.
           v-model="folioNumber"
         >
         </v-text-field>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" class="form__btns pb-0">
+      </fieldset>
+      <div class="form__btns mt-6">
         <v-btn large color="primary" @click="save" :disabled='!isFormValid()'>
-          Save
+          Update
         </v-btn>
         <v-btn large depressed color="default" @click="cancel">
           Cancel
         </v-btn>
-      </v-col>
-    </v-row>
+      </div>
   </v-form>
 </template>
 

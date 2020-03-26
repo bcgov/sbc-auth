@@ -15,7 +15,7 @@
           <p v-if="!editing">There is no contact information for this {{ businessType }}. You will need to provide the contact information for this {{businessType}} before you continue.</p>
           <p v-if="editing">Edit contact information an manage folio/reference numbers for this {{ businessType }}.</p>
         </div>
-        <v-card class="profile-card">
+        <v-card flat>
           <v-container>
             <v-card-title class="mb-4">
               {{ currentBusiness.name}}
