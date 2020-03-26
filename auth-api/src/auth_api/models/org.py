@@ -25,7 +25,6 @@ from auth_api.utils.roles import OrgStatus as OrgStatusEnum
 from .base_model import BaseModel
 from .org_status import OrgStatus
 from .org_type import OrgType
-from .payment_type import PaymentType
 
 
 class Org(BaseModel):  # pylint: disable=too-few-public-methods
