@@ -21,7 +21,7 @@ from flask import current_app
 from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
-from auth_api.utils.constants import BCROS
+from auth_api.utils.constants import IdpHint
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -109,7 +109,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             except HTTPError as err:
                 current_app.logger.error('create_user in keycloak failed', err)
                 raise BusinessException(Error.FAILED_ADDING_USER_IN_KEYCLOAK, None)
-            username = BCROS + '/' + membership['username']
+            username = IdpHint.BCROS.value + '/' + membership['username']
             existing_user = UserModel.find_by_username(username)
             if existing_user:
                 current_app.logger.debug('Existing users found in DB')

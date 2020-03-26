@@ -29,7 +29,7 @@ from auth_api.services.membership import Membership as MembershipService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.constants import BCSC
+from auth_api.utils.constants import BCROS, BCSC
 from auth_api.utils.roles import Role, Status
 from auth_api.utils.util import cors_preflight
 
@@ -95,7 +95,7 @@ class Users(Resource):
             # Add the user to public_users group if the user doesn't have public_user group
             KeycloakService.join_users_group(g.jwt_oidc_token_info)
             # If the user doesn't have account_holder role check if user is part of any orgs and add to the group
-            if token.get('loginSource', None) == BCSC \
+            if token.get('loginSource', None) in (BCSC, BCROS) \
                     and Role.ACCOUNT_HOLDER.value not in token.get('roles') \
                     and len(OrgService.get_orgs(user.identifier, [Status.ACTIVE.value])) > 0:
                 KeycloakService.join_account_holders_group()
