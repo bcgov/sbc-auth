@@ -34,12 +34,18 @@ class Authorization(db.Model):
     business_identifier = Column(String)
     entity_name = Column(String)
     org_membership = Column(String)
-    keycloak_guid = Column(UUID, primary_key=True)
+    keycloak_guid = Column(UUID)
     org_id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, primary_key=True)
     org_type = Column(String)
     corp_type_code = Column(String)
     product_code = Column(String)
     roles = Column(String)
+    org_name = Column(String)
+    preferred_payment_code = Column(String)
+    bcol_user_id = Column(String)
+    bcol_account_id = Column(String)
+    folio_number = Column(String)
 
     @classmethod
     def find_user_authorization_by_business_number(cls, keycloak_guid: uuid, business_identifier: str):

@@ -13,7 +13,7 @@
 # limitations under the License.
 """API endpoints for managing an Org resource."""
 
-from flask import g
+from flask import g, request
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
@@ -21,7 +21,6 @@ from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
-
 
 API = Namespace('accounts', description='Endpoints for accounts management')
 
@@ -40,7 +39,8 @@ class AccountAuthorizations(Resource):
     @cors.crossdomain(origin='*')
     def get(account_id, product_code):
         """Return authorizations for a product in an account."""
+        expanded: bool = request.args.get('expanded', False)
         authorizations = AuthorizationService.get_account_authorizations_for_product(
             g.jwt_oidc_token_info.get('sub', None),
-            account_id, product_code)
+            account_id, product_code, expanded)
         return authorizations, http_status.HTTP_200_OK

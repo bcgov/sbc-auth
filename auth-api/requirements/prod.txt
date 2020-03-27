@@ -14,7 +14,6 @@ marshmallow==3.0.0.rc7
 marshmallow-sqlalchemy
 jsonschema
 requests
-python-keycloak==0.18.0
 itsdangerous
 sentry-sdk[flask]
 bcrypt

@@ -70,7 +70,7 @@ def test_get_entity(client, jwt, session):  # pylint:disable=unused-argument
                             headers=headers_system, content_type='application/json')
     assert rv_create.status_code == http_status.HTTP_201_CREATED
 
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
 
     rv = client.get('/api/v1/entities/{}'.format(TestEntityInfo.entity1['businessIdentifier']),
                     headers=headers, content_type='application/json')
@@ -106,7 +106,7 @@ def test_get_entity_no_auth_returns_401(client, jwt, session):  # pylint:disable
 
 def test_get_entity_no_entity_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that attempting to retrieve a non-existent entity returns a 404."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     rv = client.get('/api/v1/entities/{}'.format(TestEntityInfo.entity1['businessIdentifier']),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
@@ -114,11 +114,12 @@ def test_get_entity_no_entity_returns_404(client, jwt, session):  # pylint:disab
 
 def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an entity."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     rv = client.post('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1['businessIdentifier']),
                      headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
@@ -139,7 +140,7 @@ def test_add_contact_invalid_format_returns_400(client, jwt, session):  # pylint
 
 def test_add_contact_no_entity_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that adding a contact to a non-existant Entity returns 404."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     rv = client.post('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1['businessIdentifier']),
                      headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
@@ -147,7 +148,7 @@ def test_add_contact_no_entity_returns_404(client, jwt, session):  # pylint:disa
 
 def test_add_contact_duplicate_returns_400(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that adding a duplicate contact to an Entity returns 400."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
                 headers=headers, content_type='application/json')
     client.post('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1['businessIdentifier']),
@@ -159,7 +160,7 @@ def test_add_contact_duplicate_returns_400(client, jwt, session):  # pylint:disa
 
 def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a contact can be updated on an entity."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
                 headers=headers, content_type='application/json')
     rv = client.post('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1['businessIdentifier']),
@@ -189,7 +190,7 @@ def test_update_contact_invalid_format_returns_400(client, jwt, session):  # pyl
 
 def test_update_contact_no_entity_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that updating a contact on a non-existant entity returns 404."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     rv = client.put('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1['businessIdentifier']),
                     headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
@@ -197,32 +198,12 @@ def test_update_contact_no_entity_returns_404(client, jwt, session):  # pylint:d
 
 def test_update_contact_missing_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that updating a non-existant contact returns 404."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
     client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
                 headers=headers, content_type='application/json')
     rv = client.put('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1['businessIdentifier']),
                     headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
-
-
-def test_authorizations_passcode_returns_200(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert authorizations for passcode user returns 200."""
-    inc_number = 'CP1234567'
-
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
-    rv = client.get(f'/api/v1/entities/{inc_number}/authorizations',
-                    headers=headers, content_type='application/json')
-
-    assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.json.get('orgMembership') == 'OWNER'
-
-    # Test with invalid number
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
-    rv = client.get('/api/v1/entities/INVALID/authorizations',
-                    headers=headers, content_type='application/json')
-
-    assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.json.get('role', None) is None
 
 
 def test_update_entity_success(client, jwt, session):  # pylint:disable=unused-argument
@@ -305,7 +286,7 @@ def test_authorizations_for_affiliated_users_returns_200(client, jwt, session): 
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
 
-    claims = copy.deepcopy(TestJwtClaims.passcode.value)
+    claims = copy.deepcopy(TestJwtClaims.edit_user_role.value)
     claims['sub'] = str(user.keycloak_guid)
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
@@ -314,3 +295,31 @@ def test_authorizations_for_affiliated_users_returns_200(client, jwt, session): 
 
     assert rv.status_code == http_status.HTTP_200_OK
     assert rv.json.get('orgMembership') == 'OWNER'
+
+
+def test_authorizations_for_expanded_result(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert authorizations for affiliated users returns 200."""
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+
+    claims = copy.deepcopy(TestJwtClaims.edit_user_role.value)
+    claims['sub'] = str(user.keycloak_guid)
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.get(f'/api/v1/entities/{entity.business_identifier}/authorizations',
+                    headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('orgMembership') == 'OWNER'
+    assert rv.json.get('account', None) is None
+
+    rv = client.get(f'/api/v1/entities/{entity.business_identifier}/authorizations?expanded=true',
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('account') is not None
+    assert rv.json.get('account').get('name') == org.name
+    assert rv.json.get('business').get('name') == entity.name
+    assert rv.json.get('business').get('folioNumber') == entity.folio_number
