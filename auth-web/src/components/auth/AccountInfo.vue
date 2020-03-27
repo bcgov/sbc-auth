@@ -32,9 +32,10 @@
 
 <script lang="ts">
 
-import { Component, Vue, Watch } from 'vue-property-decorator'
+import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
+import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
 
@@ -48,7 +49,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('org', ['updateOrg'])
   }
 })
-export default class AccountInfo extends Vue {
+export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private orgStore = getModule(OrgModule, this.$store)
   private btnLabel = 'Save'
   private readonly currentOrganization!: Organization
@@ -63,12 +64,12 @@ export default class AccountInfo extends Vue {
   }
 
   private async mounted () {
-    this.orgName = this.currentOrganization?.name || ''
+    this.setAccountChangedHandler(this.syncOrgName)
+    this.syncOrgName()
   }
 
-  @Watch('currentOrganization')
-  private onCurrentAccountChange (newVal: Organization, oldVal: Organization) {
-    this.orgName = newVal?.name || ''
+  private syncOrgName () {
+    this.orgName = this.currentOrganization?.name || ''
   }
 
   private canChangeAccountName (): boolean {
