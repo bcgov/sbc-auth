@@ -115,7 +115,8 @@ class TestJwtClaims(dict, Enum):
         'preferred_username': 'testuser',
         'realm_access': {
             'roles': [
-                'staff'
+                'staff',
+                'edit'
             ]
         }
     }
@@ -128,7 +129,9 @@ class TestJwtClaims(dict, Enum):
         'preferred_username': 'testuser',
         'realm_access': {
             'roles': [
-                'staff', 'staff_admin'
+                'staff',
+                'staff_admin',
+                'edit'
             ]
         },
         'roles': [
