@@ -166,8 +166,9 @@ export default class App extends Mixins(NextPageMixin) {
     })
 
     // Listen for event from signin component so it can initiate setup
-    this.$root.$on('signin-complete', async () => {
+    this.$root.$on('signin-complete', async (callback) => {
       await this.setup()
+      callback()
     })
   }
 
