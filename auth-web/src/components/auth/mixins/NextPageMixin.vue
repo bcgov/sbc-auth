@@ -49,9 +49,7 @@ export default class NextPageMixin extends Vue {
   protected getNextPageUrl (): string {
     switch (this.currentUser?.loginSource) {
       case LoginSource.IDIR:
-        let idirNextStep = '/'
-        idirNextStep = `/${Pages.SEARCH_BUSINESS}`
-        return idirNextStep
+        return `/${Pages.SEARCH_BUSINESS}`
       case LoginSource.BCROS:
         let bcrosNextStep = '/'
         if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
