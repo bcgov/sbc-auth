@@ -47,16 +47,7 @@ export default class Signin extends Mixins(NextPageMixin) {
         if (this.redirectUrl) {
           this.redirectTo(decodeURIComponent(CommonUtils.isUrl(this.redirectUrl) ? this.redirectUrl : `/${this.redirectUrl}`))
         } else {
-          switch (this.idpHint) {
-            case IdpHint.BCSC:
-              this.redirectTo(this.getNextPageUrl())
-              break
-            case IdpHint.IDIR:
-              this.redirectTo(`/${Pages.SEARCH_BUSINESS}`)
-              break
-            case IdpHint.BCROS:
-              this.redirectTo(this.getNextPageUrl())
-          }
+          this.redirectTo(this.getNextPageUrl())
         }
       })
     }
