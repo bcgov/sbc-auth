@@ -100,12 +100,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
       if (userTerms?.userTerms?.isTermsOfUseAccepted) {
         this.$store.commit('updateHeader')
         await this.syncUser()
-        const nextPage = this.getNextPageUrl()
-        if (nextPage === 'director-search-url') {
-          window.location.replace(ConfigHelper.getValue('DIRECTOR_SEARCH_URL'))
-        } else {
-          this.$router.push(nextPage)
-        }
+        this.redirectTo(this.getNextPageUrl())
       }
     } catch (error) {
       // eslint-disable-next-line no-console

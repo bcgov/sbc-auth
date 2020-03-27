@@ -34,9 +34,9 @@
         data-test-tag="add-business"
       >
         <template v-slot:text>
-          <p>Enter the Incorporation Number and Passcode to add an existing business.</p>
+          <p>Add an existing business by entering the Incorporation Number <span class="wb">and associated Passcode.</span></p>
           <AddBusinessForm
-            class="mt-7"
+            class="mt-9"
             @close-add-business-modal="closeAddBusinessModal()"
             @add-success="showAddSuccessModal()"
             @add-failed-invalid-code="showInvalidCodeModal()"
@@ -96,6 +96,7 @@
 <script lang="ts">
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
+import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AddBusinessForm from '@/components/auth/AddBusinessForm.vue'
 import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
 import { Business } from '@/models/business'
@@ -118,7 +119,7 @@ import { mapActions } from 'vuex'
     ...mapActions('business', ['syncBusinesses', 'removeBusiness'])
   }
 })
-export default class EntityManagement extends Mixins(NextPageMixin) {
+export default class EntityManagement extends Mixins(AccountChangeMixin, NextPageMixin) {
   @Prop({ default: '' }) private orgId: string;
   private removeBusinessPayload = null
   private dialogTitle = ''
@@ -136,19 +137,20 @@ export default class EntityManagement extends Mixins(NextPageMixin) {
     addBusinessDialog: ModalDialog
   }
 
-  @Watch('currentOrganization')
-  private async onCurrentAccountChange (newVal: Organization, oldVal: Organization) {
-    await this.syncBusinesses()
-  }
-
   private async mounted () {
     // If pending approval on current account, redirect away
     if (this.currentMembership?.membershipStatus !== MembershipStatus.Active) {
       this.$router.push(this.getNextPageUrl())
     } else {
-      await this.syncBusinesses()
-      this.isLoading = false
+      this.setAccountChangedHandler(this.setup)
+      this.setup()
     }
+  }
+
+  private async setup () {
+    this.isLoading = true
+    await this.syncBusinesses()
+    this.isLoading = false
   }
 
   async showAddSuccessModal () {

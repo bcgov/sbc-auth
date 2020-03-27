@@ -29,7 +29,7 @@ import { getModule } from 'vuex-module-decorators'
 export default class NextPageMixin extends Vue {
   private userStore = getModule(UserModule, this.$store)
   private orgStore = getModule(OrgModule, this.$store)
-  protected readonly currentUser: KCUserProfile
+  protected readonly currentUser!: KCUserProfile
   protected readonly userProfile!: User
   protected readonly userContact!: Contact
   protected readonly redirectAfterLoginUrl: string
@@ -49,14 +49,16 @@ export default class NextPageMixin extends Vue {
   protected getNextPageUrl (): string {
     switch (this.currentUser?.loginSource) {
       case LoginSource.IDIR:
-        return `${Pages.SEARCH_BUSINESS}`
+        return `/${Pages.SEARCH_BUSINESS}`
       case LoginSource.BCROS:
         let bcrosNextStep = '/'
-        if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
+        if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
+          bcrosNextStep = `/${Pages.USER_PROFILE_TERMS}`
+        } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
           if (this.currentMembership.membershipTypeCode === MembershipType.Owner) {
-            bcrosNextStep = `${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`
+            bcrosNextStep = `/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`
           } else {
-            bcrosNextStep = 'director-search-url'
+            bcrosNextStep = ConfigHelper.getValue('DIRECTOR_SEARCH_URL')
           }
         }
         return bcrosNextStep

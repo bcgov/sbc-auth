@@ -99,6 +99,17 @@ strong {
   background-color: $gray1;
 }
 
+// Fieldsets
+fieldset {
+  border: none;
+}
+
+legend {
+  display: block;
+  color: $gray9;
+  font-weight: 700;
+}
+
 // Helpers
 .nobr {
   white-space: nowrap; // Utility class to prevent orphaned text
