@@ -135,6 +135,7 @@ import { ActiveUserRecord, Member, MembershipStatus, MembershipType, Organizatio
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import MemberDataTable, { ChangeRolePayload } from '@/components/auth/MemberDataTable.vue'
 import { mapActions, mapState } from 'vuex'
+import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Business } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
@@ -175,7 +176,7 @@ import { getModule } from 'vuex-module-decorators'
     ])
   }
 })
-export default class UserManagement extends Mixins(TeamManagementMixin) {
+export default class UserManagement extends Mixins(AccountChangeMixin, TeamManagementMixin) {
   @Prop({ default: '' }) private orgId: string;
 
   private tab = null
@@ -208,12 +209,8 @@ export default class UserManagement extends Mixins(TeamManagementMixin) {
     return this.pendingOrgMembers.length
   }
 
-  @Watch('currentOrganization')
-  private async onCurrentAccountChange (newVal: Organization, oldVal: Organization) {
-    await this.setup()
-  }
-
   private async mounted () {
+    this.setAccountChangedHandler(this.setup)
     await this.setup()
   }
 
