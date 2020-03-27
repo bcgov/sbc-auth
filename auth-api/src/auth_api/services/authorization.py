@@ -40,13 +40,13 @@ class Authorization:
         auth_response = {}
         auth = None
         token_roles = token_info.get('realm_access').get('roles')
-        if 'staff' in token_roles:
-            if 'edit' in token_roles:
-                if expanded:
-                    # Query Authorization view by business identifier
-                    auth = AuthorizationView.find_user_authorization_by_business_number(business_identifier)
-                    auth_response = Authorization(auth).as_dict(expanded)
-                auth_response['roles'] = ['edit', 'view']
+
+        if 'staff' in token_roles and 'edit' in token_roles:
+            if expanded:
+                # Query Authorization view by business identifier
+                auth = AuthorizationView.find_user_authorization_by_business_number(business_identifier)
+                auth_response = Authorization(auth).as_dict(expanded)
+            auth_response['roles'] = ['edit', 'view']
 
         elif Role.SYSTEM.value in token_roles:
             # a service account in keycloak should have corp_type claim setup.
