@@ -41,6 +41,7 @@
 <script lang="ts">
 import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
+import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Business } from '@/models/business'
 import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
 import BusinessModule from '@/store/modules/business'
@@ -64,18 +65,13 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('business', ['loadBusiness'])
   }
 })
-export default class BusinessProfileView extends Mixins(NextPageMixin) {
+export default class BusinessProfileView extends Mixins(AccountChangeMixin, NextPageMixin) {
   // TODO: Set businessType from current business in store
   private businessType = 'cooperative'
   private editing = false
   private isLoading = true
   private readonly currentBusiness!: Business
   private readonly loadBusiness!: () => Business
-
-  @Watch('currentOrganization')
-  private onCurrentAccountChange (newVal: Organization, oldVal: Organization) {
-    this.$router.push(this.getNextPageUrl())
-  }
 
   private navigateBack (): void {
     if (this.$route.query.redirect) {
@@ -96,6 +92,7 @@ export default class BusinessProfileView extends Mixins(NextPageMixin) {
     if ((this.currentBusiness?.contacts?.length || 0) > 0) {
       this.editing = true
     }
+    this.setAccountChangedHandler(() => { this.$router.push(this.getNextPageUrl()) })
     this.isLoading = false
   }
 }
