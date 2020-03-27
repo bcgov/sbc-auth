@@ -55,7 +55,7 @@ export default class NextPageMixin extends Vue {
         if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
           bcrosNextStep = `/${Pages.USER_PROFILE_TERMS}`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
-          if (this.currentMembership.membershipTypeCode === MembershipType.Owner) {
+          if ((this.currentMembership.membershipTypeCode === MembershipType.Owner) || (this.currentMembership.membershipTypeCode === MembershipType.Admin)) {
             bcrosNextStep = `/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`
           } else {
             bcrosNextStep = ConfigHelper.getValue('DIRECTOR_SEARCH_URL')
