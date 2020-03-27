@@ -25,7 +25,6 @@ from auth_api.utils.roles import OrgStatus as OrgStatusEnum
 from .base_model import BaseModel
 from .org_status import OrgStatus
 from .org_type import OrgType
-from .payment_type import PaymentType
 
 
 class Org(BaseModel):  # pylint: disable=too-few-public-methods
@@ -37,18 +36,17 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     type_code = Column(ForeignKey('org_type.code'), nullable=False)
     status_code = Column(ForeignKey('org_status.code'), nullable=False)
     name = Column(String(250), index=True)
-    preferred_payment_code = Column(ForeignKey('payment_type.code'), nullable=False)
+    access_type = Column(String(250), index=True, nullable=True)  # for ANONYMOUS ACCESS
+    billable = Column('billable', Boolean(), default=True, nullable=False)
 
     contacts = relationship('ContactLink', lazy='select')
     org_type = relationship('OrgType')
     org_status = relationship('OrgStatus')
-    preferred_payment = relationship('PaymentType')
     members = relationship('Membership', cascade='all,delete,delete-orphan', lazy='select')
     affiliated_entities = relationship('Affiliation', lazy='select')
     invitations = relationship('InvitationMembership', cascade='all,delete,delete-orphan', lazy='select')
     products = relationship('ProductSubscription', cascade='all,delete,delete-orphan', lazy='select')
-    access_type = Column(String(250), index=True, nullable=True)  # for ANONYMOUS ACCESS
-    billable = Column('billable', Boolean(), default=True, nullable=False)
+    payment_settings = relationship('AccountPaymentSettings', cascade='all,delete,delete-orphan', lazy='select')
 
     @classmethod
     def create_from_dict(cls, org_info: dict):
@@ -63,7 +61,6 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
             else:
                 org.org_type = OrgType.get_default_type()
             org.org_status = OrgStatus.get_default_status()
-            org.preferred_payment = PaymentType.get_default_payment_type()
             org.save()
             return org
         return None
@@ -88,7 +85,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     def update_org_from_dict(self, org_info: dict):
         """Update this org with the provided dictionary."""
         # Update from provided dictionary, but specify additional fields not to update.
-        self.update_from_dict(**org_info, _exclude=('status_code', 'type_code', 'preferred_payment_code'))
+        self.update_from_dict(**org_info, _exclude=('status_code', 'type_code'))
         self.save()
 
     def delete(self):

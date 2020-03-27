@@ -26,7 +26,6 @@ from auth_api.tracer import Tracer
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, Role
 from auth_api.utils.util import cors_preflight
 
-
 API = Namespace('entities', description='Entities')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
@@ -182,6 +181,7 @@ class AuthorizationResource(Resource):
     @cors.crossdomain(origin='*')
     def get(business_identifier):
         """Return authorization for the user for the passed business identifier."""
+        expanded: bool = request.args.get('expanded', False)
         authorisations = AuthorizationService.get_user_authorizations_for_entity(g.jwt_oidc_token_info,
-                                                                                 business_identifier)
+                                                                                 business_identifier, expanded)
         return authorisations, http_status.HTTP_200_OK
