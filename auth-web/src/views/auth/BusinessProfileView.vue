@@ -23,7 +23,7 @@
             <p class="mb-0">Edit contact information an manage folio/reference numbers for this {{ businessType }}.</p>
           </div>
         </div>
-        <v-card class="profile-card">
+        <v-card flat>
           <v-container>
             <v-card-title class="mb-4">
               {{ currentBusiness.name}}
