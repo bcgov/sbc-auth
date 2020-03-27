@@ -89,6 +89,10 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
     this.atBottom = (e.target.scrollHeight - e.target.scrollTop) <= (e.target.offsetHeight + 25)
   }
 
+  mounted () {
+    this.$store.commit('updateHeader')
+  }
+
   private async clickAccepted () {
     this.isLoading = true
     try {
@@ -98,7 +102,6 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
       })
       const userTerms = await this.saveUserTerms()
       if (userTerms?.userTerms?.isTermsOfUseAccepted) {
-        this.$store.commit('updateHeader')
         await this.syncUser()
         this.redirectTo(this.getNextPageUrl())
       }
