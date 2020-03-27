@@ -43,22 +43,22 @@ export default class Signin extends Mixins(NextPageMixin) {
     // Check if user is authenticated, and redirect according to specified redirect
     // or fallback to default route for their login source
     if (this.$store.getters['auth/isAuthenticated']) {
-      this.$root.$emit('signin-complete')
-      if (this.redirectUrl) {
-        this.redirectTo(decodeURIComponent(CommonUtils.isUrl(this.redirectUrl) ? this.redirectUrl : `/${this.redirectUrl}`))
-      } else {
-        await this.syncUser()
-        switch (this.idpHint) {
-          case IdpHint.BCSC:
-            this.redirectTo(this.getNextPageUrl())
-            break
-          case IdpHint.IDIR:
-            this.redirectTo(`/${Pages.SEARCH_BUSINESS}`)
-            break
-          case IdpHint.BCROS:
-            this.redirectTo(this.getNextPageUrl())
+      this.$root.$emit('signin-complete', () => {
+        if (this.redirectUrl) {
+          this.redirectTo(decodeURIComponent(CommonUtils.isUrl(this.redirectUrl) ? this.redirectUrl : `/${this.redirectUrl}`))
+        } else {
+          switch (this.idpHint) {
+            case IdpHint.BCSC:
+              this.redirectTo(this.getNextPageUrl())
+              break
+            case IdpHint.IDIR:
+              this.redirectTo(`/${Pages.SEARCH_BUSINESS}`)
+              break
+            case IdpHint.BCROS:
+              this.redirectTo(this.getNextPageUrl())
+          }
         }
-      }
+      })
     }
   }
 }
