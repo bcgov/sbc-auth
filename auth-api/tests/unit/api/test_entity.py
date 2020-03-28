@@ -323,3 +323,25 @@ def test_authorizations_for_expanded_result(client, jwt, session):  # pylint:dis
     assert rv.json.get('account').get('name') == org.name
     assert rv.json.get('business').get('name') == entity.name
     assert rv.json.get('business').get('folioNumber') == entity.folio_number
+
+
+def test_authorizations_expanded_for_staff(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert expanded authorizations for staff user returns result."""
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+
+    claims = copy.deepcopy(TestJwtClaims.edit_user_role.value)
+    claims['sub'] = str(user.keycloak_guid)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get(f'/api/v1/entities/{entity.business_identifier}/authorizations?expanded=true',
+                    headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('account') is not None
+    assert rv.json.get('account').get('name') == org.name
+    assert rv.json.get('business').get('name') == entity.name
+    assert rv.json.get('business').get('folioNumber') == entity.folio_number
