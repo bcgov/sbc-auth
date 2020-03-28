@@ -72,16 +72,16 @@ class User:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def create_user_and_add_membership(memberships: List[dict], org_id, token_info: Dict = None,
-                                       skip_auth: bool = False):
+                                       single_mode: bool = False):
         """
         Create user(s) in the  DB and upstream keycloak.
 
         accepts a list of memberships ie.a list of objects with username,password and membershipTpe
-        skip_auth can be used if called method already perfomed the authenticaiton
-        skip_auth= true is used now incase of invitation for admin users scenarion
-        other cases should be invoked with skip_auth=false
+        single_mode can be used if called method already perfomed the authenticaiton
+        single_mode= true is used now incase of invitation for admin users scenarion
+        other cases should be invoked with single_mode=false
         """
-        if skip_auth:  # make sure no bulk operation and only owner is created using if no auth
+        if single_mode:  # make sure no bulk operation and only owner is created using if no auth
             if len(memberships) > 1 or memberships[0].get('membershipType') not in [OWNER, ADMIN]:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
         else:
