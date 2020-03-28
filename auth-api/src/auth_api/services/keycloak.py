@@ -30,7 +30,7 @@ class KeycloakService:
     """For Keycloak services."""
 
     @staticmethod
-    def add_user(user: KeycloakUser, return_if_exists: bool = False):
+    def add_user(user: KeycloakUser, return_if_exists: bool = False, throw_error_if_exists: bool = False):
         """Add user to Keycloak."""
         config = current_app.config
         # Add user and set password
@@ -40,10 +40,13 @@ class KeycloakService:
         realm = config.get('KEYCLOAK_BCROS_REALMNAME')
 
         # Check if the user exists
-        if return_if_exists:
+        if return_if_exists or throw_error_if_exists:
             existing_user = KeycloakService.get_user_by_username(user.user_name, admin_token=admin_token)
             if existing_user:
-                return existing_user
+                if not throw_error_if_exists:
+                    return existing_user
+                else:
+                    raise BusinessException(Error.USER_ALREADY_EXISTS_IN_KEYCLOAK , None)
         # Add user to the keycloak group '$group_name'
         headers = {
             'Content-Type': ContentType.JSON.value,
