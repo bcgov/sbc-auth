@@ -27,7 +27,7 @@
       :fullscreen-on-mobile="$vuetify.breakpoint.xsOnly || $vuetify.breakpoint.smOnly || $vuetify.breakpoint.mdOnly"
       :is-persistent="true"
       :is-scrollable="true"
-      max-width="640"
+      max-width="800"
     >
       <template v-slot:title>
         <span>Add Team Members</span>
@@ -45,7 +45,7 @@
       max-width="640"
     >
       <template v-slot:actions>
-        <v-btn large color="error" @click="close($refs.addUsersSuccessDialog)">OK</v-btn>
+        <v-btn large color="primary" @click="close($refs.addUsersSuccessDialog)">OK</v-btn>
       </template>
 
       <template v-slot:text>

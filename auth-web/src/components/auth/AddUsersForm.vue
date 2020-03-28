@@ -15,6 +15,7 @@
             <v-text-field
               filled
               label="Temporary Password"
+              class="ml-2"
               v-model="user.password"
               :data-test="getIndexedTag('password', index)"
             ></v-text-field>
