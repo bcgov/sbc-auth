@@ -17,6 +17,8 @@ This module manages the User Information.
 """
 from typing import List, Dict
 
+from auth_api import status as http_status
+from auth_api import db
 from flask import current_app
 from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
@@ -101,6 +103,11 @@ class User:  # pylint: disable=too-many-instance-attributes
             create_user_request.password = membership['password']
             create_user_request.enabled = True
             create_user_request.attributes = {'access_type': AccessType.ANONYMOUS.value}
+            db_username = IdpHint.BCROS.value + '/' + membership['username']
+            existing_user = UserModel.find_by_username(db_username)
+            if existing_user:
+                current_app.logger.debug('Existing users found in DB')
+                raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
             if membership.get('update_password_on_login', True):  # by default , reset needed
                 create_user_request.update_password_on_login()
             try:
@@ -109,27 +116,29 @@ class User:  # pylint: disable=too-many-instance-attributes
             except HTTPError as err:
                 current_app.logger.error('create_user in keycloak failed', err)
                 raise BusinessException(Error.FAILED_ADDING_USER_IN_KEYCLOAK, None)
-            username = IdpHint.BCROS.value + '/' + membership['username']
-            existing_user = UserModel.find_by_username(username)
-            if existing_user:
-                current_app.logger.debug('Existing users found in DB')
-                raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
-            user_model: UserModel = UserModel(username=username,
-                                              # BCROS is temporary value.Will be overwritten when user logs in
-                                              is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
-                                              type=AccessType.ANONYMOUS.value, email=membership.get('email', None),
-                                              firstname=kc_user.first_name, lastname=kc_user.last_name)
 
-            user_model.save()
-            User._add_org_membership(org_id, user_model.id, membership['membershipType'])
-            users.append(User(user_model).as_dict())
+            try:
+                user_model: UserModel = UserModel(username=db_username,
+                                                  is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
+                                                  type=AccessType.ANONYMOUS.value, email=membership.get('email', None),
+                                                  firstname=kc_user.first_name, lastname=kc_user.last_name)
+
+                user_model.flush()
+                membership = MembershipModel(org_id=org_id, user_id=user_model.id,
+                                             membership_type_code=membership['membershipType'],
+                                             membership_type_status=Status.ACTIVE.value)
+                membership.save()
+                user_model.commit()
+                user_dict = User(user_model).as_dict()
+                user_dict['status'] = http_status.HTTP_201_CREATED
+                user_dict['error'] = ''
+                users.append(user_dict)
+            except Exception as e:
+                current_app.logger.error('Error on get create_user_and_add_membership: {}', e)
+                db.session.rollback()
+                KeycloakService.delete_user_by_username(create_user_request.user_name)
+
         return {'users': users}
-
-    @staticmethod
-    def _add_org_membership(org_id, user_id, membership_type):
-        membership = MembershipModel(org_id=org_id, user_id=user_id, membership_type_code=membership_type,
-                                     membership_type_status=Status.ACTIVE.value)
-        membership.save()
 
     @classmethod
     def save_from_jwt_token(cls, token: dict = None):

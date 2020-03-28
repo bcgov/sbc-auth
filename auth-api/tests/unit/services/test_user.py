@@ -28,12 +28,13 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import User as UserModel
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
+from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import IdpHint
 from auth_api.utils.roles import Status, ADMIN, OWNER, MEMBER
 from werkzeug.exceptions import HTTPException
 
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, \
-    TestUserInfo, TestAnonymousMembership
+    TestUserInfo, TestAnonymousMembership, KeycloakScenario
 from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_user_model, \
     factory_org_model, factory_membership_model
 
@@ -108,7 +109,10 @@ def test_create_user_and_add_same_user_name_error_in_kc(session, auth_mock,
     """Assert that same user name cannot be added twice."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(OWNER)]
-    UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
+    keycloak_service = KeycloakService()
+    request = KeycloakScenario.create_user_request()
+    request.user_name = membership[0]['username']
+    keycloak_service.add_user(request)
     with pytest.raises(BusinessException) as exception:
         UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
     assert exception.value.code == Error.FAILED_ADDING_USER_IN_KEYCLOAK.name
