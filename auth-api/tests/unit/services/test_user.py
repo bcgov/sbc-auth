@@ -131,6 +131,7 @@ def test_create_user_and_add_same_user_name_error_in_db(session, auth_mock,
     assert users['users'][0]['status'] == 409
     assert users['users'][0]['error'] == 'The username is already taken'
 
+
 def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,
                                                              keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an admin can be added as anonymous."""

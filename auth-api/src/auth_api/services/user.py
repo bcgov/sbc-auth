@@ -22,7 +22,6 @@ from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
-from auth_api import db
 from auth_api.utils.constants import IdpHint
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -95,14 +94,9 @@ class User:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('create_user')
         users = []
         for membership in memberships:
-            create_user_request = KeycloakUser()
 
             current_app.logger.debug(f"create user username: {membership['username']}")
-            create_user_request.first_name = membership['username']
-            create_user_request.user_name = membership['username']
-            create_user_request.password = membership['password']
-            create_user_request.enabled = True
-            create_user_request.attributes = {'access_type': AccessType.ANONYMOUS.value}
+            create_user_request = User._create_kc_user(membership)
             db_username = IdpHint.BCROS.value + '/' + membership['username']
             existing_user = UserModel.find_by_username(db_username)
             if existing_user:
@@ -138,17 +132,26 @@ class User:  # pylint: disable=too-many-instance-attributes
                 membership.save()
                 user_model.commit()
                 user_dict = User(user_model).as_dict()
-                user_dict['status'] = http_status.HTTP_201_CREATED
-                user_dict['error'] = ''
+                user_dict.update({'status': http_status.HTTP_201_CREATED, 'error': ''})
                 users.append(user_dict)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 current_app.logger.error('Error on  create_user_and_add_membership: {}', e)
-                db.session.rollback()
+                user_model.rollback()
                 KeycloakService.delete_user_by_username(create_user_request.user_name)
                 users.append(User._get_error_dict(membership['username'], Error.FAILED_ADDING_USER_ERROR))
                 continue
 
         return {'users': users}
+
+    @staticmethod
+    def _create_kc_user(membership):
+        create_user_request = KeycloakUser()
+        create_user_request.first_name = membership['username']
+        create_user_request.user_name = membership['username']
+        create_user_request.password = membership['password']
+        create_user_request.enabled = True
+        create_user_request.attributes = {'access_type': AccessType.ANONYMOUS.value}
+        return create_user_request
 
     @classmethod
     def save_from_jwt_token(cls, token: dict = None):
