@@ -65,8 +65,12 @@ class AnonymousUser(Resource):
             membership_details.update(request_json)
             user = UserService.create_user_and_add_membership([membership_details],
                                                               invitation['membership'][0]['org']['id'], single_mode=True)
-            InvitationService.accept_invitation(invitation['id'], None, None, False)
-            response, status = user, http_status.HTTP_201_CREATED
+            user_dict = user['users'][0]
+            if user_dict['status'] != http_status.HTTP_201_CREATED:
+                response, status = {'code': user_dict['status'], 'message': user_dict['error']}, user_dict['error']
+            else:
+                InvitationService.accept_invitation(invitation['id'], None, None, False)
+                response, status = user, http_status.HTTP_201_CREATED
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

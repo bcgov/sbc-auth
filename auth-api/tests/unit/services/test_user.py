@@ -113,9 +113,9 @@ def test_create_user_and_add_same_user_name_error_in_kc(session, auth_mock,
     request = KeycloakScenario.create_user_request()
     request.user_name = membership[0]['username']
     keycloak_service.add_user(request)
-    with pytest.raises(BusinessException) as exception:
-        UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
-    assert exception.value.code == Error.FAILED_ADDING_USER_IN_KEYCLOAK.name
+    users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
+    assert users['users'][0]['status'] == 409
+    assert users['users'][0]['error'] == 'The username is already taken'
 
 
 def test_create_user_and_add_same_user_name_error_in_db(session, auth_mock,
@@ -127,10 +127,9 @@ def test_create_user_and_add_same_user_name_error_in_db(session, auth_mock,
     new_members = TestAnonymousMembership.generate_random_user(OWNER)
     new_members['username'] = user.username.replace(f'{IdpHint.BCROS.value}/', '')
     membership = [new_members]
-    with pytest.raises(BusinessException) as exception:
-        UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
-    assert exception.value.code == Error.DATA_ALREADY_EXISTS.name
-
+    users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
+    assert users['users'][0]['status'] == 409
+    assert users['users'][0]['error'] == 'The username is already taken'
 
 def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,
                                                              keycloak_mock):  # pylint:disable=unused-argument

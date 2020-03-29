@@ -46,7 +46,7 @@ class KeycloakService:
                 if not throw_error_if_exists:
                     return existing_user
                 else:
-                    raise BusinessException(Error.USER_ALREADY_EXISTS_IN_KEYCLOAK , None)
+                    raise BusinessException(Error.USER_ALREADY_EXISTS_IN_KEYCLOAK, None)
         # Add user to the keycloak group '$group_name'
         headers = {
             'Content-Type': ContentType.JSON.value,

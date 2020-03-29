@@ -17,12 +17,12 @@ This module manages the User Information.
 """
 from typing import List, Dict
 
-from auth_api import status as http_status
-from auth_api import db
 from flask import current_app
 from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api import status as http_status
+from auth_api import db
 from auth_api.utils.constants import IdpHint
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -107,12 +107,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             existing_user = UserModel.find_by_username(db_username)
             if existing_user:
                 current_app.logger.debug('Existing users found in DB')
-                if single_mode:
-                    raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
-                else:
-                    user_dict = {'username': membership['username'], 'status': http_status.HTTP_409_CONFLICT,
-                                 'error': 'User name Already Exists'}
-                    users.append(user_dict)
+                users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
                 continue
 
             if membership.get('update_password_on_login', True):  # by default , reset needed
@@ -122,22 +117,12 @@ class User:  # pylint: disable=too-many-instance-attributes
                 kc_user = KeycloakService.add_user(create_user_request, throw_error_if_exists=True)
 
             except BusinessException as err:
-                current_app.logger.error('create_user in keycloak failed', err)
-                if single_mode:
-                    raise BusinessException(Error.FAILED_ADDING_USER_IN_KEYCLOAK, None)
-                else:
-                    user_dict = {'username': membership['username'], 'status': http_status.HTTP_409_CONFLICT,
-                                 'error': 'User name Already Exists'}
-                    users.append(user_dict)
+                current_app.logger.error('create_user in keycloak failed :duplicate user {}', err)
+                users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
                 continue
             except HTTPError as err:
-                current_app.logger.error('create_user in keycloak failed', err)
-                if single_mode:
-                    raise BusinessException(Error.FAILED_ADDING_USER_IN_KEYCLOAK, None)
-                else:
-                    user_dict = {'username': membership['username'], 'status': http_status.HTTP_500_INTERNAL_SERVER_ERROR,
-                                 'error': 'Failed adding in user'}
-                    users.append(user_dict)
+                current_app.logger.error('create_user in keycloak failed {}', err)
+                users.append(User._get_error_dict(membership['username'], Error.FAILED_ADDING_USER_ERROR))
                 continue
 
             try:
@@ -157,16 +142,10 @@ class User:  # pylint: disable=too-many-instance-attributes
                 user_dict['error'] = ''
                 users.append(user_dict)
             except Exception as e:
-                current_app.logger.error('Error on get create_user_and_add_membership: {}', e)
+                current_app.logger.error('Error on  create_user_and_add_membership: {}', e)
                 db.session.rollback()
                 KeycloakService.delete_user_by_username(create_user_request.user_name)
-                if single_mode:
-                    raise BusinessException(Error.UNDEFINED_ERROR, None)
-                else:
-                    user_dict = {'username': membership['username'],
-                                 'status': http_status.HTTP_500_INTERNAL_SERVER_ERROR,
-                                 'error': 'Failed adding in user'}
-                    users.append(user_dict)
+                users.append(User._get_error_dict(membership['username'], Error.FAILED_ADDING_USER_ERROR))
                 continue
 
         return {'users': users}
@@ -205,6 +184,11 @@ class User:  # pylint: disable=too-many-instance-attributes
         for contact_link in user.contacts:
             collection.append(ContactService(contact_link.contact).as_dict())
         return {'contacts': collection}
+
+    @staticmethod
+    def _get_error_dict(username, error):
+        return {'username': username, 'status': error.value[1],
+                'error': error.value[0]}
 
     @staticmethod
     def add_contact(token, contact_info: dict):
