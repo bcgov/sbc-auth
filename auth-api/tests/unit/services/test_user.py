@@ -132,8 +132,8 @@ def test_create_user_and_add_same_user_name_error_in_db(session, auth_mock,
     assert users['users'][0]['error'] == 'The username is already taken'
 
 
-def test_create_user_and_add_transaction_membership(session
-                                                    , auth_mock, keycloak_mock):  # pylint:disable=unused-argument
+def test_create_user_and_add_transaction_membership(session, auth_mock,
+                                                    keycloak_mock):  # pylint:disable=unused-argument
     """Assert transactions works fine."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(OWNER)]
