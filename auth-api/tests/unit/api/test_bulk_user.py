@@ -21,13 +21,15 @@ import uuid
 from random import randint
 
 from auth_api import status as http_status
+from auth_api.schemas import utils as schema_utils
 from auth_api.services.keycloak import KeycloakService
+from auth_api.utils.constants import IdpHint
+
 from config import get_named_config
 from tests.utilities.factory_scenarios import BulkUserTestScenario, TestJwtClaims, \
     TestOrgInfo
 from tests.utilities.factory_utils import (
     factory_auth_header, factory_invitation_anonymous)
-
 
 KEYCLOAK_SERVICE = KeycloakService()
 
@@ -39,6 +41,7 @@ def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'anonymous_user_response')
 
 
 def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -85,8 +88,29 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
 
     # headers = factory_auth_header(jwt=jwt,
     #                               claims=TestJwtClaims.anonymous_bcros_role)
+    user_input = BulkUserTestScenario.get_bulk_user1_for_org(org_id)
     rv = client.post('/api/v1/bulk/users', headers=headers,
-                     data=json.dumps(BulkUserTestScenario.get_bulk_user1_for_org(org_id)),
+                     data=json.dumps(user_input),
                      content_type='application/json')
 
     assert len(rv.json['users']) == 2
+    assert schema_utils.validate(rv.json, 'anonymous_user_response')
+
+    assert rv.json['users'][0]['http_status'] == 201
+    assert rv.json['users'][0]['http_status'] == 201
+    assert rv.json['users'][0]['error'] == ''
+    assert rv.json['users'][1]['error'] == ''
+    assert rv.json['users'][0]['username'] == IdpHint.BCROS.value + '/' + user_input['users'][0]['username']
+    assert rv.json['users'][1]['username'] == IdpHint.BCROS.value + '/' + user_input['users'][1]['username']
+
+    rv = client.post('/api/v1/bulk/users', headers=headers,
+                     data=json.dumps(user_input),
+                     content_type='application/json')
+
+    assert len(rv.json['users']) == 2
+    assert schema_utils.validate(rv.json, 'anonymous_user_response')
+    print('----SSS---', rv.json['users'])
+    assert rv.json['users'][0]['http_status'] == 409
+    assert rv.json['users'][1]['http_status'] == 409
+    assert rv.json['users'][0]['error'] == 'The username is already taken'
+    assert rv.json['users'][1]['error'] == 'The username is already taken'
