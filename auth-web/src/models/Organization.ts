@@ -90,3 +90,27 @@ export interface AddUsersToOrgBody {
     users: AddUserBody[]
     orgId: string
 }
+
+export interface BulkUsersSuccess {
+  username: string
+  password: string
+}
+
+export interface BulkUsersFailed {
+  username: string
+  error: string
+}
+
+export interface BulkUserResponse {
+  // eslint-disable-next-line camelcase
+  http_status: number,
+  username: string,
+  created?: string,
+  error?: string,
+  firstname?: string,
+  type?: string
+}
+
+export interface BulkUserResponseBody {
+  users: BulkUserResponse[]
+}
