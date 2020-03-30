@@ -25,6 +25,7 @@ from auth_api.exceptions.errors import Error
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
+from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
 from auth_api.utils.roles import Status
 from tests import skip_in_pod
@@ -68,6 +69,7 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
         'username']
     assert dictionary['users'][0].get('password') is None
     assert dictionary['users'][0].get('type') == 'ANONYMOUS'
+    assert schema_utils.validate(rv.json, 'anonymous_user_response')
 
 
 def test_add_user_no_token_returns_401(client, session):  # pylint:disable=unused-argument

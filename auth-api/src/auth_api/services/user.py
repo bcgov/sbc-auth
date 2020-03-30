@@ -21,6 +21,7 @@ from flask import current_app
 from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api import status as http_status
 from auth_api.utils.constants import IdpHint
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -70,16 +71,17 @@ class User:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def create_user_and_add_membership(memberships: List[dict], org_id, token_info: Dict = None,
-                                       skip_auth: bool = False):
+                                       # pylint: disable=too-many-locals
+                                       single_mode: bool = False):
         """
         Create user(s) in the  DB and upstream keycloak.
 
         accepts a list of memberships ie.a list of objects with username,password and membershipTpe
-        skip_auth can be used if called method already perfomed the authenticaiton
-        skip_auth= true is used now incase of invitation for admin users scenarion
-        other cases should be invoked with skip_auth=false
+        single_mode can be used if called method already perfomed the authenticaiton
+        single_mode= true is used now incase of invitation for admin users scenarion
+        other cases should be invoked with single_mode=false
         """
-        if skip_auth:  # make sure no bulk operation and only owner is created using if no auth
+        if single_mode:  # make sure no bulk operation and only owner is created using if no auth
             if len(memberships) > 1 or memberships[0].get('membershipType') not in [OWNER, ADMIN]:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
         else:
@@ -93,43 +95,64 @@ class User:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('create_user')
         users = []
         for membership in memberships:
-            create_user_request = KeycloakUser()
 
             current_app.logger.debug(f"create user username: {membership['username']}")
-            create_user_request.first_name = membership['username']
-            create_user_request.user_name = membership['username']
-            create_user_request.password = membership['password']
-            create_user_request.enabled = True
-            create_user_request.attributes = {'access_type': AccessType.ANONYMOUS.value}
+            create_user_request = User._create_kc_user(membership)
+            db_username = IdpHint.BCROS.value + '/' + membership['username']
+            existing_user = UserModel.find_by_username(db_username)
+            if existing_user:
+                current_app.logger.debug('Existing users found in DB')
+                users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
+                continue
+
             if membership.get('update_password_on_login', True):  # by default , reset needed
                 create_user_request.update_password_on_login()
             try:
                 # TODO may be this method itself throw the business exception;can handle different exceptions?
-                kc_user = KeycloakService.add_user(create_user_request)
-            except HTTPError as err:
-                current_app.logger.error('create_user in keycloak failed', err)
-                raise BusinessException(Error.FAILED_ADDING_USER_IN_KEYCLOAK, None)
-            username = IdpHint.BCROS.value + '/' + membership['username']
-            existing_user = UserModel.find_by_username(username)
-            if existing_user:
-                current_app.logger.debug('Existing users found in DB')
-                raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
-            user_model: UserModel = UserModel(username=username,
-                                              # BCROS is temporary value.Will be overwritten when user logs in
-                                              is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
-                                              type=AccessType.ANONYMOUS.value, email=membership.get('email', None),
-                                              firstname=kc_user.first_name, lastname=kc_user.last_name)
+                kc_user = KeycloakService.add_user(create_user_request, throw_error_if_exists=True)
 
-            user_model.save()
-            User._add_org_membership(org_id, user_model.id, membership['membershipType'])
-            users.append(User(user_model).as_dict())
+            except BusinessException as err:
+                current_app.logger.error('create_user in keycloak failed :duplicate user {}', err)
+                users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
+                continue
+            except HTTPError as err:
+                current_app.logger.error('create_user in keycloak failed {}', err)
+                users.append(User._get_error_dict(membership['username'], Error.FAILED_ADDING_USER_ERROR))
+                continue
+
+            try:
+                user_model: UserModel = UserModel(username=db_username,
+                                                  is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
+                                                  type=AccessType.ANONYMOUS.value, email=membership.get('email', None),
+                                                  firstname=kc_user.first_name, lastname=kc_user.last_name)
+
+                user_model.flush()
+                membership_model = MembershipModel(org_id=org_id, user_id=user_model.id,
+                                                   membership_type_code=membership['membershipType'],
+                                                   membership_type_status=Status.ACTIVE.value)
+                membership_model.flush()
+                user_model.commit()
+                user_dict = User(user_model).as_dict()
+                user_dict.update({'http_status': http_status.HTTP_201_CREATED, 'error': ''})
+                users.append(user_dict)
+            except Exception as e:  # pylint: disable=broad-except
+                current_app.logger.error('Error on  create_user_and_add_membership: {}', e)
+                user_model.rollback()
+                KeycloakService.delete_user_by_username(create_user_request.user_name)
+                users.append(User._get_error_dict(membership['username'], Error.FAILED_ADDING_USER_ERROR))
+                continue
+
         return {'users': users}
 
     @staticmethod
-    def _add_org_membership(org_id, user_id, membership_type):
-        membership = MembershipModel(org_id=org_id, user_id=user_id, membership_type_code=membership_type,
-                                     membership_type_status=Status.ACTIVE.value)
-        membership.save()
+    def _create_kc_user(membership):
+        create_user_request = KeycloakUser()
+        create_user_request.first_name = membership['username']
+        create_user_request.user_name = membership['username']
+        create_user_request.password = membership['password']
+        create_user_request.enabled = True
+        create_user_request.attributes = {'access_type': AccessType.ANONYMOUS.value}
+        return create_user_request
 
     @classmethod
     def save_from_jwt_token(cls, token: dict = None):
@@ -165,6 +188,11 @@ class User:  # pylint: disable=too-many-instance-attributes
         for contact_link in user.contacts:
             collection.append(ContactService(contact_link.contact).as_dict())
         return {'contacts': collection}
+
+    @staticmethod
+    def _get_error_dict(username, error):
+        return {'username': username, 'http_status': error.value[1],
+                'error': error.value[0]}
 
     @staticmethod
     def add_contact(token, contact_info: dict):

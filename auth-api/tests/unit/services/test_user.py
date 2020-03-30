@@ -28,12 +28,13 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import User as UserModel
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
+from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import IdpHint
 from auth_api.utils.roles import Status, ADMIN, OWNER, MEMBER
 from werkzeug.exceptions import HTTPException
 
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, \
-    TestUserInfo, TestAnonymousMembership
+    TestUserInfo, TestAnonymousMembership, KeycloakScenario
 from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_user_model, \
     factory_org_model, factory_membership_model
 
@@ -91,7 +92,7 @@ def test_create_user_and_add_membership_owner_skip_auth_mode(session, auth_mock,
     """Assert that an owner can be added as anonymous."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(OWNER)]
-    users = UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
+    users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
     assert len(users['users']) == 1
     assert users['users'][0]['username'] == IdpHint.BCROS.value + '/' + membership[0]['username']
     assert users['users'][0]['type'] == 'ANONYMOUS'
@@ -108,10 +109,13 @@ def test_create_user_and_add_same_user_name_error_in_kc(session, auth_mock,
     """Assert that same user name cannot be added twice."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(OWNER)]
-    UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
-    with pytest.raises(BusinessException) as exception:
-        UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
-    assert exception.value.code == Error.FAILED_ADDING_USER_IN_KEYCLOAK.name
+    keycloak_service = KeycloakService()
+    request = KeycloakScenario.create_user_request()
+    request.user_name = membership[0]['username']
+    keycloak_service.add_user(request)
+    users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
+    assert users['users'][0]['http_status'] == 409
+    assert users['users'][0]['error'] == 'The username is already taken'
 
 
 def test_create_user_and_add_same_user_name_error_in_db(session, auth_mock,
@@ -123,9 +127,57 @@ def test_create_user_and_add_same_user_name_error_in_db(session, auth_mock,
     new_members = TestAnonymousMembership.generate_random_user(OWNER)
     new_members['username'] = user.username.replace(f'{IdpHint.BCROS.value}/', '')
     membership = [new_members]
-    with pytest.raises(BusinessException) as exception:
-        UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
-    assert exception.value.code == Error.DATA_ALREADY_EXISTS.name
+    users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
+    assert users['users'][0]['http_status'] == 409
+    assert users['users'][0]['error'] == 'The username is already taken'
+
+
+def test_create_user_and_add_transaction_membership(session, auth_mock,
+                                                    keycloak_mock):  # pylint:disable=unused-argument
+    """Assert transactions works fine."""
+    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
+    membership = [TestAnonymousMembership.generate_random_user(OWNER)]
+    with patch('auth_api.models.Membership.flush', side_effect=Exception('mocked error')):
+        users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
+
+    user_name = IdpHint.BCROS.value + '/' + membership[0]['username']
+    assert len(users['users']) == 1
+    assert users['users'][0]['username'] == membership[0]['username']
+    assert users['users'][0]['http_status'] == 500
+    assert users['users'][0]['error'] == 'Adding User Failed'
+
+    # make sure no records are created
+    user = UserModel.find_by_username(user_name)
+    assert user is None
+    user = UserModel.find_by_username(membership[0]['username'])
+    assert user is None
+    members = MembershipModel.find_members_by_org_id(org.id)
+    # only one member should be there since its a STAFF created org
+    assert len(members) == 0
+
+
+def test_create_user_and_add_transaction_membership_1(session, auth_mock,
+                                                      keycloak_mock):  # pylint:disable=unused-argument
+    """Assert transactions works fine."""
+    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
+    membership = [TestAnonymousMembership.generate_random_user(OWNER)]
+    with patch('auth_api.models.User.flush', side_effect=Exception('mocked error')):
+        users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
+
+    user_name = IdpHint.BCROS.value + '/' + membership[0]['username']
+    assert len(users['users']) == 1
+    assert users['users'][0]['username'] == membership[0]['username']
+    assert users['users'][0]['http_status'] == 500
+    assert users['users'][0]['error'] == 'Adding User Failed'
+
+    # make sure no records are created
+    user = UserModel.find_by_username(user_name)
+    assert user is None
+    user = UserModel.find_by_username(membership[0]['username'])
+    assert user is None
+    members = MembershipModel.find_members_by_org_id(org.id)
+    # only one member should be there since its a STAFF created org
+    assert len(members) == 0
 
 
 def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,
@@ -133,7 +185,7 @@ def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,
     """Assert that an admin can be added as anonymous."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
-    users = UserService.create_user_and_add_membership(membership, org.id, skip_auth=True)
+    users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
     assert len(users['users']) == 1
     assert users['users'][0]['username'] == IdpHint.BCROS.value + '/' + membership[0]['username']
     assert users['users'][0]['type'] == 'ANONYMOUS'
@@ -203,24 +255,24 @@ def test_create_user_and_add_membership_admin_bulk_mode_multiple(session, auth_m
 
 def test_create_user_and_add_membership_member_error_skip_auth_mode(session, auth_mock,
                                                                     keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that an member cannot be added as anonymous in skip_auth mode."""
+    """Assert that an member cannot be added as anonymous in single_mode mode."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(MEMBER)]
     with pytest.raises(BusinessException) as exception:
         UserService.create_user_and_add_membership(membership, org.id,
-                                                   skip_auth=True)
+                                                   single_mode=True)
     assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
 
 
 def test_create_user_and_add_membership_multiple_error_skip_auth_mode(session, auth_mock,
                                                                       keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that multiple user cannot be created  in skip_auth mode."""
+    """Assert that multiple user cannot be created  in single_mode mode."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(MEMBER),
                   TestAnonymousMembership.generate_random_user(ADMIN)]
     with pytest.raises(BusinessException) as exception:
         UserService.create_user_and_add_membership(membership, org.id, TestJwtClaims.public_user_role,
-                                                   skip_auth=True)
+                                                   single_mode=True)
     assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
 
 
