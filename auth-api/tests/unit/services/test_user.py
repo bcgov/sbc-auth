@@ -137,7 +137,7 @@ def test_create_user_and_add_transaction_membership(session, auth_mock,
     """Assert transactions works fine."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(OWNER)]
-    with patch('auth_api.models.Membership.save', side_effect=Exception('mocked error')):
+    with patch('auth_api.models.Membership.flush', side_effect=Exception('mocked error')):
         users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
 
     user_name = IdpHint.BCROS.value + '/' + membership[0]['username']
@@ -155,6 +155,29 @@ def test_create_user_and_add_transaction_membership(session, auth_mock,
     # only one member should be there since its a STAFF created org
     assert len(members) == 0
 
+
+def test_create_user_and_add_transaction_membership_1(session, auth_mock,
+                                                    keycloak_mock):  # pylint:disable=unused-argument
+    """Assert transactions works fine."""
+    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
+    membership = [TestAnonymousMembership.generate_random_user(OWNER)]
+    with patch('auth_api.models.User.flush', side_effect=Exception('mocked error')):
+        users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
+
+    user_name = IdpHint.BCROS.value + '/' + membership[0]['username']
+    assert len(users['users']) == 1
+    assert users['users'][0]['username'] == membership[0]['username']
+    assert users['users'][0]['http_status'] == 500
+    assert users['users'][0]['error'] == 'Adding User Failed'
+
+    # make sure no records are created
+    user = UserModel.find_by_username(user_name)
+    assert user is None
+    user = UserModel.find_by_username(membership[0]['username'])
+    assert user is None
+    members = MembershipModel.find_members_by_org_id(org.id)
+    # only one member should be there since its a STAFF created org
+    assert len(members) == 0
 
 def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,
                                                              keycloak_mock):  # pylint:disable=unused-argument

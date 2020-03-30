@@ -130,7 +130,7 @@ class User:  # pylint: disable=too-many-instance-attributes
                 membership_model = MembershipModel(org_id=org_id, user_id=user_model.id,
                                                    membership_type_code=membership['membershipType'],
                                                    membership_type_status=Status.ACTIVE.value)
-                membership_model.save()
+                membership_model.flush()
                 user_model.commit()
                 user_dict = User(user_model).as_dict()
                 user_dict.update({'http_status': http_status.HTTP_201_CREATED, 'error': ''})
