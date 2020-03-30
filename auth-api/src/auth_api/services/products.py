@@ -24,11 +24,13 @@ from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import ProductSubscriptionRole as ProductSubscriptionRoleModel
 from auth_api.models import Org as OrgModel
 
+
 class Product:
     """Manages all aspects of Products data.
 
-    This service manages creating, updating, and retrieving products and product subscriptions."""
-    
+    This service manages creating, updating, and retrieving products and product subscriptions.
+    """
+
     @staticmethod
     def create_product_subscription(org_id, subscription_data: Tuple[Dict[str, Any]]):
         """Create product subscription for the user.
