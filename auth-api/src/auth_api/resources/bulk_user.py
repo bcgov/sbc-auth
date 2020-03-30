@@ -50,7 +50,7 @@ class BulkUser(Resource):
 
             users = UserService.create_user_and_add_membership(request_json['users'],
                                                                request_json['orgId'], token)
-            is_any_error = any(user['status'] != 201 for user in users['users'])
+            is_any_error = any(user['http_status'] != 201 for user in users['users'])
 
             response, status = users, http_status.HTTP_207_MULTI_STATUS if is_any_error else http_status.HTTP_200_OK
         except BusinessException as exception:

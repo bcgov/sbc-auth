@@ -114,7 +114,7 @@ def test_create_user_and_add_same_user_name_error_in_kc(session, auth_mock,
     request.user_name = membership[0]['username']
     keycloak_service.add_user(request)
     users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
-    assert users['users'][0]['status'] == 409
+    assert users['users'][0]['http_status'] == 409
     assert users['users'][0]['error'] == 'The username is already taken'
 
 
@@ -128,8 +128,32 @@ def test_create_user_and_add_same_user_name_error_in_db(session, auth_mock,
     new_members['username'] = user.username.replace(f'{IdpHint.BCROS.value}/', '')
     membership = [new_members]
     users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
-    assert users['users'][0]['status'] == 409
+    assert users['users'][0]['http_status'] == 409
     assert users['users'][0]['error'] == 'The username is already taken'
+
+
+def test_create_user_and_add_transaction_membership(session
+                                                    , auth_mock, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an owner can be added as anonymous."""
+    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
+    membership = [TestAnonymousMembership.generate_random_user(OWNER)]
+    with patch('auth_api.models.Membership.save', side_effect=Exception('mocked error')):
+        users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
+
+    user_name = IdpHint.BCROS.value + '/' + membership[0]['username']
+    assert len(users['users']) == 1
+    assert users['users'][0]['username'] == membership[0]['username']
+    assert users['users'][0]['http_status'] == 500
+    assert users['users'][0]['error'] == 'Adding User Failed'
+
+    # make sure no records are created
+    user = UserModel.find_by_username(user_name)
+    assert user is None
+    user = UserModel.find_by_username(membership[0]['username'])
+    assert user is None
+    members = MembershipModel.find_members_by_org_id(org.id)
+    # only one member should be there since its a STAFF created org
+    assert len(members) == 0
 
 
 def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,

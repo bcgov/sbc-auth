@@ -46,7 +46,7 @@ class Error(Enum):
     USER_CANT_CREATE_ANONYMOUS_ORG = 'Only staff can create anonymous org', http_status.HTTP_401_UNAUTHORIZED
     USER_ALREADY_EXISTS_IN_KEYCLOAK = 'User Already exists in keycloak', http_status.HTTP_409_CONFLICT
     USER_ALREADY_EXISTS = 'The username is already taken', http_status.HTTP_409_CONFLICT
-    FAILED_ADDING_USER_ERROR = 'Undefined error.Error adding user', http_status.HTTP_500_INTERNAL_SERVER_ERROR
+    FAILED_ADDING_USER_ERROR = 'Adding User Failed', http_status.HTTP_500_INTERNAL_SERVER_ERROR
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""

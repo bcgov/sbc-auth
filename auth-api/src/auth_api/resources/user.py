@@ -67,7 +67,7 @@ class AnonymousUser(Resource):
                                                               invitation['membership'][0]['org']['id'],
                                                               single_mode=True)
             user_dict = user['users'][0]
-            if user_dict['status'] != http_status.HTTP_201_CREATED:
+            if user_dict['http_status'] != http_status.HTTP_201_CREATED:
                 response, status = {'code': user_dict['status'], 'message': user_dict['error']}, user_dict['error']
             else:
                 InvitationService.accept_invitation(invitation['id'], None, None, False)

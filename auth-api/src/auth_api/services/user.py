@@ -71,6 +71,7 @@ class User:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def create_user_and_add_membership(memberships: List[dict], org_id, token_info: Dict = None,
+                                       # pylint: disable=too-many-locals
                                        single_mode: bool = False):
         """
         Create user(s) in the  DB and upstream keycloak.
@@ -126,13 +127,13 @@ class User:  # pylint: disable=too-many-instance-attributes
                                                   firstname=kc_user.first_name, lastname=kc_user.last_name)
 
                 user_model.flush()
-                membership = MembershipModel(org_id=org_id, user_id=user_model.id,
-                                             membership_type_code=membership['membershipType'],
-                                             membership_type_status=Status.ACTIVE.value)
-                membership.save()
+                membership_model = MembershipModel(org_id=org_id, user_id=user_model.id,
+                                                   membership_type_code=membership['membershipType'],
+                                                   membership_type_status=Status.ACTIVE.value)
+                membership_model.save()
                 user_model.commit()
                 user_dict = User(user_model).as_dict()
-                user_dict.update({'status': http_status.HTTP_201_CREATED, 'error': ''})
+                user_dict.update({'http_status': http_status.HTTP_201_CREATED, 'error': ''})
                 users.append(user_dict)
             except Exception as e:  # pylint: disable=broad-except
                 current_app.logger.error('Error on  create_user_and_add_membership: {}', e)
@@ -190,7 +191,7 @@ class User:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def _get_error_dict(username, error):
-        return {'username': username, 'status': error.value[1],
+        return {'username': username, 'http_status': error.value[1],
                 'error': error.value[0]}
 
     @staticmethod
