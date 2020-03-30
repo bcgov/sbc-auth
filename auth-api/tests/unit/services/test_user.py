@@ -157,7 +157,7 @@ def test_create_user_and_add_transaction_membership(session, auth_mock,
 
 
 def test_create_user_and_add_transaction_membership_1(session, auth_mock,
-                                                    keycloak_mock):  # pylint:disable=unused-argument
+                                                      keycloak_mock):  # pylint:disable=unused-argument
     """Assert transactions works fine."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     membership = [TestAnonymousMembership.generate_random_user(OWNER)]
@@ -178,6 +178,7 @@ def test_create_user_and_add_transaction_membership_1(session, auth_mock,
     members = MembershipModel.find_members_by_org_id(org.id)
     # only one member should be there since its a STAFF created org
     assert len(members) == 0
+
 
 def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,
                                                              keycloak_mock):  # pylint:disable=unused-argument
