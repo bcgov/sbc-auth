@@ -13,7 +13,7 @@
 # limitations under the License.
 """Service for managing Organization data."""
 
-from typing import Any, Dict, Tuple
+from typing import Dict, Tuple
 
 from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
@@ -22,14 +22,10 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
-from auth_api.models import ProductCode as ProductCodeModel
-from auth_api.models import ProductRoleCode as ProductRoleCodeModel
-from auth_api.models import ProductSubscriptionRole as ProductSubscriptionRoleModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
-from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.schemas import OrgSchema
 from auth_api.utils.roles import OWNER, VALID_STATUSES, Status, AccessType
 from auth_api.utils.util import camelback2snake
@@ -90,37 +86,6 @@ class Org:
             KeycloakService.join_account_holders_group()
 
         return Org(org)
-
-    @staticmethod
-    def create_product_subscription(org_id, subscription_data: Tuple[Dict[str, Any]]):
-        """Create product subscription for the user.
-
-        create product subscription first
-        create the product role next if roles are given
-        """
-        org = OrgModel.find_by_org_id(org_id)
-        if not org:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
-        subscriptions_list = subscription_data.get('subscriptions')
-        # just used for returning all the models.. not ideal..
-        # todo remove this and may be return the subscriptions from db
-        subscriptions_model_list = []
-        for subscription in subscriptions_list:
-            product_code = subscription.get('productCode')
-            product = ProductCodeModel.find_by_code(product_code)
-            if product:
-                product_subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code).save()
-                subscriptions_model_list.append(product_subscription)
-            else:
-                raise BusinessException(Error.DATA_NOT_FOUND, None)
-            if subscription.get('product_roles') is not None:
-                for role in subscription.get('productRoles'):
-                    product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role, product_code)
-                    if product_role_code:
-                        ProductSubscriptionRoleModel(product_subscription_id=product_subscription.id,
-                                                     product_role_id=product_role_code.id).save()
-        # TODO return something better/useful.may be return the whole model from db
-        return subscriptions_model_list
 
     def update_org(self, org_info):
         """Update the passed organization with the new info."""

@@ -19,6 +19,7 @@ from .documents import Documents
 from .entity import Entity
 from .invitation import Invitation
 from .membership import Membership
+from .products import Product
 from .org import Org
 from .reset import ResetTestData
 from .user import User
