@@ -1,5 +1,5 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { AddUserBody, AddUsersToOrgBody, CreateRequestBody as CreateOrgRequestBody, Member, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { AddUserBody, AddUsersToOrgBody, BulkUsersFailed, BulkUsersSuccess, CreateRequestBody as CreateOrgRequestBody, Member, Organization, UpdateMemberPayload } from '@/models/Organization'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
 import { AccountSettings } from '@/models/account-settings'
@@ -26,7 +26,8 @@ export default class OrgModule extends VuexModule {
   pendingOrgInvitations: Invitation[] = []
   invalidInvitationToken = false
   tokenError = false
-  createdUsers: AddUserBody[] = []
+  createdUsers: BulkUsersSuccess[] = []
+  failedUsers: BulkUsersFailed[] = []
 
   @Mutation
   public setActiveOrgMembers (activeMembers: Member[]) {
@@ -81,8 +82,13 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
-  public setCreatedUsers (users: AddUserBody[]) {
+  public setCreatedUsers (users: BulkUsersSuccess[]) {
     this.createdUsers = users
+  }
+
+  @Mutation
+  public setFailedUsers (users: BulkUsersFailed[]) {
+    this.failedUsers = users
   }
 
   @Action({ rawError: true })
@@ -252,15 +258,35 @@ export default class OrgModule extends VuexModule {
     const response = await StaffService.addProducts(this.context.state['currentOrganization'].id, productsRequestBody)
     return response?.data
   }
+
   @Action({ rawError: true })
   public async createUsers (addUserBody: AddUsersToOrgBody) {
     try {
       const response = await UserService.createUsers(addUserBody)
-      if (!response || !response.data || response.status !== 201) {
+      if (!response || !response.data || ![200, 201, 207].includes(response.status) || !response.data?.users) {
         throw new Error('Unable to create users')
+      } else {
+        let users = response.data.users
+        let successUsers: BulkUsersSuccess[] = []
+        let failedUsers: BulkUsersFailed[] = []
+        users.forEach((user) => {
+          if (user.http_status === 201) {
+            const password = (addUserBody.users.find(({ username }) => username === user.firstname))?.password
+            successUsers.push({
+              username: user.firstname,
+              password: password
+            })
+          } else {
+            failedUsers.push({
+              username: user.username,
+              error: user.error
+            })
+          }
+        })
+        this.context.commit('setCreatedUsers', successUsers)
+        this.context.commit('setFailedUsers', failedUsers)
+        await this.context.dispatch('syncActiveOrgMembers')
       }
-      this.context.commit('setCreatedUsers', addUserBody.users)
-      await this.context.dispatch('syncActiveOrgMembers')
     } catch (exception) {
       throw exception
     }
