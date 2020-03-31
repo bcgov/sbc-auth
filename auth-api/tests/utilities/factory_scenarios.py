@@ -115,7 +115,8 @@ class TestJwtClaims(dict, Enum):
         'preferred_username': 'testuser',
         'realm_access': {
             'roles': [
-                'staff'
+                'staff',
+                'edit'
             ]
         }
     }
@@ -128,9 +129,14 @@ class TestJwtClaims(dict, Enum):
         'preferred_username': 'testuser',
         'realm_access': {
             'roles': [
-                'staff', 'staff_admin'
+                'staff',
+                'staff_admin',
+                'edit'
             ]
-        }
+        },
+        'roles': [
+            'staff', 'staff_admin'
+        ]
     }
 
     system_role = {
@@ -311,7 +317,8 @@ class TestEntityInfo(dict, Enum):
                'businessNumber': '791861073BC0001',
                'name': 'Foobar, Inc.',
                'passCode': '',
-               'corpTypeCode': 'CP'}
+               'corpTypeCode': 'CP',
+               'folioNumber': '1234'}
     entity2 = {'businessIdentifier': 'CP1234568',
                'businessNumber': '791861079BC0001',
                'name': 'BarFoo, Inc.',
@@ -489,8 +496,10 @@ class BulkUserTestScenario:
     def get_bulk_user1_for_org(org_id: str):
         """Generate a bulk user input."""
         return {'users': [
-            {'username': 'first2user2238', 'password': 'helo', 'membershipType': 'ADMIN'},
-            {'username': 'secon2duse2r248', 'password': 'helo', 'membershipType': 'MEMBER'}
+            {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'helo',
+             'membershipType': 'ADMIN'},
+            {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'helo',
+             'membershipType': 'MEMBER'}
         ],
             'orgId': org_id
         }

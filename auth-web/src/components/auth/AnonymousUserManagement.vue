@@ -27,7 +27,7 @@
       :fullscreen-on-mobile="$vuetify.breakpoint.xsOnly || $vuetify.breakpoint.smOnly || $vuetify.breakpoint.mdOnly"
       :is-persistent="true"
       :is-scrollable="true"
-      max-width="640"
+      max-width="800"
     >
       <template v-slot:title>
         <span>Add Team Members</span>
@@ -45,7 +45,11 @@
       max-width="640"
     >
       <template v-slot:actions>
-        <v-btn large color="error" @click="close($refs.addUsersSuccessDialog)">OK</v-btn>
+        <v-btn large color="primary" @click="close($refs.addUsersSuccessDialog)">OK</v-btn>
+      </template>
+
+      <template v-slot:icon v-if="!createdUsers.length && failedUsers.length">
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
 
       <template v-slot:text>
@@ -119,7 +123,7 @@
 </template>
 
 <script lang="ts">
-import { ActiveUserRecord, AddUserBody, Member, MembershipStatus, MembershipType, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
+import { ActiveUserRecord, AddUserBody, BulkUsersFailed, BulkUsersSuccess, Member, MembershipStatus, MembershipType, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import MemberDataTable, { ChangeRolePayload } from '@/components/auth/MemberDataTable.vue'
 import { mapActions, mapState } from 'vuex'
@@ -148,7 +152,8 @@ import { getModule } from 'vuex-module-decorators'
   },
   computed: {
     ...mapState('org', [
-      'createdUsers'
+      'createdUsers',
+      'failedUsers'
     ])
   },
   methods: {
@@ -164,7 +169,8 @@ export default class AnonymousUserManagement extends Mixins(TeamManagementMixin)
   private isLoading = true
 
   private readonly syncActiveOrgMembers!: () => Member[]
-  private readonly createdUsers!: AddUserBody[]
+  private readonly createdUsers!: BulkUsersSuccess[]
+  private readonly failedUsers!: BulkUsersFailed[]
 
   $refs: {
     successDialog: ModalDialog
@@ -191,6 +197,9 @@ export default class AnonymousUserManagement extends Mixins(TeamManagementMixin)
   private showSuccessModal () {
     this.$refs.addAnonUsersDialog.close()
     this.successTitle = `Added ${this.createdUsers.length} Team Members`
+    if (this.failedUsers.length) {
+      this.successTitle = `Added ${this.createdUsers.length} of ${(this.failedUsers.length + this.createdUsers.length)} Team Members`
+    }
     this.$refs.addUsersSuccessDialog.open()
   }
 }

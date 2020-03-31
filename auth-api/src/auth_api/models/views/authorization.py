@@ -34,17 +34,30 @@ class Authorization(db.Model):
     business_identifier = Column(String)
     entity_name = Column(String)
     org_membership = Column(String)
-    keycloak_guid = Column(UUID, primary_key=True)
+    keycloak_guid = Column(UUID)
     org_id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, primary_key=True)
     org_type = Column(String)
     corp_type_code = Column(String)
     product_code = Column(String)
     roles = Column(String)
+    org_name = Column(String)
+    preferred_payment_code = Column(String)
+    bcol_user_id = Column(String)
+    bcol_account_id = Column(String)
+    folio_number = Column(String)
 
     @classmethod
-    def find_user_authorization_by_business_number(cls, keycloak_guid: uuid, business_identifier: str):
+    def find_user_authorization_by_business_number(cls, business_identifier: str, keycloak_guid: uuid = None):
         """Return authorization view object."""
-        return cls.query.filter_by(keycloak_guid=keycloak_guid, business_identifier=business_identifier).one_or_none()
+        auth = None
+        if keycloak_guid and business_identifier:
+            auth = cls.query.filter_by(keycloak_guid=keycloak_guid,
+                                       business_identifier=business_identifier).one_or_none()
+        if not keycloak_guid and business_identifier:
+            auth = cls.query.filter_by(business_identifier=business_identifier).first()
+
+        return auth
 
     @classmethod
     def find_user_authorization_by_business_number_and_corp_type(cls, business_identifier: str, corp_type: str):

@@ -64,9 +64,14 @@ class AnonymousUser(Resource):
             }
             membership_details.update(request_json)
             user = UserService.create_user_and_add_membership([membership_details],
-                                                              invitation['membership'][0]['org']['id'], skip_auth=True)
-            InvitationService.accept_invitation(invitation['id'], None, None, False)
-            response, status = user, http_status.HTTP_201_CREATED
+                                                              invitation['membership'][0]['org']['id'],
+                                                              single_mode=True)
+            user_dict = user['users'][0]
+            if user_dict['http_status'] != http_status.HTTP_201_CREATED:
+                response, status = {'code': user_dict['http_status'], 'message': user_dict['error']}, user_dict['error']
+            else:
+                InvitationService.accept_invitation(invitation['id'], None, None, False)
+                response, status = user, http_status.HTTP_201_CREATED
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -95,8 +100,8 @@ class Users(Resource):
             # Add the user to public_users group if the user doesn't have public_user group
             KeycloakService.join_users_group(g.jwt_oidc_token_info)
             # If the user doesn't have account_holder role check if user is part of any orgs and add to the group
-            if token.get('loginSource', None) in (BCSC, BCROS) \
-                    and Role.ACCOUNT_HOLDER.value not in token.get('roles') \
+            if token.get('loginSource', '') in (BCSC, BCROS) \
+                    and Role.ACCOUNT_HOLDER.value not in token.get('roles', []) \
                     and len(OrgService.get_orgs(user.identifier, [Status.ACTIVE.value])) > 0:
                 KeycloakService.join_account_holders_group()
 

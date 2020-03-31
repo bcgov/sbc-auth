@@ -21,6 +21,7 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Affiliation as AffiliationModel
+from auth_api.models import AccountPaymentSettings as AccountPaymentModel
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
@@ -84,6 +85,9 @@ class Org:
 
             # Add the user to account_holders group
             KeycloakService.join_account_holders_group()
+
+        # TODO Remove later, create payment settings now with default values
+        AccountPaymentModel.create_from_dict({'org_id': org.id})
 
         return Org(org)
 

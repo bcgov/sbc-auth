@@ -20,8 +20,7 @@ from typing import Dict
 from flask import abort
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
-from auth_api.schemas.authorization import AuthorizationSchema
-from auth_api.utils.roles import OWNER, STAFF, Role, STAFF_ADMIN
+from auth_api.utils.roles import STAFF, Role, STAFF_ADMIN
 
 
 class Authorization:
@@ -36,33 +35,35 @@ class Authorization:
         self._model = model
 
     @staticmethod
-    def get_user_authorizations_for_entity(token_info: Dict, business_identifier: str):
+    def get_user_authorizations_for_entity(token_info: Dict, business_identifier: str, expanded: bool = False):
         """Get User authorizations for the entity."""
         auth_response = {}
-        if token_info.get('loginSource', None) == 'PASSCODE':
-            if token_info.get('username', None).upper() == business_identifier.upper():
-                auth_response = {
-                    'orgMembership': OWNER,
-                    'roles': ['edit', 'view']
-                }
-        elif 'staff' in token_info.get('realm_access').get('roles'):
-            auth_response = {
-                'roles': ['edit', 'view']
-            }
-        elif Role.SYSTEM.value in token_info.get('realm_access').get('roles'):
+        auth = None
+        token_roles = token_info.get('realm_access').get('roles')
+
+        if 'staff' in token_roles and 'edit' in token_roles:
+            if expanded:
+                # Query Authorization view by business identifier
+                auth = AuthorizationView.find_user_authorization_by_business_number(business_identifier)
+                auth_response = Authorization(auth).as_dict(expanded)
+            auth_response['roles'] = ['edit', 'view']
+
+        elif Role.SYSTEM.value in token_roles:
             # a service account in keycloak should have corp_type claim setup.
             keycloak_corp_type = token_info.get('corp_type', None)
             if keycloak_corp_type:
                 auth = AuthorizationView.find_user_authorization_by_business_number_and_corp_type(business_identifier,
                                                                                                   keycloak_corp_type)
                 if auth:
-                    auth_response = Authorization(auth).as_dict(exclude=['business_identifier'])
+                    auth_response = Authorization(auth).as_dict(expanded)
                     auth_response['roles'] = ['edit', 'view']
         else:
             keycloak_guid = token_info.get('sub', None)
-            auth = AuthorizationView.find_user_authorization_by_business_number(keycloak_guid, business_identifier)
+            if business_identifier and keycloak_guid:
+                auth = AuthorizationView.find_user_authorization_by_business_number(business_identifier, keycloak_guid)
+
             if auth:
-                auth_response = Authorization(auth).as_dict(exclude=['business_identifier'])
+                auth_response = Authorization(auth).as_dict(expanded)
                 auth_response['roles'] = ['edit', 'view']
 
         return auth_response
@@ -79,24 +80,42 @@ class Authorization:
         return authorizations_response
 
     @staticmethod
-    def get_account_authorizations_for_product(keycloak_guid: str, account_id: str, product_code: str):
+    def get_account_authorizations_for_product(keycloak_guid: str, account_id: str, product_code: str,
+                                               expanded: bool = False):
         """Get account authorizations for the product."""
-        auth_response: Dict = {'roles': []}
         authorization = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(keycloak_guid,
                                                                                                     account_id,
                                                                                                     product_code)
+        auth_response = Authorization(authorization).as_dict(expanded)
         auth_response['roles'] = authorization.roles.split(',') if authorization and authorization.roles else []
+
         return auth_response
 
-    def as_dict(self, exclude: [] = None):
-        """Return the authorization as a python dictionary.
+    def as_dict(self, expanded: bool = False):
+        """Return the authorization as a python dictionary."""
+        auth_dict = {}
 
-        None fields are not included in the dictionary.
-        """
-        if not exclude:
-            exclude = []
-        auth_schema = AuthorizationSchema(exclude=exclude)
-        return auth_schema.dump(self._model, many=False)
+        if not self._model:
+            return auth_dict
+
+        auth_dict['orgMembership'] = self._model.org_membership
+
+        # If the request is for expanded authz return more info
+        if expanded:
+            auth_dict['business'] = {
+                'folioNumber': self._model.folio_number,
+                'name': self._model.entity_name
+            }
+            auth_dict['account'] = {
+                'id': self._model.org_id,
+                'name': self._model.org_name,
+                'paymentPreference': {
+                    'methodOfPayment': self._model.preferred_payment_code,
+                    'bcOnlineUserId': self._model.bcol_user_id,
+                    'bcOnlineAccountId': self._model.bcol_account_id
+                }
+            }
+        return auth_dict
 
 
 def check_auth(token_info: Dict, **kwargs):
@@ -111,8 +130,7 @@ def check_auth(token_info: Dict, **kwargs):
         _check_for_roles(STAFF_ADMIN, kwargs)
     elif 'staff' in token_info.get('realm_access').get('roles'):
         _check_for_roles(STAFF, kwargs)
-    elif Role.SYSTEM.value in token_info.get('realm_access').get('roles') \
-            and not token_info.get('loginSource', None) == 'PASSCODE':
+    elif Role.SYSTEM.value in token_info.get('realm_access').get('roles'):
         corp_type_in_jwt = token_info.get('corp_type', None)
         if corp_type_in_jwt is None:
             # corp type must be present in jwt

@@ -24,6 +24,7 @@ from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
 
+
 API = Namespace('bulk users', description='Endpoints for bulk user profile management')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
@@ -49,7 +50,9 @@ class BulkUser(Resource):
 
             users = UserService.create_user_and_add_membership(request_json['users'],
                                                                request_json['orgId'], token)
-            response, status = users, http_status.HTTP_201_CREATED
+            is_any_error = any(user['http_status'] != 201 for user in users['users'])
+
+            response, status = users, http_status.HTTP_207_MULTI_STATUS if is_any_error else http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

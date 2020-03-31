@@ -30,8 +30,8 @@ def test_find_user_authorization_by_business_number(session):  # pylint:disable=
     membership = factory_membership_model(user.id, org.id)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
-    authorization = Authorization.find_user_authorization_by_business_number(str(user.keycloak_guid),
-                                                                             entity.business_identifier)
+    authorization = Authorization.find_user_authorization_by_business_number(entity.business_identifier,
+                                                                             str(user.keycloak_guid))
 
     assert authorization is not None
     assert authorization.org_membership == membership.membership_type_code
@@ -164,12 +164,12 @@ def test_find_invalid_user_authorization_by_business_number(session):  # pylint:
     factory_membership_model(user.id, org.id)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
-    authorization = Authorization.find_user_authorization_by_business_number(str(uuid.uuid4()),
-                                                                             entity.business_identifier)
+    authorization = Authorization.find_user_authorization_by_business_number(entity.business_identifier,
+                                                                             str(uuid.uuid4()))
     assert authorization is None
 
     # Test with invalid business identifier
-    authorization = Authorization.find_user_authorization_by_business_number(str(uuid.uuid4()), '')
+    authorization = Authorization.find_user_authorization_by_business_number('', str(uuid.uuid4()))
     assert authorization is None
 
 

@@ -3374,9 +3374,20 @@ paths:
               examples:
                 example1:
                   value:
+                    orgMembership: OWNER
                     roles:
                       - search
                       - edit
+                    business:
+                      folioNumber: MOCK1234
+                      name: Mock Business
+                    account:
+                      id: '1234'
+                      name: Mock Account
+                      paymentPreference:
+                        methodOfPayment: CC
+                        bcOnlineUserId: PB25020
+                        bcOnlineAccountId: ''
         default:
           description: unexpected error
           content:
