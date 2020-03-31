@@ -26,6 +26,7 @@ from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
+from auth_api.services import Product as ProductService
 from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
@@ -62,7 +63,7 @@ def test_create_product_single_subscription(session, keycloak_mock):  # pylint:d
     assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
-    subscriptions = OrgService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products1, )
+    subscriptions = ProductService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products1, )
     assert len(subscriptions) == 1
     assert subscriptions[0].product_code == TestOrgProductsInfo.org_products1['subscriptions'][0]['productCode']
 
@@ -74,7 +75,7 @@ def test_create_product_multiple_subscription(session, keycloak_mock):  # pylint
     assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
-    subscriptions = OrgService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products2, )
+    subscriptions = ProductService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products2, )
     assert len(subscriptions) == 2
     assert subscriptions[0].product_code == TestOrgProductsInfo.org_products2['subscriptions'][0]['productCode']
     assert subscriptions[1].product_code == TestOrgProductsInfo.org_products2['subscriptions'][1]['productCode']
