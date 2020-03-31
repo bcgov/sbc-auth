@@ -78,6 +78,8 @@ class Product:
                     merged_product_infos.append({
                         'name': product.desc,
                         'description': product_config.get('description'),
-                        'url': product_config.get('url')
+                        'url': product_config.get('url'),
+                        'type': product.type_code,
+                        'mdiIcon': product_config.get('mdiIcon')
                     })
         return merged_product_infos
