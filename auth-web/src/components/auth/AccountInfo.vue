@@ -87,6 +87,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   private async updateOrgName () {
+    this.errorMessage = ''
     this.btnLabel = 'Saving'
     const createRequestBody: CreateRequestBody = {
       name: this.orgName
