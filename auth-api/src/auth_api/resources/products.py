@@ -28,6 +28,7 @@ API = Namespace('products', description='Endpoints for products management')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
 
+
 @cors_preflight('GET,OPTIONS')
 @API.route('', methods=['GET', 'OPTIONS'])
 class Products(Resource):
