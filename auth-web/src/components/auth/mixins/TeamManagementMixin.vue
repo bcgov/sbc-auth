@@ -1,6 +1,7 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { LoginSource, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
 import MemberDataTable, { ChangeRolePayload } from '@/components/auth/MemberDataTable.vue'
 import { mapActions, mapState } from 'vuex'
@@ -11,10 +12,11 @@ import { EventBus } from '@/event-bus'
 import { Invitation } from '@/models/Invitation'
 import InvitationsDataTable from '@/components/auth/InvitationsDataTable.vue'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import PendingMemberDataTable from '@/components/auth/PendingMemberDataTable.vue'
-import { SessionStorageKeys } from '@/util/constants'
+import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -24,6 +26,9 @@ import { getModule } from 'vuex-module-decorators'
   computed: {
     ...mapState('org', [
       'currentMembership'
+    ]),
+    ...mapState('user', [
+      'currentUser'
     ])
   },
   methods: {
@@ -35,6 +40,7 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class TeamManagementMixin extends Vue {
+  private userStore = getModule(UserModule, this.$store)
   protected successTitle: string = ''
   protected successText: string = ''
   protected errorTitle: string = ''
@@ -52,6 +58,7 @@ export default class TeamManagementMixin extends Vue {
   protected readonly updateMember!: (updateMemberPayload: UpdateMemberPayload) => void
   protected readonly leaveTeam!: (memberId: number) => void
   protected readonly dissolveTeam!: () => void
+  protected readonly currentUser!: KCUserProfile
 
   private notifyUser = true
   private modal: ModalDialog
@@ -127,7 +134,7 @@ export default class TeamManagementMixin extends Vue {
     await this.updateMember({
       memberId: this.roleChangeToAction.member.id,
       role: this.roleChangeToAction.targetRole.toString().toUpperCase(),
-      notifyUser: this.notifyUser
+      notifyUser: (this.currentUser?.loginSource !== LoginSource.BCROS) ? this.notifyUser : false
     })
     this.modal.close()
   }
