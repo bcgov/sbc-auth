@@ -11,9 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""API endpoints for managing an Org resource."""
+"""API endpoints for managing a Product resource."""
 
-from flask_restplus import Namespace, Resource
+import json
+
+from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
@@ -26,17 +28,18 @@ API = Namespace('products', description='Endpoints for products management')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
 
-
-@cors_preflight('GET,POST,OPTIONS')
-@API.route('', methods=['GET', 'POST', 'OPTIONS'])
-class OrgProducts(Resource):
+@cors_preflight('GET,OPTIONS')
+@API.route('', methods=['GET', 'OPTIONS'])
+class Products(Resource):
     """Resource for managing products."""
 
     @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
     def get():
         """Get a list of all products."""
         try:
-            response, status = ProductService.get_products(), http_status.HTTP_200_OK
+            response, status = json.dumps(ProductService.get_products()), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
