@@ -173,8 +173,8 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
               case 'FAILED_ADDING_USER_IN_KEYCLOAK':
                 this.showErrorModal('Failed to add the user, please try again')
                 break
-              case 'DATA_ALREADY_EXISTS':
-                this.showErrorModal('There is already an user existing with the given username, please try with a new one')
+              case 409:
+                this.showErrorModal('The username has already been taken.Please try another user name.')
                 break
               default: this.showErrorModal()
             }
