@@ -4,8 +4,8 @@
       <sbc-loader :show="showLoading" />
       <sbc-header
         :key="$store.state.refreshKey"
-        in-auth=true
-        showProductSelector=true
+        :in-auth="true"
+        :show-product-selector="false"
         @account-switch-started="startAccountSwitch"
         @account-switch-completed="completeAccountSwitch"
         @hook:mounted="setup"
