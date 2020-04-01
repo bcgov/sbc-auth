@@ -1,7 +1,7 @@
 <template>
   <div>
     <template v-if="isDenied">
-      <interim-landing :summary="$t('deniedInvitationTitle', { team: $route.params.team_name })" :description="$t('deniedInvitationMsg')" icon="mdi-alert-circle-outline" iconColor="error">
+      <interim-landing :summary="$t('notAuthorized')" :description="$t('deniedInvitationMsg', { team: $route.params.team_name })" icon="mdi-alert-circle-outline" iconColor="error">
       </interim-landing>
     </template>
     <template v-else>

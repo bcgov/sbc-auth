@@ -3,7 +3,7 @@
     <v-row justify="center">
       <v-col cols="12" lg="8" class="text-center">
         <v-icon size="48" color="error" class="mb-6">{{(isDirSearchUser) ? 'mdi-information-outline' : 'mdi-lock-outline'}}</v-icon>
-        <h1 class="mb-5">Not Authorized</h1>
+        <h1 class="mb-5">{{$t('notAuthorized')}}</h1>
         <p class="mb-9">{{ errorMessage }}</p>
         <div v-if="isDirSearchUser">
           <v-btn
