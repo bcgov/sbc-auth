@@ -1,5 +1,5 @@
 
-name: Auth WEB Lint and Test
+name: UI Lint and Test
 
 on:
   pull_request:
@@ -29,19 +29,19 @@ jobs:
         npm ci
       env:
         CI: true
-    - name: Lint
+    - name: Run Lint
       working-directory: ./auth-web
       run: | 
         npm run lint
       env:
         CI: true
-    - name: Unit Test
+    - name: Run Unit Tests
       working-directory: ./auth-web
       run: | 
         npm run test:unit
       env:
         CI: true
-    - name: run build
+    - name: Run build
       working-directory: ./auth-web
       run: |
         npm run build
