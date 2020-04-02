@@ -1,5 +1,5 @@
 
-name: Auth WEB CHECK LINT AND TEST
+name: Auth WEB Lint and Test
 
 on:
   pull_request:
@@ -24,21 +24,25 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: install with npm ci
+      working-directory: ./auth-web
       run: | 
         npm ci
       env:
         CI: true
     - name: Lint
+      working-directory: ./auth-web
       run: | 
         npm run lint
       env:
         CI: true
     - name: Unit Test
+      working-directory: ./auth-web
       run: | 
         npm run test:unit
       env:
         CI: true
     - name: run build
+      working-directory: ./auth-web
       run: |
         npm run build
         env:
