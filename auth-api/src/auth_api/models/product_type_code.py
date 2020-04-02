@@ -11,28 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages a Product Code record.
+"""This manages a Product Type Code record.
 
-It defines the available products.
+It defines the available types of products, e.g. Internal, Partner.
 """
-
-from sqlalchemy import Column, ForeignKey
 
 from .base_model import BaseCodeModel
 
 
-class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
-    """Product code table to store all the products supported by auth system."""
+class ProductTypeCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
+    """Product type code table to store all the types of products supported by auth system."""
 
-    __tablename__ = 'product_code'
-    type_code = Column(ForeignKey('product_type_code.code'), default='INTERNAL', nullable=False)
+    __tablename__ = 'product_type_code'
 
     @classmethod
     def find_by_code(cls, code):
-        """Find a Product Role Code instance that matches the code."""
+        """Find a Product Type Code instance that matches the code."""
         return cls.query.filter_by(code=code).one_or_none()
-
-    @classmethod
-    def get_all_products(cls):
-        """Get all of the products codes."""
-        return cls.query.all()
