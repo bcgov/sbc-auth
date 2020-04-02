@@ -31,7 +31,8 @@ module.exports = {
   testURL: 'http://localhost/',
   globals: {
     'ts-jest': {
-      babelConfig: true
+      babelConfig: true,
+      isolatedModules: true
     }
   }
 }
