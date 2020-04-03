@@ -53,7 +53,7 @@ class Product:
                 subscriptions_model_list.append(product_subscription)
             else:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)
-            if subscription.get('product_roles') is not None:
+            if subscription.get('productRoles') is not None:
                 for role in subscription.get('productRoles'):
                     product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role, product_code)
                     if product_role_code:
