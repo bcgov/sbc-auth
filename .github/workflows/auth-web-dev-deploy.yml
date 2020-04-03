@@ -1,1 +1,30 @@
 
+name: Auth Web DEV CD
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - "auth-web/**"
+env:
+  IMAGE_NAME: auth-web
+  TAG_NAME: dev
+
+jobs:
+  auth-web-dev:    
+      runs-on: ubuntu-latest
+
+      strategy:
+          matrix:
+            node-version: [12.x]
+      steps:
+        - uses: actions/checkout@v2
+        - name: Use Node.js ${{ matrix.node-version }}
+          uses: actions/setup-node@v1
+          with:
+            node-version: ${{ matrix.node-version }}
+
+        - name: Build image
+          run: docker build . --file Dockerfile --tag image 
+          working-directory: ./auth-web
