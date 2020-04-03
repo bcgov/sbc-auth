@@ -189,6 +189,7 @@ export default class AddUsersForm extends Vue {
           this.users.splice(i, 1)
         } else {
           user.membershipType = user.selectedRole.name.toUpperCase()
+          user.username = user.username.toLowerCase()
         }
       }
       await this.createUsers({ orgId: this.currentOrganization.id, users: this.users })
