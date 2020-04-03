@@ -2,7 +2,7 @@
   <div class="passcode-form">
     <v-form ref="addBusinessForm" lazy-validation>
       <fieldset>
-        <legend class="mb-4" hidden>Incorporation Number and Passcode</legend>
+        <legend class="mb-4" hidden>Incorporation Number and Passcodes</legend>
         <v-expand-transition>
           <div class="passcode-form__alert-container" v-show="validationError">
             <v-alert
