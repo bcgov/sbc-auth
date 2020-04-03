@@ -11,12 +11,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import { Account } from '@/util/constants'
 import AnonymousUserManagement from '@/components/auth/AnonymousUserManagement.vue'
 import { Event } from '@/models/event'
+import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import UserManagement from '@/components/auth/UserManagement.vue'
 import { getModule } from 'vuex-module-decorators'
@@ -36,13 +37,14 @@ import { getModule } from 'vuex-module-decorators'
 
   }
 })
-export default class TeamManagement extends Vue {
+export default class TeamManagement extends Mixins(NextPageMixin) {
   @Prop({ default: '' }) private orgId: string;
 
-  private readonly currentMembership!: Member
-  private readonly currentOrganization!: Organization
-
   private async mounted () {
+    // redirect to dir search/team management according to dir search user role change
+    if (this.isAnonymousAccount()) {
+      this.redirectTo(this.getNextPageUrl())
+    }
   }
 
   private canInvite (): boolean {
