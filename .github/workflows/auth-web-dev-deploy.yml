@@ -28,3 +28,15 @@ jobs:
         - name: Build image
           run: docker build . --file Dockerfile --tag image 
           working-directory: ./auth-web
+        
+        - name: Log into registry
+          run: echo "${{ secrets.OPENSHIFT_TOKEN }}" | docker login ${{ secrets.OPENSHIFT_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
+      
+        - name: Push image
+          run: |
+            IMAGE_ID=${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME
+            echo IMAGE_ID=$IMAGE_ID
+            docker push $IMAGE_ID:latest
+            docker image tag $IMAGE_ID:latest $IMAGE_ID:$TAG_NAME
+            docker push $IMAGE_ID:$TAG_NAME
+            
