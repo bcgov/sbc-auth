@@ -4,7 +4,7 @@ name: Auth Web DEV CD
 on:
   push:
     branches:
-      - development
+      - gha
     paths:
       - "auth-web/**"
 env:
