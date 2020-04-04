@@ -1,5 +1,5 @@
 {
-  "realm": "fcf0kpqrss",
+  "realm": "fcf0kpqr",
   "auth-server-url": "https://sso-dev.pathfinder.gov.bc.ca/auth",
   "ssl-required": "external",
   "resource": "sbc-auth-web",
