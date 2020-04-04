@@ -9,7 +9,7 @@ For more information on the API please refer to:
 
 [auth-api\Readme](auth-api/README.md)
 
-For more information on the web component refer to:
+For more information on the web component refer to:s
 
 [auth-web\Readme](auth-web/README.md)
 
