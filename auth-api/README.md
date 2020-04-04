@@ -25,7 +25,7 @@ You also need to set up the variables used for environment-specific settings:
 
 ## Running the Auth Database on localhost
 
-To prepare your local database:
+To prepare your local databases:
 1. In the [root project folder](../docker/docker-compose.yml): `docker-compose up -d`
 2. In your `venv` environment: `python manage.py db upgrade`
 
