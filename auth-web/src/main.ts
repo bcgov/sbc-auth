@@ -20,7 +20,7 @@ Vue.prototype.$tokenService = new TokenService()
  */
 ConfigHelper.saveConfigToSessionStorage().then((data) => {
   // eslint-disable-next-line no-console
-  console.log('deployment1')
+  console.log('deployment2')
   renderVue()
 }
 )
