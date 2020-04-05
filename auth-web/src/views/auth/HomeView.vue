@@ -16,7 +16,7 @@
 
       <header class="hero-banner">
         <v-container>
-          <h1>Welcome to Cooperatives Online<sup>Beta!</sup></h1>
+          <h1>Welcome to Cooperatives Online<sup>Beta!!</sup></h1>
           <p>File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
 
           <div class="hero-banner__cta-btns">
