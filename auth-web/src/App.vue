@@ -12,7 +12,7 @@
         idpHint="bcsc"
         ref="header">
         <template v-slot:login-button-text>
-          Log in with BC Services Card
+          Log in with BC Services Cardss
         </template>
       </sbc-header>
        <v-snackbar top :color="toastType" v-model="showNotification" :timeout="toastTimeout">
