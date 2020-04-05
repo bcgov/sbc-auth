@@ -46,6 +46,11 @@ jobs:
             docker push $IMAGE_ID:$latest
             docker tag image $IMAGE_ID:$TAG_NAME
             docker push $IMAGE_ID:$TAG_NAME
+        - name: Login Openshift
+          working-directory: ./auth-web
+          run: |
+           oc ${{ secrets.oc_parameters }}
+           oc project ${{ secrets.OPENSHIFT_REPOSITORY_DEV }}     
         - name: Rollout new deployment
           working-directory: ./auth-web
           run: |
