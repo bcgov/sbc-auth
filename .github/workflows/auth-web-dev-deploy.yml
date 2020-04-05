@@ -9,7 +9,7 @@ on:
       - "auth-web/**"
 env:
   IMAGE_NAME: auth-web
-  TAG_NAME: dev
+  TAG_NAME: latest
 
 jobs:
   auth-web-dev:    
@@ -37,7 +37,21 @@ jobs:
           run: |
             IMAGE_ID=${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME
             echo IMAGE_ID=$IMAGE_ID
-            # docker push $IMAGE_ID:latest
-            docker tag image $IMAGE_ID:latest
-            docker push $IMAGE_ID:latest
+            # docker push $IMAGE_ID:$TAG_NAME
+            docker tag image $IMAGE_ID:$TAG_NAME
+            docker push $IMAGE_ID:$TAG_NAME
+        - name: Rollout new deployment
+          working-directory: ./auth-web
+          run: |
+           oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -w    
+        - name: Rocket.Chat Notification
+          uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+          if: always()
+          with:
+           type: ${{ job.status }}
+           job_name: "*Auth WEB Built and Deployed to DEV*"
+           channel: "#relationship-developers"
+           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+           commit: true
+           token: ${{ secrets.GITHUB_TOKEN }}   
             
