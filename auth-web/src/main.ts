@@ -19,6 +19,8 @@ Vue.prototype.$tokenService = new TokenService()
  *  Two ways , either reload Vue after we get the settings or load vue after we get the configs..going for second
  */
 ConfigHelper.saveConfigToSessionStorage().then((data) => {
+  // eslint-disable-next-line no-console
+  console.log('deployment1')
   renderVue()
 }
 )
