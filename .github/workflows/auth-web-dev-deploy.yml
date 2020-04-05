@@ -9,7 +9,7 @@ on:
       - "auth-web/**"
 env:
   IMAGE_NAME: auth-web
-  TAG_NAME: latest
+  TAG_NAME: dev
 
 jobs:
   auth-web-dev:    
@@ -43,7 +43,7 @@ jobs:
           run: |
             IMAGE_ID=${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME
             echo IMAGE_ID=$IMAGE_ID
-            # docker push $IMAGE_ID:$TAG_NAME
+            docker push $IMAGE_ID:$latest
             docker tag image $IMAGE_ID:$TAG_NAME
             docker push $IMAGE_ID:$TAG_NAME
         - name: Rollout new deployment
@@ -55,7 +55,7 @@ jobs:
           if: always()
           with:
            type: ${{ job.status }}
-           job_name: "*Auth WEB Built and Deployed to DEV*"
+           job_name: "*Auth WEB Built and Deployed to ${{env.TAG_NAME}}*"
            channel: "#relationship-developers"
            url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
            commit: true
