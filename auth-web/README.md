@@ -44,7 +44,7 @@ npm run test:unit
 ```
 ---
 ## For Production Build 
-Run the following command in the root folders:
+Run the following command in the root folder:
 
 ```
 npm run build
