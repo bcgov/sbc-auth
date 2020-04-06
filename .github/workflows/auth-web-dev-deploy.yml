@@ -56,7 +56,6 @@ jobs:
         - name: Rollout new deployment
           working-directory: ./auth-web
           run: |
-           oc tag $IMAGE_ID:latest $IMAGE_ID:dev 
            oc rollout status dc/$IMAGE_NAME-dev -w    
         - name: Rocket.Chat Notification
           uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
