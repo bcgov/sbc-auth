@@ -31,7 +31,7 @@ from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
 from auth_api.utils.constants import InvitationStatus
-from auth_api.utils.roles import ADMIN, MEMBER, OWNER, Status, InvitationType, STAFF_ADMIN, AccessType, InvitationType
+from auth_api.utils.roles import ADMIN, MEMBER, OWNER, Status, InvitationType, STAFF_ADMIN, AccessType
 from config import get_named_config
 
 from .authorization import check_auth
@@ -75,7 +75,8 @@ class Invitation:
             check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
 
         org_name = org.name
-        invitation_type = InvitationType.DIRECTOR_SEARCH.value if org.access_type == AccessType.ANONYMOUS.value else InvitationType.STANDARD.value
+        invitation_type = InvitationType.DIRECTOR_SEARCH.value if org.access_type == AccessType.ANONYMOUS.value \
+            else InvitationType.STANDARD.value
 
         invitation = InvitationModel.create_from_dict(invitation_info, user.identifier, invitation_type)
         confirmation_token = Invitation.generate_confirmation_token(invitation.id, invitation.type)
