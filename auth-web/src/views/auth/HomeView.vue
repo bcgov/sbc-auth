@@ -1,6 +1,19 @@
 <template>
   <div>
     <article>
+      <v-alert color="grey lighten-3" class="covid-alert">
+        <v-container>
+          <p class="title font-weight-bold">Special Notice Regarding COVID-19 and Annual General Meetings</p>
+          <p>In these uncertain times, it is important that individuals and organizations follow the guidelines
+            and recommendations set forth by the Provincial Health Officer and B.C. Health Minister, as well as
+            Health Canada guidelines in regards to the novel coronavirus (COVID-19). Due to these guidelines, the
+            Registrar has decided to grant an extension for all Cooperatives that wish to delay their Annual General
+            Meeting (AGM) for a period of six months from March 31, 2020 to September 30, 2020.</p>
+          <p>You do not need to make an application to the registrar to request a delay of your AGM; however, you
+            must inform your members that the AGM has been delayed.</p>
+        </v-container>
+      </v-alert>
+
       <header class="hero-banner">
         <v-container>
           <h1>Welcome to Cooperatives Online<sup>Beta</sup></h1>
@@ -13,7 +26,10 @@
                 @click="goToManageBusinesses()">
                 Manage Businesses
               </v-btn>
-              <v-btn large outlined color="#ffffff" class="cta-btn" @click="createAccount()">
+              <v-btn large outlined color="#ffffff"
+                class="cta-btn"
+                v-if="!isDirSearchUser"
+                @click="createAccount()">
                 Create a new BC Registries Account
               </v-btn>
             </div>
@@ -212,11 +228,12 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
-import { Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
 import { User } from '@/models/user'
 import { VueConstructor } from 'vue'
@@ -227,7 +244,7 @@ import { VueConstructor } from 'vue'
     LoginBCSC
   },
   computed: {
-    ...mapState('user', ['userProfile']),
+    ...mapState('user', ['userProfile', 'currentUser']),
     ...mapState('org', ['currentAccountSettings', 'currentMembership'])
   }
 })
@@ -237,8 +254,10 @@ export default class HomeView extends Vue {
   private readonly currentAccountSettings!: AccountSettings
   private readonly currentMembership!: Member
   private readonly getUserProfile!: (identifier: string) => User
+  private readonly currentUser!: KCUserProfile
   private noPasscodeDialog = false
   private accountDialog = false
+  private isDirSearchUser: boolean = false
 
   private get showManageBusinessesBtn (): boolean {
     return this.currentAccountSettings && this.currentMembership?.membershipStatus === MembershipStatus.Active
@@ -259,11 +278,25 @@ export default class HomeView extends Vue {
   private login () {
     this.$router.push('/signin/bcsc/createaccount')
   }
+
+  mounted () {
+    this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
+  }
 }
 </script>
 
 <style lang="scss" scoped>
   @import "$assets/scss/theme.scss";
+
+  .v-alert.covid-alert {
+    margin-bottom: 0;
+    padding: 0;
+
+    .container {
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+  }
 
   article {
     padding: 0;

@@ -19,6 +19,7 @@
    or by accessing this configuration directly.
 """
 
+import json
 import os
 import sys
 from dotenv import load_dotenv, find_dotenv
@@ -136,6 +137,9 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     # url for the front end app
     WEB_APP_URL = os.getenv('WEB_APP_URL')
 
+    # Product config json object string - includes URL and description content
+    PRODUCT_CONFIG = json.loads(os.getenv('PRODUCT_CONFIG', '[]'))
+
     try:
         MAX_NUMBER_OF_ORGS = int(os.getenv('MAX_NUMBER_OF_ORGS'))
     except:
@@ -238,6 +242,14 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     # If any value is present in this flag, starts up a keycloak docker
     USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)
     USE_DOCKER_MOCK = os.getenv('USE_DOCKER_MOCK', None)
+
+    PRODUCT_CONFIG = {
+                        "BUSINESS": {
+                            "url": "https://test.bcregistry.ca/cooperatives",
+                            "description": "Information for companies, firms & societies. Most filings for BC & Extraprovincial companies can be done in the Business Registry.",
+                            "mdiIcon": "mdi-image-outline"
+                        }
+                      }
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
