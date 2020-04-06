@@ -43,7 +43,7 @@ jobs:
           run: |
             IMAGE_ID=${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME
             echo IMAGE_ID=$IMAGE_ID
-            docker push $IMAGE_ID:$latest
+            docker push $IMAGE_ID:latest
             # docker tag image $IMAGE_ID:$TAG_NAME
             # docker push $IMAGE_ID:$TAG_NAME
         - name: Login Openshift
@@ -54,7 +54,7 @@ jobs:
         - name: Rollout new deployment
           working-directory: ./auth-web
           run: |
-           oc rollout status dc/$IMAGE_NAME-latest -w    
+           oc rollout status dc/$IMAGE_NAME-dev -w    
         - name: Rocket.Chat Notification
           uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
           if: always()
