@@ -26,7 +26,10 @@
                 @click="goToManageBusinesses()">
                 Manage Businesses
               </v-btn>
-              <v-btn large outlined color="#ffffff" class="cta-btn" @click="createAccount()">
+              <v-btn large outlined color="#ffffff"
+                class="cta-btn"
+                v-if="!isDirSearchUser"
+                @click="createAccount()">
                 Create a new BC Registries Account
               </v-btn>
             </div>
@@ -225,11 +228,12 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
-import { Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
 import { User } from '@/models/user'
 import { VueConstructor } from 'vue'
@@ -240,7 +244,7 @@ import { VueConstructor } from 'vue'
     LoginBCSC
   },
   computed: {
-    ...mapState('user', ['userProfile']),
+    ...mapState('user', ['userProfile', 'currentUser']),
     ...mapState('org', ['currentAccountSettings', 'currentMembership'])
   }
 })
@@ -250,8 +254,10 @@ export default class HomeView extends Vue {
   private readonly currentAccountSettings!: AccountSettings
   private readonly currentMembership!: Member
   private readonly getUserProfile!: (identifier: string) => User
+  private readonly currentUser!: KCUserProfile
   private noPasscodeDialog = false
   private accountDialog = false
+  private isDirSearchUser: boolean = false
 
   private get showManageBusinessesBtn (): boolean {
     return this.currentAccountSettings && this.currentMembership?.membershipStatus === MembershipStatus.Active
@@ -271,6 +277,10 @@ export default class HomeView extends Vue {
 
   private login () {
     this.$router.push('/signin/bcsc/createaccount')
+  }
+
+  mounted () {
+    this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
   }
 }
 </script>

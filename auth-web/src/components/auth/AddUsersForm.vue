@@ -152,12 +152,10 @@ export default class AddUsersForm extends Vue {
   }
 
   private isFormValid (): boolean {
-    let isValid: boolean = true
+    let isValid: boolean = false
     this.users.forEach(user => {
       if (user.username || user.password) {
-        if (!user.username || !user.password) {
-          isValid = false
-        }
+        isValid = true
       }
     })
     return isValid && !this.hasDuplicates()
@@ -189,6 +187,7 @@ export default class AddUsersForm extends Vue {
           this.users.splice(i, 1)
         } else {
           user.membershipType = user.selectedRole.name.toUpperCase()
+          user.username = user.username.toLowerCase()
         }
       }
       await this.createUsers({ orgId: this.currentOrganization.id, users: this.users })
