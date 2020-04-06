@@ -5,7 +5,7 @@
         <v-progress-circular size="50" width="5" color="primary" :indeterminate="termsContent"/>
       </div>
     </v-fade-transition>
-    <p v-html="termsContent" class="terms-container"></p>
+    <div v-html="termsContent" class="terms-container"></div>
   </div>
 </template>
 
