@@ -41,7 +41,7 @@ export default class PendingApprovalView extends Vue {
   private isDenied: boolean = false
 
   mounted () {
-    this.isDenied = !(this.currentMembership?.membershipStatus)
+    this.isDenied = (this.currentMembership?.membershipStatus === MembershipStatus.Rejected || this.currentMembership?.membershipStatus === MembershipStatus.Inactive)
   }
 }
 </script>
