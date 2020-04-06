@@ -113,7 +113,7 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
             .first()
 
         return records
-    
+
     @classmethod
     def find_membership_by_user_and_org_all_status(cls, user_id, org_id):
         """Get the membership for the specified user and org with all memebership statuses"""
