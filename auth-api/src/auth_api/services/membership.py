@@ -243,3 +243,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
     def get_membership_for_org_and_user(org_id, user_id):
         """Get the membership for the given org and user id."""
         return MembershipModel.find_membership_by_user_and_org(user_id, org_id)
+    
+    @staticmethod
+    def get_membership_for_org_and_user_all_status(org_id, user_id):
+        """Get the membership for the specified user and org with all memebership statuses."""
+        return MembershipModel.find_membership_by_user_and_org_all_status(user_id, org_id)

@@ -113,6 +113,17 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
             .first()
 
         return records
+    
+    @classmethod
+    def find_membership_by_user_and_org_all_status(cls, user_id, org_id):
+        """Get the membership for the specified user and org with all memebership statuses"""
+        records = cls.query \
+            .filter(cls.user_id == user_id) \
+            .filter(cls.org_id == org_id) \
+            .order_by(desc(Membership.created)) \
+            .first()
+
+        return records
 
     @classmethod
     def check_if_active_admin_or_owner_org_id(cls, org_id, user_id):
