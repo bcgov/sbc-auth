@@ -3,11 +3,10 @@
     <div class="view-container text-center">
       <article>
         <div class="group">
-          <v-icon class="pa-10" size="60">mdi-check</v-icon>
+          <v-icon size="48" class="mb-6">mdi-check</v-icon>
         </div>
-        <h1 class="mb-6">Account successfully created</h1>
-        <p class="body-1 mb-1">The Director Search account {{accountName}} has successfully been created.</p>
-        <p class="body-1">An email has been sent to {{accountEmail}} containting instructions on how to access their new account.</p>
+        <h1 class="mb-5">Account successfully created</h1>
+        <p class="mb-9"> The Director Search account {{accountName}} has successfully been created. An email has been sent to {{accountEmail}} containting instructions on how to access their new account.</p>
         <v-btn
           large
           color="primary"

@@ -20,7 +20,8 @@ export enum Role {
     Public = 'public_user',
     Edit = 'edit',
     Basic = 'basic',
-    StaffAdmin = 'staff_admin'
+    StaffAdmin = 'staff_admin',
+    AnonymousUser = 'anonymous_user'
 }
 
 export enum Pages {
@@ -30,10 +31,12 @@ export enum Pages {
     PENDING_APPROVAL = 'pendingapproval',
     MAIN = 'account',
     SIGNIN = 'signin',
+    SIGNOUT = 'signout',
     CREATE_USER_PROFILE = 'createuserprofile',
     SEARCH_BUSINESS = 'searchbusiness',
     DIRSEARCH_CONFIRM_TOKEN = 'dirsearch-confirmtoken',
     USER_PROFILE_TERMS = 'userprofileterms',
+    USER_PROFILE_TERMS_DECLINE = 'unauthorizedtermsdecline',
     HOME = 'home'
 }
 

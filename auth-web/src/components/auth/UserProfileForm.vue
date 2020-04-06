@@ -153,6 +153,7 @@ import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
+import { Pages } from '@/util/constants'
 import TermsOfUseDialog from '@/components/auth/TermsOfUseDialog.vue'
 import UserModule from '@/store/modules/user'
 import UserService from '@/services/user.services'
@@ -300,7 +301,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
         this.isDeactivating = true
         await UserService.deactivateUser()
         const redirectUri = encodeURIComponent(`${configHelper.getSelfURL()}/profiledeactivated`)
-        this.$router.push(`/signout/${redirectUri}`)
+        this.$router.push(`/${Pages.SIGNOUT}/${redirectUri}`)
       } catch (exception) {
         this.$refs.deactivateUserFailureDialog.open()
       } finally {

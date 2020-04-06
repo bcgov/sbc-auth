@@ -11,16 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all of the Services used in the API."""
-from .affiliation import Affiliation
-from .codes import Codes
-from .contact import Contact
-from .documents import Documents
-from .entity import Entity
-from .invitation import Invitation
-from .membership import Membership
-from .products import Product
-from .org import Org
-from .reset import ResetTestData
-from .user import User
-from .user_settings import UserSettings
+"""Tests for the Product resource.
+
+Test suite to ensure that the Product api endpoints are working as expected.
+"""
+
+import json
+
+
+def test_get_all_products(client, session):  # pylint:disable=unused-argument
+    """Assert that an org can be retrieved via GET."""
+    rv = client.get('/api/v1/products')
+    item_list = json.loads(rv.data)
+    # assert the structure is correct by checking for name, description properties in each element
+    for item in item_list:
+        assert item['name'] and item['description']
