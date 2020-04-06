@@ -1,7 +1,7 @@
 name: Notify API PR CI
 
 on:
-  push:
+  pull_request:
     branches:
       - development
     paths:
@@ -13,10 +13,11 @@ jobs:
     if: github.repository == 'bcgov/sbc-auth'
     env:
       DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+      TEST_NATS_DOCKER: "YES"
 
     strategy:
       matrix:
-        python-version: [3.7]
+        python-version: [3.7, 3.8]
     services:
       postgres:
         image: postgres:11
@@ -28,11 +29,6 @@ jobs:
           - 5432:5432
         # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-      nats:
-        image: nats-streaming
-        ports:
-          - 4222:4222
-          - 8222:8222
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
