@@ -18,6 +18,7 @@ from flask import current_app
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models import db
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductRoleCode as ProductRoleCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
@@ -53,12 +54,22 @@ class Product:
                 subscriptions_model_list.append(product_subscription)
             else:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)
-            if subscription.get('productRoles') is not None:
+            if subscription.get('productRoles') is not None and not subscription.get('productRoles'):
                 for role in subscription.get('productRoles'):
                     product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role, product_code)
                     if product_role_code:
                         ProductSubscriptionRoleModel(product_subscription_id=product_subscription.id,
                                                      product_role_id=product_role_code.id).save()
+            else:  # empty product roles ;give subscription to everything
+                product_roles = ProductRoleCodeModel.find_all_roles_by_product_code(product_code)
+                obj = []
+                for role in product_roles:
+                    obj.append(ProductSubscriptionRoleModel(product_subscription_id=product_subscription.id,
+                                                            product_role_id=role.id))
+
+                db.session.bulk_save_objects(obj)
+                db.session.commit()
+
         # TODO return something better/useful.may be return the whole model from db
         return subscriptions_model_list
 
