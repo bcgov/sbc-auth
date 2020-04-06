@@ -16,3 +16,4 @@ jsonschema
 requests
 sentry-sdk[flask]
 arrow
+Werkzeug==0.16.1
