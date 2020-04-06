@@ -45,6 +45,7 @@ import { Component, Mixins } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
+import { Pages } from '@/util/constants'
 import TermsOfUse from '@/components/auth/TermsOfUse.vue'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { User } from '@/models/user'
@@ -102,7 +103,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
   }
 
   private clickDecline () {
-    this.$router.push('/unauthorizedtermsdecline')
+    this.$router.push(`/${Pages.USER_PROFILE_TERMS_DECLINE}`)
   }
 }
 </script>

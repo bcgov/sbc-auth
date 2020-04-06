@@ -101,7 +101,9 @@ export default class NextPageMixin extends Vue {
     if (CommonUtils.isUrl(target)) {
       window.location.assign(target)
     } else {
-      this.$router.push(target)
+      if (this.$route.path !== target) {
+        this.$router.push(target)
+      }
     }
   }
 
