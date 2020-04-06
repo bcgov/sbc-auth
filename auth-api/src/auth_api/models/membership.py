@@ -116,7 +116,7 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
 
     @classmethod
     def find_membership_by_user_and_org_all_status(cls, user_id, org_id):
-        """Get the membership for the specified user and org with all memebership statuses"""
+        """Get the membership for the specified user and org with all membership statuses."""
         records = cls.query \
             .filter(cls.user_id == user_id) \
             .filter(cls.org_id == org_id) \
