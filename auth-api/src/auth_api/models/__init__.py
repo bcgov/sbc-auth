@@ -30,6 +30,7 @@ from .entity import Entity
 from .invitation import Invitation
 from .invitation_membership import InvitationMembership
 from .invite_status import InvitationStatus
+from .invitation_type import InvitationType
 from .membership import Membership
 from .membership_status_code import MembershipStatusCode
 from .membership_type import MembershipType

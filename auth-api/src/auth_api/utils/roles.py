@@ -73,10 +73,13 @@ ALL_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF, STAFF_ADMIN)
 class InvitationType(Enum):
     """Invitation type."""
 
-    DIRECTOR_SEARCH = 'DIRECTOR_SEARCH'
+    DIRECTOR_SEARCH = 'DIRECTOR_SEARCH' # Used to indicate an anonymous account invitation used only for director search
+    STANDARD = 'STANDARD'               # Used to indicate the standard email invite with admin approval
 
 
 class AccessType(Enum):
     """Access Type."""
 
-    ANONYMOUS = 'ANONYMOUS'
+    ANONYMOUS = 'ANONYMOUS' # Anonymous type login (director search)
+    BCSC = 'BCSC'           # BC Services Card login
+    IDIR = 'IDIR'           # IDIR login
