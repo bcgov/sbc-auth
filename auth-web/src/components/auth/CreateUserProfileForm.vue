@@ -19,7 +19,7 @@
               req
               persistent-hint
               :rules="usernameRules"
-              v-model="username"
+              v-model.trim="username"
               data-test="username"
               :disabled="isLoading"
           >
@@ -133,7 +133,7 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
     }
 
     private usernameRules = [
-      v => !!v || 'Username is required'
+      v => !!v.trim() || 'Username is required'
     ]
 
     private passwordRules = [
@@ -157,7 +157,7 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
       if (this.isFormValid()) {
         this.isLoading = true
         const requestBody: UserProfileRequestBody = {
-          username: this.username,
+          username: this.username.trim().toLowerCase(),
           password: this.password
         }
         try {
@@ -191,7 +191,7 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
     }
 
     private cancel () {
-      window.history.back()
+      this.$router.push('/signin/bcros/')
     }
 
     close () {

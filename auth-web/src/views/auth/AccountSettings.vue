@@ -9,7 +9,11 @@
     </v-fade-transition>
 
     <div class="view-header">
-      <v-btn large icon color="secondary" class="back-btn mr-3" @click="handleBackButton()" data-test="account-settings-back-button">
+      <v-btn large icon color="secondary"
+        class="back-btn mr-3"
+        @click="handleBackButton()"
+        v-if="!isDirSearchUser"
+        data-test="account-settings-back-button">
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
       <div>
@@ -49,11 +53,21 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { LoginSource } from '@/util/constants'
+import { mapState } from 'vuex'
 
-@Component({})
+@Component({
+  computed: {
+    ...mapState('user', ['currentUser'])
+  }
+})
 export default class AccountSettings extends Vue {
   @Prop({ default: '' }) private orgId: string
+
+  private readonly currentUser!: KCUserProfile
   private isLoading = true
+  private isDirSearchUser: boolean = false
 
   private handleBackButton (): void {
     this.$router.push(`/account/${this.orgId}/business`)
@@ -69,6 +83,7 @@ export default class AccountSettings extends Vue {
 
   private mounted () {
     this.isLoading = false
+    this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
   }
 }
 </script>
