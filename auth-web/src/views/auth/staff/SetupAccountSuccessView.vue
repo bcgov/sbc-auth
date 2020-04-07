@@ -6,7 +6,10 @@
           <v-icon size="48" class="mb-6">mdi-check</v-icon>
         </div>
         <h1 class="mb-5">Account successfully created</h1>
-        <p class="mb-9"> The Director Search account {{accountName}} has successfully been created. An email has been sent to {{accountEmail}} containting instructions on how to access their new account.</p>
+        <p class="mb-9">
+          The Director Search account <span class="font-italic">{{accountName}}</span> has successfully been created. <br>
+          An email has been sent to <span class="font-italic">{{accountEmail}}</span> containing instructions <br>
+          on how to access their new account.</p>
         <v-btn
           large
           color="primary"
@@ -41,7 +44,7 @@ export default class SetupAccountSuccessView extends Vue {
   @Prop({ default: '' }) accountName: string
 
   private async mounted () {
-    this.accountEmail = (this.sentInvitations?.length && this.sentInvitations[0].recipientEmail) ? this.sentInvitations[0].recipientEmail : ''
+    this.accountEmail = (this.sentInvitations?.length && this.sentInvitations[this.sentInvitations.length - 1].recipientEmail) ? this.sentInvitations[this.sentInvitations.length - 1].recipientEmail : ''
   }
 
   goToDashboard () {
