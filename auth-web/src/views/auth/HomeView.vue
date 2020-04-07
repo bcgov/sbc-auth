@@ -4,7 +4,7 @@
       <v-alert color="grey lighten-3" class="covid-alert">
         <v-container>
           <p class="title font-weight-bold">Special Notice Regarding COVID-19 and Annual General Meetings</p>
-          <p>!In these uncertain times, it is important that individuals and organizations follow the guidelines
+          <p>In these uncertain times, it is important that individuals and organizations follow the guidelines
             and recommendations set forth by the Provincial Health Officer and B.C. Health Minister, as well as
             Health Canada guidelines in regards to the novel coronavirus (COVID-19). Due to these guidelines, the
             Registrar has decided to grant an extension for all Cooperatives that wish to delay their Annual General
