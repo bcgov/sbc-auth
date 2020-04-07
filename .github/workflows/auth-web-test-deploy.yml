@@ -4,7 +4,7 @@ name: Auth Web DEV CD
 on:
   push:
     branches:
-      - testgh
+      - master
     paths:
       - "auth-web/**"
 env:
@@ -61,7 +61,7 @@ jobs:
           with:
            type: ${{ job.status }}
            job_name: "*Auth WEB Built and Deployed to ${{env.TAG_NAME}}*"
-           channel: "#test1980"
+           channel: "#registries-relationships-team"
            url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
            commit: true
            token: ${{ secrets.GITHUB_TOKEN }}   
