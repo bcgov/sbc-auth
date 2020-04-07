@@ -44,14 +44,12 @@ jobs:
             IMAGE_ID=${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME
             echo IMAGE_ID=$IMAGE_ID
             # docker push $IMAGE_ID:latest
-            docker tag image $IMAGE_ID:latest
-            docker push $IMAGE_ID:latest
+            docker tag image $IMAGE_ID:$TAG_NAME
+            docker push $IMAGE_ID:$TAG_NAME
         - name: Login Openshift and Tag image
           working-directory: ./auth-web
           run: |
            oc ${{ secrets.oc_parameters }}
-           oc project ${{ secrets.OPENSHIFT_REPOSITORY_TOOLS }}
-           oc tag auth-web:latest $IMAGE_NAME:${TAG_NAME}
            oc project ${{ secrets.OPENSHIFT_REPOSITORY_TEST }}     
         - name: Rollout new deployment
           working-directory: ./auth-web
