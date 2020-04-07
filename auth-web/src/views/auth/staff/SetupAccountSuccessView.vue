@@ -41,7 +41,7 @@ export default class SetupAccountSuccessView extends Vue {
   @Prop({ default: '' }) accountName: string
 
   private async mounted () {
-    this.accountEmail = (this.sentInvitations?.length && this.sentInvitations[0].recipientEmail) ? this.sentInvitations[0].recipientEmail : ''
+    this.accountEmail = (this.sentInvitations?.length && this.sentInvitations[this.sentInvitations.length - 1].recipientEmail) ? this.sentInvitations[this.sentInvitations.length - 1].recipientEmail : ''
   }
 
   goToDashboard () {
