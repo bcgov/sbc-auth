@@ -61,7 +61,7 @@
             "type": "ConfigChange"
           }
         ],
-        "replicas": "${REPLICAS}",
+        "replicas": 1,
         "test": false,
         "selector": {
           "app": "${NAME}-${TAG_NAME}",
@@ -83,13 +83,6 @@
           "spec": {
             "volumes": [
               {
-                "name": "web-caddy-config",
-                "configMap": {
-                  "name": "${NAME}-${TAG_NAME}-caddy-config",
-                  "defaultMode": 420
-                }
-              },
-              {
                 "name": "web-ui-configuration",
                 "configMap": {
                   "name": "${NAME}-${TAG_NAME}-ui-configuration",
@@ -106,29 +99,22 @@
             "containers": [
               {
                 "name": "${NAME}-${TAG_NAME}",
-                "args": ["/tmp/scripts/run"],
                 "ports": [
                   {
-                    "containerPort": 2015,
+                    "containerPort": 8080,
                     "protocol": "TCP"
                   }
                 ],
                 "volumeMounts": [
                   {
-                    "name": "web-caddy-config",
-                    "readOnly": true,
-                    "mountPath": "/etc/Caddyfile",
-                    "subPath": "Caddyfile"
-                  },
-                  {
                     "name": "web-ui-configuration",
                     "readOnly": true,
-                    "mountPath": "/var/www/html/${WEB_APP_CONTEXT_PATH}/config"
+                    "mountPath": "/app/config"
                   },
                   {
                     "name": "keycloak-configuration",
                     "readOnly": true,
-                    "mountPath": "/var/www/html/${WEB_APP_CONTEXT_PATH}/config/kc"
+                    "mountPath": "/app/config/kc"
                   }
                 ],
                 "envFrom": [],
@@ -171,10 +157,10 @@
       "spec": {
         "ports": [
           {
-            "name": "2015-tcp",
+            "name": "8080-tcp",
             "protocol": "TCP",
-            "port": 2015,
-            "targetPort": 2015
+            "port": 8080,
+            "targetPort": 8080
           }
         ],
         "selector": {
@@ -206,7 +192,7 @@
           "weight": 100
         },
         "port": {
-          "targetPort": "2015-tcp"
+          "targetPort": "8080-tcp"
         },
         "tls": {
           "termination": "edge"
@@ -243,7 +229,7 @@
       "displayName": "Name of Runtime",
       "description": "The name assigned to all of the OpenShift resources associated to the server instance.",
       "required": true,
-      "value": "auth-web-runtime"
+      "value": "auth-web"
     },
     {
       "name": "APP_GROUP",
@@ -300,13 +286,6 @@
       "description": "The number of replicas to run in this environment.",
       "required": true,
       "value": "1"
-    },
-    {
-      "name": "WEB_APP_CONTEXT_PATH",
-      "displayName": "WEB_APP_CONTEXT_PATH",
-      "description": "The path at which web application is deployed.Context root for the web applicaton",
-      "required": true,
-      "value": "cooperatives/auth"
     }
   ]
 }

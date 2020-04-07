@@ -26,6 +26,7 @@ import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.
 import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
+import TermsOfServiceDeclineView from '@/views/auth/TermsOfServiceDeclineView.vue'
 import TermsOfServiceView from '@/views/auth/TermsOfServiceView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
 import { User } from '@/models/user'
@@ -68,7 +69,8 @@ export function getRoutes (): RouteConfig[] {
           component: EntityManagement,
           props: true,
           meta: {
-            showNavBar: true
+            showNavBar: true,
+            disabledRoles: [Role.AnonymousUser]
           }
         }]
     },
@@ -109,7 +111,7 @@ export function getRoutes (): RouteConfig[] {
     { path: '/returnpayment/:paymentId/transaction/:transactionId', name: 'returnpayment', component: PaymentReturnView, props: mapReturnPayVars, meta: { requiresAuth: false, requiresProfile: true } },
     { path: '/searchbusiness', name: 'searchbusiness', component: SearchBusinessView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
     { path: '/unauthorized', name: 'unauthorized', component: UnauthorizedView, props: true, meta: { requiresAuth: false } },
-    { path: '/unauthorizedtermsdecline', name: 'unauthorizedtermsdecline', component: UnauthorizedView, props: true, meta: { requiresAuth: true } },
+    { path: '/unauthorizedtermsdecline', name: 'unauthorizedtermsdecline', component: TermsOfServiceDeclineView, props: true, meta: { requiresAuth: true } },
     { path: '/pendingapproval/:team_name?', name: 'pendingapproval', component: PendingApprovalView, props: true, meta: { requiresAuth: false, requiresProfile: true } },
     { path: '/leaveteam', name: 'leaveteam', component: LeaveTeamLandingView, props: true, meta: { requiresAuth: true } },
     { path: '/staff-setup-account', name: 'staffsetupaccount', component: SetupAccountView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
