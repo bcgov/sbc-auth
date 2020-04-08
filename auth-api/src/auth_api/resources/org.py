@@ -62,7 +62,7 @@ class Orgs(Resource):
                                    http_status.HTTP_401_UNAUTHORIZED
                 return response, status
             response, status = OrgService.create_org(request_json, user.identifier, token).as_dict(), \
-                               http_status.HTTP_201_CREATED
+                http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -110,7 +110,6 @@ class Org(Resource):
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'org')
         token = g.jwt_oidc_token_info
-        is_staff_admin = 'staff_admin' in token.get('realm_access').get('roles')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
@@ -329,7 +328,7 @@ class OrgMember(Resource):
                     MembershipService.get_membership_status_by_code(membership_status)
             membership = MembershipService.find_membership_by_id(membership_id, token)
             is_own_membership = membership.as_dict()['user']['username'] == \
-                                UserService.find_by_jwt_token(token).as_dict()['username']
+                UserService.find_by_jwt_token(token).as_dict()['username']
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
