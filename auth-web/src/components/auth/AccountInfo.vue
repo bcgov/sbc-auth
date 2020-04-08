@@ -60,10 +60,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private touched = false
   private errorMessage: string = ''
 
-  private readonly accountNameRules = [
-    v => !!v || 'An account name is required'
-  ]
-
   private isFormValid (): boolean {
     return !!this.orgName || this.orgName === this.currentOrganization?.name
   }
@@ -119,6 +115,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
       }
     }
   }
+
+  private readonly accountNameRules = [
+    v => !!v || 'An account name is required'
+  ]
 }
 </script>
 
