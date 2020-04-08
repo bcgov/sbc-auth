@@ -116,7 +116,7 @@ class Org(Resource):
             org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
                                             allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF_ADMIN))
             if org and org.as_dict().get('accessType', None) == AccessType.ANONYMOUS.value and \
-                    'staff_admin' not in token.get('realm_access').get('roles'):
+                    Role.STAFF_ADMIN.value not in token.get('realm_access').get('roles'):
                 return {'message': 'The organisation can only be updated by a staff admin.'}, \
                     http_status.HTTP_401_UNAUTHORIZED
             if org:
