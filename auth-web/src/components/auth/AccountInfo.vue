@@ -36,6 +36,7 @@ import { Account, Pages } from '@/util/constants'
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
+import { Account } from '@/util/constants'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
@@ -79,6 +80,9 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, NextPageMixi
   }
 
   private canChangeAccountName (): boolean {
+    if (this.currentOrganization?.accessType === Account.ANONYMOUS) {
+      return false
+    }
     switch (this.currentMembership?.membershipTypeCode) {
       case MembershipType.Owner:
         return true

@@ -12,4 +12,5 @@ requests
 flake8
 flake8-quotes
 autopep8
-
+lovely-pytest-docker
+pytest-asyncio

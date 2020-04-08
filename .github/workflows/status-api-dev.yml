@@ -15,9 +15,6 @@ jobs:
   status-api-dev:
     runs-on: ubuntu-latest
     if: github.repository == 'bcgov/sbc-auth'
-    strategy:
-      matrix:
-        python-version: [3.7]
     steps:
       - uses: actions/checkout@v2
       - name: Install tools

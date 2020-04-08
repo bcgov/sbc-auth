@@ -13,11 +13,16 @@
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
 import asyncio
+import os
+import random
+import time
 
 import pytest
 import sqlalchemy
 from sqlalchemy import event
 from starlette.testclient import TestClient
+from nats.aio.client import Client as Nats
+from stan.aio.client import Client as Stan
 
 from notify_api import applications
 from notify_api.core import config as AppConfig
@@ -91,3 +96,53 @@ def app_fixture(engine):
 def client_fixture(app):
     """FastAPI test client."""
     return TestClient(app)
+
+
+@pytest.fixture('function')
+def client_id():
+    """Return a unique client_id that can be used in tests."""
+    _id = random.SystemRandom().getrandbits(0x58)
+    #     _id = (base64.urlsafe_b64encode(uuid.uuid4().bytes)).replace('=', '')
+
+    return f'client-{_id}'
+
+
+@pytest.fixture(scope='session')
+def stan_server(docker_services):
+    """Create the nats / stan services that the integration tests will use."""
+    if os.getenv('TEST_NATS_DOCKER'):
+        docker_services.start('nats')
+        time.sleep(2)
+
+
+@pytest.fixture(scope='function')
+@pytest.mark.asyncio
+async def stan(event_loop, client_id):  # pylint: disable=redefined-outer-name
+    """Create a stan connection for each function, to be used in the tests."""
+    nats_client = Nats()
+    stan_client = Stan()
+    cluster_name = 'test-cluster'
+
+    await nats_client.connect(io_loop=event_loop, name='entity.filing.tester')
+
+    await stan_client.connect(cluster_name, client_id, nats=nats_client)
+
+    yield stan_client
+
+    await stan_client.close()
+    await nats_client.close()
+
+
+@pytest.fixture(scope='function')
+def future(event_loop):
+    """Return a future that is used for managing function tests."""
+    _future = asyncio.Future(loop=event_loop)
+    return _future
+
+
+@pytest.fixture(scope='session')
+def docker_compose_files(pytestconfig):
+    """Get the docker-compose.yml absolute path."""
+    return [
+        os.path.join(str(pytestconfig.rootdir), 'tests/docker', 'docker-compose.yml')
+    ]

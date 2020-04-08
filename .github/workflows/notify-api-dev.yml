@@ -43,7 +43,7 @@ jobs:
         working-directory: .
         run: |
           vaults='[{ "vault": "shared", "application": ["email", "nats"]}, {"vault": "relationship","application": ["postgres-notify", "notify-api", "sentry"]}]'
-          ./setenv_deploy.sh ${{ secrets.op_parameters }} -e "${TAG_NAME}" -v "${vaults}" -a "${IMAGE_NAME}-${TAG_NAME}"
+          ./scripts/1pass_secret.sh ${{ secrets.op_parameters }} -e "${TAG_NAME}" -v "${vaults}" -a "${IMAGE_NAME}-${TAG_NAME}"
       - name: Rollout new deployment
         working-directory: ./notify-api
         run: |
