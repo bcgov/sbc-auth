@@ -62,7 +62,7 @@ class Orgs(Resource):
                                    http_status.HTTP_401_UNAUTHORIZED
                 return response, status
             response, status = OrgService.create_org(request_json, user.identifier, token).as_dict(), \
-                               http_status.HTTP_201_CREATED
+                http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -115,10 +115,10 @@ class Org(Resource):
         try:
             org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
                                             allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF_ADMIN))
-            if org and org.as_dict().get('accessType', None) == AccessType.ANONYMOUS.value and 'staff_admin' not in token.get(
-                    'realm_access').get('roles'):
+            if org and org.as_dict().get('accessType', None) == AccessType.ANONYMOUS.value and \
+                    'staff_admin' not in token.get('realm_access').get('roles'):
                 return {'message': 'The organisation can only be updated by a staff admin.'}, \
-                       http_status.HTTP_401_UNAUTHORIZED
+                    http_status.HTTP_401_UNAUTHORIZED
             if org:
                 response, status = org.update_org(request_json).as_dict(), http_status.HTTP_200_OK
             else:
@@ -328,7 +328,7 @@ class OrgMember(Resource):
                     MembershipService.get_membership_status_by_code(membership_status)
             membership = MembershipService.find_membership_by_id(membership_id, token)
             is_own_membership = membership.as_dict()['user']['username'] == \
-                                UserService.find_by_jwt_token(token).as_dict()['username']
+                UserService.find_by_jwt_token(token).as_dict()['username']
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
