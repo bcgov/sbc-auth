@@ -32,24 +32,29 @@
 
 <script lang="ts">
 
-import { Account, Pages } from '@/util/constants'
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
+import { Account } from '@/util/constants'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
-import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
   },
+  computed: {
+    ...mapState('org', ['currentOrganization', 'currentMembership'])
+  },
   methods: {
     ...mapActions('org', ['updateOrg'])
   }
 })
-export default class AccountInfo extends Mixins(AccountChangeMixin, NextPageMixin) {
+export default class AccountInfo extends Mixins(AccountChangeMixin) {
+  private orgStore = getModule(OrgModule, this.$store)
   private btnLabel = 'Save'
+  private readonly currentOrganization!: Organization
+  private readonly currentMembership!: Member
   private readonly updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
   private orgName = ''
   private touched = false
@@ -66,12 +71,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, NextPageMixi
   private async mounted () {
     this.setAccountChangedHandler(this.syncOrgName)
     this.syncOrgName()
-    if (this.isAnonymousAccount()) {
-      const nextPage = this.getNextPageUrl()
-      if (nextPage === `/${Pages.USER_PROFILE_TERMS}`) {
-        this.redirectTo(nextPage)
-      }
-    }
   }
 
   private syncOrgName () {
@@ -119,11 +118,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, NextPageMixi
           this.errorMessage = 'An error occurred while attempting to create your account.'
       }
     }
-  }
-
-  private isAnonymousAccount (): boolean {
-    return this.currentOrganization &&
-            this.currentOrganization.accessType === Account.ANONYMOUS
   }
 }
 </script>
