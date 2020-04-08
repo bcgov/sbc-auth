@@ -101,6 +101,7 @@
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
+import { Account } from '@/util/constants'
 import { Business } from '@/models/business'
 import moment from 'moment'
 
@@ -112,13 +113,14 @@ export interface ChangeRolePayload {
 @Component({
   computed: {
     ...mapState('business', ['businesses']),
-    ...mapState('org', ['activeOrgMembers', 'currentMembership'])
+    ...mapState('org', ['activeOrgMembers', 'currentMembership', 'currentOrganization'])
   }
 })
 export default class MemberDataTable extends Vue {
   private readonly businesses!: Business[]
   private readonly activeOrgMembers!: Member[]
   private readonly currentMembership!: Member
+  private readonly currentOrganization!: Organization
 
   private readonly availableRoles: RoleInfo[] = [
     {
@@ -292,10 +294,15 @@ export default class MemberDataTable extends Vue {
   }
 
   private canDissolve (): boolean {
-    if (this.activeOrgMembers.length === 1 && this.businesses.length === 0) {
+    if (this.activeOrgMembers.length === 1 && this.businesses.length === 0 && !this.isAnonymousAccount()) {
       return true
     }
     return false
+  }
+
+  private isAnonymousAccount (): boolean {
+    return this.currentOrganization &&
+            this.currentOrganization.accessType === Account.ANONYMOUS
   }
 
   @Emit()
