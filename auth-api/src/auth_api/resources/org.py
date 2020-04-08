@@ -28,7 +28,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.enums import NotificationType
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, MEMBER, Role, Status
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, MEMBER, Role, Status, AccessType
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('orgs', description='Endpoints for organization management')
@@ -62,7 +62,7 @@ class Orgs(Resource):
                                    http_status.HTTP_401_UNAUTHORIZED
                 return response, status
             response, status = OrgService.create_org(request_json, user.identifier, token).as_dict(), \
-                http_status.HTTP_201_CREATED
+                               http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -109,11 +109,17 @@ class Org(Resource):
         """Update the org specified by the provided id with the request body."""
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'org')
+        token = g.jwt_oidc_token_info
+        is_staff_admin = 'staff_admin' in token.get('realm_access').get('roles')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
             org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=CLIENT_ADMIN_ROLES)
+            if org.as_dict().get('accessType', None) == AccessType.ANONYMOUS.value and 'staff_admin' not in token.get(
+                    'realm_access').get('roles'):
+                return {'message': 'The organisation can only be updated by a staff admin.'}, \
+                       http_status.HTTP_401_UNAUTHORIZED
             if org:
                 response, status = org.update_org(request_json).as_dict(), http_status.HTTP_200_OK
             else:
@@ -323,7 +329,7 @@ class OrgMember(Resource):
                     MembershipService.get_membership_status_by_code(membership_status)
             membership = MembershipService.find_membership_by_id(membership_id, token)
             is_own_membership = membership.as_dict()['user']['username'] == \
-                UserService.find_by_jwt_token(token).as_dict()['username']
+                                UserService.find_by_jwt_token(token).as_dict()['username']
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND

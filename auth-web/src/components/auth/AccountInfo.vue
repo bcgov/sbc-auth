@@ -35,6 +35,7 @@
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
+import { Account } from '@/util/constants'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
@@ -73,6 +74,9 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   private canChangeAccountName (): boolean {
+    if (this.currentOrganization?.accessType === Account.ANONYMOUS) {
+      return false
+    }
     switch (this.currentMembership?.membershipTypeCode) {
       case MembershipType.Owner:
         return true
