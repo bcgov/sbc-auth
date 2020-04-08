@@ -172,11 +172,21 @@ router.beforeEach((to, from, next) => {
     const currentOrganization: Organization = (store.state as any)?.org?.currentOrganization
     const currentMembership: Member = (store.state as any)?.org?.currentMembership
     const currentUser: KCUserProfile = (store.state as any)?.user?.currentUser
-    if (to.matched.some(record => record.meta.requiresProfile && currentUser.loginSource === LoginSource.BCSC) &&
-      (!userContact || !userProfile?.userTerms?.isTermsOfUseAccepted)) {
-      return next({
-        path: `/${Pages.USER_PROFILE}`
-      })
+    if (to.matched.some(record => record.meta.requiresProfile) &&
+      !userProfile?.userTerms?.isTermsOfUseAccepted) {
+      switch (currentUser.loginSource) {
+        case LoginSource.BCSC:
+          if (!userContact) {
+            return next({
+              path: `/${Pages.USER_PROFILE}`
+            })
+          }
+          break
+        case LoginSource.BCROS:
+          return next({
+            path: `/${Pages.USER_PROFILE_TERMS}`
+          })
+      }
     }
 
     if (to.matched.some(record => record.meta.requiresActiveAccount) && currentUser.loginSource === LoginSource.BCSC) {

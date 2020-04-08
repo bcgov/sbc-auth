@@ -17,6 +17,9 @@ import asyncio
 import json
 import logging
 import random
+from typing import Callable
+
+import stan
 
 from nats.aio.client import Client as NATS  # noqa N814; by convention the name is NATS
 from stan.aio.client import Client as STAN  # noqa N814; by convention the name is STAN
@@ -88,3 +91,25 @@ async def publish(payload):  # pylint: disable=too-few-public-methods
         # await nc.flush()
         await close()
     # current_app.logger.debug('>publish')
+
+
+async def subscribe_to_queue(stan_client: stan.aio.client.Client,
+                             call_back: Callable[[stan.aio.client.Msg], None]) \
+        -> str:
+    """Subscribe to the Queue using the environment setup.
+
+    Args:
+        stan_client: the stan connection
+        call_back: a callback function that accepts 1 parameter, a Msg
+    Returns:
+       str: the name of the queue
+    """
+    entity_subject = AppConfig.NATS_SUBJECT
+    entity_queue = AppConfig.NATS_QUEUE
+    entity_durable_name = entity_queue + '_durable'
+
+    await stan_client.subscribe(subject=entity_subject,
+                                queue=entity_queue,
+                                durable_name=entity_durable_name,
+                                cb=call_back)
+    return entity_subject

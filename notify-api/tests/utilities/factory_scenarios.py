@@ -46,7 +46,7 @@ NOTIFICATION_REQUEST_DATA = [
             'body': 'test url',
             'attachmentName': 'aaa.pdf',
             'attachmentBytes': '',
-            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+            'attachmentUrl': 'http://www.africau.edu/images/default/sample.pdf'
         }
     },
     {
@@ -56,7 +56,7 @@ NOTIFICATION_REQUEST_DATA = [
             'body': 'test url',
             'attachmentName': 'aaa.pdf',
             'attachmentBytes': '',
-            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+            'attachmentUrl': 'http://www.africau.edu/images/default/sample.pdf'
         }
     }
 ]
@@ -70,7 +70,7 @@ NOTIFICATION_REQUEST_BAD_DATA = [
             'body': 'test url',
             'attachmentName': 'aaa.pdf',
             'attachmentBytes': '',
-            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+            'attachmentUrl': 'http://www.africau.edu/images/default/sample.pdf'
         }
     },
     {
@@ -79,7 +79,7 @@ NOTIFICATION_REQUEST_BAD_DATA = [
             'body': 'test url',
             'attachmentName': 'aaa.pdf',
             'attachmentBytes': '',
-            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+            'attachmentUrl': 'http://www.africau.edu/images/default/sample.pdf'
         }
     },
     {
@@ -89,7 +89,7 @@ NOTIFICATION_REQUEST_BAD_DATA = [
             'body': 'test url',
             'attachmentName': 'aaa.pdf',
             'attachmentBytes': '',
-            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+            'attachmentUrl': 'http://www.africau.edu/images/default/sample.pdf'
         }
     },
     {
@@ -99,7 +99,7 @@ NOTIFICATION_REQUEST_BAD_DATA = [
             'body': 'test url',
             'attachmentName': 'aaa.pdf',
             'attachmentBytes': '',
-            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+            'attachmentUrl': 'http://www.africau.edu/images/default/sample.pdf'
         }
     },
     {
@@ -109,7 +109,7 @@ NOTIFICATION_REQUEST_BAD_DATA = [
             'body': 'test url',
             'attachmentName': 'aaa.pdf',
             'attachmentBytes': '',
-            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+            'attachmentUrl': 'http://www.africau.edu/images/default/sample.pdf'
         }
     },
     {
@@ -119,7 +119,7 @@ NOTIFICATION_REQUEST_BAD_DATA = [
             'body': 'test url',
             'attachmentName': 'aaa.pdf',
             'attachmentBytes': '',
-            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+            'attachmentUrl': 'http://www.africau.edu/images/default/sample.pdf'
         }
     },
     {
@@ -129,7 +129,7 @@ NOTIFICATION_REQUEST_BAD_DATA = [
             'body': 'test url',
             'attachmentName': 'aaa.pdf',
             'attachmentBytes': '',
-            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+            'attachmentUrl': 'http://www.africau.edu/images/default/sample.pdf'
         }
     },
     {
@@ -138,7 +138,7 @@ NOTIFICATION_REQUEST_BAD_DATA = [
             'body': 'test url',
             'attachmentName': 'aaa.pdf',
             'attachmentBytes': '',
-            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+            'attachmentUrl': 'http://www.africau.edu/images/default/sample.pdf'
         }
     },
     {
@@ -148,7 +148,7 @@ NOTIFICATION_REQUEST_BAD_DATA = [
             'body': '',
             'attachmentName': 'aaa.pdf',
             'attachmentBytes': '',
-            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+            'attachmentUrl': 'http://www.africau.edu/images/default/sample.pdf'
         }
     },
     {
@@ -157,7 +157,7 @@ NOTIFICATION_REQUEST_BAD_DATA = [
             'subject': 'aaa',
             'attachmentName': 'aaa.pdf',
             'attachmentBytes': '',
-            'attachmentUrl': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+            'attachmentUrl': 'http://www.africau.edu/images/default/sample.pdf'
         }
     }
 ]
@@ -174,7 +174,7 @@ CONTENT_DATA = [
         'body': 'test pdf',
         'attachment_name': 'aaa.pdf',
         'attachment': '',
-        'attachment_url': 'https://www.antennahouse.com/XSLsample/pdf/sample-link_1.pdf'
+        'attachment_url': 'http://www.africau.edu/images/default/sample.pdf'
     },
     {
         'id': 3,
