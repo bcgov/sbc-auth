@@ -104,6 +104,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
@@ -137,11 +138,13 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
     ]
 
     private passwordRules = [
-      v => !!v || 'Password is required'
+      value => !!value || 'Password is required',
+      value => CommonUtils.validatePasswordRules(value) ||
+        'Min. 8 characters with at least one capital letter, a number and a special character.'
     ]
 
     private passwordMustMatch (): string {
-      return (this.password === this.confirmPassword) ? '' : 'Passwords must'
+      return (this.password === this.confirmPassword) ? '' : 'Passwords must match'
     }
 
     private isFormValid (): boolean {

@@ -17,6 +17,7 @@
               label="Temporary Password"
               class="ml-2"
               v-model="user.password"
+              :rules="passwordRules"
               :data-test="getIndexedTag('password', index)"
             ></v-text-field>
 
@@ -83,6 +84,7 @@
 import { AddUserBody, AddUsersToOrgBody, Member, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import { mapActions, mapMutations, mapState } from 'vuex'
+import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
@@ -134,6 +136,11 @@ export default class AddUsersForm extends Vue {
     }
   ]
 
+  private passwordRules = [
+    value => CommonUtils.validatePasswordRules(value) ||
+      `Min. 8 characters with at least one capital letter, a number and a special character.`
+  ]
+
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
@@ -154,7 +161,7 @@ export default class AddUsersForm extends Vue {
   private isFormValid (): boolean {
     let isValid: boolean = false
     this.users.forEach(user => {
-      if (user.username || user.password) {
+      if (user.username && user.password && CommonUtils.validatePasswordRules(user.password)) {
         isValid = true
       }
     })
@@ -174,6 +181,7 @@ export default class AddUsersForm extends Vue {
     for (let i = 0; i < 3; i++) {
       this.users.push(this.getDefaultRow())
     }
+    this.$refs.form?.reset()
   }
 
   private async addUsers () {
