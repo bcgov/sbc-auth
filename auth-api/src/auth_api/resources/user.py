@@ -340,7 +340,7 @@ class MembershipResource(Resource):
                 response, status = {'message': 'User not found.'}, http_status.HTTP_404_NOT_FOUND
             else:
                 membership = MembershipService \
-                    .get_membership_for_org_and_user(org_id=org_id, user_id=user.identifier)
+                    .get_membership_for_org_and_user_all_status(org_id=org_id, user_id=user.identifier)
                 response, status = MembershipSchema(exclude=['org']).dump(membership), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

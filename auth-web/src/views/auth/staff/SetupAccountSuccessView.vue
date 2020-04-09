@@ -3,11 +3,13 @@
     <div class="view-container text-center">
       <article>
         <div class="group">
-          <v-icon class="pa-10" size="60">mdi-check</v-icon>
+          <v-icon size="48" class="mb-6">mdi-check</v-icon>
         </div>
-        <h1 class="mb-6">Account successfully created</h1>
-        <p class="body-1 mb-1">The Director Search account {{accountName}} has successfully been created.</p>
-        <p class="body-1">An email has been sent to {{accountEmail}} containting instructions on how to access their new account.</p>
+        <h1 class="mb-5">Account successfully created</h1>
+        <p class="mb-9">
+          The Director Search account <span class="font-italic">{{accountName}}</span> has successfully been created. <br>
+          An email has been sent to <span class="font-italic">{{accountEmail}}</span> containing instructions <br>
+          on how to access their new account.</p>
         <v-btn
           large
           color="primary"
@@ -42,7 +44,7 @@ export default class SetupAccountSuccessView extends Vue {
   @Prop({ default: '' }) accountName: string
 
   private async mounted () {
-    this.accountEmail = (this.sentInvitations?.length && this.sentInvitations[0].recipientEmail) ? this.sentInvitations[0].recipientEmail : ''
+    this.accountEmail = (this.sentInvitations?.length && this.sentInvitations[this.sentInvitations.length - 1].recipientEmail) ? this.sentInvitations[this.sentInvitations.length - 1].recipientEmail : ''
   }
 
   goToDashboard () {

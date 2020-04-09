@@ -35,6 +35,8 @@
   "notifyChangeUserRoleMsg": "Notify user about this change",
   "pendingInvitationTitle": "Thanks for joining the account {team} at BC Registries & Online Services.",
   "pendingInvitationMsg": "The administrator for this account needs to verify your invitation before you can access this application.",
+  "notAuthorized": "Not Authorized",
+  "deniedInvitationMsg": "Your invitation to join the {team} account has been revoked by the administrator",
   "noActiveUsersLabel": "No Active Users",
   "pageNotFoundTitle": "Page not found",
   "pageNotFoundMsg": "The page you are looking for has been removed or doesn't exist.",

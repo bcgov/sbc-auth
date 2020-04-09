@@ -48,7 +48,7 @@ def test_get_by_status(session, app, client):  # pylint: disable=unused-argument
     assert notification.recipients == response_data[0]['recipients']
 
 
-def test_post(session, app, client):  # pylint: disable=unused-argument
+def test_post(session, app, client, client_id, stan_server):  # pylint: disable=unused-argument
     """Assert the test can create notification."""
     for notification_data in NOTIFICATION_REQUEST_DATA:
         res = client.post('/api/v1/notify/', json=notification_data)

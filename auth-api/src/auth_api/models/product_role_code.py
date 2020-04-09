@@ -35,3 +35,8 @@ class ProductRoleCode(BaseModel):  # pylint: disable=too-few-public-methods
     def find_by_code_and_product_code(cls, code: str, product_code: str):
         """Find a Product Role Code instance that matches the code and product code."""
         return cls.query.filter_by(code=code, product_code=product_code).one_or_none()
+
+    @classmethod
+    def find_all_roles_by_product_code(cls, product_code: str):
+        """Find a Product Role Code instance for the product code."""
+        return cls.query.filter_by(product_code=product_code).all()
