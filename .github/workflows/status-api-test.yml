@@ -1,4 +1,4 @@
-name: status API DEV CD
+name: status API TEST CD
 
 on:
   push:
@@ -12,7 +12,7 @@ env:
   TAG_NAME: test
 
 jobs:
-  status-api-dev:
+  status-api-test:
     runs-on: ubuntu-latest
     if: github.repository == 'bcgov/sbc-auth'
     strategy:
@@ -40,7 +40,7 @@ jobs:
         working-directory: ./status-api
         run: |
           dIMAGE_ID=${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME
-          docker image tag $IMAGE_ID:latest $IMAGE_ID:$TAG_NAME
+          docker image tag $IMAGE_ID:$TAG_NAME
           docker push $IMAGE_ID:$TAG_NAME
       - name: Login Openshift
         working-directory: ./status-api
