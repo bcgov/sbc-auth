@@ -35,7 +35,8 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('org', [
       'updateMember',
       'leaveTeam',
-      'dissolveTeam'
+      'dissolveTeam',
+      'deleteUser'
     ])
   }
 })
@@ -56,6 +57,7 @@ export default class TeamManagementMixin extends Vue {
 
   protected readonly currentMembership!: Member
   protected readonly updateMember!: (updateMemberPayload: UpdateMemberPayload) => void
+  protected readonly deleteUser!: (userName: string) => void
   protected readonly leaveTeam!: (memberId: number) => void
   protected readonly dissolveTeam!: () => void
   protected readonly currentUser!: KCUserProfile
@@ -123,13 +125,20 @@ export default class TeamManagementMixin extends Vue {
   }
 
   protected async removeMember () {
-    await this.updateMember({
-      memberId: this.memberToBeRemoved.id,
-      status: MembershipStatus.Inactive
-    })
+    if (this.isAnonymousUser()) {
+      await this.deleteUser(this.memberToBeRemoved.user.username)
+    } else {
+      await this.updateMember({
+        memberId: this.memberToBeRemoved.id,
+        status: MembershipStatus.Inactive
+      })
+    }
     this.modal.close()
   }
 
+  isAnonymousUser (): boolean {
+    return this.currentUser?.loginSource === LoginSource.BCROS
+  }
   protected async changeRole () {
     await this.updateMember({
       memberId: this.roleChangeToAction.member.id,

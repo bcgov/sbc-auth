@@ -59,6 +59,30 @@ class KeycloakService:
         return KeycloakService.get_user_by_username(user.user_name, admin_token)
 
     @staticmethod
+    def update_user(user: KeycloakUser):
+        """Add user to Keycloak."""
+        config = current_app.config
+        # Add user and set password
+        admin_token = KeycloakService._get_admin_token(upstream=True)
+
+        base_url = config.get('KEYCLOAK_BCROS_BASE_URL')
+        realm = config.get('KEYCLOAK_BCROS_REALMNAME')
+
+        existing_user = KeycloakService.get_user_by_username(user.user_name, admin_token=admin_token)
+        if not existing_user:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        headers = {
+            'Content-Type': ContentType.JSON.value,
+            'Authorization': f'Bearer {admin_token}'
+        }
+
+        update_user_url = f'{base_url}/auth/admin/realms/{realm}/users/{existing_user.id}'
+        response = requests.put(update_user_url, data=user.value(), headers=headers)
+        response.raise_for_status()
+
+        return KeycloakService.get_user_by_username(user.user_name, admin_token)
+
+    @staticmethod
     def get_user_by_username(username, admin_token=None) -> KeycloakUser:
         """Get user from Keycloak by username."""
         user = None
@@ -66,6 +90,8 @@ class KeycloakService:
         realm = current_app.config.get('KEYCLOAK_BCROS_REALMNAME')
         if not admin_token:
             admin_token = KeycloakService._get_admin_token()
+
+        print(admin_token)
         headers = {
             'Content-Type': ContentType.JSON.value,
             'Authorization': f'Bearer {admin_token}'

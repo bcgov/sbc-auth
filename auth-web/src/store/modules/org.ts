@@ -235,6 +235,20 @@ export default class OrgModule extends VuexModule {
     }
   }
 
+  @Action({ rawError: true })
+  public async deleteUser (userId: string) {
+    // Send request to update member on server and get result
+    const response = await UserService.deleteAnonymousUser(userId)
+
+    // If no response or error, throw exception to be caught
+    if (!response || response.status !== 200 || !response.data) {
+      throw Error('Unable to remove user')
+    } else {
+      this.context.dispatch('syncActiveOrgMembers')
+      this.context.dispatch('syncPendingOrgMembers')
+    }
+  }
+
   @Action({ commit: 'setActiveOrgMembers', rawError: true })
   public async syncActiveOrgMembers () {
     const response = await OrgService.getOrgMembers(this.context.state['currentOrganization'].id, 'ACTIVE')

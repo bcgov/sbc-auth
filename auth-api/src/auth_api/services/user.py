@@ -99,17 +99,30 @@ class User:  # pylint: disable=too-many-instance-attributes
             current_app.logger.debug(f"create user username: {membership['username']}")
             create_user_request = User._create_kc_user(membership)
             db_username = IdpHint.BCROS.value + '/' + membership['username']
-            existing_user = UserModel.find_by_username(db_username)
-            if existing_user:
-                current_app.logger.debug('Existing users found in DB')
-                users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
-                continue
+            user_model = UserModel.find_by_username(db_username)
+            enable_user = False
+            if user_model:
+                if user_model.status == Status.INACTIVE.value:  # check is it a disabled user
+                    membership_model = MembershipModel.find_membership_by_userid(user_model.id)
+                    if membership_model.org_id == org_id:
+                        enable_user = True
+                    else:
+                        current_app.logger.debug('Existing users found in DB')
+                        users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
+                        continue
+                else:
+                    current_app.logger.debug('Existing users found in DB')
+                    users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
+                    continue
 
             if membership.get('update_password_on_login', True):  # by default , reset needed
                 create_user_request.update_password_on_login()
             try:
                 # TODO may be this method itself throw the business exception;can handle different exceptions?
-                kc_user = KeycloakService.add_user(create_user_request, throw_error_if_exists=True)
+                if not enable_user:
+                    kc_user = KeycloakService.add_user(create_user_request, throw_error_if_exists=True)
+                else:
+                    kc_user = KeycloakService.update_user(create_user_request)
 
             except BusinessException as err:
                 current_app.logger.error('create_user in keycloak failed :duplicate user {}', err)
@@ -121,16 +134,27 @@ class User:  # pylint: disable=too-many-instance-attributes
                 continue
 
             try:
-                user_model: UserModel = UserModel(username=db_username,
-                                                  is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
-                                                  type=AccessType.ANONYMOUS.value, email=membership.get('email', None),
-                                                  firstname=kc_user.first_name, lastname=kc_user.last_name)
+                if not enable_user:
+                    user_model: UserModel = UserModel(username=db_username,
+                                                      is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
+                                                      type=AccessType.ANONYMOUS.value,
+                                                      email=membership.get('email', None),
+                                                      firstname=kc_user.first_name, lastname=kc_user.last_name)
+                    user_model.flush()
+                else:
+                    user_model.status = Status.ACTIVE.value
+                    user_model.flush()
 
-                user_model.flush()
-                membership_model = MembershipModel(org_id=org_id, user_id=user_model.id,
-                                                   membership_type_code=membership['membershipType'],
-                                                   membership_type_status=Status.ACTIVE.value)
-                membership_model.flush()
+                if not enable_user:
+                    membership_model = MembershipModel(org_id=org_id, user_id=user_model.id,
+                                                       membership_type_code=membership['membershipType'],
+                                                       membership_type_status=Status.ACTIVE.value)
+
+                    membership_model.flush()
+                else:
+                    membership_model.status = Status.ACTIVE.value
+                    membership_model.flush()
+
                 user_model.commit()
                 user_dict = User(user_model).as_dict()
                 user_dict.update({'http_status': http_status.HTTP_201_CREATED, 'error': ''})
@@ -143,6 +167,68 @@ class User:  # pylint: disable=too-many-instance-attributes
                 continue
 
         return {'users': users}
+
+    @staticmethod
+    def delete_anonymous_user(user_name, token_info: Dict = None):
+        """Delete User Profile.
+        1) check if the token user is admin/owner of the current user
+        2) disable the user from kc
+        3) set user status as INACTIVE
+        4) set membership as inactive
+
+        """
+
+        admin_user: UserModel = UserModel.find_by_jwt_token(token_info)
+        if not admin_user:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        if admin_user.status == UserStatus.INACTIVE.value:
+            raise BusinessException(Error.DELETE_FAILED_INACTIVE_USER, None)
+
+        """ handle validations.
+        
+        check if its self delete or delete by admin/owner 
+        Check if the current user is the only owner for any org - If yes, deny the action
+        
+        """
+
+        user = UserModel.find_by_username(user_name)
+        membership = MembershipModel.find_membership_by_userid(user.id)
+        org_id = membership.org_id
+
+        is_valid_action = False
+
+        # admin/owner deleteion
+        admin_user_membership = MembershipModel.find_membership_by_user_and_org(admin_user.id, org_id)
+        if admin_user_membership.membership_type_code in [ADMIN, OWNER]:
+            is_valid_action = True
+
+        # staff admin deleteion
+        is_staff_admin = token_info and 'staff_admin' in token_info.get('realm_access').get('roles')
+        if is_staff_admin:
+            is_valid_action = True
+
+        # self deletion
+        if user.keycloak_guid == admin_user.keycloak_guid:
+            is_valid_action = True
+
+        # is the only owner getting deleted
+        if is_valid_action and membership.membership_type_code == OWNER:
+            if MembershipModel.get_count_active_owner_org_id(org_id) == 1:
+                is_valid_action = False
+
+        if not is_valid_action:
+            raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
+
+        user.is_terms_of_use_accepted = False
+        user.status = UserStatus.INACTIVE.value
+        user.save()
+
+        membership.status = Status.INACTIVE.value
+        membership.save()
+        update_user_request = KeycloakUser()
+        update_user_request.user_name = user_name.replace(IdpHint.BCROS.value + '/', '')
+        update_user_request.enabled = False
+        KeycloakService.update_user(update_user_request)
 
     @staticmethod
     def _create_kc_user(membership):

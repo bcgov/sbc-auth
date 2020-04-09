@@ -29,8 +29,8 @@ from auth_api.services.membership import Membership as MembershipService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.constants import BCROS, BCSC
-from auth_api.utils.roles import Role, Status
+from auth_api.utils.constants import BCROS, BCSC, IdpHint
+from auth_api.utils.roles import Role, Status, AccessType
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('users', description='Endpoints for user profile management')
@@ -129,8 +129,8 @@ class Users(Resource):
         return response, status
 
 
-@cors_preflight('GET,OPTIONS')
-@API.route('/<string:username>', methods=['GET', 'OPTIONS'])
+@cors_preflight('GET,OPTIONS,DELETE')
+@API.route('/<path:username>', methods=['GET', 'OPTIONS', 'DELETE'])
 class UserStaff(Resource):
     """Resource for managing an individual user for a STAFF user."""
 
@@ -146,6 +146,22 @@ class UserStaff(Resource):
         else:
             response, status = user.as_dict(), http_status.HTTP_200_OK
         return response, status
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def delete(username):
+        token = g.jwt_oidc_token_info
+        UserService.delete_anonymous_user(username, token_info=token)
+        user = UserService.find_by_username(username)
+
+        if user is None:
+            return {'message': 'User {} does not exist.'.format(username)}, http_status.HTTP_404_NOT_FOUND
+        if user.as_dict().get('type',None) != AccessType.ANONYMOUS.value:
+            return {'Normal users cant be deleted', http_status.HTTP_501_NOT_IMPLEMENTED}
+
+
 
 
 @cors_preflight('GET,OPTIONS,PATCH,DELETE')
