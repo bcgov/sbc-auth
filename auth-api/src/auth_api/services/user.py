@@ -24,10 +24,12 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 from auth_api import status as http_status
 from auth_api.utils.constants import IdpHint
 from auth_api.exceptions import BusinessException
+from auth_api.models import db
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
+
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import UserSchema
@@ -125,13 +127,13 @@ class User:  # pylint: disable=too-many-instance-attributes
                 else:
                     user_model = User._create_new_user_and_membership(db_username, kc_user, membership, org_id)
 
-                user_model.commit()  # commit is for session ;need not to invoke for every object
+                db.session.commit()  # commit is for session ;need not to invoke for every object
                 user_dict = User(user_model).as_dict()
                 user_dict.update({'http_status': http_status.HTTP_201_CREATED, 'error': ''})
                 users.append(user_dict)
             except Exception as e:  # pylint: disable=broad-except
                 current_app.logger.error('Error on  create_user_and_add_membership: {}', e)
-                user_model.rollback()
+                db.session.rollback()
                 KeycloakService.delete_user_by_username(create_user_request.user_name)
                 users.append(User._get_error_dict(membership['username'], Error.FAILED_ADDING_USER_ERROR))
                 continue
@@ -158,13 +160,11 @@ class User:  # pylint: disable=too-many-instance-attributes
                                           email=membership.get('email', None),
                                           firstname=kc_user.first_name, lastname=kc_user.last_name)
         user_model.flush()
-
         membership_model = MembershipModel(org_id=org_id, user_id=user_model.id,
                                            membership_type_code=membership['membershipType'],
                                            membership_type_status=Status.ACTIVE.value)
 
         membership_model.flush()
-
         return user_model
 
     @staticmethod
