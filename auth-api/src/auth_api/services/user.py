@@ -178,44 +178,39 @@ class User:  # pylint: disable=too-many-instance-attributes
         4) set membership as inactive
         """
         admin_user: UserModel = UserModel.find_by_jwt_token(token_info)
+
         if not admin_user:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         if admin_user.status == UserStatus.INACTIVE.value:
             raise BusinessException(Error.DELETE_FAILED_INACTIVE_USER, None)
-
         # handle validations.
         user = UserModel.find_by_username(user_name)
         membership = MembershipModel.find_membership_by_userid(user.id)
         org_id = membership.org_id
-
         is_valid_action = False
 
         # admin/owner deleteion
         admin_user_membership = MembershipModel.find_membership_by_user_and_org(admin_user.id, org_id)
-        if admin_user_membership.membership_type_code in [ADMIN, OWNER]:
+        if admin_user_membership.membership_type_code in [OWNER]:
             is_valid_action = True
-
         # staff admin deleteion
         is_staff_admin = token_info and 'staff_admin' in token_info.get('realm_access').get('roles')
         if is_staff_admin:
             is_valid_action = True
-
         # self deletion
         if user.keycloak_guid == admin_user.keycloak_guid:
             is_valid_action = True
 
         # is the only owner getting deleted
         if is_valid_action and membership.membership_type_code == OWNER:
-            if MembershipModel.get_count_active_owner_org_id(org_id) == 1:
+            count_of_owners = MembershipModel.get_count_active_owner_org_id(org_id)
+            if count_of_owners == 1:
                 is_valid_action = False
-
         if not is_valid_action:
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
-
         user.is_terms_of_use_accepted = False
         user.status = UserStatus.INACTIVE.value
         user.save()
-
         membership.status = Status.INACTIVE.value
         membership.save()
         update_user_request = KeycloakUser()

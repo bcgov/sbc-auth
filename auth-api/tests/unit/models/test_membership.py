@@ -29,7 +29,6 @@ from auth_api.models import Membership as MembershipModel
 
 def factory_membersip_model(session):
     """Produce a templated org model."""
-
     user = factory_user_model()
     org_type = OrgTypeModel(code='TEST', desc='Test')
     session.add(org_type)

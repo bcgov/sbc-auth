@@ -222,14 +222,15 @@ class TestJwtClaims(dict, Enum):
     }
 
     @staticmethod
-    def get_test_real_user(sub):
+    def get_test_real_user(sub, preferred_username='testuser', access_ype=''):
         """Produce a created user."""
         return {
             'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
             'sub': str(sub),
             'firstname': 'Test',
             'lastname': 'User',
-            'preferred_username': 'testuser',
+            'accessType': access_ype,
+            'preferred_username': preferred_username,
             'realm_access': {
                 'roles': [
                     'edit'
@@ -439,11 +440,20 @@ class TestUserInfo(dict, Enum):
         'password': 'testuser12345',
     }
     user_bcros = {
-        'username': f'{IdpHint.BCROS.value}/CP1234567',
+        'username': f'{IdpHint.BCROS.value}/Test',
         'firstname': 'Test',
         'lastname': 'User',
         'roles': '{edit, uma_authorization, staff}'
         # dont add a kc_guid
+    }
+
+    user_bcros_active = {
+        'username': f'{IdpHint.BCROS.value}/Test',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'roles': '{edit, uma_authorization, staff}',
+        'keycloak_guid': uuid.uuid4(),
+        'access_type': 'ANONYMOUS'
     }
 
     @staticmethod

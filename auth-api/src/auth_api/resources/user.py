@@ -153,15 +153,18 @@ class UserStaff(Resource):
     @_JWT.requires_auth
     def delete(username):
         """Delete the user profile associated with the provided username."""
-        user = UserService.find_by_username(username)
-
-        if user is None:
-            response, status = {'message': 'User {} does not exist.'.format(username)}, http_status.HTTP_404_NOT_FOUND
-        elif user.as_dict().get('type', None) != AccessType.ANONYMOUS.value:
-            response, status = {'Normal users cant be deleted', http_status.HTTP_501_NOT_IMPLEMENTED}
-        else:
-            UserService.delete_anonymous_user(username, token_info=g.jwt_oidc_token_info)
-            response, status = '', http_status.HTTP_204_NO_CONTENT
+        try:
+            user = UserService.find_by_username(username)
+            if user is None:
+                response, status = {'message': 'User {} does not exist.'.format(username)}, \
+                    http_status.HTTP_404_NOT_FOUND
+            elif user.as_dict().get('type', None) != AccessType.ANONYMOUS.value:
+                response, status = {'Normal users cant be deleted', http_status.HTTP_501_NOT_IMPLEMENTED}
+            else:
+                UserService.delete_anonymous_user(username, token_info=g.jwt_oidc_token_info)
+                response, status = '', http_status.HTTP_204_NO_CONTENT
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
 
 
