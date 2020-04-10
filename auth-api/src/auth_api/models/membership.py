@@ -140,7 +140,7 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         """Return the count of pending members."""
         query = db.session.query(Membership).filter(
             and_(Membership.org_id == org_id, Membership.status == Status.ACTIVE.value,
-                 Membership.membership_type_code.in_((OWNER, ADMIN)))). \
+                 Membership.membership_type_code == OWNER)). \
             join(OrgModel).filter(OrgModel.id == org_id)
         count_q = query.statement.with_only_columns([func.count()]).order_by(None)
         count = query.session.execute(count_q).scalar()
