@@ -146,7 +146,6 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         count = query.session.execute(count_q).scalar()
         return count
 
-
     @classmethod
     def check_if_active_admin_or_owner_org_id(cls, org_id, user_id):
         """Return the count of pending members."""

@@ -81,16 +81,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         single_mode= true is used now incase of invitation for admin users scenarion
         other cases should be invoked with single_mode=false
         """
-        if single_mode:  # make sure no bulk operation and only owner is created using if no auth
-            if len(memberships) > 1 or memberships[0].get('membershipType') not in [OWNER, ADMIN]:
-                raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
-        else:
-            check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
-
-        # check if anonymous org ;these actions cannot be performed on normal orgs
-        org = OrgModel.find_by_org_id(org_id)
-        if not org or org.access_type != AccessType.ANONYMOUS.value:
-            raise BusinessException(Error.INVALID_INPUT, None)
+        User._validate_and_throw_exception(memberships, org_id, single_mode, token_info)
 
         current_app.logger.debug('create_user')
         users = []
@@ -100,30 +91,23 @@ class User:  # pylint: disable=too-many-instance-attributes
             create_user_request = User._create_kc_user(membership)
             db_username = IdpHint.BCROS.value + '/' + membership['username']
             user_model = UserModel.find_by_username(db_username)
-            enable_user = False
-            if user_model:
-                if user_model.status == Status.INACTIVE.value:  # check is it a disabled user
-                    membership_model = MembershipModel.find_membership_by_userid(user_model.id)
-                    if membership_model.org_id == org_id:
-                        enable_user = True
-                    else:
-                        current_app.logger.debug('Existing users found in DB')
-                        users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
-                        continue
-                else:
-                    current_app.logger.debug('Existing users found in DB')
-                    users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
-                    continue
+            re_enable_user = False
+            if user_model and user_model.status == Status.INACTIVE.value:
+                membership_model = MembershipModel.find_membership_by_userid(user_model.id)
+                re_enable_user = membership_model.org_id == org_id
+
+            if user_model and not re_enable_user:
+                current_app.logger.debug('Existing users found in DB')
+                users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
+                continue
 
             if membership.get('update_password_on_login', True):  # by default , reset needed
                 create_user_request.update_password_on_login()
             try:
-                # TODO may be this method itself throw the business exception;can handle different exceptions?
-                if not enable_user:
-                    kc_user = KeycloakService.add_user(create_user_request, throw_error_if_exists=True)
-                else:
+                if re_enable_user:
                     kc_user = KeycloakService.update_user(create_user_request)
-
+                else:
+                    kc_user = KeycloakService.add_user(create_user_request, throw_error_if_exists=True)
             except BusinessException as err:
                 current_app.logger.error('create_user in keycloak failed :duplicate user {}', err)
                 users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
@@ -132,30 +116,16 @@ class User:  # pylint: disable=too-many-instance-attributes
                 current_app.logger.error('create_user in keycloak failed {}', err)
                 users.append(User._get_error_dict(membership['username'], Error.FAILED_ADDING_USER_ERROR))
                 continue
-
             try:
-                if not enable_user:
-                    user_model: UserModel = UserModel(username=db_username,
-                                                      is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
-                                                      type=AccessType.ANONYMOUS.value,
-                                                      email=membership.get('email', None),
-                                                      firstname=kc_user.first_name, lastname=kc_user.last_name)
-                    user_model.flush()
-                else:
+                if re_enable_user:
                     user_model.status = Status.ACTIVE.value
                     user_model.flush()
-
-                if not enable_user:
-                    membership_model = MembershipModel(org_id=org_id, user_id=user_model.id,
-                                                       membership_type_code=membership['membershipType'],
-                                                       membership_type_status=Status.ACTIVE.value)
-
-                    membership_model.flush()
-                else:
                     membership_model.status = Status.ACTIVE.value
                     membership_model.flush()
+                else:
+                    user_model = User._create_new_user_and_membership(db_username, kc_user, membership, org_id)
 
-                user_model.commit()
+                user_model.commit()  # commit is for session ;need not to invoke for every object
                 user_dict = User(user_model).as_dict()
                 user_dict.update({'http_status': http_status.HTTP_201_CREATED, 'error': ''})
                 users.append(user_dict)
@@ -169,28 +139,51 @@ class User:  # pylint: disable=too-many-instance-attributes
         return {'users': users}
 
     @staticmethod
+    def _validate_and_throw_exception(memberships, org_id, single_mode, token_info):
+        if single_mode:  # make sure no bulk operation and only owner is created using if no auth
+            if len(memberships) > 1 or memberships[0].get('membershipType') not in [OWNER, ADMIN]:
+                raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
+        else:
+            check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
+        # check if anonymous org ;these actions cannot be performed on normal orgs
+        org = OrgModel.find_by_org_id(org_id)
+        if not org or org.access_type != AccessType.ANONYMOUS.value:
+            raise BusinessException(Error.INVALID_INPUT, None)
+
+    @staticmethod
+    def _create_new_user_and_membership(db_username, kc_user, membership, org_id):
+        user_model: UserModel = UserModel(username=db_username,
+                                          is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
+                                          type=AccessType.ANONYMOUS.value,
+                                          email=membership.get('email', None),
+                                          firstname=kc_user.first_name, lastname=kc_user.last_name)
+        user_model.flush()
+
+        membership_model = MembershipModel(org_id=org_id, user_id=user_model.id,
+                                           membership_type_code=membership['membershipType'],
+                                           membership_type_status=Status.ACTIVE.value)
+
+        membership_model.flush()
+
+        return user_model
+
+    @staticmethod
     def delete_anonymous_user(user_name, token_info: Dict = None):
-        """Delete User Profile.
+        """
+        Delete User Profile.
+
         1) check if the token user is admin/owner of the current user
         2) disable the user from kc
         3) set user status as INACTIVE
         4) set membership as inactive
-
         """
-
         admin_user: UserModel = UserModel.find_by_jwt_token(token_info)
         if not admin_user:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         if admin_user.status == UserStatus.INACTIVE.value:
             raise BusinessException(Error.DELETE_FAILED_INACTIVE_USER, None)
 
-        """ handle validations.
-        
-        check if its self delete or delete by admin/owner 
-        Check if the current user is the only owner for any org - If yes, deny the action
-        
-        """
-
+        # handle validations.
         user = UserModel.find_by_username(user_name)
         membership = MembershipModel.find_membership_by_userid(user.id)
         org_id = membership.org_id
