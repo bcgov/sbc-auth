@@ -95,11 +95,10 @@ class User:  # pylint: disable=too-many-instance-attributes
             user_model = UserModel.find_by_username(db_username)
             re_enable_user = False
             existing_kc_user = KeycloakService.get_user_by_username(username)
-            enabled_in_kc = existing_kc_user and not existing_kc_user.enabled
-            if user_model and user_model.status == Status.INACTIVE.value and not enabled_in_kc:
+            enabled_in_kc = getattr(existing_kc_user, 'enabled', True)
+            if getattr(user_model, 'status', None) == Status.INACTIVE.value and not enabled_in_kc:
                 membership_model = MembershipModel.find_membership_by_userid(user_model.id)
                 re_enable_user = membership_model.org_id == org_id
-
             if user_model and not re_enable_user:
                 current_app.logger.debug('Existing users found in DB')
                 users.append(User._get_error_dict(username, Error.USER_ALREADY_EXISTS))
