@@ -91,7 +91,6 @@ class KeycloakService:
         if not admin_token:
             admin_token = KeycloakService._get_admin_token()
 
-        print(admin_token)
         headers = {
             'Content-Type': ContentType.JSON.value,
             'Authorization': f'Bearer {admin_token}'
