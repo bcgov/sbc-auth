@@ -73,7 +73,7 @@ class User:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def create_user_and_add_membership(memberships: List[dict], org_id, token_info: Dict = None,
-                                       # pylint: disable=too-many-locals
+                                       # pylint: disable=too-many-locals, too-many-statements, too-many-branches
                                        single_mode: bool = False):
         """
         Create user(s) in the  DB and upstream keycloak.
@@ -88,19 +88,21 @@ class User:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('create_user')
         users = []
         for membership in memberships:
-
-            current_app.logger.debug(f"create user username: {membership['username']}")
+            username = membership['username']
+            current_app.logger.debug(f'create user username: {username}')
             create_user_request = User._create_kc_user(membership)
-            db_username = IdpHint.BCROS.value + '/' + membership['username']
+            db_username = IdpHint.BCROS.value + '/' + username
             user_model = UserModel.find_by_username(db_username)
             re_enable_user = False
-            if user_model and user_model.status == Status.INACTIVE.value:
+            existing_kc_user = KeycloakService.get_user_by_username(username)
+            enabled_in_kc = existing_kc_user and not existing_kc_user.enabled
+            if user_model and user_model.status == Status.INACTIVE.value and not enabled_in_kc:
                 membership_model = MembershipModel.find_membership_by_userid(user_model.id)
                 re_enable_user = membership_model.org_id == org_id
 
             if user_model and not re_enable_user:
                 current_app.logger.debug('Existing users found in DB')
-                users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
+                users.append(User._get_error_dict(username, Error.USER_ALREADY_EXISTS))
                 continue
 
             if membership.get('update_password_on_login', True):  # by default , reset needed
@@ -112,11 +114,11 @@ class User:  # pylint: disable=too-many-instance-attributes
                     kc_user = KeycloakService.add_user(create_user_request, throw_error_if_exists=True)
             except BusinessException as err:
                 current_app.logger.error('create_user in keycloak failed :duplicate user {}', err)
-                users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
+                users.append(User._get_error_dict(username, Error.USER_ALREADY_EXISTS))
                 continue
             except HTTPError as err:
                 current_app.logger.error('create_user in keycloak failed {}', err)
-                users.append(User._get_error_dict(membership['username'], Error.FAILED_ADDING_USER_ERROR))
+                users.append(User._get_error_dict(username, Error.FAILED_ADDING_USER_ERROR))
                 continue
             try:
                 if re_enable_user:
@@ -134,11 +136,21 @@ class User:  # pylint: disable=too-many-instance-attributes
             except Exception as e:  # pylint: disable=broad-except
                 current_app.logger.error('Error on  create_user_and_add_membership: {}', e)
                 db.session.rollback()
-                KeycloakService.delete_user_by_username(create_user_request.user_name)
-                users.append(User._get_error_dict(membership['username'], Error.FAILED_ADDING_USER_ERROR))
+                if re_enable_user:
+                    User._update_user_in_kc(create_user_request)
+                else:
+                    KeycloakService.delete_user_by_username(create_user_request.user_name)
+                users.append(User._get_error_dict(username, Error.FAILED_ADDING_USER_ERROR))
                 continue
 
         return {'users': users}
+
+    @staticmethod
+    def _update_user_in_kc(create_user_request):
+        update_user_request = KeycloakUser()
+        update_user_request.user_name = create_user_request.user_name
+        update_user_request.enabled = False
+        KeycloakService.update_user(update_user_request)
 
     @staticmethod
     def _validate_and_throw_exception(memberships, org_id, single_mode, token_info):

@@ -29,6 +29,7 @@ from auth_api.models import User as UserModel
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services.keycloak import KeycloakService
+from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils.constants import IdpHint
 from auth_api.utils.roles import Status, ADMIN, OWNER, MEMBER
 from werkzeug.exceptions import HTTPException
@@ -215,6 +216,50 @@ def test_create_user_and_add_membership_admin_bulk_mode(session, auth_mock,
 
     # staff didnt create members..so count is count of owner+other 1 member
     assert len(members) == 2
+
+
+def test_create_user_add_membership_reenable(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an admin can add a member."""
+    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
+    user = factory_user_model()
+    factory_membership_model(user.id, org.id)
+    claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
+    anon_member = TestAnonymousMembership.generate_random_user(MEMBER)
+    membership = [anon_member]
+    users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
+    user_name = IdpHint.BCROS.value + '/' + membership[0]['username']
+    assert len(users['users']) == 1
+    assert users['users'][0]['username'] == user_name
+    assert users['users'][0]['type'] == 'ANONYMOUS'
+
+    members = MembershipModel.find_members_by_org_id(org.id)
+
+    # staff didnt create members..so count is count of owner+other 1 member
+    assert len(members) == 2
+
+    # assert cant be readded
+    users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
+    assert users['users'][0]['http_status'] == 409
+    assert users['users'][0]['error'] == 'The username is already taken'
+
+    # deactivate everything and try again
+
+    anon_user = UserModel.find_by_username(user_name)
+    anon_user.status = Status.INACTIVE.value
+    anon_user.save()
+    membership_model = MembershipModel.find_membership_by_userid(anon_user.id)
+    membership_model.status = Status.INACTIVE.value
+
+    update_user_request = KeycloakUser()
+    update_user_request.user_name = membership[0]['username']
+    update_user_request.enabled = False
+    KeycloakService.update_user(update_user_request)
+
+    users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
+
+    assert len(users['users']) == 1
+    assert users['users'][0]['username'] == IdpHint.BCROS.value + '/' + membership[0]['username']
+    assert users['users'][0]['type'] == 'ANONYMOUS'
 
 
 def test_create_user_and_add_membership_admin_bulk_mode_unauthorised(session, auth_mock,
