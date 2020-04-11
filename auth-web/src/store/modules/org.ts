@@ -241,7 +241,7 @@ export default class OrgModule extends VuexModule {
     const response = await UserService.deleteAnonymousUser(userId)
 
     // If no response or error, throw exception to be caught
-    if (!response || response.status !== 200 || !response.data) {
+    if (!response || response.status !== 204) {
       throw Error('Unable to remove user')
     } else {
       this.context.dispatch('syncActiveOrgMembers')

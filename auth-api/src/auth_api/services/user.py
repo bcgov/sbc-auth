@@ -124,6 +124,7 @@ class User:  # pylint: disable=too-many-instance-attributes
                     user_model.status = Status.ACTIVE.value
                     user_model.flush()
                     membership_model.status = Status.ACTIVE.value
+                    membership_model.membership_type_code=membership['membershipType']
                     membership_model.flush()
                 else:
                     user_model = User._create_new_user_and_membership(db_username, kc_user, membership, org_id)

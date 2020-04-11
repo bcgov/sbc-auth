@@ -158,7 +158,11 @@ export default class TeamManagementMixin extends Vue {
   }
 
   protected async leave () {
-    await this.leaveTeam(this.currentMembership.id)
+    if (this.isAnonymousUser()) {
+      await this.deleteUser(this.currentMembership.user.username)
+    } else {
+      await this.leaveTeam(this.currentMembership.id)
+    }
     this.modal.close()
     this.$store.commit('updateHeader')
     this.$router.push('/leaveteam')
