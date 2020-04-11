@@ -437,7 +437,7 @@ class TestUserInfo(dict, Enum):
     }
     user_anonymous_1 = {
         'username': 'testuser12345',
-        'password': 'testuser12345',
+        'password': 'Password@1234',
     }
     user_bcros = {
         'username': f'{IdpHint.BCROS.value}/Test',
@@ -477,7 +477,7 @@ class KeycloakScenario:
         create_user_request = KeycloakUser()
         user_name = ''.join(choice(ascii_lowercase) for i in range(5))
         create_user_request.user_name = user_name
-        create_user_request.password = '1111'
+        create_user_request.password = 'Test@123'
         create_user_request.first_name = 'test_first'
         create_user_request.last_name = 'test_last'
         create_user_request.email = f'{user_name}@gov.bc.ca'
@@ -506,9 +506,9 @@ class BulkUserTestScenario:
     def get_bulk_user1_for_org(org_id: str):
         """Generate a bulk user input."""
         return {'users': [
-            {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'helo',
+            {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'Test@12345',
              'membershipType': 'ADMIN'},
-            {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'helo',
+            {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'Test@12345',
              'membershipType': 'MEMBER'}
         ],
             'orgId': org_id

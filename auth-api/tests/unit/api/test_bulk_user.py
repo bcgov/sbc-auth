@@ -63,7 +63,7 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
 
     user = {
         'username': 'testuser{}'.format(randint(0, 1000)),
-        'password': 'testuser',
+        'password': 'Password@1234',
     }
     rv = client.post('/api/v1/users/bcros', data=json.dumps(user),
                      headers={'invitation_token': dictionary.get('token')}, content_type='application/json')
@@ -109,7 +109,6 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
 
     assert len(rv.json['users']) == 2
     assert schema_utils.validate(rv.json, 'anonymous_user_response')
-    print('----SSS---', rv.json['users'])
     assert rv.json['users'][0]['http_status'] == 409
     assert rv.json['users'][1]['http_status'] == 409
     assert rv.json['users'][0]['error'] == 'The username is already taken'
