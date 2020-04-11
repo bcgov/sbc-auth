@@ -89,7 +89,7 @@ class KeycloakService:
         base_url = current_app.config.get('KEYCLOAK_BCROS_BASE_URL')
         realm = current_app.config.get('KEYCLOAK_BCROS_REALMNAME')
         if not admin_token:
-            admin_token = KeycloakService._get_admin_token()
+            admin_token = KeycloakService._get_admin_token(upstream=True)
 
         headers = {
             'Content-Type': ContentType.JSON.value,
