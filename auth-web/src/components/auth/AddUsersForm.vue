@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 <template>
   <div>
+    <p>Enter a username, temporary password and select a role for each team member you want to add to this account.</p>
     <v-form ref="form" class="mt-9">
       <ul class="invite-list">
         <transition-group name="slide-y-transition">
