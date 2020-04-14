@@ -39,8 +39,6 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
-    dictionary = json.loads(rv.data)
-    assert 'accessType' not in dictionary  # access type shouldn't be set for normal orgs
 
 
 def test_add_anonymous_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
