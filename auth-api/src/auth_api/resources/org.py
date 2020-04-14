@@ -28,7 +28,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.enums import NotificationType
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, MEMBER, Role, Status
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, MEMBER, Role, Status, AccessType, STAFF_ADMIN
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('orgs', description='Endpoints for organization management')
@@ -111,11 +111,16 @@ class Org(Resource):
         """Update the org specified by the provided id with the request body."""
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'org')
+        token = g.jwt_oidc_token_info
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
-
         try:
-            org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=CLIENT_ADMIN_ROLES)
+            org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
+                                            allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF_ADMIN))
+            if org and org.as_dict().get('accessType', None) == AccessType.ANONYMOUS.value and \
+                    Role.STAFF_ADMIN.value not in token.get('realm_access').get('roles'):
+                return {'message': 'The organisation can only be updated by a staff admin.'}, \
+                    http_status.HTTP_401_UNAUTHORIZED
             if org:
                 response, status = org.update_org(request_json).as_dict(), http_status.HTTP_200_OK
             else:

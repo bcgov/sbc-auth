@@ -3,7 +3,7 @@
     <header class="view-header align-center">
       <h2 class="view-header__title">Team Members</h2>
       <div class="view-header__actions">
-        <v-btn color="primary" v-if="canInvite" @click="showAddUsersModal()" data-test="add-people-button">
+        <v-btn large color="primary" v-if="canInvite" @click="showAddUsersModal()" data-test="add-people-button">
           <v-icon small>mdi-plus</v-icon>
           <span>Add Team Member</span>
         </v-btn>
@@ -196,9 +196,9 @@ export default class AnonymousUserManagement extends Mixins(TeamManagementMixin)
 
   private showSuccessModal () {
     this.$refs.addAnonUsersDialog.close()
-    this.successTitle = `Added ${this.createdUsers.length} Team Members`
-    if (this.failedUsers.length) {
-      this.successTitle = `Added ${this.createdUsers.length} of ${(this.failedUsers.length + this.createdUsers.length)} Team Members`
+    this.successTitle = `${this.createdUsers.length} Team Members Added`
+    if (this.createdUsers.length) {
+      this.successTitle = `${this.createdUsers.length} of ${(this.failedUsers.length + this.createdUsers.length)} Team Members Added`
     }
     this.$refs.addUsersSuccessDialog.open()
   }

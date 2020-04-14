@@ -620,6 +620,29 @@ def test_get_invitations(client, jwt, session, keycloak_mock):  # pylint:disable
     assert dictionary['invitations'][1]['recipientEmail'] == 'xyz456@email.com'
 
 
+def test_update_anon_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be updated via PUT."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_anonymous),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    dictionary = json.loads(rv.data)
+    assert dictionary['accessType'] == 'ANONYMOUS'
+    org_id = dictionary['id']
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo2'}),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['name'] == 'helo2'
+
+    public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo2'}),
+                    headers=public_headers, content_type='application/json')
+    # not an admin/owner..so unauthorized will be thrown when trying to access it
+    assert rv.status_code == http_status.HTTP_403_FORBIDDEN
+
+
 def test_update_member(client, jwt, session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a member of an org can have their role updated."""
     # Set up: create/login user, create org
