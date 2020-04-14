@@ -39,7 +39,7 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     accepted_date = Column(DateTime, nullable=True)
     token = Column(String(100), nullable=True)  # stores the one time invitation token
     invitation_status_code = Column(ForeignKey('invitation_status.code'), nullable=False, default='PENDING')
-    type = Column('invitation_type', String(100), nullable=True)  # Director Search etc
+    type = Column(ForeignKey('invitation_type.code'), nullable=False, default='STANDARD')
 
     invitation_status = relationship('InvitationStatus', foreign_keys=[invitation_status_code])
     sender = relationship('User', foreign_keys=[sender_id])
@@ -63,12 +63,12 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         return self.invitation_status_code
 
     @classmethod
-    def create_from_dict(cls, invitation_info: dict, user_id):
+    def create_from_dict(cls, invitation_info: dict, user_id, invitation_type):
         """Create a new Invitation from the provided dictionary."""
         if invitation_info:
             invitation = Invitation()
             invitation.sender_id = user_id
-            invitation.type = invitation_info.get('type')
+            invitation.type = invitation_type
             invitation.recipient_email = invitation_info['recipientEmail']
             invitation.sent_date = datetime.now()
             invitation.invitation_status = InvitationStatus.get_default_status()

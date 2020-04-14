@@ -75,6 +75,9 @@ class Org:
         if is_staff_admin:
             org.access_type = AccessType.ANONYMOUS.value
             org.billable = False
+        else:
+            org.access_type = AccessType.BCSC.value
+            org.billable = True
         org.save()
         current_app.logger.info(f'<created_org org_id:{org.id}')
         # create the membership record for this user if its not created by staff and access_type is anonymous
@@ -250,4 +253,8 @@ class Org:
                 find_affiliations_by_business_identifier(kwargs.get('business_identifier'))
             if affiliation:
                 orgs['orgs'].append(Org(OrgModel.find_by_org_id(affiliation.org_id)).as_dict())
+        elif kwargs.get('org_type', None):
+            org_models = OrgModel.find_by_org_access_type(kwargs.get('org_type'))
+            for org in org_models:
+                orgs['orgs'].append(Org(org).as_dict())
         return orgs
