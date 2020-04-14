@@ -24,10 +24,12 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 from auth_api import status as http_status
 from auth_api.utils.constants import IdpHint
 from auth_api.exceptions import BusinessException
+from auth_api.models import db
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
+
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import UserSchema
@@ -71,7 +73,7 @@ class User:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def create_user_and_add_membership(memberships: List[dict], org_id, token_info: Dict = None,
-                                       # pylint: disable=too-many-locals
+                                       # pylint: disable=too-many-locals, too-many-statements, too-many-branches
                                        single_mode: bool = False):
         """
         Create user(s) in the  DB and upstream keycloak.
@@ -81,68 +83,152 @@ class User:  # pylint: disable=too-many-instance-attributes
         single_mode= true is used now incase of invitation for admin users scenarion
         other cases should be invoked with single_mode=false
         """
-        if single_mode:  # make sure no bulk operation and only owner is created using if no auth
-            if len(memberships) > 1 or memberships[0].get('membershipType') not in [OWNER, ADMIN]:
-                raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
-        else:
-            check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
-
-        # check if anonymous org ;these actions cannot be performed on normal orgs
-        org = OrgModel.find_by_org_id(org_id)
-        if not org or org.access_type != AccessType.ANONYMOUS.value:
-            raise BusinessException(Error.INVALID_INPUT, None)
+        User._validate_and_throw_exception(memberships, org_id, single_mode, token_info)
 
         current_app.logger.debug('create_user')
         users = []
         for membership in memberships:
-
-            current_app.logger.debug(f"create user username: {membership['username']}")
+            username = membership['username']
+            current_app.logger.debug(f'create user username: {username}')
             create_user_request = User._create_kc_user(membership)
-            db_username = IdpHint.BCROS.value + '/' + membership['username']
-            existing_user = UserModel.find_by_username(db_username)
-            if existing_user:
+            db_username = IdpHint.BCROS.value + '/' + username
+            user_model = UserModel.find_by_username(db_username)
+            re_enable_user = False
+            existing_kc_user = KeycloakService.get_user_by_username(username)
+            enabled_in_kc = getattr(existing_kc_user, 'enabled', True)
+            if getattr(user_model, 'status', None) == Status.INACTIVE.value and not enabled_in_kc:
+                membership_model = MembershipModel.find_membership_by_userid(user_model.id)
+                re_enable_user = membership_model.org_id == org_id
+            if user_model and not re_enable_user:
                 current_app.logger.debug('Existing users found in DB')
-                users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
+                users.append(User._get_error_dict(username, Error.USER_ALREADY_EXISTS))
                 continue
 
             if membership.get('update_password_on_login', True):  # by default , reset needed
                 create_user_request.update_password_on_login()
             try:
-                # TODO may be this method itself throw the business exception;can handle different exceptions?
-                kc_user = KeycloakService.add_user(create_user_request, throw_error_if_exists=True)
-
+                if re_enable_user:
+                    kc_user = KeycloakService.update_user(create_user_request)
+                else:
+                    kc_user = KeycloakService.add_user(create_user_request, throw_error_if_exists=True)
             except BusinessException as err:
                 current_app.logger.error('create_user in keycloak failed :duplicate user {}', err)
-                users.append(User._get_error_dict(membership['username'], Error.USER_ALREADY_EXISTS))
+                users.append(User._get_error_dict(username, Error.USER_ALREADY_EXISTS))
                 continue
             except HTTPError as err:
                 current_app.logger.error('create_user in keycloak failed {}', err)
-                users.append(User._get_error_dict(membership['username'], Error.FAILED_ADDING_USER_ERROR))
+                users.append(User._get_error_dict(username, Error.FAILED_ADDING_USER_ERROR))
                 continue
-
             try:
-                user_model: UserModel = UserModel(username=db_username,
-                                                  is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
-                                                  type=AccessType.ANONYMOUS.value, email=membership.get('email', None),
-                                                  firstname=kc_user.first_name, lastname=kc_user.last_name)
+                if re_enable_user:
+                    user_model.status = Status.ACTIVE.value
+                    user_model.flush()
+                    membership_model.status = Status.ACTIVE.value
+                    membership_model.membership_type_code = membership['membershipType']
+                    membership_model.flush()
+                else:
+                    user_model = User._create_new_user_and_membership(db_username, kc_user, membership, org_id)
 
-                user_model.flush()
-                membership_model = MembershipModel(org_id=org_id, user_id=user_model.id,
-                                                   membership_type_code=membership['membershipType'],
-                                                   membership_type_status=Status.ACTIVE.value)
-                membership_model.flush()
-                user_model.commit()
+                db.session.commit()  # commit is for session ;need not to invoke for every object
                 user_dict = User(user_model).as_dict()
                 user_dict.update({'http_status': http_status.HTTP_201_CREATED, 'error': ''})
                 users.append(user_dict)
             except Exception as e:  # pylint: disable=broad-except
                 current_app.logger.error('Error on  create_user_and_add_membership: {}', e)
-                user_model.rollback()
-                KeycloakService.delete_user_by_username(create_user_request.user_name)
-                users.append(User._get_error_dict(membership['username'], Error.FAILED_ADDING_USER_ERROR))
+                db.session.rollback()
+                if re_enable_user:
+                    User._update_user_in_kc(create_user_request)
+                else:
+                    KeycloakService.delete_user_by_username(create_user_request.user_name)
+                users.append(User._get_error_dict(username, Error.FAILED_ADDING_USER_ERROR))
                 continue
 
         return {'users': users}
+
+    @staticmethod
+    def _update_user_in_kc(create_user_request):
+        update_user_request = KeycloakUser()
+        update_user_request.user_name = create_user_request.user_name
+        update_user_request.enabled = False
+        KeycloakService.update_user(update_user_request)
+
+    @staticmethod
+    def _validate_and_throw_exception(memberships, org_id, single_mode, token_info):
+        if single_mode:  # make sure no bulk operation and only owner is created using if no auth
+            if len(memberships) > 1 or memberships[0].get('membershipType') not in [OWNER, ADMIN]:
+                raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
+        else:
+            check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
+        # check if anonymous org ;these actions cannot be performed on normal orgs
+        org = OrgModel.find_by_org_id(org_id)
+        if not org or org.access_type != AccessType.ANONYMOUS.value:
+            raise BusinessException(Error.INVALID_INPUT, None)
+
+    @staticmethod
+    def _create_new_user_and_membership(db_username, kc_user, membership, org_id):
+        user_model: UserModel = UserModel(username=db_username,
+                                          is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
+                                          type=AccessType.ANONYMOUS.value,
+                                          email=membership.get('email', None),
+                                          firstname=kc_user.first_name, lastname=kc_user.last_name)
+        user_model.flush()
+        membership_model = MembershipModel(org_id=org_id, user_id=user_model.id,
+                                           membership_type_code=membership['membershipType'],
+                                           membership_type_status=Status.ACTIVE.value)
+
+        membership_model.flush()
+        return user_model
+
+    @staticmethod
+    def delete_anonymous_user(user_name, token_info: Dict = None):
+        """
+        Delete User Profile.
+
+        1) check if the token user is admin/owner of the current user
+        2) disable the user from kc
+        3) set user status as INACTIVE
+        4) set membership as inactive
+        """
+        admin_user: UserModel = UserModel.find_by_jwt_token(token_info)
+
+        if not admin_user:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        if admin_user.status == UserStatus.INACTIVE.value:
+            raise BusinessException(Error.DELETE_FAILED_INACTIVE_USER, None)
+        # handle validations.
+        user = UserModel.find_by_username(user_name)
+        membership = MembershipModel.find_membership_by_userid(user.id)
+        org_id = membership.org_id
+        is_valid_action = False
+
+        # admin/owner deleteion
+        admin_user_membership = MembershipModel.find_membership_by_user_and_org(admin_user.id, org_id)
+        if admin_user_membership.membership_type_code in [OWNER]:
+            is_valid_action = True
+        # staff admin deleteion
+        is_staff_admin = token_info and 'staff_admin' in token_info.get('realm_access').get('roles')
+        if is_staff_admin:
+            is_valid_action = True
+        # self deletion
+        if user.keycloak_guid == admin_user.keycloak_guid:
+            is_valid_action = True
+
+        # is the only owner getting deleted
+        if is_valid_action and membership.membership_type_code == OWNER:
+            count_of_owners = MembershipModel.get_count_active_owner_org_id(org_id)
+            if count_of_owners == 1:
+                is_valid_action = False
+        if not is_valid_action:
+            raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
+        user.is_terms_of_use_accepted = False
+        user.status = UserStatus.INACTIVE.value
+        user.save()
+        membership.status = Status.INACTIVE.value
+        membership.save()
+        update_user_request = KeycloakUser()
+        update_user_request.user_name = user_name.replace(IdpHint.BCROS.value + '/', '')
+        update_user_request.enabled = False
+        KeycloakService.update_user(update_user_request)
 
     @staticmethod
     def _create_kc_user(membership):
