@@ -57,6 +57,13 @@ export default class UserModule extends VuexModule {
     return KeyCloakService.getUserInfo()
   }
 
+  @Action({ rawError: true })
+  public async reset () {
+    this.context.commit('setCurrentUser', undefined)
+    this.context.commit('setUserProfile', undefined)
+    this.context.commit('setUserContact', undefined)
+  }
+
   @Action({ commit: 'setUserProfile' })
   public async getUserProfile (identifier: string) {
     const response = await UserService.getUserProfile(identifier)

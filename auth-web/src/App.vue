@@ -188,8 +188,18 @@ export default class App extends Mixins(NextPageMixin) {
       this.loadUserInfo()
       await this.syncUser()
       this.setupNavigationBar()
-      await this.tokenService.init()
-      this.tokenService.scheduleRefreshTimer()
+      this.tokenService.init(this.$store)
+        .then(() => {
+          this.tokenService.scheduleRefreshTimer()
+        })
+        .catch(error => {
+          // eslint-disable-next-line no-console
+          console.log('Could not initialize token refresher: ' + error)
+          this.navigationBarConfig.menuItems = []
+          this.$store.dispatch('user/reset')
+          this.$store.commit('loadComplete')
+          this.$router.push('/home')
+        })
     }
     this.$store.commit('loadComplete')
   }
