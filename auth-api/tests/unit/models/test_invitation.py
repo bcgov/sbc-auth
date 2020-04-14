@@ -194,7 +194,7 @@ def test_create_from_dict(session):  # pylint:disable=unused-argument
             }
         ]
     }
-    result_invitation = InvitationModel.create_from_dict(invitation_info, user.id)
+    result_invitation = InvitationModel.create_from_dict(invitation_info, user.id, 'STANDARD')
 
     assert result_invitation.id is not None
 
@@ -208,7 +208,7 @@ def test_create_from_dict_no_schema(session):  # pylint:disable=unused-argument
     session.add(user)
     session.commit()
 
-    result_invitation = InvitationModel.create_from_dict(None, user.id)
+    result_invitation = InvitationModel.create_from_dict(None, user.id, 'STANDARD')
 
     assert result_invitation is None
 

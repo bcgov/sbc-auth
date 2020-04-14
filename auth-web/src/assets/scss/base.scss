@@ -85,12 +85,17 @@ strong {
   font-family: 'BCSans', Verdana, Arial, sans-serif;  // BC Government Font
 
   .title,
-  .caption {
+  .caption,
+  [class^='subtitle'] {
     font-family: 'BCSans', Verdana, Arial, sans-serif !important;  // BC Government Font
   }
 
   .caption {
     letter-spacing: 0 !important;
+  }
+
+  [class^='subtitle'] {
+    color: $gray9;
   }
 }
 
