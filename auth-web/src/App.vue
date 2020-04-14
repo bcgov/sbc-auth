@@ -171,7 +171,7 @@ export default class App extends Mixins(NextPageMixin) {
       await this.setup()
       // set logout url ONLY for bcros user
       if (sessionStorage.getItem(SessionStorageKeys.UserAccountType) === LoginSource.BCROS) {
-        const logoutUrl = `${window.origin}/${process.env.VUE_APP_PATH}signin/bcros`
+        const logoutUrl = `${window.origin}${process.env.VUE_APP_PATH}signin/bcros`
         this.$refs.header.redirectOnLogout = logoutUrl
       }
       callback()
