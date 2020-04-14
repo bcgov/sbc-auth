@@ -262,7 +262,7 @@ def test_send_invitation_exception(session, notify_mock, keycloak_mock):  # pyli
 
     invitation_info = factory_invitation(org_dictionary['id'])
 
-    invitation = InvitationModel.create_from_dict(invitation_info, user.id)
+    invitation = InvitationModel.create_from_dict(invitation_info, user.id, 'STANDARD')
 
     with patch.object(notification, 'send_email', return_value=False):
         with pytest.raises(BusinessException) as exception:

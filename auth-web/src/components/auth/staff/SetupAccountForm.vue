@@ -225,7 +225,6 @@ export default class SetupAccountForm extends Vue {
         await this.createInvitation({
           recipientEmail: this.email,
           sentDate: new Date(),
-          type: 'DIRECTOR_SEARCH',
           membership: [{ membershipType: MembershipType.Owner, orgId: organization.id }]
         })
         this.saving = false
