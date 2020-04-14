@@ -27,10 +27,11 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
-from auth_api.utils.roles import Status
+from auth_api.services import User as UserService
+from auth_api.utils.roles import Status, MEMBER, ADMIN, UserStatus, AccessType, OWNER
 from tests import skip_in_pod
 from tests.utilities.factory_scenarios import KeycloakScenario, TestContactInfo, TestEntityInfo, TestJwtClaims, \
-    TestOrgInfo, TestUserInfo
+    TestOrgInfo, TestUserInfo, TestAnonymousMembership
 from tests.utilities.factory_utils import (
     factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
     factory_membership_model, factory_org_model, factory_user_model, factory_invitation_anonymous)
@@ -46,6 +47,79 @@ def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+
+
+def test_delete_bcros_valdiations(client, jwt, session, keycloak_mock):
+    """Assert different conditions of user deletion."""
+    admin_user = TestUserInfo.user_bcros_active
+    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
+    user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
+    factory_membership_model(user.id, org.id)
+    owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
+    member = TestAnonymousMembership.generate_random_user(MEMBER)
+    admin = TestAnonymousMembership.generate_random_user(ADMIN)
+    membership = [member, admin]
+    UserService.create_user_and_add_membership(membership, org.id, token_info=owner_claims)
+    owner_headers = factory_auth_header(jwt=jwt, claims=owner_claims)
+    member_username = IdpHint.BCROS.value + '/' + member['username']
+    admin_username = IdpHint.BCROS.value + '/' + admin['username']
+    admin_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(), admin_username, access_ype=AccessType.ANONYMOUS.value)
+    admin_headers = factory_auth_header(jwt=jwt, claims=admin_claims)
+    member_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(), member_username,
+                                                     access_ype=AccessType.ANONYMOUS.value)
+    member_headers = factory_auth_header(jwt=jwt, claims=member_claims)
+    # set up JWTS for member and admin
+    client.post('/api/v1/users', headers=admin_headers, content_type='application/json')
+    client.post('/api/v1/users', headers=member_headers, content_type='application/json')
+    # delete only owner ;failure
+    rv = client.delete(f"/api/v1/users/{admin_user['username']}", headers=owner_headers,
+                       content_type='application/json')
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+    # admin trying to delete member: Failure
+    rv = client.delete(f'/api/v1/users/{member_username}', headers=admin_headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+    # member delete admin: failure
+    rv = client.delete(f'/api/v1/users/{admin_username}', headers=member_headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+    # a self delete ;should work ;mimics leave team for anonymous user
+    rv = client.delete(f'/api/v1/users/{member_username}', headers=member_headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+    rv = client.delete(f'/api/v1/users/{admin_username}', headers=admin_headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+    # add one more admin
+    new_owner = TestAnonymousMembership.generate_random_user(OWNER)
+    membership = [new_owner]
+    UserService.create_user_and_add_membership(membership, org.id, token_info=owner_claims)
+    rv = client.delete(f"/api/v1/users/{IdpHint.BCROS.value + '/' + new_owner['username']}", headers=owner_headers,
+                       content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+
+def test_add_back_a_delete_bcros(client, jwt, session, keycloak_mock):
+    """Assert different conditions of user deletion."""
+    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
+    user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
+    factory_membership_model(user.id, org.id)
+    owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
+    member = TestAnonymousMembership.generate_random_user(MEMBER)
+    membership = [member,
+                  TestAnonymousMembership.generate_random_user(ADMIN)]
+    UserService.create_user_and_add_membership(membership, org.id, token_info=owner_claims)
+    headers = factory_auth_header(jwt=jwt, claims=owner_claims)
+    member_user_id = IdpHint.BCROS.value + '/' + member.get('username')
+    rv = client.delete(f'/api/v1/users/{member_user_id}', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+    kc_user = KeycloakService.get_user_by_username(member.get('username'))
+    assert kc_user.enabled is False
+    user_model = UserService.find_by_username(member_user_id)
+    assert user_model.as_dict().get('userStatus') == UserStatus.INACTIVE.value
+    membership = MembershipModel.find_membership_by_userid(user_model.identifier)
+    assert membership.status == Status.INACTIVE.value
 
 
 def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -70,6 +144,26 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
     assert dictionary['users'][0].get('password') is None
     assert dictionary['users'][0].get('type') == 'ANONYMOUS'
     assert schema_utils.validate(rv.json, 'anonymous_user_response')
+
+    # different error scenarios
+
+    # check expired invitation
+    rv = client.post('/api/v1/users/bcros', data=json.dumps(TestUserInfo.user_anonymous_1),
+                     headers={'invitation_token': dictionary.get('token')}, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    assert dictionary['code'] == 'EXPIRED_INVITATION'
+
+    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation_anonymous(org_id=org_id)),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+
+    # check duplicate user
+    rv = client.post('/api/v1/users/bcros', data=json.dumps(TestUserInfo.user_anonymous_1),
+                     headers={'invitation_token': dictionary.get('token')}, content_type='application/json')
+    dictionary = json.loads(rv.data)
+
+    assert dictionary['code'] == 409
+    assert dictionary['message'] == 'The username is already taken'
 
 
 def test_add_user_no_token_returns_401(client, session):  # pylint:disable=unused-argument
