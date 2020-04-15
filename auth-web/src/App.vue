@@ -10,7 +10,7 @@
         @account-switch-completed="completeAccountSwitch"
         @hook:mounted="setup"
         idpHint="bcsc"
-        ref="header">
+        ref="header" :redirect-on-logout="logoutUrl">
         <template v-slot:login-button-text>
           Log in with BC Services Card
         </template>
@@ -84,6 +84,7 @@ export default class App extends Mixins(NextPageMixin) {
   private showLoading = true
   private toastType = 'primary'
   private toastTimeout = 6000
+  private logoutUrl = ''
   private navigationBarConfig: NavigationBarConfig = {
     titleItem: {
       name: '',
@@ -166,16 +167,20 @@ export default class App extends Mixins(NextPageMixin) {
       this.toastTimeout = eventInfo.timeout
     })
 
+    // set logout url after refresh
+    this.setLogOutUrl()
+
     // Listen for event from signin component so it can initiate setup
     this.$root.$on('signin-complete', async (callback) => {
       await this.setup()
-      // set logout url ONLY for bcros user
-      if (sessionStorage.getItem(SessionStorageKeys.UserAccountType) === LoginSource.BCROS) {
-        const logoutUrl = `${window.origin}/${process.env.VUE_APP_PATH}signin/bcros`
-        this.$refs.header.redirectOnLogout = logoutUrl
-      }
+      // set logout url on first time sigin
+      this.setLogOutUrl()
       callback()
     })
+  }
+
+  private setLogOutUrl () {
+    this.logoutUrl = sessionStorage.getItem(SessionStorageKeys.UserAccountType) === LoginSource.BCROS ? ConfigHelper.getBcrosURL() : ''
   }
 
   private destroyed () {
@@ -188,18 +193,17 @@ export default class App extends Mixins(NextPageMixin) {
       this.loadUserInfo()
       await this.syncUser()
       this.setupNavigationBar()
-      this.tokenService.init(this.$store)
-        .then(() => {
-          this.tokenService.scheduleRefreshTimer()
-        })
-        .catch(error => {
-          // eslint-disable-next-line no-console
-          console.log('Could not initialize token refresher: ' + error)
-          this.navigationBarConfig.menuItems = []
-          this.$store.dispatch('user/reset')
-          this.$store.commit('loadComplete')
-          this.$router.push('/home')
-        })
+      try {
+        await this.tokenService.init(this.$store)
+        this.tokenService.scheduleRefreshTimer()
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log('Could not initialize token refresher: ' + e)
+        this.navigationBarConfig.menuItems = []
+        this.$store.dispatch('user/reset')
+        this.$store.commit('loadComplete')
+        this.$router.push('/home')
+      }
     }
     this.$store.commit('loadComplete')
   }
