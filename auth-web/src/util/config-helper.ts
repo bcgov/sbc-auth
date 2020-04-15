@@ -28,6 +28,10 @@ export default class ConfigHelper {
     return `${window.location.origin}/${process.env.VUE_APP_PATH_COOPS}/`
   }
 
+  static getBcrosURL () {
+    return `${ConfigHelper.getSelfURL()}/signin/bcros/`
+  }
+
   static getNewBusinessURL () {
     // returns new business URL
     return ConfigHelper.getValue('VUE_APP_PATH_NEW_BUSINESS')
