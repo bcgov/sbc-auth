@@ -1,15 +1,6 @@
 <template>
   <div>
     <v-form ref="form" lazy-validation>
-      <v-expand-transition>
-        <div class="form_alert-container" v-show="formError">
-          <v-alert type="error" class="mb-0"
-                  :value="true"
-          >
-            {{formError}}
-          </v-alert>
-        </div>
-      </v-expand-transition>
       <!-- Username -->
       <v-row>
         <v-col cols="12" class="py-0 mb-4">
@@ -136,7 +127,6 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
     private username = ''
     private password = ''
     private confirmPassword = ''
-    private formError = ''
     private isLoading = false
     private dialogTitle = ''
     private dialogText = ''
