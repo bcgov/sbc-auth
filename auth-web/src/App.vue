@@ -145,6 +145,8 @@ export default class App extends Mixins(NextPageMixin) {
     this.notificationText = `Switched to account '${this.currentAccountSettings.label}'`
     this.showNotification = true
 
+    this.$store.commit('updateHeader')
+
     // Some edge cases where user needs to be redirected based on their account status and current location
     if (this.currentMembership.membershipStatus === MembershipStatus.Active && this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
       // 1. If user was in a pending approval page and switched to an active account, take them to the home page
