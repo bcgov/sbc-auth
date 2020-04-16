@@ -3,7 +3,7 @@
     <!-- Breadcrumbs / Back Navigation -->
     <nav class="crumbs" v-if="isDirSearchUser">
       <v-container class="pt-5 pb-4">
-        <v-btn large text color="primary" class="back-btn pr-2 pl-1" :href="redirectToDirSearch">
+        <v-btn large text color="primary" class="back-btn pr-2 pl-1" :href="dirSearchUrl">
           <v-icon small class="mr-1">mdi-arrow-left</v-icon>
           <span>Director Search Home</span>
         </v-btn>
@@ -81,7 +81,7 @@ export default class AccountSettings extends Vue {
   private readonly currentUser!: KCUserProfile
   private isLoading = true
   private isDirSearchUser: boolean = false
-  private redirectToDirSearch = ConfigHelper.getValue('DIRECTOR_SEARCH_URL')
+  private dirSearchUrl = ConfigHelper.getValue('DIRECTOR_SEARCH_URL')
 
   private handleBackButton (): void {
     this.$router.push(`/account/${this.orgId}/business`)
