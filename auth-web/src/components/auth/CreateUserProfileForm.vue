@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-form ref="form">
+    <v-form ref="form" lazy-validation>
       <v-expand-transition>
         <div class="form_alert-container" v-show="formError">
           <v-alert type="error" class="mb-0"
@@ -41,6 +41,7 @@
               data-test="password"
               type="password"
               :disabled="isLoading"
+              :append-icon="(password && !passwordRuleValid) ? 'mdi-alert-circle-outline' : '' "
           >
           </v-text-field>
           <div
