@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-form ref="form" lazy-validation>
+    <v-form ref="form">
       <v-expand-transition>
         <div class="form_alert-container" v-show="formError">
           <v-alert type="error" class="mb-0"
@@ -12,12 +12,13 @@
       </v-expand-transition>
       <!-- Username -->
       <v-row>
-        <v-col cols="12" class="pt-0 pb-0">
+        <v-col cols="12" class="py-0 mb-4">
           <v-text-field
               filled
               label="Username"
               req
               persistent-hint
+              :hint="inputHints.username"
               :rules="usernameRules"
               v-model.trim="username"
               data-test="username"
@@ -28,12 +29,13 @@
       </v-row>
       <!-- Password -->
       <v-row>
-        <v-col cols="12" class="pt-0 pb-0">
+        <v-col cols="12" class="py-0 mb-4">
           <v-text-field
               filled
               label="Password"
               req
               persistent-hint
+              :hint="inputHints.password"
               :rules="passwordRules"
               v-model="password"
               data-test="password"
@@ -41,6 +43,17 @@
               :disabled="isLoading"
           >
           </v-text-field>
+          <div
+            class="pl-1 my-1 password-error"
+            v-bind:class="{ 'error--text': password && !passwordRuleValid }"
+          >
+            <ul>
+              <li>include at least one uppercase character (A-Z)</li>
+              <li>include at least one lowercase character (a-z)</li>
+              <li>include at least one number (0-9)</li>
+              <li>include at least one special character (examples: !, @, #, $)</li>
+            </ul>
+          </div>
         </v-col>
       </v-row>
       <!-- Confirm Password -->
@@ -51,6 +64,7 @@
               label="Confirm Password"
               req
               persistent-hint
+              :hint="inputHints.confirmPassword"
               :error-messages="passwordMustMatch()"
               v-model="confirmPassword"
               data-test="confirm-password"
@@ -125,6 +139,13 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
     private isLoading = false
     private dialogTitle = ''
     private dialogText = ''
+    private passwordRuleValid = false
+
+    private inputHints = {
+      username: 'Minimum 8 characters',
+      password: `Minimum of 8 characters and includes the following:`,
+      confirmPassword: 'Minimum of 8 characters'
+    }
 
     @Prop() token: string
 
@@ -134,13 +155,13 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
     }
 
     private usernameRules = [
-      v => !!v.trim() || 'Username is required'
+      v => !!v.trim() || 'Username is required',
+      v => (v.trim().length >= 8) || this.inputHints.username
     ]
 
     private passwordRules = [
       value => !!value || 'Password is required',
-      value => CommonUtils.validatePasswordRules(value) ||
-        'Min. 8 characters with at least one capital letter, a number and a special character.'
+      value => this.validatePassword(value) || this.inputHints.password
     ]
 
     private passwordMustMatch (): string {
@@ -197,6 +218,11 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
       this.$router.push('/signin/bcros/')
     }
 
+    private validatePassword (value) {
+      this.passwordRuleValid = CommonUtils.validatePasswordRules(value)
+      return this.passwordRuleValid
+    }
+
     close () {
       this.$refs.errorDialog.close()
     }
@@ -219,5 +245,13 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
     .v-btn + .v-btn {
       margin-left: 0.5rem;
     }
+  }
+
+  .password-error {
+    color: rgba(0,0,0,.6);
+    font-size: 12px;
+    min-height: 14px;
+    min-width: 1px;
+    position: relative;
   }
 </style>
