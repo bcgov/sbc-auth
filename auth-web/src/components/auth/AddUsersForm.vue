@@ -195,11 +195,13 @@ export default class AddUsersForm extends Vue {
 
   private isFormValid (): boolean {
     let isValid: boolean = false
-    this.users.forEach(user => {
-      if (user.username.trim() && user.password && CommonUtils.validatePasswordRules(user.password) && this.validateUserName(user.username)) {
-        isValid = true
+    for (let user of this.users) {
+      // check for rows which have values and then check the validity of the inputs
+      if (user.username && user.password) {
+        isValid = (CommonUtils.validatePasswordRules(user.password) && this.validateUserName(user.username))
+        if (!isValid) break
       }
-    })
+    }
     return isValid && !this.hasDuplicates()
   }
 
