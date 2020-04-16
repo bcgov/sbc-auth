@@ -50,6 +50,10 @@ export default class ConfigHelper {
     return ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')
   }
 
+  static getSearchApplicationUrl () {
+    return ConfigHelper.getValue('DIRECTOR_SEARCH_URL')
+  }
+
   static getLegalAPIUrl () {
     return ConfigHelper.getValue('VUE_APP_LEGAL_ROOT_API')
   }

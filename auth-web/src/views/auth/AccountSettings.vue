@@ -81,7 +81,7 @@ export default class AccountSettings extends Vue {
   private readonly currentUser!: KCUserProfile
   private isLoading = true
   private isDirSearchUser: boolean = false
-  private dirSearchUrl = ConfigHelper.getValue('DIRECTOR_SEARCH_URL')
+  private dirSearchUrl = ConfigHelper.getSearchApplicationUrl()
 
   private handleBackButton (): void {
     this.$router.push(`/account/${this.orgId}/business`)
