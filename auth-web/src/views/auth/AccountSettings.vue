@@ -1,60 +1,73 @@
 <template>
-  <v-container class="view-container">
-
-    <!-- Loading status -->
-    <v-fade-transition>
-      <div class="loading-container" v-if="isLoading">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
-      </div>
-    </v-fade-transition>
-
-    <div class="view-header">
-      <v-btn large icon color="secondary"
-        class="back-btn mr-3"
-        @click="handleBackButton()"
-        v-if="!isDirSearchUser"
-        data-test="account-settings-back-button">
-        <v-icon>mdi-arrow-left</v-icon>
-      </v-btn>
-      <div>
-        <h1 class="view-header__title" data-test="account-settings-title">Account Settings</h1>
-        <p class="mb-0">Manage account information and users of this account</p>
-      </div>
-    </div>
-    <v-card flat class="account-settings-card" data-test="account-settings-card">
-      <v-container class="nav-container">
-        <v-navigation-drawer floating permanent data-test="account-nav-drawer">
-          <v-list dense>
-            <v-list-item-group color="primary">
-              <v-list-item :to="accountInfoUrl" data-test="account-info-nav-item">
-                <v-list-item-icon>
-                  <v-icon left>mdi-information-outline</v-icon>
-                </v-list-item-icon>
-                <v-list-item-title>Account Info</v-list-item-title>
-              </v-list-item>
-              <v-list-item :to="teamMembersUrl" data-test="team-members-nav-item">
-                <v-list-item-icon>
-                  <v-icon left>mdi-account-group-outline</v-icon>
-                </v-list-item-icon>
-                <v-list-item-title>Team Members</v-list-item-title>
-              </v-list-item>
-            </v-list-item-group>
-          </v-list>
-        </v-navigation-drawer>
+  <div>
+    <!-- Breadcrumbs / Back Navigation -->
+    <nav class="crumbs" v-if="isDirSearchUser">
+      <v-container class="pt-5 pb-4">
+        <v-btn large text color="primary" class="back-btn pr-2 pl-1" :href="dirSearchUrl">
+          <v-icon small class="mr-1">mdi-arrow-left</v-icon>
+          <span>Director Search Home</span>
+        </v-btn>
       </v-container>
-      <v-container class="account-settings__content">
+    </nav>
+
+    <v-container class="view-container">
+
+      <!-- Loading status -->
+      <v-fade-transition>
+        <div class="loading-container" v-if="isLoading">
+          <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+        </div>
+      </v-fade-transition>
+
+      <div class="view-header">
+        <v-btn large icon color="secondary"
+          class="back-btn mr-3"
+          @click="handleBackButton()"
+          v-if="!isDirSearchUser"
+          data-test="account-settings-back-button">
+          <v-icon>mdi-arrow-left</v-icon>
+        </v-btn>
+        <div>
+          <h1 class="view-header__title" data-test="account-settings-title">Account Settings</h1>
+          <p class="mb-0">Manage account information and users of this account</p>
+        </div>
+      </div>
+      <v-card flat class="account-settings-card" data-test="account-settings-card">
+        <v-container class="nav-container pt-8 pb-8">
+          <v-navigation-drawer floating permanent data-test="account-nav-drawer">
+            <v-list dense class="pt-0 pb-0">
+              <v-list-item-group color="primary">
+                <v-list-item :to="accountInfoUrl" data-test="account-info-nav-item">
+                  <v-list-item-icon>
+                    <v-icon color="link" left>mdi-information-outline</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-title>Account Info</v-list-item-title>
+                </v-list-item>
+                <v-list-item :to="teamMembersUrl" data-test="team-members-nav-item">
+                  <v-list-item-icon>
+                    <v-icon color="link" left>mdi-account-group-outline</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-title>Team Members</v-list-item-title>
+                </v-list-item>
+              </v-list-item-group>
+            </v-list>
+          </v-navigation-drawer>
+        </v-container>
         <transition name="fade" mode="out-in">
-          <router-view></router-view>
+          <router-view class="account-settings__content pa-8"></router-view>
         </transition>
-      </v-container>
-    </v-card>
-  </v-container>
+      </v-card>
+    </v-container>
+  </div>
 </template>
 
 <script lang="ts">
+
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { LoginSource } from '@/util/constants'
+
 import { mapState } from 'vuex'
 
 @Component({
@@ -68,6 +81,7 @@ export default class AccountSettings extends Vue {
   private readonly currentUser!: KCUserProfile
   private isLoading = true
   private isDirSearchUser: boolean = false
+  private dirSearchUrl = ConfigHelper.getSearchApplicationUrl()
 
   private handleBackButton (): void {
     this.$router.push(`/account/${this.orgId}/business`)
@@ -80,7 +94,6 @@ export default class AccountSettings extends Vue {
   private get teamMembersUrl (): string {
     return `/account/${this.orgId}/settings/team-members`
   }
-
   private mounted () {
     this.isLoading = false
     this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
@@ -98,7 +111,6 @@ export default class AccountSettings extends Vue {
   .nav-container {
     flex: 0 0 auto;
     width: 16rem;
-    border-right: 1px solid $gray3;
   }
 
   .v-list--dense .v-list-item .v-list-item__title {
@@ -127,5 +139,23 @@ export default class AccountSettings extends Vue {
   .fade-enter,
   .fade-leave-active {
     opacity: 0
+  }
+
+  .back-btn {
+    font-weight: 700;
+
+    span {
+      margin-top: -1px;
+    }
+
+    &:hover {
+      span {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .crumbs + .view-container {
+    padding-top: 0 !important;
   }
 </style>
