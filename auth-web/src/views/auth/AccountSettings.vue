@@ -3,7 +3,7 @@
     <!-- Breadcrumbs / Back Navigation -->
     <nav class="crumbs" v-if="isDirSearchUser">
       <v-container class="pt-5 pb-4">
-        <v-btn large text color="primary" class="back-btn pr-2 pl-1" to="#">
+        <v-btn large text color="primary" class="back-btn pr-2 pl-1" :href="redirectToDirSearch">
           <v-icon small class="mr-1">mdi-arrow-left</v-icon>
           <span>Director Search Home</span>
         </v-btn>
@@ -62,9 +62,12 @@
 </template>
 
 <script lang="ts">
+
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { LoginSource } from '@/util/constants'
+
 import { mapState } from 'vuex'
 
 @Component({
@@ -78,6 +81,7 @@ export default class AccountSettings extends Vue {
   private readonly currentUser!: KCUserProfile
   private isLoading = true
   private isDirSearchUser: boolean = false
+  private redirectToDirSearch = ConfigHelper.getValue('DIRECTOR_SEARCH_URL')
 
   private handleBackButton (): void {
     this.$router.push(`/account/${this.orgId}/business`)
@@ -90,7 +94,6 @@ export default class AccountSettings extends Vue {
   private get teamMembersUrl (): string {
     return `/account/${this.orgId}/settings/team-members`
   }
-
   private mounted () {
     this.isLoading = false
     this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
