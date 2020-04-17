@@ -37,8 +37,8 @@ from auth_api.services import Org as OrgService
 from auth_api.utils.roles import InvitationType
 
 from tests.utilities.factory_scenarios import (
-    JWT_HEADER, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgStatusInfo, TestOrgTypeInfo, TestPaymentTypeInfo,
-    TestUserInfo)
+    JWT_HEADER, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgStatusInfo, TestOrgTypeInfo,
+    TestPaymentTypeInfo, TestUserInfo)
 
 
 def factory_auth_header(jwt, claims):
@@ -91,7 +91,8 @@ def factory_org_model(org_info: dict = TestOrgInfo.org1,
                       org_type_info: dict = TestOrgTypeInfo.test_type,
                       org_status_info: dict = TestOrgStatusInfo.test_status,
                       payment_type_info: dict = TestPaymentTypeInfo.test_type,
-                      user_id=None):
+                      user_id=None,
+                      bcol_info: dict = TestBCOLInfo.bcol1):
     """Produce a templated org model."""
     org_type = OrgTypeModel.get_default_type()
     if org_type_info['code'] != TestOrgTypeInfo.implicit['code']:
@@ -120,6 +121,7 @@ def factory_org_model(org_info: dict = TestOrgInfo.org1,
     account_payment = AccountPaymentModel()
     account_payment.preferred_payment = preferred_payment
     account_payment.org = org
+    account_payment.bcol_account_id = bcol_info['bcol_account_id']
     account_payment.save()
 
     return org
@@ -128,12 +130,14 @@ def factory_org_model(org_info: dict = TestOrgInfo.org1,
 def factory_org_service(org_info: dict = TestOrgInfo.org1,
                         org_type_info: dict = TestOrgTypeInfo.test_type,
                         org_status_info: dict = TestOrgStatusInfo.test_status,
-                        payment_type_info: dict = TestPaymentTypeInfo.test_type):
+                        payment_type_info: dict = TestPaymentTypeInfo.test_type,
+                        bcol_info: dict = TestBCOLInfo.bcol1):
     """Produce a templated org service."""
     org_model = factory_org_model(org_info=org_info,
                                   org_type_info=org_type_info,
                                   org_status_info=org_status_info,
-                                  payment_type_info=payment_type_info)
+                                  payment_type_info=payment_type_info,
+                                  bcol_info=bcol_info)
     org_service = OrgService(org_model)
     return org_service
 
