@@ -41,7 +41,7 @@ export default class PaymentView extends Vue {
         })
         .catch(error => {
           this.errorMessage = this.$t('payFailedMessage').toString()
-          if (error.response.data && error.response.data.code === 'PAY006') { // Transaction is already completed.Show as a modal.
+          if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') { // Transaction is already completed.Show as a modal.
             this.goToUrl(this.redirectUrl)
           } else {
             this.showErrorModal = true
