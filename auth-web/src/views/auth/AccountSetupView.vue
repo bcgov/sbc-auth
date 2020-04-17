@@ -39,23 +39,23 @@ import { mount } from '@vue/test-utils'
 })
 export default class AccountSetupView extends Vue {
   private stepperConfig: Array<StepConfiguration> =
-  [
-    {
-      title: 'Select Account Type',
-      component: StepperStub,
-      componentProps: {}
-    },
-    {
-      title: 'Account Settings',
-      component: CreateAccountInfoForm,
-      componentProps: {}
-    },
-    {
-      title: 'User Profile',
-      component: UserProfileForm,
-      componentProps: {}
-    }
-  ]
+    [
+      {
+        title: 'Select Account Type',
+        component: StepperStub,
+        componentProps: {}
+      },
+      {
+        title: 'Account Settings',
+        component: CreateAccountInfoForm,
+        componentProps: {}
+      },
+      {
+        title: 'User Profile',
+        component: UserProfileForm,
+        componentProps: {}
+      }
+    ]
 }
 </script>
 
