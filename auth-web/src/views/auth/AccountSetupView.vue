@@ -53,7 +53,7 @@ export default class AccountSetupView extends Vue {
     {
       title: 'User Profile',
       component: UserProfileForm,
-      componentProps: { redirectOnSave: false }
+      componentProps: {}
     }
   ]
 }
