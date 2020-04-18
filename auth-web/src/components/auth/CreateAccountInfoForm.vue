@@ -59,7 +59,8 @@ export default class CreateAccountInfoForm extends Vue {
     private readonly syncMembership!: (orgId: number) => Promise<Member>
     private readonly syncOrganization!: (orgId: number) => Promise<Organization>
     private readonly currentOrganization!: Organization
-    @Prop({ default: true }) redirectOnSave!: boolean
+    @Prop() stepForward!: () => void
+    @Prop() stepBack!: () => void
 
     $refs: {
       createAccountInfoForm: HTMLFormElement
@@ -85,10 +86,11 @@ export default class CreateAccountInfoForm extends Vue {
           await this.syncOrganization(organization.id)
           await this.syncMembership(organization.id)
           this.$store.commit('updateHeader')
-          if (this.redirectOnSave) {
+          if (!this.stepForward) {
             this.redirectToNext(organization)
+          } else {
+            this.stepForward()
           }
-          this.$emit('account-saved')
         } catch (err) {
           this.saving = false
           switch (err.response.status) {
@@ -110,7 +112,11 @@ export default class CreateAccountInfoForm extends Vue {
     }
 
     private cancel () {
-      this.$router.push({ path: '/home' })
+      if (this.stepBack) {
+        this.stepBack()
+      } else {
+        this.$router.push({ path: '/home' })
+      }
     }
 
     private redirectToNext (organization?: Organization) {
