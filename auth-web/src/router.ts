@@ -4,11 +4,11 @@ import Router, { Route, RouteConfig } from 'vue-router'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
 import { AccountSettings } from '@/models/account-settings'
+import AccountSetupView from '@/views/auth/AccountSetupView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import CreateAccountView from '@/views/auth/CreateAccountView.vue'
-import CreateUserProfileView from '@/views/auth/CreateUserProfileView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
@@ -93,6 +93,7 @@ export function getRoutes (): RouteConfig[] {
         }
       ]
     },
+    { path: '/setup-account', name: 'setupaccount', component: AccountSetupView, props: true, meta: { requiresAuth: true } },
     { path: '/userprofile/:token?', name: 'userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
     { path: '/createaccount', name: 'createaccount', component: CreateAccountView, meta: { requiresAuth: false, requiresProfile: false }, props: true },
     { path: '/duplicateteam', name: 'duplicateteam', component: DuplicateTeamWarningView, meta: { requiresAuth: true } },
@@ -148,6 +149,10 @@ router.beforeEach((to, from, next) => {
           query: { redirect: to.fullPath }
         })
       }
+      return next({
+        path: '/unauthorized',
+        query: { redirect: to.fullPath }
+      })
     }
   }
 
