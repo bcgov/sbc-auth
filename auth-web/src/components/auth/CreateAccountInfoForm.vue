@@ -1,36 +1,45 @@
 <template>
-      <v-form ref="createAccountInfoForm">
-        <v-radio-group class="mt-0 mb-4 pt-0" v-model="teamType" :mandatory="true">
-          <v-radio color="primary" class="mb-3" label="I manage my own business" value="BASIC" data-test="select-manage-own-business" />
-          <v-radio color="primary" label="I manage multiple businesses on behalf of my clients" value="PREMIUM" data-test="select-manage-multiple-business" />
-        </v-radio-group>
-
-        <v-alert type="error" v-show="errorMessage">{{errorMessage}}</v-alert>
-
-        <v-text-field filled
-          label="Account Name"
-          v-model.trim="teamName"
-          :rules="teamNameRules"
-          persistent-hint
-          :disabled="saving"
-          :hint="teamType === 'BASIC' ? 'Example: Your Business Name' : 'Example: Your Management Company or Law Firm Name'"/>
+      <v-form ref="createAccountInfoForm" lazy-validation>
+        <div class="view-container">
+            <h1 class="mb-5">Account Settings</h1>
+            <p class="intro-text">You must be the Prime Contact to link this account with your existing BC Online account.</p>
+        </div>
+        <div>
         <v-row>
-          <v-col cols="12" class="form__btns pb-0">
-            <v-btn
-              large
-              color="primary"
-              class="mr-2"
-              :loading = "saving"
-              :disabled="!isFormValid() || saving"
-              @click="save"
-              data-test="save-button">
-              Save and Continue
-            </v-btn>
-            <v-btn large depressed color="default" :disable="saving" @click="cancel" data-test="cancel-button">
-              Cancel
-            </v-btn>
+          <v-col cols="12">
+            <h4 class="mb-5">BC Online Prime Contact Details
+              <v-tooltip v-model="show" top>
+                <template v-slot:activator="{ on }">
+                  <v-btn icon v-on="on">
+                    <v-icon color="grey lighten-1">mdi-help-circle-outline</v-icon>
+                  </v-btn>
+                </template>
+                <span>BC Online Prime Contacts are users who have authority to manage account settings for a BC Online Account.</span>
+              </v-tooltip></h4>
           </v-col>
         </v-row>
+
+        <v-row>
+          <v-col cols="4" class="py-0 mb-4">
+            <v-text-field
+                    filled
+                    label="User ID"
+                    req
+            >
+            </v-text-field>
+          </v-col>
+          <v-col cols="4" class="py-0 mb-4">
+            <v-text-field
+                    filled
+                    label="Password"
+            >
+            </v-text-field>
+          </v-col>
+          <v-col cols="4" class="py-0 mb-4">
+            <v-btn large color="primary" @click="close()" data-test="dialog-ok-button">Link Accounts</v-btn>
+          </v-col>
+        </v-row>
+        </div></div>
       </v-form>
 </template>
 
