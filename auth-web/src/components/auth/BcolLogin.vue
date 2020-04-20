@@ -19,6 +19,7 @@
                   filled
                   label="User ID"
                   v-model.trim="username"
+                  :rules="usernameRules"
                   req
           >
           </v-text-field>
@@ -28,11 +29,13 @@
                   filled
                   label="Password"
                   v-model.trim="password"
+                  req
+                  :rules="passwordRules"
           >
           </v-text-field>
         </v-col>
         <v-col cols="4" class="py-0 mb-4">
-          <v-btn large color="primary" @click="linkAccounts()" data-test="dialog-save-button">Link Accounts</v-btn>
+          <v-btn large color="primary" @click="linkAccounts()" data-test="dialog-save-button"  :disabled='!isFormValid()'>Link Accounts</v-btn>
         </v-col>
       </v-row>
     <v-alert type="error" class="mb-6"
@@ -64,6 +67,13 @@ export default class BcolLogin extends Vue {
   private isFormValid (): boolean {
     return !!this.username && !!this.password
   }
+  private usernameRules = [
+    v => !!v.trim() || 'Username is required'
+  ]
+
+  private passwordRules = [
+    value => !!value || 'Password is required'
+  ]
 
   private async linkAccounts () {
     // Validate form, and then create an team with this user a member

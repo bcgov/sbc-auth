@@ -7,10 +7,10 @@
            <v-container v-if="linked">
             <v-alert type="text" v-model="linked"  outlined icon="mdi-check">
                 <v-row>
-                    <v-col cols="6">
+                    <v-col cols="8">
                     ACCOUNT LINKED!
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="4">
                         <v-btn large color="primary" @click="unlinkAccounts()" data-test="dialog-save-button">Remove Linked Accounts</v-btn>
                     </v-col>
                 </v-row>
@@ -23,7 +23,7 @@
 
             </v-alert>
             <v-checkbox
-                    v-model="grantAccess">
+                    v-model="grantAccess" class="mt-5 pt-5">
                <template v-slot:label>
                    <span v-html="grantAccessText"></span>
                </template>
