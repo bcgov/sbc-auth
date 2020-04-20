@@ -23,14 +23,11 @@ import groovy.json.*
 
 // define constants - values sent in as env vars from whatever calls this pipeline
 def APP_NAME = 'auth-web'
-def APP_RUNTIME_NAME = "${APP_NAME}-runtime"
 def DESTINATION_TAG = 'dev'
 def TOOLS_TAG = 'tools'
 def NAMESPACE_APP = '1rdehl'
-def NAMESPACE_SHARED = 'd7eovc'
 def NAMESPACE_BUILD = "${NAMESPACE_APP}"  + '-' + "${TOOLS_TAG}"
 def NAMESPACE_DEPLOY = "${NAMESPACE_APP}" + '-' + "${DESTINATION_TAG}"
-def NAMESPACE_UNITTEST = "${NAMESPACE_SHARED}" + '-'+ "${TOOLS_TAG}"
 
 def ROCKETCHAT_DEVELOPER_CHANNEL='#relationship-developers'
 
@@ -131,28 +128,6 @@ if( run_pipeline ) {
         }
 
         if (build_ok) {
-            try{
-                stage("Build ${APP_RUNTIME_NAME}") {
-                    script {
-                        openshift.withCluster() {
-                            openshift.withProject("${NAMESPACE_BUILD}") {
-                                echo "Building the ${APP_RUNTIME_NAME} image ..."
-                                def build = openshift.selector("bc", "${APP_RUNTIME_NAME}").startBuild()
-                                build.untilEach {
-                                    return it.object().status.phase == "Running"
-                                }
-                                build.logs('-f')
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                echo e.getMessage()
-                build_ok = false
-            }
-        }
-
-        if (build_ok) {
             stage("Tag ${APP_NAME}:${DESTINATION_TAG}") {
                 script {
                     openshift.withCluster() {
@@ -163,13 +138,13 @@ if( run_pipeline ) {
                     openshift.withCluster() {
                         openshift.withProject("${NAMESPACE_BUILD}") {
                             try {
-                                echo "Tagging ${APP_RUNTIME_NAME} for deployment to ${DESTINATION_TAG} ..."
+                                echo "Tagging ${APP_NAME} for deployment to ${DESTINATION_TAG} ..."
 
                                 // Don't tag with BUILD_ID so the pruner can do it's job; it won't delete tagged images.
                                 // Tag the images for deployment based on the image's hash
-                                def IMAGE_HASH = getImageTagHash("${APP_RUNTIME_NAME}")
+                                def IMAGE_HASH = getImageTagHash("${APP_NAME}")
                                 echo "IMAGE_HASH: ${IMAGE_HASH}"
-                                openshift.tag("${APP_RUNTIME_NAME}@${IMAGE_HASH}", "${APP_RUNTIME_NAME}:${DESTINATION_TAG}")
+                                openshift.tag("${APP_NAME}@${IMAGE_HASH}", "${APP_NAME}:${DESTINATION_TAG}")
                             } catch (Exception e) {
                                 echo e.getMessage()
                                 build_ok = false

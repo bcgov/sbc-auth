@@ -30,7 +30,7 @@ jobs:
         working-directory: ./notify-api
         run: |
           IMAGE_ID=${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME
-          docker image tag $IMAGE_ID:$TAG_NAME
+          docker tag image $IMAGE_ID:$TAG_NAME
           docker push $IMAGE_ID:$TAG_NAME
       - name: Login Openshift
         working-directory: ./notify-api

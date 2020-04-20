@@ -32,4 +32,10 @@ export default class CommonUtils {
     const VALID_FORMAT = new RegExp(/^(A|B|BC|C|CP|EPR|FM|FOR|LIC|LL|LLC|LP|MF|QA|QB|QC|QD|QE|REG|S|S-|S\/|XL|XP|XS|XS-|XS\/|CS|CS-|CS\/)?\d+$/)
     return VALID_FORMAT.test(value.toUpperCase())
   }
+  // This will validate the password rules with the regex
+  // atleast 1 number, 1 uppercase, 1 lowercase, 1 special character and minimum length is 8
+  static validatePasswordRules (value: string):boolean {
+    const VALID_PASSWORD_FORMAT = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/)
+    return VALID_PASSWORD_FORMAT.test(value)
+  }
 }

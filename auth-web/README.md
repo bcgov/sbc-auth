@@ -49,7 +49,7 @@ Run the following command in the root folder:
 ```
 npm run build
 ```
-Once the build is successful, check the **/dist** folder for the build files.
+Once the build is successful, check the **/dist** folder for the build files
 
 ---
 ## Customize webpack configuration

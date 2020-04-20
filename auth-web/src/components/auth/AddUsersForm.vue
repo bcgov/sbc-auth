@@ -2,14 +2,34 @@
 <template>
   <div>
     <p>Enter a username, temporary password and select a role for each team member you want to add to this account.</p>
-    <v-form ref="form" class="mt-9">
+
+    <v-alert
+      type="info"
+      class="my-8"
+      icon="mdi-information-outline"
+    >
+      <strong>Temporary Passwords</strong> must be a <strong>minimum of 8 characters</strong> long and include the following characters:
+      <ul class="mt-4">
+        <li>include at least one uppercase character (A-Z)</li>
+        <li>include at least one lowercase character (a-z)</li>
+        <li>include at least one number (0-9)</li>
+        <li>include at least one special character (examples: !, @, #, $)</li>
+      </ul>
+    </v-alert>
+
+    <h4>Team Members</h4>
+
+    <v-form ref="form" class="mt-3">
       <ul class="invite-list">
         <transition-group name="slide-y-transition">
-          <li class="d-flex" v-for="(user, index) in users" v-bind:key="index + 1">
+          <li class="d-flex mb-1" v-for="(user, index) in users" v-bind:key="index + 1">
             <v-text-field
               filled
               label="Username"
               v-model="user.username"
+              persistent-hint
+              :hint="inputHints.username"
+              :rules="userNameRules"
               :data-test="getIndexedTag('username', index)"
             ></v-text-field>
 
@@ -18,6 +38,9 @@
               label="Temporary Password"
               class="ml-2"
               v-model="user.password"
+              persistent-hint
+              :hint="inputHints.password"
+              :rules="passwordRules"
               :data-test="getIndexedTag('password', index)"
             ></v-text-field>
 
@@ -84,6 +107,7 @@
 import { AddUserBody, AddUsersToOrgBody, Member, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import { mapActions, mapMutations, mapState } from 'vuex'
+import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
@@ -102,6 +126,11 @@ export default class AddUsersForm extends Vue {
   private readonly currentOrganization!: Organization
   private readonly currentMembership!: Member
   private readonly createUsers!: (AddUsersToOrgBody) => Promise<void>
+
+  private inputHints = {
+    username: 'Minimum 8 characters',
+    password: 'See requirements above'
+  }
 
   $refs: {
     form: HTMLFormElement
@@ -135,6 +164,14 @@ export default class AddUsersForm extends Vue {
     }
   ]
 
+  private userNameRules = [
+    value => this.validateUserName(value) || this.inputHints.username
+  ]
+
+  private passwordRules = [
+    value => CommonUtils.validatePasswordRules(value) || `Invalid Password`
+  ]
+
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
@@ -147,6 +184,10 @@ export default class AddUsersForm extends Vue {
     return { username: '', password: '', selectedRole: { ...this.roles[0] }, membershipType: this.roles[0].name }
   }
 
+  private validateUserName (value) {
+    return (value?.trim().length >= 8)
+  }
+
   private hasDuplicates (): boolean {
     const users = this.users.filter(user => user.username)
     return new Set(users.map(user => user.username.toLowerCase())).size !== users.length
@@ -154,11 +195,13 @@ export default class AddUsersForm extends Vue {
 
   private isFormValid (): boolean {
     let isValid: boolean = false
-    this.users.forEach(user => {
-      if (user.username || user.password) {
-        isValid = true
+    for (let user of this.users) {
+      // check for rows which have values and then check the validity of the inputs
+      if (user.username && user.password) {
+        isValid = (CommonUtils.validatePasswordRules(user.password) && this.validateUserName(user.username))
+        if (!isValid) break
       }
-    })
+    }
     return isValid && !this.hasDuplicates()
   }
 
@@ -175,6 +218,7 @@ export default class AddUsersForm extends Vue {
     for (let i = 0; i < 3; i++) {
       this.users.push(this.getDefaultRow())
     }
+    this.$refs.form?.reset()
   }
 
   private async addUsers () {
