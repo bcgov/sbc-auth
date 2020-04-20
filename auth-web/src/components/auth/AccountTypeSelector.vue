@@ -59,7 +59,7 @@
 
 <script lang="ts">
 
-import { Component, Mixins, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 
 @Component({
   components: {
@@ -67,6 +67,7 @@ import { Component, Mixins, Vue } from 'vue-property-decorator'
 })
 export default class AccountTypeSelector extends Vue {
   private selectedAccountType: string = ''
+  @Prop() stepForward!: () => void
   private async mounted () {
   }
 
@@ -74,6 +75,7 @@ export default class AccountTypeSelector extends Vue {
     // eslint-disable-next-line no-console
     console.log(accountType)
     this.selectedAccountType = accountType
+    this.stepForward()
   }
 }
 </script>
