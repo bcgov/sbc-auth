@@ -3,56 +3,58 @@
         <div class="view-container">
             <h1 class="mb-5">Account Settings</h1>
             <p class="intro-text">You must be the Prime Contact to link this account with your existing BC Online account.</p>
-        </div>
-        <div>
-        <v-row>
-          <v-col cols="12">
-            <h4 class="mb-5">BC Online Prime Contact Details
-              <v-tooltip v-model="show" top>
-                <template v-slot:activator="{ on }">
-                  <v-btn icon v-on="on">
-                    <v-icon color="grey lighten-1">mdi-help-circle-outline</v-icon>
-                  </v-btn>
-                </template>
-                <span>BC Online Prime Contacts are users who have authority to manage account settings for a BC Online Account.</span>
-              </v-tooltip></h4>
-          </v-col>
-        </v-row>
+          <BcolLogin v-on:account-link-successful="onLink" v-show="!linked"></BcolLogin>
+           <v-container v-if="linked">
+            <v-alert type="text" v-model="linked"  outlined icon="mdi-check">
+                <v-row>
+                    <v-col cols="6">
+                    ACCOUNT LINKED!
+                    </v-col>
+                    <v-col cols="6">
+                        <v-btn large color="primary" @click="unlinkAccounts()" data-test="dialog-save-button">Remove Linked Accounts</v-btn>
+                    </v-col>
+                </v-row>
+                <v-row v-if="bcolAccountDetails">
+                    <v-col cols="6">
+                        <h3>MY BCOL Account</h3>
+                        Account No: {{bcolAccountDetails.accountNumber}}   |   Authorizing User ID: {{bcolAccountDetails.userId}}
+                    </v-col>
+                </v-row>
 
-        <v-row>
-          <v-col cols="4" class="py-0 mb-4">
-            <v-text-field
-                    filled
-                    label="User ID"
-                    req
-            >
-            </v-text-field>
-          </v-col>
-          <v-col cols="4" class="py-0 mb-4">
-            <v-text-field
-                    filled
-                    label="Password"
-            >
-            </v-text-field>
-          </v-col>
-          <v-col cols="4" class="py-0 mb-4">
-            <v-btn large color="primary" @click="close()" data-test="dialog-ok-button">Link Accounts</v-btn>
-          </v-col>
-        </v-row>
-        </div></div>
+            </v-alert>
+            <v-checkbox
+                    v-model="grantAccess">
+               <template v-slot:label>
+                   <span v-html="grantAccessText"></span>
+               </template>
+            </v-checkbox>
+
+           </v-container>
+
+        </div>
+
       </v-form>
 </template>
 
 <script lang="ts">
+
+import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
+import BcolLogin from '@/components/auth/BcolLogin.vue'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
+  components: {
+    BcolLogin
+  },
   computed: {
-    ...mapState('org', ['currentOrganization'])
+    ...mapState('org', ['currentOrganization']),
+    ...mapState('user', ['userProfile', 'currentUser'])
   },
   methods: {
     ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization'])
@@ -60,16 +62,21 @@ import { getModule } from 'vuex-module-decorators'
 })
 export default class CreateAccountInfoForm extends Vue {
     private orgStore = getModule(OrgModule, this.$store)
-    private teamName: string = ''
-    private teamType: string = 'BASIC'
+    private username = ''
+    private password = ''
     private errorMessage: string = ''
     private saving = false
     private readonly createOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
     private readonly syncMembership!: (orgId: number) => Promise<Member>
     private readonly syncOrganization!: (orgId: number) => Promise<Organization>
     private readonly currentOrganization!: Organization
+    private readonly currentUser!: KCUserProfile
     @Prop() stepForward!: () => void
     @Prop() stepBack!: () => void
+    private linked = false
+    private bcolAccountDetails:BcolAccountDetails
+    private grantAccess:boolean
+    private grantAccessText:string
 
     $refs: {
       createAccountInfoForm: HTMLFormElement
@@ -79,47 +86,14 @@ export default class CreateAccountInfoForm extends Vue {
       v => !!v || 'An account name is required']
 
     private isFormValid (): boolean {
-      return !!this.teamName
+      return !!this.username && !!this.password
     }
-
-    private async save () {
-      // Validate form, and then create an team with this user a member
-      if (this.isFormValid()) {
-        const createRequestBody: CreateRequestBody = {
-          name: this.teamName,
-          typeCode: this.teamType === 'BASIC' ? 'IMPLICIT' : 'EXPLICIT'
-        }
-        try {
-          this.saving = true
-          const organization = await this.createOrg(createRequestBody)
-          await this.syncOrganization(organization.id)
-          await this.syncMembership(organization.id)
-          this.$store.commit('updateHeader')
-          if (!this.stepForward) {
-            this.redirectToNext(organization)
-          } else {
-            this.stepForward()
-          }
-        } catch (err) {
-          this.saving = false
-          switch (err.response.status) {
-            case 409:
-              this.errorMessage = 'An account with this name already exists. Try a different account name.'
-              break
-            case 400:
-              if (err.response.data.code === 'MAX_NUMBER_OF_ORGS_LIMIT') {
-                this.errorMessage = 'Maximum number of accounts reached'
-              } else {
-                this.errorMessage = 'Invalid account name'
-              }
-              break
-            default:
-              this.errorMessage = 'An error occurred while attempting to create your account.'
-          }
-        }
-      }
+    private onLink (bcolAccountDetails:BcolAccountDetails) {
+      debugger
+      this.linked = true
+      this.bcolAccountDetails = bcolAccountDetails
+      this.grantAccessText = `I ,<b></b> ${this.currentUser.fullName} </b>, confirm that I am authorized to grant access to the account <b>${bcolAccountDetails.accountNumber}</b>`
     }
-
     private cancel () {
       if (this.stepBack) {
         this.stepBack()

@@ -1,0 +1,96 @@
+<template>
+  <v-form ref="createAccountInfoForm" lazy-validation>
+      <v-row>
+        <v-col cols="12">
+          <h4 class="mb-5">BC Online Prime Contact Details
+            <v-tooltip v-model="show" top>
+              <template v-slot:activator="{ on }">
+                <v-btn icon v-on="on">
+                  <v-icon color="grey lighten-1">mdi-help-circle-outline</v-icon>
+                </v-btn>
+              </template>
+              <span>BC Online Prime Contacts are users who have authority to manage account settings for a BC Online Account.</span>
+            </v-tooltip></h4>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="4" class="py-0 mb-4">
+          <v-text-field
+                  filled
+                  label="User ID"
+                  v-model.trim="username"
+                  req
+          >
+          </v-text-field>
+        </v-col>
+        <v-col cols="4" class="py-0 mb-4">
+          <v-text-field
+                  filled
+                  label="Password"
+                  v-model.trim="password"
+          >
+          </v-text-field>
+        </v-col>
+        <v-col cols="4" class="py-0 mb-4">
+          <v-btn large color="primary" @click="linkAccounts()" data-test="dialog-save-button">Link Accounts</v-btn>
+        </v-col>
+      </v-row>
+    <v-alert type="error" class="mb-6"
+             v-show="errorMessage">
+      {{errorMessage}}
+    </v-alert>
+  </v-form>
+</template>
+
+<script lang="ts">
+import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
+@Component({
+  name: 'BcolLogin',
+  computed: {
+    ...mapState('org', ['currentOrganization'])
+  },
+  methods: {
+    ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization', 'validateBcolAccount'])
+  }
+})
+export default class BcolLogin extends Vue {
+  private username = ''
+  private password = ''
+  private errorMessage: string = ''
+  private readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
+
+  private isFormValid (): boolean {
+    return !!this.username && !!this.password
+  }
+
+  private async linkAccounts () {
+    // Validate form, and then create an team with this user a member
+    if (this.isFormValid()) {
+      const bcolProfile: BcolProfile = {
+        userId: this.username,
+        password: this.password
+      }
+      try {
+        debugger
+        const bcolAccountDetails = await this.validateBcolAccount(bcolProfile)
+        if (bcolAccountDetails) { // TODO whats the success status
+          this.$emit('account-link-successful', bcolAccountDetails)
+        }
+      } catch (err) {
+        switch (err.response.status) {
+          case 400:
+            this.errorMessage = err.response.data.detail
+            break
+          default:
+            this.errorMessage = 'An error occurred while attempting to create your account.'
+        }
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+</style>

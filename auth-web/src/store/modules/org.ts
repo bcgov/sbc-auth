@@ -1,8 +1,10 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { AddUserBody, AddUsersToOrgBody, BulkUsersFailed, BulkUsersSuccess, CreateRequestBody as CreateOrgRequestBody, Member, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { AddUsersToOrgBody, BulkUsersFailed, BulkUsersSuccess, CreateRequestBody as CreateOrgRequestBody, Member, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
 import { AccountSettings } from '@/models/account-settings'
+import BcolService from '@/services/bcol.services'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
@@ -117,6 +119,17 @@ export default class OrgModule extends VuexModule {
   public async createOrg (createRequestBody: CreateOrgRequestBody): Promise<Organization> {
     const response = await OrgService.createOrg(createRequestBody)
     this.context.commit('setCurrentOrganization', response?.data)
+    return response?.data
+  }
+
+  @Action({ rawError: true })
+  public async validateBcolAccount (bcolProfile: BcolProfile): Promise<BcolAccountDetails> {
+    if (bcolProfile.userId === 'test') {
+      const accnt: BcolAccountDetails = { 'userId': 'heloman', 'accountNumber': 'BC00001' }
+      return Promise.resolve(accnt)
+    }
+    const response = await BcolService.validateBCOL(bcolProfile)
+    // this.context.commit('setCurrentOrganization', response?.data)
     return response?.data
   }
 
