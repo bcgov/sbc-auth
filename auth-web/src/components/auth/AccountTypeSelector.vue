@@ -10,6 +10,7 @@
         <v-card
           class="account-card pa-8"
           flat
+          hover
           :outlined="selectedAccountType == 'basic'"
           @click="selectAccountType('basic')"
         >
@@ -30,6 +31,7 @@
         <v-card
           class="account-card pa-8"
           flat
+          hover
           :outlined="selectedAccountType == 'premium'"
           @click="selectAccountType('premium')"
         >
@@ -54,6 +56,19 @@
         </v-card>
       </v-col>
     </v-row>
+    <v-row justify="right">
+      <v-col
+        cols="12"
+        class="text-right"
+      >
+        <v-btn class="mr-3" large color="primary" @click="goNext" :disabled='!selectedAccountType'>
+          Next
+        </v-btn>
+        <v-btn large depressed color="default" @click="cancel">
+          Cancel
+        </v-btn>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -72,10 +87,16 @@ export default class AccountTypeSelector extends Vue {
   }
 
   private selectAccountType (accountType) {
-    // eslint-disable-next-line no-console
-    console.log(accountType)
     this.selectedAccountType = accountType
+  }
+
+  private goNext () {
     this.stepForward()
+  }
+
+  private cancel () {
+    // eslint-disable-next-line no-console
+    console.log('Cancel')
   }
 }
 </script>
