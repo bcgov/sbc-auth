@@ -48,7 +48,7 @@
             </strong>
           </div>
           <div class="help-url mt-4 mb-2">
-            <v-btn text color="primary" href="hhttps://www.bconline.gov.bc.ca/" target="_blank" rel="noopener noreferrer">
+            <v-btn text color="primary" href="https://www.bconline.gov.bc.ca/" target="_blank" rel="noopener noreferrer">
               <v-icon small>mdi-help-circle-outline</v-icon>
               <span>How do I get a BC Online Account?</span>
             </v-btn>
@@ -56,7 +56,7 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-row justify="right">
+    <v-row justify="end">
       <v-col
         cols="12"
         class="text-right"
