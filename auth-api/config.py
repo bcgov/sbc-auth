@@ -145,6 +145,8 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     except:
         MAX_NUMBER_OF_ORGS = 3
 
+    BCOL_ACCOUNT_LINK_CHECK = bool(os.getenv('BCOL_ACCOUNT_LINK_CHECK', True))
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False
@@ -250,6 +252,8 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
                             "mdiIcon": "mdi-image-outline"
                         }
                       }
+
+    BCOL_ACCOUNT_LINK_CHECK = True
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods

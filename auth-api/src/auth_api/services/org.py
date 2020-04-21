@@ -258,3 +258,13 @@ class Org:
             for org in org_models:
                 orgs['orgs'].append(Org(org).as_dict())
         return orgs
+
+    @staticmethod
+    def bcol_account_link_check(bcol_account_id):
+        """Validate the BCOL id is linked or not. If already linked, return True."""
+        if current_app.config.get('BCOL_ACCOUNT_LINK_CHECK'):
+            account_payment = AccountPaymentModel.find_by_bcol_account_id(bcol_account_id)
+            if account_payment:
+                return True
+
+        return False

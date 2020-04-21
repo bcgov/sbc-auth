@@ -50,3 +50,8 @@ class AccountPaymentSettings(BaseModel):  # pylint: disable=too-few-public-metho
             payment_settings.save()
             return payment_settings
         return None
+
+    @classmethod
+    def find_by_bcol_account_id(cls, bcol_account_id):
+        """Find an account setting instance that matches the provided bcol_account_id."""
+        return cls.query.filter_by(bcol_account_id=bcol_account_id).first()
