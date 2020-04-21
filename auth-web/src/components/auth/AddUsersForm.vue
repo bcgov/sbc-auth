@@ -215,7 +215,10 @@ export default class AddUsersForm extends Vue {
 
   private resetForm () {
     this.$refs.form?.reset()
-    setTimeout(() => {
+    /** the form reset and data initialization happens at the same cycle which causes issues
+    like false validation notifications and initializing the role selector
+    resetting the form and initializing the data in the next tick **/
+    this.$nextTick(() => {
       this.users = []
       for (let i = 0; i < 3; i++) {
         this.users.push(this.getDefaultRow())
