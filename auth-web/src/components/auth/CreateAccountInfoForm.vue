@@ -28,7 +28,29 @@
                    <span v-html="grantAccessText"></span>
                </template>
             </v-checkbox>
-
+            <div v-if="grantAccess">
+               <v-row>
+                   <v-col cols="12" class="pb-0 mb-2">
+                       <h4 class="mb-2">Account Name</h4>
+                   </v-col>
+               </v-row>
+               <v-row>
+                   <v-col cols="12" class="">
+                       <v-text-field
+                               filled
+                               label="Account Name"
+                               v-model.trim="bcolAccountDetails.orgName"
+                               :rules="accountNameRules"
+                               persistent-hint
+                               disabled
+                               data-test="account-name"
+                       >
+                       </v-text-field>
+                   </v-col>
+               </v-row>
+                <base-address :address="bcolAccountDetails.address">
+                </base-address>
+               </div>
            </v-container>
 
         </div>
@@ -42,6 +64,7 @@ import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
+import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
@@ -50,7 +73,7 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
-    BcolLogin
+    BcolLogin, BaseAddress
   },
   computed: {
     ...mapState('org', ['currentOrganization']),
@@ -75,7 +98,7 @@ export default class CreateAccountInfoForm extends Vue {
     @Prop() stepBack!: () => void
     private linked = false
     private bcolAccountDetails:BcolAccountDetails
-    private grantAccess:boolean
+    private grantAccess:boolean = false
     private grantAccessText:string
 
     $refs: {
