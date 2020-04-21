@@ -36,6 +36,8 @@ from tests.utilities.factory_scenarios import (
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
     factory_org_service, factory_user_model)
+from auth_api.models.account_payment_settings import AccountPaymentSettings
+from auth_api.utils.enums import PaymentType, OrgType
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -418,3 +420,25 @@ def test_delete_does_not_remove_user_from_account_holder_group(session, monkeypa
     for group in user_groups:
         groups.append(group.get('name'))
     assert GROUP_ACCOUNT_HOLDERS in groups
+
+
+def test_create_org_with_linked_bcol_account(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org can be created."""
+    user = factory_user_model()
+    org = OrgService.create_org(TestOrgInfo.bcol_linked, user_id=user.id)
+    assert org
+    dictionary = org.as_dict()
+    payment_settings = AccountPaymentSettings.find_by_id(dictionary['payment_settings'][0])
+    assert payment_settings
+    assert payment_settings.preferred_payment_code == PaymentType.BCOL.value
+    assert dictionary['name'] == TestOrgInfo.bcol_linked['name']
+    assert dictionary['orgType'] == OrgType.PREMIUM.value
+
+
+def test_create_org_with_invalid_name_than_bcol_account(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org can be created."""
+    user = factory_user_model()
+
+    with pytest.raises(BusinessException) as exception:
+        OrgService.create_org(TestOrgInfo.bcol_linked_invalid_name, user_id=user.id)
+    assert exception.value.code == Error.INVALID_INPUT.name

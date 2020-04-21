@@ -140,6 +140,9 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     # Product config json object string - includes URL and description content
     PRODUCT_CONFIG = json.loads(os.getenv('PRODUCT_CONFIG', '[]'))
 
+    # BC Online endpoint
+    BCOL_API_URL = os.getenv('BCOL_API_URL')  # e.g, https://bcol-api-dev.pathfinder.gov.bc.ca/api/v1
+
     try:
         MAX_NUMBER_OF_ORGS = int(os.getenv('MAX_NUMBER_OF_ORGS'))
     except:
@@ -238,10 +241,12 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     LEGAL_API_URL = 'https://mock-auth-tools.pathfinder.gov.bc.ca/rest/legal-api/2.7/api/v1'
 
     NOTIFY_API_URL = 'http://localhost:8080/notify-api/api/v1'
+    BCOL_API_URL = 'http://localhost:8080/bcol-api/api/v1'
 
     # If any value is present in this flag, starts up a keycloak docker
     USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)
     USE_DOCKER_MOCK = os.getenv('USE_DOCKER_MOCK', None)
+    MAX_NUMBER_OF_ORGS = 3
 
     PRODUCT_CONFIG = {
                         "BUSINESS": {

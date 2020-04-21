@@ -30,10 +30,12 @@ from auth_api.models import User as UserModel
 from auth_api.schemas import OrgSchema
 from auth_api.utils.roles import OWNER, VALID_STATUSES, Status, AccessType
 from auth_api.utils.util import camelback2snake
+from auth_api.utils.enums import PaymentType, OrgType
 
 from .authorization import check_auth
 from .contact import Contact as ContactService
 from .keycloak import KeycloakService
+from .rest_service import RestService
 
 
 class Org:
@@ -57,9 +59,31 @@ class Org:
         return obj
 
     @staticmethod
-    def create_org(org_info: dict, user_id, token_info: Dict = None):
+    def create_org(org_info: dict, user_id,  # pylint: disable=too-many-locals, too-many-statements
+                   token_info: Dict = None, bearer_token: str = None):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
+        # If the account is created using BCOL credential, verify its valid bc online account
+        allow_duplicate_name: bool = False
+        bcol_user_id = None
+        bcol_account_number = None
+        payment_type = None
+        bcol_credential = org_info.pop('bcOnlineCredential', None)
+        mailing_address = org_info.pop('mailingAddress', None)
+
+        if bcol_credential:
+            bcol_response = RestService.post(endpoint=current_app.config.get('BCOL_API_URL') + '/profiles',
+                                             data=bcol_credential, token=bearer_token)
+
+            if bcol_response.json().get('orgName') != org_info.get('name'):
+                raise BusinessException(Error.INVALID_INPUT, None)
+
+            bcol_user_id = bcol_credential.get('userId', None)
+            bcol_account_number = bcol_response.json().get('accountNumber')
+            payment_type = PaymentType.BCOL.value
+            allow_duplicate_name = True
+            org_info['typeCode'] = OrgType.PREMIUM.value
+
         is_staff_admin = token_info and 'staff_admin' in token_info.get('realm_access').get('roles')
         if not is_staff_admin:  # staff can create any number of orgs
             count = OrgModel.get_count_of_org_created_by_user_id(user_id)
@@ -68,29 +92,50 @@ class Org:
             if org_info.get('accessType', None) == AccessType.ANONYMOUS.value:
                 raise BusinessException(Error.USER_CANT_CREATE_ANONYMOUS_ORG, None)
 
-        existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'])
-        if existing_similar__org is not None:
-            raise BusinessException(Error.DATA_CONFLICT, None)
+        if not allow_duplicate_name:
+            existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'])
+            if existing_similar__org is not None:
+                raise BusinessException(Error.DATA_CONFLICT, None)
+
         org = OrgModel.create_from_dict(camelback2snake(org_info))
+        org.add_to_session()
+
         if is_staff_admin:
             org.access_type = AccessType.ANONYMOUS.value
             org.billable = False
         else:
             org.access_type = AccessType.BCSC.value
             org.billable = True
-        org.save()
-        current_app.logger.info(f'<created_org org_id:{org.id}')
+        # If mailing address is provided, save it
+        if mailing_address:
+            contact = ContactModel(**camelback2snake(mailing_address))
+            contact = contact.add_to_session()
+
+            contact_link = ContactLinkModel()
+            contact_link.contact = contact
+            contact_link.org = org
+            contact_link.add_to_session()
+
         # create the membership record for this user if its not created by staff and access_type is anonymous
         if not is_staff_admin and org_info.get('access_type') != AccessType.ANONYMOUS:
             membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='OWNER',
                                          membership_type_status=Status.ACTIVE.value)
-            membership.save()
+            membership.add_to_session()
 
             # Add the user to account_holders group
             KeycloakService.join_account_holders_group()
 
         # TODO Remove later, create payment settings now with default values
-        AccountPaymentModel.create_from_dict({'org_id': org.id})
+        payment_settings = AccountPaymentModel.create_from_dict({
+            'org_id': org.id,
+            'preferred_payment_code': payment_type,
+            'bcol_user_id': bcol_user_id,
+            'bcol_account_id': bcol_account_number
+        })
+        payment_settings.add_to_session()
+
+        org.save()
+        current_app.logger.info(f'<created_org org_id:{org.id}')
 
         return Org(org)
 

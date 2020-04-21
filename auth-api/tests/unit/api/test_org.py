@@ -27,6 +27,7 @@ from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
+from auth_api.utils.enums import OrgType
 from tests.utilities.factory_scenarios import (
     TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo)
 from tests.utilities.factory_utils import factory_auth_header, factory_invitation
@@ -828,3 +829,23 @@ def test_unauthorized_search_orgs_for_affiliation(client, jwt, session,
     rv = client.get('/api/v1/orgs?affiliation={}'.format(TestAffliationInfo.affiliation3.get('businessIdentifier')),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+
+def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.json.get('orgType') == OrgType.PREMIUM.value
+    assert rv.json.get('name') == TestOrgInfo.bcol_linked['name']
+
+
+def test_add_bcol_linked_org_invalid_name(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked_invalid_name),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST

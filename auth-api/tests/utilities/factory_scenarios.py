@@ -301,6 +301,35 @@ class TestOrgInfo(dict, Enum):
     invalid_name_spaces = {'name': '    '}
     invalid_name_start_space = {'name': '  helo'}
     invalid_name_end_space = {'name': '  helo   '}
+    bcol_linked = {
+        'name': 'BC ONLINE TECHNICAL TEAM DEVL',
+        'bcOnlineCredential': {
+            'userId': 'test',
+            'password': 'password'
+        },
+        'mailingAddress': {
+            'street': '1234 Abcd Street',
+            'city': 'Test',
+            'region': 'BC',
+            'postalCode': 'T1T1T1',
+            'country': 'CA'
+        }
+    }
+
+    bcol_linked_invalid_name = {
+        'name': 'Test',
+        'bcOnlineCredential': {
+            'userId': 'test',
+            'password': 'password'
+        },
+        'mailingAddress': {
+            'street': '1234 Abcd Street',
+            'city': 'Test',
+            'region': 'BC',
+            'postalCode': 'T1T1T1',
+            'country': 'CA'
+        }
+    }
 
 
 class TestOrgProductsInfo(dict, Enum):
