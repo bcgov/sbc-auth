@@ -31,13 +31,18 @@
 import { IdpHint, LoginSource, Pages, Role } from '@/util/constants'
 import { Component } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import UserModule from '@/store/modules/user'
 import Vue from 'vue'
+import { mapState } from 'vuex'
 
 @Component({
   computed: {
+    ...mapState('user', ['currentUser'])
   }
 })
 export default class UnauthorizedView extends Vue {
+  private currentUser!: KCUserProfile
   errorMessage : string = ''
 
   mounted () {
@@ -49,8 +54,12 @@ export default class UnauthorizedView extends Vue {
       case 'termsofuse': this.$router.push(`/${Pages.USER_PROFILE_TERMS}`)
         break
       case 'logout':
-        let redirectUrl = `${ConfigHelper.getSelfURL()}/signin/bcros/`
-        this.$router.push(`/${Pages.SIGNOUT}/${encodeURIComponent(redirectUrl)}`)
+        if (this.currentUser?.loginSource === LoginSource.BCROS) {
+          let redirectUrl = `${ConfigHelper.getSelfURL()}/signin/bcros/`
+          this.$router.push(`/${Pages.SIGNOUT}/${encodeURIComponent(redirectUrl)}`)
+        } else {
+          this.$router.push(`/${Pages.SIGNOUT}`)
+        }
         break
     }
   }
