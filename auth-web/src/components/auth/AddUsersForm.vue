@@ -214,11 +214,13 @@ export default class AddUsersForm extends Vue {
   }
 
   private resetForm () {
-    this.users = []
-    for (let i = 0; i < 3; i++) {
-      this.users.push(this.getDefaultRow())
-    }
     this.$refs.form?.reset()
+    setTimeout(() => {
+      this.users = []
+      for (let i = 0; i < 3; i++) {
+        this.users.push(this.getDefaultRow())
+      }
+    })
   }
 
   private async addUsers () {
@@ -231,7 +233,7 @@ export default class AddUsersForm extends Vue {
         if (!user.username.trim() && !user.password.trim()) {
           this.users.splice(i, 1)
         } else {
-          user.membershipType = user.selectedRole.name.toUpperCase()
+          user.membershipType = user?.selectedRole?.name?.toUpperCase()
           user.username = user.username.toLowerCase()
         }
       }
@@ -247,6 +249,7 @@ export default class AddUsersForm extends Vue {
 
   @Emit()
   private addUsersComplete () {
+    this.loading = false
   }
 
   @Emit()
