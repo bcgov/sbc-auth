@@ -301,50 +301,42 @@ class TestOrgInfo(dict, Enum):
     invalid_name_spaces = {'name': '    '}
     invalid_name_start_space = {'name': '  helo'}
     invalid_name_end_space = {'name': '  helo   '}
-    bcol_linked = {
-        'name': 'BC ONLINE TECHNICAL TEAM DEVL',
-        'bcOnlineCredential': {
-            'userId': 'test',
-            'password': 'password'
-        },
-        'mailingAddress': {
-            'street': '1234 Abcd Street',
-            'city': 'Test',
-            'region': 'BC',
-            'postalCode': 'T1T1T1',
-            'country': 'CA'
-        }
-    }
 
-    bcol_linked_duplicate_account_id = {
-        'name': 'BC ONLINE TECHNICAL TEAM DEVL',
-        'bcOnlineCredential': {
-            'userId': 'test',
-            'password': 'password'
-        },
-        'mailingAddress': {
-            'street': '0000 Abcd Street',
-            'city': 'Test 2',
-            'region': 'BC',
-            'postalCode': 'T1T1T1',
-            'country': 'CA'
+    @staticmethod
+    def bcol_linked():
+        """Return org info for bcol linked info."""
+        return {
+            'name': 'BC ONLINE TECHNICAL TEAM DEVL',
+            'bcOnlineCredential': {
+                'userId': 'test',
+                'password': 'password'
+            },
+            'mailingAddress': {
+                'street': '1234 Abcd Street',
+                'city': 'Test',
+                'region': 'BC',
+                'postalCode': 'T1T1T1',
+                'country': 'CA'
+            }
         }
-    }
 
-    bcol_linked_invalid_name = {
-        'name': 'Test',
-        'bcOnlineCredential': {
-            'userId': 'test',
-            'password': 'password'
-        },
-        'mailingAddress': {
-            'street': '1234 Abcd Street',
-            'city': 'Test',
-            'region': 'BC',
-            'postalCode': 'T1T1T1',
-            'country': 'CA'
+    @staticmethod
+    def bcol_linked_invalid_name():
+        """Return org info for bcol linked info with invalid name."""
+        return {
+            'name': 'Test',
+            'bcOnlineCredential': {
+                'userId': 'test',
+                'password': 'password'
+            },
+            'mailingAddress': {
+                'street': '1234 Abcd Street',
+                'city': 'Test',
+                'region': 'BC',
+                'postalCode': 'T1T1T1',
+                'country': 'CA'
+            }
         }
-    }
 
 
 class TestOrgProductsInfo(dict, Enum):

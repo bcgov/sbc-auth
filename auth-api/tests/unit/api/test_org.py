@@ -835,17 +835,17 @@ def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:dis
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked),
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked()),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     assert rv.json.get('orgType') == OrgType.PREMIUM.value
-    assert rv.json.get('name') == TestOrgInfo.bcol_linked['name']
+    assert rv.json.get('name') == TestOrgInfo.bcol_linked()['name']
 
 
 def test_add_bcol_linked_org_invalid_name(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked_invalid_name),
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked_invalid_name()),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST

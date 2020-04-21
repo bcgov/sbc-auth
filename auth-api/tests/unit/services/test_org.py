@@ -426,13 +426,13 @@ def test_delete_does_not_remove_user_from_account_holder_group(session, monkeypa
 def test_create_org_with_linked_bcol_account(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model()
-    org = OrgService.create_org(TestOrgInfo.bcol_linked, user_id=user.id)
+    org = OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
     assert org
     dictionary = org.as_dict()
     payment_settings = AccountPaymentSettings.find_by_id(dictionary['payment_settings'][0])
     assert payment_settings
     assert payment_settings.preferred_payment_code == PaymentType.BCOL.value
-    assert dictionary['name'] == TestOrgInfo.bcol_linked['name']
+    assert dictionary['name'] == TestOrgInfo.bcol_linked()['name']
     assert dictionary['orgType'] == OrgType.PREMIUM.value
 
 
@@ -441,7 +441,7 @@ def test_create_org_with_invalid_name_than_bcol_account(session, keycloak_mock):
     user = factory_user_model()
 
     with pytest.raises(BusinessException) as exception:
-        OrgService.create_org(TestOrgInfo.bcol_linked_invalid_name, user_id=user.id)
+        OrgService.create_org(TestOrgInfo.bcol_linked_invalid_name(), user_id=user.id)
     assert exception.value.code == Error.INVALID_INPUT.name
 
 
@@ -465,11 +465,10 @@ def test_create_org_with_a_linked_bcol_details(session, keycloak_mock):  # pylin
     """Assert that org creation with an existing linked BCOL account fails."""
     user = factory_user_model()
 
-    org = OrgService.create_org(TestOrgInfo.bcol_linked, user_id=user.id)
+    org = OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
     assert org
     # Create again
 
     with pytest.raises(BusinessException) as exception:
-        OrgService.create_org(TestOrgInfo.bcol_linked_duplicate_account_id, user_id=user.id)
+        OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
     assert exception.value.code == Error.BCOL_ACCOUNT_ALREADY_LINKED.name
-
