@@ -316,6 +316,21 @@ class TestOrgInfo(dict, Enum):
         }
     }
 
+    bcol_linked_duplicate_account_id = {
+        'name': 'BC ONLINE TECHNICAL TEAM DEVL',
+        'bcOnlineCredential': {
+            'userId': 'test',
+            'password': 'password'
+        },
+        'mailingAddress': {
+            'street': '0000 Abcd Street',
+            'city': 'Test 2',
+            'region': 'BC',
+            'postalCode': 'T1T1T1',
+            'country': 'CA'
+        }
+    }
+
     bcol_linked_invalid_name = {
         'name': 'Test',
         'bcOnlineCredential': {

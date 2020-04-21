@@ -74,12 +74,14 @@ class Org:
         if bcol_credential:
             bcol_response = RestService.post(endpoint=current_app.config.get('BCOL_API_URL') + '/profiles',
                                              data=bcol_credential, token=bearer_token)
+            bcol_account_number = bcol_response.json().get('accountNumber')
 
             if bcol_response.json().get('orgName') != org_info.get('name'):
                 raise BusinessException(Error.INVALID_INPUT, None)
+            if Org.bcol_account_link_check(bcol_account_number):
+                raise BusinessException(Error.BCOL_ACCOUNT_ALREADY_LINKED, None)
 
             bcol_user_id = bcol_credential.get('userId', None)
-            bcol_account_number = bcol_response.json().get('accountNumber')
             payment_type = PaymentType.BCOL.value
             allow_duplicate_name = True
             org_info['typeCode'] = OrgType.PREMIUM.value

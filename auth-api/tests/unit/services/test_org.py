@@ -460,3 +460,16 @@ def test_bcol_account_not_exists(session):  # pylint:disable=unused-argument
     check_result = OrgService.bcol_account_link_check(TestBCOLInfo.bcol2['bcol_account_id'])
     assert not check_result
 
+
+def test_create_org_with_a_linked_bcol_details(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that org creation with an existing linked BCOL account fails."""
+    user = factory_user_model()
+
+    org = OrgService.create_org(TestOrgInfo.bcol_linked, user_id=user.id)
+    assert org
+    # Create again
+
+    with pytest.raises(BusinessException) as exception:
+        OrgService.create_org(TestOrgInfo.bcol_linked_duplicate_account_id, user_id=user.id)
+    assert exception.value.code == Error.BCOL_ACCOUNT_ALREADY_LINKED.name
+
