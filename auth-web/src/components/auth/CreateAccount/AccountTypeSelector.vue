@@ -12,7 +12,7 @@
           flat
           hover
           :outlined="selectedAccountType == 'basic'"
-          @click="selectAccountType('basic')"
+          @click="selectAccountType('BASIC')"
         >
           <div class="account-type mb-1">Basic</div>
           <div class="account-type-header">I make 10 purchases per month or less</div>
@@ -33,7 +33,7 @@
           flat
           hover
           :outlined="selectedAccountType == 'premium'"
-          @click="selectAccountType('premium')"
+          @click="selectAccountType('PREMIUM')"
         >
           <div class="account-type mb-1">PREMIUM</div>
           <div class="account-type-header">I make more than 10 purchases per month</div>
@@ -75,18 +75,29 @@
 <script lang="ts">
 
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { mapMutations, mapState } from 'vuex'
+import { Account } from '@/util/constants'
 
 @Component({
   components: {
+
+  },
+  methods: {
+    ...mapMutations('org', ['setSelectedAccountType'])
   }
 })
 export default class AccountTypeSelector extends Vue {
   private selectedAccountType: string = ''
   @Prop() stepForward!: () => void
+  private readonly setSelectedAccountType!: (selectedAccountType: Account) => void
+
   private async mounted () {
   }
 
   private selectAccountType (accountType) {
+    // eslint-disable-next-line no-console
+    console.log('accountType', accountType)
+    this.setSelectedAccountType(accountType)
     this.selectedAccountType = accountType
   }
 

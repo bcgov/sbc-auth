@@ -30,6 +30,12 @@ export default class OrgModule extends VuexModule {
   tokenError = false
   createdUsers: BulkUsersSuccess[] = []
   failedUsers: BulkUsersFailed[] = []
+  selectedAccountType:Account
+
+  @Mutation
+  public setSelectedAccountType (selectedAccountType: Account) {
+    this.selectedAccountType = selectedAccountType
+  }
 
   @Mutation
   public setActiveOrgMembers (activeMembers: Member[]) {
@@ -124,10 +130,6 @@ export default class OrgModule extends VuexModule {
 
   @Action({ rawError: true })
   public async validateBcolAccount (bcolProfile: BcolProfile): Promise<BcolAccountDetails> {
-    if (bcolProfile.userId === 'test') {
-      const accnt: BcolAccountDetails = { 'userId': 'heloman', 'accountNumber': 'BC00001' }
-      return Promise.resolve(accnt)
-    }
     const response = await BcolService.validateBCOL(bcolProfile)
     // this.context.commit('setCurrentOrganization', response?.data)
     return response?.data
