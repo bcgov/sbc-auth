@@ -56,3 +56,8 @@ class AccountPaymentSettings(BaseModel):  # pylint: disable=too-few-public-metho
     def find_by_id(cls, identifier: int):
         """Find payment settings by identifier."""
         return cls.query.filter_by(id=identifier).one_or_none()
+
+    @classmethod
+    def find_by_bcol_account_id(cls, bcol_account_id):
+        """Find an account setting instance that matches the provided bcol_account_id."""
+        return cls.query.filter_by(bcol_account_id=bcol_account_id).first()

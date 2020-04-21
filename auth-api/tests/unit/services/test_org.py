@@ -32,7 +32,8 @@ from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
 from tests.utilities.factory_scenarios import (
-    KeycloakScenario, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo, TestOrgProductsInfo)
+    KeycloakScenario, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo,
+    TestOrgProductsInfo)
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
     factory_org_service, factory_user_model)
@@ -442,3 +443,20 @@ def test_create_org_with_invalid_name_than_bcol_account(session, keycloak_mock):
     with pytest.raises(BusinessException) as exception:
         OrgService.create_org(TestOrgInfo.bcol_linked_invalid_name, user_id=user.id)
     assert exception.value.code == Error.INVALID_INPUT.name
+
+
+def test_bcol_account_exists(session):  # pylint:disable=unused-argument
+    """Assert that the BCOL account is exists."""
+    factory_org_service(bcol_info=TestBCOLInfo.bcol1)
+
+    check_result = OrgService.bcol_account_link_check(TestBCOLInfo.bcol1['bcol_account_id'])
+    assert check_result
+
+
+def test_bcol_account_not_exists(session):  # pylint:disable=unused-argument
+    """Assert that the BCOL account is not exists."""
+    factory_org_service(bcol_info=TestBCOLInfo.bcol1)
+
+    check_result = OrgService.bcol_account_link_check(TestBCOLInfo.bcol2['bcol_account_id'])
+    assert not check_result
+

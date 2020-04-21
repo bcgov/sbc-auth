@@ -542,3 +542,10 @@ class BulkUserTestScenario:
         ],
             'orgId': org_id
         }
+
+
+class TestBCOLInfo(dict, Enum):
+    """Test scenarios of org."""
+
+    bcol1 = {'bcol_account_id': 'BCOL1'}
+    bcol2 = {'bcol_account_id': 'BCOL2'}
