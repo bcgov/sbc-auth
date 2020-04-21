@@ -17,8 +17,8 @@
 
       <template v-if="createdUsers.length">
         <v-list dense class="pt-0 pb-0">
-          <template v-for="user in createdUsers">
-            <v-divider class="mt-1 mb-1" :key="user"></v-divider>
+          <template v-for="(user, index) in createdUsers">
+            <v-divider class="mt-1 mb-1" :key="index"></v-divider>
             <v-list-item :key="user.username">
               <v-list-item-icon><v-icon color="success" class="mt-4">mdi-check</v-icon></v-list-item-icon>
               <v-list-item-content>
@@ -60,8 +60,8 @@
 
       <template v-if="failedUsers.length">
         <v-list dense class="pt-0 pb-0">
-          <template v-for="user in failedUsers">
-            <v-divider class="mt-1 mb-1" :key="user"></v-divider>
+          <template v-for="(user, index) in failedUsers">
+            <v-divider class="mt-1 mb-1" :key="index"></v-divider>
             <v-list-item :key="user.username">
               <v-list-item-icon><v-icon color="error" class="mt-4">mdi-alert-circle-outline</v-icon></v-list-item-icon>
               <v-list-item-content>
