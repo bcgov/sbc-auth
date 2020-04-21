@@ -95,8 +95,6 @@ export default class AccountTypeSelector extends Vue {
   }
 
   private selectAccountType (accountType) {
-    // eslint-disable-next-line no-console
-    console.log('accountType', accountType)
     this.setSelectedAccountType(accountType)
     this.selectedAccountType = accountType
   }
