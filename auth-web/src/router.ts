@@ -107,7 +107,7 @@ export function getRoutes (): RouteConfig[] {
     { path: '/signout', name: 'signout', component: SignoutView, props: true, meta: { requiresAuth: true } },
     { path: '/signout/:redirectUrl', name: 'signout-redirect', component: SignoutView, props: true, meta: { requiresAuth: true } },
     { path: '/businessprofile', name: 'businessprofile', component: BusinessProfileView, meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true, showNavBar: true } },
-    { path: '/makepayment/:paymentId/:redirectUrl', name: 'makepayment', component: PaymentView, props: true, meta: { requiresAuth: false, requiresProfile: true } },
+    { path: '/makepayment/:paymentId/:redirectUrl', name: 'makepayment', component: PaymentView, props: true, meta: { requiresAuth: false } },
     { path: '/profiledeactivated', name: 'profiledeactivated', component: ProfileDeactivatedView, props: true, meta: { requiresAuth: false } },
     { path: '/returnpayment/:paymentId/transaction/:transactionId', name: 'returnpayment', component: PaymentReturnView, props: mapReturnPayVars, meta: { requiresAuth: false, requiresProfile: true } },
     { path: '/searchbusiness', name: 'searchbusiness', component: SearchBusinessView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
@@ -179,7 +179,7 @@ router.beforeEach((to, from, next) => {
     const currentUser: KCUserProfile = (store.state as any)?.user?.currentUser
     if (to.matched.some(record => record.meta.requiresProfile) &&
       !userProfile?.userTerms?.isTermsOfUseAccepted) {
-      switch (currentUser.loginSource) {
+      switch (currentUser?.loginSource) {
         case LoginSource.BCSC:
           if (!userContact) {
             return next({
@@ -190,6 +190,10 @@ router.beforeEach((to, from, next) => {
         case LoginSource.BCROS:
           return next({
             path: `/${Pages.USER_PROFILE_TERMS}`
+          })
+        default:
+          return next({
+            path: '/'
           })
       }
     }
