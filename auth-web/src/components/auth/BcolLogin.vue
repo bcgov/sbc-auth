@@ -100,7 +100,7 @@ export default class BcolLogin extends Vue {
         const bcolAccountDetails = await this.validateBcolAccount(bcolProfile)
         this.isLoading = false
         if (bcolAccountDetails) { // TODO whats the success status
-          this.$emit('account-link-successful', bcolAccountDetails)
+          this.$emit('account-link-successful', { bcolProfile, bcolAccountDetails })
         }
       } catch (err) {
         this.isLoading = false

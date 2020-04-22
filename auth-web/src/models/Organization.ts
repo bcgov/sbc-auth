@@ -1,3 +1,5 @@
+import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
+import { Address } from '@/models/address'
 import { Business } from '@/models/business'
 import { Invitation } from '@/models/Invitation'
 import { User } from '@/models/user'
@@ -20,6 +22,9 @@ export interface Organization {
   members?: Member[];
   invitations?: Invitation[];
   accessType: string;
+  address?: Address,
+  bcolProfile?:BcolProfile
+  bcolAccountDetails?:BcolAccountDetails
 }
 
 export interface UpdateMemberPayload {

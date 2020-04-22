@@ -77,13 +77,14 @@
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
 import { Account } from '@/util/constants'
+import { Organization } from '@/models/Organization'
 
 @Component({
   components: {
 
   },
   methods: {
-    ...mapMutations('org', ['setSelectedAccountType'])
+    ...mapMutations('org', ['setSelectedAccountType', 'setCurrentOrganization'])
   }
 })
 export default class AccountTypeSelector extends Vue {
@@ -94,6 +95,7 @@ export default class AccountTypeSelector extends Vue {
   private selectedAccountType: string = ''
   @Prop() stepForward!: () => void
   private readonly setSelectedAccountType!: (selectedAccountType: Account) => void
+  private readonly setCurrentOrganization!: (organization: Organization) => void
 
   private async mounted () {
   }
@@ -104,6 +106,7 @@ export default class AccountTypeSelector extends Vue {
   }
 
   private goNext () {
+    this.setCurrentOrganization(undefined)
     this.stepForward()
   }
 
