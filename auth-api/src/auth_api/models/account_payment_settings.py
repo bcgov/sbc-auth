@@ -46,10 +46,16 @@ class AccountPaymentSettings(BaseModel):  # pylint: disable=too-few-public-metho
             current_app.logger.debug(
                 'Creating payment settings from dictionary {}'.format(payment_info)
             )
-            payment_settings.preferred_payment = PaymentType.get_default_payment_type()
-            payment_settings.save()
+            if not payment_info.get('preferred_payment_code', None):
+                payment_settings.preferred_payment = PaymentType.get_default_payment_type()
+
             return payment_settings
         return None
+
+    @classmethod
+    def find_by_id(cls, identifier: int):
+        """Find payment settings by identifier."""
+        return cls.query.filter_by(id=identifier).one_or_none()
 
     @classmethod
     def find_by_bcol_account_id(cls, bcol_account_id):
