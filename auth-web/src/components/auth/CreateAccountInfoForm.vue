@@ -4,55 +4,93 @@
           <h1 class="mb-5">Account Settings</h1>
           <p class="intro-text mb-8">You must be the Prime Contact to link this account with your existing BC Online account.</p>
           <BcolLogin v-on:account-link-successful="onLink" v-show="!linked"></BcolLogin>
-           <v-container v-if="linked">
-            <v-alert type="text" v-model="linked"  outlined icon="mdi-check">
-                <v-row>
-                    <v-col cols="8">
-                    ACCOUNT LINKED!
-                    </v-col>
-                    <v-col cols="4">
-                        <v-btn large color="primary" @click="unlinkAccounts()" data-test="dialog-save-button">Remove Linked Accounts</v-btn>
-                    </v-col>
-                </v-row>
-                <v-row v-if="bcolAccountDetails">
-                    <v-col cols="6">
-                        <h3>MY BCOL Account</h3>
-                        Account No: {{bcolAccountDetails.accountNumber}}   |   Authorizing User ID: {{bcolAccountDetails.userId}}
-                    </v-col>
-                </v-row>
-
+          <v-container v-if="linked">
+            <v-alert
+              v-model="linked"
+              dark
+              color="info"
+              icon="mdi-check"
+            >
+              <v-row>
+                <v-col cols="8">
+                  <div class="text-uppercase mb-3">Account Linked!</div>
+                  <div v-if="bcolAccountDetails">
+                    <div class="bcol-acc-label">{{bcolAccountDetails.orgName}}</div>
+                    Account No: {{bcolAccountDetails.accountNumber}} | Authorizing User ID: {{bcolAccountDetails.userId}}
+                  </div>
+                </v-col>
+                <v-col cols="4" align-self="center">
+                    <v-btn
+                      large
+                      outlined
+                      @click="unlinkAccounts()"
+                      data-test="dialog-save-button"
+                    >
+                    <strong>Remove Linked Accounts</strong></v-btn>
+                </v-col>
+              </v-row>
             </v-alert>
             <v-checkbox
-                    v-model="grantAccess" class="mt-5 pt-5">
-               <template v-slot:label>
-                   <span v-html="grantAccessText"></span>
-               </template>
+              v-model="grantAccess" class="mt-5">
+              <template v-slot:label>
+                  <span class="grant-access" v-html="grantAccessText"></span>
+              </template>
             </v-checkbox>
-            <div v-if="grantAccess">
-               <v-row>
-                   <v-col cols="12" class="pb-0 mb-2">
-                       <h4 class="mb-2">Account Name</h4>
-                   </v-col>
-               </v-row>
-               <v-row>
-                   <v-col cols="12" class="">
-                       <v-text-field
-                               filled
-                               label="Account Name"
-                               v-model.trim="bcolAccountDetails.orgName"
-                               :rules="accountNameRules"
-                               persistent-hint
-                               disabled
-                               data-test="account-name"
-                       >
-                       </v-text-field>
-                   </v-col>
-               </v-row>
-                <base-address :address="bcolAccountDetails.address">
-                </base-address>
-               </div>
-           </v-container>
-
+            <template v-if="grantAccess">
+              <v-row class="mt-6">
+                <v-col cols="12">
+                  <h3 class="mb-4">Account Information</h3>
+                  <p class="mb-0">The following information will be imported from your existing BC Online account.</p>
+                  <p class="mb-8">Review your account information below and update if needed.</p>
+                </v-col>
+              </v-row>
+              <v-row class="mb-1">
+                <v-col cols="12" class="">
+                  <h4 class="mb-2">Account Name</h4>
+                  <v-text-field
+                          filled
+                          label="Account Name"
+                          v-model.trim="bcolAccountDetails.orgName"
+                          :rules="accountNameRules"
+                          persistent-hint
+                          disabled
+                          data-test="account-name"
+                  >
+                  </v-text-field>
+                </v-col>
+              </v-row>
+              <BaseAddress :address="bcolAccountDetails.address">
+              </BaseAddress>
+            </template>
+          </v-container>
+          <v-row>
+            <v-col cols="12" class="d-inline-flex">
+              <v-btn
+                large
+                color="grey lighten-3"
+                class="mx-1"
+              >
+                <v-icon left class="mr-1">mdi-arrow-left</v-icon>
+                Back
+              </v-btn>
+              <v-spacer></v-spacer>
+              <v-btn
+                large
+                color="primary"
+                :disabled="!grantAccess"
+              >
+                Next
+                <v-icon right class="ml-1">mdi-arrow-right</v-icon>
+              </v-btn>
+              <v-btn
+                large
+                color="grey lighten-3"
+                class="mx-5"
+              >
+                Cancel
+              </v-btn>
+            </v-col>
+          </v-row>
         </div>
 
       </v-form>
@@ -114,7 +152,7 @@ export default class CreateAccountInfoForm extends Vue {
     private onLink (bcolAccountDetails:BcolAccountDetails) {
       this.linked = true
       this.bcolAccountDetails = bcolAccountDetails
-      this.grantAccessText = `I ,<b></b> ${this.currentUser.fullName} </b>, confirm that I am authorized to grant access to the account <b>${bcolAccountDetails.accountNumber}</b>`
+      this.grantAccessText = `I ,<strong>${this.currentUser.fullName} </strong>, confirm that I am authorized to grant access to the account <strong>${bcolAccountDetails.orgName}</strong>`
     }
     private cancel () {
       if (this.stepBack) {
@@ -142,5 +180,14 @@ export default class CreateAccountInfoForm extends Vue {
   .form__btns {
     display: flex;
     justify-content: flex-end;
+  }
+
+  .bcol-acc-label {
+    font-size: 1.35rem;
+    font-weight: 600;
+  }
+
+  .grant-access {
+    font-size: 1rem !important;
   }
 </style>

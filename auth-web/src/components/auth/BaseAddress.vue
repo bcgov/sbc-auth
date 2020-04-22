@@ -1,17 +1,17 @@
 <template>
   <v-form ref="adress" lazy-validation>
-    <h4>Mailing Address</h4>
-      <v-row>
-        <v-col cols="12" class="py-0 mb-4">
-          <v-text-field
-                  filled
-                  label="Street Address"
-                  v-model.trim="address.line1"
-                  req
-          >
-          </v-text-field>
-        </v-col>
-      </v-row>
+    <h4 class="mb-2">Mailing Address</h4>
+    <v-row>
+      <v-col cols="12" class="py-0 mb-4">
+        <v-text-field
+                filled
+                label="Street Address"
+                v-model.trim="address.line1"
+                req
+        >
+        </v-text-field>
+      </v-col>
+    </v-row>
     <v-row>
       <v-col cols="4" class="py-0 mb-4">
         <v-text-field
@@ -40,17 +40,17 @@
         >
         </v-text-field>
       </v-col>
-      </v-row>
+    </v-row>
     <v-row>
-    <v-col cols="4" class="py-0 mb-4">
-      <v-text-field
-              filled
-              label="Country"
-              v-model.trim="address.country"
-              req
-      >
-      </v-text-field>
-    </v-col>
+      <v-col cols="4" class="py-0 mb-4">
+        <v-text-field
+                filled
+                label="Country"
+                v-model.trim="address.country"
+                req
+        >
+        </v-text-field>
+      </v-col>
     </v-row>
   </v-form>
 </template>

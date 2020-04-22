@@ -43,7 +43,8 @@
             color="primary"
             @click="linkAccounts()"
             data-test="dialog-save-button"
-            :disabled='!isFormValid()'
+            :loading="isLoading"
+            :disabled='!isFormValid() || isLoading'
           >
             <strong>Link Accounts</strong>
           </v-btn>
@@ -73,6 +74,7 @@ export default class BcolLogin extends Vue {
   private username = ''
   private password = ''
   private errorMessage: string = ''
+  private isLoading: boolean = false
   private readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
 
   private isFormValid (): boolean {
@@ -87,6 +89,7 @@ export default class BcolLogin extends Vue {
   ]
 
   private async linkAccounts () {
+    this.isLoading = true
     // Validate form, and then create an team with this user a member
     if (this.isFormValid()) {
       const bcolProfile: BcolProfile = {
@@ -95,10 +98,12 @@ export default class BcolLogin extends Vue {
       }
       try {
         const bcolAccountDetails = await this.validateBcolAccount(bcolProfile)
+        this.isLoading = false
         if (bcolAccountDetails) { // TODO whats the success status
           this.$emit('account-link-successful', bcolAccountDetails)
         }
       } catch (err) {
+        this.isLoading = false
         switch (err.response.status) {
           case 400:
             this.errorMessage = err.response.data.detail
