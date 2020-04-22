@@ -5,6 +5,7 @@ import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/
 import { Products, ProductsRequestBody } from '@/models/Staff'
 import { Account } from '@/util/constants'
 import { AccountSettings } from '@/models/account-settings'
+import { Address } from '@/models/address'
 import BcolService from '@/services/bcol.services'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
@@ -83,6 +84,11 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentOrganization (organization: Organization | undefined) {
     this.currentOrganization = organization
+  }
+
+  @Mutation
+  public setCurrentOrganizationAddress (address: Address | undefined) {
+    this.currentOrganization.bcolAccountDetails.address = address
   }
 
   @Mutation

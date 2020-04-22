@@ -69,7 +69,7 @@
               </v-text-field>
             </v-col>
           </v-row>
-          <BaseAddress :address="currentOrganization.bcolAccountDetails.address"> </BaseAddress>
+          <BaseAddress :inputAddress="address" v-on:adress-update="updateAddress"> </BaseAddress>
         </template>
       </v-container>
       <v-row>
@@ -93,6 +93,7 @@
 </template>
 
 <script lang="ts">
+
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import {
@@ -102,6 +103,7 @@ import {
 } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { Account } from '@/util/constants'
+import { Address } from '@/models/address'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
@@ -118,7 +120,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('user', ['userProfile', 'currentUser'])
   },
   methods: {
-    ...mapMutations('org', ['setCurrentOrganization']),
+    ...mapMutations('org', ['setCurrentOrganization', 'setCurrentOrganizationAddress']),
     ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization', ''])
   }
 })
@@ -138,7 +140,8 @@ export default class AccountCreatePremium extends Vue {
   private grantAccess: boolean = false
   private grantAccessText: string
   private readonly setCurrentOrganization!: (organization: Organization) => void
-  private debug = false
+  private readonly setCurrentOrganizationAddress!: (address: Address) => void
+  private debug = true
 
   async mounted () {
     this.setCurrentOrganization(undefined)
@@ -154,6 +157,9 @@ export default class AccountCreatePremium extends Vue {
     return !!this.username && !!this.password
   }
 
+  private get address () {
+    return this.currentOrganization.bcolAccountDetails.address
+  }
   private unlinkAccounts () {
     // eslint-disable-next-line no-console
     console.log('uni' + JSON.stringify(this.currentOrganization))
@@ -161,9 +167,12 @@ export default class AccountCreatePremium extends Vue {
   private get linked () {
     return !!this.currentOrganization?.bcolAccountDetails
   }
+  private updateAddress (address:Address) {
+    this.setCurrentOrganizationAddress(address)
+  }
+
   private onLink (details: { bcolProfile: BcolProfile, bcolAccountDetails: BcolAccountDetails }) {
     this.grantAccessText = `I ,<strong>${this.currentUser.fullName} </strong>, confirm that I am authorized to grant access to the account <strong>${details.bcolAccountDetails.orgName}</strong>`
-    debugger
     if (!this.currentOrganization) {
       var org: Organization = {
         name: details.bcolAccountDetails.orgName,
