@@ -11,8 +11,8 @@
           class="account-card pa-8"
           flat
           hover
-          :outlined="selectedAccountType == 'basic'"
-          @click="selectAccountType('BASIC')"
+          :outlined="selectedAccountType == ACCOUNT_TYPE.BASIC"
+          @click="selectAccountType(ACCOUNT_TYPE.BASIC)"
         >
           <div class="account-type mb-1">Basic</div>
           <div class="account-type-header">I make 10 purchases per month or less</div>
@@ -32,8 +32,8 @@
           class="account-card pa-8"
           flat
           hover
-          :outlined="selectedAccountType == 'premium'"
-          @click="selectAccountType('PREMIUM')"
+          :outlined="selectedAccountType == ACCOUNT_TYPE.PREMIUM"
+          @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)"
         >
           <div class="account-type mb-1">PREMIUM</div>
           <div class="account-type-header">I make more than 10 purchases per month</div>
@@ -87,6 +87,10 @@ import { Account } from '@/util/constants'
   }
 })
 export default class AccountTypeSelector extends Vue {
+  private readonly ACCOUNT_TYPE = {
+    BASIC: 'BASIC',
+    PREMIUM: 'PREMIUM'
+  }
   private selectedAccountType: string = ''
   @Prop() stepForward!: () => void
   private readonly setSelectedAccountType!: (selectedAccountType: Account) => void

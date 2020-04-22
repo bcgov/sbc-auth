@@ -1,8 +1,8 @@
 <template>
       <v-form ref="createAccountInfoForm" lazy-validation>
         <div class="view-container">
-            <h1 class="mb-5">Account Settings</h1>
-            <p class="intro-text">You must be the Prime Contact to link this account with your existing BC Online account.</p>
+          <h1 class="mb-5">Account Settings</h1>
+          <p class="intro-text mb-8">You must be the Prime Contact to link this account with your existing BC Online account.</p>
           <BcolLogin v-on:account-link-successful="onLink" v-show="!linked"></BcolLogin>
            <v-container v-if="linked">
             <v-alert type="text" v-model="linked"  outlined icon="mdi-check">
@@ -112,7 +112,6 @@ export default class CreateAccountInfoForm extends Vue {
       return !!this.username && !!this.password
     }
     private onLink (bcolAccountDetails:BcolAccountDetails) {
-      debugger
       this.linked = true
       this.bcolAccountDetails = bcolAccountDetails
       this.grantAccessText = `I ,<b></b> ${this.currentUser.fullName} </b>, confirm that I am authorized to grant access to the account <b>${bcolAccountDetails.accountNumber}</b>`

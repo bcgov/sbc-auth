@@ -1,12 +1,12 @@
 <template>
   <v-form ref="createAccountInfoForm" lazy-validation>
-      <v-row>
-        <v-col cols="12">
-          <h4 class="mb-5">BC Online Prime Contact Details
-            <v-tooltip v-model="show" top>
+      <v-row align="end">
+        <v-col cols="12" align-self="end">
+          <h4>BC Online Prime Contact Details
+            <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-btn icon v-on="on">
-                  <v-icon color="grey lighten-1">mdi-help-circle-outline</v-icon>
+                <v-btn icon color="grey darken-2" small v-on="on" class="help-tooltip-btn">
+                  <v-icon>mdi-help-circle-outline</v-icon>
                 </v-btn>
               </template>
               <span>BC Online Prime Contacts are users who have authority to manage account settings for a BC Online Account.</span>
@@ -21,6 +21,7 @@
                   v-model.trim="username"
                   :rules="usernameRules"
                   req
+                  dense
           >
           </v-text-field>
         </v-col>
@@ -31,12 +32,21 @@
                   v-model.trim="password"
                   type="password"
                   req
+                  dense
                   :rules="passwordRules"
           >
           </v-text-field>
         </v-col>
         <v-col cols="4" class="py-0 mb-4">
-          <v-btn large color="primary" @click="linkAccounts()" data-test="dialog-save-button"  :disabled='!isFormValid()'>Link Accounts</v-btn>
+          <v-btn
+            x-large
+            color="primary"
+            @click="linkAccounts()"
+            data-test="dialog-save-button"
+            :disabled='!isFormValid()'
+          >
+            <strong>Link Accounts</strong>
+          </v-btn>
         </v-col>
       </v-row>
     <v-alert type="error" class="mb-6"
@@ -84,7 +94,6 @@ export default class BcolLogin extends Vue {
         password: this.password
       }
       try {
-        debugger
         const bcolAccountDetails = await this.validateBcolAccount(bcolProfile)
         if (bcolAccountDetails) { // TODO whats the success status
           this.$emit('account-link-successful', bcolAccountDetails)
@@ -104,4 +113,7 @@ export default class BcolLogin extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.help-tooltip-btn {
+  margin-top: -8px;
+}
 </style>
