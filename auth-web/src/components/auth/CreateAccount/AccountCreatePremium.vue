@@ -105,7 +105,6 @@ import { mapActions, mapState } from 'vuex'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
 
@@ -121,7 +120,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization'])
   }
 })
-export default class CreateAccountInfoForm extends Vue {
+export default class AccountCreatePremium extends Vue {
     private orgStore = getModule(OrgModule, this.$store)
     private username = ''
     private password = ''

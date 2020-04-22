@@ -20,7 +20,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import CreateAccountInfoForm from '@/components/auth/CreateAccountInfoForm.vue'
+import CreateAccountInfoForm from '@/components/auth/CreateAccount/CreateAccountInfoForm.vue'
 import { Organization } from '@/models/Organization'
 import { getModule } from 'vuex-module-decorators'
 
