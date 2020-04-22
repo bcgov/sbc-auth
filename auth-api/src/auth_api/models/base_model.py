@@ -108,6 +108,11 @@ class BaseModel(db.Model):
         db.session.flush()
         return self
 
+    def add_to_session(self):
+        """Save and flush."""
+        db.session.add(self)
+        return self
+
     def save(self):
         """Save and commit."""
         db.session.add(self)
