@@ -43,11 +43,10 @@ async def subscribe_to_queue(stan_client: stan.aio.client.Client,
     return subject
 
 
-async def helper_add_payment_to_queue(stan_client: stan.aio.client.Client,
-                                      subject: str,
-                                      payment_id: str,
-                                      status_code: str):
-    """Add a payment token to the Queue."""
-    payload = {'paymentToken': {'id': payment_id, 'statusCode': status_code}}
+async def helper_add_notification_to_queue(stan_client: stan.aio.client.Client,
+                                           subject: str,
+                                           notification_id: str):
+    """Add a notification id to the Queue."""
+    payload = notification_id
     await stan_client.publish(subject=subject,
                               payload=json.dumps(payload).encode('utf-8'))

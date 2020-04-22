@@ -1,4 +1,3 @@
-
 name: Auth Web DEV CD
 
 on:
@@ -12,59 +11,58 @@ env:
   TAG_NAME: dev
 
 jobs:
-  auth-web-dev:    
-      runs-on: ubuntu-latest
+  auth-web-dev:
+    runs-on: ubuntu-latest
 
-      strategy:
-          matrix:
-            node-version: [12.x]
-      steps:
-        - uses: actions/checkout@v2
-        - name: Install tools
-          run: |
-           ./scripts/install_tools.sh
-           oc version
-           op --version
-        - uses: actions/checkout@v2
-        - name: Use Node.js ${{ matrix.node-version }}
-          uses: actions/setup-node@v1
-          with:
-            node-version: ${{ matrix.node-version }}
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install tools
+        run: |
+          ./scripts/install_tools.sh
+          oc version
+          op --version
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
 
-        - name: Build image
-          run: docker build . --file Dockerfile --tag image 
-          working-directory: ./auth-web
-        
-        - name: Log into registry
-          run: echo "${{ secrets.OPENSHIFT_TOKEN }}" | docker login ${{ secrets.OPENSHIFT_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
-      
-        - name: Push image
-          working-directory: ./auth-web
-          run: |
-            IMAGE_ID=${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME
-            echo IMAGE_ID=$IMAGE_ID
-            # docker push $IMAGE_ID:latest
-            docker tag image $IMAGE_ID:latest
-            docker push $IMAGE_ID:latest
-        - name: Login Openshift and Tag image
-          working-directory: ./auth-web
-          run: |
-           oc ${{ secrets.oc_parameters }}
-           oc project ${{ secrets.OPENSHIFT_REPOSITORY_TOOLS }}
-           oc tag auth-web:latest $IMAGE_NAME:${TAG_NAME}
-           oc project ${{ secrets.OPENSHIFT_REPOSITORY_DEV }}     
-        - name: Rollout new deployment
-          working-directory: ./auth-web
-          run: |
-           oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -w    
-        - name: Rocket.Chat Notification
-          uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
-          if: always()
-          with:
-           type: ${{ job.status }}
-           job_name: "*Auth WEB Built and Deployed to ${{env.TAG_NAME}}*"
-           channel: "#relationship-developers"
-           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
-           commit: true
-           token: ${{ secrets.GITHUB_TOKEN }}   
-            
+      - name: Build image
+        run: docker build . --file Dockerfile --tag image
+        working-directory: ./auth-web
+
+      - name: Log into registry
+        run: echo "${{ secrets.OPENSHIFT_TOKEN }}" | docker login ${{ secrets.OPENSHIFT_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
+
+      - name: Push image
+        working-directory: ./auth-web
+        run: |
+          IMAGE_ID=${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME
+          echo IMAGE_ID=$IMAGE_ID
+          # docker push $IMAGE_ID:latest
+          docker tag image $IMAGE_ID:latest
+          docker push $IMAGE_ID:latest
+      - name: Login Openshift and Tag image
+        working-directory: ./auth-web
+        run: |
+          oc ${{ secrets.oc_parameters }}
+          oc project ${{ secrets.OPENSHIFT_REPOSITORY_TOOLS }}
+          oc tag auth-web:latest $IMAGE_NAME:${TAG_NAME}
+          oc project ${{ secrets.OPENSHIFT_REPOSITORY_DEV }}
+      - name: Rollout new deployment
+        working-directory: ./auth-web
+        run: |
+          oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -w
+      - name: Rocket.Chat Notification
+        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+        if: failure()
+        with:
+          type: ${{ job.status }}
+          job_name: "*Auth WEB Built and Deployed to ${{env.TAG_NAME}}*"
+          channel: "#relationship-developers"
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          commit: true
+          token: ${{ secrets.GITHUB_TOKEN }}
