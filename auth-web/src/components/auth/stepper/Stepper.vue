@@ -101,8 +101,9 @@ export default class Stepper extends Vue {
     this.currentStepNumber = Math.max(1, this.currentStepNumber - 1)
   }
 
-  private jumpToStep (index: number) {
+  private jumpToStep (index: number, useAlternateStep = false) {
     if (index > 0 && index <= this.steps.length) {
+      this.useAlternateStep = useAlternateStep && !!this.steps[index].alternate
       this.currentStepNumber = index
     }
   }
