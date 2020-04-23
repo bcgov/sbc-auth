@@ -148,10 +148,6 @@ export default class AccountCreatePremium extends Vue {
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private readonly setGrantAccess!: (grantAccess: boolean) => void
 
-  async mounted () {
-    // this.setCurrentOrganization(undefined)
-  }
-
   get grantAccessText () {
     return `I ,<strong>${this.currentUser?.fullName} </strong>, confirm that I am authorized to grant access to the account <strong>${this.currentOrganization?.bcolAccountDetails?.orgName}</strong>`
   }

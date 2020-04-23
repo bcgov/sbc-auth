@@ -1,9 +1,9 @@
 <template>
   <v-form ref="createAccountInfoForm">
     <div class="view-container">
-      <h1 class="mb-5">Account Settings</h1>
+      <h1 class="mb-8">Account Settings</h1>
       <v-alert type="error" v-show="errorMessage">{{ errorMessage }}</v-alert>
-      <h4 class="mb-5">Enter an Account Name</h4>
+      <h4 class="mb-2">Enter an Account Name</h4>
       <v-text-field
         filled
         label="Account Name"
@@ -55,6 +55,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
+import { Account } from '@/util/constants'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
 import OrgModule from '@/store/modules/org'
@@ -76,7 +77,7 @@ import { getModule } from 'vuex-module-decorators'
 export default class AccountCreateBasic extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
   private teamName: string = ''
-  private teamType: string = 'BASIC'
+  private teamType: string = Account.BASIC
   private errorMessage: string = ''
   private saving = false
   private readonly createOrg!: (
@@ -99,7 +100,7 @@ export default class AccountCreateBasic extends Vue {
     if (this.isFormValid()) {
       const createRequestBody: CreateRequestBody = {
         name: this.teamName,
-        typeCode: this.teamType === 'BASIC' ? 'IMPLICIT' : 'EXPLICIT'
+        typeCode: this.teamType === Account.BASIC ? Account.IMPLICIT : Account.EXPLICIT
       }
       try {
         this.saving = true

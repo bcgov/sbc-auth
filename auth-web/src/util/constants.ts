@@ -43,7 +43,9 @@ export enum Pages {
 export enum Account {
     ANONYMOUS = 'ANONYMOUS',
     PREMIUM = 'PREMIUM',
-    BASIC = 'BASIC'
+    BASIC = 'BASIC',
+    IMPLICIT = 'IMPLICIT', // To be removed later
+    EXPLICIT = 'EXPLICIT' // To be removed later
 }
 
 export enum IdpHint {

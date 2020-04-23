@@ -88,10 +88,7 @@ import { mapMutations } from 'vuex'
   }
 })
 export default class AccountTypeSelector extends Vue {
-  private readonly ACCOUNT_TYPE = {
-    BASIC: 'BASIC',
-    PREMIUM: 'PREMIUM'
-  }
+  private readonly ACCOUNT_TYPE = Account
   private selectedAccountType: string = ''
   @Prop() stepForward!: () => void
   private readonly setSelectedAccountType!: (selectedAccountType: Account) => void
