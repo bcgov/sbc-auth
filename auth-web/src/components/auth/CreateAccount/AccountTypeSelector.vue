@@ -111,8 +111,7 @@ export default class AccountTypeSelector extends Vue {
   }
 
   private cancel () {
-    // eslint-disable-next-line no-console
-    console.log('Cancel')
+    this.$router.push({ path: '/home' })
   }
 }
 </script>
