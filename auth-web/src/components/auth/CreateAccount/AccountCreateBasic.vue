@@ -1,5 +1,7 @@
 <template>
   <v-form ref="createAccountInfoForm">
+    <div class="view-container">
+      <h1 class="mb-5">Account Settings</h1>
     <v-alert type="error" v-show="errorMessage">{{errorMessage}}</v-alert>
     <v-text-field
       filled
@@ -36,19 +38,17 @@
         </v-btn>
       </v-col>
     </v-row>
+    </div>
   </v-form>
 </template>
 
 <script lang="ts">
 
-import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
 

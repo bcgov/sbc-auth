@@ -74,10 +74,10 @@
 
 <script lang="ts">
 
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { mapMutations, mapState } from 'vuex'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Account } from '@/util/constants'
 import { Organization } from '@/models/Organization'
+import { mapMutations } from 'vuex'
 
 @Component({
   components: {
@@ -106,7 +106,7 @@ export default class AccountTypeSelector extends Vue {
   }
 
   private goNext () {
-    // this.setCurrentOrganization(undefined)
+    // this.setCurrentOrganization(undefined)  //TODO not very sure if we shud reset the data or not
     this.stepForward()
   }
 
