@@ -163,11 +163,11 @@ export default class AccountCreatePremium extends Vue {
   }
 
   get grantAccessText () {
-    return `I ,<strong>${this.currentUser.fullName} </strong>, confirm that I am authorized to grant access to the account <strong>${this.currentOrganization.bcolAccountDetails.orgName}</strong>`
+    return `I ,<strong>${this.currentUser?.fullName} </strong>, confirm that I am authorized to grant access to the account <strong>${this.currentOrganization?.bcolAccountDetails?.orgName}</strong>`
   }
 
   get grantAccess () {
-    return this.currentOrganization.grantAccess
+    return this.currentOrganization?.grantAccess
   }
   set grantAccess (grantAccess:boolean) {
     this.setGrantAccess(grantAccess)
@@ -189,8 +189,7 @@ export default class AccountCreatePremium extends Vue {
     this.setCurrentOrganizationAddress(address)
   }
   private unlinkAccounts () {
-    // eslint-disable-next-line no-console
-    console.log('uni' + JSON.stringify(this.currentOrganization))
+    this.setCurrentOrganization(undefined)
   }
   private get linked () {
     return !!this.currentOrganization?.bcolAccountDetails

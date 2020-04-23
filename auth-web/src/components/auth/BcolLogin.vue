@@ -88,6 +88,11 @@ export default class BcolLogin extends Vue {
     value => !!value || 'Password is required'
   ]
 
+  mounted () {
+    this.username = ''
+    this.password = ''
+  }
+
   private async linkAccounts () {
     this.isLoading = true
     // Validate form, and then create an team with this user a member
