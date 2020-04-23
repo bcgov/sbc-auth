@@ -106,7 +106,7 @@ export default class AccountTypeSelector extends Vue {
   }
 
   private goNext () {
-    this.setCurrentOrganization(undefined)
+    // this.setCurrentOrganization(undefined)
     this.stepForward()
   }
 

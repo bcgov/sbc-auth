@@ -27,6 +27,7 @@ export interface Organization {
   address?: Address,
   bcolProfile?:BcolProfile
   bcolAccountDetails?:BcolAccountDetails
+  grantAccess?:boolean
 }
 
 export interface UpdateMemberPayload {

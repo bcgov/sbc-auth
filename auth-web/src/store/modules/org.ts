@@ -35,6 +35,11 @@ export default class OrgModule extends VuexModule {
   selectedAccountType:Account
 
   @Mutation
+  public setGrantAccess (grantAccess: boolean) {
+    this.currentOrganization.grantAccess = grantAccess
+  }
+
+  @Mutation
   public setSelectedAccountType (selectedAccountType: Account) {
     this.selectedAccountType = selectedAccountType
   }

@@ -7,7 +7,7 @@
         Online account.
       </p>
       <BcolLogin
-        v-on:account-link-successful="onLink"
+        @account-link-successful="onLink"
         v-show="!linked"
       ></BcolLogin>
       <v-container v-if="linked">
@@ -133,7 +133,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('user', ['userProfile', 'currentUser'])
   },
   methods: {
-    ...mapMutations('org', ['setCurrentOrganization', 'setCurrentOrganizationAddress']),
+    ...mapMutations('org', ['setCurrentOrganization', 'setCurrentOrganizationAddress', 'setGrantAccess']),
     ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization', ''])
   }
 })
@@ -150,15 +150,24 @@ export default class AccountCreatePremium extends Vue {
   private readonly currentUser!: KCUserProfile
   @Prop() stepForward!: () => void
   @Prop() stepBack!: () => void
-  private grantAccess: boolean = false
-  private grantAccessText: string = ''
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
+  private readonly setGrantAccess!: (grantAccess:boolean) => void
 
   async mounted () {
-    this.setCurrentOrganization(undefined)
+    // this.setCurrentOrganization(undefined)
   }
 
+  get grantAccessText () {
+    return `I ,<strong>${this.currentUser.fullName} </strong>, confirm that I am authorized to grant access to the account <strong>${this.currentOrganization.bcolAccountDetails.orgName}</strong>`
+  }
+
+  get grantAccess () {
+    return this.currentOrganization.grantAccess
+  }
+  set grantAccess (grantAccess:boolean) {
+    this.setGrantAccess(grantAccess)
+  }
   $refs: {
     createAccountInfoForm: HTMLFormElement
   }
@@ -215,16 +224,14 @@ export default class AccountCreatePremium extends Vue {
   }
 
   private onLink (details: { bcolProfile: BcolProfile, bcolAccountDetails: BcolAccountDetails }) {
-    this.grantAccessText = `I ,<strong>${this.currentUser.fullName} </strong>, confirm that I am authorized to grant access to the account <strong>${details.bcolAccountDetails.orgName}</strong>`
-    if (!this.currentOrganization) {
-      var org: Organization = {
-        name: details.bcolAccountDetails.orgName,
-        accessType: Account.PREMIUM,
-        bcolProfile: details.bcolProfile,
-        bcolAccountDetails: details.bcolAccountDetails
-      }
-      this.setCurrentOrganization(org)
+    var org: Organization = {
+      name: details.bcolAccountDetails.orgName,
+      accessType: Account.PREMIUM,
+      bcolProfile: details.bcolProfile,
+      bcolAccountDetails: details.bcolAccountDetails,
+      grantAccess: false
     }
+    this.setCurrentOrganization(org)
   }
   private cancel () {
     if (this.stepBack) {
