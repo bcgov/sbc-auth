@@ -71,8 +71,8 @@ import { mapActions, mapState } from 'vuex'
   }
 })
 export default class BcolLogin extends Vue {
-  private username = ''
-  private password = ''
+  private username: string = ''
+  private password: string = ''
   private errorMessage: string = ''
   private isLoading: boolean = false
   private readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
@@ -87,11 +87,6 @@ export default class BcolLogin extends Vue {
   private passwordRules = [
     value => !!value || 'Password is required'
   ]
-
-  mounted () {
-    this.username = ''
-    this.password = ''
-  }
 
   private async linkAccounts () {
     this.isLoading = true

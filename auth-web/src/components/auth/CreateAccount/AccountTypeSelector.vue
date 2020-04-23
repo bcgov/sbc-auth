@@ -89,10 +89,7 @@ import { mapMutations } from 'vuex'
   }
 })
 export default class AccountTypeSelector extends Mixins(Steppable) {
-  private readonly ACCOUNT_TYPE = {
-    BASIC: 'BASIC',
-    PREMIUM: 'PREMIUM'
-  }
+  private readonly ACCOUNT_TYPE = Account
   private selectedAccountType: string = ''
   private readonly setSelectedAccountType!: (selectedAccountType: Account) => void
   private readonly setCurrentOrganization!: (organization: Organization) => void
