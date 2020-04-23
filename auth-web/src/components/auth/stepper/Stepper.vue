@@ -47,6 +47,7 @@ export interface StepConfiguration {
 })
 export default class Stepper extends Vue {
   @Prop({ default: null }) stepperConfiguration!: StepConfiguration[]
+  @Prop({ default: '/business' }) redirectWhenDone!: string
   private steps: StepConfiguration[]
   private currentStepNumber = 1
   private useAlternateStep = false
@@ -90,7 +91,7 @@ export default class Stepper extends Vue {
 
   private stepForward (useAlternateStep = false) {
     if (this.currentStepNumber >= this.steps.length) {
-      // TODO, decide where to route to after account creation is done
+      this.$router.push(this.redirectWhenDone)
     } else {
       this.useAlternateStep = useAlternateStep && !!this.steps[this.currentStepNumber].alternate
       this.currentStepNumber++
@@ -98,6 +99,7 @@ export default class Stepper extends Vue {
   }
 
   private stepBack () {
+    this.useAlternateStep = false
     this.currentStepNumber = Math.max(1, this.currentStepNumber - 1)
   }
 

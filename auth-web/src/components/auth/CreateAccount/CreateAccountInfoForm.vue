@@ -8,7 +8,7 @@
 <script lang="ts">
 
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import { Account } from '@/util/constants'
@@ -16,6 +16,7 @@ import AccountBasicCreate from '@/components/auth/CreateAccount/AccountCreateBas
 import AccountPremiumCreate from '@/components/auth/CreateAccount/AccountCreatePremium.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import OrgModule from '@/store/modules/org'
+import Steppable from '@/components/auth/stepper/Steppable.vue'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -31,7 +32,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization'])
   }
 })
-export default class CreateAccountInfoForm extends Vue {
+export default class CreateAccountInfoForm extends Mixins(Steppable) {
     private orgStore = getModule(OrgModule, this.$store)
     private username = ''
     private password = ''
@@ -43,8 +44,6 @@ export default class CreateAccountInfoForm extends Vue {
     private readonly currentOrganization!: Organization
     private readonly currentUser!: KCUserProfile
     private readonly selectedAccountType!: Account
-    @Prop() stepForward!: () => void
-    @Prop() stepBack!: () => void
 
     $refs: {
       createAccountInfoForm: HTMLFormElement
