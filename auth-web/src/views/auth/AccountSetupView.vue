@@ -19,6 +19,7 @@ import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/CreateAccountInfoForm.vue'
+import HomeView from '@/views/auth/HomeView.vue'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
 import { Organization } from '@/models/Organization'
 import { RouteConfig } from 'vue-router'
@@ -31,6 +32,7 @@ import { mount } from '@vue/test-utils'
 
 @Component({
   components: {
+    HomeView,
     CreateAccountInfoForm,
     UserProfileForm,
     StepperStub,
@@ -48,7 +50,12 @@ export default class AccountSetupView extends Vue {
       {
         title: 'Account Settings',
         component: CreateAccountInfoForm,
-        componentProps: {}
+        componentProps: {},
+        alternate: {
+          title: 'Home View',
+          component: HomeView,
+          componentProps: {}
+        }
       },
       {
         title: 'User Profile',
