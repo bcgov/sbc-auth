@@ -7,7 +7,7 @@
                 filled
                 v-on:change="emitAddress()"
                 label="Street Address"
-                v-model.trim="address.line1"
+                v-model.trim="address.street"
                 req
         >
         </v-text-field>
@@ -28,7 +28,7 @@
         <v-text-field
                 filled
                 label="Province/Region/State"
-                v-model.trim="address.province"
+                v-model.trim="address.region"
                 v-on:change="emitAddress()"
                 req
         >
@@ -72,7 +72,7 @@ export default class BaseAddress extends Vue {
   private password = ''
   private errorMessage: string = ''
   @Prop() inputAddress: Address
-  private address:Address = { line1: '', city: '', country: 'Canada', postalCode: '', province: '', line2: '' } // TODO probably dont need this intialisation
+  private address:Address = { streetAdditional: '', city: '', country: 'Canada', postalCode: '', region: '', street: '' } // TODO probably dont need this intialisation
 
   mounted () {
     if (this.inputAddress) {

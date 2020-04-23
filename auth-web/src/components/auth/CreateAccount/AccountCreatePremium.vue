@@ -79,7 +79,7 @@
             Back
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn large color="primary" :disabled="!grantAccess">
+          <v-btn large color="primary" :disabled="!grantAccess" @click="save">
             Next
             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
           </v-btn>
@@ -168,7 +168,35 @@ export default class AccountCreatePremium extends Vue {
     return !!this.currentOrganization?.bcolAccountDetails
   }
   private updateAddress (address:Address) {
+    address.country = 'CA' // TODO change backend to accept full character
     this.setCurrentOrganizationAddress(address)
+  }
+  private async save () {
+    const createRequestBody: CreateRequestBody = {
+      name: this.currentOrganization.name,
+      bcOnlineCredential: this.currentOrganization.bcolProfile,
+      mailingAddress: this.currentOrganization.bcolAccountDetails.address
+    }
+    try {
+      this.saving = true
+      const organization = await this.createOrg(createRequestBody)
+    } catch (err) {
+      debugger
+      switch (err.response.status) {
+        case 409:
+          this.errorMessage = 'An account with this name already exists. Try a different account name.'
+          break
+        case 400:
+          if (err.response.data.code === 'MAX_NUMBER_OF_ORGS_LIMIT') {
+            this.errorMessage = 'Maximum number of accounts reached'
+          } else {
+            this.errorMessage = 'Invalid account name'
+          }
+          break
+        default:
+          this.errorMessage = 'An error occurred while attempting to create your account.'
+      }
+    }
   }
 
   private onLink (details: { bcolProfile: BcolProfile, bcolAccountDetails: BcolAccountDetails }) {

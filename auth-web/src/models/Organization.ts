@@ -7,6 +7,8 @@ import { User } from '@/models/user'
 export interface CreateRequestBody {
   name: string,
   typeCode?: string
+  bcOnlineCredential?:BcolProfile
+  mailingAddress?:Address
 }
 
 export interface Organizations
