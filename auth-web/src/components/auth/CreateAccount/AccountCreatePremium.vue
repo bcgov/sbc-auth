@@ -6,10 +6,7 @@
         You must be the Prime Contact to link this account with your existing BC
         Online account.
       </p>
-      <BcolLogin
-        @account-link-successful="onLink"
-        v-show="!linked"
-      ></BcolLogin>
+      <BcolLogin @account-link-successful="onLink" v-show="!linked"></BcolLogin>
       <v-container v-if="linked">
         <v-alert v-model="linked" dark color="info" icon="mdi-check">
           <v-row>
@@ -19,8 +16,10 @@
                 <div class="bcol-acc-label">
                   {{ currentOrganization.name }}
                 </div>
-                Account No: {{ currentOrganization.bcolAccountDetails.accountNumber }} | Authorizing
-                User ID: {{ currentOrganization.bcolAccountDetails.userId }}
+                Account No:
+                {{ currentOrganization.bcolAccountDetails.accountNumber }} |
+                Authorizing User ID:
+                {{ currentOrganization.bcolAccountDetails.userId }}
               </div>
             </v-col>
             <v-col cols="4" align-self="center">
@@ -67,40 +66,25 @@
               </v-text-field>
             </v-col>
           </v-row>
-          <BaseAddress :inputAddress="address" @address-update="updateAddress"> </BaseAddress>
+          <BaseAddress :inputAddress="address" @address-update="updateAddress">
+          </BaseAddress>
         </template>
-        <v-alert type="error" class="mb-6"
-                 v-show="errorMessage">
-          {{errorMessage}}
+        <v-alert type="error" class="mb-6" v-show="errorMessage">
+          {{ errorMessage }}
         </v-alert>
       </v-container>
       <v-row>
         <v-col cols="12" class="d-inline-flex">
-          <v-btn
-            large
-            color="grey lighten-3"
-            class="mx-1"
-            @click="goBack"
-          >
+          <v-btn large color="grey lighten-3" class="mx-1" @click="goBack">
             <v-icon left class="mr-1">mdi-arrow-left</v-icon>
             Back
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn
-            large
-            color="primary"
-            :disabled="!grantAccess"
-            @click="save"
-          >
+          <v-btn large color="primary" :disabled="!grantAccess" @click="save">
             Next
             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
           </v-btn>
-          <v-btn
-            large
-            color="grey lighten-3"
-            class="mx-5"
-            @click="cancel"
-          >
+          <v-btn large color="grey lighten-3" class="mx-5" @click="cancel">
             Cancel
           </v-btn>
         </v-col>
@@ -110,14 +94,9 @@
 </template>
 
 <script lang="ts">
-
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import {
-  CreateRequestBody,
-  Member,
-  Organization
-} from '@/models/Organization'
+import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { Account } from '@/util/constants'
 import { Address } from '@/models/address'
@@ -137,8 +116,17 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('user', ['userProfile', 'currentUser'])
   },
   methods: {
-    ...mapMutations('org', ['setCurrentOrganization', 'setCurrentOrganizationAddress', 'setGrantAccess']),
-    ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization', ''])
+    ...mapMutations('org', [
+      'setCurrentOrganization',
+      'setCurrentOrganizationAddress',
+      'setGrantAccess'
+    ]),
+    ...mapActions('org', [
+      'createOrg',
+      'syncMembership',
+      'syncOrganization',
+      ''
+    ])
   }
 })
 export default class AccountCreatePremium extends Vue {
@@ -147,7 +135,9 @@ export default class AccountCreatePremium extends Vue {
   private password = ''
   private errorMessage: string = ''
   private saving = false
-  private readonly createOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
+  private readonly createOrg!: (
+    requestBody: CreateRequestBody
+  ) => Promise<Organization>
   private readonly syncMembership!: (orgId: number) => Promise<Member>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
   private readonly currentOrganization!: Organization
@@ -156,7 +146,7 @@ export default class AccountCreatePremium extends Vue {
   @Prop() stepBack!: () => void
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
-  private readonly setGrantAccess!: (grantAccess:boolean) => void
+  private readonly setGrantAccess!: (grantAccess: boolean) => void
 
   async mounted () {
     // this.setCurrentOrganization(undefined)
@@ -169,7 +159,7 @@ export default class AccountCreatePremium extends Vue {
   get grantAccess () {
     return this.currentOrganization?.grantAccess
   }
-  set grantAccess (grantAccess:boolean) {
+  set grantAccess (grantAccess: boolean) {
     this.setGrantAccess(grantAccess)
   }
   $refs: {
@@ -194,7 +184,7 @@ export default class AccountCreatePremium extends Vue {
   private get linked () {
     return !!this.currentOrganization?.bcolAccountDetails
   }
-  private updateAddress (address:Address) {
+  private updateAddress (address: Address) {
     this.address = address
   }
   private async save () {
@@ -208,7 +198,8 @@ export default class AccountCreatePremium extends Vue {
       const organization = await this.createOrg(createRequestBody)
       this.goNext()
     } catch (err) {
-      this.errorMessage = 'An error occurred while attempting to create your account.'
+      this.errorMessage =
+        'An error occurred while attempting to create your account.'
       switch (err.response.status) {
         case 409:
           this.errorMessage = err.response.data.message
@@ -217,7 +208,10 @@ export default class AccountCreatePremium extends Vue {
     }
   }
 
-  private onLink (details: { bcolProfile: BcolProfile, bcolAccountDetails: BcolAccountDetails }) {
+  private onLink (details: {
+    bcolProfile: BcolProfile
+    bcolAccountDetails: BcolAccountDetails
+  }) {
     var org: Organization = {
       name: details.bcolAccountDetails.orgName,
       accessType: Account.PREMIUM,
