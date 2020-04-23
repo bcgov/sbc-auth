@@ -52,13 +52,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import { Account } from '@/util/constants'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
 import OrgModule from '@/store/modules/org'
+import Steppable from '@/components/auth/stepper/Steppable.vue'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -74,7 +75,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization'])
   }
 })
-export default class AccountCreateBasic extends Vue {
+export default class AccountCreateBasic extends Mixins(Steppable) {
   private orgStore = getModule(OrgModule, this.$store)
   private teamName: string = ''
   private teamType: string = Account.BASIC
@@ -86,8 +87,6 @@ export default class AccountCreateBasic extends Vue {
   private readonly syncMembership!: (orgId: number) => Promise<Member>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
   private readonly currentOrganization!: Organization
-  @Prop() stepForward!: () => void
-  @Prop() stepBack!: () => void
   $refs: {
     createAccountInfoForm: HTMLFormElement
   }

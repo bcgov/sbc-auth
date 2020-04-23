@@ -74,9 +74,10 @@
 
 <script lang="ts">
 
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { Account } from '@/util/constants'
 import { Organization } from '@/models/Organization'
+import Steppable from '@/components/auth/stepper/Steppable.vue'
 import { mapMutations } from 'vuex'
 
 @Component({
@@ -87,10 +88,9 @@ import { mapMutations } from 'vuex'
     ...mapMutations('org', ['setSelectedAccountType', 'setCurrentOrganization'])
   }
 })
-export default class AccountTypeSelector extends Vue {
+export default class AccountTypeSelector extends Mixins(Steppable) {
   private readonly ACCOUNT_TYPE = Account
   private selectedAccountType: string = ''
-  @Prop() stepForward!: () => void
   private readonly setSelectedAccountType!: (selectedAccountType: Account) => void
   private readonly setCurrentOrganization!: (organization: Organization) => void
 
@@ -103,8 +103,7 @@ export default class AccountTypeSelector extends Vue {
   }
 
   private goNext () {
-    // this.setCurrentOrganization(undefined)  //TODO not very sure if we shud reset the data or not
-    this.stepForward()
+    this.stepForward(this.selectedAccountType === this.ACCOUNT_TYPE.PREMIUM)
   }
 
   private cancel () {

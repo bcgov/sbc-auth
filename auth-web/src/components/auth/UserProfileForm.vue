@@ -154,6 +154,7 @@ import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
+import Steppable from '@/components/auth/stepper/Steppable.vue'
 import TermsOfUseDialog from '@/components/auth/TermsOfUseDialog.vue'
 import UserModule from '@/store/modules/user'
 import UserService from '@/services/user.services'
@@ -182,7 +183,7 @@ import { mask } from 'vue-the-mask'
     )
   }
 })
-export default class UserProfileForm extends Mixins(NextPageMixin) {
+export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private readonly createUserContact!: (contact: Contact) => Contact
     private readonly updateUserContact!: (contact: Contact) => Contact
     private readonly saveUserTerms!: () => Promise<User>
@@ -199,8 +200,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     private deactivateProfileDialog = false
     private isDeactivating = false
     @Prop() token: string
-    @Prop() stepForward!: () => void
-    @Prop() stepBack!: () => void
 
     $refs: {
       deactivateUserConfirmationDialog: ModalDialog,
