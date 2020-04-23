@@ -142,8 +142,7 @@ export default class OrgModule extends VuexModule {
 
   @Action({ rawError: true })
   public async validateBcolAccount (bcolProfile: BcolProfile): Promise<BcolAccountDetails> {
-    const response = await BcolService.validateBCOL(bcolProfile)
-    return response
+    return BcolService.validateBCOL(bcolProfile)
   }
 
   @Action({ rawError: true })
