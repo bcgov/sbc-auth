@@ -69,6 +69,10 @@
           </v-row>
           <BaseAddress :inputAddress="address" @address-update="updateAddress"> </BaseAddress>
         </template>
+        <v-alert type="error" class="mb-6"
+                 v-show="errorMessage">
+          {{errorMessage}}
+        </v-alert>
       </v-container>
       <v-row>
         <v-col cols="12" class="d-inline-flex">
@@ -205,20 +209,11 @@ export default class AccountCreatePremium extends Vue {
       const organization = await this.createOrg(createRequestBody)
       this.goNext()
     } catch (err) {
-      debugger
+      this.errorMessage = 'An error occurred while attempting to create your account.'
       switch (err.response.status) {
         case 409:
-          this.errorMessage = 'An account with this name already exists. Try a different account name.'
+          this.errorMessage = err.response.data.message
           break
-        case 400:
-          if (err.response.data.code === 'MAX_NUMBER_OF_ORGS_LIMIT') {
-            this.errorMessage = 'Maximum number of accounts reached'
-          } else {
-            this.errorMessage = 'Invalid account name'
-          }
-          break
-        default:
-          this.errorMessage = 'An error occurred while attempting to create your account.'
       }
     }
   }
