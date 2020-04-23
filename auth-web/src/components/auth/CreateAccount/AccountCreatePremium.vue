@@ -86,7 +86,7 @@
             large
             color="primary"
             :disabled="!grantAccess"
-            @click="goNext"
+            @click="save"
           >
             Next
             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
@@ -194,6 +194,7 @@ export default class AccountCreatePremium extends Vue {
     try {
       this.saving = true
       const organization = await this.createOrg(createRequestBody)
+      this.goNext()
     } catch (err) {
       debugger
       switch (err.response.status) {
