@@ -1,6 +1,5 @@
 <template>
   <v-form ref="createAccountInfoForm" lazy-validation>
-    <pre v-if="debug">{{currentOrganization|json}}</pre>
     <div class="view-container">
       <h1 class="mb-5">Account Settings</h1>
       <p class="intro-text mb-8">
@@ -61,7 +60,6 @@
                 filled
                 label="Account Name"
                 v-model.trim="currentOrganization.name"
-                :rules="accountNameRules"
                 persistent-hint
                 disabled
                 data-test="account-name"
@@ -69,21 +67,36 @@
               </v-text-field>
             </v-col>
           </v-row>
-          <BaseAddress :inputAddress="address" v-on:adress-update="updateAddress"> </BaseAddress>
+          <BaseAddress :inputAddress="address" @address-update="updateAddress"> </BaseAddress>
         </template>
       </v-container>
       <v-row>
         <v-col cols="12" class="d-inline-flex">
-          <v-btn large color="grey lighten-3" class="mx-1">
+          <v-btn
+            large
+            color="grey lighten-3"
+            class="mx-1"
+            @click="goBack"
+          >
             <v-icon left class="mr-1">mdi-arrow-left</v-icon>
             Back
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn large color="primary" :disabled="!grantAccess" @click="save">
+          <v-btn
+            large
+            color="primary"
+            :disabled="!grantAccess"
+            @click="goNext"
+          >
             Next
             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
           </v-btn>
-          <v-btn large color="grey lighten-3" class="mx-5">
+          <v-btn
+            large
+            color="grey lighten-3"
+            class="mx-5"
+            @click="cancel"
+          >
             Cancel
           </v-btn>
         </v-col>
@@ -138,10 +151,9 @@ export default class AccountCreatePremium extends Vue {
   @Prop() stepForward!: () => void
   @Prop() stepBack!: () => void
   private grantAccess: boolean = false
-  private grantAccessText: string
+  private grantAccessText: string = ''
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
-  private debug = true
 
   async mounted () {
     this.setCurrentOrganization(undefined)
@@ -160,6 +172,9 @@ export default class AccountCreatePremium extends Vue {
   private get address () {
     return this.currentOrganization.bcolAccountDetails.address
   }
+  private set address (address: Address) {
+    this.setCurrentOrganizationAddress(address)
+  }
   private unlinkAccounts () {
     // eslint-disable-next-line no-console
     console.log('uni' + JSON.stringify(this.currentOrganization))
@@ -168,8 +183,7 @@ export default class AccountCreatePremium extends Vue {
     return !!this.currentOrganization?.bcolAccountDetails
   }
   private updateAddress (address:Address) {
-    address.country = 'CA' // TODO change backend to accept full character
-    this.setCurrentOrganizationAddress(address)
+    this.address = address
   }
   private async save () {
     const createRequestBody: CreateRequestBody = {
@@ -217,6 +231,14 @@ export default class AccountCreatePremium extends Vue {
     } else {
       this.$router.push({ path: '/home' })
     }
+  }
+
+  private goBack () {
+    this.stepBack()
+  }
+
+  private goNext () {
+    this.stepForward()
   }
 
   private redirectToNext (organization?: Organization) {

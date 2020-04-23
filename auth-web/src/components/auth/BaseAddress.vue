@@ -5,9 +5,10 @@
       <v-col cols="12" class="py-0 mb-4">
         <v-text-field
                 filled
-                v-on:change="emitAddress()"
+                @change="emitAddress"
                 label="Street Address"
                 v-model.trim="address.street"
+                :rules="rules.streetAddress"
                 req
         >
         </v-text-field>
@@ -18,8 +19,9 @@
         <v-text-field
                 filled
                 label="City"
-                v-on:change="emitAddress()"
+                @change="emitAddress"
                 v-model.trim="address.city"
+                :rules="rules.city"
                 req
         >
         </v-text-field>
@@ -29,7 +31,8 @@
                 filled
                 label="Province/Region/State"
                 v-model.trim="address.region"
-                v-on:change="emitAddress()"
+                @change="emitAddress"
+                :rules="rules.province"
                 req
         >
         </v-text-field>
@@ -39,7 +42,8 @@
                 filled
                 label="Postal Code"
                 v-model.trim="address.postalCode"
-                v-on:change="emitAddress()"
+                @change="emitAddress"
+                :rules="rules.postalCode"
                 req
         >
         </v-text-field>
@@ -51,7 +55,8 @@
                 filled
                 label="Country"
                 v-model.trim="address.country"
-                v-on:change="emitAddress()"
+                @change="emitAddress"
+                :rules="rules.country"
                 req
         >
         </v-text-field>
@@ -74,13 +79,21 @@ export default class BaseAddress extends Vue {
   @Prop() inputAddress: Address
   private address:Address = { streetAdditional: '', city: '', country: 'Canada', postalCode: '', region: '', street: '' } // TODO probably dont need this intialisation
 
+  private readonly rules = {
+    streetAddress: [v => !!v || 'Street address is required'],
+    city: [v => !!v || 'City is required'],
+    province: [v => !!v || 'Province is required'],
+    postalCode: [v => !!v || 'Postal Code is required'],
+    country: [v => !!v || 'Country is required']
+  }
+
   mounted () {
     if (this.inputAddress) {
-      this.address = this.inputAddress
+      this.address = { ...this.inputAddress }
     }
   }
 
-  @Emit('adress-update')
+  @Emit('address-update')
   emitAddress () {
     return this.address
   }

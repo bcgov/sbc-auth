@@ -1,33 +1,34 @@
 <template>
   <v-form ref="createAccountInfoForm">
     <v-alert type="error" v-show="errorMessage">{{errorMessage}}</v-alert>
-
-    <v-text-field filled
-                  label="Account Name"
-                  v-model.trim="teamName"
-                  :rules="teamNameRules"
-                  persistent-hint
-                  :disabled="saving"
-                  :hint="teamType === 'BASIC' ? 'Example: Your Business Name' : 'Example: Your Management Company or Law Firm Name'"/>
+    <v-text-field
+      filled
+      label="Account Name"
+      v-model.trim="teamName"
+      :rules="teamNameRules"
+      persistent-hint
+      :disabled="saving"
+      :hint="teamType === 'BASIC' ? 'Example: Your Business Name' : 'Example: Your Management Company or Law Firm Name'"/>
     <v-row>
       <v-col cols="12" class="d-inline-flex">
         <v-btn
-                large
-                color="grey lighten-3"
-                class="mx-1"
+          large
+          color="grey lighten-3"
+          class="mx-1"
+          @click="goBack"
         >
           <v-icon left class="mr-1">mdi-arrow-left</v-icon>
           Back
         </v-btn>
         <v-spacer></v-spacer>
         <v-btn
-                large
-                color="primary"
-                class="mr-2"
-                :loading = "saving"
-                :disabled="!isFormValid() || saving"
-                @click="save"
-                data-test="save-button">
+          large
+          color="primary"
+          class="mr-2"
+          :loading = "saving"
+          :disabled="!isFormValid() || saving"
+          @click="save"
+          data-test="save-button">
           Save and Continue
         </v-btn>
         <v-btn large depressed color="default" :disable="saving" @click="cancel" data-test="cancel-button">
@@ -129,6 +130,14 @@ export default class AccountCreateBasic extends Vue {
   }
   private redirectToNext (organization?: Organization) {
     this.$router.push({ path: `/account/${organization.id}/` })
+  }
+
+  private goBack () {
+    this.stepBack()
+  }
+
+  private goNext () {
+    this.stepForward()
   }
 }
 </script>
