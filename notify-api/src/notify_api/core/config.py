@@ -59,11 +59,12 @@ MAIL_FROM_ID = CONFIG('MAIL_FROM_ID', cast=str, default='abcabc@abcdabcd.com')
 # Sentry Config
 SENTRY_DSN = CONFIG('SENTRY_DSN', cast=str, default=None)
 
-NATS_CLIENT_NAME = CONFIG('NATS_CLIENT_NAME', cast=str, default='entity.notifiation.worker')
+NATS_CLIENT_NAME = CONFIG('NATS_CLIENT_NAME', cast=str, default='notifiations.worker')
 NATS_CLUSTER_ID = CONFIG('NATS_CLUSTER_ID', cast=str, default='test-cluster')
-NATS_QUEUE = CONFIG('NATS_QUEUE', cast=str, default='notifiation-worker')
+NATS_QUEUE = CONFIG('NATS_QUEUE', cast=str, default='notifiations-worker')
 NATS_SERVERS = CONFIG('NATS_SERVERS', cast=str, default='nats://127.0.0.1:4222')
-NATS_SUBJECT = CONFIG('NATS_SUBJECT', cast=str, default='entity.notifiations')
+NATS_SUBJECT = CONFIG('NATS_SUBJECT', cast=str, default='notifiations')
+NATS_FILER_SUBJECT = CONFIG('NATS_FILER_SUBJECT', cast=str, default='notifications.filer')
 
 NATS_CONNECTION_OPTIONS = {
     'servers': NATS_SERVERS.split(','),
@@ -81,6 +82,10 @@ SUBSCRIPTION_OPTIONS = {
     'subject': NATS_SUBJECT,
     'queue': NATS_QUEUE,
     'durable_name': NATS_QUEUE + '_durable',
+}
+
+FILER_PUBLISH_OPTIONS = {
+    'subject': CONFIG('NATS_FILER_SUBJECT', cast=str, default='notifications.filer'),
 }
 
 DELIVERY_FAILURE_RETRY_TIME_FRAME = CONFIG('DELIVERY_FAILURE_RETRY_TIME_FRAME', cast=int, default=2)
