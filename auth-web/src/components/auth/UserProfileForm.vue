@@ -94,13 +94,6 @@
     </v-row>
 
     <v-row>
-      <v-col cols="12" class="pt-0 pb-0">
-        <TermsOfUseDialog @terms-updated="updateTerms($event)"
-        />
-      </v-col>
-    </v-row>
-
-    <v-row>
       <v-col cols="12" class="form__btns pt-5">
         <v-btn large depressed color="default" class="deactivate-btn" v-show="editing" @click="$refs.deactivateUserConfirmationDialog.open()">Deactivate my profile</v-btn>
         <!-- Modal for deactivation confirmation -->
@@ -147,26 +140,23 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { User, UserTerms } from '@/models/user'
 import { Contact } from '@/models/contact'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import OrgModule from '@/store/modules/org'
-import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
-import TermsOfUseDialog from '@/components/auth/TermsOfUseDialog.vue'
+import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
 import UserService from '@/services/user.services'
 import configHelper from '@/util/config-helper'
 import { getModule } from 'vuex-module-decorators'
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import { mask } from 'vue-the-mask'
+import { Organization } from '@/models/Organization'
 
 @Component({
   components: {
-    ModalDialog,
-    TermsOfUseDialog
+    ModalDialog
   },
   directives: {
     mask
@@ -176,9 +166,7 @@ import { mask } from 'vue-the-mask'
       [
         'createUserContact',
         'updateUserContact',
-        'saveUserTerms',
-        'getUserProfile',
-        'updateCurrentUserTerms'
+        'getUserProfile'
       ]
     )
   }
@@ -186,9 +174,7 @@ import { mask } from 'vue-the-mask'
 export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private readonly createUserContact!: (contact: Contact) => Contact
     private readonly updateUserContact!: (contact: Contact) => Contact
-    private readonly saveUserTerms!: () => Promise<User>
     private readonly getUserProfile!: (identifer: string) => User
-    private readonly updateCurrentUserTerms!: (UserTerms) => void
     private firstName = ''
     private lastName = ''
     private emailAddress = ''
@@ -230,16 +216,13 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private isFormValid (): boolean {
       return this.$refs.form &&
         this.$refs.form.validate() &&
-        this.confirmedEmailAddress === this.emailAddress &&
-        this.userProfile.userTerms &&
-        this.userProfile.userTerms.isTermsOfUseAccepted
+        this.confirmedEmailAddress === this.emailAddress
     }
 
     private async mounted () {
       if (!this.userProfile) {
         await this.getUserProfile('@me')
       }
-
       this.firstName = this.userProfile?.firstname
       this.lastName = this.userProfile?.lastname
       if (this.userContact) {
@@ -250,13 +233,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       }
     }
 
-    private async updateTerms (event) {
-      await this.updateCurrentUserTerms({
-        termsOfUseAcceptedVersion: event.termsVersion,
-        isTermsOfUseAccepted: event.isTermsAccepted
-      })
-    }
-
     private async save () {
       if (this.isFormValid()) {
         const contact = {
@@ -265,10 +241,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
           phoneExtension: this.extension
         }
         if (!this.editing) {
-          await Promise.all([
-            await this.createUserContact(contact),
-            await this.saveUserTerms()
-          ])
+          await this.createUserContact(contact)
         } else {
           await this.updateUserContact(contact)
         }
@@ -279,12 +252,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
           this.$router.push('/confirmtoken/' + this.token)
           return
         }
-
-        if (!this.stepForward) {
-          this.redirectToNext()
-        } else {
-          this.stepForward()
-        }
+        this.redirectToNext()
       }
     }
 

@@ -52,14 +52,17 @@
 </template>
 
 <script lang="ts">
+
+import { Account, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
-import { Account } from '@/util/constants'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
+import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
+import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -104,6 +107,16 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
       try {
         this.saving = true
         const organization = await this.createOrg(createRequestBody)
+        const usersettings:UserSettings = {
+          id: organization.id.toString(),
+          label: organization.name,
+          type: 'ACCOUNT',
+          urlorigin: '',
+          urlpath: `/account/${organization.id}/settings`
+
+        }
+        ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify(usersettings))
+
         await this.syncOrganization(organization.id)
         await this.syncMembership(organization.id)
         this.$store.commit('updateHeader')
