@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <p>There is no cost to create a BC Registries account. You only pay for the services and products you purchase.</p>
+    <p class="mb-7">There is no cost to create a BC Registries account. You only pay for the services and products you purchase.</p>
     <v-row>
       <v-col
         class="d-flex align-stretch"
@@ -59,9 +59,9 @@
     <v-row justify="end">
       <v-col
         cols="12"
-        class="text-right"
+        class="text-right mt-6"
       >
-        <v-btn class="mr-3" large color="primary" @click="goNext" :disabled='!selectedAccountType'>
+        <v-btn class="mr-3" depressed large color="primary" @click="goNext" :disabled='!selectedAccountType'>
           Next
         </v-btn>
         <v-btn large depressed color="default" @click="cancel">
