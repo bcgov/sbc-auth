@@ -1,7 +1,6 @@
 <template>
-  <v-form ref="createAccountInfoForm">
-    <div class="view-container">
-      <h1 class="mb-8">Account Settings</h1>
+  <v-container>
+    <v-form ref="createAccountInfoForm" class="mt-8">
       <v-alert type="error" v-show="errorMessage">{{ errorMessage }}</v-alert>
       <h4 class="mb-2">Enter an Account Name</h4>
       <v-text-field
@@ -19,7 +18,7 @@
       />
       <v-row>
         <v-col cols="12" class="d-inline-flex">
-          <v-btn large color="grey lighten-3" class="mx-1" @click="goBack">
+          <v-btn large depressed color="grey lighten-3" class="mx-1" @click="goBack">
             <v-icon left class="mr-1">mdi-arrow-left</v-icon>
             Back
           </v-btn>
@@ -31,6 +30,7 @@
             :loading="saving"
             :disabled="!isFormValid() || saving"
             @click="save"
+            depressed
             data-test="save-button"
           >
             Save and Continue
@@ -47,8 +47,8 @@
           </v-btn>
         </v-col>
       </v-row>
-    </div>
-  </v-form>
+    </v-form>
+  </v-container>
 </template>
 
 <script lang="ts">

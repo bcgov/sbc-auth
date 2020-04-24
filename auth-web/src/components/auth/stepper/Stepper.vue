@@ -1,6 +1,6 @@
 <template>
   <v-stepper v-model="currentStepNumber">
-    <v-row>
+    <v-row class="mx-0">
       <v-col class="stepper-menu" :cols="2">
         <v-stepper-step
           v-for="step in steps"
@@ -9,18 +9,20 @@
           :step="getStepIndex(step)"
         >{{ getStepTitle(step) }}</v-stepper-step>
       </v-col>
-      <v-divider vertical />
-      <v-col>
+      <v-col class="pa-9">
         <div v-for="step in steps" :key="getStepIndex(step)" class="flex-grow">
-          <component
-            class="pa-2"
-            v-if="getStepIndex(step) === currentStepNumber"
-            :is="currentStep.component"
-            v-bind="getPropsForStep(step)"
-            keep-alive
-            transition="fade"
-            mode="out-in"
-          />
+          <template v-if="getStepIndex(step) === currentStepNumber">
+            <div class="stepper-count mb-1">Step {{currentStepNumber}} of {{steps.length}}</div>
+            <h2 class="mb-4">{{getStepTitle(step)}}</h2>
+            <component
+              class="pa-0"
+              :is="currentStep.component"
+              v-bind="getPropsForStep(step)"
+              keep-alive
+              transition="fade"
+              mode="out-in"
+            />
+          </template>
         </div>
       </v-col>
     </v-row>
@@ -120,6 +122,12 @@ export default class Stepper extends Vue {
   @import "$assets/scss/theme.scss";
 
   .stepper-menu {
-    min-width: 25%;
+    min-width: 24%;
+  }
+  .stepper-count {
+    font-weight: 600;
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    color: $gray6;
   }
 </style>

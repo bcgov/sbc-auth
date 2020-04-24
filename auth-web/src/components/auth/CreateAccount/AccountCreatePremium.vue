@@ -1,13 +1,12 @@
 <template>
-  <v-form ref="createAccountInfoForm" lazy-validation>
-    <div class="view-container">
-      <h1 class="mb-5">Account Settings</h1>
-      <p class="intro-text mb-8">
+  <v-container>
+    <v-form ref="createAccountInfoForm" lazy-validation>
+      <p class="mb-7">
         You must be the Prime Contact to link this account with your existing BC
         Online account.
       </p>
       <BcolLogin @account-link-successful="onLink" v-show="!linked"></BcolLogin>
-      <v-container v-if="linked">
+      <template v-if="linked">
         <v-alert v-model="linked" dark color="info" icon="mdi-check">
           <v-row>
             <v-col cols="8">
@@ -72,25 +71,25 @@
         <v-alert type="error" class="mb-6" v-show="errorMessage">
           {{ errorMessage }}
         </v-alert>
-      </v-container>
+      </template>
       <v-row>
         <v-col cols="12" class="d-inline-flex">
-          <v-btn large color="grey lighten-3" class="mx-1" @click="goBack">
+          <v-btn large depressed color="grey lighten-3" class="mx-1" @click="goBack">
             <v-icon left class="mr-1">mdi-arrow-left</v-icon>
             Back
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn large color="primary" :disabled="!grantAccess" @click="save">
+          <v-btn large depressed color="primary" :disabled="!grantAccess" @click="save">
             Next
             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
           </v-btn>
-          <v-btn large color="grey lighten-3" class="mx-5" @click="cancel">
+          <v-btn large depressed color="grey lighten-3" class="ml-4" @click="cancel">
             Cancel
           </v-btn>
         </v-col>
       </v-row>
-    </div>
-  </v-form>
+    </v-form>
+  </v-container>
 </template>
 
 <script lang="ts">
