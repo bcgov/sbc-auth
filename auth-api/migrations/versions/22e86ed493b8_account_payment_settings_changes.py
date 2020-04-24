@@ -1,8 +1,8 @@
 """account_payment_settings_changes
 
-Revision ID: de09ab11e3fc
-Revises: 0ab62b841b88
-Create Date: 2020-04-23 10:40:28.014529
+Revision ID: 22e86ed493b8
+Revises: 48b340d1fe8b
+Create Date: 2020-04-24 14:54:04.506292
 
 """
 from alembic import op
@@ -13,9 +13,10 @@ import sqlalchemy as sa
 from sqlalchemy import Boolean, String
 from sqlalchemy.sql import column, table
 
+
 # revision identifiers, used by Alembic.
-revision = 'de09ab11e3fc'
-down_revision = '0ab62b841b88'
+revision = '22e86ed493b8'
+down_revision = '48b340d1fe8b'
 branch_labels = None
 depends_on = None
 
@@ -124,7 +125,6 @@ def upgrade():
     )
     op.execute('update org set type_code=\'BASIC\' where type_code in (\'IMPLICIT\', \'EXPLICIT\')')
     op.execute('delete from org_type where code in (\'IMPLICIT\', \'EXPLICIT\')')
-
     # ### end Alembic commands ###
 
 
