@@ -57,7 +57,7 @@ jobs:
           oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -w
       - name: Rocket.Chat Notification
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
-        if: always()
+        if: failure()
         with:
           type: ${{ job.status }}
           job_name: "*Status API Build and Deploy to ${{env.TAG_NAME}}*"

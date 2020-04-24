@@ -1,137 +1,110 @@
 # Copyright © 2019 Province of British Columbia
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
+# distributed under the License is distributed on an 'AS IS' BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
 import asyncio
-import datetime
 import os
 import random
 import time
-from contextlib import contextmanager
 
 import pytest
-from fastapi import FastAPI
+import sqlalchemy
 from nats.aio.client import Client as Nats
-from notify_api.core.config import get_named_config
-from sqlalchemy import event, text
+from notify_api import applications
+from notify_api.core import config as AppConfig
+from notify_api.db.database import BASE, SESSION
+from notify_api.db.models import NotificationStatusModel, NotificationTypeModel
+from sqlalchemy import event
 from stan.aio.client import Client as Stan
 from starlette.testclient import TestClient
 
-from . import FROZEN_DATETIME
+from notify_service import worker
 
 
-@contextmanager
-def not_raises(exception):
-    """Corallary to the pytest raises builtin.
-
-    Assures that an exception is NOT thrown.
-    """
-    try:
-        yield
-    except exception:
-        raise pytest.fail(f'DID RAISE {exception}')
-
-# fixture to freeze utcnow to a fixed date-time
-@pytest.fixture
-def freeze_datetime_utcnow(monkeypatch):
-    """Fixture to return a static time for utcnow()."""
-    class _Datetime:
-        @classmethod
-        def utcnow(cls):
-            return FROZEN_DATETIME
-
-    monkeypatch.setattr(datetime, 'datetime', _Datetime)
+DATABASE_URL = AppConfig.SQLALCHEMY_TEST_DATABASE_URI
 
 
-@pytest.fixture(scope='session')
-def app():
-    """Return a session-wide application configured in TEST mode."""
-    # _app = create_app('testing')
-    _app = FastAPI()
-    _app.config.from_object(get_named_config('testing'))
-    db.init_app(_app)
-
-    return _app
+@event.listens_for(NotificationTypeModel.__table__, 'after_create')
+def insert_data(target, connection, **kw):  # pylint: disable=unused-argument
+    """Load notification type data."""
+    connection.execute(target.insert(),
+                       {'code': 'EMAIL', 'desc': 'The Email type of notification', 'default': True},
+                       {'code': 'TEXT', 'desc': 'The Text message type of notification', 'default': False})
 
 
-@pytest.fixture
-def config(app):
-    """Return the application config."""
-    return app.config
+@event.listens_for(NotificationStatusModel.__table__, 'after_create')
+def insert_data2(target, connection, **kw):  # pylint: disable=unused-argument
+    """Load notification status data."""
+    connection.execute(target.insert(),
+                       {'code': 'PENDING', 'desc': 'Initial state of the notification', 'default': True},
+                       {'code': 'DELIVERED', 'desc': 'Status for the notification sent successful', 'default': False},
+                       {'code': 'FAILURE', 'desc': 'Status for the notification sent failuree', 'default': False})
 
 
-@pytest.fixture(scope='session')
-def client(app):  # pylint: disable=redefined-outer-name
-    """Return a session-wide Flask test client."""
-    return app.test_client()
+@pytest.fixture(scope='function', name='loop')
+def loop_fixture():
+    """Asyn event loop."""
+    return asyncio.new_event_loop()
 
 
-@pytest.fixture(scope='session')
-def jwt():
-    """Return a session-wide jwt manager."""
-    return _jwt
+@pytest.fixture(scope='session', name='engine')
+def engine_fixture():
+    """Connect to the database."""
+    engine = sqlalchemy.create_engine(AppConfig.SQLALCHEMY_TEST_DATABASE_URI)
+    SESSION.configure(bind=engine)
+    return engine
 
 
-@pytest.fixture(scope='session')
-def client_ctx(app):  # pylint: disable=redefined-outer-name
-    """Return session-wide Flask test client."""
-    with app.test_client() as _client:
-        yield _client
+@pytest.fixture(scope='function', name='session')
+def session_fixture(engine):
+    """Create and drop all database metadata."""
+    def _drop_all():
+        meta = sqlalchemy.MetaData()
+        meta.reflect(bind=engine)
+        meta.drop_all(bind=engine)
+
+    _drop_all()
+    BASE.metadata.create_all(engine)
+
+    session = SESSION()
+
+    yield session
+    session.close()
+
+    _drop_all()
+
+
+@pytest.fixture(scope='function', name='app')
+def app_fixture(engine):
+    """FastAPI app."""
+    return applications.NotifyAPI(
+        engine,
+        title='notify_api',
+        version='0.0.0'
+    )
+
+
+@pytest.fixture(scope='function', name='client')
+def client_fixture(app):
+    """FastAPI test client."""
+    return TestClient(app)
 
 
 @pytest.fixture('function')
 def client_id():
     """Return a unique client_id that can be used in tests."""
     _id = random.SystemRandom().getrandbits(0x58)
-#     _id = (base64.urlsafe_b64encode(uuid.uuid4().bytes)).replace('=', '')
-
     return f'client-{_id}'
-
-
-@pytest.fixture(scope='function')
-def session(app):  # pylint: disable=redefined-outer-name, invalid-name
-    """Return a function-scoped session."""
-    with app.app_context():
-        conn = db.engine.connect()
-        txn = conn.begin()
-
-        options = dict(bind=conn, binds={})
-        sess = db.create_scoped_session(options=options)
-
-        # establish  a SAVEPOINT just before beginning the test
-        # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)
-        sess.begin_nested()
-
-        @event.listens_for(sess(), 'after_transaction_end')
-        def restart_savepoint(sess2, trans):  # pylint: disable=unused-variable
-            # Detecting whether this is indeed the nested transaction of the test
-            if trans.nested and not trans._parent.nested:  # pylint: disable=protected-access
-                # Handle where test DOESN'T session.commit(),
-                sess2.expire_all()
-                sess.begin_nested()
-
-        db.session = sess
-
-        sql = text('select 1')
-        sess.execute(sql)
-
-        yield sess
-
-        # Cleanup
-        sess.remove()
-        # This instruction rollsback any commit that were executed in the tests.
-        txn.rollback()
-        conn.close()
 
 
 @pytest.fixture(scope='session')
@@ -140,53 +113,24 @@ def stan_server(docker_services):
     if os.getenv('TEST_NATS_DOCKER'):
         docker_services.start('nats')
         time.sleep(2)
-    # TODO get the wait part working, as opposed to sleeping for 2s
-    # public_port = docker_services.wait_for_service("nats", 4222)
-    # dsn = "{docker_services.docker_ip}:{public_port}".format(**locals())
-    # return dsn
 
 
 @pytest.fixture(scope='function')
 @pytest.mark.asyncio
-async def stan(event_loop, client_id):
+async def notification_stan(event_loop, client_id):  # pylint: disable=redefined-outer-name
     """Create a stan connection for each function, to be used in the tests."""
-    nc = Nats()
-    sc = Stan()
+    nats_client = Nats()
+    stan_client = Stan()
     cluster_name = 'test-cluster'
 
-    await nc.connect(io_loop=event_loop, name='entity.filing.tester')
+    await nats_client.connect(io_loop=event_loop, name='entity.filing.tester')
 
-    await sc.connect(cluster_name, client_id, nats=nc)
+    await stan_client.connect(cluster_name, client_id, nats=nats_client)
 
-    yield sc
+    yield stan_client
 
-    await sc.close()
-    await nc.close()
-
-
-@pytest.fixture(scope='function')
-@pytest.mark.asyncio
-async def entity_stan(app, event_loop, client_id):
-    """Create a stan connection for each function.
-
-    Uses environment variables for the cluster name.
-    """
-    nc = Nats()
-    sc = Stan()
-
-    await nc.connect(io_loop=event_loop)
-
-    cluster_name = os.getenv('STAN_CLUSTER_NAME')
-
-    if not cluster_name:
-        raise ValueError('Missing env variable: STAN_CLUSTER_NAME')
-
-    await sc.connect(cluster_name, client_id, nats=nc)
-
-    yield sc
-
-    await sc.close()
-    await nc.close()
+    await stan_client.close()
+    await nats_client.close()
 
 
 @pytest.fixture(scope='function')
@@ -196,17 +140,27 @@ def future(event_loop):
     return _future
 
 
-@pytest.fixture
-def create_mock_coro(mocker, monkeypatch):
-    """Return a mocked coroutine, and optionally patch-it in."""
-    def _create_mock_patch_coro(to_patch=None):
-        mock = mocker.Mock()
+@pytest.fixture(scope='session')
+def docker_compose_files(pytestconfig):
+    """Get the docker-compose.yml absolute path."""
+    return [
+        os.path.join(str(pytestconfig.rootdir), 'tests/docker', 'docker-compose.yml')
+    ]
 
-        async def _coro(*args, **kwargs):
-            return mock(*args, **kwargs)
 
-        if to_patch:  # <-- may not need/want to patch anything
-            monkeypatch.setattr(to_patch, _coro)
-        return mock, _coro
+@pytest.fixture()
+def sendmail_mock(monkeypatch):
+    """Mock send_with_send_message."""
+    async def mock_send_message(*args, **kwargs):  # pylint: disable=unused-argument
+        return True
 
-    return _create_mock_patch_coro
+    monkeypatch.setattr(worker, 'send_with_send_message', mock_send_message)
+
+
+@pytest.fixture()
+def sendmail_failed_mock(monkeypatch):
+    """Mock send_with_send_message failed."""
+    async def mock_send_message(*args, **kwargs):  # pylint: disable=unused-argument
+        return False
+
+    monkeypatch.setattr(worker, 'send_with_send_message', mock_send_message)

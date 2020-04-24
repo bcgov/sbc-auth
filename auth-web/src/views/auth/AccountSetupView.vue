@@ -16,14 +16,16 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import Stepper, { StepConfiguration } from '@/components/auth/stepper/Stepper.vue'
 import { mapActions, mapState } from 'vuex'
+import AccountCreateBasic from '@/components/auth/CreateAccount/AccountCreateBasic.vue'
+import AccountCreatePremium from '@/components/auth/CreateAccount/AccountCreatePremium.vue'
+import AccountTypeSelector from '@/components/auth/CreateAccount/AccountTypeSelector.vue'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
-import CreateAccountInfoForm from '@/components/auth/CreateAccountInfoForm.vue'
+import CreateAccountInfoForm from '@/components/auth/CreateAccount/CreateAccountInfoForm.vue'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
 import { Organization } from '@/models/Organization'
 import { RouteConfig } from 'vue-router'
 import { SessionStorageKeys } from '@/util/constants'
-import StepperStub from '@/components/auth/stepper/StepperStub.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/UserProfileForm.vue'
 import { getRoutes } from '@/router'
@@ -33,7 +35,9 @@ import { mount } from '@vue/test-utils'
   components: {
     CreateAccountInfoForm,
     UserProfileForm,
-    StepperStub,
+    AccountTypeSelector,
+    AccountCreateBasic,
+    AccountCreatePremium,
     Stepper
   }
 })
@@ -42,13 +46,18 @@ export default class AccountSetupView extends Vue {
     [
       {
         title: 'Select Account Type',
-        component: StepperStub,
+        component: AccountTypeSelector,
         componentProps: {}
       },
       {
         title: 'Account Settings',
-        component: CreateAccountInfoForm,
-        componentProps: {}
+        component: AccountCreateBasic,
+        componentProps: {},
+        alternate: {
+          title: 'Account Settings',
+          component: AccountCreatePremium,
+          componentProps: {}
+        }
       },
       {
         title: 'User Profile',

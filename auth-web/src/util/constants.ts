@@ -26,7 +26,7 @@ export enum Role {
 
 export enum Pages {
     USER_PROFILE = 'userprofile',
-    CREATE_ACCOUNT = 'createaccount',
+    CREATE_ACCOUNT = 'setup-account',
     DUPLICATE_TEAM_MESAGE = 'duplicateteam',
     PENDING_APPROVAL = 'pendingapproval',
     MAIN = 'account',
@@ -41,7 +41,11 @@ export enum Pages {
 }
 
 export enum Account {
-    ANONYMOUS = 'ANONYMOUS'
+    ANONYMOUS = 'ANONYMOUS',
+    PREMIUM = 'PREMIUM',
+    BASIC = 'BASIC',
+    IMPLICIT = 'IMPLICIT', // To be removed later
+    EXPLICIT = 'EXPLICIT' // To be removed later
 }
 
 export enum IdpHint {
