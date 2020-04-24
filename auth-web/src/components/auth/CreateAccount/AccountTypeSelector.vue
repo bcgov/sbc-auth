@@ -64,9 +64,7 @@
         <v-btn class="mr-3" depressed large color="primary" @click="goNext" :disabled='!selectedAccountType'>
           Next
         </v-btn>
-        <v-btn large depressed color="default" @click="cancel">
-          Cancel
-        </v-btn>
+        <ConfirmCancelButton></ConfirmCancelButton>
       </v-col>
     </v-row>
   </v-container>
@@ -76,13 +74,14 @@
 
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { Account } from '@/util/constants'
+import ConfirmCancelButton from '@/components/auth/generic/ConfirmCancelButton.vue'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
 import { mapMutations } from 'vuex'
 
 @Component({
   components: {
-
+    ConfirmCancelButton
   },
   methods: {
     ...mapMutations('org', ['setSelectedAccountType', 'setCurrentOrganization'])

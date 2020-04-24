@@ -79,13 +79,11 @@
             Back
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn large depressed color="primary" :disabled="!grantAccess" @click="save">
+          <v-btn class="mr-4" large depressed color="primary" :disabled="!grantAccess" @click="save">
             Next
             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
           </v-btn>
-          <v-btn large depressed color="grey lighten-3" class="ml-4" @click="cancel">
-            Cancel
-          </v-btn>
+          <ConfirmCancelButton></ConfirmCancelButton>
         </v-col>
       </v-row>
     </v-form>
@@ -101,6 +99,7 @@ import { Account } from '@/util/constants'
 import { Address } from '@/models/address'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
+import ConfirmCancelButton from '@/components/auth/generic/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
@@ -109,7 +108,8 @@ import { getModule } from 'vuex-module-decorators'
 @Component({
   components: {
     BcolLogin,
-    BaseAddress
+    BaseAddress,
+    ConfirmCancelButton
   },
   computed: {
     ...mapState('org', ['currentOrganization']),

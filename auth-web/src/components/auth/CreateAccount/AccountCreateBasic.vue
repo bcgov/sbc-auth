@@ -35,16 +35,9 @@
           >
             Save and Continue
           </v-btn>
-          <v-btn
-            large
-            depressed
-            color="default"
-            :disable="saving"
-            @click="cancel"
-            data-test="cancel-button"
-          >
-            Cancel
-          </v-btn>
+          <ConfirmCancelButton
+            :disabled="saving"
+          ></ConfirmCancelButton>
         </v-col>
       </v-row>
     </v-form>
@@ -60,6 +53,7 @@ import { mapActions, mapState } from 'vuex'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
 import ConfigHelper from '@/util/config-helper'
+import ConfirmCancelButton from '@/components/auth/generic/ConfirmCancelButton.vue'
 import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
@@ -68,7 +62,8 @@ import { getModule } from 'vuex-module-decorators'
 @Component({
   components: {
     BcolLogin,
-    BaseAddress
+    BaseAddress,
+    ConfirmCancelButton
   },
   computed: {
     ...mapState('org', ['currentOrganization']),
