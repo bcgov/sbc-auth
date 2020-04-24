@@ -140,9 +140,11 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 import { Contact } from '@/models/contact'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
+import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
 import { User } from '@/models/user'
@@ -150,9 +152,7 @@ import UserModule from '@/store/modules/user'
 import UserService from '@/services/user.services'
 import configHelper from '@/util/config-helper'
 import { getModule } from 'vuex-module-decorators'
-import { mapActions, mapState } from 'vuex'
 import { mask } from 'vue-the-mask'
-import { Organization } from '@/models/Organization'
 
 @Component({
   components: {
