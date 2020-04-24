@@ -191,8 +191,8 @@
                 },
                 "livenessProbe": {
                   "httpGet": {
-                    "path": "/ops/healthz",
-                    "port": 8080,
+                    "path": "/healthz",
+                    "port": 7070,
                     "scheme": "HTTP"
                   },
                   "timeoutSeconds": 1,
@@ -202,8 +202,8 @@
                 },
                 "readinessProbe": {
                   "httpGet": {
-                    "path": "/ops/readyz",
-                    "port": 8080,
+                    "path": "/readyz",
+                    "port": 7070,
                     "scheme": "HTTP"
                   },
                   "timeoutSeconds": 1,
