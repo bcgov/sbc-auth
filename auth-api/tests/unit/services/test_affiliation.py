@@ -69,7 +69,7 @@ def test_create_affiliation_no_entity(session, auth_mock):  # pylint:disable=unu
 
 
 def test_create_affiliation_implicit(session, auth_mock):  # pylint:disable=unused-argument
-    """Assert that an Affiliation can not be created when org is IMPLICIT."""
+    """Assert that an Affiliation can not be created when org is BASIC."""
     entity_service1 = factory_entity_service()
     entity_dictionary1 = entity_service1.as_dict()
     business_identifier1 = entity_dictionary1['businessIdentifier']

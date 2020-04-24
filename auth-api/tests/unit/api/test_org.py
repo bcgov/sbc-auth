@@ -255,9 +255,31 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     dictionary = json.loads(rv.data)
     assert dictionary['id'] == org_id
 
-    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo'}),
+    rv = client.post('/api/v1/orgs', data=json.dumps({'name': 'helo-duplicate'}),
+                     headers=headers, content_type='application/json')
+
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo-duplicate'}),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_409_CONFLICT
+
+
+def test_update_premium_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be updated via PUT."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked()),
+                     headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.json.get('orgType') == OrgType.PREMIUM.value
+
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    # Update with same data
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(TestOrgInfo.bcol_linked()), headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
 
 
 def test_update_org_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument

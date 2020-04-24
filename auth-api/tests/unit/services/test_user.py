@@ -26,7 +26,6 @@ from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import User as UserModel
-from auth_api.models import Org as OrgModel
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services.keycloak import KeycloakService
@@ -256,9 +255,9 @@ def test_create_user_add_membership_reenable(session, auth_mock, keycloak_mock):
     update_user_request.enabled = False
     KeycloakService.update_user(update_user_request)
 
-    # re add to different org.Should Fail
-    org2 = OrgModel(name='Test2', access_type='ANONYMOUS', type_code='IMPLICIT', status_code='ACTIVE')
-    org2.save()
+    org2 = factory_org_model(org_info=TestOrgInfo.org_anonymous_2, org_type_info={'code': 'BASIC'},
+                             org_status_info=None, payment_type_info=None)
+
     factory_membership_model(user.id, org2.id)
     users = UserService.create_user_and_add_membership(membership, org2.id, token_info=claims)
     assert users['users'][0]['http_status'] == 409

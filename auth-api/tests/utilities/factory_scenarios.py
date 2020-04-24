@@ -262,7 +262,7 @@ class TestOrgTypeInfo(dict, Enum):
     """Test scenarios of org type."""
 
     test_type = {'code': 'TEST', 'desc': 'Test'}
-    implicit = {'code': 'IMPLICIT', 'desc': 'IMPLICIT'}
+    implicit = {'code': 'BASIC', 'desc': 'BASIC'}
 
 
 class TestPaymentTypeInfo(dict, Enum):
@@ -296,6 +296,7 @@ class TestOrgInfo(dict, Enum):
     org4 = {'name': 'fourth Orgs'}
     org5 = {'name': 'fifth Orgs'}
     org_anonymous = {'name': 'My Test Org', 'accessType': 'ANONYMOUS'}
+    org_anonymous_2 = {'name': 'Test', 'accessType': 'ANONYMOUS'}
     invalid = {'foo': 'bar'}
     invalid_name_space = {'name': ''}
     invalid_name_spaces = {'name': '    '}
