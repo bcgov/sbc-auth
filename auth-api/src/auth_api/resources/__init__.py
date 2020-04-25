@@ -42,6 +42,7 @@ from .user_settings import API as USER_SETTINGS_API
 from .org_products import API as ORG_PRODUCTS_API
 from .products import API as PRODUCTS_API
 from .notifications import API as NOTIFICATIONS_API
+from .bcol_profiles import API as BCOL_PROFILE_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
@@ -91,6 +92,7 @@ API.add_namespace(ORG_PRODUCTS_API, path='/orgs/<string:org_id>/products')
 API.add_namespace(PRODUCTS_API, path='/products')
 API.add_namespace(NOTIFICATIONS_API, path='/users/<string:user_id>/org/<string:org_id>/notifications')
 API.add_namespace(USER_API, path='/users/<string:invitation_token>')
+API.add_namespace(BCOL_PROFILE_API, path='/bcol-profiles')
 
 
 TEST_BLUEPRINT = Blueprint('TEST', __name__, url_prefix='/test')
