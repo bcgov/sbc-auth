@@ -1,9 +1,2 @@
 aiosmtplib
-jsonschema
-python-dotenv
-sentry-sdk[flask]
-asyncio-nats-client
-asyncio-nats-streaming
-pycountry
-attrs==19.3.0
-six==1.12
+email-validator

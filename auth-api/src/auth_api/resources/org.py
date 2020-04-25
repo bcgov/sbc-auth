@@ -76,10 +76,23 @@ class Orgs(Resource):
         """Search orgs."""
         # Search based on request arguments
         business_identifier = request.args.get('affiliation', None)
+        name = request.args.get('name', None)
         org_type = request.args.get('type', None)
         try:
-            response, status = OrgService.search_orgs(business_identifier=business_identifier, org_type=org_type), \
+            response, status = OrgService.search_orgs(business_identifier=business_identifier, org_type=org_type,
+                                                      name=name), \
                                http_status.HTTP_200_OK
+
+            # TODO change it later
+            # If searching by name return 200 with empty results if orgs exist
+            # Else return 204
+            if name:
+                if response and response.get('orgs'):
+                    status = http_status.HTTP_200_OK
+                else:
+                    status = http_status.HTTP_204_NO_CONTENT
+                response = {}  # Do not return any results if searching by name
+
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

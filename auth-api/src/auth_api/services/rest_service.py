@@ -25,7 +25,6 @@ from urllib3.util.retry import Retry
 from auth_api.exceptions import ServiceUnavailableException
 from auth_api.utils.enums import AuthHeaderType, ContentType
 
-
 RETRY_ADAPTER = HTTPAdapter(max_retries=Retry(total=5, backoff_factor=1, status_forcelist=[404]))
 
 
@@ -33,8 +32,9 @@ class RestService:
     """Service to invoke Rest services which uses OAuth 2.0 implementation."""
 
     @staticmethod
-    def post(endpoint, token=None, auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
-             content_type: ContentType = ContentType.JSON, data=None):
+    def post(endpoint, token=None,  # pylint: disable=too-many-arguments
+             auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
+             content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True):
         """POST service."""
         current_app.logger.debug('<post')
 
@@ -52,7 +52,8 @@ class RestService:
         try:
             response = requests.post(endpoint, data=data, headers=headers,
                                      timeout=current_app.config.get('CONNECT_TIMEOUT'))
-            response.raise_for_status()
+            if raise_for_status:
+                response.raise_for_status()
         except (ReqConnectionError, ConnectTimeout) as exc:
             current_app.logger.error('---Error on POST---')
             current_app.logger.error(exc)
