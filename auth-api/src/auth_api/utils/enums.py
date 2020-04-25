@@ -61,6 +61,5 @@ class PaymentType(Enum):
 class OrgType(Enum):
     """Org types."""
 
-    IMPLICIT = 'IMPLICIT'
-    EXPLICIT = 'EXPLICIT'
     PREMIUM = 'PREMIUM'
+    BASIC = 'BASIC'

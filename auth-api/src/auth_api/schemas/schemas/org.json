@@ -23,9 +23,9 @@
         "$id": "#/properties/orgType",
         "type": "string",
         "title": "Organizational Type",
-        "default": "IMPLICIT",
+        "default": "BASIC",
         "examples": [
-          "IMPLICIT", "EXPLICIT"
+          "BASIC", "PREMIUM"
         ],
         "pattern": "^(.*)$"
       },

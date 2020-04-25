@@ -33,10 +33,11 @@ from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo,
+    TestOrgTypeInfo,
     TestOrgProductsInfo)
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
-    factory_org_service, factory_user_model)
+    factory_org_service, factory_user_model, factory_org_model)
 from auth_api.models.account_payment_settings import AccountPaymentSettings
 from auth_api.utils.enums import PaymentType, OrgType
 
@@ -98,10 +99,8 @@ def test_update__duplicate_org(session):  # pylint:disable=unused-argument
     """Assert that an Org cannot be updated."""
     org = factory_org_service()
 
-    org.update_org(TestOrgInfo.org2)
-
-    dictionary = org.as_dict()
-    assert dictionary['name'] == TestOrgInfo.org2['name']
+    factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit, org_status_info=None,
+                      payment_type_info=None)
 
     with pytest.raises(BusinessException) as exception:
         org.update_org(TestOrgInfo.org2)

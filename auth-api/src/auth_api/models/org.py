@@ -76,10 +76,13 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
         return cls.query.filter_by(access_type=org_type).all()
 
     @classmethod
-    def find_similar_org_by_name(cls, name):
+    def find_similar_org_by_name(cls, name, org_id=None):
         """Find an Org instance that matches the provided name."""
         # TODO: add more fancy comparison
-        return cls.query.filter(Org.name.ilike(f'%{name}%')).first()
+        query = cls.query.filter(Org.name.ilike(f'%{name}%'))
+        if org_id:
+            query = query.filter(Org.id != org_id)
+        return query.first()
 
     @classmethod
     def get_count_of_org_created_by_user_id(cls, user_id):
