@@ -74,7 +74,7 @@
 
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { Account } from '@/util/constants'
-import ConfirmCancelButton from '@/components/auth/generic/ConfirmCancelButton.vue'
+import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
 import { mapMutations } from 'vuex'
@@ -94,6 +94,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   private readonly setCurrentOrganization!: (organization: Organization) => void
 
   private async mounted () {
+    this.setCurrentOrganization({ name: '' }) // TODO find a better logic to reset ;may be in cancel button
   }
 
   private selectAccountType (accountType) {

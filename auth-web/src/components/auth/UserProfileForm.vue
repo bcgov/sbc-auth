@@ -11,9 +11,6 @@
     </v-expand-transition>
     <!-- First / Last Name -->
     <v-row>
-      {{editing}}
-    </v-row>
-    <v-row>
       <v-col cols="12" md="6" class="pt-0 pb-0">
         <v-text-field
                 filled
@@ -254,17 +251,36 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
           phoneExtension: this.extension
         }
         if (this.stepForward) { // On stepper ;so Save the org
-          const organization = await this.createOrg()
-          if (this.editing) {
-            await this.updateUserContact(contact)
-          } else {
-            await this.createUserContact(contact)
+          try {
+            const organization = await this.createOrg()
+            if (this.editing) {
+              await this.updateUserContact(contact)
+            } else {
+              await this.createUserContact(contact)
+            }
+            await this.getUserProfile('@me')
+            await this.syncOrganization(organization.id)
+            await this.syncMembership(organization.id)
+            this.$store.commit('updateHeader')
+            this.$router.push('/setup-account-success')
+          } catch (err) {
+            switch (err.response.status) {
+              case 409:
+                this.formError =
+                        'An account with this name already exists. Try a different account name.'
+                break
+              case 400:
+                if (err.response.data.code === 'MAX_NUMBER_OF_ORGS_LIMIT') {
+                  this.formError = 'Maximum number of accounts reached'
+                } else {
+                  this.formError = 'Invalid account name'
+                }
+                break
+              default:
+                this.formError =
+                        'An error occurred while attempting to create your account.'
+            }
           }
-          await this.getUserProfile('@me')
-          await this.syncOrganization(organization.id)
-          await this.syncMembership(organization.id)
-          this.$store.commit('updateHeader')
-          this.$router.push('/setup-account-success')
         } else {
           await this.updateUserContact(contact)
           await this.getUserProfile('@me')

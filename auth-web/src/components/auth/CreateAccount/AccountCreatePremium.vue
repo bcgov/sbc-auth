@@ -99,7 +99,7 @@ import { Account } from '@/util/constants'
 import { Address } from '@/models/address'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
-import ConfirmCancelButton from '@/components/auth/generic/ConfirmCancelButton.vue'
+import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
@@ -180,18 +180,8 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     this.address = address
   }
   private async save () {
-    try {
-      // TODO Handle edit mode as well here
-      this.goNext()
-    } catch (err) {
-      this.errorMessage =
-        'An error occurred while attempting to create your account.'
-      switch (err.response.status) {
-        case 409:
-          this.errorMessage = err.response.data.message
-          break
-      }
-    }
+    // TODO Handle edit mode as well here
+    this.goNext()
   }
 
   private onLink (details: {
