@@ -1,17 +1,28 @@
+import { Account, SessionStorageKeys } from '@/util/constants'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { AddUsersToOrgBody, BulkUsersFailed, BulkUsersSuccess, CreateRequestBody as CreateOrgRequestBody, Member, Organization, UpdateMemberPayload } from '@/models/Organization'
+import {
+  AddUsersToOrgBody,
+  BulkUsersFailed,
+  BulkUsersSuccess,
+  CreateRequestBody as CreateOrgRequestBody,
+  CreateRequestBody,
+  Member,
+  Organization,
+  UpdateMemberPayload
+} from '@/models/Organization'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
-import { Account } from '@/util/constants'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BcolService from '@/services/bcol.services'
+import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
 import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
+import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 
 @Module({
   name: 'org',
@@ -134,15 +145,45 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async createOrg (createRequestBody: CreateOrgRequestBody): Promise<Organization> {
+  public async createOrg (): Promise<Organization> {
+    const org = this.context.state['currentOrganization']
+    const createRequestBody: CreateRequestBody = {
+      name: org.name
+    }
+    if (org.bcolProfile) {
+      createRequestBody.bcOnlineCredential = org.bcolProfile
+      createRequestBody.mailingAddress = org.bcolAccountDetails.address
+    }
     const response = await OrgService.createOrg(createRequestBody)
-    this.context.commit('setCurrentOrganization', response?.data)
+    const organization = response?.data
+    this.context.commit('setCurrentOrganization', organization)
+    if (organization) { // avoid junk
+      const usersettings: UserSettings = {
+        id: organization.id.toString(),
+        label: organization.name,
+        type: 'ACCOUNT',
+        urlorigin: '',
+        urlpath: `/account/${organization.id}/settings`
+
+      }
+      ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify(usersettings))
+    }
     return response?.data
   }
 
   @Action({ rawError: true })
   public async validateBcolAccount (bcolProfile: BcolProfile): Promise<BcolAccountDetails> {
     return BcolService.validateBCOL(bcolProfile)
+  }
+
+  @Action({ rawError: true })
+  public async isOrgNameAvailable (name: string) {
+    const response = await OrgService.isOrgNameAvailable(name)
+    if (response.status === 204) {
+      return true
+    } else {
+      return false
+    }
   }
 
   @Action({ rawError: true })

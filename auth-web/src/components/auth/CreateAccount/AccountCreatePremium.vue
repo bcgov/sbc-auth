@@ -135,9 +135,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private password = ''
   private errorMessage: string = ''
   private saving = false
-  private readonly createOrg!: (
-    requestBody: CreateRequestBody
-  ) => Promise<Organization>
+  private readonly createOrg!: () => Promise<Organization>
   private readonly syncMembership!: (orgId: number) => Promise<Member>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
   private readonly currentOrganization!: Organization
@@ -182,14 +180,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     this.address = address
   }
   private async save () {
-    const createRequestBody: CreateRequestBody = {
-      name: this.currentOrganization.name,
-      bcOnlineCredential: this.currentOrganization.bcolProfile,
-      mailingAddress: this.currentOrganization.bcolAccountDetails.address
-    }
     try {
-      this.saving = true
-      const organization = await this.createOrg(createRequestBody)
       this.goNext()
     } catch (err) {
       this.errorMessage =

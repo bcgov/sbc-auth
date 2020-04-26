@@ -11,6 +11,9 @@
     </v-expand-transition>
     <!-- First / Last Name -->
     <v-row>
+      {{editing}}
+    </v-row>
+    <v-row>
       <v-col cols="12" md="6" class="pt-0 pb-0">
         <v-text-field
                 filled
@@ -139,13 +142,14 @@
 </template>
 
 <script lang="ts">
+
+import { Account, Pages } from '@/util/constants'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import { Contact } from '@/models/contact'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import { Organization } from '@/models/Organization'
-import { Pages } from '@/util/constants'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
@@ -161,14 +165,17 @@ import { mask } from 'vue-the-mask'
   directives: {
     mask
   },
+  computed: {
+    ...mapState('org', ['currentOrganization'])
+  },
   methods: {
     ...mapActions('user',
       [
         'createUserContact',
         'updateUserContact',
         'getUserProfile'
-      ]
-    )
+      ]),
+    ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization'])
   }
 })
 export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
@@ -186,6 +193,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private deactivateProfileDialog = false
     private isDeactivating = false
     @Prop() token: string
+    readonly currentOrganization!: Organization
+    private readonly createOrg!: () => Promise<Organization>
+    readonly syncMembership!: (orgId: number) => Promise<Member>
+    readonly syncOrganization!: (orgId: number) => Promise<Organization>
 
     $refs: {
       deactivateUserConfirmationDialog: ModalDialog,
@@ -240,19 +251,29 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
           phone: this.phoneNumber,
           phoneExtension: this.extension
         }
-        if (!this.editing) {
-          await this.createUserContact(contact)
+        if (this.stepForward) { // On stepper ;so Save the org
+          const organization = await this.createOrg()
+          if (this.editing) {
+            await this.updateUserContact(contact)
+          } else {
+            await this.createUserContact(contact)
+          }
+          await this.getUserProfile('@me')
+          await this.syncOrganization(organization.id)
+          await this.syncMembership(organization.id)
+          this.$store.commit('updateHeader')
+          this.$router.push('/setup-account-success')
         } else {
           await this.updateUserContact(contact)
+          await this.getUserProfile('@me')
+          // If a token was provided, that means we are in the accept invitation flow
+          // so redirect to /confirmtoken
+          if (this.token) {
+            this.$router.push('/confirmtoken/' + this.token)
+            return
+          }
+          this.redirectToNext()
         }
-        await this.getUserProfile('@me')
-        // If a token was provided, that means we are in the accept invitation flow
-        // so redirect to /confirmtoken
-        if (this.token) {
-          this.$router.push('/confirmtoken/' + this.token)
-          return
-        }
-        this.redirectToNext()
       }
     }
 
