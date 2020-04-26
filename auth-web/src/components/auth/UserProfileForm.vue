@@ -134,7 +134,7 @@
           <v-btn large color="primary" class="save-continue-button" :disabled='!isFormValid()' @click="save" data-test="save-button">
             Save
           </v-btn>
-          <v-btn large depressed @click="cancel" data-test="cancel-button" class="cancel-button">Cancel</v-btn>
+          <ConfirmCancelButton></ConfirmCancelButton>
         </div>
       </v-col>
     </v-row>
@@ -147,6 +147,7 @@ import { Account, Pages } from '@/util/constants'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
+import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Contact } from '@/models/contact'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
@@ -160,7 +161,8 @@ import { mask } from 'vue-the-mask'
 
 @Component({
   components: {
-    ModalDialog
+    ModalDialog,
+    ConfirmCancelButton
   },
   directives: {
     mask

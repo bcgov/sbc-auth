@@ -48,7 +48,7 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 import { Account } from '@/util/constants'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
-import ConfirmCancelButton from '@/components/auth/generic/ConfirmCancelButton.vue'
+import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
 import { getModule } from 'vuex-module-decorators'
@@ -125,7 +125,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
         }
       } else {
         // check if the name is avaialble
-        const avaialble:boolean = await this.isOrgNameAvailable(this.orgName)
+        const avaialble = await this.isOrgNameAvailable(this.orgName)
         if (avaialble) {
           this.stepForward()
         } else {

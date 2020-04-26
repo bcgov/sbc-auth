@@ -181,6 +181,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   }
   private async save () {
     try {
+      // TODO Handle edit mode as well here
       this.goNext()
     } catch (err) {
       this.errorMessage =
