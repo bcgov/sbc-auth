@@ -6,7 +6,6 @@
     <template v-slot:activator="{ on }">
       <v-btn
         large
-        depressed
         color="default"
         :disabled="disabled"
         @click="showConfirmDialog = true"
@@ -39,8 +38,15 @@
 <script lang="ts">
 import { Component, Emit, Prop } from 'vue-property-decorator'
 import Vue from 'vue'
+import { mapActions } from 'vuex'
 
-@Component
+@Component({
+  methods: {
+    ...mapActions('org', [
+      'resetAccountSetupProgress'
+    ])
+  }
+})
 export default class CancelButton extends Vue {
   @Prop({ default: false }) isEmit: boolean
   @Prop({ default: false }) disabled: boolean
@@ -50,6 +56,8 @@ export default class CancelButton extends Vue {
   @Prop({ default: 'No' }) rejectText: string
   private showConfirmDialog: boolean = false
 
+  private readonly resetAccountSetupProgress!: () => Promise<void>
+
   private confirmDialogResponse (response) {
     if (response) {
       this.clickConfirm()
@@ -57,7 +65,8 @@ export default class CancelButton extends Vue {
     this.showConfirmDialog = false
   }
 
-  private clickConfirm () {
+  private async clickConfirm () {
+    await this.resetAccountSetupProgress()
     if (this.isEmit) {
       this.emitClickConfirm()
     } else {

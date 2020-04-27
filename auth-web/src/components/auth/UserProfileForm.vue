@@ -11,29 +11,9 @@
     </v-expand-transition>
     <!-- First / Last Name -->
     <v-row>
-      <v-col cols="12" md="6" class="pt-0 pb-0">
-        <v-text-field
-                filled
-                label="First Name"
-                req
-                persistent-hint
-                disabled
-                v-model="firstName"
-                data-test="first-name"
-        >
-        </v-text-field>
-      </v-col>
-      <v-col cols="12" md="6" class="pt-0 pb-0">
-        <v-text-field
-                filled
-                label="Last Name"
-                req
-                persistent-hint
-                disabled
-                v-model="lastName"
-                data-test="last-name"
-        >
-        </v-text-field>
+      <v-col cols="12" class="pt-0 pb-0">
+        <h4 class="mb-1">{{firstName}} {{lastName}}</h4>
+        <p class="mb-6 intro-text">This is your legal name as it appears on your BC Services Card.</p>
       </v-col>
     </v-row>
     <!-- Email Address -->

@@ -51,7 +51,7 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
-  public setSelectedAccountType (selectedAccountType: Account) {
+  public setSelectedAccountType (selectedAccountType: Account | undefined) {
     this.selectedAccountType = selectedAccountType
   }
 
@@ -104,7 +104,9 @@ export default class OrgModule extends VuexModule {
 
   @Mutation
   public setCurrentOrganizationAddress (address: Address | undefined) {
-    this.currentOrganization.bcolAccountDetails.address = address
+    if (this.currentOrganization?.bcolAccountDetails) {
+      this.currentOrganization.bcolAccountDetails.address = address
+    }
   }
 
   @Mutation
@@ -370,5 +372,13 @@ export default class OrgModule extends VuexModule {
     } catch (exception) {
       throw exception
     }
+  }
+
+  @Action({ rawError: true })
+  public async resetAccountSetupProgress (): Promise<void> {
+    this.context.commit('setCurrentOrganizationAddress', undefined)
+    this.context.commit('setGrantAccess', false)
+    this.context.commit('setCurrentOrganization', undefined)
+    this.context.commit('setSelectedAccountType', undefined)
   }
 }
