@@ -276,7 +276,7 @@ export default class HomeView extends Vue {
   }
 
   private login () {
-    this.$router.push('/signin/bcsc/createaccount')
+    this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
   }
 
   mounted () {

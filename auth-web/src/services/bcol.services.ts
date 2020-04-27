@@ -7,7 +7,7 @@ const axios = addAxiosInterceptors(Axios.create())
 
 export default class BcolService {
   static async validateBCOL (bcOnlineProfile: BcolProfile): Promise<BcolAccountDetails> {
-    let response = await axios.post(`${ConfigHelper.getBcolAPIURL()}/profiles`, bcOnlineProfile)
+    let response = await axios.post(`${ConfigHelper.getAuthAPIUrl()}/bcol-profiles`, bcOnlineProfile)
     const retAddress = response.data.address
 
     // TODO use spread and destrcutre

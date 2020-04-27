@@ -78,13 +78,11 @@
             Back
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn large color="primary" :disabled="!grantAccess" @click="save">
+          <v-btn class="mr-4" large depressed color="primary" :disabled="!grantAccess" @click="save">
             Next
             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
           </v-btn>
-          <v-btn large color="default" class="ml-4" @click="cancel">
-            Cancel
-          </v-btn>
+          <ConfirmCancelButton></ConfirmCancelButton>
         </v-col>
       </v-row>
     </v-form>
@@ -100,6 +98,7 @@ import { Account } from '@/util/constants'
 import { Address } from '@/models/address'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
+import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
@@ -108,7 +107,8 @@ import { getModule } from 'vuex-module-decorators'
 @Component({
   components: {
     BcolLogin,
-    BaseAddress
+    BaseAddress,
+    ConfirmCancelButton
   },
   computed: {
     ...mapState('org', ['currentOrganization']),
@@ -134,9 +134,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private password = ''
   private errorMessage: string = ''
   private saving = false
-  private readonly createOrg!: (
-    requestBody: CreateRequestBody
-  ) => Promise<Organization>
+  private readonly createOrg!: () => Promise<Organization>
   private readonly syncMembership!: (orgId: number) => Promise<Member>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
   private readonly currentOrganization!: Organization
@@ -181,24 +179,8 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     this.address = address
   }
   private async save () {
-    const createRequestBody: CreateRequestBody = {
-      name: this.currentOrganization.name,
-      bcOnlineCredential: this.currentOrganization.bcolProfile,
-      mailingAddress: this.currentOrganization.bcolAccountDetails.address
-    }
-    try {
-      this.saving = true
-      const organization = await this.createOrg(createRequestBody)
-      this.goNext()
-    } catch (err) {
-      this.errorMessage =
-        'An error occurred while attempting to create your account.'
-      switch (err.response.status) {
-        case 409:
-          this.errorMessage = err.response.data.message
-          break
-      }
-    }
+    // TODO Handle edit mode as well here
+    this.goNext()
   }
 
   private onLink (details: {

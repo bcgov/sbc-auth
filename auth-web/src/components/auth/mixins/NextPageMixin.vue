@@ -64,11 +64,12 @@ export default class NextPageMixin extends Vue {
         return bcrosNextStep
       case LoginSource.BCSC:
         let nextStep = '/'
-        // Redirect to user profile if no contact info or terms not accepted
+        // Redirect to TOS if no terms accepted
+        // for invited users , handle user profile
         // Redirect to create team if no orgs
         // Redirect to dashboard otherwise
-        if (!this.userContact || !this.userProfile?.userTerms?.isTermsOfUseAccepted) {
-          nextStep = Pages.USER_PROFILE
+        if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
+          nextStep = Pages.USER_PROFILE_TERMS
         } else if (!this.currentOrganization && !this.currentMembership) {
           nextStep = Pages.CREATE_ACCOUNT
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {

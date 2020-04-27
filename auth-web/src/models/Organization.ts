@@ -23,7 +23,7 @@ export interface Organization {
   orgType?: string;
   members?: Member[];
   invitations?: Invitation[];
-  accessType: string;
+  accessType?: string;
   address?: Address,
   bcolProfile?:BcolProfile
   bcolAccountDetails?:BcolAccountDetails
