@@ -3,6 +3,7 @@ import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import Router, { Route, RouteConfig } from 'vue-router'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
+import AccountCreationSuccessView from '@/views/auth/AccountCreationSuccessView.vue'
 import { AccountSettings } from '@/models/account-settings'
 import AccountSetupView from '@/views/auth/AccountSetupView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
@@ -93,7 +94,8 @@ export function getRoutes (): RouteConfig[] {
         }
       ]
     },
-    { path: '/setup-account', name: 'setupaccount', component: AccountSetupView, props: true, meta: { requiresAuth: true } },
+    { path: '/setup-account', name: 'setupaccount', component: AccountSetupView, props: true, meta: { requiresAuth: true, requiresProfile: true } },
+    { path: '/setup-account-success', name: 'setup-account-success', component: AccountCreationSuccessView, meta: { requiresAuth: true, requiresProfile: true } },
     { path: '/userprofile/:token?', name: 'userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
     { path: '/createaccount', name: 'createaccount', component: CreateAccountView, meta: { requiresAuth: false, requiresProfile: false }, props: true },
     { path: '/duplicateteam', name: 'duplicateteam', component: DuplicateTeamWarningView, meta: { requiresAuth: true } },

@@ -4,11 +4,11 @@
       <template v-for="step in steps">
         <v-stepper-step
           class="pa-3"
-          :key="getStepIndex(step)"
+          :key="`${getStepIndex(step)}-step`"
           :complete="currentStepNumber > getStepIndex(step)"
           :step="getStepIndex(step)"
         >{{ getStepTitle(step) }}</v-stepper-step>
-        <v-divider vertical :key="step" v-if="step !== steps"></v-divider>
+        <v-divider vertical :key="`${getStepIndex(step)}-divider`" v-if="step !== steps"></v-divider>
       </template>
     </v-container>
     <v-container class="stepper-content pa-9">

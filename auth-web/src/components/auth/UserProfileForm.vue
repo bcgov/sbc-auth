@@ -11,29 +11,9 @@
     </v-expand-transition>
     <!-- First / Last Name -->
     <v-row>
-      <v-col cols="12" md="6" class="pt-0 pb-0">
-        <v-text-field
-                filled
-                label="First Name"
-                req
-                persistent-hint
-                disabled
-                v-model="firstName"
-                data-test="first-name"
-        >
-        </v-text-field>
-      </v-col>
-      <v-col cols="12" md="6" class="pt-0 pb-0">
-        <v-text-field
-                filled
-                label="Last Name"
-                req
-                persistent-hint
-                disabled
-                v-model="lastName"
-                data-test="last-name"
-        >
-        </v-text-field>
+      <v-col cols="12" class="pt-0 pb-0">
+        <h4 class="mb-1">{{firstName}} {{lastName}}</h4>
+        <p class="mb-6 intro-text">This is your legal name as it appears on your BC Services Card.</p>
       </v-col>
     </v-row>
     <!-- Email Address -->
@@ -94,13 +74,6 @@
     </v-row>
 
     <v-row>
-      <v-col cols="12" class="pt-0 pb-0">
-        <TermsOfUseDialog @terms-updated="updateTerms($event)"
-        />
-      </v-col>
-    </v-row>
-
-    <v-row>
       <v-col cols="12" class="form__btns pt-5">
         <v-btn large depressed color="default" class="deactivate-btn" v-show="editing" @click="$refs.deactivateUserConfirmationDialog.open()">Deactivate my profile</v-btn>
         <!-- Modal for deactivation confirmation -->
@@ -138,7 +111,7 @@
           <v-btn large color="primary" class="save-continue-button" :disabled='!isFormValid()' @click="save" data-test="save-button">
             Save
           </v-btn>
-          <v-btn large depressed @click="cancel" data-test="cancel-button" class="cancel-button">Cancel</v-btn>
+          <ConfirmCancelButton></ConfirmCancelButton>
         </div>
       </v-col>
     </v-row>
@@ -146,49 +119,48 @@
 </template>
 
 <script lang="ts">
+
+import { Account, Pages } from '@/util/constants'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { User, UserTerms } from '@/models/user'
+import { CreateRequestBody, Member, Organization } from '@/models/Organization'
+import { mapActions, mapState } from 'vuex'
+import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Contact } from '@/models/contact'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import OrgModule from '@/store/modules/org'
-import { Organization } from '@/models/Organization'
-import { Pages } from '@/util/constants'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
-import TermsOfUseDialog from '@/components/auth/TermsOfUseDialog.vue'
+import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
 import UserService from '@/services/user.services'
 import configHelper from '@/util/config-helper'
 import { getModule } from 'vuex-module-decorators'
-import { mapActions } from 'vuex'
 import { mask } from 'vue-the-mask'
 
 @Component({
   components: {
     ModalDialog,
-    TermsOfUseDialog
+    ConfirmCancelButton
   },
   directives: {
     mask
+  },
+  computed: {
+    ...mapState('org', ['currentOrganization'])
   },
   methods: {
     ...mapActions('user',
       [
         'createUserContact',
         'updateUserContact',
-        'saveUserTerms',
-        'getUserProfile',
-        'updateCurrentUserTerms'
-      ]
-    )
+        'getUserProfile'
+      ]),
+    ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization'])
   }
 })
 export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private readonly createUserContact!: (contact: Contact) => Contact
     private readonly updateUserContact!: (contact: Contact) => Contact
-    private readonly saveUserTerms!: () => Promise<User>
     private readonly getUserProfile!: (identifer: string) => User
-    private readonly updateCurrentUserTerms!: (UserTerms) => void
     private firstName = ''
     private lastName = ''
     private emailAddress = ''
@@ -200,6 +172,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private deactivateProfileDialog = false
     private isDeactivating = false
     @Prop() token: string
+    readonly currentOrganization!: Organization
+    private readonly createOrg!: () => Promise<Organization>
+    readonly syncMembership!: (orgId: number) => Promise<Member>
+    readonly syncOrganization!: (orgId: number) => Promise<Organization>
 
     $refs: {
       deactivateUserConfirmationDialog: ModalDialog,
@@ -230,16 +206,13 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private isFormValid (): boolean {
       return this.$refs.form &&
         this.$refs.form.validate() &&
-        this.confirmedEmailAddress === this.emailAddress &&
-        this.userProfile.userTerms &&
-        this.userProfile.userTerms.isTermsOfUseAccepted
+        this.confirmedEmailAddress === this.emailAddress
     }
 
     private async mounted () {
       if (!this.userProfile) {
         await this.getUserProfile('@me')
       }
-
       this.firstName = this.userProfile?.firstname
       this.lastName = this.userProfile?.lastname
       if (this.userContact) {
@@ -250,13 +223,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       }
     }
 
-    private async updateTerms (event) {
-      await this.updateCurrentUserTerms({
-        termsOfUseAcceptedVersion: event.termsVersion,
-        isTermsOfUseAccepted: event.isTermsAccepted
-      })
-    }
-
     private async save () {
       if (this.isFormValid()) {
         const contact = {
@@ -264,26 +230,47 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
           phone: this.phoneNumber,
           phoneExtension: this.extension
         }
-        if (!this.editing) {
-          await Promise.all([
-            await this.createUserContact(contact),
-            await this.saveUserTerms()
-          ])
+        if (this.stepForward) { // On stepper ;so Save the org
+          try {
+            const organization = await this.createOrg()
+            if (this.editing) {
+              await this.updateUserContact(contact)
+            } else {
+              await this.createUserContact(contact)
+            }
+            await this.getUserProfile('@me')
+            await this.syncOrganization(organization.id)
+            await this.syncMembership(organization.id)
+            this.$store.commit('updateHeader')
+            this.$router.push('/setup-account-success')
+          } catch (err) {
+            switch (err.response.status) {
+              case 409:
+                this.formError =
+                        'An account with this name already exists. Try a different account name.'
+                break
+              case 400:
+                if (err.response.data.code === 'MAX_NUMBER_OF_ORGS_LIMIT') {
+                  this.formError = 'Maximum number of accounts reached'
+                } else {
+                  this.formError = 'Invalid account name'
+                }
+                break
+              default:
+                this.formError =
+                        'An error occurred while attempting to create your account.'
+            }
+          }
         } else {
           await this.updateUserContact(contact)
-        }
-        await this.getUserProfile('@me')
-        // If a token was provided, that means we are in the accept invitation flow
-        // so redirect to /confirmtoken
-        if (this.token) {
-          this.$router.push('/confirmtoken/' + this.token)
-          return
-        }
-
-        if (!this.stepForward) {
+          await this.getUserProfile('@me')
+          // If a token was provided, that means we are in the accept invitation flow
+          // so redirect to /confirmtoken
+          if (this.token) {
+            this.$router.push('/confirmtoken/' + this.token)
+            return
+          }
           this.redirectToNext()
-        } else {
-          this.stepForward()
         }
       }
     }

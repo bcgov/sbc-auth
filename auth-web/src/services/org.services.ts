@@ -13,6 +13,10 @@ export default class OrgService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`)
   }
 
+  public static async isOrgNameAvailable (orgName: string): Promise<AxiosResponse> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs?name=${orgName}`)
+  }
+
   public static async getOrgMembers (orgId: number, status: string): Promise<AxiosResponse<Members>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/members?status=${status}`)
   }

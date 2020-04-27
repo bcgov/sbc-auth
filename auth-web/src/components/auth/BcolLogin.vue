@@ -108,6 +108,9 @@ export default class BcolLogin extends Vue {
       } catch (err) {
         this.isLoading = false
         switch (err.response.status) {
+          case 409:
+            this.errorMessage = err.response.data.message
+            break
           case 400:
             this.errorMessage = err.response.data.message
             break

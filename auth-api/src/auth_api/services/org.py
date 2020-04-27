@@ -332,9 +332,9 @@ class Org:
             for org in org_models:
                 orgs['orgs'].append(Org(org).as_dict())
         elif kwargs.get('name', None):
-            org_models = OrgModel.find_similar_org_by_name(kwargs.get('name'))
-            for org in org_models:
-                orgs['orgs'].append(Org(org).as_dict())
+            org_model = OrgModel.find_similar_org_by_name(kwargs.get('name'))
+            if org_model is not None:
+                orgs['orgs'].append(Org(org_model).as_dict())
         return orgs
 
     @staticmethod
