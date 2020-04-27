@@ -1,67 +1,69 @@
 <template>
   <v-form ref="adress" lazy-validation>
-    <h4 class="mb-2">Mailing Address</h4>
-    <v-row>
-      <v-col cols="12" class="py-0 mb-4">
-        <v-text-field
-                filled
-                @change="emitAddress"
-                label="Street Address"
-                v-model.trim="address.street"
-                :rules="rules.streetAddress"
-                req
-        >
-        </v-text-field>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="4" class="py-0 mb-4">
-        <v-text-field
-                filled
-                label="City"
-                @change="emitAddress"
-                v-model.trim="address.city"
-                :rules="rules.city"
-                req
-        >
-        </v-text-field>
-      </v-col>
-      <v-col cols="4" class="py-0 mb-4">
-        <v-text-field
-                filled
-                label="Province/Region/State"
-                v-model.trim="address.region"
-                @change="emitAddress"
-                :rules="rules.province"
-                req
-        >
-        </v-text-field>
-      </v-col>
-      <v-col cols="4" class="py-0 mb-4">
-        <v-text-field
-                filled
-                label="Postal Code"
-                v-model.trim="address.postalCode"
-                @change="emitAddress"
-                :rules="rules.postalCode"
-                req
-        >
-        </v-text-field>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="4" class="py-0 mb-4">
-        <v-text-field
-                filled
-                label="Country"
-                v-model.trim="address.country"
-                @change="emitAddress"
-                :rules="rules.country"
-                req
-        >
-        </v-text-field>
-      </v-col>
-    </v-row>
+    <fieldset>
+      <legend class="mb-3">Mailing Address</legend>
+      <v-row>
+        <v-col cols="12" class="py-0">
+          <v-text-field
+                  filled
+                  @change="emitAddress"
+                  label="Street Address"
+                  v-model.trim="address.street"
+                  :rules="rules.streetAddress"
+                  req
+          >
+          </v-text-field>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="4" class="py-0">
+          <v-text-field
+                  filled
+                  label="City"
+                  @change="emitAddress"
+                  v-model.trim="address.city"
+                  :rules="rules.city"
+                  req
+          >
+          </v-text-field>
+        </v-col>
+        <v-col cols="4" class="py-0">
+          <v-text-field
+                  filled
+                  label="Province/Region/State"
+                  v-model.trim="address.region"
+                  @change="emitAddress"
+                  :rules="rules.province"
+                  req
+          >
+          </v-text-field>
+        </v-col>
+        <v-col cols="4" class="py-0">
+          <v-text-field
+                  filled
+                  label="Postal Code"
+                  v-model.trim="address.postalCode"
+                  @change="emitAddress"
+                  :rules="rules.postalCode"
+                  req
+          >
+          </v-text-field>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="4" class="py-0">
+          <v-text-field
+                  filled
+                  label="Country"
+                  v-model.trim="address.country"
+                  @change="emitAddress"
+                  :rules="rules.country"
+                  req
+          >
+          </v-text-field>
+        </v-col>
+      </v-row>
+    </fieldset>
   </v-form>
 </template>
 

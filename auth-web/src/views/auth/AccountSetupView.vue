@@ -1,14 +1,12 @@
 <template>
-  <v-container>
-    <div class="view-container">
-      <article>
-        <h1 class="mb-5">Create Account</h1>
-        <p class="intro-text">Please follow the steps below to create your account.</p>
-        <v-card flat>
-          <Stepper :stepper-configuration="stepperConfig"></Stepper>
-        </v-card>
-      </article>
+  <v-container class="view-container">
+    <div class="view-header flex-column">
+      <h1 class="view-header__title">Create a BC Registries Account</h1>
+      <p class="mb-0">Create an account to access BC Registries products and services.</p>
     </div>
+    <v-card flat>
+      <Stepper :stepper-configuration="stepperConfig"></Stepper>
+    </v-card>
   </v-container>
 </template>
 

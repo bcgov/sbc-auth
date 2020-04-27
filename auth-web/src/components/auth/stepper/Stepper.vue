@@ -1,31 +1,30 @@
 <template>
-  <v-stepper v-model="currentStepNumber">
-    <v-row class="mx-0">
-      <v-col class="stepper-menu" :cols="2">
+  <v-stepper class="stepper d-flex" v-model="currentStepNumber">
+    <v-container class="stepper-nav py-7 pl-8" :cols="2">
+      <template v-for="step in steps">
         <v-stepper-step
-          v-for="step in steps"
+          class="pa-3"
           :key="getStepIndex(step)"
           :complete="currentStepNumber > getStepIndex(step)"
           :step="getStepIndex(step)"
         >{{ getStepTitle(step) }}</v-stepper-step>
-      </v-col>
-      <v-col class="pa-9">
-        <div v-for="step in steps" :key="getStepIndex(step)" class="flex-grow">
-          <template v-if="getStepIndex(step) === currentStepNumber">
-            <div class="stepper-count mb-1">Step {{currentStepNumber}} of {{steps.length}}</div>
-            <h2 class="mb-4">{{getStepTitle(step)}}</h2>
-            <component
-              class="pa-0"
-              :is="currentStep.component"
-              v-bind="getPropsForStep(step)"
-              keep-alive
-              transition="fade"
-              mode="out-in"
-            />
-          </template>
-        </div>
-      </v-col>
-    </v-row>
+        <v-divider vertical :key="step" v-if="step !== steps"></v-divider>
+      </template>
+    </v-container>
+    <v-container class="stepper-content pa-9">
+      <div v-for="step in steps" :key="getStepIndex(step)" class="flex-grow">
+        <template v-if="getStepIndex(step) === currentStepNumber">
+          <div class="stepper-content__count mt-1 mb-1">Step {{currentStepNumber}} of {{steps.length}}</div>
+          <h2 class="stepper-content__title mb-6">{{getStepTitle(step)}}</h2>
+          <component
+            class="pa-0"
+            :is="currentStep.component"
+            v-bind="getPropsForStep(step)"
+            keep-alive
+          />
+        </template>
+      </div>
+    </v-container>
   </v-stepper>
 </template>
 
@@ -121,13 +120,110 @@ export default class Stepper extends Vue {
 <style lang="scss" scoped>
   @import "$assets/scss/theme.scss";
 
-  .stepper-menu {
-    min-width: 24%;
+  .stepper-nav {
+    width: 18rem;
+    flex: 0 0 auto;
+
+    hr:last-child {
+      display: none;
+    }
   }
-  .stepper-count {
-    font-weight: 600;
-    font-size: 1.05rem;
-    text-transform: uppercase;
-    color: $gray6;
+
+  .stepper-content {
+    flex: 1 1 auto;
+
+    &__count {
+      color: var(--v-grey-darken1);
+      text-transform: uppercase;
+      font-size: 0.9375rem;
+      font-weight: bold;
+    }
+
+    &__title {
+      font-size: 1.5rem;
+    }
+  }
+
+  // Stepper
+   $step-icon-size: 1.8rem;
+   $step-font-size: 0.8375rem;
+
+  .v-stepper {
+    box-shadow: none;
+    overflow: visible;
+
+    .v-divider {
+      margin-left: 1.65rem;
+      height: 1.5rem;
+      min-height: 1.5rem;
+      max-height: 1.5rem;
+      border-width: 1px;
+    }
+  }
+
+  .v-stepper__step {
+    border-radius: 4px;
+    font-size: $step-font-size;
+    font-weight: 700;
+
+    ::v-deep {
+      .v-stepper__step__step {
+        margin-right: 1rem;
+        width: $step-icon-size;
+        height: $step-icon-size;
+        min-width: $step-icon-size
+      }
+    }
+  }
+
+  .v-stepper__step:focus,
+  .v-stepper__step:active {
+    outline: none;
+    box-shadow: 0 0 0 1px var(--v-primary-base);
+  }
+
+  .v-stepper__step:hover,
+  .v-stepper__step--active {
+    ::v-deep {
+      .v-stepper__label {
+        text-shadow: none !important;
+        color: var(--v-primary-base) !important;
+      }
+    }
+  }
+
+  .v-stepper__step--complete {
+    ::v-deep {
+      .v-stepper__step__step {
+        border: 2px solid var(--v-primary-base) !important;
+        background-color: transparent !important;
+      }
+      .v-icon {
+        color: var(--v-primary-base) !important;
+      }
+    }
+  }
+
+  .theme--light.v-stepper .v-stepper__step--complete .v-stepper__label {
+    color: rgba(0,0,0,.38);
+  }
+
+  ::v-deep {
+    .step-btns .v-btn {
+      width: 7rem;
+      font-weight: 700;
+    }
+  }
+
+  .fade-enter-active,
+  .fade-leave-active {
+    transition-duration: 0.3s;
+    transition-property: opacity;
+    transition-timing-function: ease;
+  }
+
+  .fade-enter,
+  .fade-leave-active {
+    opacity: 0
   }
 </style>
