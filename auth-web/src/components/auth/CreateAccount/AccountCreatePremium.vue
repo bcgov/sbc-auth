@@ -2,40 +2,42 @@
   <v-container>
     <v-form ref="createAccountInfoForm" lazy-validation>
       <p class="mb-7">
-        You must be the Prime Contact to link this account with your existing BC
-        Online account.
+        You must be the Prime Contact to link this account with your existing BC Online account.
       </p>
       <BcolLogin @account-link-successful="onLink" v-show="!linked"></BcolLogin>
       <template v-if="linked">
-        <v-alert v-model="linked" dark color="info" icon="mdi-check">
-          <v-row>
-            <v-col cols="8">
-              <div class="text-uppercase mb-3">Account Linked!</div>
-              <div v-if="currentOrganization.bcolAccountDetails">
-                <div class="bcol-acc-label">
-                  {{ currentOrganization.name }}
-                </div>
-                Account No:
-                {{ currentOrganization.bcolAccountDetails.accountNumber }} |
-                Authorizing User ID:
-                {{ currentOrganization.bcolAccountDetails.userId }}
+        <v-alert dark color="primary" icon="mdi-check" class="py-6 pr-6 pl-4" v-model="linked">
+          <div class="bcol-acc d-flex justify-space-between align-center">
+            <div v-if="currentOrganization.bcolAccountDetails">
+              <div class="bcol-acc__link-status mb-3">Account Linked!</div>
+              <div class="bcol-acc__name">
+                {{ currentOrganization.name }}
               </div>
-            </v-col>
-            <v-col cols="4" align-self="center">
+              <ul class="bcol-acc__meta">
+                <li>
+                  Account No: {{ currentOrganization.bcolAccountDetails.accountNumber }}
+                </li>
+                <li>
+                  Authorizing User ID: {{ currentOrganization.bcolAccountDetails.userId }}
+                </li>
+              </ul>
+            </div>
+            <div>
               <v-btn
                 large
                 outlined
+                class="font-weight-bold"
                 @click="unlinkAccounts()"
                 data-test="dialog-save-button"
               >
-                <strong>Remove Linked Accounts</strong></v-btn
-              >
-            </v-col>
-          </v-row>
+                Remove Linked Accounts
+              </v-btn>
+            </div>
+          </div>
         </v-alert>
-        <v-checkbox v-model="grantAccess" class="mt-5">
+        <v-checkbox large color="primary" v-model="grantAccess" class="bcol-auth mt-8">
           <template v-slot:label>
-            <span class="grant-access" v-html="grantAccessText"></span>
+            <div class="bcol-auth__label" v-html="grantAccessText"></div>
           </template>
         </v-checkbox>
         <template v-if="grantAccess">
@@ -43,28 +45,25 @@
             <v-col cols="12">
               <h3 class="mb-4">Account Information</h3>
               <p class="mb-0">
-                The following information will be imported from your existing BC
-                Online account.
+                The following information will be imported from your existing BC Online account.
               </p>
               <p class="mb-8">
                 Review your account information below and update if needed.
               </p>
             </v-col>
           </v-row>
-          <v-row class="mb-1">
-            <v-col cols="12" class="">
-              <h4 class="mb-2">Account Name</h4>
-              <v-text-field
-                filled
-                label="Account Name"
-                v-model.trim="currentOrganization.name"
-                persistent-hint
-                disabled
-                data-test="account-name"
-              >
-              </v-text-field>
-            </v-col>
-          </v-row>
+          <fieldset class="mb-2">
+            <legend class="mb-3">Account Name</legend>
+            <v-text-field
+              filled
+              label="Account Name"
+              v-model.trim="currentOrganization.name"
+              persistent-hint
+              disabled
+              data-test="account-name"
+            >
+            </v-text-field>
+          </fieldset>
           <BaseAddress :inputAddress="address" @address-update="updateAddress">
           </BaseAddress>
         </template>
@@ -73,8 +72,8 @@
         </v-alert>
       </template>
       <v-row>
-        <v-col cols="12" class="d-inline-flex">
-          <v-btn large depressed color="grey lighten-3" class="mx-1" @click="goBack">
+        <v-col cols="12" class="step-btns mt-8 pb-0 d-inline-flex">
+          <v-btn large color="default" @click="goBack">
             <v-icon left class="mr-1">mdi-arrow-left</v-icon>
             Back
           </v-btn>
@@ -233,12 +232,57 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   justify-content: flex-end;
 }
 
-.bcol-acc-label {
-  font-size: 1.35rem;
-  font-weight: 600;
+.bcol-acc__link-status {
+  text-transform: uppercase;
+  font-size: 0.9375rem;
 }
 
-.grant-access {
-  font-size: 1rem !important;
+.bcol-acc {
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.bcol-acc__name {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.bcol-acc__meta {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+
+  li {
+    position: relative;
+    display: inline-block
+  }
+
+  li + li {
+    &:before {
+      content: ' | ';
+      display: inline-block;
+      position: relative;
+      top: -2px;
+      width: 2rem;
+      vertical-align: top;
+      text-align: center;
+    }
+  }
+}
+
+.bcol-auth {
+  max-width: 40rem;
+
+  ::v-deep {
+    .v-input__slot {
+      align-items: flex-start;
+    }
+  }
+}
+
+.bcol-auth__label {
+  margin-left: 0.5rem;
+  line-height: 1.5;
+  color: var(--v-grey-darken4) !important;
 }
 </style>
