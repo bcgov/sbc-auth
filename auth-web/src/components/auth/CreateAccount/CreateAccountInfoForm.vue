@@ -1,8 +1,8 @@
 <template>
-      <v-form ref="createAccountInfoForm" lazy-validation>
-          <account-premium-create  v-if="isPremium()" :stepForward="stepForward" :stepBack="stepBack"></account-premium-create>
-          <account-basic-create  v-if="!isPremium()" :stepForward="stepForward" :stepBack="stepBack"></account-basic-create>
-      </v-form>
+  <v-form ref="createAccountInfoForm" lazy-validation>
+    <account-premium-create  v-if="isPremium()" :stepForward="stepForward" :stepBack="stepBack"></account-premium-create>
+    <account-basic-create  v-if="!isPremium()" :stepForward="stepForward" :stepBack="stepBack"></account-basic-create>
+  </v-form>
 </template>
 
 <script lang="ts">

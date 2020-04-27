@@ -1,20 +1,24 @@
 <template>
   <v-form ref="createAccountInfoForm" lazy-validation>
-      <v-row align="end">
-        <v-col cols="12" align-self="end">
-          <h4>BC Online Prime Contact Details
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <v-btn icon color="grey darken-2" small v-on="on" class="help-tooltip-btn">
-                  <v-icon>mdi-help-circle-outline</v-icon>
-                </v-btn>
-              </template>
-              <span>BC Online Prime Contacts are users who have authority to manage account settings for a BC Online Account.</span>
-            </v-tooltip></h4>
-        </v-col>
-      </v-row>
+    <fieldset>
+      <legend class="mb-3">
+        BC Online Prime Contact Details
+        <v-tooltip bottom color="grey darken-4">
+          <template v-slot:activator="{ on }">
+            <v-icon color="grey darken-4" v-on="on" tabindex="0">mdi-help-circle-outline</v-icon>
+          </template>
+          <div class="bcol-tooltip__msg py-2">BC Online Prime Contacts are users who have authority to manage account settings for a BC Online Account.</div>
+        </v-tooltip>
+      </legend>
+      <v-slide-y-transition>
+        <div class="pb-2" v-show="errorMessage">
+          <v-alert type="error">
+            {{errorMessage}}
+          </v-alert>
+        </div>
+      </v-slide-y-transition>
       <v-row>
-        <v-col cols="4" class="py-0 mb-4">
+        <v-col cols="4" class="py-0 pr-0">
           <v-text-field
                   filled
                   label="User ID"
@@ -25,7 +29,7 @@
           >
           </v-text-field>
         </v-col>
-        <v-col cols="4" class="py-0 mb-4">
+        <v-col cols="4" class="py-0 pr-0">
           <v-text-field
                   filled
                   label="Password"
@@ -37,23 +41,22 @@
           >
           </v-text-field>
         </v-col>
-        <v-col cols="4" class="py-0 mb-4">
+        <v-col cols="4" class="py-0">
           <v-btn
             x-large
+            depressed
             color="primary"
+            class="link-account-btn"
             @click="linkAccounts()"
             data-test="dialog-save-button"
             :loading="isLoading"
             :disabled='!isFormValid() || isLoading'
           >
-            <strong>Link Accounts</strong>
+            Link Accounts
           </v-btn>
         </v-col>
       </v-row>
-    <v-alert type="error" class="mb-6"
-             v-show="errorMessage">
-      {{errorMessage}}
-    </v-alert>
+    </fieldset>
   </v-form>
 </template>
 
@@ -118,7 +121,32 @@ export default class BcolLogin extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.help-tooltip-btn {
-  margin-top: -8px;
-}
+  .bcol-tooltip__msg {
+    max-width: 20rem;
+    line-height: 1.5;
+    font-size: 0.9375rem;
+  }
+
+  .v-icon {
+    margin-top: -2px;
+    font-size: 1.25rem !important;
+  }
+
+  .v-btn.link-account-btn {
+    font-size: 0.9375rem !important;
+    font-weight: 700;
+  }
+
+  .v-tooltip__content:before {
+    content: ' ';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    margin-left: -10px;
+    width: 20px;
+    height: 20px;
+    border-width: 10px 10px 10px 10px;
+    border-style: solid;
+    border-color: transparent transparent var(--v-grey-darken4) transparent;
+  }
 </style>

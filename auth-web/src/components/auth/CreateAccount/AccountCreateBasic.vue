@@ -1,8 +1,12 @@
 <template>
-  <v-container>
-    <v-form ref="createAccountInfoForm" class="mt-8">
-      <v-alert type="error" v-show="errorMessage">{{ errorMessage }}</v-alert>
-      <h4 class="mb-2">Enter an Account Name</h4>
+  <v-form class="pt-2" ref="createAccountInfoForm">
+    <fieldset>
+      <legend class="mb-3">Enter an Account Name</legend>
+      <v-slide-y-transition>
+        <div class="pb-2" v-show="errorMessage">
+          <v-alert type="error">{{ errorMessage }}</v-alert>
+        </div>
+      </v-slide-y-transition>
       <v-text-field
         filled
         label="Account Name"
@@ -10,45 +14,39 @@
         :rules="teamNameRules"
         persistent-hint
         :disabled="saving"
-        :hint="
-          teamType === 'BASIC'
-            ? 'Example: Your Business Name'
-            : 'Example: Your Management Company or Law Firm Name'
-        "
       />
-      <v-row>
-        <v-col cols="12" class="d-inline-flex">
-          <v-btn large depressed color="grey lighten-3" class="mx-1" @click="goBack">
-            <v-icon left class="mr-1">mdi-arrow-left</v-icon>
-            Back
-          </v-btn>
-          <v-spacer></v-spacer>
-          <v-btn
-            large
-            color="primary"
-            class="mr-2"
-            :loading="saving"
-            :disabled="!isFormValid() || saving"
-            @click="save"
-            depressed
-            data-test="save-button"
-          >
-            Save and Continue
-          </v-btn>
-          <v-btn
-            large
-            depressed
-            color="default"
-            :disable="saving"
-            @click="cancel"
-            data-test="cancel-button"
-          >
-            Cancel
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-form>
-  </v-container>
+    </fieldset>
+    <v-row>
+      <v-col cols="12" class="step-btns mt-8 pb-0 d-inline-flex">
+        <v-btn large color="default" @click="goBack">
+          <v-icon left class="mr-2">mdi-arrow-left</v-icon>
+          <span>Back</span>
+        </v-btn>
+        <v-spacer></v-spacer>
+        <v-btn
+          large
+          color="primary"
+          class="mr-2"
+          :loading="saving"
+          :disabled="!isFormValid() || saving"
+          @click="save"
+          data-test="save-button"
+        >
+          <span>Next</span>
+          <v-icon class="ml-2">mdi-arrow-right</v-icon>
+        </v-btn>
+        <v-btn
+          large
+          color="default"
+          :disable="saving"
+          @click="cancel"
+          data-test="cancel-button"
+        >
+          Cancel
+        </v-btn>
+      </v-col>
+    </v-row>
+  </v-form>
 </template>
 
 <script lang="ts">
