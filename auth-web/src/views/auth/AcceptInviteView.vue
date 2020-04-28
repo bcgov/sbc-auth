@@ -48,18 +48,17 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
   }
 
   /**
-   * User profile filled out?: Accept invitation, set orgid in sessionstorage, update header
-   * User profile incomplete?:  Redirect to user profile, user profile will direct here after
+   * is terms accepted : No -> Redirect to TOS page with token in url ; else continue
+   * User profile[contact] not filled out: -> Redirect him to user profile url
+   * Else invitation flow
    */
   private async accept () {
     try {
-      if (!this.userContact || !this.userProfile.userTerms.isTermsOfUseAccepted) {
-        if (this.isCreateUserProfile) {
-          this.$router.push(`/userprofileterms`)
-        } else {
-          // Go to user profile, with the token, so that we can continue acceptance flow afterwards
-          this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
-        }
+      if (!this.userProfile.userTerms.isTermsOfUseAccepted) {
+        this.$router.push(`/${Pages.USER_PROFILE_TERMS}/${this.token}`)
+        return
+      } else if (!this.userContact) {
+        this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
         return
       } else {
         const invitation = await this.acceptInvitation(this.token)

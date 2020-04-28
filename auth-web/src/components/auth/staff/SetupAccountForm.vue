@@ -138,7 +138,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('staff', ['products', 'accountTypes'])
   },
   methods: {
-    ...mapActions('org', ['createOrg', 'addProductsToOrg', 'createInvitation']),
+    ...mapActions('org', ['createOrgByStaff', 'addProductsToOrg', 'createInvitation']),
     ...mapActions('staff', ['getProducts', 'getAccountTypes'])
   },
   components: {
@@ -158,7 +158,7 @@ export default class SetupAccountForm extends Vue {
   private emailConfirm = ''
   private dialogTitle = ''
   private dialogText = ''
-  private readonly createOrg!: (
+  private readonly createOrgByStaff!: (
     requestBody: CreateRequestBody
   ) => Promise<Organization>
   private readonly addProductsToOrg!: (productsRequestBody: ProductsRequestBody) => Promise<Products>
@@ -220,7 +220,7 @@ export default class SetupAccountForm extends Vue {
       }
       try {
         this.saving = true
-        const organization = await this.createOrg(createRequestBody)
+        const organization = await this.createOrgByStaff(createRequestBody)
         await this.addProductsToOrg(addProductsRequestBody)
         await this.createInvitation({
           recipientEmail: this.email,

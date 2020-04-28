@@ -5,7 +5,5 @@
   "VUE_APP_LEGAL_ROOT_API": "https://legal-api-dev.pathfinder.gov.bc.ca/api/v1",
   "VUE_APP_STATUS_ROOT_API": "https://status-api-dev.pathfinder.gov.bc.ca/api/v1",
   "VUE_APP_PATH_NEW_BUSINESS": "https://business-create-dev.pathfinder.gov.bc.ca/businesses/",
-  "DIRECTOR_SEARCH_URL": "https://search-web-dev-1rdehl-dev.pathfinder.gov.bc.ca/",
-  "VUE_APP_BCOL_ROOT_API": "https://bcol-api-dev.pathfinder.gov.bc.ca/api/v1"
-
+  "DIRECTOR_SEARCH_URL": "https://search-web-dev-1rdehl-dev.pathfinder.gov.bc.ca/"
 }
