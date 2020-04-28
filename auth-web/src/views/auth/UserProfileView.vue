@@ -25,9 +25,6 @@
           </div>
           <v-card class="profile-card">
             <v-container>
-              <v-card-title class="mb-4">
-                {{ userProfile && userProfile.firstname }} {{ userProfile && userProfile.lastname }}
-              </v-card-title>
               <v-card-text>
                 <UserProfileForm v-bind:token="token"> </UserProfileForm>
               </v-card-text>

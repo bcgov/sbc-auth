@@ -7,6 +7,7 @@
       <v-btn
         large
         color="default"
+        data-test="confirm-cancel-button"
         :disabled="disabled"
         @click="showConfirmDialog = true"
         v-on="on"
