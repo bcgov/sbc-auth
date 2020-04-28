@@ -257,6 +257,7 @@ export default class OrgModule extends VuexModule {
     } else {
       this.context.dispatch('syncActiveOrgMembers')
       this.context.dispatch('syncPendingOrgMembers')
+      this.context.dispatch('syncMembership', this.context.state['currentOrganization'].id)
     }
   }
 
