@@ -94,6 +94,8 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
       const userTerms = await this.saveUserTerms()
       if (userTerms?.userTerms?.isTermsOfUseAccepted) {
         await this.syncUser()
+        // if there is a token in the url , that means user is in the invitation flow
+        // so after TOS , dont create accont , rather let him create profile
         if (this.token) {
           this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
           return
