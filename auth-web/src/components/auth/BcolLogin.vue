@@ -12,7 +12,7 @@
       </legend>
       <v-slide-y-transition>
         <div class="pb-2" v-show="errorMessage">
-          <v-alert type="error">
+          <v-alert type="error" icon="mdi-alert-circle-outline">
             {{errorMessage}}
           </v-alert>
         </div>

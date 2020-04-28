@@ -17,7 +17,7 @@
           v-bind:class="{'legal-name': !isStepperView}"
           class="mb-1"
         >{{firstName}} {{lastName}}</h4>
-        <p class="mb-6 intro-text">This is your legal name as it appears on your BC Services Card.</p>
+        <div class="mb-6">This is your legal name as it appears on your BC Services Card.</div>
       </v-col>
     </v-row>
     <!-- Email Address -->

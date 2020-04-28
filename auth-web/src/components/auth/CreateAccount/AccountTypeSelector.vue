@@ -7,7 +7,7 @@
         sm="6"
       >
         <v-card
-          class="account-card pa-9"
+          class="account-card pa-9 elevation-2"
           :class="{'active': selectedAccountType == ACCOUNT_TYPE.BASIC}"
           flat
           outlined
@@ -21,8 +21,8 @@
             I make 10 transactions per month or less
           </div>
           <ul class="account-type__details">
-            <li class="mb-6">For users who file on behalf of their own businesses or conduct a limited number of searches</li>
-            <li class="mb-6">Credit card payment only</li>
+            <li class="mb-5">For users who file on behalf of their own businesses or conduct a limited number of searches</li>
+            <li class="mb-5">Credit card payment only</li>
             <li>Up to 10 purchases per month</li>
           </ul>
         </v-card>
@@ -32,7 +32,7 @@
         sm="6"
       >
         <v-card
-          class="account-card pa-9"
+          class="account-card pa-9 elevation-2"
           :class="{'active': selectedAccountType == ACCOUNT_TYPE.PREMIUM}"
           flat
           outlined
@@ -42,11 +42,11 @@
           <div class="account-type__name mb-2">PREMIUM</div>
           <div class="account-type__title mb-8">I make more than 10 transactions per month</div>
           <ul class="account-type__details mb-8">
-            <li class="mb-6">For firms and companies who search frequently or file for a large number of businesses</li>
-            <li class="mb-6">Uses your BC Online account to pay for products & services</li>
+            <li class="mb-5">For firms and companies who search frequently or file for a large number of businesses</li>
+            <li class="mb-5">Uses your BC Online account to pay for products & services</li>
             <li>Unlimited purchases</li>
           </ul>
-          <div class="mb-7">
+          <div class="mb-5">
             <strong>
               Please Note: To create a Premium account, you require an existing BC Online account. You must be the Prime Contact to complete this process.
             </strong>
@@ -125,12 +125,15 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 }
 
 .account-card {
-  border-radius: 6px !important;
+  position: relative;
   background-color: var(--v-grey-lighten4) !important;
 
+  &:hover {
+    border-color: var(--v-primary-base) !important;
+  }
+
   &.active {
-    box-shadow: 0 0 0 3px inset var(--v-primary-base);
-    background-color: #ffffff;
+    box-shadow: 0 0 0 1px inset var(--v-primary-base), 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12) !important;
   }
 }
 
