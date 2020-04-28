@@ -233,11 +233,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
         if (this.stepForward) { // On stepper ;so Save the org
           try {
             const organization = await this.createOrg()
-            if (this.editing) {
-              await this.updateUserContact(contact)
-            } else {
-              await this.createUserContact(contact)
-            }
+            await this.saveOrUpdateContact(contact)
             await this.getUserProfile('@me')
             await this.syncOrganization(organization.id)
             await this.syncMembership(organization.id)
@@ -262,7 +258,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
             }
           }
         } else {
-          await this.updateUserContact(contact)
+          await this.saveOrUpdateContact(contact)
           await this.getUserProfile('@me')
           // If a token was provided, that means we are in the accept invitation flow
           // so redirect to /confirmtoken
@@ -272,6 +268,14 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
           }
           this.redirectToNext()
         }
+      }
+    }
+
+    private async saveOrUpdateContact (contact:Contact) {
+      if (this.editing) {
+        await this.updateUserContact(contact)
+      } else {
+        await this.createUserContact(contact)
       }
     }
 

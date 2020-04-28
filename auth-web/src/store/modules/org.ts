@@ -146,6 +146,17 @@ export default class OrgModule extends VuexModule {
     return response?.data
   }
 
+  /*
+   * staff doesnt need any other store set up's since he doesnt belong to an account
+   * So a minimal method to create org
+   */
+  @Action({ rawError: true })
+  public async createOrgByStaff (createRequestBody: CreateOrgRequestBody): Promise<Organization> {
+    const response = await OrgService.createOrg(createRequestBody)
+    this.context.commit('setCurrentOrganization', response?.data)
+    return response?.data
+  }
+
   @Action({ rawError: true })
   public async createOrg (): Promise<Organization> {
     const org = this.context.state['currentOrganization']
