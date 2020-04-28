@@ -108,7 +108,7 @@
           </template>
         </ModalDialog>
         <div>
-          <v-btn large color="primary" class="save-continue-button" :disabled='!isFormValid()' @click="save" data-test="save-button">
+          <v-btn large color="primary" class="save-continue-button mr-3" :disabled='!isFormValid()' @click="save" data-test="save-button">
             Save
           </v-btn>
           <ConfirmCancelButton></ConfirmCancelButton>

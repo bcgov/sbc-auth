@@ -47,7 +47,7 @@ import { mapActions } from 'vuex'
     ])
   }
 })
-export default class CancelButton extends Vue {
+export default class ConfirmCancelButton extends Vue {
   @Prop({ default: false }) isEmit: boolean
   @Prop({ default: false }) disabled: boolean
   @Prop({ default: 'Are you sure?' }) mainText: string
