@@ -60,7 +60,9 @@ export default class AccountSetupView extends Vue {
       {
         title: 'User Profile',
         component: UserProfileForm,
-        componentProps: {}
+        componentProps: {
+          isStepperView: true
+        }
       }
     ]
 }

@@ -27,7 +27,7 @@
         <v-btn
           large
           color="primary"
-          class="mr-2"
+          class="mr-3"
           :loading="saving"
           :disabled="!isFormValid() || saving"
           @click="save"
