@@ -215,10 +215,7 @@ export default class MemberDataTable extends Vue {
         return false
       case MembershipType.Admin:
         // Admins can change roles of their own
-        if (this.isOwnMembership(memberBeingChanged)) {
-          return true
-        }
-        return false
+        return this.isOwnMembership(memberBeingChanged)
       default:
         return false
     }
