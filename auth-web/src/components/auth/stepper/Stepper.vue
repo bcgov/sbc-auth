@@ -1,6 +1,6 @@
 <template>
   <v-stepper class="stepper d-flex" v-model="currentStepNumber">
-    <v-container class="stepper-nav py-7 pl-8" :cols="2">
+    <v-container class="stepper-nav py-6 px-8">
       <template v-for="step in steps">
         <v-stepper-step
           class="pa-3"
@@ -8,7 +8,7 @@
           :complete="currentStepNumber > getStepIndex(step)"
           :step="getStepIndex(step)"
         >{{ getStepTitle(step) }}</v-stepper-step>
-        <v-divider vertical :key="`${getStepIndex(step)}-divider`" v-if="step !== steps"></v-divider>
+        <v-divider vertical class="mt-n1 mb-n1" :key="`${getStepIndex(step)}-divider`" v-if="step !== steps"></v-divider>
       </template>
     </v-container>
     <v-container class="stepper-content pa-9">
@@ -121,8 +121,10 @@ export default class Stepper extends Vue {
   @import "$assets/scss/theme.scss";
 
   .stepper-nav {
-    width: 18rem;
     flex: 0 0 auto;
+    width: 19rem;
+    border-right: 1px solid var(--v-grey-lighten2);
+    background-color: var(--v-grey-lighten6);
 
     hr:last-child {
       display: none;
@@ -145,18 +147,19 @@ export default class Stepper extends Vue {
   }
 
   // Stepper
-   $step-icon-size: 1.8rem;
+   $step-icon-size: 2rem;
    $step-font-size: 0.8375rem;
+   $step-divider-height: 2rem;
 
   .v-stepper {
     box-shadow: none;
     overflow: visible;
 
     .v-divider {
-      margin-left: 1.65rem;
-      height: 1.5rem;
-      min-height: 1.5rem;
-      max-height: 1.5rem;
+      margin-left: 1.7rem;
+      height: $step-divider-height;
+      min-height: $step-divider-height;
+      max-height: $step-divider-height;
       border-width: 1px;
     }
   }
@@ -165,6 +168,7 @@ export default class Stepper extends Vue {
     border-radius: 4px;
     font-size: $step-font-size;
     font-weight: 700;
+    pointer-events: none;
 
     ::v-deep {
       .v-stepper__step__step {
@@ -202,10 +206,10 @@ export default class Stepper extends Vue {
         color: var(--v-primary-base) !important;
       }
     }
-  }
 
-  .theme--light.v-stepper .v-stepper__step--complete .v-stepper__label {
-    color: rgba(0,0,0,.38);
+    + .v-divider {
+      border-color: var(--v-primary-base);
+    }
   }
 
   ::v-deep {
@@ -213,17 +217,5 @@ export default class Stepper extends Vue {
       min-width: 7rem !important;
       font-weight: 700;
     }
-  }
-
-  .fade-enter-active,
-  .fade-leave-active {
-    transition-duration: 0.3s;
-    transition-property: opacity;
-    transition-timing-function: ease;
-  }
-
-  .fade-enter,
-  .fade-leave-active {
-    opacity: 0
   }
 </style>

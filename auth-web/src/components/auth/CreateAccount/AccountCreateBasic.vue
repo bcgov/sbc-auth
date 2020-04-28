@@ -3,8 +3,8 @@
     <fieldset>
       <legend class="mb-3">Enter an Account Name</legend>
       <v-slide-y-transition>
-        <div class="pb-2" v-show="errorMessage">
-          <v-alert type="error">{{ errorMessage }}</v-alert>
+        <div v-show="errorMessage">
+          <v-alert type="error" icon="mdi-alert-circle-outline">{{ errorMessage }}</v-alert>
         </div>
       </v-slide-y-transition>
       <v-text-field
@@ -36,9 +36,9 @@
           <span>Next</span>
           <v-icon class="ml-2">mdi-arrow-right</v-icon>
         </v-btn>
-          <ConfirmCancelButton
-            :disabled="saving"
-          ></ConfirmCancelButton>
+        <ConfirmCancelButton
+          :disabled="saving"
+        ></ConfirmCancelButton>
       </v-col>
     </v-row>
   </v-form>
