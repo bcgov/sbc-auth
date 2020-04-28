@@ -41,7 +41,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from 'vue-property-decorator'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
@@ -74,6 +74,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
   private readonly termsOfUse!: TermsOfUseDocument
   private isLoading: boolean = false
   private atBottom = false
+  @Prop() token: string
 
   private onScroll (e) {
     this.atBottom = (e.target.scrollHeight - e.target.scrollTop) <= (e.target.offsetHeight + 25)
@@ -93,6 +94,10 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
       const userTerms = await this.saveUserTerms()
       if (userTerms?.userTerms?.isTermsOfUseAccepted) {
         await this.syncUser()
+        if (this.token) {
+          this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
+          return
+        }
         this.redirectTo(this.getNextPageUrl())
       }
     } catch (error) {

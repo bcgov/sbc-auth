@@ -262,7 +262,11 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
             }
           }
         } else {
-          await this.updateUserContact(contact)
+          if (this.editing) {
+            await this.updateUserContact(contact)
+          } else {
+            await this.createUserContact(contact)
+          }
           await this.getUserProfile('@me')
           // If a token was provided, that means we are in the accept invitation flow
           // so redirect to /confirmtoken
