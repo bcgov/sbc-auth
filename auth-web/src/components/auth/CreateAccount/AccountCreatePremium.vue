@@ -78,7 +78,7 @@
             Back
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn class="mr-4" large depressed color="primary" :disabled="!grantAccess" @click="save">
+          <v-btn class="mr-3" large depressed color="primary" :disabled="!grantAccess" @click="save">
             Next
             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
           </v-btn>
