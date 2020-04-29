@@ -1,6 +1,6 @@
 <template>
   <v-stepper class="stepper d-flex" v-model="currentStepNumber">
-    <v-container class="stepper-nav py-6 px-8">
+    <v-container class="stepper-nav py-7 px-8">
       <template v-for="step in steps">
         <v-stepper-step
           class="pa-3"
@@ -11,11 +11,11 @@
         <v-divider vertical class="mt-n1 mb-n1" :key="`${getStepIndex(step)}-divider`" v-if="step !== steps"></v-divider>
       </template>
     </v-container>
-    <v-container class="stepper-content pa-9">
+    <v-container class="stepper-content pa-10">
       <div v-for="step in steps" :key="getStepIndex(step)" class="flex-grow">
         <template v-if="getStepIndex(step) === currentStepNumber">
-          <div class="stepper-content__count mt-1 mb-1">Step {{currentStepNumber}} of {{steps.length}}</div>
-          <h2 class="stepper-content__title mb-6">{{getStepTitle(step)}}</h2>
+          <div class="stepper-content__count my-1">Step {{currentStepNumber}} of {{steps.length}}</div>
+          <h2 class="stepper-content__title mb-3">{{getStepTitle(step)}}</h2>
           <component
             class="pa-0"
             :is="currentStep.component"
@@ -122,11 +122,17 @@ export default class Stepper extends Vue {
 
   .stepper-nav {
     flex: 0 0 auto;
-    width: 19rem;
+    width: 18rem;
     border-right: 1px solid var(--v-grey-lighten2);
     background-color: var(--v-grey-lighten6);
 
     hr:last-child {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .stepper-nav {
       display: none;
     }
   }
@@ -142,7 +148,7 @@ export default class Stepper extends Vue {
     }
 
     &__title {
-      font-size: 1.5rem;
+      font-size: 1.75rem;
     }
   }
 

@@ -6,8 +6,13 @@
 }
 
 .view-container {
-  padding-top: 3rem;
-  padding-bottom: 3rem;
+  padding: 3rem 2rem;
+}
+
+@media (min-width: 1200px) {
+  .view-container {
+    padding: 3rem 0;
+  }
 }
 
 .view-header {
