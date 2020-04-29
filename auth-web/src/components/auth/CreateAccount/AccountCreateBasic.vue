@@ -38,6 +38,7 @@
         </v-btn>
         <ConfirmCancelButton
           :disabled="saving"
+          :showConfirmPopup="false"
         ></ConfirmCancelButton>
       </v-col>
     </v-row>

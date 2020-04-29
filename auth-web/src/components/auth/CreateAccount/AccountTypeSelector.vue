@@ -69,7 +69,9 @@
           <span>Next</span>
           <v-icon class="ml-2">mdi-arrow-right</v-icon>
         </v-btn>
-        <ConfirmCancelButton></ConfirmCancelButton>
+        <ConfirmCancelButton
+          :showConfirmPopup="false"
+        ></ConfirmCancelButton>
       </v-col>
     </v-row>
   </div>

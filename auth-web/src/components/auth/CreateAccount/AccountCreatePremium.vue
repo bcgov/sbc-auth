@@ -82,7 +82,9 @@
             Next
             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
           </v-btn>
-          <ConfirmCancelButton></ConfirmCancelButton>
+          <ConfirmCancelButton
+            :showConfirmPopup="linked"
+          ></ConfirmCancelButton>
         </v-col>
       </v-row>
     </v-form>
