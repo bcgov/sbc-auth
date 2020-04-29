@@ -136,7 +136,7 @@ export default class BcolLogin extends Vue {
   }
 
   .v-btn.link-account-btn {
-    font-size: 0.9375rem !important;
+    font-size: 0.875rem !important;
     font-weight: 700;
   }
 

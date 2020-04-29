@@ -1,5 +1,5 @@
 <template>
-  <v-form class="pt-2" ref="createAccountInfoForm">
+  <v-form class="pt-5" ref="createAccountInfoForm">
     <fieldset>
       <legend class="mb-3">Enter an Account Name</legend>
       <v-slide-y-transition>
