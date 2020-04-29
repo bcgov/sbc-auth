@@ -102,17 +102,10 @@
           {{(isStepperView) ? 'Create Account' : 'Save'}}
         </v-btn>
         <ConfirmCancelButton
-          v-if="isStepperView"
+          :showConfirmPopup="isStepperView"
+          :isEmit="true"
+          @click-confirm="cancel"
         ></ConfirmCancelButton>
-        <v-btn
-          v-else
-          large
-          color="default"
-          class="ml-0"
-          @click="cancel"
-          data-test="cancel-button">
-          Cancel
-        </v-btn>
       </v-col>
     </v-row>
 
@@ -204,11 +197,13 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private deactivateProfileDialog = false
     private isDeactivating = false
     @Prop() token: string
-    @Prop({ default: false }) isStepperView: boolean
     readonly currentOrganization!: Organization
     private readonly createOrg!: () => Promise<Organization>
     readonly syncMembership!: (orgId: number) => Promise<Member>
     readonly syncOrganization!: (orgId: number) => Promise<Organization>
+
+    // this prop is used for conditionally using this form in both account stepper and edit profile pages
+    @Prop({ default: false }) isStepperView: boolean
 
     $refs: {
       deactivateUserConfirmationDialog: ModalDialog,
@@ -317,7 +312,11 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     }
 
     private cancel () {
-      window.history.back()
+      if (this.isStepperView) {
+        this.$router.push('/')
+      } else {
+        window.history.back()
+      }
     }
 
     private goBack () {

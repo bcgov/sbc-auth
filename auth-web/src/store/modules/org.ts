@@ -47,7 +47,9 @@ export default class OrgModule extends VuexModule {
 
   @Mutation
   public setGrantAccess (grantAccess: boolean) {
-    this.currentOrganization.grantAccess = grantAccess
+    if (this.currentOrganization) {
+      this.currentOrganization.grantAccess = grantAccess
+    }
   }
 
   @Mutation
