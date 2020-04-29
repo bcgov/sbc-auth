@@ -1,47 +1,47 @@
 <template>
-  <v-dialog
-      v-model="showConfirmDialog"
-      width="360"
+  <v-btn
+    large
+    color="default"
+    data-test="confirm-cancel-button"
+    :disabled="disabled"
+    @click="openModalDialog"
+  >
+    Cancel
+    <!-- Confirm Dialog Popup -->
+    <ModalDialog
+      ref="confirmCancelDialog"
+      :title="mainText"
+      dialog-class="notify-dialog"
+      max-width="640"
     >
-    <template v-slot:activator="{ on }">
-      <v-btn
-        large
-        color="default"
-        data-test="confirm-cancel-button"
-        :disabled="disabled"
-        @click="showConfirmDialog = true"
-        v-on="on"
-      >
-        Cancel
-      </v-btn>
-    </template>
-
-    <v-card>
-      <v-card-title>
-        <h3>{{mainText}}</h3>
-      </v-card-title>
-      <v-card-text>
-        {{subText}}
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" text @click="confirmDialogResponse(false)">
-          <strong>{{rejectText}}</strong>
+      <template v-slot:icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+      <template v-slot:text>
+        <p class="pb-1">{{subText}}</p>
+      </template>
+      <template v-slot:actions>
+        <v-btn large color="error" @click="confirmDialogResponse(true)" data-test="accept-button">
+          {{confirmBtnText}}
         </v-btn>
-        <v-btn color="primary" text @click="confirmDialogResponse(true)">
-          <strong>{{acceptText}}</strong>
+        <v-btn large color="default" @click="confirmDialogResponse(false)" data-test="reject-button">
+          {{rejectBtnText}}
         </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+      </template>
+    </ModalDialog>
+  </v-btn>
 </template>
 
 <script lang="ts">
 import { Component, Emit, Prop } from 'vue-property-decorator'
+import ModalDialog from '@/components/auth/ModalDialog.vue'
 import Vue from 'vue'
 import { mapActions } from 'vuex'
 
 @Component({
+  components: {
+    ModalDialog
+  },
   methods: {
     ...mapActions('org', [
       'resetAccountSetupProgress'
@@ -50,20 +50,24 @@ import { mapActions } from 'vuex'
 })
 export default class ConfirmCancelButton extends Vue {
   @Prop({ default: false }) isEmit: boolean
+  @Prop({ default: true }) showConfirmPopup: boolean
   @Prop({ default: false }) disabled: boolean
-  @Prop({ default: 'Are you sure?' }) mainText: string
-  @Prop({ default: 'Your progress will be lost' }) subText: string
-  @Prop({ default: 'Yes' }) acceptText: string
-  @Prop({ default: 'No' }) rejectText: string
-  private showConfirmDialog: boolean = false
+  @Prop({ default: 'Cancel Account Creation' }) mainText: string
+  @Prop({ default: 'Are you sure you want to cancel your account creation set-up?' }) subText: string
+  @Prop({ default: 'Yes' }) confirmBtnText: string
+  @Prop({ default: 'No' }) rejectBtnText: string
 
   private readonly resetAccountSetupProgress!: () => Promise<void>
+
+  $refs: {
+      confirmCancelDialog: ModalDialog
+  }
 
   private confirmDialogResponse (response) {
     if (response) {
       this.clickConfirm()
     }
-    this.showConfirmDialog = false
+    this.$refs.confirmCancelDialog.close()
   }
 
   private async clickConfirm () {
@@ -77,6 +81,14 @@ export default class ConfirmCancelButton extends Vue {
 
   @Emit('click-confirm')
   emitClickConfirm () {
+  }
+
+  private openModalDialog () {
+    if (this.showConfirmPopup) {
+      this.$refs.confirmCancelDialog.open()
+    } else {
+      this.clickConfirm()
+    }
   }
 }
 </script>
