@@ -40,7 +40,7 @@ jobs:
         working-directory: ./status-api
         run: |
           dIMAGE_ID=${{ secrets.OPENSHIFT_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY }}/$IMAGE_NAME
-          docker tag image $IMAGE_ID:$TAG_NAME
+          docker image tag $IMAGE_ID:latest $IMAGE_ID:$TAG_NAME
           docker push $IMAGE_ID:$TAG_NAME
       - name: Login Openshift
         working-directory: ./status-api
@@ -59,7 +59,7 @@ jobs:
           oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -w
       - name: Rocket.Chat Notification
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
-        if: always()
+        if: failure()
         with:
           type: ${{ job.status }}
           job_name: "*Status API Build and Deploy to ${{env.TAG_NAME}}*"

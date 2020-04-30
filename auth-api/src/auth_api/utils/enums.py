@@ -49,3 +49,17 @@ class RequiredAction(Enum):
     UPDATE_PROFILE = 'UPDATE_PROFILE'
     CONFIGURE_TOTP = 'CONFIGURE_TOTP'
     UPDATE_PASSWORD = 'UPDATE_PASSWORD'
+
+
+class PaymentType(Enum):
+    """Payment types."""
+
+    CREDIT_CARD = 'CC'
+    BCOL = 'DRAWDOWN'
+
+
+class OrgType(Enum):
+    """Org types."""
+
+    PREMIUM = 'PREMIUM'
+    BASIC = 'BASIC'

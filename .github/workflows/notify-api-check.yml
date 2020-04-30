@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'bcgov/sbc-auth'
     env:
+      working-directory: ./notify-api
       DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
       TEST_NATS_DOCKER: "YES"
 

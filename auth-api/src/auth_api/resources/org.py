@@ -61,8 +61,9 @@ class Orgs(Resource):
                 response, status = {'message': 'Not authorized to perform this action'}, \
                                    http_status.HTTP_401_UNAUTHORIZED
                 return response, status
-            response, status = OrgService.create_org(request_json, user.identifier, token).as_dict(), \
-                http_status.HTTP_201_CREATED
+            bearer_token = request.headers['Authorization'].replace('Bearer ', '')
+            response, status = OrgService.create_org(request_json, user.identifier, token,
+                                                     bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -75,10 +76,23 @@ class Orgs(Resource):
         """Search orgs."""
         # Search based on request arguments
         business_identifier = request.args.get('affiliation', None)
+        name = request.args.get('name', None)
         org_type = request.args.get('type', None)
         try:
-            response, status = OrgService.search_orgs(business_identifier=business_identifier, org_type=org_type), \
-                http_status.HTTP_200_OK
+            response, status = OrgService.search_orgs(business_identifier=business_identifier, org_type=org_type,
+                                                      name=name), \
+                               http_status.HTTP_200_OK
+
+            # TODO change it later
+            # If searching by name return 200 with empty results if orgs exist
+            # Else return 204
+            if name:
+                if response and response.get('orgs'):
+                    status = http_status.HTTP_200_OK
+                else:
+                    status = http_status.HTTP_204_NO_CONTENT
+                response = {}  # Do not return any results if searching by name
+
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -120,7 +134,7 @@ class Org(Resource):
             if org and org.as_dict().get('accessType', None) == AccessType.ANONYMOUS.value and \
                     Role.STAFF_ADMIN.value not in token.get('realm_access').get('roles'):
                 return {'message': 'The organisation can only be updated by a staff admin.'}, \
-                    http_status.HTTP_401_UNAUTHORIZED
+                       http_status.HTTP_401_UNAUTHORIZED
             if org:
                 response, status = org.update_org(request_json).as_dict(), http_status.HTTP_200_OK
             else:

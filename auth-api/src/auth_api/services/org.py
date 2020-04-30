@@ -20,20 +20,21 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import AccountPaymentSettings as AccountPaymentModel
+from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import OrgSchema
+from auth_api.utils.enums import PaymentType, OrgType
 from auth_api.utils.roles import OWNER, VALID_STATUSES, Status, AccessType
 from auth_api.utils.util import camelback2snake
-
 from .authorization import check_auth
 from .contact import Contact as ContactService
 from .keycloak import KeycloakService
+from .rest_service import RestService
 
 
 class Org:
@@ -57,9 +58,23 @@ class Org:
         return obj
 
     @staticmethod
-    def create_org(org_info: dict, user_id, token_info: Dict = None):
+    def create_org(org_info: dict, user_id,  # pylint: disable=too-many-locals, too-many-statements
+                   token_info: Dict = None, bearer_token: str = None):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
+        bcol_credential = org_info.pop('bcOnlineCredential', None)
+        mailing_address = org_info.pop('mailingAddress', None)
+        bcol_account_number = None
+        bcol_user_id = None
+
+        # If the account is created using BCOL credential, verify its valid bc online account
+        if bcol_credential:
+            bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token).json()
+            bcol_account_number = bcol_response.get('accountNumber')
+            bcol_user_id = bcol_response.get('userId')
+
+        org_info['typeCode'] = OrgType.PREMIUM.value if bcol_account_number else OrgType.BASIC.value
+
         is_staff_admin = token_info and 'staff_admin' in token_info.get('realm_access').get('roles')
         if not is_staff_admin:  # staff can create any number of orgs
             count = OrgModel.get_count_of_org_created_by_user_id(user_id)
@@ -68,39 +83,98 @@ class Org:
             if org_info.get('accessType', None) == AccessType.ANONYMOUS.value:
                 raise BusinessException(Error.USER_CANT_CREATE_ANONYMOUS_ORG, None)
 
-        existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'])
-        if existing_similar__org is not None:
-            raise BusinessException(Error.DATA_CONFLICT, None)
+        if not bcol_account_number:  # Allow duplicate names if premium
+            existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'])
+            if existing_similar__org is not None:
+                raise BusinessException(Error.DATA_CONFLICT, None)
+
         org = OrgModel.create_from_dict(camelback2snake(org_info))
+        org.add_to_session()
+
         if is_staff_admin:
             org.access_type = AccessType.ANONYMOUS.value
             org.billable = False
         else:
             org.access_type = AccessType.BCSC.value
             org.billable = True
-        org.save()
-        current_app.logger.info(f'<created_org org_id:{org.id}')
+
+        # If mailing address is provided, save it
+        if mailing_address:
+            contact = ContactModel(**camelback2snake(mailing_address))
+            contact = contact.add_to_session()
+
+            contact_link = ContactLinkModel()
+            contact_link.contact = contact
+            contact_link.org = org
+            contact_link.add_to_session()
+
         # create the membership record for this user if its not created by staff and access_type is anonymous
         if not is_staff_admin and org_info.get('access_type') != AccessType.ANONYMOUS:
             membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='OWNER',
                                          membership_type_status=Status.ACTIVE.value)
-            membership.save()
+            membership.add_to_session()
 
             # Add the user to account_holders group
             KeycloakService.join_account_holders_group()
 
-        # TODO Remove later, create payment settings now with default values
-        AccountPaymentModel.create_from_dict({'org_id': org.id})
+        Org.add_payment_settings(org.id, bcol_account_number, bcol_user_id)
+
+        org.save()
+        current_app.logger.info(f'<created_org org_id:{org.id}')
 
         return Org(org)
 
-    def update_org(self, org_info):
+    @staticmethod
+    def add_payment_settings(org_id, bcol_account_number, bcol_user_id):
+        """Add payment settings for the org."""
+        payment_settings = AccountPaymentModel.create_from_dict({
+            'org_id': org_id,
+            'preferred_payment_code': PaymentType.BCOL.value if bcol_account_number else PaymentType.CREDIT_CARD.value,
+            'bcol_user_id': bcol_user_id,
+            'bcol_account_id': bcol_account_number
+        })
+        payment_settings.add_to_session()
+
+    @staticmethod
+    def get_bcol_details(bcol_credential: Dict, org_info: Dict = None, bearer_token: str = None, org_id=None):
+        """Retrieve and validate BC Online credentials."""
+        bcol_response = None
+        if bcol_credential:
+            bcol_response = RestService.post(endpoint=current_app.config.get('BCOL_API_URL') + '/profiles',
+                                             data=bcol_credential, token=bearer_token, raise_for_status=False)
+
+            bcol_account_number = bcol_response.json().get('accountNumber')
+
+            if org_info:
+                if bcol_response.json().get('orgName') != org_info.get('name'):
+                    raise BusinessException(Error.INVALID_INPUT, None)
+            if Org.bcol_account_link_check(bcol_account_number, org_id):
+                raise BusinessException(Error.BCOL_ACCOUNT_ALREADY_LINKED, None)
+        return bcol_response
+
+    def update_org(self, org_info, bearer_token: str = None):
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
 
-        existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'])
+        existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'], self._model.id)
         if existing_similar__org is not None:
             raise BusinessException(Error.DATA_CONFLICT, None)
+
+        bcol_credential = org_info.pop('bcOnlineCredential', None)
+        mailing_address = org_info.pop('mailingAddress', None)
+        # If the account is created using BCOL credential, verify its valid bc online account
+        # If it's a valid account disable the current one and add a new one
+        if bcol_credential:
+            bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token, self._model.id).json()
+            payment_settings: AccountPaymentModel = AccountPaymentModel.find_active_by_org_id(account_id=self._model.id)
+            payment_settings.is_active = False
+            payment_settings.add_to_session()
+            Org.add_payment_settings(self._model.id, bcol_response.get('accountNumber'), bcol_response.get('userId'))
+        # Update mailing address
+        if mailing_address:
+            contact = self._model.contacts[0]
+            contact.update_from_dict(**camelback2snake(mailing_address))
+            contact.add_to_session()
 
         self._model.update_org_from_dict(camelback2snake(org_info))
         current_app.logger.debug('>update_org ')
@@ -257,4 +331,18 @@ class Org:
             org_models = OrgModel.find_by_org_access_type(kwargs.get('org_type'))
             for org in org_models:
                 orgs['orgs'].append(Org(org).as_dict())
+        elif kwargs.get('name', None):
+            org_model = OrgModel.find_similar_org_by_name(kwargs.get('name'))
+            if org_model is not None:
+                orgs['orgs'].append(Org(org_model).as_dict())
         return orgs
+
+    @staticmethod
+    def bcol_account_link_check(bcol_account_id, org_id=None):
+        """Validate the BCOL id is linked or not. If already linked, return True."""
+        if current_app.config.get('BCOL_ACCOUNT_LINK_CHECK'):
+            account_payment = AccountPaymentModel.find_by_bcol_account_id(bcol_account_id, org_id)
+            if account_payment:
+                return True
+
+        return False

@@ -1,3 +1,5 @@
+import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
+import { Address } from '@/models/address'
 import { Business } from '@/models/business'
 import { Invitation } from '@/models/Invitation'
 import { User } from '@/models/user'
@@ -5,6 +7,8 @@ import { User } from '@/models/user'
 export interface CreateRequestBody {
   name: string,
   typeCode?: string
+  bcOnlineCredential?:BcolProfile
+  mailingAddress?:Address
 }
 
 export interface Organizations
@@ -19,7 +23,11 @@ export interface Organization {
   orgType?: string;
   members?: Member[];
   invitations?: Invitation[];
-  accessType: string;
+  accessType?: string;
+  address?: Address,
+  bcolProfile?:BcolProfile
+  bcolAccountDetails?:BcolAccountDetails
+  grantAccess?:boolean
 }
 
 export interface UpdateMemberPayload {
