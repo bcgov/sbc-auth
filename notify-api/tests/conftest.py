@@ -33,7 +33,7 @@ from notify_api.db.models import NotificationStatusModel, NotificationTypeModel
 DATABASE_URL = AppConfig.SQLALCHEMY_TEST_DATABASE_URI
 
 
-@event.listens_for(NotificationTypeModel.__table__, 'after_create')
+@event.listens_for(NotificationTypeModel.__table__, 'after_create')  # pylint: disable=no-member
 def insert_data(target, connection, **kw):  # pylint: disable=unused-argument
     """Load notification type data."""
     connection.execute(target.insert(),
@@ -41,7 +41,7 @@ def insert_data(target, connection, **kw):  # pylint: disable=unused-argument
                        {'code': 'TEXT', 'desc': 'The Text message type of notification', 'default': False})
 
 
-@event.listens_for(NotificationStatusModel.__table__, 'after_create')
+@event.listens_for(NotificationStatusModel.__table__, 'after_create')  # pylint: disable=no-member
 def insert_data2(target, connection, **kw):  # pylint: disable=unused-argument
     """Load notification status data."""
     connection.execute(target.insert(),

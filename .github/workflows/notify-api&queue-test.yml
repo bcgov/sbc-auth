@@ -38,7 +38,7 @@ jobs:
         working-directory: ./notify-api
         run: |
           oc ${{ secrets.oc_parameters }}
-          oc project ${{ secrets.OPENSHIFT_REPOSITORY_DEV }}
+          oc project ${{ secrets.OPENSHIFT_REPOSITORY_TEST }}
       - name: Set Deployment Environement Variables
         working-directory: .
         run: |
@@ -96,7 +96,7 @@ jobs:
         working-directory: ./queue_services/notify-queue
         run: |
           oc ${{ secrets.oc_parameters }}
-          oc project ${{ secrets.OPENSHIFT_REPOSITORY_DEV }}
+          oc project ${{ secrets.OPENSHIFT_REPOSITORY_TEST }}
       - name: Set Deployment Environement Variables
         working-directory: .
         run: |
