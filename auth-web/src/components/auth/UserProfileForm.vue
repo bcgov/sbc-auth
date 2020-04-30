@@ -1,5 +1,6 @@
 <template>
   <v-form ref="form" lazy-validation>
+    <p class="mb-9" v-if="isStepperView">Enter your contact information. Once your account is created, you may add additional users and assign roles.</p>
     <v-expand-transition>
       <div class="form_alert-container" v-show="formError">
         <v-alert type="error" class="mb-0"
@@ -11,29 +12,12 @@
     </v-expand-transition>
     <!-- First / Last Name -->
     <v-row>
-      <v-col cols="12" md="6" class="pt-0 pb-0">
-        <v-text-field
-                filled
-                label="First Name"
-                req
-                persistent-hint
-                disabled
-                v-model="firstName"
-                data-test="first-name"
-        >
-        </v-text-field>
-      </v-col>
-      <v-col cols="12" md="6" class="pt-0 pb-0">
-        <v-text-field
-                filled
-                label="Last Name"
-                req
-                persistent-hint
-                disabled
-                v-model="lastName"
-                data-test="last-name"
-        >
-        </v-text-field>
+      <v-col cols="12" class="pt-0 pb-0">
+        <h4
+          v-bind:class="{'legal-name': !isStepperView}"
+          class="mb-1"
+        >{{firstName}} {{lastName}}</h4>
+        <div class="mb-6">This is your legal name as it appears on your BC Services Card.</div>
       </v-col>
     </v-row>
     <!-- Email Address -->
@@ -94,100 +78,114 @@
     </v-row>
 
     <v-row>
-      <v-col cols="12" class="pt-0 pb-0">
-        <TermsOfUseDialog @terms-updated="updateTerms($event)"
-        />
+      <v-col cols="12" class="step-btns mt-8 pb-0 d-inline-flex">
+        <!-- The deactivate profile button should be hidden for account stepper view -->
+        <v-btn
+          large
+          depressed
+          color="default"
+          class="deactivate-btn"
+          v-show="editing && !isStepperView"
+          @click="$refs.deactivateUserConfirmationDialog.open()"
+        >Deactivate my profile</v-btn>
+        <v-btn
+          large
+          v-if="isStepperView"
+          color="default"
+          @click="goBack"
+        >
+          <v-icon left class="mr-2">mdi-arrow-left</v-icon>
+          <span>Back</span>
+        </v-btn>
+        <v-spacer></v-spacer>
+        <v-btn large color="primary" class="save-continue-button mr-3" :disabled='!isFormValid()' @click="save" data-test="save-button">
+          {{(isStepperView) ? 'Create Account' : 'Save'}}
+        </v-btn>
+        <ConfirmCancelButton
+          :showConfirmPopup="isStepperView"
+          :isEmit="true"
+          @click-confirm="cancel"
+        ></ConfirmCancelButton>
       </v-col>
     </v-row>
 
-    <v-row>
-      <v-col cols="12" class="form__btns pt-5">
-        <v-btn large depressed color="default" class="deactivate-btn" v-show="editing" @click="$refs.deactivateUserConfirmationDialog.open()">Deactivate my profile</v-btn>
-        <!-- Modal for deactivation confirmation -->
-        <ModalDialog
-          ref="deactivateUserConfirmationDialog"
-          :title="$t('deactivateConfirmTitle')"
-          dialog-class="notify-dialog"
-          max-width="640"
-        >
-          <template v-slot:icon>
-            <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-          </template>
-          <template v-slot:text>
-            <p class="pb-1">{{ $t('deactivateConfirmText')}} <strong>{{ $t('deactivateConfirmTextEmphasis') }}</strong></p>
-          </template>
-          <template v-slot:actions>
-            <v-btn large color="error" @click="deactivate()" :loading="isDeactivating" data-test="deactivate-confirm-button">Deactivate</v-btn>
-            <v-btn large color="default" :disabled="isDeactivating" @click="cancelConfirmDeactivate()" data-test="deactivate-cancel-button">Cancel</v-btn>
-          </template>
-        </ModalDialog>
+    <!-- Modal for deactivation confirmation -->
+    <ModalDialog
+      ref="deactivateUserConfirmationDialog"
+      :title="$t('deactivateConfirmTitle')"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+      <template v-slot:text>
+        <p class="pb-1">{{ $t('deactivateConfirmText')}} <strong>{{ $t('deactivateConfirmTextEmphasis') }}</strong></p>
+      </template>
+      <template v-slot:actions>
+        <v-btn large color="error" @click="deactivate()" :loading="isDeactivating" data-test="deactivate-confirm-button">Deactivate</v-btn>
+        <v-btn large color="default" :disabled="isDeactivating" @click="cancelConfirmDeactivate()" data-test="deactivate-cancel-button">Cancel</v-btn>
+      </template>
+    </ModalDialog>
 
-        <!-- Modal for deactivation failure -->
-        <ModalDialog
-          ref="deactivateUserFailureDialog"
-          :title="$t('deactivateFailureTitle')"
-          :text="$t('deactivateFailureText')"
-          dialog-class="notify-dialog"
-          max-width="640"
-        >
-          <template v-slot:icon>
-            <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-          </template>
-        </ModalDialog>
-        <div>
-          <v-btn large color="primary" class="save-continue-button" :disabled='!isFormValid()' @click="save" data-test="save-button">
-            Save
-          </v-btn>
-          <v-btn large depressed @click="cancel" data-test="cancel-button" class="cancel-button">Cancel</v-btn>
-        </div>
-      </v-col>
-    </v-row>
+    <!-- Modal for deactivation failure -->
+    <ModalDialog
+      ref="deactivateUserFailureDialog"
+      :title="$t('deactivateFailureTitle')"
+      :text="$t('deactivateFailureText')"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+    </ModalDialog>
   </v-form>
 </template>
 
 <script lang="ts">
+
+import { Account, Pages } from '@/util/constants'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { User, UserTerms } from '@/models/user'
+import { CreateRequestBody, Member, Organization } from '@/models/Organization'
+import { mapActions, mapState } from 'vuex'
+import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Contact } from '@/models/contact'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import OrgModule from '@/store/modules/org'
-import { Organization } from '@/models/Organization'
-import { Pages } from '@/util/constants'
-import TermsOfUseDialog from '@/components/auth/TermsOfUseDialog.vue'
+import Steppable from '@/components/auth/stepper/Steppable.vue'
+import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
 import UserService from '@/services/user.services'
 import configHelper from '@/util/config-helper'
 import { getModule } from 'vuex-module-decorators'
-import { mapActions } from 'vuex'
 import { mask } from 'vue-the-mask'
 
 @Component({
   components: {
     ModalDialog,
-    TermsOfUseDialog
+    ConfirmCancelButton
   },
   directives: {
     mask
+  },
+  computed: {
+    ...mapState('org', ['currentOrganization'])
   },
   methods: {
     ...mapActions('user',
       [
         'createUserContact',
         'updateUserContact',
-        'saveUserTerms',
-        'getUserProfile',
-        'updateCurrentUserTerms'
-      ]
-    )
+        'getUserProfile'
+      ]),
+    ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization'])
   }
 })
-export default class UserProfileForm extends Mixins(NextPageMixin) {
+export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private readonly createUserContact!: (contact: Contact) => Contact
     private readonly updateUserContact!: (contact: Contact) => Contact
-    private readonly saveUserTerms!: () => Promise<User>
     private readonly getUserProfile!: (identifer: string) => User
-    private readonly updateCurrentUserTerms!: (UserTerms) => void
     private firstName = ''
     private lastName = ''
     private emailAddress = ''
@@ -199,8 +197,13 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     private deactivateProfileDialog = false
     private isDeactivating = false
     @Prop() token: string
-    @Prop() stepForward!: () => void
-    @Prop() stepBack!: () => void
+    readonly currentOrganization!: Organization
+    private readonly createOrg!: () => Promise<Organization>
+    readonly syncMembership!: (orgId: number) => Promise<Member>
+    readonly syncOrganization!: (orgId: number) => Promise<Organization>
+
+    // this prop is used for conditionally using this form in both account stepper and edit profile pages
+    @Prop({ default: false }) isStepperView: boolean
 
     $refs: {
       deactivateUserConfirmationDialog: ModalDialog,
@@ -231,16 +234,13 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     private isFormValid (): boolean {
       return this.$refs.form &&
         this.$refs.form.validate() &&
-        this.confirmedEmailAddress === this.emailAddress &&
-        this.userProfile.userTerms &&
-        this.userProfile.userTerms.isTermsOfUseAccepted
+        this.confirmedEmailAddress === this.emailAddress
     }
 
     private async mounted () {
       if (!this.userProfile) {
         await this.getUserProfile('@me')
       }
-
       this.firstName = this.userProfile?.firstname
       this.lastName = this.userProfile?.lastname
       if (this.userContact) {
@@ -251,13 +251,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
       }
     }
 
-    private async updateTerms (event) {
-      await this.updateCurrentUserTerms({
-        termsOfUseAcceptedVersion: event.termsVersion,
-        isTermsOfUseAccepted: event.isTermsAccepted
-      })
-    }
-
     private async save () {
       if (this.isFormValid()) {
         const contact = {
@@ -265,27 +258,52 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
           phone: this.phoneNumber,
           phoneExtension: this.extension
         }
-        if (!this.editing) {
-          await Promise.all([
-            await this.createUserContact(contact),
-            await this.saveUserTerms()
-          ])
+        if (this.stepForward) { // On stepper ;so Save the org
+          try {
+            const organization = await this.createOrg()
+            await this.saveOrUpdateContact(contact)
+            await this.getUserProfile('@me')
+            await this.syncOrganization(organization.id)
+            await this.syncMembership(organization.id)
+            this.$store.commit('updateHeader')
+            this.$router.push('/setup-account-success')
+          } catch (err) {
+            switch (err.response.status) {
+              case 409:
+                this.formError =
+                        'An account with this name already exists. Try a different account name.'
+                break
+              case 400:
+                if (err.response.data.code === 'MAX_NUMBER_OF_ORGS_LIMIT') {
+                  this.formError = 'Maximum number of accounts reached'
+                } else {
+                  this.formError = 'Invalid account name'
+                }
+                break
+              default:
+                this.formError =
+                        'An error occurred while attempting to create your account.'
+            }
+          }
         } else {
-          await this.updateUserContact(contact)
-        }
-        await this.getUserProfile('@me')
-        // If a token was provided, that means we are in the accept invitation flow
-        // so redirect to /confirmtoken
-        if (this.token) {
-          this.$router.push('/confirmtoken/' + this.token)
-          return
-        }
-
-        if (!this.stepForward) {
+          await this.saveOrUpdateContact(contact)
+          await this.getUserProfile('@me')
+          // If a token was provided, that means we are in the accept invitation flow
+          // so redirect to /confirmtoken
+          if (this.token) {
+            this.$router.push('/confirmtoken/' + this.token)
+            return
+          }
           this.redirectToNext()
-        } else {
-          this.stepForward()
         }
+      }
+    }
+
+    private async saveOrUpdateContact (contact:Contact) {
+      if (this.editing) {
+        await this.updateUserContact(contact)
+      } else {
+        await this.createUserContact(contact)
       }
     }
 
@@ -294,11 +312,15 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
     }
 
     private cancel () {
-      if (!this.stepBack) {
-        window.history.back()
+      if (this.isStepperView) {
+        this.$router.push('/')
       } else {
-        this.stepBack()
+        window.history.back()
       }
+    }
+
+    private goBack () {
+      this.stepBack()
     }
 
     private async deactivate (): Promise<void> {
@@ -321,18 +343,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin) {
 </script>
 
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
-
-  .form__btns {
-    display: flex;
-    justify-content: flex-end;
-
-    .v-btn + .v-btn {
-      margin-left: 0.5rem;
-    }
-
-    .deactivate-btn {
-      margin-right: auto;
-    }
-  }
+@import '$assets/scss/theme.scss';
+.legal-name {
+  font-size: 1.25rem !important;
+  font-weight: 700;
+  letter-spacing: -0.02rem;
+}
 </style>

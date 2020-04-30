@@ -23,9 +23,9 @@
         "$id": "#/properties/orgType",
         "type": "string",
         "title": "Organizational Type",
-        "default": "IMPLICIT",
+        "default": "BASIC",
         "examples": [
-          "IMPLICIT", "EXPLICIT"
+          "BASIC", "PREMIUM"
         ],
         "pattern": "^(.*)$"
       },
@@ -37,6 +37,20 @@
           "ANONYMOUS"
         ],
         "pattern": "^(.*)$"
+      },
+      "bcOnlineCredential": {
+        "oneOf": [
+          {
+            "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/bconline_credential"
+          }
+        ]
+      },
+      "mailingAddress": {
+        "oneOf": [
+          {
+            "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/contact"
+          }
+        ]
       }
     }
   }

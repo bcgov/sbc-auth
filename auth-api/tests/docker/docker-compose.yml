@@ -31,9 +31,16 @@ services:
           - '8080:80'
         depends_on:
           - notify
+          - bcol
 
   notify:
     image: stoplight/prism:3.3.0
     command: >
       mock -p 4010 --host 0.0.0.0
       https://raw.githubusercontent.com/bcgov/sbc-auth/development/docs/docs/api_contract/notify-api-1.0.0.yaml
+
+  bcol:
+    image: stoplight/prism:3.3.0
+    command: >
+      mock -p 4010 --host 0.0.0.0
+      https://raw.githubusercontent.com/bcgov/sbc-pay/development/docs/docs/api_contract/bcol-api-1.0.0.yaml

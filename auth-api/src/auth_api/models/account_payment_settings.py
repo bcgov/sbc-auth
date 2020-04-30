@@ -17,7 +17,7 @@ Default details will be for CC payment.
 """
 
 from flask import current_app
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -34,6 +34,7 @@ class AccountPaymentSettings(BaseModel):  # pylint: disable=too-few-public-metho
     bcol_user_id = Column(String(20))
     bcol_account_id = Column(String(20))
     org_id = Column(ForeignKey('org.id'), nullable=False)
+    is_active = Column(Boolean(), default=True)
 
     org = relationship('Org', foreign_keys=[org_id], lazy='select')
     preferred_payment = relationship('PaymentType')
@@ -43,10 +44,30 @@ class AccountPaymentSettings(BaseModel):  # pylint: disable=too-few-public-metho
         """Create a new Payment Info from the provided dictionary."""
         if payment_info:
             payment_settings = AccountPaymentSettings(**payment_info)
+            payment_settings.is_active = True
             current_app.logger.debug(
                 'Creating payment settings from dictionary {}'.format(payment_info)
             )
-            payment_settings.preferred_payment = PaymentType.get_default_payment_type()
-            payment_settings.save()
+            if not payment_info.get('preferred_payment_code', None):
+                payment_settings.preferred_payment = PaymentType.get_default_payment_type()
+
             return payment_settings
         return None
+
+    @classmethod
+    def find_by_id(cls, identifier: int):
+        """Find payment settings by identifier."""
+        return cls.query.filter_by(id=identifier).one_or_none()
+
+    @classmethod
+    def find_by_bcol_account_id(cls, bcol_account_id, org_id=None):
+        """Find an account setting instance that matches the provided bcol_account_id."""
+        query = cls.query.filter_by(bcol_account_id=bcol_account_id).filter_by(is_active=True)
+        if org_id:
+            query = query.filter(AccountPaymentSettings.org_id != org_id)
+        return query.first()
+
+    @classmethod
+    def find_active_by_org_id(cls, account_id):
+        """Find an account setting instance that matches the provided org_id."""
+        return cls.query.filter_by(org_id=account_id).filter_by(is_active=True).first()

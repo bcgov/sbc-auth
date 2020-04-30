@@ -13,6 +13,7 @@
 # limitations under the License.
 """The unique worker functionality for this service is contained here."""
 import json
+import logging.config
 import re
 import unicodedata
 from datetime import datetime
@@ -24,13 +25,18 @@ from email.mime.text import MIMEText
 import nats
 from aiosmtplib import SMTP
 from entity_queue_common.service import QueueServiceManager
-from entity_queue_common.service_utils import QueueException, logger
+from entity_queue_common.service_utils import QueueException
 from notify_api import NotifyAPI
-from notify_api.core import config as app_config
 from notify_api.db.models.notification import Notification, NotificationUpdate
 from notify_api.db.models.notification_status import NotificationStatusEnum
 from notify_api.services.notify import NotifyService
 
+from notify_service import config as app_config
+
+
+# setup loggers
+logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+logger = logging.getLogger(__name__)
 
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
 APP = NotifyAPI(bind=app_config.SQLALCHEMY_DATABASE_URI)
@@ -38,10 +44,15 @@ APP = NotifyAPI(bind=app_config.SQLALCHEMY_DATABASE_URI)
 
 async def send_with_send_message(message, recipients):
     """Send email."""
-    smtp_client = SMTP(hostname=app_config.MAIL_SERVER, port=app_config.MAIL_PORT)
-    await smtp_client.connect()
-    await smtp_client.send_message(message=message, recipients=recipients)
-    await smtp_client.quit()
+    try:
+        smtp_client = SMTP(hostname=app_config.MAIL_SERVER, port=app_config.MAIL_PORT)
+        await smtp_client.connect()
+        await smtp_client.send_message(message=message, recipients=recipients)
+        await smtp_client.quit()
+    except Exception as err:  # pylint: disable=broad-except # noqa F841;
+        logger.error('Notify Job (send_with_send_message) Error: %s', err)
+        return False
+    return True
 
 
 async def process_notification(notification_id: int, db_session):
@@ -78,15 +89,17 @@ async def process_notification(notification_id: int, db_session):
 
                 message.attach(part)
 
-            await send_with_send_message(message, recipients)
+            sent_status = await send_with_send_message(message, recipients)
+            if not sent_status:
+                raise QueueException('Could not send email through SMTP server.')
 
             update_notification: NotificationUpdate = NotificationUpdate(id=notification_id,
                                                                          sent_date=datetime.utcnow(),
                                                                          notify_status=NotificationStatusEnum.DELIVERED)
 
             await NotifyService.update_notification_status(db_session, update_notification)
-    except Exception as err:  # pylint: disable=broad-except, unused-variable # noqa F841;
-        logger.info('Notify Job (process_notification) Error: %s', exc_info=True)
+    except (QueueException, Exception) as err:  # pylint: disable=broad-except
+        logger.error('Notify Job (process_notification) Error: %s', err)
         update_notification: NotificationUpdate = NotificationUpdate(id=notification_id,
                                                                      sent_date=datetime.utcnow(),
                                                                      notify_status=NotificationStatusEnum.FAILURE)
@@ -103,8 +116,8 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
         notification_id = json.loads(msg.data.decode('utf-8'))
         logger.info('Extracted id: %s', notification_id)
         await process_notification(notification_id, db_session)
-    except (QueueException, Exception):  # pylint: disable=broad-except
-        logger.info('Notify Queue Error: %s', exc_info=True)
+    except (QueueException, Exception) as err:  # pylint: disable=broad-except
+        logger.error('Notify Queue Error: %s', err)
     finally:
         db_session.close()
 

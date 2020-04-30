@@ -1,0 +1,58 @@
+name: Notify Queue PR CI
+
+on:
+  pull_request:
+    branches:
+      - development
+    paths:
+      - "queue_services/notify-queue/**"
+
+jobs:
+  notify-queue_service-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./queue_services/notify-queue
+
+    if: github.repository == 'bcgov/sbc-auth'
+    env:
+      DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+      TEST_NATS_DOCKER: "YES"
+
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8]
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements/dev.txt
+      - name: Lint with pylint
+        run: |
+          pylint --rcfile=setup.cfg --disable=C0301,W0511 src/notify_service tests
+      - name: Lint with flake8
+        run: |
+          flake8 src/notify_service tests
+      - name: Test with pytest
+        run: |
+          pip install .
+          export PYTHONPATH=./src/
+          pytest

@@ -262,7 +262,7 @@ class TestOrgTypeInfo(dict, Enum):
     """Test scenarios of org type."""
 
     test_type = {'code': 'TEST', 'desc': 'Test'}
-    implicit = {'code': 'IMPLICIT', 'desc': 'IMPLICIT'}
+    implicit = {'code': 'BASIC', 'desc': 'BASIC'}
 
 
 class TestPaymentTypeInfo(dict, Enum):
@@ -296,11 +296,48 @@ class TestOrgInfo(dict, Enum):
     org4 = {'name': 'fourth Orgs'}
     org5 = {'name': 'fifth Orgs'}
     org_anonymous = {'name': 'My Test Org', 'accessType': 'ANONYMOUS'}
+    org_anonymous_2 = {'name': 'Test', 'accessType': 'ANONYMOUS'}
     invalid = {'foo': 'bar'}
     invalid_name_space = {'name': ''}
     invalid_name_spaces = {'name': '    '}
     invalid_name_start_space = {'name': '  helo'}
     invalid_name_end_space = {'name': '  helo   '}
+
+    @staticmethod
+    def bcol_linked():
+        """Return org info for bcol linked info."""
+        return {
+            'name': 'BC ONLINE TECHNICAL TEAM DEVL',
+            'bcOnlineCredential': {
+                'userId': 'test',
+                'password': 'password'
+            },
+            'mailingAddress': {
+                'street': '1234 Abcd Street',
+                'city': 'Test',
+                'region': 'BC',
+                'postalCode': 'T1T1T1',
+                'country': 'CA'
+            }
+        }
+
+    @staticmethod
+    def bcol_linked_invalid_name():
+        """Return org info for bcol linked info with invalid name."""
+        return {
+            'name': 'Test',
+            'bcOnlineCredential': {
+                'userId': 'test',
+                'password': 'password'
+            },
+            'mailingAddress': {
+                'street': '1234 Abcd Street',
+                'city': 'Test',
+                'region': 'BC',
+                'postalCode': 'T1T1T1',
+                'country': 'CA'
+            }
+        }
 
 
 class TestOrgProductsInfo(dict, Enum):
@@ -513,3 +550,10 @@ class BulkUserTestScenario:
         ],
             'orgId': org_id
         }
+
+
+class TestBCOLInfo(dict, Enum):
+    """Test scenarios of org."""
+
+    bcol1 = {'bcol_account_id': 'BCOL1'}
+    bcol2 = {'bcol_account_id': 'BCOL2'}
