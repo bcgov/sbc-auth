@@ -183,12 +183,9 @@ router.beforeEach((to, from, next) => {
       !userProfile?.userTerms?.isTermsOfUseAccepted) {
       switch (currentUser?.loginSource) {
         case LoginSource.BCSC:
-          if (!userContact) {
-            return next({
-              path: `/${Pages.USER_PROFILE}`
-            })
-          }
-          break
+          return next({
+            path: `/${Pages.USER_PROFILE_TERMS}`
+          })
         case LoginSource.BCROS:
           return next({
             path: `/${Pages.USER_PROFILE_TERMS}`
