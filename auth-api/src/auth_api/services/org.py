@@ -13,11 +13,13 @@
 # limitations under the License.
 """Service for managing Organization data."""
 
+
 from typing import Dict, Tuple
 
 from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountPaymentSettings as AccountPaymentModel
@@ -142,6 +144,10 @@ class Org:
         if bcol_credential:
             bcol_response = RestService.post(endpoint=current_app.config.get('BCOL_API_URL') + '/profiles',
                                              data=bcol_credential, token=bearer_token, raise_for_status=False)
+
+            # todo not at all ideal..find out what all bcol error messages possible
+            if bcol_response.status_code != http_status.HTTP_200_OK:
+                raise BusinessException(Error.BCOL_INVALID_USERNAME_PASSWORD, None)
 
             bcol_account_number = bcol_response.json().get('accountNumber')
 
