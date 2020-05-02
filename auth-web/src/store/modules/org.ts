@@ -43,7 +43,6 @@ export default class OrgModule extends VuexModule {
   tokenError = false
   createdUsers: BulkUsersSuccess[] = []
   failedUsers: BulkUsersFailed[] = []
-  selectedAccountType:Account
 
   @Mutation
   public setGrantAccess (grantAccess: boolean) {
@@ -53,8 +52,15 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
+  public resetCurrentOrganisation () {
+    this.currentOrganization = { name: '' }
+  }
+
+  @Mutation
   public setSelectedAccountType (selectedAccountType: Account | undefined) {
-    this.selectedAccountType = selectedAccountType
+    if (this.currentOrganization) {
+      this.currentOrganization.orgType = selectedAccountType
+    }
   }
 
   @Mutation

@@ -84,15 +84,18 @@
 <script lang="ts">
 
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { mapMutations, mapState } from 'vuex'
 import { Account } from '@/util/constants'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
-import { mapMutations } from 'vuex'
 
 @Component({
   components: {
     ConfirmCancelButton
+  },
+  computed: {
+    ...mapState('org', ['currentOrganization'])
   },
   methods: {
     ...mapMutations('org', ['setSelectedAccountType', 'setCurrentOrganization'])
@@ -103,9 +106,15 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   private selectedAccountType: string = ''
   private readonly setSelectedAccountType!: (selectedAccountType: Account) => void
   private readonly setCurrentOrganization!: (organization: Organization) => void
+  private readonly currentOrganization!: Organization
 
   private async mounted () {
-    this.setCurrentOrganization({ name: '' }) // TODO find a better logic to reset ;may be in cancel button
+    // first time to the page , start afresh
+    if (!this.currentOrganization) {
+      this.setCurrentOrganization({ name: '' }) // TODO find a better logic to reset ;may be in cancel button
+    } else {
+      this.selectedAccountType = this.currentOrganization.orgType
+    }
   }
 
   private selectAccountType (accountType) {
