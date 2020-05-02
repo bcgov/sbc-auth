@@ -145,6 +145,9 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private readonly setGrantAccess!: (grantAccess: boolean) => void
 
+  private async mounted () {
+  }
+
   get grantAccessText () {
     return `I ,<strong>${this.currentUser?.fullName} </strong>, confirm that I am authorized to grant access to the account <strong>${this.currentOrganization?.bcolAccountDetails?.orgName}</strong>`
   }
@@ -194,7 +197,8 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
       accessType: Account.PREMIUM,
       bcolProfile: details.bcolProfile,
       bcolAccountDetails: details.bcolAccountDetails,
-      grantAccess: false
+      grantAccess: false,
+      orgType: Account.PREMIUM
     }
     this.setCurrentOrganization(org)
   }
