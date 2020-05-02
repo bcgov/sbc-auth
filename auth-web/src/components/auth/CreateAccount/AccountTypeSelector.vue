@@ -119,10 +119,10 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   }
 
   private selectAccountType (accountType) {
-    this.setSelectedAccountType(accountType)
-    this.selectedAccountType = accountType
     // to reset any existing details ;user might have went to user profile ;came back and selects another type scenarios
     this.resetCurrentOrganisation()
+    this.setSelectedAccountType(accountType)
+    this.selectedAccountType = accountType
   }
 
   private goNext () {
