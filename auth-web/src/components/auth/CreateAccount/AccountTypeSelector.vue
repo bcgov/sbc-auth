@@ -98,7 +98,7 @@ import Steppable from '@/components/auth/stepper/Steppable.vue'
     ...mapState('org', ['currentOrganization'])
   },
   methods: {
-    ...mapMutations('org', ['setSelectedAccountType', 'setCurrentOrganization'])
+    ...mapMutations('org', ['setSelectedAccountType', 'setCurrentOrganization', 'resetCurrentOrganisation'])
   }
 })
 export default class AccountTypeSelector extends Mixins(Steppable) {
@@ -107,6 +107,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   private readonly setSelectedAccountType!: (selectedAccountType: Account) => void
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly currentOrganization!: Organization
+  private readonly resetCurrentOrganisation!: () => void
 
   private async mounted () {
     // first time to the page , start afresh
@@ -120,6 +121,8 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   private selectAccountType (accountType) {
     this.setSelectedAccountType(accountType)
     this.selectedAccountType = accountType
+    // to reset any existing details ;user might have went to user profile ;came back and selects another type scenarios
+    this.resetCurrentOrganisation()
   }
 
   private goNext () {
