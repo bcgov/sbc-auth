@@ -272,7 +272,6 @@ export default class HomeView extends Vue {
   }
 
   private goToManageBusinesses (): void {
-    this.resetCurrentOrganisation()
     this.$router.push(`/${Pages.MAIN}/${this.currentAccountSettings.id}`)
   }
 

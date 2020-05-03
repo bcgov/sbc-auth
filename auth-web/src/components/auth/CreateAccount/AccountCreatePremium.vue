@@ -113,13 +113,14 @@ import { getModule } from 'vuex-module-decorators'
     ConfirmCancelButton
   },
   computed: {
-    ...mapState('org', ['currentOrganization']),
+    ...mapState('org', ['currentOrganization', 'currentOrgAddress']),
     ...mapState('user', ['userProfile', 'currentUser'])
   },
   methods: {
     ...mapMutations('org', [
       'setCurrentOrganization',
       'setCurrentOrganizationAddress',
+      'setCurrentOrgAddress',
       'setGrantAccess'
     ]),
     ...mapActions('org', [
@@ -137,6 +138,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private errorMessage: string = ''
   private saving = false
   private readonly createOrg!: () => Promise<Organization>
+  private readonly currentOrgAddress!: Address
   private readonly syncMembership!: (orgId: number) => Promise<Member>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
   private readonly currentOrganization!: Organization
@@ -169,11 +171,9 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   }
 
   private get address () {
-    return this.currentOrganization.bcolAccountDetails.address
+    return this.currentOrgAddress
   }
-  private set address (address: Address) {
-    this.setCurrentOrganizationAddress(address)
-  }
+
   private unlinkAccounts () {
     this.setCurrentOrganization(undefined)
   }
@@ -181,7 +181,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     return !!this.currentOrganization?.bcolAccountDetails
   }
   private updateAddress (address: Address) {
-    this.address = address
+    this.setCurrentOrganizationAddress(address)
   }
   private async save () {
     // TODO Handle edit mode as well here
@@ -201,6 +201,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
       orgType: Account.PREMIUM
     }
     this.setCurrentOrganization(org)
+    this.setCurrentOrganizationAddress(details.bcolAccountDetails.address)
   }
   private cancel () {
     if (this.stepBack) {
