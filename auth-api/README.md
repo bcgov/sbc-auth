@@ -5,7 +5,7 @@
 # AUTH API
 
 BC Registries authentication and authorization services.
-
+ 
 
 ## Development Environment
 
