@@ -214,11 +214,8 @@ export default class MemberDataTable extends Vue {
         }
         return false
       case MembershipType.Admin:
-        // Admins can change roles of other admins and members, including their own
-        if (memberBeingChanged.membershipTypeCode !== MembershipType.Owner) {
-          return true
-        }
-        return false
+        // Admins can change roles of their own
+        return this.isOwnMembership(memberBeingChanged)
       default:
         return false
     }
