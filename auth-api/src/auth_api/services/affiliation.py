@@ -82,7 +82,8 @@ class Affiliation:
         return data
 
     @staticmethod
-    def create_affiliation(org_id, business_identifier, pass_code=None, token_info: Dict = None):
+    def create_affiliation(org_id, business_identifier, pass_code=None, token_info: Dict = None,
+                           bearer_token: str = None, ):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
@@ -130,7 +131,7 @@ class Affiliation:
         # Retrieve entity name from Legal-API and update the entity with current name
         # TODO: Create subscription to listen for future name updates
         current_app.logger.debug('<create_affiliation sync_name')
-        entity.sync_name()
+        entity.sync_name(bearer_token)
 
         affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id)
         affiliation.save()
