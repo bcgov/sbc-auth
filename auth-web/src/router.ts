@@ -119,7 +119,7 @@ export function getRoutes (): RouteConfig[] {
     { path: '/leaveteam', name: 'leaveteam', component: LeaveTeamLandingView, props: true, meta: { requiresAuth: true } },
     { path: '/staff-setup-account', name: 'staffsetupaccount', component: SetupAccountView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
     { path: '/staff-setup-account-success/:accountName?', name: 'staffsetupaccountsuccess', component: SetupAccountSuccessView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
-    { path: '/userprofileterms/:token?', name: 'userprofileterms', props: true, component: TermsOfServiceView, meta: { } },
+    { path: '/userprofileterms/:token?', name: 'userprofileterms', props: true, component: TermsOfServiceView, meta: { requiresAuth: true } },
     { path: '*', name: 'notfound', component: PageNotFound }
   ]
 
