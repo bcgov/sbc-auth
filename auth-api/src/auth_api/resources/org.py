@@ -235,13 +235,14 @@ class OrgAffiliations(Resource):
         """Post a new Affiliation for an org using the request body."""
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'affiliation')
+        bearer_token = request.headers['Authorization'].replace('Bearer ', '')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
             response, status = AffiliationService.create_affiliation(
                 org_id, request_json.get('businessIdentifier'), request_json.get('passCode'),
-                token_info=g.jwt_oidc_token_info).as_dict(), http_status.HTTP_201_CREATED
+                token_info=g.jwt_oidc_token_info, bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
