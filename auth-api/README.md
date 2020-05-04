@@ -75,5 +75,4 @@ pip install certifi /Applications/Python\ 3.7/Install\ Certificates.command
 
 View the [document](../docs/build-deploy.md).
 
-## Github Actions 
-
+## Github Actions
