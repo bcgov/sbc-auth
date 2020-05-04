@@ -208,7 +208,7 @@ class Entity:
             return True
         return False
 
-    def sync_name(self, bearer_token: str = None, ):
+    def sync_name(self, bearer_token: str = None):
         """Sync this entity's name with the name used in the LEAR database."""
         current_app.logger.info(f'<entity sync_name {self._model.business_identifier}')
         if self.corp_type == CorpType.NR.value:
