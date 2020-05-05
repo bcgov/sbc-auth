@@ -24,7 +24,7 @@
           @key-down="keyDown()"
           @address-update="updateAddress"
           v-if="isPremiumAccount && currentOrgAddress"
-          :disabled="!canChangeAddress"
+          :disabled="!canChangeAddress()"
         >
         </BaseAddress>
       </div>
@@ -126,10 +126,8 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private canChangeAddress (): boolean {
     if (this.isPremiumAccount) {
       const premiumOwner =
-        this.currentMembership?.membershipTypeCode === MembershipType.Owner
-      // org name is read only ;the only thing which they can change is address
-      // detect any change in address
-      return true
+        this.currentMembership?.membershipTypeCode === MembershipType.Owner || this.currentMembership?.membershipTypeCode === MembershipType.Admin
+      return premiumOwner
     }
     return false
   }
