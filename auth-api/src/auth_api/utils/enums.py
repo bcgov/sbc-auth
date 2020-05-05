@@ -63,3 +63,10 @@ class OrgType(Enum):
 
     PREMIUM = 'PREMIUM'
     BASIC = 'BASIC'
+
+
+class DocumentType(Enum):
+    """Document types."""
+
+    TERMS_OF_USE = 'termsofuse'
+    TERMS_OF_USE_DIRECTOR_SEARCH = 'termsofuse_directorsearch'
