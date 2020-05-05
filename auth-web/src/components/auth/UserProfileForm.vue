@@ -201,6 +201,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private readonly createOrg!: () => Promise<Organization>
     readonly syncMembership!: (orgId: number) => Promise<Member>
     readonly syncOrganization!: (orgId: number) => Promise<Organization>
+    private readonly ACCOUNT_TYPE = Account
 
     // this prop is used for conditionally using this form in both account stepper and edit profile pages
     @Prop({ default: false }) isStepperView: boolean
@@ -320,7 +321,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     }
 
     private goBack () {
-      this.stepBack()
+      this.stepBack(this.currentOrganization!.orgType === this.ACCOUNT_TYPE.PREMIUM)
     }
 
     private async deactivate (): Promise<void> {

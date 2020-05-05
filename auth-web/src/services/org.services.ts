@@ -1,6 +1,7 @@
 import { Affiliation, CreateRequestBody as CreateAffiliationRequestBody } from '@/models/affiliation'
 import Axios, { AxiosResponse } from 'axios'
 import { CreateRequestBody as CreateOrganizationRequestBody, Member, Members, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { Address } from '@/models/address'
 import { Businesses } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import { Invitations } from '@/models/Invitation'
@@ -11,6 +12,12 @@ const axios = addAxiosInterceptors(Axios.create())
 export default class OrgService {
   public static async getOrganization (orgId: number): Promise<AxiosResponse<Organization>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`)
+  }
+
+  public static async getContactForOrg (orgId: number): Promise<Address> {
+    const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/contacts`)
+    // for now it returns only address , can return the all the contacts as well
+    return response.data.contacts[0]
   }
 
   public static async isOrgNameAvailable (orgName: string): Promise<AxiosResponse> {
