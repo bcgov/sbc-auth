@@ -13,6 +13,7 @@
 # limitations under the License.
 """API endpoints for managing an Invitation resource."""
 
+from flask import g
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
@@ -20,6 +21,8 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.services import Documents as DocumentService
 from auth_api.tracer import Tracer
+from auth_api.utils.enums import DocumentType
+from auth_api.utils.roles import AccessType
 from auth_api.utils.util import cors_preflight
 
 
@@ -36,9 +39,15 @@ class Documents(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
     def get(document_type):
         """Return the latest terms of use."""
         try:
+            if document_type == DocumentType.TERMS_OF_USE.value:
+                token = g.jwt_oidc_token_info
+                if token.get('accessType', None) == AccessType.ANONYMOUS.value:
+                    document_type = DocumentType.TERMS_OF_USE_DIRECTOR_SEARCH.value
+
             doc = DocumentService.fetch_latest_document(document_type)
             if doc is not None:
                 response, status = doc.as_dict(), http_status.HTTP_200_OK

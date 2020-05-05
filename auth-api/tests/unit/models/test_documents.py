@@ -26,7 +26,7 @@ def test_documents_with_insert(session):
     Start with a blank document.
     """
     doc_latest = Documents.fetch_latest_document_by_type('termsofuse')
-    assert doc_latest.version_id == 1
+    assert doc_latest.version_id == '1'
 
 
 def test_documents_with_insert_some_type(session):
