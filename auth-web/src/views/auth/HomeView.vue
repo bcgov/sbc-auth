@@ -230,7 +230,7 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
@@ -246,6 +246,9 @@ import { VueConstructor } from 'vue'
   computed: {
     ...mapState('user', ['userProfile', 'currentUser']),
     ...mapState('org', ['currentAccountSettings', 'currentMembership'])
+  },
+  methods: {
+    ...mapMutations('org', ['resetCurrentOrganisation'])
   }
 })
 
@@ -258,6 +261,7 @@ export default class HomeView extends Vue {
   private noPasscodeDialog = false
   private accountDialog = false
   private isDirSearchUser: boolean = false
+  private readonly resetCurrentOrganisation!: () => void
 
   private get showManageBusinessesBtn (): boolean {
     return this.currentAccountSettings && this.currentMembership?.membershipStatus === MembershipStatus.Active
@@ -272,6 +276,7 @@ export default class HomeView extends Vue {
   }
 
   private createAccount (): void {
+    this.resetCurrentOrganisation()
     this.$router.push(`/${Pages.CREATE_ACCOUNT}`)
   }
 

@@ -8,7 +8,7 @@ import Vue from 'vue'
 })
 export default class Steppable extends Vue {
   @Prop() stepForward!: (useAlternate?: boolean) => void
-  @Prop() stepBack!: () => void
+  @Prop() stepBack!: (useAlternate?: boolean) => void
   @Prop() jumpToStep!: (index: number, useAlternate?: boolean) => void
 }
 </script>

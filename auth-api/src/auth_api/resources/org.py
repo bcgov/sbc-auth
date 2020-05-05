@@ -160,7 +160,7 @@ class Org(Resource):
 
 
 @cors_preflight('GET,DELETE,POST,PUT,OPTIONS')
-@API.route('/<string:org_id>/contacts', methods=['GET', 'DELETE', 'POST', 'PUT'])
+@API.route('/<string:org_id>/contacts', methods=['GET', 'DELETE', 'POST', 'PUT', 'OPTIONS'])
 class OrgContacts(Resource):
     """Resource for managing org contacts."""
 
