@@ -96,6 +96,12 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     return !!this.orgName
   }
 
+  private async mounted () {
+    if (this.currentOrganization) {
+      this.orgName = this.currentOrganization.name
+    }
+  }
+
   private async save () {
     // Validate form, and then create an team with this user a member
     if (this.isFormValid()) {

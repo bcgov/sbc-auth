@@ -25,7 +25,7 @@ import { getModule } from 'vuex-module-decorators'
     AccountBasicCreate
   },
   computed: {
-    ...mapState('org', ['currentOrganization', 'selectedAccountType']),
+    ...mapState('org', ['currentOrganization']),
     ...mapState('user', ['userProfile', 'currentUser'])
   },
   methods: {
@@ -43,7 +43,6 @@ export default class CreateAccountInfoForm extends Mixins(Steppable) {
     private readonly syncOrganization!: (orgId: number) => Promise<Organization>
     private readonly currentOrganization!: Organization
     private readonly currentUser!: KCUserProfile
-    private readonly selectedAccountType!: Account
 
     $refs: {
       createAccountInfoForm: HTMLFormElement
@@ -57,7 +56,7 @@ export default class CreateAccountInfoForm extends Mixins(Steppable) {
     }
 
     private isPremium () {
-      return this.selectedAccountType === Account.PREMIUM
+      return this.currentOrganization.orgType === Account.PREMIUM
     }
 
     private redirectToNext (organization?: Organization) {

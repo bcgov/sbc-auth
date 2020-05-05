@@ -24,7 +24,6 @@ export interface Organization {
   members?: Member[];
   invitations?: Invitation[];
   accessType?: string;
-  address?: Address,
   bcolProfile?:BcolProfile
   bcolAccountDetails?:BcolAccountDetails
   grantAccess?:boolean
