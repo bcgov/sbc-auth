@@ -129,6 +129,12 @@ class BaseModel(db.Model):
         """RollBack."""
         db.session.rollback()
 
+    def reset(self):
+        """Reset."""
+        if self:
+            db.session.delete(self)
+            db.session.commit()
+
 
 class BaseCodeModel(BaseModel):
     """This class manages all of the base code, type or status model functions."""
