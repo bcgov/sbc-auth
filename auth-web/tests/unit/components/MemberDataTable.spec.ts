@@ -11,9 +11,7 @@ Vue.use(Vuetify)
 Vue.use(VueRouter)
 Vue.use(VueI18n)
 
-jest.mock('axios', () => ({
-  post: jest.fn(() => Promise.resolve({ data: { } }))
-}))
+jest.mock('../../../src/services/bcol.services')
 
 describe('MemberDataTable.vue', () => {
   let localVue
@@ -35,7 +33,7 @@ describe('MemberDataTable.vue', () => {
         pendingOrgInvitations: [],
         currentOrganization: {},
         activeOrgMembers: [{ 'membershipTypeCode': 'OWNER', 'user': { 'username': 'test' } }],
-        pendingOrgMembers: []
+        pendingOrgMembers: [{ 'membershipTypeCode': 'OWNER', 'user': { 'username': 'test' } }]
       },
       actions: {
         createInvitation: jest.fn(),
