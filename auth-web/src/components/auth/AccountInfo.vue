@@ -20,10 +20,10 @@
       </v-text-field>
       <div>
         <BaseAddress
-          :inputAddress="currentOrgAddress"
+          :inputAddress="currentOrgAddress" :key="currentOrgAddress"
           @key-down="keyDown()"
           @address-update="updateAddress"
-          v-if="isPremiumAccount && currentOrgAddress"
+          v-if="isPremiumAccount"
           :disabled="!canChangeAddress()"
         >
         </BaseAddress>
@@ -43,12 +43,21 @@
           </v-expand-x-transition>
           <span class="save-btn__label">{{ btnLabel }}</span>
         </v-btn>
+        <v-btn
+                large
+                depressed
+                class="ml-2"
+                color="default"
+                @click="resetForm"
+                data-test="reset-button"
+        >RESET</v-btn>
       </div>
     </v-form>
   </v-container>
 </template>
 
 <script lang="ts">
+import { Account, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import {
   CreateRequestBody,
@@ -57,10 +66,11 @@ import {
   Organization
 } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
-import { Account } from '@/util/constants'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
+import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
 
@@ -90,7 +100,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     requestBody: CreateRequestBody
   ) => Promise<Organization>
   private readonly syncAddress!: () => Address
-  private readonly syncOrganization!: () => Organization
+  protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
   private orgName = ''
   private errorMessage: string = ''
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
@@ -101,6 +111,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   private async mounted () {
+    await this.syncOrganization(this.getAccountFromSession().id)
     this.setAccountChangedHandler(this.syncOrgName)
     this.syncOrgName()
     if (this.isPremiumAccount) {
@@ -123,6 +134,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     this.orgName = this.currentOrganization?.name || ''
   }
 
+  protected getAccountFromSession (): AccountSettings {
+    return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
+  }
+
   private canChangeAddress (): boolean {
     if (this.isPremiumAccount) {
       const premiumOwner =
@@ -130,6 +145,11 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
       return premiumOwner
     }
     return false
+  }
+
+  private async resetForm () {
+    this.syncOrgName()
+    await this.syncAddress()
   }
 
   get isPremiumAccount (): boolean {
