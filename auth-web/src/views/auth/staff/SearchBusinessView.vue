@@ -81,6 +81,7 @@ import { Role } from '@/util/constants'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
+import UserModule from '@/store/modules/user'
 
 @Component({
   components: {

@@ -28,10 +28,40 @@ describe('SearchBusinessView.vue', () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
+    const businessModule = {
+      namespaced: true,
+      state: {
+        currentBusiness: {
+          businessIdentifier: 'CP0000000',
+          businessNumber: 'CP0000000',
+          contacts: [
+            {
+              created: '2019-12-11T04:03:11.830365+00:00',
+              createdBy: 'TEST',
+              email: 'test@gmail.com',
+              modified: '2019-12-11T04:03:11.830395+00:00',
+              phone: '',
+              phoneExtension: ''
+            }
+          ],
+          folioNumber: '22222222222'
+        }
+      }
+    }
+
+    const userModule = {
+      namespaced: true,
+      state: {
+        currentUser: { 'userName': 'test' }
+      }
+    }
+
     const store = new Vuex.Store({
+      state: {},
       strict: false,
       modules: {
-        business: BusinessModule
+        business: businessModule,
+        user: userModule
       }
     })
 

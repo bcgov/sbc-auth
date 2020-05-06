@@ -14,6 +14,7 @@ Vue.use(VueRouter)
 
 describe('UserProfileForm.vue', () => {
   let wrapper: Wrapper<UserProfileForm>
+  let vuetify
   const config = {
     'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
     'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
@@ -24,6 +25,7 @@ describe('UserProfileForm.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
+    vuetify = new Vuetify()
     const $t = () => 'test'
 
     const store = new Vuex.Store({
@@ -36,6 +38,7 @@ describe('UserProfileForm.vue', () => {
     wrapper = mount(UserProfileForm, {
       store,
       localVue,
+      vuetify,
       mocks: { $t },
       stubs: {
         ModalDialog: true,
