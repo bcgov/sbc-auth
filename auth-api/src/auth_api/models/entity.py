@@ -26,7 +26,7 @@ from auth_api.utils.util import camelback2snake
 from .base_model import BaseModel
 
 
-class Entity(BaseModel):  # pylint: disable=too-few-public-methods
+class Entity(BaseModel):  # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """This is the Entity model for the Auth service."""
 
     __tablename__ = 'entity'
@@ -66,3 +66,14 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods
     def find_by_entity_id(cls, entity_id):
         """Find an Entity instance that matches the provided id."""
         return cls.query.filter_by(id=entity_id).first()
+
+    def reset(self):
+        """Reset an Entity back to init state."""
+        self.pass_code_claimed = False
+        self.folio_number = None
+        self.name = 'Test ' + self.business_identifier + ' Name'
+        self.created_by_id = None
+        self.created = None
+        self.modified_by_id = None
+        self.modified = None
+        self.save()

@@ -26,7 +26,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import ResetTestData as ResetDataService
 from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
-from tests.utilities.factory_scenarios import TestJwtClaims, TestUserInfo
+from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestUserInfo
 from tests.utilities.factory_utils import (
     factory_entity_model, factory_membership_model, factory_org_model, factory_user_model)
 
@@ -50,7 +50,10 @@ def test_reset(session, auth_mock):  # pylint: disable=unused-argument
     assert found_org is None
 
     found_entity = EntityService.find_by_entity_id(entity.id)
-    assert found_entity is None
+    assert found_entity is not None
+    dictionary = found_entity.as_dict()
+    assert dictionary['businessIdentifier'] == TestEntityInfo.entity1['businessIdentifier']
+    assert not dictionary['passCodeClaimed']
 
     found_memeber = MembershipService.get_members_for_org(org.id)
     assert found_memeber is None
