@@ -116,6 +116,13 @@ legend {
   font-weight: 700;
 }
 
+// Form Buttons
+.form__btns {
+  .v-btn {
+    font-weight: 700;
+  }
+}
+
 // Helpers
 .nobr {
   white-space: nowrap; // Utility class to prevent orphaned text

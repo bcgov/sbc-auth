@@ -15,18 +15,28 @@
           @click="selectAccountType(ACCOUNT_TYPE.BASIC)"
         >
           <div class="account-type">
-            <div class="account-type__name mb-2">
+            <div class="account-type__name mt-n1 mb-2">
               Basic
             </div>
             <div class="account-type__title mb-8">
               I make 10 transactions per month or less
             </div>
-            <ul class="account-type__details">
-              <li class="mb-5">For users who file on behalf of their own businesses or conduct a limited number of searches</li>
-              <li class="mb-5">Credit card payment only</li>
+            <ul class="account-type__details ml-1">
+              <li class="mb-4">For users who file on behalf of their own businesses or conduct a limited number of searches</li>
+              <li class="mb-4">Credit card payment only</li>
               <li>Up to 10 purchases per month</li>
             </ul>
           </div>
+
+          <!-- State Button -->
+          <div class="mt-9">
+            <v-btn large block depressed color="primary" class="font-weight-bold"
+              :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
+              @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
+              {{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT' }}
+            </v-btn>
+          </div>
+
         </v-card>
       </v-col>
       <v-col
@@ -42,24 +52,30 @@
           @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)"
         >
           <div class="account-type">
-            <div class="account-type__name mb-2">PREMIUM</div>
+            <div class="account-type__name mt-n1 mb-2">PREMIUM</div>
             <div class="account-type__title mb-8">I make more than 10 transactions per month</div>
-            <ul class="account-type__details mb-8">
-              <li class="mb-5">For firms and companies who search frequently or file for a large number of businesses</li>
-              <li class="mb-5">Uses your BC Online account to pay for products & services</li>
-              <li>Unlimited purchases</li>
+            <ul class="account-type__details  ml-1 mb-5">
+              <li class="mb-4">For firms and companies who search frequently or file for a large number of businesses</li>
+              <li class="mb-4">Uses your BC Online account to pay for products and services</li>
+              <li class="mb-4">Unlimited transactions</li>
+              <li>Requires an existing BC Online account and Prime Contact credentials to complete.</li>
             </ul>
-            <div class="mb-5">
-              <strong>
-                Please Note: To create a Premium account, you require an existing BC Online account. You must be the Prime Contact to complete this process.
-              </strong>
-            </div>
             <div>
               <v-btn text color="primary" class="bcol-link px-2" href="https://www.bconline.gov.bc.ca/" target="_blank" rel="noopener noreferrer">
                 <v-icon>mdi-help-circle-outline</v-icon>
                 <span>How do I get a BC Online Account?</span>
               </v-btn>
             </div>
+
+            <!-- State Button -->
+            <div class="mt-9">
+              <v-btn large block depressed color="primary" class="font-weight-bold"
+                :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
+                @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
+                {{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT' }}
+              </v-btn>
+            </div>
+
           </div>
         </v-card>
       </v-col>
@@ -143,9 +159,10 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 }
 
 .account-card {
+  display: flex;
+  flex-direction: column;
   position: relative;
   background-color: var(--v-grey-lighten4) !important;
-  flex-direction: column;
 
   &:hover {
     border-color: var(--v-primary-base) !important;
@@ -158,6 +175,10 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 
 .theme--light.v-card.v-card--outlined.active {
   border-color: var(--v-primary-base);
+}
+
+.account-type {
+  flex: 1 1 auto;
 }
 
 .account-type__title {
