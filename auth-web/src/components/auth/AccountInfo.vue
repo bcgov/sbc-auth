@@ -57,6 +57,7 @@
                 @address-update="updateAddress"
                 v-if="isPremiumAccount && currentOrgAddress"
                 :disabled="!canChangeAddress()"
+                :key="addressKey"
         >
         </BaseAddress>
       <div class="form__btns">
@@ -146,6 +147,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     return !!this.orgName || this.orgName === this.currentOrganization?.name
   }
 
+  get addressKey () {
+    return JSON.stringify(this.currentOrgAddress)
+  }
+
   private async mounted () {
     // eslint-disable-next-line no-console
     const accountSettings = this.getAccountFromSession()
@@ -189,6 +194,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private async resetForm () {
     this.syncOrgName()
     await this.syncAddress()
+    this.isSaveEnabled()
   }
 
   get isPremiumAccount (): boolean {
