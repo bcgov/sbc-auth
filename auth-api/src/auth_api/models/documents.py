@@ -16,7 +16,7 @@
 Documents which are static in nature are stored in this table  ie.terms of use
 """
 
-from sqlalchemy import Column, Integer, String, Text, desc
+from sqlalchemy import Column, String, Text, desc
 
 from .base_model import BaseModel
 from .db import db
@@ -28,7 +28,7 @@ class Documents(BaseModel):
     __tablename__ = 'documents'
 
     # TODO version concept is not well refined..this is the first version..refine it
-    version_id = Column(Integer, primary_key=True, autoincrement=False)
+    version_id = Column(String(10), primary_key=True, autoincrement=False)
     type = Column('type', String(20), nullable=False)
     content = Column('content', Text)
 

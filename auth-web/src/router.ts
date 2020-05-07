@@ -96,7 +96,7 @@ export function getRoutes (): RouteConfig[] {
     },
     { path: '/setup-account', name: 'setupaccount', component: AccountSetupView, props: true, meta: { requiresAuth: true, requiresProfile: true } },
     { path: '/setup-account-success', name: 'setup-account-success', component: AccountCreationSuccessView, meta: { requiresAuth: true, requiresProfile: true } },
-    { path: '/userprofile/:token?', name: 'userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true } },
+    { path: '/userprofile/:token?', name: 'userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true, requiresProfile: true } },
     { path: '/createaccount', name: 'createaccount', component: CreateAccountView, meta: { requiresAuth: false, requiresProfile: false }, props: true },
     { path: '/duplicateteam', name: 'duplicateteam', component: DuplicateTeamWarningView, meta: { requiresAuth: true } },
     { path: '/validatetoken/:token', name: 'validatetoken', component: AcceptInviteLandingView, props: true, meta: { requiresAuth: false, disabledRoles: [Role.Staff] } },
@@ -119,7 +119,7 @@ export function getRoutes (): RouteConfig[] {
     { path: '/leaveteam', name: 'leaveteam', component: LeaveTeamLandingView, props: true, meta: { requiresAuth: true } },
     { path: '/staff-setup-account', name: 'staffsetupaccount', component: SetupAccountView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
     { path: '/staff-setup-account-success/:accountName?', name: 'staffsetupaccountsuccess', component: SetupAccountSuccessView, props: true, meta: { requiresAuth: true, allowedRoles: [Role.Staff] } },
-    { path: '/userprofileterms/:token?', name: 'userprofileterms', props: true, component: TermsOfServiceView, meta: { } },
+    { path: '/userprofileterms/:token?', name: 'userprofileterms', props: true, component: TermsOfServiceView, meta: { requiresAuth: true } },
     { path: '*', name: 'notfound', component: PageNotFound }
   ]
 
