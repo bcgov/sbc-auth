@@ -12,15 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Organization data."""
-
-
+import json
 from typing import Dict, Tuple
 
 from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
-from auth_api.exceptions import BusinessException
+from auth_api.exceptions import BusinessException, CustomException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountPaymentSettings as AccountPaymentModel
 from auth_api.models import Affiliation as AffiliationModel
@@ -147,7 +146,8 @@ class Org:
 
             # todo not at all ideal..find out what all bcol error messages possible
             if bcol_response.status_code != http_status.HTTP_200_OK:
-                raise BusinessException(Error.BCOL_INVALID_USERNAME_PASSWORD, None)
+                error = json.loads(bcol_response.text)
+                raise BusinessException(CustomException(error['detail'], bcol_response.status_code), None)
 
             bcol_account_number = bcol_response.json().get('accountNumber')
 
@@ -227,6 +227,18 @@ class Org:
         check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
 
         return Org(org_model)
+
+    @staticmethod
+    def get_payment_settings_for_org(org_id, token_info: Dict = None, allowed_roles: Tuple = None):
+        """Get the payment settings for the given org."""
+        current_app.logger.debug('get_payment_settings(>')
+        org = OrgModel.find_by_org_id(org_id)
+        if org is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # Check authorization for the user
+        check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
+        return AccountPaymentModel.find_active_by_org_id(org_id)
 
     @staticmethod
     def get_contacts(org_id):

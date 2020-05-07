@@ -5,4 +5,6 @@ export interface Address {
     streetAdditional?: string
     postalCode?: string
     region?: string
+    key?: string
+
 }

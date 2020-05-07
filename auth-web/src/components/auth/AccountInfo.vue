@@ -13,12 +13,12 @@
           <div class="name" id="accountType">Account Type</div>
           <div class="value" aria-labelledby="accountType">
             <div class="value__title">{{ isPremiumAccount ? 'PREMIUM' : 'BASIC' }}</div>
-            <ul class="bcol-acc__meta mt-1" v-if="isPremiumAccount">
+            <ul class="bcol-acc__meta mt-1" v-if="isPremiumAccount && currentOrgPaymentSettings">
               <li>
-                BC Online Account No: 18670
+                BC Online Account No: {{currentOrgPaymentSettings.bcolAccountId}}
               </li>
               <li>
-                Authorizing User ID: PB25020
+                Authorizing User ID: {{currentOrgPaymentSettings.bcolUserId}}
               </li>
             </ul>
             <!--
@@ -51,9 +51,8 @@
         >
         </v-text-field>
       </fieldset>
-
         <BaseAddress
-                :inputAddress="currentOrgAddress" :key="currentOrgAddress"
+                :inputAddress="currentOrgAddress" :key="addressKey"
                 @key-down="keyDown()"
                 @address-update="updateAddress"
                 v-if="isPremiumAccount"
@@ -104,6 +103,7 @@ import { Address } from '@/models/address'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
+import { PaymentSettings } from '@/models/PaymentSettings'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -114,11 +114,12 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('org', [
       'currentOrganization',
       'currentMembership',
-      'currentOrgAddress'
+      'currentOrgAddress',
+      'currentOrgPaymentSettings'
     ])
   },
   methods: {
-    ...mapActions('org', ['updateOrg', 'syncAddress', 'syncOrganization']),
+    ...mapActions('org', ['updateOrg', 'syncAddress', 'syncOrganization', 'syncPaymentSettings']),
     ...mapMutations('org', ['setCurrentOrganizationAddress'])
   }
 })
@@ -127,27 +128,35 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private btnLabel = 'Save'
   private readonly currentOrganization!: Organization
   private readonly currentOrgAddress!: Address
+  private readonly currentOrgPaymentSettings!: PaymentSettings
   private readonly currentMembership!: Member
   private readonly updateOrg!: (
     requestBody: CreateRequestBody
   ) => Promise<Organization>
   private readonly syncAddress!: () => Address
   protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
+  protected readonly syncPaymentSettings!: (currentAccount: number) => Promise<PaymentSettings>
   private orgName = ''
   private errorMessage: string = ''
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private addressTocuhed = false
+  // TODO just did this since address component is not getting updated after fetching it..find out why and remove this
+  private addressKey = ''
 
   private isFormValid (): boolean {
     return !!this.orgName || this.orgName === this.currentOrganization?.name
   }
 
   private async mounted () {
-    await this.syncOrganization(this.getAccountFromSession().id)
+    // eslint-disable-next-line no-console
+    const accountSettings = this.getAccountFromSession()
+    await this.syncOrganization(accountSettings.id)
     this.setAccountChangedHandler(this.syncOrgName)
     this.syncOrgName()
     if (this.isPremiumAccount) {
+      await this.syncPaymentSettings(accountSettings.id)
       await this.syncAddress()
+      this.addressKey = JSON.stringify(this.currentOrgAddress)
     }
   }
 

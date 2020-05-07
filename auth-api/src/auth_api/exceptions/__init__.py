@@ -37,3 +37,13 @@ class ServiceUnavailableException(Exception):
         super(ServiceUnavailableException, self).__init__(*args, **kwargs)
         self.error = error
         self.status_code = Error.SERVICE_UNAVAILABLE.name
+
+
+class CustomException:
+    """A custom exception object to be used propagate errors."""
+
+    def __init__(self, message, status_code, name=None):
+        """Return a Custom exception when enum cant be used."""
+        self.message = message
+        self.status_code = status_code
+        self.name = name
