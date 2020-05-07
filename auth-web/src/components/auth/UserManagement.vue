@@ -1,10 +1,10 @@
 <template>
-  <v-container>
-    <header class="view-header align-center">
+  <v-container class="pa-0">
+    <header class="view-header align-center mt-n1 mb-6">
       <h2 class="view-header__title">Team Members</h2>
       <div class="view-header__actions">
-        <v-btn color="primary" v-if="canInvite()" @click="showInviteUsersModal()" data-test="invite-people-button">
-          <v-icon small>mdi-plus</v-icon>
+        <v-btn color="primary" class="font-weight-bold" large v-if="canInvite()" @click="showInviteUsersModal()" data-test="invite-people-button">
+          <v-icon small class="ml-n1">mdi-plus</v-icon>
           <span>Invite People</span>
         </v-btn>
       </div>

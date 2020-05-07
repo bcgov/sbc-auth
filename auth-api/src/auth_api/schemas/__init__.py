@@ -29,3 +29,4 @@ from .org_type import OrgTypeSchema
 from .user import UserSchema
 from .user_settings import UserSettingsSchema
 from .product_subscription import ProductSubscriptionSchema
+from .account_payment_settings import AccountPaymentSettingsSchema
