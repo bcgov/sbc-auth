@@ -194,7 +194,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private async resetForm () {
     this.syncOrgName()
     await this.syncAddress()
-    this.isSaveEnabled()
   }
 
   get isPremiumAccount (): boolean {
