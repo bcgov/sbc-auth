@@ -55,7 +55,7 @@
                 :inputAddress="currentOrgAddress"
                 @key-down="keyDown()"
                 @address-update="updateAddress"
-                v-if="isPremiumAccount"
+                v-if="isPremiumAccount && currentOrgAddress"
                 :disabled="!canChangeAddress()"
         >
         </BaseAddress>

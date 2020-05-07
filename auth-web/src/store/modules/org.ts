@@ -41,7 +41,7 @@ export default class OrgModule extends VuexModule {
   activeOrgMembers: Member[] = []
   pendingOrgMembers: Member[] = []
   pendingOrgInvitations: Invitation[] = []
-  currentOrgPaymentSettings:PaymentSettings
+  currentOrgPaymentSettings:PaymentSettings =undefined
   invalidInvitationToken = false
   tokenError = false
   createdUsers: BulkUsersSuccess[] = []
