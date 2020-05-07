@@ -5,6 +5,7 @@ import { Address } from '@/models/address'
 import { Businesses } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import { Invitations } from '@/models/Invitation'
+import { PaymentSettings } from '@/models/PaymentSettings'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
 
 const axios = addAxiosInterceptors(Axios.create())
@@ -26,6 +27,10 @@ export default class OrgService {
 
   public static async getOrgMembers (orgId: number, status: string): Promise<AxiosResponse<Members>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/members?status=${status}`)
+  }
+
+  public static async getPaymentSettings (orgId: number): Promise<AxiosResponse<PaymentSettings>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/payment_settings`)
   }
 
   public static async getOrgInvitations (orgId: number, status: string = 'ALL'): Promise<AxiosResponse<Invitations>> {

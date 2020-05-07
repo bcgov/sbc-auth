@@ -20,6 +20,7 @@ import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
+import { PaymentSettings } from '@/models/PaymentSettings'
 import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
@@ -40,10 +41,16 @@ export default class OrgModule extends VuexModule {
   activeOrgMembers: Member[] = []
   pendingOrgMembers: Member[] = []
   pendingOrgInvitations: Invitation[] = []
+  currentOrgPaymentSettings:PaymentSettings
   invalidInvitationToken = false
   tokenError = false
   createdUsers: BulkUsersSuccess[] = []
   failedUsers: BulkUsersFailed[] = []
+
+  @Mutation
+  public setCurrentOrgPaymentSettings (currentOrgPaymentSettings:PaymentSettings) {
+    this.currentOrgPaymentSettings = currentOrgPaymentSettings
+  }
 
   @Mutation
   public setGrantAccess (grantAccess: boolean) {
@@ -341,6 +348,12 @@ export default class OrgModule extends VuexModule {
   public async syncActiveOrgMembers () {
     const response = await OrgService.getOrgMembers(this.context.state['currentOrganization'].id, 'ACTIVE')
     return response.data && response.data.members ? response.data.members : []
+  }
+
+  @Action({ commit: 'setCurrentOrgPaymentSettings', rawError: true })
+  public async syncPaymentSettings () {
+    const response = await OrgService.getPaymentSettings(this.context.state['currentOrganization'].id)
+    return response.data
   }
 
   @Action({ rawError: true })

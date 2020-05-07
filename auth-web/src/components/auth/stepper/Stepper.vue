@@ -148,7 +148,7 @@ export default class Stepper extends Vue {
     }
 
     &__title {
-      font-size: 1.75rem;
+      font-size: 1.65rem;
     }
   }
 
