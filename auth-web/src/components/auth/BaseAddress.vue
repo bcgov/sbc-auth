@@ -1,6 +1,6 @@
 <template>
   <v-form ref="adress" lazy-validation>
-    <fieldset>
+    <fieldset v-if="address">
       <legend class="mb-4">Mailing Address</legend>
       <v-row>
         <v-col cols="12" class="py-0">

@@ -52,7 +52,7 @@
         </v-text-field>
       </fieldset>
         <BaseAddress
-                :inputAddress="currentOrgAddress" :key="addressKey"
+                :inputAddress="currentOrgAddress"
                 @key-down="keyDown()"
                 @address-update="updateAddress"
                 v-if="isPremiumAccount"
@@ -141,7 +141,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private addressTocuhed = false
   // TODO just did this since address component is not getting updated after fetching it..find out why and remove this
-  private addressKey = ''
 
   private isFormValid (): boolean {
     return !!this.orgName || this.orgName === this.currentOrganization?.name
@@ -156,7 +155,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     if (this.isPremiumAccount) {
       await this.syncPaymentSettings(accountSettings.id)
       await this.syncAddress()
-      this.addressKey = JSON.stringify(this.currentOrgAddress)
     }
   }
 
