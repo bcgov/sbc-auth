@@ -81,7 +81,7 @@
                 color="default"
                 @click="resetForm"
                 data-test="reset-button"
-        >RESET</v-btn>
+        >Reset</v-btn>
       </div>
     </v-form>
   </v-container>
