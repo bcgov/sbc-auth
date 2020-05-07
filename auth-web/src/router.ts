@@ -49,6 +49,7 @@ export function getRoutes (): RouteConfig[] {
   const accountSettings = () => import(/* webpackChunkName: "account-settings" */ './views/auth/AccountSettings.vue')
   const accountInfo = () => import(/* webpackChunkName: "account-settings" */ './components/auth/AccountInfo.vue')
   const teamManagement = () => import(/* webpackChunkName: "account-settings" */ './components/auth/TeamManagement.vue')
+  const transaction = () => import(/* webpackChunkName: "account-settings" */ './components/auth/Transactions.vue')
   const routes = [
     { path: '/', name: 'root', component: HomeView, meta: { showNavBar: true } },
     { path: '/home', name: 'home', component: HomeView, meta: { showNavBar: true } },
@@ -91,6 +92,11 @@ export function getRoutes (): RouteConfig[] {
           path: 'team-members',
           name: 'team-members',
           component: teamManagement
+        },
+        {
+          path: 'transactions',
+          name: 'transactions',
+          component: transaction
         }
       ]
     },

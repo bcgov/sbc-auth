@@ -26,9 +26,9 @@
 
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
+import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
 import { mapState } from 'vuex'
-import moment from 'moment'
 
 @Component({
   computed: {
@@ -65,9 +65,7 @@ export default class InvitationsDataTable extends Vue {
     }
   ]
 
-  private formatDate (date: Date) {
-    return moment(date).format('DD MMM, YYYY')
-  }
+  private formatDate = CommonUtils.formatDisplayDate
 
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`

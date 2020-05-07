@@ -13,6 +13,7 @@ import {
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
+import { Transaction, TransactionListResponse, TransactionTableList, TransactionTableRow } from '@/models/transaction'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BcolService from '@/services/bcol.services'
@@ -20,6 +21,7 @@ import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
+import PaymentService from '@/services/payment.services'
 import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
@@ -44,6 +46,7 @@ export default class OrgModule extends VuexModule {
   createdUsers: BulkUsersSuccess[] = []
   failedUsers: BulkUsersFailed[] = []
   selectedAccountType:Account
+  currentOrgTransactionList: TransactionTableRow[] = []
 
   @Mutation
   public setGrantAccess (grantAccess: boolean) {
@@ -124,6 +127,11 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setFailedUsers (users: BulkUsersFailed[]) {
     this.failedUsers = users
+  }
+
+  @Mutation
+  public setCurrentOrgTransactionList (transactionResp: TransactionTableList) {
+    this.currentOrgTransactionList = transactionResp.transactionsList
   }
 
   @Action({ rawError: true })
@@ -386,6 +394,50 @@ export default class OrgModule extends VuexModule {
     } catch (exception) {
       throw exception
     }
+  }
+
+  @Action({ commit: 'setCurrentOrgTransactionList', rawError: true })
+  public async getTransactionList () {
+    const dateFilter = {
+      'dateFilter': {
+        'startDate': '01/01/2020',
+        'endDate': '12/31/2020'
+      }
+    }
+    const response = await PaymentService.getTransactions(this.context.state['currentOrganization'].id, dateFilter)
+    if (response?.data) {
+      const formattedList = await this.formatTransactionTableData(response.data.items || [])
+      // eslint-disable-next-line no-console
+      console.log(formattedList)
+      return {
+        limit: response.data.limit,
+        page: response.data.page,
+        total: response.data.total,
+        transactionsList: formattedList
+      }
+    }
+    return {}
+  }
+
+  @Action({ rawError: true })
+  public formatTransactionTableData (transactionList) {
+    let transactionTableData = []
+    transactionList.forEach(transaction => {
+      let transactionNames = []
+      transaction?.invoice?.lineItems?.forEach(lineItem => {
+        transactionNames.push(lineItem.description)
+      })
+      transactionTableData.push({
+        id: transaction.id,
+        transactionNames: transactionNames,
+        folioNumber: transaction?.invoice?.folioNumber || '',
+        initiatedBy: transaction.createdName,
+        transactionDate: transaction.createdOn,
+        totalAmount: transaction?.invoice?.total || 0,
+        status: transaction.statusCode
+      })
+    })
+    return transactionTableData
   }
 
   @Action({ rawError: true })

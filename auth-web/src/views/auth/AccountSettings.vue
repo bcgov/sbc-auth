@@ -49,6 +49,12 @@
                   </v-list-item-icon>
                   <v-list-item-title>Team Members</v-list-item-title>
                 </v-list-item>
+                <v-list-item :to="transactionUrl" data-test="transactions-nav-item">
+                  <v-list-item-icon>
+                    <v-icon color="link" left>mdi-file-document-outline</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-title>Transactions</v-list-item-title>
+                </v-list-item>
               </v-list-item-group>
             </v-list>
           </v-navigation-drawer>
@@ -94,6 +100,11 @@ export default class AccountSettings extends Vue {
   private get teamMembersUrl (): string {
     return `/account/${this.orgId}/settings/team-members`
   }
+
+  private get transactionUrl (): string {
+    return `/account/${this.orgId}/settings/transactions`
+  }
+
   private mounted () {
     this.isLoading = false
     this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)

@@ -1,105 +1,41 @@
 <template>
   <v-data-table
     class="user-list"
-    :headers="headerMembers"
-    :items="indexedOrgMembers"
+    :headers="headerTranscations"
+    :items="transactionList"
     :items-per-page="5"
-    :hide-default-footer="indexedOrgMembers.length <= 5"
+    :hide-default-footer="transactionList.length <= 5"
     :custom-sort="customSortActive"
     :no-data-text="$t('noActiveUsersLabel')"
   >
     <template v-slot:loading>
       Loading...
     </template>
-    <template v-slot:item.name="{ item }">
+    <template v-slot:item.transactionNames="{ item }">
       <v-list-item-title
         class="user-name"
-        :data-test="getIndexedTag('user-name', item.index)"
-        >{{ item.user.firstname }} {{ item.user.lastname }}</v-list-item-title>
-      <v-list-item-subtitle
-        :data-test="getIndexedTag('business-id', item.index)"
-        v-if="item.user.contacts && item.user.contacts.length > 0"
-      >{{ item.user.contacts[0].email }}</v-list-item-subtitle>
-    </template>
-    <template v-slot:item.role="{ item }">
-      <v-menu>
-        <template v-slot:activator="{ on }">
-          <v-btn
-            :disabled="!canChangeRole(item)"
-            class="role-selector"
-            small
-            depressed
-            v-on="on"
-            :data-test="getIndexedTag('role-selector', item.index)"
-          >
-            {{ item.membershipTypeCode }}
-            <v-icon
-              small
-              depressed
-              class="ml-1"
-            >mdi-chevron-down</v-icon>
-          </v-btn>
-        </template>
-        <v-list
-          dense
-          class="role-list"
+        :data-test="getIndexedTag('transaction-name', item.index)"
         >
-          <v-item-group>
-            <v-list-item
-              three-line
-              v-for="(role, index) in availableRoles"
-              :key="index"
-              @click="item.membershipTypeCode.toUpperCase() !== role.name.toUpperCase()? confirmChangeRole(item, role.name): ''"
-              :disabled="!isRoleEnabled(role)"
-              v-bind:class="{'primary--text v-item--active v-list-item--active': item.membershipTypeCode.toUpperCase() === role.name.toUpperCase()}"
-            >
-              <v-list-item-icon>
-                <v-icon v-text="role.icon" />
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title v-text="role.name">
-                </v-list-item-title>
-                <v-list-item-subtitle v-text="role.desc">
-                </v-list-item-subtitle>
-                <v-divider></v-divider>
-              </v-list-item-content>
-            </v-list-item>
-          </v-item-group>
-        </v-list>
-      </v-menu>
-
+        <div
+          v-for="(name, nameIndex) in item.transactionNames"
+          :key="nameIndex">
+          {{ name }}
+        </div>
+      </v-list-item-title>
+      <v-list-item-subtitle
+        :data-test="getIndexedTag('transaction-sub', item.index)"
+      >Business Registry</v-list-item-subtitle>
     </template>
-    <template
-      v-slot:item.lastActive="{ item }"
-      :data-test="getIndexedTag('last-active', item.index)"
-    >
-      {{ formatDate(item.user.modified) }}
-    </template>
-    <template v-slot:item.action="{ item }">
-      <v-btn
-        :data-test="getIndexedTag('remove-user-button', item.index)"
-        v-show="canRemove(item)"
-        depressed
-        small
-        @click="confirmRemoveMember(item)"
-      >Remove</v-btn>
-      <v-btn
-        :data-test="getIndexedTag('leave-team-button', item.index)"
-        v-show="canLeave(item)"
-        depressed
-        small
-        @click="confirmLeaveTeam(item)"
-      >
-        <span v-if="!canDissolve()">Leave</span>
-        <span v-if="canDissolve()">Dissolve</span>
-      </v-btn>
+    <template v-slot:item.transactionDate="{ item }">
+      {{formatDate(item.transactionDate)}}
     </template>
   </v-data-table>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
+import { Transaction, TransactionListResponse, TransactionTableList, TransactionTableRow } from '@/models/transaction'
 import { mapActions, mapState } from 'vuex'
 import { Account } from '@/util/constants'
 import { Business } from '@/models/business'
@@ -113,62 +49,77 @@ export interface ChangeRolePayload {
 @Component({
   computed: {
     ...mapState('business', ['businesses']),
-    ...mapState('org', ['activeOrgMembers', 'currentMembership', 'currentOrganization'])
+    ...mapState('org', [
+      'activeOrgMembers',
+      'currentMembership',
+      'currentOrganization'
+    ])
+  },
+  methods: {
+    ...mapActions('org', [
+      'getTransactionList'
+    ])
   }
 })
-export default class MemberDataTable extends Vue {
+export default class TransactionsDataTable extends Vue {
   private readonly businesses!: Business[]
   private readonly activeOrgMembers!: Member[]
   private readonly currentMembership!: Member
   private readonly currentOrganization!: Organization
+  private readonly getTransactionList!: () => TransactionTableList
 
-  private readonly availableRoles: RoleInfo[] = [
-    {
-      icon: 'mdi-account',
-      name: 'Member',
-      desc: 'Can add businesses, and file for a business.'
-    },
-    {
-      icon: 'mdi-settings',
-      name: 'Admin',
-      desc: 'Can add/remove team members, add businesses, and file for a business.'
-    },
-    {
-      icon: 'mdi-shield-key',
-      name: 'Owner',
-      desc: 'Can add/remove team members and businesses, and file for a business.'
-    }
-  ]
-
-  private readonly headerMembers = [
-    {
-      text: 'Team Member',
-      align: 'left',
-      sortable: true,
-      value: 'name'
-    },
-    {
-      text: 'Roles',
-      align: 'left',
-      sortable: true,
-      value: 'role'
-    },
-    {
-      text: 'Last Active',
-      align: 'left',
-      sortable: true,
-      value: 'lastActive'
-    },
-    {
-      text: 'Actions',
-      align: 'left',
-      value: 'action',
-      sortable: false,
-      width: '80'
-    }
-  ]
-
+  private transactionList: TransactionTableRow[] = [];
   private formatDate = CommonUtils.formatDisplayDate
+
+  private readonly headerTranscations = [
+    {
+      text: 'Transaction',
+      align: 'left',
+      sortable: true,
+      value: 'transactionNames'
+    },
+    {
+      text: 'Folio #',
+      align: 'left',
+      sortable: true,
+      value: 'folioNumber'
+    },
+    {
+      text: 'Initiated By',
+      align: 'left',
+      sortable: true,
+      value: 'initiatedBy'
+    },
+    {
+      text: 'Date',
+      align: 'left',
+      value: 'transactionDate',
+      sortable: true
+    },
+    {
+      text: 'Total Amount',
+      align: 'left',
+      value: 'totalAmount',
+      sortable: true
+    },
+    {
+      text: 'Status',
+      align: 'left',
+      value: 'status',
+      sortable: true
+    }
+  ]
+
+  private async mounted () {
+    this.loadTransactionList()
+  }
+
+  private async loadTransactionList () {
+    const resp = await this.getTransactionList()
+    this.transactionList = resp?.transactionsList || []
+    // eslint-disable-next-line no-console
+    console.log(this.transactionList)
+  }
 
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`
