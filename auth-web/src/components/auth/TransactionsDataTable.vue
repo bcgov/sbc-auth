@@ -134,11 +134,11 @@ export default class TransactionsDataTable extends Vue {
     },
     {
       status: TransactionStatus.CREATED,
-      description: 'add description'
+      description: 'Transaction Created'
     },
     {
       status: TransactionStatus.DELETED,
-      description: 'add description'
+      description: 'Transaction Deleted'
     }
   ]
 
@@ -172,34 +172,9 @@ export default class TransactionsDataTable extends Vue {
 
   private customSortActive (items, index, isDescending) {
     const isDesc = isDescending.length > 0 && isDescending[0]
-    switch (index[0]) {
-      case 'name':
-        items.sort((a, b) => {
-          if (isDesc) {
-            return a.user.firstname < b.user.firstname ? -1 : 1
-          } else {
-            return b.user.firstname < a.user.firstname ? -1 : 1
-          }
-        })
-        break
-      case 'role':
-        items.sort((a, b) => {
-          if (isDesc) {
-            return a.membershipTypeCode < b.membershipTypeCode ? -1 : 1
-          } else {
-            return b.membershipTypeCode < a.membershipTypeCode ? -1 : 1
-          }
-        })
-        break
-      case 'lastActive':
-        items.sort((a, b) => {
-          if (isDesc) {
-            return a.user.modified < b.user.modified ? -1 : 1
-          } else {
-            return b.user.modified < a.user.modified ? -1 : 1
-          }
-        })
-    }
+    items.sort((a, b) => {
+      return (isDesc) ? (a[index[0]] < b[index[0]] ? -1 : 1) : (b[index[0]] < a[index[0]] ? -1 : 1)
+    })
     return items
   }
 }
