@@ -9,7 +9,7 @@
       itemsPerPageOptions: getPaginationOptions
     }"
     :custom-sort="customSortActive"
-    :no-data-text="$t('noActiveUsersLabel')"
+    :no-data-text="$t('noTransactionList')"
   >
     <template v-slot:loading>
       Loading...
@@ -63,7 +63,7 @@
 import { Account, TransactionStatus } from '@/util/constants'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
-import { Transaction, TransactionListResponse, TransactionTableList, TransactionTableRow } from '@/models/transaction'
+import { Transaction, TransactionDateFilter, TransactionListResponse, TransactionTableList, TransactionTableRow } from '@/models/transaction'
 import { mapActions, mapState } from 'vuex'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
@@ -82,7 +82,7 @@ import CommonUtils from '@/util/common-util'
 })
 export default class TransactionsDataTable extends Vue {
   private readonly currentOrganization!: Organization
-  private readonly getTransactionList!: () => TransactionTableList
+  private readonly getTransactionList!: (dateFilter: TransactionDateFilter) => TransactionTableList
 
   private transactionList: TransactionTableRow[] = [];
   private formatDate = CommonUtils.formatDisplayDate
@@ -153,7 +153,14 @@ export default class TransactionsDataTable extends Vue {
   }
 
   private async loadTransactionList () {
-    const resp = await this.getTransactionList()
+    // TODO: Filter using date once filter is done, fetching all records from 2020 for now
+    const dateFilter: TransactionDateFilter = {
+      'dateFilter': {
+        'startDate': '01/01/2020',
+        'endDate': '12/31/2020'
+      }
+    }
+    const resp = await this.getTransactionList(dateFilter)
     this.transactionList = resp?.transactionsList || []
   }
 

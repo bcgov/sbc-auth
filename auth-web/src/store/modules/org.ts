@@ -13,7 +13,7 @@ import {
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
-import { Transaction, TransactionListResponse, TransactionTableList, TransactionTableRow } from '@/models/transaction'
+import { TransactionDateFilter, TransactionTableList, TransactionTableRow } from '@/models/transaction'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BcolService from '@/services/bcol.services'
@@ -397,13 +397,7 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ commit: 'setCurrentOrgTransactionList', rawError: true })
-  public async getTransactionList () {
-    const dateFilter = {
-      'dateFilter': {
-        'startDate': '01/01/2020',
-        'endDate': '12/31/2020'
-      }
-    }
+  public async getTransactionList (dateFilter: TransactionDateFilter) {
     const response = await PaymentService.getTransactions(this.context.state['currentOrganization'].id, dateFilter)
     if (response?.data) {
       const formattedList = await this.formatTransactionTableData(response.data.items || [])
