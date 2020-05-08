@@ -614,22 +614,6 @@ def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock):
     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
 
 
-def test_delete_user_with_tester_role(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
-    """Test delete the user by tester role assert status is 204."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.tester_role)
-    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_201_CREATED
-
-    # post token with updated claims
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.tester_role)
-
-    rv = client.delete('/api/v1/users/@me', headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
-
-    rv = client.get('/api/v1/users/@me', headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_404_NOT_FOUND
-
-
 def test_add_user_adds_to_account_holders_group(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a user gets added to account_holders group if the user has any active account."""
     # Create a user in keycloak

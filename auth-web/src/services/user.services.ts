@@ -65,4 +65,8 @@ export default class UserService {
       headers: headers
     })
   }
+
+  static async resetUser (): Promise<AxiosResponse<any>> {
+    return axios.post(`${ConfigHelper.getAuthResetAPIUrl()}`)
+  }
 }

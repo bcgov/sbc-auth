@@ -21,7 +21,8 @@ export enum Role {
     Edit = 'edit',
     Basic = 'basic',
     StaffAdmin = 'staff_admin',
-    AnonymousUser = 'anonymous_user'
+    AnonymousUser = 'anonymous_user',
+    Tester = 'tester'
 }
 
 export enum Pages {
