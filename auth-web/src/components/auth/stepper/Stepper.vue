@@ -99,9 +99,9 @@ export default class Stepper extends Vue {
     }
   }
 
-  private stepBack () {
-    this.useAlternateStep = false
+  private stepBack (useAlternateStep = false) {
     this.currentStepNumber = Math.max(1, this.currentStepNumber - 1)
+    this.useAlternateStep = useAlternateStep && !!this.steps[this.currentStepNumber - 1].alternate
   }
 
   private jumpToStep (index: number, useAlternateStep = false) {
@@ -148,7 +148,7 @@ export default class Stepper extends Vue {
     }
 
     &__title {
-      font-size: 1.75rem;
+      font-size: 1.65rem;
     }
   }
 

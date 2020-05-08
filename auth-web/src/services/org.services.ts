@@ -1,9 +1,11 @@
 import { Affiliation, CreateRequestBody as CreateAffiliationRequestBody } from '@/models/affiliation'
 import Axios, { AxiosResponse } from 'axios'
 import { CreateRequestBody as CreateOrganizationRequestBody, Member, Members, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { Address } from '@/models/address'
 import { Businesses } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import { Invitations } from '@/models/Invitation'
+import { PaymentSettings } from '@/models/PaymentSettings'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
 
 const axios = addAxiosInterceptors(Axios.create())
@@ -13,12 +15,22 @@ export default class OrgService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`)
   }
 
+  public static async getContactForOrg (orgId: number): Promise<Address> {
+    const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/contacts`)
+    // for now it returns only address , can return the all the contacts as well
+    return response.data.contacts[0]
+  }
+
   public static async isOrgNameAvailable (orgName: string): Promise<AxiosResponse> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs?name=${orgName}`)
   }
 
   public static async getOrgMembers (orgId: number, status: string): Promise<AxiosResponse<Members>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/members?status=${status}`)
+  }
+
+  public static async getPaymentSettings (orgId: number): Promise<AxiosResponse<PaymentSettings>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/payment_settings`)
   }
 
   public static async getOrgInvitations (orgId: number, status: string = 'ALL'): Promise<AxiosResponse<Invitations>> {

@@ -206,12 +206,12 @@ def test_update_user_terms_of_use(client, jwt, session):  # pylint:disable=unuse
 
     # post token with updated claims
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.updated_test)
-    input_data = json.dumps({'termsversion': 1, 'istermsaccepted': True})
+    input_data = json.dumps({'termsversion': '1', 'istermsaccepted': True})
     rv = client.patch('/api/v1/users/@me', headers=headers,
                       data=input_data, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     user = json.loads(rv.data)
-    assert user['userTerms']['termsOfUseAcceptedVersion'] == 1
+    assert user['userTerms']['termsOfUseAcceptedVersion'] == '1'
 
 
 def test_update_user_terms_of_use_invalid_input(client, jwt, session):  # pylint:disable=unused-argument
@@ -612,22 +612,6 @@ def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock):
 
     rv = client.delete('/api/v1/users/@me', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
-
-
-def test_delete_user_with_tester_role(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
-    """Test delete the user by tester role assert status is 204."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.tester_role)
-    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_201_CREATED
-
-    # post token with updated claims
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.tester_role)
-
-    rv = client.delete('/api/v1/users/@me', headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
-
-    rv = client.get('/api/v1/users/@me', headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
 def test_add_user_adds_to_account_holders_group(client, jwt, session):  # pylint:disable=unused-argument

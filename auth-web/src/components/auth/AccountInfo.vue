@@ -1,80 +1,211 @@
 <template>
-  <v-container class="p-0">
-    <header class="view-header">
-      <h2 class="view-header__title">Account Info</h2>
+  <v-container class="pa-0">
+    <header class="view-header mb-10">
+      <h2 class="view-header__title">Account Information</h2>
     </header>
     <v-form ref="editAccountForm">
-      <v-alert type="error" class="mb-6"
-        v-show="errorMessage">
-        {{errorMessage}}
+      <v-alert type="error" class="mb-6" v-show="errorMessage">
+        {{ errorMessage }}
       </v-alert>
-      <v-text-field filled clearable required label="Account Name" :disabled="!canChangeAccountName()"
-        :rules="accountNameRules"
-        v-model="orgName"
-        v-on:keydown="enableBtn();">
-      </v-text-field>
+
+      <ul class="nv-list">
+        <li class="nv-list-item mb-9">
+          <div class="name" id="accountType">Account Type</div>
+          <div class="value" aria-labelledby="accountType">
+            <div class="value__title">{{ isPremiumAccount ? 'PREMIUM' : 'BASIC' }}</div>
+            <ul class="bcol-acc__meta mt-1" v-if="isPremiumAccount && currentOrgPaymentSettings">
+              <li>
+                BC Online Account No: {{currentOrgPaymentSettings.bcolAccountId}}
+              </li>
+              <li>
+                Authorizing User ID: {{currentOrgPaymentSettings.bcolUserId}}
+              </li>
+            </ul>
+            <!--
+            <div class="mt-2">
+              <a class="change-account-link" href="">Change Account</a>
+            </div>
+            -->
+          </div>
+        </li>
+        <li class="nv-list-item mb-12" v-if="isPremiumAccount">
+          <div class="name" id="accountName">Account Name</div>
+          <div class="value" aria-labelledby="accountType">
+            <div class="value__title">{{ orgName }}</div>
+            <div class="mt-1">Premium accounts use your existing BC Online account name and cannot be modified.</div>
+          </div>
+        </li>
+      </ul>
+
+      <fieldset v-if="!isPremiumAccount">
+        <legend class="mb-4">Account Details</legend>
+        <v-text-field
+          filled
+          clearable
+          required
+          label="Account Name"
+          :rules="accountNameRules"
+          v-if="!isPremiumAccount"
+          v-model="orgName"
+          v-on:keydown="enableBtn()"
+        >
+        </v-text-field>
+      </fieldset>
+        <BaseAddress
+                :inputAddress="currentOrgAddress"
+                @key-down="keyDown()"
+                @address-update="updateAddress"
+                v-if="isPremiumAccount && currentOrgAddress"
+                :disabled="!canChangeAddress()"
+                :key="addressKey"
+        >
+        </BaseAddress>
       <div class="form__btns">
-        <v-btn large class="save-btn"
-          v-bind:class="{ 'disabled' : btnLabel == 'Saved' }"
-          :color="btnLabel == 'Saved'? 'success' : 'primary'"
-          :disabled="!isFormValid() || !canChangeAccountName()"
+        <v-btn
+          large
+          class="save-btn"
+          v-bind:class="{ disabled: btnLabel == 'Saved' }"
+          :color="btnLabel == 'Saved' ? 'success' : 'primary'"
+          :disabled="!isSaveEnabled()"
           :loading="btnLabel == 'Saving'"
-          @click="updateOrgName()">
+          @click="updateDetails()"
+        >
           <v-expand-x-transition>
             <v-icon v-show="btnLabel == 'Saved'">mdi-check</v-icon>
           </v-expand-x-transition>
-          <span class="save-btn__label">{{btnLabel}}</span>
+          <span class="save-btn__label">{{ btnLabel }}</span>
         </v-btn>
+        <v-btn
+                large
+                depressed
+                class="ml-2"
+                color="default"
+                @click="resetForm"
+                data-test="reset-button"
+        >Reset</v-btn>
       </div>
     </v-form>
   </v-container>
 </template>
 
 <script lang="ts">
-
+import { Account, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
-import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
-import { Account } from '@/util/constants'
+import {
+  CreateRequestBody,
+  Member,
+  MembershipType,
+  Organization
+} from '@/models/Organization'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import { AccountSettings } from '@/models/account-settings'
+import { Address } from '@/models/address'
+import BaseAddress from '@/components/auth/BaseAddress.vue'
+import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
+import { PaymentSettings } from '@/models/PaymentSettings'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
+    BaseAddress
   },
   computed: {
-    ...mapState('org', ['currentOrganization', 'currentMembership'])
+    ...mapState('org', [
+      'currentOrganization',
+      'currentMembership',
+      'currentOrgAddress',
+      'currentOrgPaymentSettings'
+    ])
   },
   methods: {
-    ...mapActions('org', ['updateOrg'])
+    ...mapActions('org', ['updateOrg', 'syncAddress', 'syncOrganization', 'syncPaymentSettings']),
+    ...mapMutations('org', ['setCurrentOrganizationAddress'])
   }
 })
 export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private orgStore = getModule(OrgModule, this.$store)
   private btnLabel = 'Save'
   private readonly currentOrganization!: Organization
+  private readonly currentOrgAddress!: Address
+  private readonly currentOrgPaymentSettings!: PaymentSettings
   private readonly currentMembership!: Member
-  private readonly updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
+  private readonly updateOrg!: (
+    requestBody: CreateRequestBody
+  ) => Promise<Organization>
+  private readonly syncAddress!: () => Address
+  protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
+  protected readonly syncPaymentSettings!: (currentAccount: number) => Promise<PaymentSettings>
   private orgName = ''
-  private touched = false
   private errorMessage: string = ''
+  private readonly setCurrentOrganizationAddress!: (address: Address) => void
+  private addressTocuhed = false
+  // TODO just did this since address component is not getting updated after fetching it..find out why and remove this
 
   private isFormValid (): boolean {
     return !!this.orgName || this.orgName === this.currentOrganization?.name
   }
 
+  get addressKey () {
+    return JSON.stringify(this.currentOrgAddress)
+  }
+
   private async mounted () {
+    // eslint-disable-next-line no-console
+    const accountSettings = this.getAccountFromSession()
+    await this.syncOrganization(accountSettings.id)
     this.setAccountChangedHandler(this.syncOrgName)
     this.syncOrgName()
+    if (this.isPremiumAccount) {
+      await this.syncPaymentSettings(accountSettings.id)
+      await this.syncAddress()
+    }
+  }
+
+  private keyDown (address: Address) {
+    this.addressTocuhed = true
+    this.enableBtn()
+  }
+
+  private updateAddress (address: Address) {
+    this.setCurrentOrganizationAddress(address)
+    this.addressTocuhed = true
+    this.enableBtn()
   }
 
   private syncOrgName () {
     this.orgName = this.currentOrganization?.name || ''
   }
 
+  protected getAccountFromSession (): AccountSettings {
+    return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
+  }
+
+  private canChangeAddress (): boolean {
+    if (this.isPremiumAccount) {
+      const premiumOwner =
+        this.currentMembership?.membershipTypeCode === MembershipType.Owner || this.currentMembership?.membershipTypeCode === MembershipType.Admin
+      return premiumOwner
+    }
+    return false
+  }
+
+  private async resetForm () {
+    this.syncOrgName()
+    await this.syncAddress()
+  }
+
+  get isPremiumAccount (): boolean {
+    return this.currentOrganization?.orgType === Account.PREMIUM
+  }
+
   private canChangeAccountName (): boolean {
     if (this.currentOrganization?.accessType === Account.ANONYMOUS) {
+      return false
+    }
+    // Premium account name cant be updated
+    if (this.isPremiumAccount) {
       return false
     }
     switch (this.currentMembership?.membershipTypeCode) {
@@ -85,16 +216,31 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     }
   }
 
-  private enableBtn () {
-    this.btnLabel = 'Save'
-    this.touched = true
+  private isSaveEnabled () {
+    if (this.currentOrganization?.orgType === Account.BASIC) {
+      return this.isFormValid() && this.canChangeAccountName()
+    }
+    if (this.isPremiumAccount) {
+      // org name is read only ;the only thing which they can change is address
+      // detect any change in address
+      return this.addressTocuhed
+    }
+    // nothing can be changed in anonymous org
+    return false
   }
 
-  private async updateOrgName () {
+  private enableBtn () {
+    this.btnLabel = 'Save'
+  }
+
+  private async updateDetails () {
     this.errorMessage = ''
     this.btnLabel = 'Saving'
-    const createRequestBody: CreateRequestBody = {
+    let createRequestBody: CreateRequestBody = {
       name: this.orgName
+    }
+    if (this.isPremiumAccount) {
+      createRequestBody.mailingAddress = this.currentOrgAddress
     }
     try {
       await this.updateOrg(createRequestBody)
@@ -102,16 +248,17 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
       this.btnLabel = 'Saved'
     } catch (err) {
       this.btnLabel = 'Save'
-      this.touched = false
       switch (err.response.status) {
         case 409:
-          this.errorMessage = 'An account with this name already exists. Try a different account name.'
+          this.errorMessage =
+            'An account with this name already exists. Try a different account name.'
           break
         case 400:
           this.errorMessage = 'Invalid account name'
           break
         default:
-          this.errorMessage = 'An error occurred while attempting to create your account.'
+          this.errorMessage =
+            'An error occurred while attempting to create your account.'
       }
     }
   }
@@ -123,48 +270,92 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 </script>
 
 <style lang="scss" scoped>
-  @import "$assets/scss/theme.scss";
+@import '$assets/scss/theme.scss';
 
-  .v-application p {
-    margin-bottom: 3rem;
+.v-application p {
+  margin-bottom: 3rem;
+}
+
+.nv-list {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.nv-list-item {
+  vertical-align: top;
+
+  .name, .value {
+    display: inline-block;
+    vertical-align: top;
   }
 
-  .nav-bg {
-    background-color: $gray0;
-  }
-
-  .v-list--dense .v-list-item .v-list-item__title {
+  .name {
+    min-width: 10rem;
     font-weight: 700;
   }
+}
 
-  .form__btns {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: 2rem;
+.v-list--dense .v-list-item .v-list-item__title {
+  font-weight: 700;
+}
 
-    .v-btn {
-      width: 6rem;
+.form__btns {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 2rem;
+
+  .v-btn {
+    width: 6rem;
+  }
+}
+
+.account-nav-container {
+  height: 100%;
+  border-right: 1px solid #eeeeee;
+}
+
+.header-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.bcol-acc__meta {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+
+  li {
+    position: relative;
+    display: inline-block
+  }
+
+  li + li {
+    &:before {
+      content: ' | ';
+      display: inline-block;
+      position: relative;
+      top: -2px;
+      left: 2px;
+      width: 2rem;
+      vertical-align: top;
+      text-align: center;
     }
   }
+}
 
-  .account-nav-container {
-    height: 100%;
-    border-right: 1px solid #eeeeee;
-  }
+.save-btn.disabled {
+  pointer-events: none;
+}
 
-  .header-container {
-    display: flex;
-    flex-direction: row;
-  }
+.save-btn__label {
+  padding-left: 0.2rem;
+  padding-right: 0.2rem;
+}
 
-  .save-btn.disabled {
-    pointer-events: none;
-  }
-
-  .save-btn__label {
-    padding-left: 0.2rem;
-    padding-right: 0.2rem;
-  }
+.change-account-link {
+  font-size: 0.875rem;
+}
 </style>

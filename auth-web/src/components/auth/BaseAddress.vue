@@ -1,16 +1,18 @@
 <template>
   <v-form ref="adress" lazy-validation>
-    <fieldset>
-      <legend class="mb-3">Mailing Address</legend>
+    <fieldset v-if="address">
+      <legend class="mb-4">Mailing Address</legend>
       <v-row>
         <v-col cols="12" class="py-0">
           <v-text-field
-                  filled
-                  @change="emitAddress"
-                  label="Street Address"
-                  v-model.trim="address.street"
-                  :rules="rules.streetAddress"
-                  req
+            :disabled="disabled"
+            filled
+            @change="emitAddress"
+            @keydown="emitKeyDown"
+            label="Street Address"
+            v-model.trim="address.street"
+            :rules="rules.streetAddress"
+            req
           >
           </v-text-field>
         </v-col>
@@ -18,34 +20,40 @@
       <v-row>
         <v-col cols="4" class="py-0">
           <v-text-field
-                  filled
-                  label="City"
-                  @change="emitAddress"
-                  v-model.trim="address.city"
-                  :rules="rules.city"
-                  req
+            :disabled="disabled"
+            filled
+            label="City"
+            @change="emitAddress"
+            @keydown="emitKeyDown"
+            v-model.trim="address.city"
+            :rules="rules.city"
+            req
           >
           </v-text-field>
         </v-col>
         <v-col cols="4" class="py-0">
           <v-text-field
-                  filled
-                  label="Province/Region/State"
-                  v-model.trim="address.region"
-                  @change="emitAddress"
-                  :rules="rules.province"
-                  req
+            :disabled="disabled"
+            filled
+            label="Province/Region/State"
+            v-model.trim="address.region"
+            @change="emitAddress"
+            @keydown="emitKeyDown"
+            :rules="rules.province"
+            req
           >
           </v-text-field>
         </v-col>
         <v-col cols="4" class="py-0">
           <v-text-field
-                  filled
-                  label="Postal Code"
-                  v-model.trim="address.postalCode"
-                  @change="emitAddress"
-                  :rules="rules.postalCode"
-                  req
+            :disabled="disabled"
+            filled
+            label="Postal Code"
+            v-model.trim="address.postalCode"
+            @change="emitAddress"
+            @keydown="emitKeyDown"
+            :rules="rules.postalCode"
+            req
           >
           </v-text-field>
         </v-col>
@@ -53,12 +61,14 @@
       <v-row>
         <v-col cols="4" class="py-0">
           <v-text-field
-                  filled
-                  label="Country"
-                  v-model.trim="address.country"
-                  @change="emitAddress"
-                  :rules="rules.country"
-                  req
+            :disabled="disabled"
+            filled
+            label="Country"
+            v-model.trim="address.country"
+            @change="emitAddress"
+            @keydown="emitKeyDown"
+            :rules="rules.country"
+            req
           >
           </v-text-field>
         </v-col>
@@ -79,7 +89,15 @@ export default class BaseAddress extends Vue {
   private password = ''
   private errorMessage: string = ''
   @Prop() inputAddress: Address
-  private address:Address = { streetAdditional: '', city: '', country: 'Canada', postalCode: '', region: '', street: '' } // TODO probably dont need this intialisation
+  @Prop() disabled = false
+  private address: Address = {
+    streetAdditional: '',
+    city: '',
+    country: 'Canada',
+    postalCode: '',
+    region: '',
+    street: ''
+  } // TODO probably dont need this intialisation
 
   private readonly rules = {
     streetAddress: [v => !!v || 'Street address is required'],
@@ -99,8 +117,10 @@ export default class BaseAddress extends Vue {
   emitAddress () {
     return this.address
   }
+
+  @Emit('key-down')
+  emitKeyDown () {}
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

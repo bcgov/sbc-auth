@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Organization data."""
-
+import json
 from typing import Dict, Tuple
 
 from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
-from auth_api.exceptions import BusinessException
+from auth_api import status as http_status
+from auth_api.exceptions import BusinessException, CustomException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountPaymentSettings as AccountPaymentModel
 from auth_api.models import Affiliation as AffiliationModel
@@ -143,6 +144,11 @@ class Org:
             bcol_response = RestService.post(endpoint=current_app.config.get('BCOL_API_URL') + '/profiles',
                                              data=bcol_credential, token=bearer_token, raise_for_status=False)
 
+            # todo not at all ideal..find out what all bcol error messages possible
+            if bcol_response.status_code != http_status.HTTP_200_OK:
+                error = json.loads(bcol_response.text)
+                raise BusinessException(CustomException(error['detail'], bcol_response.status_code), None)
+
             bcol_account_number = bcol_response.json().get('accountNumber')
 
             if org_info:
@@ -156,9 +162,10 @@ class Org:
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
 
-        existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'], self._model.id)
-        if existing_similar__org is not None:
-            raise BusinessException(Error.DATA_CONFLICT, None)
+        if self._model.type_code != OrgType.PREMIUM.value:
+            existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'], self._model.id)
+            if existing_similar__org is not None:
+                raise BusinessException(Error.DATA_CONFLICT, None)
 
         bcol_credential = org_info.pop('bcOnlineCredential', None)
         mailing_address = org_info.pop('mailingAddress', None)
@@ -172,11 +179,11 @@ class Org:
             Org.add_payment_settings(self._model.id, bcol_response.get('accountNumber'), bcol_response.get('userId'))
         # Update mailing address
         if mailing_address:
-            contact = self._model.contacts[0]
+            contact = self._model.contacts[0].contact
             contact.update_from_dict(**camelback2snake(mailing_address))
-            contact.add_to_session()
-
-        self._model.update_org_from_dict(camelback2snake(org_info))
+            contact.save()
+        if self._model.type_code != OrgType.PREMIUM.value:
+            self._model.update_org_from_dict(camelback2snake(org_info))
         current_app.logger.debug('>update_org ')
         return self
 
@@ -220,6 +227,18 @@ class Org:
         check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
 
         return Org(org_model)
+
+    @staticmethod
+    def get_payment_settings_for_org(org_id, token_info: Dict = None, allowed_roles: Tuple = None):
+        """Get the payment settings for the given org."""
+        current_app.logger.debug('get_payment_settings(>')
+        org = OrgModel.find_by_org_id(org_id)
+        if org is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # Check authorization for the user
+        check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
+        return AccountPaymentModel.find_active_by_org_id(org_id)
 
     @staticmethod
     def get_contacts(org_id):

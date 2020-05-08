@@ -90,6 +90,14 @@
         >Deactivate my profile</v-btn>
         <v-btn
           large
+          depressed
+          color="default"
+          class="reset-btn"
+          v-show="editing && !isStepperView && isTester"
+          @click="$refs.resetDialog.open()"
+        >Reset</v-btn>
+        <v-btn
+          large
           v-if="isStepperView"
           color="default"
           @click="goBack"
@@ -140,20 +148,55 @@
         <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
     </ModalDialog>
+
+    <!-- Modal for Reset  -->
+    <ModalDialog
+      ref="resetDialog"
+      :title="$t('resetConfirmTitle')"
+      :text="$t('resetConfirmText')"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+      <template v-slot:text>
+        <p class="pb-1">{{ $t('resetConfirmText')}} <strong>{{ $t('resetConfirmTextEmphasis') }}</strong></p>
+      </template>
+      <template v-slot:actions>
+        <v-btn large color="error" @click="reset()" :loading="isReseting" data-test="reset-confirm-button">Reset</v-btn>
+        <v-btn large color="default" :disabled="isReseting" @click="cancelConfirmReset()" data-test="reset-cancel-button">Cancel</v-btn>
+      </template>
+    </ModalDialog>
+
+    <!-- Modal for reset failure -->
+    <ModalDialog
+      ref="resetFailureDialog"
+      :title="$t('resetFailureTitle')"
+      :text="$t('resetFailureText')"
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+    </ModalDialog>
   </v-form>
 </template>
 
 <script lang="ts">
 
-import { Account, Pages } from '@/util/constants'
+import { Account, Pages, Role } from '@/util/constants'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Contact } from '@/models/contact'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
+
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
 import UserService from '@/services/user.services'
@@ -201,6 +244,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private readonly createOrg!: () => Promise<Organization>
     readonly syncMembership!: (orgId: number) => Promise<Member>
     readonly syncOrganization!: (orgId: number) => Promise<Organization>
+    private readonly ACCOUNT_TYPE = Account
+    private isTester: boolean = false
+    private isReseting = false
+    readonly currentUser!: KCUserProfile
 
     // this prop is used for conditionally using this form in both account stepper and edit profile pages
     @Prop({ default: false }) isStepperView: boolean
@@ -208,6 +255,8 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     $refs: {
       deactivateUserConfirmationDialog: ModalDialog,
       deactivateUserFailureDialog: ModalDialog,
+      resetDialog: ModalDialog,
+      resetFailureDialog: ModalDialog,
       form: HTMLFormElement
     }
 
@@ -248,6 +297,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
         this.phoneNumber = this.userContact.phone
         this.extension = this.userContact.phoneExtension
         this.editing = true
+      }
+
+      if (configHelper.getAuthResetAPIUrl()) {
+        this.isTester = this.currentUser?.roles?.includes(Role.Tester)
       }
     }
 
@@ -320,7 +373,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     }
 
     private goBack () {
-      this.stepBack()
+      this.stepBack(this.currentOrganization!.orgType === this.ACCOUNT_TYPE.PREMIUM)
     }
 
     private async deactivate (): Promise<void> {
@@ -338,6 +391,23 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
 
     private cancelConfirmDeactivate () {
       this.$refs.deactivateUserConfirmationDialog.close()
+    }
+
+    private async reset (): Promise<void> {
+      try {
+        this.isReseting = true
+        await UserService.resetUser()
+        const redirectUri = encodeURIComponent(`${configHelper.getSelfURL()}/profiledeactivated`)
+        this.$router.push(`/${Pages.SIGNOUT}/${redirectUri}`)
+      } catch (exception) {
+        this.$refs.resetFailureDialog.open()
+      } finally {
+        this.isReseting = false
+      }
+    }
+
+    private cancelConfirmReset () {
+      this.$refs.resetDialog.close()
     }
 }
 </script>

@@ -22,6 +22,7 @@ import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
+import { PaymentSettings } from '@/models/PaymentSettings'
 import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
@@ -37,16 +38,22 @@ export default class OrgModule extends VuexModule {
   failedInvitations: Invitation[] = []
   currentAccountSettings: AccountSettings = undefined
   currentOrganization: Organization = undefined
+  currentOrgAddress:Address = undefined
   currentMembership: Member = undefined
   activeOrgMembers: Member[] = []
   pendingOrgMembers: Member[] = []
   pendingOrgInvitations: Invitation[] = []
+  currentOrgPaymentSettings:PaymentSettings =undefined
   invalidInvitationToken = false
   tokenError = false
   createdUsers: BulkUsersSuccess[] = []
   failedUsers: BulkUsersFailed[] = []
-  selectedAccountType:Account
+
   currentOrgTransactionList: TransactionTableRow[] = []
+  @Mutation
+  public setCurrentOrgPaymentSettings (currentOrgPaymentSettings:PaymentSettings) {
+    this.currentOrgPaymentSettings = currentOrgPaymentSettings
+  }
 
   @Mutation
   public setGrantAccess (grantAccess: boolean) {
@@ -56,8 +63,15 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
+  public resetCurrentOrganisation () {
+    this.currentOrganization = { name: '' }
+  }
+
+  @Mutation
   public setSelectedAccountType (selectedAccountType: Account | undefined) {
-    this.selectedAccountType = selectedAccountType
+    if (this.currentOrganization) {
+      this.currentOrganization.orgType = selectedAccountType
+    }
   }
 
   @Mutation
@@ -105,13 +119,6 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentOrganization (organization: Organization | undefined) {
     this.currentOrganization = organization
-  }
-
-  @Mutation
-  public setCurrentOrganizationAddress (address: Address | undefined) {
-    if (this.currentOrganization?.bcolAccountDetails) {
-      this.currentOrganization.bcolAccountDetails.address = address
-    }
   }
 
   @Mutation
@@ -170,12 +177,13 @@ export default class OrgModule extends VuexModule {
   @Action({ rawError: true })
   public async createOrg (): Promise<Organization> {
     const org = this.context.state['currentOrganization']
+    const address = this.context.state['currentOrgAddress']
     const createRequestBody: CreateRequestBody = {
       name: org.name
     }
     if (org.bcolProfile) {
       createRequestBody.bcOnlineCredential = org.bcolProfile
-      createRequestBody.mailingAddress = org.bcolAccountDetails.address
+      createRequestBody.mailingAddress = address
     }
     const response = await OrgService.createOrg(createRequestBody)
     const organization = response?.data
@@ -192,6 +200,11 @@ export default class OrgModule extends VuexModule {
       ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify(usersettings))
     }
     return response?.data
+  }
+
+  @Mutation
+  public setCurrentOrganizationAddress (address: Address | undefined) {
+    this.currentOrgAddress = address
   }
 
   @Action({ rawError: true })
@@ -345,6 +358,25 @@ export default class OrgModule extends VuexModule {
     return response.data && response.data.members ? response.data.members : []
   }
 
+  @Action({ commit: 'setCurrentOrgPaymentSettings', rawError: true })
+  public async syncPaymentSettings () {
+    const response = await OrgService.getPaymentSettings(this.context.state['currentOrganization'].id)
+    return response.data
+  }
+
+  @Action({ rawError: true })
+  public async syncAddress () {
+    const contact = await OrgService.getContactForOrg(this.context.state['currentOrganization'].id)
+    // the contact model has lot of values which are not address..strip them off
+    const address:Address = { region: contact.region,
+      city: contact.city,
+      postalCode: contact.postalCode,
+      country: contact.country,
+      street: contact.street,
+      streetAdditional: contact.streetAdditional }
+    this.context.commit('setCurrentOrganizationAddress', address)
+  }
+
   @Action({ commit: 'setPendingOrgMembers', rawError: true })
   public async syncPendingOrgMembers () {
     const response = await OrgService.getOrgMembers(this.context.state['currentOrganization'].id, 'PENDING_APPROVAL')
@@ -434,7 +466,6 @@ export default class OrgModule extends VuexModule {
 
   @Action({ rawError: true })
   public async resetAccountSetupProgress (): Promise<void> {
-    this.context.commit('setCurrentOrganizationAddress', undefined)
     this.context.commit('setGrantAccess', false)
     this.context.commit('setCurrentOrganization', undefined)
     this.context.commit('setSelectedAccountType', undefined)
