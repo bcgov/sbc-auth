@@ -3,13 +3,27 @@
     class="user-list"
     :headers="headerTranscations"
     :items="transactionList"
-    :items-per-page="5"
-    :hide-default-footer="transactionList.length <= 5"
+    :items-per-page="ITEMS_PER_PAGE"
+    :hide-default-footer="transactionList.length <= ITEMS_PER_PAGE"
+    :footer-props="{
+      itemsPerPageOptions: getPaginationOptions
+    }"
     :custom-sort="customSortActive"
     :no-data-text="$t('noActiveUsersLabel')"
   >
     <template v-slot:loading>
       Loading...
+    </template>
+    <template v-slot:header.status="{ header }">
+      {{header.text}}
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on }">
+          <v-icon class="px-1" small v-on="on">mdi-information-outline</v-icon>
+        </template>
+        <div v-for="(status, index) in transactionStatus" :key="index">
+          {{status.status}} - {{status.description}}
+        </div>
+      </v-tooltip>
     </template>
     <template v-slot:item.transactionNames="{ item }">
       <v-list-item-title
@@ -29,29 +43,34 @@
     <template v-slot:item.transactionDate="{ item }">
       {{formatDate(item.transactionDate)}}
     </template>
+    <template v-slot:item.totalAmount="{ item }">
+      <div class="font-weight-bold">
+        ${{item.totalAmount.toFixed(2)}}
+      </div>
+    </template>
+    <template v-slot:item.status="{ item }">
+      <div
+        class="font-weight-bold"
+        v-bind:class="getStatusClass(item)"
+      >
+        {{item.status}}
+      </div>
+    </template>
   </v-data-table>
 </template>
 
 <script lang="ts">
+import { Account, TransactionStatus } from '@/util/constants'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { Transaction, TransactionListResponse, TransactionTableList, TransactionTableRow } from '@/models/transaction'
 import { mapActions, mapState } from 'vuex'
-import { Account } from '@/util/constants'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
 
-export interface ChangeRolePayload {
-  member: Member
-  targetRole: string
-}
-
 @Component({
   computed: {
-    ...mapState('business', ['businesses']),
     ...mapState('org', [
-      'activeOrgMembers',
-      'currentMembership',
       'currentOrganization'
     ])
   },
@@ -62,14 +81,12 @@ export interface ChangeRolePayload {
   }
 })
 export default class TransactionsDataTable extends Vue {
-  private readonly businesses!: Business[]
-  private readonly activeOrgMembers!: Member[]
-  private readonly currentMembership!: Member
   private readonly currentOrganization!: Organization
   private readonly getTransactionList!: () => TransactionTableList
 
   private transactionList: TransactionTableRow[] = [];
   private formatDate = CommonUtils.formatDisplayDate
+  private readonly ITEMS_PER_PAGE = 10
 
   private readonly headerTranscations = [
     {
@@ -110,6 +127,27 @@ export default class TransactionsDataTable extends Vue {
     }
   ]
 
+  private readonly transactionStatus = [
+    {
+      status: TransactionStatus.COMPLETED,
+      description: 'Funds received'
+    },
+    {
+      status: TransactionStatus.CREATED,
+      description: 'add description'
+    },
+    {
+      status: TransactionStatus.DELETED,
+      description: 'add description'
+    }
+  ]
+
+  private get getPaginationOptions () {
+    let pagination = [...Array(4)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
+    pagination[pagination.length - 1] = -1
+    return pagination
+  }
+
   private async mounted () {
     this.loadTransactionList()
   }
@@ -117,93 +155,19 @@ export default class TransactionsDataTable extends Vue {
   private async loadTransactionList () {
     const resp = await this.getTransactionList()
     this.transactionList = resp?.transactionsList || []
-    // eslint-disable-next-line no-console
-    console.log(this.transactionList)
   }
 
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
 
-  private get indexedOrgMembers () {
-    return this.activeOrgMembers.map((item, index) => ({
-      index,
-      ...item
-    }))
-  }
-
-  private isRoleEnabled (role: RoleInfo): boolean {
-    switch (this.currentMembership.membershipTypeCode) {
-      case MembershipType.Owner:
-        return true
-      case MembershipType.Admin:
-        if (role.name !== 'Owner') {
-          return true
-        }
-        return false
-      default:
-        return false
+  private getStatusClass (item) {
+    switch (item.status) {
+      case TransactionStatus.COMPLETED: return 'status-paid'
+      case TransactionStatus.CREATED: return 'status-pending'
+      case TransactionStatus.DELETED: return 'status-deleted'
+      default: return ''
     }
-  }
-
-  private canChangeRole (memberBeingChanged: Member): boolean {
-    if (this.currentMembership.membershipStatus !== MembershipStatus.Active) {
-      return false
-    }
-
-    switch (this.currentMembership.membershipTypeCode) {
-      case MembershipType.Owner:
-        // Owners can change roles of other users who are not owners
-        if (!this.isOwnMembership(memberBeingChanged) && memberBeingChanged.membershipTypeCode !== MembershipType.Owner) {
-          return true
-        }
-        // And they can downgrade their own role if there is another owner on the team
-        if (this.isOwnMembership(memberBeingChanged) && this.ownerCount() > 1) {
-          return true
-        }
-        return false
-      case MembershipType.Admin:
-        // Admins can change roles of their own
-        return this.isOwnMembership(memberBeingChanged)
-      default:
-        return false
-    }
-  }
-
-  private canRemove (memberToRemove: Member): boolean {
-    // Can't remove yourself
-    if (this.currentMembership.user.username === memberToRemove.user.username) {
-      return false
-    }
-
-    // Can't remove unless Admin/Owner
-    if (this.currentMembership.membershipTypeCode === MembershipType.Member) {
-      return false
-    }
-
-    // Can't remove Admin unless Owner
-    if (this.currentMembership.membershipTypeCode === MembershipType.Admin &&
-      memberToRemove.membershipTypeCode === MembershipType.Admin) {
-      return false
-    }
-
-    // No one can change an OWNER's status, only option is OWNER to leave the team. #2319
-    if (memberToRemove.membershipTypeCode === MembershipType.Owner) {
-      return false
-    }
-
-    return true
-  }
-
-  private canLeave (member: Member): boolean {
-    if (this.currentMembership.user.username !== member.user.username) {
-      return false
-    }
-    return true
-  }
-
-  private ownerCount (): number {
-    return this.activeOrgMembers.filter(member => member.membershipTypeCode === MembershipType.Owner).length
   }
 
   private customSortActive (items, index, isDescending) {
@@ -238,51 +202,11 @@ export default class TransactionsDataTable extends Vue {
     }
     return items
   }
-
-  private canDissolve (): boolean {
-    if (this.activeOrgMembers.length === 1 && this.businesses.length === 0 && !this.isAnonymousAccount()) {
-      return true
-    }
-    return false
-  }
-
-  private isAnonymousAccount (): boolean {
-    return this.currentOrganization &&
-            this.currentOrganization.accessType === Account.ANONYMOUS
-  }
-
-  @Emit()
-  private confirmRemoveMember (member: Member) { }
-
-  @Emit()
-  private confirmChangeRole (member: Member, targetRole: string): ChangeRolePayload {
-    return {
-      member,
-      targetRole
-    }
-  }
-
-  private confirmLeaveTeam (member: Member) {
-    if (member.membershipTypeCode === MembershipType.Owner &&
-      this.ownerCount() === 1 &&
-      !this.canDissolve()) {
-      this.$emit('single-owner-error')
-    } else {
-      if (this.canDissolve()) {
-        this.$emit('confirm-dissolve-team')
-      } else {
-        this.$emit('confirm-leave-team')
-      }
-    }
-  }
-
-  private isOwnMembership (member: Member) {
-    return this.currentMembership?.user?.username === member.user.username || false
-  }
 }
 </script>
 
 <style lang="scss" scoped>
+@import '~vuetify/src/styles/styles.sass';
 @import '$assets/scss/theme.scss';
 
 .v-list--dense {
@@ -299,5 +223,14 @@ export default class TransactionsDataTable extends Vue {
 
 .role-list {
   width: 20rem;
+}
+.status-pending {
+  color: map-get($grey, darken-1);
+}
+.status-paid {
+  color: map-get($green, darken-1);
+}
+.status-deleted {
+  color: map-get($red, lighten-2);
 }
 </style>

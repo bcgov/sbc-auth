@@ -407,8 +407,6 @@ export default class OrgModule extends VuexModule {
     const response = await PaymentService.getTransactions(this.context.state['currentOrganization'].id, dateFilter)
     if (response?.data) {
       const formattedList = await this.formatTransactionTableData(response.data.items || [])
-      // eslint-disable-next-line no-console
-      console.log(formattedList)
       return {
         limit: response.data.limit,
         page: response.data.page,

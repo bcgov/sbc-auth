@@ -57,3 +57,9 @@ export enum LoginSource {
     IDIR = 'IDIR',
     BCSC = 'BCSC'
 }
+
+export enum TransactionStatus {
+    COMPLETED = 'COMPLETED',
+    CREATED = 'CREATED',
+    DELETED = 'DELETED'
+}
