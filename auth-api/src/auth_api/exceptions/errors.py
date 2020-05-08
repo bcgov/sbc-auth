@@ -47,7 +47,7 @@ class Error(Enum):
     USER_ALREADY_EXISTS_IN_KEYCLOAK = 'User Already exists in keycloak', http_status.HTTP_409_CONFLICT
     USER_ALREADY_EXISTS = 'The username is already taken', http_status.HTTP_409_CONFLICT
     FAILED_ADDING_USER_ERROR = 'Adding User Failed', http_status.HTTP_500_INTERNAL_SERVER_ERROR
-    BCOL_ACCOUNT_ALREADY_LINKED = 'The BC Online account you want to link is already linked with another account.', \
+    BCOL_ACCOUNT_ALREADY_LINKED = 'The BC Online account you have requested to link is already taken.', \
                                   http_status.HTTP_409_CONFLICT
     BCOL_INVALID_USERNAME_PASSWORD = 'Invalid User Id or Password', http_status.HTTP_400_BAD_REQUEST
 
