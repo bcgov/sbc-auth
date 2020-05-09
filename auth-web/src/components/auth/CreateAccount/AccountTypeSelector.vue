@@ -28,12 +28,22 @@
             </ul>
           </div>
 
-          <!-- State Button -->
+          <!-- State Button (Create Account) -->
+          <div class="mt-9" v-if="!isAccountChange">
+            <v-btn large block depressed color="primary" class="font-weight-bold"
+              :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
+              @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
+              {{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT'}}
+            </v-btn>
+          </div>
+
+          <!-- State Button (Change Account) -->
           <div class="mt-9" v-if="isAccountChange">
             <v-btn large block depressed color="primary" class="font-weight-bold"
               :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
               @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
-              {{ originalAccountType == ACCOUNT_TYPE.BASIC ? 'CURRENT ACCOUNT' : 'SELECT'}}
+              <span v-if="originalAccountType == ACCOUNT_TYPE.BASIC">CURRENT ACCOUNT</span>
+              <span v-if="originalAccountType != ACCOUNT_TYPE.BASIC">{{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT'}}</span>
             </v-btn>
           </div>
 
@@ -67,12 +77,22 @@
               </v-btn>
             </div>
 
-            <!-- State Button -->
+            <!-- State Button (Create Account) -->
+            <div class="mt-9" v-if="!isAccountChange">
+              <v-btn large block depressed color="primary" class="font-weight-bold"
+                :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
+                @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
+                {{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT' }}
+              </v-btn>
+            </div>
+
+            <!-- State Button (Change Account) -->
             <div class="mt-9" v-if="isAccountChange">
               <v-btn large block depressed color="primary" class="font-weight-bold"
                 :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
                 @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
-                {{ originalAccountType == ACCOUNT_TYPE.PREMIUM ? 'CURRENT ACCOUNT' : 'SELECT' }}
+                <span v-if="originalAccountType == ACCOUNT_TYPE.PREMIUM">CURRENT ACCOUNT</span>
+                <span v-if="originalAccountType != ACCOUNT_TYPE.PREMIUM">{{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT'}}</span>
               </v-btn>
             </div>
 

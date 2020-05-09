@@ -1,8 +1,8 @@
 <template>
   <v-container class="view-container">
     <div class="view-header flex-column">
-      <h1 class="view-header__title">Create a BC Registries Account</h1>
-      <p class="mb-0">Create an account to access BC Registries products and services.</p>
+      <h1 class="view-header__title">Change Your BC Registries Account</h1>
+      <p class="mb-0">Change your existing BC Registries account type and information.</p>
     </div>
     <v-card flat>
       <Stepper :stepper-configuration="stepperConfig"></Stepper>
