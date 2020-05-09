@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p class="mb-7">There is no cost to create a BC Registries account. You only pay for the services and products you purchase.</p>
+    <p class="mb-7">There is no cost to create a BC Registries account. You only pay for the services and products you purchase.-</p>
     <v-row>
       <v-col
         class="d-flex align-stretch"
@@ -29,11 +29,11 @@
           </div>
 
           <!-- State Button -->
-          <div class="mt-9">
+          <div class="mt-9" v-if="isAccountChange">
             <v-btn large block depressed color="primary" class="font-weight-bold"
               :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
               @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
-              {{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT' }}
+              {{ originalAccountType == ACCOUNT_TYPE.BASIC ? 'CURRENT ACCOUNT' : 'SELECT'}}
             </v-btn>
           </div>
 
@@ -68,11 +68,11 @@
             </div>
 
             <!-- State Button -->
-            <div class="mt-9">
+            <div class="mt-9" v-if="isAccountChange">
               <v-btn large block depressed color="primary" class="font-weight-bold"
                 :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
                 @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
-                {{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT' }}
+                {{ originalAccountType == ACCOUNT_TYPE.PREMIUM ? 'CURRENT ACCOUNT' : 'SELECT' }}
               </v-btn>
             </div>
 
@@ -85,7 +85,7 @@
         cols="12"
         class="step-btns mt-8 pb-0 text-right"
       >
-        <v-btn large color="primary" class="mr-3" @click="goNext" :disabled='!selectedAccountType'>
+        <v-btn large color="primary" class="mr-3" @click="goNext" :disabled='!canContinue'>
           <span>Next</span>
           <v-icon class="ml-2">mdi-arrow-right</v-icon>
         </v-btn>
@@ -119,18 +119,25 @@ import Steppable from '@/components/auth/stepper/Steppable.vue'
 })
 export default class AccountTypeSelector extends Mixins(Steppable) {
   private readonly ACCOUNT_TYPE = Account
-  private selectedAccountType: string = ''
+  private selectedAccountType = ''
   private readonly setSelectedAccountType!: (selectedAccountType: Account) => void
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly currentOrganization!: Organization
   private readonly resetCurrentOrganisation!: () => void
+  private originalAccountType = '' // used for detecting the original type of the account which is getting down/up graded
+  @Prop() isAccountChange: boolean
 
   private async mounted () {
-    // first time to the page , start afresh
-    if (!this.currentOrganization) {
-      this.setCurrentOrganization({ name: '' }) // TODO find a better logic to reset ;may be in cancel button
-    } else {
+    if (this.isAccountChange) {
+      this.originalAccountType = this.currentOrganization.orgType
       this.selectedAccountType = this.currentOrganization.orgType
+    } else {
+      // first time to the page , start afresh
+      if (!this.currentOrganization) {
+        this.setCurrentOrganization({ name: '' })
+      } else {
+        this.selectedAccountType = this.currentOrganization.orgType
+      }
     }
   }
 
@@ -143,6 +150,14 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 
   private goNext () {
     this.stepForward(this.selectedAccountType === this.ACCOUNT_TYPE.PREMIUM)
+  }
+
+  private get canContinue () {
+    if (this.isAccountChange) {
+      return this.originalAccountType !== this.selectedAccountType
+    } else {
+      return this.selectedAccountType
+    }
   }
 
   private cancel () {

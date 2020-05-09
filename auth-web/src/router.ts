@@ -3,6 +3,7 @@ import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import Router, { Route, RouteConfig } from 'vue-router'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
+import AccountChangeView from '@/views/auth/AccountChangeView.vue'
 import AccountCreationSuccessView from '@/views/auth/AccountCreationSuccessView.vue'
 import { AccountSettings } from '@/models/account-settings'
 import AccountSetupView from '@/views/auth/AccountSetupView.vue'
@@ -94,6 +95,7 @@ export function getRoutes (): RouteConfig[] {
         }
       ]
     },
+    { path: '/change-account', name: 'changeaccount', component: AccountChangeView, props: true, meta: { requiresAuth: true, requiresProfile: true } },
     { path: '/setup-account', name: 'setupaccount', component: AccountSetupView, props: true, meta: { requiresAuth: true, requiresProfile: true } },
     { path: '/setup-account-success', name: 'setup-account-success', component: AccountCreationSuccessView, meta: { requiresAuth: true, requiresProfile: true } },
     { path: '/userprofile/:token?', name: 'userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true, requiresProfile: true } },

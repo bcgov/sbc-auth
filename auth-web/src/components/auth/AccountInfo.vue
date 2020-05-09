@@ -21,11 +21,11 @@
                 Authorizing User ID: {{currentOrgPaymentSettings.bcolUserId}}
               </li>
             </ul>
-            <!--
+
             <div class="mt-2">
-              <a class="change-account-link" href="">Change Account</a>
+              <a class="change-account-link" href="/change-account">Change Account</a>
             </div>
-            -->
+
           </div>
         </li>
         <li class="nv-list-item mb-12" v-if="isPremiumAccount">
