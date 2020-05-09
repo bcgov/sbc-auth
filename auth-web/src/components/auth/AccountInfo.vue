@@ -9,11 +9,23 @@
       </v-alert>
 
       <ul class="nv-list">
-        <li class="nv-list-item mb-9">
+        <li class="nv-list-item mb-10">
           <div class="name" id="accountType">Account Type</div>
           <div class="value" aria-labelledby="accountType">
-            <div class="value__title">{{ isPremiumAccount ? 'PREMIUM' : 'BASIC' }}</div>
-            <ul class="bcol-acc__meta mt-1" v-if="isPremiumAccount && currentOrgPaymentSettings">
+            <div class="value__title">{{ isPremiumAccount ? 'Premium' : 'Basic' }}</div>
+            <div>
+              <a class="change-account-link" href="/change-account">Change Account</a>
+            </div>
+
+          </div>
+        </li>
+        <li class="nv-list-item mb-12" v-if="isPremiumAccount">
+          <div class="name mb-3" id="accountName">Linked BC Online Account Details</div>
+          <v-alert dark color="primary" class="bcol-acc px-7 py-5">
+            <div class="bcol-acc__name">
+              {{ currentOrganization.name }}
+            </div>
+            <ul class="bcol-acc__meta" v-if="isPremiumAccount && currentOrgPaymentSettings">
               <li>
                 BC Online Account No: {{currentOrgPaymentSettings.bcolAccountId}}
               </li>
@@ -21,19 +33,7 @@
                 Authorizing User ID: {{currentOrgPaymentSettings.bcolUserId}}
               </li>
             </ul>
-
-            <div class="mt-2">
-              <a class="change-account-link" href="/change-account">Change Account</a>
-            </div>
-
-          </div>
-        </li>
-        <li class="nv-list-item mb-12" v-if="isPremiumAccount">
-          <div class="name" id="accountName">Account Name</div>
-          <div class="value" aria-labelledby="accountType">
-            <div class="value__title">{{ orgName }}</div>
-            <div class="mt-1">Premium accounts use your existing BC Online account name and cannot be modified.</div>
-          </div>
+          </v-alert>
         </li>
       </ul>
 
@@ -320,6 +320,12 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 .header-container {
   display: flex;
   flex-direction: row;
+}
+
+// BC Online Account Information
+.bcol-acc__name {
+  font-size: 1.125rem;
+  font-weight: 700;
 }
 
 .bcol-acc__meta {
