@@ -27,7 +27,7 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import NotificationType
+from auth_api.utils.enums import NotificationType, ChangeType
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, MEMBER, Role, Status, AccessType, STAFF_ADMIN, \
     CLIENT_AUTH_ROLES
 from auth_api.utils.util import cors_preflight
@@ -125,8 +125,10 @@ class Org(Resource):
     def put(org_id):
         """Update the org specified by the provided id with the request body."""
         request_json = request.get_json()
+        action = request.args.get('action')
         valid_format, errors = schema_utils.validate(request_json, 'org')
         token = g.jwt_oidc_token_info
+        bearer_token = request.headers['Authorization'].replace('Bearer ', '')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
         try:
@@ -137,7 +139,11 @@ class Org(Resource):
                 return {'message': 'The organisation can only be updated by a staff admin.'}, \
                        http_status.HTTP_401_UNAUTHORIZED
             if org:
-                response, status = org.update_org(request_json).as_dict(), http_status.HTTP_200_OK
+                if action in (ChangeType.DOWNGRADE.value, ChangeType.UPGRADE.value):
+                    response, status = org.change_org_ype(request_json, action,
+                                                          bearer_token).as_dict(), http_status.HTTP_200_OK
+                else:
+                    response, status = org.update_org(request_json, bearer_token).as_dict(), http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
