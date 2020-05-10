@@ -1,6 +1,6 @@
 <template>
   <v-stepper class="stepper d-flex" v-model="currentStepNumber">
-    <v-container class="stepper-nav py-7 px-8">
+    <v-container class="stepper-nav pa-6">
       <template v-for="step in steps">
         <v-stepper-step
           class="pa-3"
@@ -14,7 +14,7 @@
     <v-container class="stepper-content pa-10">
       <div v-for="step in steps" :key="getStepIndex(step)" class="flex-grow">
         <template v-if="getStepIndex(step) === currentStepNumber">
-          <div class="stepper-content__count my-1">Step {{currentStepNumber}} of {{steps.length}}</div>
+          <div class="stepper-content__count mb-1">Step {{currentStepNumber}} of {{steps.length}}</div>
           <h2 class="stepper-content__title mb-3">{{getStepTitle(step)}}</h2>
           <component
             class="pa-0"
@@ -145,10 +145,6 @@ export default class Stepper extends Vue {
       text-transform: uppercase;
       font-size: 0.9375rem;
       font-weight: bold;
-    }
-
-    &__title {
-      font-size: 1.65rem;
     }
   }
 

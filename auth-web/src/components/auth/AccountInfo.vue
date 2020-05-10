@@ -12,11 +12,10 @@
         <li class="nv-list-item mb-10">
           <div class="name" id="accountType">Account Type</div>
           <div class="value" aria-labelledby="accountType">
-            <div class="value__title">{{ isPremiumAccount ? 'Premium' : 'Basic' }}</div>
+            <div class="value__title font-weight-bold">{{ isPremiumAccount ? 'Premium' : 'Basic' }}</div>
             <div>
               <router-link :to="editAccountUrl">Change Account</router-link>
             </div>
-
           </div>
         </li>
         <li class="nv-list-item mb-12" v-if="isPremiumAccount">
@@ -76,12 +75,11 @@
           <span class="save-btn__label">{{ btnLabel }}</span>
         </v-btn>
         <v-btn
-                large
-                depressed
-                class="ml-2"
-                color="default"
-                @click="resetForm"
-                data-test="reset-button"
+          large
+          class="ml-2"
+          color="default"
+          @click="resetForm"
+          data-test="reset-button"
         >Reset</v-btn>
       </div>
     </v-form>

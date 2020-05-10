@@ -64,7 +64,7 @@
           <div class="account-type">
             <div class="account-type__name mt-n1 mb-2">PREMIUM</div>
             <div class="account-type__title mb-8">I make more than 10 transactions per month</div>
-            <ul class="account-type__details  ml-1 mb-5">
+            <ul class="account-type__details ml-1 mb-6">
               <li class="mb-4">For firms and companies who search frequently or file for a large number of businesses</li>
               <li class="mb-4">Uses your BC Online account to pay for products and services</li>
               <li class="mb-4">Unlimited transactions</li>
@@ -246,6 +246,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 
 ul {
   list-style: none; /* Remove default bullets */
+  font-size: 0.875rem;
 }
 
 ul li::before {

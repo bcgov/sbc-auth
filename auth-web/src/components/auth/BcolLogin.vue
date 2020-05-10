@@ -34,7 +34,6 @@
                   filled
                   label="Password"
                   v-model.trim="password"
-                  type="password"
                   req
                   dense
                   :rules="passwordRules"
