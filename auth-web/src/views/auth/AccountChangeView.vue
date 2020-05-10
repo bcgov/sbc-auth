@@ -50,11 +50,11 @@ export default class AccountSetupView extends Vue {
       {
         title: 'Account Settings',
         component: AccountCreateBasic,
-        componentProps: {},
+        componentProps: { 'isAccountChange': true },
         alternate: {
           title: 'Account Settings',
           component: AccountCreatePremium,
-          componentProps: {}
+          componentProps: { 'isAccountChange': true }
         }
       }
     ]

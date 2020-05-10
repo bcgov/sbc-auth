@@ -14,7 +14,7 @@
           <div class="value" aria-labelledby="accountType">
             <div class="value__title">{{ isPremiumAccount ? 'Premium' : 'Basic' }}</div>
             <div>
-              <a class="change-account-link" href="/change-account">Change Account</a>
+              <router-link :to="editAccountUrl">Change Account</router-link>
             </div>
 
           </div>
@@ -89,7 +89,7 @@
 </template>
 
 <script lang="ts">
-import { Account, SessionStorageKeys } from '@/util/constants'
+import { Account, Pages, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import {
   CreateRequestBody,
@@ -149,6 +149,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 
   get addressKey () {
     return JSON.stringify(this.currentOrgAddress)
+  }
+
+  get editAccountUrl () {
+    return Pages.EDIT_ACCOUNT_TYPE
   }
 
   private async mounted () {

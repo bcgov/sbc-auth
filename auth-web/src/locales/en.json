@@ -59,5 +59,7 @@
   "confirmDissolveTeamTitle": "Confirm Dissolve Account",
   "confirmDissolveTeamText": "Are you sure you wish to dissolve the account?",
   "bcscAccountCreationSuccessTitle": "Your BC Registries account has successfully been created.",
-  "bcscAccountCreationSuccessSubtext": "You can now start accessing products & services available exclusively to BC Registries account holders."
+  "bcscAccountCreationSuccessSubtext": "You can now start accessing products & services available exclusively to BC Registries account holders.",
+  "bcscAccountChangeSuccessTitle": "Your BC Registries account type has successfully been changed.",
+  "bcscAccountChangeSuccessSubtext": "You can now start accessing products & services available exclusively to the BC Registries account type."
 }
