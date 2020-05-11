@@ -1,15 +1,9 @@
 <template>
   <v-container>
-    <header class="view-header align-center">
+    <header class="view-header mb-6">
       <h2 class="view-header__title">Transactions</h2>
-      <div class="view-header__actions">
-        <v-btn color="primary" data-test="export-button">
-          <span>Export</span>
-        </v-btn>
-      </div>
     </header>
-    <TransactionsDataTable
-    ></TransactionsDataTable>
+    <TransactionsDataTable></TransactionsDataTable>
   </v-container>
 </template>
 

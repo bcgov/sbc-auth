@@ -16,9 +16,9 @@
     </template>
     <template v-slot:header.status="{ header }">
       {{header.text}}
-      <v-tooltip bottom>
+      <v-tooltip bottom color="grey darken-4">
         <template v-slot:activator="{ on }">
-          <v-icon class="px-1" small v-on="on">mdi-information-outline</v-icon>
+          <v-icon small class="status-tooltip-icon" v-on="on">mdi-information-outline</v-icon>
         </template>
         <div v-for="(status, index) in transactionStatus" :key="index">
           {{status.status}} - {{status.description}}
@@ -207,13 +207,33 @@ export default class TransactionsDataTable extends Vue {
 .role-list {
   width: 20rem;
 }
+
 .status-pending {
   color: map-get($grey, darken-1);
 }
+
 .status-paid {
   color: map-get($green, darken-1);
 }
 .status-deleted {
   color: map-get($red, lighten-2);
+}
+
+.status-tooltip-icon {
+  margin-top: -2px;
+  margin-right: 5px;
+}
+
+.v-tooltip__content:before {
+  content: ' ';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  margin-left: -10px;
+  width: 20px;
+  height: 20px;
+  border-width: 10px 10px 10px 10px;
+  border-style: solid;
+  border-color: transparent transparent var(--v-grey-darken4) transparent;
 }
 </style>
