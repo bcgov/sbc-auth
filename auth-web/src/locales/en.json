@@ -61,7 +61,7 @@
   "bcscAccountCreationSuccessTitle": "Your BC Registries account has successfully been created.",
   "bcscAccountCreationSuccessSubtext": "You can now start accessing products & services available exclusively to BC Registries account holders.",
   "bcscAccountChangeSuccessTitle": "Your BC Registries account type has successfully been changed.",
-  "bcscAccountChangeSuccessSubtext": "You can now start accessing products & services available exclusively to the BC Registries account type."
+  "bcscAccountChangeSuccessSubtext": "You can now start accessing products & services available exclusively to the BC Registries account type.",
   "resetConfirmTitle": "Reset your Profile",
   "resetConfirmText": "Reseting your profile will remove all your information.",
   "resetConfirmTextEmphasis": "This action cannot be undone.",
