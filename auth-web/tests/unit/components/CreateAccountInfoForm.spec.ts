@@ -30,6 +30,8 @@ describe('CreateAccountInfoForm.vue', () => {
     const orgModule = {
       namespaced: true,
       state: {
+        currentOrganization: {
+        },
         organizations: [],
         orgCreateMessage: 'test'
       },
