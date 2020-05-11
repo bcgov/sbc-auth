@@ -2,15 +2,19 @@ import Axios from 'axios'
 import { ProductsRequestBody } from '@/models/Staff'
 import StaffService from '../../../src/services/staff.services'
 
+jest.mock('../../../src/services/staff.services')
+/*
 jest.mock('axios', () => ({
-  get: jest.fn(),
+  create: jest.fn(() => Promise.resolve({ data: { }})),
+  get: jest.fn(() => Promise.resolve({ data: {mockob}})),
   all: jest.fn(),
-  post: jest.fn(),
+  post: jest.fn(() => Promise.resolve({ data: {}})),
   put: jest.fn(),
   patch: jest.fn()
 }), {
   virtual: true
 })
+*/
 var mockob = {
   'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
   'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
@@ -26,14 +30,15 @@ var mockProducts : ProductsRequestBody = {
   ]
 }
 
+const spyGetProducts = jest.spyOn(StaffService, 'getProducts')
+const spyGetAccountTypes = jest.spyOn(StaffService, 'getAccountTypes')
+const spyAddProducts = jest.spyOn(StaffService, 'addProducts')
+
 describe('Get staff service', () => {
   const results = []
   beforeEach(() => {
     sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)
-    // @ts-ignore
-    Axios.get.mockClear()
-    // @ts-ignore
-    Axios.all.mockResolvedValue(results)
+    jest.clearAllMocks()
 
     StaffService.getProducts()
     StaffService.getAccountTypes()
@@ -41,14 +46,14 @@ describe('Get staff service', () => {
   })
 
   it('should call get products ', () => {
-    expect(Axios.get).toHaveBeenCalledWith(`${mockob.VUE_APP_AUTH_ROOT_API}/codes/product_code`)
+    expect(spyGetProducts).toHaveBeenCalledTimes(1)
   })
 
-  it('should call get org types ', () => {
-    expect(Axios.get).toHaveBeenCalledWith(`${mockob.VUE_APP_AUTH_ROOT_API}/codes/org_type`)
+  it('should call get account types ', () => {
+    expect(spyGetAccountTypes).toHaveBeenCalledTimes(1)
   })
 
   it('should call add products ', () => {
-    expect(Axios.post).toHaveBeenCalledWith(`${mockob.VUE_APP_AUTH_ROOT_API}/orgs/1/products`, mockProducts)
+    expect(spyAddProducts).toHaveBeenCalledWith(1, mockProducts)
   })
 })

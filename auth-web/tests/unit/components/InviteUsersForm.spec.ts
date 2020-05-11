@@ -40,7 +40,7 @@ describe('InviteUsersForm.vue', () => {
         currentOrganization: {
           name: 'test org'
         },
-        currentMembership: [{ 
+        currentMembership: [{
           membershipTypeCode: 'OWNER',
           membershipStatus: 'ACTIVE',
           user: { username: 'test' } }],
