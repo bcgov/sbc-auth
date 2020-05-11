@@ -263,7 +263,161 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     assert rv.status_code == http_status.HTTP_409_CONFLICT
 
 
+def test_upgrade_anon_org_fail(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be updated via PUT."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_anonymous),
+                     headers=headers, content_type='application/json')
+
+    dictionary = json.loads(rv.data)
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.json.get('orgType') == OrgType.BASIC.value
+    assert rv.json.get('name') == TestOrgInfo.org1.get('name')
+
+    org_id = dictionary['id']
+    # upgrade with same data
+
+    premium_info = TestOrgInfo.bcol_linked()
+    premium_info['typeCode'] = OrgType.PREMIUM.value
+
+    rv = client.put('/api/v1/orgs/{}?action=UPGRADE'.format(org_id),
+                    data=json.dumps(premium_info), headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+
+
+def test_upgrade_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be updated via PUT."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+
+    dictionary = json.loads(rv.data)
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.json.get('orgType') == OrgType.BASIC.value
+    assert rv.json.get('name') == TestOrgInfo.org1.get('name')
+
+    org_id = dictionary['id']
+    # upgrade with same data
+
+    premium_info = TestOrgInfo.bcol_linked()
+    premium_info['typeCode'] = OrgType.PREMIUM.value
+
+    rv = client.put('/api/v1/orgs/{}?action=UPGRADE'.format(org_id),
+                    data=json.dumps(premium_info), headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    rv = client.get('/api/v1/orgs/{}'.format(org_id),
+                    headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['id'] == org_id
+    assert rv.json.get('orgType') == OrgType.PREMIUM.value
+    assert rv.json.get('name') == premium_info['name']
+
+
+def test_upgrade_downgrade_reattach_bcol_todifferent_org(client, jwt, session,
+                                                         keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be updated via PUT."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    bcol_account = TestOrgInfo.bcol_linked()
+    rv = client.post('/api/v1/orgs', data=json.dumps(bcol_account),
+                     headers=headers, content_type='application/json')
+
+    dictionary = json.loads(rv.data)
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.json.get('orgType') == OrgType.PREMIUM.value
+    assert rv.json.get('name') == bcol_account.get('name')
+    org_id = dictionary['id']
+
+    # create a new org with same bcol
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    bcol_account = TestOrgInfo.bcol_linked()
+    rv = client.post('/api/v1/orgs', data=json.dumps(bcol_account),
+                     headers=headers, content_type='application/json')
+
+    # should fail since BCOL is already attached
+    assert rv.status_code == http_status.HTTP_409_CONFLICT
+
+    # downgrade with same data
+    rv = client.put('/api/v1/orgs/{}?action=DOWNGRADE'.format(org_id),
+                    data=json.dumps({'name': 'My Test Orgs', 'typeCode': 'BASIC'}), headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    rv = client.get('/api/v1/orgs/{}'.format(org_id),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['id'] == org_id
+    assert rv.json.get('orgType') == OrgType.BASIC.value
+    assert rv.json.get('name') == 'My Test Orgs'
+
+    # create a new org with same bcol
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    bcol_account = TestOrgInfo.bcol_linked()
+    rv = client.post('/api/v1/orgs', data=json.dumps(bcol_account),
+                     headers=headers, content_type='application/json')
+
+    dictionary = json.loads(rv.data)
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.json.get('orgType') == OrgType.PREMIUM.value
+    assert rv.json.get('name') == bcol_account.get('name')
+
+
+def test_downgrade_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be updated via PUT."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    bcol_account = TestOrgInfo.bcol_linked()
+    rv = client.post('/api/v1/orgs', data=json.dumps(bcol_account),
+                     headers=headers, content_type='application/json')
+
+    dictionary = json.loads(rv.data)
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.json.get('orgType') == OrgType.PREMIUM.value
+    assert rv.json.get('name') == bcol_account.get('name')
+
+    org_id = dictionary['id']
+    # downgrade with same data
+    rv = client.put('/api/v1/orgs/{}?action=DOWNGRADE'.format(org_id),
+                    data=json.dumps({'name': 'My Test Orgs', 'typeCode': 'BASIC'}), headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    rv = client.get('/api/v1/orgs/{}'.format(org_id),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['id'] == org_id
+    assert rv.json.get('orgType') == OrgType.BASIC.value
+    assert rv.json.get('name') == 'My Test Orgs'
+
+
 def test_update_premium_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be updated via PUT."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked()),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.json.get('orgType') == OrgType.PREMIUM.value
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    # Update with same data
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(TestOrgInfo.bcol_linked()), headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+
+
+def test_get_org_payment_settings(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -275,11 +429,12 @@ def test_update_premium_org(client, jwt, session, keycloak_mock):  # pylint:disa
 
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
+    rv = client.get('/api/v1/orgs/{}/contacts'.format(org_id), headers=headers)
 
     # Update with same data
-    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(TestOrgInfo.bcol_linked()), headers=headers,
-                    content_type='application/json')
+    rv = client.get('/api/v1/orgs/{}/payment_settings'.format(org_id), headers=headers)
     assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
 
 
 def test_update_org_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument

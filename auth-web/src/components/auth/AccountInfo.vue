@@ -7,35 +7,35 @@
       <v-alert type="error" class="mb-6" v-show="errorMessage">
         {{ errorMessage }}
       </v-alert>
-
-      <ul class="nv-list">
-        <li class="nv-list-item mb-9">
+      <ul class="nv-list" v-show="!anonAccount">
+        <li class="nv-list-item mb-10">
           <div class="name" id="accountType">Account Type</div>
           <div class="value" aria-labelledby="accountType">
-            <div class="value__title">{{ isPremiumAccount ? 'PREMIUM' : 'BASIC' }}</div>
-            <ul class="bcol-acc__meta mt-1" v-if="isPremiumAccount && currentOrgPaymentSettings">
+            <div class="value__title">{{ isPremiumAccount ? 'Premium' : 'Basic' }}</div>
+            <div>
+              <router-link :to="editAccountUrl">Change account type</router-link>
+            </div>
+          </div>
+        </li>
+        <li class="nv-list-item mb-12" v-if="isPremiumAccount">
+          <div class="name mb-3" id="accountName">Linked BC Online Account Details</div>
+          <v-alert dark color="primary" class="bcol-acc px-7 py-5">
+            <div class="bcol-acc__name">
+              {{ currentOrganization.name }}
+            </div>
+            <ul class="bcol-acc__meta" v-if="isPremiumAccount && currentOrgPaymentSettings">
               <li>
                 BC Online Account No: {{currentOrgPaymentSettings.bcolAccountId}}
               </li>
               <li>
-                Authorizing User ID: {{currentOrgPaymentSettings.bcolUserId}}
+                Prime Contact ID: {{currentOrgPaymentSettings.bcolUserId}}
               </li>
             </ul>
-            <!--
-            <div class="mt-2">
-              <a class="change-account-link" href="">Change Account</a>
-            </div>
-            -->
-          </div>
-        </li>
-        <li class="nv-list-item mb-12" v-if="isPremiumAccount">
-          <div class="name" id="accountName">Account Name</div>
-          <div class="value" aria-labelledby="accountType">
-            <div class="value__title">{{ orgName }}</div>
-            <div class="mt-1">Premium accounts use your existing BC Online account name and cannot be modified.</div>
-          </div>
+          </v-alert>
         </li>
       </ul>
+
+      <v-divider class="mb-10"></v-divider>
 
       <fieldset v-if="!isPremiumAccount">
         <legend class="mb-4">Account Details</legend>
@@ -45,21 +45,25 @@
           required
           label="Account Name"
           :rules="accountNameRules"
+          :disabled="!canChangeAccountName()"
           v-if="!isPremiumAccount"
           v-model="orgName"
           v-on:keydown="enableBtn()"
         >
         </v-text-field>
       </fieldset>
-        <BaseAddress
-                :inputAddress="currentOrgAddress"
-                @key-down="keyDown()"
-                @address-update="updateAddress"
-                v-if="isPremiumAccount && currentOrgAddress"
-                :disabled="!canChangeAddress()"
-                :key="addressKey"
-        >
-        </BaseAddress>
+      <BaseAddress
+              :inputAddress="currentOrgAddress"
+              @key-down="keyDown()"
+              @address-update="updateAddress"
+              v-if="isPremiumAccount && currentOrgAddress"
+              :disabled="!canChangeAddress()"
+              :key="addressKey"
+      >
+      </BaseAddress>
+
+      <v-divider class="mt-3 mb-10"></v-divider>
+
       <div class="form__btns">
         <v-btn
           large
@@ -76,12 +80,12 @@
           <span class="save-btn__label">{{ btnLabel }}</span>
         </v-btn>
         <v-btn
-                large
-                depressed
-                class="ml-2"
-                color="default"
-                @click="resetForm"
-                data-test="reset-button"
+          large
+          depressed
+          class="ml-2"
+          color="default"
+          @click="resetForm"
+          data-test="reset-button"
         >Reset</v-btn>
       </div>
     </v-form>
@@ -89,7 +93,7 @@
 </template>
 
 <script lang="ts">
-import { Account, SessionStorageKeys } from '@/util/constants'
+import { Account, Pages, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import {
   CreateRequestBody,
@@ -151,6 +155,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     return JSON.stringify(this.currentOrgAddress)
   }
 
+  get editAccountUrl () {
+    return Pages.EDIT_ACCOUNT_TYPE
+  }
+
   private async mounted () {
     // eslint-disable-next-line no-console
     const accountSettings = this.getAccountFromSession()
@@ -198,6 +206,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 
   get isPremiumAccount (): boolean {
     return this.currentOrganization?.orgType === Account.PREMIUM
+  }
+
+  get anonAccount (): boolean {
+    return this.currentOrganization?.accessType === Account.ANONYMOUS
   }
 
   private canChangeAccountName (): boolean {
@@ -320,6 +332,12 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 .header-container {
   display: flex;
   flex-direction: row;
+}
+
+// BC Online Account Information
+.bcol-acc__name {
+  font-size: 1.125rem;
+  font-weight: 700;
 }
 
 .bcol-acc__meta {

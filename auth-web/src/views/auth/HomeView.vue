@@ -71,9 +71,9 @@
                   <v-col sm="12" md="4" class="section-card__links">
                     <ul class="mb-0">
                       <li>
-                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank" rel="noopener noreferrer">
+                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card" target="_blank" rel="noopener noreferrer">
                           <v-icon small>mdi-open-in-new</v-icon>
-                          <span>What is a BC <span class="nobr">Services Card?</span></span>
+                          <span>What is a Mobile BC <span class="nobr">Services Card?</span></span>
                         </v-btn>
                       </li>
                       <li>
