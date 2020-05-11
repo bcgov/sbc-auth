@@ -125,7 +125,7 @@ class Org(Resource):
     def put(org_id):
         """Update the org specified by the provided id with the request body."""
         request_json = request.get_json()
-        action = request.args.get('action')
+        action = request.args.get('action', '').upper()
         valid_format, errors = schema_utils.validate(request_json, 'org')
         token = g.jwt_oidc_token_info
         bearer_token = request.headers['Authorization'].replace('Bearer ', '')
