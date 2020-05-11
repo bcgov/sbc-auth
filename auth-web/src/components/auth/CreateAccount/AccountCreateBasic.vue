@@ -119,11 +119,16 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private async save () {
     // Validate form, and then create an team with this user a member
     if (this.isFormValid()) {
-      const avaialble = await this.isOrgNameAvailable(this.orgName)
-      if (!avaialble) {
-        this.errorMessage =
+      // if its not account change , do check for duplicate
+      // if its account change , check if user changed the already existing name
+      const checkNameAVailability = !this.isAccountChange || (this.orgName !== this.currentOrganization.name)
+      if (checkNameAVailability) {
+        const available = await this.isOrgNameAvailable(this.orgName)
+        if (!available) {
+          this.errorMessage =
                 'An account with this name already exists. Try a different account name.'
-        return
+          return
+        }
       }
       if (this.isAccountChange) {
         try {
@@ -134,7 +139,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
           await this.syncOrganization(organization.id)
           // await this.syncMembership(organization.id)
           this.$store.commit('updateHeader')
-          this.$router.push('/setup-account-success')
+          this.$router.push('/change-account-success')
           return
         } catch (err) {
           this.saving = false
