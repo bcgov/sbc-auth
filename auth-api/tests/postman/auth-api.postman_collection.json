@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "433fa9b5-4fb1-47b7-8e58-f862044c8eab",
-		"name": "auth-api-invitation",
+		"name": "auth-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -520,7 +520,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{  \r\n   \"businessIdentifier\": \"{{business_identifier}}\",\r\n   \"name\": \"{{business_name}}\",\r\n   \"businessNumber\": \"{{business_number}}\",\r\n   \"passCode\": \"{{entity_passcode}}\",\r\n    \"corpTypeCode\": \"CP\"\r\n}"
+							"raw": "{  \r\n   \"businessIdentifier\": \"{{business_identifier}}\",\r\n   \"name\": \"{{business_name}}\",\r\n   \"businessNumber\": \"{{business_number}}\",\r\n   \"passCode\": \"{{entity_passcode}}\",\r\n   \"corpTypeCode\": \"CP\",\r\n   \"folioNumber\": \"12345678\"\r\n}"
 						},
 						"url": {
 							"raw": "{{api_url}}/api/v1/entities",
@@ -999,7 +999,7 @@
 					"response": []
 				},
 				{
-					"name": "Create an org",
+					"name": "Create an account",
 					"event": [
 						{
 							"listen": "test",
@@ -1060,6 +1060,83 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n\t\"name\": \"{{test_org_name}}\"\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/orgs",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"orgs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create additional account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "58bd542c-3498-4e98-8d28-9fe2eb62ea3b",
+								"exec": [
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									"",
+									"pm.test(\"Verify payload\",  () => {",
+									"    pm.expect(pm.response.text()).to.include(\"id\");",
+									"    //pm.expect(pm.response.text()).to.include(\"affiliatedEntities\")",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"org_identifier_additional\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"{{test_org_name}} second\"\n}"
 						},
 						"url": {
 							"raw": "{{api_url}}/api/v1/orgs",
@@ -1782,7 +1859,7 @@
 									"",
 									"var jsonData = pm.response.json();",
 									"// take the latest id",
-									"//pm.environment.set(\"member_id\", Math.max.apply(Math, jsonData.members.map(function(o) { return o.id; })));"
+									"pm.environment.set(\"member_id\", Math.max.apply(Math, jsonData.members.map(function(o) { return o.id; })));"
 								],
 								"type": "text/javascript"
 							}
@@ -1824,6 +1901,83 @@
 								"orgs",
 								"{{org_identifier}}",
 								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update contact for entity Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"exec": [
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    //pm.response.to.have.jsonBody(\"\"); ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									"",
+									"pm.test(\"Verify payload\",  () => {",
+									"    pm.expect(pm.response.text()).to.include(\"businessIdentifier\");",
+									"    pm.expect(pm.response.text()).to.include(\"contacts\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{  \r\n   \"email\": \"{{sample_updated_email}}\",\r\n   \"phone\": \"{{sample_phone}}\",\r\n   \"phoneExtension\": \"{{sample_extension}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/entities/{{business_identifier}}/contacts",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"entities",
+								"{{business_identifier}}",
+								"contacts"
 							]
 						}
 					},
@@ -2628,21 +2782,34 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "cbeb8178-cd2f-447e-acac-8eb69efc0031",
+								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
 								"exec": [
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									"",
+									"pm.test(\"Verify payload\",  () => {",
+									"    pm.expect(pm.response.text()).to.include(\"username\");",
+									"});",
+									"",
+									"",
+									"var auth_token = pm.request.getHeaders()['Authorization'];",
+									"auth_token = auth_token.replace('Bearer ', '');",
+									"postman.setEnvironmentVariable('staffToken', auth_token);",
+									"",
 									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"staffToken\", jsonData.access_token);",
-									""
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"id": "776fb4fd-4f46-4f00-91eb-fd796e49fcc8",
-								"exec": [
-									""
+									"pm.environment.set(\"username\", jsonData.username);"
 								],
 								"type": "text/javascript"
 							}
@@ -2650,25 +2817,45 @@
 					],
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{staffAccessToken}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
 						},
 						"method": "POST",
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
 								"value": "application/x-www-form-urlencoded"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "grant_type=password&client_id={{web-client-id}}&username={{test_staff_username}}&password={{test_staff_password}}&client_secret={{web-client-secret}}"
+							"raw": ""
 						},
 						"url": {
-							"raw": "{{token_url}}",
+							"raw": "{{api_url}}/api/v1/users",
 							"host": [
-								"{{token_url}}"
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
 							]
 						}
 					},
@@ -2733,6 +2920,64 @@
 						}
 					},
 					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "14abfca5-5fd7-42fd-a81c-d5fbf611eca3",
+						"type": "text/javascript",
+						"exec": [
+							"var current_timestamp = new Date()",
+							"postman.setEnvironmentVariable(\"current_timestamp\", current_timestamp.toISOString());",
+							"",
+							"function getvar(variableName) {",
+							"    let value = pm.variables.get(variableName);",
+							"    if (!value) throw new Error(",
+							"        `Variable '${variableName}' is not defined.`);",
+							"        return value;",
+							"    }",
+							"    ",
+							"    let tokenUrl = getvar('token_url');",
+							"    let accountId = getvar('service-account-staff-id');",
+							"    let accountSecret = getvar('service-account-staff-secret');",
+							"    ",
+							"    let getTokenRequest = {",
+							"    method: 'POST',",
+							"    url: tokenUrl,",
+							"    header: {",
+							"        'content-type': 'application/x-www-form-urlencoded',",
+							"        'Authorization': 'Basic '+ btoa(accountId+':'+accountSecret)",
+							"    },",
+							"    ",
+							"    body: 'grant_type=client_credentials'",
+							"",
+							"};",
+							"",
+							"pm.sendRequest(getTokenRequest, (err, response) => {",
+							"    let jsonResponse = response.json(),",
+							"    newAccessToken = jsonResponse.access_token;",
+							"    ",
+							"    console.log({ err, jsonResponse, newAccessToken })",
+							"    ",
+							"    pm.environment.set('staffAccessToken', newAccessToken);",
+							"    pm.variables.set('staffAccessToken', newAccessToken);",
+							"",
+							"});",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "87a0cd78-905e-43c7-9809-58e0679b3428",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -2841,6 +3086,66 @@
 								"name": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api_url}}/test/reset",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"test",
+								"reset"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset staff Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"exec": [
+									"pm.test(\"Response time is less than 5000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"postman.setEnvironmentVariable('memberToken', '');",
+									"postman.setEnvironmentVariable('memberAccessToken', '');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{staffToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
 							}
 						],
 						"body": {

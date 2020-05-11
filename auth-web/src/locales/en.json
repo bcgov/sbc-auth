@@ -11,8 +11,8 @@
   "paymentPrepareMsg": "Preparing your payments",
   "paymentDoneMsg": "Completing the payment",
   "businessContactCopy": "It looks like we are missing some contact information for your {businessType}. You will need to supply us with a few additional details before you can get started...",
-  "businessListEmptyMessage":"You have not added any businesses",
-  "businessListActionMessage":"Click Here to add a business by incorporation number and passcode",
+  "businessListEmptyMessage": "You have not added any businesses",
+  "businessListActionMessage": "Click Here to add a business by incorporation number and passcode",
   "noResultMsg": "The Incorporation Number you entered does not correspond to a Co-operative in the system. Please try again.",
   "noIncorporationNumberFound": "No match found for Incorporation Number",
   "errorOccurredTitle": "An error has occurred",
@@ -62,4 +62,9 @@
   "bcscAccountCreationSuccessSubtext": "You can now start accessing products & services available exclusively to BC Registries account holders.",
   "bcscAccountChangeSuccessTitle": "Your BC Registries account type has successfully been changed.",
   "bcscAccountChangeSuccessSubtext": "You can now start accessing products & services available exclusively to the BC Registries account type."
+  "resetConfirmTitle": "Reset your Profile",
+  "resetConfirmText": "Reseting your profile will remove all your information.",
+  "resetConfirmTextEmphasis": "This action cannot be undone.",
+  "resetFailureTitle": "Reset Failed",
+  "resetFailureText": "Unable to reset your profile. "
 }

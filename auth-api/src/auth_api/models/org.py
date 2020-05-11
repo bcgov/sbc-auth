@@ -90,10 +90,10 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
         return cls.query.filter(and_(Org.created_by_id == user_id, Org.status_code == 'ACTIVE')).with_entities(
             func.count()).scalar()
 
-    def update_org_from_dict(self, org_info: dict):
+    def update_org_from_dict(self, org_info: dict, exclude=('status_code', 'type_code')):
         """Update this org with the provided dictionary."""
         # Update from provided dictionary, but specify additional fields not to update.
-        self.update_from_dict(**org_info, _exclude=('status_code', 'type_code'))
+        self.update_from_dict(**org_info, _exclude=exclude)
         self.save()
 
     def delete(self):
