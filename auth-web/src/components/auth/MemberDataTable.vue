@@ -103,7 +103,7 @@ import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from
 import { mapActions, mapState } from 'vuex'
 import { Account } from '@/util/constants'
 import { Business } from '@/models/business'
-import moment from 'moment'
+import CommonUtils from '@/util/common-util'
 
 export interface ChangeRolePayload {
   member: Member
@@ -168,6 +168,8 @@ export default class MemberDataTable extends Vue {
     }
   ]
 
+  private formatDate = CommonUtils.formatDisplayDate
+
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
@@ -177,10 +179,6 @@ export default class MemberDataTable extends Vue {
       index,
       ...item
     }))
-  }
-
-  private formatDate (date: Date) {
-    return moment(date).format('DD MMM, YYYY')
   }
 
   private isRoleEnabled (role: RoleInfo): boolean {

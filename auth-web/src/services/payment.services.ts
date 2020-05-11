@@ -1,4 +1,5 @@
 import Axios, { AxiosPromise } from 'axios'
+import { TransactionDateFilter, TransactionListResponse } from '@/models/transaction'
 import ConfigHelper from '@/util/config-helper'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
 
@@ -18,5 +19,10 @@ export default class PaymentService {
     return axios.patch(url, {
       receipt_number: receiptNum
     })
+  }
+
+  static getTransactions (accountId: string, datefilter: TransactionDateFilter): AxiosPromise<TransactionListResponse> {
+    var url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/queries`
+    return axios.post(url, datefilter)
   }
 }
