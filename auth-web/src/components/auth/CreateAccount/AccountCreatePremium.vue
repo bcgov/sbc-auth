@@ -18,7 +18,7 @@
                   Account No: {{ currentOrganization.bcolAccountDetails.accountNumber }}
                 </li>
                 <li>
-                  Authorizing User ID: {{ currentOrganization.bcolAccountDetails.userId }}
+                  Prime Contact ID: {{ currentOrganization.bcolAccountDetails.userId }}
                 </li>
               </ul>
             </div>

@@ -28,7 +28,7 @@
                 BC Online Account No: {{currentOrgPaymentSettings.bcolAccountId}}
               </li>
               <li>
-                Authorizing User ID: {{currentOrgPaymentSettings.bcolUserId}}
+                Prime Contact ID: {{currentOrgPaymentSettings.bcolUserId}}
               </li>
             </ul>
           </v-alert>
