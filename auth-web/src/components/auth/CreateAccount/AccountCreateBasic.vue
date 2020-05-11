@@ -40,9 +40,10 @@
           @click="save"
           data-test="save-button"
         >
-          <span v-if="!isAccountChange">Next</span>
+          <span v-if="!isAccountChange">Next
+            <v-icon class="ml-2">mdi-arrow-right</v-icon>
+          </span>
           <span v-if="isAccountChange">Change Account</span>
-          <v-icon v-if="!isAccountChange" class="ml-2">mdi-arrow-right</v-icon>
         </v-btn>
         <ConfirmCancelButton
           :disabled="saving"

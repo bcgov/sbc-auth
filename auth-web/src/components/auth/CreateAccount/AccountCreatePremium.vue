@@ -86,9 +86,11 @@
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn class="mr-3" large depressed color="primary" :disabled="!grantAccess || saving" @click="save">
-            <span v-if="!isAccountChange">Next</span>
+            <span v-if="!isAccountChange">Next
+             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
+            </span>
             <span v-if="isAccountChange">Change Account</span>
-            <v-icon  v-if="!isAccountChange" right class="ml-1">mdi-arrow-right</v-icon>
+
           </v-btn>
           <ConfirmCancelButton
             :showConfirmPopup="linked"
