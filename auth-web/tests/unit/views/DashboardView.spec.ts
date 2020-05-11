@@ -9,6 +9,8 @@ import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
+jest.mock('../../../src/plugins/i18n', () => {})
+
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 const router = new VueRouter()
@@ -49,6 +51,7 @@ describe('DashboardView.vue', () => {
         syncCurrentOrganization: jest.fn()
       }
     }
+
     const store = new Vuex.Store({
       state: {},
       strict: false,
