@@ -186,6 +186,7 @@ export default class OrgModule extends VuexModule {
     const response = await OrgService.upgradeOrDowngradeOrg(createRequestBody, org.id, action)
     const organization = response?.data
     this.context.commit('setCurrentOrganization', organization)
+    this.context.commit('setAccountTypeBeforeChange', organization.orgType)
     return response?.data
   }
 

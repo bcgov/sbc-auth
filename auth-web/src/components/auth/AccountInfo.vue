@@ -7,8 +7,7 @@
       <v-alert type="error" class="mb-6" v-show="errorMessage">
         {{ errorMessage }}
       </v-alert>
-
-      <ul class="nv-list">
+      <ul class="nv-list" v-show="!anonAccount">
         <li class="nv-list-item mb-10">
           <div class="name" id="accountType">Account Type</div>
           <div class="value" aria-labelledby="accountType">
@@ -44,6 +43,7 @@
           required
           label="Account Name"
           :rules="accountNameRules"
+          :disabled="!canChangeAccountName()"
           v-if="!isPremiumAccount"
           v-model="orgName"
           v-on:keydown="enableBtn()"
@@ -200,6 +200,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 
   get isPremiumAccount (): boolean {
     return this.currentOrganization?.orgType === Account.PREMIUM
+  }
+
+  get anonAccount (): boolean {
+    return this.currentOrganization?.accessType === Account.ANONYMOUS
   }
 
   private canChangeAccountName (): boolean {
