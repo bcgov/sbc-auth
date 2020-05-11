@@ -111,6 +111,8 @@
         </v-btn>
         <ConfirmCancelButton
           :showConfirmPopup="false"
+          :clear-current-org="!isAccountChange"
+          :target-route="cancelUrl"
         ></ConfirmCancelButton>
       </v-col>
     </v-row>
@@ -147,6 +149,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   private readonly accountTypeBeforeChange!: string
   private readonly resetCurrentOrganisation!: () => void
   @Prop() isAccountChange: boolean
+  @Prop() cancelUrl: string
 
   private async mounted () {
     if (this.isAccountChange) {

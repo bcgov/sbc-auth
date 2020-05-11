@@ -91,6 +91,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private readonly currentOrganization!: Organization
   private orgName: string = ''
   @Prop() isAccountChange: boolean
+  @Prop() cancelUrl: string
 
   $refs: {
     createAccountInfoForm: HTMLFormElement
@@ -99,10 +100,6 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private readonly orgNameRules = [v => !!v || 'An account name is required']
   private isFormValid (): boolean {
     return !!this.orgName
-  }
-
-  private get cancelUrl () {
-    return this.isAccountChange ? `/account/${this.currentOrganization.id}/settings/account-info` : Pages.HOME
   }
 
   private async mounted () {

@@ -85,7 +85,8 @@
           </v-btn>
           <ConfirmCancelButton
             :showConfirmPopup="linked"
-            :target-url="cancelUrl"
+            :clear-current-org="!isAccountChange"
+            :target-route="cancelUrl"
           ></ConfirmCancelButton>
         </v-col>
       </v-row>
@@ -149,6 +150,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private readonly setGrantAccess!: (grantAccess: boolean) => void
   private readonly changeOrgType!: (action:Actions) => Promise<Organization>
+  @Prop() cancelUrl: string
   @Prop() isAccountChange: boolean
 
   private async mounted () {
@@ -172,9 +174,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
 
   private isFormValid (): boolean {
     return !!this.username && !!this.password
-  }
-  private get cancelUrl () {
-    return this.isAccountChange ? `/account/${this.currentOrganization.id}/settings/account-info` : Pages.HOME
   }
 
   private get address () {
