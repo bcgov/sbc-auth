@@ -66,11 +66,11 @@ h1 {
 }
 
 h2 {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
 }
 
 h3 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
 }
 
 p {
@@ -114,6 +114,18 @@ legend {
   display: block;
   color: $gray9;
   font-weight: 700;
+}
+
+// Form Buttons
+.form__btns {
+  .v-btn {
+    min-width: 7rem !important;
+    font-weight: 700;
+
+    &.default {
+      font-weight: 400;
+    }
+  }
 }
 
 // Helpers

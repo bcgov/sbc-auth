@@ -1,6 +1,7 @@
 import { Affiliation, CreateRequestBody as CreateAffiliationRequestBody } from '@/models/affiliation'
 import Axios, { AxiosResponse } from 'axios'
 import { CreateRequestBody as CreateOrganizationRequestBody, Member, Members, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { Actions } from '@/util/constants'
 import { Address } from '@/models/address'
 import { Businesses } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
@@ -52,6 +53,10 @@ export default class OrgService {
 
   public static async createOrg (createRequestBody: CreateOrganizationRequestBody): Promise<AxiosResponse<Organization>> {
     return axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs`, createRequestBody)
+  }
+
+  public static async upgradeOrDowngradeOrg (createRequestBody: CreateOrganizationRequestBody, orgId: number, action:Actions): Promise<AxiosResponse<Organization>> {
+    return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgId}?action=${action}`, createRequestBody)
   }
 
   public static async updateOrg (orgId: number, createRequestBody: CreateOrganizationRequestBody): Promise<AxiosResponse<Organization>> {

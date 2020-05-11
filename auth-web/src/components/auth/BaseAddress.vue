@@ -5,14 +5,14 @@
       <v-row>
         <v-col cols="12" class="py-0">
           <v-text-field
-            :disabled="disabled"
             filled
+            req
+            label="STREET ADDRESS"
+            :rules="rules.streetAddress"
+            :disabled="disabled"
+            v-model.trim="address.street"
             @change="emitAddress"
             @keydown="emitKeyDown"
-            label="Street Address"
-            v-model.trim="address.street"
-            :rules="rules.streetAddress"
-            req
           >
           </v-text-field>
         </v-col>
@@ -20,40 +20,40 @@
       <v-row>
         <v-col cols="4" class="py-0">
           <v-text-field
-            :disabled="disabled"
             filled
-            label="City"
+            req
+            label="CITY"
+            :disabled="disabled"
+            :rules="rules.city"
+            v-model.trim="address.city"
             @change="emitAddress"
             @keydown="emitKeyDown"
-            v-model.trim="address.city"
-            :rules="rules.city"
-            req
           >
           </v-text-field>
         </v-col>
         <v-col cols="4" class="py-0">
           <v-text-field
-            :disabled="disabled"
             filled
-            label="Province/Region/State"
+            req
+            label="PROVINCE"
+            :disabled="disabled"
+            :rules="rules.province"
             v-model.trim="address.region"
             @change="emitAddress"
             @keydown="emitKeyDown"
-            :rules="rules.province"
-            req
           >
           </v-text-field>
         </v-col>
         <v-col cols="4" class="py-0">
           <v-text-field
-            :disabled="disabled"
             filled
-            label="Postal Code"
+            req
+            label="POSTAL CODE"
+            :disabled="disabled"
+            :rules="rules.postalCode"
             v-model.trim="address.postalCode"
             @change="emitAddress"
             @keydown="emitKeyDown"
-            :rules="rules.postalCode"
-            req
           >
           </v-text-field>
         </v-col>
@@ -61,14 +61,14 @@
       <v-row>
         <v-col cols="4" class="py-0">
           <v-text-field
-            :disabled="disabled"
             filled
-            label="Country"
+            req
+            label="COUNTRY"
+            :disabled="disabled"
+            :rules="rules.country"
             v-model.trim="address.country"
             @change="emitAddress"
             @keydown="emitKeyDown"
-            :rules="rules.country"
-            req
           >
           </v-text-field>
         </v-col>

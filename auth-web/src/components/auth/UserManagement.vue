@@ -1,6 +1,6 @@
 <template>
   <v-container class="pa-0">
-    <header class="view-header align-center mt-n1 mb-6">
+    <header class="view-header align-center mt-n1 mb-5">
       <h2 class="view-header__title">Team Members</h2>
       <div class="view-header__actions">
         <v-btn color="primary" class="font-weight-bold" large v-if="canInvite()" @click="showInviteUsersModal()" data-test="invite-people-button">
@@ -11,7 +11,7 @@
     </header>
 
     <!-- Tab Navigation -->
-    <v-tabs class="mb-9" height="40" v-model="tab" background-color="transparent">
+    <v-tabs class="mb-9" v-model="tab" background-color="transparent">
       <v-tab data-test="active-tab">Active</v-tab>
       <v-tab data-test="pending-approval-tab" v-show="canInvite()">
         <v-badge inline color="error"
