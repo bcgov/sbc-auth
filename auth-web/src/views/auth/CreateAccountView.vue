@@ -1,19 +1,17 @@
 <template>
   <v-container>
-    <div class="view-container">
-      <article>
-        <h1 class="mb-5">Create a New Account</h1>
-        <p class="intro-text">Tell us about this new account, and enter an account name.</p>
-        <v-card class="profile-card">
-          <v-container>
-            <v-card-title class="mb-3">Account Information</v-card-title>
-            <v-card-text>
-              <CreateAccountInfoForm />
-            </v-card-text>
-          </v-container>
-        </v-card>
-      </article>
+    <div class="view-header flex-column">
+      <h1 class="view-header__title mb-4">Create a New Account</h1>
+      <p>Tell us about this new account, and enter an account name.</p>
     </div>
+    <v-card class="profile-card">
+      <v-container>
+        <v-card-title class="mb-3">Account Information</v-card-title>
+        <v-card-text>
+          <CreateAccountInfoForm />
+        </v-card-text>
+      </v-container>
+    </v-card>
   </v-container>
 </template>
 
