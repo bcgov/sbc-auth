@@ -87,6 +87,7 @@ export default class TransactionsDataTable extends Vue {
   private transactionList: TransactionTableRow[] = [];
   private formatDate = CommonUtils.formatDisplayDate
   private readonly ITEMS_PER_PAGE = 10
+  private readonly PAGINATION_COUNTER_STEP = 4
 
   private readonly headerTranscations = [
     {
@@ -143,7 +144,7 @@ export default class TransactionsDataTable extends Vue {
   ]
 
   private get getPaginationOptions () {
-    let pagination = [...Array(4)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
+    let pagination = [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
     pagination[pagination.length - 1] = -1
     return pagination
   }

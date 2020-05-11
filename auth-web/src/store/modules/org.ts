@@ -443,8 +443,9 @@ export default class OrgModule extends VuexModule {
     return {}
   }
 
+  // This function will be used to format the transaction response to a required table display format
   @Action({ rawError: true })
-  public formatTransactionTableData (transactionList) {
+  private formatTransactionTableData (transactionList) {
     let transactionTableData = []
     transactionList.forEach(transaction => {
       let transactionNames = []

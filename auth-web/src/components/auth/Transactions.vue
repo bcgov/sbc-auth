@@ -14,32 +14,12 @@
 </template>
 
 <script lang="ts">
-import { ActiveUserRecord, Member, MembershipStatus, MembershipType, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
-import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import { Transaction, TransactionListResponse } from '@/models/transaction'
-import { mapActions, mapState } from 'vuex'
-import { Business } from '@/models/business'
-import ConfigHelper from '@/util/config-helper'
-import { Event } from '@/models/event'
-import { EventBus } from '@/event-bus'
-import { Invitation } from '@/models/Invitation'
-import ModalDialog from '@/components/auth/ModalDialog.vue'
-import OrgModule from '@/store/modules/org'
-import { SessionStorageKeys } from '@/util/constants'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import TransactionsDataTable from '@/components/auth/TransactionsDataTable.vue'
-import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
-    TransactionsDataTable,
-    ModalDialog
-  },
-  computed: {
-  },
-  methods: {
-    ...mapActions('org', [
-      'getTransactionList'
-    ])
+    TransactionsDataTable
   }
 })
 export default class Transactions extends Vue {
