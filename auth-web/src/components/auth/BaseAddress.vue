@@ -7,7 +7,7 @@
           <v-text-field
             filled
             req
-            label="STREET ADDRESS"
+            label="Street Address"
             :rules="rules.streetAddress"
             :disabled="disabled"
             v-model.trim="address.street"
@@ -22,7 +22,7 @@
           <v-text-field
             filled
             req
-            label="CITY"
+            label="City"
             :disabled="disabled"
             :rules="rules.city"
             v-model.trim="address.city"
@@ -35,7 +35,7 @@
           <v-text-field
             filled
             req
-            label="PROVINCE"
+            label="Province"
             :disabled="disabled"
             :rules="rules.province"
             v-model.trim="address.region"
@@ -48,7 +48,7 @@
           <v-text-field
             filled
             req
-            label="POSTAL CODE"
+            label="Postal Code"
             :disabled="disabled"
             :rules="rules.postalCode"
             v-model.trim="address.postalCode"
@@ -63,7 +63,7 @@
           <v-text-field
             filled
             req
-            label="COUNTRY"
+            label="Country"
             :disabled="disabled"
             :rules="rules.country"
             v-model.trim="address.country"
