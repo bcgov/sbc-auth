@@ -39,6 +39,8 @@
         </v-btn>
         <ConfirmCancelButton
           :disabled="saving"
+          :clear-current-org="!isAccountChange"
+          :target-route="cancelUrl"
           :showConfirmPopup="false"
         ></ConfirmCancelButton>
       </v-col>
@@ -97,6 +99,10 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private readonly orgNameRules = [v => !!v || 'An account name is required']
   private isFormValid (): boolean {
     return !!this.orgName
+  }
+
+  private get cancelUrl () {
+    return this.isAccountChange ? `/account/${this.currentOrganization.id}/settings/account-info` : Pages.HOME
   }
 
   private async mounted () {

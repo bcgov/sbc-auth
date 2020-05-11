@@ -46,10 +46,16 @@ export default class OrgModule extends VuexModule {
   tokenError = false
   createdUsers: BulkUsersSuccess[] = []
   failedUsers: BulkUsersFailed[] = []
+  accountTypeBeforeChange = '' // used for detecting the original type of the account which is getting down/up graded
 
   @Mutation
   public setCurrentOrgPaymentSettings (currentOrgPaymentSettings:PaymentSettings) {
     this.currentOrgPaymentSettings = currentOrgPaymentSettings
+  }
+
+  @Mutation
+  public setAccountTypeBeforeChange (accountTypeBeforeChange:string) {
+    this.accountTypeBeforeChange = accountTypeBeforeChange
   }
 
   @Mutation

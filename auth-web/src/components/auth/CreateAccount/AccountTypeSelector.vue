@@ -42,8 +42,8 @@
             <v-btn large block depressed color="primary" class="font-weight-bold"
               :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
               @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
-              <span v-if="originalAccountType == ACCOUNT_TYPE.BASIC">CURRENT ACCOUNT</span>
-              <span v-if="originalAccountType != ACCOUNT_TYPE.BASIC">{{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT'}}</span>
+              <span v-if="accountTypeBeforeChange == ACCOUNT_TYPE.BASIC">CURRENT ACCOUNT</span>
+              <span v-if="accountTypeBeforeChange != ACCOUNT_TYPE.BASIC">{{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT'}}</span>
             </v-btn>
           </div>
 
@@ -91,8 +91,8 @@
               <v-btn large block depressed color="primary" class="font-weight-bold"
                 :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
                 @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
-                <span v-if="originalAccountType == ACCOUNT_TYPE.PREMIUM">CURRENT ACCOUNT</span>
-                <span v-if="originalAccountType != ACCOUNT_TYPE.PREMIUM">{{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT'}}</span>
+                <span v-if="accountTypeBeforeChange == ACCOUNT_TYPE.PREMIUM">CURRENT ACCOUNT</span>
+                <span v-if="accountTypeBeforeChange != ACCOUNT_TYPE.PREMIUM">{{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT'}}</span>
               </v-btn>
             </div>
 
@@ -131,28 +131,33 @@ import Steppable from '@/components/auth/stepper/Steppable.vue'
     ConfirmCancelButton
   },
   computed: {
-    ...mapState('org', ['currentOrganization'])
+    ...mapState('org', ['currentOrganization', 'accountTypeBeforeChange'])
   },
   methods: {
-    ...mapMutations('org', ['setSelectedAccountType', 'setCurrentOrganization', 'resetCurrentOrganisation'])
+    ...mapMutations('org', ['setSelectedAccountType', 'setCurrentOrganization', 'resetCurrentOrganisation', 'setAccountTypeBeforeChange'])
   }
 })
 export default class AccountTypeSelector extends Mixins(Steppable) {
   private readonly ACCOUNT_TYPE = Account
   private selectedAccountType = ''
   private readonly setSelectedAccountType!: (selectedAccountType: Account) => void
+  private readonly setAccountTypeBeforeChange!: (accountTypeBeforeChange: string) => void
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly currentOrganization!: Organization
+  private readonly accountTypeBeforeChange!: string
   private readonly resetCurrentOrganisation!: () => void
-  private originalAccountType = '' // used for detecting the original type of the account which is getting down/up graded
   @Prop() isAccountChange: boolean
 
   private async mounted () {
     if (this.isAccountChange) {
-      this.originalAccountType = this.currentOrganization.orgType
+      // Account change needs all the org details as such..so do not clear any details...
+      // Account change doesnt create a new org
+      if (!this.accountTypeBeforeChange) { // do not reset the originalAccountType after first time..
+        this.setAccountTypeBeforeChange(this.currentOrganization.orgType)
+      }
       this.selectedAccountType = this.currentOrganization.orgType
     } else {
-      // first time to the page , start afresh
+      // first time to the page , start afresh..this is Create New account flow
       if (!this.currentOrganization) {
         this.setCurrentOrganization({ name: '' })
       } else {
@@ -176,7 +181,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 
   private get canContinue () {
     if (this.isAccountChange) {
-      return this.originalAccountType !== this.selectedAccountType
+      return this.accountTypeBeforeChange !== this.selectedAccountType
     } else {
       return this.selectedAccountType
     }
