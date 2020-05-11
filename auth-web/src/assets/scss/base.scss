@@ -119,7 +119,12 @@ legend {
 // Form Buttons
 .form__btns {
   .v-btn {
+    min-width: 7rem !important;
     font-weight: 700;
+
+    &.default {
+      font-weight: 400;
+    }
   }
 }
 

@@ -15,7 +15,7 @@
           Log in with BC Services Card
         </template>
       </sbc-header>
-       <v-snackbar bottom multi-line style="margin-bottom: 2rem;" v-model="showNotification" :timeout="toastTimeout">
+       <v-snackbar bottom multi-line class="reg-snackbar" v-model="showNotification" :timeout="toastTimeout">
         <span v-html="notificationText"></span>
         <v-btn dark icon color="default" @click="showNotification = false">
           <v-icon>mdi-close</v-icon>
@@ -232,4 +232,9 @@ export default class App extends Mixins(NextPageMixin) {
     flex: 1 1 auto;
     position: relative;
   }
+
+  .reg-snackbar {
+    margin-bottom: 1rem;
+  }
+
 </style>

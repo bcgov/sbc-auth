@@ -17,10 +17,17 @@
         hint="Example: Your Business Name"
       />
     </fieldset>
+
+    <v-divider class="my-10"></v-divider>
+
     <v-row>
-      <v-col cols="12" class="step-btns mt-8 pb-0 d-inline-flex">
-        <v-btn large color="default" @click="goBack">
-          <v-icon left class="mr-2">mdi-arrow-left</v-icon>
+      <v-col cols="12" class="form__btns py-0 d-inline-flex">
+        <v-btn
+          large
+          depressed
+          color="default"
+          @click="goBack">
+          <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
           <span>Back</span>
         </v-btn>
         <v-spacer></v-spacer>

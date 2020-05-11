@@ -103,7 +103,7 @@
     <v-row>
       <v-col
         cols="12"
-        class="step-btns mt-8 pb-0 text-right"
+        class="form__btns mt-6 pb-0 text-right"
       >
         <v-btn large color="primary" class="mr-3" @click="goNext" :disabled='!canContinue'>
           <span>Next</span>

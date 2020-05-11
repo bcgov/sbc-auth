@@ -1,6 +1,7 @@
 <template>
   <v-btn
     large
+    depressed
     color="default"
     data-test="confirm-cancel-button"
     :disabled="disabled"

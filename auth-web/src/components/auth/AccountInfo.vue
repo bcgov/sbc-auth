@@ -11,9 +11,9 @@
         <li class="nv-list-item mb-10">
           <div class="name" id="accountType">Account Type</div>
           <div class="value" aria-labelledby="accountType">
-            <div class="value__title font-weight-bold">{{ isPremiumAccount ? 'Premium' : 'Basic' }}</div>
+            <div class="value__title">{{ isPremiumAccount ? 'Premium' : 'Basic' }}</div>
             <div>
-              <router-link :to="editAccountUrl">Change Account</router-link>
+              <router-link :to="editAccountUrl">Change account type</router-link>
             </div>
           </div>
         </li>
@@ -35,6 +35,8 @@
         </li>
       </ul>
 
+      <v-divider class="mb-10"></v-divider>
+
       <fieldset v-if="!isPremiumAccount">
         <legend class="mb-4">Account Details</legend>
         <v-text-field
@@ -50,15 +52,18 @@
         >
         </v-text-field>
       </fieldset>
-        <BaseAddress
-                :inputAddress="currentOrgAddress"
-                @key-down="keyDown()"
-                @address-update="updateAddress"
-                v-if="isPremiumAccount && currentOrgAddress"
-                :disabled="!canChangeAddress()"
-                :key="addressKey"
-        >
-        </BaseAddress>
+      <BaseAddress
+              :inputAddress="currentOrgAddress"
+              @key-down="keyDown()"
+              @address-update="updateAddress"
+              v-if="isPremiumAccount && currentOrgAddress"
+              :disabled="!canChangeAddress()"
+              :key="addressKey"
+      >
+      </BaseAddress>
+
+      <v-divider class="mt-3 mb-10"></v-divider>
+
       <div class="form__btns">
         <v-btn
           large
@@ -76,6 +81,7 @@
         </v-btn>
         <v-btn
           large
+          depressed
           class="ml-2"
           color="default"
           @click="resetForm"

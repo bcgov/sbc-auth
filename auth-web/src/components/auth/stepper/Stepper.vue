@@ -215,9 +215,14 @@ export default class Stepper extends Vue {
   }
 
   ::v-deep {
-    .step-btns .v-btn {
-      min-width: 7rem !important;
-      font-weight: 700;
+    .step-btns {
+      .v-btn {
+        min-width: 7rem !important;
+
+        &.primary {
+          font-weight: 700;
+        }
+      }
     }
   }
 </style>

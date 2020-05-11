@@ -19,11 +19,11 @@
               <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
             <div>
-              <h1>Edit Profile</h1>
-              <p class="mb-0">Edit your profile contact information</p>
+              <h1 class="view-header__title">Edit Profile</h1>
+              <p class="mt-3 mb-0">Edit your profile contact information</p>
             </div>
           </div>
-          <v-card class="profile-card">
+          <v-card flat class="profile-card">
             <v-container>
               <v-card-text>
                 <UserProfileForm v-bind:token="token"> </UserProfileForm>

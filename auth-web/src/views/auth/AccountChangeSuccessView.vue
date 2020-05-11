@@ -7,11 +7,7 @@
         <p class="mb-9">{{$t('bcscAccountChangeSuccessSubtext')}}</p>
         <div>
           <v-btn large color="primary" @click="goTo('home')">
-            <strong>BC Registries Home</strong>
-          </v-btn>
-          <strong class="mx-3">or</strong>
-          <v-btn large color="primary" @click="goTo('team-members')">
-            <strong>Add Team Members</strong>
+            <strong>View Account</strong>
           </v-btn>
         </div>
       </v-col>
