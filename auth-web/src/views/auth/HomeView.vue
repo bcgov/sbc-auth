@@ -16,30 +16,47 @@
 
       <header class="hero-banner">
         <v-container>
-          <h1>Welcome to Cooperatives Online<sup>Beta</sup></h1>
-          <p>File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
+          <h1>Start A Business And <br> Keep Records Up To Date<sup>Beta</sup></h1>
+          <p>The Business Registry manages the creation (incorporation and registration) and listing of businesses
+            and organizations in British Columbia.</p>
 
           <div class="hero-banner__cta-btns">
+            <v-btn large color="#003366" class="cta-btn mb-6 white--text"
+              href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
+              Request a Name
+            </v-btn>
+
             <!-- Authenticated -->
             <div v-if="userProfile">
+              <v-btn large color="#003366" class="cta-btn white--text"
+                @click="goToManageBusinesses()">
+                Incorporate a Named Company
+              </v-btn>
+              <v-btn large color="#003366" class="cta-btn mb-6 white--text"
+                @click="goToManageBusinesses()">
+                Incorporate a Numbered Company
+              </v-btn>
               <v-btn large color="#fcba19" class="cta-btn"
                 @click="goToManageBusinesses()">
-                Manage Businesses
+                Manage an Existing Business
               </v-btn>
-              <v-btn large outlined color="#ffffff"
-                class="cta-btn"
-                v-if="!isDirSearchUser"
+              <v-btn large v-if="!isDirSearchUser" color="#fcba19" class="cta-btn"
                 @click="createAccount()">
                 Create a new BC Registries Account
               </v-btn>
             </div>
 
             <!-- Non-authenticated -->
-            <v-btn large color="#fcba19" class="cta-btn"
-              v-if="!userProfile"
-              @click="accountDialog = true">
-              Create a BC Registries Account
-            </v-btn>
+            <div v-else>
+              <v-btn large color="#fcba19" class="cta-btn"
+                @click="login()">
+                Log in to my account
+              </v-btn>
+              <v-btn large color="#003366" class="cta-btn white--text"
+                @click="accountDialog = true">
+                Create an account
+              </v-btn>
+            </div>
           </div>
 
           <v-dialog v-model="accountDialog" max-width="640">
@@ -318,8 +335,8 @@ export default class HomeView extends Vue {
 
   // Hero Banner
   .hero-banner {
-    color: #ffffff;
-    background-color: $BCgovBlue5;
+    color: $gray9;
+    background-color: #ffffff;
 
     h1 {
       margin-bottom: 1.5rem;
@@ -351,9 +368,14 @@ export default class HomeView extends Vue {
     }
   }
 
-  .hero-banner__cta-btns {
-    .cta-btn + .cta-btn {
-      margin-left: 0.5rem;
+  .hero-banner__cta-btns, .hero-banner__cta-btns > div {
+    display: flex;
+    max-width: 300px;
+    flex-wrap: wrap;
+
+    .cta-btn {
+      flex: 0 0 100%;
+      margin: .5rem 0;
     }
   }
 
