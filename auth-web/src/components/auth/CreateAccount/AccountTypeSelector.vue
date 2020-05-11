@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p class="mb-7">There is no cost to create a BC Registries account. You only pay for the services and products you purchase.</p>
+    <p class="mb-7">There is no cost to create a BC Registries account. You only pay for the services and products you purchase.-</p>
     <v-row>
       <v-col
         class="d-flex align-stretch"
@@ -15,18 +15,38 @@
           @click="selectAccountType(ACCOUNT_TYPE.BASIC)"
         >
           <div class="account-type">
-            <div class="account-type__name mb-2">
+            <div class="account-type__name mt-n1 mb-2">
               Basic
             </div>
             <div class="account-type__title mb-8">
               I make 10 transactions per month or less
             </div>
-            <ul class="account-type__details">
-              <li class="mb-5">For users who file on behalf of their own businesses or conduct a limited number of searches</li>
-              <li class="mb-5">Credit card payment only</li>
+            <ul class="account-type__details ml-1">
+              <li class="mb-4">For users who file on behalf of their own businesses or conduct a limited number of searches</li>
+              <li class="mb-4">Credit card payment only</li>
               <li>Up to 10 purchases per month</li>
             </ul>
           </div>
+
+          <!-- State Button (Create Account) -->
+          <div class="mt-9" v-if="!isAccountChange">
+            <v-btn large block depressed color="primary" class="font-weight-bold"
+              :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
+              @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
+              {{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT'}}
+            </v-btn>
+          </div>
+
+          <!-- State Button (Change Account) -->
+          <div class="mt-9" v-if="isAccountChange">
+            <v-btn large block depressed color="primary" class="font-weight-bold"
+              :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
+              @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
+              <span v-if="accountTypeBeforeChange == ACCOUNT_TYPE.BASIC">CURRENT ACCOUNT</span>
+              <span v-if="accountTypeBeforeChange != ACCOUNT_TYPE.BASIC">{{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT'}}</span>
+            </v-btn>
+          </div>
+
         </v-card>
       </v-col>
       <v-col
@@ -42,24 +62,40 @@
           @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)"
         >
           <div class="account-type">
-            <div class="account-type__name mb-2">PREMIUM</div>
+            <div class="account-type__name mt-n1 mb-2">PREMIUM</div>
             <div class="account-type__title mb-8">I make more than 10 transactions per month</div>
-            <ul class="account-type__details mb-8">
-              <li class="mb-5">For firms and companies who search frequently or file for a large number of businesses</li>
-              <li class="mb-5">Uses your BC Online account to pay for products & services</li>
-              <li>Unlimited purchases</li>
+            <ul class="account-type__details ml-1 mb-6">
+              <li class="mb-4">For firms and companies who search frequently or file for a large number of businesses</li>
+              <li class="mb-4">Uses your BC Online account to pay for products and services</li>
+              <li class="mb-4">Unlimited transactions</li>
+              <li>Requires an existing BC Online account and Prime Contact credentials to complete.</li>
             </ul>
-            <div class="mb-5">
-              <strong>
-                Please Note: To create a Premium account, you require an existing BC Online account. You must be the Prime Contact to complete this process.
-              </strong>
-            </div>
             <div>
               <v-btn text color="primary" class="bcol-link px-2" href="https://www.bconline.gov.bc.ca/" target="_blank" rel="noopener noreferrer">
                 <v-icon>mdi-help-circle-outline</v-icon>
                 <span>How do I get a BC Online Account?</span>
               </v-btn>
             </div>
+
+            <!-- State Button (Create Account) -->
+            <div class="mt-9" v-if="!isAccountChange">
+              <v-btn large block depressed color="primary" class="font-weight-bold"
+                :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
+                @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
+                {{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT' }}
+              </v-btn>
+            </div>
+
+            <!-- State Button (Change Account) -->
+            <div class="mt-9" v-if="isAccountChange">
+              <v-btn large block depressed color="primary" class="font-weight-bold"
+                :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
+                @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
+                <span v-if="accountTypeBeforeChange == ACCOUNT_TYPE.PREMIUM">CURRENT ACCOUNT</span>
+                <span v-if="accountTypeBeforeChange != ACCOUNT_TYPE.PREMIUM">{{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT'}}</span>
+              </v-btn>
+            </div>
+
           </div>
         </v-card>
       </v-col>
@@ -67,14 +103,16 @@
     <v-row>
       <v-col
         cols="12"
-        class="step-btns mt-8 pb-0 text-right"
+        class="form__btns mt-6 pb-0 text-right"
       >
-        <v-btn large color="primary" class="mr-3" @click="goNext" :disabled='!selectedAccountType'>
+        <v-btn large color="primary" class="mr-3" @click="goNext" :disabled='!canContinue'>
           <span>Next</span>
           <v-icon class="ml-2">mdi-arrow-right</v-icon>
         </v-btn>
         <ConfirmCancelButton
           :showConfirmPopup="false"
+          :clear-current-org="!isAccountChange"
+          :target-route="cancelUrl"
         ></ConfirmCancelButton>
       </v-col>
     </v-row>
@@ -95,38 +133,61 @@ import Steppable from '@/components/auth/stepper/Steppable.vue'
     ConfirmCancelButton
   },
   computed: {
-    ...mapState('org', ['currentOrganization'])
+    ...mapState('org', ['currentOrganization', 'accountTypeBeforeChange'])
   },
   methods: {
-    ...mapMutations('org', ['setSelectedAccountType', 'setCurrentOrganization', 'resetCurrentOrganisation'])
+    ...mapMutations('org', ['setSelectedAccountType', 'setCurrentOrganization', 'resetCurrentOrganisation', 'setAccountTypeBeforeChange'])
   }
 })
 export default class AccountTypeSelector extends Mixins(Steppable) {
   private readonly ACCOUNT_TYPE = Account
-  private selectedAccountType: string = ''
+  private selectedAccountType = ''
   private readonly setSelectedAccountType!: (selectedAccountType: Account) => void
+  private readonly setAccountTypeBeforeChange!: (accountTypeBeforeChange: string) => void
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly currentOrganization!: Organization
+  private readonly accountTypeBeforeChange!: string
   private readonly resetCurrentOrganisation!: () => void
+  @Prop() isAccountChange: boolean
+  @Prop() cancelUrl: string
 
   private async mounted () {
-    // first time to the page , start afresh
-    if (!this.currentOrganization) {
-      this.setCurrentOrganization({ name: '' }) // TODO find a better logic to reset ;may be in cancel button
-    } else {
+    if (this.isAccountChange) {
+      // Account change needs all the org details as such..so do not clear any details...
+      // Account change doesnt create a new org
+      if (!this.accountTypeBeforeChange) { // do not reset the originalAccountType after first time..
+        this.setAccountTypeBeforeChange(this.currentOrganization.orgType)
+      }
       this.selectedAccountType = this.currentOrganization.orgType
+    } else {
+      // first time to the page , start afresh..this is Create New account flow
+      if (!this.currentOrganization) {
+        this.setCurrentOrganization({ name: '' })
+      } else {
+        this.selectedAccountType = this.currentOrganization.orgType
+      }
     }
   }
 
   private selectAccountType (accountType) {
     // to reset any existing details ;user might have went to user profile ;came back and selects another type scenarios
-    this.resetCurrentOrganisation()
+    if (!this.isAccountChange) {
+      this.resetCurrentOrganisation()
+    }
     this.setSelectedAccountType(accountType)
     this.selectedAccountType = accountType
   }
 
   private goNext () {
     this.stepForward(this.selectedAccountType === this.ACCOUNT_TYPE.PREMIUM)
+  }
+
+  private get canContinue () {
+    if (this.isAccountChange) {
+      return this.accountTypeBeforeChange !== this.selectedAccountType
+    } else {
+      return this.selectedAccountType
+    }
   }
 
   private cancel () {
@@ -143,9 +204,10 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 }
 
 .account-card {
+  display: flex;
+  flex-direction: column;
   position: relative;
   background-color: var(--v-grey-lighten4) !important;
-  flex-direction: column;
 
   &:hover {
     border-color: var(--v-primary-base) !important;
@@ -158,6 +220,10 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 
 .theme--light.v-card.v-card--outlined.active {
   border-color: var(--v-primary-base);
+}
+
+.account-type {
+  flex: 1 1 auto;
 }
 
 .account-type__title {
@@ -188,6 +254,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 
 ul {
   list-style: none; /* Remove default bullets */
+  font-size: 0.875rem;
 }
 
 ul li::before {

@@ -1,4 +1,4 @@
-import { Account, SessionStorageKeys } from '@/util/constants'
+import { Account, Actions, SessionStorageKeys } from '@/util/constants'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import {
   AddUsersToOrgBody,
@@ -48,11 +48,17 @@ export default class OrgModule extends VuexModule {
   tokenError = false
   createdUsers: BulkUsersSuccess[] = []
   failedUsers: BulkUsersFailed[] = []
+  accountTypeBeforeChange = '' // used for detecting the original type of the account which is getting down/up graded
 
   currentOrgTransactionList: TransactionTableRow[] = []
   @Mutation
   public setCurrentOrgPaymentSettings (currentOrgPaymentSettings:PaymentSettings) {
     this.currentOrgPaymentSettings = currentOrgPaymentSettings
+  }
+
+  @Mutation
+  public setAccountTypeBeforeChange (accountTypeBeforeChange:string) {
+    this.accountTypeBeforeChange = accountTypeBeforeChange
   }
 
   @Mutation
@@ -171,6 +177,24 @@ export default class OrgModule extends VuexModule {
   public async createOrgByStaff (createRequestBody: CreateOrgRequestBody): Promise<Organization> {
     const response = await OrgService.createOrg(createRequestBody)
     this.context.commit('setCurrentOrganization', response?.data)
+    return response?.data
+  }
+
+  @Action({ rawError: true })
+  public async changeOrgType (action:Actions): Promise<Organization> {
+    const org:Organization = this.context.state['currentOrganization']
+    let createRequestBody: CreateRequestBody = {
+      name: org.name,
+      typeCode: org.orgType
+    }
+    if (org.orgType === Account.PREMIUM) {
+      createRequestBody.bcOnlineCredential = org.bcolProfile
+      createRequestBody.mailingAddress = this.context.state['currentOrgAddress']
+    }
+    const response = await OrgService.upgradeOrDowngradeOrg(createRequestBody, org.id, action)
+    const organization = response?.data
+    this.context.commit('setCurrentOrganization', organization)
+    this.context.commit('setAccountTypeBeforeChange', organization.orgType)
     return response?.data
   }
 

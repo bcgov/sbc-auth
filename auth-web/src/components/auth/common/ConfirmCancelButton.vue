@@ -1,6 +1,7 @@
 <template>
   <v-btn
     large
+    depressed
     color="default"
     data-test="confirm-cancel-button"
     :disabled="disabled"
@@ -56,6 +57,10 @@ export default class ConfirmCancelButton extends Vue {
   @Prop({ default: 'Are you sure you want to cancel your account creation set-up?' }) subText: string
   @Prop({ default: 'Yes' }) confirmBtnText: string
   @Prop({ default: 'No' }) rejectBtnText: string
+  // targetRoute can be passed in when different page has to be shown after cancelling
+  @Prop({ default: '/' }) targetRoute: string
+  // for not to clear current org values [for account change , while clicking on cancel , current org has to stay]
+  @Prop({ default: true }) clearCurrentOrg: boolean
 
   private readonly resetAccountSetupProgress!: () => Promise<void>
 
@@ -71,11 +76,13 @@ export default class ConfirmCancelButton extends Vue {
   }
 
   private async clickConfirm () {
-    await this.resetAccountSetupProgress()
+    if (this.clearCurrentOrg) {
+      await this.resetAccountSetupProgress()
+    }
     if (this.isEmit) {
       this.emitClickConfirm()
     } else {
-      this.$router.push('/')
+      this.$router.push(this.targetRoute)
     }
   }
 

@@ -77,8 +77,10 @@
       </v-col>
     </v-row>
 
+    <v-divider class="mt-7 mb-10"></v-divider>
+
     <v-row>
-      <v-col cols="12" class="step-btns mt-8 pb-0 d-inline-flex">
+      <v-col cols="12" class="form__btns py-0 d-inline-flex">
         <!-- The deactivate profile button should be hidden for account stepper view -->
         <v-btn
           large
@@ -88,6 +90,7 @@
           v-show="editing && !isStepperView"
           @click="$refs.deactivateUserConfirmationDialog.open()"
         >Deactivate my profile</v-btn>
+        <!--
         <v-btn
           large
           depressed
@@ -96,8 +99,10 @@
           v-show="editing && !isStepperView && isTester"
           @click="$refs.resetDialog.open()"
         >Reset</v-btn>
+        -->
         <v-btn
           large
+          depressed
           v-if="isStepperView"
           color="default"
           @click="goBack"
@@ -106,7 +111,12 @@
           <span>Back</span>
         </v-btn>
         <v-spacer></v-spacer>
-        <v-btn large color="primary" class="save-continue-button mr-3" :disabled='!isFormValid()' @click="save" data-test="save-button">
+        <v-btn
+          large
+          color="primary"
+          class="save-continue-button mr-2"
+          :disabled='!isFormValid()'
+          @click="save" data-test="save-button">
           {{(isStepperView) ? 'Create Account' : 'Save'}}
         </v-btn>
         <ConfirmCancelButton

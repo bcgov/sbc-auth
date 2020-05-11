@@ -29,7 +29,7 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import OrgSchema
-from auth_api.utils.enums import PaymentType, OrgType
+from auth_api.utils.enums import PaymentType, OrgType, ChangeType
 from auth_api.utils.roles import OWNER, VALID_STATUSES, Status, AccessType
 from auth_api.utils.util import camelback2snake
 from .authorization import check_auth
@@ -101,13 +101,7 @@ class Org:
 
         # If mailing address is provided, save it
         if mailing_address:
-            contact = ContactModel(**camelback2snake(mailing_address))
-            contact = contact.add_to_session()
-
-            contact_link = ContactLinkModel()
-            contact_link.contact = contact
-            contact_link.org = org
-            contact_link.add_to_session()
+            Org.add_contact_to_org(mailing_address, org)
 
         # create the membership record for this user if its not created by staff and access_type is anonymous
         if not is_staff_admin and org_info.get('access_type') != AccessType.ANONYMOUS:
@@ -144,19 +138,70 @@ class Org:
             bcol_response = RestService.post(endpoint=current_app.config.get('BCOL_API_URL') + '/profiles',
                                              data=bcol_credential, token=bearer_token, raise_for_status=False)
 
-            # todo not at all ideal..find out what all bcol error messages possible
             if bcol_response.status_code != http_status.HTTP_200_OK:
                 error = json.loads(bcol_response.text)
                 raise BusinessException(CustomException(error['detail'], bcol_response.status_code), None)
 
             bcol_account_number = bcol_response.json().get('accountNumber')
-
             if org_info:
                 if bcol_response.json().get('orgName') != org_info.get('name'):
                     raise BusinessException(Error.INVALID_INPUT, None)
             if Org.bcol_account_link_check(bcol_account_number, org_id):
                 raise BusinessException(Error.BCOL_ACCOUNT_ALREADY_LINKED, None)
         return bcol_response
+
+    def change_org_ype(self, org_info, action=None, bearer_token: str = None):
+        """Update the passed organization with the new info.
+
+        if Upgrade:
+            //TODO .Missing RULES
+            1.do bcol verification
+            2.attach mailing
+            3.change the org with bcol org name
+        If downgrade:
+            //TODO .Missing RULES
+            1.remove contact
+            2.deactivate payment settings
+            3.add new payment settings for cc
+            4.change the org with user passed org name
+
+        """
+        if self._model.access_type == AccessType.ANONYMOUS.value:
+            raise BusinessException(Error.INVALID_INPUT, None)
+        bcol_credential = org_info.pop('bcOnlineCredential', None)
+        mailing_address = org_info.pop('mailingAddress', None)
+        current_app.logger.debug('<update_org ', action)
+        if action == ChangeType.DOWNGRADE.value:
+            if org_info.get('typeCode') != OrgType.BASIC.value:
+                raise BusinessException(Error.INVALID_INPUT, None)
+            payment_settings: AccountPaymentModel = AccountPaymentModel.find_active_by_org_id(account_id=self._model.id)
+            payment_settings.is_active = False
+            payment_settings.add_to_session()
+            Org.add_payment_settings(self._model.id, None, None)
+            Org.__delete_contact(self._model)
+
+        if action == ChangeType.UPGRADE.value:
+            if org_info.get('typeCode') != OrgType.PREMIUM.value or bcol_credential is None:
+                raise BusinessException(Error.INVALID_INPUT, None)
+            bcol_org_name = self.add_bcol_to_account(bcol_credential, bearer_token, org_info)
+            org_info['name'] = bcol_org_name
+
+            # If mailing address is provided, save it
+            if mailing_address:
+                self.add_contact_to_org(mailing_address, self._model)
+
+        self._model.update_org_from_dict(camelback2snake(org_info), exclude=('status_code'))
+        return self
+
+    @staticmethod
+    def add_contact_to_org(mailing_address, org):
+        """Update the passed organization with the mailing address."""
+        contact = ContactModel(**camelback2snake(mailing_address))
+        contact = contact.add_to_session()
+        contact_link = ContactLinkModel()
+        contact_link.contact = contact
+        contact_link.org = org
+        contact_link.add_to_session()
 
     def update_org(self, org_info, bearer_token: str = None):
         """Update the passed organization with the new info."""
@@ -172,11 +217,7 @@ class Org:
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
         if bcol_credential:
-            bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token, self._model.id).json()
-            payment_settings: AccountPaymentModel = AccountPaymentModel.find_active_by_org_id(account_id=self._model.id)
-            payment_settings.is_active = False
-            payment_settings.add_to_session()
-            Org.add_payment_settings(self._model.id, bcol_response.get('accountNumber'), bcol_response.get('userId'))
+            self.add_bcol_to_account(bcol_credential, bearer_token, org_info)
         # Update mailing address
         if mailing_address:
             contact = self._model.contacts[0].contact
@@ -186,6 +227,15 @@ class Org:
             self._model.update_org_from_dict(camelback2snake(org_info))
         current_app.logger.debug('>update_org ')
         return self
+
+    def add_bcol_to_account(self, bcol_credential, bearer_token, org_info):
+        """Add the passed organization with the bcol account details."""
+        bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token, self._model.id).json()
+        payment_settings: AccountPaymentModel = AccountPaymentModel.find_active_by_org_id(account_id=self._model.id)
+        payment_settings.is_active = False
+        payment_settings.add_to_session()
+        Org.add_payment_settings(self._model.id, bcol_response.get('accountNumber'), bcol_response.get('userId'))
+        return bcol_response.get('orgName')
 
     @staticmethod
     def delete_org(org_id, token_info: Dict = None, ):

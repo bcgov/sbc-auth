@@ -56,8 +56,10 @@
         </v-row>
       </fieldset>
 
+      <v-divider class="mt-6 mb-9"></v-divider>
+
       <!-- Folio / Reference Number Fields -->
-      <fieldset class="mt-9">
+      <fieldset>
         <legend class="mb-4">Folio / Reference Number (optional)</legend>
         <p class="mb-8">If you file forms for a number of companies, you may want to enter a folio or reference number to help you keep track of your transactions.</p>
         <v-text-field
@@ -69,7 +71,10 @@
         >
         </v-text-field>
       </fieldset>
-      <div class="form__btns mt-6">
+
+      <v-divider class="my-2 mb-10"></v-divider>
+
+      <div class="form__btns">
         <v-btn large color="primary" @click="save" :disabled='!isFormValid()'>
           Update
         </v-btn>
