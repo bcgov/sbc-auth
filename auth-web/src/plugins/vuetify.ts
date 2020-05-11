@@ -27,8 +27,24 @@ export default new Vuetify({
           darken3: '#343a40',
           darken4: '#212529'
         },
-        navBg: '#003366',
-        navMenuBg: '#26527d'
+        bcgovblue: {
+          base: '#003366',
+          lighten5: '#e0e7ed',
+          lighten4: '#b3c2d1',
+          lighten3: '#8099b3',
+          lighten2: '#4d7094',
+          lighten1: '#26527d',
+          darken1: '#1e1e1f',
+          darken2: '#002753',
+          darken3: '#002049',
+          darken4: '#001438'
+        },
+        navBg: {
+          base: '#001438'
+        },
+        navMenuBg: {
+          base: '#26527d'
+        }
       }
     }
   }

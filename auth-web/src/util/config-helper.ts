@@ -82,4 +82,8 @@ export default class ConfigHelper {
   static clearSession () {
     sessionStorage.clear()
   }
+
+  static accountSettingsRoute () {
+    return `/account/${JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}').id || 0}/settings`
+  }
 }

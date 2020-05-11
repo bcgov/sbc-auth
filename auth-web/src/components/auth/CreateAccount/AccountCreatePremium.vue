@@ -2,7 +2,7 @@
   <v-container>
     <v-form ref="createAccountInfoForm" lazy-validation>
       <p class="mb-10">
-        You must be the Prime Contact to link this account with your existing BC Online account.
+        You must be the Prime Contact to link this account with your existing BC Online account.{{isAccountChange}}
       </p>
       <BcolLogin @account-link-successful="onLink" v-show="!linked"></BcolLogin>
       <template v-if="linked">
@@ -18,7 +18,7 @@
                   Account No: {{ currentOrganization.bcolAccountDetails.accountNumber }}
                 </li>
                 <li>
-                  Authorizing User ID: {{ currentOrganization.bcolAccountDetails.userId }}
+                  Prime Contact ID: {{ currentOrganization.bcolAccountDetails.userId }}
                 </li>
               </ul>
             </div>
@@ -71,19 +71,31 @@
           {{ errorMessage }}
         </v-alert>
       </template>
+
+      <v-divider class="my-10"></v-divider>
+
       <v-row>
-        <v-col cols="12" class="step-btns mt-8 pb-0 d-inline-flex">
-          <v-btn large color="default" @click="goBack">
-            <v-icon left class="mr-1">mdi-arrow-left</v-icon>
+        <v-col cols="12" class="form__btns py-0 d-inline-flex">
+          <v-btn
+            large
+            depressed
+            color="default"
+            @click="goBack">
+            <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
             Back
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn class="mr-3" large depressed color="primary" :disabled="!grantAccess" @click="save">
-            Next
-            <v-icon right class="ml-1">mdi-arrow-right</v-icon>
+          <v-btn class="mr-3" large depressed color="primary" :disabled="!grantAccess || saving" @click="save">
+            <span v-if="!isAccountChange">Next
+             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
+            </span>
+            <span v-if="isAccountChange">Change Account</span>
+
           </v-btn>
           <ConfirmCancelButton
             :showConfirmPopup="linked"
+            :clear-current-org="!isAccountChange"
+            :target-route="cancelUrl"
           ></ConfirmCancelButton>
         </v-col>
       </v-row>
@@ -92,11 +104,11 @@
 </template>
 
 <script lang="ts">
+import { Account, Actions, Pages } from '@/util/constants'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
-import { Account } from '@/util/constants'
 import { Address } from '@/models/address'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
@@ -127,7 +139,7 @@ import { getModule } from 'vuex-module-decorators'
       'createOrg',
       'syncMembership',
       'syncOrganization',
-      ''
+      'changeOrgType'
     ])
   }
 })
@@ -146,6 +158,9 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private readonly setGrantAccess!: (grantAccess: boolean) => void
+  private readonly changeOrgType!: (action:Actions) => Promise<Organization>
+  @Prop() cancelUrl: string
+  @Prop() isAccountChange: boolean
 
   private async mounted () {
   }
@@ -175,7 +190,9 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   }
 
   private unlinkAccounts () {
-    this.setCurrentOrganization(undefined)
+    if (!this.changeOrgType) {
+      this.setCurrentOrganization(undefined)
+    }
   }
   private get linked () {
     return !!this.currentOrganization?.bcolAccountDetails
@@ -193,6 +210,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     bcolAccountDetails: BcolAccountDetails
   }) {
     var org: Organization = {
+      id: this.currentOrganization.id,
       name: details.bcolAccountDetails.orgName,
       accessType: Account.PREMIUM,
       bcolProfile: details.bcolProfile,
@@ -215,8 +233,23 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     this.stepBack()
   }
 
-  private goNext () {
-    this.stepForward()
+  private async goNext () {
+    if (this.isAccountChange) {
+      try {
+        this.saving = true
+        const organization = await this.changeOrgType('upgrade')
+        await this.syncOrganization(organization.id)
+        // await this.syncMembership(organization.id)
+        this.$router.push('/setup-account-success')
+        return
+      } catch (err) {
+        this.saving = false
+        this.errorMessage =
+                    'An error occurred while attempting to create your account.'
+      }
+    } else {
+      this.stepForward()
+    }
   }
 
   private redirectToNext (organization?: Organization) {

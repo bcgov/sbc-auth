@@ -29,21 +29,21 @@
         </v-btn>
         <div>
           <h1 class="view-header__title" data-test="account-settings-title">Account Settings</h1>
-          <p class="mb-0">Manage account information and users of this account</p>
+          <p class="mt-3 mb-0">Manage account information and users of this account</p>
         </div>
       </div>
       <v-card flat class="account-settings-card" data-test="account-settings-card">
-        <v-container class="nav-container py-8 px-8">
+        <v-container class="nav-container py-8 px-6">
           <v-navigation-drawer floating permanent width="auto" data-test="account-nav-drawer">
             <v-list class="py-0">
               <v-list-item-group color="primary">
-                <v-list-item dense class="py-1 px-5" :to="accountInfoUrl" data-test="account-info-nav-item">
+                <v-list-item dense class="py-1 px-4" :to="accountInfoUrl" data-test="account-info-nav-item">
                   <v-list-item-icon>
                     <v-icon color="link" left>mdi-information-outline</v-icon>
                   </v-list-item-icon>
                   <v-list-item-title>Account Info</v-list-item-title>
                 </v-list-item>
-                <v-list-item dense class="py-1 px-5" :to="teamMembersUrl" data-test="team-members-nav-item">
+                <v-list-item dense class="py-1 px-4" :to="teamMembersUrl" data-test="team-members-nav-item">
                   <v-list-item-icon>
                     <v-icon color="link" left>mdi-account-group-outline</v-icon>
                   </v-list-item-icon>
@@ -54,7 +54,7 @@
           </v-navigation-drawer>
         </v-container>
         <transition name="fade" mode="out-in">
-          <router-view class="account-settings__content py-9 px-8"></router-view>
+          <router-view class="account-settings__content px-10 py-9"></router-view>
         </transition>
       </v-card>
     </v-container>
@@ -110,7 +110,7 @@ export default class AccountSettings extends Vue {
 
   .nav-container {
     flex: 0 0 auto;
-    width: 18rem;
+    width: 17rem;
     border-radius: 0 !important;
     border-right: 1px solid var(--v-grey-lighten2);
   }
@@ -118,14 +118,6 @@ export default class AccountSettings extends Vue {
   .v-list-item .v-list-item__title {
     font-size: 0.875rem !important;
     font-weight: 700;
-  }
-
-  .account-settings__content {
-    ::v-deep {
-      h2 {
-        font-size: 1.65rem;
-      }
-    }
   }
 
   .fade-enter-active,
