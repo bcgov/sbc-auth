@@ -121,7 +121,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     if (this.isFormValid()) {
       // if its not account change , do check for duplicate
       // if its account change , check if user changed the already existing name
-      const checkNameAVailability = !this.isAccountChange || (this.orgName !== this.currentOrganization.name)
+      const checkNameAVailability = !this.isAccountChange || (this.orgName !== this.currentOrganization?.name)
       if (checkNameAVailability) {
         const available = await this.isOrgNameAvailable(this.orgName)
         if (!available) {
