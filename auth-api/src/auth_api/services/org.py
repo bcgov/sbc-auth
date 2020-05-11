@@ -119,6 +119,7 @@ class Org:
 
     @staticmethod
     def raise_error_if_duplicate_name(name):
+        """Raise error if there is duplicate org name already."""
         existing_similar__org = OrgModel.find_similar_org_by_name(name)
         if existing_similar__org is not None:
             raise BusinessException(Error.DATA_CONFLICT, None)
