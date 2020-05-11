@@ -240,7 +240,8 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
         const organization = await this.changeOrgType('upgrade')
         await this.syncOrganization(organization.id)
         // await this.syncMembership(organization.id)
-        this.$router.push('/setup-account-success')
+        this.$store.commit('updateHeader')
+        this.$router.push('/change-account-success')
         return
       } catch (err) {
         this.saving = false

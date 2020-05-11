@@ -85,9 +85,7 @@ class Org:
                 raise BusinessException(Error.USER_CANT_CREATE_ANONYMOUS_ORG, None)
 
         if not bcol_account_number:  # Allow duplicate names if premium
-            existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'])
-            if existing_similar__org is not None:
-                raise BusinessException(Error.DATA_CONFLICT, None)
+            Org.raise_error_if_duplicate_name(org_info['name'])
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.add_to_session()
@@ -118,6 +116,13 @@ class Org:
         current_app.logger.info(f'<created_org org_id:{org.id}')
 
         return Org(org)
+
+    @staticmethod
+    def raise_error_if_duplicate_name(name):
+        """Raise error if there is duplicate org name already."""
+        existing_similar__org = OrgModel.find_similar_org_by_name(name)
+        if existing_similar__org is not None:
+            raise BusinessException(Error.DATA_CONFLICT, None)
 
     @staticmethod
     def add_payment_settings(org_id, bcol_account_number, bcol_user_id):
@@ -174,6 +179,9 @@ class Org:
         if action == ChangeType.DOWNGRADE.value:
             if org_info.get('typeCode') != OrgType.BASIC.value:
                 raise BusinessException(Error.INVALID_INPUT, None)
+            # if they have not changed the name , they can claim the name. Dont check duplicate..or else check duplicate
+            if org_info.get('name') != self._model.name:
+                Org.raise_error_if_duplicate_name(org_info['name'])
             payment_settings: AccountPaymentModel = AccountPaymentModel.find_active_by_org_id(account_id=self._model.id)
             payment_settings.is_active = False
             payment_settings.add_to_session()
