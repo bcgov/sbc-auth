@@ -1,6 +1,8 @@
 /**
  * Place to put all the custom utility methods
  */
+import moment from 'moment'
+
 export default class CommonUtils {
   // checking url matches the regex
   static isUrl (value:string):boolean {
@@ -37,5 +39,10 @@ export default class CommonUtils {
   static validatePasswordRules (value: string):boolean {
     const VALID_PASSWORD_FORMAT = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/)
     return VALID_PASSWORD_FORMAT.test(value)
+  }
+
+  // Formatting date in the desired format for displaying in the template
+  static formatDisplayDate (date: Date) {
+    return moment(date).format('DD MMM, YYYY')
   }
 }

@@ -61,3 +61,9 @@ export enum LoginSource {
 }
 
 export type Actions = 'upgrade' | 'downgrade'
+
+export enum TransactionStatus {
+    COMPLETED = 'COMPLETED',
+    CREATED = 'CREATED',
+    DELETED = 'DELETED'
+}
