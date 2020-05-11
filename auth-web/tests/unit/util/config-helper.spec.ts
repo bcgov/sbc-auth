@@ -29,6 +29,8 @@ describe('ConfigHelper tests', () => {
   })
 })
 
+sessionStorage.clear()
+
 describe('ConfigHelper tests', () => {
   sessionStorage.clear()
   let url = `${process.env.VUE_APP_PATH}config/configuration.json`
