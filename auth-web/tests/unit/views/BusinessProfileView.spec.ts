@@ -12,9 +12,7 @@ import Vuex from 'vuex'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
-jest.mock('axios', () => ({
-  post: jest.fn(() => Promise.resolve({ data: { access_token: 'abcd', refresh_token: 'efgh', registries_trace_id: '12345abcde' } }))
-}))
+jest.mock('../../../src/services/bcol.services')
 
 describe('BusinessProfileView.vue', () => {
   let wrapper: Wrapper<BusinessProfileView>
@@ -35,6 +33,13 @@ describe('BusinessProfileView.vue', () => {
       namespaced: true,
       state: {
         currentBusiness: {
+          businessIdentifier: 'CP0001245',
+          businessNumber: '791861073BC0001',
+          created: '2019-08-26T11:50:32.620965+00:00',
+          created_by: 'BCREGTEST Jeong SIX',
+          id: 11,
+          modified: '2019-08-26T11:50:32.620989+00:00',
+          name: 'Foobar, Inc.'
         }
       },
       actions: {
