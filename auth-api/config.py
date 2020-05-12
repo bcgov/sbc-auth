@@ -148,7 +148,7 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     except:
         MAX_NUMBER_OF_ORGS = 3
 
-    BCOL_ACCOUNT_LINK_CHECK = bool(os.getenv('BCOL_ACCOUNT_LINK_CHECK', True))
+    BCOL_ACCOUNT_LINK_CHECK = os.getenv('BCOL_ACCOUNT_LINK_CHECK', 'True').lower() == 'true'
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
