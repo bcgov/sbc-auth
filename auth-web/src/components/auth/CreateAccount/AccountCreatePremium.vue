@@ -133,7 +133,8 @@ import { getModule } from 'vuex-module-decorators'
       'setCurrentOrganization',
       'setCurrentOrganizationAddress',
       'setCurrentOrgAddress',
-      'setGrantAccess'
+      'setGrantAccess',
+      'resetBcolDetails'
     ]),
     ...mapActions('org', [
       'createOrg',
@@ -157,6 +158,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private readonly currentUser!: KCUserProfile
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
+  private readonly resetBcolDetails!: () => void
   private readonly setGrantAccess!: (grantAccess: boolean) => void
   private readonly changeOrgType!: (action:Actions) => Promise<Organization>
   @Prop() cancelUrl: string
@@ -190,9 +192,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   }
 
   private unlinkAccounts () {
-    if (!this.changeOrgType) {
-      this.setCurrentOrganization(undefined)
-    }
+    this.resetBcolDetails()
   }
   private get linked () {
     return !!this.currentOrganization?.bcolAccountDetails

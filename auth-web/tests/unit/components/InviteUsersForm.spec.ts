@@ -1,6 +1,5 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
-import OrgModule from '@/store/modules/org'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
@@ -11,9 +10,7 @@ Vue.use(Vuetify)
 Vue.use(VueRouter)
 Vue.use(VueI18n)
 
-jest.mock('axios', () => ({
-  post: jest.fn(() => Promise.resolve({ data: { } }))
-}))
+jest.mock('../../../src/services/bcol.services')
 
 describe('InviteUsersForm.vue', () => {
   let localVue
@@ -32,9 +29,21 @@ describe('InviteUsersForm.vue', () => {
     const orgModule = {
       namespaced: true,
       state: {
-        pendingOrgInvitations: [],
-        currentOrganization: {},
-        activeOrgMembers: [{ 'membershipTypeCode': 'OWNER', 'user': { 'username': 'test' } }],
+        pendingOrgInvitations: [{
+          id: 1,
+          recipientEmail: 'myemail@mytestemail.com',
+          sentDate: '2019-12-11T04:03:11.830365+00:00',
+          membership: [],
+          expiresOn: '2020-12-11T04:03:11.830365+00:00',
+          status: 'pending'
+        }],
+        currentOrganization: {
+          name: 'test org'
+        },
+        currentMembership: [{
+          membershipTypeCode: 'OWNER',
+          membershipStatus: 'ACTIVE',
+          user: { username: 'test' } }],
         pendingOrgMembers: []
       },
       actions: {
@@ -43,13 +52,20 @@ describe('InviteUsersForm.vue', () => {
       },
       mutations: {
         resetInvitations: jest.fn()
-      },
-      getters: OrgModule.getters
+      }
     }
+
     const userModule = {
       namespaced: true,
       state: {
-        currentUser: { 'userName': 'test' }
+        currentUser: { userName: 'test' }
+      }
+    }
+
+    const invitationModule = {
+      namespaced: true,
+      state: {
+        invitations: []
       }
     }
 
