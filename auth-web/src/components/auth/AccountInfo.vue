@@ -160,15 +160,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   private async mounted () {
-    // eslint-disable-next-line no-console
     const accountSettings = this.getAccountFromSession()
     await this.syncOrganization(accountSettings.id)
-    this.setAccountChangedHandler(this.syncOrgName)
-    this.syncOrgName()
-    if (this.isPremiumAccount) {
-      await this.syncPaymentSettings(accountSettings.id)
-      await this.syncAddress()
-    }
+    this.setAccountChangedHandler(this.setup)
+    this.setup()
   }
 
   private keyDown (address: Address) {
@@ -182,8 +177,13 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     this.enableBtn()
   }
 
-  private syncOrgName () {
+  private async setup () {
+    const accountSettings = this.getAccountFromSession()
     this.orgName = this.currentOrganization?.name || ''
+    if (this.isPremiumAccount) {
+      await this.syncPaymentSettings(accountSettings.id)
+      await this.syncAddress()
+    }
   }
 
   protected getAccountFromSession (): AccountSettings {
@@ -200,7 +200,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   private async resetForm () {
-    this.syncOrgName()
+    this.setup()
     await this.syncAddress()
   }
 
