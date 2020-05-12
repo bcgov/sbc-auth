@@ -74,6 +74,13 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
+  public resetBcolDetails () {
+    this.currentOrganization.bcolProfile = undefined
+    this.currentOrganization.bcolAccountDetails = undefined
+    this.currentOrgAddress = undefined
+  }
+
+  @Mutation
   public setSelectedAccountType (selectedAccountType: Account | undefined) {
     if (this.currentOrganization) {
       this.currentOrganization.orgType = selectedAccountType
