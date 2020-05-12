@@ -51,7 +51,7 @@
             :loading="isLoading"
             :disabled='!isFormValid() || isLoading'
           >
-            Link Accounts
+            Link Account
           </v-btn>
         </v-col>
       </v-row>
