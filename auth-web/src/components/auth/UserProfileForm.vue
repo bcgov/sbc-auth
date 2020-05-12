@@ -90,7 +90,7 @@
           v-show="editing && !isStepperView"
           @click="$refs.deactivateUserConfirmationDialog.open()"
         >Deactivate my profile</v-btn>
-        <!--
+        <!-- The reset button should be hidden in Production environment and who doesn't have tester role -->
         <v-btn
           large
           depressed
@@ -99,7 +99,6 @@
           v-show="editing && !isStepperView && isTester"
           @click="$refs.resetDialog.open()"
         >Reset</v-btn>
-        -->
         <v-btn
           large
           depressed
