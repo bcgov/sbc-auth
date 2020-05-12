@@ -1,6 +1,7 @@
 <template>
   <div>
-    <p class="mb-7">There is no cost to create a BC Registries account. You only pay for the services and products you purchase.-</p>
+    <p class="mb-7" v-if="!isAccountChange">There is no cost to create a BC Registries account. You only pay for the services and products you purchase.</p>
+    <p class="mb-7" v-if="isAccountChange">There is no cost to change a BC Registries account type. You only pay for the services and products you purchase.</p>
     <v-row>
       <v-col
         class="d-flex align-stretch"
