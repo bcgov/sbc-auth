@@ -11,9 +11,7 @@ Vue.use(Vuetify)
 Vue.use(VueRouter)
 Vue.use(VueI18n)
 
-jest.mock('axios', () => ({
-  post: jest.fn(() => Promise.resolve({ data: { } }))
-}))
+jest.mock('../../../src/services/bcol.services')
 
 describe('CreateAccountInfoForm.vue', () => {
   let localVue
@@ -32,6 +30,8 @@ describe('CreateAccountInfoForm.vue', () => {
     const orgModule = {
       namespaced: true,
       state: {
+        currentOrganization: {
+        },
         organizations: [],
         orgCreateMessage: 'test'
       },

@@ -79,6 +79,7 @@ import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Role } from '@/util/constants'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
+import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
 
