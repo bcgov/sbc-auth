@@ -6,7 +6,7 @@
         <h1 class="mb-5">{{$t('bcscAccountChangeSuccessTitle')}}</h1>
         <p class="mb-9">{{$t('bcscAccountChangeSuccessSubtext')}}</p>
         <div>
-          <v-btn large color="primary" @click="goTo('home')">
+          <v-btn large color="primary" @click="goTo('account-info')">
             <strong>View Account</strong>
           </v-btn>
         </div>
@@ -35,6 +35,8 @@ export default class AccountChangeSuccessView extends Vue {
       case 'home': this.$router.push('/')
         break
       case 'team-members': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
+        break
+      case 'account-info': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
         break
     }
   }

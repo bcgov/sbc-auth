@@ -12,7 +12,7 @@
           <div class="name" id="accountType">Account Type</div>
           <div class="value" aria-labelledby="accountType">
             <div class="value__title">{{ isPremiumAccount ? 'Premium' : 'Basic' }}</div>
-            <div>
+            <div v-if="isOwner">
               <router-link :to="editAccountUrl">Change account type</router-link>
             </div>
           </div>
@@ -210,6 +210,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 
   get anonAccount (): boolean {
     return this.currentOrganization?.accessType === Account.ANONYMOUS
+  }
+
+  private get isOwner (): boolean {
+    return this.currentMembership?.membershipTypeCode === MembershipType.Owner
   }
 
   private canChangeAccountName (): boolean {
