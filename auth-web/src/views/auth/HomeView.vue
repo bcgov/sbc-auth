@@ -33,16 +33,12 @@
                 Incorporate a Named Company
               </v-btn>
               <v-btn large color="#003366" class="cta-btn mb-6 white--text"
-                @click="goToManageBusinesses()">
+                @click="goToManageBusinesses(true)">
                 Incorporate a Numbered Company
               </v-btn>
               <v-btn large color="#fcba19" class="cta-btn"
                 @click="goToManageBusinesses()">
                 Manage an Existing Business
-              </v-btn>
-              <v-btn large v-if="!isDirSearchUser" color="#fcba19" class="cta-btn"
-                @click="createAccount()">
-                Create a new BC Registries Account
               </v-btn>
             </div>
 
@@ -288,8 +284,11 @@ export default class HomeView extends Vue {
     return !!this.currentAccountSettings
   }
 
-  private goToManageBusinesses (): void {
-    this.$router.push(`/${Pages.MAIN}/${this.currentAccountSettings.id}`)
+  private goToManageBusinesses (isNcRequest: boolean = false): void {
+    let manageBusinessUrl: any = { path: `/${Pages.MAIN}/${this.currentAccountSettings.id}` }
+    if (isNcRequest) manageBusinessUrl.query = { isNcRequest: `${isNcRequest}` }
+
+    this.$router.push(manageBusinessUrl)
   }
 
   private createAccount (): void {
