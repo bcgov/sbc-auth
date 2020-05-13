@@ -45,5 +45,5 @@ jobs:
       working-directory: ./auth-web
       run: |
         npm run build
-        env:
-          CI: true
+      env:
+        CI: true
