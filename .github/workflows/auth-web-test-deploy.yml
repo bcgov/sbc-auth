@@ -1,4 +1,4 @@
-name: Auth Web DEV CD
+name: Auth Web TEST CD
 
 on:
   push:
@@ -11,7 +11,7 @@ env:
   TAG_NAME: test
 
 jobs:
-  auth-web-dev:
+  auth-web-test:
     runs-on: ubuntu-latest
 
     strategy:
