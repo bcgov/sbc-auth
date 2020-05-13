@@ -6,7 +6,7 @@ import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { CreateRequestBody as CreateAffiliationRequestBody } from '@/models/affiliation'
 import OrgService from '@/services/org.services'
-import { SessionStorageKeys } from '@/util/constants'
+import { SessionStorageKeys, FilingTypes } from '@/util/constants'
 
 @Module({
   name: 'business',
@@ -15,7 +15,6 @@ import { SessionStorageKeys } from '@/util/constants'
 export default class BusinessModule extends VuexModule {
   currentBusiness: Business = undefined
   businesses: Business[] = []
-  private readonly INCORPORATION_APPLICATION: string = 'incorporationApplication'
 
   @Mutation
   public setCurrentBusiness (business: Business) {
@@ -78,7 +77,7 @@ export default class BusinessModule extends VuexModule {
     const requestBody: NumberedBusinessRequest = {
       filing: {
         header: {
-          name: this.INCORPORATION_APPLICATION,
+          name: FilingTypes.INCORPORATION_APPLICATION,
           accountId: accountId
         }
       }
