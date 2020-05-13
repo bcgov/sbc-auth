@@ -1,5 +1,5 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { Business, FolioNumberload, LoginPayload } from '@/models/business'
+import { Business, FolioNumberload, LoginPayload, NumberedBusinessRequest } from '@/models/business'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
@@ -15,6 +15,7 @@ import { SessionStorageKeys } from '@/util/constants'
 export default class BusinessModule extends VuexModule {
   currentBusiness: Business = undefined
   businesses: Business[] = []
+  private readonly INCORPORATION_APPLICATION: string = 'incorporationApplication'
 
   @Mutation
   public setCurrentBusiness (business: Business) {
@@ -69,6 +70,34 @@ export default class BusinessModule extends VuexModule {
         if (response.status === 200) {
           ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessNumber)
         }
+      })
+  }
+
+  @Action({ rawError: true })
+  public async createNumberedBusiness (accountId: number) {
+    const requestBody: NumberedBusinessRequest = {
+      filing: {
+        header: {
+          name: this.INCORPORATION_APPLICATION,
+          accountId: accountId
+        }
+      }
+    }
+
+    await BusinessService.createNumberedBusiness(requestBody)
+      .then(response => {
+        if (response && response.data && (response.status === 200 || response.status === 201)) {
+          const identifier = response.data.filing?.business?.identifier
+          if (identifier) {
+            ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, identifier)
+            let redirectURL = `${ConfigHelper.getCoopsURL()}${identifier}`
+
+            window.location.href = decodeURIComponent(redirectURL)
+          }
+        }
+      }).catch(error => {
+        // eslint-disable-next-line no-console
+        console.log(error) // ToDo: Handle error
       })
   }
 
