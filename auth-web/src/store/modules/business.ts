@@ -1,12 +1,12 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { Business, FolioNumberload, LoginPayload, NumberedBusinessRequest } from '@/models/business'
+import { FilingTypes, SessionStorageKeys } from '@/util/constants'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { CreateRequestBody as CreateAffiliationRequestBody } from '@/models/affiliation'
 import OrgService from '@/services/org.services'
-import { SessionStorageKeys, FilingTypes } from '@/util/constants'
 
 @Module({
   name: 'business',
@@ -96,7 +96,7 @@ export default class BusinessModule extends VuexModule {
         }
       }).catch(error => {
         // eslint-disable-next-line no-console
-        console.log(error) // ToDo: Handle error
+        console.log(error)
       })
   }
 
