@@ -132,7 +132,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   protected readonly currentAccountSettings!: AccountSettings
   private readonly syncBusinesses!: () => Promise<Business[]>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
-  private readonly createNumberedBusiness!: (accountId: Number) => Number
+  private readonly createNumberedBusiness!: (accountId: Number) => Promise<void>
 
   $refs: {
     successDialog: ModalDialog

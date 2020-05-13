@@ -86,17 +86,17 @@ export default class BusinessModule extends VuexModule {
     await BusinessService.createNumberedBusiness(requestBody)
       .then(response => {
         if (response && response.data && (response.status === 200 || response.status === 201)) {
-          const identifier = response.data.filing?.business?.identifier
-          if (identifier) {
-            ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, identifier)
-            let redirectURL = `${ConfigHelper.getCoopsURL()}${identifier}`
+          const tempRegNum = response.data.filing?.business?.identifier
+          if (tempRegNum) {
+            ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, tempRegNum)
+            let redirectURL = `${ConfigHelper.getCoopsURL()}${tempRegNum}`
 
             window.location.href = decodeURIComponent(redirectURL)
           }
         }
       }).catch(error => {
         // eslint-disable-next-line no-console
-        console.log(error)
+        console.log(error) // ToDo: Handle error
       })
   }
 
