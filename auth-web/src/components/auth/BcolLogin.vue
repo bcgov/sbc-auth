@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="createAccountInfoForm" lazy-validation>
+  <v-form ref="form" lazy-validation >
     <fieldset>
       <legend class="mb-3">
         BC Online Prime Contact Details
@@ -90,8 +90,13 @@ export default class BcolLogin extends Vue {
     value => !!value || 'Password is required'
   ]
 
+  $refs: {
+    form: HTMLFormElement
+  }
+
   private async linkAccounts () {
     this.isLoading = true
+    this.errorMessage = ''
     // Validate form, and then create an team with this user a member
     if (this.isFormValid()) {
       const bcolProfile: BcolProfile = {
@@ -103,6 +108,7 @@ export default class BcolLogin extends Vue {
         this.isLoading = false
         if (bcolAccountDetails) { // TODO whats the success status
           this.$emit('account-link-successful', { bcolProfile, bcolAccountDetails })
+          this.resetForm()
         }
       } catch (err) {
         this.isLoading = false
@@ -118,6 +124,10 @@ export default class BcolLogin extends Vue {
         }
       }
     }
+  }
+  resetForm () {
+    this.username = this.password = this.errorMessage = ''
+    this.$refs.form.resetValidation()
   }
 }
 </script>
