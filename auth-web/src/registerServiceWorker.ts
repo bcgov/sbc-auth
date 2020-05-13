@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
 
+import ConfigHelper from './util/config-helper'
+import { SessionStorageKeys } from './util/constants'
 import { register } from 'register-service-worker'
 
 if (process.env.NODE_ENV === 'production') {
@@ -23,6 +25,11 @@ if (process.env.NODE_ENV === 'production') {
       // write code for popup here
       console.log('New content is available; refreshing page in 1 sec')
       // showInteractiveToastReload('New content is available!', updatedEvent)
+
+      // Remove Launch Darkly files from session if new build content is downloaded
+      // Once the app is reloaded after the timeout, the App.vue will initialize the LD againx
+      // Otherwise, user will only get the LD flags if he/she signout-and-signin or restart-browser
+      ConfigHelper.removeFromSession(SessionStorageKeys.LaunchDarklyFlags)
 
       updatedEvent.waiting.postMessage({ action: 'skipWaiting' })
       // timeout is for the service worker to get activated

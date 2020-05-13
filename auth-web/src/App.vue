@@ -43,6 +43,7 @@ import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import NavigationBar from 'sbc-common-components/src/components/NavigationBar.vue'
 import { NavigationBarConfig } from 'sbc-common-components/src/models/NavigationBarConfig'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
@@ -161,6 +162,9 @@ export default class App extends Mixins(NextPageMixin) {
     // set keycloak config file's location to the sbc-common-components
     await KeyCloakService.setKeycloakConfigUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
     this.showLoading = false
+
+    // Initializing Launch Darkly services
+    await LaunchDarklyService.init(process.env.LAUNCH_DARKLY_ENV_KEY || '5db9da115f58e008123cd783')
 
     EventBus.$on('show-toast', (eventInfo: Event) => {
       this.showNotification = true
