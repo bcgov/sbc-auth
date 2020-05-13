@@ -286,7 +286,7 @@ export default class HomeView extends Vue {
 
   private goToManageBusinesses (isNcRequest: boolean = false): void {
     let manageBusinessUrl: any = { path: `/${Pages.MAIN}/${this.currentAccountSettings.id}` }
-    if (isNcRequest) manageBusinessUrl.query = { isNcRequest: `${isNcRequest}` }
+    if (isNcRequest) manageBusinessUrl.query = { isNcRequest }
 
     this.$router.push(manageBusinessUrl)
   }
