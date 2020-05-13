@@ -164,7 +164,7 @@ export default class App extends Mixins(NextPageMixin) {
     this.showLoading = false
 
     // Initializing Launch Darkly services
-    await LaunchDarklyService.init(process.env.LAUNCH_DARKLY_ENV_KEY || '5db9da115f58e008123cd783')
+    await LaunchDarklyService.init(ConfigHelper.getValue('LAUNCH_DARKLY_ENV_KEY'))
 
     EventBus.$on('show-toast', (eventInfo: Event) => {
       this.showNotification = true
