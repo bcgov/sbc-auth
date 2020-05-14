@@ -19,12 +19,11 @@
           <h1>Start A Business And <br> Keep Records up to Date</h1>
           <p>The Business Registry manages the creation (incorporation and registration)<br> and listing of businesses
             and organizations in British Columbia.</p>
-
           <div class="hero-banner__cta-btns">
             <!-- Authenticated -->
             <div v-if="userProfile" class="cta-btns-authenticated">
               <v-btn large color="#003366" class="cta-btn white--text"
-                     href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
+                href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
                 Request a Name
               </v-btn>
               <v-btn large color="#003366" class="cta-btn white--text"
@@ -40,7 +39,6 @@
                 Manage an Existing Business
               </v-btn>
             </div>
-
             <!-- Non-authenticated -->
             <div v-else>
                <v-btn large color="#fcba19" class="cta-btn"
