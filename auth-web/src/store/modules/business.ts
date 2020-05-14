@@ -89,14 +89,14 @@ export default class BusinessModule extends VuexModule {
           const tempRegNum = response.data.filing?.business?.identifier
           if (tempRegNum) {
             ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, tempRegNum)
-            let redirectURL = `${ConfigHelper.getCoopsURL()}${tempRegNum}`
+            const redirectURL = `${ConfigHelper.getCoopsURL()}${tempRegNum}`
 
             window.location.href = decodeURIComponent(redirectURL)
           }
         }
       }).catch(error => {
         // eslint-disable-next-line no-console
-        console.log(error) // ToDo: Handle error
+        console.log(error) // ToDo: Handle error: Redirect back to Homeview? Feedback required here
       })
   }
 
