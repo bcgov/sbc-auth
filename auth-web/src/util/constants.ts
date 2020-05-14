@@ -63,11 +63,11 @@ export enum LoginSource {
 export type Actions = 'upgrade' | 'downgrade'
 
 export enum TransactionStatus {
-  COMPLETED = 'COMPLETED',
-  CREATED = 'CREATED',
-  DELETED = 'DELETED'
+    COMPLETED = 'COMPLETED',
+    CREATED = 'CREATED',
+    DELETED = 'DELETED'
 }
 
 export enum FilingTypes {
-  INCORPORATION_APPLICATION = 'incorporationApplication'
+    INCORPORATION_APPLICATION = 'incorporationApplication'
 }
