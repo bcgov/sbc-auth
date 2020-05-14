@@ -49,7 +49,11 @@
                   </v-list-item-icon>
                   <v-list-item-title>Team Members</v-list-item-title>
                 </v-list-item>
-                <v-list-item :to="transactionUrl" data-test="transactions-nav-item">
+                <v-list-item
+                  v-if="showTransactions"
+                  :to="transactionUrl"
+                  data-test="transactions-nav-item"
+                >
                   <v-list-item-icon>
                     <v-icon color="link" left>mdi-file-document-outline</v-icon>
                   </v-list-item-icon>
@@ -72,6 +76,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { LoginSource } from '@/util/constants'
 
 import { mapState } from 'vuex'
@@ -103,6 +108,10 @@ export default class AccountSettings extends Vue {
 
   private get transactionUrl (): string {
     return `/account/${this.orgId}/settings/transactions`
+  }
+
+  private get showTransactions (): boolean {
+    return LaunchDarklyService.getFlag('transaction-history') || false
   }
 
   private mounted () {

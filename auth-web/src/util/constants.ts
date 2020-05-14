@@ -13,6 +13,7 @@ export enum SessionStorageKeys {
     PendingApprovalCount = 'PENDING_APPROVAL_COUNT',
     CurrentAccount = 'CURRENT_ACCOUNT',
     NamesRequestNumberKey = 'NR_NUMBER',
+    LaunchDarklyFlags = 'LD_FLAGS'
 }
 
 export enum Role {
