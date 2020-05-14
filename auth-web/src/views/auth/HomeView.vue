@@ -16,23 +16,22 @@
 
       <header class="hero-banner">
         <v-container>
-          <h1>Start A Business And <br> Keep Records Up To Date<sup>Beta</sup></h1>
-          <p>The Business Registry manages the creation (incorporation and registration) and listing of businesses
+          <h1>Start A Business And <br> Keep Records up to Date</h1>
+          <p>The Business Registry manages the creation (incorporation and registration)<br> and listing of businesses
             and organizations in British Columbia.</p>
 
           <div class="hero-banner__cta-btns">
-            <v-btn large color="#003366" class="cta-btn mb-6 white--text"
-              href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
-              Request a Name
-            </v-btn>
-
             <!-- Authenticated -->
-            <div v-if="userProfile">
+            <div v-if="userProfile" class="cta-btns-authenticated">
+              <v-btn large color="#003366" class="cta-btn white--text"
+                     href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
+                Request a Name
+              </v-btn>
               <v-btn large color="#003366" class="cta-btn white--text"
                 @click="goToManageBusinesses()">
                 Incorporate a Named Company
               </v-btn>
-              <v-btn large color="#003366" class="cta-btn mb-6 white--text"
+              <v-btn large color="#003366" class="cta-btn white--text"
                 @click="goToManageBusinesses(true)">
                 Incorporate a Numbered Company
               </v-btn>
@@ -44,14 +43,17 @@
 
             <!-- Non-authenticated -->
             <div v-else>
-              <v-btn large color="#fcba19" class="cta-btn"
+               <v-btn large color="#fcba19" class="cta-btn"
                 @click="login()">
-                Log in to my account
+                Log in with BC Services Card
               </v-btn>
-              <v-btn large color="#003366" class="cta-btn white--text"
-                @click="accountDialog = true">
-                Create an account
+              <v-btn large color="#003366" class="cta-btn ml-4 white--text"
+                href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
+                Request a Name
               </v-btn>
+              <p>New to BC Registries? <a @click="accountDialog = true" style="font-size: 1rem">
+                <u>Create a BC Registries Account</u></a>
+              </p>
             </div>
           </div>
 
@@ -336,6 +338,10 @@ export default class HomeView extends Vue {
   .hero-banner {
     color: $gray9;
     background-color: #ffffff;
+    background-image: url('../../assets/img/fpo-hero-image-1600x500.png');
+    background-position: bottom right;
+    background-size: 80% 100%;
+    background-repeat: no-repeat;
 
     h1 {
       margin-bottom: 1.5rem;
@@ -357,7 +363,7 @@ export default class HomeView extends Vue {
 
     p {
       max-width: 40rem;
-      margin-bottom: 2.5rem;
+      margin: 1.5rem 0;
       font-size: 1rem;
     }
 
@@ -367,14 +373,24 @@ export default class HomeView extends Vue {
     }
   }
 
-  .hero-banner__cta-btns, .hero-banner__cta-btns > div {
+  .hero-banner__cta-btns {
     display: flex;
-    max-width: 300px;
-    flex-wrap: wrap;
+    min-height: 150px;
 
     .cta-btn {
       flex: 0 0 100%;
-      margin: .5rem 0;
+    }
+
+    .cta-btns-authenticated, .cta-btns-authenticated > div {
+      display: flex;
+      max-width: 300px;
+      flex-wrap: wrap;
+      margin-bottom: 13px;
+
+      .cta-btn {
+        flex: 0 0 100%;
+        margin-bottom: 13px;
+      }
     }
   }
 
