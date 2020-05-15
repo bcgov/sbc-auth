@@ -17,7 +17,7 @@
       <header class="hero-banner">
         <v-container>
           <h1>Start A Business And <br> Keep Records up to Date</h1>
-          <p>The Business Registry manages the creation (incorporation and registration)<br> and listing of businesses
+          <p>The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
             and organizations in British Columbia.</p>
           <div class="hero-banner__cta-btns">
             <!-- Authenticated -->
@@ -338,7 +338,7 @@ export default class HomeView extends Vue {
     background-color: #ffffff;
     background-image: url('../../assets/img/fpo-hero-image-1600x500.png');
     background-position: bottom right;
-    background-size: 80% 100%;
+    background-size: 80% 110%;
     background-repeat: no-repeat;
 
     h1 {
@@ -373,7 +373,6 @@ export default class HomeView extends Vue {
 
   .hero-banner__cta-btns {
     display: flex;
-    min-height: 150px;
 
     .cta-btn {
       flex: 0 0 100%;
