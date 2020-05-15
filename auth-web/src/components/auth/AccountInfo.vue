@@ -35,8 +35,6 @@
         </li>
       </ul>
 
-      <v-divider class="mb-10"></v-divider>
-
       <fieldset v-if="!isPremiumAccount">
         <legend class="mb-4">Account Details</legend>
         <v-text-field
