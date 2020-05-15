@@ -12,9 +12,7 @@
         label="Account Name"
         v-model.trim="orgName"
         :rules="orgNameRules"
-        persistent-hint
         :disabled="saving"
-        hint="Example: Your Business Name"
       />
     </fieldset>
 
