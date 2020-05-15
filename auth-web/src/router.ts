@@ -13,17 +13,21 @@ import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import CreateAccountView from '@/views/auth/CreateAccountView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
+import DecideBusinessInfo from '@/components/auth/DecideBusinessInfo.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
 import HomeView from '@/views/auth/HomeView.vue'
+import IncorpOrRegisterInfo from '@/components/auth/IncorpOrRegisterInfo.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
+import MaintainBusinessInfo from '@/components/auth/MaintainBusinessInfo.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
 import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
 import PaymentView from '@/views/pay/PaymentView.vue'
 import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
+import RequestNameInfo from '@/components/auth/RequestNameInfo.vue'
 import SearchBusinessView from '@/views/auth/staff/SearchBusinessView.vue'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
 import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
@@ -53,8 +57,31 @@ export function getRoutes (): RouteConfig[] {
   const teamManagement = () => import(/* webpackChunkName: "account-settings" */ './components/auth/TeamManagement.vue')
   const transaction = () => import(/* webpackChunkName: "account-settings" */ './components/auth/Transactions.vue')
   const routes = [
-    { path: '/', name: 'root', component: HomeView, meta: { showNavBar: true } },
-    { path: '/home', name: 'home', component: HomeView, meta: { showNavBar: true } },
+    { path: '/',
+      name: 'root',
+      component: HomeView,
+      children: [
+        {
+          path: 'decide-business-info',
+          component: DecideBusinessInfo
+        },
+        {
+          path: 'request-name-info',
+          component: RequestNameInfo
+        },
+        {
+          path: 'incorp-or-register-info',
+          component: IncorpOrRegisterInfo
+        },
+        {
+          path: 'maintain-business-info',
+          component: MaintainBusinessInfo
+        }
+      ],
+      meta: { showNavBar: true }
+    },
+    { path: '/home', name: 'home', component: HomeView, meta: { showNavBar: true }
+    },
     { path: '/business',
       name: 'business-root',
       meta: { requiresAuth: true, showNavBar: true },
