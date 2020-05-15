@@ -2,11 +2,11 @@
   <v-container>
     <v-form ref="createAccountInfoForm" lazy-validation>
       <p class="mb-10">
-        You must be the Prime Contact to link this account with your existing BC Online account.{{isAccountChange}}
+        You must be the Prime Contact to link this account with your existing BC Online account.
       </p>
       <BcolLogin @account-link-successful="onLink" v-show="!linked"></BcolLogin>
       <template v-if="linked">
-        <v-alert dark color="primary" icon="mdi-check" class="py-6 pr-6 pl-4" v-model="linked">
+        <v-alert dark color="primary" icon="mdi-check" class="py-4 pr-8 pl-4" v-model="linked">
           <div class="bcol-acc d-flex justify-space-between align-center">
             <div v-if="currentOrganization.bcolAccountDetails">
               <div class="bcol-acc__link-status mb-3">Account Linked!</div>
@@ -30,49 +30,62 @@
                 @click="unlinkAccounts()"
                 data-test="dialog-save-button"
               >
-                Remove Linked Accounts
+                Unlink Account
               </v-btn>
             </div>
           </div>
         </v-alert>
-        <v-checkbox large color="primary" v-model="grantAccess" class="bcol-auth mt-8">
+        <v-checkbox color="primary" v-model="grantAccess" class="bcol-auth mt-8 ml-3">
           <template v-slot:label>
             <div class="bcol-auth__label" v-html="grantAccessText"></div>
           </template>
         </v-checkbox>
-        <template v-if="grantAccess">
-          <v-row class="mt-6">
-            <v-col cols="12">
-              <h3 class="mb-4">Account Information</h3>
-              <p class="mb-0">
-                The following information will be imported from your existing BC Online account.
-              </p>
-              <p class="mb-8">
-                Review your account information below and update if needed.
-              </p>
-            </v-col>
-          </v-row>
-          <fieldset class="mb-2">
-            <legend class="mb-3">Account Name</legend>
-            <v-text-field
-              filled
-              label="Account Name"
-              v-model.trim="currentOrganization.name"
-              persistent-hint
-              disabled
-              data-test="account-name"
-            >
-            </v-text-field>
-          </fieldset>
-          <BaseAddress :inputAddress="address" @address-update="updateAddress">
-          </BaseAddress>
-        </template>
+        <v-expand-transition>
+          <div v-if="grantAccess">
+            <v-divider class="mt-4 mb-10"></v-divider>
+            <template>
+              <v-row class="mt-6">
+                <v-col cols="12">
+                  <h3 class="mb-3">Account Information</h3>
+                  <p class="mb-10">
+                    The following information will be imported from your existing BC Online account. Review your account <br> information below and update if needed.
+                  </p>
+                </v-col>
+              </v-row>
+              <ul class="nv-list mb-2">
+                <li class="nv-list-item mb-10">
+                  <div class="name" id="accountType">Account Name</div>
+                  <div class="value" aria-labelledby="accountType">
+                    <div class="value__title">
+                      <div class="mb-1">{{ currentOrganization.name }}</div>
+                      <div class="text--secondary subtitle-2">Linked accounts will use your existing BC Online Account name</div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+                <!--
+                <v-text-field
+                  filled
+                  label="Account Name"
+                  v-model.trim="currentOrganization.name"
+                  persistent-hint
+                  disabled
+                  data-test="account-name"
+                >
+                </v-text-field>
+                -->
+              <BaseAddress :inputAddress="address" @address-update="updateAddress">
+              </BaseAddress>
+            </template>
+          </div>
+        </v-expand-transition>
+
         <v-alert type="error" class="mb-6" v-show="errorMessage">
           {{ errorMessage }}
         </v-alert>
       </template>
 
-      <v-divider class="my-10"></v-divider>
+      <v-divider class="mt-4 mb-10"></v-divider>
 
       <v-row>
         <v-col cols="12" class="form__btns py-0 d-inline-flex">
@@ -85,7 +98,7 @@
             Back
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn class="mr-3" large depressed color="primary" :disabled="!grantAccess || saving" @click="save">
+          <v-btn class="mr-3" large depressed color="primary" :loading="saving" :disabled="!grantAccess || saving" @click="save">
             <span v-if="!isAccountChange">Next
              <v-icon right class="ml-1">mdi-arrow-right</v-icon>
             </span>
@@ -168,7 +181,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   }
 
   get grantAccessText () {
-    return `I ,<strong>${this.currentUser?.fullName} </strong>, confirm that I am authorized to grant access to the account <strong>${this.currentOrganization?.bcolAccountDetails?.orgName}</strong>`
+    return `I, ${this.currentUser?.fullName}, confirm that I am authorized to grant access to the account ${this.currentOrganization?.bcolAccountDetails?.orgName}`
   }
 
   get grantAccess () {
@@ -279,12 +292,12 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
 }
 
 .bcol-acc {
-  margin-top: 2px;
+  margin-top: 1px;
   margin-bottom: 2px;
 }
 
 .bcol-acc__name {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
 }
 
@@ -326,4 +339,25 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   line-height: 1.5;
   color: var(--v-grey-darken4) !important;
 }
+
+.nv-list {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.nv-list-item {
+  vertical-align: top;
+
+  .name, .value {
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  .name {
+    min-width: 10rem;
+    font-weight: 700;
+  }
+}
+
 </style>

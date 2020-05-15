@@ -1,10 +1,10 @@
 <template>
-  <v-container>
+  <v-container class="view-container">
     <v-row justify="center">
-      <v-col cols="12" sm="6" class="text-center">
+      <v-col cols="12" class="text-center">
         <v-icon size="42" color="grey darken-3" class="mb-6">mdi-check</v-icon>
-        <h1 class="mb-5">{{$t('bcscAccountChangeSuccessTitle')}}</h1>
-        <p class="mb-9">{{$t('bcscAccountChangeSuccessSubtext')}}</p>
+        <h1 class="mb-7">{{$t('bcscAccountChangeSuccessTitle')}}</h1>
+        <p class="mb-10">{{$t('bcscAccountChangeSuccessSubtext')}}</p>
         <div>
           <v-btn large color="primary" @click="goTo('account-info')">
             <strong>View Account</strong>
@@ -47,7 +47,6 @@ export default class AccountChangeSuccessView extends Vue {
   @import "$assets/scss/theme.scss";
 
   .container {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+    max-width: 35rem;
   }
 </style>
