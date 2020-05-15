@@ -153,7 +153,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   private async setup () {
     this.isLoading = true
-    this.$route.query.isNcRequest && await this.createNumberedBusiness(this.currentAccountSettings.id)
+    this.$route.query.isNumberedCompanyRequest && await this.createNumberedBusiness(this.currentAccountSettings.id)
     await this.syncBusinesses()
     this.isLoading = false
   }
