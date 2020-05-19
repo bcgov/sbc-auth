@@ -27,10 +27,7 @@ SQL = text('select 1')
 
 @ROUTER.get('/healthz')
 async def healthz(db_session: Session = Depends(get_db)):
-    """Determines if the service and required dependencies are still working.
-
-    This could be thought of as a heartbeat for the service.
-    """
+    """Return a JSON object that determines if the service and required dependencies are still working."""
     try:
         db_session.execute(SQL)
     except exc.SQLAlchemyError:
@@ -42,6 +39,6 @@ async def healthz(db_session: Session = Depends(get_db)):
 
 @ROUTER.get('/readyz')
 async def readyz():
-    """Return a JSON object that identifies if the service is setupAnd ready to work."""
+    """Return a JSON object that identifies if the service is setup and ready to work."""
     # TODO: add a poll to the DB when called
     return JSONResponse(status_code=200, content={'message': 'api is ready'})

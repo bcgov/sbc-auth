@@ -11,6 +11,12 @@ pytest-mock
 requests
 flake8
 flake8-quotes
+flake8-debugger
+flake8-docstrings
+flake8-isort
+flake8-quotes
+pep8-naming
 autopep8
 lovely-pytest-docker
 pytest-asyncio
+faker

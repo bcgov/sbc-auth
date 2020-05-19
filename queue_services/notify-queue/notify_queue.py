@@ -18,9 +18,9 @@
 import asyncio
 import datetime
 
-from notify_api.core import config as app_config
 from notify_api.db.models.notification_status import NotificationStatusEnum
 
+from notify_service import config as app_config
 from notify_service.worker import cb_subscription_handler, job_handler, qsm
 
 

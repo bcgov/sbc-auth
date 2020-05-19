@@ -17,6 +17,7 @@ Tests to assure the ops end-point.
 Test-Suite to ensure that the /ops endpoint is working as expected.
 """
 import sqlalchemy
+
 from notify_api.db.database import SESSION
 
 
