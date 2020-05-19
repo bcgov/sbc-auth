@@ -40,7 +40,8 @@ export enum Pages {
     USER_PROFILE_TERMS = 'userprofileterms',
     USER_PROFILE_TERMS_DECLINE = 'unauthorizedtermsdecline',
     HOME = 'home',
-    EDIT_ACCOUNT_TYPE= '/change-account'
+    EDIT_ACCOUNT_TYPE= '/change-account',
+    STAFF_DASHBOARD= 'searchbusiness'
 }
 
 export enum Account {
