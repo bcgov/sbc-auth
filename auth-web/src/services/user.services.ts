@@ -1,4 +1,4 @@
-import { AddUsersToOrgBody, BulkUserResponseBody, Member, Organizations } from '@/models/Organization'
+import { AddUsersToOrgBody, BulkUserResponseBody, Member, Organizations, RoleInfo } from '@/models/Organization'
 import Axios, { AxiosResponse } from 'axios'
 import { Contact, Contacts } from '@/models/contact'
 import { User, UserProfileRequestBody } from '@/models/user'
@@ -10,6 +10,10 @@ const axios = addAxiosInterceptors(Axios.create())
 export default class UserService {
   static async getUserProfile (identifier: string): Promise<AxiosResponse<User>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/users/${identifier}`)
+  }
+
+  static async getRoles (): Promise<AxiosResponse<RoleInfo[]>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/codes/membership_type`)
   }
 
   static async syncUserProfile (): Promise<AxiosResponse<User>> {
