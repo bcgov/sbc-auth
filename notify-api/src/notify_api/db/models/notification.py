@@ -21,42 +21,50 @@ from sqlalchemy.orm import relationship
 
 from notify_api.core.utils import to_camel
 from notify_api.db.database import BASE
-from notify_api.db.models.notification_contents import NotificationContentsRequest, NotificationContentsResponse
+from notify_api.db.models.content import ContentRequest, ContentResponse
 from notify_api.db.models.notification_status import NotificationStatus
 from notify_api.db.models.notification_type import NotificationType
 
 
 class NotificationModel(BASE):  # pylint: disable=too-few-public-methods
     """This is the Entity model for the Notification service."""
+
     __tablename__ = 'notification'
 
     id = Column(Integer, primary_key=True)
     recipients = Column(String(2000), nullable=False)
     request_date = Column(DateTime, nullable=False)
+    request_by = Column(String(100), nullable=True)
     sent_date = Column(DateTime, nullable=True)
     type_code = Column(ForeignKey('notification_type.code'), nullable=False)
     status_code = Column(ForeignKey('notification_status.code'), nullable=False)
 
     notify_type = relationship('NotificationTypeModel')
     notify_status = relationship('NotificationStatusModel')
-    contents = relationship('NotificationContentsModel', uselist=False)
+    content = relationship('ContentModel', uselist=False)
 
 
 class NotificationBase(BaseModel):  # pylint: disable=too-few-public-methods
     """Base Notification model."""
+
     id: int
 
     class Config:  # pylint: disable=too-few-public-methods
+        """Config."""
+
         orm_mode = True
 
 
 class NotificationRequest(BaseModel):  # pylint: disable=too-few-public-methods
     """Notification model for resquest."""
+
     recipients: str = None
-    contents: NotificationContentsRequest = None
+    request_by: str = None
+    content: ContentRequest = None
 
     @validator('recipients', always=True)
-    def validate_email(cls, v_field):  # pylint: disable=no-self-argument, no-self-use
+    def validate_email(cls, v_field):  # pylint: disable=no-self-argument, no-self-use # noqa: N805
+        """Validate email."""
         if not v_field:
             raise ValueError('must not empty')
 
@@ -66,29 +74,37 @@ class NotificationRequest(BaseModel):  # pylint: disable=too-few-public-methods
         return v_field
 
     class Config:  # pylint: disable=too-few-public-methods
+        """Config."""
+
         alias_generator = to_camel
 
 
 class NotificationUpdate(NotificationBase):  # pylint: disable=too-few-public-methods
     """Notification model for update."""
+
     id: int
     sent_date: datetime
     notify_status: str = ''
 
     class Config:  # pylint: disable=too-few-public-methods
+        """Config."""
+
         orm_mode = True
 
 
 class NotificationResponse(NotificationBase):  # pylint: disable=too-few-public-methods
     """Notification model for response."""
+
     recipients: str = ''
     request_date: Optional[datetime]
     sent_date: Optional[datetime]
     notify_type: NotificationType = None
     notify_status: NotificationStatus = None
-    contents: Optional[NotificationContentsResponse] = None
+    content: ContentResponse = None
 
     class Config:  # pylint: disable=too-few-public-methods
+        """Config."""
+
         orm_mode = True
         allow_population_by_alias = True
         alias_generator = to_camel
@@ -96,6 +112,7 @@ class NotificationResponse(NotificationBase):  # pylint: disable=too-few-public-
 
 class Notification(NotificationBase):  # pylint: disable=too-few-public-methods
     """Notification model."""
+
     recipients: str = ''
     request_date: Optional[datetime]
     sent_date: Optional[datetime]

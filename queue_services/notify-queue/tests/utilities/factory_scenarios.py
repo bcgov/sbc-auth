@@ -1,7 +1,5 @@
-import base64
-
 from datetime import datetime, timedelta
-from notify_api.core import config as AppConfig
+from notify_service import config as AppConfig
 
 NOTIFICATION_DATA = [
     {
@@ -69,8 +67,6 @@ CONTENT_DATA = [
     },
     {
         'subject': 'test bytes',
-        'body': 'test bytes',
-        'attachment_name': 'aaa.txt',
-        'attachment': base64.b64decode('dGVzdCB0eHQ=')
+        'body': 'test bytes'
     }
 ]

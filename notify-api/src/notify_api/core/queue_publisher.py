@@ -24,7 +24,7 @@ import stan
 from nats.aio.client import Client as NATS  # noqa N814; by convention the name is NATS
 from stan.aio.client import Client as STAN  # noqa N814; by convention the name is STAN
 
-from notify_api.core import config as AppConfig
+from notify_api.core.settings import get_api_settings
 
 
 logger = logging.getLogger(__name__)
@@ -60,16 +60,16 @@ async def publish(payload):  # pylint: disable=too-few-public-methods
     # Connection and Queue configuration.
     def nats_connection_options():
         return {
-            'servers': AppConfig.NATS_SERVERS,
+            'servers': get_api_settings().NATS_SERVERS,
             # 'io_loop': loop,
             'error_cb': error_cb,
             'closed_cb': closed_cb,
-            'name': AppConfig.NATS_CLIENT_NAME,
+            'name': get_api_settings().NATS_CLIENT_NAME,
         }
 
     def stan_connection_options():
         return {
-            'cluster_id': AppConfig.NATS_CLUSTER_ID,
+            'cluster_id': get_api_settings().NATS_CLUSTER_ID,
             'client_id': str(random.SystemRandom().getrandbits(0x58)),
             'nats': nats_con
         }
@@ -81,7 +81,7 @@ async def publish(payload):  # pylint: disable=too-few-public-methods
 
         logger.debug(payload)
 
-        await stan_con.publish(subject=AppConfig.NATS_SUBJECT,
+        await stan_con.publish(subject=get_api_settings().NATS_SUBJECT,
                                payload=json.dumps(payload).encode('utf-8'))
 
     except Exception as e:  # pylint: disable=broad-except
@@ -104,8 +104,8 @@ async def subscribe_to_queue(stan_client: stan.aio.client.Client,
     Returns:
        str: the name of the queue
     """
-    entity_subject = AppConfig.NATS_SUBJECT
-    entity_queue = AppConfig.NATS_QUEUE
+    entity_subject = get_api_settings().NATS_SUBJECT
+    entity_queue = get_api_settings().NATS_QUEUE
     entity_durable_name = entity_queue + '_durable'
 
     await stan_client.subscribe(subject=entity_subject,
