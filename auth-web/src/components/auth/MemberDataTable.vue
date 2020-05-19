@@ -32,7 +32,7 @@
             v-on="on"
             :data-test="getIndexedTag('role-selector', item.index)"
           >
-            {{ item.membershipTypeCode }}
+            {{ item.roleDisplayName }}
             <v-icon
               small
               depressed
@@ -57,7 +57,7 @@
                 <v-icon v-text="role.icon" />
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title v-text="role.name">
+                <v-list-item-title v-text="role.displayName">
                 </v-list-item-title>
                 <v-list-item-subtitle v-text="role.desc">
                 </v-list-item-subtitle>
@@ -113,33 +113,24 @@ export interface ChangeRolePayload {
 @Component({
   computed: {
     ...mapState('business', ['businesses']),
-    ...mapState('org', ['activeOrgMembers', 'currentMembership', 'currentOrganization'])
+    ...mapState('org', ['activeOrgMembers', 'currentMembership', 'currentOrganization']),
+    ...mapState('user', ['roleInfos'])
+  },
+  methods: {
+    ...mapActions('user', [
+      'getRoleInfo'
+    ])
   }
 })
 export default class MemberDataTable extends Vue {
   private readonly businesses!: Business[]
-  private readonly activeOrgMembers!: Member[]
+  private activeOrgMembers!: Member[]
   private readonly currentMembership!: Member
   private readonly currentOrganization!: Organization
+  private readonly getRoleInfo!: () => Promise<RoleInfo[]>
+  private readonly roleInfos!: RoleInfo[]
 
-  private readonly availableRoles: RoleInfo[] = [
-    {
-      icon: 'mdi-account',
-      name: 'Member',
-      desc: 'Can add businesses, and file for a business.'
-    },
-    {
-      icon: 'mdi-settings',
-      name: 'Admin',
-      desc: 'Can add/remove team members, add businesses, and file for a business.'
-    },
-    {
-      icon: 'mdi-shield-key',
-      name: 'Owner',
-      desc: 'Can add/remove team members and businesses, and file for a business.'
-    }
-  ]
-
+  private availableRoles: RoleInfo[] = []
   private readonly headerMembers = [
     {
       text: 'Team Member',
@@ -170,11 +161,24 @@ export default class MemberDataTable extends Vue {
 
   private formatDate = CommonUtils.formatDisplayDate
 
+  private async mounted () {
+    await this.getRoleInfo()
+    this.availableRoles = this.roleInfos
+    // eslint-disable-next-line no-console
+    console.log('this.availableRoles ', JSON.stringify(this.availableRoles))
+  }
+
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
 
   private get indexedOrgMembers () {
+    // eslint-disable-next-line no-console
+    console.log('this.availableRoles***', this.availableRoles)
+    var self = this
+    this.activeOrgMembers.forEach(function (element) {
+      element.roleDisplayName = self.availableRoles.find(role => role.name === element.membershipTypeCode).displayName
+    })
     return this.activeOrgMembers.map((item, index) => ({
       index,
       ...item
