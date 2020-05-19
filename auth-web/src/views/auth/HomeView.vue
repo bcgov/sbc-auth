@@ -261,6 +261,7 @@ export default class HomeView extends Vue {
   private noPasscodeDialog = false
   private accountDialog = false
   private isDirSearchUser: boolean = false
+  private isStaffUser: boolean = false
   private readonly resetCurrentOrganisation!: () => void
 
   private get showManageBusinessesBtn (): boolean {
@@ -286,6 +287,10 @@ export default class HomeView extends Vue {
 
   mounted () {
     this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
+    this.isStaffUser = (this.currentUser?.loginSource === LoginSource.IDIR)
+    if (this.isStaffUser) {
+      this.$router.push(`/${Pages.STAFF_DASHBOARD}`)
+    }
   }
 }
 </script>
