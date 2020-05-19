@@ -138,6 +138,9 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   }
 
   private async mounted () {
+    if (this.currentMembership === undefined) {
+      this.$router.push(`/${Pages.CREATE_ACCOUNT}`)
+    }
     // If pending approval on current account, redirect away
     if (this.currentMembership?.membershipStatus !== MembershipStatus.Active) {
       this.$router.push(this.getNextPageUrl())
