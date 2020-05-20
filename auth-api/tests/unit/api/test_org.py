@@ -683,7 +683,7 @@ def test_get_members(client, jwt, session, keycloak_mock):  # pylint:disable=unu
     dictionary = json.loads(rv.data)
     assert dictionary['members']
     assert len(dictionary['members']) == 1
-    assert dictionary['members'][0]['membershipTypeCode'] == 'OWNER'
+    assert dictionary['members'][0]['membershipTypeCode'] == 'ADMIN'
 
 
 def test_delete_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -757,15 +757,15 @@ def test_delete_org_failure_members(client, jwt, session, auth_mock, keycloak_mo
 
     # Find the pending member
     new_member = dictionary['members'][0]
-    assert new_member['membershipTypeCode'] == 'MEMBER'
+    assert new_member['membershipTypeCode'] == 'USER'
     member_id = new_member['id']
 
     # Update the new member
     rv = client.patch('/api/v1/orgs/{}/members/{}'.format(org_id, member_id), headers=headers_invitee,
-                      data=json.dumps({'role': 'ADMIN'}), content_type='application/json')
+                      data=json.dumps({'role': 'COORDINATOR'}), content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     dictionary = json.loads(rv.data)
-    assert dictionary['membershipTypeCode'] == 'ADMIN'
+    assert dictionary['membershipTypeCode'] == 'COORDINATOR'
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
     rv = client.delete('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
@@ -859,15 +859,15 @@ def test_update_member(client, jwt, session, auth_mock, keycloak_mock):  # pylin
 
     # Find the pending member
     new_member = dictionary['members'][0]
-    assert new_member['membershipTypeCode'] == 'MEMBER'
+    assert new_member['membershipTypeCode'] == 'USER'
     member_id = new_member['id']
 
     # Update the new member
     rv = client.patch('/api/v1/orgs/{}/members/{}'.format(org_id, member_id), headers=headers_invitee,
-                      data=json.dumps({'role': 'ADMIN'}), content_type='application/json')
+                      data=json.dumps({'role': 'COORDINATOR'}), content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     dictionary = json.loads(rv.data)
-    assert dictionary['membershipTypeCode'] == 'ADMIN'
+    assert dictionary['membershipTypeCode'] == 'COORDINATOR'
 
 
 def test_add_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument

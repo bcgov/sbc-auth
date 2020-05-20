@@ -29,7 +29,7 @@ from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
 from auth_api.utils.enums import NotificationType
-from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, OWNER, Status
+from auth_api.utils.roles import COORDINATOR, ALL_ALLOWED_ROLES, ADMIN, Status
 from config import get_named_config
 
 from .authorization import check_auth
@@ -116,8 +116,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
         # If active status for current user, then check organizational role
         if current_user_membership.status == Status.ACTIVE.value:
-            if current_user_membership.membership_type_code == OWNER or \
-                    current_user_membership.membership_type_code == ADMIN:
+            if current_user_membership.membership_type_code == ADMIN or \
+                    current_user_membership.membership_type_code == COORDINATOR:
                 return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status)
 
             return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status) \
@@ -136,10 +136,10 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         membership = MembershipModel.find_membership_by_id(membership_id)
 
         if membership:
-            # Ensure that this user is an ADMIN or OWNER on the org associated with this membership
+            # Ensure that this user is an COORDINATOR or ADMIN on the org associated with this membership
             # or that the membership is for the current user
             if membership.user.username != token_info.get('username'):
-                check_auth(org_id=membership.org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
+                check_auth(org_id=membership.org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN))
             return Membership(membership)
         return None
 
@@ -178,23 +178,23 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
     def update_membership(self, updated_fields, token_info: Dict = None):
         """Update an existing membership with the given role."""
-        # Ensure that this user is an ADMIN or OWNER on the org associated with this membership
+        # Ensure that this user is an COORDINATOR or ADMIN on the org associated with this membership
         current_app.logger.debug('<update_membership')
-        check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
+        check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN))
 
-        # Ensure that a member does not upgrade a member to OWNER from ADMIN unless they are an OWNER themselves
-        if self._model.membership_type.code == ADMIN and updated_fields.get('membership_type', None) == OWNER:
-            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(OWNER))
+        # Ensure that a member does not upgrade a member to ADMIN from COORDINATOR unless they are an ADMIN themselves
+        if self._model.membership_type.code == COORDINATOR and updated_fields.get('membership_type', None) == ADMIN:
+            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN))
 
-        # No one can change an OWNER's status, only option is OWNER to leave the team. #2319
+        # No one can change an ADMIN's status, only option is ADMIN to leave the team. #2319
         if updated_fields.get('membership_status', None) \
                 and updated_fields['membership_status'].id == Status.INACTIVE.value \
-                and self._model.membership_type.code == OWNER:
+                and self._model.membership_type.code == ADMIN:
             raise BusinessException(Error.OWNER_CANNOT_BE_REMOVED, None)
 
         # Ensure that if downgrading from owner that there is at least one other owner in org
-        if self._model.membership_type.code == OWNER and \
-                updated_fields.get('membership_type', None) != OWNER and \
+        if self._model.membership_type.code == ADMIN and \
+                updated_fields.get('membership_type', None) != ADMIN and \
                 OrgService(self._model.org).get_owner_count() == 1:
             raise BusinessException(Error.CHANGE_ROLE_FAILED_ONLY_OWNER, None)
 
@@ -213,11 +213,11 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         current_app.logger.debug('<deactivate_membership')
         # if this is a member removing another member, check that they admin or owner
         if self._model.user.username != token_info.get('username'):
-            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
+            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN))
 
         # check to ensure that owner isn't removed by anyone but an owner
-        if self._model.membership_type == OWNER:
-            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(OWNER))
+        if self._model.membership_type == ADMIN:
+            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN))
 
         self._model.membership_status = MembershipStatusCodeModel.get_membership_status_by_code('INACTIVE')
         current_app.logger.info(f'<deactivate_membership for {self._model.user.username}')

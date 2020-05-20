@@ -183,7 +183,7 @@ def test_get_members(session, keycloak_mock):  # pylint:disable=unused-argument
                                                      token_info=TestJwtClaims.public_user_role)
     assert response
     assert len(response) == 1
-    assert response[0].membership_type_code == 'OWNER'
+    assert response[0].membership_type_code == 'ADMIN'
 
 
 def test_get_invitations(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
@@ -222,9 +222,9 @@ def test_get_owner_count_two_owner_with_admins(session, keycloak_mock):  # pylin
     user = factory_user_model(user_info=user_with_token)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
     user2 = factory_user_model(user_info=TestUserInfo.user2)
-    factory_membership_model(user2.id, org._model.id, member_type='ADMIN')
+    factory_membership_model(user2.id, org._model.id, member_type='COORDINATOR')
     user3 = factory_user_model(user_info=TestUserInfo.user3)
-    factory_membership_model(user3.id, org._model.id, member_type='OWNER')
+    factory_membership_model(user3.id, org._model.id, member_type='ADMIN')
     assert org.get_owner_count() == 2
 
 
@@ -235,9 +235,9 @@ def test_delete_org_with_members_fail(session, auth_mock, keycloak_mock):  # pyl
     user = factory_user_model(user_info=user_with_token)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
     user2 = factory_user_model(user_info=TestUserInfo.user2)
-    factory_membership_model(user2.id, org._model.id, member_type='ADMIN')
+    factory_membership_model(user2.id, org._model.id, member_type='COORDINATOR')
     user3 = factory_user_model(user_info=TestUserInfo.user3)
-    factory_membership_model(user3.id, org._model.id, member_type='OWNER')
+    factory_membership_model(user3.id, org._model.id, member_type='ADMIN')
 
     with pytest.raises(BusinessException) as exception:
         OrgService.delete_org(org.as_dict()['id'], TestJwtClaims.public_user_role)

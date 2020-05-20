@@ -294,7 +294,7 @@ def test_authorizations_for_affiliated_users_returns_200(client, jwt, session): 
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.json.get('orgMembership') == 'OWNER'
+    assert rv.json.get('orgMembership') == 'ADMIN'
 
 
 def test_authorizations_for_expanded_result(client, jwt, session):  # pylint:disable=unused-argument
@@ -313,7 +313,7 @@ def test_authorizations_for_expanded_result(client, jwt, session):  # pylint:dis
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.json.get('orgMembership') == 'OWNER'
+    assert rv.json.get('orgMembership') == 'ADMIN'
     assert rv.json.get('account', None) is None
 
     rv = client.get(f'/api/v1/entities/{entity.business_identifier}/authorizations?expanded=true',
