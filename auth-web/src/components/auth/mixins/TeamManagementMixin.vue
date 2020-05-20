@@ -183,8 +183,8 @@ export default class TeamManagementMixin extends Vue {
   protected canInvite (): boolean {
     return this.currentMembership &&
             this.currentMembership.membershipStatus === MembershipStatus.Active &&
-            (this.currentMembership.membershipTypeCode === MembershipType.Owner ||
-             this.currentMembership.membershipTypeCode === MembershipType.Admin)
+            (this.currentMembership.membershipTypeCode === MembershipType.Admin ||
+             this.currentMembership.membershipTypeCode === MembershipType.Coordinator)
   }
 }
 </script>

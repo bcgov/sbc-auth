@@ -95,7 +95,7 @@ export default class AffiliatedEntityList extends Vue {
   private canRemove (): boolean {
     return this.currentMembership &&
             this.currentMembership.membershipStatus === MembershipStatus.Active &&
-            this.currentMembership.membershipTypeCode === MembershipType.Owner
+            this.currentMembership.membershipTypeCode === MembershipType.Admin
   }
 
   private isNameRequest (corpType: string): boolean {

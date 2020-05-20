@@ -137,8 +137,8 @@ export default class AddUsersForm extends Vue {
   }
 
   private get availableRoles () {
-    if (this.currentMembership.membershipTypeCode !== MembershipType.Owner) {
-      return this.roles.filter(role => role.name !== 'Owner')
+    if (this.currentMembership.membershipTypeCode !== MembershipType.Admin) {
+      return this.roles.filter(role => role.name !== 'Admin')
     }
     return this.roles
   }
@@ -147,21 +147,6 @@ export default class AddUsersForm extends Vue {
 
   // Get the description from UX team
   private readonly roles: RoleInfo[] = [
-    {
-      icon: 'mdi-account',
-      name: 'Member',
-      desc: 'Can add businesses, and file for a business.'
-    },
-    {
-      icon: 'mdi-settings',
-      name: 'Admin',
-      desc: 'Can add/remove team members, add businesses, and file for a business.'
-    },
-    {
-      icon: 'mdi-shield-key',
-      name: 'Owner',
-      desc: 'Can add/remove team members and businesses, and file for a business.'
-    }
   ]
 
   private userNameRules = [
