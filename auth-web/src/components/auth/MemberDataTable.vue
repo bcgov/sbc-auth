@@ -47,7 +47,7 @@
           <v-item-group>
             <v-list-item
               three-line
-              v-for="(role, index) in availableRoles"
+              v-for="(role, index) in roleInfos"
               :key="index"
               @click="item.membershipTypeCode.toUpperCase() !== role.name.toUpperCase()? confirmChangeRole(item, role.name): ''"
               :disabled="!isRoleEnabled(role)"
@@ -130,7 +130,6 @@ export default class MemberDataTable extends Vue {
   private readonly getRoleInfo!: () => Promise<RoleInfo[]>
   private readonly roleInfos!: RoleInfo[]
 
-  private availableRoles: RoleInfo[] = []
   private readonly headerMembers = [
     {
       text: 'Team Member',
@@ -162,10 +161,10 @@ export default class MemberDataTable extends Vue {
   private formatDate = CommonUtils.formatDisplayDate
 
   private async mounted () {
-    await this.getRoleInfo()
-    this.availableRoles = this.roleInfos
-    // eslint-disable-next-line no-console
-    console.log('this.availableRoles ', JSON.stringify(this.availableRoles))
+    // need not to reload everytime .roles seldom changes
+    if (!this.roleInfos) {
+      await this.getRoleInfo()
+    }
   }
 
   private getIndexedTag (tag, index): string {
@@ -174,10 +173,9 @@ export default class MemberDataTable extends Vue {
 
   private get indexedOrgMembers () {
     // eslint-disable-next-line no-console
-    console.log('this.availableRoles***', this.availableRoles)
     var self = this
     this.activeOrgMembers.forEach(function (element) {
-      element.roleDisplayName = self.availableRoles.find(role => role.name === element.membershipTypeCode).displayName
+      element.roleDisplayName = self.roleInfos.find(role => role.name === element.membershipTypeCode).displayName
     })
     return this.activeOrgMembers.map((item, index) => ({
       index,
