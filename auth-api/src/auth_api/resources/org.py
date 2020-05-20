@@ -263,13 +263,19 @@ class OrgAffiliations(Resource):
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'affiliation')
         bearer_token = request.headers['Authorization'].replace('Bearer ', '')
+        is_new_incorporation = request.args.get('newIncorporation', 'false').lower() == 'true'
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            response, status = AffiliationService.create_affiliation(
-                org_id, request_json.get('businessIdentifier'), request_json.get('passCode'),
-                token_info=g.jwt_oidc_token_info, bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
+            if is_new_incorporation:
+                response, status = AffiliationService.create_new_incorporation(
+                    org_id, request_json.get('businessIdentifier'), request_json.get('email'), request_json.get('phone'),
+                    token_info=g.jwt_oidc_token_info, bearer_token=bearer_token).as_dict(), http_status.HTTP_204_NO_CONTENT
+            else:
+                response, status = AffiliationService.create_affiliation(
+                    org_id, request_json.get('businessIdentifier'), request_json.get('passCode'),
+                    token_info=g.jwt_oidc_token_info, bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

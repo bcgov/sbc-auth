@@ -51,6 +51,12 @@ class Error(Enum):
                                   http_status.HTTP_409_CONFLICT
     BCOL_INVALID_USERNAME_PASSWORD = 'Invalid User Id or Password', http_status.HTTP_400_BAD_REQUEST
 
+    # NR_EXPIRED = 'The specified name request has expired', http_status.HTTP_400_BAD_REQUEST
+    NR_CONSUMED = 'The specified name request has already been consumed', http_status.HTTP_400_BAD_REQUEST
+    NR_NOT_APPROVED = 'The specified name request has not been approved', http_status.HTTP_400_BAD_REQUEST
+    NR_NOT_FOUND = 'The specified name request number could not be found', http_status.HTTP_400_BAD_REQUEST
+    NR_INVALID_CONTACT = 'Invalid email or phone number', http_status.HTTP_400_BAD_REQUEST
+
     def __new__(cls, message, status_code):
         """Attributes for the enum."""
         obj = object.__new__(cls)
