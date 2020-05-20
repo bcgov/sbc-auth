@@ -22,7 +22,7 @@ import pytest
 from werkzeug.exceptions import HTTPException
 
 from auth_api.services.authorization import Authorization, check_auth
-from auth_api.utils.roles import MEMBER, OWNER, STAFF, STAFF_ADMIN
+from auth_api.utils.roles import USER, ADMIN, STAFF, STAFF_ADMIN
 from tests.utilities.factory_utils import (
     TestOrgInfo, TestOrgTypeInfo, factory_affiliation_model, factory_entity_model, factory_membership_model,
     factory_org_model, factory_product_model, factory_user_model)
@@ -83,7 +83,7 @@ def test_get_user_authorizations_for_entity_service_account(session):
         {'loginSource': '', 'realm_access': {'roles': ['system']}, 'corp_type': 'CP'},
         entity.business_identifier)
     assert bool(authorization) is True
-    assert authorization.get('orgMembership', None) == 'OWNER'
+    assert authorization.get('orgMembership', None) == 'ADMIN'
 
     # Test for service accounts with wrong corp type
     authorization = Authorization.get_user_authorizations_for_entity(
@@ -147,10 +147,10 @@ def test_check_auth(session):  # pylint:disable=unused-argument
     # Test for staff role
     check_auth({'realm_access': {'roles': ['staff']}, 'sub': str(user.keycloak_guid)}, one_of_roles=[STAFF])
     # Test for owner role
-    check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, one_of_roles=[OWNER],
+    check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, one_of_roles=[ADMIN],
                business_identifier=entity.business_identifier)
     # Test for owner role with org id
-    check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, one_of_roles=[OWNER],
+    check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, one_of_roles=[ADMIN],
                org_id=org.id)
 
     # Test for exception, check for auth if resource is available for STAFF users
@@ -167,19 +167,19 @@ def test_check_auth(session):  # pylint:disable=unused-argument
 
     # Test auth where STAFF role is exact match
     with pytest.raises(HTTPException) as excinfo:
-        check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, equals_role=MEMBER,
+        check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, equals_role=USER,
                    business_identifier=entity.business_identifier)
         assert excinfo.exception.code == 403
 
     # Test auth where STAFF role is exact match
     with pytest.raises(HTTPException) as excinfo:
-        check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, equals_role=MEMBER,
+        check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, equals_role=USER,
                    org_id=org.id)
         assert excinfo.exception.code == 403
 
         # Test auth where STAFF role is exact match
         with pytest.raises(HTTPException) as excinfo:
-            check_auth({'realm_access': {'roles': ['staff_admin']}, 'sub': str(user.keycloak_guid)}, equals_role=MEMBER,
+            check_auth({'realm_access': {'roles': ['staff_admin']}, 'sub': str(user.keycloak_guid)}, equals_role=USER,
                        org_id=org.id)
             assert excinfo.exception.code == 403
 

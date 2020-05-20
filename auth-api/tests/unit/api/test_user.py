@@ -28,7 +28,7 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
-from auth_api.utils.roles import Status, MEMBER, ADMIN, UserStatus, AccessType, OWNER
+from auth_api.utils.roles import Status, USER, COORDINATOR, UserStatus, AccessType, ADMIN
 from tests import skip_in_pod
 from tests.utilities.factory_scenarios import KeycloakScenario, TestContactInfo, TestEntityInfo, TestJwtClaims, \
     TestOrgInfo, TestUserInfo, TestAnonymousMembership
@@ -56,8 +56,8 @@ def test_delete_bcros_valdiations(client, jwt, session, keycloak_mock):
     user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
     factory_membership_model(user.id, org.id)
     owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
-    member = TestAnonymousMembership.generate_random_user(MEMBER)
-    admin = TestAnonymousMembership.generate_random_user(ADMIN)
+    member = TestAnonymousMembership.generate_random_user(USER)
+    admin = TestAnonymousMembership.generate_random_user(COORDINATOR)
     membership = [member, admin]
     UserService.create_user_and_add_membership(membership, org.id, token_info=owner_claims)
     owner_headers = factory_auth_header(jwt=jwt, claims=owner_claims)
@@ -92,7 +92,7 @@ def test_delete_bcros_valdiations(client, jwt, session, keycloak_mock):
     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
 
     # add one more admin
-    new_owner = TestAnonymousMembership.generate_random_user(OWNER)
+    new_owner = TestAnonymousMembership.generate_random_user(ADMIN)
     membership = [new_owner]
     UserService.create_user_and_add_membership(membership, org.id, token_info=owner_claims)
     rv = client.delete(f"/api/v1/users/{IdpHint.BCROS.value + '/' + new_owner['username']}", headers=owner_headers,
@@ -106,9 +106,9 @@ def test_add_back_a_delete_bcros(client, jwt, session, keycloak_mock):
     user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
     factory_membership_model(user.id, org.id)
     owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
-    member = TestAnonymousMembership.generate_random_user(MEMBER)
+    member = TestAnonymousMembership.generate_random_user(USER)
     membership = [member,
-                  TestAnonymousMembership.generate_random_user(ADMIN)]
+                  TestAnonymousMembership.generate_random_user(COORDINATOR)]
     UserService.create_user_and_add_membership(membership, org.id, token_info=owner_claims)
     headers = factory_auth_header(jwt=jwt, claims=owner_claims)
     member_user_id = IdpHint.BCROS.value + '/' + member.get('username')
@@ -472,7 +472,7 @@ def test_get_orgs_for_user(client, jwt, session, keycloak_mock):  # pylint:disab
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
-    # Add an org - the current user should be auto-added as an OWNER
+    # Add an org - the current user should be auto-added as an ADMIN
     rv = client.post('/api/v1/orgs', headers=headers, data=json.dumps(TestOrgInfo.org1),
                      content_type='application/json')
 
@@ -501,7 +501,7 @@ def test_user_authorizations_returns_200(client, jwt, session):  # pylint:disabl
     rv = client.get('/api/v1/users/authorizations', headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.json.get('authorizations')[0].get('orgMembership') == 'OWNER'
+    assert rv.json.get('authorizations')[0].get('orgMembership') == 'ADMIN'
 
     # Test with invalid user
     claims['sub'] = str(uuid.uuid4())
@@ -601,7 +601,7 @@ def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock):
     contact_link.user = user_model2
     contact_link.commit()
 
-    membership = MembershipModel(org_id=org_id, user_id=user_model2.id, membership_type_code='MEMBER',
+    membership = MembershipModel(org_id=org_id, user_id=user_model2.id, membership_type_code='USER',
                                  membership_type_status=Status.ACTIVE.value)
     membership.save()
 
