@@ -23,7 +23,7 @@ export default class UserModule extends VuexModule {
   userContact: Contact = undefined
   termsOfUse: TermsOfUseDocument = undefined
   redirectAfterLoginUrl: string = ''
-  roleInfos: RoleInfo[]
+  roleInfos: RoleInfo[] = undefined
 
   @Mutation
   public setUserProfile (userProfile: User) {
