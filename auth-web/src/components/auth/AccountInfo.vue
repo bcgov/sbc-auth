@@ -191,7 +191,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private canChangeAddress (): boolean {
     if (this.isPremiumAccount) {
       const premiumOwner =
-        this.currentMembership?.membershipTypeCode === MembershipType.Owner || this.currentMembership?.membershipTypeCode === MembershipType.Admin
+        this.currentMembership?.membershipTypeCode === MembershipType.Admin || this.currentMembership?.membershipTypeCode === MembershipType.Coordinator
       return premiumOwner
     }
     return false
@@ -211,7 +211,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   private get isOwner (): boolean {
-    return this.currentMembership?.membershipTypeCode === MembershipType.Owner
+    return this.currentMembership?.membershipTypeCode === MembershipType.Admin
   }
 
   private canChangeAccountName (): boolean {
@@ -223,7 +223,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
       return false
     }
     switch (this.currentMembership?.membershipTypeCode) {
-      case MembershipType.Owner:
+      case MembershipType.Admin:
         return true
       default:
         return false

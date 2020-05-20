@@ -187,10 +187,10 @@ export default class MemberDataTable extends Vue {
 
   private isRoleEnabled (role: RoleInfo): boolean {
     switch (this.currentMembership.membershipTypeCode) {
-      case MembershipType.Owner:
-        return true
       case MembershipType.Admin:
-        if (role.name !== 'Owner') {
+        return true
+      case MembershipType.Coordinator:
+        if (role.name !== 'Admin') {
           return true
         }
         return false
@@ -205,9 +205,9 @@ export default class MemberDataTable extends Vue {
     }
 
     switch (this.currentMembership.membershipTypeCode) {
-      case MembershipType.Owner:
+      case MembershipType.Admin:
         // Owners can change roles of other users who are not owners
-        if (!this.isOwnMembership(memberBeingChanged) && memberBeingChanged.membershipTypeCode !== MembershipType.Owner) {
+        if (!this.isOwnMembership(memberBeingChanged) && memberBeingChanged.membershipTypeCode !== MembershipType.Admin) {
           return true
         }
         // And they can downgrade their own role if there is another owner on the team
@@ -215,7 +215,7 @@ export default class MemberDataTable extends Vue {
           return true
         }
         return false
-      case MembershipType.Admin:
+      case MembershipType.Coordinator:
         // Admins can change roles of their own
         return this.isOwnMembership(memberBeingChanged)
       default:
@@ -230,18 +230,18 @@ export default class MemberDataTable extends Vue {
     }
 
     // Can't remove unless Admin/Owner
-    if (this.currentMembership.membershipTypeCode === MembershipType.Member) {
+    if (this.currentMembership.membershipTypeCode === MembershipType.User) {
       return false
     }
 
     // Can't remove Admin unless Owner
     if (this.currentMembership.membershipTypeCode === MembershipType.Admin &&
-      memberToRemove.membershipTypeCode === MembershipType.Admin) {
+      memberToRemove.membershipTypeCode === MembershipType.Coordinator) {
       return false
     }
 
     // No one can change an OWNER's status, only option is OWNER to leave the team. #2319
-    if (memberToRemove.membershipTypeCode === MembershipType.Owner) {
+    if (memberToRemove.membershipTypeCode === MembershipType.Admin) {
       return false
     }
 
@@ -256,7 +256,7 @@ export default class MemberDataTable extends Vue {
   }
 
   private ownerCount (): number {
-    return this.activeOrgMembers.filter(member => member.membershipTypeCode === MembershipType.Owner).length
+    return this.activeOrgMembers.filter(member => member.membershipTypeCode === MembershipType.Admin).length
   }
 
   private customSortActive (items, index, isDescending) {
@@ -316,7 +316,7 @@ export default class MemberDataTable extends Vue {
   }
 
   private confirmLeaveTeam (member: Member) {
-    if (member.membershipTypeCode === MembershipType.Owner &&
+    if (member.membershipTypeCode === MembershipType.Admin &&
       this.ownerCount() === 1 &&
       !this.canDissolve()) {
       this.$emit('single-owner-error')

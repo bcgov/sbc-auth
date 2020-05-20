@@ -50,7 +50,7 @@ export default class TeamManagement extends Mixins(NextPageMixin) {
   private canInvite (): boolean {
     return this.currentMembership &&
             this.currentMembership.membershipStatus === MembershipStatus.Active &&
-            (this.currentMembership.membershipTypeCode === MembershipType.Owner ||
+            (this.currentMembership.membershipTypeCode === MembershipType.Coordinator ||
              this.currentMembership.membershipTypeCode === MembershipType.Admin)
   }
 

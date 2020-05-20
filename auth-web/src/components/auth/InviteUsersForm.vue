@@ -112,8 +112,8 @@ export default class InviteUsersForm extends Vue {
   }
 
   private get availableRoles () {
-    if (this.currentMembership.membershipTypeCode !== MembershipType.Owner) {
-      return this.roles.filter(role => role.name !== 'Owner')
+    if (this.currentMembership.membershipTypeCode !== MembershipType.Admin) {
+      return this.roles.filter(role => role.name !== 'Admin')
     }
     return this.roles
   }

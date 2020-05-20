@@ -76,9 +76,9 @@ export enum MembershipStatus {
 }
 
 export enum MembershipType {
-  'Owner' = 'OWNER',
   'Admin' = 'ADMIN',
-  'Member' = 'MEMBER'
+  'Coordinator' = 'COORDINATOR',
+  'User' = 'USER'
 }
 
 export interface RoleInfo {
