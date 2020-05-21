@@ -1,23 +1,30 @@
 <template>
-  <v-container id="step-buttons-container">
-    <template v-for="(step, index) in steps">
-      <div class="step" :key="index">
-        <v-btn
-          fab
-          class="step__icon"
-          active-class="no-active filled"
-          :id=step.id :outlined="true"
-          color="#1A5A96"
-          :to=step.to>
-          <v-icon>{{step.step}}</v-icon>
-        </v-btn>
-        <v-btn class="step__label" active-class="no-active selected" text color="#1A5A96" :to=step.to>
-          {{step.text}}
-        </v-btn>
-        <span :class="{ 'arrow-down': isCurrentStep(step) }"></span>
-      </div>
-    </template>
-  </v-container>
+  <section>
+    <v-container id="step-buttons-container">
+      <template v-for="(step, index) in steps">
+        <div class="step" :key="index">
+          <v-btn
+            fab
+            class="step__icon"
+            active-class="filled no-active"
+            :id=step.id :outlined="true"
+            color="#1A5A96"
+            :to=step.to>
+            <v-icon>{{step.step}}</v-icon>
+          </v-btn>
+          <v-btn class="step__label" active-class="selected no-active" text color="#1A5A96" :to=step.to>
+            {{step.text}}
+          </v-btn>
+          <span :class="{ 'arrow-down': isCurrentStep(step) }"></span>
+        </div>
+      </template>
+    </v-container>
+    <div class="next-step-wrapper">
+      <span class="next-step-btn" :class="{ 'hide-next-btn': getCurrentStep() === steps.length }" @click="nextStep()">
+        <u>Next Step</u><v-icon color="#1A5A96">mdi-menu-right</v-icon>
+      </span>
+    </div>
+  </section>
 </template>
 
 <script lang="ts">
@@ -53,8 +60,23 @@ export default class Stepper extends Vue {
     }
   ]
 
+  private nextStep (): void {
+    const currentStepIndex = this.getCurrentStep()
+    const nextStep = this.steps[currentStepIndex]
+    this.$router.push(nextStep.to)
+  }
+
   private isCurrentStep (step: any): boolean {
     return this.$route.path === step.to
+  }
+
+  private getCurrentStep (): number {
+    const route = this.$route.path
+    for (const path of this.steps) {
+      if (path.to === route) {
+        return path.step
+      }
+    }
   }
 }
 </script>
@@ -88,8 +110,8 @@ export default class Stepper extends Vue {
   }
 
   .step__icon {
+    margin-bottom: .5rem;
     position: relative;
-    z-index: 2;
     font-weight: 400;
   }
 
@@ -111,5 +133,23 @@ export default class Stepper extends Vue {
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
     border-top: 8px solid $BCgoveBueText1;
+  }
+
+  .next-step-wrapper {
+    min-height: 24px;
+    .next-step-btn {
+      color: $BCgoveBueText1;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .next-step-btn:hover {
+      cursor: pointer;
+    }
+
+    .hide-next-btn {
+      min-height: 2rem;
+      display: none;
+    }
   }
 </style>

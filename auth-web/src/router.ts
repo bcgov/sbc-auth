@@ -62,6 +62,10 @@ export function getRoutes (): RouteConfig[] {
       component: HomeView,
       children: [
         {
+          path: '',
+          redirect: 'decide-business-info'
+        },
+        {
           path: 'decide-business-info',
           component: DecideBusinessInfo
         },
