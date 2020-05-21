@@ -57,8 +57,10 @@ export function getRoutes (): RouteConfig[] {
   const teamManagement = () => import(/* webpackChunkName: "account-settings" */ './components/auth/TeamManagement.vue')
   const transaction = () => import(/* webpackChunkName: "account-settings" */ './components/auth/Transactions.vue')
   const routes = [
-    { path: '/',
-      name: 'root',
+    { path: '/', name: 'root', redirect: 'home'
+    },
+    { path: '/home',
+      name: 'home',
       component: HomeView,
       children: [
         {
@@ -67,24 +69,26 @@ export function getRoutes (): RouteConfig[] {
         },
         {
           path: 'decide-business-info',
-          component: DecideBusinessInfo
+          component: DecideBusinessInfo,
+          meta: { showNavBar: true }
         },
         {
           path: 'request-name-info',
-          component: RequestNameInfo
+          component: RequestNameInfo,
+          meta: { showNavBar: true }
         },
         {
           path: 'incorp-or-register-info',
-          component: IncorpOrRegisterInfo
+          component: IncorpOrRegisterInfo,
+          meta: { showNavBar: true }
         },
         {
           path: 'maintain-business-info',
-          component: MaintainBusinessInfo
+          component: MaintainBusinessInfo,
+          meta: { showNavBar: true }
         }
       ],
       meta: { showNavBar: true }
-    },
-    { path: '/home', name: 'home', component: HomeView, meta: { showNavBar: true }
     },
     { path: '/business',
       name: 'business-root',
