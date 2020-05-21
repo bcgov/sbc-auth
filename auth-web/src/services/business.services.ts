@@ -1,5 +1,5 @@
 import Axios, { AxiosResponse } from 'axios'
-import { Business, FolioNumberload } from '@/models/business'
+import { Business, FolioNumberload, NumberedBusinessRequest } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
@@ -25,6 +25,10 @@ export default class BusinessService {
 
   static async searchBusiness (businessIdentifier: string): Promise<AxiosResponse<any>> {
     return axios.get(`${ConfigHelper.getLegalAPIUrl()}/businesses/${businessIdentifier}`)
+  }
+
+  static async createNumberedBusiness (numberedBusinessRequest: NumberedBusinessRequest): Promise<AxiosResponse<any>> {
+    return axios.post(`${ConfigHelper.getLegalAPIUrl()}/businesses?draft=true`, numberedBusinessRequest)
   }
 
   static async updateFolioNumber (folioNumber: FolioNumberload): Promise<AxiosResponse<any>> {
