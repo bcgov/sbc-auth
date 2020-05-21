@@ -85,7 +85,6 @@ export default class BusinessModule extends VuexModule {
 
     await BusinessService.createNumberedBusiness(requestBody)
       .then(response => {
-        console.log(response)
         if (response && response.data && (response.status === 200 || response.status === 201)) {
           const tempRegNum = response.data.filing?.business?.identifier
           if (tempRegNum) {

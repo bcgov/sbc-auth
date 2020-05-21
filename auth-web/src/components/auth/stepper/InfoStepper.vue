@@ -145,6 +145,7 @@ export default class Stepper extends Vue {
 
     .next-step-btn:hover {
       cursor: pointer;
+      color: $BCgoveBueText2;
     }
 
     .hide-next-btn {

@@ -3,7 +3,7 @@
     <v-row>
       <!-- Info Column -->
       <v-col cols="12" md="6">
-        <h2>Incorporate or Register</h2>
+        <h2>Manage and Maintain Your Business</h2>
         <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
           <v-icon size="6" class="list-item-bullet">mdi-square</v-icon>
           <v-list-item-content>
@@ -23,7 +23,11 @@
         </v-list-item>
         <!-- Panel Btns -->
         <div class="maintain-info-btns">
-          <v-btn large color="#fcba19" @click="login()" class="my-5">
+          <v-btn v-if="userProfile" large color="#fcba19" class="my-5"
+            @click="emitManageBusinesses()">
+            Manage an Existing Business
+          </v-btn>
+          <v-btn v-else large color="#fcba19" @click="login()" class="my-5">
             Log in with BC Services Card
           </v-btn>
           <v-btn large outlined color="#003366" class="btn-learn-more"
@@ -42,7 +46,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Pages } from '@/util/constants'
 
 @Component({})
@@ -58,9 +62,14 @@ export default class MaintainBusinessInfo extends Vue {
     { text: 'See the history of your business\' filings and download copies of all documents including your Certificate of Incorporation and more.' }
   ]
 
+  @Prop() userProfile
+
   private login (): void {
     this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
   }
+
+  @Emit('manage-businesses')
+  private emitManageBusinesses () {}
 }
 </script>
 

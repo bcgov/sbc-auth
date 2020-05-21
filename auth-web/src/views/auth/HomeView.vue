@@ -356,12 +356,6 @@ export default class HomeView extends Vue {
     }
   }
 
-  @media only screen and (max-width: 600px) {
-    .hero-banner {
-      background-image: none;
-    }
-  }
-
   .hero-banner__cta-btns {
     .cta-btn + .cta-btn {
       margin-left: 0.5rem;

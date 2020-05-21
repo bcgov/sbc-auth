@@ -12,6 +12,15 @@
             </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item class="list-item">
+          <v-icon size="6" class="list-item-bullet">mdi-square</v-icon>
+          <v-list-item-content>
+            <v-list-item-subtitle class="list-item-text">
+              You can choose to incorporate a <NumberedCompanyTooltip />
+              and start your incorporation immediately.
+            </v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
         <!-- Panel Btns -->
         <div class="request-name-info-btns mt-5">
           <v-btn large color="#003366" class="white--text"
@@ -41,14 +50,18 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
 
-@Component({})
+@Component({
+  components: {
+    NumberedCompanyTooltip
+  }
+})
 export default class RequestNameInfo extends Vue {
   private bulletPoints: Array<any> = [
     { text: 'Create a unique name that ensures the public is not confused or misled by similar corporate names.' },
     { text: 'Submit this name for examination by the Business Registry' },
-    { text: 'If your name is approved, you can use it to incorporate or register your business.' },
-    { text: `You can choose to incorporate a numbered Benefit Company and start your incorporation immediately.` }
+    { text: 'If your name is approved, you can use it to incorporate or register your business.' }
   ]
 }
 </script>
@@ -59,6 +72,10 @@ export default class RequestNameInfo extends Vue {
   #request-name-info-container {
     padding-top: 0!important;
     flex-wrap: wrap;
+
+    a:hover {
+      color: $BCgoveBueText2;
+    }
 
     .list-item {
       margin: .5rem 0;
