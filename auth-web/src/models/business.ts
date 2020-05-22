@@ -21,3 +21,12 @@ export interface Business {
 export interface Businesses {
     entities: Business[]
 }
+
+export interface NumberedBusinessRequest {
+    filing: {
+        header: {
+            name: string,
+            accountId: number
+        }
+    }
+}
