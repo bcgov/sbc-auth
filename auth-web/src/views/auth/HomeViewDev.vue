@@ -121,6 +121,7 @@ import { VueConstructor } from 'vue'
 @Component({
   name: 'Home',
   components: {
+    InfoStepper,
     LoginBCSC
   },
   computed: {

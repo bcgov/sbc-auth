@@ -61,8 +61,8 @@ export function getRoutes (): RouteConfig[] {
   const routes = [
     { path: '/', name: 'root', redirect: 'home' },
     { path: '/home', name: 'home', component: HomeView, meta: { showNavBar: true } },
-    { path: '/home/dev',
-      name: 'home',
+    { path: '/home-dev',
+      name: 'home-dev',
       component: HomeViewDev,
       children: [
         {
@@ -257,14 +257,9 @@ router.beforeEach((to, from, next) => {
 
 // Feature Flagging Routes
 // For Development only
-// const test = LaunchDarklyService.init('5db9da115f58e008123cd783')
-// console.log(test)
-const flagCondition = LaunchDarklyService.getFlag('auth-web-dev-only')
-console.log(flagCondition)
-console.log(LaunchDarklyService.isFlagsAvailable)
-
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.conditionalRoute)) {
+    const flagCondition = LaunchDarklyService.getFlag('auth-web-dev-only')
     // this route requires condition to be accessed
     // if not, redirect to home page.
     if (!flagCondition) {
