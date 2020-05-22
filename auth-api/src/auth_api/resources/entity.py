@@ -101,6 +101,25 @@ class EntityResource(Resource):
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
 
+    @staticmethod
+    @_JWT.has_one_of_roles([Role.SYSTEM.value])
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    def delete(business_identifier):
+        """Delete an existing entity by it's business number."""
+        try:
+            entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
+                                                               allowed_roles=ALL_ALLOWED_ROLES)
+            if entity is not None:
+                entity.delete()
+                response, status = None, http_status.HTTP_204_NO_CONTENT
+            else:
+                response, status = {'message': 'A business for {} was not found.'.format(business_identifier)}, \
+                                   http_status.HTTP_404_NOT_FOUND
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
 
 @cors_preflight('DELETE,POST,PUT,OPTIONS')
 @API.route('/<string:business_identifier>/contacts', methods=['DELETE', 'POST', 'PUT', 'OPTIONS'])

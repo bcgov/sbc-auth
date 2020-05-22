@@ -223,3 +223,12 @@ class Entity:
                 entity_name = entity_json.get('business').get('legalName')
                 self._model.name = entity_name
                 self._model.save()
+
+    def delete(self):
+        """Delete an entity."""
+        if self._model is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        if self._model.affiliations:
+            raise BusinessException(Error.ENTITY_DELETE_FAILED, None)
+        self.delete_contact()
+        self._model.delete()

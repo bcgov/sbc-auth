@@ -27,6 +27,11 @@ from auth_api.services.org import Org as OrgService
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
 from .rest_service import RestService
+from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import ConnectTimeout, HTTPError
+from urllib3.util.retry import Retry
+
+from auth_api.exceptions import ServiceUnavailableException
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -129,20 +134,29 @@ class Affiliation:
         if affiliation is not None:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
+        affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id)
+        affiliation.save()
+
         # Retrieve entity name from Legal-API and update the entity with current name
         # TODO: Create subscription to listen for future name updates
         current_app.logger.debug('<create_affiliation sync_name')
-        entity.sync_name(bearer_token)
 
-        affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id)
-        affiliation.save()
-        entity.set_pass_code_claimed(True)
+        try:
+            entity.sync_name(bearer_token)
+            entity.set_pass_code_claimed(True)
+        except (HTTPError, ServiceUnavailableException) as e:
+            current_app.logger.info('Error occurred while calling legal-api rto get entity')
+            current_app.logger.warning(e)
+
+            # Delete the affiliation now
+            affiliation.delete()
+
         current_app.logger.debug('<create_affiliation affiliated')
 
         return Affiliation(affiliation)
 
     @staticmethod
-    def create_new_incorporation(org_id, business_identifier=None, email=None, phone=None, token_info: Dict = None, bearer_token: str = None, ):
+    def create_new_business(org_id, business_identifier=None, email=None, phone=None, token_info: Dict = None, bearer_token: str = None, ):
         """Initiate a new incorporation."""
         # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
@@ -156,9 +170,8 @@ class Affiliation:
 
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         # If entity already exists and is already affiliated to an org, throw error
-        if entity:
-            if entity.as_dict()['passCodeClaimed']:
-                raise BusinessException(Error.NR_CONSUMED, None)
+        if entity and entity.as_dict()['passCodeClaimed']:
+            raise BusinessException(Error.NR_CONSUMED, None)
 
         # Call the legal-api to verify the NR details
         get_nr_url = current_app.config.get('LEGAL_API_URL') + f'/nameRequests/{business_identifier}'
@@ -191,6 +204,9 @@ class Affiliation:
                     }
                 }
             })
+
+            current_app.logger.debug('NR Response....\n')
+            current_app.logger.debug(post_business_response.json())
 
         else:
             raise BusinessException(Error.NR_NOT_FOUND, None)

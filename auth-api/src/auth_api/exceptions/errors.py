@@ -57,6 +57,8 @@ class Error(Enum):
     NR_NOT_FOUND = 'The specified name request number could not be found', http_status.HTTP_400_BAD_REQUEST
     NR_INVALID_CONTACT = 'Invalid email or phone number', http_status.HTTP_400_BAD_REQUEST
 
+    ENTITY_DELETE_FAILED = 'Cannot delete entity due to related records.', http_status.HTTP_400_BAD_REQUEST
+
     def __new__(cls, message, status_code):
         """Attributes for the enum."""
         obj = object.__new__(cls)
