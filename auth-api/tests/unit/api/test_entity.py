@@ -345,3 +345,40 @@ def test_authorizations_expanded_for_staff(client, jwt, session):  # pylint:disa
     assert rv.json.get('account').get('name') == org.name
     assert rv.json.get('business').get('name') == entity.name
     assert rv.json.get('business').get('folioNumber') == entity.folio_number
+
+
+def test_delete_entity(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an entity can be deleted."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    rv = client.delete('/api/v1/entities/{}'.format(TestEntityInfo.entity1.get('businessIdentifier')), headers=headers)
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+
+def test_delete_entity_unauthorized(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an entity cannot be deleted by any role other than system."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+
+    rv = client.delete('/api/v1/entities/{}'.format(TestEntityInfo.entity1.get('businessIdentifier')), headers=headers,
+                       content_type='application/json')
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+
+def test_add_entity_idempotent(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an entity can be POSTed with same data."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_202_ACCEPTED
+

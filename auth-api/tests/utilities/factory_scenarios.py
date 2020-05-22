@@ -403,6 +403,7 @@ class TestAffliationInfo(dict, Enum):
     affliation2 = {'businessIdentifier': 'CP1234568'}
     affiliation3 = {'businessIdentifier': 'CP0002103', 'passCode': '222222222'}
     affiliation4 = {'businessIdentifier': 'CP0002106', 'passCode': '222222222'}
+    nr_affiliation = {'businessIdentifier': 'NR 1234567', 'phone': '1112223333' }
     invalid = {'name': 'CP1234567'}
 
 
