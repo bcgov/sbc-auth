@@ -39,25 +39,25 @@ export default class Stepper extends Vue {
       id: 'step-1-btn',
       step: 1,
       text: 'Decide on a Business Type',
-      to: '/home/decide-business-info'
+      to: '/home/dev/decide-business-info'
     },
     {
       id: 'step-2-btn',
       step: 2,
       text: 'Request a Name',
-      to: '/home/request-name-info'
+      to: '/home/dev/request-name-info'
     },
     {
       id: 'step-3-btn',
       step: 3,
       text: 'Incorporate or Register',
-      to: '/home/incorp-or-register-info'
+      to: '/home/dev/incorp-or-register-info'
     },
     {
       id: 'step-4-btn',
       step: 4,
       text: 'Maintain Your Business',
-      to: '/home/maintain-business-info'
+      to: '/home/dev/maintain-business-info'
     }
   ]
 

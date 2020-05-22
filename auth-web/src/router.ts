@@ -21,6 +21,7 @@ import HomeViewDev from '@/views/auth/HomeViewDev.vue'
 import IncorpOrRegisterInfo from '@/components/auth/IncorpOrRegisterInfo.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import MaintainBusinessInfo from '@/components/auth/MaintainBusinessInfo.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
@@ -58,9 +59,9 @@ export function getRoutes (): RouteConfig[] {
   const teamManagement = () => import(/* webpackChunkName: "account-settings" */ './components/auth/TeamManagement.vue')
   const transaction = () => import(/* webpackChunkName: "account-settings" */ './components/auth/Transactions.vue')
   const routes = [
-    { path: '/', name: 'root', redirect: 'home'
-    },
-    { path: '/home',
+    { path: '/', name: 'root', redirect: 'home' },
+    { path: '/home', name: 'home', component: HomeView, meta: { showNavBar: true } },
+    { path: '/home/dev',
       name: 'home',
       component: HomeViewDev,
       children: [
@@ -89,7 +90,7 @@ export function getRoutes (): RouteConfig[] {
           meta: { showNavBar: true }
         }
       ],
-      meta: { showNavBar: true }
+      meta: { conditionalRoute: true, showNavBar: true }
     },
     { path: '/business',
       name: 'business-root',
@@ -251,6 +252,28 @@ router.beforeEach((to, from, next) => {
       }
     }
     originalTarget ? next(originalTarget) : next()
+  }
+})
+
+// Feature Flagging Routes
+// For Development only
+// const test = LaunchDarklyService.init('5db9da115f58e008123cd783')
+// console.log(test)
+const flagCondition = LaunchDarklyService.getFlag('auth-web-dev-only')
+console.log(flagCondition)
+console.log(LaunchDarklyService.isFlagsAvailable)
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.conditionalRoute)) {
+    // this route requires condition to be accessed
+    // if not, redirect to home page.
+    if (!flagCondition) {
+      next({ path: '/home' })
+    } else {
+      next()
+    }
+  } else {
+    next()
   }
 })
 

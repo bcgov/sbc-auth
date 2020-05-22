@@ -13,7 +13,7 @@
           </v-list-item-content>
         </v-list-item>
         <!-- Sub Bullet Points -->
-        <v-list-item class="list-item list-item-sub" v-for="(item, index) in subBulletPoints" :key="index">
+        <v-list-item class="list-item list-item-sub" v-for="(item, index) in subBulletPoints" :key="`Sub-index: ${index}`">
           <v-icon size="6" class="list-item-bullet">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
