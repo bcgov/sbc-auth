@@ -358,13 +358,10 @@ def test_validate_invalid_pass_code(app, session):  # pylint:disable=unused-argu
 
 def test_delete_entity(app, session):  # pylint:disable=unused-argument
     """Assert that an entity can be deleted."""
-
     entity_model = factory_entity_model()
     entity = EntityService(entity_model)
 
     org = factory_org_service()
-    org_dictionary = org.as_dict()
-    org_id = org_dictionary['id']
 
     contact = factory_contact_model()
 
@@ -379,4 +376,3 @@ def test_delete_entity(app, session):  # pylint:disable=unused-argument
     entity = EntityService.find_by_entity_id(entity.identifier)
 
     assert entity is None
-

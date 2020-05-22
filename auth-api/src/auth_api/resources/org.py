@@ -270,12 +270,13 @@ class OrgAffiliations(Resource):
         try:
             if is_new_business:
                 response, status = AffiliationService.create_new_business_affiliation(
-                    org_id, request_json.get('businessIdentifier'), request_json.get('email'), request_json.get('phone'),
+                    org_id, request_json.get('businessIdentifier'), request_json.get('email'),
+                    request_json.get('phone'),
                     token_info=g.jwt_oidc_token_info, bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
             else:
                 response, status = AffiliationService.create_affiliation(
                     org_id, request_json.get('businessIdentifier'), request_json.get('passCode'),
-                    token_info=g.jwt_oidc_token_info, bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
+                    token_info=g.jwt_oidc_token_info).as_dict(), http_status.HTTP_201_CREATED
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
