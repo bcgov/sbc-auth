@@ -16,22 +16,20 @@
 from typing import Dict
 
 from flask import current_app
+from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.exceptions import BusinessException
+from auth_api.exceptions import ServiceUnavailableException
 from auth_api.exceptions.errors import Error
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
+from auth_api.utils.enums import CorpType
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
 from .rest_service import RestService
-from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import ConnectTimeout, HTTPError
-from urllib3.util.retry import Retry
-
-from auth_api.exceptions import ServiceUnavailableException
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -137,26 +135,13 @@ class Affiliation:
         affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id)
         affiliation.save()
 
-        # Retrieve entity name from Legal-API and update the entity with current name
-        # TODO: Create subscription to listen for future name updates
-        current_app.logger.debug('<create_affiliation sync_name')
-
-        try:
-            entity.sync_name(bearer_token)
-            entity.set_pass_code_claimed(True)
-        except (HTTPError, ServiceUnavailableException) as e:
-            current_app.logger.info('Error occurred while calling legal-api rto get entity')
-            current_app.logger.warning(e)
-
-            # Delete the affiliation now
-            affiliation.delete()
-
-        current_app.logger.debug('<create_affiliation affiliated')
+        entity.set_pass_code_claimed(True)
 
         return Affiliation(affiliation)
 
     @staticmethod
-    def create_new_business(org_id, business_identifier=None, email=None, phone=None, token_info: Dict = None, bearer_token: str = None, ):
+    def create_new_business_affiliation(org_id, business_identifier=None, email=None, phone=None,
+                                        token_info: Dict = None, bearer_token: str = None, ):
         """Initiate a new incorporation."""
         # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
@@ -174,11 +159,9 @@ class Affiliation:
             raise BusinessException(Error.NR_CONSUMED, None)
 
         # Call the legal-api to verify the NR details
-        get_nr_url = current_app.config.get('LEGAL_API_URL') + f'/nameRequests/{business_identifier}'
-        get_nr_response = RestService.get(get_nr_url, token=bearer_token)
+        nr_json = Affiliation._get_nr_details(business_identifier, bearer_token)
 
-        if get_nr_response:
-            nr_json = get_nr_response.json()
+        if nr_json:
             status = nr_json.get('state')
             nr_phone = nr_json.get('applicants').get('phoneNumber')
             nr_email = nr_json.get('applicants').get('emailAddress')
@@ -189,31 +172,22 @@ class Affiliation:
             if (phone and phone != nr_phone) or (email and email != nr_email):
                 raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
-            # If all good call legal-api to create the business
-            post_business_url = current_app.config.get('LEGAL_API_URL') + f'/businesses?draft=true'
-            post_business_response = RestService.post(post_business_url, token=bearer_token, data={
-                'filing': {
-                    'header': {
-                        'name': 'incorporationApplication',
-                        'accountId': org_id
-                    },
-                    'incorporationApplication': {
-                        'nameRequest': {
-                            'nrNumber': business_identifier
-                        }
-                    }
-                }
-            })
-
-            current_app.logger.debug('NR Response....\n')
-            current_app.logger.debug(post_business_response.json())
-
+            # If all good create the business and affiliation
+            if not entity:
+                name = next(
+                    (name.get('name') for name in nr_json.get('names') if name.get('state', None) == 'APPROVED'), None)
+                entity = EntityService.save_entity({
+                    'businessIdentifier': business_identifier,
+                    'name': name,
+                    'corpTypeCode': CorpType.NR.value,
+                    'passCodeClaimed': True
+                })
+                # Create an affiliation with org
+                affiliation = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
+                affiliation.save()
+                return Affiliation(affiliation)
         else:
             raise BusinessException(Error.NR_NOT_FOUND, None)
-
-        current_app.logger.debug('<create_affiliation affiliated')
-
-        return None
 
     @staticmethod
     def delete_affiliation(org_id, business_identifier, token_info: Dict = None):
@@ -236,3 +210,15 @@ class Affiliation:
 
         affiliation.delete()
         entity.set_pass_code_claimed(False)
+
+    @staticmethod
+    def _get_nr_details(nr_number: str, token: str):
+        """Return NR details by calling legal-api."""
+        get_nr_url = current_app.config.get('LEGAL_API_URL') + f'/nameRequests/{nr_number}'
+        try:
+            get_nr_response = RestService.get(get_nr_url, token=token)
+        except (HTTPError, ServiceUnavailableException) as e:
+            current_app.logger.info(e)
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        return get_nr_response.json()
