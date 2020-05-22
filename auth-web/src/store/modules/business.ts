@@ -52,7 +52,9 @@ export default class BusinessModule extends VuexModule {
   public async addBusiness (payload: LoginPayload) {
     const requestBody: CreateAffiliationRequestBody = {
       businessIdentifier: payload.businessIdentifier,
-      passCode: payload.passCode
+      passCode: payload.passCode,
+      phone: payload.phone,
+      email: payload.email
     }
 
     const currentOrganization: Organization = this.context.rootState.org.currentOrganization

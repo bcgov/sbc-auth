@@ -3,7 +3,9 @@ import { Organization } from '@/models/Organization'
 
 export interface CreateRequestBody {
   businessIdentifier: string
-  passCode: string
+  passCode?: string
+  phone?: string
+  email?: string
 }
 
 export interface Affiliation {
