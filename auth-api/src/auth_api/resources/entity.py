@@ -45,7 +45,8 @@ class EntityResources(Resource):
         request_json = request.get_json()
 
         # If the record exists, just return existing record.
-        entity = EntityService.find_by_business_identifier(request_json.get('businessIdentifier'), token_info=g.jwt_oidc_token_info,
+        entity = EntityService.find_by_business_identifier(request_json.get('businessIdentifier'),
+                                                           token_info=g.jwt_oidc_token_info,
                                                            allowed_roles=ALL_ALLOWED_ROLES)
         if entity:
             return entity.as_dict(), http_status.HTTP_202_ACCEPTED

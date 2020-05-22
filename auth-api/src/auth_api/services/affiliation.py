@@ -86,8 +86,7 @@ class Affiliation:
         return data
 
     @staticmethod
-    def create_affiliation(org_id, business_identifier, pass_code=None, token_info: Dict = None,
-                           bearer_token: str = None, ):
+    def create_affiliation(org_id, business_identifier, pass_code=None, token_info: Dict = None):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
@@ -140,11 +139,12 @@ class Affiliation:
         return Affiliation(affiliation)
 
     @staticmethod
-    def create_new_business_affiliation(org_id, business_identifier=None, email=None, phone=None,
-                                        token_info: Dict = None, bearer_token: str = None, ):
+    def create_new_business_affiliation(org_id, business_identifier=None,  # pylint: disable=too-many-arguments
+                                        email=None, phone=None, token_info: Dict = None, bearer_token: str = None):
         """Initiate a new incorporation."""
         # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
+        affiliation_model = None
 
         if not email and not phone:
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
@@ -183,11 +183,12 @@ class Affiliation:
                     'passCodeClaimed': True
                 })
                 # Create an affiliation with org
-                affiliation = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
-                affiliation.save()
-                return Affiliation(affiliation)
+                affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
+                affiliation_model.save()
         else:
             raise BusinessException(Error.NR_NOT_FOUND, None)
+
+        return Affiliation(affiliation_model)
 
     @staticmethod
     def delete_affiliation(org_id, business_identifier, token_info: Dict = None):

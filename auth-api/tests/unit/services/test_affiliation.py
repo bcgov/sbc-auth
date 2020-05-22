@@ -308,7 +308,6 @@ def test_delete_affiliation_implicit(session, auth_mock):  # pylint:disable=unus
 
 def test_create_new_business(session, auth_mock, nr_mock):  # pylint:disable=unused-argument
     """Assert that an new business can be created."""
-
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary['id']
@@ -322,7 +321,6 @@ def test_create_new_business(session, auth_mock, nr_mock):  # pylint:disable=unu
 
 def test_create_new_business_invalid_contact(session, auth_mock, nr_mock):  # pylint:disable=unused-argument
     """Assert that an new business can be created."""
-
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary['id']

@@ -1043,4 +1043,3 @@ def test_new_business_affiliation(client, jwt, session, keycloak_mock, nr_mock):
     dictionary = json.loads(rv.data)
     assert dictionary['organization']['id'] == org_id
     assert dictionary['business']['businessIdentifier'] == TestAffliationInfo.nr_affiliation['businessIdentifier']
-

@@ -381,4 +381,3 @@ def test_add_entity_idempotent(client, jwt, session):  # pylint:disable=unused-a
     rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_202_ACCEPTED
-
