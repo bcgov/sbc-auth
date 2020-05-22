@@ -159,6 +159,15 @@ export default class AddBusinessForm extends Vue {
         // attempt to add business
         await this.addBusiness({ businessIdentifier: this.businessIdentifier.trim().toUpperCase(), passCode: this.passcode })
 
+        // TODO if 201 -> call legal-api to get business
+        // If 200 OK -> auth-api PATCH /entities/businessIdentifier
+        // {
+        //   'name': name from legal-api
+        // }
+        // Show success message
+        // If error from legal-api
+        // Delete affilaition auth-api
+
         await this.updateFolioNumber({ businessIdentifier: this.businessIdentifier.trim().toUpperCase(), folioNumber: this.folioNumber })
 
         // emit event to let parent know business added

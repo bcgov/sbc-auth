@@ -28,8 +28,8 @@
           <template v-slot:item.info="{ item }">
             <div class="meta">
               <v-list-item-title>{{ item.name }}</v-list-item-title>
-              <v-list-item-subtitle v-if="!isNameRequest(item.corpType)">Incorporation Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
-              <v-list-item-subtitle v-if="isNameRequest(item.corpType)">Name Request Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
+              <v-list-item-subtitle v-if="!isNameRequest(item.corpType.code)">Incorporation Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
+              <v-list-item-subtitle v-if="isNameRequest(item.corpType.code)">{{ item.corpType.desc }}: {{ item.businessIdentifier }}</v-list-item-subtitle>
             </div>
           </template>
           <template v-slot:item.action="{ item }">
@@ -99,7 +99,7 @@ export default class AffiliatedEntityList extends Vue {
   }
 
   private isNameRequest (corpType: string): boolean {
-    return corpType === 'NR'
+    return corpType === 'NR' || corpType === 'TMP'
   }
 
   private customSort (items, index, isDescending) {

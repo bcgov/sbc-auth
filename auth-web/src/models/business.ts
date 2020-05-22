@@ -16,10 +16,15 @@ export interface Business {
     businessNumber?: string
     name?: string
     contacts?: Contact[]
-    corpType: string,
+    corpType: CorpType,
     folioNumber: string
 }
 
 export interface Businesses {
     entities: Business[]
+}
+
+export interface CorpType {
+    code: string
+    desc: string
 }
