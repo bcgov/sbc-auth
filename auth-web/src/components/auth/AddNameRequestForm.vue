@@ -170,6 +170,31 @@ export default class AddNameRequestForm extends Vue {
           email: this.applicantEmail
         })
 
+        // XXX TODO  pass newBusiness=true if it's an NR affiliation
+
+        // After the POST Call, 
+        // If any 400 http code, parse the resopnse and show message as error message to user
+        // If http status is 404 show Invalid Name Request
+        // if http status code is 201; -> Store the returned affilaition.
+        // make another HTTP post call to legal-api
+        // URL : https://legal-api-dev.pathfinder.gov.bc.ca/api/v1/businesses?draft=true
+        // Payload : {
+        // 'filing': {
+        //           'header': {
+        //               'name': 'incorporationApplication',
+        //               'accountId': this.currentOrganization.id
+        //           },
+        //           'incorporationApplication': {
+        //               'nameRequest': {
+        //                   'nrNumber': this.nameRequestNumber
+        //               }
+        //           }
+        //       }
+        // }
+        //
+        // If response is either 400, 404, or 500 show Error message 'Cannot add business due to some tchnical reasons'. Call delete affiliation for the affiliation created in step XXX
+        // If > 200 show succes -> then refresh affilaition list
+
         // await this.updateFolioNumber({ businessIdentifier: this.nameRequestNumber.trim().toUpperCase(), folioNumber: this.folioNumber })
 
         // emit event to let parent know business added
