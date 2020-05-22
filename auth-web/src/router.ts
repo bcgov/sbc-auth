@@ -17,6 +17,7 @@ import DecideBusinessInfo from '@/components/auth/DecideBusinessInfo.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
 import HomeView from '@/views/auth/HomeView.vue'
+import HomeViewDev from '@/views/auth/HomeViewDev.vue'
 import IncorpOrRegisterInfo from '@/components/auth/IncorpOrRegisterInfo.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
@@ -61,7 +62,7 @@ export function getRoutes (): RouteConfig[] {
     },
     { path: '/home',
       name: 'home',
-      component: HomeView,
+      component: HomeViewDev,
       children: [
         {
           path: '',

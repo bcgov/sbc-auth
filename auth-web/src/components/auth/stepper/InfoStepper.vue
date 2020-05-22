@@ -1,13 +1,14 @@
 <template>
-  <section>
+  <div>
     <v-container id="step-buttons-container">
       <template v-for="(step, index) in steps">
         <div class="step" :key="index">
           <v-btn
             fab
+            outlined
             class="step__icon"
             active-class="filled no-active"
-            :id=step.id :outlined="true"
+            :id=step.id
             color="#1A5A96"
             :to=step.to>
             <v-icon>{{step.step}}</v-icon>
@@ -24,7 +25,7 @@
         <u>Next Step</u><v-icon color="#1A5A96">mdi-menu-right</v-icon>
       </span>
     </div>
-  </section>
+  </div>
 </template>
 
 <script lang="ts">
@@ -136,11 +137,13 @@ export default class Stepper extends Vue {
   }
 
   .next-step-wrapper {
+    position: relative;
     min-height: 24px;
+    width: 100%;
     .next-step-btn {
+      position: absolute;
+      right: 0;
       color: $BCgoveBueText1;
-      display: flex;
-      justify-content: flex-end;
     }
 
     .next-step-btn:hover {
@@ -149,7 +152,6 @@ export default class Stepper extends Vue {
     }
 
     .hide-next-btn {
-      min-height: 2rem;
       display: none;
     }
   }
