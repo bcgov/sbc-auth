@@ -2,7 +2,9 @@ import { Contact } from './contact'
 
 export interface LoginPayload {
     businessIdentifier: string
-    passCode: string
+    passCode?: string
+    phone?: string
+    email?: string
 }
 
 export interface FolioNumberload {

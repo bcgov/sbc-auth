@@ -34,6 +34,14 @@ export default class CommonUtils {
     const VALID_FORMAT = new RegExp(/^(A|B|BC|C|CP|EPR|FM|FOR|LIC|LL|LLC|LP|MF|QA|QB|QC|QD|QE|REG|S|S-|S\/|XL|XP|XS|XS-|XS\/|CS|CS-|CS\/)?\d+$/)
     return VALID_FORMAT.test(value.toUpperCase())
   }
+  static validateNameRequestNumber (value: string):boolean {
+    const VALID_FORMAT = new RegExp(/^(NR )?\d+$/)
+    return VALID_FORMAT.test(value.toUpperCase())
+  }
+  static validateEmailFormat (value: string):boolean {
+    const VALID_FORMAT = new RegExp(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
+    return VALID_FORMAT.test(value)
+  }
   // This will validate the password rules with the regex
   // atleast 1 number, 1 uppercase, 1 lowercase, 1 special character and minimum length is 8
   static validatePasswordRules (value: string):boolean {
