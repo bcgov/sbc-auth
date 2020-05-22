@@ -16,30 +16,43 @@
 
       <header class="hero-banner">
         <v-container>
-          <h1>Welcome to Cooperatives Online<sup>Beta</sup></h1>
-          <p>File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
-
+          <h1>Start A Business And <br> Keep Records up to Date</h1>
+          <p>The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
+            and organizations in British Columbia.</p>
           <div class="hero-banner__cta-btns">
             <!-- Authenticated -->
-            <div v-if="userProfile">
+            <div v-if="userProfile" class="cta-btns-authenticated">
+              <v-btn large color="#003366" class="cta-btn white--text"
+                     href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
+                Request a Name
+              </v-btn>
+              <v-btn large color="#003366" class="cta-btn white--text"
+                     @click="goToManageBusinesses()">
+                Incorporate a Named Company
+              </v-btn>
+              <v-btn large color="#003366" class="cta-btn white--text"
+                     @click="goToManageBusinesses(true)">
+                Incorporate a Numbered Company
+              </v-btn>
               <v-btn large color="#fcba19" class="cta-btn"
                      @click="goToManageBusinesses()">
-                Manage Businesses
-              </v-btn>
-              <v-btn large outlined color="#ffffff"
-                     class="cta-btn"
-                     v-if="!isDirSearchUser"
-                     @click="createAccount()">
-                Create a new BC Registries Account
+                Manage an Existing Business
               </v-btn>
             </div>
-
             <!-- Non-authenticated -->
-            <v-btn large color="#fcba19" class="cta-btn"
-                   v-if="!userProfile"
-                   @click="accountDialog = true">
-              Create a BC Registries Account
-            </v-btn>
+            <div v-else>
+              <v-btn large color="#fcba19" class="cta-btn"
+                     @click="login()">
+                Log in with BC Services Card
+              </v-btn>
+              <v-btn large color="#003366" class="cta-btn ml-4 white--text"
+                     href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
+                Request a Name
+              </v-btn>
+              <p>New to BC Registries? <a @click="accountDialog = true" style="font-size: 1rem">
+                <u>Create a BC Registries Account</u></a>
+              </p>
+            </div>
           </div>
 
           <v-dialog v-model="accountDialog" max-width="640">
@@ -261,7 +274,6 @@ export default class HomeView extends Vue {
   private noPasscodeDialog = false
   private accountDialog = false
   private isDirSearchUser: boolean = false
-  private isStaffUser: boolean = false
   private readonly resetCurrentOrganisation!: () => void
 
   private get showManageBusinessesBtn (): boolean {
@@ -272,8 +284,11 @@ export default class HomeView extends Vue {
     return !!this.currentAccountSettings
   }
 
-  private goToManageBusinesses (): void {
-    this.$router.push(`/${Pages.MAIN}/${this.currentAccountSettings.id}`)
+  private goToManageBusinesses (isNumberedCompanyRequest: boolean = false): void {
+    let manageBusinessUrl: any = { path: `/${Pages.MAIN}/${this.currentAccountSettings.id}` }
+    if (isNumberedCompanyRequest) manageBusinessUrl.query = { isNumberedCompanyRequest }
+
+    this.$router.push(manageBusinessUrl)
   }
 
   private createAccount (): void {
@@ -287,10 +302,6 @@ export default class HomeView extends Vue {
 
   mounted () {
     this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
-    this.isStaffUser = (this.currentUser?.loginSource === LoginSource.IDIR)
-    if (this.isStaffUser) {
-      this.$router.push(`/${Pages.STAFF_DASHBOARD}`)
-    }
   }
 }
 </script>
@@ -323,8 +334,12 @@ export default class HomeView extends Vue {
 
   // Hero Banner
   .hero-banner {
-    color: #ffffff;
-    background-color: $BCgovBlue5;
+    color: $gray9;
+    background-color: #ffffff;
+    background-image: url('../../assets/img/fpo-hero-image-1600x500.png');
+    background-position: bottom right;
+    background-size: 80% 110%;
+    background-repeat: no-repeat;
 
     h1 {
       margin-bottom: 1.5rem;
@@ -346,7 +361,7 @@ export default class HomeView extends Vue {
 
     p {
       max-width: 40rem;
-      margin-bottom: 2.5rem;
+      margin: 1.5rem 0;
       font-size: 1rem;
     }
 
@@ -357,8 +372,22 @@ export default class HomeView extends Vue {
   }
 
   .hero-banner__cta-btns {
-    .cta-btn + .cta-btn {
-      margin-left: 0.5rem;
+    display: flex;
+
+    .cta-btn {
+      flex: 0 0 100%;
+    }
+
+    .cta-btns-authenticated, .cta-btns-authenticated > div {
+      display: flex;
+      max-width: 300px;
+      flex-wrap: wrap;
+      margin-bottom: 13px;
+
+      .cta-btn {
+        flex: 0 0 100%;
+        margin-bottom: 13px;
+      }
     }
   }
 
