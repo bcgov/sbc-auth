@@ -182,9 +182,9 @@ class Affiliation:
                     'corpTypeCode': CorpType.NR.value,
                     'passCodeClaimed': True
                 })
-                # Create an affiliation with org
-                affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
-                affiliation_model.save()
+            # Create an affiliation with org
+            affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
+            affiliation_model.save()
         else:
             raise BusinessException(Error.NR_NOT_FOUND, None)
 
