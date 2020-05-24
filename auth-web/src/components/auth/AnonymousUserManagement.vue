@@ -3,7 +3,7 @@
     <header class="view-header align-center">
       <h2 class="view-header__title">Team Members</h2>
       <div class="view-header__actions">
-        <v-btn large color="primary" v-if="canInvite" @click="showAddUsersModal()" data-test="add-people-button">
+        <v-btn large color="primary" v-can:INVITE_MEMBERS.hide @click="showAddUsersModal()" data-test="add-people-button">
           <v-icon small>mdi-plus</v-icon>
           <span>Add Team Member</span>
         </v-btn>

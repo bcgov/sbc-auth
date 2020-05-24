@@ -7,7 +7,7 @@ import {
   CreateRequestBody as CreateOrgRequestBody,
   CreateRequestBody,
   Member,
-  Organization,
+  Organization, Permissions,
   UpdateMemberPayload
 } from '@/models/Organization'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
@@ -26,6 +26,7 @@ import { PaymentSettings } from '@/models/PaymentSettings'
 import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
+import PermissionService from '@/services/permission.services'
 
 @Module({
   name: 'org',
@@ -49,6 +50,7 @@ export default class OrgModule extends VuexModule {
   createdUsers: BulkUsersSuccess[] = []
   failedUsers: BulkUsersFailed[] = []
   accountTypeBeforeChange = '' // used for detecting the original type of the account which is getting down/up graded
+  permissions: string[] = []
 
   currentOrgTransactionList: TransactionTableRow[] = []
   @Mutation
@@ -140,6 +142,11 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
+  public setPermissions (permissions: string[]) {
+    this.permissions = permissions
+  }
+
+  @Mutation
   public setCreatedUsers (users: BulkUsersSuccess[]) {
     this.createdUsers = users
   }
@@ -170,9 +177,13 @@ export default class OrgModule extends VuexModule {
     return organization
   }
 
-  @Action({ rawError: true, commit: 'setCurrentMembership' })
+  @Action({ rawError: true })
   public async syncMembership (orgId: number): Promise<Member> {
     const response = await UserService.getMembership(orgId)
+    let membership:Member = response?.data
+    this.context.commit('setCurrentMembership', membership)
+    const res = await PermissionService.getPermissions(membership.membershipTypeCode)
+    this.context.commit('setPermissions', res?.data)
     return response?.data
   }
 
