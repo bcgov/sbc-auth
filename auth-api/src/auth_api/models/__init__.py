@@ -47,6 +47,7 @@ from .product_subscription import ProductSubscription
 from .user import User
 from .user_settings import UserSettings
 from .user_status_code import UserStatusCode
+from .permissions import Permissions
 
 
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)

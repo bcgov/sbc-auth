@@ -52,7 +52,7 @@ def test_fetch_codes(session):  # pylint: disable=unused-argument
     code_type = 'membership_type'
     data = CodesService.fetch_codes(code_type)
     assert data is not None
-    assert data[0]['code'] == 'USER'
+    assert data[0]['name'] == 'USER'
 
 
 def test_fetch_codes_not_found(session):  # pylint: disable=unused-argument
