@@ -81,6 +81,10 @@ export enum MembershipType {
   'User' = 'USER'
 }
 
+export interface Permissions {
+  action: string[]
+}
+
 export interface RoleInfo {
   icon: string
   name: string

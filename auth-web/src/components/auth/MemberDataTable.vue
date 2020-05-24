@@ -59,7 +59,7 @@
               <v-list-item-content>
                 <v-list-item-title v-text="role.displayName">
                 </v-list-item-title>
-                <v-list-item-subtitle v-text="role.desc">
+                <v-list-item-subtitle v-text="role.label">
                 </v-list-item-subtitle>
                 <v-divider></v-divider>
               </v-list-item-content>
