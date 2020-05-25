@@ -94,6 +94,7 @@
             class="mt-9"
             @close-add-nr-modal="cancelAddNameRequest()"
             @add-success="showAddSuccessModalNR()"
+            @add-failed-show-msg="showNRErrorModal"
             @add-failed-no-entity="showNRNotFoundModal()"
             @add-unknown-error="showUnknownErrorModal('nr')"
             @cancel="cancelAddNameRequest()"
@@ -224,6 +225,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Added'
     this.dialogText = 'You have successfully added a name request'
+    await this.syncBusinesses()
     this.$refs.successDialog.open()
   }
 
@@ -245,6 +247,13 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Not Found'
     this.dialogText = 'The specified name request was not found.'
+    this.$refs.errorDialog.open()
+  }
+
+  showNRErrorModal (msg) {
+    this.$refs.addNRDialog.close()
+    this.dialogTitle = 'Error Adding Name Request'
+    this.dialogText = msg
     this.$refs.errorDialog.open()
   }
 

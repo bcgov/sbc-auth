@@ -55,6 +55,7 @@
           large color="primary"
           :disabled="!isFormValid()"
           @click="add"
+          :loading="isLoading"
         >
           <span>Add</span>
         </v-btn>
@@ -93,12 +94,13 @@
 </template>
 
 <script lang="ts">
-import { Business, FolioNumberload, LoginPayload } from '@/models/business'
+import { Business, FolioNumberload, LoginPayload, UpdateFilingBody } from '@/models/business'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import BusinessModule from '@/store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
+import { CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization } from '@/models/Organization'
 import { getModule } from 'vuex-module-decorators'
 import { mask } from 'vue-the-mask'
@@ -111,12 +113,17 @@ import { mask } from 'vue-the-mask'
     ...mapState('org', ['currentOrganization'])
   },
   methods: {
-    ...mapActions('business', ['addBusiness', 'updateFolioNumber'])
+    ...mapActions('business', [
+      'addNameRequest',
+      'updateFiling',
+      'updateFolioNumber'
+    ])
   }
 })
 export default class AddNameRequestForm extends Vue {
   private readonly currentOrganization!: Organization
-  private readonly addBusiness!: (payload: LoginPayload) => void
+  private readonly addNameRequest!: (payload: CreateNRAffiliationRequestBody) => any
+  private readonly updateFiling!: (filingBody: UpdateFilingBody) => any
   private readonly updateFolioNumber!: (folioNumberload: FolioNumberload) => void
   private validationError = ''
   private entityNumRules = [
@@ -138,6 +145,7 @@ export default class AddNameRequestForm extends Vue {
   private passcode: string = ''
   private folioNumber: string = ''
   private helpDialog = false
+  private isLoading = false
 
   $refs: {
     addNRForm: HTMLFormElement
@@ -156,57 +164,45 @@ export default class AddNameRequestForm extends Vue {
     return ((!!this.applicantPhoneNumber && !!value) || !!CommonUtils.validateEmailFormat(value))
   }
 
-  private redirectToNext (): void {
-    this.$router.push(`/account/${this.currentOrganization.id}`)
-  }
-
   async add () {
     if (this.isFormValid()) {
+      this.isLoading = true
       try {
         // attempt to add business
-        await this.addBusiness({
-          businessIdentifier: this.nameRequestNumber.trim().toUpperCase(),
-          phone: this.applicantPhoneNumber,
+        const nrResponse = await this.addNameRequest({
+          businessIdentifier: this.nameRequestNumber,
+          phone: this.applicantPhoneNumber.replace(/-/g, ''),
           email: this.applicantEmail
         })
 
-        // XXX TODO  pass newBusiness=true if it's an NR affiliation
-
-        // After the POST Call, 
-        // If any 400 http code, parse the resopnse and show message as error message to user
-        // If http status is 404 show Invalid Name Request
-        // if http status code is 201; -> Store the returned affilaition.
-        // make another HTTP post call to legal-api
-        // URL : https://legal-api-dev.pathfinder.gov.bc.ca/api/v1/businesses?draft=true
-        // Payload : {
-        // 'filing': {
-        //           'header': {
-        //               'name': 'incorporationApplication',
-        //               'accountId': this.currentOrganization.id
-        //           },
-        //           'incorporationApplication': {
-        //               'nameRequest': {
-        //                   'nrNumber': this.nameRequestNumber
-        //               }
-        //           }
-        //       }
-        // }
-        //
-        // If response is either 400, 404, or 500 show Error message 'Cannot add business due to some tchnical reasons'. Call delete affiliation for the affiliation created in step XXX
-        // If > 200 show succes -> then refresh affilaition list
-
-        // await this.updateFolioNumber({ businessIdentifier: this.nameRequestNumber.trim().toUpperCase(), folioNumber: this.folioNumber })
-
-        // emit event to let parent know business added
-        this.$emit('add-success')
-        this.$emit('close-add-nr-modal')
+        if (nrResponse?.status === 201) {
+          // update the legal api if the status is success
+          const updateBody = {
+            filing: {
+              header: {
+                name: 'incorporationApplication',
+                accountId: this.currentOrganization.id
+              },
+              incorporationApplication: {
+                nameRequest: {
+                  nrNumber: this.nameRequestNumber
+                }
+              }
+            }
+          }
+          const filingResponse = await this.updateFiling(updateBody)
+          if (filingResponse?.errorMsg) {
+            this.$emit('add-unknown-error')
+          } else {
+            // emit event to let parent know business added
+            this.$emit('add-success')
+          }
+        }
       } catch (exception) {
-        if (exception.response && exception.response.status === 401) {
-          this.$emit('add-failed-invalid-code')
+        if (exception.response && exception.response.status === 400) {
+          this.$emit('add-failed-show-msg', exception.response?.data?.message || '')
         } else if (exception.response && exception.response.status === 404) {
           this.$emit('add-failed-no-entity')
-        } else if (exception.response && exception.response.status === 406) {
-          this.$emit('add-failed-passcode-claimed')
         } else {
           this.$emit('add-unknown-error')
         }
@@ -225,6 +221,7 @@ export default class AddNameRequestForm extends Vue {
     this.applicantEmail = ''
     this.applicantPhoneNumber = ''
     this.$refs.addNRForm.resetValidation()
+    this.isLoading = false
   }
 
   incorpNumFormat () {

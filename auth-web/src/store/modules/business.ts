@@ -1,10 +1,10 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { Business, FolioNumberload, LoginPayload } from '@/models/business'
+import { Business, FolioNumberload, LoginPayload, UpdateFilingBody } from '@/models/business'
+import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
-import { CreateRequestBody as CreateAffiliationRequestBody } from '@/models/affiliation'
 import OrgService from '@/services/org.services'
 import { SessionStorageKeys } from '@/util/constants'
 
@@ -52,15 +52,38 @@ export default class BusinessModule extends VuexModule {
   public async addBusiness (payload: LoginPayload) {
     const requestBody: CreateAffiliationRequestBody = {
       businessIdentifier: payload.businessIdentifier,
-      passCode: payload.passCode,
-      phone: payload.phone,
-      email: payload.email
+      passCode: payload.passCode
     }
 
     const currentOrganization: Organization = this.context.rootState.org.currentOrganization
 
     // Create an affiliation between implicit org and requested business
     await OrgService.createAffiliation(currentOrganization.id, requestBody)
+  }
+
+  @Action({ rawError: true })
+  public async addNameRequest (requestBody: CreateNRAffiliationRequestBody) {
+    const currentOrganization: Organization = this.context.rootState.org.currentOrganization
+
+    // Create an affiliation between implicit org and requested business
+    return OrgService.createNRAffiliation(currentOrganization.id, requestBody)
+  }
+
+  @Action({ rawError: true })
+  public async updateFiling (filingBody: UpdateFilingBody) {
+    // Create an affiliation between implicit org and requested business
+    const updateResponse = await BusinessService.updateFiling(filingBody)
+    if (updateResponse?.status >= 200 && updateResponse?.status < 300) {
+      return updateResponse
+    } else {
+      // delete affiliation
+      const orgId = filingBody?.filing?.header?.accountId
+      const nrNumber = filingBody?.filing?.incorporationApplication?.nameRequest?.nrNumber
+      await OrgService.removeAffiliation(orgId, nrNumber)
+      return {
+        errorMsg: 'Cannot add business due to some technical reasons'
+      }
+    }
   }
 
   // Following searchBusiness will search data from legal-api.

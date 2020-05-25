@@ -28,3 +28,17 @@ export interface CorpType {
     code: string
     desc: string
 }
+
+export interface UpdateFilingBody {
+    filing: {
+        header: {
+            name: string,
+            accountId: number
+        },
+        incorporationApplication: {
+            nameRequest: {
+                nrNumber: string
+            }
+        }
+    }
+}
