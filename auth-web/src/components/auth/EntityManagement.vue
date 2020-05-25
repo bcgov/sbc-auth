@@ -150,15 +150,17 @@
 <script lang="ts">
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
+import { Pages, SessionStorageKeys } from '@/util/constants'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import { AccountSettings } from '@/models/account-settings'
 import AddBusinessForm from '@/components/auth/AddBusinessForm.vue'
 import AddNameRequestForm from '@/components/auth/AddNameRequestForm.vue'
 import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
 import { Business } from '@/models/business'
 import BusinessModule from '@/store/modules/business'
+import ConfigHelper from '@/util/config-helper'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import { Pages } from '@/util/constants'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 import i18n from '@/plugins/i18n'
@@ -172,7 +174,7 @@ import { mapActions } from 'vuex'
     ModalDialog
   },
   methods: {
-    ...mapActions('business', ['syncBusinesses', 'removeBusiness'])
+    ...mapActions('business', ['syncBusinesses', 'removeBusiness', 'createNumberedBusiness'])
   }
 })
 export default class EntityManagement extends Mixins(AccountChangeMixin, NextPageMixin) {
@@ -183,8 +185,10 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   private messageTextList = i18n.messages[i18n.locale]
   private isLoading = true
 
+  protected readonly currentAccountSettings!: AccountSettings
   private readonly syncBusinesses!: () => Promise<Business[]>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
+  private readonly createNumberedBusiness!: (accountId: Number) => Promise<void>
 
   $refs: {
     successDialog: ModalDialog
@@ -209,6 +213,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   private async setup () {
     this.isLoading = true
+    this.$route.query.isNumberedCompanyRequest && await this.createNumberedBusiness(this.currentAccountSettings.id)
     await this.syncBusinesses()
     this.isLoading = false
   }

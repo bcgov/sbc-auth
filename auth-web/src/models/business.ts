@@ -19,9 +19,17 @@ export interface Business {
     corpType: CorpType,
     folioNumber: string
 }
-
 export interface Businesses {
     entities: Business[]
+}
+
+export interface NumberedBusinessRequest {
+    filing: {
+        header: {
+            name: string,
+            accountId: number
+        }
+    }
 }
 
 export interface CorpType {

@@ -18,6 +18,7 @@ from marshmallow import fields
 from auth_api.models import Entity as EntityModel
 
 from .camel_case_schema import CamelCaseSchema
+from .corp_type import CorpTypeSchema
 
 
 class EntitySchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
@@ -34,3 +35,4 @@ class EntitySchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-
     pass_code_claimed = fields.Boolean(data_key='passCodeClaimed')
     contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
     folio_number = fields.String(data_key='folioNumber')
+    corp_type = fields.Nested(CorpTypeSchema, many=False)
