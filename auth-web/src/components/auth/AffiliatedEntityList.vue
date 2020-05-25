@@ -34,8 +34,8 @@
           </template>
           <template v-slot:item.action="{ item }">
             <div class="actions">
-              <v-btn small color="primary" @click="goToDashboard(item)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Dashboard</v-btn>
-              <v-btn small depressed @click="editContact(item)" title="Edit Business Profile" data-test="edit-contact-button">Edit</v-btn>
+              <v-btn small color="primary" @click="goToDashboard(item)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Open</v-btn>
+              <!-- <v-btn small depressed @click="editContact(item)" title="Edit Business Profile" data-test="edit-contact-button">Edit</v-btn> -->
               <v-btn :disabled="!canRemove()" small depressed @click="removeBusiness(item.businessIdentifier)" title="Remove Business" data-test="remove-button">Remove</v-btn>
             </div>
           </template>
