@@ -31,7 +31,7 @@ from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
 from auth_api.utils.constants import InvitationStatus
-from auth_api.utils.roles import ADMIN, MEMBER, OWNER, Status, InvitationType, STAFF_ADMIN, AccessType
+from auth_api.utils.roles import COORDINATOR, USER, ADMIN, Status, InvitationType, STAFF_ADMIN, AccessType
 from config import get_named_config
 
 from .authorization import check_auth
@@ -62,7 +62,7 @@ class Invitation:
     @staticmethod
     def create_invitation(invitation_info: Dict, user, token_info: Dict, invitation_origin):
         """Create a new invitation."""
-        # Ensure that the current user is OWNER or ADMIN on each org being invited to
+        # Ensure that the current user is ADMIN or COORDINATOR on each org being invited to
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         org_id = invitation_info['membership'][0]['orgId']
         # get the org and check the access_type
@@ -72,7 +72,7 @@ class Invitation:
         if org.access_type == AccessType.ANONYMOUS.value:
             check_auth(token_info, org_id=org_id, equals_role=STAFF_ADMIN)
         elif org.access_type == AccessType.BCSC.value:
-            check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
+            check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR))
 
         org_name = org.name
         invitation_type = InvitationType.DIRECTOR_SEARCH.value if org.access_type == AccessType.ANONYMOUS.value \
@@ -88,11 +88,11 @@ class Invitation:
 
     def update_invitation(self, user, token_info: Dict, invitation_origin):
         """Update the specified invitation with new data."""
-        # Ensure that the current user is OWNER or ADMIN on each org being re-invited to
+        # Ensure that the current user is ADMIN or COORDINATOR on each org being re-invited to
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         for membership in self._model.membership:
             org_id = membership.org_id
-            check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
+            check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR))
 
         # TODO doesnt work when invited to multiple teams.. Re-work the logic when multiple teams introduced
         confirmation_token = Invitation.generate_confirmation_token(self._model.id, self._model.type)
@@ -106,13 +106,13 @@ class Invitation:
     @staticmethod
     def delete_invitation(invitation_id, token_info: Dict = None):
         """Delete the specified invitation."""
-        # Ensure that the current user is OWNER or ADMIN for each org in the invitation
+        # Ensure that the current user is ADMIN or COORDINATOR for each org in the invitation
         invitation = InvitationModel.find_invitation_by_id(invitation_id)
         if invitation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         for membership in invitation.membership:
             org_id = membership.org_id
-            check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
+            check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR))
         invitation.delete()
 
     @staticmethod
@@ -138,8 +138,8 @@ class Invitation:
                 current_user_membership.status != Status.ACTIVE.value:
             return []
 
-        # Ensure either OWNER or ADMIN
-        if current_user_membership.membership_type_code == MEMBER:
+        # Ensure either ADMIN or COORDINATOR
+        if current_user_membership.membership_type_code == USER:
             return []
 
         return InvitationModel.find_invitations_by_org(org_id=org_id, status=status)
@@ -154,10 +154,10 @@ class Invitation:
         if not invitation:
             return None
 
-        # Ensure that the current user is an OWNER or ADMIN on each org in the invite being retrieved
+        # Ensure that the current user is an ADMIN or COORDINATOR on each org in the invite being retrieved
         for membership in invitation.membership:
             org_id = membership.org_id
-            check_auth(token_info, org_id=org_id, one_of_roles=(OWNER, ADMIN))
+            check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR))
 
         return Invitation(invitation)
 

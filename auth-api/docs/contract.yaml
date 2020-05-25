@@ -83,19 +83,19 @@ paths:
               examples:
                 owner:
                   value:
-                    orgMembership: OWNER
+                    orgMembership: ADMIN
                     roles:
                       - view
                       - edit
                 admin:
                   value:
-                    orgMembership: ADMIN
+                    orgMembership: COORDINATOR
                     roles:
                       - view
                       - edit
                 member:
                   value:
-                    orgMembership: MEMBER
+                    orgMembership: USER
                     roles:
                       - view
                       - edit
@@ -152,9 +152,9 @@ components:
         orgMembership:
           type: string
           enum:
-            - MEMBER
+            - USER
+            - COORDINATOR
             - ADMIN
-            - OWNER
         roles:
           type: array
           items: {}
@@ -164,26 +164,26 @@ components:
         - authorization
       x-examples:
         owner:
-          role: OWNER
-          value:
-            roles:
-              - view
-              - edit
-            orgMembership: OWNER
-        admin:
           role: ADMIN
           value:
             roles:
               - view
               - edit
             orgMembership: ADMIN
-        member:
-          role: MEMBER
+        admin:
+          role: COORDINATOR
           value:
             roles:
               - view
               - edit
-            orgMembership: MEMBER
+            orgMembership: COORDINATOR
+        member:
+          role: USER
+          value:
+            roles:
+              - view
+              - edit
+            orgMembership: USER
         staff:
           role: STAFF
           value:

@@ -28,7 +28,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.enums import NotificationType, ChangeType
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, MEMBER, Role, Status, AccessType, STAFF_ADMIN, \
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, USER, Role, Status, AccessType, STAFF_ADMIN, \
     CLIENT_AUTH_ROLES
 from auth_api.utils.util import cors_preflight
 
@@ -389,7 +389,7 @@ class OrgMember(Resource):
                 # if user status changed to active , mail the user
                 if membership_status == Status.ACTIVE.name:
                     membership.send_notification_to_member(origin, NotificationType.MEMBERSHIP_APPROVED.value)
-                elif notify_user and updated_role and updated_role.code != MEMBER and not is_own_membership:
+                elif notify_user and updated_role and updated_role.code != USER and not is_own_membership:
                     membership.send_notification_to_member(origin, NotificationType.ROLE_CHANGED.value)
 
             return response, status

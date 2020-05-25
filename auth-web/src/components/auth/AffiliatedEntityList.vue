@@ -36,7 +36,7 @@
             <div class="actions">
               <v-btn small color="primary" @click="goToDashboard(item)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Open</v-btn>
               <!-- <v-btn small depressed @click="editContact(item)" title="Edit Business Profile" data-test="edit-contact-button">Edit</v-btn> -->
-              <v-btn :disabled="!canRemove()" small depressed @click="removeBusiness(item.businessIdentifier)" title="Remove Business" data-test="remove-button">Remove</v-btn>
+              <v-btn v-can:REMOVE_BUSINESS.disable small depressed @click="removeBusiness(item.businessIdentifier)" title="Remove Business" data-test="remove-button">Remove</v-btn>
             </div>
           </template>
         </v-data-table>
@@ -92,11 +92,13 @@ export default class AffiliatedEntityList extends Vue {
     ]
   }
 
+  /*
   private canRemove (): boolean {
     return this.currentMembership &&
             this.currentMembership.membershipStatus === MembershipStatus.Active &&
-            this.currentMembership.membershipTypeCode === MembershipType.Owner
+            this.currentMembership.membershipTypeCode === MembershipType.Admin
   }
+   */
 
   private isNameRequest (corpType: string): boolean {
     return corpType === 'NR' || corpType === 'TMP'
