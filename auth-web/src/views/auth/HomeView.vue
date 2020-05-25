@@ -23,21 +23,21 @@
             <!-- Authenticated -->
             <div v-if="userProfile">
               <v-btn large color="#fcba19" class="cta-btn"
-                     @click="goToManageBusinesses()">
+                @click="goToManageBusinesses()">
                 Manage Businesses
               </v-btn>
               <v-btn large outlined color="#ffffff"
-                     class="cta-btn"
-                     v-if="!isDirSearchUser"
-                     @click="createAccount()">
+                class="cta-btn"
+                v-if="!isDirSearchUser"
+                @click="createAccount()">
                 Create a new BC Registries Account
               </v-btn>
             </div>
 
             <!-- Non-authenticated -->
             <v-btn large color="#fcba19" class="cta-btn"
-                   v-if="!userProfile"
-                   @click="accountDialog = true">
+              v-if="!userProfile"
+              @click="accountDialog = true">
               Create a BC Registries Account
             </v-btn>
           </div>
