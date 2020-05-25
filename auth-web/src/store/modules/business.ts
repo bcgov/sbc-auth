@@ -1,12 +1,12 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { Business, FolioNumberload, LoginPayload, UpdateFilingBody } from '@/models/business'
+import { Business, FolioNumberload, LoginPayload, NumberedBusinessRequest, UpdateFilingBody } from '@/models/business'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
+import { FilingTypes, SessionStorageKeys } from '@/util/constants'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import OrgService from '@/services/org.services'
-import { SessionStorageKeys } from '@/util/constants'
 
 @Module({
   name: 'business',
@@ -94,6 +94,34 @@ export default class BusinessModule extends VuexModule {
         if (response.status === 200) {
           ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessNumber)
         }
+      })
+  }
+
+  @Action({ rawError: true })
+  public async createNumberedBusiness (accountId: number) {
+    const requestBody: NumberedBusinessRequest = {
+      filing: {
+        header: {
+          name: FilingTypes.INCORPORATION_APPLICATION,
+          accountId: accountId
+        }
+      }
+    }
+
+    await BusinessService.createNumberedBusiness(requestBody)
+      .then(response => {
+        if (response && response.data && (response.status === 200 || response.status === 201)) {
+          const tempRegNum = response.data.filing?.business?.identifier
+          if (tempRegNum) {
+            ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, tempRegNum)
+            const redirectURL = `${ConfigHelper.getCoopsURL()}${tempRegNum}`
+
+            window.location.href = decodeURIComponent(redirectURL)
+          }
+        }
+      }).catch(error => {
+        // eslint-disable-next-line no-console
+        console.log(error) // ToDo: Handle error: Redirect back to Homeview? Feedback required here
       })
   }
 
