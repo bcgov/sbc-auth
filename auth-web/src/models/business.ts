@@ -17,7 +17,6 @@ export interface Business {
     corpType: string,
     folioNumber: string
 }
-
 export interface Businesses {
     entities: Business[]
 }

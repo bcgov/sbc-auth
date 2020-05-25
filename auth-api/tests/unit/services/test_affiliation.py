@@ -304,3 +304,38 @@ def test_delete_affiliation_implicit(session, auth_mock):  # pylint:disable=unus
 
     found_affiliation = AffiliationModel.query.filter_by(id=affiliation.identifier).first()
     assert found_affiliation is None
+
+
+def test_create_new_business(session, auth_mock, nr_mock):  # pylint:disable=unused-argument
+    """Assert that an new business can be created."""
+    org_service = factory_org_service()
+    org_dictionary = org_service.as_dict()
+    org_id = org_dictionary['id']
+    business_identifier = 'NR 1234567'
+
+    affiliation = AffiliationService.create_new_business_affiliation(org_id, business_identifier=business_identifier,
+                                                                     email='test@test.com', phone='1112223333')
+    assert affiliation
+    assert affiliation.as_dict()['business']['businessIdentifier'] == business_identifier
+
+
+def test_create_new_business_invalid_contact(session, auth_mock, nr_mock):  # pylint:disable=unused-argument
+    """Assert that an new business can be created."""
+    org_service = factory_org_service()
+    org_dictionary = org_service.as_dict()
+    org_id = org_dictionary['id']
+    business_identifier = 'NR 1234567'
+
+    with pytest.raises(BusinessException) as exception:
+        AffiliationService.create_new_business_affiliation(org_id,
+                                                           business_identifier=business_identifier,
+                                                           phone='0000000000')
+
+    assert exception.value.code == Error.NR_INVALID_CONTACT.name
+
+    with pytest.raises(BusinessException) as exception:
+        AffiliationService.create_new_business_affiliation(org_id,
+                                                           business_identifier=business_identifier,
+                                                           email='aaa@aaa.com')
+
+    assert exception.value.code == Error.NR_INVALID_CONTACT.name
