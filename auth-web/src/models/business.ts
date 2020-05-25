@@ -2,7 +2,9 @@ import { Contact } from './contact'
 
 export interface LoginPayload {
     businessIdentifier: string
-    passCode: string
+    passCode?: string
+    phone?: string
+    email?: string
 }
 
 export interface FolioNumberload {
@@ -14,7 +16,7 @@ export interface Business {
     businessNumber?: string
     name?: string
     contacts?: Contact[]
-    corpType: string,
+    corpType: CorpType,
     folioNumber: string
 }
 export interface Businesses {
@@ -26,6 +28,25 @@ export interface NumberedBusinessRequest {
         header: {
             name: string,
             accountId: number
+        }
+    }
+}
+
+export interface CorpType {
+    code: string
+    desc: string
+}
+
+export interface UpdateFilingBody {
+    filing: {
+        header: {
+            name: string,
+            accountId: number
+        },
+        incorporationApplication: {
+            nameRequest: {
+                nrNumber: string
+            }
         }
     }
 }
