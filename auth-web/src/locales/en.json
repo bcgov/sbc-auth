@@ -19,6 +19,7 @@
   "expiredInvitationTitle": "Your account invitation is invalid",
   "expiredInvitationMessage": "This invitation to join a BC Registries and Online Services account has been revoked, accepted or has expired.",
   "homeBtnLabel": "Go to Homepage",
+  "addExistingBtnLabel": "Add an Existing ...",
   "invitationProcessingErrorMsg": "An error has occured while processing this invitation. Please try again later.",
   "staffUnauthorizedMsg": "You are not authorized to access this page.",
   "clientUnauthorizedMsg": "You are not authorized to access this page. If you having trouble, or require access to this application, please contact support.",

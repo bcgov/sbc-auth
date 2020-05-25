@@ -87,7 +87,7 @@ def test_update_entity_existing_success(session):  # pylint:disable=unused-argum
     })
 
     assert entity
-    assert entity.as_dict()['corpType'] == 'BC'
+    assert entity.as_dict()['corpType']['code'] == 'BC'
 
     updated_entity_info = {
         'businessIdentifier': TestEntityInfo.bc_entity_passcode4['businessIdentifier'],
@@ -118,7 +118,7 @@ def test_update_entity_existing_failures(session):  # pylint:disable=unused-argu
     })
 
     assert entity
-    assert entity.as_dict()['corpType'] == 'BC'
+    assert entity.as_dict()['corpType']['code'] == 'BC'
 
     updated_entity_info = {
         'businessIdentifier': TestEntityInfo.bc_entity_passcode4['businessIdentifier'],
@@ -356,11 +356,23 @@ def test_validate_invalid_pass_code(app, session):  # pylint:disable=unused-argu
     assert not validated
 
 
-def test_entity_name_sync(app, session):  # pylint:disable=unused-argument
-    """Assert that the name syncing for entity affiliation is working correctly."""
-    entity_model = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
+def test_delete_entity(app, session):  # pylint:disable=unused-argument
+    """Assert that an entity can be deleted."""
+    entity_model = factory_entity_model()
     entity = EntityService(entity_model)
-    entity.sync_name()
 
-    dictionary = entity.as_dict()
-    assert dictionary['name'] == 'Legal Name CP0002103'
+    org = factory_org_service()
+
+    contact = factory_contact_model()
+
+    contact_link = ContactLinkModel()
+    contact_link.contact = contact
+    contact_link.entity = entity._model  # pylint:disable=protected-access
+    contact_link.org = org._model  # pylint:disable=protected-access
+    contact_link.commit()
+
+    entity.delete()
+
+    entity = EntityService.find_by_entity_id(entity.identifier)
+
+    assert entity is None
