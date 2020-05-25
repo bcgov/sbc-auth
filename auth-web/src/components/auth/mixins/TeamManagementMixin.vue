@@ -179,12 +179,5 @@ export default class TeamManagementMixin extends Vue {
     ConfigHelper.removeFromSession(SessionStorageKeys.CurrentAccount)
     this.$router.push('/')
   }
-
-  protected canInvite (): boolean {
-    return this.currentMembership &&
-            this.currentMembership.membershipStatus === MembershipStatus.Active &&
-            (this.currentMembership.membershipTypeCode === MembershipType.Owner ||
-             this.currentMembership.membershipTypeCode === MembershipType.Admin)
-  }
 }
 </script>

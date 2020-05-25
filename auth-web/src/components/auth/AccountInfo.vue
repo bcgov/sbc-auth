@@ -12,8 +12,8 @@
           <div class="name" id="accountType">Account Type</div>
           <div class="value" aria-labelledby="accountType">
             <div class="value__title">{{ isPremiumAccount ? 'Premium' : 'Basic' }}</div>
-            <div v-if="isOwner">
-              <router-link :to="editAccountUrl">Change account type</router-link>
+            <div v-can:CHANGE_ACCOUNT_TYPE.hide>
+              <router-link :to="editAccountUrl" v-can:CHANGE_ACCOUNT_TYPE.hide >Change account type</router-link>
             </div>
           </div>
         </li>
@@ -43,6 +43,7 @@
           required
           label="Account Name"
           :rules="accountNameRules"
+          v-can:CHANGE_ORG_NAME.disable
           :disabled="!canChangeAccountName()"
           v-if="!isPremiumAccount"
           v-model="orgName"
@@ -55,7 +56,7 @@
               @key-down="keyDown()"
               @address-update="updateAddress"
               v-if="isPremiumAccount && currentOrgAddress"
-              :disabled="!canChangeAddress()"
+              v-can:CHANGE_ADDRESS.disable
               :key="addressKey"
       >
       </BaseAddress>
@@ -188,15 +189,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
   }
 
-  private canChangeAddress (): boolean {
-    if (this.isPremiumAccount) {
-      const premiumOwner =
-        this.currentMembership?.membershipTypeCode === MembershipType.Owner || this.currentMembership?.membershipTypeCode === MembershipType.Admin
-      return premiumOwner
-    }
-    return false
-  }
-
   private async resetForm () {
     this.setup()
     await this.syncAddress()
@@ -210,10 +202,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     return this.currentOrganization?.accessType === Account.ANONYMOUS
   }
 
-  private get isOwner (): boolean {
-    return this.currentMembership?.membershipTypeCode === MembershipType.Owner
-  }
-
   private canChangeAccountName (): boolean {
     if (this.currentOrganization?.accessType === Account.ANONYMOUS) {
       return false
@@ -222,17 +210,12 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     if (this.isPremiumAccount) {
       return false
     }
-    switch (this.currentMembership?.membershipTypeCode) {
-      case MembershipType.Owner:
-        return true
-      default:
-        return false
-    }
+    return true
   }
 
   private isSaveEnabled () {
     if (this.currentOrganization?.orgType === Account.BASIC) {
-      return this.isFormValid() && this.canChangeAccountName()
+      return this.isFormValid()
     }
     if (this.isPremiumAccount) {
       // org name is read only ;the only thing which they can change is address

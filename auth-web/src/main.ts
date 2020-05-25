@@ -7,6 +7,7 @@ import App from './App.vue'
 import ConfigHelper from '@/util/config-helper'
 import TokenService from 'sbc-common-components/src/services/token.services'
 import Vue from 'vue'
+import can from '@/directives/can'
 import i18n from './plugins/i18n'
 import store from './store'
 import vuetify from './plugins/vuetify'
@@ -30,6 +31,6 @@ function renderVue () {
     i18n,
     render: (h) => h(App)
   }).$mount('#app')
-
+  Vue.directive('can', can)
   router.addRoutes(getRoutes())
 }

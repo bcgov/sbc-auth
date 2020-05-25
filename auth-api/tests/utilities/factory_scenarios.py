@@ -545,9 +545,9 @@ class BulkUserTestScenario:
         """Generate a bulk user input."""
         return {'users': [
             {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'Test@12345',
-             'membershipType': 'ADMIN'},
+             'membershipType': 'COORDINATOR'},
             {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'Test@12345',
-             'membershipType': 'MEMBER'}
+             'membershipType': 'USER'}
         ],
             'orgId': org_id
         }

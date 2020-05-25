@@ -19,7 +19,7 @@ The Membership object connects User models to one or more Org models.
 from sqlalchemy import Column, ForeignKey, Integer, and_, desc, func
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.roles import VALID_STATUSES, Status, ADMIN, OWNER
+from auth_api.utils.roles import VALID_STATUSES, Status, COORDINATOR, ADMIN
 
 from .base_model import BaseModel
 from .db import db
@@ -140,7 +140,7 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         """Return the count of pending members."""
         query = db.session.query(Membership).filter(
             and_(Membership.org_id == org_id, Membership.status == Status.ACTIVE.value,
-                 Membership.membership_type_code == OWNER)). \
+                 Membership.membership_type_code == ADMIN)). \
             join(OrgModel).filter(OrgModel.id == org_id)
         count_q = query.statement.with_only_columns([func.count()]).order_by(None)
         count = query.session.execute(count_q).scalar()
@@ -151,7 +151,7 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         """Return the count of pending members."""
         query = db.session.query(Membership).filter(
             and_(Membership.user_id == user_id, Membership.org_id == org_id, Membership.status == Status.ACTIVE.value,
-                 Membership.membership_type_code.in_((OWNER, ADMIN)))). \
+                 Membership.membership_type_code.in_((ADMIN, COORDINATOR)))). \
             join(OrgModel).filter(OrgModel.id == org_id)
         count_q = query.statement.with_only_columns([func.count()]).order_by(None)
         count = query.session.execute(count_q).scalar()

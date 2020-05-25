@@ -58,7 +58,7 @@ def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:d
     user2 = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user2.id))
 
     # Add a membership to the user for the org created
-    factory_membership_model(user2.id, org.as_dict().get('id'), member_type='ADMIN', member_status=4)
+    factory_membership_model(user2.id, org.as_dict().get('id'), member_type='COORDINATOR', member_status=4)
 
     # Find the membership and update to ACTIVE
     membership = MembershipService.get_membership_for_org_and_user(org.as_dict().get('id'), user2.id)
@@ -102,7 +102,7 @@ def test_remove_member_removes_group_to_the_user(session, monkeypatch):  # pylin
     user2 = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user2.id))
 
     # Add a membership to the user for the org created
-    factory_membership_model(user2.id, org.as_dict().get('id'), member_type='ADMIN', member_status=4)
+    factory_membership_model(user2.id, org.as_dict().get('id'), member_type='COORDINATOR', member_status=4)
 
     # Find the membership and update to ACTIVE
     membership = MembershipService.get_membership_for_org_and_user(org.as_dict().get('id'), user2.id)

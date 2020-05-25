@@ -23,7 +23,7 @@ class Role(Enum):
     STAFF = 'staff'
     VIEWER = 'viewer'
     EDITOR = 'edit'
-    ADMIN = 'admin'
+    COORDINATOR = 'admin'
     SYSTEM = 'system'
     TESTER = 'tester'
     ACCOUNT_HOLDER = 'account_holder'
@@ -33,9 +33,9 @@ class Role(Enum):
 
 # Membership types
 STAFF = 'STAFF'
+COORDINATOR = 'COORDINATOR'
 ADMIN = 'ADMIN'
-OWNER = 'OWNER'
-MEMBER = 'MEMBER'
+USER = 'USER'
 STAFF_ADMIN = 'STAFF_ADMIN'
 
 
@@ -65,8 +65,8 @@ class OrgStatus(Enum):
 
 VALID_STATUSES = (Status.ACTIVE.value, Status.PENDING_APPROVAL.value)
 
-CLIENT_ADMIN_ROLES = (ADMIN, OWNER)
-CLIENT_AUTH_ROLES = (*CLIENT_ADMIN_ROLES, MEMBER)
+CLIENT_ADMIN_ROLES = (COORDINATOR, ADMIN)
+CLIENT_AUTH_ROLES = (*CLIENT_ADMIN_ROLES, USER)
 ALL_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF, STAFF_ADMIN)
 
 

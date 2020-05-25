@@ -30,7 +30,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import OrgSchema
 from auth_api.utils.enums import PaymentType, OrgType, ChangeType
-from auth_api.utils.roles import OWNER, VALID_STATUSES, Status, AccessType
+from auth_api.utils.roles import ADMIN, VALID_STATUSES, Status, AccessType
 from auth_api.utils.util import camelback2snake
 from .authorization import check_auth
 from .contact import Contact as ContactService
@@ -103,7 +103,7 @@ class Org:
 
         # create the membership record for this user if its not created by staff and access_type is anonymous
         if not is_staff_admin and org_info.get('access_type') != AccessType.ANONYMOUS:
-            membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='OWNER',
+            membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='ADMIN',
                                          membership_type_status=Status.ACTIVE.value)
             membership.add_to_session()
 
@@ -253,7 +253,7 @@ class Org:
         """
         # Check authorization for the user
         current_app.logger.debug('<org Inactivated')
-        check_auth(token_info, one_of_roles=OWNER, org_id=org_id)
+        check_auth(token_info, one_of_roles=ADMIN, org_id=org_id)
 
         org: OrgModel = OrgModel.find_by_org_id(org_id)
         if not org:
@@ -388,7 +388,7 @@ class Org:
 
     def get_owner_count(self):
         """Get the number of owners for the specified org."""
-        return len([x for x in self._model.members if x.membership_type_code == OWNER])
+        return len([x for x in self._model.members if x.membership_type_code == ADMIN])
 
     @staticmethod
     def get_orgs(user_id, valid_statuses=VALID_STATUSES):

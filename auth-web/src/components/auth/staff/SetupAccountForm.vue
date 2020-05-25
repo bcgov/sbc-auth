@@ -24,7 +24,7 @@
       <!-- Email/Confirm Email -->
       <v-row>
         <v-col cols="12" class="pb-0">
-          <h4 class="mb-2">Account Owner Contact</h4>
+          <h4 class="mb-2">Account Admin Contact</h4>
           <p class="mb-6">Enter the email address of the user who will be managing this account. An email will be sent to this user to verify and activate this account</p>
         </v-col>
       </v-row>
@@ -124,7 +124,7 @@
 <script lang="ts">
 import { AccountType, ProductCode, Products, ProductsRequestBody } from '@/models/Staff'
 import { Component, Vue } from 'vue-property-decorator'
-import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
+import { CreateRequestBody, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import { CreateRequestBody as InvitationRequestBody } from '@/models/Invitation'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
@@ -225,7 +225,7 @@ export default class SetupAccountForm extends Vue {
         await this.createInvitation({
           recipientEmail: this.email,
           sentDate: new Date(),
-          membership: [{ membershipType: MembershipType.Owner, orgId: organization.id }]
+          membership: [{ membershipType: MembershipType.Admin, orgId: organization.id }]
         })
         this.saving = false
         this.loader = this.saving
