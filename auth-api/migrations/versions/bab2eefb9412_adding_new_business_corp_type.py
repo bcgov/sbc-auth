@@ -29,8 +29,7 @@ def upgrade():
     op.bulk_insert(
         corp_type_table,
         [
-            {'code': 'TMP', 'desc': 'New Business', 'default': False},
-            {'code': 'BC', 'desc': 'Benefit Company', 'default': False}
+            {'code': 'TMP', 'desc': 'New Business', 'default': False}
         ]
     )
 
