@@ -1,7 +1,7 @@
 <template>
   <v-tooltip top max-width="450px" light content-class="tooltip">
     <template v-slot:activator="{ on }">
-      <span v-on="on"><a><u>numbered Benefit Company</u></a></span>
+      <span v-on="on" class="tooltip-text"><u>numbered Benefit Company</u></span>
     </template>
     <v-card class="tooltip-content">
       <h3 class="mb-3">Numbered Benefit Company</h3>
@@ -31,5 +31,14 @@ export default class NumberedCompanyTooltip extends Vue {
     .tooltip-content {
       padding: 2rem;
     }
+  }
+
+  .tooltip-text {
+    color: $BCgoveBueText1;
+  }
+
+  .tooltip-text:hover {
+    color: $BCgoveBueText2;
+    cursor: pointer;
   }
 </style>

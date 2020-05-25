@@ -13,23 +13,23 @@ import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import CreateAccountView from '@/views/auth/CreateAccountView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
-import DecideBusinessInfo from '@/components/auth/DecideBusinessInfo.vue'
+import DecideBusinessView from '@/views/auth/DecideBusinessView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
 import HomeView from '@/views/auth/HomeView.vue'
 import HomeViewDev from '@/views/auth/HomeViewDev.vue'
-import IncorpOrRegisterInfo from '@/components/auth/IncorpOrRegisterInfo.vue'
+import IncorpOrRegisterView from '@/views/auth/IncorpOrRegisterView.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
-import MaintainBusinessInfo from '@/components/auth/MaintainBusinessInfo.vue'
+import MaintainBusinessView from '@/views/auth/MaintainBusinessView.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
 import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
 import PaymentView from '@/views/pay/PaymentView.vue'
 import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
-import RequestNameInfo from '@/components/auth/RequestNameInfo.vue'
+import RequestNameView from '@/views/auth/RequestNameView.vue'
 import SearchBusinessView from '@/views/auth/staff/SearchBusinessView.vue'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
 import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
@@ -67,30 +67,30 @@ export function getRoutes (): RouteConfig[] {
       children: [
         {
           path: '',
-          redirect: 'decide-business-info'
+          redirect: 'decide-business'
         },
         {
-          path: 'decide-business-info',
-          component: DecideBusinessInfo,
+          path: 'decide-business',
+          component: DecideBusinessView,
           meta: { showNavBar: true }
         },
         {
-          path: 'request-name-info',
-          component: RequestNameInfo,
+          path: 'request-name',
+          component: RequestNameView,
           meta: { showNavBar: true }
         },
         {
-          path: 'incorp-or-register-info',
-          component: IncorpOrRegisterInfo,
+          path: 'incorporate-or-register',
+          component: IncorpOrRegisterView,
           meta: { showNavBar: true }
         },
         {
-          path: 'maintain-business-info',
-          component: MaintainBusinessInfo,
+          path: 'maintain-business',
+          component: MaintainBusinessView,
           meta: { showNavBar: true }
         }
       ],
-      meta: { conditionalRoute: true, showNavBar: true }
+      meta: { incorporationLaunchRoute: true, showNavBar: true }
     },
     { path: '/business',
       name: 'business-root',
@@ -258,8 +258,8 @@ router.beforeEach((to, from, next) => {
 // Feature Flagging Routes
 // For Development only
 router.beforeEach((to, from, next) => {
-  if (to.matched.some(record => record.meta.conditionalRoute)) {
-    const flagCondition = LaunchDarklyService.getFlag('auth-web-dev-only')
+  if (to.matched.some(record => record.meta.incorporationLaunchRoute)) {
+    const flagCondition = LaunchDarklyService.getFlag('incorporations-launch-feature')
     // this route requires condition to be accessed
     // if not, redirect to home page.
     if (!flagCondition) {

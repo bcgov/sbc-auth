@@ -5,7 +5,7 @@
       <v-col cols="12" md="6">
         <h2>Request a Name or Use a Numbered Company</h2>
         <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index" >
-          <v-icon size="6" class="list-item-bullet">mdi-square</v-icon>
+          <v-icon size="6" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               {{item.text}}
@@ -13,7 +13,7 @@
           </v-list-item-content>
         </v-list-item>
         <v-list-item class="list-item">
-          <v-icon size="6" class="list-item-bullet">mdi-square</v-icon>
+          <v-icon size="6" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               You can choose to incorporate a <NumberedCompanyTooltip />
@@ -27,17 +27,13 @@
             href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
             Request a Name
           </v-btn>
-          <p class="my-5">Have an existing Name Request?
+          <p class="mt-5">Have an existing Name Request?
             <a href="https://www.bcregistrynames.gov.bc.ca/nro/nro.htm?_flowId=anonymous-monitor-flow&_flowExecutionKey=e1s1"
               target="_blank" rel="noopener noreferrer">
               Check your Name Request Status
             </a>
           </p>
-          <v-btn large outlined color="#003366"
-            href="https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-small-business/%7D"
-            target="_blank" rel="noopener noreferrer">
-            Learn More
-          </v-btn>
+          <LearnMoreButton />
         </div>
       </v-col>
       <!-- Image Column -->
@@ -50,17 +46,19 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
 
 @Component({
   components: {
+    LearnMoreButton,
     NumberedCompanyTooltip
   }
 })
-export default class RequestNameInfo extends Vue {
+export default class RequestNameView extends Vue {
   private bulletPoints: Array<any> = [
     { text: 'Create a unique name that ensures the public is not confused or misled by similar corporate names.' },
-    { text: 'Submit this name for examination by the Business Registry' },
+    { text: 'Submit this name for examination by the Business Registry.' },
     { text: 'If your name is approved, you can use it to incorporate or register your business.' }
   ]
 }
@@ -78,21 +76,22 @@ export default class RequestNameInfo extends Vue {
     }
 
     .list-item {
+      align-items: flex-start;
       margin: .5rem 0;
       padding-left: 0;
     }
 
     .list-item-bullet {
-      color: #CCCCCC;
+      color: $BCgovBullet;
       margin-right: 1rem;
     }
 
     .list-item-text {
       white-space: initial;
       color: $gray7;
-      font-size: 16px;
+      font-size: 1rem;
       letter-spacing: 0;
-      line-height: 24px;
+      line-height: 1.5rem;
     }
 
     .request-name-info-btns {

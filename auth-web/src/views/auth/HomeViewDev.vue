@@ -277,7 +277,7 @@ export default class HomeView extends Vue {
 
   // How to Section
   .how-to-container {
-    background: $grat1B;
+    background: $BCgovBG;
 
     .container {
       padding-top: 2.5rem;

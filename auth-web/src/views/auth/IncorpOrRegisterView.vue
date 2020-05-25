@@ -5,7 +5,7 @@
       <v-col cols="12" md="6">
         <h2>Incorporate or Register</h2>
         <v-list-item class="list-item">
-          <v-icon size="6" class="list-item-bullet">mdi-square</v-icon>
+          <v-icon size="6" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               If you have an approved Name Request (NR number), or you want a <NumberedCompanyTooltip />,
@@ -14,7 +14,7 @@
           </v-list-item-content>
         </v-list-item>
         <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
-          <v-icon size="6" class="list-item-bullet">mdi-square</v-icon>
+          <v-icon size="6" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               {{item.text}}
@@ -23,30 +23,26 @@
         </v-list-item>
         <!-- Panel Btns -->
         <!-- Authenticated -->
-        <div v-if="userProfile">
-          <v-btn large color="#003366" class="mr-2 mb-5 white--text"
+        <template v-if="userProfile">
+          <v-btn large color="#003366" class="mr-2 my-5 white--text"
             @click="emitManageBusinesses()">
             Incorporate a Named Company
           </v-btn>
-          <v-btn large color="#003366" class="ml-2 mb-5 white--text"
+          <v-btn large color="#003366" class="ml-2 my-5 white--text"
             @click="emitManageBusinesses(true)">
             Incorporate a Numbered Company
           </v-btn>
-        </div>
+        </template>
         <!-- Not Authenticated -->
-        <div v-else class="incorporate-info-btns">
+        <template v-else>
           <v-btn large color="#fcba19" @click="login()" class="mt-5">
             Log in with BC Services Card
           </v-btn>
           <p class="my-5">New to BC Registries? <a @click="emitAccountDialog()" class="create-account-link">
             <u>Create a BC Registries Account</u></a>
           </p>
-        </div>
-        <v-btn large outlined color="#003366" class="btn-learn-more"
-          href="https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-small-business/%7D"
-          target="_blank" rel="noopener noreferrer">
-          Learn More
-        </v-btn>
+        </template>
+        <LearnMoreButton />
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
@@ -58,19 +54,21 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
 import { Pages } from '@/util/constants'
 
 @Component({
   components: {
+    LearnMoreButton,
     NumberedCompanyTooltip
   }
 })
-export default class IncorpOrRegisterInfo extends Vue {
+export default class IncorpOrRegisterView extends Vue {
   private bulletPoints: Array<any> = [
-    { text: 'For Name Companies, add your existing Name Request number to your account and open it.' },
-    { text: 'Establish your company\'s articles and prepare an incorporation agreement. Either create your own, or use template provided in the incorporation application.' },
-    { text: 'Complete the Incorporation application by providing information about your company: addresses, directors and share structure.' },
+    { text: 'For Named Companies, add your existing Name Request number to your account and open it.' },
+    { text: 'Establish your company\'s articles and prepare an Incorporation Agreement. Either create your own, or use template provided in the Incorporation Application.' },
+    { text: 'Complete the Incorporation Application by providing information about your company: addresses, directors and share structure.' },
     { text: 'Retain a copy of all Incorporation documents for your business\'s records.' }
   ]
 
@@ -102,36 +100,27 @@ export default class IncorpOrRegisterInfo extends Vue {
     }
 
     .list-item {
+      align-items: flex-start;
       margin: .5rem 0;
       padding-left: 0;
     }
 
     .list-item-bullet {
-      color: #CCCCCC;
+      color: $BCgovBullet;
       margin-right: 1rem;
     }
 
     .list-item-text {
       white-space: initial;
       color: $gray7;
-      font-size: 16px;
+      font-size: 1rem;
       letter-spacing: 0;
-      line-height: 24px;
+      line-height: 1.5rem;
     }
 
     .v-btn {
       max-width: 300px;
       font-weight: bold;
-    }
-
-    .incorporate-info-btns {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .btn-learn-more {
-      font-weight: bold;
-      width: 160px;
     }
   }
 </style>

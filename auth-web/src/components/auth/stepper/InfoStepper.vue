@@ -39,25 +39,25 @@ export default class Stepper extends Vue {
       id: 'step-1-btn',
       step: 1,
       text: 'Decide on a Business Type',
-      to: '/home-dev/decide-business-info'
+      to: '/home-dev/decide-business'
     },
     {
       id: 'step-2-btn',
       step: 2,
       text: 'Request a Name',
-      to: '/home-dev/request-name-info'
+      to: '/home-dev/request-name'
     },
     {
       id: 'step-3-btn',
       step: 3,
       text: 'Incorporate or Register',
-      to: '/home-dev/incorp-or-register-info'
+      to: '/home-dev/incorporate-or-register'
     },
     {
       id: 'step-4-btn',
       step: 4,
       text: 'Maintain Your Business',
-      to: '/home-dev/maintain-business-info'
+      to: '/home-dev/maintain-business'
     }
   ]
 
@@ -75,7 +75,7 @@ export default class Stepper extends Vue {
     const route = this.$route.path
     for (const path of this.steps) {
       if (path.to === route) {
-        return path.step
+        return path.step || 0
       }
     }
   }
@@ -95,7 +95,7 @@ export default class Stepper extends Vue {
 
   .filled {
     background-color: $BCgoveBueText1!important;
-    color: $grat1B!important;
+    color: $BCgovBG!important;
   }
 
   .selected {

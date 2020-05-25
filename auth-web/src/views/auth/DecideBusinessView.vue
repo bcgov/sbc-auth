@@ -5,7 +5,7 @@
       <v-col cols="12" md="6">
         <h2>Decide on a Business Type</h2>
         <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index" >
-          <v-icon size="6" class="list-item-bullet">mdi-square</v-icon>
+          <v-icon size="6" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               {{item.text}}
@@ -13,11 +13,7 @@
           </v-list-item-content>
         </v-list-item>
         <!-- Panel Btns -->
-        <v-btn large outlined color="#003366" class="btn-learn-more"
-          href="https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-small-business/%7D"
-          target="_blank" rel="noopener noreferrer">
-          Learn More
-        </v-btn>
+        <LearnMoreButton />
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
@@ -29,9 +25,14 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 
-@Component({})
-export default class DecideBusinessInfo extends Vue {
+@Component({
+  components: {
+    LearnMoreButton
+  }
+})
+export default class DecideBusinessView extends Vue {
   private bulletPoints: Array<any> = [
     { text: 'Decide which business structure is most appropriate for you: A few options are sole proprietorship, ' +
       'partnership or incorporation.' },
@@ -48,27 +49,22 @@ export default class DecideBusinessInfo extends Vue {
     flex-wrap: wrap;
 
     .list-item {
+      align-items: flex-start;
       margin: .5rem 0;
       padding-left: 0;
     }
 
     .list-item-bullet {
-      color: #CCCCCC;
+      color: $BCgovBullet;
       margin-right: 1rem;
     }
 
     .list-item-text {
       white-space: initial;
       color: $gray7;
-      font-size: 16px;
+      font-size: 1rem;
       letter-spacing: 0;
-      line-height: 24px;
-    }
-
-    .btn-learn-more {
-      margin-top: .5rem;
-      font-weight: bold;
-      min-width: 160px;
+      line-height: 1.5rem;
     }
   }
 </style>

@@ -1,7 +1,6 @@
 // Gray Palette
 $gray0: #f8f9fa;
 $gray1: #f1f3f5;
-$grat1B: #f2f2f2; // BC GOV BACKGROUND
 $gray2: #e9ecef;
 $gray3: #dee2e6;
 $gray4: #ced4da;
@@ -23,7 +22,11 @@ $BCgovBlue7: #002753;
 $BCgovBlue8: #002049;
 $BCgovBlue9: #001438;
 
-// BC GOV BLUE TEXT/LINKS
+// BC GOV BACKGROUND
+$BCgovBG: #f2f2f2;
+
+// BC GOV TEXT
+$BCgovBullet: #CCCCCC;
 $BCgoveBueText1: #1A5A96; // PRIMARY BLUE TEXT
 $BCgoveBueText2: #0000EE; // LINK TEXT HOVER
 

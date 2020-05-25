@@ -5,20 +5,19 @@
       <v-col cols="12" md="6">
         <h2>Manage and Maintain Your Business</h2>
         <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
-          <v-icon size="6" class="list-item-bullet">mdi-square</v-icon>
+          <v-icon size="6" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               {{item.text}}
             </v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-        <!-- Sub Bullet Points -->
-        <v-list-item class="list-item list-item-sub" v-for="(item, index) in subBulletPoints" :key="`Sub-index: ${index}`">
-          <v-icon size="6" class="list-item-bullet">mdi-square</v-icon>
-          <v-list-item-content>
-            <v-list-item-subtitle class="list-item-text">
-              {{item.text}}
-            </v-list-item-subtitle>
+            <v-list-item class="list-item list-item-sub" v-for="(item, index) in item.subText" :key="`sub-${index}`">
+              <v-icon size="6" class="list-item-bullet mt-5">mdi-square</v-icon>
+              <v-list-item-content>
+                <v-list-item-subtitle class="list-item-text">
+                  {{item.text}}
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
           </v-list-item-content>
         </v-list-item>
         <!-- Panel Btns -->
@@ -30,11 +29,7 @@
           <v-btn v-else large color="#fcba19" @click="login()" class="my-5">
             Log in with BC Services Card
           </v-btn>
-          <v-btn large outlined color="#003366" class="btn-learn-more"
-            href="https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-small-business/%7D"
-            target="_blank" rel="noopener noreferrer">
-            Learn More
-          </v-btn>
+          <LearnMoreButton />
         </div>
       </v-col>
       <!-- Image Column -->
@@ -47,19 +42,24 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import { Pages } from '@/util/constants'
 
-@Component({})
-export default class MaintainBusinessInfo extends Vue {
+@Component({
+  components: {
+    LearnMoreButton
+  }
+})
+export default class MaintainBusinessView extends Vue {
   private bulletPoints: Array<any> = [
     { text: 'Once your business is incorporated or registered you are required to keep information about your business up to date with the Registry.' },
-    { text: 'By managing your business throught your BC registry account you can:' }
-  ]
-
-  private subBulletPoints: Array<any> = [
-    { text: 'See which Annual Reports are due and file each year.' },
-    { text: 'View and change your current directors and addresses by filing Director and Address Changes.' },
-    { text: 'See the history of your business\' filings and download copies of all documents including your Certificate of Incorporation and more.' }
+    { text: 'By managing your business through your BC Registry account you can:',
+      subText: [
+        { text: 'See which Annual Reports are due and file each year.' },
+        { text: 'View and change your current directors and addresses by filing Director and Address Changes.' },
+        { text: 'See the history of your business\' filings and download copies of all documents including your Certificate of Incorporation and more.' }
+      ]
+    }
   ]
 
   @Prop() userProfile
@@ -81,25 +81,26 @@ export default class MaintainBusinessInfo extends Vue {
     flex-wrap: wrap;
 
     .list-item {
+      align-items: flex-start;
       margin: .5rem 0;
       padding-left: 0;
     }
 
     .list-item-sub {
-      padding-left: 2.5rem;
+      padding-left: 1.5rem;
     }
 
     .list-item-bullet {
-      color: #CCCCCC;
+      color: $BCgovBullet;
       margin-right: 1rem;
     }
 
     .list-item-text {
       white-space: initial;
       color: $gray7;
-      font-size: 16px;
+      font-size: 1rem;
       letter-spacing: 0;
-      line-height: 24px;
+      line-height: 1.5rem;
     }
 
     .maintain-info-btns {
@@ -109,11 +110,6 @@ export default class MaintainBusinessInfo extends Vue {
       .v-btn {
         max-width: 250px;
         font-weight: bold;
-      }
-
-      .btn-learn-more {
-        font-weight: bold;
-        width: 160px;
       }
     }
   }
