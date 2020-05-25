@@ -173,3 +173,25 @@ def keycloak_mock(monkeypatch):
                         lambda *args, **kwargs: None)
     monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.remove_from_account_holders_group',
                         lambda *args, **kwargs: None)
+
+
+@pytest.fixture()
+def nr_mock(monkeypatch):
+    """Mock nr get call."""
+
+    def get_nr(business_identifier, bearer_token):
+        return {
+            'applicants': {
+                'emailAddress': 'test@test.com',
+                'phoneNumber': '1112223333'
+            },
+            'names': [
+                {
+                    'name': 'TEST INC..',
+                    'state': 'APPROVED'
+                }
+            ],
+            'state': 'APPROVED'
+        }
+
+    monkeypatch.setattr('auth_api.services.affiliation.Affiliation._get_nr_details', get_nr)

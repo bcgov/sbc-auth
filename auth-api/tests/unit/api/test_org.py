@@ -1026,3 +1026,20 @@ def test_add_bcol_linked_org_invalid_name(client, jwt, session, keycloak_mock): 
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked_invalid_name()),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+
+
+def test_new_business_affiliation(client, jwt, session, keycloak_mock, nr_mock):  # pylint:disable=unused-argument
+    """Assert that an NR can be affiliated to an org."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.post('/api/v1/orgs/{}/affiliations?newBusiness=true'.format(org_id), headers=headers,
+                     data=json.dumps(TestAffliationInfo.nr_affiliation), content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    dictionary = json.loads(rv.data)
+    assert dictionary['organization']['id'] == org_id
+    assert dictionary['business']['businessIdentifier'] == TestAffliationInfo.nr_affiliation['businessIdentifier']

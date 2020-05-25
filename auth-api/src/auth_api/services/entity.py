@@ -15,7 +15,6 @@
 
 from typing import Dict, Tuple
 
-from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.exceptions import BusinessException
@@ -24,13 +23,10 @@ from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
-from auth_api.utils.enums import CorpType
 from auth_api.utils.passcode import passcode_hash
-from auth_api.utils.util import camelback2snake
 from auth_api.utils.roles import Role
-
+from auth_api.utils.util import camelback2snake
 from .authorization import check_auth
-from .rest_service import RestService
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -182,6 +178,7 @@ class Entity:
     def delete_contact(self):
         """Delete a business contact for this entity."""
         contact_link = ContactLinkModel.find_by_entity_id(self._model.id)
+
         if contact_link is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -208,18 +205,14 @@ class Entity:
             return True
         return False
 
-    def sync_name(self, bearer_token: str = None):
-        """Sync this entity's name with the name used in the LEAR database."""
-        current_app.logger.info(f'<entity sync_name {self._model.business_identifier}')
-        if self.corp_type == CorpType.NR.value:
-            pass  # TODO Later call Names API to verify the details
-        else:
-            legal_url = current_app.config.get('LEGAL_API_URL') + f'/businesses/{self._model.business_identifier}'
-            legal_response = RestService.get(legal_url, token=bearer_token)
-            current_app.logger.debug('<entity legal_response')
+    def delete(self):
+        """Delete an entity."""
+        if self._model is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        if self._model.affiliations:
+            raise BusinessException(Error.ENTITY_DELETE_FAILED, None)
 
-            if legal_response:
-                entity_json = legal_response.json()
-                entity_name = entity_json.get('business').get('legalName')
-                self._model.name = entity_name
-                self._model.save()
+        if self._model.contacts:
+            self.delete_contact()
+
+        self._model.delete()
