@@ -34,7 +34,7 @@ def downgrade():
     op.drop_constraint('membership_membership_type_code_fkey', 'membership', type_='foreignkey')
     op.drop_column('membership_type', 'display_name')
     op.execute("UPDATE membership_type SET code = 'MEMBER' where code= 'USER'")
-    op.execute("UPDATE membership_type SET code = 'OWNER', display_name = 'Account administrator' where code = 'ADMIN'")
+    op.execute("UPDATE membership_type SET code = 'OWNER' where code = 'ADMIN'")
     op.execute("UPDATE membership_type SET code = 'ADMIN' where code = 'COORDINATOR'")
     op.execute("UPDATE membership SET membership_type_code = 'MEMBER' where membership_type_code= 'USER'")
     op.execute("UPDATE membership SET membership_type_code = 'OWNER' where membership_type_code= 'ADMIN'")
