@@ -28,14 +28,14 @@
           <template v-slot:item.info="{ item }">
             <div class="meta">
               <v-list-item-title>{{ item.name }}</v-list-item-title>
-              <v-list-item-subtitle v-if="!isNameRequest(item.corpType)">Incorporation Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
-              <v-list-item-subtitle v-if="isNameRequest(item.corpType)">Name Request Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
+              <v-list-item-subtitle v-if="!isNameRequest(item.corpType.code)">Incorporation Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
+              <v-list-item-subtitle v-if="isNameRequest(item.corpType.code)">{{ item.corpType.desc }}: {{ item.businessIdentifier }}</v-list-item-subtitle>
             </div>
           </template>
           <template v-slot:item.action="{ item }">
             <div class="actions">
-              <v-btn small color="primary" @click="goToDashboard(item)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Dashboard</v-btn>
-              <v-btn small depressed @click="editContact(item)" title="Edit Business Profile" data-test="edit-contact-button">Edit</v-btn>
+              <v-btn small color="primary" @click="goToDashboard(item)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Open</v-btn>
+              <!-- <v-btn small depressed @click="editContact(item)" title="Edit Business Profile" data-test="edit-contact-button">Edit</v-btn> -->
               <v-btn :disabled="!canRemove()" small depressed @click="removeBusiness(item.businessIdentifier)" title="Remove Business" data-test="remove-button">Remove</v-btn>
             </div>
           </template>
@@ -99,7 +99,7 @@ export default class AffiliatedEntityList extends Vue {
   }
 
   private isNameRequest (corpType: string): boolean {
-    return corpType === 'NR'
+    return corpType === 'NR' || corpType === 'TMP'
   }
 
   private customSort (items, index, isDescending) {

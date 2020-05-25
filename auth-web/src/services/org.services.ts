@@ -1,4 +1,4 @@
-import { Affiliation, CreateRequestBody as CreateAffiliationRequestBody } from '@/models/affiliation'
+import { Affiliation, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import Axios, { AxiosResponse } from 'axios'
 import { CreateRequestBody as CreateOrganizationRequestBody, Member, Members, Organization, UpdateMemberPayload } from '@/models/Organization'
 import { Actions } from '@/util/constants'
@@ -69,6 +69,10 @@ export default class OrgService {
 
   static async createAffiliation (orgIdentifier: number, affiliation: CreateAffiliationRequestBody): Promise<AxiosResponse<Affiliation>> {
     return axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/affiliations`, affiliation)
+  }
+
+  static async createNRAffiliation (orgIdentifier: number, affiliation: CreateNRAffiliationRequestBody): Promise<AxiosResponse<Affiliation>> {
+    return axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/affiliations?newBusiness=true`, affiliation)
   }
 
   static async removeAffiliation (orgIdentifier: number, incorporationNumber: string): Promise<AxiosResponse<void>> {
