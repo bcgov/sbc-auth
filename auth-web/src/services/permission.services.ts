@@ -5,7 +5,7 @@ import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptor
 const axios = addAxiosInterceptors(Axios.create())
 
 export default class PermissionService {
-  static async getPermissions (role: string): Promise<AxiosResponse<String[]>> {
+  static async getPermissions (role: string): Promise<AxiosResponse<string[]>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/permissions/${role}`)
   }
 }

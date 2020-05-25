@@ -7,7 +7,7 @@ import {
   CreateRequestBody as CreateOrgRequestBody,
   CreateRequestBody,
   Member,
-  Organization, Permissions,
+  Organization,
   UpdateMemberPayload
 } from '@/models/Organization'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
@@ -23,10 +23,10 @@ import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
 import { PaymentSettings } from '@/models/PaymentSettings'
+import PermissionService from '@/services/permission.services'
 import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
-import PermissionService from '@/services/permission.services'
 
 @Module({
   name: 'org',
@@ -180,7 +180,7 @@ export default class OrgModule extends VuexModule {
   @Action({ rawError: true })
   public async syncMembership (orgId: number): Promise<Member> {
     const response = await UserService.getMembership(orgId)
-    let membership:Member = response?.data
+    const membership:Member = response?.data
     this.context.commit('setCurrentMembership', membership)
     const res = await PermissionService.getPermissions(membership.membershipTypeCode)
     this.context.commit('setPermissions', res?.data)
