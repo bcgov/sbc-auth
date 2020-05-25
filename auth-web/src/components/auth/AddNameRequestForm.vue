@@ -95,12 +95,12 @@
 <script lang="ts">
 import { Business, FolioNumberload, LoginPayload, UpdateFilingBody } from '@/models/business'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { FilingTypes, LegalTypes } from '@/util/constants'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import BusinessModule from '@/store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { CreateNRAffiliationRequestBody } from '@/models/affiliation'
-import { FilingTypes } from '@/util/constants'
 import { Organization } from '@/models/Organization'
 import { getModule } from 'vuex-module-decorators'
 import { mask } from 'vue-the-mask'
@@ -177,11 +177,14 @@ export default class AddNameRequestForm extends Vue {
 
         if (nrResponse?.status === 201) {
           // update the legal api if the status is success
-          const updateBody = {
+          const updateBody: UpdateFilingBody = {
             filing: {
               header: {
                 name: FilingTypes.INCORPORATION_APPLICATION,
                 accountId: this.currentOrganization.id
+              },
+              business: {
+                legalType: LegalTypes.BCOMP
               },
               incorporationApplication: {
                 nameRequest: {

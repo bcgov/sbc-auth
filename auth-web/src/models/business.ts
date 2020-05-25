@@ -51,6 +51,9 @@ export interface UpdateFilingBody {
             name: string,
             accountId: number
         },
+        business: {
+            legalType: string
+        },
         incorporationApplication: {
             nameRequest: {
                 nrNumber: string
