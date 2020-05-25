@@ -21,16 +21,16 @@ function canAccess (binding: DirectiveBinding, el: HTMLElement, node: VNode) {
   const behaviour = binding.modifiers.disable ? 'disable' : 'hide'
   const requestedAction = binding.arg
   const permissions:string[] = (store.state as any)?.org?.permissions
-  const el_ = el as CustomHTMLElement
+  const customeEl = el as CustomHTMLElement
   const okayToAccess = permissions.indexOf(requestedAction) >= 0
   // if not okay , hide or disable
   if (!okayToAccess) {
     if (behaviour === 'hide') {
       commentNode(el, node)
     } else if (behaviour === 'disable') {
-      el_.disabled = true
+      customeEl.disabled = true
     } else if (behaviour === 'readonly') {
-      el_.readOnly = true
+      customeEl.readOnly = true
     }
   }
 }
