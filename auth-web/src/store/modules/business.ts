@@ -1,7 +1,7 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { Business, FolioNumberload, LoginPayload, NumberedBusinessRequest, UpdateFilingBody } from '@/models/business'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
-import { FilingTypes, SessionStorageKeys } from '@/util/constants'
+import { FilingTypes, SessionStorageKeys, LegalTypes } from '@/util/constants'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
@@ -137,6 +137,9 @@ export default class BusinessModule extends VuexModule {
         header: {
           name: FilingTypes.INCORPORATION_APPLICATION,
           accountId: accountId
+        },
+        business: {
+          legalType: LegalTypes.BCOMP
         }
       }
     }

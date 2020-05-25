@@ -73,3 +73,9 @@ export enum TransactionStatus {
 export enum FilingTypes {
     INCORPORATION_APPLICATION = 'incorporationApplication'
 }
+
+export enum LegalTypes {
+    BCOMP = 'BC',
+    COOP = 'CP',
+    CORP = 'CR'
+}
