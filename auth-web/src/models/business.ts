@@ -28,6 +28,9 @@ export interface NumberedBusinessRequest {
         header: {
             name: string,
             accountId: number
+        },
+        business: {
+            legalType: string
         }
     }
 }
