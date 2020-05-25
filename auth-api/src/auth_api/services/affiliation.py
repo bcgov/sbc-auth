@@ -172,8 +172,9 @@ class Affiliation:
             if (phone and phone != nr_phone) or (email and email != nr_email):
                 raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
-            # If all good create the business and affiliation
+            # Create an entity with the Name from NR if entity doesn't exist
             if not entity:
+                # Filter the names from NR response and get the name which has status APPROVED as the name.
                 name = next(
                     (name.get('name') for name in nr_json.get('names') if name.get('state', None) == 'APPROVED'), None)
                 entity = EntityService.save_entity({
@@ -185,6 +186,7 @@ class Affiliation:
             # Create an affiliation with org
             affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
             affiliation_model.save()
+            entity.set_pass_code_claimed(True)
         else:
             raise BusinessException(Error.NR_NOT_FOUND, None)
 
