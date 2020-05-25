@@ -61,6 +61,7 @@
             large color="primary"
             :disabled="!isFormValid()"
             @click="add"
+            :loading="isLoading"
           >
             <span>Add</span>
           </v-btn>
@@ -114,12 +115,17 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('org', ['currentOrganization'])
   },
   methods: {
-    ...mapActions('business', ['addBusiness', 'updateFolioNumber'])
+    ...mapActions('business', [
+      'addBusiness',
+      'updateBusinessName',
+      'updateFolioNumber'
+    ])
   }
 })
 export default class AddBusinessForm extends Vue {
   private readonly currentOrganization!: Organization
-  private readonly addBusiness!: (loginPayload: LoginPayload) => void
+  private readonly addBusiness!: (loginPayload: LoginPayload) => any
+  private readonly updateBusinessName!: (businessIdentifier: string) => any
   private readonly updateFolioNumber!: (folioNumberload: FolioNumberload) => void
   private validationError = ''
   private entityNumRules = [
@@ -135,6 +141,7 @@ export default class AddBusinessForm extends Vue {
   private passcode: string = ''
   private folioNumber: string = ''
   private helpDialog = false
+  private isLoading = false
 
   $refs: {
     addBusinessForm: HTMLFormElement
@@ -152,26 +159,22 @@ export default class AddBusinessForm extends Vue {
 
   async add () {
     if (this.isFormValid()) {
+      this.isLoading = true
       try {
-        // close modal but continue to work in background
-        this.$emit('close-add-business-modal')
-
         // attempt to add business
-        await this.addBusiness({ businessIdentifier: this.businessIdentifier.trim().toUpperCase(), passCode: this.passcode })
+        const addResponse = await this.addBusiness({ businessIdentifier: this.businessIdentifier, passCode: this.passcode })
 
-        // TODO if 201 -> call legal-api to get business
-        // If 200 OK -> auth-api PATCH /entities/businessIdentifier
-        // {
-        //   'name': name from legal-api
-        // }
-        // Show success message
-        // If error from legal-api
-        // Delete affilaition auth-api
-
-        await this.updateFolioNumber({ businessIdentifier: this.businessIdentifier.trim().toUpperCase(), folioNumber: this.folioNumber })
-
-        // emit event to let parent know business added
-        this.$emit('add-success')
+        if (addResponse?.status === 201) {
+          const businessResponse = await this.updateBusinessName(this.businessIdentifier)
+          if (businessResponse?.status === 200) {
+            // update folio number if the business name updated successfully
+            await this.updateFolioNumber({ businessIdentifier: this.businessIdentifier, folioNumber: this.folioNumber })
+            // emit event to let parent know business added
+            this.$emit('add-success')
+          } else {
+            this.$emit('add-unknown-error')
+          }
+        }
       } catch (exception) {
         if (exception.response && exception.response.status === 401) {
           this.$emit('add-failed-invalid-code')
@@ -195,6 +198,7 @@ export default class AddBusinessForm extends Vue {
     this.businessIdentifier = ''
     this.passcode = ''
     this.$refs.addBusinessForm.resetValidation()
+    this.isLoading = false
   }
 
   incorpNumFormat () {

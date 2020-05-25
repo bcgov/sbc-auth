@@ -58,7 +58,39 @@ export default class BusinessModule extends VuexModule {
     const currentOrganization: Organization = this.context.rootState.org.currentOrganization
 
     // Create an affiliation between implicit org and requested business
-    await OrgService.createAffiliation(currentOrganization.id, requestBody)
+    return OrgService.createAffiliation(currentOrganization.id, requestBody)
+  }
+
+  @Action({ rawError: true })
+  public async updateBusinessName (businessNumber: string) {
+    let isUpdateFailed = false
+    try {
+      const businessResponse = await BusinessService.searchBusiness(businessNumber)
+      if ((businessResponse?.status === 200) && businessResponse?.data?.business?.legalName) {
+        const updateBusinessResponse = await BusinessService.updateBusinessName({
+          businessIdentifier: businessNumber,
+          name: businessResponse.data.business.legalName
+        })
+        if (updateBusinessResponse?.status === 200) {
+          return updateBusinessResponse
+        } else {
+          isUpdateFailed = true
+        }
+      } else {
+        isUpdateFailed = true
+      }
+    } catch (error) {
+      isUpdateFailed = true
+    }
+    if (isUpdateFailed) {
+      // delete the created affiliation if the update failed for avoiding orphan records
+      // unable to do these from backend, since it causes a circular dependency
+      const orgId = this.context.rootState.org.currentOrganization?.id
+      await OrgService.removeAffiliation(orgId, businessNumber)
+      return {
+        errorMsg: 'Cannot add business due to some technical reasons'
+      }
+    }
   }
 
   @Action({ rawError: true })
@@ -76,7 +108,8 @@ export default class BusinessModule extends VuexModule {
     if (updateResponse?.status >= 200 && updateResponse?.status < 300) {
       return updateResponse
     } else {
-      // delete affiliation
+      // delete the created affiliation if the update failed for avoiding orphan records
+      // unable to do these from backend, since it causes a circular dependency
       const orgId = filingBody?.filing?.header?.accountId
       const nrNumber = filingBody?.filing?.incorporationApplication?.nameRequest?.nrNumber
       await OrgService.removeAffiliation(orgId, nrNumber)
