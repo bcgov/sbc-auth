@@ -189,17 +189,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
   }
 
-  /*
-  private canChangeAddress (): boolean {
-    if (this.isPremiumAccount) {
-      const premiumOwner =
-        this.currentMembership?.membershipTypeCode === MembershipType.Admin || this.currentMembership?.membershipTypeCode === MembershipType.Coordinator
-      return premiumOwner
-    }
-    return false
-  }
-  */
-
   private async resetForm () {
     this.setup()
     await this.syncAddress()
@@ -212,12 +201,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   get anonAccount (): boolean {
     return this.currentOrganization?.accessType === Account.ANONYMOUS
   }
-
-  /*
-  private get isOwner (): boolean {
-    return this.currentMembership?.membershipTypeCode === MembershipType.Admin
-  }
-  */
 
   private canChangeAccountName (): boolean {
     if (this.currentOrganization?.accessType === Account.ANONYMOUS) {
