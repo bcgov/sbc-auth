@@ -42,6 +42,7 @@ class CorpType(Enum):
     NR = 'NR'
     CP = 'CP'
     TMP = 'TMP'
+    BC = 'BC'
 
 
 class RequiredAction(Enum):
