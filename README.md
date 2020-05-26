@@ -1,4 +1,5 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![codecov](https://codecov.io/gh/bcgov/sbc-auth/branch/development/graph/badge.svg)](https://codecov.io/gh/bcgov/sbc-auth)
 
 # BC Registiries authentication and authorization services
 
