@@ -123,7 +123,6 @@ export default class AddBusinessForm extends Vue {
   private passcode: string = ''
   private folioNumber: string = ''
   private isLoading = false
-  private isLoading = false
 
   $refs: {
     addBusinessForm: HTMLFormElement,
