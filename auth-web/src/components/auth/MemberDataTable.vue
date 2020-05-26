@@ -1,5 +1,5 @@
 <template>
-  <v-data-table
+  <v-data-table v-if="roleInfos"
     class="user-list"
     :headers="headerMembers"
     :items="indexedOrgMembers"
