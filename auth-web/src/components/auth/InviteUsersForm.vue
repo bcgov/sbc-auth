@@ -35,7 +35,7 @@
                   </v-list-item-icon>
                   <v-list-item-content>
                     <v-list-item-title>{{ item.displayName }}</v-list-item-title>
-                    <v-list-item-subtitle>{{ item.desc }}</v-list-item-subtitle>
+                    <v-list-item-subtitle>{{ item.label }}</v-list-item-subtitle>
                   </v-list-item-content>
                 </div>
               </template>
