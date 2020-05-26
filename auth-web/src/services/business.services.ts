@@ -1,5 +1,5 @@
 import Axios, { AxiosResponse } from 'axios'
-import { Business, FolioNumberload, NumberedBusinessRequest, UpdateFilingBody } from '@/models/business'
+import { Business, FolioNumberload, NumberedBusinessRequest, UpdateBusinessNamePayload, UpdateFilingBody } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
@@ -37,5 +37,9 @@ export default class BusinessService {
 
   static async updateFolioNumber (folioNumber: FolioNumberload): Promise<AxiosResponse<any>> {
     return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/entities/${folioNumber.businessIdentifier}`, folioNumber)
+  }
+
+  static async updateBusinessName (updatePayload: UpdateBusinessNamePayload): Promise<AxiosResponse<any>> {
+    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/entities/${updatePayload.businessIdentifier}`, updatePayload)
   }
 }

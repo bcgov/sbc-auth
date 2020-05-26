@@ -11,7 +11,7 @@
       <div class="view-header align-center">
         <h1 class="view-header__title">Manage Businesses</h1>
         <div class="view-header__actions">
-          <v-menu>
+          <v-menu v-if="showAddNameRequestDropdown">
             <template v-slot:activator="{ on }">
               <v-btn
                 color="primary"
@@ -43,6 +43,16 @@
               </v-list-item>
             </v-list>
           </v-menu>
+          <v-btn
+            large
+            color="primary"
+            @click="showAddBusinessModal()"
+            data-test="add-business-button"
+            v-else
+          >
+            <v-icon small>mdi-plus</v-icon>
+            <span>Add Existing Business</span>
+          </v-btn>
         </div>
       </div>
 
@@ -159,6 +169,7 @@ import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
 import { Business } from '@/models/business'
 import BusinessModule from '@/store/modules/business'
 import ConfigHelper from '@/util/config-helper'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import UserModule from '@/store/modules/user'
@@ -196,6 +207,10 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     confirmDeleteDialog: ModalDialog
     addBusinessDialog: ModalDialog
     addNRDialog: ModalDialog
+  }
+
+  private get showAddNameRequestDropdown (): boolean {
+    return LaunchDarklyService.getFlag('show-add-nr-dropdown') || false
   }
 
   private async mounted () {

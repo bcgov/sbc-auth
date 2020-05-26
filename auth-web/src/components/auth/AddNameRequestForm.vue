@@ -31,7 +31,6 @@
             :rules="entityPhoneNumberRules"
             v-model="applicantPhoneNumber"
             type="tel"
-            v-mask="['###-###-####']"
             data-test="entity-phonenumber"
           ></v-text-field>
           <div class="font-weight-bold ml-3 mb-2">or</div>
@@ -96,6 +95,7 @@
 <script lang="ts">
 import { Business, FolioNumberload, LoginPayload, UpdateFilingBody } from '@/models/business'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { FilingTypes, LegalTypes } from '@/util/constants'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import BusinessModule from '@/store/modules/business'
 import CommonUtils from '@/util/common-util'
@@ -156,8 +156,8 @@ export default class AddNameRequestForm extends Vue {
       (!!this.applicantPhoneNumber || !!this.applicantEmail)
   }
 
-  private isInputEntered (value: any, ipType: string) {
-    return (!!((ipType === 'email') ? this.applicantPhoneNumber : this.applicantEmail) || !!value)
+  private isInputEntered (value: any, inputType: string) {
+    return (!!((inputType === 'email') ? this.applicantPhoneNumber : this.applicantEmail) || !!value)
   }
 
   private isValidateEmail (value: any) {
@@ -177,11 +177,14 @@ export default class AddNameRequestForm extends Vue {
 
         if (nrResponse?.status === 201) {
           // update the legal api if the status is success
-          const updateBody = {
+          const updateBody: UpdateFilingBody = {
             filing: {
               header: {
-                name: 'incorporationApplication',
+                name: FilingTypes.INCORPORATION_APPLICATION,
                 accountId: this.currentOrganization.id
+              },
+              business: {
+                legalType: LegalTypes.BCOMP
               },
               incorporationApplication: {
                 nameRequest: {
