@@ -52,7 +52,7 @@
           ></v-text-field>
         </div>
         <div class="form__btns mt-6">
-          <v-btn large text class="pl-2 pr-2 lost-passcode-btn" data-test="forgot-passcode-button" @click.stop="helpDialog = true">
+          <v-btn large text class="pl-2 pr-2 lost-passcode-btn" data-test="forgot-passcode-button" @click.stop="openHelp()">
             <v-icon>mdi-help-circle-outline</v-icon>
             <span>I lost or forgot my passcode</span>
           </v-btn>
@@ -71,32 +71,10 @@
         </div>
       </fieldset>
     </v-form>
-    <v-dialog v-model="helpDialog" max-width="640">
-      <v-card>
-        <v-card-title>Need Assistance?</v-card-title>
-        <v-card-text>
-          <p class="mb-7">If you have not received your Access Letter from BC Registries, or have lost your Passcode, please contact us at:</p>
-          <ul class="contact-info__list mb-7">
-            <li>
-              <span>Toll Free:</span>&nbsp;&nbsp;{{ $t('techSupportTollFree') }}
-            </li>
-            <li>
-              <span>Phone:</span>&nbsp;&nbsp;{{ $t('techSupportPhone') }}
-            </li>
-            <li>
-              <span>Email:</span>&nbsp;&nbsp;<a v-bind:href="'mailto:' + $t('techSupportEmail') + '?subject=' + $t('techSupportEmailSubject')">{{ $t('techSupportEmail') }}</a>
-            </li>
-          </ul>
-          <div>
-            <p class="mb-0"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
-          </div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn large color="primary" @click="helpDialog = false">OK</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <HelpDialog
+      :helpDialogFor="'Passcode'"
+      ref="helpDialog"
+    ></HelpDialog>
   </div>
 </template>
 
@@ -107,10 +85,14 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 import BusinessModule from '@/store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
+import HelpDialog from '@/components/auth/HelpDialog.vue'
 import { Organization } from '@/models/Organization'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
+  components: {
+    HelpDialog
+  },
   computed: {
     ...mapState('org', ['currentOrganization'])
   },
@@ -140,11 +122,11 @@ export default class AddBusinessForm extends Vue {
   private businessIdentifier: string = ''
   private passcode: string = ''
   private folioNumber: string = ''
-  private helpDialog = false
   private isLoading = false
 
   $refs: {
-    addBusinessForm: HTMLFormElement
+    addBusinessForm: HTMLFormElement,
+    helpDialog: HelpDialog
   }
 
   private isFormValid (): boolean {
@@ -203,6 +185,10 @@ export default class AddBusinessForm extends Vue {
 
   incorpNumFormat () {
     this.businessIdentifier = CommonUtils.formatIncorporationNumber(this.businessIdentifier)
+  }
+
+  openHelp () {
+    this.$refs.helpDialog.open()
   }
 }
 </script>
