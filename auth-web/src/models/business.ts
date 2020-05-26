@@ -23,6 +23,11 @@ export interface Businesses {
     entities: Business[]
 }
 
+export interface UpdateBusinessNamePayload {
+    businessIdentifier: string
+    name: string
+}
+
 export interface NumberedBusinessRequest {
     filing: {
         header: {
@@ -45,6 +50,9 @@ export interface UpdateFilingBody {
         header: {
             name: string,
             accountId: number
+        },
+        business: {
+            legalType: string
         },
         incorporationApplication: {
             nameRequest: {
