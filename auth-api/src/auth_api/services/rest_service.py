@@ -15,7 +15,7 @@
 import json
 
 import requests
-from flask import current_app
+from flask import current_app, request
 from requests.adapters import HTTPAdapter  # pylint:disable=ungrouped-imports
 # pylint:disable=ungrouped-imports
 from requests.exceptions import ConnectionError as ReqConnectionError
@@ -37,6 +37,9 @@ class RestService:
              content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True):
         """POST service."""
         current_app.logger.debug('<post')
+
+        if not token:
+            token = _get_token()
 
         headers = {
             'Authorization': auth_header_type.value.format(token),
@@ -108,3 +111,8 @@ class RestService:
 
         current_app.logger.debug('>GET')
         return response
+
+
+def _get_token() -> str:
+    token: str = request.headers['Authorization'] if request and 'Authorization' in request.headers else None
+    return token.replace('Bearer ', '') if token else None

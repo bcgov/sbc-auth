@@ -16,4 +16,5 @@ from notify_api.db.database import BASE
 from notify_api.db.models.notification_type import NotificationTypeModel
 from notify_api.db.models.notification_status import NotificationStatusModel
 from notify_api.db.models.notification import NotificationModel
-from notify_api.db.models.notification_contents import NotificationContentsModel
+from notify_api.db.models.content import ContentModel
+from notify_api.db.models.attachment import AttachmentModel
