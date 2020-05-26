@@ -35,10 +35,11 @@ class Error(Enum):
     EXPIRED_INVITATION = 'The invitation has expired.', http_status.HTTP_400_BAD_REQUEST
     FAILED_INVITATION = 'Failed to dispatch the invitation', http_status.HTTP_500_INTERNAL_SERVER_ERROR
     FAILED_NOTIFICATION = 'Failed to dispatch the notification', http_status.HTTP_500_INTERNAL_SERVER_ERROR
-    DELETE_FAILED_ONLY_OWNER = 'Cannot delete as user is the only owner of some teams', http_status.HTTP_400_BAD_REQUEST
+    DELETE_FAILED_ONLY_OWNER = 'Cannot delete as user is the only Account Administrator of some teams', \
+                               http_status.HTTP_400_BAD_REQUEST
     DELETE_FAILED_INACTIVE_USER = 'User is already inactive', http_status.HTTP_400_BAD_REQUEST
-    CHANGE_ROLE_FAILED_ONLY_OWNER = 'User is only owner in org', http_status.HTTP_400_BAD_REQUEST
-    OWNER_CANNOT_BE_REMOVED = 'Owner cannot be removed by anyone', http_status.HTTP_400_BAD_REQUEST
+    CHANGE_ROLE_FAILED_ONLY_OWNER = 'User is only Account Administrator in org', http_status.HTTP_400_BAD_REQUEST
+    OWNER_CANNOT_BE_REMOVED = 'Account Administrator cannot be removed by anyone', http_status.HTTP_400_BAD_REQUEST
     MAX_NUMBER_OF_ORGS_LIMIT = 'Maximum number of organisations reached', http_status.HTTP_400_BAD_REQUEST
     ALREADY_CLAIMED_PASSCODE = 'Passcode you entered has already been claimed', http_status.HTTP_406_NOT_ACCEPTABLE
     ORG_CANNOT_BE_DISSOLVED = 'Organization cannot be dissolved', http_status.HTTP_406_NOT_ACCEPTABLE

@@ -1,13 +1,15 @@
 from __future__ import with_statement
 
-from notify_api.core import config as appConfig
-from notify_api.db.models import BASE
 import pathlib
 import sys
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+
+from notify_api.core.settings import get_api_settings
+from notify_api.db.models import BASE
+
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
 
@@ -31,7 +33,7 @@ target_metadata = BASE.metadata
 # ... etc.
 
 
-config.set_main_option("sqlalchemy.url", str(appConfig.SQLALCHEMY_DATABASE_URI))
+config.set_main_option("sqlalchemy.url", str(get_api_settings().DATABASE_URL))
 
 
 def run_migrations_offline():

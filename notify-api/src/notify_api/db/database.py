@@ -20,7 +20,7 @@ SESSION = sessionmaker()
 
 
 def get_db():
-    """get new database session."""
+    """Get new database session."""
     try:
         db_session = SESSION()
         yield db_session

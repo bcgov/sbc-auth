@@ -114,7 +114,8 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
-    ...mapState('org', ['currentOrganization', 'currentMembership'])
+    ...mapState('org', ['currentOrganization', 'currentMembership']),
+    ...mapState('user', ['roleInfos'])
   },
   methods: {
     // ...mapMutations('org', ['resetInvitations']),
@@ -137,33 +138,16 @@ export default class AddUsersForm extends Vue {
   }
 
   private get availableRoles () {
-    if (this.currentMembership.membershipTypeCode !== MembershipType.Owner) {
-      return this.roles.filter(role => role.name !== 'Owner')
+    if (this.currentMembership.membershipTypeCode !== MembershipType.Admin) {
+      return this.roleInfos.filter(role => role.name !== 'Admin')
     }
-    return this.roles
+    return this.roleInfos
   }
 
   private users: AddUserBody[] = []
 
   // Get the description from UX team
-  private readonly roles: RoleInfo[] = [
-    {
-      icon: 'mdi-account',
-      name: 'Member',
-      desc: 'Can add businesses, and file for a business.'
-    },
-    {
-      icon: 'mdi-settings',
-      name: 'Admin',
-      desc: 'Can add/remove team members, add businesses, and file for a business.'
-    },
-    {
-      icon: 'mdi-shield-key',
-      name: 'Owner',
-      desc: 'Can add/remove team members and businesses, and file for a business.'
-    }
-  ]
-
+  private readonly roleInfos!: RoleInfo[]
   private userNameRules = [
     value => this.validateUserName(value) || this.inputHints.username
   ]
@@ -181,7 +165,7 @@ export default class AddUsersForm extends Vue {
   }
 
   private getDefaultRow (): AddUserBody {
-    return { username: '', password: '', selectedRole: { ...this.roles[0] }, membershipType: this.roles[0].name }
+    return { username: '', password: '', selectedRole: { ...this.roleInfos[0] }, membershipType: this.roleInfos[0].name }
   }
 
   private validateUserName (value) {

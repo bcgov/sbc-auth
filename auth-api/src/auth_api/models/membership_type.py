@@ -28,6 +28,7 @@ class MembershipType(BaseCodeModel):  # pylint: disable=too-few-public-methods
 
     label = Column(String(100))
     icon = Column(String(100))
+    display_name = Column(String(100))
 
     @classmethod
     def get_default_type(cls):
