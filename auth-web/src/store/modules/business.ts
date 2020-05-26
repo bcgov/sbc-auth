@@ -63,7 +63,6 @@ export default class BusinessModule extends VuexModule {
 
   @Action({ rawError: true })
   public async updateBusinessName (businessNumber: string) {
-    let isUpdateFailed = false
     try {
       const businessResponse = await BusinessService.searchBusiness(businessNumber)
       if ((businessResponse?.status === 200) && businessResponse?.data?.business?.legalName) {
@@ -73,16 +72,10 @@ export default class BusinessModule extends VuexModule {
         })
         if (updateBusinessResponse?.status === 200) {
           return updateBusinessResponse
-        } else {
-          isUpdateFailed = true
         }
-      } else {
-        isUpdateFailed = true
       }
+      throw Error('update failed')
     } catch (error) {
-      isUpdateFailed = true
-    }
-    if (isUpdateFailed) {
       // delete the created affiliation if the update failed for avoiding orphan records
       // unable to do these from backend, since it causes a circular dependency
       const orgId = this.context.rootState.org.currentOrganization?.id
