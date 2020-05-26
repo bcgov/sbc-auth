@@ -17,6 +17,7 @@
 Test-Suite to ensure that the /users endpoint is working as expected.
 """
 import copy
+import json
 
 from auth_api import status as http_status
 from auth_api.models import ContactLink as ContactLinkModel
@@ -43,5 +44,8 @@ def test_get_user_settings(client, jwt, session, keycloak_mock):  # pylint:disab
     # post token with updated claims
     headers = factory_auth_header(jwt=jwt, claims=claims)
     rv = client.get(f'/api/v1/users/{kc_id}/settings', headers=headers, content_type='application/json')
+    item_list = json.loads(rv.data)
+    account = next(obj for obj in item_list if obj['type'] == 'ACCOUNT')
+    assert account['accountType'] == 'BASIC'
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(rv.json, 'user_settings_response')
