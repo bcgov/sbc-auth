@@ -75,6 +75,12 @@
             @manage-businesses="goToManageBusinesses($event)"/>
         </v-container>
       </div>
+      <TestimonialQuotes />
+      <BCSCPanel
+        :userProfile="userProfile"
+        @login="login()"
+        @account-dialog="accountDialog = true"
+      />
       <div class="contact-info-container">
         <v-container>
           <v-row>
@@ -111,18 +117,22 @@ import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
+import BCSCPanel from '@/components/auth/BCSCPanel.vue'
 import ConfigHelper from '@/util/config-helper'
 import InfoStepper from '@/components/auth/stepper/InfoStepper.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
+import TestimonialQuotes from '@/components/auth/TestimonialQuotes.vue'
 import { User } from '@/models/user'
 import { VueConstructor } from 'vue'
 
 @Component({
   name: 'Home',
   components: {
+    BCSCPanel,
     InfoStepper,
-    LoginBCSC
+    LoginBCSC,
+    TestimonialQuotes
   },
   computed: {
     ...mapState('user', ['userProfile', 'currentUser']),
@@ -278,6 +288,7 @@ export default class HomeView extends Vue {
   // How to Section
   .how-to-container {
     background: $BCgovBG;
+    width: 100%;
 
     .container {
       padding-top: 2.5rem;
