@@ -48,11 +48,11 @@ def downgrade():
     op.drop_constraint('invitation_membership_membership_type_code_fkey', 'invitation_membership', type_='foreignkey')
     op.drop_column('membership_type', 'display_name')
     op.execute(
-        "UPDATE membership_type SET code = 'MEMBER',label=\'can add businesses, and file for a business.\' where code= 'USER'")
+        "UPDATE membership_type SET code = 'MEMBER',label='can add businesses, and file for a business.' where code= 'USER'")
     op.execute(
-        "UPDATE membership_type SET code = 'OWNER',label=\'can add/remove team members and businesses, and file for a business.\' where code = 'ADMIN'")
+        "UPDATE membership_type SET code = 'OWNER',label='can add/remove team members and businesses, and file for a business.' where code = 'ADMIN'")
     op.execute(
-        "UPDATE membership_type SET code = 'ADMIN',label=\'can add/remove team members, add businesses, and file for a business.\'  where code = 'COORDINATOR'")
+        "UPDATE membership_type SET code = 'ADMIN',label='can add/remove team members, add businesses, and file for a business.'  where code = 'COORDINATOR'")
     op.execute("UPDATE membership SET membership_type_code = 'MEMBER' where membership_type_code= 'USER'")
     op.execute("UPDATE membership SET membership_type_code = 'OWNER' where membership_type_code= 'ADMIN'")
     op.execute("UPDATE membership SET membership_type_code = 'ADMIN' where membership_type_code= 'COORDINATOR'")
