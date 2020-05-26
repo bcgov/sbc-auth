@@ -26,7 +26,7 @@ class MembershipType(BaseCodeModel):  # pylint: disable=too-few-public-methods
 
     __tablename__ = 'membership_type'
 
-    label = Column(String(100))
+    label = Column(String(200))
     icon = Column(String(100))
     display_name = Column(String(100))
 
