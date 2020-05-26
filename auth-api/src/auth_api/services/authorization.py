@@ -131,21 +131,22 @@ def check_auth(token_info: Dict, **kwargs):
     elif 'staff' in token_info.get('realm_access').get('roles'):
         _check_for_roles(STAFF, kwargs)
     elif Role.SYSTEM.value in token_info.get('realm_access').get('roles'):
-        corp_type_in_jwt = token_info.get('corp_type', None)
-        if corp_type_in_jwt is None:
-            # corp type must be present in jwt
-            abort(403)
-        business_identifier = kwargs.get('business_identifier', None)
-        org_identifier = kwargs.get('org_id', None)
-        auth = None
-        if business_identifier:
-            auth = Authorization.get_user_authorizations_for_entity(token_info, business_identifier)
-        elif org_identifier:
-            auth_record = AuthorizationView.find_user_authorization_by_org_id_and_corp_type(org_identifier,
-                                                                                            corp_type_in_jwt)
-            auth = Authorization(auth_record).as_dict() if auth_record else None
-        if auth is None:
-            abort(403)
+        # corp_type_in_jwt = token_info.get('corp_type', None)
+        # if corp_type_in_jwt is None:
+        #     # corp type must be present in jwt
+        #     abort(403)
+        # business_identifier = kwargs.get('business_identifier', None)
+        # org_identifier = kwargs.get('org_id', None)
+        # auth = None
+        # if business_identifier:
+        #     auth = Authorization.get_user_authorizations_for_entity(token_info, business_identifier)
+        # elif org_identifier:
+        #     auth_record = AuthorizationView.find_user_authorization_by_org_id_and_corp_type(org_identifier,
+        #                                                                                     corp_type_in_jwt)
+        #     auth = Authorization(auth_record).as_dict() if auth_record else None
+        # if auth is None:
+        #     abort(403)
+        return
     else:
         business_identifier = kwargs.get('business_identifier', None)
         org_identifier = kwargs.get('org_id', None)
