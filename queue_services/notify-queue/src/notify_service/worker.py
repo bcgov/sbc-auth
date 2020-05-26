@@ -65,29 +65,30 @@ async def process_notification(notification_id: int, db_session):
 
             encoding = 'utf-8'
             message = MIMEMultipart()
-            message['Subject'] = notification.contents.subject
+            message['Subject'] = notification.content.subject
             message['From'] = sender
             message['To'] = notification.recipients
-            message.attach(MIMEText(notification.contents.body, 'html', encoding))
+            message.attach(MIMEText(notification.content.body, 'html', encoding))
 
-            if notification.contents.attachment:
-                part = MIMEBase('application', 'octet-stream')
-                part.set_payload(notification.contents.attachment)
-                encode_base64(part)
+            if notification.content.attachments:
+                for attachment in notification.content.attachments:
+                    part = MIMEBase('application', 'octet-stream')
+                    part.set_payload(attachment.file_bytes)
+                    encode_base64(part)
 
-                spaces = re.compile(r'[\s]+', re.UNICODE)
-                filename = unicodedata.normalize('NFKD', notification.contents.attachment_name)
-                filename = filename.encode('ascii', 'ignore').decode('ascii')
-                filename = spaces.sub(u' ', filename).strip()
+                    spaces = re.compile(r'[\s]+', re.UNICODE)
+                    filename = unicodedata.normalize('NFKD', attachment.file_name)
+                    filename = filename.encode('ascii', 'ignore').decode('ascii')
+                    filename = spaces.sub(u' ', filename).strip()
 
-                try:
-                    filename and filename.encode('ascii')
-                except UnicodeEncodeError:
-                    filename = ('UTF8', '', filename)
+                    try:
+                        filename and filename.encode('ascii')
+                    except UnicodeEncodeError:
+                        filename = ('UTF8', '', filename)
 
-                part.add_header('Content-Disposition', 'attachment; filename=' + filename)
+                    part.add_header('Content-Disposition', 'attachment; filename=' + filename)
 
-                message.attach(part)
+                    message.attach(part)
 
             sent_status = await send_with_send_message(message, recipients)
             if not sent_status:

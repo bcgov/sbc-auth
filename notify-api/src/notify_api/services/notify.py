@@ -16,10 +16,9 @@ import logging
 
 from sqlalchemy.orm import Session
 
-from notify_api.core import config as AppConfig
+from notify_api.core.settings import get_api_settings
 from notify_api.core.queue_publisher import publish
 from notify_api.db.crud import notification as NotificaitonCRUD
-from notify_api.db.crud import notification_contents as ContentsCRUD
 from notify_api.db.models.notification import NotificationRequest, NotificationUpdate
 from notify_api.db.models.notification_status import NotificationStatusEnum
 
@@ -44,10 +43,10 @@ class NotifyService:  # pylint: disable=too-few-public-methods
         """Get notifications by status."""
         notifications = None
         if status == NotificationStatusEnum.FAILURE:
-            hours = AppConfig.DELIVERY_FAILURE_RETRY_TIME_FRAME
+            seconds = get_api_settings().DELIVERY_FAILURE_RETRY_TIME_FRAME
             notifications = await NotificaitonCRUD.find_notifications_by_status_time(db_session,
                                                                                      status,
-                                                                                     hours)
+                                                                                     seconds)
         else:
             notifications = await NotificaitonCRUD.find_notifications_by_status(db_session, status)
 
@@ -57,11 +56,6 @@ class NotifyService:  # pylint: disable=too-few-public-methods
     async def send_notification(db_session: Session, notification: NotificationRequest):
         """Create a new notification and send it out."""
         new_notification = await NotificaitonCRUD.create_notification(db_session, notification=notification)
-
-        # save email contents
-        await ContentsCRUD.create_contents(db_session,
-                                           contents=notification.contents,
-                                           notification_id=new_notification.id)
 
         # push the email to the queue service
         await publish(payload=new_notification.id)

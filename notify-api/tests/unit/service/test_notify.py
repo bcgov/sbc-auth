@@ -13,86 +13,82 @@
 # limitations under the License.
 
 """The Unit Test for the Service."""
+import logging
 from datetime import datetime
 
-from notify_api.db.models.notification import NotificationModel, NotificationRequest, NotificationUpdate
+from notify_api.db.models.notification import NotificationRequest, NotificationUpdate
 from notify_api.services.notify import NotifyService
-from tests.utilities.factory_scenarios import NOTIFICATION_DATA, NOTIFICATION_REQUEST_DATA
+from tests.factories.attachment import AttachmentFactory
+from tests.factories.content import ContentFactory
+from tests.factories.notification import NotificationFactory
+
+
+logger = logging.getLogger(__name__)
 
 
 def test_find_notification_by_id(session, loop):
     """Assert the test can retrieve notification by id."""
-    notification = NotificationModel(**NOTIFICATION_DATA[0])
-    session.add(notification)
-    session.commit()
-    notification = session.merge(notification)
+    notification = NotificationFactory.create_model(session, notification_info=NotificationFactory.Models.PENDING_1)
+    content = ContentFactory.create_model(session, notification.id, content_info=ContentFactory.Models.CONTENT_1)
+    AttachmentFactory.create_model(session, content.id, attachment_info=AttachmentFactory.Models.FILE_1)
 
     result = loop.run_until_complete(
         NotifyService.find_notification(session, notification.id)
     )
-    assert result == notification
-    assert result.id == NOTIFICATION_DATA[0]['id']
-    assert result.recipients == NOTIFICATION_DATA[0]['recipients']
+
+    assert result.id == NotificationFactory.Models.PENDING_1['id']
+    assert result.recipients == NotificationFactory.Models.PENDING_1['recipients']
+    assert result.content.subject == ContentFactory.Models.CONTENT_1['subject']
+    assert result.content.attachments[0].file_name == AttachmentFactory.Models.FILE_1['file_name']
 
 
 def test_find_notification_by_status(session, loop):
     """Assert the test can retrieve notification by status."""
-    notification = NotificationModel(**NOTIFICATION_DATA[0])
-    session.add(notification)
-    session.commit()
-    notification = session.merge(notification)
+    notification = NotificationFactory.create_model(session)
 
     result = loop.run_until_complete(
         NotifyService.find_notifications_by_status(session, notification.status_code)
     )
-    assert result[0] == notification
-    assert result[0].id == NOTIFICATION_DATA[0]['id']
-    assert result[0].recipients == NOTIFICATION_DATA[0]['recipients']
+    assert result[0].id == NotificationFactory.Models.PENDING_1['id']
+    assert result[0].recipients == NotificationFactory.Models.PENDING_1['recipients']
 
 
 def test_find_notification_by_status_time(session, loop):
     """Assert the test can retrieve notification by status and time frame."""
-    notification = NotificationModel(**NOTIFICATION_DATA[2])
-    session.add(notification)
-    session.commit()
-    notification = session.merge(notification)
+    notification = NotificationFactory.create_model(session,
+                                                    notification_info=NotificationFactory.Models.LESS_1_HOUR)
 
     result = loop.run_until_complete(
         NotifyService.find_notifications_by_status(session, notification.status_code)
     )
     assert result[0] == notification
-    assert result[0].id == NOTIFICATION_DATA[2]['id']
-    assert result[0].recipients == NOTIFICATION_DATA[2]['recipients']
+    assert result[0].id == NotificationFactory.Models.LESS_1_HOUR['id']
+    assert result[0].recipients == NotificationFactory.Models.LESS_1_HOUR['recipients']
 
 
-def test_find_no_notification_by_status_time_(session, loop):
+def test_find_no_notification_by_status_time(session, loop):
     """Assert the test can not retrieve notification by status and time frame."""
-    notification = NotificationModel(**NOTIFICATION_DATA[3])
-    session.add(notification)
-    session.commit()
-    notification = session.merge(notification)
+    notification = NotificationFactory.create_model(session,
+                                                    notification_info=NotificationFactory.Models.OVER_1_HOUR)
 
     result = loop.run_until_complete(
         NotifyService.find_notifications_by_status(session, notification.status_code)
     )
-    assert result == []
+    assert not result
 
 
-def test_create_notification(session, loop):
+def test_create_notification(session, loop, client, client_id, stan_server):  # pylint: disable=unused-argument
     """Assert the test can create notification."""
     result = loop.run_until_complete(
-        NotifyService.send_notification(session, NotificationRequest(**NOTIFICATION_REQUEST_DATA[0]))
+        NotifyService.send_notification(session, NotificationRequest(**NotificationFactory.RequestData.REQUEST_1))
     )
-    assert result.id == NOTIFICATION_DATA[0]['id']
-    assert result.recipients == NOTIFICATION_DATA[0]['recipients']
+    assert result is not None
+    assert result.recipients == NotificationFactory.RequestData.REQUEST_1['recipients']
 
 
 def test_update_notification(session, loop):
     """Assert the test can update notification."""
-    notification = NotificationModel(**NOTIFICATION_DATA[0])
-    session.add(notification)
-    session.commit()
-    notification = session.merge(notification)
+    notification = NotificationFactory.create_model(session)
 
     update_notification: NotificationUpdate = NotificationUpdate(id=notification.id,
                                                                  sent_date=datetime.now(),
@@ -100,13 +96,14 @@ def test_update_notification(session, loop):
     result = loop.run_until_complete(
         NotifyService.update_notification_status(session, update_notification)
     )
-    assert result == notification
-    assert result.id == NOTIFICATION_DATA[0]['id']
-    assert result.recipients == NOTIFICATION_DATA[0]['recipients']
+
+    assert result.id == NotificationFactory.Models.PENDING_1['id']
+    assert result.recipients == NotificationFactory.Models.PENDING_1['recipients']
     assert result.status_code == 'FAILURE'
 
 
 def test_update_notification_no_exists(session, loop):
+    """Assert the test can not update a non exists notification."""
     update_notification: NotificationUpdate = NotificationUpdate(id=999,
                                                                  sent_date=datetime.now(),
                                                                  notify_status='FAILURE')
