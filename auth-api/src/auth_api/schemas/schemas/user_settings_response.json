@@ -62,6 +62,16 @@
           "ACCOUNT"
         ],
         "pattern": "^(.*)$"
+      },
+      "accountType": {
+        "$id": "#/properties/accountType",
+        "type": "string",
+        "title": "Type of the account.Like Premium or basic",
+        "default": "",
+        "examples": [
+          "BASIC"
+        ],
+        "pattern": "^(.*)$"
       }
     }
   }
