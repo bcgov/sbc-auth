@@ -31,7 +31,7 @@ from auth_api.services import User as UserService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils.constants import IdpHint
-from auth_api.utils.roles import Status, ADMIN, OWNER, MEMBER
+from auth_api.utils.roles import Status, COORDINATOR, ADMIN, USER
 from werkzeug.exceptions import HTTPException
 
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, \
@@ -92,7 +92,7 @@ def test_create_user_and_add_membership_owner_skip_auth_mode(session, auth_mock,
                                                              keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an owner can be added as anonymous."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestAnonymousMembership.generate_random_user(OWNER)]
+    membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
     users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
     assert len(users['users']) == 1
     assert users['users'][0]['username'] == IdpHint.BCROS.value + '/' + membership[0]['username']
@@ -102,14 +102,14 @@ def test_create_user_and_add_membership_owner_skip_auth_mode(session, auth_mock,
 
     # only one member should be there since its a STAFF created org
     assert len(members) == 1
-    assert members[0].membership_type_code == OWNER
+    assert members[0].membership_type_code == ADMIN
 
 
 def test_create_user_and_add_same_user_name_error_in_kc(session, auth_mock,
                                                         keycloak_mock):  # pylint:disable=unused-argument
     """Assert that same user name cannot be added twice."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestAnonymousMembership.generate_random_user(OWNER)]
+    membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
     keycloak_service = KeycloakService()
     request = KeycloakScenario.create_user_request()
     request.user_name = membership[0]['username']
@@ -125,7 +125,7 @@ def test_create_user_and_add_same_user_name_error_in_db(session, auth_mock,
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model(TestUserInfo.user_bcros)
     factory_membership_model(user.id, org.id)
-    new_members = TestAnonymousMembership.generate_random_user(OWNER)
+    new_members = TestAnonymousMembership.generate_random_user(ADMIN)
     new_members['username'] = user.username.replace(f'{IdpHint.BCROS.value}/', '')
     membership = [new_members]
     users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
@@ -137,7 +137,7 @@ def test_create_user_and_add_transaction_membership(session, auth_mock,
                                                     keycloak_mock):  # pylint:disable=unused-argument
     """Assert transactions works fine."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestAnonymousMembership.generate_random_user(OWNER)]
+    membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
     with patch('auth_api.models.Membership.flush', side_effect=Exception('mocked error')):
         users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
 
@@ -161,7 +161,7 @@ def test_create_user_and_add_transaction_membership_1(session, auth_mock,
                                                       keycloak_mock):  # pylint:disable=unused-argument
     """Assert transactions works fine."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestAnonymousMembership.generate_random_user(OWNER)]
+    membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
     with patch('auth_api.models.User.flush', side_effect=Exception('mocked error')):
         users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
 
@@ -185,7 +185,7 @@ def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,
                                                              keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an admin can be added as anonymous."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestAnonymousMembership.generate_random_user(ADMIN)]
+    membership = [TestAnonymousMembership.generate_random_user(COORDINATOR)]
     users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
     assert len(users['users']) == 1
     assert users['users'][0]['username'] == IdpHint.BCROS.value + '/' + membership[0]['username']
@@ -195,7 +195,7 @@ def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,
 
     # only one member should be there since its a STAFF created org
     assert len(members) == 1
-    assert members[0].membership_type_code == ADMIN
+    assert members[0].membership_type_code == COORDINATOR
 
 
 def test_create_user_and_add_membership_admin_bulk_mode(session, auth_mock,
@@ -205,7 +205,7 @@ def test_create_user_and_add_membership_admin_bulk_mode(session, auth_mock,
     user = factory_user_model()
     factory_membership_model(user.id, org.id)
     claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
-    membership = [TestAnonymousMembership.generate_random_user(MEMBER)]
+    membership = [TestAnonymousMembership.generate_random_user(USER)]
     users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
 
     assert len(users['users']) == 1
@@ -224,7 +224,7 @@ def test_create_user_add_membership_reenable(session, auth_mock, keycloak_mock):
     user = factory_user_model()
     factory_membership_model(user.id, org.id)
     claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
-    anon_member = TestAnonymousMembership.generate_random_user(MEMBER)
+    anon_member = TestAnonymousMembership.generate_random_user(USER)
     membership = [anon_member]
     users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
     user_name = IdpHint.BCROS.value + '/' + membership[0]['username']
@@ -276,7 +276,7 @@ def test_create_user_and_add_membership_admin_bulk_mode_unauthorised(session, au
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model()
     factory_membership_model(user.id, org.id)
-    membership = [TestAnonymousMembership.generate_random_user(MEMBER)]
+    membership = [TestAnonymousMembership.generate_random_user(USER)]
 
     with pytest.raises(HTTPException) as excinfo:
         UserService.create_user_and_add_membership(membership, org.id, token_info=TestJwtClaims.public_user_role)
@@ -290,8 +290,8 @@ def test_create_user_and_add_membership_admin_bulk_mode_multiple(session, auth_m
     user = factory_user_model()
     factory_membership_model(user.id, org.id)
     claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
-    membership = [TestAnonymousMembership.generate_random_user(MEMBER),
-                  TestAnonymousMembership.generate_random_user(ADMIN)]
+    membership = [TestAnonymousMembership.generate_random_user(USER),
+                  TestAnonymousMembership.generate_random_user(COORDINATOR)]
     users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
 
     assert len(users['users']) == 2
@@ -310,7 +310,7 @@ def test_create_user_and_add_membership_member_error_skip_auth_mode(session, aut
                                                                     keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an member cannot be added as anonymous in single_mode mode."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestAnonymousMembership.generate_random_user(MEMBER)]
+    membership = [TestAnonymousMembership.generate_random_user(USER)]
     with pytest.raises(BusinessException) as exception:
         UserService.create_user_and_add_membership(membership, org.id,
                                                    single_mode=True)
@@ -321,8 +321,8 @@ def test_create_user_and_add_membership_multiple_error_skip_auth_mode(session, a
                                                                       keycloak_mock):  # pylint:disable=unused-argument
     """Assert that multiple user cannot be created  in single_mode mode."""
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
-    membership = [TestAnonymousMembership.generate_random_user(MEMBER),
-                  TestAnonymousMembership.generate_random_user(ADMIN)]
+    membership = [TestAnonymousMembership.generate_random_user(USER),
+                  TestAnonymousMembership.generate_random_user(COORDINATOR)]
     with pytest.raises(BusinessException) as exception:
         UserService.create_user_and_add_membership(membership, org.id, TestJwtClaims.public_user_role,
                                                    single_mode=True)
@@ -614,7 +614,7 @@ def test_delete_user_where_user_is_member_on_org(session, auth_mock, keycloak_mo
     contact_link.user = user_model2
     contact_link.commit()
 
-    membership = MembershipModel(org_id=org_id, user_id=user_model2.id, membership_type_code='MEMBER',
+    membership = MembershipModel(org_id=org_id, user_id=user_model2.id, membership_type_code='USER',
                                  membership_type_status=Status.ACTIVE.value)
     membership.save()
 
@@ -654,7 +654,7 @@ def test_delete_user_where_org_has_another_owner(session, auth_mock, keycloak_mo
     contact_link.user = user_model2
     contact_link.commit()
 
-    membership = MembershipModel(org_id=org_id, user_id=user_model2.id, membership_type_code='OWNER',
+    membership = MembershipModel(org_id=org_id, user_id=user_model2.id, membership_type_code='ADMIN',
                                  membership_type_status=Status.ACTIVE.value)
     membership.save()
     membership.commit()

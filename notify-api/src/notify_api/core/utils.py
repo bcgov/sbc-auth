@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Application utils. """
+"""Application utils."""
 import urllib.request
 
 
 def download_file(url: str) -> bytes:
-    """download file from url."""
+    """Download file from url."""
     file_contents = None
     with urllib.request.urlopen(url) as response:
         file_contents = response.read()
@@ -25,7 +25,7 @@ def download_file(url: str) -> bytes:
 
 
 def to_camel(string: str) -> str:
-    """"convert string to camel format."""
+    """Convert string to camel format."""
     if '_' not in string or string.startswith('_'):
         return string
     return ''.join([

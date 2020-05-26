@@ -22,6 +22,7 @@ from notify_api.db.database import BASE
 
 class NotificationStatusModel(BASE):  # pylint: disable=too-few-public-methods
     """This is the model for a Notification Status record."""
+
     __tablename__ = 'notification_status'
 
     code = Column(String(15), primary_key=True)
@@ -31,10 +32,13 @@ class NotificationStatusModel(BASE):  # pylint: disable=too-few-public-methods
 
 class NotificationStatus(BaseModel):  # pylint: disable=too-few-public-methods
     """This is pydantic model of notification status."""
+
     code: str = ''
     desc: str = ''
 
     class Config:  # pylint: disable=too-few-public-methods
+        """Config."""
+
         orm_mode = True
 
 

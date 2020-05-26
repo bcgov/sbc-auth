@@ -17,12 +17,12 @@ import random
 from datetime import datetime, timedelta
 
 import pytest
-from notify_api.core import config as AppConfig
+from notify_api.db.models.content import ContentModel
 from notify_api.db.models.notification import NotificationModel
-from notify_api.db.models.notification_contents import NotificationContentsModel
 from notify_api.db.models.notification_status import NotificationStatusEnum
 from notify_api.services.notify import NotifyService
 
+from notify_service import config as AppConfig
 from notify_service import worker
 from notify_service.worker import app_config, cb_subscription_handler, qsm
 from tests.utilities.factory_scenarios import CONTENT_DATA, NOTIFICATION_DATA
@@ -37,7 +37,7 @@ async def test_process_notification(session, sendmail_mock):  # pylint: disable=
     session.commit()
     notification = session.merge(notification)
 
-    content = NotificationContentsModel(**CONTENT_DATA[1], notification_id=notification.id)
+    content = ContentModel(**CONTENT_DATA[1], notification_id=notification.id)
     session.add(content)
     session.commit()
 
@@ -57,7 +57,7 @@ async def test_process_notification_sendmail_failed(session, sendmail_failed_moc
     session.commit()
     notification = session.merge(notification)
 
-    content = NotificationContentsModel(**CONTENT_DATA[1], notification_id=notification.id)
+    content = ContentModel(**CONTENT_DATA[1], notification_id=notification.id)
     session.add(content)
     session.commit()
 
@@ -77,7 +77,7 @@ async def test_process_notification_delivered(session, sendmail_mock):  # pylint
     session.commit()
     notification = session.merge(notification)
 
-    content = NotificationContentsModel(**CONTENT_DATA[0], notification_id=notification.id)
+    content = ContentModel(**CONTENT_DATA[0], notification_id=notification.id)
     session.add(content)
     session.commit()
 
@@ -125,7 +125,7 @@ async def test_cb_subscription_handler(session,  # pylint: disable=too-many-argu
     session.commit()
     notification = session.merge(notification)
 
-    content = NotificationContentsModel(**CONTENT_DATA[0], notification_id=notification.id)
+    content = ContentModel(**CONTENT_DATA[0], notification_id=notification.id)
     session.add(content)
     session.commit()
     content = session.merge(content)
@@ -163,8 +163,8 @@ async def test_cb_subscription_handler(session,  # pylint: disable=too-many-argu
 
     try:
         await asyncio.wait_for(future, 2, loop=event_loop)
-    except Exception as err:  # pylint: disable=broad-except
-        print(err)
+    except Exception:  # pylint: disable=broad-except
+        pass
 
     notification_update: NotificationModel = await NotifyService.find_notification(session, notification_id)
     assert notification_update is not None
@@ -180,7 +180,7 @@ async def test_job_handler(session, sendmail_mock):  # pylint: disable=unused-ar
         session.add(notification)
         session.commit()
 
-        content = NotificationContentsModel(**CONTENT_DATA[0], notification_id=notification.id)
+        content = ContentModel(**CONTENT_DATA[0], notification_id=notification.id)
         session.add(content)
         session.commit()
 
@@ -188,10 +188,10 @@ async def test_job_handler(session, sendmail_mock):  # pylint: disable=unused-ar
 
     await worker.job_handler(notification_status)
 
-    hours: int = AppConfig.DELIVERY_FAILURE_RETRY_TIME_FRAME
+    seconds: int = AppConfig.DELIVERY_FAILURE_RETRY_TIME_FRAME
     for i in NOTIFICATION_DATA:
         if i['status_code'] == notification_status \
-                and (datetime.utcnow() - timedelta(hours=hours)) < i['request_date']:
+                and (datetime.utcnow() - timedelta(seconds=seconds)) < i['request_date']:
             notification_update: NotificationModel = await NotifyService.find_notification(session, i['id'])
             assert notification_update is not None
             assert notification_update.id == i['id']

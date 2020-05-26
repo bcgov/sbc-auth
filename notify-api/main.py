@@ -4,7 +4,7 @@ import uvicorn
 from starlette.responses import RedirectResponse
 
 from notify_api import NotifyAPI
-from notify_api.core import config as AppConfig
+from notify_api.core.settings import get_api_settings
 
 
 # setup loggers
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)  # the __name__ resolve to "main" since we 
 # This will get the root logger since no logger in the configuration has this name.
 
 
-app = NotifyAPI(bind=AppConfig.SQLALCHEMY_DATABASE_URI)
+app = NotifyAPI(bind=get_api_settings().DATABASE_URL)
 
 
 @app.get("/")

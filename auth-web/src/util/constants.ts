@@ -13,6 +13,7 @@ export enum SessionStorageKeys {
     PendingApprovalCount = 'PENDING_APPROVAL_COUNT',
     CurrentAccount = 'CURRENT_ACCOUNT',
     NamesRequestNumberKey = 'NR_NUMBER',
+    LaunchDarklyFlags = 'LD_FLAGS'
 }
 
 export enum Role {
@@ -39,7 +40,8 @@ export enum Pages {
     USER_PROFILE_TERMS = 'userprofileterms',
     USER_PROFILE_TERMS_DECLINE = 'unauthorizedtermsdecline',
     HOME = 'home',
-    EDIT_ACCOUNT_TYPE= '/change-account'
+    EDIT_ACCOUNT_TYPE= '/change-account',
+    STAFF_DASHBOARD= 'searchbusiness'
 }
 
 export enum Account {
@@ -66,4 +68,14 @@ export enum TransactionStatus {
     COMPLETED = 'COMPLETED',
     CREATED = 'CREATED',
     DELETED = 'DELETED'
+}
+
+export enum FilingTypes {
+    INCORPORATION_APPLICATION = 'incorporationApplication'
+}
+
+export enum LegalTypes {
+    BCOMP = 'BC',
+    COOP = 'CP',
+    CORP = 'CR'
 }

@@ -25,7 +25,7 @@
               menu-props="dense"
             >
               <template v-slot:selection="{ item }">
-                {{ item.name }}
+                {{ item.displayName }}
               </template>
 
               <template v-slot:item="{ item }">
@@ -34,8 +34,8 @@
                     <v-icon v-text="item.icon" />
                   </v-list-item-icon>
                   <v-list-item-content>
-                    <v-list-item-title>{{ item.name }}</v-list-item-title>
-                    <v-list-item-subtitle>{{ item.desc }}</v-list-item-subtitle>
+                    <v-list-item-title>{{ item.displayName }}</v-list-item-title>
+                    <v-list-item-subtitle>{{ item.label }}</v-list-item-subtitle>
                   </v-list-item-content>
                 </div>
               </template>
@@ -88,7 +88,8 @@ interface InvitationInfo {
 
 @Component({
   computed: {
-    ...mapState('org', ['currentOrganization', 'currentMembership', 'pendingOrgInvitations'])
+    ...mapState('org', ['currentOrganization', 'currentMembership', 'pendingOrgInvitations']),
+    ...mapState('user', ['roleInfos'])
   },
   methods: {
     ...mapMutations('org', ['resetInvitations']),
@@ -104,14 +105,15 @@ export default class InviteUsersForm extends Vue {
   private readonly resetInvitations!: () => void
   private readonly createInvitation!: (Invitation) => Promise<void>
   private readonly resendInvitation!: (Invitation) => Promise<void>
+  private roleInfos!: RoleInfo[]
 
   $refs: {
     form: HTMLFormElement
   }
 
   private get availableRoles () {
-    if (this.currentMembership.membershipTypeCode !== MembershipType.Owner) {
-      return this.roles.filter(role => role.name !== 'Owner')
+    if (this.currentMembership.membershipTypeCode !== MembershipType.Admin) {
+      return this.roles.filter(role => role.name !== 'Admin')
     }
     return this.roles
   }
@@ -122,29 +124,14 @@ export default class InviteUsersForm extends Vue {
     v => !v || this.pattern.test(v) || 'Enter a valid email address'
   ]
 
-  private readonly roles: RoleInfo[] = [
-    {
-      icon: 'mdi-account',
-      name: 'Member',
-      desc: 'Can add businesses, and file for a business.'
-    },
-    {
-      icon: 'mdi-settings',
-      name: 'Admin',
-      desc: 'Can add/remove team members, add businesses, and file for a business.'
-    },
-    {
-      icon: 'mdi-shield-key',
-      name: 'Owner',
-      desc: 'Can add/remove team members and businesses, and file for a business.'
-    }
-  ]
+  private roles: RoleInfo[] = []
 
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
 
   private created () {
+    this.roles = this.roleInfos
     for (let i = 0; i < 3; i++) {
       this.invitations.push({ emailAddress: '', role: this.roles[0], selectedRole: { ...this.roles[0] } })
     }
@@ -161,7 +148,6 @@ export default class InviteUsersForm extends Vue {
             !this.hasDuplicates() &&
             this.$refs.form.validate()
   }
-
   private removeEmail (index: number) {
     this.invitations.splice(index, 1)
   }

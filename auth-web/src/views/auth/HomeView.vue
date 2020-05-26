@@ -140,7 +140,7 @@
                           </ul>
                           <p class="mb-7"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
                           <a class="link-w-icon" href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card"
-                            target="_blank" rel="noopener noreferrer">
+                             target="_blank" rel="noopener noreferrer">
                             <v-icon small class="mr-2">mdi-open-in-new</v-icon>
                             <span>Frequently Asked Questions</span>
                           </a>
@@ -203,7 +203,7 @@
               <h3 class="mb-6">Need more information?</h3>
               <p class="mb-4">To learn more about Cooperative Associations in British Columbia, please visit the Cooperative Associations information page on the <a href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations" target="_blank" rel="noopener">BC Government website</a>.</p>
               <a class="link-w-icon" href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card"
-                target="_blank" rel="noopener noreferrer">
+                 target="_blank" rel="noopener noreferrer">
                 <v-icon small class="mr-2">mdi-open-in-new</v-icon>
                 <span>Frequently Asked Questions</span>
               </a>
@@ -261,6 +261,7 @@ export default class HomeView extends Vue {
   private noPasscodeDialog = false
   private accountDialog = false
   private isDirSearchUser: boolean = false
+  private isStaffUser: boolean = false
   private readonly resetCurrentOrganisation!: () => void
 
   private get showManageBusinessesBtn (): boolean {
@@ -286,6 +287,10 @@ export default class HomeView extends Vue {
 
   mounted () {
     this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
+    this.isStaffUser = (this.currentUser?.loginSource === LoginSource.IDIR)
+    if (this.isStaffUser) {
+      this.$router.push(`/${Pages.STAFF_DASHBOARD}`)
+    }
   }
 }
 </script>
