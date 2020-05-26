@@ -33,4 +33,4 @@ def upgrade():
     )
 
 def downgrade():
-    pass
+    op.execute('delete from corp_type where code=\'NR\'')
