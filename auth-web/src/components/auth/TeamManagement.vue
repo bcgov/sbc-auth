@@ -2,10 +2,10 @@
   <v-container>
     <UserManagement
       v-if="!isAnonymousAccount()"
-      v-can:INVITE_MEMBERS.hide></UserManagement>
+     ></UserManagement>
     <AnonymousUserManagement
         v-if="isAnonymousAccount()"
-        v-can:INVITE_MEMBERS.hide></AnonymousUserManagement>
+    ></AnonymousUserManagement>
   </v-container>
 </template>
 

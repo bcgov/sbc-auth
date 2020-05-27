@@ -83,7 +83,7 @@ export default class UserModule extends VuexModule {
   public async getRoleInfo ():Promise<RoleInfo[]> {
     const response = await UserService.getRoles()
     if (response && response.data) {
-      return response.data
+      return response.data.sort((a, b) => (a.displayOrder > b.displayOrder) ? 1 : -1)
     }
   }
 
