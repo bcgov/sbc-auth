@@ -16,7 +16,7 @@
 It defines the available types of membership Users have with Orgs.
 """
 
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, Integer
 
 from .base_model import BaseCodeModel
 
@@ -29,6 +29,7 @@ class MembershipType(BaseCodeModel):  # pylint: disable=too-few-public-methods
     label = Column(String(200))
     icon = Column(String(100))
     display_name = Column(String(100))
+    display_order = Column(Integer)
 
     @classmethod
     def get_default_type(cls):
