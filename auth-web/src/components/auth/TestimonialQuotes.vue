@@ -2,8 +2,8 @@
   <section id="testimonials-container">
     <v-container class="quote-container">
       <p>"We're incredibly excited to be able to incorporate as a Benefit Company in BC, it really reflects our values
-        and the role we want to Play."</p>
-      <p><strong>- BC Benefit Company user</strong></p>
+        and the role we want to play."</p>
+      <p><strong>&ndash; BC Benefit Company user</strong></p>
     </v-container>
   </section>
 </template>

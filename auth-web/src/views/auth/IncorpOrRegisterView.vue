@@ -57,6 +57,7 @@ import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
 import { Pages } from '@/util/constants'
+import { User } from '@/models/user'
 
 @Component({
   components: {
@@ -72,7 +73,8 @@ export default class IncorpOrRegisterView extends Vue {
     { text: 'Retain a copy of all Incorporation documents for your business\'s records.' }
   ]
 
-  @Prop() userProfile
+  @Prop()
+  private userProfile: User
 
   private login (): void {
     this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)

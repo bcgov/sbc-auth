@@ -44,6 +44,7 @@
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import { Pages } from '@/util/constants'
+import { User } from '@/models/user'
 
 @Component({
   components: {
@@ -62,7 +63,8 @@ export default class MaintainBusinessView extends Vue {
     }
   ]
 
-  @Prop() userProfile
+  @Prop()
+  private userProfile: User
 
   private login (): void {
     this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)

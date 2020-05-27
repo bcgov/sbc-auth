@@ -1,7 +1,9 @@
 <template>
   <v-container id="bcsc-container" class="my-10">
     <h2 class="mt-5">Create an Account to Incorporate</h2>
-    <p class="my-5">Log in securely using your mobile BC Services Card, government's trust way to access online services</p>
+    <p class="my-5">
+      Log in securely using your mobile BC Services Card, government's trusted way to access online services
+    </p>
     <v-row>
       <!-- Image Column -->
       <v-col cols="12" md="5">
@@ -33,8 +35,8 @@
           <v-btn large color="#fcba19" @click="emitLogin()" class="mt-5">
             Log in with BC Services Card
           </v-btn>
-          <p class="my-5">New to BC Registries? <a @click="emitAccountDialog()" class="create-account-link">
-            <u>Create a BC Registries Account</u></a>
+          <p class="my-5">New to BC Registries?
+            <a @click="emitAccountDialog()" class="create-account-link"><u>Create a BC Registries Account</u></a>
           </p>
         </template>
         <LearnMoreButton />
@@ -46,6 +48,7 @@
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
+import { User } from '@/models/user'
 
 @Component({
   components: {
@@ -60,10 +63,11 @@ export default class BCSCPanel extends Vue {
 
   private easeBulletPoints: Array<any> = [
     { text: 'It normally takes about 5 minutes to set up a mobile card.' },
-    { text: 'you can verify your identity by video right from your mobile device. You don\'t need to go in person unless you can\'t verify by video.' }
+    { text: 'You can verify your identity by video right from your mobile device. You don\'t need to go in person unless you can\'t verify by video.' }
   ]
 
-  @Prop() userProfile
+  @Prop()
+  private userProfile: User
 
   @Emit('login')
   private emitLogin () {}
