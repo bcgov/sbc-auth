@@ -46,13 +46,4 @@ export default class TestimonialQuotes extends Vue {}
       width: 50%;
     }
   }
-
-  .arrow-down {
-    margin-left: 48.3%;
-    width: 0;
-    height: 0;
-    border-left: 32px solid transparent;
-    border-right: 0px solid transparent;
-    border-top: 36px solid #003366;
-  }
 </style>

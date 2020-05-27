@@ -7,12 +7,11 @@
       <v-col cols="12" md="5">
         <v-img src="../../assets/img/BCSC-Helper.png" aspect-ratio="1.2" contain></v-img>
       </v-col>
-      <v-col cols="12" md="1">
-      </v-col>
+      <v-spacer></v-spacer>
       <!-- Info Column -->
       <v-col cols="12" md="6" class="bcsc-info-col">
         <h2>It's Secure</h2>
-        <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index" >
+        <v-list-item class="list-item" v-for="(item, index) in secureBulletPoints" :key="index" >
           <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
@@ -21,7 +20,7 @@
           </v-list-item-content>
         </v-list-item>
         <h2>It's Quick and Easy</h2>
-        <v-list-item class="list-item" v-for="(item, index) in bulletPoints2" :key="index" >
+        <v-list-item class="list-item" v-for="(item, index) in easeBulletPoints" :key="index" >
           <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
@@ -31,12 +30,12 @@
         </v-list-item>
         <!-- Panel Btns -->
         <template v-if="!userProfile">
-        <v-btn large color="#fcba19" @click="emitLogin()" class="mt-5">
-          Log in with BC Services Card
-        </v-btn>
-        <p class="my-5">New to BC Registries? <a @click="emitAccountDialog()" class="create-account-link">
-          <u>Create a BC Registries Account</u></a>
-        </p>
+          <v-btn large color="#fcba19" @click="emitLogin()" class="mt-5">
+            Log in with BC Services Card
+          </v-btn>
+          <p class="my-5">New to BC Registries? <a @click="emitAccountDialog()" class="create-account-link">
+            <u>Create a BC Registries Account</u></a>
+          </p>
         </template>
         <LearnMoreButton />
       </v-col>
@@ -54,12 +53,12 @@ import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
   }
 })
 export default class BCSCPanel extends Vue {
-  private bulletPoints: Array<any> = [
+  private secureBulletPoints: Array<any> = [
     { text: 'A mobile card is a representation of your BC Services Card on your mobile device. It\'s used to prove who you are when you log in to access government services online.' },
     { text: 'Only your name and a unique identifier is stored on the mobile device.' }
   ]
 
-  private bulletPoints2: Array<any> = [
+  private easeBulletPoints: Array<any> = [
     { text: 'It normally takes about 5 minutes to set up a mobile card.' },
     { text: 'you can verify your identity by video right from your mobile device. You don\'t need to go in person unless you can\'t verify by video.' }
   ]
