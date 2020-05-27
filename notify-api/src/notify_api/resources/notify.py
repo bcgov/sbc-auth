@@ -16,7 +16,9 @@ from typing import List
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Path
 from sqlalchemy.orm import Session
+from starlette.requests import Request
 
+from notify_api.core.authentication import requires
 from notify_api.db.database import get_db
 from notify_api.db.models.notification import NotificationRequest, NotificationResponse
 from notify_api.services.notify import NotifyService
@@ -26,8 +28,11 @@ ROUTER = APIRouter()
 
 
 @ROUTER.get('/{notification_id}', response_model=NotificationResponse)
-async def find_notification(notification_id: int = Path(...), db_session: Session = Depends(get_db)):
-    """get notification endpoint by id."""
+@requires('authenticated')
+async def find_notification(request: Request,  # pylint: disable=unused-argument
+                            notification_id: int = Path(...),
+                            db_session: Session = Depends(get_db)):
+    """Get notification endpoint by id."""
     notification = await NotifyService.find_notification(db_session, notification_id=notification_id)
     if notification is None:
         raise HTTPException(status_code=404, detail='Notification not found')
@@ -35,14 +40,23 @@ async def find_notification(notification_id: int = Path(...), db_session: Sessio
 
 
 @ROUTER.get('/notifications/{status}', response_model=List[NotificationResponse])
-async def find_notifications(status: str = Path(...), db_session: Session = Depends(get_db)):
-    """get notifications endpoint by status."""
+@requires('authenticated')
+async def find_notifications(request: Request,  # pylint: disable=unused-argument
+                             status: str = Path(...),
+                             db_session: Session = Depends(get_db)):
+    """Get notifications endpoint by status."""
     notifications = await NotifyService.find_notifications_by_status(db_session, status)
     return notifications
 
 
 @ROUTER.post('/', response_model=NotificationResponse)
-async def send_notification(notification: NotificationRequest = Body(...), db_session: Session = Depends(get_db)):
-    """create and send notification endpoint."""
+@requires('authenticated')
+async def send_notification(request: Request,
+                            notification: NotificationRequest = Body(...),
+                            db_session: Session = Depends(get_db)):
+    """Create and send notification endpoint."""
+    if request.user.display_name:
+        notification.request_by = request.user.display_name
+
     notification = await NotifyService.send_notification(db_session, notification)
     return notification

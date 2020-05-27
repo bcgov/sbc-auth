@@ -15,7 +15,7 @@
 
 Test suite to ensure that the Org model routines are working as expected.
 """
-from auth_api.utils.roles import OWNER
+from auth_api.utils.roles import ADMIN
 
 from tests.utilities.factory_scenarios import TestUserInfo
 from tests.utilities.factory_utils import factory_user_model
@@ -47,7 +47,7 @@ def factory_membersip_model(session):
     org.preferred_payment = preferred_payment
     org.save()
 
-    membership = MembershipModel(org_id=org.id, user_id=user.id, membership_type_code=OWNER, status=1)
+    membership = MembershipModel(org_id=org.id, user_id=user.id, membership_type_code=ADMIN, status=1)
     membership.save()
     return membership
 
@@ -64,7 +64,7 @@ def test_get_count_active_owner_org_id_multiple(session):  # pylint:disable=unus
     membership1 = factory_membersip_model(session)
     user2 = factory_user_model(TestUserInfo.user2)
 
-    membership2 = MembershipModel(org_id=membership1.org_id, user_id=user2.id, membership_type_code=OWNER, status=1)
+    membership2 = MembershipModel(org_id=membership1.org_id, user_id=user2.id, membership_type_code=ADMIN, status=1)
     membership2.save()
 
     assert MembershipModel.get_count_active_owner_org_id(membership2.org_id) == 2

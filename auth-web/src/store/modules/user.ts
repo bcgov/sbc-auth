@@ -3,6 +3,7 @@ import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
+import { RoleInfo } from '@/models/Organization'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { User } from '@/models/user'
 import UserService from '@/services/user.services'
@@ -22,10 +23,16 @@ export default class UserModule extends VuexModule {
   userContact: Contact = undefined
   termsOfUse: TermsOfUseDocument = undefined
   redirectAfterLoginUrl: string = ''
+  roleInfos: RoleInfo[] = undefined
 
   @Mutation
   public setUserProfile (userProfile: User) {
     this.userProfile = userProfile
+  }
+
+  @Mutation
+  public setRoleInfos (roleInfos: RoleInfo[]) {
+    this.roleInfos = roleInfos
   }
 
   @Mutation
@@ -69,6 +76,14 @@ export default class UserModule extends VuexModule {
     const response = await UserService.getUserProfile(identifier)
     if (response && response.data) {
       return response.data
+    }
+  }
+
+  @Action({ commit: 'setRoleInfos' })
+  public async getRoleInfo ():Promise<RoleInfo[]> {
+    const response = await UserService.getRoles()
+    if (response && response.data) {
+      return response.data.sort((a, b) => (a.displayOrder > b.displayOrder) ? 1 : -1)
     }
   }
 

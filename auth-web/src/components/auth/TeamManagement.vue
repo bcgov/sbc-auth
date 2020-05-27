@@ -2,11 +2,10 @@
   <v-container>
     <UserManagement
       v-if="!isAnonymousAccount()"
-      :can-invite="canInvite()"></UserManagement>
+     ></UserManagement>
     <AnonymousUserManagement
         v-if="isAnonymousAccount()"
-        :can-invite="canInvite()"></AnonymousUserManagement>
-
+    ></AnonymousUserManagement>
   </v-container>
 </template>
 
@@ -46,14 +45,6 @@ export default class TeamManagement extends Mixins(NextPageMixin) {
       this.redirectTo(this.getNextPageUrl())
     }
   }
-
-  private canInvite (): boolean {
-    return this.currentMembership &&
-            this.currentMembership.membershipStatus === MembershipStatus.Active &&
-            (this.currentMembership.membershipTypeCode === MembershipType.Owner ||
-             this.currentMembership.membershipTypeCode === MembershipType.Admin)
-  }
-
   private isAnonymousAccount (): boolean {
     return this.currentOrganization &&
             this.currentOrganization.accessType === Account.ANONYMOUS

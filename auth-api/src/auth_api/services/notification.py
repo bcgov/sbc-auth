@@ -25,7 +25,7 @@ def send_email(subject: str, sender: str, recipients: str, html_body: str):  # p
     notify_url = current_app.config.get('NOTIFY_API_URL') + '/notify/'
     notify_body = {
         'recipients': recipients,
-        'contents': {
+        'content': {
             'subject': subject,
             'body': html_body
         }

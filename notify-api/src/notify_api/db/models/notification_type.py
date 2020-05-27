@@ -22,6 +22,7 @@ from notify_api.db.database import BASE
 
 class NotificationTypeModel(BASE):  # pylint: disable=too-few-public-methods
     """This is the model for a notification Type record."""
+
     __tablename__ = 'notification_type'
 
     code = Column(String(15), primary_key=True, unique=True)
@@ -31,10 +32,13 @@ class NotificationTypeModel(BASE):  # pylint: disable=too-few-public-methods
 
 class NotificationType(BaseModel):  # pylint: disable=too-few-public-methods
     """This is pydantic model of notification type."""
+
     code: str = ''
     desc: str = ''
 
     class Config:  # pylint: disable=too-few-public-methods
+        """Config."""
+
         orm_mode = True
 
 

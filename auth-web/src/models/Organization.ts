@@ -45,6 +45,7 @@ export interface Member {
   id: number
   membershipTypeCode: MembershipType
   membershipStatus: MembershipStatus
+  roleDisplayName?:string
   user: User
 }
 
@@ -75,15 +76,21 @@ export enum MembershipStatus {
 }
 
 export enum MembershipType {
-  'Owner' = 'OWNER',
   'Admin' = 'ADMIN',
-  'Member' = 'MEMBER'
+  'Coordinator' = 'COORDINATOR',
+  'User' = 'USER'
+}
+
+export interface Permissions {
+  action: string[]
 }
 
 export interface RoleInfo {
   icon: string
   name: string
-  desc: string
+  desc: string,
+  displayName: string,
+  displayOrder: number
 }
 
 export interface AddUserBody {

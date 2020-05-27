@@ -403,6 +403,7 @@ class TestAffliationInfo(dict, Enum):
     affliation2 = {'businessIdentifier': 'CP1234568'}
     affiliation3 = {'businessIdentifier': 'CP0002103', 'passCode': '222222222'}
     affiliation4 = {'businessIdentifier': 'CP0002106', 'passCode': '222222222'}
+    nr_affiliation = {'businessIdentifier': 'NR 1234567', 'phone': '1112223333'}
     invalid = {'name': 'CP1234567'}
 
 
@@ -544,9 +545,9 @@ class BulkUserTestScenario:
         """Generate a bulk user input."""
         return {'users': [
             {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'Test@12345',
-             'membershipType': 'ADMIN'},
+             'membershipType': 'COORDINATOR'},
             {'username': ''.join(choice(ascii_uppercase) for i in range(5)), 'password': 'Test@12345',
-             'membershipType': 'MEMBER'}
+             'membershipType': 'USER'}
         ],
             'orgId': org_id
         }

@@ -69,3 +69,13 @@ export enum TransactionStatus {
     CREATED = 'CREATED',
     DELETED = 'DELETED'
 }
+
+export enum FilingTypes {
+    INCORPORATION_APPLICATION = 'incorporationApplication'
+}
+
+export enum LegalTypes {
+    BCOMP = 'BC',
+    COOP = 'CP',
+    CORP = 'CR'
+}
