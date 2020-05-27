@@ -33,23 +33,23 @@
         </div>
       </div>
       <v-card flat class="account-settings-card" data-test="account-settings-card">
-        <v-container class="nav-container py-8 px-6">
+        <v-container class="nav-container py-8 px-0">
           <v-navigation-drawer floating permanent width="auto" data-test="account-nav-drawer">
             <v-list class="py-0">
               <v-list-item-group color="primary">
-                <v-list-item dense class="py-1 px-4" :to="accountInfoUrl" data-test="account-info-nav-item">
+                <v-list-item dense class="py-1 px-8" :to="accountInfoUrl" data-test="account-info-nav-item">
                   <v-list-item-icon>
                     <v-icon color="link" left>mdi-information-outline</v-icon>
                   </v-list-item-icon>
                   <v-list-item-title>Account Info</v-list-item-title>
                 </v-list-item>
-                <v-list-item dense class="py-1 px-4" :to="teamMembersUrl" data-test="team-members-nav-item">
+                <v-list-item dense class="py-1 px-8" :to="teamMembersUrl" data-test="team-members-nav-item">
                   <v-list-item-icon>
                     <v-icon color="link" left>mdi-account-group-outline</v-icon>
                   </v-list-item-icon>
                   <v-list-item-title>Team Members</v-list-item-title>
                 </v-list-item>
-                <v-list-item
+                <v-list-item dense class="py-1 px-8"
                   v-if="showTransactions"
                   :to="transactionUrl"
                   data-test="transactions-nav-item"

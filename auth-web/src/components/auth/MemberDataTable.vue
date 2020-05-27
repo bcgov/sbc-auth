@@ -24,20 +24,14 @@
     <template v-slot:item.role="{ item }">
       <v-menu>
         <template v-slot:activator="{ on }">
-          <v-btn
+          <v-btn small text
             :disabled="!canChangeRole(item)"
             class="role-selector"
-            small
-            depressed
             v-on="on"
             :data-test="getIndexedTag('role-selector', item.index)"
           >
             {{ item.roleDisplayName }}
-            <v-icon
-              small
-              depressed
-              class="ml-1"
-            >mdi-chevron-down</v-icon>
+            <v-icon depressed>mdi-menu-down</v-icon>
           </v-btn>
         </template>
         <v-list
@@ -45,8 +39,7 @@
           class="role-list"
         >
           <v-item-group>
-            <v-list-item
-              three-line
+            <v-list-item class="py-1"
               v-for="(role, index) in roleInfos"
               :key="index"
               @click="item.membershipTypeCode.toUpperCase() !== role.name.toUpperCase()? confirmChangeRole(item, role.name): ''"
@@ -57,9 +50,9 @@
                 <v-icon v-text="role.icon" />
               </v-list-item-icon>
               <v-list-item-content>
-                <v-list-item-title v-text="role.displayName">
+                <v-list-item-title class="user-role-name" v-text="role.displayName">
                 </v-list-item-title>
-                <v-list-item-subtitle v-text="role.label">
+                <v-list-item-subtitle class="user-role-desc" v-text="role.label">
                 </v-list-item-subtitle>
                 <v-divider></v-divider>
               </v-list-item-content>
@@ -337,11 +330,6 @@ export default class MemberDataTable extends Vue {
 @import '$assets/scss/theme.scss';
 
 .v-list--dense {
-  .v-list-item {
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
-  }
-
   .v-list-item .v-list-item__title {
     margin-bottom: 0.25rem;
     font-weight: 700;
@@ -349,6 +337,10 @@ export default class MemberDataTable extends Vue {
 }
 
 .role-list {
-  width: 20rem;
+  width: 24rem;
+}
+
+.user-role-desc {
+  white-space: normal !important;
 }
 </style>

@@ -2,10 +2,11 @@
   <div>
     <p>Enter email addresses to invite team members. Team members will be required to sign in with their <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank">BC Services Card</a>.</p>
     <v-form ref="form" class="mt-9">
-      <ul class="invite-list">
+      <div class="invite-list">
         <transition-group name="slide-y-transition">
-          <li class="d-flex" v-for="(invite, index) in invitations" v-bind:key="index + 1">
+          <div class="d-flex" v-for="(invite, index) in invitations" v-bind:key="index + 1">
             <v-text-field
+              dense
               filled
               label="Email Address"
               v-model="invitations[index].emailAddress"
@@ -15,23 +16,25 @@
 
             <v-overflow-btn
               filled
+              hide-details
               class="select-role-btn ml-2"
               v-model="invitations[index].selectedRole.name"
               item-text="name"
               item-value="name"
+              menu-props="dense"
               :items="availableRoles"
               :value="availableRoles[0]"
               :data-test="getIndexedTag('role-selector', index)"
-              menu-props="dense"
             >
               <template v-slot:selection="{ item }">
                 {{ item.displayName }}
               </template>
 
               <template v-slot:item="{ item }">
-                <div class="role-container">
+                <div class="role-menu-item">
                   <v-list-item-icon>
-                    <v-icon v-text="item.icon" />
+                  <v-icon v-text="item.icon" />
+
                   </v-list-item-icon>
                   <v-list-item-content>
                     <v-list-item-title>{{ item.displayName }}</v-list-item-title>
@@ -46,20 +49,20 @@
               @click="removeEmail(index)">
               <v-icon>mdi-close</v-icon>
             </v-btn>
-          </li>
+          </div>
         </transition-group>
-      </ul>
-      <v-btn text small color="primary"
+      </div>
+      <v-btn text small color="primary" class="pr-3 pl-1"
         @click="addEmail()" data-test="add-another-button">
         <v-icon>mdi-plus-box</v-icon>
         <span>Add Another</span>
       </v-btn>
       <div class="form__btns">
         <v-btn large depressed color="primary"
-                @click="sendInvites"
-                :loading="loading"
-                :disabled="loading || !isFormValid()"
-                data-test="send-invites-button"
+          @click="sendInvites"
+          :loading="loading"
+          :disabled="loading || !isFormValid()"
+          data-test="send-invites-button"
         >
           <span>Send Invites</span>
         </v-btn>
@@ -220,12 +223,12 @@ export default class InviteUsersForm extends Vue {
     justify-content: flex-end;
   }
 
-  .role-container {
+  .role-menu-item {
     display: flex;
-    width: 20rem;
+    width: 24rem;
 
     .v-list-item__title {
-      letter-spacing: -0.02rem;
+      margin-bottom: 0.25rem;
       font-size: 0.875rem;
       font-weight: 700;
     }
@@ -233,8 +236,8 @@ export default class InviteUsersForm extends Vue {
     .v-list-item__subtitle {
       white-space: normal;
       overflow: visible;
-      line-height: 1.5;
-      font-size: 0.875rem;
+      line-height: 1rem;
+      font-size: 0.812rem;
     }
   }
 
@@ -243,6 +246,8 @@ export default class InviteUsersForm extends Vue {
   }
 
   .select-role-btn {
+    width: 9rem;
+
     ::v-deep .v-input__slot {
       padding-right: 0 !important
     }
