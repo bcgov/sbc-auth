@@ -1,5 +1,5 @@
 <template>
-  <v-container id="bcsc-container" class="my-5">
+  <v-container id="bcsc-container" class="my-10">
     <h2 class="mt-5">Create an Account to Incorporate</h2>
     <p class="my-5">Log in securely using your mobile BC Services Card, government's trust way to access online services</p>
     <v-row>

@@ -17,7 +17,7 @@
       <header class="hero-banner">
         <v-container>
           <h1>Start A Business And <br> Keep Records up to Date</h1>
-          <p>The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
+          <p class="my-10">The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
             and organizations in British Columbia.</p>
           <div class="hero-banner__cta-btns">
             <!-- Authenticated -->
@@ -49,7 +49,7 @@
                      href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
                 Request a Name
               </v-btn>
-              <p>New to BC Registries? <a @click="accountDialog = true" class="create-account-link">
+              <p class="mt-10">New to BC Registries? <a @click="accountDialog = true" class="create-account-link">
                 <u>Create a BC Registries Account</u></a>
               </p>
             </div>
@@ -65,7 +65,7 @@
           </v-dialog>
         </v-container>
       </header>
-      <div class="how-to-container">
+      <div class="how-to-container mt-10">
         <v-container>
           <h2>How does it work?</h2>
           <InfoStepper />
@@ -213,10 +213,11 @@ export default class HomeView extends Vue {
   // Hero Banner
   .hero-banner {
     color: $gray9;
+    min-height: 550px;
     background-color: #ffffff;
-    background-image: url('../../assets/img/fpo-hero-image-1600x500.png');
+    background-image: url('../../assets/img/bc-launch-hero-img-min.jpg');
     background-position: bottom right;
-    background-size: 80% 110%;
+    background-size: 80% 115%;
     background-repeat: no-repeat;
 
     h1 {

@@ -5,7 +5,6 @@
         and the role we want to Play."</p>
       <p><strong>- BC Benefit Company user</strong></p>
     </v-container>
-    <span class="arrow-down"></span>
   </section>
 </template>
 
