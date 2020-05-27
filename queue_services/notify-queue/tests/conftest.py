@@ -21,20 +21,20 @@ import pytest
 import sqlalchemy
 from nats.aio.client import Client as Nats
 from notify_api import applications
-from notify_api.core import config as AppConfig
 from notify_api.db.database import BASE, SESSION
 from notify_api.db.models import NotificationStatusModel, NotificationTypeModel
 from sqlalchemy import event
 from stan.aio.client import Client as Stan
 from starlette.testclient import TestClient
 
+from notify_service import config as AppConfig
 from notify_service import worker
 
 
 DATABASE_URL = AppConfig.SQLALCHEMY_TEST_DATABASE_URI
 
 
-@event.listens_for(NotificationTypeModel.__table__, 'after_create')
+@event.listens_for(NotificationTypeModel.__tablename__, 'after_create')
 def insert_data(target, connection, **kw):  # pylint: disable=unused-argument
     """Load notification type data."""
     connection.execute(target.insert(),
@@ -42,7 +42,7 @@ def insert_data(target, connection, **kw):  # pylint: disable=unused-argument
                        {'code': 'TEXT', 'desc': 'The Text message type of notification', 'default': False})
 
 
-@event.listens_for(NotificationStatusModel.__table__, 'after_create')
+@event.listens_for(NotificationStatusModel.__tablename__, 'after_create')
 def insert_data2(target, connection, **kw):  # pylint: disable=unused-argument
     """Load notification status data."""
     connection.execute(target.insert(),

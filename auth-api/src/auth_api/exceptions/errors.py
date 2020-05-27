@@ -35,10 +35,11 @@ class Error(Enum):
     EXPIRED_INVITATION = 'The invitation has expired.', http_status.HTTP_400_BAD_REQUEST
     FAILED_INVITATION = 'Failed to dispatch the invitation', http_status.HTTP_500_INTERNAL_SERVER_ERROR
     FAILED_NOTIFICATION = 'Failed to dispatch the notification', http_status.HTTP_500_INTERNAL_SERVER_ERROR
-    DELETE_FAILED_ONLY_OWNER = 'Cannot delete as user is the only owner of some teams', http_status.HTTP_400_BAD_REQUEST
+    DELETE_FAILED_ONLY_OWNER = 'Cannot delete as user is the only Account Administrator of some teams', \
+                               http_status.HTTP_400_BAD_REQUEST
     DELETE_FAILED_INACTIVE_USER = 'User is already inactive', http_status.HTTP_400_BAD_REQUEST
-    CHANGE_ROLE_FAILED_ONLY_OWNER = 'User is only owner in org', http_status.HTTP_400_BAD_REQUEST
-    OWNER_CANNOT_BE_REMOVED = 'Owner cannot be removed by anyone', http_status.HTTP_400_BAD_REQUEST
+    CHANGE_ROLE_FAILED_ONLY_OWNER = 'User is only Account Administrator in org', http_status.HTTP_400_BAD_REQUEST
+    OWNER_CANNOT_BE_REMOVED = 'Account Administrator cannot be removed by anyone', http_status.HTTP_400_BAD_REQUEST
     MAX_NUMBER_OF_ORGS_LIMIT = 'Maximum number of organisations reached', http_status.HTTP_400_BAD_REQUEST
     ALREADY_CLAIMED_PASSCODE = 'Passcode you entered has already been claimed', http_status.HTTP_406_NOT_ACCEPTABLE
     ORG_CANNOT_BE_DISSOLVED = 'Organization cannot be dissolved', http_status.HTTP_406_NOT_ACCEPTABLE
@@ -50,6 +51,14 @@ class Error(Enum):
     BCOL_ACCOUNT_ALREADY_LINKED = 'The BC Online account you have requested to link is already taken.', \
                                   http_status.HTTP_409_CONFLICT
     BCOL_INVALID_USERNAME_PASSWORD = 'Invalid User Id or Password', http_status.HTTP_400_BAD_REQUEST
+
+    # NR_EXPIRED = 'The specified name request has expired', http_status.HTTP_400_BAD_REQUEST
+    NR_CONSUMED = 'The specified name request has already been consumed', http_status.HTTP_400_BAD_REQUEST
+    NR_NOT_APPROVED = 'The specified name request has not been approved', http_status.HTTP_400_BAD_REQUEST
+    NR_NOT_FOUND = 'The specified name request number could not be found', http_status.HTTP_400_BAD_REQUEST
+    NR_INVALID_CONTACT = 'Invalid email or phone number', http_status.HTTP_400_BAD_REQUEST
+
+    ENTITY_DELETE_FAILED = 'Cannot delete entity due to related records.', http_status.HTTP_400_BAD_REQUEST
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""

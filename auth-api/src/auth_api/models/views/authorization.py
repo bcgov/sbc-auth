@@ -23,7 +23,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import expression
 
 from auth_api.models.db import db
-from auth_api.utils.roles import ADMIN, MEMBER, OWNER
+from auth_api.utils.roles import COORDINATOR, USER, ADMIN
 
 
 class Authorization(db.Model):
@@ -67,9 +67,9 @@ class Authorization(db.Model):
 
         """
         return cls.query.filter_by(corp_type_code=corp_type, business_identifier=business_identifier) \
-            .order_by(expression.case(((Authorization.org_membership == OWNER, 1),
-                                       (Authorization.org_membership == ADMIN, 2),
-                                       (Authorization.org_membership == MEMBER, 3)))) \
+            .order_by(expression.case(((Authorization.org_membership == ADMIN, 1),
+                                       (Authorization.org_membership == COORDINATOR, 2),
+                                       (Authorization.org_membership == USER, 3)))) \
             .first()
 
     @classmethod
@@ -83,9 +83,9 @@ class Authorization(db.Model):
         return db.session.query(Authorization).filter(
             and_(Authorization.org_id == org_id,
                  or_(Authorization.corp_type_code == corp_type, Authorization.corp_type_code.is_(None)))).order_by(
-                     expression.case(((Authorization.org_membership == OWNER, 1),
-                                      (Authorization.org_membership == ADMIN, 2),
-                                      (Authorization.org_membership == MEMBER, 3)))).first()
+                     expression.case(((Authorization.org_membership == ADMIN, 1),
+                                      (Authorization.org_membership == COORDINATOR, 2),
+                                      (Authorization.org_membership == USER, 3)))).first()
 
     @classmethod
     def find_account_authorization_by_org_id_and_product_for_user(cls, keycloak_guid: uuid, org_id: int, product: str):

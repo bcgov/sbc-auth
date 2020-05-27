@@ -13,6 +13,8 @@
 # limitations under the License.
 """Manager for org schema and export."""
 
+from marshmallow import fields
+
 from auth_api.models import ma
 
 
@@ -22,4 +24,6 @@ class UserSettingsSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors,
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the User Settings fields to a default schema."""
 
-        fields = ('id', 'label', 'urlorigin', 'urlpath', 'type')
+        fields = ('id', 'label', 'urlorigin', 'urlpath', 'type', 'account_type')
+
+    account_type = fields.String(data_key='accountType')

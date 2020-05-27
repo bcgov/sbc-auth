@@ -17,3 +17,6 @@ sqlalchemy-filters
 tzlocal
 uvicorn
 gunicorn
+Werkzeug==0.16.1
+cryptography
+

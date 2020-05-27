@@ -75,7 +75,7 @@ def factory_user_model(user_info: dict = TestUserInfo.user1):
     return user
 
 
-def factory_membership_model(user_id, org_id, member_type='OWNER', member_status=1):
+def factory_membership_model(user_id, org_id, member_type='ADMIN', member_status=1):
     """Produce a Membership model."""
     membership = MembershipModel(user_id=user_id,
                                  org_id=org_id,
@@ -167,7 +167,7 @@ def factory_contact_model(contact_info: dict = TestContactInfo.contact1):
 def factory_invitation(org_id,
                        email='abc123@email.com',
                        sent_date=datetime.datetime.now().strftime('Y-%m-%d %H:%M:%S'),
-                       membership_type='MEMBER'):
+                       membership_type='USER'):
     """Produce an invite for the given org and email."""
     return {
         'recipientEmail': email,
@@ -184,7 +184,7 @@ def factory_invitation(org_id,
 def factory_invitation_anonymous(org_id,
                                  email='abc123@email.com',
                                  sent_date=datetime.datetime.now().strftime('Y-%m-%d %H:%M:%S'),
-                                 membership_type='OWNER'):
+                                 membership_type='ADMIN'):
     """Produce an invite for the given org and email."""
     return {
         'recipientEmail': email,

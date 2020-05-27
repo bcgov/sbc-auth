@@ -35,7 +35,7 @@ from auth_api.models import User as UserModel
 from auth_api.schemas import UserSchema
 from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.roles import CLIENT_ADMIN_ROLES, OWNER, OrgStatus, Status, UserStatus, ADMIN, AccessType
+from auth_api.utils.roles import CLIENT_ADMIN_ROLES, ADMIN, OrgStatus, Status, UserStatus, COORDINATOR, AccessType
 from auth_api.utils.util import camelback2snake
 
 from .contact import Contact as ContactService
@@ -155,10 +155,10 @@ class User:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _validate_and_throw_exception(memberships, org_id, single_mode, token_info):
         if single_mode:  # make sure no bulk operation and only owner is created using if no auth
-            if len(memberships) > 1 or memberships[0].get('membershipType') not in [OWNER, ADMIN]:
+            if len(memberships) > 1 or memberships[0].get('membershipType') not in [ADMIN, COORDINATOR]:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
         else:
-            check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, OWNER))
+            check_auth(org_id=org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN))
         # check if anonymous org ;these actions cannot be performed on normal orgs
         org = OrgModel.find_by_org_id(org_id)
         if not org or org.access_type != AccessType.ANONYMOUS.value:
@@ -203,7 +203,7 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         # admin/owner deleteion
         admin_user_membership = MembershipModel.find_membership_by_user_and_org(admin_user.id, org_id)
-        if admin_user_membership.membership_type_code in [OWNER]:
+        if admin_user_membership.membership_type_code in [ADMIN]:
             is_valid_action = True
         # staff admin deleteion
         is_staff_admin = token_info and 'staff_admin' in token_info.get('realm_access').get('roles')
@@ -214,7 +214,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             is_valid_action = True
 
         # is the only owner getting deleted
-        if is_valid_action and membership.membership_type_code == OWNER:
+        if is_valid_action and membership.membership_type_code == ADMIN:
             count_of_owners = MembershipModel.get_count_active_owner_org_id(org_id)
             if count_of_owners == 1:
                 is_valid_action = False
@@ -463,9 +463,9 @@ class User:  # pylint: disable=too-many-instance-attributes
         for member in MembershipModel.find_members_by_org_id(org.id):
             if member.user_id == user_id:
                 user_membership = member
-                if member.membership_type_code == OWNER:
+                if member.membership_type_code == ADMIN:
                     is_user_an_owner = True
-            elif member.membership_type_code == OWNER:
+            elif member.membership_type_code == ADMIN:
                 org_has_other_owners = True
         current_app.logger.info(
             f'Org :{org.name} --> User Owner : {is_user_an_owner},Has other owners :{org_has_other_owners}')

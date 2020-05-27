@@ -11,7 +11,45 @@
       <div class="view-header align-center">
         <h1 class="view-header__title">Manage Businesses</h1>
         <div class="view-header__actions">
-          <v-btn large color="primary" @click="showAddBusinessModal()" data-test="add-business-button">
+          <v-menu v-if="showAddNameRequestDropdown">
+            <template v-slot:activator="{ on }">
+              <v-btn
+                color="primary"
+                dark
+                large
+                v-on="on"
+              >
+                <v-icon small>mdi-plus</v-icon>
+                <span>{{ $t('addExistingBtnLabel') }}</span>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item
+              >
+                <v-list-item-title class="d-inline-flex">
+                  <v-icon small>mdi-plus</v-icon>
+                  <div class="ml-1">{{ $t('addExistingBtnLabel') }}</div>
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item
+                @click="showAddNRModal()"
+              >
+                Name Request
+              </v-list-item>
+              <v-list-item
+                @click="showAddBusinessModal()"
+              >
+                Business
+              </v-list-item>
+            </v-list>
+          </v-menu>
+          <v-btn
+            large
+            color="primary"
+            @click="showAddBusinessModal()"
+            data-test="add-business-button"
+            v-else
+          >
             <v-icon small>mdi-plus</v-icon>
             <span>Add Existing Business</span>
           </v-btn>
@@ -42,8 +80,34 @@
             @add-failed-invalid-code="showInvalidCodeModal()"
             @add-failed-no-entity="showEntityNotFoundModal()"
             @add-failed-passcode-claimed="showPasscodeClaimedModal()"
-            @add-unknown-error="showUnknownErrorModal()"
+            @add-unknown-error="showUnknownErrorModal('business')"
             @cancel="cancelAddBusiness()"
+          />
+        </template>
+      </ModalDialog>
+
+      <!-- Add Name Request Dialog -->
+      <ModalDialog
+        ref="addNRDialog"
+        :is-persistent="true"
+        :title="dialogTitle"
+        :show-icon="false"
+        :show-actions="false"
+        max-width="640"
+        data-test-tag="add-name-request"
+      >
+        <template v-slot:text>
+          <p>
+            Enter the Name Request Number (e.g., NR 1234567) and either the applicant phone  number OR applicant email that were used when the name was requested.
+          </p>
+          <AddNameRequestForm
+            class="mt-9"
+            @close-add-nr-modal="cancelAddNameRequest()"
+            @add-success="showAddSuccessModalNR()"
+            @add-failed-show-msg="showNRErrorModal"
+            @add-failed-no-entity="showNRNotFoundModal()"
+            @add-unknown-error="showUnknownErrorModal('nr')"
+            @cancel="cancelAddNameRequest()"
           />
         </template>
       </ModalDialog>
@@ -96,14 +160,18 @@
 <script lang="ts">
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
+import { Pages, SessionStorageKeys } from '@/util/constants'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import { AccountSettings } from '@/models/account-settings'
 import AddBusinessForm from '@/components/auth/AddBusinessForm.vue'
+import AddNameRequestForm from '@/components/auth/AddNameRequestForm.vue'
 import AffiliatedEntityList from '@/components/auth/AffiliatedEntityList.vue'
 import { Business } from '@/models/business'
 import BusinessModule from '@/store/modules/business'
+import ConfigHelper from '@/util/config-helper'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import { Pages } from '@/util/constants'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 import i18n from '@/plugins/i18n'
@@ -112,11 +180,12 @@ import { mapActions } from 'vuex'
 @Component({
   components: {
     AddBusinessForm,
+    AddNameRequestForm,
     AffiliatedEntityList,
     ModalDialog
   },
   methods: {
-    ...mapActions('business', ['syncBusinesses', 'removeBusiness'])
+    ...mapActions('business', ['syncBusinesses', 'removeBusiness', 'createNumberedBusiness'])
   }
 })
 export default class EntityManagement extends Mixins(AccountChangeMixin, NextPageMixin) {
@@ -127,14 +196,21 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   private messageTextList = i18n.messages[i18n.locale]
   private isLoading = true
 
+  protected readonly currentAccountSettings!: AccountSettings
   private readonly syncBusinesses!: () => Promise<Business[]>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
+  private readonly createNumberedBusiness!: (accountId: Number) => Promise<void>
 
   $refs: {
     successDialog: ModalDialog
     errorDialog: ModalDialog
     confirmDeleteDialog: ModalDialog
     addBusinessDialog: ModalDialog
+    addNRDialog: ModalDialog
+  }
+
+  private get showAddNameRequestDropdown (): boolean {
+    return LaunchDarklyService.getFlag('show-add-nr-dropdown') || false
   }
 
   private async mounted () {
@@ -152,6 +228,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   private async setup () {
     this.isLoading = true
+    this.$route.query.isNumberedCompanyRequest && await this.createNumberedBusiness(this.currentAccountSettings.id)
     await this.syncBusinesses()
     this.isLoading = false
   }
@@ -160,6 +237,14 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Business Added'
     this.dialogText = 'You have successfully added a business'
+    await this.syncBusinesses()
+    this.$refs.successDialog.open()
+  }
+
+  async showAddSuccessModalNR () {
+    this.$refs.addNRDialog.close()
+    this.dialogTitle = 'Name Request Added'
+    this.dialogText = 'You have successfully added a name request'
     await this.syncBusinesses()
     this.$refs.successDialog.open()
   }
@@ -178,6 +263,20 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.$refs.errorDialog.open()
   }
 
+  showNRNotFoundModal () {
+    this.$refs.addNRDialog.close()
+    this.dialogTitle = 'Name Request Not Found'
+    this.dialogText = 'The specified name request was not found.'
+    this.$refs.errorDialog.open()
+  }
+
+  showNRErrorModal (msg) {
+    this.$refs.addNRDialog.close()
+    this.dialogTitle = 'Error Adding Name Request'
+    this.dialogText = msg
+    this.$refs.errorDialog.open()
+  }
+
   showPasscodeClaimedModal () {
     const contactNumber = (this.messageTextList && this.messageTextList.techSupportTollFree) ? this.messageTextList.techSupportTollFree : 'helpdesk'
     this.$refs.addBusinessDialog.close()
@@ -186,16 +285,27 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.$refs.errorDialog.open()
   }
 
-  showUnknownErrorModal () {
-    this.$refs.addBusinessDialog.close()
-    this.dialogTitle = 'Error Adding Existing Business'
-    this.dialogText = 'An error occurred adding your business. Please try again.'
+  showUnknownErrorModal (type: string) {
+    if (type === 'business') {
+      this.$refs.addBusinessDialog.close()
+      this.dialogTitle = 'Error Adding Existing Business'
+      this.dialogText = 'An error occurred adding your business. Please try again.'
+    } else if (type === 'nr') {
+      this.$refs.addNRDialog.close()
+      this.dialogTitle = 'Error Adding Existing Name Request'
+      this.dialogText = 'An error occurred adding your name request. Please try again.'
+    }
     this.$refs.errorDialog.open()
   }
 
   showAddBusinessModal () {
     this.dialogTitle = 'Add Existing Business'
     this.$refs.addBusinessDialog.open()
+  }
+
+  showAddNRModal () {
+    this.dialogTitle = 'Add an Existing Name Request'
+    this.$refs.addNRDialog.open()
   }
 
   showConfirmRemoveModal (removeBusinessPayload: RemoveBusinessPayload) {
@@ -211,6 +321,10 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   cancelAddBusiness () {
     this.$refs.addBusinessDialog.close()
+  }
+
+  cancelAddNameRequest () {
+    this.$refs.addNRDialog.close()
   }
 
   async remove () {

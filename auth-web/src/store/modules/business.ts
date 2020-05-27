@@ -1,12 +1,12 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { Business, FolioNumberload, LoginPayload } from '@/models/business'
+import { Business, FolioNumberload, LoginPayload, NumberedBusinessRequest, UpdateFilingBody } from '@/models/business'
+import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
+import { FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
-import { CreateRequestBody as CreateAffiliationRequestBody } from '@/models/affiliation'
 import OrgService from '@/services/org.services'
-import { SessionStorageKeys } from '@/util/constants'
 
 @Module({
   name: 'business',
@@ -58,7 +58,58 @@ export default class BusinessModule extends VuexModule {
     const currentOrganization: Organization = this.context.rootState.org.currentOrganization
 
     // Create an affiliation between implicit org and requested business
-    await OrgService.createAffiliation(currentOrganization.id, requestBody)
+    return OrgService.createAffiliation(currentOrganization.id, requestBody)
+  }
+
+  @Action({ rawError: true })
+  public async updateBusinessName (businessNumber: string) {
+    try {
+      const businessResponse = await BusinessService.searchBusiness(businessNumber)
+      if ((businessResponse?.status === 200) && businessResponse?.data?.business?.legalName) {
+        const updateBusinessResponse = await BusinessService.updateBusinessName({
+          businessIdentifier: businessNumber,
+          name: businessResponse.data.business.legalName
+        })
+        if (updateBusinessResponse?.status === 200) {
+          return updateBusinessResponse
+        }
+      }
+      throw Error('update failed')
+    } catch (error) {
+      // delete the created affiliation if the update failed for avoiding orphan records
+      // unable to do these from backend, since it causes a circular dependency
+      const orgId = this.context.rootState.org.currentOrganization?.id
+      await OrgService.removeAffiliation(orgId, businessNumber)
+      return {
+        errorMsg: 'Cannot add business due to some technical reasons'
+      }
+    }
+  }
+
+  @Action({ rawError: true })
+  public async addNameRequest (requestBody: CreateNRAffiliationRequestBody) {
+    const currentOrganization: Organization = this.context.rootState.org.currentOrganization
+
+    // Create an affiliation between implicit org and requested business
+    return OrgService.createNRAffiliation(currentOrganization.id, requestBody)
+  }
+
+  @Action({ rawError: true })
+  public async updateFiling (filingBody: UpdateFilingBody) {
+    // Create an affiliation between implicit org and requested business
+    const updateResponse = await BusinessService.updateFiling(filingBody)
+    if (updateResponse?.status >= 200 && updateResponse?.status < 300) {
+      return updateResponse
+    } else {
+      // delete the created affiliation if the update failed for avoiding orphan records
+      // unable to do these from backend, since it causes a circular dependency
+      const orgId = filingBody?.filing?.header?.accountId
+      const nrNumber = filingBody?.filing?.incorporationApplication?.nameRequest?.nrNumber
+      await OrgService.removeAffiliation(orgId, nrNumber)
+      return {
+        errorMsg: 'Cannot add business due to some technical reasons'
+      }
+    }
   }
 
   // Following searchBusiness will search data from legal-api.
@@ -69,6 +120,37 @@ export default class BusinessModule extends VuexModule {
         if (response.status === 200) {
           ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessNumber)
         }
+      })
+  }
+
+  @Action({ rawError: true })
+  public async createNumberedBusiness (accountId: number) {
+    const requestBody: NumberedBusinessRequest = {
+      filing: {
+        header: {
+          name: FilingTypes.INCORPORATION_APPLICATION,
+          accountId: accountId
+        },
+        business: {
+          legalType: LegalTypes.BCOMP
+        }
+      }
+    }
+
+    await BusinessService.createNumberedBusiness(requestBody)
+      .then(response => {
+        if (response && response.data && (response.status === 200 || response.status === 201)) {
+          const tempRegNum = response.data.filing?.business?.identifier
+          if (tempRegNum) {
+            ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, tempRegNum)
+            const redirectURL = `${ConfigHelper.getCoopsURL()}${tempRegNum}`
+
+            window.location.href = decodeURIComponent(redirectURL)
+          }
+        }
+      }).catch(error => {
+        // eslint-disable-next-line no-console
+        console.log(error) // ToDo: Handle error: Redirect back to Homeview? Feedback required here
       })
   }
 

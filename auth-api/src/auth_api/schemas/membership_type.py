@@ -13,6 +13,8 @@
 # limitations under the License.
 """Manager for membership type schema and export."""
 
+from marshmallow import fields
+
 from auth_api.models import MembershipType as MembershipTypeModel
 
 from .base_schema import BaseSchema
@@ -25,3 +27,7 @@ class MembershipTypeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, t
         """Maps all of the MembershipType fields to a default schema."""
 
         model = MembershipTypeModel
+
+    display_name = fields.String(data_key='displayName')
+    display_order = fields.String(data_key='displayOrder')
+    code = fields.String(data_key='name')

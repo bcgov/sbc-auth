@@ -40,6 +40,9 @@ class CorpType(Enum):
     """Corp Types."""
 
     NR = 'NR'
+    CP = 'CP'
+    TMP = 'TMP'
+    BC = 'BC'
 
 
 class RequiredAction(Enum):

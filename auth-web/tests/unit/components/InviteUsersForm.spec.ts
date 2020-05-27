@@ -58,7 +58,15 @@ describe('InviteUsersForm.vue', () => {
     const userModule = {
       namespaced: true,
       state: {
-        currentUser: { userName: 'test' }
+        currentUser: { userName: 'test' },
+        roleInfos: [{
+          'default': false,
+          'desc': 'Admin for the organization',
+          'displayName': 'Account Coordinator',
+          'icon': 'mdi-settings',
+          'label': 'Submit searches and filings, add / remove businesses, add / remove team members',
+          'name': 'COORDINATOR'
+        }]
       }
     }
 

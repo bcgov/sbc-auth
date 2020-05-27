@@ -64,7 +64,7 @@ def factory_invitation_model(session, status, sent_date=datetime.now()):
 
     invitation_membership = InvitationMembershipModel()
     invitation_membership.org_id = org.id
-    invitation_membership.membership_type_code = 'MEMBER'
+    invitation_membership.membership_type_code = 'USER'
     invitation.membership.append(invitation_membership)
 
     invitation.save()
@@ -189,7 +189,7 @@ def test_create_from_dict(session):  # pylint:disable=unused-argument
         'recipientEmail': 'abc.test@gmail.com',
         'membership': [
             {
-                'membershipType': 'MEMBER',
+                'membershipType': 'USER',
                 'orgId': org.id
             }
         ]

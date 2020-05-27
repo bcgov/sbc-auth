@@ -10,6 +10,6 @@ The keycloak theme for BC Registries Keycloak service.
     oc login xxxxxx
     oc project 1rdehl-tools
     oc new-build --name auth-keycloak-theme --binary --strategy docker
-    oc start-build auth-keycloak-theme --from-dir=.
+     
     ```
 2. Restart auth-keycloak (Statful Sets) in Openshift;

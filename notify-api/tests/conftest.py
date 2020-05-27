@@ -19,18 +19,20 @@ import time
 
 import pytest
 import sqlalchemy
-from sqlalchemy import event
-from starlette.testclient import TestClient
 from nats.aio.client import Client as Nats
+from sqlalchemy import event
 from stan.aio.client import Client as Stan
+from starlette.testclient import TestClient
 
 from notify_api import applications
-from notify_api.core import config as AppConfig
+from notify_api.core.jwt import JWTWrapper
+from notify_api.core.settings import get_api_settings
 from notify_api.db.database import BASE, SESSION
 from notify_api.db.models import NotificationStatusModel, NotificationTypeModel
+from tests.factories.jwt import JwtFactory
 
 
-DATABASE_URL = AppConfig.SQLALCHEMY_TEST_DATABASE_URI
+_JWT = JWTWrapper.get_instance()
 
 
 @event.listens_for(NotificationTypeModel.__table__, 'after_create')  # pylint: disable=no-member
@@ -52,13 +54,14 @@ def insert_data2(target, connection, **kw):  # pylint: disable=unused-argument
 
 @pytest.fixture(scope='function', name='loop')
 def loop_fixture():
+    """Event Loop fixture."""
     return asyncio.new_event_loop()
 
 
 @pytest.fixture(scope='session', name='engine')
 def engine_fixture():
     """Connect to the database."""
-    engine = sqlalchemy.create_engine(AppConfig.SQLALCHEMY_TEST_DATABASE_URI)
+    engine = sqlalchemy.create_engine(get_api_settings().DATABASE_TEST_URL)
     SESSION.configure(bind=engine)
     return engine
 
@@ -84,17 +87,27 @@ def session_fixture(engine):
 
 @pytest.fixture(scope='function', name='app')
 def app_fixture(engine):
-    """FastAPI app."""
-    return applications.NotifyAPI(
+    """Application."""
+    app = applications.NotifyAPI(
         engine,
         title='notify_api',
         version='0.0.0'
     )
 
+    app.setup_jwt_manager(_JWT, test_mode=True)
+    _JWT.set_testing_keys(JwtFactory.get_private_key(), JwtFactory.get_public_key())
+    return app
+
+
+@pytest.fixture(scope='session')
+def jwt():
+    """Return a session-wide jwt manager."""
+    return _JWT
+
 
 @pytest.fixture(scope='function', name='client')
 def client_fixture(app):
-    """FastAPI test client."""
+    """Test client."""
     return TestClient(app)
 
 
