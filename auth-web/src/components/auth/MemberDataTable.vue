@@ -216,7 +216,7 @@ export default class MemberDataTable extends Vue {
         return false
       case MembershipType.Coordinator:
         // Admins can change roles of their own and users as well
-        return this.isOwnMembership(memberBeingChanged) || (memberBeingChanged.membershipTypeCode !== MembershipType.Admin)
+        return this.isOwnMembership(memberBeingChanged) || (memberBeingChanged.membershipTypeCode === MembershipType.User)
       default:
         return false
     }
