@@ -188,7 +188,8 @@ export default class MemberDataTable extends Vue {
       case MembershipType.Admin:
         return true
       case MembershipType.Coordinator:
-        if (role.name !== 'Admin') {
+        // coordinator cant upgrade/change themselves to admin
+        if (role.name !== MembershipType.Admin) {
           return true
         }
         return false
@@ -214,8 +215,8 @@ export default class MemberDataTable extends Vue {
         }
         return false
       case MembershipType.Coordinator:
-        // Admins can change roles of their own
-        return this.isOwnMembership(memberBeingChanged)
+        // Admins can change roles of their own and users as well
+        return this.isOwnMembership(memberBeingChanged) || (memberBeingChanged.membershipTypeCode !== MembershipType.Admin)
       default:
         return false
     }
