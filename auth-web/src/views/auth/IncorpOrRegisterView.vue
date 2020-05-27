@@ -5,7 +5,7 @@
       <v-col cols="12" md="6">
         <h2>Incorporate or Register</h2>
         <v-list-item class="list-item">
-          <v-icon size="6" class="list-item-bullet mt-5">mdi-square</v-icon>
+          <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               If you have an approved Name Request (NR number), or you want a <NumberedCompanyTooltip />,
@@ -14,7 +14,7 @@
           </v-list-item-content>
         </v-list-item>
         <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
-          <v-icon size="6" class="list-item-bullet mt-5">mdi-square</v-icon>
+          <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               {{item.text}}
