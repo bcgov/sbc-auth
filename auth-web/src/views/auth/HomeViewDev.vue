@@ -76,7 +76,7 @@
         </v-container>
       </div>
       <TestimonialQuotes />
-      <BCSCPanel
+      <BcscPanel
         :userProfile="userProfile"
         @login="login()"
         @account-dialog="accountDialog = true"
@@ -117,7 +117,7 @@ import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
-import BCSCPanel from '@/components/auth/BcscPanel.vue'
+import BcscPanel from '@/components/auth/BcscPanel.vue'
 import ConfigHelper from '@/util/config-helper'
 import InfoStepper from '@/components/auth/stepper/InfoStepper.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
@@ -129,7 +129,7 @@ import { VueConstructor } from 'vue'
 @Component({
   name: 'Home',
   components: {
-    BCSCPanel,
+    BcscPanel,
     InfoStepper,
     LoginBCSC,
     TestimonialQuotes

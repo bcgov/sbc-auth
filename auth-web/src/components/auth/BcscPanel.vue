@@ -7,7 +7,7 @@
     <v-row>
       <!-- Image Column -->
       <v-col cols="12" md="5">
-        <v-img src="../../assets/img/BCSC-Helper.png" aspect-ratio="1.2" contain></v-img>
+        <v-img src="../../assets/img/Bcsc-Helper.png" aspect-ratio="1.2" contain></v-img>
       </v-col>
       <v-spacer></v-spacer>
       <!-- Info Column -->
@@ -55,7 +55,7 @@ import { User } from '@/models/user'
     LearnMoreButton
   }
 })
-export default class BCSCPanel extends Vue {
+export default class BcscPanel extends Vue {
   private secureBulletPoints: Array<any> = [
     { text: 'A mobile card is a representation of your BC Services Card on your mobile device. It\'s used to prove who you are when you log in to access government services online.' },
     { text: 'Only your name and a unique identifier is stored on the mobile device.' }
