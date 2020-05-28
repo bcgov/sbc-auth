@@ -65,9 +65,9 @@ export enum LoginSource {
 export type Actions = 'upgrade' | 'downgrade'
 
 export enum TransactionStatus {
-    COMPLETED = 'COMPLETED',
-    CREATED = 'CREATED',
-    DELETED = 'DELETED'
+    COMPLETED = 'Completed',
+    PENDING = 'Pending',
+    CANCELLED = 'Cancelled'
 }
 
 export enum FilingTypes {
