@@ -9,6 +9,8 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import HomeViewDev from '@/views/auth/HomeViewDev.vue'
 import InfoStepper from '@/components/auth/stepper/InfoStepper.vue'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
+import TestimonialQuotes from '@/components/auth/TestimonialQuotes.vue'
+import BcscPanel from '@/components/auth/BcscPanel.vue'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -76,6 +78,8 @@ describe('HomeView.vue', () => {
 
   it('renders the sub-components properly', () => {
     expect(wrapper.find(InfoStepper).exists()).toBe(true)
+    expect(wrapper.find(TestimonialQuotes).exists()).toBe(true)
+    expect(wrapper.find(BcscPanel).exists()).toBe(true)
   })
 
   it('renders the correct buttons when authenticated', () => {
