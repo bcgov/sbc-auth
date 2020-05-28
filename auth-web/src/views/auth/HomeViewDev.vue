@@ -98,8 +98,8 @@
               <h3 class="mb-6">Contact Us</h3>
               <p class="mb-5">For support or questions about this application, contact us at:</p>
               <ul class="contact-info__list mb-5">
-                <li><span>Toll Free:</span> {{ $t('techSupportTollFree') }}</li>
-                <li><span>Phone:</span> {{ $t('techSupportPhone') }}</li>
+<!--                <li><span>Toll Free:</span> {{ $t('techSupportTollFree') }}</li>-->
+<!--                <li><span>Phone:</span> {{ $t('techSupportPhone') }}</li>-->
                 <li><span>Email:</span> <a href="mailto:bcregistries@gov.bc.ca?subject=BC Registries - Cooperatives Online Support Request">bcregistries@gov.bc.ca</a></li>
               </ul>
               <p class="mb-0"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
@@ -113,18 +113,16 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
-import { Member, MembershipStatus, Organization } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { LoginSource, Pages } from '@/util/constants'
+import { Member, MembershipStatus } from '@/models/Organization'
+import { mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import BcscPanel from '@/components/auth/BcscPanel.vue'
-import ConfigHelper from '@/util/config-helper'
 import InfoStepper from '@/components/auth/stepper/InfoStepper.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
 import TestimonialQuotes from '@/components/auth/TestimonialQuotes.vue'
 import { User } from '@/models/user'
-import { VueConstructor } from 'vue'
 
 @Component({
   name: 'Home',
@@ -142,8 +140,7 @@ import { VueConstructor } from 'vue'
     ...mapMutations('org', ['resetCurrentOrganisation'])
   }
 })
-
-export default class HomeView extends Vue {
+export default class HomeViewDev extends Vue {
   private readonly userProfile!: User
   private readonly currentAccountSettings!: AccountSettings
   private readonly currentMembership!: Member
