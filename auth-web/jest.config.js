@@ -15,9 +15,6 @@ module.exports = {
   transformIgnorePatterns: [
     '/node_modules/(?!sbc-common-components/.*)'
   ],
-  'collectCoverage': true,
-  'collectCoverageFrom': ['**/*.{js,vue}', '!**/node_modules/**'],
-  'coverageReporters': ['html', 'text-summary'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
   },

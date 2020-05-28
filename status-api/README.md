@@ -1,6 +1,8 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../LICENSE)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_sbc-auth&metric=alert_status)](https://sonarcloud.io/code?id=bcgov_sbc-auth&selected=bcgov_sbc-auth%3Astatus-api)
-[![codecov](https://codecov.io/gh/bcgov/sbc-auth/branch/master/graph/badge.svg)](https://codecov.io/gh/bcgov/sbc-auth)
+[![codecov](https://codecov.io/gh/bcgov/sbc-auth/branch/development/graph/badge.svg?flag=statusapi)](https://codecov.io/gh/bcgov/sbc-auth/tree/development/status-api)
+![Status API PR CI](https://github.com/bcgov/sbc-auth/workflows/Status%20API%20PR%20CI/badge.svg)
+![Status API DEV CD](https://github.com/bcgov/sbc-auth/workflows/Status%20API%20DEV%20CD/badge.svg)
+![Status API TEST CD](https://github.com/bcgov/sbc-auth/workflows/Status%20API%20TEST%20CD/badge.svg)
 
 # Status API
 

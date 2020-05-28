@@ -25,7 +25,7 @@ def test_status_with_name(client):
 
 def test_status_without_name(client):
     """Assert that the endpoint returns 404."""
-    rv = client.get(f'/api/v1/status/')
+    rv = client.get('/api/v1/status/')
     assert rv.status_code == 404
 
 
