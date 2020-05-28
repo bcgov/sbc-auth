@@ -13,7 +13,7 @@ import {
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
-import { TransactionDateFilter, TransactionTableList, TransactionTableRow } from '@/models/transaction'
+import { TransactionFilterParams, TransactionTableList, TransactionTableRow } from '@/models/transaction'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BcolService from '@/services/bcol.services'
@@ -471,8 +471,8 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ commit: 'setCurrentOrgTransactionList', rawError: true })
-  public async getTransactionList (dateFilter: TransactionDateFilter) {
-    const response = await PaymentService.getTransactions(this.context.state['currentOrganization'].id, dateFilter)
+  public async getTransactionList (filterParams: TransactionFilterParams) {
+    const response = await PaymentService.getTransactions(this.context.state['currentOrganization'].id, filterParams)
     if (response?.data) {
       const formattedList = await this.formatTransactionTableData(response.data.items || [])
       return {
@@ -500,7 +500,7 @@ export default class OrgModule extends VuexModule {
         folioNumber: transaction?.invoice?.folioNumber || '',
         initiatedBy: transaction.createdName,
         transactionDate: transaction.createdOn,
-        totalAmount: transaction?.invoice?.total || 0,
+        totalAmount: (transaction?.invoice?.total || 0).toFixed(2),
         status: transaction.statusCode
       })
     })
