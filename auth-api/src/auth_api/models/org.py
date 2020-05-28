@@ -46,7 +46,8 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     affiliated_entities = relationship('Affiliation', lazy='select')
     invitations = relationship('InvitationMembership', cascade='all,delete,delete-orphan', lazy='select')
     products = relationship('ProductSubscription', cascade='all,delete,delete-orphan', lazy='select')
-    payment_settings = relationship('AccountPaymentSettings', cascade='all,delete,delete-orphan', lazy='select')
+    payment_settings = relationship('AccountPaymentSettings',cascade='all,delete,delete-orphan',
+                                    primaryjoin='and_(Org.id == AccountPaymentSettings.org_id, AccountPaymentSettings.is_active == True)', lazy='select')
 
     @classmethod
     def create_from_dict(cls, org_info: dict):
