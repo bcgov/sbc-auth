@@ -34,5 +34,5 @@ def upgrade():
 
 
 def downgrade():
-    op.execute('delete from membership_type_code where id=10')
-    op.execute('delete from membership_type_code where id=11')
+    op.execute('delete from permissions where id=10')
+    op.execute('delete from permissions where id=11')
