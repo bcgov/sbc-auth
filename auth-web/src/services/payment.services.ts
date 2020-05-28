@@ -22,17 +22,14 @@ export default class PaymentService {
   }
 
   static getTransactions (accountId: string, filterParams: TransactionFilterParams): AxiosPromise<TransactionListResponse> {
-    let queryParams = []
+    let params = new URLSearchParams()
     if (filterParams.pageNumber) {
-      queryParams.push(`page=${filterParams.pageNumber}`)
+      params.append('page', filterParams.pageNumber.toString())
     }
     if (filterParams.pageLimit) {
-      queryParams.push(`limit=${filterParams.pageLimit}`)
+      params.append('limit', filterParams.pageLimit.toString())
     }
-    let url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/queries`
-    if (queryParams.length) {
-      url = `${url}?${queryParams.join('&')}`
-    }
-    return axios.post(url, filterParams.filterPayload)
+    const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/queries`
+    return axios.post(url, filterParams.filterPayload, { params })
   }
 }

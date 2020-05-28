@@ -500,7 +500,7 @@ export default class OrgModule extends VuexModule {
         folioNumber: transaction?.invoice?.folioNumber || '',
         initiatedBy: transaction.createdName,
         transactionDate: transaction.createdOn,
-        totalAmount: transaction?.invoice?.total || 0,
+        totalAmount: (transaction?.invoice?.total || 0).toFixed(2),
         status: transaction.statusCode
       })
     })

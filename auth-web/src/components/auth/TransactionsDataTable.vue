@@ -5,7 +5,7 @@
     :items="transactionList"
     :custom-sort="customSortActive"
     :no-data-text="$t('noTransactionList')"
-    :server-items-length="totalTransactions"
+    :server-items-length="totalTransactionsCount"
     :options.sync="tableDataOptions"
     :loading="isDataLoading"
     :footer-props="{
@@ -22,7 +22,7 @@
           <v-icon small class="status-tooltip-icon" v-on="on">mdi-information-outline</v-icon>
         </template>
         <div v-for="(status, index) in transactionStatus" :key="index">
-          {{status.status.toUpperCase()}} - {{status.description}}
+          {{status.status}} - {{status.description}}
         </div>
       </v-tooltip>
     </template>
@@ -46,15 +46,15 @@
     </template>
     <template v-slot:item.totalAmount="{ item }">
       <div class="font-weight-bold">
-        ${{item.totalAmount.toFixed(2)}}
+        ${{item.totalAmount}}
       </div>
     </template>
     <template v-slot:item.status="{ item }">
       <div
-        class="font-weight-bold"
+        class="font-weight-bold text-uppercase"
         v-bind:class="getStatusClass(item)"
       >
-        {{item.status.toUpperCase()}}
+        {{item.status}}
       </div>
     </template>
   </v-data-table>
@@ -89,7 +89,7 @@ export default class TransactionsDataTable extends Vue {
   private readonly PAGINATION_COUNTER_STEP = 4
   private transactionList: TransactionTableRow[] = [];
   private formatDate = CommonUtils.formatDisplayDate
-  private totalTransactions = 0
+  private totalTransactionsCount = 0
   private isDataLoading = false
   private tableDataOptions: any = {}
 
@@ -134,26 +134,21 @@ export default class TransactionsDataTable extends Vue {
 
   private readonly transactionStatus = [
     {
-      status: TransactionStatus.COMPLETED,
+      status: TransactionStatus.COMPLETED.toUpperCase(),
       description: 'Funds received'
     },
     {
-      status: TransactionStatus.PENDING,
+      status: TransactionStatus.PENDING.toUpperCase(),
       description: 'Transaction is Pending'
     },
     {
-      status: TransactionStatus.CANCELLED,
+      status: TransactionStatus.CANCELLED.toUpperCase(),
       description: 'Transaction is Cancelled'
     }
   ]
 
   private get getPaginationOptions () {
-    let pagination = [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
-    return pagination
-  }
-
-  private async mounted () {
-    this.loadTransactionList()
+    return [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
   }
 
   private async loadTransactionList (pageNumber?: number, itemsPerPage?: number) {
@@ -171,7 +166,7 @@ export default class TransactionsDataTable extends Vue {
     }
     const resp = await this.getTransactionList(filterParams)
     this.transactionList = resp?.transactionsList || []
-    this.totalTransactions = resp?.total || 0
+    this.totalTransactionsCount = resp?.total || 0
     this.isDataLoading = false
   }
 
