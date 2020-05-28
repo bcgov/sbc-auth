@@ -3,13 +3,14 @@
     class="user-list"
     :headers="headerTranscations"
     :items="transactionList"
-    :items-per-page="ITEMS_PER_PAGE"
-    :hide-default-footer="transactionList.length <= ITEMS_PER_PAGE"
+    :custom-sort="customSortActive"
+    :no-data-text="$t('noTransactionList')"
+    :server-items-length="totalTransactionsCount"
+    :options.sync="tableDataOptions"
+    :loading="isDataLoading"
     :footer-props="{
       itemsPerPageOptions: getPaginationOptions
     }"
-    :custom-sort="customSortActive"
-    :no-data-text="$t('noTransactionList')"
   >
     <template v-slot:loading>
       Loading...
@@ -45,12 +46,12 @@
     </template>
     <template v-slot:item.totalAmount="{ item }">
       <div class="font-weight-bold">
-        ${{item.totalAmount.toFixed(2)}}
+        ${{item.totalAmount}}
       </div>
     </template>
     <template v-slot:item.status="{ item }">
       <div
-        class="font-weight-bold"
+        class="font-weight-bold text-uppercase"
         v-bind:class="getStatusClass(item)"
       >
         {{item.status}}
@@ -61,9 +62,9 @@
 
 <script lang="ts">
 import { Account, TransactionStatus } from '@/util/constants'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
-import { Transaction, TransactionDateFilter, TransactionListResponse, TransactionTableList, TransactionTableRow } from '@/models/transaction'
+import { Transaction, TransactionFilterParams, TransactionListResponse, TransactionTableList, TransactionTableRow } from '@/models/transaction'
 import { mapActions, mapState } from 'vuex'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
@@ -82,87 +83,98 @@ import CommonUtils from '@/util/common-util'
 })
 export default class TransactionsDataTable extends Vue {
   private readonly currentOrganization!: Organization
-  private readonly getTransactionList!: (dateFilter: TransactionDateFilter) => TransactionTableList
+  private readonly getTransactionList!: (filterParams: TransactionFilterParams) => TransactionTableList
 
+  private readonly ITEMS_PER_PAGE = 5
+  private readonly PAGINATION_COUNTER_STEP = 4
   private transactionList: TransactionTableRow[] = [];
   private formatDate = CommonUtils.formatDisplayDate
-  private readonly ITEMS_PER_PAGE = 10
-  private readonly PAGINATION_COUNTER_STEP = 4
+  private totalTransactionsCount = 0
+  private isDataLoading = false
+  private tableDataOptions: any = {}
 
   private readonly headerTranscations = [
     {
       text: 'Transaction',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'transactionNames'
     },
     {
       text: 'Folio #',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'folioNumber'
     },
     {
       text: 'Initiated By',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'initiatedBy'
     },
     {
       text: 'Date',
       align: 'left',
       value: 'transactionDate',
-      sortable: true
+      sortable: false
     },
     {
       text: 'Total Amount',
       align: 'left',
       value: 'totalAmount',
-      sortable: true
+      sortable: false
     },
     {
       text: 'Status',
       align: 'left',
       value: 'status',
-      sortable: true
+      sortable: false
     }
   ]
 
   private readonly transactionStatus = [
     {
-      status: TransactionStatus.COMPLETED,
+      status: TransactionStatus.COMPLETED.toUpperCase(),
       description: 'Funds received'
     },
     {
-      status: TransactionStatus.CREATED,
-      description: 'Transaction Created'
+      status: TransactionStatus.PENDING.toUpperCase(),
+      description: 'Transaction is Pending'
     },
     {
-      status: TransactionStatus.DELETED,
-      description: 'Transaction Deleted'
+      status: TransactionStatus.CANCELLED.toUpperCase(),
+      description: 'Transaction is Cancelled'
     }
   ]
 
   private get getPaginationOptions () {
-    let pagination = [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
-    pagination[pagination.length - 1] = -1
-    return pagination
+    return [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
   }
 
-  private async mounted () {
-    this.loadTransactionList()
-  }
-
-  private async loadTransactionList () {
+  private async loadTransactionList (pageNumber?: number, itemsPerPage?: number) {
+    this.isDataLoading = true
     // TODO: Filter using date once filter is done, fetching all records from 2020 for now
-    const dateFilter: TransactionDateFilter = {
-      'dateFilter': {
-        'startDate': '01/01/2020',
-        'endDate': '12/31/2020'
-      }
+    const filterParams: TransactionFilterParams = {
+      filterPayload: {
+        dateFilter: {
+          startDate: '01/01/2020',
+          endDate: '12/31/2020'
+        }
+      },
+      pageNumber: pageNumber,
+      pageLimit: itemsPerPage
     }
-    const resp = await this.getTransactionList(dateFilter)
+    const resp = await this.getTransactionList(filterParams)
     this.transactionList = resp?.transactionsList || []
+    this.totalTransactionsCount = resp?.total || 0
+    this.isDataLoading = false
+  }
+
+  @Watch('tableDataOptions', { deep: true })
+  async getTransactions (val, oldVal) {
+    const pageNumber = val.page || 1
+    const itemsPerPage = val.itemsPerPage
+    await this.loadTransactionList(pageNumber, itemsPerPage)
   }
 
   private getIndexedTag (tag, index): string {
@@ -172,8 +184,8 @@ export default class TransactionsDataTable extends Vue {
   private getStatusClass (item) {
     switch (item.status) {
       case TransactionStatus.COMPLETED: return 'status-paid'
-      case TransactionStatus.CREATED: return 'status-pending'
-      case TransactionStatus.DELETED: return 'status-deleted'
+      case TransactionStatus.PENDING: return 'status-pending'
+      case TransactionStatus.CANCELLED: return 'status-deleted'
       default: return ''
     }
   }

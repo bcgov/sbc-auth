@@ -42,6 +42,12 @@ export interface TransactionDateFilter {
   }
 }
 
+export interface TransactionFilterParams {
+  filterPayload: TransactionDateFilter
+  pageNumber?: number
+  pageLimit?: number
+}
+
 export interface TransactionListResponse {
   items: Transaction[]
   limit: number
