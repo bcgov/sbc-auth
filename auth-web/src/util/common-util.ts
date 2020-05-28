@@ -10,7 +10,7 @@ export default class CommonUtils {
     return URL_MATCHER.test(value)
   }
   // formatting incorporation number according to the length of numbers
-  static formatIncorporationNumber (incorpNum:string, numLength?:number):string {
+  static formatIncorporationNumber (incorpNum:string, isNR: boolean = false, numLength?:number):string {
     numLength = numLength || 7 // optional: go with '7' if nothing specified
     const numberFirstIndex = incorpNum.search(/[0-9]/i)
     if (numberFirstIndex > -1) {
@@ -26,7 +26,7 @@ export default class CommonUtils {
         businessIdentifierNumbers = businessIdentifierNumbers.substring(0, numLength)
       }
       // join both first part and second part
-      incorpNum = (businessIdentifierStr + businessIdentifierNumbers)
+      incorpNum = (isNR) ? `${businessIdentifierStr} ${businessIdentifierNumbers}` : `${businessIdentifierStr}${businessIdentifierNumbers}`
     }
     return incorpNum.toUpperCase()
   }
