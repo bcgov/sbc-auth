@@ -5,7 +5,7 @@
       <v-col cols="12" md="6">
         <h2>Request a Name or Use a Numbered Company</h2>
         <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index" >
-          <v-icon size="6" class="list-item-bullet mt-5">mdi-square</v-icon>
+          <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               {{item.text}}
@@ -13,7 +13,7 @@
           </v-list-item-content>
         </v-list-item>
         <v-list-item class="list-item">
-          <v-icon size="6" class="list-item-bullet mt-5">mdi-square</v-icon>
+          <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               You can choose to incorporate a <NumberedCompanyTooltip />
