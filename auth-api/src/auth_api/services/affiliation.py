@@ -28,7 +28,7 @@ from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
 from auth_api.utils.enums import CorpType
 from auth_api.utils.passcode import validate_passcode
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
 from .rest_service import RestService
 
 
@@ -196,12 +196,12 @@ class Affiliation:
     def delete_affiliation(org_id, business_identifier, token_info: Dict = None):
         """Delete the affiliation for the provided org id and business id."""
         current_app.logger.info(f'<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}')
-        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         entity = EntityService.find_by_business_identifier(business_identifier, token_info=token_info,
-                                                           allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+                                                           allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
