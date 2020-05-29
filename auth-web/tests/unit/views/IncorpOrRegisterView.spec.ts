@@ -1,13 +1,10 @@
-// Libraries
-import Vue from 'vue'
-import Vuex from 'vuex'
-import Vuetify from 'vuetify'
 import { createLocalVue, mount } from '@vue/test-utils'
-
-// Components
 import IncorpOrRegisterView from '@/views/auth/IncorpOrRegisterView.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
+import Vue from 'vue'
+import Vuetify from 'vuetify'
+import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
@@ -32,7 +29,7 @@ describe('IncorpOrRegisterView.vue', () => {
         vuetify,
         propsData: {
           ...propsData
-        },
+        }
       })
     }
 

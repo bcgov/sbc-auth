@@ -1,12 +1,9 @@
-// Libraries
-import Vue from 'vue'
-import Vuex from 'vuex'
-import Vuetify from 'vuetify'
 import { createLocalVue, mount } from '@vue/test-utils'
-
-// Components
-import MaintainBusinessView from '@/views/auth/MaintainBusinessView.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
+import MaintainBusinessView from '@/views/auth/MaintainBusinessView.vue'
+import Vue from 'vue'
+import Vuetify from 'vuetify'
+import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
@@ -31,7 +28,7 @@ describe('MaintainBusinessView.vue', () => {
         vuetify,
         propsData: {
           ...propsData
-        },
+        }
       })
     }
 
@@ -79,12 +76,17 @@ describe('MaintainBusinessView.vue', () => {
 
   it('renders the correct text and number of bullet points', () => {
     wrapper.vm.bulletPoints = [
-      { text: 'Bullet 1' }, { text: 'Bullet 2', subText: [{ text: 'Sub Bullet 3' }, { text: 'Sub Bullet 4'} ]},
+      { text: 'Bullet 1' },
+      { text: 'Bullet 2',
+        subText: [
+          { text: 'Sub Bullet 3' },
+          { text: 'Sub Bullet 4' }
+        ]
+      }
     ]
 
     const bulletListItems = wrapper.vm.$el.querySelectorAll('.list-item')
     const bulletListSubItems = wrapper.vm.$el.querySelectorAll('.list-item-sub')
-
 
     expect(bulletListItems[0].textContent).toContain('Bullet 1')
     expect(bulletListItems[1].textContent).toContain('Bullet 2')

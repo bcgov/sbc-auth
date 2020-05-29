@@ -1,13 +1,10 @@
-// Libraries
-import Vue from 'vue'
-import Vuex from 'vuex'
-import Vuetify from 'vuetify'
-import VueRouter from 'vue-router'
 import { createLocalVue, mount } from '@vue/test-utils'
-
-// Components
 import DecideBusinessView from '@/views/auth/DecideBusinessView.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import Vuetify from 'vuetify'
+import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)

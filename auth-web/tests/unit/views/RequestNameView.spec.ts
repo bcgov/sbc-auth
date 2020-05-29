@@ -1,13 +1,10 @@
-// Libraries
-import Vue from 'vue'
-import Vuex from 'vuex'
-import Vuetify from 'vuetify'
 import { createLocalVue, mount } from '@vue/test-utils'
-
-// Components
-import RequestNameView from '@/views/auth/RequestNameView.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
+import RequestNameView from '@/views/auth/RequestNameView.vue'
+import Vue from 'vue'
+import Vuetify from 'vuetify'
+import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})

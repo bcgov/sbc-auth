@@ -1,12 +1,9 @@
-// Libraries
-import Vue from 'vue'
-import Vuex from 'vuex'
-import Vuetify from 'vuetify'
 import { createLocalVue, mount } from '@vue/test-utils'
-
-// Components
 import BcscPanel from '@/components/auth/BcscPanel.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
+import Vue from 'vue'
+import Vuetify from 'vuetify'
+import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
@@ -31,7 +28,7 @@ describe('MaintainBusinessView.vue', () => {
         vuetify,
         propsData: {
           ...propsData
-        },
+        }
       })
     }
 
@@ -62,7 +59,6 @@ describe('MaintainBusinessView.vue', () => {
     // Verify the account create link is not rendered
     expect(createAccountLink.length).toStrictEqual(1)
     expect(createAccountLink[0].textContent).not.toEqual('Create a BC Registries Account')
-
   })
 
   it('renders the login button and create account link when NOT authenticated', () => {

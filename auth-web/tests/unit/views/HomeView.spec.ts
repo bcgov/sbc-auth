@@ -1,16 +1,13 @@
-// Libraries
-import Vue from 'vue'
-import Vuex from 'vuex'
-import Vuetify from 'vuetify'
-import VueRouter from 'vue-router'
 import { createLocalVue, mount } from '@vue/test-utils'
-
-// Components
+import BcscPanel from '@/components/auth/BcscPanel.vue'
 import HomeViewDev from '@/views/auth/HomeViewDev.vue'
 import InfoStepper from '@/components/auth/stepper/InfoStepper.vue'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
 import TestimonialQuotes from '@/components/auth/TestimonialQuotes.vue'
-import BcscPanel from '@/components/auth/BcscPanel.vue'
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import Vuetify from 'vuetify'
+import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -76,7 +73,7 @@ describe('HomeView.vue', () => {
   })
 
   it('is a Vue instance', () => {
-      expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
   it('renders the sub-components properly', () => {
@@ -109,7 +106,7 @@ describe('HomeView.vue', () => {
     expect(loginBtn).toBeUndefined()
   })
 
-  it('renders the correct buttons when not authenticated',async () => {
+  it('renders the correct buttons when not authenticated', async () => {
     // Render Un-authenticated
     userModule.state.userProfile = null
 
@@ -129,7 +126,7 @@ describe('HomeView.vue', () => {
     expect(createAccountLink.textContent).toContain('Create a BC Registries Account')
   })
 
-  it('renders the LoginBCSC when the create account dialog is called',async () => {
+  it('renders the LoginBCSC when the create account dialog is called', async () => {
     userModule.state.userProfile = null
 
     const createAccountLink = wrapper.vm.$el.querySelector('.create-account-link')
