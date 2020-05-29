@@ -248,4 +248,27 @@ export default class TransactionsDataTable extends Vue {
   border-style: solid;
   border-color: transparent transparent var(--v-grey-darken4) transparent;
 }
+
+::v-deep {
+  .v-data-table td {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    height: auto;
+    vertical-align: top;
+  }
+
+  .v-list-item__title {
+    display: block;
+    font-weight: 700;
+  }
+
+  .v-badge--inline .v-badge__wrapper {
+    margin-left: 0;
+
+    .v-badge__badge {
+      margin-right: -0.25rem;
+      margin-left: 0.25rem;
+    }
+  }
+}
 </style>
