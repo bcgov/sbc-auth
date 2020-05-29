@@ -64,3 +64,4 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ## Openshift Environment
 View the document [here](/docs/build-deploy.md#webui-runtime)
+
