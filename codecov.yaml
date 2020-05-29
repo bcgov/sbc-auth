@@ -7,6 +7,27 @@ coverage:
   precision: 2
   round: down
   range: "70...100"
+  status:
+    patch: off
+    project:
+      default: off
+      backend:
+        target: 80%
+        flags:
+          - authapi
+          - notifyapi
+          - notifyqueue
+          - statusapi
+      ui:
+        target: 35%
+        flags:
+          - authweb
+    branches:
+      - development
+    if_not_found: success
+    if_ci_failed: error
+    informational: false
+    only_pulls: true
 
 ignore:
   - "^/tests/**/*" # ignore test harness code
@@ -23,3 +44,25 @@ comment:
   layout: "diff,flags,tree"
   behavior: default
   require_changes: yes
+
+flags:
+  authapi:
+    paths:
+      - auth-api/src/auth_api
+    carryforward: true
+  notifyapi:
+    paths:
+      - notify-api/src/notify_api
+    carryforward: true
+  notifyqueue:
+    paths:
+      - queue_services/notify-queue/src/notify_service
+    carryforward: true
+  statusapi:
+    paths:
+      - status-api/src/status_api
+    carryforward: true
+  authweb:
+    paths:
+      - auth-web/src
+    carryforward: true
