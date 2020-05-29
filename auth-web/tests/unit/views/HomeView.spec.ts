@@ -65,7 +65,10 @@ describe('HomeView.vue', () => {
       store,
       localVue,
       router,
-      vuetify
+      vuetify,
+      mocks: {
+        $t: (mock) => mock
+      }
     })
 
     jest.resetModules()
