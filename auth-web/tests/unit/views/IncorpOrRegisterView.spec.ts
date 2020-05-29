@@ -83,7 +83,9 @@ describe('IncorpOrRegisterView.vue', () => {
 
   it('renders the correct text and number of bullet points', () => {
     wrapper.vm.bulletPoints = [
-      { text: 'Bullet 1' }, { text: 'Bullet 2' }, { text: 'Bullet 3' }
+      { text: 'Bullet 1' },
+      { text: 'Bullet 2' },
+      { text: 'Bullet 3' }
     ]
 
     const bulletListItems = wrapper.vm.$el.querySelectorAll('.list-item')
