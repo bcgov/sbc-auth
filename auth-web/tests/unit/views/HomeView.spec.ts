@@ -16,7 +16,6 @@ const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
-jest.mock('../../../src/plugins/i18n', () => {})
 
 describe('HomeView.vue', () => {
   let wrapper: any
@@ -67,7 +66,9 @@ describe('HomeView.vue', () => {
         $t: (mock) => mock
       }
     })
+  })
 
+  afterEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
   })

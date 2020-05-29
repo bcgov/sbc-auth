@@ -29,7 +29,9 @@ describe('DecideBusinessView.vue', () => {
       router,
       vuetify
     })
+  })
 
+  afterEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
   })

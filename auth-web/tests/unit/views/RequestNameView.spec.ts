@@ -26,7 +26,9 @@ describe('RequestNameView.vue', () => {
       localVue,
       vuetify
     })
+  })
 
+  afterEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
   })

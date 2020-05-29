@@ -34,7 +34,9 @@ describe('IncorpOrRegisterView.vue', () => {
     }
 
     wrapper = wrapperFactory({ userProfile: {} })
+  })
 
+  afterEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
   })
