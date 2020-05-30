@@ -173,7 +173,7 @@ def test_find_affiliated_entities_by_org_id(session, auth_mock):  # pylint:disab
 
     assert affiliated_entities
     assert len(affiliated_entities) == 2
-    assert affiliated_entities[0]['businessIdentifier'] == entity_dictionary1['businessIdentifier']
+    assert affiliated_entities[0]['businessIdentifier'] == entity_dictionary2['businessIdentifier']
 
 
 def test_find_affiliated_entities_by_org_id_no_org(session, auth_mock):  # pylint:disable=unused-argument

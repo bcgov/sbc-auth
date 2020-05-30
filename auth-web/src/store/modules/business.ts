@@ -160,6 +160,7 @@ export default class BusinessModule extends VuexModule {
     for (const orgId of payload.orgIdentifiers) {
       await OrgService.removeAffiliation(orgId, payload.businessIdentifier)
     }
+    await this.syncBusinesses()
   }
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })

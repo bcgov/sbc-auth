@@ -81,6 +81,11 @@ class Affiliation:
 
         for affiliation_model in affiliation_models:
             data.append(EntityService(affiliation_model.entity).as_dict())
+
+        # 3806 : Filter out the NR affiliation if there is IA affiliation for the same NR.
+        tmp_business_list = [d['name'] for d in data if d['corpType']['code'] == CorpType.TMP.value]
+        data = list(filter(lambda affiliation: (affiliation['businessIdentifier'] not in tmp_business_list), data))
+
         current_app.logger.debug('>find_affiliations_by_org_id')
 
         return data
