@@ -1,6 +1,7 @@
 import { Account, Actions, SessionStorageKeys } from '@/util/constants'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import {
+  AddUserBody,
   AddUsersToOrgBody,
   BulkUsersFailed,
   BulkUsersSuccess,
@@ -468,6 +469,15 @@ export default class OrgModule extends VuexModule {
     } catch (exception) {
       throw exception
     }
+  }
+
+  @Action({ rawError: true })
+  public async resetPassword (addUserBody: AddUserBody) {
+    await UserService.resetPassword(addUserBody.username, addUserBody.password)
+    // setting so that it can be shown in the updated modal ;no other reason
+    const successUsers: BulkUsersSuccess[] = [{ username: addUserBody.username, password: addUserBody.password }]
+    this.context.commit('setCreatedUsers', successUsers)
+    this.context.commit('setFailedUsers', [])
   }
 
   @Action({ commit: 'setCurrentOrgTransactionList', rawError: true })

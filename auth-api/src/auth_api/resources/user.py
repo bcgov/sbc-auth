@@ -128,10 +128,10 @@ class Users(Resource):
         return response, status
 
 
-@cors_preflight('GET,OPTIONS,DELETE')
-@API.route('/<path:username>', methods=['GET', 'OPTIONS', 'DELETE'])
+@cors_preflight('GET,OPTIONS,DELETE,PATCH')
+@API.route('/<path:username>', methods=['GET', 'OPTIONS', 'DELETE', 'PATCH'])
 class UserStaff(Resource):
-    """Resource for managing an individual user for a STAFF user."""
+    """Resource for managing an individual user for a STAFF/ADMIN user."""
 
     @staticmethod
     @TRACER.trace()
@@ -156,11 +156,39 @@ class UserStaff(Resource):
             user = UserService.find_by_username(username)
             if user is None:
                 response, status = {'message': 'User {} does not exist.'.format(username)}, \
-                    http_status.HTTP_404_NOT_FOUND
+                                   http_status.HTTP_404_NOT_FOUND
             elif user.as_dict().get('type', None) != AccessType.ANONYMOUS.value:
                 response, status = {'Normal users cant be deleted', http_status.HTTP_501_NOT_IMPLEMENTED}
             else:
                 UserService.delete_anonymous_user(username, token_info=g.jwt_oidc_token_info)
+                response, status = '', http_status.HTTP_204_NO_CONTENT
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def patch(username):
+        """Patch the user profile associated with the provided username.
+
+        User only for patching the password.
+        """
+        try:
+
+            request_json = request.get_json()
+            valid_format, errors = schema_utils.validate(request_json, 'anonymous_user')
+            if not valid_format:
+                return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+            user = UserService.find_by_username(username)
+            if user is None:
+                response, status = {'message': 'User {} does not exist.'.format(username)}, \
+                                   http_status.HTTP_404_NOT_FOUND
+            elif user.as_dict().get('type', None) != AccessType.ANONYMOUS.value:
+                response, status = {'Normal users cant be patched', http_status.HTTP_501_NOT_IMPLEMENTED}
+            else:
+                UserService.reset_password_for_anon_user(request_json, username, token_info=g.jwt_oidc_token_info)
                 response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

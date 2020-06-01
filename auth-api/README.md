@@ -1,7 +1,8 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../LICENSE)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_sbc-auth&metric=alert_status)](https://sonarcloud.io/code?id=bcgov_sbc-auth&selected=bcgov_sbc-auth%3Aauth-api)
-[![codecov](https://codecov.io/gh/bcgov/sbc-auth/branch/master/graph/badge.svg)](https://codecov.io/gh/bcgov/sbc-auth)
-
+[![codecov](https://codecov.io/gh/bcgov/sbc-auth/branch/development/graph/badge.svg?flag=authapi)](https://codecov.io/gh/bcgov/sbc-auth/tree/development/auth-api)
+![Auth API CHECK CI](https://github.com/bcgov/sbc-auth/workflows/Auth%20API%20CHECK%20CI/badge.svg)
+![Auth API DEV CD](https://github.com/bcgov/sbc-auth/workflows/Auth%20API%20DEV%20CD/badge.svg)
+![Auth API TEST CD](https://github.com/bcgov/sbc-auth/workflows/Auth%20API%20TEST%20CD/badge.svg)
 # AUTH API
 
 BC Registries authentication and authorization services.

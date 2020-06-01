@@ -60,6 +60,13 @@ export default class UserService {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/bulk/users`, addUsersToOrgBody)
   }
 
+  static async resetPassword (username: string, password:string): Promise<AxiosResponse<void>> {
+    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/users/${encodeURIComponent(username)}`, {
+      username: username,
+      password: password }
+    )
+  }
+
   static async createUserProfile (token: string, userProfile: UserProfileRequestBody): Promise<AxiosResponse<any>> {
     const headers = {
       'Content-Type': 'application/json',
