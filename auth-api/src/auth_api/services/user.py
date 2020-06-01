@@ -35,7 +35,8 @@ from auth_api.models import User as UserModel
 from auth_api.schemas import UserSchema
 from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.roles import CLIENT_ADMIN_ROLES, ADMIN, OrgStatus, Status, UserStatus, COORDINATOR, AccessType
+from auth_api.utils.roles import CLIENT_ADMIN_ROLES, ADMIN, STAFF, OrgStatus, Status, UserStatus, COORDINATOR, \
+    AccessType
 from auth_api.utils.util import camelback2snake
 
 from .contact import Contact as ContactService
@@ -178,6 +179,29 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         membership_model.flush()
         return user_model
+
+    @staticmethod
+    def reset_password_for_anon_user(user_info: dict, user_name, token_info: Dict = None):
+        """Reset the password of the user."""
+        user = UserModel.find_by_username(user_name)
+        membership = MembershipModel.find_membership_by_userid(user.id)
+        org_id = membership.org_id
+        org = OrgModel.find_by_org_id(org_id)
+        if not org or org.access_type != AccessType.ANONYMOUS.value:
+            raise BusinessException(Error.INVALID_INPUT, None)
+
+        check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, STAFF))
+        update_user_request = KeycloakUser()
+        update_user_request.user_name = user_name.replace(IdpHint.BCROS.value + '/', '')
+        update_user_request.password = user_info['password']
+        update_user_request.update_password_on_login()
+
+        try:
+            kc_user = KeycloakService.update_user(update_user_request)
+        except HTTPError as err:
+            current_app.logger.error('update_user in keycloak failed {}', err)
+            raise BusinessException(Error.UNDEFINED_ERROR, err)
+        return kc_user
 
     @staticmethod
     def delete_anonymous_user(user_name, token_info: Dict = None):

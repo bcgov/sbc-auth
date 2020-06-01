@@ -1,13 +1,13 @@
 /* eslint-disable no-console */
 <template>
   <v-container class="pt-1 text-left">
-
     <p class="mb-8" v-if="!createdUsers.length">
       {{ failedUsers.length }} {{ failedUsers.length > 1 ? 'Team Members' : 'Team Member' }} could not be added to this account.
     </p>
 
     <div class="mb-8" v-if="createdUsers.length">
-      <p>{{ createdUsers.length }} {{ createdUsers.length > 1 ? 'Team Members have' : 'Team Member has' }} been added to this account.</p>
+      <p v-if="action!=='resetpassword'">{{ createdUsers.length }} {{ createdUsers.length > 1 ? 'Team Members have' : 'Team Member has' }} been added to this account.</p>
+      <p v-if="action=='resetpassword'">A new temporary password has been created for user <strong>{{createdUsers[0].username |filterLoginSource}}</strong></p>
       <p>You will need to provide Team Members with their <strong>Username</strong>, <strong>Temporary Password</strong> and the <strong>Login Address</strong> to access this account.</p>
     </div>
 
@@ -28,7 +28,7 @@
                       Username
                     </div>
                     <div class="font-weight-bold">
-                      {{ user.username }}
+                      {{ user.username|filterLoginSource }}
                     </div>
                   </div>
                   <div>
@@ -127,11 +127,12 @@
 
 <script lang="ts">
 import { AddUserBody, BulkUsersFailed, BulkUsersSuccess } from '@/models/Organization'
-import { Component, Emit, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { IdpHint, Pages } from '@/util/constants'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
+import { User } from '@/models/user'
 
 @Component({
   computed: {
@@ -139,12 +140,18 @@ import OrgModule from '@/store/modules/org'
       'createdUsers',
       'failedUsers'
     ])
+  },
+  filters: {
+    filterLoginSource (value: string) {
+      return value.replace('bcros/', '')
+    }
   }
 })
 export default class AddUsersSuccess extends Vue {
   private readonly createdUsers!: BulkUsersSuccess[]
   private readonly failedUsers!: BulkUsersFailed[]
   private loginUrl: string = ConfigHelper.getSelfURL() + `/${Pages.SIGNIN}/${IdpHint.BCROS}`
+  @Prop() private action: string
 
   @Emit()
   private close () { }
