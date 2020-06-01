@@ -36,7 +36,7 @@
             <div class="actions">
               <v-btn small color="primary" @click="goToDashboard(item)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Open</v-btn>
               <!-- <v-btn small depressed @click="editContact(item)" title="Edit Business Profile" data-test="edit-contact-button">Edit</v-btn> -->
-              <v-btn v-can:REMOVE_BUSINESS.disable small depressed @click="removeBusiness(item.businessIdentifier)" title="Remove Business" data-test="remove-button">Remove</v-btn>
+              <v-btn v-can:REMOVE_BUSINESS.disable small depressed @click="removeBusiness(item)" title="Remove Business" data-test="remove-button">Remove</v-btn>
             </div>
           </template>
         </v-data-table>
@@ -48,7 +48,7 @@
 <script lang="ts">
 import { Business, NamedBusinessRequest } from '@/models/business'
 import { Component, Emit, Vue } from 'vue-property-decorator'
-import { FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
+import { CorpType, FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
@@ -105,7 +105,7 @@ export default class AffiliatedEntityList extends Vue {
    */
 
   private isNameRequest (corpType: string): boolean {
-    return corpType === 'NR' || corpType === 'TMP'
+    return corpType === CorpType.NAME_REQUEST || corpType === CorpType.NEW_BUSINESS
   }
 
   private customSort (items, index, isDescending) {
@@ -130,10 +130,10 @@ export default class AffiliatedEntityList extends Vue {
   addBusiness () { }
 
   @Emit()
-  removeBusiness (businessIdentifier: string): RemoveBusinessPayload {
+  removeBusiness (business: Business): RemoveBusinessPayload {
     return {
-      orgIdentifiers: [this.currentOrganization.id],
-      businessIdentifier
+      orgIdentifier: this.currentOrganization.id,
+      business
     }
   }
 
@@ -146,7 +146,7 @@ export default class AffiliatedEntityList extends Vue {
     let businessIdentifier = business.businessIdentifier
     // 3806 : Create new IA if the selected item is Name Request
     // If the business is NR, indicates there is no temporary business. Create a new IA for this NR and navigate.
-    if (business.corpType.code === 'NR') {
+    if (business.corpType.code === CorpType.NAME_REQUEST) {
       const namedBusinessRequest: NamedBusinessRequest = {
         filing: {
           header: {
