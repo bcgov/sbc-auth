@@ -38,7 +38,6 @@ from tests.utilities.factory_scenarios import (
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
     factory_org_service, factory_user_model, factory_org_model)
-from auth_api.models.account_payment_settings import AccountPaymentSettings
 from auth_api.utils.enums import PaymentType, OrgType
 
 
