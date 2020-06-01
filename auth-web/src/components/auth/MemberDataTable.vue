@@ -86,6 +86,7 @@
       {{ formatDate(item.user.modified) }}
     </template>
     <template v-slot:item.action="{ item }">
+      <div class="btn-inline">
       <v-btn
               :data-test="getIndexedTag('reset-password-button', item.index)"
               v-can:RESET_PASSWORD.hide
@@ -114,6 +115,7 @@
         <span v-if="!canDissolve()">Leave</span>
         <span v-if="canDissolve()">Dissolve</span>
       </v-btn>
+      </div>
     </template>
   </v-data-table>
 </template>
@@ -409,6 +411,9 @@ export default class MemberDataTable extends Vue {
 
 .role-list {
   width: 20rem;
+}
+.btn-inline {
+  white-space: nowrap;
 }
 
 .user-role-desc {
