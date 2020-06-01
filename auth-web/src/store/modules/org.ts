@@ -473,9 +473,9 @@ export default class OrgModule extends VuexModule {
 
   @Action({ rawError: true })
   public async resetPassword (addUserBody: AddUserBody) {
-    const response = await UserService.resetPassword(addUserBody.username, addUserBody.password)
+    await UserService.resetPassword(addUserBody.username, addUserBody.password)
     // setting so that it can be shown in the updated modal ;no other reason
-    let successUsers: BulkUsersSuccess[] = [{ username: addUserBody.username, password: addUserBody.password }]
+    const successUsers: BulkUsersSuccess[] = [{ username: addUserBody.username, password: addUserBody.password }]
     this.context.commit('setCreatedUsers', successUsers)
     this.context.commit('setFailedUsers', [])
   }
