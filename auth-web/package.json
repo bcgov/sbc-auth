@@ -59,6 +59,7 @@
     "vue-cli-plugin-vuetify": "^2.0.3",
     "vue-template-compiler": "^2.6.10",
     "vuex-module-decorators": "^0.10.1",
-    "workbox-webpack-plugin": "^4.3.1"
+    "workbox-webpack-plugin": "^4.3.1",
+    "flush-promises": "^1.0.2"
   }
 }

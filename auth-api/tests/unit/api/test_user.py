@@ -122,6 +122,46 @@ def test_add_back_a_delete_bcros(client, jwt, session, keycloak_mock):
     assert membership.status == Status.INACTIVE.value
 
 
+def test_reset_password(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an anonymous admin can be Patched."""
+    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
+    user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
+    factory_membership_model(user.id, org.id)
+    owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
+    member = TestAnonymousMembership.generate_random_user(USER)
+    admin = TestAnonymousMembership.generate_random_user(COORDINATOR)
+    membership = [member, admin]
+    UserService.create_user_and_add_membership(membership, org.id, token_info=owner_claims)
+    owner_headers = factory_auth_header(jwt=jwt, claims=owner_claims)
+    member_username = IdpHint.BCROS.value + '/' + member['username']
+    admin_username = IdpHint.BCROS.value + '/' + admin['username']
+    admin_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(), admin_username, access_ype=AccessType.ANONYMOUS.value)
+    admin_headers = factory_auth_header(jwt=jwt, claims=admin_claims)
+    member_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(), member_username,
+                                                     access_ype=AccessType.ANONYMOUS.value)
+    member_headers = factory_auth_header(jwt=jwt, claims=member_claims)
+    # set up JWTS for member and admin
+    client.post('/api/v1/users', headers=admin_headers, content_type='application/json')
+    client.post('/api/v1/users', headers=member_headers, content_type='application/json')
+
+    # reset password of admin by owner
+    input_data = json.dumps({'username': admin_username, 'password': 'Mysecretcode@1234'})
+
+    rv = client.patch(f'/api/v1/users/{admin_username}', headers=owner_headers,
+                      data=input_data, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+    # member cant reset password
+    rv = client.patch(f'/api/v1/users/{admin_username}', headers=member_headers,
+                      data=input_data, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_403_FORBIDDEN
+
+    # admin cant reset password
+    rv = client.patch(f'/api/v1/users/{admin_username}', headers=admin_headers,
+                      data=input_data, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_403_FORBIDDEN
+
+
 def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an anonymous admin can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
