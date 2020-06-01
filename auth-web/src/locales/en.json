@@ -68,5 +68,7 @@
   "resetConfirmText": "Reseting your profile will remove all your information.",
   "resetConfirmTextEmphasis": "This action cannot be undone.",
   "resetFailureTitle": "Reset Failed",
-  "resetFailureText": "Unable to reset your profile. "
+  "resetFailureText": "Unable to reset your profile. ",
+  "passwordResetFailureTitle": "An error has occured",
+  "passwordResetFailureText": "An error occurred while attempting to reset this password.\nPlease try again later."
 }
