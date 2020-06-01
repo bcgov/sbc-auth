@@ -1,12 +1,9 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import ModalDialog from '@/components/auth/ModalDialog.vue'
-import PasswordRequirementAlert from '@/components/auth/common/PasswordRequirementAlert.vue'
 import PasswordReset from '@/components/auth/PasswordReset.vue'
 import { User } from '@/models/user'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
@@ -23,13 +20,14 @@ describe('PasswordReset.vue', () => {
     localVue.use(Vuex)
 
     const store = new Vuex.Store({})
-
+    const user:User = { firstname: '', lastname: '', 'username': 'testuser' }
     wrapperFactory = (propsData) => {
       return mount(PasswordReset, {
         localVue,
         store,
         vuetify,
-        stubs: { }
+        stubs: { },
+        propsData: { user: user }
       })
     }
 
@@ -49,30 +47,11 @@ describe('PasswordReset.vue', () => {
     expect(wrapper.find(PasswordReset).exists()).toBe(true)
   })
 
-  it('renders the components properly', () => {
+  it('renders the components properly', async () => {
     expect(wrapper.find(PasswordReset).exists()).toBe(true)
-  })
-
-  it('doesnt show modal before open is called', async () => {
-    const dialogele = wrapper.find('.v-dialog')
-    expect(wrapper.find(PasswordRequirementAlert).exists()).toBe(false)
-    expect(dialogele.isVisible()).toBe(false)
-  })
-
-  it('shows modal when open is called', async () => {
-    const user: User = { firstname: '', lastname: '', username: '' }
-    await wrapper.vm.openDialog(user)
-    const dialogele = wrapper.find('.v-dialog')
-    expect(dialogele.classes('v-dialog--active')).toBe(true)
-    expect(dialogele.isVisible()).toBe(true)
-    expect(wrapper.find(PasswordRequirementAlert).exists()).toBe(true)
-  })
-  it('click the reset password', async () => {
-    const user: User = { firstname: '', lastname: '', username: '' }
-    await wrapper.vm.openDialog(user)
-    const dialogele = wrapper.find('.v-dialog')
-    expect(dialogele.classes('v-dialog--active')).toBe(true)
-    expect(dialogele.isVisible()).toBe(true)
-    expect(wrapper.find(PasswordRequirementAlert).exists()).toBe(true)
+    const authenticatedBtns = wrapper.vm.$el.querySelectorAll('.v-btn')
+    const titleText = wrapper.vm.$el.querySelectorAll('p')
+    expect(titleText.length).toStrictEqual(1)
+    expect(authenticatedBtns.length).toStrictEqual(2)
   })
 })
