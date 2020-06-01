@@ -4,7 +4,7 @@
     <div class="mb-8" v-if="createdUsers.length">
       <p>
         A new temporary password has been created for user
-        <b>{{ createdUsers[0].username | filterLoginSource }}</b>
+        <strong>{{ createdUsers[0].username | filterLoginSource }}</strong>
       </p>
       <p>
         You will need to provide Team Members with their
@@ -80,7 +80,7 @@ import { mapState } from 'vuex'
     ...mapState('org', ['createdUsers', 'failedUsers'])
   },
   filters: {
-    filterLoginSource(value: string) {
+    filterLoginSource (value: string) {
       return value.replace('bcros/', '')
     }
   }
@@ -90,7 +90,7 @@ export default class AddUsersSuccess extends Vue {
   private loginUrl: string = ConfigHelper.getSelfURL() + `/${Pages.SIGNIN}/${IdpHint.BCROS}`
 
   @Emit()
-  private close() {}
+  private close () {}
 }
 </script>
 

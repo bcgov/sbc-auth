@@ -17,7 +17,7 @@
     </template>
     <template v-slot:text>
       <div v-if="user">
-        <p>Enter a new temporary password for user <b>{{ user.firstname }}</b></p>
+        <p>Enter a new temporary password for user <strong>{{ user.firstname }}</strong></p>
 
        <PasswordRequirementAlert/>
         <v-form ref="form" class="mt-3">
@@ -160,47 +160,4 @@ export default class AddUsersForm extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-.invite-list {
-  margin: 0;
-  padding: 0;
-}
-
-.invite-list .select-role {
-  width: 8rem;
-}
-
-.form__btns {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-}
-
-.role-container {
-  display: flex;
-  width: 20rem;
-
-  .v-list-item__title {
-    letter-spacing: -0.02rem;
-    font-size: 0.875rem;
-    font-weight: 700;
-  }
-
-  .v-list-item__subtitle {
-    white-space: normal;
-    overflow: visible;
-    line-height: 1.5;
-    font-size: 0.875rem;
-  }
-}
-
-.v-list-item.active {
-  background: $BCgovBlue0;
-}
-
-.select-role-btn {
-  ::v-deep .v-input__slot {
-    padding-right: 0 !important;
-  }
-}
 </style>
