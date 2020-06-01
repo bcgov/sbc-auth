@@ -1,6 +1,8 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../LICENSE)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_sbc-auth&metric=alert_status)](https://sonarcloud.io/code?id=bcgov_sbc-auth&selected=bcgov_sbc-auth%3Anotify-api)
-[![codecov](https://codecov.io/gh/bcgov/sbc-auth/branch/master/graph/badge.svg)](https://codecov.io/gh/bcgov/sbc-auth)
+[![codecov](https://codecov.io/gh/bcgov/sbc-auth/branch/development/graph/badge.svg?flag=notifyapi)](https://codecov.io/gh/bcgov/sbc-auth/tree/development/notify-api)
+![Notify API PR CI](https://github.com/bcgov/sbc-auth/workflows/Notify%20API%20PR%20CI/badge.svg)
+![Notify API & Queue DEV CD](https://github.com/bcgov/sbc-auth/workflows/Notify%20API%20&%20Queue%20DEV%20CD/badge.svg)
+![Notify API & Queue TEST CD](https://github.com/bcgov/sbc-auth/workflows/Notify%20API%20&%20Queue%20TEST%20CD/badge.svg)
 
 # Notify API
 
@@ -23,7 +25,7 @@ virtual environment to install the Python packages used by this project.
 You also need to set up the variables used for environment-specific settings:
 1. Copy the [dotenv template file](./docs/dotenv_template) to somewhere above the source code and rename to `.env`. You will need to fill in missing values.
 
-## Running the Auth Database on localhost
+## Running the Notify Database on localhost
 
 To prepare your local database:
 1. In the [root project folder](../docker/docker-compose.yml): `docker-compose up -d`
@@ -47,3 +49,4 @@ To prepare your local database:
 ## Openshift Environment
 
 View the [document](../docs/build-deploy.md).
+

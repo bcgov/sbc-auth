@@ -56,3 +56,10 @@ jobs:
           pip install .
           export PYTHONPATH=./src/
           pytest
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./queue_services/notify-queue/coverage.xml
+          flags: notifyqueue
+          name: codecov-notify-queue
+          fail_ci_if_error: true

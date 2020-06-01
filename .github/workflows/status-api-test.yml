@@ -1,4 +1,4 @@
-name: status API TEST CD
+name: Status API TEST CD
 
 on:
   push:
