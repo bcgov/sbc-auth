@@ -428,9 +428,9 @@ def test_create_org_with_linked_bcol_account(session, keycloak_mock):  # pylint:
     org = OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
     assert org
     dictionary = org.as_dict()
-    payment_settings = AccountPaymentSettings.find_by_id(dictionary['payment_settings'][0])
+    payment_settings = dictionary['payment_settings'][0]
     assert payment_settings
-    assert payment_settings.preferred_payment_code == PaymentType.BCOL.value
+    assert payment_settings['preferredPayment'] == PaymentType.BCOL.value
     assert dictionary['name'] == TestOrgInfo.bcol_linked()['name']
     assert dictionary['orgType'] == OrgType.PREMIUM.value
 
