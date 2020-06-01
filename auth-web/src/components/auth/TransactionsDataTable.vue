@@ -82,6 +82,7 @@ import CommonUtils from '@/util/common-util'
   }
 })
 export default class TransactionsDataTable extends Vue {
+  @Prop({ default: undefined }) private dateFilter: any;
   private readonly currentOrganization!: Organization
   private readonly getTransactionList!: (filterParams: TransactionFilterParams) => TransactionTableList
 

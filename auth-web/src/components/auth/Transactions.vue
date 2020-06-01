@@ -32,8 +32,9 @@
                 class="mb-4"
               >
                 <v-list-item-group
-                  v-model="dateFilterSelected"
+                  v-model="dateFilterSelectedIndex"
                   color="primary"
+                  @change="dateFilterChange"
                 >
                   <v-list-item
                     v-for="(filterRange, i) in dateFilterRanges"
@@ -52,6 +53,8 @@
                 <v-btn
                   color="primary"
                   class="font-weight-bold"
+                  depressed
+                  @click="applyFilter"
                 >
                   Apply
                 </v-btn>
@@ -64,11 +67,18 @@
                 </v-btn>
               </div>
             </v-col>
-            <v-col>
+            <v-col class="pb-8">
+              <h3 class="mt-4 mb-6">
+                {{showDateRangeSelected}}
+              </h3>
               <v-date-picker
+                class="text-center"
                 color="primary"
                 v-model="dateRangeSelected"
+                no-title
                 range
+                :class="{'date-picker-disable': disableDatePicker}"
+                first-day-of-week="1"
               ></v-date-picker>
             </v-col>
           </v-row>
@@ -101,13 +111,25 @@
         large
       >Export</v-btn>
     </div>
-    <TransactionsDataTable></TransactionsDataTable>
+    <TransactionsDataTable
+      :dateFilter="dateFilterProp"
+    ></TransactionsDataTable>
   </v-container>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import CommonUtils from '@/util/common-util'
 import TransactionsDataTable from '@/components/auth/TransactionsDataTable.vue'
+import moment from 'moment'
+
+const DATEFILTER_CODES = {
+  TODAY: 'TODAY',
+  YESTERDAY: 'YESTERDAY',
+  LASTWEEK: 'LASTWEEK',
+  LASTMONTH: 'LASTMONTH',
+  CUSTOMRANGE: 'CUSTOMRANGE'
+}
 
 @Component({
   components: {
@@ -116,35 +138,86 @@ import TransactionsDataTable from '@/components/auth/TransactionsDataTable.vue'
 })
 export default class Transactions extends Vue {
   @Prop({ default: '' }) private orgId: string;
-  private showDateFilter: boolean = true
-  private dateFilterSelected: any = null
-  private dateRangeSelected: any = ['2019-07-23', '2019-09-20']
-
+  private showDateFilter: boolean = false
+  private dateRangeSelected: any = [this.formatDatePickerDate(moment()), this.formatDatePickerDate(moment())]
   private readonly dateFilterRanges = [
     {
       label: 'Today',
-      code: 'TODAY'
+      code: DATEFILTER_CODES.TODAY
     },
     {
       label: 'Yesterday',
-      code: 'YESTERDAY'
+      code: DATEFILTER_CODES.YESTERDAY
     },
     {
       label: 'Last Week',
-      code: 'LASTWEEK'
+      code: DATEFILTER_CODES.LASTWEEK
     },
     {
       label: 'Last Month',
-      code: 'LASTMONTH'
+      code: DATEFILTER_CODES.LASTMONTH
     },
     {
       label: 'Custom Range',
-      code: 'CUSTOMRANGE'
+      code: DATEFILTER_CODES.CUSTOMRANGE
     }
   ]
+  private dateFilterSelectedIndex: number = 0
+  private dateFilterSelected: any = this.dateFilterRanges[this.dateFilterSelectedIndex]
+  private dateFilterProp: any = {}
+
+  private get showDateRangeSelected () {
+    if ((this.dateFilterSelected?.code === DATEFILTER_CODES.TODAY) || (this.dateFilterSelected?.code === DATEFILTER_CODES.YESTERDAY)) {
+      return `${this.dateFilterSelected.label} - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')}`
+    }
+    return `${this.dateFilterSelected.label} - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')} - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[1], 'MMM DD, YYYY')}`
+  }
+
+  private get disableDatePicker () {
+    return this.dateFilterSelected.code !== DATEFILTER_CODES.CUSTOMRANGE
+  }
 
   openDateFilter () {
     this.showDateFilter = true
+  }
+
+  dateFilterChange (val) {
+    if (val > -1) {
+      this.dateFilterSelected = this.dateFilterRanges[val]
+      switch (this.dateFilterSelected.code) {
+        case DATEFILTER_CODES.YESTERDAY:
+          const yesterday = this.formatDatePickerDate(moment().subtract(1, 'days'))
+          this.dateRangeSelected = [yesterday, yesterday]
+          break
+        case DATEFILTER_CODES.LASTWEEK:
+          // Week should start from  Monday and Ends on Sunday
+          const weekStart = this.formatDatePickerDate(moment().subtract(1, 'weeks').startOf('isoWeek'))
+          const weekEnd = this.formatDatePickerDate(moment().subtract(1, 'weeks').endOf('isoWeek'))
+          this.dateRangeSelected = [weekStart, weekEnd]
+          break
+        case DATEFILTER_CODES.LASTMONTH:
+          const monthStart = this.formatDatePickerDate(moment().subtract(1, 'months').startOf('month'))
+          const monthEnd = this.formatDatePickerDate(moment().subtract(1, 'months').endOf('month'))
+          this.dateRangeSelected = [monthStart, monthEnd]
+          break
+        case DATEFILTER_CODES.CUSTOMRANGE:
+        case DATEFILTER_CODES.TODAY:
+          const today = this.formatDatePickerDate(moment())
+          this.dateRangeSelected = [today, today]
+      }
+    }
+  }
+
+  private formatDatePickerDate (dateObj) {
+    return dateObj.format('YYYY-MM-DD')
+  }
+
+  private applyFilter () {
+    this.dateFilterProp = {
+      startDate: this.dateRangeSelected[0],
+      endDate: this.dateRangeSelected[0]
+    }
+    this.showDateFilter = false
   }
 }
 </script>
@@ -174,4 +247,9 @@ export default class Transactions extends Vue {
       padding-right: 0;
     }
   }
+
+  .date-picker-disable {
+    pointer-events: none;
+  }
+
 </style>
