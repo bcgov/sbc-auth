@@ -173,7 +173,7 @@ def test_find_affiliated_entities_by_org_id(session, auth_mock):  # pylint:disab
 
     assert affiliated_entities
     assert len(affiliated_entities) == 2
-    assert affiliated_entities[0]['businessIdentifier'] == entity_dictionary1['businessIdentifier']
+    assert affiliated_entities[0]['businessIdentifier'] == entity_dictionary2['businessIdentifier']
 
 
 def test_find_affiliated_entities_by_org_id_no_org(session, auth_mock):  # pylint:disable=unused-argument
@@ -339,3 +339,47 @@ def test_create_new_business_invalid_contact(session, auth_mock, nr_mock):  # py
                                                            email='aaa@aaa.com')
 
     assert exception.value.code == Error.NR_INVALID_CONTACT.name
+
+
+def test_find_affiliations_for_new_business(session, auth_mock, nr_mock):  # pylint:disable=unused-argument
+    """Assert that an Affiliation can be created."""
+    # Create 2 entities - 1 with type NR and another one TMP
+    # Affiliate to an org
+    # Get should return only 1 - TMP
+    # Then delete one affiliation - TMP
+    # Get should return only 1 - NR
+
+    entity_service1 = factory_entity_service(entity_info=TestEntityInfo.name_request)
+    entity_dictionary1 = entity_service1.as_dict()
+    business_identifier1 = entity_dictionary1['businessIdentifier']
+
+    entity_service2 = factory_entity_service(entity_info=TestEntityInfo.tenp_business)
+    entity_dictionary2 = entity_service2.as_dict()
+    business_identifier2 = entity_dictionary2['businessIdentifier']
+
+    org_service = factory_org_service()
+    org_dictionary = org_service.as_dict()
+    org_id = org_dictionary['id']
+
+    # create NR affiliation
+    AffiliationService.create_new_business_affiliation(org_id,
+                                                       business_identifier=business_identifier1,
+                                                       phone='1112223333')
+    # create second row in affiliation table
+    AffiliationService.create_affiliation(org_id,
+                                          business_identifier2,
+                                          {})
+
+    affiliated_entities = AffiliationService.find_affiliated_entities_by_org_id(org_id)
+
+    assert affiliated_entities
+    assert len(affiliated_entities) == 1
+    assert affiliated_entities[0]['businessIdentifier'] == business_identifier2
+
+    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier2)
+
+    affiliated_entities = AffiliationService.find_affiliated_entities_by_org_id(org_id)
+
+    assert affiliated_entities
+    assert len(affiliated_entities) == 1
+    assert affiliated_entities[0]['businessIdentifier'] == business_identifier1
