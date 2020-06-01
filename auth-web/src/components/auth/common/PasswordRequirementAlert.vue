@@ -1,4 +1,5 @@
 <template>
+  <div>
   <v-alert type="info" class="my-8" icon="mdi-information-outline">
     <strong>Temporary Passwords</strong> must be a
     <strong>minimum of 8 characters</strong> long and include the following
@@ -12,6 +13,7 @@
       </li>
     </ul>
   </v-alert>
+  </div>
 </template>
 
 <script lang="ts">

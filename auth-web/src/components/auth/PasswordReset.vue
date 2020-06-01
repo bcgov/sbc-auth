@@ -16,7 +16,7 @@
       <span>Reset Password</span>
     </template>
     <template v-slot:text>
-      <div v-if="user">
+      <template v-if="user">√
         <p>Enter a new temporary password for user <strong>{{ user.firstname }}</strong></p>
 
        <PasswordRequirementAlert/>
@@ -57,7 +57,7 @@
             </v-btn>
           </div>
         </v-form>
-      </div>
+      </template>
     </template>
   </ModalDialog>
 </template>
@@ -82,7 +82,7 @@ import { User } from '../../models/user'
     ...mapActions('org', ['resetPassword'])
   }
 })
-export default class AddUsersForm extends Vue {
+export default class PasswordReset extends Vue {
   private loading = false
   private readonly resetPassword!: (AddUserBody) => Promise<void>
   private password = ''
