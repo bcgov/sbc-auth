@@ -112,7 +112,7 @@
       </template>
 
       <template v-slot:text>
-        <PasswordResetSuccess ref="passwordResetSuccessRef" />
+        <AddUsersSuccess ref="addUserSuccessRef" v-bind:action="action"/>
       </template>
     </ModalDialog>
 
@@ -229,13 +229,11 @@ import AddUsersSuccess from '@/components/auth/AddUsersSuccess.vue'
 import MemberDataTable from '@/components/auth/MemberDataTable.vue'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import PasswordReset from '@/components/auth/PasswordReset.vue'
-import PasswordResetSuccess from '@/components/auth/PasswordResetSuccess.vue'
 import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vue'
 import { User } from '../../models/user'
 
 @Component({
   components: {
-    PasswordResetSuccess,
     PasswordReset,
     MemberDataTable,
     ModalDialog,
@@ -261,6 +259,7 @@ export default class AnonymousUserManagement extends Mixins(
   private readonly createdUsers!: BulkUsersSuccess[]
   private readonly failedUsers!: BulkUsersFailed[]
   private user: User = { firstname: '', lastname: '', username: '' }
+  private action = ''
 
   $refs: {
     successDialog: ModalDialog
@@ -287,7 +286,7 @@ export default class AnonymousUserManagement extends Mixins(
   }
 
   protected showPasswordResetErrorModal () {
-    this.$refs.passwordResetComp.closeDialog()
+    this.$refs.passwordResetDialog.close()
     this.errorTitle = this.$t('passwordResetFailureTitle').toString()
     this.errorText = this.$t('passwordResetFailureText').toString()
     this.$refs.errorDialog.open()
@@ -300,6 +299,7 @@ export default class AnonymousUserManagement extends Mixins(
 
   private showUpdateModal () {
     this.$refs.passwordResetDialog.close()
+    this.action = 'resetpassword'
     this.successTitle = `Password Reset`
     this.$refs.passwordResetSuccessDialog.open()
   }
