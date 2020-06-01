@@ -45,7 +45,7 @@ export interface CorpType {
     desc: string
 }
 
-export interface UpdateFilingBody {
+export interface NamedBusinessRequest {
     filing: {
         header: {
             name: string,

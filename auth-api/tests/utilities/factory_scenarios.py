@@ -395,6 +395,18 @@ class TestEntityInfo(dict, Enum):
     entity_folio_number = {'businessIdentifier': 'CP1234568',
                            'folioNumber': '12345678'}
 
+    name_request = {
+        'businessIdentifier': 'NR 1234567',
+        'name': 'ABC Corp Inc.',
+        'corpTypeCode': 'NR'
+    }
+
+    tenp_business = {
+        'businessIdentifier': 'QWERTYUIO',
+        'name': 'NR 1234567',
+        'corpTypeCode': 'TMP'
+    }
+
 
 class TestAffliationInfo(dict, Enum):
     """Test scenarios of affliation."""

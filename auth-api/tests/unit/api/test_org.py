@@ -959,8 +959,9 @@ def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disabl
     rv = client.get('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers)
     assert rv.status_code == http_status.HTTP_200_OK
     affiliations = json.loads(rv.data)
-    assert affiliations['entities'][0]['businessIdentifier'] == TestEntityInfo.entity_lear_mock['businessIdentifier']
-    assert affiliations['entities'][1]['businessIdentifier'] == TestEntityInfo.entity_lear_mock2['businessIdentifier']
+    # Result is sorted desc order of created date
+    assert affiliations['entities'][1]['businessIdentifier'] == TestEntityInfo.entity_lear_mock['businessIdentifier']
+    assert affiliations['entities'][0]['businessIdentifier'] == TestEntityInfo.entity_lear_mock2['businessIdentifier']
 
 
 def test_search_orgs_for_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
