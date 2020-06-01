@@ -1,22 +1,5 @@
 <template>
-  <ModalDialog
-    ref="passwordResetDialog"
-    :show-icon="false"
-    :show-actions="false"
-    :fullscreen-on-mobile="
-      $vuetify.breakpoint.xsOnly ||
-        $vuetify.breakpoint.smOnly ||
-        $vuetify.breakpoint.mdOnly
-    "
-    :is-persistent="true"
-    :is-scrollable="true"
-    max-width="800"
-  >
-    <template v-slot:title>
-      <span>Reset Password</span>
-    </template>
-    <template v-slot:text>
-      <template v-if="user">
+      <v-container v-if="user">
         <p>Enter a new temporary password for user <strong>{{ user.firstname }}</strong></p>
 
        <PasswordRequirementAlert/>
@@ -51,20 +34,18 @@
               depressed
               class="ml-2"
               data-test="cancel-button"
-              @click="closeDialog"
+              @click="cancel"
             >
               <span>Cancel</span>
             </v-btn>
           </div>
         </v-form>
-      </template>
-    </template>
-  </ModalDialog>
+      </v-container>
 </template>
 
 <script lang="ts">
 import { AddUserBody, Member, Organization } from '@/models/Organization'
-import { Component, Emit, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
@@ -86,7 +67,7 @@ export default class PasswordReset extends Vue {
   private loading = false
   private readonly resetPassword!: (AddUserBody) => Promise<void>
   private password = ''
-  private user: User = { firstname: '', lastname: '', username: '' }
+  @Prop() private user: User
 
   private inputHints = {
     username: 'Minimum 8 characters',
@@ -95,7 +76,7 @@ export default class PasswordReset extends Vue {
 
   $refs: {
     form: HTMLFormElement
-    passwordResetDialog: ModalDialog
+    passwordResetDialog: PasswordReset
   }
 
   private users: AddUserBody[] = []
@@ -103,10 +84,6 @@ export default class PasswordReset extends Vue {
   private passwordRules = [
     value => CommonUtils.validatePasswordRules(value) || `Invalid Password`
   ]
-
-  private created () {
-    this.resetForm()
-  }
 
   private isFormValid (): boolean {
     let isValid: boolean = false
@@ -119,14 +96,10 @@ export default class PasswordReset extends Vue {
   private resetForm () {
     this.$refs.form?.reset()
   }
-  public openDialog (user: User) {
-    this.$refs.form?.reset()
-    this.user = user
-    this.$refs.passwordResetDialog.open()
-  }
 
-  public closeDialog () {
-    this.$refs.passwordResetDialog.close()
+  @Emit()
+  private cancel () {
+    this.resetForm()
   }
 
   private async changePassword () {
@@ -150,11 +123,6 @@ export default class PasswordReset extends Vue {
       this.$emit('reset-complete')
       this.loading = false
     }
-  }
-
-  @Emit()
-  private cancel () {
-    this.resetForm()
   }
 }
 </script>

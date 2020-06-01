@@ -60,6 +60,33 @@
       </template>
     </ModalDialog>
 
+    <!-- Add Users Dialog -->
+    <ModalDialog
+            ref="passwordResetDialog"
+            :show-icon="false"
+            :show-actions="false"
+            :fullscreen-on-mobile="
+        $vuetify.breakpoint.xsOnly ||
+          $vuetify.breakpoint.smOnly ||
+          $vuetify.breakpoint.mdOnly
+      "
+            :is-persistent="true"
+            :is-scrollable="true"
+            max-width="800"
+    >
+      <template v-slot:title>
+        <span>Reset Password</span>
+      </template>
+      <template v-slot:text>
+        <PasswordReset v-bind:user="user"
+                       ref="passwordResetComp"
+                @reset-complete="showUpdateModal()"
+                @reset-error="showPasswordResetErrorModal()"
+                       @cancel="close($refs.passwordResetDialog)"
+        />
+      </template>
+    </ModalDialog>
+
     <PasswordReset
       ref="passwordResetComp"
       @reset-complete="showUpdateModal()"
@@ -233,6 +260,7 @@ export default class AnonymousUserManagement extends Mixins(
   private readonly syncActiveOrgMembers!: () => Member[]
   private readonly createdUsers!: BulkUsersSuccess[]
   private readonly failedUsers!: BulkUsersFailed[]
+  private user: User = { firstname: '', lastname: '', username: '' }
 
   $refs: {
     successDialog: ModalDialog
@@ -241,7 +269,7 @@ export default class AnonymousUserManagement extends Mixins(
     confirmActionDialogWithQuestion: ModalDialog
     addAnonUsersDialog: ModalDialog
     addUsersSuccessDialog: ModalDialog
-    passwordResetComp: PasswordReset
+    passwordResetDialog: ModalDialog
     passwordResetSuccessDialog: ModalDialog
   }
 
@@ -266,11 +294,12 @@ export default class AnonymousUserManagement extends Mixins(
   }
 
   private showResetPasswordModal (payload: User) {
-    this.$refs.passwordResetComp.openDialog(payload)
+    this.user = payload
+    this.$refs.passwordResetDialog.open()
   }
 
   private showUpdateModal () {
-    this.$refs.passwordResetComp.closeDialog()
+    this.$refs.passwordResetDialog.close()
     this.successTitle = `Password Reset`
     this.$refs.passwordResetSuccessDialog.open()
   }
