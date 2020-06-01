@@ -162,7 +162,6 @@ export default class BusinessModule extends VuexModule {
     }
     // Remove an affiliation between the given business and each specified org
     await OrgService.removeAffiliation(payload.orgIdentifier, payload.business.businessIdentifier)
-    await this.syncBusinesses()
   }
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })
