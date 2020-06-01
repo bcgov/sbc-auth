@@ -2,21 +2,7 @@
 <template>
   <div>
     <p>Enter a username, temporary password and select a role for each team member you want to add to this account.</p>
-
-    <v-alert
-      type="info"
-      class="my-8"
-      icon="mdi-information-outline"
-    >
-      <strong>Temporary Passwords</strong> must be a <strong>minimum of 8 characters</strong> long and include the following characters:
-      <ul class="mt-4">
-        <li>include at least one uppercase character (A-Z)</li>
-        <li>include at least one lowercase character (a-z)</li>
-        <li>include at least one number (0-9)</li>
-        <li>include at least one special character (examples: !, @, #, $)</li>
-      </ul>
-    </v-alert>
-
+     <PasswordRequirementAlert/>
     <h4>Team Members</h4>
 
     <v-form ref="form" class="mt-3">
@@ -110,9 +96,13 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
 import OrgModule from '@/store/modules/org'
+import PasswordRequirementAlert from '@/components/auth/common/PasswordRequirementAlert.vue'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
+  components: {
+    PasswordRequirementAlert
+  },
   computed: {
     ...mapState('org', ['currentOrganization', 'currentMembership']),
     ...mapState('user', ['roleInfos'])
