@@ -1,7 +1,7 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { Business, FolioNumberload, LoginPayload, NumberedBusinessRequest, UpdateFilingBody } from '@/models/business'
+import { Business, FolioNumberload, LoginPayload, NamedBusinessRequest, NumberedBusinessRequest } from '@/models/business'
+import { CorpType, FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
-import { FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
@@ -95,9 +95,9 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async updateFiling (filingBody: UpdateFilingBody) {
+  public async createNamedBusiness (filingBody: NamedBusinessRequest) {
     // Create an affiliation between implicit org and requested business
-    const updateResponse = await BusinessService.updateFiling(filingBody)
+    const updateResponse = await BusinessService.createNamedBusiness(filingBody)
     if (updateResponse?.status >= 200 && updateResponse?.status < 300) {
       return updateResponse
     } else {
@@ -156,10 +156,12 @@ export default class BusinessModule extends VuexModule {
 
   @Action({ rawError: true })
   public async removeBusiness (payload: RemoveBusinessPayload) {
-    // Remove an affiliation between the given business and each specified org
-    for (const orgId of payload.orgIdentifiers) {
-      await OrgService.removeAffiliation(orgId, payload.businessIdentifier)
+    // If the business is a new registration then remove the business from legal-db
+    if (payload.business.corpType.code === CorpType.NEW_BUSINESS) {
+      await BusinessService.deleteBusiness(payload.business.businessIdentifier)
     }
+    // Remove an affiliation between the given business and each specified org
+    await OrgService.removeAffiliation(payload.orgIdentifier, payload.business.businessIdentifier)
     await this.syncBusinesses()
   }
 
