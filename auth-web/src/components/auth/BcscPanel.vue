@@ -13,7 +13,7 @@
       <!-- Info Column -->
       <v-col cols="12" md="6" class="bcsc-info-col">
         <h2>It's Secure</h2>
-        <v-list-item class="list-item" v-for="(item, index) in secureBulletPoints" :key="index" >
+        <v-list-item class="list-item" v-for="(item, index) in secureBulletPoints" :key="`List-1-${index}`" >
           <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
@@ -22,7 +22,7 @@
           </v-list-item-content>
         </v-list-item>
         <h2>It's Quick and Easy</h2>
-        <v-list-item class="list-item" v-for="(item, index) in easeBulletPoints" :key="index" >
+        <v-list-item class="list-item" v-for="(item, index) in easeBulletPoints" :key="`List-2-${index}`" >
           <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
