@@ -84,18 +84,17 @@ class Affiliation:
             affiliation = EntityService(affiliation_model.entity).as_dict()
             # If it's a numbered company registration then name and business identifier will be same.
             # Replace name of company to indicate it's a numbered company
-            if affiliation['corpType']['code'] == CorpType.TMP.value and affiliation['name'] == affiliation['businessIdentifier']:
+            if affiliation['corpType']['code'] == CorpType.TMP.value \
+                    and affiliation['name'] == affiliation['businessIdentifier']:
                 affiliation['name'] = NUMBERED_COMPANY_LABEL
             data.append(affiliation)
 
         # 3806 : Filter out the NR affiliation if there is IA affiliation for the same NR.
         tmp_business_list = [d['name'] for d in data if d['corpType']['code'] == CorpType.TMP.value]
-        data = list(filter(lambda aff: (not (
-                    aff['corpType']['code'] == CorpType.NR.value and aff[
-                        'businessIdentifier'] in tmp_business_list)), data))
+        data = list(filter(lambda aff: (not (aff['corpType']['code'] == CorpType.NR.value and aff['businessIdentifier']
+                                             in tmp_business_list)), data))
 
         current_app.logger.debug('>find_affiliations_by_org_id')
-
         return data
 
     @staticmethod
