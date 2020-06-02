@@ -156,12 +156,22 @@ export default class BusinessModule extends VuexModule {
 
   @Action({ rawError: true })
   public async removeBusiness (payload: RemoveBusinessPayload) {
-    // If the business is a new registration then remove the business from legal-db
+    // If the business is a new registration then remove the business filing from legal-db
     if (payload.business.corpType.code === CorpType.NEW_BUSINESS) {
-      await BusinessService.deleteBusiness(payload.business.businessIdentifier)
+      let filingResponse = await BusinessService.getFilings(payload.business.businessIdentifier)
+      if (filingResponse && filingResponse.data && filingResponse.status === 200) {
+        let filingId = filingResponse?.data?.filing?.header?.filingId
+        // If there is a filing delete it which will delete the affiliation, else delete the affiliation
+        if (filingId) {
+          await BusinessService.deleteBusinessFiling(payload.business.businessIdentifier, filingId)
+        } else {
+          await OrgService.removeAffiliation(payload.orgIdentifier, payload.business.businessIdentifier)
+        }
+      }
+    } else {
+      // Remove an affiliation between the given business and each specified org
+      await OrgService.removeAffiliation(payload.orgIdentifier, payload.business.businessIdentifier)
     }
-    // Remove an affiliation between the given business and each specified org
-    await OrgService.removeAffiliation(payload.orgIdentifier, payload.business.businessIdentifier)
   }
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })

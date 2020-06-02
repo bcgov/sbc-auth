@@ -34,9 +34,11 @@ export default class BusinessService {
   static async createNumberedBusiness (numberedBusinessRequest: NumberedBusinessRequest): Promise<AxiosResponse<any>> {
     return axios.post(`${ConfigHelper.getLegalAPIUrl()}/businesses?draft=true`, numberedBusinessRequest)
   }
-
-  static async deleteBusiness (businessRegNumber: string): Promise<AxiosResponse<any>> {
-    return axios.delete(`${ConfigHelper.getLegalAPIUrl()}/businesses/${businessRegNumber}`)
+  static async deleteBusinessFiling (businessRegNumber: string, filingId: string): Promise<AxiosResponse<any>> {
+    return axios.delete(`${ConfigHelper.getLegalAPIUrl()}/businesses/${businessRegNumber}/filings/${filingId}`)
+  }
+  static async getFilings (businessRegNumber: string): Promise<AxiosResponse<any>> {
+    return axios.get(`${ConfigHelper.getLegalAPIUrl()}/businesses/${businessRegNumber}/filings`)
   }
 
   static async updateFolioNumber (folioNumber: FolioNumberload): Promise<AxiosResponse<any>> {
