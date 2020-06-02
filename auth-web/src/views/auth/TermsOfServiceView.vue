@@ -13,8 +13,15 @@
         <h1>Terms of Use</h1>
       </div>
       <v-card class="profile-card" flat>
+        <v-alert
+                text
+                type="info"
+                v-if="showTosBanner"
+        >
+          {{$t('tos_updated')}}
+        </v-alert>
         <v-card-text>
-          <terms-of-use></terms-of-use>
+          <terms-of-use @update_version="showUpdateBanner()"></terms-of-use>
         </v-card-text>
         <v-card-actions class="terms-of-use-btns justify-center pt-0 pb-9">
           <v-btn
@@ -76,6 +83,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
   private atBottom = false
   @Prop() token: string
   protected readonly currentUser!: KCUserProfile
+  private showTosBanner = false
 
   private onScroll (e) {
     this.atBottom = (e.target.scrollHeight - e.target.scrollTop) <= (e.target.offsetHeight + 25)
@@ -83,6 +91,10 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
 
   mounted () {
     this.$store.commit('updateHeader')
+  }
+
+  showUpdateBanner () {
+    this.showTosBanner = true
   }
 
   private async clickAccepted () {

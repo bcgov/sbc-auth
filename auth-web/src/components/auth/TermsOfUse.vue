@@ -2,7 +2,12 @@
   <div>
     <v-fade-transition>
       <div class="loading-container" v-if="!termsContent">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="termsContent"/>
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="termsContent"
+        />
       </div>
     </v-fade-transition>
     <div v-html="termsContent" class="terms-container"></div>
@@ -10,23 +15,24 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
+import { User } from '@/models/user'
 import documentService from '@/services/document.services.ts'
 
 @Component({
   computed: {
-    ...mapState('user', ['termsOfUse'])
+    ...mapState('user', ['termsOfUse', 'userProfile'])
   },
   methods: {
     ...mapMutations('user', ['setTermsOfUse'])
   }
 })
-
 export default class TermsOfUse extends Vue {
   private readonly setTermsOfUse!: (terms: TermsOfUseDocument) => void
   private termsContent = ''
+  protected readonly userProfile!: User
 
   @Prop({ default: '' }) private content: string
 
@@ -36,10 +42,31 @@ export default class TermsOfUse extends Vue {
       if (response.data) {
         this.termsContent = response.data.content
         this.setTermsOfUse(response.data)
+        const hasLatestTermsAccepted = this.hasAcceptedLatestTos(
+          response.data.version_id
+        )
+        if (!hasLatestTermsAccepted) {
+          this.$emit('update_version')
+        }
       }
     } else {
       this.termsContent = this.content
     }
+  }
+
+  private hasAcceptedLatestTos (latestVersionId: string) {
+    /*
+    version id comes with a string prefix like d1 , d2... strip that , convert to number for comparison
+    Or else 'd1' will be,l 'd2' . But 'd2' wont be less than ' d10 '!!!  '
+    */
+    const currerntlyAcceptedTermsVersion = Number(
+      this.userProfile.userTerms.termsOfUseAcceptedVersion.replace(/\D/g, '')
+    )
+    const latestVersionNumber = Number(latestVersionId.replace(/\D/g, ''))
+    return (
+      this.userProfile.userTerms.isTermsOfUseAccepted &&
+      currerntlyAcceptedTermsVersion > latestVersionNumber
+    )
   }
 }
 </script>

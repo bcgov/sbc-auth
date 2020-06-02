@@ -48,8 +48,13 @@ class Documents:
 
     @classmethod
     def fetch_latest_document(cls, document_type):
-        """Get a membership type by the given code."""
+        """Get a document type by the given document type."""
         doc = DocumentsModel.fetch_latest_document_by_type(file_type=document_type)
         if doc:
             return Documents(doc)
         return None
+
+    @staticmethod
+    def find_latest_version_by_type(document_type):
+        """Get the latest version for the given document type."""
+        return DocumentsModel.find_latest_version_by_type(file_type=document_type)

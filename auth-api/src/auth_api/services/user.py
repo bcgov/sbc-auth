@@ -15,12 +15,15 @@
 
 This module manages the User Information.
 """
+
 from typing import List, Dict
 
 from flask import current_app
 from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api.utils.enums import DocumentType
+from auth_api.utils import util
 from auth_api import status as http_status
 from auth_api.utils.constants import IdpHint
 from auth_api.exceptions import BusinessException
@@ -40,6 +43,7 @@ from auth_api.utils.roles import CLIENT_ADMIN_ROLES, ADMIN, STAFF, OrgStatus, St
 from auth_api.utils.util import camelback2snake
 
 from .contact import Contact as ContactService
+from .documents import Documents as DocumentService
 
 from .keycloak import KeycloakService
 
@@ -270,7 +274,8 @@ class User:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('save_from_jwt_token')
         if not token:
             return None
-        if token.get('accessType', None) != AccessType.ANONYMOUS.value:
+        is_anonymous_user = token.get('accessType', None) == AccessType.ANONYMOUS.value
+        if not is_anonymous_user:
             existing_user = UserModel.find_by_jwt_token(token)
         else:
             existing_user = UserModel.find_by_username(token.get('preferred_username'))
@@ -282,6 +287,16 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         if not user_model:
             return None
+
+        # if accepted , double check if there is a new TOS in place .IF so , update the flag to false
+        if user_model.is_terms_of_use_accepted:
+            document_type = DocumentType.TERMS_OF_USE_DIRECTOR_SEARCH.value if is_anonymous_user \
+                else DocumentType.TERMS_OF_USE.value
+            # get the digit version of the terms of service..ie d1 gives 1 ; d2 gives 2..for proper comparison
+            latest_version = util.digitify(DocumentService.find_latest_version_by_type(document_type))
+            current_version = util.digitify(user_model.terms_of_use_accepted_version)
+            if latest_version > current_version:
+                user_model.is_terms_of_use_accepted = False
 
         user = User(user_model)
         return user
