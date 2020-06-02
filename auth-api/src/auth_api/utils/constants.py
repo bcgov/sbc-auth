@@ -25,6 +25,9 @@ BCSC = 'BCSC'
 STAFF = 'IDIR'
 BCROS = 'BCROS'
 
+# Numbered Company Text
+NUMBERED_COMPANY_LABEL = 'Numbered Company'
+
 
 # IdpHint
 class IdpHint(Enum):
