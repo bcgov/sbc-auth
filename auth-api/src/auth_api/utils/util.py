@@ -22,6 +22,7 @@ import re
 
 def cors_preflight(methods):
     """Render an option method on the class."""
+
     def wrapper(f):
         def options(self, *args, **kwargs):  # pylint: disable=unused-argument
             return {'Allow': 'GET'}, 200, \
@@ -32,6 +33,7 @@ def cors_preflight(methods):
 
         setattr(f, 'options', options)
         return f
+
     return wrapper
 
 
@@ -63,3 +65,8 @@ class Singleton(type):
         if cls not in cls._instances:
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
+
+
+def digitify(payload: str) -> int:
+    """Return the digits from the string."""
+    return int(re.sub(r'\D', '', payload))

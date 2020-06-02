@@ -70,5 +70,6 @@
   "resetFailureTitle": "Reset Failed",
   "resetFailureText": "Unable to reset your profile. ",
   "passwordResetFailureTitle": "An error has occured",
-  "passwordResetFailureText": "An error occurred while attempting to reset this password.\nPlease try again later."
+  "passwordResetFailureText": "An error occurred while attempting to reset this password.\nPlease try again later.",
+  "tos_updated": "Terms of service has been updated.Please read carefully and accept the terms of service to proceed."
 }
