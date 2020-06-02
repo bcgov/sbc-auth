@@ -54,7 +54,8 @@
                   color="primary"
                   class="font-weight-bold"
                   depressed
-                  @click="applyFilter"
+                  :disabled="!isApplyFilterValid"
+                  @click="applyDateFilter"
                 >
                   Apply
                 </v-btn>
@@ -62,6 +63,7 @@
                 <v-btn
                   color="primary"
                   outlined
+                  @click="showDateFilter=false"
                 >
                   Cancel
                 </v-btn>
@@ -92,6 +94,7 @@
           single-line
           dense
           clearable
+          v-model="folioNumberSearch"
           hide-details
           height="44"
           class="search-text-field"
@@ -101,6 +104,8 @@
           class="font-weight-bold search-button"
           depressed
           large
+          :disabled="!folioNumberSearch"
+          @click="applyFolioFilter"
         >Apply</v-btn>
       </div>
       <v-spacer></v-spacer>
@@ -111,8 +116,34 @@
         large
       >Export</v-btn>
     </div>
+    <div class="d-inline-flex align-center mb-3">
+      <h4>{{totalTransactionsCount}} Records found</h4>
+      <v-chip
+        class="mx-2 filter-chip"
+        close
+        close-icon="mdi-window-close"
+        color="primary"
+        label
+        v-for="filter in filterArray"
+        :key="filter.type"
+        @click:close="clearFilter(filter)"
+      >
+        {{filter.displayText}}
+      </v-chip>
+      <v-btn
+        v-if="filterArray.length"
+        text
+        color="primary"
+        @click="clearFilter('', true)"
+      >
+        Clear all filters
+      </v-btn>
+    </div>
     <TransactionsDataTable
       :dateFilter="dateFilterProp"
+      :folioFilter="folioFilterProp"
+      :key="updateTransactionTableCounter"
+      @total-transaction-count="setTotalTransactionCount"
     ></TransactionsDataTable>
   </v-container>
 </template>
@@ -139,7 +170,7 @@ const DATEFILTER_CODES = {
 export default class Transactions extends Vue {
   @Prop({ default: '' }) private orgId: string;
   private showDateFilter: boolean = false
-  private dateRangeSelected: any = [this.formatDatePickerDate(moment()), this.formatDatePickerDate(moment())]
+  private dateRangeSelected: any = []
   private readonly dateFilterRanges = [
     {
       label: 'Today',
@@ -165,19 +196,42 @@ export default class Transactions extends Vue {
   private dateFilterSelectedIndex: number = 0
   private dateFilterSelected: any = this.dateFilterRanges[this.dateFilterSelectedIndex]
   private dateFilterProp: any = {}
+  private folioFilterProp: string = ''
+  private updateTransactionTableCounter: number = 0
+  private folioNumberSearch: string = ''
+  private filterArray = []
+  private totalTransactionsCount: number = 0
+
+  private beforeMount () {
+    this.initDatePicker()
+    this.dateFilterProp = this.prepDateFilterObj()
+  }
 
   private get showDateRangeSelected () {
     if ((this.dateFilterSelected?.code === DATEFILTER_CODES.TODAY) || (this.dateFilterSelected?.code === DATEFILTER_CODES.YESTERDAY)) {
       return `${this.dateFilterSelected.label} - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')}`
     }
-    return `${this.dateFilterSelected.label} - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')} - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[1], 'MMM DD, YYYY')}`
+    return `${this.dateFilterSelected.label} 
+      - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')} 
+      - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[1], 'MMM DD, YYYY')}`
   }
 
   private get disableDatePicker () {
     return this.dateFilterSelected.code !== DATEFILTER_CODES.CUSTOMRANGE
   }
 
+  private get isApplyFilterValid () {
+    return this.dateRangeSelected[0] && this.dateRangeSelected[1]
+  }
+
+  private initDatePicker () {
+    this.dateRangeSelected = [this.formatDatePickerDate(moment()), this.formatDatePickerDate(moment())]
+    this.dateFilterSelectedIndex = 0
+    this.dateFilterSelected = this.dateFilterRanges[this.dateFilterSelectedIndex]
+  }
+
   openDateFilter () {
+    this.initDatePicker()
     this.showDateFilter = true
   }
 
@@ -212,12 +266,80 @@ export default class Transactions extends Vue {
     return dateObj.format('YYYY-MM-DD')
   }
 
-  private applyFilter () {
-    this.dateFilterProp = {
-      startDate: this.dateRangeSelected[0],
-      endDate: this.dateRangeSelected[0]
-    }
+  private formatDateFilter (dateStr) {
+    if (!dateStr) return null
+    const [year, month, day] = dateStr.split('-')
+    return `${month}/${day}/${year}`
+  }
+
+  private applyDateFilter () {
+    this.dateFilterProp = this.prepDateFilterObj()
+    this.updateTransactionTableCounter++
+    this.setFilterArray()
     this.showDateFilter = false
+  }
+
+  private prepDateFilterObj () {
+    return {
+      startDate: this.formatDateFilter(this.dateRangeSelected[0]),
+      endDate: this.formatDateFilter(this.dateRangeSelected[1])
+    }
+  }
+
+  private setFilterArray () {
+    this.filterArray = []
+    if (this.dateFilterProp?.startDate && this.dateFilterProp?.endDate) {
+      this.filterArray.push({
+        type: 'DATE',
+        displayText: (this.dateFilterProp?.startDate === this.dateFilterProp?.endDate)
+          ? CommonUtils.formatDisplayDate(new Date(this.dateFilterProp?.startDate))
+          : `${CommonUtils.formatDisplayDate(new Date(this.dateFilterProp?.startDate))} - ${CommonUtils.formatDisplayDate(new Date(this.dateFilterProp?.endDate))}`
+      })
+    }
+    if (this.folioNumberSearch) {
+      this.filterArray.push({
+        type: 'FOLIO',
+        displayText: `Folio: ${this.folioNumberSearch}`
+      })
+    }
+  }
+
+  private clearFilter (filter, isAll: boolean = false) {
+    if (isAll) {
+      this.dateFilterProp = {
+        startDate: '',
+        endDate: ''
+      }
+      this.folioNumberSearch = this.folioFilterProp = ''
+      this.filterArray = []
+    } else {
+      switch (filter.type) {
+        case 'DATE':
+          this.dateFilterProp = {
+            startDate: '',
+            endDate: ''
+          }
+          break
+        case 'FOLIO':
+          this.folioNumberSearch = this.folioFilterProp = ''
+          break
+      }
+      const index = this.filterArray.findIndex((elem) => elem.type === filter.type)
+      if (index > -1) {
+        this.filterArray.splice(index, 1)
+      }
+    }
+    this.updateTransactionTableCounter++
+  }
+
+  private setTotalTransactionCount (value) {
+    this.totalTransactionsCount = value
+  }
+
+  private applyFolioFilter () {
+    this.folioFilterProp = this.folioNumberSearch
+    this.updateTransactionTableCounter++
+    this.setFilterArray()
   }
 }
 </script>
@@ -248,8 +370,16 @@ export default class Transactions extends Vue {
     }
   }
 
-  .date-picker-disable {
-    pointer-events: none;
+  ::v-deep {
+    .date-picker-disable {
+      .v-date-picker-table {
+        pointer-events: none;
+      }
+    }
+  }
+
+  .filter-chip {
+    font-size: .9rem;
   }
 
 </style>
