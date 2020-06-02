@@ -15,6 +15,7 @@
             class="mr-2"
             color="grey lighten-2"
             v-on="on"
+            @click="openDateFilter"
           >
             <v-icon class="mr-2">mdi-calendar</v-icon>
             Date Range
@@ -54,7 +55,7 @@
                   color="primary"
                   class="font-weight-bold"
                   depressed
-                  :disabled="!isApplyFilterValid"
+                  :disabled="!isApplyFilterBtnValid"
                   @click="applyDateFilter"
                 >
                   Apply
@@ -79,6 +80,7 @@
                 v-model="dateRangeSelected"
                 no-title
                 range
+                :show-current="false"
                 :class="{'date-picker-disable': disableDatePicker}"
                 first-day-of-week="1"
               ></v-date-picker>
@@ -93,7 +95,6 @@
           prepend-inner-icon="mdi-magnify"
           single-line
           dense
-          clearable
           v-model="folioNumberSearch"
           hide-details
           height="44"
@@ -204,7 +205,6 @@ export default class Transactions extends Vue {
 
   private beforeMount () {
     this.initDatePicker()
-    this.dateFilterProp = this.prepDateFilterObj()
   }
 
   private get showDateRangeSelected () {
@@ -217,16 +217,19 @@ export default class Transactions extends Vue {
   }
 
   private get disableDatePicker () {
-    return this.dateFilterSelected.code !== DATEFILTER_CODES.CUSTOMRANGE
+    return this.dateFilterSelected?.code !== DATEFILTER_CODES.CUSTOMRANGE
   }
 
-  private get isApplyFilterValid () {
-    return this.dateRangeSelected[0] && this.dateRangeSelected[1]
+  // apply filter button enable only if the date ranges are selected and start date <= end date
+  private get isApplyFilterBtnValid () {
+    return this.dateRangeSelected[0] && this.dateRangeSelected[1] && (this.dateRangeSelected[0] <= this.dateRangeSelected[1])
   }
 
   private initDatePicker () {
-    this.dateRangeSelected = [this.formatDatePickerDate(moment()), this.formatDatePickerDate(moment())]
-    this.dateFilterSelectedIndex = 0
+    this.dateRangeSelected = [
+      this.formatDatePickerDate(moment(this.dateFilterProp?.startDate)),
+      this.formatDatePickerDate(moment(this.dateFilterProp?.endDate))
+    ]
     this.dateFilterSelected = this.dateFilterRanges[this.dateFilterSelectedIndex]
   }
 
@@ -262,10 +265,12 @@ export default class Transactions extends Vue {
     }
   }
 
+  // date formatting required by the date picker
   private formatDatePickerDate (dateObj) {
     return dateObj.format('YYYY-MM-DD')
   }
 
+  // filter date desired for the API payload
   private formatDateFilter (dateStr) {
     if (!dateStr) return null
     const [year, month, day] = dateStr.split('-')
@@ -306,19 +311,15 @@ export default class Transactions extends Vue {
 
   private clearFilter (filter, isAll: boolean = false) {
     if (isAll) {
-      this.dateFilterProp = {
-        startDate: '',
-        endDate: ''
-      }
+      this.dateFilterProp = {}
       this.folioNumberSearch = this.folioFilterProp = ''
+      this.dateFilterSelectedIndex = 0
       this.filterArray = []
     } else {
       switch (filter.type) {
         case 'DATE':
-          this.dateFilterProp = {
-            startDate: '',
-            endDate: ''
-          }
+          this.dateFilterProp = {}
+          this.dateFilterSelectedIndex = 0
           break
         case 'FOLIO':
           this.folioNumberSearch = this.folioFilterProp = ''
