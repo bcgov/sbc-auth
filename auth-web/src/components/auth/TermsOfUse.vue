@@ -1,14 +1,5 @@
 <template>
   <div>
-    <v-alert
-      icon="mdi-information-outline"
-      prominent
-      text
-      type="info"
-      v-if="updatedWarning"
-    >
-      {{ updatedWarning }}
-    </v-alert>
     <v-fade-transition>
       <div class="loading-container" v-if="!termsContent">
         <v-progress-circular
@@ -41,7 +32,6 @@ import documentService from '@/services/document.services.ts'
 export default class TermsOfUse extends Vue {
   private readonly setTermsOfUse!: (terms: TermsOfUseDocument) => void
   private termsContent = ''
-  private updatedWarning = ''
   protected readonly userProfile!: User
 
   @Prop({ default: '' }) private content: string
@@ -56,7 +46,7 @@ export default class TermsOfUse extends Vue {
           response.data.version_id
         )
         if (!hasLatestTermsAccepted) {
-          this.updatedWarning = 'We have updated our terms of service.'
+          this.$emit('update_version')
         }
       }
     } else {
