@@ -23,7 +23,7 @@
   "invitationProcessingErrorMsg": "An error has occured while processing this invitation. Please try again later.",
   "staffUnauthorizedMsg": "You are not authorized to access this page.",
   "clientUnauthorizedMsg": "You are not authorized to access this page. If you having trouble, or require access to this application, please contact support.",
-  "dirSearchUnauthorizedMsg": "You are not authorized to access this application. You must agree to the Terms of Use before you can use this service.",
+  "dirSearchUnauthorizedMsg": "You must agree to the Terms of Use before you can access this application.",
   "confirmRemoveMemberTitle": "Remove Team Member",
   "confirmRoleChangeTitle": "Confirm Role Change",
   "confirmRemoveInviteTitle": "Confirm Invite Removal",
@@ -71,5 +71,5 @@
   "resetFailureText": "Unable to reset your profile. ",
   "passwordResetFailureTitle": "An error has occured",
   "passwordResetFailureText": "An error occurred while attempting to reset this password.\nPlease try again later.",
-  "tos_updated": "Terms of service has been updated.Please read carefully and accept the terms of service to proceed."
+  "tos_updated": "We have updated our Terms of Use. Please review and accept the new terms to proceed."
 }
