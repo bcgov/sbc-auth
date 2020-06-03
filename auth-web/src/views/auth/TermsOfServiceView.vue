@@ -9,18 +9,15 @@
     </v-fade-transition>
 
     <div v-if="!isLoading">
+      <v-alert type="warning" icon="mdi-alert-circle-outline" class="pa-5 mb-8"
+        v-if="showTosBanner"
+      >{{$t('tos_updated')}}
+      </v-alert>
       <div class="view-header">
         <h1>Terms of Use</h1>
       </div>
-      <v-card class="profile-card" flat>
-        <v-alert
-                text
-                type="info"
-                v-if="showTosBanner"
-        >
-          {{$t('tos_updated')}}
-        </v-alert>
-        <v-card-text>
+      <v-card flat>
+        <v-card-text class="pa-sm-6 pa-md-8 pa-lg-8 pa-xl-8">
           <terms-of-use @update_version="showUpdateBanner()"></terms-of-use>
         </v-card-text>
         <v-card-actions class="terms-of-use-btns justify-center pt-0 pb-9">
@@ -131,7 +128,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
 
 <style lang="scss" scoped>
   .terms-of-use-container {
-    max-width: 80rem;
+    max-width: 65rem;
   }
 
   .terms-of-use-btns {

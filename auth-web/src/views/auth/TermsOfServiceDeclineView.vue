@@ -1,7 +1,7 @@
 <template>
-  <v-container>
+  <v-container class="view-container">
     <v-row justify="center">
-      <v-col cols="12" lg="8" class="text-center">
+      <v-col cols="12" lg="6" class="text-center">
         <v-icon size="48" color="error" class="mb-6">mdi-information-outline</v-icon>
         <h1 class="mb-5">Not Authorized</h1>
         <p class="mb-9">{{ errorMessage }}</p>
@@ -15,8 +15,8 @@
           </v-btn>
           <v-btn
             large
-            color="primary"
-            class="ml-6"
+            color="default"
+            class="ml-4"
             @click="navigate('logout')"
           >
             Log out
@@ -69,8 +69,11 @@ export default class UnauthorizedView extends Vue {
 <style lang="scss" scoped>
   @import "$assets/scss/theme.scss";
 
-  .container {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+  .v-btn {
+    width: 8rem;
+  }
+
+  .v-btn.primary {
+    font-weight: 700;
   }
 </style>
