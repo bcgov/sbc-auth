@@ -85,19 +85,9 @@ import { Address } from '@/models/address'
   name: 'Address'
 })
 export default class BaseAddress extends Vue {
-  private username = ''
-  private password = ''
-  private errorMessage: string = ''
   @Prop() inputAddress: Address
-  @Prop() disabled = false
-  private address: Address = {
-    streetAdditional: '',
-    city: '',
-    country: 'Canada',
-    postalCode: '',
-    region: '',
-    street: ''
-  } // TODO probably dont need this intialisation
+  @Prop({ default: false }) disabled: boolean
+  private address: Address = {}
 
   private readonly rules = {
     streetAddress: [v => !!v || 'Street address is required'],
@@ -109,7 +99,11 @@ export default class BaseAddress extends Vue {
 
   mounted () {
     if (this.inputAddress) {
-      this.address = { ...this.inputAddress }
+      this.$set(this.address, 'street', this.inputAddress?.street)
+      this.$set(this.address, 'city', this.inputAddress?.city)
+      this.$set(this.address, 'region', this.inputAddress?.region)
+      this.$set(this.address, 'postalCode', this.inputAddress?.postalCode)
+      this.$set(this.address, 'country', this.inputAddress?.country)
     }
   }
 
