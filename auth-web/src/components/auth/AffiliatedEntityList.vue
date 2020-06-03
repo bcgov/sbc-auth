@@ -27,9 +27,11 @@
         >
           <template v-slot:item.info="{ item }">
             <div class="meta">
-              <v-list-item-title>{{ item.name }}</v-list-item-title>
-              <v-list-item-subtitle v-if="!isNameRequest(item.corpType.code)">Incorporation Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
-              <v-list-item-subtitle v-if="isNameRequest(item.corpType.code)">{{ item.corpType.desc }}: {{ item.businessIdentifier }}</v-list-item-subtitle>
+              <v-list-item-title v-if="isNumberedIncorporationApplication(item)">Numbered Benefit Company</v-list-item-title>
+              <v-list-item-title v-if="!isNumberedIncorporationApplication(item)">{{ item.name }}</v-list-item-title>
+              <v-list-item-subtitle v-if="isIncorporationNumber(item.corpType.code)">Incorporation Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
+              <v-list-item-subtitle v-if="isNameRequest(item.corpType.code)">Name Request ({{ item.businessIdentifier }})</v-list-item-subtitle>
+              <v-list-item-subtitle v-if="isTemporaryBusinessRegistration(item.corpType.code)">Incorporation Application</v-list-item-subtitle>
             </div>
           </template>
           <template v-slot:item.action="{ item }">
@@ -104,8 +106,19 @@ export default class AffiliatedEntityList extends Vue {
   }
    */
 
+  private isIncorporationNumber (corpType: string): boolean {
+    return corpType !== CorpType.NAME_REQUEST && corpType !== CorpType.NEW_BUSINESS
+  }
+
   private isNameRequest (corpType: string): boolean {
-    return corpType === CorpType.NAME_REQUEST || corpType === CorpType.NEW_BUSINESS
+    return corpType === CorpType.NAME_REQUEST
+  }
+
+  private isTemporaryBusinessRegistration (corpType: string): boolean {
+    return corpType === CorpType.NEW_BUSINESS
+  }
+  private isNumberedIncorporationApplication (item: Business): boolean {
+    return item.corpType.code === CorpType.NEW_BUSINESS && item.name === item.businessIdentifier
   }
 
   private customSort (items, index, isDescending) {
