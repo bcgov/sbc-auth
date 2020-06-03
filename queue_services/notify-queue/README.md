@@ -1,6 +1,6 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-
+[![codecov](https://codecov.io/gh/bcgov/sbc-auth/branch/development/graph/badge.svg?flag=notifyqueue)](https://codecov.io/gh/bcgov/sbc-auth/tree/development/queue_services)
 
 # Application Name
 
@@ -72,4 +72,3 @@ By participating in this project you agree to abide by its terms.
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-

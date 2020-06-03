@@ -43,3 +43,10 @@ jobs:
           pip install .
           export PYTHONPATH=./src/
           pytest
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./status-api/coverage.xml
+          flags: statusapi
+          name: codecov-status-api
+          fail_ci_if_error: true

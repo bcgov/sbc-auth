@@ -1,5 +1,5 @@
 import Axios, { AxiosPromise } from 'axios'
-import { TransactionDateFilter, TransactionListResponse } from '@/models/transaction'
+import { TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 import ConfigHelper from '@/util/config-helper'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
 
@@ -21,8 +21,15 @@ export default class PaymentService {
     })
   }
 
-  static getTransactions (accountId: string, datefilter: TransactionDateFilter): AxiosPromise<TransactionListResponse> {
-    var url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/queries`
-    return axios.post(url, datefilter)
+  static getTransactions (accountId: string, filterParams: TransactionFilterParams): AxiosPromise<TransactionListResponse> {
+    let params = new URLSearchParams()
+    if (filterParams.pageNumber) {
+      params.append('page', filterParams.pageNumber.toString())
+    }
+    if (filterParams.pageLimit) {
+      params.append('limit', filterParams.pageLimit.toString())
+    }
+    const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/queries`
+    return axios.post(url, filterParams.filterPayload, { params })
   }
 }

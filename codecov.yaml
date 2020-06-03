@@ -1,54 +1,68 @@
+codecov:
+  require_ci_to_pass: yes
+  branch: development
+  max_report_age: no
+
 coverage:
+  precision: 2
+  round: down
+  range: "70...100"
   status:
+    patch: no
     project:
-      default:
-        target: off
-      authapi:
-        target: 85%
+      default: no
+      backend:
+        target: 80%
         flags:
           - authapi
-      authweb:
-        target: 50%
+          - notifyapi
+          - notifyqueue
+          - statusapi
+      ui:
+        target: 35%
         flags:
           - authweb
-      statusapi:
-        target: 85%
-        flags:
-          - statusapi
-      notifyapi:
-        target: 85%
-        flags:
-          - notifyapi
-      notifyqueue:
-        target: 85%
-        flags:
-          - notifyqueue
+    branches:
+      - development
+    if_not_found: success
+    if_ci_failed: error
+    informational: false
+    only_pulls: true
+
+ignore:
+  - "^/tests/**/*" # ignore test harness code
+
+parsers:
+  gcov:
+    branch_detection:
+      conditional: yes
+      loop: yes
+      method: no
+      macro: no
+
 comment:
-  layout: "reach, diff, flags, files"
+  layout: "diff,flags,tree"
   behavior: default
-  require_changes: false
-  require_base: yes
-  require_head: yes
-  branches:
-    - "development"
+  require_changes: yes
+
 flags:
   authapi:
     paths:
       - auth-api/src/auth_api
     carryforward: true
-  authweb:
+  notifyapi:
     paths:
-      - auth-web/src
+      - notify-api/src/notify_api
+    carryforward: true
+  notifyqueue:
+    paths:
+      - queue_services/notify-queue/src/notify_service
     carryforward: true
   statusapi:
     paths:
       - status-api/src/status_api
     carryforward: true
-  notifyapi:
+  authweb:
     paths:
-      - notify-api/src/notify-api
-    carryforward: true
-  notifyqueue:
-    paths:
-      - queue_services/notify-queue/src
+      - auth-web/src
     carryforward: true

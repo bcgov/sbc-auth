@@ -21,13 +21,15 @@ def upgrade():
     op.drop_constraint('invitation_membership_membership_type_code_fkey', 'invitation_membership', type_='foreignkey')
     # add new column
     op.add_column('membership_type', sa.Column('display_name', sa.String(length=50), nullable=True))
+    op.add_column('membership_type', sa.Column('display_order', sa.Integer(), nullable=True))
     # change roles in membership_type
     op.execute(
-        "UPDATE membership_type SET code = 'USER' ,label='Submit searches and filings, add / remove businesses', display_name = 'User' where code= 'MEMBER'")
+        "UPDATE membership_type SET code = 'USER' ,icon='mdi-account-outline', label='Submit searches and filings, add / remove businesses', display_name = 'User',display_order = 1 where code= 'MEMBER'")
     op.execute(
-        "UPDATE membership_type SET code = 'COORDINATOR' ,label='Submit searches and filings, add / remove businesses, add / remove team members', display_name = 'Account Coordinator' where code = 'ADMIN'")
+        "UPDATE membership_type SET code = 'COORDINATOR',icon='mdi-account-cog-outline' ,label='Submit searches and filings, add / remove businesses, add / remove team members',display_order = 2 , display_name = 'Account Coordinator' where code = 'ADMIN'")
     op.execute(
-        "UPDATE membership_type SET code = 'ADMIN',label='Submit searches and filings, add / remove businesses, add / remove team members, access financial statements, update payment methods',  display_name = 'Account Administrator' where code = 'OWNER'")
+        "UPDATE membership_type SET code = 'ADMIN',icon='mdi-shield-account-outline',label='Submit searches and filings, add / remove businesses, add / remove team members, access financial statements, update payment methods',  "
+        "display_name = 'Account Administrator',display_order = 3 where code = 'OWNER'")
     # change role name in membership
     op.execute("UPDATE membership SET membership_type_code = 'USER' where membership_type_code= 'MEMBER'")
     op.execute("UPDATE membership SET membership_type_code = 'COORDINATOR' where membership_type_code= 'ADMIN'")
@@ -47,6 +49,7 @@ def downgrade():
     op.drop_constraint('membership_membership_type_code_fkey', 'membership', type_='foreignkey')
     op.drop_constraint('invitation_membership_membership_type_code_fkey', 'invitation_membership', type_='foreignkey')
     op.drop_column('membership_type', 'display_name')
+    op.drop_column('membership_type', 'display_order')
     op.execute(
         "UPDATE membership_type SET code = 'MEMBER',label='can add businesses, and file for a business.' where code= 'USER'")
     op.execute(

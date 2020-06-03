@@ -15,12 +15,15 @@
 
 This module manages the User Information.
 """
+
 from typing import List, Dict
 
 from flask import current_app
 from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api.utils.enums import DocumentType
+from auth_api.utils import util
 from auth_api import status as http_status
 from auth_api.utils.constants import IdpHint
 from auth_api.exceptions import BusinessException
@@ -35,10 +38,12 @@ from auth_api.models import User as UserModel
 from auth_api.schemas import UserSchema
 from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.roles import CLIENT_ADMIN_ROLES, ADMIN, OrgStatus, Status, UserStatus, COORDINATOR, AccessType
+from auth_api.utils.roles import CLIENT_ADMIN_ROLES, ADMIN, STAFF, OrgStatus, Status, UserStatus, COORDINATOR, \
+    AccessType
 from auth_api.utils.util import camelback2snake
 
 from .contact import Contact as ContactService
+from .documents import Documents as DocumentService
 
 from .keycloak import KeycloakService
 
@@ -180,6 +185,29 @@ class User:  # pylint: disable=too-many-instance-attributes
         return user_model
 
     @staticmethod
+    def reset_password_for_anon_user(user_info: dict, user_name, token_info: Dict = None):
+        """Reset the password of the user."""
+        user = UserModel.find_by_username(user_name)
+        membership = MembershipModel.find_membership_by_userid(user.id)
+        org_id = membership.org_id
+        org = OrgModel.find_by_org_id(org_id)
+        if not org or org.access_type != AccessType.ANONYMOUS.value:
+            raise BusinessException(Error.INVALID_INPUT, None)
+
+        check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, STAFF))
+        update_user_request = KeycloakUser()
+        update_user_request.user_name = user_name.replace(IdpHint.BCROS.value + '/', '')
+        update_user_request.password = user_info['password']
+        update_user_request.update_password_on_login()
+
+        try:
+            kc_user = KeycloakService.update_user(update_user_request)
+        except HTTPError as err:
+            current_app.logger.error('update_user in keycloak failed {}', err)
+            raise BusinessException(Error.UNDEFINED_ERROR, err)
+        return kc_user
+
+    @staticmethod
     def delete_anonymous_user(user_name, token_info: Dict = None):
         """
         Delete User Profile.
@@ -246,7 +274,8 @@ class User:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('save_from_jwt_token')
         if not token:
             return None
-        if token.get('accessType', None) != AccessType.ANONYMOUS.value:
+        is_anonymous_user = token.get('accessType', None) == AccessType.ANONYMOUS.value
+        if not is_anonymous_user:
             existing_user = UserModel.find_by_jwt_token(token)
         else:
             existing_user = UserModel.find_by_username(token.get('preferred_username'))
@@ -258,6 +287,16 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         if not user_model:
             return None
+
+        # if accepted , double check if there is a new TOS in place .IF so , update the flag to false
+        if user_model.is_terms_of_use_accepted:
+            document_type = DocumentType.TERMS_OF_USE_DIRECTOR_SEARCH.value if is_anonymous_user \
+                else DocumentType.TERMS_OF_USE.value
+            # get the digit version of the terms of service..ie d1 gives 1 ; d2 gives 2..for proper comparison
+            latest_version = util.digitify(DocumentService.find_latest_version_by_type(document_type))
+            current_version = util.digitify(user_model.terms_of_use_accepted_version)
+            if latest_version > current_version:
+                user_model.is_terms_of_use_accepted = False
 
         user = User(user_model)
         return user

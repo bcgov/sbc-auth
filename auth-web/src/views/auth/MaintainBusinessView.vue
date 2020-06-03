@@ -5,13 +5,13 @@
       <v-col cols="12" md="6">
         <h2>Manage and Maintain Your Business</h2>
         <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
-          <v-icon size="6" class="list-item-bullet mt-5">mdi-square</v-icon>
+          <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               {{item.text}}
             </v-list-item-subtitle>
             <v-list-item class="list-item list-item-sub" v-for="(item, index) in item.subText" :key="`sub-${index}`">
-              <v-icon size="6" class="list-item-bullet mt-5">mdi-square</v-icon>
+              <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
               <v-list-item-content>
                 <v-list-item-subtitle class="list-item-text">
                   {{item.text}}
@@ -44,6 +44,7 @@
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import { Pages } from '@/util/constants'
+import { User } from '@/models/user'
 
 @Component({
   components: {
@@ -62,7 +63,8 @@ export default class MaintainBusinessView extends Vue {
     }
   ]
 
-  @Prop() userProfile
+  @Prop()
+  private userProfile: User
 
   private login (): void {
     this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)

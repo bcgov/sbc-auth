@@ -26,9 +26,10 @@ from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
+from auth_api.utils.constants import NUMBERED_COMPANY_LABEL
 from auth_api.utils.enums import CorpType
 from auth_api.utils.passcode import validate_passcode
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
 from .rest_service import RestService
 
 
@@ -80,9 +81,20 @@ class Affiliation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         for affiliation_model in affiliation_models:
-            data.append(EntityService(affiliation_model.entity).as_dict())
-        current_app.logger.debug('>find_affiliations_by_org_id')
+            affiliation = EntityService(affiliation_model.entity).as_dict()
+            # If it's a numbered company registration then name and business identifier will be same.
+            # Replace name of company to indicate it's a numbered company
+            if affiliation['corpType']['code'] == CorpType.TMP.value \
+                    and affiliation['name'] == affiliation['businessIdentifier']:
+                affiliation['name'] = NUMBERED_COMPANY_LABEL
+            data.append(affiliation)
 
+        # 3806 : Filter out the NR affiliation if there is IA affiliation for the same NR.
+        tmp_business_list = [d['name'] for d in data if d['corpType']['code'] == CorpType.TMP.value]
+        data = list(filter(lambda aff: (not (aff['corpType']['code'] == CorpType.NR.value and aff['businessIdentifier']
+                                             in tmp_business_list)), data))
+
+        current_app.logger.debug('>find_affiliations_by_org_id')
         return data
 
     @staticmethod
@@ -196,12 +208,12 @@ class Affiliation:
     def delete_affiliation(org_id, business_identifier, token_info: Dict = None):
         """Delete the affiliation for the provided org id and business id."""
         current_app.logger.info(f'<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}')
-        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         entity = EntityService.find_by_business_identifier(business_identifier, token_info=token_info,
-                                                           allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+                                                           allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 

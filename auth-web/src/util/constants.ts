@@ -65,9 +65,9 @@ export enum LoginSource {
 export type Actions = 'upgrade' | 'downgrade'
 
 export enum TransactionStatus {
-    COMPLETED = 'COMPLETED',
-    CREATED = 'CREATED',
-    DELETED = 'DELETED'
+    COMPLETED = 'Completed',
+    PENDING = 'Pending',
+    CANCELLED = 'Cancelled'
 }
 
 export enum FilingTypes {
@@ -78,4 +78,11 @@ export enum LegalTypes {
     BCOMP = 'BC',
     COOP = 'CP',
     CORP = 'CR'
+}
+
+export enum CorpType {
+    COOP = 'CP',
+    NEW_BUSINESS = 'TMP',
+    BCOMP = 'BC',
+    NAME_REQUEST = 'NR'
 }

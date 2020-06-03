@@ -1,4 +1,3 @@
-
 name: UI Lint and Test
 
 on:
@@ -10,7 +9,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -18,32 +16,39 @@ jobs:
         node-version: [12.x]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: install with npm ci
-      working-directory: ./auth-web
-      run: | 
-        npm ci
-      env:
-        CI: true
-    - name: Run Lint
-      working-directory: ./auth-web
-      run: | 
-        npm run lint
-      env:
-        CI: true
-    - name: Run Unit Tests
-      working-directory: ./auth-web
-      run: | 
-        npm run test:unit
-      env:
-        CI: true
-    - name: Run build
-      working-directory: ./auth-web
-      run: |
-        npm run build
-      env:
-        CI: true
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: install with npm ci
+        working-directory: ./auth-web
+        run: |
+          npm ci
+        env:
+          CI: true
+      - name: Run Lint
+        working-directory: ./auth-web
+        run: |
+          npm run lint
+        env:
+          CI: true
+      - name: Run Unit Tests
+        working-directory: ./auth-web
+        run: |
+          npm run test:unit
+        env:
+          CI: true
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          flags: authweb
+          name: codecov-auth-web
+          fail_ci_if_error: true
+      - name: Run build
+        working-directory: ./auth-web
+        run: |
+          npm run build
+        env:
+          CI: true
+

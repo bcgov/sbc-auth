@@ -20,7 +20,7 @@
     "moment": "^2.24.0",
     "regenerator-runtime": "^0.13.3",
     "register-service-worker": "^1.6.2",
-    "sbc-common-components": "^2.1.28",
+    "sbc-common-components": "^2.1.30",
     "vue": "^2.6.11",
     "vue-i18n": "^8.0.0",
     "vue-property-decorator": "^8.3.0",
@@ -59,7 +59,7 @@
     "vue-cli-plugin-vuetify": "^2.0.3",
     "vue-template-compiler": "^2.6.10",
     "vuex-module-decorators": "^0.10.1",
-    "workbox-webpack-plugin": "^4.3.1"
+    "workbox-webpack-plugin": "^4.3.1",
+    "flush-promises": "^1.0.2"
   }
 }
-

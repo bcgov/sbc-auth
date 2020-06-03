@@ -37,8 +37,8 @@ export interface UpdateMemberPayload {
 }
 
 export interface RemoveBusinessPayload {
-  orgIdentifiers: number[]
-  businessIdentifier: string
+  orgIdentifier: number
+  business: Business
 }
 
 export interface Member {
@@ -90,7 +90,7 @@ export interface RoleInfo {
   name: string
   desc: string,
   displayName: string,
-
+  displayOrder: number
 }
 
 export interface AddUserBody {

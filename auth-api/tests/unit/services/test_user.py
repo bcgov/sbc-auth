@@ -105,6 +105,36 @@ def test_create_user_and_add_membership_owner_skip_auth_mode(session, auth_mock,
     assert members[0].membership_type_code == ADMIN
 
 
+def test_reset_password(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that the password can be changed."""
+    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
+    user = factory_user_model()
+    factory_membership_model(user.id, org.id)
+    claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
+    membership = [TestAnonymousMembership.generate_random_user(USER)]
+    users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
+    user_name = users['users'][0]['username']
+    user_info = {'username': user_name, 'password': 'password'}
+    kc_user = UserService.reset_password_for_anon_user(user_info, user_name, claims)
+    # cant assert anything else since password wont be gotten back
+    assert kc_user.user_name == user_name.replace(f'{IdpHint.BCROS.value}/', '').lower()
+
+
+def test_reset_password_by_member(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that the password cant be changed by member."""
+    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
+    user = factory_user_model()
+    factory_membership_model(user.id, org.id)
+    admin_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
+    membership = [TestAnonymousMembership.generate_random_user(USER)]
+    users = UserService.create_user_and_add_membership(membership, org.id, token_info=admin_claims)
+    user_name = users['users'][0]['username']
+    user_info = {'username': user_name, 'password': 'password'}
+    with pytest.raises(HTTPException) as excinfo:
+        UserService.reset_password_for_anon_user(user_info, user_name, token_info=TestJwtClaims.public_user_role)
+        assert excinfo.exception.code == 403
+
+
 def test_create_user_and_add_same_user_name_error_in_kc(session, auth_mock,
                                                         keycloak_mock):  # pylint:disable=unused-argument
     """Assert that same user name cannot be added twice."""
@@ -390,6 +420,31 @@ def test_update_terms_of_use_for_user(session):  # pylint: disable=unused-argume
     UserService.save_from_jwt_token(TestJwtClaims.user_test)
 
     updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 1)
+    dictionary = updated_user.as_dict()
+    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
+
+
+def test_terms_of_service_prev_version(session):  # pylint: disable=unused-argument
+    """Assert that a terms of use can be updated for a user."""
+    UserService.save_from_jwt_token(TestJwtClaims.user_test)
+
+    # update TOS with old version
+    updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 1)
+    dictionary = updated_user.as_dict()
+    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
+
+    # accepted version from previous step was old.so comparison should return false
+    updated_user = UserService.save_from_jwt_token(TestJwtClaims.user_test)
+    dictionary = updated_user.as_dict()
+    assert dictionary['userTerms']['isTermsOfUseAccepted'] is False
+
+    # update TOS with latest version
+    updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 2)  # 2 is the latest for now
+    dictionary = updated_user.as_dict()
+    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
+
+    # accepted version from previous step is latest.so comparison should return true
+    updated_user = UserService.save_from_jwt_token(TestJwtClaims.user_test)
     dictionary = updated_user.as_dict()
     assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
 

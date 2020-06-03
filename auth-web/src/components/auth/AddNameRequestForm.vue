@@ -45,7 +45,7 @@
           ></v-text-field>
       </fieldset>
       <div class="form__btns mt-8">
-        <v-btn large text class="pl-2 pr-2 lost-passcode-btn" data-test="forgot-passcode-button" @click.stop="helpDialog = true">
+        <v-btn large text class="pl-2 pr-2 lost-passcode-btn" data-test="forgot-passcode-button" @click.stop="openHelp()">
           <v-icon>mdi-help-circle-outline</v-icon>
           <span>I lost or forgot my Name Request (NR) Number</span>
         </v-btn>
@@ -63,37 +63,15 @@
         </v-btn>
       </div>
     </v-form>
-    <v-dialog v-model="helpDialog" max-width="640">
-      <v-card>
-        <v-card-title>Need Assistance?</v-card-title>
-        <v-card-text>
-          <p class="mb-7">If you have not received your Access Letter from BC Registries, or have lost your Name Request (NR) Number, please contact us at:</p>
-          <ul class="contact-info__list mb-7">
-            <li>
-              <span>Toll Free:</span>&nbsp;&nbsp;{{ $t('techSupportTollFree') }}
-            </li>
-            <li>
-              <span>Phone:</span>&nbsp;&nbsp;{{ $t('techSupportPhone') }}
-            </li>
-            <li>
-              <span>Email:</span>&nbsp;&nbsp;<a v-bind:href="'mailto:' + $t('techSupportEmail') + '?subject=' + $t('techSupportEmailSubject')">{{ $t('techSupportEmail') }}</a>
-            </li>
-          </ul>
-          <div>
-            <p class="mb-0"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
-          </div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn large color="primary" @click="helpDialog = false">OK</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <HelpDialog
+      :helpDialogFor="'Name Request (NR) Number'"
+      ref="helpDialog"
+    ></HelpDialog>
   </div>
 </template>
 
 <script lang="ts">
-import { Business, FolioNumberload, LoginPayload, UpdateFilingBody } from '@/models/business'
+import { Business, FolioNumberload, LoginPayload, NamedBusinessRequest } from '@/models/business'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { FilingTypes, LegalTypes } from '@/util/constants'
 import { mapActions, mapMutations, mapState } from 'vuex'
@@ -101,6 +79,7 @@ import BusinessModule from '@/store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { CreateNRAffiliationRequestBody } from '@/models/affiliation'
+import HelpDialog from '@/components/auth/HelpDialog.vue'
 import { Organization } from '@/models/Organization'
 import { getModule } from 'vuex-module-decorators'
 import { mask } from 'vue-the-mask'
@@ -109,13 +88,16 @@ import { mask } from 'vue-the-mask'
   directives: {
     mask
   },
+  components: {
+    HelpDialog
+  },
   computed: {
     ...mapState('org', ['currentOrganization'])
   },
   methods: {
     ...mapActions('business', [
       'addNameRequest',
-      'updateFiling',
+      'createNamedBusiness',
       'updateFolioNumber'
     ])
   }
@@ -123,7 +105,7 @@ import { mask } from 'vue-the-mask'
 export default class AddNameRequestForm extends Vue {
   private readonly currentOrganization!: Organization
   private readonly addNameRequest!: (payload: CreateNRAffiliationRequestBody) => any
-  private readonly updateFiling!: (filingBody: UpdateFilingBody) => any
+  private readonly createNamedBusiness!: (filingBody: NamedBusinessRequest) => any
   private readonly updateFolioNumber!: (folioNumberload: FolioNumberload) => void
   private validationError = ''
   private entityNumRules = [
@@ -144,11 +126,11 @@ export default class AddNameRequestForm extends Vue {
   private applicantEmail: string = ''
   private passcode: string = ''
   private folioNumber: string = ''
-  private helpDialog = false
   private isLoading = false
 
   $refs: {
-    addNRForm: HTMLFormElement
+    addNRForm: HTMLFormElement,
+    helpDialog: HelpDialog
   }
 
   private isFormValid (): boolean {
@@ -177,7 +159,7 @@ export default class AddNameRequestForm extends Vue {
 
         if (nrResponse?.status === 201) {
           // update the legal api if the status is success
-          const updateBody: UpdateFilingBody = {
+          const namedBusinessRequest: NamedBusinessRequest = {
             filing: {
               header: {
                 name: FilingTypes.INCORPORATION_APPLICATION,
@@ -193,7 +175,7 @@ export default class AddNameRequestForm extends Vue {
               }
             }
           }
-          const filingResponse = await this.updateFiling(updateBody)
+          const filingResponse = await this.createNamedBusiness(namedBusinessRequest)
           if (filingResponse?.errorMsg) {
             this.$emit('add-unknown-error')
           } else {
@@ -228,7 +210,11 @@ export default class AddNameRequestForm extends Vue {
   }
 
   incorpNumFormat () {
-    this.nameRequestNumber = this.nameRequestNumber.trim().toUpperCase()
+    this.nameRequestNumber = CommonUtils.formatIncorporationNumber(this.nameRequestNumber, true)
+  }
+
+  openHelp () {
+    this.$refs.helpDialog.open()
   }
 }
 </script>
