@@ -78,11 +78,6 @@ export default class TermsOfUse extends Vue {
 $indent-width: 3rem;
 
 .terms-container ::v-deep {
-  article {
-    padding: 2rem;
-    // background: $gray1;
-  }
-
   section {
     margin-top: 2rem;
   }
@@ -90,9 +85,8 @@ $indent-width: 3rem;
   section header {
     margin-bottom: 1rem;
     color: $gray9;
-    text-transform: uppercase;
     letter-spacing: -0.02rem;
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     font-weight: 700;
   }
 
@@ -101,12 +95,12 @@ $indent-width: 3rem;
     width: $indent-width;
   }
 
-  section div > p {
-    padding-left: $indent-width;
+  header + div {
+    margin-left: 3.25rem;
   }
 
-  section p:last-child {
-    margin-bottom: 0;
+  section div > p {
+    padding-left: $indent-width;
   }
 
   p {
