@@ -1,16 +1,16 @@
 codecov:
   require_ci_to_pass: yes
   branch: development
-  max_report_age: off
+  max_report_age: no
 
 coverage:
   precision: 2
   round: down
   range: "70...100"
   status:
-    patch: off
+    patch: no
     project:
-      default: off
+      default: no
       backend:
         target: 80%
         flags:

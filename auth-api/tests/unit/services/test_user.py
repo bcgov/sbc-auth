@@ -424,6 +424,31 @@ def test_update_terms_of_use_for_user(session):  # pylint: disable=unused-argume
     assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
 
 
+def test_terms_of_service_prev_version(session):  # pylint: disable=unused-argument
+    """Assert that a terms of use can be updated for a user."""
+    UserService.save_from_jwt_token(TestJwtClaims.user_test)
+
+    # update TOS with old version
+    updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 1)
+    dictionary = updated_user.as_dict()
+    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
+
+    # accepted version from previous step was old.so comparison should return false
+    updated_user = UserService.save_from_jwt_token(TestJwtClaims.user_test)
+    dictionary = updated_user.as_dict()
+    assert dictionary['userTerms']['isTermsOfUseAccepted'] is False
+
+    # update TOS with latest version
+    updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 2)  # 2 is the latest for now
+    dictionary = updated_user.as_dict()
+    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
+
+    # accepted version from previous step is latest.so comparison should return true
+    updated_user = UserService.save_from_jwt_token(TestJwtClaims.user_test)
+    dictionary = updated_user.as_dict()
+    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
+
+
 def test_update_contact_for_user_no_user(session):  # pylint: disable=unused-argument
     """Assert that a contact cannot be updated for a user that does not exist."""
     with pytest.raises(BusinessException) as exception:
