@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="adress" lazy-validation>
+  <v-form ref="baseAddressForm" lazy-validation>
     <fieldset v-if="address">
       <legend class="mb-4">Mailing Address</legend>
       <v-row>
@@ -89,6 +89,10 @@ export default class BaseAddress extends Vue {
   @Prop({ default: false }) disabled: boolean
   private address: Address = {}
 
+  $refs: {
+    baseAddressForm: HTMLFormElement,
+  }
+
   private readonly rules = {
     streetAddress: [v => !!v || 'Street address is required'],
     city: [v => !!v || 'City is required'],
@@ -109,11 +113,17 @@ export default class BaseAddress extends Vue {
 
   @Emit('address-update')
   emitAddress () {
+    this.isFormValid()
     return this.address
   }
 
   @Emit('key-down')
   emitKeyDown () {}
+
+  @Emit('is-form-valid')
+  isFormValid () {
+    return this.$refs.baseAddressForm.validate()
+  }
 }
 </script>
 
