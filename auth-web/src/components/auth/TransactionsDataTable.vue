@@ -1,63 +1,65 @@
 <template>
-  <v-data-table
-    class="user-list"
-    :headers="headerTranscations"
-    :items="transactionList"
-    :custom-sort="customSortActive"
-    :no-data-text="$t('noTransactionList')"
-    :server-items-length="totalTransactionsCount"
-    :options.sync="tableDataOptions"
-    :loading="isDataLoading"
-    :footer-props="{
-      itemsPerPageOptions: getPaginationOptions
-    }"
-  >
-    <template v-slot:loading>
-      Loading...
-    </template>
-    <template v-slot:header.status="{ header }">
-      {{header.text}}
-      <v-tooltip bottom color="grey darken-4">
-        <template v-slot:activator="{ on }">
-          <v-icon small class="status-tooltip-icon" v-on="on">mdi-information-outline</v-icon>
-        </template>
-        <div v-for="(status, index) in transactionStatus" :key="index">
-          {{status.status}} - {{status.description}}
+  <div>
+    <v-data-table
+      class="transaction-list"
+      :headers="headerTranscations"
+      :items="transactionList"
+      :custom-sort="customSortActive"
+      :no-data-text="$t('noTransactionList')"
+      :server-items-length="totalTransactionsCount"
+      :options.sync="tableDataOptions"
+      :loading="isDataLoading"
+      :footer-props="{
+        itemsPerPageOptions: getPaginationOptions
+      }"
+    >
+      <template v-slot:loading>
+        Loading...
+      </template>
+      <template v-slot:header.status="{ header }">
+        {{header.text}}
+        <v-tooltip bottom color="grey darken-4">
+          <template v-slot:activator="{ on }">
+            <v-icon small class="status-tooltip-icon" v-on="on">mdi-information-outline</v-icon>
+          </template>
+          <div v-for="(status, index) in transactionStatus" :key="index">
+            {{status.status}} - {{status.description}}
+          </div>
+        </v-tooltip>
+      </template>
+      <template v-slot:item.transactionNames="{ item }">
+        <v-list-item-title
+          class="user-name"
+          :data-test="getIndexedTag('transaction-name', item.index)"
+          >
+          <div
+            v-for="(name, nameIndex) in item.transactionNames"
+            :key="nameIndex">
+            {{ name }}
+          </div>
+        </v-list-item-title>
+        <v-list-item-subtitle
+          :data-test="getIndexedTag('transaction-sub', item.index)"
+        >Business Registry</v-list-item-subtitle>
+      </template>
+      <template v-slot:item.transactionDate="{ item }">
+        {{formatDate(item.transactionDate)}}
+      </template>
+      <template v-slot:item.totalAmount="{ item }">
+        <div class="font-weight-bold">
+          ${{item.totalAmount}}
         </div>
-      </v-tooltip>
-    </template>
-    <template v-slot:item.transactionNames="{ item }">
-      <v-list-item-title
-        class="user-name"
-        :data-test="getIndexedTag('transaction-name', item.index)"
-        >
+      </template>
+      <template v-slot:item.status="{ item }">
         <div
-          v-for="(name, nameIndex) in item.transactionNames"
-          :key="nameIndex">
-          {{ name }}
+          class="font-weight-bold text-uppercase"
+          v-bind:class="getStatusClass(item)"
+        >
+          {{item.status}}
         </div>
-      </v-list-item-title>
-      <v-list-item-subtitle
-        :data-test="getIndexedTag('transaction-sub', item.index)"
-      >Business Registry</v-list-item-subtitle>
-    </template>
-    <template v-slot:item.transactionDate="{ item }">
-      {{formatDate(item.transactionDate)}}
-    </template>
-    <template v-slot:item.totalAmount="{ item }">
-      <div class="font-weight-bold">
-        ${{item.totalAmount}}
-      </div>
-    </template>
-    <template v-slot:item.status="{ item }">
-      <div
-        class="font-weight-bold text-uppercase"
-        v-bind:class="getStatusClass(item)"
-      >
-        {{item.status}}
-      </div>
-    </template>
-  </v-data-table>
+      </template>
+    </v-data-table>
+  </div>
 </template>
 
 <script lang="ts">
@@ -82,6 +84,8 @@ import CommonUtils from '@/util/common-util'
   }
 })
 export default class TransactionsDataTable extends Vue {
+  @Prop({ default: undefined }) private dateFilter: any;
+  @Prop({ default: '' }) private folioFilter: string;
   private readonly currentOrganization!: Organization
   private readonly getTransactionList!: (filterParams: TransactionFilterParams) => TransactionTableList
 
@@ -153,13 +157,10 @@ export default class TransactionsDataTable extends Vue {
 
   private async loadTransactionList (pageNumber?: number, itemsPerPage?: number) {
     this.isDataLoading = true
-    // TODO: Filter using date once filter is done, fetching all records from 2020 for now
     const filterParams: TransactionFilterParams = {
       filterPayload: {
-        dateFilter: {
-          startDate: '01/01/2020',
-          endDate: '12/31/2020'
-        }
+        dateFilter: this.dateFilter,
+        folioNumber: this.folioFilter
       },
       pageNumber: pageNumber,
       pageLimit: itemsPerPage
@@ -167,6 +168,7 @@ export default class TransactionsDataTable extends Vue {
     const resp = await this.getTransactionList(filterParams)
     this.transactionList = resp?.transactionsList || []
     this.totalTransactionsCount = resp?.total || 0
+    this.emitTotalCount()
     this.isDataLoading = false
   }
 
@@ -175,6 +177,11 @@ export default class TransactionsDataTable extends Vue {
     const pageNumber = val.page || 1
     const itemsPerPage = val.itemsPerPage
     await this.loadTransactionList(pageNumber, itemsPerPage)
+  }
+
+  @Emit('total-transaction-count')
+  private emitTotalCount () {
+    return this.totalTransactionsCount
   }
 
   private getIndexedTag (tag, index): string {
@@ -216,10 +223,6 @@ export default class TransactionsDataTable extends Vue {
   }
 }
 
-.role-list {
-  width: 20rem;
-}
-
 .status-pending {
   color: map-get($grey, darken-1);
 }
@@ -247,5 +250,26 @@ export default class TransactionsDataTable extends Vue {
   border-width: 10px 10px 10px 10px;
   border-style: solid;
   border-color: transparent transparent var(--v-grey-darken4) transparent;
+}
+
+::v-deep {
+  .transaction-list {
+    .v-data-table-header {
+      th {
+        font-weight: 600;
+        color: #000
+      }
+    }
+    td {
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+      height: auto;
+      vertical-align: top;
+    }
+    .v-list-item__title {
+      display: block;
+      font-weight: 700;
+    }
+  }
 }
 </style>
