@@ -1,0 +1,80 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/mailing_address",
+    "type": "object",
+    "title": "mailing_address",
+    "additionalProperties": false,
+    "required": [
+    "street","city","region","country","postalCode"
+    ],
+    "properties": {
+      "street": {
+        "$id": "#/properties/street",
+        "type": "string",
+        "title": "Street",
+        "default": "",
+        "examples": [
+          "123 Roundabout Lane"
+        ],
+        "pattern": "^(.*)$",
+        "minLength": 1
+
+      },
+      "streetAdditional": {
+        "$id": "#/properties/street_additional",
+        "type": "string",
+        "title": "Street Additional",
+        "default": "",
+        "examples": [
+          "Unit 1"
+        ],
+        "pattern": "^(.*)$",
+        "minLength": 1
+      },
+      "city": {
+        "$id": "#/properties/city",
+        "type": "string",
+        "title": "City",
+        "default": "",
+        "examples": [
+          "Victoria"
+        ],
+        "pattern": "^(.*)$",
+        "minLength": 1
+      },
+      "region": {
+        "$id": "#/properties/region",
+        "type": "string",
+        "title": "Region",
+        "default": "",
+        "examples": [
+          "British Columbia"
+        ],
+        "pattern": "^(.*)$",
+        "minLength": 1
+      },
+      "country": {
+        "$id": "#/properties/country",
+        "type": "string",
+        "title": "Country",
+        "default": "",
+        "examples": [
+          "CA"
+        ],
+        "pattern": "^(.*)$",
+        "minLength": 1
+      },
+      "postalCode": {
+        "$id": "#/properties/postal_code",
+        "type": "string",
+        "title": "Postal Code",
+        "default": "",
+        "examples": [
+          "V1A 1A1"
+        ],
+        "pattern": "^(.*)$",
+        "minLength": 1
+      }
+    }
+  }

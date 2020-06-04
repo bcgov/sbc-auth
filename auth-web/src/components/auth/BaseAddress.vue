@@ -95,7 +95,6 @@ export default class BaseAddress extends Vue {
 
   private readonly rules = {
     streetAddress: [v => !!v || 'Street address is required'],
-    city: [v => !!v || 'City is required'],
     province: [v => !!v || 'Province is required'],
     postalCode: [v => !!v || 'Postal Code is required'],
     country: [v => !!v || 'Country is required']
@@ -103,11 +102,10 @@ export default class BaseAddress extends Vue {
 
   mounted () {
     if (this.inputAddress) {
-      this.$set(this.address, 'street', this.inputAddress?.street)
-      this.$set(this.address, 'city', this.inputAddress?.city)
-      this.$set(this.address, 'region', this.inputAddress?.region)
-      this.$set(this.address, 'postalCode', this.inputAddress?.postalCode)
-      this.$set(this.address, 'country', this.inputAddress?.country)
+      // directly setting to address probelamatic bcoz of vues reactivity
+      Object.keys(this.inputAddress).forEach(key => {
+        this.$set(this.address, key, this.inputAddress?.[key])
+      })
     }
   }
 
