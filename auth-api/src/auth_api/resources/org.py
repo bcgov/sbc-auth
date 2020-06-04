@@ -45,7 +45,7 @@ class Orgs(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.PUBLIC_USER.value, Role.STAFF_ADMIN.value])
+    @_JWT.has_one_of_roles([Role.PUBLIC_USER.value, Role.STAFF_ADMIN.value, Role.SYSTEM.value])
     def post():
         """Post a new org using the request body.
 

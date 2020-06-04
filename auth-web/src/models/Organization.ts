@@ -37,8 +37,8 @@ export interface UpdateMemberPayload {
 }
 
 export interface RemoveBusinessPayload {
-  orgIdentifiers: number[]
-  businessIdentifier: string
+  orgIdentifier: number
+  business: Business
 }
 
 export interface Member {

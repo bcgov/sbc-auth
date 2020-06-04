@@ -74,7 +74,11 @@
                 >
                 </v-text-field>
                 -->
-              <BaseAddress :inputAddress="address" @address-update="updateAddress">
+              <BaseAddress
+                :inputAddress="address"
+                @address-update="updateAddress"
+                @is-form-valid="checkBaseAddressValidity"
+              >
               </BaseAddress>
             </template>
           </div>
@@ -98,7 +102,7 @@
             Back
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn class="mr-3" large depressed color="primary" :loading="saving" :disabled="!grantAccess || saving" @click="save">
+          <v-btn class="mr-3" large depressed color="primary" :loading="saving" :disabled="!grantAccess || saving || !isBaseAddressValid" @click="save">
             <span v-if="!isAccountChange">Next
              <v-icon right class="ml-1">mdi-arrow-right</v-icon>
             </span>
@@ -163,6 +167,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private password = ''
   private errorMessage: string = ''
   private saving = false
+  private isBaseAddressValid: boolean = true
   private readonly createOrg!: () => Promise<Organization>
   private readonly currentOrgAddress!: Address
   private readonly syncMembership!: (orgId: number) => Promise<Member>
@@ -268,6 +273,10 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
 
   private redirectToNext (organization?: Organization) {
     this.$router.push({ path: `/account/${organization.id}/` })
+  }
+
+  private checkBaseAddressValidity (isValid) {
+    this.isBaseAddressValid = !!isValid
   }
 }
 </script>

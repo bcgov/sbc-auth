@@ -27,16 +27,18 @@
         >
           <template v-slot:item.info="{ item }">
             <div class="meta">
-              <v-list-item-title>{{ item.name }}</v-list-item-title>
-              <v-list-item-subtitle v-if="!isNameRequest(item.corpType.code)">Incorporation Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
-              <v-list-item-subtitle v-if="isNameRequest(item.corpType.code)">{{ item.corpType.desc }}: {{ item.businessIdentifier }}</v-list-item-subtitle>
+              <v-list-item-title v-if="isNumberedIncorporationApplication(item)">Numbered Benefit Company</v-list-item-title>
+              <v-list-item-title v-if="!isNumberedIncorporationApplication(item)">{{ item.name }}</v-list-item-title>
+              <v-list-item-subtitle v-if="isIncorporationNumber(item.corpType.code)">Incorporation Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
+              <v-list-item-subtitle v-if="isNameRequest(item.corpType.code)">Name Request ({{ item.businessIdentifier }})</v-list-item-subtitle>
+              <v-list-item-subtitle v-if="isTemporaryBusinessRegistration(item.corpType.code)">Incorporation Application</v-list-item-subtitle>
             </div>
           </template>
           <template v-slot:item.action="{ item }">
             <div class="actions">
               <v-btn small color="primary" @click="goToDashboard(item)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Open</v-btn>
               <!-- <v-btn small depressed @click="editContact(item)" title="Edit Business Profile" data-test="edit-contact-button">Edit</v-btn> -->
-              <v-btn v-can:REMOVE_BUSINESS.disable small depressed @click="removeBusiness(item.businessIdentifier)" title="Remove Business" data-test="remove-button">Remove</v-btn>
+              <v-btn v-can:REMOVE_BUSINESS.disable small depressed @click="removeBusiness(item)" title="Remove Business" data-test="remove-button">Remove</v-btn>
             </div>
           </template>
         </v-data-table>
@@ -46,13 +48,13 @@
 </template>
 
 <script lang="ts">
+import { Business, NamedBusinessRequest } from '@/models/business'
 import { Component, Emit, Vue } from 'vue-property-decorator'
+import { CorpType, FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { mapMutations, mapState } from 'vuex'
-import { Business } from '@/models/business'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
-import { SessionStorageKeys } from '@/util/constants'
 import TeamManagement from '@/components/auth/TeamManagement.vue'
 import { getModule } from 'vuex-module-decorators'
 
@@ -62,7 +64,9 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('org', ['currentOrganization', 'currentMembership'])
   },
   methods: {
-    ...mapMutations('business', ['setCurrentBusiness'])
+    ...mapMutations('business', ['setCurrentBusiness']),
+    ...mapActions('business', ['createNamedBusiness', 'syncBusinesses'])
+
   }
 })
 export default class AffiliatedEntityList extends Vue {
@@ -73,6 +77,8 @@ export default class AffiliatedEntityList extends Vue {
   private readonly currentOrganization!: Organization
   private readonly currentMembership!: Member
   private readonly setCurrentBusiness!: (business: Business) => void
+  private readonly createNamedBusiness!: (filingBody: NamedBusinessRequest) => any
+  private readonly syncBusinesses!: () => Promise<Business[]>
 
   private get tableHeaders () {
     return [
@@ -100,8 +106,19 @@ export default class AffiliatedEntityList extends Vue {
   }
    */
 
+  private isIncorporationNumber (corpType: string): boolean {
+    return corpType !== CorpType.NAME_REQUEST && corpType !== CorpType.NEW_BUSINESS
+  }
+
   private isNameRequest (corpType: string): boolean {
-    return corpType === 'NR' || corpType === 'TMP'
+    return corpType === CorpType.NAME_REQUEST
+  }
+
+  private isTemporaryBusinessRegistration (corpType: string): boolean {
+    return corpType === CorpType.NEW_BUSINESS
+  }
+  private isNumberedIncorporationApplication (item: Business): boolean {
+    return item.corpType.code === CorpType.NEW_BUSINESS && item.name === item.businessIdentifier
   }
 
   private customSort (items, index, isDescending) {
@@ -126,10 +143,10 @@ export default class AffiliatedEntityList extends Vue {
   addBusiness () { }
 
   @Emit()
-  removeBusiness (businessIdentifier: string): RemoveBusinessPayload {
+  removeBusiness (business: Business): RemoveBusinessPayload {
     return {
-      orgIdentifiers: [this.currentOrganization.id],
-      businessIdentifier
+      orgIdentifier: this.currentOrganization.id,
+      business
     }
   }
 
@@ -138,9 +155,35 @@ export default class AffiliatedEntityList extends Vue {
     this.$router.push({ path: '/businessprofile', query: { redirect: `/account/${this.currentOrganization.id}` } })
   }
 
-  goToDashboard (business: Business) {
-    ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, business.businessIdentifier)
-    let redirectURL = `${ConfigHelper.getCoopsURL()}${business.businessIdentifier}`
+  async goToDashboard (business: Business) {
+    let businessIdentifier = business.businessIdentifier
+    // 3806 : Create new IA if the selected item is Name Request
+    // If the business is NR, indicates there is no temporary business. Create a new IA for this NR and navigate.
+    if (business.corpType.code === CorpType.NAME_REQUEST) {
+      const namedBusinessRequest: NamedBusinessRequest = {
+        filing: {
+          header: {
+            name: FilingTypes.INCORPORATION_APPLICATION,
+            accountId: this.currentOrganization.id
+          },
+          business: {
+            legalType: LegalTypes.BCOMP
+          },
+          incorporationApplication: {
+            nameRequest: {
+              nrNumber: business.businessIdentifier
+            }
+          }
+        }
+      }
+      const filingResponse = await this.createNamedBusiness(namedBusinessRequest)
+      // Sync businesses to update the store
+      await this.syncBusinesses()
+      // Find business with name as the NR number and use it for redirection
+      businessIdentifier = this.businesses.find(bus => bus.name === business.businessIdentifier).businessIdentifier
+    }
+    ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
+    let redirectURL = `${ConfigHelper.getCoopsURL()}${businessIdentifier}`
 
     window.location.href = decodeURIComponent(redirectURL)
   }

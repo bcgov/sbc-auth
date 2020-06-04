@@ -79,3 +79,10 @@ export enum LegalTypes {
     COOP = 'CP',
     CORP = 'CR'
 }
+
+export enum CorpType {
+    COOP = 'CP',
+    NEW_BUSINESS = 'TMP',
+    BCOMP = 'BC',
+    NAME_REQUEST = 'NR'
+}

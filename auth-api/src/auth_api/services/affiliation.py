@@ -80,9 +80,25 @@ class Affiliation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         for affiliation_model in affiliation_models:
-            data.append(EntityService(affiliation_model.entity).as_dict())
-        current_app.logger.debug('>find_affiliations_by_org_id')
+            affiliation = EntityService(affiliation_model.entity).as_dict()
+            data.append(affiliation)
 
+        # 3806 : Filter out the NR affiliation if there is IA affiliation for the same NR.
+        # Dict with key as NR number and value as name
+        nr_number_name_dict = {d['businessIdentifier']: d['name']
+                               for d in data if d['corpType']['code'] == CorpType.NR.value}
+        # Create a list of all temporary business names
+        tmp_business_list = [d['name'] for d in data if d['corpType']['code'] == CorpType.TMP.value]
+        # Filter all affiliations with business identifier in tmp_business_list and tis Name Request
+        data = list(filter(lambda aff: (not (aff['corpType']['code'] == CorpType.NR.value and aff['businessIdentifier']
+                                             in tmp_business_list)), data))
+        # Replace the name of temporary business registration with NR Name
+        nr_numbers = nr_number_name_dict.keys()
+        for affiliation in data:
+            if affiliation['corpType']['code'] == CorpType.TMP.value and affiliation['name'] in nr_numbers:
+                affiliation['name'] = nr_number_name_dict[affiliation['name']]
+
+        current_app.logger.debug('>find_affiliations_by_org_id')
         return data
 
     @staticmethod
