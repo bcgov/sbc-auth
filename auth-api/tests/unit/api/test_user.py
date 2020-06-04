@@ -253,6 +253,12 @@ def test_update_user_terms_of_use(client, jwt, session):  # pylint:disable=unuse
     user = json.loads(rv.data)
     assert user['userTerms']['termsOfUseAcceptedVersion'] == '1'
 
+    # version 1 is old version ; so api should return terms of service accepted as false
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    user = json.loads(rv.data)
+    assert user['userTerms']['isTermsOfUseAccepted'] is False
+
 
 def test_update_user_terms_of_use_invalid_input(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that a PATCH to an existing user updates that user."""

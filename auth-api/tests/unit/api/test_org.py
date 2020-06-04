@@ -959,8 +959,9 @@ def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disabl
     rv = client.get('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers)
     assert rv.status_code == http_status.HTTP_200_OK
     affiliations = json.loads(rv.data)
-    assert affiliations['entities'][0]['businessIdentifier'] == TestEntityInfo.entity_lear_mock['businessIdentifier']
-    assert affiliations['entities'][1]['businessIdentifier'] == TestEntityInfo.entity_lear_mock2['businessIdentifier']
+    # Result is sorted desc order of created date
+    assert affiliations['entities'][1]['businessIdentifier'] == TestEntityInfo.entity_lear_mock['businessIdentifier']
+    assert affiliations['entities'][0]['businessIdentifier'] == TestEntityInfo.entity_lear_mock2['businessIdentifier']
 
 
 def test_search_orgs_for_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -1017,6 +1018,16 @@ def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:dis
     assert rv.status_code == http_status.HTTP_201_CREATED
     assert rv.json.get('orgType') == OrgType.PREMIUM.value
     assert rv.json.get('name') == TestOrgInfo.bcol_linked()['name']
+
+
+def test_add_bcol_linked_org_failure_mailing_address(client, jwt, session,
+                                                     keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked_incomplete_mailing_addrees()),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
 def test_add_bcol_linked_org_invalid_name(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument

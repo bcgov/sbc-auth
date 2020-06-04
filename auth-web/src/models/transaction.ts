@@ -39,7 +39,8 @@ export interface TransactionDateFilter {
   dateFilter: {
     startDate: string
     endDate: string
-  }
+  },
+  folioNumber?: string
 }
 
 export interface TransactionFilterParams {

@@ -9,12 +9,16 @@
     </v-fade-transition>
 
     <div v-if="!isLoading">
+      <v-alert type="warning" icon="mdi-alert-circle-outline" class="pa-5 mb-8"
+        v-if="showTosBanner"
+      >{{$t('tos_updated')}}
+      </v-alert>
       <div class="view-header">
         <h1>Terms of Use</h1>
       </div>
-      <v-card class="profile-card" flat>
-        <v-card-text>
-          <terms-of-use></terms-of-use>
+      <v-card flat>
+        <v-card-text class="pa-sm-6 pa-md-8 pa-lg-8 pa-xl-8">
+          <terms-of-use @update_version="showUpdateBanner()"></terms-of-use>
         </v-card-text>
         <v-card-actions class="terms-of-use-btns justify-center pt-0 pb-9">
           <v-btn
@@ -76,6 +80,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
   private atBottom = false
   @Prop() token: string
   protected readonly currentUser!: KCUserProfile
+  private showTosBanner = false
 
   private onScroll (e) {
     this.atBottom = (e.target.scrollHeight - e.target.scrollTop) <= (e.target.offsetHeight + 25)
@@ -83,6 +88,10 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
 
   mounted () {
     this.$store.commit('updateHeader')
+  }
+
+  showUpdateBanner () {
+    this.showTosBanner = true
   }
 
   private async clickAccepted () {
@@ -119,7 +128,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
 
 <style lang="scss" scoped>
   .terms-of-use-container {
-    max-width: 80rem;
+    max-width: 65rem;
   }
 
   .terms-of-use-btns {

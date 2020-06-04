@@ -6,19 +6,19 @@
 }
 
 .view-container {
-  padding: 3rem 2rem;
+  padding: 2.5rem 2rem;
 }
 
 @media (min-width: 1200px) {
   .view-container {
-    padding: 3rem 1rem;
+    padding: 2.5rem 1rem;
   }
 }
 
 .view-header {
   display: flex;
   flex-direction: row;
-  margin-bottom: 3.65rem;
+  margin-bottom: 2.75rem;
 
   .back-btn {
     margin-top: -0.25rem;

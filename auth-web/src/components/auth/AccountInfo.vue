@@ -55,6 +55,7 @@
               :inputAddress="currentOrgAddress"
               @key-down="keyDown()"
               @address-update="updateAddress"
+              @is-form-valid="checkBaseAddressValidity"
               v-if="isPremiumAccount && currentOrgAddress"
               v-can:CHANGE_ADDRESS.disable
               :key="addressKey"
@@ -143,8 +144,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private orgName = ''
   private errorMessage: string = ''
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
-  private addressTocuhed = false
-  // TODO just did this since address component is not getting updated after fetching it..find out why and remove this
+  private isBaseAddressValid: boolean = false
 
   private isFormValid (): boolean {
     return !!this.orgName || this.orgName === this.currentOrganization?.name
@@ -166,13 +166,11 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   private keyDown (address: Address) {
-    this.addressTocuhed = true
     this.enableBtn()
   }
 
   private updateAddress (address: Address) {
     this.setCurrentOrganizationAddress(address)
-    this.addressTocuhed = true
     this.enableBtn()
   }
 
@@ -220,7 +218,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     if (this.isPremiumAccount) {
       // org name is read only ;the only thing which they can change is address
       // detect any change in address
-      return this.addressTocuhed
+      return this.isBaseAddressValid
     }
     // nothing can be changed in anonymous org
     return false
@@ -263,6 +261,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private readonly accountNameRules = [
     v => !!v || 'An account name is required'
   ]
+
+  private checkBaseAddressValidity (isValid) {
+    this.isBaseAddressValid = !!isValid
+  }
 }
 </script>
 

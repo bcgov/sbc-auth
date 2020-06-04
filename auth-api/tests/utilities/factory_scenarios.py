@@ -322,6 +322,23 @@ class TestOrgInfo(dict, Enum):
         }
 
     @staticmethod
+    def bcol_linked_incomplete_mailing_addrees():
+        """Return org info for bcol linked info."""
+        return {
+            'name': 'BC ONLINE TECHNICAL TEAM DEVL',
+            'bcOnlineCredential': {
+                'userId': 'test',
+                'password': 'password'
+            },
+            'mailingAddress': {
+                'city': 'Test',
+                'region': 'BC',
+                'postalCode': 'T1T1T1',
+                'country': 'CA'
+            }
+        }
+
+    @staticmethod
     def bcol_linked_invalid_name():
         """Return org info for bcol linked info with invalid name."""
         return {
@@ -394,6 +411,18 @@ class TestEntityInfo(dict, Enum):
 
     entity_folio_number = {'businessIdentifier': 'CP1234568',
                            'folioNumber': '12345678'}
+
+    name_request = {
+        'businessIdentifier': 'NR 1234567',
+        'name': 'ABC Corp Inc.',
+        'corpTypeCode': 'NR'
+    }
+
+    tenp_business = {
+        'businessIdentifier': 'QWERTYUIO',
+        'name': 'NR 1234567',
+        'corpTypeCode': 'TMP'
+    }
 
 
 class TestAffliationInfo(dict, Enum):
