@@ -495,6 +495,12 @@ export default class OrgModule extends VuexModule {
     return {}
   }
 
+  @Action({ rawError: true })
+  public async getTransactionReport (filterParams: any) {
+    const response = await PaymentService.getTransactionReports(this.context.state['currentOrganization'].id, filterParams)
+    return response?.data
+  }
+
   // This function will be used to format the transaction response to a required table display format
   @Action({ rawError: true })
   private formatTransactionTableData (transactionList) {
