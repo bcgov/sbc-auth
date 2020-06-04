@@ -65,7 +65,7 @@ import { getModule } from 'vuex-module-decorators'
   },
   methods: {
     ...mapMutations('business', ['setCurrentBusiness']),
-    ...mapActions('business', ['createNamedBusiness', 'syncBusinesses'])
+    ...mapActions('business', ['createNamedBusiness'])
 
   }
 })
@@ -78,7 +78,6 @@ export default class AffiliatedEntityList extends Vue {
   private readonly currentMembership!: Member
   private readonly setCurrentBusiness!: (business: Business) => void
   private readonly createNamedBusiness!: (filingBody: NamedBusinessRequest) => any
-  private readonly syncBusinesses!: () => Promise<Business[]>
 
   private get tableHeaders () {
     return [
@@ -160,6 +159,7 @@ export default class AffiliatedEntityList extends Vue {
     // 3806 : Create new IA if the selected item is Name Request
     // If the business is NR, indicates there is no temporary business. Create a new IA for this NR and navigate.
     if (business.corpType.code === CorpType.NAME_REQUEST) {
+      this.isLoading = true
       const namedBusinessRequest: NamedBusinessRequest = {
         filing: {
           header: {
@@ -177,10 +177,9 @@ export default class AffiliatedEntityList extends Vue {
         }
       }
       const filingResponse = await this.createNamedBusiness(namedBusinessRequest)
-      // Sync businesses to update the store
-      await this.syncBusinesses()
+      this.isLoading = false
       // Find business with name as the NR number and use it for redirection
-      businessIdentifier = this.businesses.find(bus => bus.name === business.businessIdentifier).businessIdentifier
+      businessIdentifier = filingResponse.data.filing.business.identifier
     }
     ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
     let redirectURL = `${ConfigHelper.getCoopsURL()}${businessIdentifier}`
