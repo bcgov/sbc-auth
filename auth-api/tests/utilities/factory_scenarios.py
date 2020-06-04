@@ -322,6 +322,23 @@ class TestOrgInfo(dict, Enum):
         }
 
     @staticmethod
+    def bcol_linked_incomplete_mailing_addrees():
+        """Return org info for bcol linked info."""
+        return {
+            'name': 'BC ONLINE TECHNICAL TEAM DEVL',
+            'bcOnlineCredential': {
+                'userId': 'test',
+                'password': 'password'
+            },
+            'mailingAddress': {
+                'city': 'Test',
+                'region': 'BC',
+                'postalCode': 'T1T1T1',
+                'country': 'CA'
+            }
+        }
+
+    @staticmethod
     def bcol_linked_invalid_name():
         """Return org info for bcol linked info with invalid name."""
         return {

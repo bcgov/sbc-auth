@@ -8,6 +8,9 @@
     "required": [
       "name"
     ],
+    "dependencies": {
+      "bcOnlineCredential": { "required": ["mailingAddress"] }
+    },
     "properties": {
       "name": {
         "$id": "#/properties/name",
@@ -48,7 +51,7 @@
       "mailingAddress": {
         "oneOf": [
           {
-            "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/contact"
+            "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/mailing_address"
           }
         ]
       }

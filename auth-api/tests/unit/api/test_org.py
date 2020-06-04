@@ -1020,6 +1020,16 @@ def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:dis
     assert rv.json.get('name') == TestOrgInfo.bcol_linked()['name']
 
 
+def test_add_bcol_linked_org_failure_mailing_address(client, jwt, session,
+                                                     keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked_incomplete_mailing_addrees()),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+
+
 def test_add_bcol_linked_org_invalid_name(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
