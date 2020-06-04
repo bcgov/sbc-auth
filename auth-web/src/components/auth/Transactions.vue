@@ -158,8 +158,6 @@ import TransactionsDataTable from '@/components/auth/TransactionsDataTable.vue'
 import { mapActions } from 'vuex'
 import moment from 'moment'
 
-const fileDownload = require('js-file-download')
-
 const DATEFILTER_CODES = {
   TODAY: 'TODAY',
   YESTERDAY: 'YESTERDAY',
@@ -360,7 +358,7 @@ export default class Transactions extends Vue {
       folioNumber: this.folioFilterProp
     }
     const downloadData = await this.getTransactionReport(filterParams)
-    fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`)
+    CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`)
   }
 }
 </script>
