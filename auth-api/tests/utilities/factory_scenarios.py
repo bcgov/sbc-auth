@@ -338,7 +338,6 @@ class TestOrgInfo(dict, Enum):
             }
         }
 
-
     @staticmethod
     def bcol_linked_invalid_name():
         """Return org info for bcol linked info with invalid name."""
