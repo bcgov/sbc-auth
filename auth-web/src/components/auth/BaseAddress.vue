@@ -95,6 +95,7 @@ export default class BaseAddress extends Vue {
 
   private readonly rules = {
     streetAddress: [v => !!v || 'Street address is required'],
+    city: [v => !!v || 'City is required'],
     province: [v => !!v || 'Province is required'],
     postalCode: [v => !!v || 'Postal Code is required'],
     country: [v => !!v || 'Country is required']
