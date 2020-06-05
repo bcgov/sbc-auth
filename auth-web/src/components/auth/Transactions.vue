@@ -1,9 +1,9 @@
 <template>
   <v-container>
-    <header class="view-header mb-6">
+    <header class="view-header mb-8">
       <h2 class="view-header__title">Transactions</h2>
     </header>
-    <div class="d-flex mb-7">
+    <div class="filter-bar d-flex mb-8">
       <v-menu
         v-model="showDateFilter"
         :close-on-content-click="false"
@@ -12,97 +12,90 @@
           <v-btn
             depressed
             large
-            class="mr-2"
-            color="grey lighten-2"
+            class="mr-3 px-3"
+            color="default"
             v-on="on"
             @click="openDateFilter"
           >
-            <v-icon class="mr-2">mdi-calendar</v-icon>
+            <v-icon class="mr-2">mdi-calendar-range</v-icon>
             Date Range
             <v-icon class="ml-1">mdi-menu-down</v-icon>
           </v-btn>
         </template>
-        <v-card
-          min-width="640"
-          class="date-filter-container">
-          <v-row>
-            <v-col
-              cols="4"
-              class="date-range-list">
-              <v-list
-                class="mb-4"
-              >
-                <v-list-item-group
-                  v-model="dateFilterSelectedIndex"
-                  color="primary"
-                  @change="dateFilterChange"
-                >
-                  <v-list-item
-                    v-for="(filterRange, i) in dateFilterRanges"
-                    :key="i"
-                  >
-                    <v-list-item-content>
-                      <v-list-item-title
-                        class="font-weight-bold px-1"
-                        v-text="filterRange.label"
-                      ></v-list-item-title>
-                    </v-list-item-content>
-                  </v-list-item>
-                </v-list-item-group>
-              </v-list>
-              <div class="d-flex px-5 py-3">
-                <v-btn
-                  color="primary"
-                  class="font-weight-bold"
-                  depressed
-                  :disabled="!isApplyFilterBtnValid"
-                  @click="applyDateFilter"
-                >
-                  Apply
-                </v-btn>
-                <v-spacer></v-spacer>
-                <v-btn
-                  color="primary"
-                  outlined
-                  @click="showDateFilter=false"
-                >
-                  Cancel
-                </v-btn>
-              </div>
-            </v-col>
-            <v-col class="pb-8">
-              <h3 class="mt-4 mb-6">
-                {{showDateRangeSelected}}
-              </h3>
-              <v-date-picker
-                class="text-center"
+        <v-card class="date-range-container d-flex">
+          <div class="date-range-options d-flex flex-column justify-space-between flex-grow-0 pb-6 pt-2">
+            <v-list dense class="py-0"
+            >
+              <v-list-item-group
+                v-model="dateFilterSelectedIndex"
                 color="primary"
-                v-model="dateRangeSelected"
-                no-title
-                range
-                :show-current="false"
-                :class="{'date-picker-disable': disableDatePicker}"
-                first-day-of-week="1"
-              ></v-date-picker>
-            </v-col>
-          </v-row>
+                @change="dateFilterChange"
+              >
+                <v-list-item class="py-2 px-6"
+                  v-for="(filterRange, i) in dateFilterRanges"
+                  :key="i"
+                >
+                  <v-list-item-content>
+                    <v-list-item-title
+                      class="font-weight-bold px-1"
+                      v-text="filterRange.label"
+                    ></v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list-item-group>
+            </v-list>
+            <div class="date-filter-btns px-6 d-flex flex-end">
+              <v-btn large
+                color="primary"
+                class="font-weight-bold flex-grow-1"
+                :disabled="!isApplyFilterBtnValid"
+                @click="applyDateFilter"
+              >
+                Apply
+              </v-btn>
+              <v-btn large
+                outlined
+                color="primary"
+                class="flex-grow-1 ml-2"
+                @click="showDateFilter=false"
+              >
+                Cancel
+              </v-btn>
+            </div>
+          </div>
+          <div class="pa-6">
+            <div class="date-range-label mb-6">
+              {{showDateRangeSelected}}
+            </div>
+            <v-date-picker
+              color="primary"
+              width="400"
+              class="text-center"
+              v-model="dateRangeSelected"
+              no-title
+              range
+              :show-current="false"
+              :class="{'date-picker-disable': disableDatePicker}"
+              first-day-of-week="1"
+            ></v-date-picker>
+          </div>
         </v-card>
       </v-menu>
-      <div class="d-inline-flex search-input-with-btn">
+      <div class="folio-number-filter d-inline-flex search-input-with-btn">
         <v-text-field
-          outlined
-          label="Folio #"
-          prepend-inner-icon="mdi-magnify"
-          single-line
           dense
-          v-model="folioNumberSearch"
+          outlined
+          single-line
           hide-details
           height="44"
-          class="search-text-field"
+          class="folio-number-field"
+          label="Folio #"
+          prepend-inner-icon="mdi-magnify"
+          v-model="folioNumberSearch"
         ></v-text-field>
         <v-btn
           color="primary"
-          class="font-weight-bold search-button"
+          class="folio-number-apply-btn"
           depressed
           large
           :disabled="!folioNumberSearch"
@@ -118,13 +111,13 @@
         @click="exportCSV"
       >Export CSV</v-btn>
     </div>
-    <div class="d-inline-flex align-center mb-3">
-      <h4>{{totalTransactionsCount}} Records found</h4>
+    <div class="filter-results d-inline-flex align-center mb-5">
+      <div class="filter-results-label py-2 mr-5">{{totalTransactionsCount}} Records found</div>
       <v-chip
-        class="mx-2 filter-chip"
+        class="mr-2 filter-chip"
         close
         close-icon="mdi-window-close"
-        color="primary"
+        color="info"
         label
         v-for="filter in filterArray"
         :key="filter.type"
@@ -370,16 +363,15 @@ export default class Transactions extends Vue {
     justify-content: space-between;
   }
 
-  .search-input-with-btn {
-    .search-text-field {
-      border-top-right-radius: 0px;
-      border-bottom-right-radius: 0px;
-      max-width: 180px;
-    }
-    .search-button {
-      border-top-left-radius: 0px;
-      border-bottom-left-radius: 0px;
-    }
+  .folio-number-field {
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    max-width: 180px;
+  }
+
+  .folio-number-apply-btn {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
   }
 
   .date-filter-container {
@@ -397,8 +389,34 @@ export default class Transactions extends Vue {
     }
   }
 
-  .filter-chip {
-    font-size: .9rem;
+  .date-range-options {
+    width: 16rem;
+    border-radius: 0 !important;
+    border-right: 1px solid var(--v-grey-lighten1);
   }
 
+  .date-range-label {
+    font-weight: 700;
+    font-size: 1.125rem;
+  }
+
+  .v-picker.v-card {
+    border: 1px solid var(--v-grey-lighten1);
+    box-shadow: none !important;
+  }
+
+  .filter-results-label {
+    font-weight: 700;
+  }
+
+  ::v-deep {
+    .v-text-field--outlined.v-input--dense .v-label {
+      top: 12px;
+    }
+
+    .v-input__prepend-inner {
+      margin-top: 10px !important;
+      margin-right: 5px !important;
+    }
+  }
 </style>
