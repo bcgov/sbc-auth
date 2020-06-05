@@ -32,4 +32,12 @@ export default class PaymentService {
     const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/queries`
     return axios.post(url, filterParams.filterPayload, { params })
   }
+
+  static getTransactionReports (accountId: string, filterParams: any): AxiosPromise<any> {
+    const headers = {
+      'Accept': 'text/csv'
+    }
+    const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/reports`
+    return axios.post(url, filterParams, { headers })
+  }
 }
