@@ -115,7 +115,8 @@
         class="font-weight-bold"
         depressed
         large
-      >Export</v-btn>
+        @click="exportCSV"
+      >Export CSV</v-btn>
     </div>
     <div class="d-inline-flex align-center mb-3">
       <h4>{{totalTransactionsCount}} Records found</h4>
@@ -151,8 +152,10 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { TransactionFilterParams, TransactionTableList } from '@/models/transaction'
 import CommonUtils from '@/util/common-util'
 import TransactionsDataTable from '@/components/auth/TransactionsDataTable.vue'
+import { mapActions } from 'vuex'
 import moment from 'moment'
 
 const DATEFILTER_CODES = {
@@ -166,10 +169,16 @@ const DATEFILTER_CODES = {
 @Component({
   components: {
     TransactionsDataTable
+  },
+  methods: {
+    ...mapActions('org', [
+      'getTransactionReport'
+    ])
   }
 })
 export default class Transactions extends Vue {
   @Prop({ default: '' }) private orgId: string;
+  private readonly getTransactionReport!: (filterParams: any) => TransactionTableList
   private showDateFilter: boolean = false
   private dateRangeSelected: any = []
   private readonly dateFilterRanges = [
@@ -341,6 +350,15 @@ export default class Transactions extends Vue {
     this.folioFilterProp = this.folioNumberSearch
     this.updateTransactionTableCounter++
     this.setFilterArray()
+  }
+
+  private async exportCSV () {
+    const filterParams = {
+      dateFilter: this.dateFilterProp,
+      folioNumber: this.folioFilterProp
+    }
+    const downloadData = await this.getTransactionReport(filterParams)
+    CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`)
   }
 }
 </script>

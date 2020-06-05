@@ -42,7 +42,7 @@
               menu-props="dense"
             >
               <template v-slot:selection="{ item }">
-                {{ item.name }}
+                {{ item.displayName }}
               </template>
 
               <template v-slot:item="{ item }">
@@ -51,8 +51,8 @@
                     <v-icon v-text="item.icon" />
                   </v-list-item-icon>
                   <v-list-item-content>
-                    <v-list-item-title>{{ item.name }}</v-list-item-title>
-                    <v-list-item-subtitle>{{ item.desc }}</v-list-item-subtitle>
+                    <v-list-item-title>{{ item.displayName }}</v-list-item-title>
+                    <v-list-item-subtitle>{{ item.label }}</v-list-item-subtitle>
                   </v-list-item-content>
                 </div>
               </template>
