@@ -64,7 +64,7 @@ export function getRoutes (): RouteConfig[] {
       name: 'home',
       component: getEnvHomeView(),
       children: getEnvChildRoutes(),
-      meta: { showNavBar: true }
+      meta: { showNavBar: !flagCondition }
     },
     { path: '/business',
       name: 'business-root',
