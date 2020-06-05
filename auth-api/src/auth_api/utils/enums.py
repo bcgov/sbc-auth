@@ -80,3 +80,17 @@ class DocumentType(Enum):
 
     TERMS_OF_USE = 'termsofuse'
     TERMS_OF_USE_DIRECTOR_SEARCH = 'termsofuse_directorsearch'
+
+
+class NRStatus(Enum):
+    """NR statuses."""
+
+    APPROVED = 'APPROVED'
+    CONDITIONAL = 'CONDITIONAL'
+
+
+class NRNameStatus(Enum):
+    """NR name statuses."""
+
+    APPROVED = 'APPROVED'
+    CONDITION = 'CONDITION'
