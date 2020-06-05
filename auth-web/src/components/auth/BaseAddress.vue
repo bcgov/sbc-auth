@@ -117,7 +117,9 @@ export default class BaseAddress extends Vue {
   }
 
   @Emit('key-down')
-  emitKeyDown () {}
+  emitKeyDown () {
+    this.isFormValid()
+  }
 
   @Emit('is-form-valid')
   isFormValid () {
