@@ -59,6 +59,10 @@ export default class TermsOfUse extends Vue {
     version id comes with a string prefix like d1 , d2... strip that , convert to number for comparison
     Or else 'd1' will be,l 'd2' . But 'd2' wont be less than ' d10 '!!!  '
     */
+
+    if (!this.userProfile.userTerms?.termsOfUseAcceptedVersion) {
+      return true
+    }
     const currerntlyAcceptedTermsVersion = Number(
       this.userProfile.userTerms.termsOfUseAcceptedVersion.replace(/\D/g, '')
     )

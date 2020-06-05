@@ -128,4 +128,9 @@ export default class PasswordReset extends Vue {
 </script>
 
 <style lang="scss" scoped>
+    .form__btns {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+    }
 </style>
