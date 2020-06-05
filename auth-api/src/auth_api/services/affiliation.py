@@ -30,6 +30,7 @@ from auth_api.utils.enums import CorpType
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
 from .rest_service import RestService
+from auth_api.utils.enums import NRNameStatus, NRStatus
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -182,7 +183,11 @@ class Affiliation:
             nr_phone = nr_json.get('applicants').get('phoneNumber')
             nr_email = nr_json.get('applicants').get('emailAddress')
 
-            if status not in ('APPROVED', 'CONDITIONAL'):
+            if status not in (NRStatus.APPROVED.value, NRStatus.CONDITIONAL.value):
+                raise BusinessException(Error.NR_NOT_APPROVED, None)
+
+            # If consentFlag is not R, N or Null for a CONDITIONAL NR throw error
+            if status == NRStatus.CONDITIONAL.value and nr_json.get('consentFlag', None) not in (None, 'R', 'N'):
                 raise BusinessException(Error.NR_NOT_APPROVED, None)
 
             if (phone and phone != nr_phone) or (email and email != nr_email):
@@ -191,8 +196,12 @@ class Affiliation:
             # Create an entity with the Name from NR if entity doesn't exist
             if not entity:
                 # Filter the names from NR response and get the name which has status APPROVED as the name.
-                name = next(
-                    (name.get('name') for name in nr_json.get('names') if name.get('state', None) == 'APPROVED'), None)
+                # Filter the names from NR response and get the name which has status CONDITION as the name.
+                nr_name_state = NRNameStatus.APPROVED.value if status == NRStatus.APPROVED.value \
+                    else NRNameStatus.CONDITION.value
+                name = next((name.get('name') for name in nr_json.get('names') if
+                             name.get('state', None) == nr_name_state), None)
+
                 entity = EntityService.save_entity({
                     'businessIdentifier': business_identifier,
                     'name': name,
