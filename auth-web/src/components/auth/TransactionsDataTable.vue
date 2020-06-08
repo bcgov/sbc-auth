@@ -9,6 +9,7 @@
       :server-items-length="totalTransactionsCount"
       :options.sync="tableDataOptions"
       :loading="isDataLoading"
+      loading-text="loading text"
       :footer-props="{
         itemsPerPageOptions: getPaginationOptions
       }"
@@ -20,7 +21,7 @@
         {{header.text}}
         <v-tooltip bottom color="grey darken-4">
           <template v-slot:activator="{ on }">
-            <v-icon small class="status-tooltip-icon" v-on="on">mdi-information-outline</v-icon>
+            <v-icon class="status-tooltip-icon" v-on="on">mdi-information-outline</v-icon>
           </template>
           <div v-for="(status, index) in transactionStatus" :key="index">
             {{status.status}} - {{status.description}}
@@ -28,19 +29,18 @@
         </v-tooltip>
       </template>
       <template v-slot:item.transactionNames="{ item }">
-        <v-list-item-title
-          class="user-name"
+        <div class="product-purchased font-weight-bold"
           :data-test="getIndexedTag('transaction-name', item.index)"
           >
-          <div
+          <div class="product-name"
             v-for="(name, nameIndex) in item.transactionNames"
             :key="nameIndex">
             {{ name }}
           </div>
-        </v-list-item-title>
-        <v-list-item-subtitle
+        </div>
+        <div class="product-suite"
           :data-test="getIndexedTag('transaction-sub', item.index)"
-        >Business Registry</v-list-item-subtitle>
+        >Business Registry</div>
       </template>
       <template v-slot:item.transactionDate="{ item }">
         {{formatDate(item.transactionDate)}}
@@ -51,12 +51,7 @@
         </div>
       </template>
       <template v-slot:item.status="{ item }">
-        <div
-          class="font-weight-bold text-uppercase"
-          v-bind:class="getStatusClass(item)"
-        >
-          {{item.status}}
-        </div>
+        {{item.status}}
       </template>
     </v-data-table>
   </div>
@@ -108,7 +103,8 @@ export default class TransactionsDataTable extends Vue {
       text: 'Folio #',
       align: 'left',
       sortable: false,
-      value: 'folioNumber'
+      value: 'folioNumber',
+      width: 115
     },
     {
       text: 'Initiated By',
@@ -120,19 +116,22 @@ export default class TransactionsDataTable extends Vue {
       text: 'Date',
       align: 'left',
       value: 'transactionDate',
-      sortable: false
+      sortable: false,
+      width: 115
     },
     {
       text: 'Total Amount',
-      align: 'left',
+      align: 'right',
       value: 'totalAmount',
-      sortable: false
+      sortable: false,
+      width: 125
     },
     {
       text: 'Status',
       align: 'left',
       value: 'status',
-      sortable: false
+      sortable: false,
+      width: 115
     }
   ]
 
@@ -235,8 +234,9 @@ export default class TransactionsDataTable extends Vue {
 }
 
 .status-tooltip-icon {
-  margin-top: -2px;
+  margin-top: -4px;
   margin-right: 5px;
+  margin-left: 2px;
 }
 
 .v-tooltip__content:before {
@@ -260,14 +260,20 @@ export default class TransactionsDataTable extends Vue {
         color: #000
       }
     }
+
     td {
       padding-top: 1rem;
       padding-bottom: 1rem;
       height: auto;
       vertical-align: top;
+      overflow: hidden;
     }
-    .v-list-item__title {
+
+    .product-name {
       display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       font-weight: 700;
     }
   }

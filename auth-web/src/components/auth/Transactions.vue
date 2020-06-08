@@ -23,7 +23,7 @@
           </v-btn>
         </template>
         <v-card class="date-range-container d-flex">
-          <div class="date-range-options d-flex flex-column justify-space-between flex-grow-0 pb-6 pt-2">
+          <div class="date-range-options d-flex flex-column justify-space-between flex-grow-0 pb-6 pt-3">
             <v-list dense class="py-0"
             >
               <v-list-item-group
@@ -92,10 +92,10 @@
       <div class="folio-number-filter d-inline-flex search-input-with-btn">
         <v-text-field
           dense
-          outlined
+          filled
           single-line
           hide-details
-          height="44"
+          height="43"
           class="folio-number-field"
           label="Folio #"
           prepend-inner-icon="mdi-magnify"
@@ -112,15 +112,14 @@
       </div>
       <v-spacer></v-spacer>
       <v-btn
+        large
         color="primary"
         class="font-weight-bold"
-        depressed
-        large
         @click="exportCSV"
       >Export CSV</v-btn>
     </div>
     <div class="filter-results d-inline-flex align-center mb-5">
-      <div class="filter-results-label py-2 mr-5">{{totalTransactionsCount}} Records found</div>
+      <div class="filter-results-label py-2 mr-7">{{totalTransactionsCount}} Records found</div>
       <v-chip
         class="mr-2 filter-chip"
         close
@@ -431,7 +430,16 @@ export default class Transactions extends Vue {
 
   ::v-deep {
     .v-text-field--outlined.v-input--dense .v-label {
-      top: 12px;
+      top: 14px !important;
+    }
+
+    .v-text-field__slot input {
+      font-size: 0.875rem;
+    }
+
+    .v-label {
+      font-size: 0.875rem !important;
+      top: 12px !important;
     }
 
     .v-input__prepend-inner {
