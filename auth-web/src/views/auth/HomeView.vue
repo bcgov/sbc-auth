@@ -300,7 +300,7 @@ export default class HomeView extends Vue {
   }
 
   private goToOutOfProvince () {
-    this.$router.push(`/setup-account-oop`)
+    this.$router.push(`/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE}/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE_INSTRUCTIONS}`)
   }
 
   mounted () {
