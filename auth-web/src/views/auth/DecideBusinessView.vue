@@ -11,7 +11,7 @@
               {{item.text}}
               <a href="https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-small-business/%7D"
                class="learn-more-link" target="_blank" rel="noopener noreferrer">
-                <u>{{item.linkText}}</u>
+                {{item.linkText}}
               </a>
             </v-list-item-subtitle>
           </v-list-item-content>
@@ -21,7 +21,7 @@
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
-        <v-img src="../../assets/img/Describe-business-img-Placeholder.png" aspect-ratio="1.2" contain></v-img>
+        <v-img src="../../assets/img/Step1_DecideBusiness_x1.jpg" aspect-ratio="1.2" contain></v-img>
       </v-col>
     </v-row>
   </v-container>
@@ -76,10 +76,10 @@ export default class DecideBusinessView extends Vue {
     .learn-more-link {
       font-size: 1rem;
       color: $BCgoveBueText1!important;
+    }
 
-      :hover {
-        color: $BCgoveBueText2!important;
-      }
+    .learn-more-link:hover {
+      color: $BCgoveBueText2!important;
     }
   }
 </style>

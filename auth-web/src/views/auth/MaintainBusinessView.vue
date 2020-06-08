@@ -125,10 +125,10 @@ export default class MaintainBusinessView extends Vue {
       font-size: 1rem;
       font-weight: bold;
       color: $BCgoveBueText1!important;
+    }
 
-      :hover {
-        color: $BCgoveBueText2!important;
-      }
+    .create-account-link:hover {
+      color: $BCgoveBueText2!important;
     }
   }
 </style>

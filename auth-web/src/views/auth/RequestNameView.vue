@@ -16,7 +16,7 @@
           <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
-              You can choose to incorporate a <NumberedCompanyTooltip />
+              You can choose to incorporate a numbered Benefit Company
               and start your incorporation immediately.
             </v-list-item-subtitle>
           </v-list-item-content>
@@ -29,7 +29,7 @@
           </v-btn>
           <p class="mt-5">Have an existing Name Request?
             <a href="https://www.bcregistrynames.gov.bc.ca/nro/nro.htm?_flowId=anonymous-monitor-flow&_flowExecutionKey=e1s1"
-              target="_blank" rel="noopener noreferrer">
+              target="_blank" rel="noopener noreferrer" class="status-link">
               Check your Name Request Status
             </a>
           </p>
@@ -71,10 +71,6 @@ export default class RequestNameView extends Vue {
     padding-top: 0!important;
     flex-wrap: wrap;
 
-    a:hover {
-      color: $BCgoveBueText2;
-    }
-
     .list-item {
       align-items: flex-start;
       margin: .5rem 0;
@@ -102,6 +98,16 @@ export default class RequestNameView extends Vue {
         font-weight: bold;
         width: 160px;
       }
+    }
+
+    .status-link {
+      font-size: 1rem;
+      font-weight: bold;
+      color: $BCgoveBueText1!important;
+    }
+
+    .status-link:hover {
+      color: $BCgoveBueText2!important;
     }
   }
 </style>

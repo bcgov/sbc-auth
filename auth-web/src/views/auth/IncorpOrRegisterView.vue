@@ -8,7 +8,7 @@
           <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
-              If you have an approved Name Request (NR number), or you want a <NumberedCompanyTooltip />,
+              If you have an approved Name Request (NR number), or you want a numbered Benefit Company,
               you can start your Incorporation Application.
             </v-list-item-subtitle>
           </v-list-item-content>
