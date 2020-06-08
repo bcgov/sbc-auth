@@ -29,6 +29,9 @@
           <v-btn v-else large color="#fcba19" @click="login()" class="my-5">
             Log in with BC Services Card
           </v-btn>
+          <p>New to BC Registries? <a @click="emitAccountDialog()" class="create-account-link">
+            <u>Create a BC Registries Account</u></a>
+          </p>
           <LearnMoreButton />
         </div>
       </v-col>
@@ -69,6 +72,9 @@ export default class MaintainBusinessView extends Vue {
   private login (): void {
     this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
   }
+
+  @Emit('account-dialog')
+  private emitAccountDialog () {}
 
   @Emit('manage-businesses')
   private emitManageBusinesses () {}
@@ -112,6 +118,16 @@ export default class MaintainBusinessView extends Vue {
       .v-btn {
         max-width: 250px;
         font-weight: bold;
+      }
+    }
+
+    .create-account-link {
+      font-size: 1rem;
+      font-weight: bold;
+      color: $BCgoveBueText1!important;
+
+      :hover {
+        color: $BCgoveBueText2!important;
       }
     }
   }

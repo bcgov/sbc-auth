@@ -57,10 +57,10 @@ describe('IncorpOrRegisterView.vue', () => {
     const numberedCompBtn = authenticatedBtns[1]
 
     expect(namedCompBtn).toBeDefined()
-    expect(namedCompBtn.textContent).toContain('Incorporate a Named Company')
+    expect(namedCompBtn.textContent).toContain('Incorporate a Named Benefit Company')
 
     expect(numberedCompBtn).toBeDefined()
-    expect(numberedCompBtn.textContent).toContain('Incorporate a Numbered Company')
+    expect(numberedCompBtn.textContent).toContain('Incorporate a Numbered Benefit Company')
   })
 
   it('renders the login button when NOT authenticated', () => {

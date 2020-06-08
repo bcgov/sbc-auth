@@ -9,6 +9,10 @@
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               {{item.text}}
+              <a href="https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-small-business/%7D"
+               class="learn-more-link" target="_blank" rel="noopener noreferrer">
+                <u>{{item.linkText}}</u>
+              </a>
             </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
@@ -36,7 +40,9 @@ export default class DecideBusinessView extends Vue {
   private bulletPoints: Array<any> = [
     { text: 'Decide which business structure is most appropriate for you: A few options are sole proprietorship, ' +
       'partnership or incorporation.' },
-    { text: 'Each structure has a different legal and financial implications.' }
+    { text: 'Each structure has a different legal and financial implications.',
+      linkText: 'Make sure a Benefit Company is right for you.'
+    }
   ]
 }
 </script>
@@ -65,6 +71,15 @@ export default class DecideBusinessView extends Vue {
       font-size: 1rem;
       letter-spacing: 0;
       line-height: 1.5rem;
+    }
+
+    .learn-more-link {
+      font-size: 1rem;
+      color: $BCgoveBueText1!important;
+
+      :hover {
+        color: $BCgoveBueText2!important;
+      }
     }
   }
 </style>

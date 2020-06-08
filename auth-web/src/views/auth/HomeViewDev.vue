@@ -16,7 +16,7 @@
 
       <header class="hero-banner">
         <v-container>
-          <h1>Start A Business And <br> Keep Records up to Date</h1>
+          <h1>Start a Benefit Company And <br> Keep Cooperatives Records up to date</h1>
           <p class="my-10">The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
             and organizations in British Columbia.</p>
           <div class="hero-banner__cta-btns">
@@ -28,11 +28,11 @@
               </v-btn>
               <v-btn large color="#003366" class="cta-btn white--text"
                      @click="goToManageBusinesses()">
-                Incorporate a Named Company
+                Incorporate a Named Benefit Company
               </v-btn>
               <v-btn large color="#003366" class="cta-btn white--text"
                      @click="goToManageBusinesses(true)">
-                Incorporate a Numbered Company
+                Incorporate a Numbered Benefit Company
               </v-btn>
               <v-btn large color="#fcba19" class="cta-btn"
                      @click="goToManageBusinesses()">
@@ -263,7 +263,7 @@ export default class HomeViewDev extends Vue {
 
     .cta-btns-authenticated, .cta-btns-authenticated > div {
       display: flex;
-      max-width: 300px;
+      max-width: 350px;
       flex-wrap: wrap;
       margin-bottom: 13px;
 

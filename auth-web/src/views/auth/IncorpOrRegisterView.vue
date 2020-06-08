@@ -24,14 +24,16 @@
         <!-- Panel Btns -->
         <!-- Authenticated -->
         <template v-if="userProfile">
-          <v-btn large color="#003366" class="mr-2 my-5 white--text"
-            @click="emitManageBusinesses()">
-            Incorporate a Named Company
-          </v-btn>
-          <v-btn large color="#003366" class="ml-2 my-5 white--text"
-            @click="emitManageBusinesses(true)">
-            Incorporate a Numbered Company
-          </v-btn>
+          <div class="incorporate-btns">
+            <v-btn large color="#003366" class="incorporate-btn mr-2 my-5 white--text"
+              @click="emitManageBusinesses()">
+              Incorporate a Named Benefit Company
+            </v-btn>
+            <v-btn large color="#003366" class="incorporate-btn mb-5 white--text"
+              @click="emitManageBusinesses(true)">
+              Incorporate a Numbered Benefit Company
+            </v-btn>
+          </div>
         </template>
         <!-- Not Authenticated -->
         <template v-else>
@@ -121,8 +123,25 @@ export default class IncorpOrRegisterView extends Vue {
     }
 
     .v-btn {
-      max-width: 300px;
       font-weight: bold;
+    }
+
+    .incorporate-btns {
+      flex-direction: column;
+
+      .incorporate-btn {
+        justify-content: left;
+      }
+    }
+
+    .create-account-link {
+      font-size: 1rem;
+      font-weight: bold;
+      color: $BCgoveBueText1!important;
+
+      :hover {
+        color: $BCgoveBueText2!important;
+      }
     }
   }
 </style>
