@@ -71,7 +71,7 @@
 </template>
 
 <script lang="ts">
-import { Business, FolioNumberload, LoginPayload, NamedBusinessRequest } from '@/models/business'
+import { Business, BusinessRequest, FolioNumberload, LoginPayload } from '@/models/business'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { FilingTypes, LegalTypes } from '@/util/constants'
 import { mapActions, mapMutations, mapState } from 'vuex'
@@ -105,7 +105,7 @@ import { mask } from 'vue-the-mask'
 export default class AddNameRequestForm extends Vue {
   private readonly currentOrganization!: Organization
   private readonly addNameRequest!: (payload: CreateNRAffiliationRequestBody) => any
-  private readonly createNamedBusiness!: (filingBody: NamedBusinessRequest) => any
+  private readonly createNamedBusiness!: (filingBody: BusinessRequest) => any
   private readonly updateFolioNumber!: (folioNumberload: FolioNumberload) => void
   private validationError = ''
   private entityNumRules = [
@@ -159,7 +159,7 @@ export default class AddNameRequestForm extends Vue {
 
         if (nrResponse?.status === 201) {
           // update the legal api if the status is success
-          const namedBusinessRequest: NamedBusinessRequest = {
+          const filingBody: BusinessRequest = {
             filing: {
               header: {
                 name: FilingTypes.INCORPORATION_APPLICATION,
@@ -170,12 +170,13 @@ export default class AddNameRequestForm extends Vue {
               },
               incorporationApplication: {
                 nameRequest: {
+                  legalType: LegalTypes.BCOMP,
                   nrNumber: this.nameRequestNumber
                 }
               }
             }
           }
-          const filingResponse = await this.createNamedBusiness(namedBusinessRequest)
+          const filingResponse = await this.createNamedBusiness(filingBody)
           if (filingResponse?.errorMsg) {
             this.$emit('add-unknown-error')
           } else {
