@@ -212,7 +212,7 @@ export default class HomeViewDev extends Vue {
     color: $gray9;
     min-height: 550px;
     background-color: #ffffff;
-    background-image: url('../../assets/img/bc-launch-hero-img-min.jpg');
+    background-image: url('../../assets/img/hero-img-min.jpg');
     background-position: bottom right;
     background-size: 80% 115%;
     background-repeat: no-repeat;
