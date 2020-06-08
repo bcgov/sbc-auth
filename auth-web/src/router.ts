@@ -60,37 +60,11 @@ export function getRoutes (): RouteConfig[] {
   const transaction = () => import(/* webpackChunkName: "account-settings" */ './components/auth/Transactions.vue')
   const routes = [
     { path: '/', name: 'root', redirect: 'home' },
-    { path: '/home', name: 'home', component: HomeView, meta: { showNavBar: true } },
-    { path: '/home-dev',
-      name: 'home-dev',
-      component: HomeViewDev,
-      children: [
-        {
-          path: '',
-          redirect: 'decide-business'
-        },
-        {
-          path: 'decide-business',
-          component: DecideBusinessView,
-          meta: { showNavBar: true }
-        },
-        {
-          path: 'request-name',
-          component: RequestNameView,
-          meta: { showNavBar: true }
-        },
-        {
-          path: 'incorporate-or-register',
-          component: IncorpOrRegisterView,
-          meta: { showNavBar: true }
-        },
-        {
-          path: 'maintain-business',
-          component: MaintainBusinessView,
-          meta: { showNavBar: true }
-        }
-      ],
-      meta: { incorporationLaunchRoute: true, showNavBar: true }
+    { path: '/home',
+      name: 'home',
+      component: getEnvHomeView(),
+      children: getEnvChildRoutes(),
+      meta: { showNavBar: !flagCondition }
     },
     { path: '/business',
       name: 'business-root',
@@ -255,21 +229,44 @@ router.beforeEach((to, from, next) => {
   }
 })
 
-// Feature Flagging Routes
+// Feature Flagging HomeView Components
 // For Development only
-router.beforeEach((to, from, next) => {
-  if (to.matched.some(record => record.meta.incorporationLaunchRoute)) {
-    const flagCondition = LaunchDarklyService.getFlag('incorporations-launch-feature')
-    // this route requires condition to be accessed
-    // if not, redirect to home page.
-    if (!flagCondition) {
-      next({ path: '/home' })
-    } else {
-      next()
+const flagCondition = LaunchDarklyService.getFlag('incorporations-launch-feature')
+
+// Get the correct Homeview depending on Environment
+const getEnvHomeView = () => {
+  return flagCondition ? HomeViewDev : HomeView
+}
+
+// Get the child routes depending on environment
+const getEnvChildRoutes = () => {
+  return flagCondition ? [
+    {
+      path: '',
+      redirect: 'decide-business'
+    },
+    {
+      path: 'decide-business',
+      component: DecideBusinessView,
+      meta: { showNavBar: false }
+    },
+    {
+      path: 'request-name',
+      component: RequestNameView,
+      meta: { showNavBar: false }
+    },
+    {
+      path: 'incorporate-or-register',
+      component: IncorpOrRegisterView,
+      meta: { showNavBar: false }
+    },
+    {
+      path: 'maintain-business',
+      component: MaintainBusinessView,
+      meta: { showNavBar: false }
     }
-  } else {
-    next()
-  }
-})
+  ]
+    : []
+}
 
 export default router
