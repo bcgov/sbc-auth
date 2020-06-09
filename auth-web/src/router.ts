@@ -24,6 +24,7 @@ import KeyCloakService from 'sbc-common-components/src/services/keycloak.service
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import MaintainBusinessView from '@/views/auth/MaintainBusinessView.vue'
+import OutOfProvinceAccount from '@/views/auth/OutOfProvinceAccount.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
 import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
 import PaymentView from '@/views/pay/PaymentView.vue'
@@ -115,6 +116,7 @@ export function getRoutes (): RouteConfig[] {
     },
     { path: '/change-account', name: 'changeaccount', component: AccountChangeView, props: true, meta: { requiresAuth: true, requiresProfile: true } },
     { path: '/setup-account', name: 'setupaccount', component: AccountSetupView, props: true, meta: { requiresAuth: true, requiresProfile: true } },
+    { path: '/setup-account-oop', name: 'setupaccount-oop', component: OutOfProvinceAccount, props: true, meta: { requiresAuth: false, requiresProfile: false } },
     { path: '/change-account-success', name: 'change-account-success', component: AccountChangeSuccessView, meta: { requiresAuth: true, requiresProfile: true } },
     { path: '/setup-account-success', name: 'setup-account-success', component: AccountCreationSuccessView, meta: { requiresAuth: true, requiresProfile: true } },
     { path: '/userprofile/:token?', name: 'userprofile', component: UserProfileView, props: true, meta: { requiresAuth: true, requiresProfile: true } },
