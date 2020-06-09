@@ -247,14 +247,14 @@ export default class HomeViewDev extends Vue {
     }
   }
 
-  @media only screen and (max-width: 48rem) {
+  @media only screen and (max-width: 640px) {
     .hero-banner {
       background-image: none;
     }
   }
-  @media only screen and (min-width: 120rem) {
+  @media only screen and (min-width: 1920px) {
     .hero-banner {
-      background-size: 120rem 110%;
+      background-size: 1920px 110%;
     }
   }
 
