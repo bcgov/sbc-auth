@@ -213,8 +213,8 @@ export default class HomeViewDev extends Vue {
     min-height: 550px;
     background-color: #ffffff;
     background-image: url('../../assets/img/hero-img-min.jpg');
-    background-position: bottom right;
-    background-size: 80% 115%;
+    background-position:  center;
+    background-size: 100% 110%;
     background-repeat: no-repeat;
 
     h1 {
@@ -247,9 +247,14 @@ export default class HomeViewDev extends Vue {
     }
   }
 
-  @media only screen and (max-width: 600px) {
+  @media only screen and (max-width: 48rem) {
     .hero-banner {
       background-image: none;
+    }
+  }
+  @media only screen and (min-width: 120rem) {
+    .hero-banner {
+      background-size: 120rem 110%;
     }
   }
 

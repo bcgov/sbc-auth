@@ -1,21 +1,19 @@
 <template>
   <section id="testimonials-container">
     <v-container class="quote-container">
-      <div :class="{ 'fadeOut': isFading, 'fadeIn': !isFading}">
+      <div class="fading">
         <p>{{quotes[quoteIndex].text}}</p>
         <p><strong>&ndash; {{quotes[quoteIndex].author}}</strong></p>
       </div>
     </v-container>
   </section>
 </template>
-
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 
 @Component({})
 export default class TestimonialQuotes extends Vue {
-  private isFading = false
-  private quoteIndex: number = 0
+  private quoteIndex = 0
   private quotes: Array<any> =
     [
       {
@@ -34,13 +32,9 @@ export default class TestimonialQuotes extends Vue {
 
   mounted () {
     setInterval(() => {
-      this.isFading = !this.isFading
-      setTimeout(() => {
-        this.isFading = !this.isFading
-        // Cycle quote index up or reset it once it reaches array size
-        if (this.quoteIndex === this.quotes.length - 1) this.quoteIndex = 0
-        else this.quoteIndex++
-      }, 500)
+      // Cycle quote index up or reset it once it reaches array size
+      if (this.quoteIndex === this.quotes.length - 1) this.quoteIndex = 0
+      else this.quoteIndex++
     }, 5000)
   }
 }
@@ -76,14 +70,23 @@ export default class TestimonialQuotes extends Vue {
       width: 50%;
     }
 
-    .fadeOut {
-      transition: 0.5s;
-      color: transparent;
+    @keyframes fading {
+      90% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+      0% {
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
     }
 
-    .fadeIn {
-      transition: 0.5s;
-      color: #ffffff;
+    .fading {
+      animation: fading 5s ease-in-out infinite;
     }
   }
 
