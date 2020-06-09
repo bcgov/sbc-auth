@@ -77,12 +77,15 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import CommonUtils from '@/util/common-util'
+import DocumentService from '@/services/document.services'
 import { Pages } from '@/util/constants'
 
 @Component
 export default class OutOfProvinceAccountDownloadAffidavit extends Vue {
-  private downloadAffidavit () {
-    // TODO: download affidavit api call
+  private async downloadAffidavit () {
+    const downloadData = await DocumentService.getAffidavitPdf()
+    CommonUtils.fileDownload(downloadData, `affidavit.pdf`)
   }
 
   private goBack () {
