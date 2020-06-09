@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts">
-import { Business, NamedBusinessRequest } from '@/models/business'
+import { Business, BusinessRequest } from '@/models/business'
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import { CorpType, FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization, RemoveBusinessPayload } from '@/models/Organization'
@@ -77,7 +77,7 @@ export default class AffiliatedEntityList extends Vue {
   private readonly currentOrganization!: Organization
   private readonly currentMembership!: Member
   private readonly setCurrentBusiness!: (business: Business) => void
-  private readonly createNamedBusiness!: (filingBody: NamedBusinessRequest) => any
+  private readonly createNamedBusiness!: (filingBody: BusinessRequest) => any
 
   private get tableHeaders () {
     return [
@@ -160,7 +160,7 @@ export default class AffiliatedEntityList extends Vue {
     // If the business is NR, indicates there is no temporary business. Create a new IA for this NR and navigate.
     if (business.corpType.code === CorpType.NAME_REQUEST) {
       this.isLoading = true
-      const namedBusinessRequest: NamedBusinessRequest = {
+      const filingBody: BusinessRequest = {
         filing: {
           header: {
             name: FilingTypes.INCORPORATION_APPLICATION,
@@ -171,12 +171,13 @@ export default class AffiliatedEntityList extends Vue {
           },
           incorporationApplication: {
             nameRequest: {
+              legalType: LegalTypes.BCOMP,
               nrNumber: business.businessIdentifier
             }
           }
         }
       }
-      const filingResponse = await this.createNamedBusiness(namedBusinessRequest)
+      const filingResponse = await this.createNamedBusiness(filingBody)
       this.isLoading = false
       // Find business with name as the NR number and use it for redirection
       businessIdentifier = filingResponse.data.filing.business.identifier

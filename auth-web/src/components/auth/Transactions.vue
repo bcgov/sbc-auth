@@ -23,7 +23,7 @@
           </v-btn>
         </template>
         <v-card class="date-range-container d-flex">
-          <div class="date-range-options d-flex flex-column justify-space-between flex-grow-0 pb-6 pt-2">
+          <div class="date-range-options d-flex flex-column justify-space-between flex-grow-0 pb-6 pt-3">
             <v-list dense class="py-0"
             >
               <v-list-item-group
@@ -44,7 +44,7 @@
                 </v-list-item>
               </v-list-item-group>
             </v-list>
-            <div class="date-filter-btns px-6 d-flex flex-end">
+            <div class="date-filter-btns px-6 mt-4 d-flex flex-end">
               <v-btn large
                 color="primary"
                 class="font-weight-bold flex-grow-1"
@@ -63,31 +63,39 @@
               </v-btn>
             </div>
           </div>
-          <div class="pa-6">
-            <div class="date-range-label mb-6">
-              {{showDateRangeSelected}}
-            </div>
-            <v-date-picker
-              color="primary"
-              width="400"
-              class="text-center"
-              v-model="dateRangeSelected"
-              no-title
-              range
-              :show-current="false"
-              :class="{'date-picker-disable': disableDatePicker}"
-              first-day-of-week="1"
-            ></v-date-picker>
+          <div class="pa-6 align-self-center">
+            <template v-if="dateFilterSelected && dateFilterSelected.code">
+              <div class="date-range-label mb-6">
+                {{showDateRangeSelected}}
+              </div>
+              <v-date-picker
+                color="primary"
+                width="400"
+                class="text-center"
+                v-model="dateRangeSelected"
+                no-title
+                range
+                :first-day-of-week="1"
+                :show-current="false"
+                :picker-date="pickerDate"
+                @click:date="dateClick"
+              ></v-date-picker>
+            </template>
+            <template v-else>
+              <p class="pa-8">
+                No Dates Selected
+              </p>
+            </template>
           </div>
         </v-card>
       </v-menu>
       <div class="folio-number-filter d-inline-flex search-input-with-btn">
         <v-text-field
           dense
-          outlined
+          filled
           single-line
           hide-details
-          height="44"
+          height="43"
           class="folio-number-field"
           label="Folio #"
           prepend-inner-icon="mdi-magnify"
@@ -104,15 +112,14 @@
       </div>
       <v-spacer></v-spacer>
       <v-btn
+        large
         color="primary"
         class="font-weight-bold"
-        depressed
-        large
         @click="exportCSV"
       >Export CSV</v-btn>
     </div>
     <div class="filter-results d-inline-flex align-center mb-5">
-      <div class="filter-results-label py-2 mr-5">{{totalTransactionsCount}} Records found</div>
+      <div class="filter-results-label py-2 mr-7">{{totalTransactionsCount}} Records found</div>
       <v-chip
         class="mr-2 filter-chip"
         close
@@ -196,14 +203,15 @@ export default class Transactions extends Vue {
       code: DATEFILTER_CODES.CUSTOMRANGE
     }
   ]
-  private dateFilterSelectedIndex: number = 0
-  private dateFilterSelected: any = this.dateFilterRanges[this.dateFilterSelectedIndex]
+  private dateFilterSelectedIndex: number = null
+  private dateFilterSelected: any = {}
   private dateFilterProp: any = {}
   private folioFilterProp: string = ''
   private updateTransactionTableCounter: number = 0
   private folioNumberSearch: string = ''
   private filterArray = []
   private totalTransactionsCount: number = 0
+  private pickerDate: string = ''
 
   private beforeMount () {
     this.initDatePicker()
@@ -211,15 +219,11 @@ export default class Transactions extends Vue {
 
   private get showDateRangeSelected () {
     if ((this.dateFilterSelected?.code === DATEFILTER_CODES.TODAY) || (this.dateFilterSelected?.code === DATEFILTER_CODES.YESTERDAY)) {
-      return `${this.dateFilterSelected.label} - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')}`
+      return `${this.dateFilterSelected?.label} - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')}`
     }
-    return `${this.dateFilterSelected.label} 
+    return `${this.dateFilterSelected?.label} 
       - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')} 
       - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[1], 'MMM DD, YYYY')}`
-  }
-
-  private get disableDatePicker () {
-    return this.dateFilterSelected?.code !== DATEFILTER_CODES.CUSTOMRANGE
   }
 
   // apply filter button enable only if the date ranges are selected and start date <= end date
@@ -232,7 +236,9 @@ export default class Transactions extends Vue {
       this.formatDatePickerDate(moment(this.dateFilterProp?.startDate)),
       this.formatDatePickerDate(moment(this.dateFilterProp?.endDate))
     ]
-    this.dateFilterSelected = this.dateFilterRanges[this.dateFilterSelectedIndex]
+    if (this.dateFilterSelectedIndex) {
+      this.dateFilterSelected = this.dateFilterRanges[this.dateFilterSelectedIndex]
+    }
   }
 
   openDateFilter () {
@@ -243,28 +249,41 @@ export default class Transactions extends Vue {
   dateFilterChange (val) {
     if (val > -1) {
       this.dateFilterSelected = this.dateFilterRanges[val]
-      switch (this.dateFilterSelected.code) {
+      switch (this.dateFilterSelected?.code) {
+        case DATEFILTER_CODES.TODAY:
+          const today = this.formatDatePickerDate(moment())
+          this.dateRangeSelected = [today, today]
+          this.pickerDate = today.slice(0, -3)
+          break
         case DATEFILTER_CODES.YESTERDAY:
           const yesterday = this.formatDatePickerDate(moment().subtract(1, 'days'))
           this.dateRangeSelected = [yesterday, yesterday]
+          this.pickerDate = yesterday.slice(0, -3)
           break
         case DATEFILTER_CODES.LASTWEEK:
           // Week should start from  Monday and Ends on Sunday
           const weekStart = this.formatDatePickerDate(moment().subtract(1, 'weeks').startOf('isoWeek'))
           const weekEnd = this.formatDatePickerDate(moment().subtract(1, 'weeks').endOf('isoWeek'))
           this.dateRangeSelected = [weekStart, weekEnd]
+          this.pickerDate = weekStart.slice(0, -3)
           break
         case DATEFILTER_CODES.LASTMONTH:
           const monthStart = this.formatDatePickerDate(moment().subtract(1, 'months').startOf('month'))
           const monthEnd = this.formatDatePickerDate(moment().subtract(1, 'months').endOf('month'))
           this.dateRangeSelected = [monthStart, monthEnd]
+          this.pickerDate = monthStart.slice(0, -3)
           break
         case DATEFILTER_CODES.CUSTOMRANGE:
-        case DATEFILTER_CODES.TODAY:
-          const today = this.formatDatePickerDate(moment())
-          this.dateRangeSelected = [today, today]
+          this.pickerDate = ''
       }
     }
+  }
+
+  private dateClick (date) {
+    this.pickerDate = ''
+    // ideally it should find using DATEFILTER_CODES.CUSTOMRANGE, but since its static and date click is often, better give the index as it is
+    this.dateFilterSelectedIndex = 4 // 4 = Custom Range
+    this.dateFilterSelected = this.dateFilterRanges[this.dateFilterSelectedIndex]
   }
 
   // date formatting required by the date picker
@@ -315,13 +334,13 @@ export default class Transactions extends Vue {
     if (isAll) {
       this.dateFilterProp = {}
       this.folioNumberSearch = this.folioFilterProp = ''
-      this.dateFilterSelectedIndex = 0
+      this.dateFilterSelectedIndex = null
       this.filterArray = []
     } else {
       switch (filter.type) {
         case 'DATE':
           this.dateFilterProp = {}
-          this.dateFilterSelectedIndex = 0
+          this.dateFilterSelectedIndex = null
           break
         case 'FOLIO':
           this.folioNumberSearch = this.folioFilterProp = ''
@@ -411,7 +430,16 @@ export default class Transactions extends Vue {
 
   ::v-deep {
     .v-text-field--outlined.v-input--dense .v-label {
-      top: 12px;
+      top: 14px !important;
+    }
+
+    .v-text-field__slot input {
+      font-size: 0.875rem;
+    }
+
+    .v-label {
+      font-size: 0.875rem !important;
+      top: 12px !important;
     }
 
     .v-input__prepend-inner {

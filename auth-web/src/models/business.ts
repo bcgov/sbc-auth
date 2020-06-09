@@ -11,6 +11,12 @@ export interface FolioNumberload {
     businessIdentifier: string
     folioNumber: string
 }
+
+export interface CorpType {
+    code: string
+    desc: string
+}
+
 export interface Business {
     businessIdentifier: string
     businessNumber?: string
@@ -19,6 +25,7 @@ export interface Business {
     corpType: CorpType,
     folioNumber: string
 }
+
 export interface Businesses {
     entities: Business[]
 }
@@ -28,24 +35,13 @@ export interface UpdateBusinessNamePayload {
     name: string
 }
 
-export interface NumberedBusinessRequest {
-    filing: {
-        header: {
-            name: string,
-            accountId: number
-        },
-        business: {
-            legalType: string
-        }
-    }
+// see https://github.com/bcgov/business-schemas/blob/master/src/registry_schemas/schemas/name_request.json
+export interface NameRequest {
+    legalType: string,
+    nrNumber?: string
 }
 
-export interface CorpType {
-    code: string
-    desc: string
-}
-
-export interface NamedBusinessRequest {
+export interface BusinessRequest {
     filing: {
         header: {
             name: string,
@@ -55,9 +51,7 @@ export interface NamedBusinessRequest {
             legalType: string
         },
         incorporationApplication: {
-            nameRequest: {
-                nrNumber: string
-            }
+            nameRequest: NameRequest
         }
     }
 }
