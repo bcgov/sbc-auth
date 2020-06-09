@@ -29,6 +29,7 @@ from .account import API as ACCOUNTS_API
 from .apihelper import Api
 from .codes import API as CODES_API
 from .documents import API as DOCUMENTS_API
+from .documents_public import API as DOCUMENTS_PUBLIC_API
 from .entity import API as ENTITY_API
 from .invitation import API as INVITATION_API
 from .meta import API as META_API
@@ -87,6 +88,7 @@ API.add_namespace(ENTITY_API, path='/entities')
 API.add_namespace(ORG_API, path='/orgs')
 API.add_namespace(INVITATION_API, path='/invitations')
 API.add_namespace(DOCUMENTS_API, path='/documents')
+API.add_namespace(DOCUMENTS_PUBLIC_API, path='/documents/public')
 API.add_namespace(CODES_API, path='/codes')
 API.add_namespace(ACCOUNTS_API, path='/accounts')
 API.add_namespace(ORG_PRODUCTS_API, path='/orgs/<string:org_id>/products')
