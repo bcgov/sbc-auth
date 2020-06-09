@@ -9,6 +9,10 @@
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               {{item.text}}
+              <a href="https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-small-business/%7D"
+               class="learn-more-link" target="_blank" rel="noopener noreferrer">
+                {{item.linkText}}
+              </a>
             </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
@@ -17,7 +21,7 @@
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
-        <v-img src="../../assets/img/Describe-business-img-Placeholder.png" aspect-ratio="1.2" contain></v-img>
+        <v-img src="../../assets/img/Step1_DecideBusiness_x1.jpg" aspect-ratio="1.2" contain></v-img>
       </v-col>
     </v-row>
   </v-container>
@@ -36,7 +40,9 @@ export default class DecideBusinessView extends Vue {
   private bulletPoints: Array<any> = [
     { text: 'Decide which business structure is most appropriate for you: A few options are sole proprietorship, ' +
       'partnership or incorporation.' },
-    { text: 'Each structure has a different legal and financial implications.' }
+    { text: 'Each structure has a different legal and financial implications.',
+      linkText: 'Make sure a Benefit Company is right for you.'
+    }
   ]
 }
 </script>
@@ -45,7 +51,7 @@ export default class DecideBusinessView extends Vue {
   @import '$assets/scss/theme.scss';
 
   #decide-business-info-container {
-    padding-top: 0!important;
+    padding-top: 0 !important;
     flex-wrap: wrap;
 
     .list-item {
@@ -65,6 +71,15 @@ export default class DecideBusinessView extends Vue {
       font-size: 1rem;
       letter-spacing: 0;
       line-height: 1.5rem;
+    }
+
+    .learn-more-link {
+      font-size: 1rem;
+      color: $BCgoveBueText1 !important;
+    }
+
+    .learn-more-link:hover {
+      color: $BCgoveBueText2 !important;
     }
   }
 </style>

@@ -16,7 +16,7 @@
 
       <header class="hero-banner">
         <v-container>
-          <h1>Start A Business And <br> Keep Records up to Date</h1>
+          <h1>Start a Benefit Company And <br> Keep Cooperatives Records up to date</h1>
           <p class="my-10">The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
             and organizations in British Columbia.</p>
           <div class="hero-banner__cta-btns">
@@ -28,11 +28,11 @@
               </v-btn>
               <v-btn large color="#003366" class="cta-btn white--text"
                      @click="goToManageBusinesses()">
-                Incorporate a Named Company
+                Incorporate a Named Benefit Company
               </v-btn>
               <v-btn large color="#003366" class="cta-btn white--text"
                      @click="goToManageBusinesses(true)">
-                Incorporate a Numbered Company
+                Incorporate a Numbered Benefit Company
               </v-btn>
               <v-btn large color="#fcba19" class="cta-btn"
                      @click="goToManageBusinesses()">
@@ -212,9 +212,9 @@ export default class HomeViewDev extends Vue {
     color: $gray9;
     min-height: 550px;
     background-color: #ffffff;
-    background-image: url('../../assets/img/bc-launch-hero-img-min.jpg');
-    background-position: bottom right;
-    background-size: 80% 115%;
+    background-image: url('../../assets/img/hero-img-min.jpg');
+    background-position:  center;
+    background-size: 100% 110%;
     background-repeat: no-repeat;
 
     h1 {
@@ -247,9 +247,14 @@ export default class HomeViewDev extends Vue {
     }
   }
 
-  @media only screen and (max-width: 600px) {
+  @media only screen and (max-width: 640px) {
     .hero-banner {
       background-image: none;
+    }
+  }
+  @media only screen and (min-width: 1920px) {
+    .hero-banner {
+      background-size: 1920px 110%;
     }
   }
 
@@ -263,7 +268,7 @@ export default class HomeViewDev extends Vue {
 
     .cta-btns-authenticated, .cta-btns-authenticated > div {
       display: flex;
-      max-width: 300px;
+      max-width: 350px;
       flex-wrap: wrap;
       margin-bottom: 13px;
 
@@ -275,10 +280,10 @@ export default class HomeViewDev extends Vue {
 
     .create-account-link {
       font-size: 1rem;
-      color: $BCgoveBueText1!important;
+      color: $BCgoveBueText1 !important;
 
       :hover {
-        color: $BCgoveBueText2!important;
+        color: $BCgoveBueText2 !important;
       }
     }
   }
