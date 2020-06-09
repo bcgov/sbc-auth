@@ -51,7 +51,7 @@ export default class DecideBusinessView extends Vue {
   @import '$assets/scss/theme.scss';
 
   #decide-business-info-container {
-    padding-top: 0!important;
+    padding-top: 0 !important;
     flex-wrap: wrap;
 
     .list-item {
@@ -75,11 +75,11 @@ export default class DecideBusinessView extends Vue {
 
     .learn-more-link {
       font-size: 1rem;
-      color: $BCgoveBueText1!important;
+      color: $BCgoveBueText1 !important;
     }
 
     .learn-more-link:hover {
-      color: $BCgoveBueText2!important;
+      color: $BCgoveBueText2 !important;
     }
   }
 </style>

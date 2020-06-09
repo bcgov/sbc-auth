@@ -68,7 +68,7 @@ export default class RequestNameView extends Vue {
   @import '$assets/scss/theme.scss';
 
   #request-name-info-container {
-    padding-top: 0!important;
+    padding-top: 0 !important;
     flex-wrap: wrap;
 
     .list-item {
@@ -103,11 +103,11 @@ export default class RequestNameView extends Vue {
     .status-link {
       font-size: 1rem;
       font-weight: bold;
-      color: $BCgoveBueText1!important;
+      color: $BCgoveBueText1 !important;
     }
 
     .status-link:hover {
-      color: $BCgoveBueText2!important;
+      color: $BCgoveBueText2 !important;
     }
   }
 </style>

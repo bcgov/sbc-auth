@@ -275,10 +275,10 @@ export default class HomeViewDev extends Vue {
 
     .create-account-link {
       font-size: 1rem;
-      color: $BCgoveBueText1!important;
+      color: $BCgoveBueText1 !important;
 
       :hover {
-        color: $BCgoveBueText2!important;
+        color: $BCgoveBueText2 !important;
       }
     }
   }

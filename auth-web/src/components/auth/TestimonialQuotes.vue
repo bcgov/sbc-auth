@@ -10,11 +10,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 
 @Component({})
 export default class TestimonialQuotes extends Vue {
-  private isFading: boolean = false
+  private isFading = false
   private quoteIndex: number = 0
   private quotes: Array<any> =
     [
@@ -37,7 +37,9 @@ export default class TestimonialQuotes extends Vue {
       this.isFading = !this.isFading
       setTimeout(() => {
         this.isFading = !this.isFading
-        this.quoteIndex === this.quotes.length - 1 ? this.quoteIndex = 0 : this.quoteIndex++
+        // Cycle quote index up or reset it once it reaches array size
+        if (this.quoteIndex === this.quotes.length - 1) this.quoteIndex = 0
+        else this.quoteIndex++
       }, 500)
     }, 5000)
   }
