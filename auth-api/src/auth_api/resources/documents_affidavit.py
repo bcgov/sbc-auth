@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """API endpoints for managing an Invitation resource."""
-from auth_api.utils.enums import DocumentType
+
+
 from flask import send_from_directory
 from flask_restplus import Namespace, Resource, cors
 
@@ -21,6 +22,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.services import Documents as DocumentService
 from auth_api.tracer import Tracer
+from auth_api.utils.enums import DocumentType
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('documents', description='Endpoints for document management')
