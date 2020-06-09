@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """API endpoints for managing an Invitation resource."""
-
+from auth_api.utils.enums import DocumentType
 from flask import send_from_directory
 from flask_restplus import Namespace, Resource, cors
 
@@ -29,23 +29,22 @@ _JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('GET,OPTIONS')
-@API.route('/<string:document_type>', methods=['GET', 'OPTIONS'])
+@API.route('', methods=['GET', 'OPTIONS'])
 class Documents(Resource):
     """Resource for managing Terms Of Use."""
 
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    def get(document_type):
+    def get():
         """Return the latest terms of use."""
         try:
-            doc = DocumentService.fetch_latest_document(document_type)
+            doc = DocumentService.fetch_latest_document(DocumentType.AFFIDAVIT.value)
             if doc is None:
                 return {'message': 'The requested document could not be found.'}, \
                        http_status.HTTP_404_NOT_FOUND
             if doc.as_dict().get('content_type', None) == 'pdf':  # pdfs has to be served as attachment
                 return send_from_directory('static', filename=doc.as_dict()['content'], as_attachment=True)
-            return doc.as_dict(), http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
