@@ -64,28 +64,21 @@
             </div>
           </div>
           <div class="pa-6 align-self-center">
-            <template v-if="dateFilterSelected && dateFilterSelected.code">
-              <div class="date-range-label mb-6">
-                {{showDateRangeSelected}}
-              </div>
-              <v-date-picker
-                color="primary"
-                width="400"
-                class="text-center"
-                v-model="dateRangeSelected"
-                no-title
-                range
-                :first-day-of-week="1"
-                :show-current="false"
-                :picker-date="pickerDate"
-                @click:date="dateClick"
-              ></v-date-picker>
-            </template>
-            <template v-else>
-              <p class="pa-8">
-                No Dates Selected
-              </p>
-            </template>
+            <div class="date-range-label mb-6">
+              {{showDateRangeSelected}}
+            </div>
+            <v-date-picker
+              color="primary"
+              width="400"
+              class="text-center"
+              v-model="dateRangeSelected"
+              no-title
+              range
+              :first-day-of-week="1"
+              :show-current="false"
+              :picker-date="pickerDate"
+              @click:date="dateClick"
+            ></v-date-picker>
           </div>
         </v-card>
       </v-menu>
@@ -118,7 +111,7 @@
         @click="exportCSV"
       >Export CSV</v-btn>
     </div>
-    <div class="filter-results d-inline-flex align-center mb-5">
+    <div class="filter-results d-inline-flex align-center mb-5" v-if="filterArray.length">
       <div class="filter-results-label py-2 mr-7">{{totalTransactionsCount}} Records found</div>
       <v-chip
         class="mr-2 filter-chip"
@@ -151,8 +144,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { TransactionFilterParams, TransactionTableList } from '@/models/transaction'
+import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
 import TransactionsDataTable from '@/components/auth/TransactionsDataTable.vue'
 import { mapActions } from 'vuex'
@@ -176,7 +170,7 @@ const DATEFILTER_CODES = {
     ])
   }
 })
-export default class Transactions extends Vue {
+export default class Transactions extends Mixins(AccountChangeMixin) {
   @Prop({ default: '' }) private orgId: string;
   private readonly getTransactionReport!: (filterParams: any) => TransactionTableList
   private showDateFilter: boolean = false
@@ -213,17 +207,31 @@ export default class Transactions extends Vue {
   private totalTransactionsCount: number = 0
   private pickerDate: string = ''
 
-  private beforeMount () {
+  private async mounted () {
+    this.setAccountChangedHandler(this.initFilter)
+    this.initFilter()
+  }
+
+  private initFilter () {
     this.initDatePicker()
+    this.dateFilterProp = {}
+    this.dateFilterSelectedIndex = null
+    this.dateRangeSelected = []
+    this.folioNumberSearch = this.folioFilterProp = ''
+    this.filterArray = []
+    this.updateTransactionTableCounter++
   }
 
   private get showDateRangeSelected () {
+    let dateText = ''
     if ((this.dateFilterSelected?.code === DATEFILTER_CODES.TODAY) || (this.dateFilterSelected?.code === DATEFILTER_CODES.YESTERDAY)) {
-      return `${this.dateFilterSelected?.label} - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')}`
+      dateText = `${this.dateFilterSelected?.label} - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')}`
+    } else {
+      dateText = `${this.dateFilterSelected?.label} 
+        - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')} 
+        - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[1], 'MMM DD, YYYY')}`
     }
-    return `${this.dateFilterSelected?.label} 
-      - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')} 
-      - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[1], 'MMM DD, YYYY')}`
+    return (this.dateFilterSelected?.code) ? dateText : 'No Dates Selected'
   }
 
   // apply filter button enable only if the date ranges are selected and start date <= end date
@@ -232,13 +240,7 @@ export default class Transactions extends Vue {
   }
 
   private initDatePicker () {
-    this.dateRangeSelected = [
-      this.formatDatePickerDate(moment(this.dateFilterProp?.startDate)),
-      this.formatDatePickerDate(moment(this.dateFilterProp?.endDate))
-    ]
-    if (this.dateFilterSelectedIndex) {
-      this.dateFilterSelected = this.dateFilterRanges[this.dateFilterSelectedIndex]
-    }
+    this.dateFilterSelected = (this.dateFilterSelectedIndex) ? this.dateFilterRanges[this.dateFilterSelectedIndex] : {}
   }
 
   openDateFilter () {
@@ -332,15 +334,13 @@ export default class Transactions extends Vue {
 
   private clearFilter (filter, isAll: boolean = false) {
     if (isAll) {
-      this.dateFilterProp = {}
-      this.folioNumberSearch = this.folioFilterProp = ''
-      this.dateFilterSelectedIndex = null
-      this.filterArray = []
+      this.initFilter()
     } else {
       switch (filter.type) {
         case 'DATE':
           this.dateFilterProp = {}
           this.dateFilterSelectedIndex = null
+          this.dateRangeSelected = []
           break
         case 'FOLIO':
           this.folioNumberSearch = this.folioFilterProp = ''
@@ -350,8 +350,8 @@ export default class Transactions extends Vue {
       if (index > -1) {
         this.filterArray.splice(index, 1)
       }
+      this.updateTransactionTableCounter++
     }
-    this.updateTransactionTableCounter++
   }
 
   private setTotalTransactionCount (value) {
