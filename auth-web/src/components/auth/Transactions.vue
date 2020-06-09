@@ -236,6 +236,9 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
 
   // apply filter button enable only if the date ranges are selected and start date <= end date
   private get isApplyFilterBtnValid () {
+    if (this.dateRangeSelected?.length === 2 && this.dateRangeSelected[0] > this.dateRangeSelected[1]) {
+      this.dateRangeSelected = [this.dateRangeSelected[1], this.dateRangeSelected[0]]
+    }
     return this.dateRangeSelected[0] && this.dateRangeSelected[1] && (this.dateRangeSelected[0] <= this.dateRangeSelected[1])
   }
 
