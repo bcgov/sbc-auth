@@ -64,6 +64,7 @@
           color="primary"
           depressed
           large
+          @click="redirectToBceId"
         >
           Continue: Register a BCeID
           <v-icon class="ml-2">
@@ -76,8 +77,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
 import DocumentService from '@/services/document.services'
 import { Pages } from '@/util/constants'
 
@@ -86,6 +88,10 @@ export default class OutOfProvinceAccountDownloadAffidavit extends Vue {
   private async downloadAffidavit () {
     const downloadData = await DocumentService.getAffidavitPdf()
     CommonUtils.fileDownload(downloadData, `affidavit.pdf`)
+  }
+
+  private redirectToBceId () {
+    window.location.href = ConfigHelper.getBceIdOsdLink()
   }
 
   private goBack () {

@@ -86,7 +86,7 @@ export default class OutOfProvinceAccountInstructions extends Vue {
     {
       number: 3,
       stepTitle: 'Use a 2-factor authentication app',
-      stepDescription: 'Download and use an app, such Google or Microsoft Authenticator.',
+      stepDescription: 'Download and use an app, such as Google or Microsoft Authenticator.',
       icon: 'mdi-cellphone-iphone'
     }
   ]

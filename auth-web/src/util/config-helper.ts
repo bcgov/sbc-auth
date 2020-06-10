@@ -46,6 +46,10 @@ export default class ConfigHelper {
     return ConfigHelper.getValue('VUE_APP_PAY_ROOT_API')
   }
 
+  static getBceIdOsdLink () {
+    return ConfigHelper.getValue('BCEID_OSD_LINK')
+  }
+
   static getAuthAPIUrl () {
     return ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')
   }
