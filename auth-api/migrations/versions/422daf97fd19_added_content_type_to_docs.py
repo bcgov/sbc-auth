@@ -19,7 +19,7 @@ depends_on = None
 
 def upgrade():
     op.add_column('documents', sa.Column('content_type', sa.String(length=50), nullable=True))
-    op.execute("update documents set content_type='html'")
+    op.execute("update documents set content_type='text/html'")
 
     documents = table('documents',
                       column('version_id', String),
@@ -31,11 +31,11 @@ def upgrade():
     op.bulk_insert(
         documents,
         [
-            {'version_id': 'a1', 'type': 'affidavit', 'content': file_name, 'content_type': 'pdf'}
+            {'version_id': 'a1', 'type': 'affidavit', 'content': file_name, 'content_type': 'application/pdf'}
         ]
     )
     
 
 def downgrade():
-    op.execute('DELETE DOCUMENTS WHERE version_id="a1"')
+    op.execute("DELETE FROM DOCUMENTS WHERE version_id='a1'")
     op.drop_column('documents', 'content_type')

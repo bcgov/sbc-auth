@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""API endpoints for managing an Invitation resource."""
+"""API endpoints for managing a document resource."""
 
 
 from flask import send_from_directory
@@ -22,7 +22,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.services import Documents as DocumentService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import DocumentType
+from auth_api.utils.enums import DocumentType, ContentType
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('documents', description='Endpoints for document management')
@@ -33,19 +33,22 @@ _JWT = JWTWrapper.get_instance()
 @cors_preflight('GET,OPTIONS')
 @API.route('', methods=['GET', 'OPTIONS'])
 class Documents(Resource):
-    """Resource for managing Terms Of Use."""
+    """Resource for managing the affidavit.
+
+    Separate resource is created since affidavit is accessible without authentication.
+    """
 
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def get():
-        """Return the latest terms of use."""
+        """Return the Affidavit."""
         try:
             doc = DocumentService.fetch_latest_document(DocumentType.AFFIDAVIT.value)
             if doc is None:
                 return {'message': 'The requested document could not be found.'}, \
                        http_status.HTTP_404_NOT_FOUND
-            if doc.as_dict().get('content_type', None) == 'pdf':  # pdfs has to be served as attachment
+            if doc.as_dict().get('content_type', None) == ContentType.PDF.value:  # pdfs has to be served as attachment
                 return send_from_directory('static', filename=doc.as_dict()['content'], as_attachment=True)
 
         except BusinessException as exception:
