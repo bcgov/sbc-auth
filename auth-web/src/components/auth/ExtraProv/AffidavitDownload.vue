@@ -1,14 +1,6 @@
 <template>
   <div class="d-flex justify-center pa-4">
     <div class="non-bc-instructions-container">
-      <v-alert
-              dense
-              outlined
-              type="error"
-              v-if="isDownloadFailed"
-      >
-        {{downloadFailedMsg}}
-      </v-alert>
       <h1 class="my-5">
         Getting your identity affidavit notarized
       </h1>
@@ -28,7 +20,7 @@
       <p class="mb-10">
         Once you have your affidavit notarized, return to this website and continue to the next step. You will upload your affidavit later in the account creation process
       </p>
-      <div class="pb-2">
+      <div class="d-inline-flex flex-column pb-2">
         <v-btn
           depressed
           outlined
@@ -51,6 +43,16 @@
             </div>
           </div>
         </v-btn>
+        <v-alert
+          dense
+          text
+          type="error"
+          height="42"
+          class="mt-3"
+          v-if="isDownloadFailed"
+        >
+          {{downloadFailedMsg}}
+        </v-alert>
       </div>
       <v-divider class="my-10"></v-divider>
       <div class="d-flex mb-6">
