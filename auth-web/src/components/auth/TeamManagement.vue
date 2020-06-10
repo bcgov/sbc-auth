@@ -10,10 +10,10 @@
 </template>
 
 <script lang="ts">
+import { AccessType, Account } from '@/util/constants'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
-import { Account } from '@/util/constants'
 import AnonymousUserManagement from '@/components/auth/AnonymousUserManagement.vue'
 import { Event } from '@/models/event'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
@@ -47,7 +47,7 @@ export default class TeamManagement extends Mixins(NextPageMixin) {
   }
   private isAnonymousAccount (): boolean {
     return this.currentOrganization &&
-            this.currentOrganization.accessType === Account.ANONYMOUS
+            this.currentOrganization.accessType === AccessType.ANONYMOUS
   }
 }
 </script>

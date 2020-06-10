@@ -13,7 +13,7 @@
 # limitations under the License.
 """Schema package."""
 
-
+from .affidavit import AffidavitSchema
 from .affiliation import AffiliationSchema
 from .contact import ContactSchema
 from .contact_link import ContactLinkSchema

@@ -19,13 +19,13 @@ Test suite to ensure that the Authorization service routines are working as expe
 import uuid
 
 import pytest
-from werkzeug.exceptions import HTTPException
-
-from auth_api.services.authorization import Authorization, check_auth
-from auth_api.utils.roles import USER, ADMIN, STAFF, STAFF_ADMIN
 from tests.utilities.factory_utils import (
     TestOrgInfo, TestOrgTypeInfo, factory_affiliation_model, factory_entity_model, factory_membership_model,
     factory_org_model, factory_product_model, factory_user_model)
+from werkzeug.exceptions import HTTPException
+
+from auth_api.services.authorization import Authorization, check_auth
+from auth_api.utils.roles import ADMIN, STAFF, STAFF_ADMIN, USER
 
 
 def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-argument

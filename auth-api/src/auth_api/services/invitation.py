@@ -30,13 +30,14 @@ from auth_api.models import OrgSettings as OrgSettingsModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
-from auth_api.utils.constants import InvitationStatus
-from auth_api.utils.roles import COORDINATOR, USER, ADMIN, Status, InvitationType, STAFF_ADMIN, AccessType
+from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, Status
+from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF_ADMIN, USER
 from config import get_named_config
 
 from .authorization import check_auth
 from .membership import Membership as MembershipService
 from .notification import send_email
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -71,7 +72,7 @@ class Invitation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         if org.access_type == AccessType.ANONYMOUS.value:
             check_auth(token_info, org_id=org_id, equals_role=STAFF_ADMIN)
-        elif org.access_type == AccessType.BCSC.value:
+        elif org.access_type == AccessType.REGULAR.value:
             check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR))
 
         org_name = org.name

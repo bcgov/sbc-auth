@@ -12,29 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Constants definitions."""
-from enum import Enum
 
 # Group names
 GROUP_PUBLIC_USERS = 'public_users'
 GROUP_ACCOUNT_HOLDERS = 'account_holders'
 GROUP_ANONYMOUS_USERS = 'anonymous_users'
-
-# Login Sources
-PASSCODE = 'PASSCODE'
-BCSC = 'BCSC'
-STAFF = 'IDIR'
-BCROS = 'BCROS'
-
-
-# IdpHint
-class IdpHint(Enum):
-    """IdpHint for user login."""
-
-    BCROS = 'bcros'
-
-
-class InvitationStatus(Enum):
-    """Invitation statuses."""
-
-    ACCEPTED = 'ACCEPTED'
-    PENDING = 'PENDING'

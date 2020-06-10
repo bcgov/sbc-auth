@@ -17,10 +17,10 @@ Basic users will have an internal Org that is not created explicitly, but implic
 """
 
 from flask import current_app
-from sqlalchemy import Column, ForeignKey, Integer, String, and_, func, Boolean
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, and_, func
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.roles import OrgStatus as OrgStatusEnum
+from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 
 from .base_model import BaseModel
 from .org_status import OrgStatus
