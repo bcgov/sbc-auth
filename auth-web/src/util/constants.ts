@@ -40,7 +40,7 @@ export enum Pages {
     USER_PROFILE_TERMS = 'userprofileterms',
     USER_PROFILE_TERMS_DECLINE = 'unauthorizedtermsdecline',
     HOME = 'home',
-    SETUP_ACCOUNT_OUT_OF_PROVINCE = 'setup-account-oop',
+    SETUP_ACCOUNT_OUT_OF_PROVINCE = 'extraprov-info',
     SETUP_ACCOUNT_OUT_OF_PROVINCE_INSTRUCTIONS = 'instructions',
     SETUP_ACCOUNT_OUT_OF_PROVINCE_DOWNLOAD = 'download',
     EDIT_ACCOUNT_TYPE= '/change-account',

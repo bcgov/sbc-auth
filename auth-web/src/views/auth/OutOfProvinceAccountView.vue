@@ -1,25 +1,15 @@
 <template>
   <div>
-    <OutOfProvinceAccountInstructions v-if="page === PAGES.SETUP_ACCOUNT_OUT_OF_PROVINCE_INSTRUCTIONS"></OutOfProvinceAccountInstructions>
-    <OutOfProvinceAccountDownloadAffidavit v-if="page === PAGES.SETUP_ACCOUNT_OUT_OF_PROVINCE_DOWNLOAD"></OutOfProvinceAccountDownloadAffidavit>
+   <router-view></router-view>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import AccountInstructions from '@/components/auth/extraprovince/AccountInstructions.vue'
-import AffidavitDownload from '@/components/auth/extraprovince/AffidavitDownload.vue'
-import { Pages } from '@/util/constants'
+import { Component, Vue } from 'vue-property-decorator'
 
 @Component({
-  components: {
-    OutOfProvinceAccountInstructions: AccountInstructions,
-    OutOfProvinceAccountDownloadAffidavit: AffidavitDownload
-  }
 })
-export default class OutOfProvinceAccountView extends Vue {
-  @Prop({ default: '' }) private page: string
-  private readonly PAGES = Pages
+export default class ExtraProvInfoView extends Vue {
 }
 </script>
 
