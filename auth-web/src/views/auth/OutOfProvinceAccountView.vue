@@ -7,14 +7,14 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import OutOfProvinceAccountDownloadAffidavit from '@/components/auth/OutOfProvinceAccountDownloadAffidavit.vue'
-import OutOfProvinceAccountInstructions from '@/components/auth/OutOfProvinceAccountInstructions.vue'
+import AffidavitDownload from '@/components/auth/extraprovince/AffidavitDownload.vue'
+import AccountInstructions from '@/components/auth/extraprovince/AccountInstructions.vue'
 import { Pages } from '@/util/constants'
 
 @Component({
   components: {
-    OutOfProvinceAccountInstructions,
-    OutOfProvinceAccountDownloadAffidavit
+    OutOfProvinceAccountInstructions: AccountInstructions,
+    OutOfProvinceAccountDownloadAffidavit: AffidavitDownload
   }
 })
 export default class OutOfProvinceAccountView extends Vue {

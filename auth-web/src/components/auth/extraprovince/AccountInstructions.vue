@@ -69,7 +69,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Pages } from '@/util/constants'
 
 @Component
-export default class OutOfProvinceAccountInstructions extends Vue {
+export default class AccountInstructions extends Vue {
   private readonly steps = [
     {
       number: 1,

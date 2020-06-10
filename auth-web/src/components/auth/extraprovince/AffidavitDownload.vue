@@ -1,6 +1,14 @@
 <template>
   <div class="d-flex justify-center pa-4">
     <div class="non-bc-instructions-container">
+      <v-alert
+              dense
+              outlined
+              type="error"
+              v-if="isDownloadFailed"
+      >
+        {{downloadFailedMsg}}
+      </v-alert>
       <h1 class="my-5">
         Getting your identity affidavit notarized
       </h1>
@@ -84,10 +92,18 @@ import DocumentService from '@/services/document.services'
 import { Pages } from '@/util/constants'
 
 @Component
-export default class OutOfProvinceAccountDownloadAffidavit extends Vue {
+export default class AffidavitDownload extends Vue {
+  private downloadFailedMsg = 'Failed download'
+  private isDownloadFailed = false
+
   private async downloadAffidavit () {
-    const downloadData = await DocumentService.getAffidavitPdf()
-    CommonUtils.fileDownload(downloadData, `affidavit.pdf`)
+    try {
+      this.isDownloadFailed = false
+      const downloadData = await DocumentService.getAffidavitPdf()
+      CommonUtils.fileDownload(downloadData, `affidavit.pdf`)
+    } catch (e) {
+      this.isDownloadFailed = true
+    }
   }
 
   private redirectToBceId () {
