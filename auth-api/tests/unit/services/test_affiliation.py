@@ -18,14 +18,14 @@ Test suite to ensure that the Affiliation service routines are working as expect
 from unittest.mock import patch
 
 import pytest
+from tests.utilities.factory_scenarios import TestEntityInfo, TestOrgTypeInfo
+from tests.utilities.factory_utils import factory_entity_service, factory_org_service
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.services import Affiliation as AffiliationService
-from tests.utilities.factory_scenarios import TestEntityInfo, TestOrgTypeInfo
-from tests.utilities.factory_utils import factory_entity_service, factory_org_service
 
 
 def test_create_affiliation(session, auth_mock):  # pylint:disable=unused-argument

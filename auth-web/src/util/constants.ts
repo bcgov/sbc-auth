@@ -45,7 +45,7 @@ export enum Pages {
 }
 
 export enum Account {
-    ANONYMOUS = 'ANONYMOUS',
+    // ANONYMOUS = 'ANONYMOUS',
     PREMIUM = 'PREMIUM',
     BASIC = 'BASIC',
 }
@@ -85,4 +85,10 @@ export enum CorpType {
     NEW_BUSINESS = 'TMP',
     BCOMP = 'BC',
     NAME_REQUEST = 'NR'
+}
+
+export enum AccessType {
+    REGULAR = 'REGULAR',
+    EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL',
+    ANONYMOUS = 'ANONYMOUS'
 }

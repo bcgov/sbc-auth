@@ -19,11 +19,11 @@ A User stores basic information from a KeyCloak user (including the KeyCloak GUI
 import datetime
 
 from flask import current_app
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, or_
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, and_, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.roles import Status, UserStatus, AccessType
+from auth_api.utils.enums import AccessType, Status, UserStatus
 
 from .base_model import BaseModel
 from .db import db
@@ -46,6 +46,15 @@ class User(BaseModel):
         'keycloak_guid', UUID(as_uuid=True), unique=True, nullable=True  # bcros users comes with no guid
     )
     roles = Column('roles', String(1000))
+    is_terms_of_use_accepted = Column(Boolean(), default=False, nullable=True)
+    terms_of_use_accepted_version = Column(
+        ForeignKey('documents.version_id'), nullable=True
+    )
+
+    # a type for the user to identify what kind of user it is..ie anonymous , bcsc etc ..similar to login source
+    type = Column('type', String(200), nullable=True)
+    status = Column(ForeignKey('user_status_code.id'))
+    idp_userid = Column('idp_userid', String(256), index=True)
 
     contacts = relationship('ContactLink', primaryjoin='User.id == ContactLink.user_id', lazy='select')
     orgs = relationship('Membership',
@@ -55,19 +64,9 @@ class User(BaseModel):
                             Status.PENDING_APPROVAL.value) + '))',
                         lazy='select')  # noqa:E127
 
-    is_terms_of_use_accepted = Column(Boolean(), default=False, nullable=True)
-    terms_of_use_accepted_version = Column(
-        ForeignKey('documents.version_id'), nullable=True
-    )
     terms_of_use_version = relationship('Documents', foreign_keys=[terms_of_use_accepted_version], uselist=False,
                                         lazy='select')
-    status = Column(
-        ForeignKey('user_status_code.id')
-    )
     user_status = relationship('UserStatusCode', foreign_keys=[status], lazy='subquery')
-
-    # a type for the user to identify what kind of user it is..ie anonymous , bcsc etc ..similar to login source
-    type = Column('type', String(200), nullable=True)
 
     @classmethod
     def find_by_username(cls, username):
@@ -76,19 +75,19 @@ class User(BaseModel):
 
     @classmethod
     def find_by_jwt_token(cls, token: dict):
-        """Find an existing user by the keycloak GUID in the provided token."""
-        return cls.query.filter_by(
-            keycloak_guid=token.get('sub', None)
-        ).one_or_none()
+        """Find an existing user by the keycloak GUID and (idpUserId is null or from token) in the provided token."""
+        return db.session.query(User).filter(
+            and_(User.keycloak_guid == token.get('sub'),
+                 or_(User.idp_userid == token.get('idp_userid', None), User.idp_userid.is_(None)))).one_or_none()
 
     @classmethod
-    def create_from_jwt_token(cls, token: dict):
+    def create_from_jwt_token(cls, token: dict, first_name: str, last_name: str):
         """Create a User from the provided JWT."""
         if token:
             user = User(
                 username=token.get('preferred_username', None),
-                firstname=token.get('firstname', None),
-                lastname=token.get('lastname', None),
+                firstname=first_name,
+                lastname=last_name,
                 email=token.get('email', None),
                 keycloak_guid=token.get('sub', None),
                 created=datetime.datetime.now(),
@@ -98,18 +97,19 @@ class User(BaseModel):
                 'Creating user from JWT:{}; User:{}'.format(token, user)
             )
             user.status = UserStatusCode.get_default_type()
+            user.idp_userid = token.get('idp_userid', None)
             user.save()
             return user
         return None
 
     @classmethod
-    def update_from_jwt_token(cls, token: dict, user):
+    def update_from_jwt_token(cls, user, token: dict, first_name: str, last_name: str):
         """Update a User from the provided JWT."""
         if token:
             if user:
                 user.username = token.get('preferred_username', user.username)
-                user.firstname = token.get('firstname', user.firstname)
-                user.lastname = token.get('lastname', user.lastname)
+                user.firstname = first_name
+                user.lastname = last_name
                 user.email = token.get('email', user.email)
                 user.modified = datetime.datetime.now()
                 user.roles = token.get('roles', user.roles)
@@ -122,6 +122,9 @@ class User(BaseModel):
 
                 # If this user is marked as Inactive, this login will re-activate them
                 user.status = UserStatus.ACTIVE.value
+
+                if token.get('idp_userid', None):
+                    user.idp_userid = token.get('idp_userid')
                 cls.commit()
                 return user
         return None

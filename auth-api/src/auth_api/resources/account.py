@@ -22,6 +22,7 @@ from auth_api.services.authorization import Authorization as AuthorizationServic
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
 
+
 API = Namespace('accounts', description='Endpoints for accounts management')
 
 TRACER = Tracer.get_instance()

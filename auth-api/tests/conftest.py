@@ -13,7 +13,6 @@
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
 import pytest
-
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
 

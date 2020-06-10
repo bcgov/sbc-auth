@@ -28,9 +28,10 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
+from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import OrgSchema
-from auth_api.utils.enums import PaymentType, OrgType, ChangeType
-from auth_api.utils.roles import ADMIN, VALID_STATUSES, Status, AccessType
+from auth_api.utils.enums import AccessType, ChangeType, LoginSource, OrgType, PaymentType, Status, OrgStatus
+from auth_api.utils.roles import ADMIN, VALID_STATUSES
 from auth_api.utils.util import camelback2snake
 from .authorization import check_auth
 from .contact import Contact as ContactService
@@ -59,7 +60,7 @@ class Org:
         return obj
 
     @staticmethod
-    def create_org(org_info: dict, user_id,  # pylint: disable=too-many-locals, too-many-statements
+    def create_org(org_info: dict, user_id,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
                    token_info: Dict = None, bearer_token: str = None):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
@@ -77,32 +78,48 @@ class Org:
         org_info['typeCode'] = OrgType.PREMIUM.value if bcol_account_number else OrgType.BASIC.value
 
         is_staff_admin = token_info and 'staff_admin' in token_info.get('realm_access').get('roles')
+        is_bceid_user = token_info and token_info.get('loginSource', None) == LoginSource.BCEID.value
         if not is_staff_admin:  # staff can create any number of orgs
             count = OrgModel.get_count_of_org_created_by_user_id(user_id)
             if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
                 raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
-            if org_info.get('accessType', None) == AccessType.ANONYMOUS.value:
+
+        # Validate accessType
+        access_type: str = org_info.get('accessType', None)
+        if access_type:
+            if not is_staff_admin and access_type == AccessType.ANONYMOUS.value:
                 raise BusinessException(Error.USER_CANT_CREATE_ANONYMOUS_ORG, None)
+            if not is_bceid_user and access_type == AccessType.EXTRA_PROVINCIAL:
+                raise BusinessException(Error.USER_CANT_CREATE_EXTRA_PROVINCIAL_ORG, None)
+        else:
+            # If access type is not provided, add default value based on user
+            if is_staff_admin:
+                access_type = AccessType.ANONYMOUS.value
+            elif is_bceid_user:
+                access_type = AccessType.EXTRA_PROVINCIAL.value
+            else:
+                access_type = AccessType.REGULAR.value
 
         if not bcol_account_number:  # Allow duplicate names if premium
             Org.raise_error_if_duplicate_name(org_info['name'])
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
+        org.access_type = access_type
+        # If the account is anonymous set the billable value as False else True
+        org.billable = access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR.value)
+        # Set the status based on access type
+        if access_type == AccessType.EXTRA_PROVINCIAL.value:
+            # Check if the user is APPROVED else set the org status to PENDING
+            if not AffidavitModel.find_approved_by_user_id(user_id=user_id):
+                org.status_code = OrgStatus.PENDING.value
         org.add_to_session()
-
-        if is_staff_admin:
-            org.access_type = AccessType.ANONYMOUS.value
-            org.billable = False
-        else:
-            org.access_type = AccessType.BCSC.value
-            org.billable = True
 
         # If mailing address is provided, save it
         if mailing_address:
             Org.add_contact_to_org(mailing_address, org)
 
         # create the membership record for this user if its not created by staff and access_type is anonymous
-        if not is_staff_admin and org_info.get('access_type') != AccessType.ANONYMOUS:
+        if not is_staff_admin and access_type != AccessType.ANONYMOUS.value:
             membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='ADMIN',
                                          membership_type_status=Status.ACTIVE.value)
             membership.add_to_session()
