@@ -93,7 +93,7 @@
 </template>
 
 <script lang="ts">
-import { Account, Pages, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, Pages, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import {
   CreateRequestBody,
@@ -197,11 +197,11 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   get anonAccount (): boolean {
-    return this.currentOrganization?.accessType === Account.ANONYMOUS
+    return this.currentOrganization?.accessType === AccessType.ANONYMOUS
   }
 
   private canChangeAccountName (): boolean {
-    if (this.currentOrganization?.accessType === Account.ANONYMOUS) {
+    if (this.currentOrganization?.accessType === AccessType.ANONYMOUS) {
       return false
     }
     // Premium account name cant be updated

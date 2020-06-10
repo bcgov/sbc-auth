@@ -19,11 +19,12 @@ Test-Suite to ensure that the /accounts endpoint is working as expected.
 
 import copy
 
-from auth_api import status as http_status
 from tests.utilities.factory_scenarios import TestJwtClaims
 from tests.utilities.factory_utils import (
     TestOrgInfo, TestOrgTypeInfo, factory_auth_header, factory_membership_model, factory_org_model,
     factory_product_model, factory_user_model)
+
+from auth_api import status as http_status
 
 
 def test_authorizations_for_account_returns_200(app, client, jwt, session):  # pylint:disable=unused-argument

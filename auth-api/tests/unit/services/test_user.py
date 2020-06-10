@@ -19,6 +19,12 @@ Test-Suite to ensure that the User Service is working as expected.
 from unittest.mock import patch
 
 import pytest
+from tests.utilities.factory_scenarios import (
+    KeycloakScenario, TestAnonymousMembership, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
+    TestUserInfo)
+from tests.utilities.factory_utils import (
+    factory_contact_model, factory_entity_model, factory_membership_model, factory_org_model, factory_user_model)
+from werkzeug.exceptions import HTTPException
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -30,14 +36,8 @@ from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.constants import IdpHint
-from auth_api.utils.roles import Status, COORDINATOR, ADMIN, USER
-from werkzeug.exceptions import HTTPException
-
-from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, \
-    TestUserInfo, TestAnonymousMembership, KeycloakScenario
-from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_user_model, \
-    factory_org_model, factory_membership_model
+from auth_api.utils.enums import IdpHint, Status
+from auth_api.utils.roles import ADMIN, COORDINATOR, USER
 
 
 def test_as_dict(session):  # pylint: disable=unused-argument

@@ -19,18 +19,19 @@ from flask_restplus import Namespace, Resource, cors
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
-from auth_api.schemas import InvitationSchema, MembershipSchema, AccountPaymentSettingsSchema
+from auth_api.schemas import AccountPaymentSettingsSchema, InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
+from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import NotificationType, ChangeType
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, USER, Role, Status, AccessType, STAFF_ADMIN, \
-    CLIENT_AUTH_ROLES
+from auth_api.utils.enums import AccessType, ChangeType, NotificationType, Status, AffidavitStatus
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF_ADMIN, USER, Role
 from auth_api.utils.util import cors_preflight
+
 
 API = Namespace('orgs', description='Endpoints for organization management')
 TRACER = Tracer.get_instance()
@@ -438,6 +439,54 @@ class OrgInvitations(Resource):
                                                                     token_info=g.jwt_oidc_token_info)
 
             response, status = {'invitations': InvitationSchema().dump(invitations, many=True)}, http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
+        return response, status
+
+
+@cors_preflight('GET,OPTIONS')
+@API.route('/<string:org_id>/admins/affidavits', methods=['GET', 'PATCH', 'OPTIONS'])
+class OrgAdminAffidavits(Resource):
+    """Resource for managing affidavits for the admins in an org."""
+
+    @staticmethod
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.BCOL_STAFF_ADMIN.value])
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    def get(org_id):
+        """Get the affidavit for the admin who created the account."""
+        try:
+            response, status = AffidavitService.find_affidavit_by_org_id(org_id=org_id).as_dict(),\
+                http_status.HTTP_200_OK
+
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
+        return response, status
+
+
+@cors_preflight('PATCH,OPTIONS')
+@API.route('/<string:org_id>/admins/affidavits/<string:affidavit_id>', methods=['PATCH', 'OPTIONS'])
+class OrgAdminAffidavit(Resource):
+    """Resource for managing affidavits for the admins in an org."""
+
+    @staticmethod
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.BCOL_STAFF_ADMIN.value])
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    def patch(org_id, affidavit_id):
+        """Patch an affidavit."""
+        request_json = request.get_json()
+        # bearer_token = request.headers['Authorization'].replace('Bearer ', '')
+        token = g.jwt_oidc_token_info
+
+        try:
+            is_approved: bool = request_json.get('statusCode', None) == AffidavitStatus.APPROVED.value
+            response, status = AffidavitService.approve_or_reject(org_id=org_id, affidavit_id=affidavit_id,
+                                                                  is_approved=is_approved,
+                                                                  token_info=token).as_dict(), http_status.HTTP_200_OK
+
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 

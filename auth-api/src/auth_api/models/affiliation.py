@@ -20,8 +20,8 @@ from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
-from .entity import Entity as EntityModel
 from .db import db
+from .entity import Entity as EntityModel
 
 
 class Affiliation(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined

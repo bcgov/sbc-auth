@@ -14,16 +14,17 @@
 """Service for managing Product and Product Subscription data."""
 
 from typing import Any, Dict, Tuple
+
 from flask import current_app
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.models import db
+from auth_api.models import Org as OrgModel
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductRoleCode as ProductRoleCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import ProductSubscriptionRole as ProductSubscriptionRoleModel
-from auth_api.models import Org as OrgModel
+from auth_api.models import db
 
 
 class Product:
