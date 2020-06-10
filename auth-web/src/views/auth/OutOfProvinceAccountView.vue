@@ -7,8 +7,8 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import AffidavitDownload from '@/components/auth/extraprovince/AffidavitDownload.vue'
 import AccountInstructions from '@/components/auth/extraprovince/AccountInstructions.vue'
+import AffidavitDownload from '@/components/auth/extraprovince/AffidavitDownload.vue'
 import { Pages } from '@/util/constants'
 
 @Component({
