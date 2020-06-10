@@ -27,6 +27,7 @@ class ContentType(Enum):
 
     JSON = 'application/json'
     FORM_URL_ENCODED = 'application/x-www-form-urlencoded'
+    PDF = 'application/pdf'
 
 
 class NotificationType(Enum):
@@ -80,6 +81,7 @@ class DocumentType(Enum):
 
     TERMS_OF_USE = 'termsofuse'
     TERMS_OF_USE_DIRECTOR_SEARCH = 'termsofuse_directorsearch'
+    AFFIDAVIT = 'affidavit'
 
 
 class NRStatus(Enum):

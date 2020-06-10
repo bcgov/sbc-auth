@@ -9,4 +9,7 @@ export default class DocumentService {
   static async getTermsOfService (identifier: string): Promise<AxiosResponse<TermsOfUseDocument>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/documents/termsofuse`)
   }
+  static async getAffidavitPdf (): Promise<AxiosResponse> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/documents/affidavit`)
+  }
 }

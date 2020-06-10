@@ -19,9 +19,9 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 @Component({
-  name: 'OutOfProvinceDialog'
+  name: 'ProvinceSelectorDialog'
 })
-export default class OutOfProvinceDialog extends Vue {
+export default class ProvinceSelectorDialog extends Vue {
   @Prop({ default: false }) signedIn
   private selection = ''
 
