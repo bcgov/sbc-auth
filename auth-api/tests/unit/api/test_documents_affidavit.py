@@ -18,13 +18,12 @@ Test-Suite to ensure that the /documents/affidavit endpoint is working as expect
 """
 
 from auth_api import status as http_status
-from tests.utilities.factory_utils import factory_auth_header, factory_document_model
-from tests.utilities.factory_scenarios import TestJwtClaims
+from auth_api.utils.enums import ContentType
 
 
 def test_documents_returns_200(client, jwt, session):  # pylint:disable=unused-argument
     """Assert get documents endpoint returns 200."""
     rv = client.get('/api/v1/documents/affidavit')
-    assert rv.headers['Content-Type'] == 'application/pdf'
-    assert rv.status_code == 200
+    assert rv.headers['Content-Type'] == ContentType.PDF.value
+    assert rv.status_code == http_status.HTTP_200_OK
     assert rv.headers['Content-Disposition'] == 'attachment; filename=affidavit_v1.pdf'
