@@ -54,6 +54,10 @@ export default class ConfigHelper {
     return ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')
   }
 
+  static getFileServerUrl () {
+    return ConfigHelper.getValue('FILE_SERVER_URL')
+  }
+
   static getAuthResetAPIUrl () {
     return ConfigHelper.getValue('VUE_APP_AUTH_RESET_API')
   }

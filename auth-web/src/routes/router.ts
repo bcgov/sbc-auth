@@ -15,6 +15,7 @@ import DecideBusinessView from '@/views/auth/DecideBusinessView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
 import ExtraProvInfoView from '@/views/auth/OutOfProvinceAccountView.vue'
+import ExtraProvincialAccountSetupView from '@/views/auth/ExtraProvincialAccountSetupView.vue'
 import HomeView from '@/views/auth/HomeView.vue'
 import HomeViewDev from '@/views/auth/HomeViewDev.vue'
 import IncorpOrRegisterView from '@/views/auth/IncorpOrRegisterView.vue'
@@ -121,6 +122,13 @@ export function getRoutes (): RouteConfig[] {
       path: '/setup-account',
       name: 'setupaccount',
       component: AccountSetupView,
+      props: true,
+      meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/setup-extra-prov-account',
+      name: 'setup-extra-prov-account',
+      component: ExtraProvincialAccountSetupView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
     },

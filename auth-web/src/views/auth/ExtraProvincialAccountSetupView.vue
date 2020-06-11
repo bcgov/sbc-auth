@@ -2,10 +2,10 @@
   <v-container class="view-container">
     <div class="view-header flex-column">
       <h1 class="view-header__title">{{$t('createBCRegistriesAccount')}}</h1>
-      <p class="mt-3 mb-0">Create an account to access BC Registries products and services.</p>
+      <p class="mt-3 mb-0">Manage account settings, team members, and view account transactions</p>
     </div>
     <v-card flat>
-      <Stepper :stepper-configuration="stepperConfig"></Stepper>
+      <Stepper :stepper-configuration="accountStepperConfig"></Stepper>
     </v-card>
   </v-container>
 </template>
@@ -17,26 +17,32 @@ import AccountCreateBasic from '@/components/auth/CreateAccount/AccountCreateBas
 import AccountCreatePremium from '@/components/auth/CreateAccount/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/CreateAccount/AccountTypeSelector.vue'
 import CreateAccountInfoForm from '@/components/auth/CreateAccount/CreateAccountInfoForm.vue'
-
+import UploadAffidavitStep from '@/components/auth/ExtraProv/UploadAffidavitStep.vue'
 import UserProfileForm from '@/components/auth/UserProfileForm.vue'
 
-  @Component({
-    components: {
-      CreateAccountInfoForm,
-      UserProfileForm,
-      AccountTypeSelector,
-      AccountCreateBasic,
-      AccountCreatePremium,
-      Stepper
-    }
-  })
-export default class AccountSetupView extends Vue {
-  private stepperConfig: Array<StepConfiguration> =
+@Component({
+  components: {
+    CreateAccountInfoForm,
+    UserProfileForm,
+    AccountTypeSelector,
+    AccountCreateBasic,
+    AccountCreatePremium,
+    Stepper
+  }
+})
+export default class ExtraProvincialAccountSetupView extends Vue {
+  private accountStepperConfig: Array<StepConfiguration> =
     [
       {
         title: 'Select Account Type',
         stepName: 'Select Account Type',
         component: AccountTypeSelector,
+        componentProps: {}
+      },
+      {
+        title: 'Upload your notarized affidavit',
+        stepName: 'Upload Affidavit',
+        component: UploadAffidavitStep,
         componentProps: {}
       },
       {
