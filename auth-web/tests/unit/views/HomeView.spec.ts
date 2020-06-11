@@ -95,10 +95,10 @@ describe('HomeView.vue', () => {
     expect(nameRequestBtn.textContent).toContain('Request a Name')
 
     expect(namedCompBtn).toBeDefined()
-    expect(namedCompBtn.textContent).toContain('Incorporate a Named Company')
+    expect(namedCompBtn.textContent).toContain('Incorporate a Named Benefit Company')
 
     expect(numberedCompBtn).toBeDefined()
-    expect(numberedCompBtn.textContent).toContain('Incorporate a Numbered Company')
+    expect(numberedCompBtn.textContent).toContain('Incorporate a Numbered Benefit Company')
 
     expect(manageBusinessBtn).toBeDefined()
     expect(manageBusinessBtn.textContent).toContain('Manage an Existing Business')

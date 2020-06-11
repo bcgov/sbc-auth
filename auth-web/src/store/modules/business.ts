@@ -1,5 +1,5 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { Business, FolioNumberload, LoginPayload, NamedBusinessRequest, NumberedBusinessRequest } from '@/models/business'
+import { Business, BusinessRequest, FolioNumberload, LoginPayload } from '@/models/business'
 import { CorpType, FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
@@ -95,7 +95,7 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async createNamedBusiness (filingBody: NamedBusinessRequest) {
+  public async createNamedBusiness (filingBody: BusinessRequest) {
     // Create an affiliation between implicit org and requested business
     const updateResponse = await BusinessService.createNamedBusiness(filingBody)
     if (updateResponse?.status >= 200 && updateResponse?.status < 300) {
@@ -125,7 +125,7 @@ export default class BusinessModule extends VuexModule {
 
   @Action({ rawError: true })
   public async createNumberedBusiness (accountId: number) {
-    const requestBody: NumberedBusinessRequest = {
+    const filingBody: BusinessRequest = {
       filing: {
         header: {
           name: FilingTypes.INCORPORATION_APPLICATION,
@@ -133,11 +133,16 @@ export default class BusinessModule extends VuexModule {
         },
         business: {
           legalType: LegalTypes.BCOMP
+        },
+        incorporationApplication: {
+          nameRequest: {
+            legalType: LegalTypes.BCOMP
+          }
         }
       }
     }
 
-    await BusinessService.createNumberedBusiness(requestBody)
+    await BusinessService.createNumberedBusiness(filingBody)
       .then(response => {
         if (response && response.data && (response.status === 200 || response.status === 201)) {
           const tempRegNum = response.data.filing?.business?.identifier

@@ -29,7 +29,7 @@
               <v-btn large outlined color="#ffffff"
                 class="cta-btn"
                 v-if="!isDirSearchUser"
-                @click="createAccount()">
+                @click="oopDialog = true">
                 Create a new BC Registries Account
               </v-btn>
             </div>
@@ -37,7 +37,7 @@
             <!-- Non-authenticated -->
             <v-btn large color="#fcba19" class="cta-btn"
               v-if="!userProfile"
-              @click="accountDialog = true">
+              @click="oopDialog = true">
               Create a BC Registries Account
             </v-btn>
           </div>
@@ -50,6 +50,17 @@
               </template>
             </LoginBCSC>
           </v-dialog>
+
+          <v-dialog v-model="oopDialog" max-width="640">
+            <OutOfProvinceDialog
+              @close="oopDialog = false"
+              @oop = "goToOutOfProvince()"
+              @bc-not-signed-in = "oopDialog = false; accountDialog = true"
+              @bc-signed-in = "createAccount()"
+              :signed-in = "!!userProfile"
+            />
+          </v-dialog>
+
         </v-container>
       </header>
       <div class="how-to-container">
@@ -235,13 +246,15 @@ import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
+import ProvinceSelectorDialog from '@/components/auth/common/ProvinceSelectorDialog.vue'
 import { User } from '@/models/user'
 import { VueConstructor } from 'vue'
 
 @Component({
   name: 'Home',
   components: {
-    LoginBCSC
+    LoginBCSC,
+    OutOfProvinceDialog: ProvinceSelectorDialog
   },
   computed: {
     ...mapState('user', ['userProfile', 'currentUser']),
@@ -260,6 +273,7 @@ export default class HomeView extends Vue {
   private readonly currentUser!: KCUserProfile
   private noPasscodeDialog = false
   private accountDialog = false
+  private oopDialog = false
   private isDirSearchUser: boolean = false
   private isStaffUser: boolean = false
   private readonly resetCurrentOrganisation!: () => void
@@ -283,6 +297,10 @@ export default class HomeView extends Vue {
 
   private login () {
     this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
+  }
+
+  private goToOutOfProvince () {
+    this.$router.push(`/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE}/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE_INSTRUCTIONS}`)
   }
 
   mounted () {

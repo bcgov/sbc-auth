@@ -47,7 +47,7 @@ describe('IncorpOrRegisterView.vue', () => {
 
   it('renders the components properly', () => {
     expect(wrapper.find(IncorpOrRegisterView).exists()).toBe(true)
-    expect(wrapper.find(NumberedCompanyTooltip).exists()).toBe(true)
+    expect(wrapper.find(NumberedCompanyTooltip).exists()).toBe(false) // Currently Pending Verbiage
     expect(wrapper.find(LearnMoreButton).exists()).toBe(true)
   })
 
@@ -57,10 +57,10 @@ describe('IncorpOrRegisterView.vue', () => {
     const numberedCompBtn = authenticatedBtns[1]
 
     expect(namedCompBtn).toBeDefined()
-    expect(namedCompBtn.textContent).toContain('Incorporate a Named Company')
+    expect(namedCompBtn.textContent).toContain('Incorporate a Named Benefit Company')
 
     expect(numberedCompBtn).toBeDefined()
-    expect(numberedCompBtn.textContent).toContain('Incorporate a Numbered Company')
+    expect(numberedCompBtn.textContent).toContain('Incorporate a Numbered Benefit Company')
   })
 
   it('renders the login button when NOT authenticated', () => {

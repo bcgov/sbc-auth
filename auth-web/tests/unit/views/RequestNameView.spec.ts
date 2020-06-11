@@ -39,7 +39,7 @@ describe('RequestNameView.vue', () => {
 
   it('renders the components properly', () => {
     expect(wrapper.find(RequestNameView).exists()).toBe(true)
-    expect(wrapper.find(NumberedCompanyTooltip).exists()).toBe(true)
+    expect(wrapper.find(NumberedCompanyTooltip).exists()).toBe(false) // Currently Pending Verbiage
     expect(wrapper.find(LearnMoreButton).exists()).toBe(true)
   })
 
