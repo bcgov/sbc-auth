@@ -1,8 +1,8 @@
 """affidavit
 
-Revision ID: 9f83bd308efa
-Revises: 598dd27fc660
-Create Date: 2020-06-09 08:54:26.113008
+Revision ID: 23a3d94ee00d
+Revises: 422daf97fd19
+Create Date: 2020-06-11 16:43:08.259779
 
 """
 import sqlalchemy as sa
@@ -11,8 +11,8 @@ from sqlalchemy import Boolean, String
 from sqlalchemy.sql import column, table
 
 # revision identifiers, used by Alembic.
-revision = '9f83bd308efa'
-down_revision = '598dd27fc660'
+revision = '23a3d94ee00d'
+down_revision = '422daf97fd19'
 branch_labels = None
 depends_on = None
 
