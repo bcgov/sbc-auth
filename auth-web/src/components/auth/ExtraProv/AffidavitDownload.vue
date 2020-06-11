@@ -102,8 +102,10 @@ export default class AffidavitDownload extends Vue {
     try {
       this.isDownloadFailed = false
       const downloadData = await DocumentService.getAffidavitPdf()
-      CommonUtils.fileDownload(downloadData, `affidavit.pdf`)
-    } catch (e) {
+      CommonUtils.fileDownload(downloadData?.data, `affidavit.pdf`, downloadData?.headers['content-type'])
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err)
       this.isDownloadFailed = true
     }
   }
