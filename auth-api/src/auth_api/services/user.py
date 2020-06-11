@@ -276,7 +276,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         else:
             existing_user = UserModel.find_by_username(token.get('preferred_username'))
 
-        first_name, last_name = cls.get_names(existing_user, request_json, token)
+        first_name, last_name = User._get_names(existing_user, request_json, token)
 
         if existing_user is None:
             user_model = UserModel.create_from_jwt_token(token, first_name, last_name)
@@ -299,8 +299,8 @@ class User:  # pylint: disable=too-many-instance-attributes
         user = User(user_model)
         return user
 
-    @classmethod
-    def get_names(cls, existing_user, request_json, token):
+    @staticmethod
+    def _get_names(existing_user, request_json, token):
         # For BCeID, IDIM doesn't want to use the names from token
         if token.get('loginSource', None) == LoginSource.BCEID.value:
             request_json = {} if not request_json else request_json
