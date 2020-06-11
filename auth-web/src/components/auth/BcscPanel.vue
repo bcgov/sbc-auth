@@ -90,10 +90,6 @@ export default class BcscPanel extends Vue {
       font-size: 2rem;
     }
 
-    a:hover {
-      color: $BCgoveBueText2;
-    }
-
     .bcsc-info-col {
      justify-content: flex-start;
       text-align: left;
@@ -121,6 +117,16 @@ export default class BcscPanel extends Vue {
     .v-btn {
       max-width: 300px;
       font-weight: bold;
+    }
+
+    .create-account-link {
+      font-size: 1rem;
+      font-weight: bold;
+      color: $BCgoveBueText1!important;
+    }
+
+    .create-account-link:hover {
+      color: $BCgoveBueText2!important;
     }
   }
 </style>
