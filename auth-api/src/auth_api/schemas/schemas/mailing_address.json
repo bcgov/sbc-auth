@@ -30,7 +30,7 @@
           "Unit 1"
         ],
         "pattern": "^(.*)$",
-        "minLength": 1
+        "minLength": 0
       },
       "city": {
         "$id": "#/properties/city",
