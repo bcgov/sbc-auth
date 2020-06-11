@@ -10,6 +10,11 @@ export default class DocumentService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/documents/termsofuse`)
   }
   static async getAffidavitPdf (): Promise<AxiosResponse> {
-    return axios.get(`${ConfigHelper.getFileServerUrl()}/affidavit_v1.pdf`)
+    return axios.get(`${ConfigHelper.getFileServerUrl()}/affidavit_v1.pdf`, {
+      responseType: 'arraybuffer',
+      headers: {
+        'Accept': 'application/pdf'
+      }
+    })
   }
 }

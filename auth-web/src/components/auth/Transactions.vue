@@ -373,7 +373,7 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
       folioNumber: this.folioFilterProp
     }
     const downloadData = await this.getTransactionReport(filterParams)
-    CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`)
+    CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`, 'text/csv')
   }
 }
 </script>
