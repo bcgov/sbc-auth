@@ -276,16 +276,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         else:
             existing_user = UserModel.find_by_username(token.get('preferred_username'))
 
-        # For BCeID, IDIM doesn't want to use the names from token
-        if token.get('loginSource', None) == LoginSource.BCEID.value:
-            request_json = {} if not request_json else request_json
-            first_name: str = request_json.get('firstName', existing_user.firstname) if existing_user \
-                else request_json.get('firstName', None)
-            last_name: str = request_json.get('lastName', existing_user.lastname) if existing_user \
-                else request_json.get('lastName', None)
-        else:
-            first_name: str = token.get('firstname', None)
-            last_name: str = token.get('lastname', None)
+        first_name, last_name = cls.get_names(existing_user, request_json, token)
 
         if existing_user is None:
             user_model = UserModel.create_from_jwt_token(token, first_name, last_name)
@@ -307,6 +298,20 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         user = User(user_model)
         return user
+
+    @classmethod
+    def get_names(cls, existing_user, request_json, token):
+        # For BCeID, IDIM doesn't want to use the names from token
+        if token.get('loginSource', None) == LoginSource.BCEID.value:
+            request_json = {} if not request_json else request_json
+            first_name: str = request_json.get('firstName', existing_user.firstname) if existing_user \
+                else request_json.get('firstName', None)
+            last_name: str = request_json.get('lastName', existing_user.lastname) if existing_user \
+                else request_json.get('lastName', None)
+        else:
+            first_name: str = token.get('firstname', None)
+            last_name: str = token.get('lastname', None)
+        return first_name, last_name
 
     @staticmethod
     def get_contacts(token):

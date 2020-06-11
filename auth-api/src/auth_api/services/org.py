@@ -79,11 +79,59 @@ class Org:
 
         is_staff_admin = token_info and 'staff_admin' in token_info.get('realm_access').get('roles')
         is_bceid_user = token_info and token_info.get('loginSource', None) == LoginSource.BCEID.value
+
+        Org.validate_account_limit(is_staff_admin, user_id)
+
+        access_type = Org.validate_access_type(is_bceid_user, is_staff_admin, org_info)
+
+        if not bcol_account_number:  # Allow duplicate names if premium
+            Org.raise_error_if_duplicate_name(org_info['name'])
+
+        org = OrgModel.create_from_dict(camelback2snake(org_info))
+        org.access_type = access_type
+        # If the account is anonymous set the billable value as False else True
+        org.billable = access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR.value)
+
+        # Set the status based on access type
+        # Check if the user is APPROVED else set the org status to PENDING
+        if access_type == AccessType.EXTRA_PROVINCIAL.value \
+                and not AffidavitModel.find_approved_by_user_id(user_id=user_id):
+            org.status_code = OrgStatus.PENDING.value
+        org.add_to_session()
+
+        # If mailing address is provided, save it
+        if mailing_address:
+            Org.add_contact_to_org(mailing_address, org)
+
+        # create the membership record for this user if its not created by staff and access_type is anonymous
+        Org.create_membership(access_type, is_staff_admin, org, user_id)
+
+        Org.add_payment_settings(org.id, bcol_account_number, bcol_user_id)
+
+        org.save()
+        current_app.logger.info(f'<created_org org_id:{org.id}')
+
+        return Org(org)
+
+    @staticmethod
+    def create_membership(access_type, is_staff_admin, org, user_id):
+        if not is_staff_admin and access_type != AccessType.ANONYMOUS.value:
+            membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='ADMIN',
+                                         membership_type_status=Status.ACTIVE.value)
+            membership.add_to_session()
+
+            # Add the user to account_holders group
+            KeycloakService.join_account_holders_group()
+
+    @staticmethod
+    def validate_account_limit(is_staff_admin, user_id):
         if not is_staff_admin:  # staff can create any number of orgs
             count = OrgModel.get_count_of_org_created_by_user_id(user_id)
             if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
                 raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
 
+    @staticmethod
+    def validate_access_type(is_bceid_user, is_staff_admin, org_info):
         # Validate accessType
         access_type: str = org_info.get('accessType', None)
         if access_type:
@@ -99,40 +147,7 @@ class Org:
                 access_type = AccessType.EXTRA_PROVINCIAL.value
             else:
                 access_type = AccessType.REGULAR.value
-
-        if not bcol_account_number:  # Allow duplicate names if premium
-            Org.raise_error_if_duplicate_name(org_info['name'])
-
-        org = OrgModel.create_from_dict(camelback2snake(org_info))
-        org.access_type = access_type
-        # If the account is anonymous set the billable value as False else True
-        org.billable = access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR.value)
-        # Set the status based on access type
-        if access_type == AccessType.EXTRA_PROVINCIAL.value:
-            # Check if the user is APPROVED else set the org status to PENDING
-            if not AffidavitModel.find_approved_by_user_id(user_id=user_id):
-                org.status_code = OrgStatus.PENDING.value
-        org.add_to_session()
-
-        # If mailing address is provided, save it
-        if mailing_address:
-            Org.add_contact_to_org(mailing_address, org)
-
-        # create the membership record for this user if its not created by staff and access_type is anonymous
-        if not is_staff_admin and access_type != AccessType.ANONYMOUS.value:
-            membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='ADMIN',
-                                         membership_type_status=Status.ACTIVE.value)
-            membership.add_to_session()
-
-            # Add the user to account_holders group
-            KeycloakService.join_account_holders_group()
-
-        Org.add_payment_settings(org.id, bcol_account_number, bcol_user_id)
-
-        org.save()
-        current_app.logger.info(f'<created_org org_id:{org.id}')
-
-        return Org(org)
+        return access_type
 
     @staticmethod
     def raise_error_if_duplicate_name(name):
