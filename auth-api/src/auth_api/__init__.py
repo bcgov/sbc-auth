@@ -20,8 +20,8 @@ import os
 
 import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports,wrong-import-order; conflicts with Flake8
 from flask import Flask
-from sbc_common_components.exception_handling.exception_handler import ExceptionHandler  # noqa: I001
 from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
+from sbc_common_components.exception_handling.exception_handler import ExceptionHandler  # noqa: I001
 
 from auth_api import models
 from auth_api.extensions import mail
