@@ -71,5 +71,6 @@
   "resetFailureText": "Unable to reset your profile. ",
   "passwordResetFailureTitle": "An error has occured",
   "passwordResetFailureText": "An error occurred while attempting to reset this password.\nPlease try again later.",
-  "tos_updated": "We have updated our Terms of Use. Please review and accept the new terms to proceed."
+  "tos_updated": "We have updated our Terms of Use. Please review and accept the new terms to proceed.",
+  "createBCRegistriesAccount": "Create a BC Registries Account"
 }
