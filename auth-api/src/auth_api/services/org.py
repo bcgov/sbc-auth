@@ -39,7 +39,7 @@ from .keycloak import KeycloakService
 from .rest_service import RestService
 
 
-class Org:
+class Org:  # pylint: disable=too-many-public-methods
     """Manages all aspects of Org data.
 
     This service manages creating, updating, and retrieving Org data via the Org model.
@@ -115,6 +115,7 @@ class Org:
 
     @staticmethod
     def create_membership(access_type, is_staff_admin, org, user_id):
+        """Create membership account."""
         if not is_staff_admin and access_type != AccessType.ANONYMOUS.value:
             membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='ADMIN',
                                          membership_type_status=Status.ACTIVE.value)
@@ -125,6 +126,7 @@ class Org:
 
     @staticmethod
     def validate_account_limit(is_staff_admin, user_id):
+        """Validate account limit."""
         if not is_staff_admin:  # staff can create any number of orgs
             count = OrgModel.get_count_of_org_created_by_user_id(user_id)
             if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
@@ -132,7 +134,7 @@ class Org:
 
     @staticmethod
     def validate_access_type(is_bceid_user, is_staff_admin, org_info):
-        # Validate accessType
+        """Validate and return access type."""
         access_type: str = org_info.get('accessType', None)
         if access_type:
             if not is_staff_admin and access_type == AccessType.ANONYMOUS.value:
