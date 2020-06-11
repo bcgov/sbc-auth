@@ -478,7 +478,6 @@ class OrgAdminAffidavit(Resource):
     def patch(org_id, affidavit_id):
         """Patch an affidavit."""
         request_json = request.get_json()
-        # bearer_token = request.headers['Authorization'].replace('Bearer ', '')
         token = g.jwt_oidc_token_info
 
         try:
