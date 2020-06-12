@@ -25,7 +25,8 @@ from auth_api.models import PaymentType as PaymentTypeModel
 
 def factory_entity_model():
     """Produce a templated entity model."""
-    entity = EntityModel(business_identifier='CP1234567', business_number='791861073BC0001', name='Foobar, Inc.')
+    entity = EntityModel(business_identifier='CP1234567', business_number='791861073BC0001', name='Foobar, Inc.',
+                         corp_type_code='CP')
     entity.save()
     return entity
 

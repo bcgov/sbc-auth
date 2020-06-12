@@ -34,11 +34,13 @@ class ContactLink(BaseModel):  # pylint: disable=too-few-public-methods
     entity_id = Column(Integer, ForeignKey('entity.id'))
     user_id = Column(Integer, ForeignKey('user.id'))
     org_id = Column(Integer, ForeignKey('org.id'))
+    affidavit_id = Column(Integer, ForeignKey('affidavit.id'))
 
     contact = relationship('Contact', foreign_keys=[contact_id])
     entity = relationship('Entity', back_populates='contacts', foreign_keys=[entity_id])
     user = relationship('User', foreign_keys=[user_id], lazy='select')
     org = relationship('Org', foreign_keys=[org_id], lazy='select')
+    affidavit = relationship('Affidavit', foreign_keys=[affidavit_id], lazy='select')
 
     @classmethod
     def find_by_entity_id(cls, entity_id):
@@ -54,6 +56,11 @@ class ContactLink(BaseModel):  # pylint: disable=too-few-public-methods
     def find_by_org_id(cls, org_id):
         """Return the first contact link with the provided org id."""
         return cls.query.filter_by(org_id=org_id).first()
+
+    @classmethod
+    def find_by_affidavit_id(cls, affidavit_id):
+        """Return the first contact link with the provided affidavit id."""
+        return cls.query.filter_by(affidavit_id=affidavit_id).one_or_none()
 
     def has_links(self):
         """Check whether there are any remaining links for this contact."""

@@ -23,7 +23,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import expression
 
 from auth_api.models.db import db
-from auth_api.utils.roles import COORDINATOR, USER, ADMIN
+from auth_api.utils.roles import ADMIN, COORDINATOR, USER
 
 
 class Authorization(db.Model):

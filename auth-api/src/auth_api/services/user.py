@@ -16,35 +16,31 @@
 This module manages the User Information.
 """
 
-from typing import List, Dict
+from typing import Dict, List
 
 from flask import current_app
 from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
-from auth_api.utils.enums import DocumentType
-from auth_api.utils import util
 from auth_api import status as http_status
-from auth_api.utils.constants import IdpHint
 from auth_api.exceptions import BusinessException
-from auth_api.models import db
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
-
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
+from auth_api.models import db
 from auth_api.schemas import UserSchema
 from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.roles import CLIENT_ADMIN_ROLES, ADMIN, STAFF, OrgStatus, Status, UserStatus, COORDINATOR, \
-    AccessType
+from auth_api.utils import util
+from auth_api.utils.enums import AccessType, DocumentType, IdpHint, LoginSource, OrgStatus, Status, UserStatus
+from auth_api.utils.roles import ADMIN, CLIENT_ADMIN_ROLES, COORDINATOR, STAFF
 from auth_api.utils.util import camelback2snake
 
 from .contact import Contact as ContactService
 from .documents import Documents as DocumentService
-
 from .keycloak import KeycloakService
 
 
@@ -269,7 +265,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         return create_user_request
 
     @classmethod
-    def save_from_jwt_token(cls, token: dict = None):
+    def save_from_jwt_token(cls, token: dict, request_json: Dict = None):
         """Save user to database (create/update)."""
         current_app.logger.debug('save_from_jwt_token')
         if not token:
@@ -280,10 +276,12 @@ class User:  # pylint: disable=too-many-instance-attributes
         else:
             existing_user = UserModel.find_by_username(token.get('preferred_username'))
 
+        first_name, last_name = User._get_names(existing_user, request_json, token)
+
         if existing_user is None:
-            user_model = UserModel.create_from_jwt_token(token)
+            user_model = UserModel.create_from_jwt_token(token, first_name, last_name)
         else:
-            user_model = UserModel.update_from_jwt_token(token, existing_user)
+            user_model = UserModel.update_from_jwt_token(existing_user, token, first_name, last_name)
 
         if not user_model:
             return None
@@ -300,6 +298,20 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         user = User(user_model)
         return user
+
+    @staticmethod
+    def _get_names(existing_user, request_json, token):
+        # For BCeID, IDIM doesn't want to use the names from token
+        if token.get('loginSource', None) == LoginSource.BCEID.value:
+            request_json = {} if not request_json else request_json
+            first_name: str = request_json.get('firstName', existing_user.firstname) if existing_user \
+                else request_json.get('firstName', None)
+            last_name: str = request_json.get('lastName', existing_user.lastname) if existing_user \
+                else request_json.get('lastName', None)
+        else:
+            first_name: str = token.get('firstname', None)
+            last_name: str = token.get('lastname', None)
+        return first_name, last_name
 
     @staticmethod
     def get_contacts(token):
