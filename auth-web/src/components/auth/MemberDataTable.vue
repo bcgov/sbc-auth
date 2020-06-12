@@ -121,6 +121,7 @@
 </template>
 
 <script lang="ts">
+import { AccessType, Account } from '@/util/constants'
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import {
   Member,
@@ -130,7 +131,6 @@ import {
   RoleInfo
 } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
-import { Account } from '@/util/constants'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
 
@@ -232,7 +232,7 @@ export default class MemberDataTable extends Vue {
   }
 
   get anonAccount (): boolean {
-    return this.currentOrganization?.accessType === Account.ANONYMOUS
+    return this.currentOrganization?.accessType === AccessType.ANONYMOUS
   }
 
   private canChangeRole (memberBeingChanged: Member): boolean {
@@ -352,7 +352,7 @@ export default class MemberDataTable extends Vue {
   private isAnonymousAccount (): boolean {
     return (
       this.currentOrganization &&
-      this.currentOrganization.accessType === Account.ANONYMOUS
+      this.currentOrganization.accessType === AccessType.ANONYMOUS
     )
   }
 

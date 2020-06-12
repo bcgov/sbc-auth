@@ -20,10 +20,10 @@ Test-Suite to ensure that the /accounts endpoint is working as expected.
 import copy
 import json
 
-from auth_api import status as http_status
 from tests.utilities.factory_scenarios import TestJwtClaims
-from tests.utilities.factory_utils import (
-    TestOrgInfo, factory_auth_header)
+from tests.utilities.factory_utils import TestOrgInfo, factory_auth_header
+
+from auth_api import status as http_status
 
 
 def test_bcol_profiles_returns_200(app, client, jwt, session):  # pylint:disable=unused-argument

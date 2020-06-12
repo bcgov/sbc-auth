@@ -20,6 +20,10 @@ Test-Suite to ensure that the /orgs endpoint is working as expected.
 import json
 from unittest.mock import patch
 
+from tests.utilities.factory_scenarios import (
+    TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo)
+from tests.utilities.factory_utils import factory_auth_header, factory_invitation
+
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -28,9 +32,6 @@ from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.utils.enums import OrgType
-from tests.utilities.factory_scenarios import (
-    TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo)
-from tests.utilities.factory_utils import factory_auth_header, factory_invitation
 
 
 def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument

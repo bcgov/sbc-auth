@@ -17,13 +17,15 @@
 Test-Suite to ensure that the Business Service is working as expected.
 """
 
+from tests.utilities.factory_scenarios import KeycloakScenario
+
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.constants import BCSC, BCROS, GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_PUBLIC_USERS, \
-    STAFF
+from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_PUBLIC_USERS
+from auth_api.utils.enums import LoginSource
 from auth_api.utils.roles import Role
-from tests.utilities.factory_scenarios import KeycloakScenario
+
 
 KEYCLOAK_SERVICE = KeycloakService()
 
@@ -108,7 +110,7 @@ def test_join_users_group(app, session):
     user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     user_id = user.id
     KEYCLOAK_SERVICE.join_users_group({'sub': user_id,
-                                       'loginSource': BCSC,
+                                       'loginSource': LoginSource.BCSC.value,
                                        'realm_access': {'roles': []}})
     # Get the user groups and verify the public_users group is in the list
     user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
@@ -118,7 +120,8 @@ def test_join_users_group(app, session):
     assert GROUP_PUBLIC_USERS in groups
 
     # BCROS
-    KEYCLOAK_SERVICE.join_users_group({'sub': user_id, 'loginSource': BCROS, 'realm_access': {'roles': []}})
+    KEYCLOAK_SERVICE.join_users_group(
+        {'sub': user_id, 'loginSource': LoginSource.BCROS.value, 'realm_access': {'roles': []}})
     # Get the user groups and verify the public_users group is in the list
     user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
@@ -134,7 +137,8 @@ def test_join_users_group_for_staff_users(session, app):
     KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
     user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     user_id = user.id
-    KEYCLOAK_SERVICE.join_users_group({'sub': user_id, 'loginSource': STAFF, 'realm_access': {'roles': []}})
+    KEYCLOAK_SERVICE.join_users_group(
+        {'sub': user_id, 'loginSource': LoginSource.STAFF.value, 'realm_access': {'roles': []}})
     # Get the user groups and verify the public_users group is in the list
     user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
@@ -150,7 +154,7 @@ def test_join_users_group_for_existing_users(session):
     user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     user_id = user.id
     KEYCLOAK_SERVICE.join_users_group(
-        {'sub': user_id, 'loginSource': BCSC, 'realm_access': {'roles': [Role.EDITOR.value]}})
+        {'sub': user_id, 'loginSource': LoginSource.BCSC.value, 'realm_access': {'roles': [Role.EDITOR.value]}})
     # Get the user groups and verify the public_users group is in the list
     user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []

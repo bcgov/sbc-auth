@@ -19,7 +19,8 @@ The Membership object connects User models to one or more Org models.
 from sqlalchemy import Column, ForeignKey, Integer, and_, desc, func
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.roles import VALID_STATUSES, Status, COORDINATOR, ADMIN
+from auth_api.utils.enums import Status
+from auth_api.utils.roles import ADMIN, COORDINATOR, VALID_STATUSES
 
 from .base_model import BaseModel
 from .db import db

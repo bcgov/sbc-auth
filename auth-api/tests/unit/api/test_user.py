@@ -20,6 +20,14 @@ import copy
 import json
 import uuid
 
+from tests import skip_in_pod
+from tests.utilities.factory_scenarios import (
+    KeycloakScenario, TestAnonymousMembership, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
+    TestUserInfo)
+from tests.utilities.factory_utils import (
+    factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
+    factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_user_model)
+
 from auth_api import status as http_status
 from auth_api.exceptions.errors import Error
 from auth_api.models import Affiliation as AffiliationModel
@@ -28,16 +36,11 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
-from auth_api.utils.roles import Status, USER, COORDINATOR, UserStatus, AccessType, ADMIN
-from tests import skip_in_pod
-from tests.utilities.factory_scenarios import KeycloakScenario, TestContactInfo, TestEntityInfo, TestJwtClaims, \
-    TestOrgInfo, TestUserInfo, TestAnonymousMembership
-from tests.utilities.factory_utils import (
-    factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
-    factory_membership_model, factory_org_model, factory_user_model, factory_invitation_anonymous)
-
 from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, IdpHint
+from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
+from auth_api.utils.enums import AccessType, IdpHint, Status, UserStatus
+from auth_api.utils.roles import ADMIN, COORDINATOR, USER
+
 
 KEYCLOAK_SERVICE = KeycloakService()
 
@@ -682,3 +685,27 @@ def test_add_user_adds_to_account_holders_group(client, jwt, session):  # pylint
     for group in user_groups:
         groups.append(group.get('name'))
     assert GROUP_ACCOUNT_HOLDERS in groups
+
+
+def test_add_bceid_user(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a user can be POSTed."""
+    # Create a user in keycloak
+    request = KeycloakScenario.create_user_request()
+    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
+    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
+    user_id = user.id
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source='BCEID'))
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json', data=json.dumps({
+        'firstName': 'John',
+        'lastName': 'Doe'
+    }))
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.json.get('firstname') == 'John'
+
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json', data=json.dumps({
+        'firstName': 'John-New',
+        'lastName': 'Doe'
+    }))
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.json.get('firstname') == 'John-New'

@@ -11,18 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all of the Services used in the API."""
-from .affidavit import Affidavit
-from .affiliation import Affiliation
-from .codes import Codes
-from .contact import Contact
-from .documents import Documents
-from .entity import Entity
-from .invitation import Invitation
-from .membership import Membership
-from .org import Org
-from .permissions import Permissions
-from .products import Product
-from .reset import ResetTestData
-from .user import User
-from .user_settings import UserSettings
+"""This manages an Affidavit Status record in the Auth service.
+
+This is a mapping between status codes and descriptions for Affidavit objects.
+"""
+
+from .base_model import BaseCodeModel
+
+
+class AffidavitStatus(
+        BaseCodeModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+    """This is the model for an Affidavit Status record."""
+
+    __tablename__ = 'affidavit_status'
+
+    @classmethod
+    def get_default_status(cls):
+        """Return the default status code for an Org."""
+        return cls.query.filter_by(default=True).first()
