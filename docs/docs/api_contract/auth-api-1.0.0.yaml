@@ -1082,6 +1082,8 @@ paths:
                     id: '1234'
                     name: Mock Account
                     preferred_payment: CC
+                    orgType: PREMIUM
+
         '404':
           description: Not Found
           content:
