@@ -107,5 +107,6 @@ def downgrade():
     op.drop_table('affidavit_status')
 
     op.execute('update org set access_type=\'BCSC\' where access_type=\'REGULAR\'')
+    op.execute('delete from org_status where code=\'REJECTED\'')
 
     # ### end Alembic commands ###
