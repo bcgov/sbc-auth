@@ -1,10 +1,16 @@
 <template>
   <div>
     <p class="mb-7">This will be reviewed by Registries staff and the account will be approved when authenticated.</p>
+    <h4 class="my-4">Attach your Notarized Affidavit</h4>
+    <FileUploadPreview
+      @file-selected="fileSelected"
+    ></FileUploadPreview>
     <NotaryInformationForm
+      @notaryinfo-update="notaryInformation"
       class="pt-5"
     ></NotaryInformationForm>
     <NotaryContactForm
+      @notarycontact-update="notaryContact"
       class="pt-5"
     ></NotaryContactForm>
     <v-row class="mt-8">
@@ -49,6 +55,7 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
+import FileUploadPreview from '@/components/auth/common/FileUploadPreview.vue'
 import NotaryContactForm from '@/components/auth/NotaryContactForm.vue'
 import NotaryInformationForm from '@/components/auth/NotaryInformationForm.vue'
 import OrgModule from '@/store/modules/org'
@@ -60,7 +67,8 @@ import { getModule } from 'vuex-module-decorators'
     BcolLogin,
     NotaryInformationForm,
     NotaryContactForm,
-    ConfirmCancelButton
+    ConfirmCancelButton,
+    FileUploadPreview
   },
   computed: {
     ...mapState('org', ['currentOrganization']),
@@ -117,6 +125,21 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
 
   private goNext () {
     this.stepForward()
+  }
+
+  private fileSelected (file) {
+    // eslint-disable-next-line no-console
+    console.log(file)
+  }
+
+  private notaryInformation (notaryInfo) {
+    // eslint-disable-next-line no-console
+    console.log(notaryInfo)
+  }
+
+  private notaryContact (notaryContact) {
+    // eslint-disable-next-line no-console
+    console.log(notaryContact)
   }
 }
 </script>
