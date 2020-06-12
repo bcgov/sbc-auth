@@ -467,24 +467,26 @@ class OrgAdminAffidavits(Resource):
 
 
 @cors_preflight('PATCH,OPTIONS')
-@API.route('/<string:org_id>/admins/affidavits/<string:affidavit_id>', methods=['PATCH', 'OPTIONS'])
-class OrgAdminAffidavit(Resource):
-    """Resource for managing affidavits for the admins in an org."""
+@API.route('/<string:org_id>/status', methods=['PATCH', 'OPTIONS'])
+class OrgStatus(Resource):
+    """Resource for changing the status of org."""
 
     @staticmethod
     @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.BCOL_STAFF_ADMIN.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    def patch(org_id, affidavit_id):
-        """Patch an affidavit."""
+    def patch(org_id):
+        """Patch an account."""
         request_json = request.get_json()
         token = g.jwt_oidc_token_info
+        # For now allowed is to put the status code, which will be done by bcol_staff_admin.
+        # If this patch is going to be used by other other roles, then add proper security check
 
         try:
             is_approved: bool = request_json.get('statusCode', None) == AffidavitStatus.APPROVED.value
-            response, status = AffidavitService.approve_or_reject(org_id=org_id, affidavit_id=affidavit_id,
-                                                                  is_approved=is_approved,
-                                                                  token_info=token).as_dict(), http_status.HTTP_200_OK
+
+            response, status = OrgService.approve_or_reject(org_id=org_id, is_approved=is_approved,
+                                                            token_info=token).as_dict(), http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

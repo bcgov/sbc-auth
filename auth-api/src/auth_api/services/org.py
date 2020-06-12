@@ -30,9 +30,11 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import OrgSchema
-from auth_api.utils.enums import AccessType, ChangeType, LoginSource, OrgType, PaymentType, Status, OrgStatus
+from auth_api.utils.enums import AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentType, Status
 from auth_api.utils.roles import ADMIN, VALID_STATUSES
 from auth_api.utils.util import camelback2snake
+
+from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
 from .contact import Contact as ContactService
 from .keycloak import KeycloakService
@@ -96,7 +98,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # Check if the user is APPROVED else set the org status to PENDING
         if access_type == AccessType.EXTRA_PROVINCIAL.value \
                 and not AffidavitModel.find_approved_by_user_id(user_id=user_id):
-            org.status_code = OrgStatus.PENDING.value
+            org.status_code = OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
         org.add_to_session()
 
         # If mailing address is provided, save it
@@ -457,3 +459,30 @@ class Org:  # pylint: disable=too-many-public-methods
                 return True
 
         return False
+
+    @staticmethod
+    def approve_or_reject(org_id: int, is_approved: bool, token_info: Dict):
+        """Mark the affidavit as approved or rejected."""
+        current_app.logger.debug('<find_affidavit_by_org_id ')
+        # Get the org and check what's the current status
+        org: OrgModel = OrgModel.find_by_org_id(org_id)
+
+        # If status is PENDING_AFFIDAVIT_REVIEW handle affidavit approve process, else raise error
+        if org.status_code == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value:
+            AffidavitService.approve_or_reject(org_id, is_approved, token_info)
+        else:
+            raise BusinessException(Error.INVALID_INPUT, None)
+
+        if is_approved:
+            org.status_code = OrgStatus.ACTIVE.value
+            # TODO Send email notification that it's approved
+        else:
+            org.status_code = OrgStatus.REJECTED.value
+            # TODO Send email notification that it's rejected
+
+        # TODO Publish to activity stream
+
+        org.save()
+
+        current_app.logger.debug('>find_affidavit_by_org_id ')
+        return Org(org)
