@@ -28,8 +28,8 @@ from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
-from auth_api.utils.enums import NotificationType
-from auth_api.utils.roles import COORDINATOR, ALL_ALLOWED_ROLES, ADMIN, Status
+from auth_api.utils.enums import NotificationType, Status
+from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR
 from config import get_named_config
 
 from .authorization import check_auth
@@ -37,6 +37,7 @@ from .keycloak import KeycloakService
 from .notification import send_email
 from .org import Org as OrgService
 from .user import User as UserService
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()

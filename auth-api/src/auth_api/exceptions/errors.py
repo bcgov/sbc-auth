@@ -45,6 +45,8 @@ class Error(Enum):
     ORG_CANNOT_BE_DISSOLVED = 'Organization cannot be dissolved', http_status.HTTP_406_NOT_ACCEPTABLE
     FAILED_ADDING_USER_IN_KEYCLOAK = 'Error adding user to keycloak', http_status.HTTP_500_INTERNAL_SERVER_ERROR
     USER_CANT_CREATE_ANONYMOUS_ORG = 'Only staff can create anonymous org', http_status.HTTP_401_UNAUTHORIZED
+    USER_CANT_CREATE_EXTRA_PROVINCIAL_ORG = 'Only out of province users can create extra provincial org', \
+                                            http_status.HTTP_401_UNAUTHORIZED
     USER_ALREADY_EXISTS_IN_KEYCLOAK = 'User Already exists in keycloak', http_status.HTTP_409_CONFLICT
     USER_ALREADY_EXISTS = 'The username is already taken', http_status.HTTP_409_CONFLICT
     FAILED_ADDING_USER_ERROR = 'Adding User Failed', http_status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -59,6 +61,9 @@ class Error(Enum):
     NR_INVALID_CONTACT = 'Invalid email or phone number', http_status.HTTP_400_BAD_REQUEST
 
     ENTITY_DELETE_FAILED = 'Cannot delete entity due to related records.', http_status.HTTP_400_BAD_REQUEST
+
+    ACTIVE_AFFIDAVIT_EXISTS = 'Cannot upload new affidavit as a Pending affidavit is present.', \
+                              http_status.HTTP_400_BAD_REQUEST
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""

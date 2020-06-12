@@ -230,7 +230,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     var org: Organization = {
       id: this.currentOrganization.id,
       name: details.bcolAccountDetails.orgName,
-      accessType: Account.PREMIUM,
+      accessType: this.currentOrganization.accessType,
       bcolProfile: details.bcolProfile,
       bcolAccountDetails: details.bcolAccountDetails,
       grantAccess: false,

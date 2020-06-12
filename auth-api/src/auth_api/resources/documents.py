@@ -21,8 +21,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.services import Documents as DocumentService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import DocumentType
-from auth_api.utils.roles import AccessType
+from auth_api.utils.enums import AccessType, DocumentType
 from auth_api.utils.util import cors_preflight
 
 

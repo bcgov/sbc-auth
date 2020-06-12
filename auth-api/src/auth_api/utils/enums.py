@@ -96,3 +96,74 @@ class NRNameStatus(Enum):
 
     APPROVED = 'APPROVED'
     CONDITION = 'CONDITION'
+
+
+class AffidavitStatus(Enum):
+    """Affidavit statuses."""
+
+    PENDING = 'PENDING'
+    APPROVED = 'APPROVED'
+    REJECTED = 'REJECTED'
+
+
+class AccessType(Enum):
+    """Access Types."""
+
+    REGULAR = 'REGULAR'
+    EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL'
+    ANONYMOUS = 'ANONYMOUS'
+
+
+class Status(Enum):
+    """User Membership status."""
+
+    ACTIVE = 1
+    INACTIVE = 2
+    REJECTED = 3
+    PENDING_APPROVAL = 4
+
+
+class UserStatus(Enum):
+    """User Membership status."""
+
+    ACTIVE = 1
+    INACTIVE = 2
+
+
+class OrgStatus(Enum):
+    """User Membership status."""
+
+    ACTIVE = 'ACTIVE'
+    INACTIVE = 'INACTIVE'
+    PENDING = 'PENDING'
+    REJECTED = 'REJECTED'
+
+
+class InvitationType(Enum):
+    """Invitation type."""
+
+    DIRECTOR_SEARCH = 'DIRECTOR_SEARCH'  # Used to indicate an anonymous account invitation
+    STANDARD = 'STANDARD'  # Used to indicate the standard email invite with admin approval
+
+
+class IdpHint(Enum):
+    """IdpHint for user login."""
+
+    BCROS = 'bcros'
+
+
+class InvitationStatus(Enum):
+    """Invitation statuses."""
+
+    ACCEPTED = 'ACCEPTED'
+    PENDING = 'PENDING'
+
+
+class LoginSource(Enum):
+    """Login source values."""
+
+    PASSCODE = 'PASSCODE'
+    BCSC = 'BCSC'
+    BCEID = 'BCEID'
+    STAFF = 'IDIR'
+    BCROS = 'BCROS'

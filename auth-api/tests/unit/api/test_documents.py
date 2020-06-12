@@ -17,9 +17,10 @@
 Test-Suite to ensure that the /documents endpoint is working as expected.
 """
 
-from auth_api import status as http_status
-from tests.utilities.factory_utils import factory_auth_header, factory_document_model
 from tests.utilities.factory_scenarios import TestJwtClaims
+from tests.utilities.factory_utils import factory_auth_header, factory_document_model
+
+from auth_api import status as http_status
 
 
 def test_documents_returns_200(client, jwt, session):  # pylint:disable=unused-argument
