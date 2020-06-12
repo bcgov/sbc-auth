@@ -73,7 +73,7 @@ export default class NotaryContactForm extends Vue {
     }
   }
 
-  @Emit('notaryinfo-update')
+  @Emit('notarycontact-update')
   emitNotaryContact () {
     this.isFormValid()
     return this.notaryContact
