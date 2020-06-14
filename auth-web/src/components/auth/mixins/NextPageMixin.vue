@@ -80,6 +80,25 @@ export default class NextPageMixin extends Vue {
           nextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
         }
         return `/${nextStep}`
+      case LoginSource.BCEID:
+        // eslint-disable-next-line no-console
+        let bceditNextStep = '/'
+        // Redirect to TOS if no terms accepted
+        // for invited users , handle user profile
+        // Redirect to create team if no orgs
+        // Redirect to dashboard otherwise
+        if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
+          bceditNextStep = Pages.USER_PROFILE_TERMS
+        } else if (!this.currentOrganization && !this.currentMembership) {
+          bceditNextStep = Pages.CREATE_EXTRAPROV_ACCOUNT
+        } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
+          bceditNextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
+        } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
+          bceditNextStep = `${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}`
+        } else {
+          bceditNextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
+        }
+        return `/${bceditNextStep}`
       default:
         return `/${Pages.HOME}`
     }

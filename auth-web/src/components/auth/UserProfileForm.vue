@@ -229,7 +229,8 @@ import { mask } from 'vue-the-mask'
       [
         'createUserContact',
         'updateUserContact',
-        'getUserProfile'
+        'getUserProfile',
+        'createAffidavit'
       ]),
     ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization'])
   }
@@ -238,6 +239,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private readonly createUserContact!: (contact: Contact) => Contact
     private readonly updateUserContact!: (contact: Contact) => Contact
     private readonly getUserProfile!: (identifer: string) => User
+    private readonly createAffidavit!: () => User
     private firstName = ''
     private lastName = ''
     private emailAddress = ''
@@ -321,32 +323,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
           phoneExtension: this.extension
         }
         if (this.stepForward) { // On stepper ;so Save the org
-          try {
-            const organization = await this.createOrg()
-            await this.saveOrUpdateContact(contact)
-            await this.getUserProfile('@me')
-            await this.syncOrganization(organization.id)
-            await this.syncMembership(organization.id)
-            this.$store.commit('updateHeader')
-            this.$router.push('/setup-account-success')
-          } catch (err) {
-            switch (err.response.status) {
-              case 409:
-                this.formError =
-                        'An account with this name already exists. Try a different account name.'
-                break
-              case 400:
-                if (err.response.data.code === 'MAX_NUMBER_OF_ORGS_LIMIT') {
-                  this.formError = 'Maximum number of accounts reached'
-                } else {
-                  this.formError = 'Invalid account name'
-                }
-                break
-              default:
-                this.formError =
-                        'An error occurred while attempting to create your account.'
-            }
-          }
+          this.createAccount(contact)
         } else {
           await this.saveOrUpdateContact(contact)
           await this.getUserProfile('@me')
@@ -357,6 +334,37 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
             return
           }
           this.redirectToNext()
+        }
+      }
+    }
+
+    private async createAccount (contact:Contact) {
+      try {
+        // for bceid , create affidavit first
+        await this.createAffidavit()
+        const organization = await this.createOrg()
+        await this.saveOrUpdateContact(contact)
+        await this.getUserProfile('@me')
+        await this.syncOrganization(organization.id)
+        await this.syncMembership(organization.id)
+        this.$store.commit('updateHeader')
+        this.$router.push('/setup-account-success')
+      } catch (err) {
+        switch (err.response.status) {
+          case 409:
+            this.formError =
+                    'An account with this name already exists. Try a different account name.'
+            break
+          case 400:
+            if (err.response.data.code === 'MAX_NUMBER_OF_ORGS_LIMIT') {
+              this.formError = 'Maximum number of accounts reached'
+            } else {
+              this.formError = 'Invalid account name'
+            }
+            break
+          default:
+            this.formError =
+                    'An error occurred while attempting to create your account.'
         }
       }
     }
