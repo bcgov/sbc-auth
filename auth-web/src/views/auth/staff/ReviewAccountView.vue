@@ -121,11 +121,11 @@
             <v-divider/>
             <v-row class="my-6">
               <v-col>
-                <v-btn large outlined color="success" class="mr-3">Approve</v-btn>
-                <v-btn large outlined color="red">Reject</v-btn>
+                <v-btn outlined color="success" class="mr-3">Approve</v-btn>
+                <v-btn outlined color="red">Reject</v-btn>
               </v-col>
               <v-col class="d-flex justify-end">
-                <v-btn large depressed class="grey lighten-3"><b>DONE</b></v-btn>
+                <v-btn depressed class="grey lighten-3"><b>DONE</b></v-btn>
               </v-col>
             </v-row>
           </div>
