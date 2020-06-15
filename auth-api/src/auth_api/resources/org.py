@@ -21,14 +21,14 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import AccountPaymentSettingsSchema, InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
-from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Affidavit as AffidavitService
+from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import AccessType, ChangeType, NotificationType, Status, AffidavitStatus
+from auth_api.utils.enums import AccessType, AffidavitStatus, ChangeType, NotificationType, Status
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF_ADMIN, USER, Role
 from auth_api.utils.util import cors_preflight
 
@@ -457,7 +457,7 @@ class OrgAdminAffidavits(Resource):
     def get(org_id):
         """Get the affidavit for the admin who created the account."""
         try:
-            response, status = AffidavitService.find_affidavit_by_org_id(org_id=org_id).as_dict(),\
+            response, status = AffidavitService.find_affidavit_by_org_id(org_id=org_id),\
                 http_status.HTTP_200_OK
 
         except BusinessException as exception:
