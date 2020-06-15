@@ -28,6 +28,7 @@ import PaymentView from '@/views/pay/PaymentView.vue'
 import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
 import RequestNameView from '@/views/auth/RequestNameView.vue'
+import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
 import { RouteConfig } from 'vue-router'
 import SearchBusinessView from '@/views/auth/staff/SearchBusinessView.vue'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
@@ -163,6 +164,12 @@ export function getRoutes (): RouteConfig[] {
       name: 'setup-account-success',
       component: AccountCreationSuccessView,
       meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/review-account',
+      name: 'review-account',
+      component: ReviewAccountView,
+      meta: { requiresAuth: true, disabledRoles: [Role.Basic, Role.Public] }
     },
     {
       path: '/userprofile/:token?',
