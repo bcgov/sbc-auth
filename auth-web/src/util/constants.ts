@@ -32,6 +32,7 @@ export enum Pages {
     CREATE_EXTRAPROV_ACCOUNT = 'setup-extra-prov-account',
     DUPLICATE_TEAM_MESAGE = 'duplicateteam',
     PENDING_APPROVAL = 'pendingapproval',
+    PENDING_AFFIDAVIT_APPROVAL = 'pendingaffidavitapproval',
     MAIN = 'account',
     SIGNIN = 'signin',
     SIGNOUT = 'signout',
