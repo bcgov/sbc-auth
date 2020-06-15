@@ -1,7 +1,7 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
 import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
-import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
+import { Member, MembershipStatus, MembershipType, OrgStatus, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
@@ -80,6 +80,26 @@ export default class NextPageMixin extends Vue {
           nextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
         }
         return `/${nextStep}`
+      case LoginSource.BCEID:
+        let bceditNextStep = '/'
+        // Redirect to TOS if no terms accepted
+        // for invited users , handle user profile
+        // Redirect to create team if no orgs
+        // Redirect to dashboard otherwise
+        if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
+          bceditNextStep = Pages.USER_PROFILE_TERMS
+        } else if (!this.currentOrganization && !this.currentMembership) {
+          bceditNextStep = Pages.CREATE_EXTRAPROV_ACCOUNT
+        } else if (this.currentOrganization && this.currentOrganization.statusCode === OrgStatus.PendingAffidavitReview) {
+          bceditNextStep = `${Pages.PENDING_AFFIDAVIT_APPROVAL}/${this.currentAccountSettings?.label}`
+        } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
+          bceditNextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
+        } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
+          bceditNextStep = `${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}`
+        } else {
+          bceditNextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
+        }
+        return `/${bceditNextStep}`
       default:
         return `/${Pages.HOME}`
     }
@@ -109,10 +129,12 @@ export default class NextPageMixin extends Vue {
   }
 
   protected async syncUser () {
+    // eslint-disable-next-line no-console
     this.setCurrentAccountSettings(this.getAccountFromSession())
     await this.syncUserProfile()
     if (this.currentAccountSettings) {
       await this.syncMembership(this.currentAccountSettings.id)
+      // await this.syncOrganization(this.currentAccountSettings.id)
       if (this.currentMembership.membershipStatus === MembershipStatus.Active) {
         await this.syncOrganization(this.currentAccountSettings.id)
       } else {
