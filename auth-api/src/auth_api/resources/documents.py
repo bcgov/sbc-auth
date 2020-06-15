@@ -20,6 +20,7 @@ from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.services import Documents as DocumentService
+from auth_api.services.minio import MinioService
 from auth_api.tracer import Tracer
 from auth_api.utils.enums import AccessType, DocumentType
 from auth_api.utils.util import cors_preflight
@@ -53,6 +54,24 @@ class Documents(Resource):
             else:
                 response, status = {'message': 'The requested invitation could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+
+@cors_preflight('GET,OPTIONS')
+@API.route('/<string:file_name>/signatures', methods=['GET', 'OPTIONS'])
+class DocumentSignature(Resource):
+    """Resource for managing Terms Of Use."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def get(file_name: str):
+        """Return the latest terms of use."""
+        try:
+            response, status = MinioService.create_signed_put_url(file_name), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
