@@ -1,11 +1,8 @@
+import { Address } from '@/models/address'
+
 export interface NotaryInformation {
     notaryName?: string
-    city?: string
-    country?: string
-    street?: string
-    streetAdditional?: string
-    postalCode?: string
-    region?: string
+    address?:Address
     key?: string
 }
 

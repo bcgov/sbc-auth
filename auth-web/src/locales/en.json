@@ -72,5 +72,7 @@
   "passwordResetFailureTitle": "An error has occured",
   "passwordResetFailureText": "An error occurred while attempting to reset this password.\nPlease try again later.",
   "tos_updated": "We have updated our Terms of Use. Please review and accept the new terms to proceed.",
-  "createBCRegistriesAccount": "Create a BC Registries Account"
+  "createBCRegistriesAccount": "Create a BC Registries Account",
+  "pendingAffidavitReviewTitle": "Thanks for creating the account {team} at BC Registries & Online Services.",
+  "pendingAffidvitReviewMessage": "Once your account has been reviewed and approved you will receive\n\nan email allowing you to activate and manage the account. \n\nPlease allow 5 business days for this process."
 }
