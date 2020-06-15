@@ -14,7 +14,7 @@
 """Role definitions."""
 from enum import Enum
 
-from .enums import Status
+from .enums import Status, OrgStatus
 
 
 class Role(Enum):
@@ -39,6 +39,7 @@ USER = 'USER'
 STAFF_ADMIN = 'STAFF_ADMIN'
 
 VALID_STATUSES = (Status.ACTIVE.value, Status.PENDING_APPROVAL.value)
+VALID_ORG_STATUSES = (OrgStatus.ACTIVE.value, OrgStatus.PENDING_AFFIDAVIT_REVIEW.value)
 
 CLIENT_ADMIN_ROLES = (COORDINATOR, ADMIN)
 CLIENT_AUTH_ROLES = (*CLIENT_ADMIN_ROLES, USER)
