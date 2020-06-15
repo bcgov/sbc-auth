@@ -51,16 +51,18 @@
         >
         </v-text-field>
       </fieldset>
-      <BaseAddress
-              :inputAddress="currentOrgAddress"
-              @key-down="keyDown()"
-              @address-update="updateAddress"
-              @is-form-valid="checkBaseAddressValidity"
-              v-if="isPremiumAccount && currentOrgAddress"
-              v-can:CHANGE_ADDRESS.disable
-              :key="addressKey"
-      >
-      </BaseAddress>
+      <template v-if="isPremiumAccount && currentOrgAddress">
+        <h4 class="mb-4">Mailing Address</h4>
+        <BaseAddress
+                :inputAddress="currentOrgAddress"
+                @key-down="keyDown()"
+                @address-update="updateAddress"
+                @is-form-valid="checkBaseAddressValidity"
+                v-can:CHANGE_ADDRESS.disable
+                :key="addressKey"
+        >
+        </BaseAddress>
+      </template>
 
       <v-divider class="mt-3 mb-10"></v-divider>
 
