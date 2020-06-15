@@ -210,12 +210,8 @@ export default class HomeViewDev extends Vue {
   // Hero Banner
   .hero-banner {
     color: $gray9;
-    min-height: 550px;
+    /*min-height: 550px;*/
     background-color: #ffffff;
-    background-image: url('../../assets/img/hero-img-min.jpg');
-    background-position:  center;
-    background-size: 100% 110%;
-    background-repeat: no-repeat;
 
     h1 {
       margin-bottom: 1.5rem;
@@ -244,6 +240,11 @@ export default class HomeViewDev extends Vue {
     .container {
       padding-top: 3rem;
       padding-bottom: 3.75rem;
+      background-image: url('../../assets/img/hero-img-min.jpg');
+      background-position:  bottom right;
+      background-size: 90% 105%;
+      background-repeat: no-repeat;
+      box-shadow: -10px 0 10px 0 #ffffff inset;
     }
   }
 
