@@ -26,7 +26,7 @@ export default class UserModule extends VuexModule {
   termsOfUse: TermsOfUseDocument = undefined
   notaryInformation: NotaryInformation = undefined
   notaryContact: NotaryContact = undefined
-  documentId:String = ''
+  documentId:string = ''
 
   redirectAfterLoginUrl: string = ''
   roleInfos: RoleInfo[] = undefined
@@ -42,11 +42,11 @@ export default class UserModule extends VuexModule {
   }
   @Mutation
   public setNotaryInformation (notaryInformation: NotaryInformation) {
-    this.notaryInformation = notaryInformation
+    this.notaryInformation = JSON.parse(JSON.stringify(notaryInformation))
   }
   @Mutation
   public setNotaryContact (notaryContact: NotaryContact) {
-    this.notaryContact = notaryContact
+    this.notaryContact = JSON.parse(JSON.stringify(notaryContact))
   }
 
   @Mutation
@@ -103,11 +103,13 @@ export default class UserModule extends VuexModule {
 
   @Action({ rawError: true })
   public async createAffidavit () {
+    // Handle doc Id logic
     const docId = this.context.state['currentOrganization']
     const notaryContact = this.context.state['notaryContact']
     const notaryInfo = this.context.state['notaryInformation']
     const userId = ConfigHelper.getFromSession(SessionStorageKeys.UserKcId)
-    const userResponse = await UserService.createNotaryDetails(docId, notaryInfo, notaryContact, userId)
+    // TODO handle error cases
+    await UserService.createNotaryDetails(docId, notaryInfo, notaryContact, userId)
   }
 
   @Action({ rawError: true })

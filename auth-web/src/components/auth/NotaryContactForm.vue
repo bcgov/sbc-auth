@@ -12,7 +12,6 @@
             hint="Optional"
             persistent-hint
             v-model.trim="notaryContact.email"
-            @change="emitNotaryContact"
           >
           </v-text-field>
         </v-col>
@@ -26,7 +25,6 @@
             hint="Optional"
             persistent-hint
             v-model.trim="notaryContact.phone"
-            @change="emitNotaryContact"
           >
           </v-text-field>
         </v-col>
@@ -38,7 +36,6 @@
             hint="Optional"
             persistent-hint
             v-model.trim="notaryContact.extension"
-            @change="emitNotaryContact"
           >
           </v-text-field>
         </v-col>
@@ -48,7 +45,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { NotaryContact } from '@/models/notary'
 
 @Component
@@ -67,10 +64,17 @@ export default class NotaryContactForm extends Vue {
 
   mounted () {
     if (this.inputNotaryContact) {
+      // eslint-disable-next-line no-console
+      console.log('----inputNotaryContactinputNotaryContactinputNotaryContact---')
       Object.keys(this.inputNotaryContact).forEach(key => {
         this.$set(this.notaryContact, key, this.inputNotaryContact?.[key])
       })
     }
+  }
+
+  @Watch('notaryContact', { deep: true })
+  async updateContact (val, oldVal) {
+    this.emitNotaryContact()
   }
 
   @Emit('notarycontact-update')
