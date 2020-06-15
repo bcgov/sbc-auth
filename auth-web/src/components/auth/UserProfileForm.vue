@@ -195,7 +195,7 @@
 
 <script lang="ts">
 
-import { Account, Pages, Role } from '@/util/constants'
+import { Account, LoginSource, Pages, Role } from '@/util/constants'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
@@ -341,7 +341,11 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private async createAccount (contact:Contact) {
       try {
         // for bceid , create affidavit first
-        await this.createAffidavit()
+        // TODO implement checks for bceid
+        if (this.currentUser?.loginSource === LoginSource.BCEID) {
+          await this.createAffidavit()
+        }
+
         const organization = await this.createOrg()
         await this.saveOrUpdateContact(contact)
         await this.getUserProfile('@me')
