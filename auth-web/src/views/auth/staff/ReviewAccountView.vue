@@ -153,10 +153,12 @@
 </template>
 
 <script lang="ts">
+import Component from 'vue-class-component'
 import { Organization } from '@/models/Organization'
 import { User } from '@/models/user'
 import Vue from 'vue'
 
+@Component({})
 export default class ReviewAccountView extends Vue {
   // TODO - remove these stub objects and replace with actual data from store
   private account: Organization = {
