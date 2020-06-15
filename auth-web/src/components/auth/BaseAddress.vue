@@ -11,7 +11,6 @@
             :rules="rules.streetAddress"
             :disabled="disabled"
             v-model.trim="address.street"
-            @change="emitAddress"
             @keydown="emitKeyDown"
           >
           </v-text-field>
@@ -26,7 +25,6 @@
             :disabled="disabled"
             :rules="rules.city"
             v-model.trim="address.city"
-            @change="emitAddress"
             @keydown="emitKeyDown"
           >
           </v-text-field>
@@ -39,7 +37,6 @@
             :disabled="disabled"
             :rules="rules.province"
             v-model.trim="address.region"
-            @change="emitAddress"
             @keydown="emitKeyDown"
           >
           </v-text-field>
@@ -52,7 +49,6 @@
             :disabled="disabled"
             :rules="rules.postalCode"
             v-model.trim="address.postalCode"
-            @change="emitAddress"
             @keydown="emitKeyDown"
           >
           </v-text-field>
@@ -67,7 +63,6 @@
             :disabled="disabled"
             :rules="rules.country"
             v-model.trim="address.country"
-            @change="emitAddress"
             @keydown="emitKeyDown"
           >
           </v-text-field>
@@ -78,7 +73,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Address } from '@/models/address'
 
 @Component({
@@ -108,6 +103,11 @@ export default class BaseAddress extends Vue {
         this.$set(this.address, key, this.inputAddress?.[key])
       })
     }
+  }
+
+  @Watch('address', { deep: true })
+  async updateAddress (val, oldVal) {
+    this.emitAddress()
   }
 
   @Emit('address-update')
