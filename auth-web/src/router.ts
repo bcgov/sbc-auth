@@ -1,5 +1,5 @@
-import { LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
-import { Member, MembershipStatus, Organization } from '@/models/Organization'
+import { Account, LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
+import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import Router, { Route, RouteConfig } from 'vue-router'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
@@ -109,7 +109,10 @@ export function getRoutes (): RouteConfig[] {
         {
           path: 'transactions',
           name: 'transactions',
-          component: transaction
+          component: transaction,
+          meta: {
+            isPremiumOnly: true
+          }
         }
       ]
     },
@@ -176,6 +179,18 @@ router.beforeEach((to, from, next) => {
         path: '/unauthorized',
         query: { redirect: to.fullPath }
       })
+    }
+    if (to.matched.some(record => record.meta.isPremiumOnly)) {
+      const currentOrganization: Organization = (store.state as any)?.org?.currentOrganization
+      const currentMembership: Member = (store.state as any)?.org?.currentMembership
+      // redirect to unauthorized page if the account selected is not Premium
+      if (!(currentOrganization?.orgType === Account.PREMIUM &&
+        [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.membershipTypeCode))) {
+        return next({
+          path: '/unauthorized',
+          query: { redirect: to.fullPath }
+        })
+      }
     }
   }
 
