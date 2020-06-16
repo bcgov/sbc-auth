@@ -1,0 +1,4 @@
+include requirements/prod.txt
+include logging.conf
+include LICENSE
+include README.md
