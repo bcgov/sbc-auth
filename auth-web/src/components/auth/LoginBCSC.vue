@@ -29,6 +29,3 @@ export default class LoginBCSC extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-</style>

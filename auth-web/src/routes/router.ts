@@ -47,9 +47,9 @@ function mapReturnPayVars (route: any) {
   }
 }
 
+// Feature Flagging HomeView Components
+// For Development only
 async function getFeatureFlag () {
-  // Feature Flagging HomeView Components
-  // For Development only
   const flagCondition = await LaunchDarklyService.getFlag('incorporations-launch-feature')
   return flagCondition
 }
