@@ -110,12 +110,11 @@ export default class RequestNameView extends Vue {
 
     .status-link {
       font-size: 1rem;
-      font-weight: bold;
-      color: $BCgoveBueText1 !important;
+      color: $BCgoveBueText1;
     }
 
     .status-link:hover {
-      color: $BCgoveBueText2 !important;
+      color: $BCgoveBueText2;
     }
   }
 </style>

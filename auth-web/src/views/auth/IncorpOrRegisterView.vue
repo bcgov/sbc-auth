@@ -49,7 +49,9 @@
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
-        <v-img src="../../assets/img/Step3_Incorporate_x2.png" aspect-ratio="1.2" contain></v-img>
+        <a href="GO SOMEWHERE">
+          <v-img src="../../assets/img/Step3_Incorporate_x2.png" aspect-ratio="1.2" contain></v-img>
+        </a>
       </v-col>
     </v-row>
   </v-container>
@@ -80,7 +82,7 @@ export default class IncorpOrRegisterView extends Vue {
   private userProfile: User
 
   private login (): void {
-    this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
+    this.$router.push(`/signin/bcsc/`)
   }
 
   @Emit('account-dialog')
@@ -125,6 +127,7 @@ export default class IncorpOrRegisterView extends Vue {
 
     .v-btn {
       font-weight: bold;
+      color: $BCgovBlue5;
     }
 
     .incorporate-btns {
@@ -137,11 +140,10 @@ export default class IncorpOrRegisterView extends Vue {
 
     .create-account-link {
       font-size: 1rem;
-      font-weight: bold;
-      color: $BCgoveBueText1 !important;
+      color: $BCgoveBueText1;
 
       :hover {
-        color: $BCgoveBueText2 !important;
+        color: $BCgoveBueText2;
       }
     }
   }

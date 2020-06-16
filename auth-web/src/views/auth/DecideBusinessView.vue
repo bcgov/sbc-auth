@@ -81,11 +81,11 @@ export default class DecideBusinessView extends Vue {
 
     .learn-more-link {
       font-size: 1rem;
-      color: $BCgoveBueText1 !important;
+      color: $BCgoveBueText1;
     }
 
     .learn-more-link:hover {
-      color: $BCgoveBueText2 !important;
+      color: $BCgoveBueText2;
     }
   }
 </style>

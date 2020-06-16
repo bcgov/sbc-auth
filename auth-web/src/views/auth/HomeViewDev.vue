@@ -38,6 +38,11 @@
                      @click="goToManageBusinesses()">
                 Manage an Existing Business
               </v-btn>
+              <p class="mt-3">
+                <a @click="accountDialog = true" class="create-account-link">
+                  <u>Add another BC Registries Account</u>
+                </a>
+              </p>
             </div>
             <!-- Non-authenticated -->
             <div v-else>
@@ -176,7 +181,7 @@ export default class HomeViewDev extends Vue {
   }
 
   private login () {
-    this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
+    this.$router.push(`/signin/bcsc/`)
   }
 
   mounted () {

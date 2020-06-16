@@ -26,21 +26,24 @@
             @click="emitManageBusinesses()">
             Manage an Existing Business
           </v-btn>
-          <v-btn v-else large color="#fcba19" @click="login()" class="my-5">
-            Log in with BC Services Card
-          </v-btn>
-          <p>New to BC Registries? <a @click="emitAccountDialog()" class="create-account-link">
-            <u>Create a BC Registries Account</u></a>
-          </p>
+          <template v-else>
+            <v-btn large color="#fcba19" @click="login()" class="my-5">
+              Log in with BC Services Card
+            </v-btn>
+            <p>New to BC Registries? <a @click="emitAccountDialog()" class="create-account-link">
+              <u>Create a BC Registries Account</u></a>
+            </p>
+          </template>
           <learn-more-button
-           :redirect-url="'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business' +
-            '-management/permits-licences-and-registration/registries-guides/info_36_com_-_maintaining_your_bc_company.pdf'"
+           :redirect-url="learnMoreUrl"
           />
         </div>
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
-        <v-img src="../../assets/img/Step4_Maintain_x2.png" aspect-ratio="1.2" contain></v-img>
+        <a :href="learnMoreUrl" target="_blank">
+          <v-img src="../../assets/img/Step4_Maintain_x2.png" aspect-ratio="1.2" contain></v-img>
+        </a>
       </v-col>
     </v-row>
   </v-container>
@@ -48,16 +51,20 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import ContactUsTooltip from '@/components/auth/common/ContactUsTooltip.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import { Pages } from '@/util/constants'
 import { User } from '@/models/user'
 
 @Component({
   components: {
+    ContactUsTooltip,
     LearnMoreButton
   }
 })
 export default class MaintainBusinessView extends Vue {
+  private learnMoreUrl = 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business' +
+    '-management/permits-licences-and-registration/registries-guides/info_36_com_-_maintaining_your_bc_company.pdf'
   private bulletPoints: Array<any> = [
     { text: 'Once your business is incorporated or registered you are required to keep information about your business up to date with the Registry.' },
     { text: 'By managing your business through your BC Registry account you can:',
@@ -73,7 +80,7 @@ export default class MaintainBusinessView extends Vue {
   private userProfile: User
 
   private login (): void {
-    this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
+    this.$router.push(`/signin/bcsc/`)
   }
 
   @Emit('account-dialog')
@@ -121,17 +128,17 @@ export default class MaintainBusinessView extends Vue {
       .v-btn {
         max-width: 250px;
         font-weight: bold;
+        color: $BCgovBlue5;
       }
     }
 
     .create-account-link {
       font-size: 1rem;
-      font-weight: bold;
-      color: $BCgoveBueText1 !important;
+      color: $BCgoveBueText1;
     }
 
     .create-account-link:hover {
-      color: $BCgoveBueText2 !important;
+      color: $BCgoveBueText2;
     }
   }
 </style>

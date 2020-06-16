@@ -47,6 +47,13 @@ function mapReturnPayVars (route: any) {
   }
 }
 
+async function getFeatureFlag () {
+  // Feature Flagging HomeView Components
+  // For Development only
+  const flagCondition = await LaunchDarklyService.getFlag('incorporations-launch-feature')
+  return flagCondition
+}
+
 export function getRoutes (): RouteConfig[] {
   const accountSettings = () => import(/* webpackChunkName: "account-settings" */ '../views/auth/AccountSettings.vue')
   const accountInfo = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/AccountInfo.vue')
@@ -59,7 +66,7 @@ export function getRoutes (): RouteConfig[] {
       name: 'home',
       component: getEnvHomeView(),
       children: getEnvChildRoutes(),
-      meta: { showNavBar: !flagCondition }
+      meta: { showNavBar: !getFeatureFlag }
     },
     {
       path: '/business',
@@ -324,18 +331,14 @@ export function getRoutes (): RouteConfig[] {
   return routes
 }
 
-// Feature Flagging HomeView Components
-// For Development only
-const flagCondition = LaunchDarklyService.getFlag('incorporations-launch-feature')
-
 // Get the correct Homeview depending on Environment
 const getEnvHomeView = () => {
-  return flagCondition ? HomeViewDev : HomeView
+  return getFeatureFlag ? HomeViewDev : HomeView
 }
 
 // Get the child routes depending on environment
 const getEnvChildRoutes = () => {
-  return flagCondition ? [
+  return getFeatureFlag ? [
     {
       path: '',
       redirect: 'decide-business'
