@@ -10,7 +10,6 @@
             :rules="rules.notaryName"
             :disabled="disabled"
             v-model.trim="notaryInfo.notaryName"
-            @change="emitNotaryInformation"
           >
           </v-text-field>
         </v-col>
@@ -26,7 +25,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Address } from '@/models/address'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import { NotaryInformation } from '@/models/notary'
@@ -76,9 +75,14 @@ export default class NotaryInformationForm extends Vue {
       Object.keys(this.inputNotaryInfo.address).forEach(key => {
         this.$set(this.address, key, this.inputNotaryInfo?.address?.[key])
       })
-      // eslint-disable-next-line no-console
-      console.log('json--', JSON.stringify(this.address))
     }
+  }
+
+  @Watch('notaryInfo', { deep: true })
+  async updateNotary (val, oldVal) {
+    // eslint-disable-next-line no-console
+    console.log(val, oldVal)
+    this.emitNotaryInformation()
   }
 
   @Emit('notaryinfo-update')
@@ -93,7 +97,7 @@ export default class NotaryInformationForm extends Vue {
 
   @Emit('is-form-valid')
   isFormValid () {
-    return this.$refs.notaryInformationForm.validate()
+    return this.$refs.notaryInformationForm.validate() && this.isBaseAddressValid
   }
 }
 </script>
