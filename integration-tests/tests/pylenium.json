@@ -1,0 +1,27 @@
+{
+  "driver": {
+    "browser": "chrome",
+    "remote_url": "http://localhost:4444/wd/hub",
+    "wait_time": 60,
+    "page_load_wait_time": 60,
+    "options": [
+      "headless",
+      "incognito",
+      "no-sandbox"
+    ],
+    "capabilities": {},
+    "version": "latest",
+    "experimental_options": null,
+    "extension_paths": []
+  },
+  "logging": {
+    "screenshots_on": true,
+    "pylog_level": "debug"
+  },
+  "viewport": {
+    "maximize": true,
+    "width": 1440,
+    "height": 900,
+    "orientation": "portrait"
+  }
+}

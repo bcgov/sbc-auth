@@ -1,0 +1,66 @@
+name: Auth Integration Testing DEV
+
+on:
+  schedule:
+    # At minute 1 past every 4th hour.
+    - cron: "01 */4 * * *"
+
+jobs:
+  auth-integration-test-dev:
+    runs-on: ubuntu-latest
+    if: github.repository == 'bcgov/sbc-auth'
+
+    env:
+      TAG_NAME: dev
+    strategy:
+      matrix:
+        python-version: [3.8]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install tools
+        run: |
+          ./scripts/install_tools.sh
+          oc version
+          op --version
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Set Environement Variables
+        working-directory: .
+        run: |
+          vaults='[{"vault": "relationship","application": ["integration-test"]}]'
+          ./scripts/1pass_env.sh ${{ secrets.op_parameters }} -e "${TAG_NAME}" -v "${vaults}"
+      - name: Get pip cache dir
+        id: pip-cache
+        run: |
+          echo "::set-output name=dir::$(pip cache dir)"
+      - name: pip cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('./integration-tests/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install
+        working-directory: ./integration-tests
+        if: steps.pip-cache.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install .
+      - name: Run Integration test
+        working-directory: ./integration-tests
+        run: |
+          export PYTHONPATH=./tests/
+          pytest
+      - name: Rocket.Chat Notification
+        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+        if: failure()
+        with:
+          type: ${{ job.status }}
+          job_name: "*Dev* Integration Testing failed."
+          channel: "#relationship-developers"
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          token: ${{ secrets.GITHUB_TOKEN }}
