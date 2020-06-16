@@ -5,7 +5,7 @@
       when authenticated.
     </p>
     <h4 class="my-4">Attach your Notarized Affidavit</h4>
-    <FileUploadPreview @file-selected="fileSelected"></FileUploadPreview>
+    <FileUploadPreview @file-selected="fileSelected" v-bind:input-file="affidavitDoc"></FileUploadPreview>
     <NotaryInformationForm
       :input-notary-info="notaryInformation"
       @notaryinfo-update="updateNotaryInformation"
@@ -80,18 +80,17 @@ import { getModule } from 'vuex-module-decorators'
       'userProfile',
       'currentUser',
       'notaryInformation',
-      'notaryContact'
+      'notaryContact',
+      'affidavitDoc'
     ])
   },
   methods: {
     ...mapMutations('org', ['setCurrentOrganization', 'setOrgName']),
-    ...mapMutations('user', ['setNotaryInformation', 'setNotaryContact']),
+    ...mapMutations('user', ['setNotaryInformation', 'setNotaryContact', 'setAffidavitDoc']),
     ...mapActions('org', [
-      'createOrg',
-      'syncMembership',
-      'syncOrganization',
-      'isOrgNameAvailable',
-      'changeOrgType'
+    ]),
+    ...mapActions('user', [
+      'uploadPendingDocsToStorage'
     ])
   }
 })
@@ -103,9 +102,14 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
   private isNotaryContactValid: boolean = false
   private isNotaryInformationValid: boolean = false
   private readonly notaryInformation!: NotaryInformation
+  private readonly affidavitDoc!:File
   private readonly notaryContact!: NotaryContact
+  private readonly uploadPendingDocsToStorage!: () => void
   private readonly setNotaryInformation!: (
     notaryInformation: NotaryInformation
+  ) => void
+  private readonly setAffidavitDoc!: (
+          affidavitDoc: File
   ) => void
   private readonly setNotaryContact!: (notaryContact: NotaryContact) => void
   private readonly currentOrganization!: Organization
@@ -119,6 +123,8 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
   }
 
   private async next () {
+    // save the file here so that in the final steps its less network calls to make
+    await this.uploadPendingDocsToStorage()
     this.stepForward(this.currentOrganization?.orgType === Account.PREMIUM)
   }
 
@@ -130,13 +136,12 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
     this.stepBack()
   }
 
-  private goNext () {
+  private async goNext () {
     this.stepForward()
   }
 
   private fileSelected (file) {
-    // eslint-disable-next-line no-console
-    console.log(file)
+    this.setAffidavitDoc(file)
   }
 
   private updateNotaryInformation (notaryInfo: NotaryInformation) {

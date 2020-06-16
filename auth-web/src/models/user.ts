@@ -17,3 +17,8 @@ export interface UserProfileRequestBody {
     username: string
     password: string
 }
+
+export interface DocumentUpload {
+    preSignedUrl: string
+    key: string
+}

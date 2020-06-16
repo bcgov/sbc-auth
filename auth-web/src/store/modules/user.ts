@@ -1,13 +1,14 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { DocumentUpload, User } from '@/models/user'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
+import DocumentService from '@/services/document.services'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import { RoleInfo } from '@/models/Organization'
 import { SessionStorageKeys } from '@/util/constants'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
-import { User } from '@/models/user'
 import UserService from '@/services/user.services'
 
 export interface UserTerms {
@@ -26,7 +27,8 @@ export default class UserModule extends VuexModule {
   termsOfUse: TermsOfUseDocument = undefined
   notaryInformation: NotaryInformation = undefined
   notaryContact: NotaryContact = undefined
-  documentId:string = ''
+  affidavitDocId:string = '' // the guid of the doc which you get from the server side
+  affidavitDoc:File = undefined
 
   redirectAfterLoginUrl: string = ''
   roleInfos: RoleInfo[] = undefined
@@ -34,6 +36,17 @@ export default class UserModule extends VuexModule {
   @Mutation
   public setUserProfile (userProfile: User) {
     this.userProfile = userProfile
+  }
+
+  @Mutation
+  public setAffidavitDocId (affidavitDocId: string) {
+    this.affidavitDocId = affidavitDocId
+  }
+
+  @Mutation
+  public setAffidavitDoc (affidavitDoc: File) {
+    this.affidavitDocId = '' // reset the file id
+    this.affidavitDoc = affidavitDoc
   }
 
   @Mutation
@@ -110,6 +123,19 @@ export default class UserModule extends VuexModule {
     const userId = ConfigHelper.getFromSession(SessionStorageKeys.UserKcId)
     // TODO handle error cases
     await UserService.createNotaryDetails(docId, notaryInfo, notaryContact, userId)
+  }
+
+  @Action({ rawError: true })
+  public async uploadPendingDocsToStorage () {
+    const isPendingUpload = !this.affidavitDocId
+    if (isPendingUpload) {
+      const file = this.context.state['affidavitDoc']
+      const response = await DocumentService.getPresignedUrl(file.name)
+      const doc:DocumentUpload = response?.data
+      this.context.commit('setAffidavitDocId', doc.key) // need this while creating org
+      const userId = ConfigHelper.getFromSession(SessionStorageKeys.UserKcId)
+      const res = await DocumentService.uplpoadToUrl(doc.preSignedUrl, file, doc.key, userId)
+    }
   }
 
   @Action({ rawError: true })
