@@ -12,7 +12,7 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <slot name="actions">
-        <v-btn large color="primary" @click="login()">Log in / Create Account</v-btn>
+        <v-btn large color="primary" @click="login()">Log in</v-btn>
       </slot>
     </v-card-actions>
   </v-card>

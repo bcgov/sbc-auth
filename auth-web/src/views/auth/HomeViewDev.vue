@@ -38,11 +38,6 @@
                      @click="goToManageBusinesses()">
                 Manage an Existing Business
               </v-btn>
-              <p class="mt-3">
-                <a @click="accountDialog = true" class="create-account-link">
-                  <u>Add another BC Registries Account</u>
-                </a>
-              </p>
             </div>
             <!-- Non-authenticated -->
             <div v-else>
@@ -120,7 +115,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { LoginSource, Pages } from '@/util/constants'
+import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus } from '@/models/Organization'
 import { mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'

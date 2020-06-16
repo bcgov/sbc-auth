@@ -44,7 +44,7 @@
         <v-btn large color="#fcba19" @click="emitLogin()" class="mt-5">
           Log in with BC Services Card
         </v-btn>
-        <p class="my-5">New to BC Registries?
+        <p class="my-5" id="create-account-link">New to BC Registries?
           <a @click="emitAccountDialog()" class="link"><u>Create a BC Registries Account</u></a>
         </p>
       </template>
