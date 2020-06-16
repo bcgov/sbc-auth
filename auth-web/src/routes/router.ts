@@ -108,7 +108,10 @@ export function getRoutes (): RouteConfig[] {
         {
           path: 'transactions',
           name: 'transactions',
-          component: transaction
+          component: transaction,
+          meta: {
+            isPremiumOnly: true
+          }
         }
       ]
     },
