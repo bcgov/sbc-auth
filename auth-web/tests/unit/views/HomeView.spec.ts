@@ -21,15 +21,6 @@ const mockSession = {
   'NRO_URL': 'Mock Url'
 }
 
-jest.mock('axios', () => ({
-  get: jest.fn(() => Promise.resolve({ data: { mockSession } })),
-  all: jest.fn(),
-  post: jest.fn(),
-  put: jest.fn()
-}), {
-  virtual: true
-})
-
 describe('HomeView.vue', () => {
   let wrapper: any
   let userModule: any
