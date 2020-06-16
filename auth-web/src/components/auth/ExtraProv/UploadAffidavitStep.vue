@@ -9,12 +9,14 @@
     <NotaryInformationForm
       :input-notary-info="notaryInformation"
       @notaryinfo-update="updateNotaryInformation"
+      @is-form-valid="isNotaryInformationValidFn"
       class="pt-5"
       v-if="notaryInformation"
     ></NotaryInformationForm>
     <NotaryContactForm
       :input-notary-contact="notaryContact"
       @notarycontact-update="updateNotaryContact"
+      @is-form-valid="isNotaryContactValidFn"
       class="pt-5"
     ></NotaryContactForm>
     <v-row class="mt-8">
@@ -29,7 +31,7 @@
           color="primary"
           class="mr-3"
           :loading="saving"
-          :disabled="saving"
+          :disabled="saving || !isNextValid"
           @click="next"
           data-test="next-button"
         >
@@ -97,32 +99,20 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
   private orgStore = getModule(OrgModule, this.$store)
   private userStore = getModule(UserModule, this.$store)
   private errorMessage: string = ''
-  private saving = false
-  private notaryInformation!: NotaryInformation
+  private saving: boolean = false
+  private isNotaryContactValid: boolean = false
+  private isNotaryInformationValid: boolean = false
+  private readonly notaryInformation!: NotaryInformation
   private readonly notaryContact!: NotaryContact
   private readonly setNotaryInformation!: (
     notaryInformation: NotaryInformation
   ) => void
   private readonly setNotaryContact!: (notaryContact: NotaryContact) => void
   private readonly currentOrganization!: Organization
-  private orgName: string = ''
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
 
-  $refs: {
-    createAccountInfoForm: HTMLFormElement
-  }
-
-  private readonly orgNameRules = [(v) => !!v || 'An account name is required']
-
-  private isFormValid (): boolean {
-    return !!this.orgName
-  }
-
   private async mounted () {
-    if (this.currentOrganization) {
-      this.orgName = this.currentOrganization.name
-    }
     if (!this.notaryInformation) {
       this.setNotaryInformation({ notaryName: '', address: {} })
     }
@@ -155,6 +145,20 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
 
   private updateNotaryContact (notaryContact: NotaryContact) {
     this.setNotaryContact(notaryContact)
+  }
+
+  private get isNextValid () {
+    // eslint-disable-next-line no-console
+    console.log(this.isNotaryContactValid, this.isNotaryInformationValid)
+    return this.isNotaryContactValid && this.isNotaryInformationValid
+  }
+
+  private isNotaryContactValidFn (val) {
+    this.isNotaryContactValid = val
+  }
+
+  private isNotaryInformationValidFn (val) {
+    this.isNotaryInformationValid = val
   }
 }
 </script>

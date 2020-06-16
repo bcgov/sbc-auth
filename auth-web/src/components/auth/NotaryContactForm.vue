@@ -64,8 +64,6 @@ export default class NotaryContactForm extends Vue {
 
   mounted () {
     if (this.inputNotaryContact) {
-      // eslint-disable-next-line no-console
-      console.log('----inputNotaryContactinputNotaryContactinputNotaryContact---')
       Object.keys(this.inputNotaryContact).forEach(key => {
         this.$set(this.notaryContact, key, this.inputNotaryContact?.[key])
       })
