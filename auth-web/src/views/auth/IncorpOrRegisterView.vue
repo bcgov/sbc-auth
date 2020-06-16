@@ -37,7 +37,7 @@
         </template>
         <!-- Not Authenticated -->
         <template v-else>
-          <v-btn large color="#fcba19" @click="login()" class="mt-5">
+          <v-btn large color="#fcba19" @click="emitLogin()" class="mt-5">
             Log in with BC Services Card
           </v-btn>
           <p class="my-5">New to BC Registries? <a @click="emitAccountDialog()" class="create-account-link">
@@ -81,9 +81,8 @@ export default class IncorpOrRegisterView extends Vue {
   @Prop()
   private userProfile: User
 
-  private login (): void {
-    this.$router.push(`/signin/bcsc/`)
-  }
+  @Emit('login')
+  private emitLogin () {}
 
   @Emit('account-dialog')
   private emitAccountDialog () {}

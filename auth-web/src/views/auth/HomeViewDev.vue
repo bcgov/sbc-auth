@@ -72,6 +72,7 @@
           <transition name="slide-x-transition">
             <router-view
               :userProfile="userProfile"
+              @login="login()"
               @account-dialog="accountDialog = true"
               @manage-businesses="goToManageBusinesses($event)"/>
           </transition>
@@ -176,7 +177,7 @@ export default class HomeViewDev extends Vue {
   }
 
   private login () {
-    this.$router.push(`/signin/bcsc/`)
+    this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
   }
 
   mounted () {
