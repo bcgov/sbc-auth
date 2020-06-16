@@ -16,7 +16,7 @@
           <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
-              You can choose to incorporate a numbered Benefit Company
+              You can choose to incorporate a <numbered-company-tooltip />
               and start your incorporation immediately.
             </v-list-item-subtitle>
           </v-list-item-content>
@@ -24,21 +24,25 @@
         <!-- Panel Btns -->
         <div class="request-name-info-btns mt-5">
           <v-btn large color="#003366" class="white--text"
-            href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
+                 :href="nroUrl" target="_blank" rel="noopener noreferrer">
             Request a Name
           </v-btn>
           <p class="mt-5">Have an existing Name Request?
-            <a href="https://www.bcregistrynames.gov.bc.ca/nro/nro.htm?_flowId=anonymous-monitor-flow&_flowExecutionKey=e1s1"
+            <a :href="`${nroUrl}nro.htm?_flowId=anonymous-monitor-flow&_flowExecutionKey=e1s1`"
               target="_blank" rel="noopener noreferrer" class="status-link">
               Check your Name Request Status
             </a>
           </p>
-          <LearnMoreButton />
+          <learn-more-button
+            :redirect-url="learnMoreUrl"
+          />
         </div>
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
-        <v-img src="../../assets/img/Step2-Name-Request.png" aspect-ratio="1.2" contain></v-img>
+        <a :href="nroUrl" target="_blank">
+          <v-img src="../../assets/img/Step2_NameRequest_x2.png" aspect-ratio="1.2" contain></v-img>
+        </a>
       </v-col>
     </v-row>
   </v-container>
@@ -46,6 +50,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import ConfigHelper from '@/util/config-helper'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
 
@@ -56,6 +61,9 @@ import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTool
   }
 })
 export default class RequestNameView extends Vue {
+  private nroUrl = ConfigHelper.getNroUrl()
+  private learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/' +
+    'permits-licences/businesses-incorporated-companies/approval-business-name'
   private bulletPoints: Array<any> = [
     { text: 'Create a unique name that ensures the public is not confused or misled by similar corporate names.' },
     { text: 'Submit this name for examination by the Business Registry.' },

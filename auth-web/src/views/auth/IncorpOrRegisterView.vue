@@ -8,7 +8,7 @@
           <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
-              If you have an approved Name Request (NR number), or you want a numbered Benefit Company,
+              If you have an approved Name Request (NR number), or you want a <numbered-company-tooltip />,
               you can start your Incorporation Application.
             </v-list-item-subtitle>
           </v-list-item-content>
@@ -44,11 +44,12 @@
             <u>Create a BC Registries Account</u></a>
           </p>
         </template>
-        <LearnMoreButton />
+        <learn-more-button
+        :redirect-url="'GO SOMEWHERE'"/>
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
-        <v-img src="../../assets/img/Step3-Incorporate-x1.png" aspect-ratio="1.2" contain></v-img>
+        <v-img src="../../assets/img/Step3_Incorporate_x2.png" aspect-ratio="1.2" contain></v-img>
       </v-col>
     </v-row>
   </v-container>

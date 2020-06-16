@@ -16,14 +16,14 @@
 
       <header class="hero-banner">
         <v-container>
-          <h1>Start a Benefit Company And <br> Keep Cooperatives Records up to date</h1>
+          <h1>Start a Benefit Company and <br> Keep Cooperatives Records up to date</h1>
           <p class="my-10">The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
             and organizations in British Columbia.</p>
           <div class="hero-banner__cta-btns">
             <!-- Authenticated -->
             <div v-if="userProfile" class="cta-btns-authenticated">
               <v-btn large color="#003366" class="cta-btn white--text"
-                     href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
+                     :href="nroUrl" target="_blank" rel="noopener noreferrer">
                 Request a Name
               </v-btn>
               <v-btn large color="#003366" class="cta-btn white--text"
@@ -46,7 +46,7 @@
                 Log in with BC Services Card
               </v-btn>
               <v-btn large color="#003366" class="cta-btn ml-4 white--text"
-                     href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
+                    :href="nroUrl" target="_blank" rel="noopener noreferrer">
                 Request a Name
               </v-btn>
               <p class="mt-10">New to BC Registries? <a @click="accountDialog = true" class="create-account-link">
@@ -69,10 +69,12 @@
         <v-container>
           <h2>How does it work?</h2>
           <InfoStepper />
-          <RouterView
-            :userProfile="userProfile"
-            @account-dialog="accountDialog = true"
-            @manage-businesses="goToManageBusinesses($event)"/>
+          <transition name="slide-x-transition">
+            <router-view
+              :userProfile="userProfile"
+              @account-dialog="accountDialog = true"
+              @manage-businesses="goToManageBusinesses($event)"/>
+          </transition>
         </v-container>
       </div>
       <TestimonialQuotes />
@@ -118,6 +120,7 @@ import { Member, MembershipStatus } from '@/models/Organization'
 import { mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import BcscPanel from '@/components/auth/BcscPanel.vue'
+import ConfigHelper from '@/util/config-helper'
 import InfoStepper from '@/components/auth/stepper/InfoStepper.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
@@ -150,6 +153,7 @@ export default class HomeViewDev extends Vue {
   private accountDialog = false
   private isDirSearchUser: boolean = false
   private readonly resetCurrentOrganisation!: () => void
+  private nroUrl = ConfigHelper.getNroUrl()
 
   private get showManageBusinessesBtn (): boolean {
     return this.currentAccountSettings && this.currentMembership?.membershipStatus === MembershipStatus.Active
@@ -210,7 +214,6 @@ export default class HomeViewDev extends Vue {
   // Hero Banner
   .hero-banner {
     color: $gray9;
-    /*min-height: 550px;*/
     background-color: #ffffff;
 
     h1 {

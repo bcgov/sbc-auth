@@ -2,24 +2,26 @@
   <div>
     <v-container id="step-buttons-container">
       <template v-for="(step, index) in steps">
-        <div class="step" :key="index">
+        <div class="step" :key="index"  @click="$router.push(step.to)">
           <v-btn
             fab
             outlined
             class="step__icon"
             active-class="filled no-active"
+            :ripple="false"
             :id=step.id
             color="#1A5A96"
-            :to=step.to>
+            :to="step.to">
             <v-icon>{{step.step}}</v-icon>
           </v-btn>
-          <v-btn class="step__label" active-class="selected no-active" text color="#1A5A96" :to=step.to>
+          <v-btn class="step__label" :ripple="false" active-class="selected no-active" text color="#1A5A96" :to="step.to">
             {{step.text}}
           </v-btn>
           <span :class="{ 'arrow-down': isCurrentStep(step) }"></span>
         </div>
       </template>
     </v-container>
+    <!-- Next Step Button -->
     <div class="next-step-wrapper">
       <span class="next-step-btn" :class="{ 'hide-next-btn': getCurrentStep() === steps.length }" @click="nextStep()">
         <u>Next Step</u><v-icon color="#1A5A96">mdi-menu-right</v-icon>
@@ -89,13 +91,17 @@ export default class Stepper extends Vue {
     display: flex;
   }
 
+  .v-btn:before {
+    background-color: $BCgovBG;
+  }
+
   .v-btn--active.no-active::before {
     opacity: 0 !important;
   }
 
   .filled {
-    background-color: $BCgoveBueText1!important;
-    color: $BCgovBG!important;
+    background-color: $BCgoveBueText1;
+    color: $BCgovBG !important;
   }
 
   .selected {
@@ -110,10 +116,24 @@ export default class Stepper extends Vue {
     align-items: center;
   }
 
+  .step:hover {
+    cursor: pointer;
+
+    .step__icon {
+      color: $BCgovBG !important;
+      background-color: $BCgoveBueText1;
+      opacity: .8;
+    }
+
+    .step__label {
+      color: $BCgovBlue5;
+      opacity: .8;
+      text-decoration: underline;
+    }
+  }
+
   .step__icon {
-    margin-bottom: .5rem;
-    position: relative;
-    font-weight: 400;
+    font-size: 1.5rem
   }
 
   .step__label {

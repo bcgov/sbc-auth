@@ -5,7 +5,9 @@
     </template>
     <v-card class="tooltip-content">
       <h3 class="mb-3">Numbered Benefit Company</h3>
-      <span>Lorem ipsum... some definition of a numbered benefit company would go into this slot here</span>
+      <span>A Benefit Company can choose to use as its name, the incorporation number of the company followed by “B.C.
+        Ltd.” The incorporation number is assigned by the Business Registry after the Incorporation Application is filed
+        and the company is incorporated.</span>
     </v-card>
   </v-tooltip>
 </template>
@@ -27,9 +29,12 @@ export default class NumberedCompanyTooltip extends Vue {
 
   .tooltip {
     background-color: transparent;
+    opacity: 1 !important;
 
     .tooltip-content {
+      min-width: 30rem;
       padding: 2rem;
+      font-size: 0.75rem;
     }
   }
 

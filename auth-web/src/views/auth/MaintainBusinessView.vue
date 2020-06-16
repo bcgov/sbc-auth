@@ -32,12 +32,15 @@
           <p>New to BC Registries? <a @click="emitAccountDialog()" class="create-account-link">
             <u>Create a BC Registries Account</u></a>
           </p>
-          <LearnMoreButton />
+          <learn-more-button
+           :redirect-url="'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business' +
+            '-management/permits-licences-and-registration/registries-guides/info_36_com_-_maintaining_your_bc_company.pdf'"
+          />
         </div>
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
-        <v-img src="../../assets/img/Step4-Maintain-x1.png" aspect-ratio="1.2" contain></v-img>
+        <v-img src="../../assets/img/Step4_Maintain_x2.png" aspect-ratio="1.2" contain></v-img>
       </v-col>
     </v-row>
   </v-container>
