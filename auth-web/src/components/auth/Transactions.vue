@@ -140,12 +140,14 @@
 </template>
 
 <script lang="ts">
+import { Account, Pages } from '@/util/constants'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Member, MembershipType, Organization } from '@/models/Organization'
 import { TransactionFilterParams, TransactionTableList } from '@/models/transaction'
+import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
 import TransactionsDataTable from '@/components/auth/TransactionsDataTable.vue'
-import { mapActions } from 'vuex'
 import moment from 'moment'
 
 const DATEFILTER_CODES = {
@@ -164,10 +166,18 @@ const DATEFILTER_CODES = {
     ...mapActions('org', [
       'getTransactionReport'
     ])
+  },
+  computed: {
+    ...mapState('org', [
+      'currentOrganization',
+      'currentMembership'
+    ])
   }
 })
 export default class Transactions extends Mixins(AccountChangeMixin) {
   @Prop({ default: '' }) private orgId: string;
+  private readonly currentMembership!: Member
+  private readonly currentOrganization!: Organization
   private readonly getTransactionReport!: (filterParams: any) => TransactionTableList
   private showDateFilter: boolean = false
   private dateRangeSelected: any = []
@@ -209,13 +219,19 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   }
 
   private initFilter () {
-    this.initDatePicker()
-    this.dateFilterProp = {}
-    this.dateFilterSelectedIndex = null
-    this.dateRangeSelected = []
-    this.folioNumberSearch = this.folioFilterProp = ''
-    this.filterArray = []
-    this.updateTransactionTableCounter++
+    if (this.isTransactionsAllowed) {
+      this.initDatePicker()
+      this.dateFilterProp = {}
+      this.dateFilterSelectedIndex = null
+      this.dateRangeSelected = []
+      this.folioNumberSearch = this.folioFilterProp = ''
+      this.filterArray = []
+      this.updateTransactionTableCounter++
+    } else {
+      // if the account switing happening when the user is already in the transaction page,
+      // redirect to account info if its a basic account
+      this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
+    }
   }
 
   private get showDateRangeSelected () {
@@ -225,7 +241,7 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
     } else {
       dateText = `<strong>${this.dateFilterSelected?.label}:</strong> 
       ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')} 
-      - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[1], 'MMM DD, YYYY')}`
+        - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[1], 'MMM DD, YYYY')}`
     }
     return (this.dateFilterSelected?.code) ? dateText : '<strong>No dates selected</strong>'
   }
@@ -370,6 +386,11 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
     }
     const downloadData = await this.getTransactionReport(filterParams)
     CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`, 'text/csv')
+  }
+
+  private get isTransactionsAllowed (): boolean {
+    return (this.currentOrganization?.orgType === Account.PREMIUM) &&
+      [MembershipType.Admin, MembershipType.Coordinator].includes(this.currentMembership.membershipTypeCode)
   }
 }
 </script>
