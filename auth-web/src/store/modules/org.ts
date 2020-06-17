@@ -247,7 +247,7 @@ export default class OrgModule extends VuexModule {
 
   @Mutation
   public setCurrentOrganizationAddress (address: Address | undefined) {
-    this.currentOrgAddress = address
+    this.currentOrgAddress = (address) ? JSON.parse(JSON.stringify(address)) : undefined
   }
 
   @Action({ rawError: true })

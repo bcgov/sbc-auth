@@ -21,6 +21,11 @@ export default class UserService {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/users`, {})
   }
 
+  // for bceid users ;the firstname and lastname has to be updated
+  static async updateUserProfile (firstName:string, lastName:string): Promise<AxiosResponse<User>> {
+    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/users`, { firstName: firstName, lastName: lastName })
+  }
+
   static async createContact (contact: Contact): Promise<AxiosResponse<Contact>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/users/contacts`, contact)
   }
