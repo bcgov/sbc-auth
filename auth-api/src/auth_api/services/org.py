@@ -440,14 +440,11 @@ class Org:  # pylint: disable=too-many-public-methods
                 find_affiliations_by_business_identifier(kwargs.get('business_identifier'))
             if affiliation:
                 orgs['orgs'].append(Org(OrgModel.find_by_org_id(affiliation.org_id)).as_dict())
-        elif kwargs.get('org_type', None):
-            org_models = OrgModel.find_by_org_access_type(kwargs.get('org_type'))
+        else:
+            org_models = OrgModel.search_org(kwargs.get('org_type', None), kwargs.get('name', None),
+                                             kwargs.get('status', None))
             for org in org_models:
                 orgs['orgs'].append(Org(org).as_dict())
-        elif kwargs.get('name', None):
-            org_model = OrgModel.find_similar_org_by_name(kwargs.get('name'))
-            if org_model is not None:
-                orgs['orgs'].append(Org(org_model).as_dict())
         return orgs
 
     @staticmethod

@@ -73,6 +73,18 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
         return cls.query.filter_by(id=org_id).first()
 
     @classmethod
+    def search_org(cls, org_type, name, status):
+        """Find all orgs with the given type."""
+        queries = []
+        if org_type:
+            queries.append(Org.access_type == org_type.upper())
+        if name:
+            queries.append(Org.name.ilike(f'%{name}%'))
+        if status:
+            queries.append(Org.status_code == status.upper())
+        return cls.query.filter(*queries).all()
+
+    @classmethod
     def find_by_org_access_type(cls, org_type):
         """Find all orgs with the given type."""
         return cls.query.filter_by(access_type=org_type).all()
