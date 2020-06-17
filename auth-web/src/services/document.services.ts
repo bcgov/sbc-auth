@@ -1,5 +1,6 @@
 import Axios, { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
+import { DocumentUpload } from '@/models/user'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
 
@@ -16,5 +17,26 @@ export default class DocumentService {
         'Accept': 'application/pdf'
       }
     })
+  }
+
+  static async getPresignedUrl (fileName: string): Promise<AxiosResponse<DocumentUpload>> {
+    return axios.get(
+      `${ConfigHelper.getAuthAPIUrl()}/documents/${fileName}/signatures`
+    )
+  }
+
+  static async uplpoadToUrl (url: string, file:File, key:String, userId: string): Promise<AxiosResponse> {
+    var options = {
+      headers: {
+        'Content-Type': file.type,
+        'x-amz-meta-userid': `${userId}`,
+        'x-amz-meta-key': `${key}`,
+        'Content-Disposition': `attachment; filename=${file.name}`
+      }
+    }
+    let response = await axios.put(
+      url, file, options
+    )
+    return response
   }
 }
