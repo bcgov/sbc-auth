@@ -150,6 +150,13 @@ class _Config(object):  # pylint: disable=too-few-public-methods
 
     BCOL_ACCOUNT_LINK_CHECK = os.getenv('BCOL_ACCOUNT_LINK_CHECK', 'True').lower() == 'true'
 
+    # Minio configuration values
+    MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')
+    MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY')
+    MINIO_ACCESS_SECRET = os.getenv('MINIO_ACCESS_SECRET')
+    MINIO_BUCKET_NAME = os.getenv('MINIO_BUCKET_NAME')
+    MINIO_BUCKET_ACCOUNTS = os.getenv('MINIO_BUCKET_ACCOUNTS', 'accounts')
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False
