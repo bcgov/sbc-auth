@@ -2,8 +2,8 @@
   <section id="testimonials-container">
     <v-container class="quote-container">
       <div class="fading">
-        <p>{{quotes[quoteIndex].text}}</p>
-        <p><strong>&ndash; {{quotes[quoteIndex].author}}</strong></p>
+        <p class="quote-text">{{quotes[quoteIndex].text}}</p>
+        <p class="quote-author">&ndash; {{quotes[quoteIndex].author}}</p>
       </div>
     </v-container>
   </section>
@@ -17,16 +17,8 @@ export default class TestimonialQuotes extends Vue {
   private quotes: Array<any> =
     [
       {
-        text: 'We\'re incredibly excited to be able to incorporate as a Benefit Company in BC, it really reflects our values and the role we want to play.',
-        author: 'BC Benefit Company user'
-      },
-      {
-        text: 'This is a placeholder for a second quote.',
-        author: 'BC Benefit Company user'
-      },
-      {
-        text: 'This is a placeholder for third quote.',
-        author: 'BC Benefit Company user'
+        text: 'We are really excited by the idea of incorporating as a Benefit Company, it really makes sense for us and the way we want to run our business.',
+        author: 'Business Founder'
       }
     ]
 
@@ -45,7 +37,7 @@ export default class TestimonialQuotes extends Vue {
 
   #testimonials-container {
     background: #E2E8EE;
-    height: 300px;
+    min-height: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -56,8 +48,8 @@ export default class TestimonialQuotes extends Vue {
     }
 
     .quote-container {
-      padding: 1rem;
-      color: #ffffff;
+      padding: 2rem .5rem 0 .5rem;
+      color: white;
       background: $BCgovBlue5;
       font-size: 1.15rem;
       line-height: 2rem;
@@ -66,8 +58,8 @@ export default class TestimonialQuotes extends Vue {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 150px;
-      width: 50%;
+      min-height: 150px;
+      width: 60%;
     }
 
     @keyframes fading {
@@ -87,6 +79,20 @@ export default class TestimonialQuotes extends Vue {
 
     .fading {
       animation: fading 5s ease-in-out infinite;
+    }
+
+    .quote-text {
+      max-width: 45rem;
+      color: #FFFFFF;
+      font-size: 1.125rem;
+      letter-spacing: 0;
+      line-height: 1.5rem;
+      text-align: center;
+    }
+
+    .quote-author {
+      font-size: .875rem;
+      font-weight: bold;
     }
   }
 
