@@ -159,10 +159,10 @@
 </template>
 
 <script lang="ts">
+import { MembershipType, Organization } from '@/models/Organization'
 import Component from 'vue-class-component'
 import DocumentService from '@/services/document.services'
 import OrgService from '@/services/org.services'
-import { Organization } from '@/models/Organization'
 import { Prop } from 'vue-property-decorator'
 import { User } from '@/models/user'
 import Vue from 'vue'
@@ -172,6 +172,7 @@ export default class ReviewAccountView extends Vue {
   @Prop() orgId: number
   private isLoading: boolean = true
   private accountUnderReview: Organization
+  private accountAdmin: User
 
   // TODO - remove these stub objects and replace with actual data from store
   // private account: Organization = {
@@ -190,11 +191,11 @@ export default class ReviewAccountView extends Vue {
   //   }
   // }
 
-  private accountAdmin: User = {
-    firstname: 'John',
-    lastname: 'Smith',
-    username: 'jsmith'
-  }
+  // private accountAdmin: User = {
+  //   firstname: 'John',
+  //   lastname: 'Smith',
+  //   username: 'jsmith'
+  // }
 
   private notary = {
     name: 'Notary Name',
@@ -211,6 +212,7 @@ export default class ReviewAccountView extends Vue {
 
   private async mounted () {
     this.accountUnderReview = (await OrgService.getOrganization(this.orgId))?.data
+    this.accountAdmin = this.accountUnderReview?.members?.find(member => member.membershipTypeCode === MembershipType.Admin)?.user
     this.isLoading = false
   }
 
