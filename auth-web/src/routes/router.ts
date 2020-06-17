@@ -16,10 +16,8 @@ import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
 import ExtraProvInfoView from '@/views/auth/OutOfProvinceAccountView.vue'
 import ExtraProvincialAccountSetupView from '@/views/auth/ExtraProvincialAccountSetupView.vue'
-import HomeView from '@/views/auth/HomeView.vue'
-import HomeViewDev from '@/views/auth/HomeViewDev.vue'
+import Home from '@/views/auth/Home.vue'
 import IncorpOrRegisterView from '@/views/auth/IncorpOrRegisterView.vue'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import MaintainBusinessView from '@/views/auth/MaintainBusinessView.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
@@ -47,12 +45,6 @@ function mapReturnPayVars (route: any) {
   }
 }
 
-// Feature Flag Function
-async function getFeatureFlag () {
-  const flagCondition = await LaunchDarklyService.getFlag('incorporations-launch-feature')
-  return flagCondition
-}
-
 export function getRoutes (): RouteConfig[] {
   const accountSettings = () => import(/* webpackChunkName: "account-settings" */ '../views/auth/AccountSettings.vue')
   const accountInfo = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/AccountInfo.vue')
@@ -63,9 +55,9 @@ export function getRoutes (): RouteConfig[] {
     {
       path: '/home',
       name: 'home',
-      component: getEnvHomeView(),
+      component: Home,
       children: getEnvChildRoutes(),
-      meta: { showNavBar: getFeatureFlag() }
+      meta: { showNavBar: !ConfigHelper.getLaunchFeatureFlag() }
     },
     {
       path: '/business',
@@ -330,14 +322,9 @@ export function getRoutes (): RouteConfig[] {
   return routes
 }
 
-// Get the correct Homeview depending on Environment
-const getEnvHomeView = () => {
-  return getFeatureFlag() ? HomeViewDev : HomeView
-}
-
 // Get the child routes depending on environment
 const getEnvChildRoutes = () => {
-  return getFeatureFlag() ? [
+  return ConfigHelper.getLaunchFeatureFlag() ? [
     {
       path: '',
       redirect: 'decide-business'

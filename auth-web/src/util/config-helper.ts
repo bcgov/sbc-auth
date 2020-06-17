@@ -1,4 +1,5 @@
 import Axios from 'axios'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { SessionStorageKeys } from './constants'
 
 /**
@@ -97,5 +98,9 @@ export default class ConfigHelper {
 
   static accountSettingsRoute () {
     return `/account/${JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}').id || 0}/settings`
+  }
+
+  static getLaunchFeatureFlag () {
+    return LaunchDarklyService.getFlag('incorporations-launch-feature')
   }
 }
