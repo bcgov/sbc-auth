@@ -75,8 +75,6 @@ export default class NotaryInformationForm extends Vue {
 
   @Watch('notaryInfo', { deep: true })
   async updateNotary (val, oldVal) {
-    // eslint-disable-next-line no-console
-    console.log(val, oldVal)
     this.emitNotaryInformation()
   }
 
@@ -92,8 +90,6 @@ export default class NotaryInformationForm extends Vue {
 
   @Emit('is-form-valid')
   isFormValid () {
-    // eslint-disable-next-line no-console
-    console.log(this.$refs.notaryInformationForm)
     return this.$refs.notaryInformationForm.validate() && this.isBaseAddressValid
   }
 }

@@ -72,8 +72,6 @@ export default class NotaryContactForm extends Vue {
 
   @Watch('notaryContact', { deep: true })
   async updateContact (val, oldVal) {
-    // eslint-disable-next-line no-console
-    console.log(val, oldVal)
     this.emitNotaryContact()
   }
 

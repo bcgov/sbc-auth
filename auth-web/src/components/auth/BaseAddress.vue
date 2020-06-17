@@ -101,6 +101,11 @@ export default class BaseAddress extends Vue {
       Object.keys(this.inputAddress).forEach(key => {
         this.$set(this.address, key, this.inputAddress?.[key])
       })
+      // emit the address in the next tick to avoid validation function to execute correctly
+      // while populating the component without user inputs
+      this.$nextTick(() => {
+        this.emitAddress()
+      })
     }
   }
 
@@ -122,9 +127,7 @@ export default class BaseAddress extends Vue {
 
   @Emit('is-form-valid')
   isFormValid () {
-    // return this.$refs.baseAddressForm.validate()
-    // TODO: Need to fix the reactivity issue for the validation, this work around is for the demo
-    return true
+    return this.$refs.baseAddressForm?.validate()
   }
 }
 </script>
