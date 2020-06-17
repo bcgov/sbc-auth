@@ -76,7 +76,6 @@ class TestBasicAccount(TestPayment):
         logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
         response_json = response.json()
         testing_config.org_id = response_json.get('id')
-        testing_config.org_type = response_json.get('orgType')
 
     def test_create_user_profile(self, testing_config, logger):
         """Test create user profile (contact information)."""
@@ -136,6 +135,8 @@ class TestBasicAccount(TestPayment):
                                 headers={'Authorization': f'Bearer {testing_config.keycloak_token}'})
         assert response.status_code == 200
         logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
+        response_json = response.json()
+        testing_config.org_type = response_json.get('orgType')
 
     def test_get_user_settings(self, testing_config, logger):
         """Test get user settings."""
