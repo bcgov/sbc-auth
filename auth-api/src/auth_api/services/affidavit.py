@@ -29,6 +29,7 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.models.user import User as UserModel
 from auth_api.schemas import AffidavitSchema
+from auth_api.services.minio import MinioService
 from auth_api.utils.enums import AffidavitStatus
 from auth_api.utils.util import camelback2snake
 
@@ -91,9 +92,10 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         """Return affidavit for the org by finding the admin for the org."""
         current_app.logger.debug('<find_affidavit_by_org_id ')
         affidavit = AffidavitModel.find_by_org_id(org_id)
-
+        affidavit_dict = Affidavit(affidavit).as_dict()
+        affidavit_dict['documentUrl'] = MinioService.create_signed_get_url(affidavit.document_id)
         current_app.logger.debug('>find_affidavit_by_org_id ')
-        return Affidavit(affidavit)
+        return affidavit_dict
 
     @staticmethod
     def approve_or_reject(org_id: int, is_approved: bool, token_info: Dict):

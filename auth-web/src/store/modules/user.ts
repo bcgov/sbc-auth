@@ -1,9 +1,11 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { NotaryContact, NotaryInformation } from '@/models/notary'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import { RoleInfo } from '@/models/Organization'
+import { SessionStorageKeys } from '@/util/constants'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { User } from '@/models/user'
 import UserService from '@/services/user.services'
@@ -22,6 +24,10 @@ export default class UserModule extends VuexModule {
   userProfile: User = undefined
   userContact: Contact = undefined
   termsOfUse: TermsOfUseDocument = undefined
+  notaryInformation: NotaryInformation = undefined
+  notaryContact: NotaryContact = undefined
+  documentId:String = ''
+
   redirectAfterLoginUrl: string = ''
   roleInfos: RoleInfo[] = undefined
 
@@ -33,6 +39,14 @@ export default class UserModule extends VuexModule {
   @Mutation
   public setRoleInfos (roleInfos: RoleInfo[]) {
     this.roleInfos = roleInfos
+  }
+  @Mutation
+  public setNotaryInformation (notaryInformation: NotaryInformation) {
+    this.notaryInformation = notaryInformation
+  }
+  @Mutation
+  public setNotaryContact (notaryContact: NotaryContact) {
+    this.notaryContact = notaryContact
   }
 
   @Mutation
@@ -85,6 +99,15 @@ export default class UserModule extends VuexModule {
     if (response && response.data) {
       return response.data.sort((a, b) => (a.displayOrder > b.displayOrder) ? 1 : -1)
     }
+  }
+
+  @Action({ rawError: true })
+  public async createAffidavit () {
+    const docId = this.context.state['currentOrganization']
+    const notaryContact = this.context.state['notaryContact']
+    const notaryInfo = this.context.state['notaryInformation']
+    const userId = ConfigHelper.getFromSession(SessionStorageKeys.UserKcId)
+    const userResponse = await UserService.createNotaryDetails(docId, notaryInfo, notaryContact, userId)
   }
 
   @Action({ rawError: true })

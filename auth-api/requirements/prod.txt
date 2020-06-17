@@ -19,3 +19,4 @@ sentry-sdk[flask]
 bcrypt
 jaeger-client
 Werkzeug==0.16.1
+minio

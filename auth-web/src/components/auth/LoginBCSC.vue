@@ -9,10 +9,10 @@
         <span>Learn how to set up and use your BC Services Card</span>
       </a>
     </v-card-text>
-    <v-card-actions>
+    <v-card-actions class="form__btns">
       <v-spacer></v-spacer>
       <slot name="actions">
-        <v-btn large color="primary" @click="login()">Log in</v-btn>
+        <v-btn large color="primary" class="font-weight-bold" @click="login()">Log in</v-btn>
       </slot>
     </v-card-actions>
   </v-card>
@@ -29,6 +29,3 @@ export default class LoginBCSC extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-</style>
