@@ -65,7 +65,7 @@ export function getRoutes (): RouteConfig[] {
       name: 'home',
       component: getEnvHomeView(),
       children: getEnvChildRoutes(),
-      meta: { showNavBar: !getFeatureFlag }
+      meta: { showNavBar: getFeatureFlag() }
     },
     {
       path: '/business',
@@ -332,12 +332,12 @@ export function getRoutes (): RouteConfig[] {
 
 // Get the correct Homeview depending on Environment
 const getEnvHomeView = () => {
-  return getFeatureFlag ? HomeViewDev : HomeView
+  return getFeatureFlag() ? HomeViewDev : HomeView
 }
 
 // Get the child routes depending on environment
 const getEnvChildRoutes = () => {
-  return getFeatureFlag ? [
+  return getFeatureFlag() ? [
     {
       path: '',
       redirect: 'decide-business'
