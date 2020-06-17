@@ -153,9 +153,7 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
   }
 
   private get isNextValid () {
-    // eslint-disable-next-line no-console
-    console.log(this.isNotaryContactValid, this.isNotaryInformationValid)
-    return this.isNotaryContactValid && this.isNotaryInformationValid
+    return this.isNotaryInformationValid
   }
 
   private isNotaryContactValidFn (val) {

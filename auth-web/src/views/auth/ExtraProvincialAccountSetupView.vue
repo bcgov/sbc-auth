@@ -13,6 +13,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import Stepper, { StepConfiguration } from '@/components/auth/stepper/Stepper.vue'
+import { AccessType } from '@/util/constants'
 import AccountCreateBasic from '@/components/auth/CreateAccount/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/CreateAccount/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/CreateAccount/AccountTypeSelector.vue'
@@ -62,7 +63,8 @@ export default class ExtraProvincialAccountSetupView extends Vue {
         stepName: 'User Profile',
         component: UserProfileForm,
         componentProps: {
-          isStepperView: true
+          isStepperView: true,
+          stepperSource: AccessType.EXTRA_PROVINCIAL
         }
       }
     ]

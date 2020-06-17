@@ -47,12 +47,7 @@ export default class NotaryInformationForm extends Vue {
   }
 
   private readonly rules = {
-    notaryName: [v => !!v || 'Name of Notary is required'],
-    streetAddress: [v => !!v || 'Street notaryInfo is required'],
-    city: [v => !!v || 'City is required'],
-    province: [v => !!v || 'Province is required'],
-    postalCode: [v => !!v || 'Postal Code is required'],
-    country: [v => !!v || 'Country is required']
+    notaryName: [v => !!v || 'Name of Notary is required']
   }
 
   private updateAddress (address: Address) {
@@ -97,6 +92,8 @@ export default class NotaryInformationForm extends Vue {
 
   @Emit('is-form-valid')
   isFormValid () {
+    // eslint-disable-next-line no-console
+    console.log(this.$refs.notaryInformationForm)
     return this.$refs.notaryInformationForm.validate() && this.isBaseAddressValid
   }
 }
