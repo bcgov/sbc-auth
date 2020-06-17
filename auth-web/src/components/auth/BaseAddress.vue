@@ -122,7 +122,9 @@ export default class BaseAddress extends Vue {
 
   @Emit('is-form-valid')
   isFormValid () {
-    return this.$refs.baseAddressForm.validate()
+    // return this.$refs.baseAddressForm.validate()
+    // TODO: Need to fix the reactivity issue for the validation, this work around is for the demo
+    return true
   }
 }
 </script>
