@@ -63,9 +63,8 @@ import { User } from '@/models/user'
   }
 })
 export default class MaintainBusinessView extends Vue {
-  private learnMoreUrl = 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business' +
-    '-management/permits-licences-and-registration/registries-guides/info_36_com_-_maintaining_your_bc_company.pdf'
-  private bulletPoints: Array<any> = [
+  private readonly learnMoreUrl = 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business-management/permits-licences-and-registration/registries-guides/info_36_com_-_maintaining_your_bc_company.pdf'
+  private readonly bulletPoints: Array<any> = [
     { text: 'Once your business is incorporated or registered you are required to keep information about your business up to date with the Registry.' },
     { text: 'By managing your business through your BC Registry account you can:',
       subText: [
@@ -128,6 +127,10 @@ export default class MaintainBusinessView extends Vue {
         max-width: 250px;
         font-weight: bold;
         color: $BCgovBlue5;
+      }
+
+      .v-btn:hover {
+        opacity: .8;
       }
     }
 

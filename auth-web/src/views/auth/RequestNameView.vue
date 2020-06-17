@@ -23,12 +23,9 @@
         </v-list-item>
         <!-- Panel Btns -->
         <div class="request-name-info-btns mt-5">
-          <v-btn large color="#003366" class="white--text"
-                 :href="nroUrl" target="_blank" rel="noopener noreferrer">
-            Request a Name
-          </v-btn>
+          <name-request-button />
           <p class="mt-5">Have an existing Name Request?
-            <a :href="`${nroUrl}nro.htm?_flowId=anonymous-monitor-flow&_flowExecutionKey=e1s1`"
+            <a :href="nameRequestStatusUrl"
               target="_blank" rel="noopener noreferrer" class="status-link">
               Check your Name Request Status
             </a>
@@ -52,23 +49,28 @@
 import { Component, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
+import NameRequestButton from '@/components/auth/common/NameRequestButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
 
 @Component({
   components: {
+    NameRequestButton,
     LearnMoreButton,
     NumberedCompanyTooltip
   }
 })
 export default class RequestNameView extends Vue {
-  private nroUrl = ConfigHelper.getNroUrl()
-  private learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/' +
-    'permits-licences/businesses-incorporated-companies/approval-business-name'
+  private readonly nroUrl = ConfigHelper.getNroUrl()
+  private readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/approval-business-name'
   private bulletPoints: Array<any> = [
     { text: 'Create a unique name that ensures the public is not confused or misled by similar corporate names.' },
     { text: 'Submit this name for examination by the Business Registry.' },
     { text: 'If your name is approved, you can use it to incorporate or register your business.' }
   ]
+
+  private get nameRequestStatusUrl () {
+    return `${this.nroUrl}nro.htm?_flowId=anonymous-monitor-flow&_flowExecutionKey=e1s1`
+  }
 }
 </script>
 
@@ -105,6 +107,10 @@ export default class RequestNameView extends Vue {
       .v-btn {
         font-weight: bold;
         width: 160px;
+      }
+
+      .v-btn:hover {
+        opacity: .8;
       }
     }
 

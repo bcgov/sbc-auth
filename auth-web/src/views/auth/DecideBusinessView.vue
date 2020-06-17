@@ -41,9 +41,9 @@ import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
   }
 })
 export default class DecideBusinessView extends Vue {
-  private learnMoreUrl = 'https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-' +
+  private readonly learnMoreUrl = 'https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-' +
     'small-business/'
-  private bulletPoints: Array<any> = [
+  private readonly bulletPoints: Array<any> = [
     { text: 'Decide which business structure is most appropriate for you: A few options are sole proprietorship, ' +
       'partnership or incorporation.' },
     { text: 'Each structure has a different legal and financial implications.',
@@ -59,6 +59,10 @@ export default class DecideBusinessView extends Vue {
   #decide-business-info-container {
     padding-top: 0 !important;
     flex-wrap: wrap;
+
+    .v-btn:hover {
+      opacity: .8;
+    }
 
     .list-item {
       align-items: flex-start;

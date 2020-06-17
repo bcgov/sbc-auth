@@ -45,11 +45,11 @@
           </p>
         </template>
         <learn-more-button
-        :redirect-url="'GO SOMEWHERE'"/>
+        :redirect-url="learnMoreUrl"/>
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
-        <a href="GO SOMEWHERE">
+        <a :href="learnMoreUrl" target="_blank">
           <v-img src="../../assets/img/Step3_Incorporate_x2.png" aspect-ratio="1.2" contain></v-img>
         </a>
       </v-col>
@@ -71,7 +71,8 @@ import { User } from '@/models/user'
   }
 })
 export default class IncorpOrRegisterView extends Vue {
-  private bulletPoints: Array<any> = [
+  private readonly learnMoreUrl = 'https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-small-business/'
+  private readonly bulletPoints: Array<any> = [
     { text: 'For Named Companies, add your existing Name Request number to your account and open it.' },
     { text: 'Establish your company\'s articles and prepare an Incorporation Agreement. Either create your own, or use template provided in the Incorporation Application.' },
     { text: 'Complete the Incorporation Application by providing information about your company: addresses, directors and share structure.' },
@@ -127,6 +128,10 @@ export default class IncorpOrRegisterView extends Vue {
     .v-btn {
       font-weight: bold;
       color: $BCgovBlue5;
+    }
+
+    .v-btn:hover {
+      opacity: .8;
     }
 
     .incorporate-btns {

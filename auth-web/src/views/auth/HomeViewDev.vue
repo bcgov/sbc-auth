@@ -22,10 +22,7 @@
           <div class="hero-banner__cta-btns">
             <!-- Authenticated -->
             <div v-if="userProfile" class="cta-btns-authenticated">
-              <v-btn large color="#003366" class="cta-btn white--text"
-                     :href="nroUrl" target="_blank" rel="noopener noreferrer">
-                Request a Name
-              </v-btn>
+              <name-request-button :isWide="true" />
               <v-btn large color="#003366" class="cta-btn white--text"
                      @click="goToManageBusinesses()">
                 Incorporate a Named Benefit Company
@@ -38,17 +35,17 @@
                      @click="goToManageBusinesses()">
                 Manage an Existing Business
               </v-btn>
+              <p class="mt-3"><a @click="accountDialog = true" class="create-account-link">
+                <u>Add another BC Registries Account</u></a>
+              </p>
             </div>
             <!-- Non-authenticated -->
             <div v-else>
-              <v-btn large color="#fcba19" class="cta-btn"
+              <v-btn large color="#fcba19" class="cta-btn mr-3"
                      @click="login()">
                 Log in with BC Services Card
               </v-btn>
-              <v-btn large color="#003366" class="cta-btn ml-4 white--text"
-                    :href="nroUrl" target="_blank" rel="noopener noreferrer">
-                Request a Name
-              </v-btn>
+              <name-request-button />
               <p class="mt-10">New to BC Registries? <a @click="accountDialog = true" class="create-account-link">
                 <u>Create a BC Registries Account</u></a>
               </p>
@@ -116,21 +113,22 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
+import { LoginSource, Pages } from '@/util/constants'
 import { Member, MembershipStatus } from '@/models/Organization'
 import { mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import BcscPanel from '@/components/auth/BcscPanel.vue'
-import ConfigHelper from '@/util/config-helper'
 import InfoStepper from '@/components/auth/stepper/InfoStepper.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
+import NameRequestButton from '@/components/auth/common/NameRequestButton.vue'
 import TestimonialQuotes from '@/components/auth/TestimonialQuotes.vue'
 import { User } from '@/models/user'
 
 @Component({
   name: 'Home',
   components: {
+    NameRequestButton,
     BcscPanel,
     InfoStepper,
     LoginBCSC,
@@ -154,7 +152,6 @@ export default class HomeViewDev extends Vue {
   private accountDialog = false
   private isDirSearchUser: boolean = false
   private readonly resetCurrentOrganisation!: () => void
-  private nroUrl = ConfigHelper.getNroUrl()
 
   private get showManageBusinessesBtn (): boolean {
     return this.currentAccountSettings && this.currentMembership?.membershipStatus === MembershipStatus.Active
@@ -212,10 +209,18 @@ export default class HomeViewDev extends Vue {
     font-size: 2rem;
   }
 
+  .v-btn:hover {
+    opacity: .8;
+  }
+
   // Hero Banner
   .hero-banner {
     color: $gray9;
     background-color: #ffffff;
+    background-image: url('../../assets/img/hero-img-min.jpg');
+    background-position:  bottom right;
+    background-size: 85% 105%;
+    background-repeat: no-repeat;
 
     h1 {
       margin-bottom: 1.5rem;
@@ -244,11 +249,6 @@ export default class HomeViewDev extends Vue {
     .container {
       padding-top: 3rem;
       padding-bottom: 3.75rem;
-      background-image: url('../../assets/img/hero-img-min.jpg');
-      background-position:  bottom right;
-      background-size: 90% 105%;
-      background-repeat: no-repeat;
-      box-shadow: -10px 0 10px 0 #ffffff inset;
     }
   }
 
@@ -257,9 +257,9 @@ export default class HomeViewDev extends Vue {
       background-image: none;
     }
   }
-  @media only screen and (min-width: 1920px) {
+  @media only screen and (min-width: 1680px) {
     .hero-banner {
-      background-size: 1920px 110%;
+      background-size: 55% 110%;
     }
   }
 

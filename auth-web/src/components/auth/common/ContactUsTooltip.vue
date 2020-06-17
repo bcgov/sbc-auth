@@ -1,11 +1,11 @@
 <template>
-  <v-tooltip top max-width="450px" light content-class="tooltip" v-model="showTip">
+  <v-tooltip top max-width="450px" light content-class="contact-us-tooltip" v-model="showTip">
     <template v-slot:activator="{ attrs }">
-      <span :attrs="attrs" @click="showTip = !showTip" class="tooltip-text">Contact Us</span>
+      <span :attrs="attrs" @click="showTip = !showTip" class="contact-us-tooltip-text">Contact Us</span>
     </template>
-    <v-card class="tooltip-content">
+    <v-card class="contact-us-tooltip-content">
       <h3 class="mb-3">Don't have a Passcode for your Cooperative Association?</h3>
-      <p>If you have no received your Access Letter from BC Registries, or have lost your Passcode, please contact us
+      <p>If you have not received your Access Letter from BC Registries, or have lost your Passcode, please contact us
         at:</p>
       <section>
         <p class="mb-0">Toll Free: 1-877-526-1526</p>
@@ -26,6 +26,8 @@
 import { Component, Prop } from 'vue-property-decorator'
 import Vue from 'vue'
 
+// This component template is for future implementation.
+// Values in the template are static and not to be used until we receive further information.
 @Component({})
 export default class ContactUsTooltip extends Vue {
   private showTip = false
@@ -38,22 +40,22 @@ export default class ContactUsTooltip extends Vue {
     color: $BCgoveBueText2;
   }
 
-  .tooltip {
+  .contact-us-tooltip {
     background-color: transparent;
     opacity: 1 !important;
 
-    .tooltip-content {
+    .contact-us-tooltip-content {
       min-width: 30rem;
       padding: 2rem;
       font-size: 0.75rem;
     }
   }
 
-  .tooltip-text {
+  .contact-us-tooltip-text {
     text-decoration: underline dashed;
   }
 
-  .tooltip-text:hover {
+  .contact-us-tooltip-text:hover {
     cursor: pointer;
   }
 </style>

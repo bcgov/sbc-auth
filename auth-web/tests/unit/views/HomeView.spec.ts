@@ -78,7 +78,7 @@ describe('HomeView.vue', () => {
     jest.clearAllMocks()
   })
 
-  it('is a Vue instance', async () => {
+  it('is a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
@@ -90,11 +90,11 @@ describe('HomeView.vue', () => {
 
   it('renders the correct buttons when authenticated', () => {
     const bannerBtns = wrapper.vm.$el.querySelectorAll('.cta-btn')
-    const nameRequestBtn = bannerBtns[0]
-    const namedCompBtn = bannerBtns[1]
-    const numberedCompBtn = bannerBtns[2]
-    const manageBusinessBtn = bannerBtns[3]
-    const loginBtn = bannerBtns[4]
+    const nameRequestBtn = wrapper.vm.$el.querySelector('.btn-name-request')
+    const namedCompBtn = bannerBtns[0]
+    const numberedCompBtn = bannerBtns[1]
+    const manageBusinessBtn = bannerBtns[2]
+    const loginBtn = bannerBtns[3]
 
     expect(nameRequestBtn).toBeDefined()
     expect(nameRequestBtn.textContent).toContain('Request a Name')
@@ -118,7 +118,7 @@ describe('HomeView.vue', () => {
 
     const bannerBtns = wrapper.vm.$el.querySelectorAll('.cta-btn')
     const loginBtn = bannerBtns[0]
-    const nameRequestBtn = bannerBtns[1]
+    const nameRequestBtn = wrapper.vm.$el.querySelector('.btn-name-request')
 
     const createAccountLink = wrapper.vm.$el.querySelector('.create-account-link')
 

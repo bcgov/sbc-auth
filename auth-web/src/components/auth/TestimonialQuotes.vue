@@ -49,7 +49,7 @@ export default class TestimonialQuotes extends Vue {
 
     .quote-container {
       padding: 2rem .5rem 0 .5rem;
-      color: #ffffff;
+      color: white;
       background: $BCgovBlue5;
       font-size: 1.15rem;
       line-height: 2rem;

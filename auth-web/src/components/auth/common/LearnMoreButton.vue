@@ -26,7 +26,6 @@ export default class LearnMoreButton extends Vue {
 
   .btn-learn-more:hover {
     background-color: $BCgovBlue5;
-    opacity: .8;
 
     .btn-text {
       color: #ffffff;
