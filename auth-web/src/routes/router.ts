@@ -166,10 +166,11 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
-      path: '/review-account',
+      path: '/review-account/:orgId',
       name: 'review-account',
       component: ReviewAccountView,
-      meta: { requiresAuth: true, disabledRoles: [Role.Basic, Role.Public] }
+      meta: { requiresAuth: true, disabledRoles: [Role.Basic, Role.Public] },
+      props: true
     },
     {
       path: '/userprofile/:token?',

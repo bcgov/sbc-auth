@@ -4,7 +4,7 @@
     <!-- Breadcrumbs / Back Navigation -->
     <nav class="crumbs">
       <div class="pt-5 pb-3">
-        <v-btn large text color="primary" class="back-btn pr-2 pl-1" :href="dirSearchUrl">
+        <v-btn large text color="primary" class="back-btn pr-2 pl-1">
           <v-icon small class="mr-1">mdi-arrow-left</v-icon>
           <span>Back to Staff Dashboard</span>
         </v-btn>
@@ -12,10 +12,10 @@
     </nav>
 
     <div class="view-header flex-column">
-    <h1 class="view-header__title">Review Account</h1>
-    <p class="mt-2 mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+      <h1 class="view-header__title">Review Account</h1>
+      <p class="mt-2 mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
     </div>
-      <v-card class="mt-8" flat>
+    <v-card class="mt-8" flat v-if="!isLoading">
       <v-row class="mr-0 ml-0">
 
         <!-- Account Information Column -->
@@ -25,7 +25,7 @@
             <section>
               <h2 class="mb-7">1. Download Affidavit</h2>
               <p class="mb-9">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam at porttitor sem. Aliquam erat volutpat.</p>
-              <v-btn x-large="" outlined color="primary" class="font-weight-bold">
+              <v-btn x-large="" outlined color="primary" class="font-weight-bold" @click="downloadAffidavit()">
                 <v-icon left class="mr-2">mdi-file-download-outline</v-icon>
                 placeholder.jpg
               </v-btn>
@@ -42,28 +42,28 @@
                 <v-col>
                   <v-alert dark color="primary" class="bcol-acc mb-0 px-7 py-5">
                     <div class="bcol-acc__name mt-n1">
-                      {{ account.name }}
+                      {{ accountUnderReview.name }}
                     </div>
                     <ul class="bcol-acc__meta">
                       <li>
-                        Account No: {{ account.bcolAccountDetails.accountNumber }}
+                        Account No: {{ accountUnderReview.bcolAccountDetails.accountNumber }}
                       </li>
                       <li>
-                        Prime Contact ID: {{ account.bcolAccountDetails.userId }}
+                        Prime Contact ID: {{ accountUnderReview.bcolAccountDetails.userId }}
                       </li>
                     </ul>
                   </v-alert>
                 </v-col>
               </v-row>
-              <v-row v-if="account.bcolAccountDetails.address">
+              <v-row v-if="acaccountUnderReviewcount.bcolAccountDetails.address">
                 <v-col class="col-12 col-sm-3">
                   Mailing Address
                 </v-col>
                 <v-col>
                   <ul class="mailing-address">
-                    <li>{{ account.bcolAccountDetails.address.street }}</li>
-                    <li>{{ account.bcolAccountDetails.address.city }}&nbsp;{{ account.bcolAccountDetails.address.region }}&nbsp;{{ account.bcolAccountDetails.address.postalCode }}</li>
-                    <li>{{ account.bcolAccountDetails.address.country }}</li>
+                    <li>{{ accountUnderReview.bcolAccountDetails.address.street }}</li>
+                    <li>{{ accountUnderReview.bcolAccountDetails.address.city }} {{ accountUnderReview.bcolAccountDetails.address.region }} {{ accountUnderReview.bcolAccountDetails.address.postalCode }}</li>
+                    <li>{{ accountUnderReview.bcolAccountDetails.address.country }}</li>
                   </ul>
                 </v-col>
               </v-row>
@@ -107,7 +107,7 @@
                     <div>
                       <ul class="mailing-address">
                         <li>{{ notary.address.street }}</li>
-                        <li>{{ notary.address.city }}&nbsp;{{ notary.address.region }}&nbsp;{{ notary.address.postalCode }}</li>
+                        <li>{{ notary.address.city }} {{ notary.address.region }} {{ notary.address.postalCode }}</li>
                         <li>{{ notary.address.country }}</li>
                       </ul>
                     </div>
@@ -160,28 +160,35 @@
 
 <script lang="ts">
 import Component from 'vue-class-component'
+import DocumentService from '@/services/document.services'
+import OrgService from '@/services/org.services'
 import { Organization } from '@/models/Organization'
+import { Prop } from 'vue-property-decorator'
 import { User } from '@/models/user'
 import Vue from 'vue'
 
 @Component({})
 export default class ReviewAccountView extends Vue {
+  @Prop() orgId: number
+  private isLoading: boolean = true
+  private accountUnderReview: Organization
+
   // TODO - remove these stub objects and replace with actual data from store
-  private account: Organization = {
-    name: 'Account Four',
-    bcolAccountDetails: {
-      accountNumber: '180670',
-      userId: 'PB25020',
-      accountType: 'BCOL',
-      address: {
-        street: '1234 Some Street Name',
-        city: 'Calgary',
-        region: 'Alberta',
-        postalCode: 'A1B 2C3',
-        country: 'CANADA'
-      }
-    }
-  }
+  // private account: Organization = {
+  //   name: 'Account Four',
+  //   bcolAccountDetails: {
+  //     accountNumber: '180670',
+  //     userId: 'PB25020',
+  //     accountType: 'BCOL',
+  //     address: {
+  //       street: '1234 Some Street Name',
+  //       city: 'Calgary',
+  //       region: 'Alberta',
+  //       postalCode: 'A1B 2C3',
+  //       country: 'CANADA'
+  //     }
+  //   }
+  // }
 
   private accountAdmin: User = {
     firstname: 'John',
@@ -200,6 +207,15 @@ export default class ReviewAccountView extends Vue {
       postalCode: 'A1B 2C3',
       country: 'CANADA'
     }
+  }
+
+  private async mounted () {
+    this.accountUnderReview = (await OrgService.getOrganization(this.orgId))?.data
+    this.isLoading = false
+  }
+
+  private async downloadAffidavit (): Promise<void> {
+    // Invoke document service to get affidavit for current organization
   }
 }
 </script>
