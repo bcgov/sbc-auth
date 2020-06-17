@@ -258,7 +258,8 @@ import { mask } from 'vue-the-mask'
         'createUserContact',
         'updateUserContact',
         'getUserProfile',
-        'createAffidavit'
+        'createAffidavit',
+        'updateUserFirstAndLastName'
       ]),
     ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization'])
   }
@@ -267,6 +268,8 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private readonly createUserContact!: (contact: Contact) => Contact
     private readonly updateUserContact!: (contact: Contact) => Contact
     private readonly getUserProfile!: (identifer: string) => User
+    private readonly updateUserFirstAndLastName!: (user: User) => Contact
+
     private readonly createAffidavit!: () => User
     private firstName = ''
     private lastName = ''
@@ -358,16 +361,21 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
 
     private async save () {
       if (this.isFormValid()) {
+        const user:User = {
+          firstname: this.firstName.trim(),
+          lastname: this.lastName.trim()
+        }
         const contact = {
-          firstName: this.firstName.trim(),
-          lastName: this.lastName.trim(),
           email: this.emailAddress.toLowerCase(),
           phone: this.phoneNumber,
           phoneExtension: this.extension
         }
         if (this.stepForward) { // On stepper ;so Save the org
-          this.createAccount(contact)
+          this.createAccount(contact, user)
         } else {
+          if (this.currentUser?.loginSource === LoginSource.BCEID) {
+            await this.updateUserFirstAndLastName(user)
+          }
           await this.saveOrUpdateContact(contact)
           await this.getUserProfile('@me')
           // If a token was provided, that means we are in the accept invitation flow
@@ -381,14 +389,14 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       }
     }
 
-    private async createAccount (contact:Contact) {
+    private async createAccount (contact:Contact, user:User) {
       try {
         // for bceid , create affidavit first
         // TODO implement checks for bceid
         if (this.currentUser?.loginSource === LoginSource.BCEID) {
           await this.createAffidavit()
+          await this.updateUserFirstAndLastName(user)
         }
-
         const organization = await this.createOrg()
         await this.saveOrUpdateContact(contact)
         await this.getUserProfile('@me')

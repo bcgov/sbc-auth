@@ -183,6 +183,14 @@ export default class UserModule extends VuexModule {
     }
   }
 
+  @Action({ commit: 'setUserProfile' })
+  public async updateUserFirstAndLastName (user: User) {
+    const response = await UserService.updateUserProfile(user.firstname, user.lastname)
+    if (response && response.data && response.status === 200) {
+      return response.data
+    }
+  }
+
   @Action({ rawError: true })
   public async logout (redirectUrl: string) {
     await KeyCloakService.logout(redirectUrl)

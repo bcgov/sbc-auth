@@ -3,7 +3,7 @@ import { RoleInfo } from '@/models/Organization'
 export interface User {
     firstname: string;
     lastname: string;
-    username: string;
+    username?: string;
     modified?: Date
     userTerms?: UserTerms
 }

@@ -1,5 +1,5 @@
 import { LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
-import { Member, MembershipStatus, Organization } from '@/models/Organization'
+import { Member, MembershipStatus, OrgStatus, Organization } from '@/models/Organization'
 import Router, { Route } from 'vue-router'
 import { AccountSettings } from '@/models/account-settings'
 import { Contact } from '@/models/contact'
@@ -76,10 +76,8 @@ router.beforeEach((to, from, next) => {
       !userProfile?.userTerms?.isTermsOfUseAccepted) {
       switch (currentUser?.loginSource) {
         case LoginSource.BCSC:
-          return next({
-            path: `/${Pages.USER_PROFILE_TERMS}`
-          })
         case LoginSource.BCROS:
+        case LoginSource.BCEID:
           return next({
             path: `/${Pages.USER_PROFILE_TERMS}`
           })
@@ -90,8 +88,11 @@ router.beforeEach((to, from, next) => {
       }
     }
 
-    if (to.matched.some(record => record.meta.requiresActiveAccount) && currentUser.loginSource === LoginSource.BCSC) {
-      if (currentAccountSettings && currentMembership.membershipStatus === MembershipStatus.Pending) {
+    if (to.matched.some(record => record.meta.requiresActiveAccount) && (currentUser.loginSource === LoginSource.BCSC || currentUser.loginSource === LoginSource.BCEID)) {
+      const isTheOrgPendingAffidavitReview = currentOrganization?.statusCode === OrgStatus.PendingAffidavitReview
+      if (isTheOrgPendingAffidavitReview) {
+        return next({ path: `${Pages.PENDING_AFFIDAVIT_APPROVAL}` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
+      } else if (currentAccountSettings && currentMembership.membershipStatus === MembershipStatus.Pending) {
         return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}` })
       } else if (!currentOrganization || currentMembership.membershipStatus !== MembershipStatus.Active) {
         return next({ path: `/${Pages.CREATE_ACCOUNT}` })
