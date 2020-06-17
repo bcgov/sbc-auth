@@ -16,10 +16,8 @@ import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
 import ExtraProvInfoView from '@/views/auth/OutOfProvinceAccountView.vue'
 import ExtraProvincialAccountSetupView from '@/views/auth/ExtraProvincialAccountSetupView.vue'
-import HomeView from '@/views/auth/HomeView.vue'
-import HomeViewDev from '@/views/auth/HomeViewDev.vue'
+import Home from '@/views/auth/Home.vue'
 import IncorpOrRegisterView from '@/views/auth/IncorpOrRegisterView.vue'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import MaintainBusinessView from '@/views/auth/MaintainBusinessView.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
@@ -58,9 +56,9 @@ export function getRoutes (): RouteConfig[] {
     {
       path: '/home',
       name: 'home',
-      component: getEnvHomeView(),
+      component: Home,
       children: getEnvChildRoutes(),
-      meta: { showNavBar: !flagCondition }
+      meta: { showNavBar: !ConfigHelper.getLaunchFeatureFlag() }
     },
     {
       path: '/business',
@@ -335,18 +333,9 @@ export function getRoutes (): RouteConfig[] {
   return routes
 }
 
-// Feature Flagging HomeView Components
-// For Development only
-const flagCondition = LaunchDarklyService.getFlag('incorporations-launch-feature')
-
-// Get the correct Homeview depending on Environment
-const getEnvHomeView = () => {
-  return flagCondition ? HomeViewDev : HomeView
-}
-
 // Get the child routes depending on environment
 const getEnvChildRoutes = () => {
-  return flagCondition ? [
+  return ConfigHelper.getLaunchFeatureFlag() ? [
     {
       path: '',
       redirect: 'decide-business'

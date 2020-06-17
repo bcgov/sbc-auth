@@ -4,13 +4,8 @@
     <p class="my-5">
       Log in securely using your mobile BC Services Card, government's trusted way to access online services
     </p>
-    <v-row>
+    <v-row class="mt-5">
       <!-- Image Column -->
-      <v-col cols="12" md="5">
-        <v-img src="../../assets/img/Bcsc-Helper.png" aspect-ratio="1.2" contain></v-img>
-      </v-col>
-      <v-spacer></v-spacer>
-      <!-- Info Column -->
       <v-col cols="12" md="6" class="bcsc-info-col">
         <h2>It's Secure</h2>
         <v-list-item class="list-item" v-for="(item, index) in secureBulletPoints" :key="`List-1-${index}`" >
@@ -21,7 +16,18 @@
             </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
+      </v-col>
+      <!-- Info Column -->
+      <v-col cols="12" md="6" class="bcsc-info-col">
         <h2>It's Quick and Easy</h2>
+        <v-list-item class="list-item">
+          <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+          <v-list-item-content>
+            <v-list-item-subtitle class="list-item-text">It normally takes about 5 minutes to
+              <a :href="cardSetUpUrl" class="link" target="_blank">set up a mobile card</a>
+            </v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
         <v-list-item class="list-item" v-for="(item, index) in easeBulletPoints" :key="`List-2-${index}`" >
           <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
@@ -30,18 +36,20 @@
             </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
-        <!-- Panel Btns -->
-        <template v-if="!userProfile">
-          <v-btn large color="#fcba19" @click="emitLogin()" class="mt-5">
-            Log in with BC Services Card
-          </v-btn>
-          <p class="my-5">New to BC Registries?
-            <a @click="emitAccountDialog()" class="create-account-link"><u>Create a BC Registries Account</u></a>
-          </p>
-        </template>
-        <LearnMoreButton />
       </v-col>
     </v-row>
+    <!-- Panel Btns -->
+    <section>
+      <template v-if="!userProfile">
+        <v-btn large color="#fcba19" @click="emitLogin()" class="mt-5">
+          Log in with BC Services Card
+        </v-btn>
+        <p class="my-5" id="create-account-link">New to BC Registries?
+          <a @click="emitAccountDialog()" class="link"><u>Create a BC Registries Account</u></a>
+        </p>
+      </template>
+      <learn-more-button :redirect-url="learnMoreUrl" />
+    </section>
   </v-container>
 </template>
 
@@ -56,13 +64,14 @@ import { User } from '@/models/user'
   }
 })
 export default class BcscPanel extends Vue {
+  private readonly cardSetUpUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card/set-up-mobile-card'
+  private readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card'
   private secureBulletPoints: Array<any> = [
     { text: 'A mobile card is a representation of your BC Services Card on your mobile device. It\'s used to prove who you are when you log in to access government services online.' },
     { text: 'Only your name and a unique identifier is stored on the mobile device.' }
   ]
 
   private easeBulletPoints: Array<any> = [
-    { text: 'It normally takes about 5 minutes to set up a mobile card.' },
     { text: 'You can verify your identity by video right from your mobile device. You don\'t need to go in person unless you can\'t verify by video.' }
   ]
 
@@ -117,16 +126,20 @@ export default class BcscPanel extends Vue {
     .v-btn {
       max-width: 300px;
       font-weight: bold;
+      color: $BCgovBlue5;
     }
 
-    .create-account-link {
+    .v-btn:hover {
+      opacity: .8;
+    }
+
+    .link {
       font-size: 1rem;
-      font-weight: bold;
-      color: $BCgoveBueText1!important;
+      color: $BCgoveBueText1;
     }
 
-    .create-account-link:hover {
-      color: $BCgoveBueText2!important;
+    .link:hover {
+      color: $BCgoveBueText2;
     }
   }
 </style>
