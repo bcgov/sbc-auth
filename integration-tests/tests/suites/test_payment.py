@@ -230,11 +230,13 @@ class TestPayment:
         assert response.status_code == 201
         logger.action(f'Response: {response.status_code}', is_subaction=True)
 
+    @pytest.mark.skip_org_type('BASIC')
     def test_get_transactions(self, testing_config, logger):
         """Test get payment transactions."""
         input_data = json.dumps({'dateFilter': {'startDate': '01/01/2020',
                                                 'endDate': '12/31/2020'}, 'folioNumber': ''})
         call_url = f'{testing_config.pay_api_url}/accounts/{testing_config.org_id}/payments/queries?page=1&limit=10'
+        print(f'{testing_config.org_type}')
         logger.action(f'Post {call_url} with {input_data}', is_subaction=True)
         response = requests.post(call_url,
                                  headers={'Authorization': f'Bearer {testing_config.keycloak_token}',
