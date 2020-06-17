@@ -123,9 +123,16 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
   }
 
   private async next () {
-    // save the file here so that in the final steps its less network calls to make
-    await this.uploadPendingDocsToStorage()
-    this.stepForward(this.currentOrganization?.orgType === Account.PREMIUM)
+    try {
+      this.saving = true
+      // save the file here so that in the final steps its less network calls to make
+      await this.uploadPendingDocsToStorage()
+      this.stepForward(this.currentOrganization?.orgType === Account.PREMIUM)
+    } catch (error) {
+      this.saving = false
+      // eslint-disable-next-line no-console
+      console.error(error)
+    }
   }
 
   private redirectToNext (organization?: Organization) {
