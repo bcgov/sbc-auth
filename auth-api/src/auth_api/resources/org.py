@@ -79,9 +79,9 @@ class Orgs(Resource):
         business_identifier = request.args.get('affiliation', None)
         name = request.args.get('name', None)
         status = request.args.get('status', None)
-        org_type = request.args.get('type', None)
+        access_type = request.args.get('type', None)
         try:
-            response, status = OrgService.search_orgs(business_identifier=business_identifier, org_type=org_type,
+            response, status = OrgService.search_orgs(business_identifier=business_identifier, access_type=access_type,
                                                       name=name, status=status), \
                                http_status.HTTP_200_OK
 

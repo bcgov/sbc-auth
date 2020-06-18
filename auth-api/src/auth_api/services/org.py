@@ -441,7 +441,7 @@ class Org:  # pylint: disable=too-many-public-methods
             if affiliation:
                 orgs['orgs'].append(Org(OrgModel.find_by_org_id(affiliation.org_id)).as_dict())
         else:
-            org_models = OrgModel.search_org(kwargs.get('org_type', None), kwargs.get('name', None),
+            org_models = OrgModel.search_org(kwargs.get('access_type', None), kwargs.get('name', None),
                                              kwargs.get('status', None))
             for org in org_models:
                 orgs['orgs'].append(Org(org).as_dict())
