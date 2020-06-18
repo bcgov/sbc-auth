@@ -33,18 +33,20 @@
 
             <v-divider class="mt-10 mb-8"></v-divider>
 
+            <!-- Account Info Section -->
             <section>
               <h2 class="mb-3">2. Account Information</h2>
               <v-row>
                 <v-col class="col-12 col-sm-3">
-                  Account Name <br/> &amp; BC Online Details
+                  <span v-if="accountUnderReview.orgType === 'PREMIUM'">Account Name <br/> &amp; BC Online Details</span>
+                  <span v-else>Account Name</span>
                 </v-col>
                 <v-col>
                   <v-alert dark color="primary" class="bcol-acc mb-0 px-7 py-5">
                     <div class="bcol-acc__name mt-n1">
                       {{ accountUnderReview.name }}
                     </div>
-                    <ul class="bcol-acc__meta">
+                    <ul class="bcol-acc__meta" v-if="accountUnderReview.bcolAccountDetails">
                       <li>
                         Account No: {{ accountUnderReview.bcolAccountDetails.accountNumber }}
                       </li>
@@ -55,15 +57,15 @@
                   </v-alert>
                 </v-col>
               </v-row>
-              <v-row v-if="acaccountUnderReviewcount.bcolAccountDetails.address">
+              <v-row v-if="accountMailingAddress">
                 <v-col class="col-12 col-sm-3">
                   Mailing Address
                 </v-col>
                 <v-col>
                   <ul class="mailing-address">
-                    <li>{{ accountUnderReview.bcolAccountDetails.address.street }}</li>
-                    <li>{{ accountUnderReview.bcolAccountDetails.address.city }} {{ accountUnderReview.bcolAccountDetails.address.region }} {{ accountUnderReview.bcolAccountDetails.address.postalCode }}</li>
-                    <li>{{ accountUnderReview.bcolAccountDetails.address.country }}</li>
+                    <li>{{ accountMailingAddress.street }}</li>
+                    <li>{{ accountMailingAddress.city }} {{ accountMailingAddress.region }} {{ accountMailingAddress.postalCode }}</li>
+                    <li>{{ accountMailingAddress.country }}</li>
                   </ul>
                 </v-col>
               </v-row>
@@ -72,7 +74,7 @@
             <v-divider class="mt-5 mb-8"></v-divider>
 
             <!-- Account Administrator Section -->
-            <section>
+            <section v-if="accountAdmin">
               <h2 class="mb-5">3. Account Administrator</h2>
               <v-row>
                 <v-col class="cols-12 col-sm-3 py-2">Given Name(s)</v-col>
@@ -99,27 +101,27 @@
               <h2 class="mb-5">4. Notary Information</h2>
               <v-row>
                   <v-col class="cols-12 col-sm-3 py-2">Notary Name</v-col>
-                  <v-col class="py-2">{{ notary.name }}</v-col>
+                  <v-col class="py-2">{{ notaryName }}</v-col>
                 </v-row>
-                <v-row v-if="notary.address">
+                <v-row v-if="notaryContact">
                   <v-col class="cols-12 col-sm-3 py-2">Mailing Address</v-col>
                   <v-col class="py-2">
                     <div>
                       <ul class="mailing-address">
-                        <li>{{ notary.address.street }}</li>
-                        <li>{{ notary.address.city }} {{ notary.address.region }} {{ notary.address.postalCode }}</li>
-                        <li>{{ notary.address.country }}</li>
+                        <li>{{ notaryContact.street }}</li>
+                        <li>{{ notaryContact.city }} {{ notaryContact.region }} {{ notaryContact.postalCode }}</li>
+                        <li>{{ notaryContact.country }}</li>
                       </ul>
                     </div>
                     </v-col>
                 </v-row>
                 <v-row>
                   <v-col class="cols-12 col-sm-3 py-2">Email Address</v-col>
-                  <v-col class="py-2">{{ notary.emailAddress }}</v-col>
+                  <v-col class="py-2">{{ notaryContact.email }}</v-col>
                 </v-row>
                 <v-row>
                   <v-col class="cols-12 col-sm-3 py-2">Phone Number</v-col>
-                  <v-col class="py-2">{{ notary.phoneNumber }}</v-col>
+                  <v-col class="py-2">{{ notaryContact.phone }}</v-col>
                 </v-row>
             </section>
 
@@ -160,7 +162,9 @@
 
 <script lang="ts">
 import { MembershipType, Organization } from '@/models/Organization'
+import { Address } from '@/models/address'
 import Component from 'vue-class-component'
+import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
 import OrgService from '@/services/org.services'
 import { Prop } from 'vue-property-decorator'
@@ -172,52 +176,33 @@ export default class ReviewAccountView extends Vue {
   @Prop() orgId: number
   private isLoading: boolean = true
   private accountUnderReview: Organization
+  private accountMailingAddress: Address
   private accountAdmin: User
-
-  // TODO - remove these stub objects and replace with actual data from store
-  // private account: Organization = {
-  //   name: 'Account Four',
-  //   bcolAccountDetails: {
-  //     accountNumber: '180670',
-  //     userId: 'PB25020',
-  //     accountType: 'BCOL',
-  //     address: {
-  //       street: '1234 Some Street Name',
-  //       city: 'Calgary',
-  //       region: 'Alberta',
-  //       postalCode: 'A1B 2C3',
-  //       country: 'CANADA'
-  //     }
-  //   }
-  // }
-
-  // private accountAdmin: User = {
-  //   firstname: 'John',
-  //   lastname: 'Smith',
-  //   username: 'jsmith'
-  // }
-
-  private notary = {
-    name: 'Notary Name',
-    emailAddress: 'email@email.com',
-    phoneNumber: '(555) 555-5555',
-    address: {
-      street: '1234 Some Street Name',
-      city: 'Calgary',
-      region: 'Alberta',
-      postalCode: 'A1B 2C3',
-      country: 'CANADA'
-    }
-  }
+  private notaryName: string
+  private notaryContact: Contact
+  private affidavitDocumentUrl: string
+  private affidavidDocumentId: string
 
   private async mounted () {
     this.accountUnderReview = (await OrgService.getOrganization(this.orgId))?.data
-    this.accountAdmin = this.accountUnderReview?.members?.find(member => member.membershipTypeCode === MembershipType.Admin)?.user
+    this.accountMailingAddress = (await OrgService.getContactForOrg(this.orgId))
+
+    // Retreive account admin by getting first owner from member list
+    const orgMembers = (await OrgService.getOrgMembers(this.orgId, 'ACTIVE'))?.data
+    this.accountAdmin = orgMembers?.members?.find(member => member.membershipTypeCode === MembershipType.Admin)?.user
+
+    // Retreive affidavit submitted by account admin
+    const affidavitInfo = (await OrgService.getAffidavitInfo(this.orgId))?.data
+    this.notaryName = affidavitInfo?.issuer || '-'
+    this.notaryContact = affidavitInfo?.contacts?.length > 0 && affidavitInfo?.contacts[0]
+    this.affidavitDocumentUrl = affidavitInfo.documentUrl
+    this.affidavidDocumentId = affidavitInfo.documentId
     this.isLoading = false
   }
 
   private async downloadAffidavit (): Promise<void> {
     // Invoke document service to get affidavit for current organization
+    DocumentService.getSignedAffidavit(this.affidavitDocumentUrl, this.affidavidDocumentId)
   }
 }
 </script>

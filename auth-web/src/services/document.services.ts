@@ -1,7 +1,7 @@
 import Axios, { AxiosResponse } from 'axios'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DocumentUpload } from '@/models/user'
-import { Organization } from '@/models/Organization'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
 
@@ -20,14 +20,9 @@ export default class DocumentService {
     })
   }
 
-  // TODO - modify this once document upload/get for completed affidavits in place
-  static async getAffidavitForOrg (org: Organization): Promise<AxiosResponse> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/${org.id}/admins/affidavits`, {
-      responseType: 'arraybuffer',
-      headers: {
-        'Accept': 'application/pdf'
-      }
-    })
+  static async getSignedAffidavit (documentUrl: string, documentId: string): Promise<void> {
+    const data = (await axios.get(documentUrl))
+    CommonUtils.fileDownload(data?.data, documentId, data?.headers['content-type'])
   }
 
   static async getPresignedUrl (fileName: string): Promise<AxiosResponse<DocumentUpload>> {
