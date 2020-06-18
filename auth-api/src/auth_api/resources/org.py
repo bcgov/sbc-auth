@@ -32,7 +32,6 @@ from auth_api.utils.enums import AccessType, AffidavitStatus, ChangeType, Notifi
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF_ADMIN, USER, Role
 from auth_api.utils.util import cors_preflight
 
-
 API = Namespace('orgs', description='Endpoints for organization management')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
@@ -79,16 +78,18 @@ class Orgs(Resource):
         # Search based on request arguments
         business_identifier = request.args.get('affiliation', None)
         name = request.args.get('name', None)
-        org_type = request.args.get('type', None)
+        status = request.args.get('status', None)
+        access_type = request.args.get('type', None)
         try:
-            response, status = OrgService.search_orgs(business_identifier=business_identifier, org_type=org_type,
-                                                      name=name), \
+            response, status = OrgService.search_orgs(business_identifier=business_identifier, access_type=access_type,
+                                                      name=name, status=status), \
                                http_status.HTTP_200_OK
 
-            # TODO change it later
-            # If searching by name return 200 with empty results if orgs exist
+            # If public user is searching , return 200 with empty results if orgs exist
             # Else return 204
-            if name:
+            token = g.jwt_oidc_token_info
+            is_public_user = Role.PUBLIC_USER.value in token.get('realm_access').get('roles')
+            if is_public_user:  # public user cant get the details in search.Gets only status of orgs
                 if response and response.get('orgs'):
                     status = http_status.HTTP_200_OK
                 else:
@@ -457,8 +458,8 @@ class OrgAdminAffidavits(Resource):
     def get(org_id):
         """Get the affidavit for the admin who created the account."""
         try:
-            response, status = AffidavitService.find_affidavit_by_org_id(org_id=org_id),\
-                http_status.HTTP_200_OK
+            response, status = AffidavitService.find_affidavit_by_org_id(org_id=org_id), \
+                               http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
