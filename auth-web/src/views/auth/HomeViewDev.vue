@@ -66,7 +66,9 @@
         <v-container>
           <h2>How does it work?</h2>
           <InfoStepper />
-          <transition name="slide-x-transition">
+          <transition
+            name="slide-x-transition"
+            mode="out-in">
             <router-view
               :userProfile="userProfile"
               @login="login()"
@@ -221,7 +223,7 @@ export default class HomeViewDev extends Vue {
     background-position:  bottom right;
     background-size: 75% 100%;
     background-repeat: no-repeat;
-    height: 40rem;
+    min-height: 40rem;
 
     h1 {
       margin-bottom: 1.5rem;
@@ -301,7 +303,7 @@ export default class HomeViewDev extends Vue {
 
     .container {
       padding-top: 2.5rem;
-      padding-bottom: 3.5rem;
+      min-height: 42.5rem;
     }
 
     h2 {
