@@ -14,42 +14,36 @@
         </v-container>
       </v-alert>
 
-      <header class="hero-banner">
+      <header class="hero-banner d-flex align-center" :class="{'auth': userProfile}">
         <v-container>
-          <h1 class="mt-10">Start a Benefit Company and <br> Keep Cooperatives Records up to date</h1>
-          <p class="my-10">The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
+          <h1>Start a Benefit Company and Keep <br>Cooperatives Records up to date</h1>
+          <p class="mt-7 mb-11">The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
             and organizations in British Columbia.</p>
-          <div class="hero-banner__cta-btns">
+          <div class="hero-banner__cta-btns mb-2">
             <!-- Authenticated -->
             <div v-if="userProfile" class="cta-btns-authenticated">
               <name-request-button :isWide="true" />
-              <v-btn large color="#003366" class="cta-btn white--text"
+              <v-btn large dark color="bcgovblue" class="font-weight-bold"
                      @click="goToManageBusinesses()">
                 Incorporate a Named Benefit Company
               </v-btn>
-              <v-btn large color="#003366" class="cta-btn white--text"
+              <v-btn large dark color="bcgovblue" class="font-weight-bold"
                      @click="goToManageBusinesses(true)">
                 Incorporate a Numbered Benefit Company
               </v-btn>
-              <v-btn large color="#fcba19" class="cta-btn"
+              <v-btn large color="bcgovgold" class="font-weight-bold"
                      @click="goToManageBusinesses()">
                 Manage an Existing Business
               </v-btn>
-              <p class="mt-3"><a @click="accountDialog = true" class="create-account-link">
-                <u>Add another BC Registries Account</u></a>
-              </p>
             </div>
             <!-- Non-authenticated -->
             <div v-else>
-              <v-btn large color="bcgovgold" class="cta-btn mr-3"
+              <v-btn large color="bcgovgold" class="cta-btn font-weight-bold mr-3"
                 to="/choose-authentication-method"
               >
-                Create an account
+                Create a BC Registries account
               </v-btn>
               <name-request-button />
-              <p class="mt-10">New to BC Registries? <a @click="accountDialog = true" class="create-account-link">
-                <u>Create a BC Registries Account</u></a>
-              </p>
             </div>
           </div>
 
@@ -63,8 +57,8 @@
           </v-dialog>
         </v-container>
       </header>
-      <div class="how-to-container mt-10">
-        <v-container>
+      <div class="how-to-container py-6">
+        <v-container class="py-10">
           <h2>How does it work?</h2>
           <InfoStepper />
           <transition
@@ -79,11 +73,13 @@
         </v-container>
       </div>
       <TestimonialQuotes />
-      <BcscPanel
-        :userProfile="userProfile"
-        @login="login()"
-        @account-dialog="accountDialog = true"
-      />
+      <div class="bcsc-container py-6">
+        <BcscPanel class="my-10"
+          :userProfile="userProfile"
+          @login="login()"
+          @account-dialog="accountDialog = true"
+        />
+      </div>
       <div class="contact-info-container">
         <v-container>
           <v-row>
@@ -222,9 +218,8 @@ export default class HomeViewDev extends Vue {
     background-color: #ffffff;
     background-image: url('../../assets/img/hero-img-min.jpg');
     background-position:  bottom right;
-    background-size: 75% 100%;
+    background-size: 75%;
     background-repeat: no-repeat;
-    min-height: 40rem;
 
     h1 {
       margin-bottom: 1.5rem;
@@ -251,8 +246,7 @@ export default class HomeViewDev extends Vue {
     }
 
     .container {
-      padding-top: 3rem;
-      padding-bottom: 3.75rem;
+      padding: 2rem 1.5rem;
     }
   }
 
@@ -261,15 +255,75 @@ export default class HomeViewDev extends Vue {
       background-image: none;
     }
   }
-  @media only screen and (min-width: 1680px) {
+
+  @media (min-width: 960px) {
     .hero-banner {
-      background-size: 55% 110%;
+      height: 30rem;
+      background-size: 900px;
+    }
+
+    .hero-banner.auth {
+      height: 38rem;
+      background-size: 1100px;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .hero-banner {
+      height: 30rem;
+      background-size: 900px;
+    }
+
+    .hero-banner.auth {
+      height: 38rem;
+      background-size: 1100px;
+    }
+  }
+
+  @media (min-width: 1264px) and (min-height: 900px) {
+    .hero-banner {
+      background-size: 950px;
+    }
+
+    .hero-banner.auth {
+      background-size: 1150px;
+    }
+  }
+
+  @media (min-width: 1360px) {
+    .hero-banner {
+      .container {
+        padding: 2rem 1rem;
+      }
+    }
+  }
+
+  @media (min-width: 1700px) {
+    .hero-banner {
+      background-size: 1150px;
+    }
+
+    .hero-banner.auth {
+      background-size: 1300px;
+    }
+  }
+
+  @media (min-width: 1920px) {
+    .hero-banner {
+      background-size: 1320px;
+      background-position-x: right;
+      background-position-y: -240px;
+    }
+
+    .hero-banner.auth {
+      background-size: 1520px;
+      background-position-x: right;
+      background-position-y: -240px;
     }
   }
 
   .hero-banner__cta-btns {
     display: flex;
-    min-height: 150px;
 
     .cta-btn {
       flex: 0 0 100%;
@@ -281,7 +335,7 @@ export default class HomeViewDev extends Vue {
       flex-wrap: wrap;
       margin-bottom: 13px;
 
-      .cta-btn {
+      .v-btn {
         flex: 0 0 100%;
         margin-bottom: 13px;
       }
@@ -301,11 +355,6 @@ export default class HomeViewDev extends Vue {
   .how-to-container {
     background: $BCgovBG;
     width: 100%;
-
-    .container {
-      padding-top: 2.5rem;
-      min-height: 42.5rem;
-    }
 
     h2 {
       text-align: center;
@@ -498,6 +547,10 @@ export default class HomeViewDev extends Vue {
 
   .app-footer {
     border-bottom: none !important;
+  }
+
+  .v-list {
+    background-color: transparent;
   }
 
 </style>
