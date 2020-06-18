@@ -2,13 +2,15 @@ import 'core-js/stable' // to polyfill ECMAScript features
 import '@mdi/font/css/materialdesignicons.min.css' // icon library (https://materialdesignicons.com/)
 import 'regenerator-runtime/runtime' // to use transpiled generator functions
 import './registerServiceWorker'
-import router, { getRoutes } from './router'
 import App from './App.vue'
 import ConfigHelper from '@/util/config-helper'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import TokenService from 'sbc-common-components/src/services/token.services'
 import Vue from 'vue'
 import can from '@/directives/can'
+import { getRoutes } from './routes/router'
 import i18n from './plugins/i18n'
+import router from './routes/index'
 import store from './store'
 import vuetify from './plugins/vuetify'
 
@@ -19,7 +21,9 @@ Vue.prototype.$tokenService = new TokenService()
  * The server side configs are necessary for app to work , since they are reference in templates and all
  *  Two ways , either reload Vue after we get the settings or load vue after we get the configs..going for second
  */
-ConfigHelper.saveConfigToSessionStorage().then((data) => {
+ConfigHelper.saveConfigToSessionStorage().then(async (data) => {
+  // Initializing Launch Darkly services
+  await LaunchDarklyService.init(ConfigHelper.getValue('LAUNCH_DARKLY_ENV_KEY'))
   renderVue()
 }
 )

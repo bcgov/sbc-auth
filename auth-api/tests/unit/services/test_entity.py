@@ -16,13 +16,13 @@
 Test suite to ensure that the Entity service routines are working as expected.
 """
 import pytest
+from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestUserInfo
+from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_org_service
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.services.entity import Entity as EntityService
-from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestUserInfo
-from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_org_service
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -131,35 +131,6 @@ def test_update_entity_existing_failures(session):  # pylint:disable=unused-argu
 
     with pytest.raises(BusinessException) as exception:
         EntityService.update_entity('invalidbusinessnumber', updated_entity_info,
-                                    {'loginSource': '', 'realm_access': {'roles': ['system']},
-                                     'corp_type': 'INVALID_CP'})
-
-    assert exception.value.code == Error.DATA_NOT_FOUND.name
-
-
-def test_update_entity_existing_failures_no_cp_for_saved_entity(session):  # pylint:disable=unused-argument
-    """Assert that an Entity can be updated from a dictionary."""
-    entity = EntityService.save_entity({
-        'businessIdentifier': TestEntityInfo.bc_entity_passcode3['businessIdentifier'],
-        'businessNumber': TestEntityInfo.bc_entity_passcode3['businessNumber'],
-        'passCode': TestEntityInfo.bc_entity_passcode3['passCode'],
-        'name': TestEntityInfo.bc_entity_passcode3['name']
-    })
-
-    assert entity
-    assert entity.as_dict().get('corpType', None) is None
-
-    updated_entity_info = {
-        'businessIdentifier': TestEntityInfo.bc_entity_passcode4['businessIdentifier'],
-        'businessNumber': TestEntityInfo.bc_entity_passcode4['businessNumber'],
-        'name': TestEntityInfo.bc_entity_passcode4['name'],
-        'corpTypeCode': TestEntityInfo.bc_entity_passcode4['corpTypeCode']
-    }
-    user_with_token = TestUserInfo.user_test
-    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
-
-    with pytest.raises(BusinessException) as exception:
-        EntityService.update_entity(entity.as_dict().get('businessIdentifier'), updated_entity_info,
                                     {'loginSource': '', 'realm_access': {'roles': ['system']},
                                      'corp_type': 'INVALID_CP'})
 

@@ -20,7 +20,7 @@ from typing import Dict
 from flask import abort
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
-from auth_api.utils.roles import STAFF, Role, STAFF_ADMIN
+from auth_api.utils.roles import STAFF, STAFF_ADMIN, Role
 
 
 class Authorization:

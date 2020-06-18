@@ -16,39 +16,37 @@
 
       <header class="hero-banner">
         <v-container>
-          <h1>Start A Business And <br> Keep Records up to Date</h1>
+          <h1 class="mt-10">Start a Benefit Company and <br> Keep Cooperatives Records up to date</h1>
           <p class="my-10">The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
             and organizations in British Columbia.</p>
           <div class="hero-banner__cta-btns">
             <!-- Authenticated -->
             <div v-if="userProfile" class="cta-btns-authenticated">
-              <v-btn large color="#003366" class="cta-btn white--text"
-                     href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
-                Request a Name
-              </v-btn>
+              <name-request-button :isWide="true" />
               <v-btn large color="#003366" class="cta-btn white--text"
                      @click="goToManageBusinesses()">
-                Incorporate a Named Company
+                Incorporate a Named Benefit Company
               </v-btn>
               <v-btn large color="#003366" class="cta-btn white--text"
                      @click="goToManageBusinesses(true)">
-                Incorporate a Numbered Company
+                Incorporate a Numbered Benefit Company
               </v-btn>
               <v-btn large color="#fcba19" class="cta-btn"
                      @click="goToManageBusinesses()">
                 Manage an Existing Business
               </v-btn>
+              <p class="mt-3"><a @click="accountDialog = true" class="create-account-link">
+                <u>Add another BC Registries Account</u></a>
+              </p>
             </div>
             <!-- Non-authenticated -->
             <div v-else>
-              <v-btn large color="#fcba19" class="cta-btn"
-                     @click="login()">
-                Log in with BC Services Card
+              <v-btn large color="bcgovgold" class="cta-btn mr-3"
+                to="/choose-authentication-method"
+              >
+                Create an account
               </v-btn>
-              <v-btn large color="#003366" class="cta-btn ml-4 white--text"
-                     href="https://www.bcregistrynames.gov.bc.ca/nro/" target="_blank" rel="noopener noreferrer">
-                Request a Name
-              </v-btn>
+              <name-request-button />
               <p class="mt-10">New to BC Registries? <a @click="accountDialog = true" class="create-account-link">
                 <u>Create a BC Registries Account</u></a>
               </p>
@@ -69,10 +67,15 @@
         <v-container>
           <h2>How does it work?</h2>
           <InfoStepper />
-          <RouterView
-            :userProfile="userProfile"
-            @account-dialog="accountDialog = true"
-            @manage-businesses="goToManageBusinesses($event)"/>
+          <transition
+            name="slide-x-transition"
+            mode="out-in">
+            <router-view
+              :userProfile="userProfile"
+              @login="login()"
+              @account-dialog="accountDialog = true"
+              @manage-businesses="goToManageBusinesses($event)"/>
+          </transition>
         </v-container>
       </div>
       <TestimonialQuotes />
@@ -121,12 +124,14 @@ import BcscPanel from '@/components/auth/BcscPanel.vue'
 import InfoStepper from '@/components/auth/stepper/InfoStepper.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
+import NameRequestButton from '@/components/auth/common/NameRequestButton.vue'
 import TestimonialQuotes from '@/components/auth/TestimonialQuotes.vue'
 import { User } from '@/models/user'
 
 @Component({
   name: 'Home',
   components: {
+    NameRequestButton,
     BcscPanel,
     InfoStepper,
     LoginBCSC,
@@ -207,15 +212,19 @@ export default class HomeViewDev extends Vue {
     font-size: 2rem;
   }
 
+  .v-btn:hover {
+    opacity: .8;
+  }
+
   // Hero Banner
   .hero-banner {
     color: $gray9;
-    min-height: 550px;
     background-color: #ffffff;
-    background-image: url('../../assets/img/bc-launch-hero-img-min.jpg');
-    background-position: bottom right;
-    background-size: 80% 115%;
+    background-image: url('../../assets/img/hero-img-min.jpg');
+    background-position:  bottom right;
+    background-size: 75% 100%;
     background-repeat: no-repeat;
+    min-height: 40rem;
 
     h1 {
       margin-bottom: 1.5rem;
@@ -247,9 +256,14 @@ export default class HomeViewDev extends Vue {
     }
   }
 
-  @media only screen and (max-width: 600px) {
+  @media only screen and (max-width: 640px) {
     .hero-banner {
       background-image: none;
+    }
+  }
+  @media only screen and (min-width: 1680px) {
+    .hero-banner {
+      background-size: 55% 110%;
     }
   }
 
@@ -263,7 +277,7 @@ export default class HomeViewDev extends Vue {
 
     .cta-btns-authenticated, .cta-btns-authenticated > div {
       display: flex;
-      max-width: 300px;
+      max-width: 350px;
       flex-wrap: wrap;
       margin-bottom: 13px;
 
@@ -275,10 +289,10 @@ export default class HomeViewDev extends Vue {
 
     .create-account-link {
       font-size: 1rem;
-      color: $BCgoveBueText1!important;
+      color: $BCgoveBueText1 !important;
 
       :hover {
-        color: $BCgoveBueText2!important;
+        color: $BCgoveBueText2 !important;
       }
     }
   }
@@ -290,7 +304,7 @@ export default class HomeViewDev extends Vue {
 
     .container {
       padding-top: 2.5rem;
-      padding-bottom: 3.5rem;
+      min-height: 42.5rem;
     }
 
     h2 {

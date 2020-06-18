@@ -26,15 +26,24 @@
             @click="emitManageBusinesses()">
             Manage an Existing Business
           </v-btn>
-          <v-btn v-else large color="#fcba19" @click="login()" class="my-5">
-            Log in with BC Services Card
-          </v-btn>
-          <LearnMoreButton />
+          <template v-else>
+            <v-btn large color="#fcba19" @click="emitLogin()" class="my-5">
+              Log in with BC Services Card
+            </v-btn>
+            <p>New to BC Registries? <a @click="emitAccountDialog()" class="create-account-link">
+              <u>Create a BC Registries Account</u></a>
+            </p>
+          </template>
+          <learn-more-button
+           :redirect-url="learnMoreUrl"
+          />
         </div>
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
-        <v-img src="../../assets/img/Step4-Maintain-x1.png" aspect-ratio="1.2" contain></v-img>
+        <a :href="learnMoreUrl" target="_blank">
+          <v-img src="../../assets/img/Step4_Maintain_x2.png" aspect-ratio="1.2" contain></v-img>
+        </a>
       </v-col>
     </v-row>
   </v-container>
@@ -42,17 +51,20 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import ContactUsTooltip from '@/components/auth/common/ContactUsTooltip.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import { Pages } from '@/util/constants'
 import { User } from '@/models/user'
 
 @Component({
   components: {
+    ContactUsTooltip,
     LearnMoreButton
   }
 })
 export default class MaintainBusinessView extends Vue {
-  private bulletPoints: Array<any> = [
+  private readonly learnMoreUrl = 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business-management/permits-licences-and-registration/registries-guides/info_36_com_-_maintaining_your_bc_company.pdf'
+  private readonly bulletPoints: Array<any> = [
     { text: 'Once your business is incorporated or registered you are required to keep information about your business up to date with the Registry.' },
     { text: 'By managing your business through your BC Registry account you can:',
       subText: [
@@ -66,9 +78,11 @@ export default class MaintainBusinessView extends Vue {
   @Prop()
   private userProfile: User
 
-  private login (): void {
-    this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
-  }
+  @Emit('login')
+  private emitLogin () {}
+
+  @Emit('account-dialog')
+  private emitAccountDialog () {}
 
   @Emit('manage-businesses')
   private emitManageBusinesses () {}
@@ -79,7 +93,7 @@ export default class MaintainBusinessView extends Vue {
   @import '$assets/scss/theme.scss';
 
   #maintain-info-container {
-    padding-top: 0!important;
+    padding-top: 0 !important;
     flex-wrap: wrap;
 
     .list-item {
@@ -112,7 +126,21 @@ export default class MaintainBusinessView extends Vue {
       .v-btn {
         max-width: 250px;
         font-weight: bold;
+        color: $BCgovBlue5;
       }
+
+      .v-btn:hover {
+        opacity: .8;
+      }
+    }
+
+    .create-account-link {
+      font-size: 1rem;
+      color: $BCgoveBueText1;
+    }
+
+    .create-account-link:hover {
+      color: $BCgoveBueText2;
     }
   }
 </style>

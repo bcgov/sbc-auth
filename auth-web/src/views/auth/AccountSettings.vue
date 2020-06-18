@@ -149,7 +149,6 @@ export default class AccountSettings extends Vue {
   }
 
   .v-list-item .v-list-item__title {
-    font-size: 0.875rem !important;
     font-weight: 700;
   }
 

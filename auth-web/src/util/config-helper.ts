@@ -1,4 +1,5 @@
 import Axios from 'axios'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { SessionStorageKeys } from './constants'
 
 /**
@@ -46,8 +47,16 @@ export default class ConfigHelper {
     return ConfigHelper.getValue('VUE_APP_PAY_ROOT_API')
   }
 
+  static getBceIdOsdLink () {
+    return ConfigHelper.getValue('BCEID_OSD_LINK')
+  }
+
   static getAuthAPIUrl () {
     return ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')
+  }
+
+  static getFileServerUrl () {
+    return ConfigHelper.getValue('FILE_SERVER_URL')
   }
 
   static getAuthResetAPIUrl () {
@@ -60,6 +69,10 @@ export default class ConfigHelper {
 
   static getLegalAPIUrl () {
     return ConfigHelper.getValue('VUE_APP_LEGAL_ROOT_API')
+  }
+
+  static getNroUrl () {
+    return ConfigHelper.getValue('NRO_URL')
   }
 
   static getValue (key: String) {
@@ -85,5 +98,9 @@ export default class ConfigHelper {
 
   static accountSettingsRoute () {
     return `/account/${JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}').id || 0}/settings`
+  }
+
+  static getLaunchFeatureFlag () {
+    return LaunchDarklyService.getFlag('incorporations-launch-feature')
   }
 }

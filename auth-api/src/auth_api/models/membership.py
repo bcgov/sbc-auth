@@ -19,7 +19,8 @@ The Membership object connects User models to one or more Org models.
 from sqlalchemy import Column, ForeignKey, Integer, and_, desc, func
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.roles import VALID_STATUSES, Status, COORDINATOR, ADMIN
+from auth_api.utils.enums import Status
+from auth_api.utils.roles import ADMIN, COORDINATOR, VALID_STATUSES, VALID_ORG_STATUSES
 
 from .base_model import BaseModel
 from .db import db
@@ -97,7 +98,7 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
             .join(OrgModel) \
             .filter(cls.user_id == user_id) \
             .filter(cls.status.in_(valid_statuses)) \
-            .filter(OrgModel.status_code == 'ACTIVE') \
+            .filter(OrgModel.status_code.in_(VALID_ORG_STATUSES)) \
             .all()
 
         return list(map(lambda x: x.org, records))

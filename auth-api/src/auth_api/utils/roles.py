@@ -14,21 +14,21 @@
 """Role definitions."""
 from enum import Enum
 
+from .enums import Status, OrgStatus
+
 
 class Role(Enum):
     """User Role."""
 
-    BASIC = 'basic'
-    PREMIUM = 'premium'
     STAFF = 'staff'
     VIEWER = 'viewer'
     EDITOR = 'edit'
-    COORDINATOR = 'admin'
     SYSTEM = 'system'
     TESTER = 'tester'
     ACCOUNT_HOLDER = 'account_holder'
     STAFF_ADMIN = 'staff_admin'
     PUBLIC_USER = 'public_user'
+    BCOL_STAFF_ADMIN = 'bcol_staff_admin'
 
 
 # Membership types
@@ -38,48 +38,9 @@ ADMIN = 'ADMIN'
 USER = 'USER'
 STAFF_ADMIN = 'STAFF_ADMIN'
 
-
-class Status(Enum):
-    """User Membership status."""
-
-    ACTIVE = 1
-    INACTIVE = 2
-    REJECTED = 3
-    PENDING_APPROVAL = 4
-
-
-class UserStatus(Enum):
-    """User Membership status."""
-
-    ACTIVE = 1
-    INACTIVE = 2
-
-
-class OrgStatus(Enum):
-    """User Membership status."""
-
-    ACTIVE = 'ACTIVE'
-    INACTIVE = 'INACTIVE'
-    PENDING = 'PENDING'
-
-
 VALID_STATUSES = (Status.ACTIVE.value, Status.PENDING_APPROVAL.value)
+VALID_ORG_STATUSES = (OrgStatus.ACTIVE.value, OrgStatus.PENDING_AFFIDAVIT_REVIEW.value)
 
 CLIENT_ADMIN_ROLES = (COORDINATOR, ADMIN)
 CLIENT_AUTH_ROLES = (*CLIENT_ADMIN_ROLES, USER)
 ALL_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF, STAFF_ADMIN)
-
-
-class InvitationType(Enum):
-    """Invitation type."""
-
-    DIRECTOR_SEARCH = 'DIRECTOR_SEARCH'  # Used to indicate an anonymous account invitation
-    STANDARD = 'STANDARD'                # Used to indicate the standard email invite with admin approval
-
-
-class AccessType(Enum):
-    """Access Type."""
-
-    ANONYMOUS = 'ANONYMOUS'  # Anonymous type login (director search)
-    BCSC = 'BCSC'            # BC Services Card login
-    IDIR = 'IDIR'            # IDIR login

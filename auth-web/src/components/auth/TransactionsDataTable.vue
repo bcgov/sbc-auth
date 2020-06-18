@@ -110,7 +110,8 @@ export default class TransactionsDataTable extends Vue {
       text: 'Initiated By',
       align: 'left',
       sortable: false,
-      value: 'initiatedBy'
+      value: 'initiatedBy',
+      width: 200
     },
     {
       text: 'Date',
@@ -255,6 +256,8 @@ export default class TransactionsDataTable extends Vue {
 ::v-deep {
   .transaction-list {
     .v-data-table-header {
+      margin-bottom: -2px;
+
       th {
         font-weight: 600;
         color: #000
@@ -277,5 +280,11 @@ export default class TransactionsDataTable extends Vue {
       font-weight: 700;
     }
   }
+}
+
+thead + thead {
+  position: absolute;
+  width: 100%;
+  top: -2px;
 }
 </style>

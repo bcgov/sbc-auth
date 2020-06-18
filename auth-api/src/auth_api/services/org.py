@@ -28,17 +28,20 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
+from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import OrgSchema
-from auth_api.utils.enums import PaymentType, OrgType, ChangeType
-from auth_api.utils.roles import ADMIN, VALID_STATUSES, Status, AccessType
+from auth_api.utils.enums import AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentType, Status
+from auth_api.utils.roles import ADMIN, VALID_STATUSES
 from auth_api.utils.util import camelback2snake
+
+from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
 from .contact import Contact as ContactService
 from .keycloak import KeycloakService
 from .rest_service import RestService
 
 
-class Org:
+class Org:  # pylint: disable=too-many-public-methods
     """Manages all aspects of Org data.
 
     This service manages creating, updating, and retrieving Org data via the Org model.
@@ -59,7 +62,7 @@ class Org:
         return obj
 
     @staticmethod
-    def create_org(org_info: dict, user_id,  # pylint: disable=too-many-locals, too-many-statements
+    def create_org(org_info: dict, user_id,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
                    token_info: Dict = None, bearer_token: str = None):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
@@ -77,38 +80,33 @@ class Org:
         org_info['typeCode'] = OrgType.PREMIUM.value if bcol_account_number else OrgType.BASIC.value
 
         is_staff_admin = token_info and 'staff_admin' in token_info.get('realm_access').get('roles')
-        if not is_staff_admin:  # staff can create any number of orgs
-            count = OrgModel.get_count_of_org_created_by_user_id(user_id)
-            if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
-                raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
-            if org_info.get('accessType', None) == AccessType.ANONYMOUS.value:
-                raise BusinessException(Error.USER_CANT_CREATE_ANONYMOUS_ORG, None)
+        is_bceid_user = token_info and token_info.get('loginSource', None) == LoginSource.BCEID.value
+
+        Org.validate_account_limit(is_staff_admin, user_id)
+
+        access_type = Org.validate_access_type(is_bceid_user, is_staff_admin, org_info)
 
         if not bcol_account_number:  # Allow duplicate names if premium
             Org.raise_error_if_duplicate_name(org_info['name'])
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
-        org.add_to_session()
+        org.access_type = access_type
+        # If the account is anonymous set the billable value as False else True
+        org.billable = access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR.value)
 
-        if is_staff_admin:
-            org.access_type = AccessType.ANONYMOUS.value
-            org.billable = False
-        else:
-            org.access_type = AccessType.BCSC.value
-            org.billable = True
+        # Set the status based on access type
+        # Check if the user is APPROVED else set the org status to PENDING
+        if access_type == AccessType.EXTRA_PROVINCIAL.value \
+                and not AffidavitModel.find_approved_by_user_id(user_id=user_id):
+            org.status_code = OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
+        org.add_to_session()
 
         # If mailing address is provided, save it
         if mailing_address:
             Org.add_contact_to_org(mailing_address, org)
 
         # create the membership record for this user if its not created by staff and access_type is anonymous
-        if not is_staff_admin and org_info.get('access_type') != AccessType.ANONYMOUS:
-            membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='ADMIN',
-                                         membership_type_status=Status.ACTIVE.value)
-            membership.add_to_session()
-
-            # Add the user to account_holders group
-            KeycloakService.join_account_holders_group()
+        Org.create_membership(access_type, is_staff_admin, org, user_id)
 
         Org.add_payment_settings(org.id, bcol_account_number, bcol_user_id)
 
@@ -116,6 +114,44 @@ class Org:
         current_app.logger.info(f'<created_org org_id:{org.id}')
 
         return Org(org)
+
+    @staticmethod
+    def create_membership(access_type, is_staff_admin, org, user_id):
+        """Create membership account."""
+        if not is_staff_admin and access_type != AccessType.ANONYMOUS.value:
+            membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='ADMIN',
+                                         membership_type_status=Status.ACTIVE.value)
+            membership.add_to_session()
+
+            # Add the user to account_holders group
+            KeycloakService.join_account_holders_group()
+
+    @staticmethod
+    def validate_account_limit(is_staff_admin, user_id):
+        """Validate account limit."""
+        if not is_staff_admin:  # staff can create any number of orgs
+            count = OrgModel.get_count_of_org_created_by_user_id(user_id)
+            if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
+                raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
+
+    @staticmethod
+    def validate_access_type(is_bceid_user, is_staff_admin, org_info):
+        """Validate and return access type."""
+        access_type: str = org_info.get('accessType', None)
+        if access_type:
+            if not is_staff_admin and access_type == AccessType.ANONYMOUS.value:
+                raise BusinessException(Error.USER_CANT_CREATE_ANONYMOUS_ORG, None)
+            if not is_bceid_user and access_type == AccessType.EXTRA_PROVINCIAL:
+                raise BusinessException(Error.USER_CANT_CREATE_EXTRA_PROVINCIAL_ORG, None)
+        else:
+            # If access type is not provided, add default value based on user
+            if is_staff_admin:
+                access_type = AccessType.ANONYMOUS.value
+            elif is_bceid_user:
+                access_type = AccessType.EXTRA_PROVINCIAL.value
+            else:
+                access_type = AccessType.REGULAR.value
+        return access_type
 
     @staticmethod
     def raise_error_if_duplicate_name(name):
@@ -404,14 +440,11 @@ class Org:
                 find_affiliations_by_business_identifier(kwargs.get('business_identifier'))
             if affiliation:
                 orgs['orgs'].append(Org(OrgModel.find_by_org_id(affiliation.org_id)).as_dict())
-        elif kwargs.get('org_type', None):
-            org_models = OrgModel.find_by_org_access_type(kwargs.get('org_type'))
+        else:
+            org_models = OrgModel.search_org(kwargs.get('access_type', None), kwargs.get('name', None),
+                                             kwargs.get('status', None))
             for org in org_models:
                 orgs['orgs'].append(Org(org).as_dict())
-        elif kwargs.get('name', None):
-            org_model = OrgModel.find_similar_org_by_name(kwargs.get('name'))
-            if org_model is not None:
-                orgs['orgs'].append(Org(org_model).as_dict())
         return orgs
 
     @staticmethod
@@ -423,3 +456,30 @@ class Org:
                 return True
 
         return False
+
+    @staticmethod
+    def approve_or_reject(org_id: int, is_approved: bool, token_info: Dict):
+        """Mark the affidavit as approved or rejected."""
+        current_app.logger.debug('<find_affidavit_by_org_id ')
+        # Get the org and check what's the current status
+        org: OrgModel = OrgModel.find_by_org_id(org_id)
+
+        # If status is PENDING_AFFIDAVIT_REVIEW handle affidavit approve process, else raise error
+        if org.status_code == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value:
+            AffidavitService.approve_or_reject(org_id, is_approved, token_info)
+        else:
+            raise BusinessException(Error.INVALID_INPUT, None)
+
+        if is_approved:
+            org.status_code = OrgStatus.ACTIVE.value
+            # TODO Send email notification that it's approved
+        else:
+            org.status_code = OrgStatus.REJECTED.value
+            # TODO Send email notification that it's rejected
+
+        # TODO Publish to activity stream
+
+        org.save()
+
+        current_app.logger.debug('>find_affidavit_by_org_id ')
+        return Org(org)

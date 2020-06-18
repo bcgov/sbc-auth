@@ -16,7 +16,6 @@
 from flask import g, request
 from flask_restplus import Namespace, Resource, cors
 
-from auth_api.utils.roles import Role
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
@@ -24,6 +23,7 @@ from auth_api.schemas import utils as schema_utils
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
+from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
 
 

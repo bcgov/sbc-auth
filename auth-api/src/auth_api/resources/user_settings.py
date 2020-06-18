@@ -50,7 +50,7 @@ class SettingsResource(Resource):  # pylint: disable=too-few-public-methods
 
         # TODO make this check better.may be read from DB or something
         if token.get('sub', None) != user_id:
-            return {'message': 'Unauthorised'}, http_status.HTTP_401_UNAUTHORIZED
+            return {'message': 'Unauthorized'}, http_status.HTTP_401_UNAUTHORIZED
 
         try:
             user = UserService.find_by_jwt_token(token)

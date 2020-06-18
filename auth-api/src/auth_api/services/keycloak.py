@@ -16,13 +16,14 @@
 from typing import Dict
 
 import requests
-from flask import g, current_app
+from flask import current_app, g
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.utils.constants import BCROS, BCSC, GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_PUBLIC_USERS
-from auth_api.utils.enums import ContentType
+from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_PUBLIC_USERS
+from auth_api.utils.enums import ContentType, LoginSource
 from auth_api.utils.roles import Role
+
 from .keycloak_user import KeycloakUser
 
 
@@ -172,12 +173,12 @@ class KeycloakService:
         """Add user to the group (public_users or anonymous_users) if the user is public."""
         login_source = token_info.get('loginSource', None)
 
-        group_name = GROUP_PUBLIC_USERS if login_source == BCSC else GROUP_ANONYMOUS_USERS
-
         # Cannot check the group from token, so check if the role 'edit' is already present.
         has_role = Role.EDITOR.value in token_info.get('realm_access').get('roles')
 
-        if not has_role and login_source in (BCSC, BCROS):
+        if not has_role and login_source in (LoginSource.BCEID.value, LoginSource.BCSC.value, LoginSource.BCROS.value):
+            group_name = GROUP_PUBLIC_USERS if login_source in (
+                LoginSource.BCSC.value, LoginSource.BCEID.value) else GROUP_ANONYMOUS_USERS
             KeycloakService._add_user_to_group(token_info.get('sub'), group_name)
 
     @staticmethod

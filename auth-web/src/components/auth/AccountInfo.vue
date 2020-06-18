@@ -51,16 +51,18 @@
         >
         </v-text-field>
       </fieldset>
-      <BaseAddress
-              :inputAddress="currentOrgAddress"
-              @key-down="keyDown()"
-              @address-update="updateAddress"
-              @is-form-valid="checkBaseAddressValidity"
-              v-if="isPremiumAccount && currentOrgAddress"
-              v-can:CHANGE_ADDRESS.disable
-              :key="addressKey"
-      >
-      </BaseAddress>
+      <template v-if="isPremiumAccount && currentOrgAddress">
+        <h4 class="mb-4">Mailing Address</h4>
+        <BaseAddress
+                :inputAddress="currentOrgAddress"
+                @key-down="keyDown()"
+                @address-update="updateAddress"
+                @is-form-valid="checkBaseAddressValidity"
+                v-can:CHANGE_ADDRESS.disable
+                :key="addressKey"
+        >
+        </BaseAddress>
+      </template>
 
       <v-divider class="mt-3 mb-10"></v-divider>
 
@@ -93,7 +95,7 @@
 </template>
 
 <script lang="ts">
-import { Account, Pages, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, Pages, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import {
   CreateRequestBody,
@@ -197,11 +199,11 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   get anonAccount (): boolean {
-    return this.currentOrganization?.accessType === Account.ANONYMOUS
+    return this.currentOrganization?.accessType === AccessType.ANONYMOUS
   }
 
   private canChangeAccountName (): boolean {
-    if (this.currentOrganization?.accessType === Account.ANONYMOUS) {
+    if (this.currentOrganization?.accessType === AccessType.ANONYMOUS) {
       return false
     }
     // Premium account name cant be updated

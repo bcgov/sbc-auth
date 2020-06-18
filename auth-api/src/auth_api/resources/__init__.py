@@ -27,23 +27,24 @@ from sbc_common_components.exception_handling.exception_handler import Exception
 
 from .account import API as ACCOUNTS_API
 from .apihelper import Api
+from .bcol_profiles import API as BCOL_PROFILE_API
+from .bulk_user import API as BULK_USER_API
 from .codes import API as CODES_API
 from .documents import API as DOCUMENTS_API
+from .documents_affidavit import API as DOCUMENTS_AFFIDAVIT_API
 from .entity import API as ENTITY_API
 from .invitation import API as INVITATION_API
 from .meta import API as META_API
+from .notifications import API as NOTIFICATIONS_API
 from .ops import API as OPS_API
 from .org import API as ORG_API
+from .org_products import API as ORG_PRODUCTS_API
+from .permissions import API as PERMISSIONS_API
+from .products import API as PRODUCTS_API
 from .reset import API as RESET_API
 from .token import API as TOKEN_API
 from .user import API as USER_API
-from .bulk_user import API as BULK_USER_API
 from .user_settings import API as USER_SETTINGS_API
-from .org_products import API as ORG_PRODUCTS_API
-from .products import API as PRODUCTS_API
-from .notifications import API as NOTIFICATIONS_API
-from .bcol_profiles import API as BCOL_PROFILE_API
-from .permissions import API as PERMISSIONS_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
@@ -87,6 +88,7 @@ API.add_namespace(ENTITY_API, path='/entities')
 API.add_namespace(ORG_API, path='/orgs')
 API.add_namespace(INVITATION_API, path='/invitations')
 API.add_namespace(DOCUMENTS_API, path='/documents')
+API.add_namespace(DOCUMENTS_AFFIDAVIT_API, path='/documents/affidavit')
 API.add_namespace(CODES_API, path='/codes')
 API.add_namespace(ACCOUNTS_API, path='/accounts')
 API.add_namespace(ORG_PRODUCTS_API, path='/orgs/<string:org_id>/products')

@@ -29,8 +29,10 @@ export enum Role {
 export enum Pages {
     USER_PROFILE = 'userprofile',
     CREATE_ACCOUNT = 'setup-account',
+    CREATE_EXTRAPROV_ACCOUNT = 'setup-extra-prov-account',
     DUPLICATE_TEAM_MESAGE = 'duplicateteam',
     PENDING_APPROVAL = 'pendingapproval',
+    PENDING_AFFIDAVIT_APPROVAL = 'pendingaffidavitapproval',
     MAIN = 'account',
     SIGNIN = 'signin',
     SIGNOUT = 'signout',
@@ -40,12 +42,15 @@ export enum Pages {
     USER_PROFILE_TERMS = 'userprofileterms',
     USER_PROFILE_TERMS_DECLINE = 'unauthorizedtermsdecline',
     HOME = 'home',
+    SETUP_ACCOUNT_OUT_OF_PROVINCE = 'extraprov-info',
+    SETUP_ACCOUNT_OUT_OF_PROVINCE_INSTRUCTIONS = 'instructions',
+    SETUP_ACCOUNT_OUT_OF_PROVINCE_DOWNLOAD = 'download',
     EDIT_ACCOUNT_TYPE= '/change-account',
     STAFF_DASHBOARD= 'searchbusiness'
 }
 
 export enum Account {
-    ANONYMOUS = 'ANONYMOUS',
+    // ANONYMOUS = 'ANONYMOUS',
     PREMIUM = 'PREMIUM',
     BASIC = 'BASIC',
 }
@@ -59,7 +64,8 @@ export enum IdpHint {
 export enum LoginSource {
     BCROS = 'BCROS',
     IDIR = 'IDIR',
-    BCSC = 'BCSC'
+    BCSC = 'BCSC',
+    BCEID = 'BCEID'
 }
 
 export type Actions = 'upgrade' | 'downgrade'
@@ -85,4 +91,10 @@ export enum CorpType {
     NEW_BUSINESS = 'TMP',
     BCOMP = 'BC',
     NAME_REQUEST = 'NR'
+}
+
+export enum AccessType {
+    REGULAR = 'REGULAR',
+    EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL',
+    ANONYMOUS = 'ANONYMOUS'
 }

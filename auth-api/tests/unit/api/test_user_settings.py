@@ -19,12 +19,13 @@ Test-Suite to ensure that the /users endpoint is working as expected.
 import copy
 import json
 
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
+from tests.utilities.factory_utils import factory_auth_header, factory_contact_model, factory_user_model
+
 from auth_api import status as http_status
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
-from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
-from tests.utilities.factory_utils import factory_auth_header, factory_contact_model, factory_user_model
 
 
 def test_get_user_settings(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument

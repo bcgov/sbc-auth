@@ -17,11 +17,16 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
+const mockSession = {
+  'NRO_URL': 'Mock Url'
+}
+
 describe('HomeView.vue', () => {
   let wrapper: any
   let userModule: any
 
   beforeEach(() => {
+    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
@@ -85,20 +90,20 @@ describe('HomeView.vue', () => {
 
   it('renders the correct buttons when authenticated', () => {
     const bannerBtns = wrapper.vm.$el.querySelectorAll('.cta-btn')
-    const nameRequestBtn = bannerBtns[0]
-    const namedCompBtn = bannerBtns[1]
-    const numberedCompBtn = bannerBtns[2]
-    const manageBusinessBtn = bannerBtns[3]
-    const loginBtn = bannerBtns[4]
+    const nameRequestBtn = wrapper.vm.$el.querySelector('.btn-name-request')
+    const namedCompBtn = bannerBtns[0]
+    const numberedCompBtn = bannerBtns[1]
+    const manageBusinessBtn = bannerBtns[2]
+    const loginBtn = bannerBtns[3]
 
     expect(nameRequestBtn).toBeDefined()
     expect(nameRequestBtn.textContent).toContain('Request a Name')
 
     expect(namedCompBtn).toBeDefined()
-    expect(namedCompBtn.textContent).toContain('Incorporate a Named Company')
+    expect(namedCompBtn.textContent).toContain('Incorporate a Named Benefit Company')
 
     expect(numberedCompBtn).toBeDefined()
-    expect(numberedCompBtn.textContent).toContain('Incorporate a Numbered Company')
+    expect(numberedCompBtn.textContent).toContain('Incorporate a Numbered Benefit Company')
 
     expect(manageBusinessBtn).toBeDefined()
     expect(manageBusinessBtn.textContent).toContain('Manage an Existing Business')
@@ -113,7 +118,7 @@ describe('HomeView.vue', () => {
 
     const bannerBtns = wrapper.vm.$el.querySelectorAll('.cta-btn')
     const loginBtn = bannerBtns[0]
-    const nameRequestBtn = bannerBtns[1]
+    const nameRequestBtn = wrapper.vm.$el.querySelector('.btn-name-request')
 
     const createAccountLink = wrapper.vm.$el.querySelector('.create-account-link')
 

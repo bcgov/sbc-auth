@@ -24,6 +24,7 @@ from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
 
+
 API = Namespace('notifications', description='Endpoints for notification management')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()

@@ -12,10 +12,15 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
+const mockSession = {
+  'NRO_URL': 'Mock Url'
+}
+
 describe('RequestNameView.vue', () => {
   let wrapper: any
 
   beforeEach(() => {
+    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
     localVue.use(Vuex)
 

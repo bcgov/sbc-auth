@@ -163,9 +163,6 @@ export default class App extends Mixins(NextPageMixin) {
     await KeyCloakService.setKeycloakConfigUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
     this.showLoading = false
 
-    // Initializing Launch Darkly services
-    await LaunchDarklyService.init(ConfigHelper.getValue('LAUNCH_DARKLY_ENV_KEY'))
-
     EventBus.$on('show-toast', (eventInfo: Event) => {
       this.showNotification = true
       this.notificationText = eventInfo.message

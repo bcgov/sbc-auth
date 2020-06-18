@@ -26,6 +26,7 @@ from auth_api.schemas import EntitySchema
 from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.roles import Role
 from auth_api.utils.util import camelback2snake
+
 from .authorization import check_auth
 
 

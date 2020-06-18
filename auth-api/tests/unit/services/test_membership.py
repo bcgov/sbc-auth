@@ -16,17 +16,15 @@
 Test suite to ensure that the Membership service routines are working as expected.
 """
 
+from tests.utilities.factory_scenarios import KeycloakScenario, TestOrgInfo, TestUserInfo
+from tests.utilities.factory_utils import factory_membership_model, factory_user_model
+
 from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.roles import Status
-from tests.utilities.factory_scenarios import (
-    KeycloakScenario, TestOrgInfo, TestUserInfo)
-from tests.utilities.factory_utils import (
-    factory_membership_model,
-    factory_user_model)
+from auth_api.utils.enums import Status
 
 
 def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:disable=unused-argument

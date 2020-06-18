@@ -17,7 +17,7 @@
 }
 @font-face{
   font-family: 'BCSans';
-  font-weight: 700; 
+  font-weight: 700;
   src: url('../fonts/BCSans/BCSans-Bold.woff2') format('woff2'), /* Optimized for very modern browsers */
        url('../fonts/BCSans/BCSans-Bold.woff') format('woff'), local('BCSans'); /* Modern Browsers */
   font-display: swap;
@@ -25,7 +25,7 @@
 @font-face{
   font-family: 'BCSans';
   font-style: italic;
-  font-weight: 700; 
+  font-weight: 700;
   src: url('../fonts/BCSans/BCSans-BoldItalic.woff2') format('woff2'), /* Optimized for very modern browsers */
        url('../fonts/BCSans/BCSans-BoldItalic.woff') format('woff'), local('BCSans'); /* Modern Browsers */
   font-display: swap;
@@ -34,7 +34,7 @@
 html,
 body {
   min-height: 100vh;
-  font-family: 'BCSans', Verdana, Arial, sans-serif; 
+  font-family: 'BCSans', Verdana, Arial, sans-serif;
 }
 
 html {
@@ -85,6 +85,7 @@ strong {
   font-family: 'BCSans', Verdana, Arial, sans-serif;  // BC Government Font
 
   .body,
+  .body-1,
   .body-2,
   .title,
   .caption,
@@ -92,9 +93,6 @@ strong {
   .subtitle-1,
   .subtitle-2 {
     font-family: 'BCSans', Verdana, Arial, sans-serif !important;  // BC Government Font
-  }
-
-  .caption {
     letter-spacing: 0 !important;
   }
 
@@ -123,10 +121,9 @@ legend {
 .form__btns {
   .v-btn {
     min-width: 7rem !important;
-    font-weight: 700;
 
-    &.default {
-      font-weight: 400;
+    &.primary {
+      font-weight: 700;
     }
   }
 }

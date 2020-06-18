@@ -13,7 +13,7 @@
 # limitations under the License.
 """API endpoints for managing a User resource."""
 
-from flask import g, jsonify, request
+from flask import abort, g, jsonify, request
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
@@ -21,6 +21,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.schemas import MembershipSchema, OrgSchema
 from auth_api.schemas import utils as schema_utils
+from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.keycloak import KeycloakService
@@ -28,9 +29,10 @@ from auth_api.services.membership import Membership as MembershipService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.constants import BCROS, BCSC
-from auth_api.utils.roles import Role, Status, AccessType
+from auth_api.utils.enums import AccessType, LoginSource, Status
+from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
+
 
 API = Namespace('users', description='Endpoints for user profile management')
 TRACER = Tracer.get_instance()
@@ -95,12 +97,20 @@ class Users(Resource):
         token = g.jwt_oidc_token_info
 
         try:
-            user = UserService.save_from_jwt_token(token)
+            request_json = request.get_json(silent=True)
+            # For BCeID users validate schema.
+            if token.get('loginSource', None) == LoginSource.BCEID.value and request_json is not None:
+                valid_format, errors = schema_utils.validate(request_json, 'user')
+                if not valid_format:
+                    return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+
+            user = UserService.save_from_jwt_token(token, request_json)
             response, status = user.as_dict(), http_status.HTTP_201_CREATED
             # Add the user to public_users group if the user doesn't have public_user group
-            KeycloakService.join_users_group(g.jwt_oidc_token_info)
+            KeycloakService.join_users_group(token)
             # If the user doesn't have account_holder role check if user is part of any orgs and add to the group
-            if token.get('loginSource', '') in (BCSC, BCROS) \
+            if token.get('loginSource', '') in \
+                    (LoginSource.BCSC.value, LoginSource.BCROS.value, LoginSource.BCEID.value) \
                     and Role.ACCOUNT_HOLDER.value not in token.get('roles', []) \
                     and len(OrgService.get_orgs(user.identifier, [Status.ACTIVE.value])) > 0:
                 KeycloakService.join_account_holders_group()
@@ -369,6 +379,33 @@ class MembershipResource(Resource):
                 membership = MembershipService \
                     .get_membership_for_org_and_user_all_status(org_id=org_id, user_id=user.identifier)
                 response, status = MembershipSchema(exclude=['org']).dump(membership), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+
+@cors_preflight('OPTIONS,POST')
+@API.route('/<string:user_guid>/affidavits', methods=['OPTIONS', 'POST'])
+class UserAffidavit(Resource):
+    """Resource for managing an individual user affidavit."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def post(user_guid):
+        """Create affidavit record for the user."""
+        token = g.jwt_oidc_token_info
+        request_json = request.get_json()
+
+        if token.get('sub', None) != user_guid:
+            abort(403)
+        valid_format, errors = schema_utils.validate(request_json, 'affidavit')
+        if not valid_format:
+            return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
+
+        try:
+            response, status = AffidavitService.create_affidavit(token, request_json).as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
