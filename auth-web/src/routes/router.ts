@@ -15,6 +15,7 @@ import DashboardView from '@/views/auth/DashboardView.vue'
 import DecideBusinessView from '@/views/auth/DecideBusinessView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
+import ExtraProAccountCreationSuccessView from '@/views/auth/ExtraProAccountCreationSuccessView.vue'
 import ExtraProvInfoView from '@/views/auth/OutOfProvinceAccountView.vue'
 import ExtraProvincialAccountSetupView from '@/views/auth/ExtraProvincialAccountSetupView.vue'
 import Home from '@/views/auth/Home.vue'
@@ -165,6 +166,12 @@ export function getRoutes (): RouteConfig[] {
       path: '/setup-account-success',
       name: 'setup-account-success',
       component: AccountCreationSuccessView,
+      meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/setup-extrapro-account-success',
+      name: 'setup-extrapro-account-success',
+      component: ExtraProAccountCreationSuccessView,
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
