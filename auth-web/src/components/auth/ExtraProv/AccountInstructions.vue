@@ -1,11 +1,9 @@
 <template>
   <v-container class="view-container">
-    <h1 class="view-header__title mb-9">
-      In order to create a BC Registries account, we need <span class="lb">to verify your identity.</span>
-    </h1>
-    <p class="mb-12">
-      There are three steps to verifying and protecting your identity when creating a BC Registries account.
-    </p>
+    <div class="view-header flex-column mb-10">
+      <h1 class="view-header__title">How to verify your identity using BCeID <span class="lb">and a notarized affidavit</span></h1>
+      <p class="mt-5 mb-0">There are three steps to verifying and protecting your identity when creating a BC Registries account.</p>
+    </div>
     <v-card
       class="step-card my-6"
       flat
@@ -29,7 +27,7 @@
         color="grey lighten-2"
         depressed
         large
-        @click="goBack"
+        to="/choose-authentication-method"
       >
         <v-icon class="mr-2">
           mdi-arrow-left
