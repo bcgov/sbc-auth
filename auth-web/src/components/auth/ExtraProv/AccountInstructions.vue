@@ -1,67 +1,56 @@
 <template>
-  <div class="d-flex justify-center pa-4">
-    <div class="non-bc-instructions-container">
-      <h1 class="my-5">
-        In order to create a BC Registries account,
-        we need to verify your identity.
-      </h1>
-      <p class="mb-5 mt-7">
-        We do this to ensure that no one is impersonating you or committing identity theft.
-      </p>
-      <p class="mb-8">
-        There are three steps to verifying and protecting your identity when creating a BC Registries account.
-      </p>
-      <v-card
-        class="my-4"
-        flat
-        v-for="step in steps"
-        :key="step.number"
+  <v-container class="view-container">
+    <h1 class="view-header__title mb-9">
+      In order to create a BC Registries account, we need <span class="lb">to verify your identity.</span>
+    </h1>
+    <p class="mb-12">
+      There are three steps to verifying and protecting your identity when creating a BC Registries account.
+    </p>
+    <v-card
+      class="step-card my-6"
+      flat
+      v-for="step in steps"
+      :key="step.number"
+    >
+      <v-card-text class="pt-4 pb-4 pb-lg-5 px-6 px-lg-8 d-inline-flex align-center">
+        <v-icon x-large color="blue-grey darken-1" class="step-icon mt-1 mr-12 ml-5">
+          {{step.icon}}
+        </v-icon>
+        <div>
+          <h2 class="mt-2 mb-4">{{step.number}}.  {{step.stepTitle}}</h2>
+          <div v-html="step.stepDescription"></div>
+        </div>
+      </v-card-text>
+    </v-card>
+    <v-divider class="mt-12"></v-divider>
+    <div class="d-flex mt-10">
+      <v-btn
+        class="font-weight-bold"
+        color="grey lighten-2"
+        depressed
+        large
+        @click="goBack"
       >
-        <v-card-text class="d-inline-flex align-center">
-          <div class="px-6 py-2">
-            <v-icon x-large color="blue-grey darken-1">
-              {{step.icon}}
-            </v-icon>
-          </div>
-          <div class="px-2">
-            <h4>
-              {{step.number}}.  {{step.stepTitle}}
-            </h4>
-            <p class="mb-0">
-              {{step.stepDescription}}
-            </p>
-          </div>
-        </v-card-text>
-      </v-card>
-      <div class="d-flex mt-12 mb-6">
-        <v-btn
-          class="font-weight-bold"
-          color="grey lighten-2"
-          depressed
-          large
-          @click="goBack"
-        >
-          <v-icon class="mr-2">
-            mdi-arrow-left
-          </v-icon>
-          Back
-        </v-btn>
-        <v-spacer></v-spacer>
-        <v-btn
-          class="font-weight-bold"
-          color="primary"
-          depressed
-          large
-          @click="goToDownload"
-        >
-          Continue: Download Affidavit
-          <v-icon class="ml-2">
-            mdi-arrow-right
-          </v-icon>
-        </v-btn>
-      </div>
+        <v-icon class="mr-2">
+          mdi-arrow-left
+        </v-icon>
+        Back
+      </v-btn>
+      <v-spacer></v-spacer>
+      <v-btn
+        class="next-btn font-weight-bold"
+        color="primary"
+        depressed
+        large
+        @click="goToDownload"
+      >
+        Next: Download Affidavit
+        <v-icon class="ml-2">
+          mdi-arrow-right
+        </v-icon>
+      </v-btn>
     </div>
-  </div>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -74,35 +63,59 @@ export default class AccountInstructions extends Vue {
     {
       number: 1,
       stepTitle: 'Get an identity affidavit notarized',
-      stepDescription: 'Visit your local notary or lawyer to have this document notarized.',
+      stepDescription: '<p>Visit your local notary or lawyer to have this document notarized. This is to ensure that no one is impersonating you or committing identity theft.</p><p><strong>Only account administrators are required to verify their identity with a notary.</strong><p>',
       icon: 'mdi-scale-balance'
     },
     {
       number: 2,
       stepTitle: 'Create a BCeID',
-      stepDescription: 'A username and password that provides secure access to online government services in British Columbia.',
+      stepDescription: '<p>A username and password that provides secure access to online government services in British Columbia.</p>',
       icon: 'mdi-account-circle-outline'
     },
     {
       number: 3,
       stepTitle: 'Use a 2-factor authentication app',
-      stepDescription: 'Download and use an app, such as Google or Microsoft Authenticator.',
-      icon: 'mdi-cellphone-iphone'
+      stepDescription: '<p>Download and use an app, such as Google or Microsoft Authenticator.</p>',
+      icon: 'mdi-cellphone-arrow-down'
     }
   ]
 
   private goToDownload () {
     this.$router.push(`/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE}/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE_DOWNLOAD}`)
+    window.scrollTo(0, 0)
   }
 
   private goBack () {
     this.$router.push(`/${Pages.HOME}`)
+    window.scrollTo(0, 0)
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.non-bc-instructions-container {
-  max-width: 660px;
-}
+  .view-container {
+    max-width: 58rem;
+  }
+
+  .step-icon {
+    align-self: flex-start;
+    font-size: 3rem !important;
+  }
+
+  @media (max-width: 599px) {
+    .step-icon,
+    .next-btn span {
+      display: none !important;
+    }
+
+    .step-card h2 {
+      font-size: 1.25rem;
+    }
+  }
+
+  @media (min-width: 600px) {
+    .lb {
+      display: block;
+    }
+  }
 </style>

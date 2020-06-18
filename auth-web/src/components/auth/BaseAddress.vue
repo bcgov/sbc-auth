@@ -1,7 +1,6 @@
 <template>
   <v-form ref="baseAddressForm" lazy-validation>
     <fieldset v-if="address">
-      <legend class="mb-4">Mailing Address</legend>
       <v-row>
         <v-col cols="12" class="py-0">
           <v-text-field
@@ -11,7 +10,6 @@
             :rules="rules.streetAddress"
             :disabled="disabled"
             v-model.trim="address.street"
-            @change="emitAddress"
             @keydown="emitKeyDown"
           >
           </v-text-field>
@@ -26,7 +24,6 @@
             :disabled="disabled"
             :rules="rules.city"
             v-model.trim="address.city"
-            @change="emitAddress"
             @keydown="emitKeyDown"
           >
           </v-text-field>
@@ -39,7 +36,6 @@
             :disabled="disabled"
             :rules="rules.province"
             v-model.trim="address.region"
-            @change="emitAddress"
             @keydown="emitKeyDown"
           >
           </v-text-field>
@@ -52,7 +48,6 @@
             :disabled="disabled"
             :rules="rules.postalCode"
             v-model.trim="address.postalCode"
-            @change="emitAddress"
             @keydown="emitKeyDown"
           >
           </v-text-field>
@@ -67,7 +62,6 @@
             :disabled="disabled"
             :rules="rules.country"
             v-model.trim="address.country"
-            @change="emitAddress"
             @keydown="emitKeyDown"
           >
           </v-text-field>
@@ -78,7 +72,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Address } from '@/models/address'
 
 @Component({
@@ -102,12 +96,22 @@ export default class BaseAddress extends Vue {
   }
 
   mounted () {
-    if (this.inputAddress) {
+    if (Object.keys(this.inputAddress).length !== 0) {
       // directly setting to address probelamatic bcoz of vues reactivity
       Object.keys(this.inputAddress).forEach(key => {
         this.$set(this.address, key, this.inputAddress?.[key])
       })
+      // emit the address in the next tick to avoid validation function to execute correctly
+      // while populating the component without user inputs
+      this.$nextTick(() => {
+        this.emitAddress()
+      })
     }
+  }
+
+  @Watch('address', { deep: true })
+  async updateAddress (val, oldVal) {
+    this.emitAddress()
   }
 
   @Emit('address-update')
@@ -123,7 +127,7 @@ export default class BaseAddress extends Vue {
 
   @Emit('is-form-valid')
   isFormValid () {
-    return this.$refs.baseAddressForm.validate()
+    return this.$refs.baseAddressForm?.validate()
   }
 }
 </script>

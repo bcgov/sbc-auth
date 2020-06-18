@@ -226,6 +226,8 @@ export default class OrgModule extends VuexModule {
     }
     if (org.bcolProfile) {
       createRequestBody.bcOnlineCredential = org.bcolProfile
+    }
+    if (address) {
       createRequestBody.mailingAddress = address
     }
     const response = await OrgService.createOrg(createRequestBody)
@@ -247,7 +249,7 @@ export default class OrgModule extends VuexModule {
 
   @Mutation
   public setCurrentOrganizationAddress (address: Address | undefined) {
-    this.currentOrgAddress = address
+    this.currentOrgAddress = (address) ? JSON.parse(JSON.stringify(address)) : undefined
   }
 
   @Action({ rawError: true })

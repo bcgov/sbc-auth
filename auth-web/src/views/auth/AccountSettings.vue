@@ -73,22 +73,29 @@
 
 <script lang="ts">
 
+import { Account, LoginSource } from '@/util/constants'
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Member, MembershipType, Organization } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { LoginSource } from '@/util/constants'
-
 import { mapState } from 'vuex'
 
 @Component({
   computed: {
-    ...mapState('user', ['currentUser'])
+    ...mapState('user', [
+      'currentUser'
+    ]),
+    ...mapState('org', [
+      'currentOrganization',
+      'currentMembership'
+    ])
   }
 })
 export default class AccountSettings extends Vue {
   @Prop({ default: '' }) private orgId: string
-
+  private readonly currentMembership!: Member
+  private readonly currentOrganization!: Organization
   private readonly currentUser!: KCUserProfile
   private isLoading = true
   private isDirSearchUser: boolean = false
@@ -111,7 +118,13 @@ export default class AccountSettings extends Vue {
   }
 
   private get showTransactions (): boolean {
-    return LaunchDarklyService.getFlag('transaction-history') || false
+    return (LaunchDarklyService.getFlag('transaction-history') || false) &&
+      this.isPremiumAccount &&
+      [MembershipType.Admin, MembershipType.Coordinator].includes(this.currentMembership.membershipTypeCode)
+  }
+
+  private get isPremiumAccount (): boolean {
+    return this.currentOrganization?.orgType === Account.PREMIUM
   }
 
   private mounted () {
@@ -136,7 +149,6 @@ export default class AccountSettings extends Vue {
   }
 
   .v-list-item .v-list-item__title {
-    font-size: 0.875rem !important;
     font-weight: 700;
   }
 

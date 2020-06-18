@@ -13,7 +13,7 @@ env:
 jobs:
   auth-web-test:
     runs-on: ubuntu-latest
-
+    if: github.repository == 'bcgov/sbc-auth'
     strategy:
       matrix:
         node-version: [12.x]

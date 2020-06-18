@@ -1,11 +1,14 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { DocumentUpload, User } from '@/models/user'
+import { NotaryContact, NotaryInformation } from '@/models/notary'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
+import DocumentService from '@/services/document.services'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import { RoleInfo } from '@/models/Organization'
+import { SessionStorageKeys } from '@/util/constants'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
-import { User } from '@/models/user'
 import UserService from '@/services/user.services'
 
 export interface UserTerms {
@@ -22,6 +25,11 @@ export default class UserModule extends VuexModule {
   userProfile: User = undefined
   userContact: Contact = undefined
   termsOfUse: TermsOfUseDocument = undefined
+  notaryInformation: NotaryInformation = undefined
+  notaryContact: NotaryContact = undefined
+  affidavitDocId:string = '' // the guid of the doc which you get from the server side
+  affidavitDoc:File = undefined
+
   redirectAfterLoginUrl: string = ''
   roleInfos: RoleInfo[] = undefined
 
@@ -31,8 +39,27 @@ export default class UserModule extends VuexModule {
   }
 
   @Mutation
+  public setAffidavitDocId (affidavitDocId: string) {
+    this.affidavitDocId = affidavitDocId
+  }
+
+  @Mutation
+  public setAffidavitDoc (affidavitDoc: File) {
+    this.affidavitDocId = '' // reset the file id
+    this.affidavitDoc = affidavitDoc
+  }
+
+  @Mutation
   public setRoleInfos (roleInfos: RoleInfo[]) {
     this.roleInfos = roleInfos
+  }
+  @Mutation
+  public setNotaryInformation (notaryInformation: NotaryInformation) {
+    this.notaryInformation = JSON.parse(JSON.stringify(notaryInformation))
+  }
+  @Mutation
+  public setNotaryContact (notaryContact: NotaryContact) {
+    this.notaryContact = JSON.parse(JSON.stringify(notaryContact))
   }
 
   @Mutation
@@ -88,6 +115,30 @@ export default class UserModule extends VuexModule {
   }
 
   @Action({ rawError: true })
+  public async createAffidavit () {
+    // Handle doc Id logic
+    const docId = this.context.state['affidavitDocId']
+    const notaryContact = this.context.state['notaryContact']
+    const notaryInfo = this.context.state['notaryInformation']
+    const userId = ConfigHelper.getFromSession(SessionStorageKeys.UserKcId)
+    // TODO handle error cases
+    await UserService.createNotaryDetails(docId, notaryInfo, notaryContact, userId)
+  }
+
+  @Action({ rawError: true })
+  public async uploadPendingDocsToStorage () {
+    const isPendingUpload = !this.affidavitDocId
+    if (isPendingUpload) {
+      const file = this.context.state['affidavitDoc']
+      const response = await DocumentService.getPresignedUrl(file.name)
+      const doc:DocumentUpload = response?.data
+      this.context.commit('setAffidavitDocId', doc.key) // need this while creating org
+      const userId = ConfigHelper.getFromSession(SessionStorageKeys.UserKcId)
+      const res = await DocumentService.uplpoadToUrl(doc.preSignedUrl, file, doc.key, userId)
+    }
+  }
+
+  @Action({ rawError: true })
   public async syncUserProfile () {
     const userResponse = await UserService.syncUserProfile()
     if (userResponse && userResponse.data && (userResponse.status === 200 || userResponse.status === 201)) {
@@ -127,6 +178,14 @@ export default class UserModule extends VuexModule {
   @Action({ commit: 'setUserContact' })
   public async updateUserContact (contact: Contact) {
     const response = await UserService.updateContact(contact)
+    if (response && response.data && response.status === 200) {
+      return response.data
+    }
+  }
+
+  @Action({ commit: 'setUserProfile' })
+  public async updateUserFirstAndLastName (user: User) {
+    const response = await UserService.updateUserProfile(user.firstname, user.lastname)
     if (response && response.data && response.status === 200) {
       return response.data
     }

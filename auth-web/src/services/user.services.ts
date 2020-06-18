@@ -1,6 +1,7 @@
 import { AddUsersToOrgBody, BulkUserResponseBody, Member, Organizations, RoleInfo } from '@/models/Organization'
 import Axios, { AxiosResponse } from 'axios'
 import { Contact, Contacts } from '@/models/contact'
+import { NotaryContact, NotaryInformation } from '@/models/notary'
 import { User, UserProfileRequestBody } from '@/models/user'
 import ConfigHelper from '@/util/config-helper'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
@@ -18,6 +19,11 @@ export default class UserService {
 
   static async syncUserProfile (): Promise<AxiosResponse<User>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/users`, {})
+  }
+
+  // for bceid users ;the firstname and lastname has to be updated
+  static async updateUserProfile (firstName:string, lastName:string): Promise<AxiosResponse<User>> {
+    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/users`, { firstName: firstName, lastName: lastName })
   }
 
   static async createContact (contact: Contact): Promise<AxiosResponse<Contact>> {
@@ -40,7 +46,8 @@ export default class UserService {
     isTermsAccepted: boolean): Promise<AxiosResponse<User>> {
     return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/users/${identifier}`, {
       termsversion: termsVersion,
-      istermsaccepted: isTermsAccepted }
+      istermsaccepted: isTermsAccepted
+    }
     )
   }
 
@@ -60,10 +67,11 @@ export default class UserService {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/bulk/users`, addUsersToOrgBody)
   }
 
-  static async resetPassword (username: string, password:string): Promise<AxiosResponse<void>> {
+  static async resetPassword (username: string, password: string): Promise<AxiosResponse<void>> {
     return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/users/${encodeURIComponent(username)}`, {
       username: username,
-      password: password }
+      password: password
+    }
     )
   }
 
@@ -79,5 +87,20 @@ export default class UserService {
 
   static async resetUser (): Promise<AxiosResponse<any>> {
     return axios.post(`${ConfigHelper.getAuthResetAPIUrl()}`)
+  }
+
+  static async createNotaryDetails (documentId: String, notaryInfo: NotaryInformation, notaryContact: NotaryContact, userId: string): Promise<AxiosResponse<User>> {
+    const inputrequest = {
+      documentId: documentId,
+      issuer: notaryInfo.notaryName,
+      contact: {
+        ...notaryInfo.address,
+        email: notaryContact.email,
+        phone: notaryContact.phone,
+        phoneExtension: notaryContact.extension
+      }
+
+    }
+    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/users/${encodeURIComponent(userId)}/affidavits`, inputrequest)
   }
 }
