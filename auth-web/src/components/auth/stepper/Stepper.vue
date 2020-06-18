@@ -7,7 +7,7 @@
           :key="`${getStepIndex(step)}-step`"
           :complete="currentStepNumber > getStepIndex(step)"
           :step="getStepIndex(step)"
-        >{{ getStepTitle(step) }}</v-stepper-step>
+        >{{ getStepName(step) }}</v-stepper-step>
         <v-divider vertical class="mt-n1 mb-n1" :key="`${getStepIndex(step)}-divider`" v-if="step !== steps"></v-divider>
       </template>
     </v-container>
@@ -35,6 +35,7 @@ import Vue from 'vue'
 
 export interface StepConfiguration {
   title: string
+  stepName: string
   component: Vue.Component
   componentProps: Record<string, any>
   alternate?: StepConfiguration // Steps can have an alternate configuration which can be used when invoking stepForward
@@ -57,16 +58,19 @@ export default class Stepper extends Vue {
     return [
       {
         title: 'Step 1',
+        stepName: 'Step Name 1',
         component: StepperStub,
         componentProps: {}
       },
       {
         title: 'Step 2',
+        stepName: 'Step Name 2',
         component: StepperStub,
         componentProps: {}
       },
       {
         title: 'Step 3',
+        stepName: 'Step Name 3',
         component: StepperStub,
         componentProps: {}
       }
@@ -80,6 +84,10 @@ export default class Stepper extends Vue {
 
   private getStepTitle (step: StepConfiguration) {
     return this.useAlternateStep && this.currentStepNumber === this.getStepIndex(step) ? step.alternate?.title : step.title
+  }
+
+  private getStepName (step: StepConfiguration) {
+    return this.useAlternateStep && this.currentStepNumber === this.getStepIndex(step) ? step.alternate?.stepName : step.stepName
   }
 
   private getPropsForStep (step: StepConfiguration): Record<string, any> {

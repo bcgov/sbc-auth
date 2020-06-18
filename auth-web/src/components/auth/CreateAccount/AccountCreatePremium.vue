@@ -1,8 +1,14 @@
 <template>
   <v-container>
     <v-form ref="createAccountInfoForm" lazy-validation>
-      <p class="mb-10">
+      <p class="mb-6">
         You must be the Prime Contact to link this account with your existing BC Online account.
+      </p>
+      <p class="mb-6">
+        Linking accounts imports your organization’s contact and drawdown account information.
+      </p>
+      <p class="mb-10">
+        Linking accounts <strong>does not</strong> import your existing users or any businesses you manage. You can invite team members and add businesses once your account is set up successfully.
       </p>
       <BcolLogin @account-link-successful="onLink" v-show="!linked"></BcolLogin>
       <template v-if="linked">
@@ -74,6 +80,7 @@
                 >
                 </v-text-field>
                 -->
+              <h4 class="mb-4">Mailing Address</h4>
               <BaseAddress
                 :inputAddress="address"
                 @address-update="updateAddress"
@@ -230,7 +237,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     var org: Organization = {
       id: this.currentOrganization.id,
       name: details.bcolAccountDetails.orgName,
-      accessType: Account.PREMIUM,
+      accessType: this.currentOrganization.accessType,
       bcolProfile: details.bcolProfile,
       bcolAccountDetails: details.bcolAccountDetails,
       grantAccess: false,

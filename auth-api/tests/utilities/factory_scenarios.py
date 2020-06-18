@@ -17,12 +17,13 @@ Test Utility for creating test scenarios.
 """
 import uuid
 from enum import Enum
-from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.constants import IdpHint
 from random import choice
-from string import ascii_uppercase, ascii_lowercase
+from string import ascii_lowercase, ascii_uppercase
 
+from auth_api.services.keycloak_user import KeycloakUser
+from auth_api.utils.enums import IdpHint
 from config import get_named_config
+
 
 CONFIG = get_named_config('testing')
 

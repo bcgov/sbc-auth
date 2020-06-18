@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Exposes all of the Services used in the API."""
+from .affidavit import Affidavit
 from .affiliation import Affiliation
 from .codes import Codes
 from .contact import Contact
@@ -19,9 +20,9 @@ from .documents import Documents
 from .entity import Entity
 from .invitation import Invitation
 from .membership import Membership
-from .products import Product
 from .org import Org
+from .permissions import Permissions
+from .products import Product
 from .reset import ResetTestData
 from .user import User
 from .user_settings import UserSettings
-from .permissions import Permissions

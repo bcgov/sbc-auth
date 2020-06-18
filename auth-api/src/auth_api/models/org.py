@@ -17,10 +17,10 @@ Basic users will have an internal Org that is not created explicitly, but implic
 """
 
 from flask import current_app
-from sqlalchemy import Column, ForeignKey, Integer, String, and_, func, Boolean
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, and_, func
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.roles import OrgStatus as OrgStatusEnum
+from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 
 from .base_model import BaseModel
 from .org_status import OrgStatus
@@ -71,6 +71,18 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     def find_by_org_id(cls, org_id):
         """Find an Org instance that matches the provided id."""
         return cls.query.filter_by(id=org_id).first()
+
+    @classmethod
+    def search_org(cls, access_type, name, status):
+        """Find all orgs with the given type."""
+        queries = []
+        if access_type:
+            queries.append(Org.access_type == access_type.upper())
+        if name:
+            queries.append(Org.name.ilike(f'%{name}%'))
+        if status:
+            queries.append(Org.status_code == status.upper())
+        return cls.query.filter(*queries).all()
 
     @classmethod
     def find_by_org_access_type(cls, org_type):

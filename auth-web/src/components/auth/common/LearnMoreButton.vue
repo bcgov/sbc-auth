@@ -1,16 +1,18 @@
 <template>
   <v-btn large outlined color="#003366" class="btn-learn-more"
-    href="https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-small-business/%7D"
+    :href="redirectUrl"
     target="_blank" rel="noopener noreferrer">
-    Learn More
+    <span class="btn-text">Learn More</span>
   </v-btn>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component({})
-export default class LearnMoreButton extends Vue {}
+export default class LearnMoreButton extends Vue {
+  @Prop() redirectUrl: string
+}
 </script>
 
 <style lang="scss" scoped>
@@ -20,5 +22,13 @@ export default class LearnMoreButton extends Vue {}
     margin-top: .5rem;
     font-weight: bold;
     width: 160px;
+  }
+
+  .btn-learn-more:hover {
+    background-color: $BCgovBlue5;
+
+    .btn-text {
+      color: #ffffff;
+    }
   }
 </style>

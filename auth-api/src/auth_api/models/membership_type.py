@@ -16,7 +16,7 @@
 It defines the available types of membership Users have with Orgs.
 """
 
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, Integer, String
 
 from .base_model import BaseCodeModel
 

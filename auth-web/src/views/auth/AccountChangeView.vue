@@ -36,15 +36,18 @@ export default class AccountSetupView extends Vue {
     [
       {
         title: 'Select Account Type',
+        stepName: 'Select Account Type',
         component: AccountTypeSelector,
         componentProps: { 'isAccountChange': true, 'cancelUrl': ConfigHelper.accountSettingsRoute() }
       },
       {
         title: 'Account Settings',
+        stepName: 'Account Settings',
         component: AccountCreateBasic,
         componentProps: { 'isAccountChange': true, 'cancelUrl': ConfigHelper.accountSettingsRoute() },
         alternate: {
           title: 'Account Settings',
+          stepName: 'Account Settings',
           component: AccountCreatePremium,
           componentProps: { 'isAccountChange': true, 'cancelUrl': ConfigHelper.accountSettingsRoute() }
         }

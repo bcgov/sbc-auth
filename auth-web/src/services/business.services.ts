@@ -1,5 +1,5 @@
 import Axios, { AxiosResponse } from 'axios'
-import { Business, FolioNumberload, NamedBusinessRequest, NumberedBusinessRequest, UpdateBusinessNamePayload } from '@/models/business'
+import { Business, BusinessRequest, FolioNumberload, UpdateBusinessNamePayload } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
@@ -27,12 +27,12 @@ export default class BusinessService {
     return axios.get(`${ConfigHelper.getLegalAPIUrl()}/businesses/${businessIdentifier}`)
   }
 
-  static async createNamedBusiness (payload: NamedBusinessRequest): Promise<AxiosResponse<any>> {
-    return axios.post(`${ConfigHelper.getLegalAPIUrl()}/businesses?draft=true`, payload)
+  static async createNamedBusiness (filingBody: BusinessRequest): Promise<AxiosResponse<any>> {
+    return axios.post(`${ConfigHelper.getLegalAPIUrl()}/businesses?draft=true`, filingBody)
   }
 
-  static async createNumberedBusiness (numberedBusinessRequest: NumberedBusinessRequest): Promise<AxiosResponse<any>> {
-    return axios.post(`${ConfigHelper.getLegalAPIUrl()}/businesses?draft=true`, numberedBusinessRequest)
+  static async createNumberedBusiness (filingBody: BusinessRequest): Promise<AxiosResponse<any>> {
+    return axios.post(`${ConfigHelper.getLegalAPIUrl()}/businesses?draft=true`, filingBody)
   }
   static async deleteBusinessFiling (businessRegNumber: string, filingId: string): Promise<AxiosResponse<any>> {
     return axios.delete(`${ConfigHelper.getLegalAPIUrl()}/businesses/${businessRegNumber}/filings/${filingId}`)

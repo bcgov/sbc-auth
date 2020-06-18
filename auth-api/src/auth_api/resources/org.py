@@ -19,17 +19,17 @@ from flask_restplus import Namespace, Resource, cors
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
-from auth_api.schemas import InvitationSchema, MembershipSchema, AccountPaymentSettingsSchema
+from auth_api.schemas import AccountPaymentSettingsSchema, InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
+from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import NotificationType, ChangeType
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, USER, Role, Status, AccessType, STAFF_ADMIN, \
-    CLIENT_AUTH_ROLES
+from auth_api.utils.enums import AccessType, AffidavitStatus, ChangeType, NotificationType, Status
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF_ADMIN, USER, Role
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('orgs', description='Endpoints for organization management')
@@ -78,16 +78,18 @@ class Orgs(Resource):
         # Search based on request arguments
         business_identifier = request.args.get('affiliation', None)
         name = request.args.get('name', None)
-        org_type = request.args.get('type', None)
+        status = request.args.get('status', None)
+        access_type = request.args.get('type', None)
         try:
-            response, status = OrgService.search_orgs(business_identifier=business_identifier, org_type=org_type,
-                                                      name=name), \
+            response, status = OrgService.search_orgs(business_identifier=business_identifier, access_type=access_type,
+                                                      name=name, status=status), \
                                http_status.HTTP_200_OK
 
-            # TODO change it later
-            # If searching by name return 200 with empty results if orgs exist
+            # If public user is searching , return 200 with empty results if orgs exist
             # Else return 204
-            if name:
+            token = g.jwt_oidc_token_info
+            is_public_user = Role.PUBLIC_USER.value in token.get('realm_access').get('roles')
+            if is_public_user:  # public user cant get the details in search.Gets only status of orgs
                 if response and response.get('orgs'):
                     status = http_status.HTTP_200_OK
                 else:
@@ -438,6 +440,55 @@ class OrgInvitations(Resource):
                                                                     token_info=g.jwt_oidc_token_info)
 
             response, status = {'invitations': InvitationSchema().dump(invitations, many=True)}, http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
+        return response, status
+
+
+@cors_preflight('GET,OPTIONS')
+@API.route('/<string:org_id>/admins/affidavits', methods=['GET', 'PATCH', 'OPTIONS'])
+class OrgAdminAffidavits(Resource):
+    """Resource for managing affidavits for the admins in an org."""
+
+    @staticmethod
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.BCOL_STAFF_ADMIN.value])
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    def get(org_id):
+        """Get the affidavit for the admin who created the account."""
+        try:
+            response, status = AffidavitService.find_affidavit_by_org_id(org_id=org_id), \
+                               http_status.HTTP_200_OK
+
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
+        return response, status
+
+
+@cors_preflight('PATCH,OPTIONS')
+@API.route('/<string:org_id>/status', methods=['PATCH', 'OPTIONS'])
+class OrgStatus(Resource):
+    """Resource for changing the status of org."""
+
+    @staticmethod
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.BCOL_STAFF_ADMIN.value])
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    def patch(org_id):
+        """Patch an account."""
+        request_json = request.get_json()
+        token = g.jwt_oidc_token_info
+        # For now allowed is to put the status code, which will be done by bcol_staff_admin.
+        # If this patch is going to be used by other other roles, then add proper security check
+
+        try:
+            is_approved: bool = request_json.get('statusCode', None) == AffidavitStatus.APPROVED.value
+
+            response, status = OrgService.approve_or_reject(org_id=org_id, is_approved=is_approved,
+                                                            token_info=token).as_dict(), http_status.HTTP_200_OK
+
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 

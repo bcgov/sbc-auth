@@ -75,14 +75,14 @@ def test_create_from_jwt_token(session):  # pylint: disable=unused-argument
         },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
-    u = User.create_from_jwt_token(token)
+    u = User.create_from_jwt_token(token, 'fname', 'lname')
     assert u.id is not None
 
 
 def test_create_from_jwt_token_no_token(session):  # pylint: disable=unused-argument
     """Assert User is not created from an empty token."""
     token = None
-    u = User.create_from_jwt_token(token)
+    u = User.create_from_jwt_token(token, 'fname', 'lname')
     assert u is None
 
 
@@ -101,7 +101,7 @@ def test_update_from_jwt_token(session):  # pylint: disable=unused-argument
         },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
-    user = User.create_from_jwt_token(token)
+    user = User.create_from_jwt_token(token, 'Bobby', 'Joe')
 
     updated_token = {
         'preferred_username': 'CP1234567',
@@ -116,7 +116,7 @@ def test_update_from_jwt_token(session):  # pylint: disable=unused-argument
         },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
-    user = User.update_from_jwt_token(updated_token, user)
+    user = User.update_from_jwt_token(user, updated_token, 'Bob', 'Joe')
 
     assert user.firstname == 'Bob'
 
@@ -136,7 +136,7 @@ def test_update_terms_of_user_success(session):  # pylint:disable=unused-argumen
         },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
-    user = User.create_from_jwt_token(token)
+    user = User.create_from_jwt_token(token, 'Bobby', 'Joe')
     assert user.is_terms_of_use_accepted is False
     assert user.terms_of_use_accepted_version is None
 
@@ -160,7 +160,7 @@ def test_update_terms_of_user_success_with_integer(session):  # pylint:disable=u
         },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
-    user = User.create_from_jwt_token(token)
+    user = User.create_from_jwt_token(token, 'Bobby', 'Joe')
     assert user.is_terms_of_use_accepted is False
     assert user.terms_of_use_accepted_version is None
 
@@ -184,10 +184,10 @@ def test_update_from_jwt_token_no_token(session):  # pylint:disable=unused-argum
         },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
-    existing_user = User.create_from_jwt_token(token)
+    existing_user = User.create_from_jwt_token(token, 'Bobby', 'Joe')
 
     token = None
-    user = User.update_from_jwt_token(token, existing_user)
+    user = User.update_from_jwt_token(existing_user, token, 'Bobby', 'Joe')
     assert user is None
 
 
@@ -207,7 +207,7 @@ def test_update_from_jwt_token_no_user(session):  # pylint:disable=unused-argume
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
 
-    user = User.update_from_jwt_token(token, None)
+    user = User.update_from_jwt_token(None, token, None, None)
     assert user is None
 
 

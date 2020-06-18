@@ -8,7 +8,7 @@
           <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
-              If you have an approved Name Request (NR number), or you want a <NumberedCompanyTooltip />,
+              If you have an approved Name Request (NR number), or you want a <numbered-company-tooltip />,
               you can start your Incorporation Application.
             </v-list-item-subtitle>
           </v-list-item-content>
@@ -24,29 +24,34 @@
         <!-- Panel Btns -->
         <!-- Authenticated -->
         <template v-if="userProfile">
-          <v-btn large color="#003366" class="mr-2 my-5 white--text"
-            @click="emitManageBusinesses()">
-            Incorporate a Named Company
-          </v-btn>
-          <v-btn large color="#003366" class="ml-2 my-5 white--text"
-            @click="emitManageBusinesses(true)">
-            Incorporate a Numbered Company
-          </v-btn>
+          <div class="incorporate-btns">
+            <v-btn large color="#003366" class="incorporate-btn mr-2 my-5 white--text"
+              @click="emitManageBusinesses()">
+              Incorporate a Named Benefit Company
+            </v-btn>
+            <v-btn large color="#003366" class="incorporate-btn mb-5 white--text"
+              @click="emitManageBusinesses(true)">
+              Incorporate a Numbered Benefit Company
+            </v-btn>
+          </div>
         </template>
         <!-- Not Authenticated -->
         <template v-else>
-          <v-btn large color="#fcba19" @click="login()" class="mt-5">
+          <v-btn large color="#fcba19" @click="emitLogin()" class="mt-5">
             Log in with BC Services Card
           </v-btn>
           <p class="my-5">New to BC Registries? <a @click="emitAccountDialog()" class="create-account-link">
             <u>Create a BC Registries Account</u></a>
           </p>
         </template>
-        <LearnMoreButton />
+        <learn-more-button
+        :redirect-url="learnMoreUrl"/>
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
-        <v-img src="../../assets/img/Step3-Incorporate-x1.png" aspect-ratio="1.2" contain></v-img>
+        <a :href="learnMoreUrl" target="_blank">
+          <v-img src="../../assets/img/Step3_Incorporate_x2.png" aspect-ratio="1.2" contain></v-img>
+        </a>
       </v-col>
     </v-row>
   </v-container>
@@ -66,7 +71,8 @@ import { User } from '@/models/user'
   }
 })
 export default class IncorpOrRegisterView extends Vue {
-  private bulletPoints: Array<any> = [
+  private readonly learnMoreUrl = 'https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-small-business/'
+  private readonly bulletPoints: Array<any> = [
     { text: 'For Named Companies, add your existing Name Request number to your account and open it.' },
     { text: 'Establish your company\'s articles and prepare an Incorporation Agreement. Either create your own, or use template provided in the Incorporation Application.' },
     { text: 'Complete the Incorporation Application by providing information about your company: addresses, directors and share structure.' },
@@ -76,9 +82,8 @@ export default class IncorpOrRegisterView extends Vue {
   @Prop()
   private userProfile: User
 
-  private login (): void {
-    this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
-  }
+  @Emit('login')
+  private emitLogin () {}
 
   @Emit('account-dialog')
   private emitAccountDialog () {}
@@ -94,7 +99,7 @@ export default class IncorpOrRegisterView extends Vue {
   @import '$assets/scss/theme.scss';
 
   #incorporate-info-container {
-    padding-top: 0!important;
+    padding-top: 0 !important;
     flex-wrap: wrap;
 
     a:hover {
@@ -121,8 +126,29 @@ export default class IncorpOrRegisterView extends Vue {
     }
 
     .v-btn {
-      max-width: 300px;
       font-weight: bold;
+      color: $BCgovBlue5;
+    }
+
+    .v-btn:hover {
+      opacity: .8;
+    }
+
+    .incorporate-btns {
+      flex-direction: column;
+
+      .incorporate-btn {
+        justify-content: left;
+      }
+    }
+
+    .create-account-link {
+      font-size: 1rem;
+      color: $BCgoveBueText1;
+
+      :hover {
+        color: $BCgoveBueText2;
+      }
     }
   }
 </style>

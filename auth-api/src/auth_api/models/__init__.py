@@ -45,9 +45,10 @@ from .product_subscription_role import ProductSubscriptionRole
 from .product_role_code import ProductRoleCode
 from .product_subscription import ProductSubscription
 from .user import User
+from .affidavit import Affidavit
+from .affidavit_status import AffidavitStatus
 from .user_settings import UserSettings
 from .user_status_code import UserStatusCode
 from .permissions import Permissions
-
 
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)

@@ -22,6 +22,7 @@ from auth_api.services.org import Org
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
 
+
 API = Namespace('BC Online Profiles', description='Endpoints for BC Online Profiles')
 
 TRACER = Tracer.get_instance()

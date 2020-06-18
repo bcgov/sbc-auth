@@ -24,6 +24,7 @@ from auth_api.services import Permissions as PermissionsService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
 
+
 API = Namespace('permissions', description='Endpoints for permissions management')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()

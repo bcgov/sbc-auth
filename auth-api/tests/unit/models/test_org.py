@@ -22,7 +22,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
-from auth_api.utils.roles import OrgStatus as OrgStatusEnum
+from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 
 
 def factory_org_model(name, session):
