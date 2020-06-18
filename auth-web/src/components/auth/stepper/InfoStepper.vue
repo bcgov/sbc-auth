@@ -2,21 +2,21 @@
   <div>
     <v-container id="step-buttons-container">
       <template v-for="(step, index) in steps">
-        <div class="step" :key="index"  @click="$router.push(step.to)">
+        <div class="step" :key="index"  @click="goTo(step)">
           <v-btn
             fab
             outlined
-            class="step__icon"
-            active-class="filled no-active"
-            :ripple="false"
             :id=step.id
+            :ripple="false"
             color="#1A5A96"
-            :to="step.to">
+            class="step__icon"
+            :class="{ 'filled': isCurrentStep(step) }"
+            >
             <v-icon>{{step.step}}</v-icon>
           </v-btn>
-          <v-btn class="step__label" :ripple="false" active-class="selected no-active" text color="#1A5A96" :to="step.to">
+          <div class="step__label" :class="{ 'selected': isCurrentStep(step) }">
             {{step.text}}
-          </v-btn>
+          </div>
           <span :class="{ 'arrow-down': isCurrentStep(step) }"></span>
         </div>
       </template>
@@ -63,6 +63,10 @@ export default class Stepper extends Vue {
     }
   ]
 
+  private goTo (step: any): void {
+    if (!this.isCurrentStep(step)) this.$router.push(step.to)
+  }
+
   private nextStep (): void {
     const currentStepIndex = this.getCurrentStep()
     const nextStep = this.steps[currentStepIndex]
@@ -105,7 +109,7 @@ export default class Stepper extends Vue {
   }
 
   .selected {
-    color: #212529!important;
+    color: #212529 !important;
     border-bottom: 3px solid $BCgoveBueText1!important;
   }
 
@@ -138,6 +142,7 @@ export default class Stepper extends Vue {
 
   .step__label {
     width: 100%;
+    color: $BCgoveBueText1;
     font-weight: bold;
     font-size: 14px;
     margin-top: 10px;
