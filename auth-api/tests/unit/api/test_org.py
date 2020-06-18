@@ -1116,18 +1116,21 @@ def test_get_org_admin_affidavits(client, jwt, session, keycloak_mock):  # pylin
     # 5. Get the affidavit as a bcol admin
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
     client.post('/api/v1/users', headers=headers, content_type='application/json')
-    document_signature = client.get('/api/v1/documents/test.jpeg/signatures', headers=headers, content_type='application/json')
+    document_signature = client.get('/api/v1/documents/test.jpeg/signatures', headers=headers,
+                                    content_type='application/json')
     doc_key = document_signature.json.get('key')
     affidavit_response = client.post('/api/v1/users/{}/affidavits'.format(TestJwtClaims.public_user_role.get('sub')),
                                      headers=headers,
                                      data=json.dumps(TestAffidavit.get_test_affidavit_with_contact(doc_id=doc_key)),
                                      content_type='application/json')
 
-    org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()), headers=headers, content_type='application/json')
+    org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()), headers=headers,
+                               content_type='application/json')
     assert org_response.status_code == http_status.HTTP_201_CREATED
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
-    staff_response = client.get('/api/v1/orgs/{}/admins/affidavits'.format(org_response.json.get('id')), headers=headers, content_type='application/json')
+    staff_response = client.get('/api/v1/orgs/{}/admins/affidavits'.format(org_response.json.get('id')),
+                                headers=headers, content_type='application/json')
     assert staff_response.json.get('documentId') == doc_key
     assert staff_response.json.get('id') == affidavit_response.json.get('id')
 
@@ -1141,26 +1144,28 @@ def test_approve_org_with_pending_affidavits(client, jwt, session, keycloak_mock
     # 5. Get the affidavit as a bcol admin
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
     client.post('/api/v1/users', headers=headers, content_type='application/json')
-    document_signature = client.get('/api/v1/documents/test.jpeg/signatures', headers=headers, content_type='application/json')
+    document_signature = client.get('/api/v1/documents/test.jpeg/signatures', headers=headers,
+                                    content_type='application/json')
     doc_key = document_signature.json.get('key')
     affidavit_response = client.post('/api/v1/users/{}/affidavits'.format(TestJwtClaims.public_user_role.get('sub')),
                                      headers=headers,
                                      data=json.dumps(TestAffidavit.get_test_affidavit_with_contact(doc_id=doc_key)),
                                      content_type='application/json')
 
-    org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()), headers=headers, content_type='application/json')
+    org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()), headers=headers,
+                               content_type='application/json')
     assert org_response.status_code == http_status.HTTP_201_CREATED
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
 
     org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
-                                     data=json.dumps({'statusCode': AffidavitStatus.APPROVED.value}),
-                                     headers=headers, content_type='application/json')
+                                      data=json.dumps({'statusCode': AffidavitStatus.APPROVED.value}),
+                                      headers=headers, content_type='application/json')
 
     assert org_patch_response.json.get('org_status') == OrgStatus.ACTIVE.value
 
-    staff_response = client.get('/api/v1/orgs/{}/admins/affidavits'.format(org_response.json.get('id')), headers=headers, content_type='application/json')
+    staff_response = client.get('/api/v1/orgs/{}/admins/affidavits'.format(org_response.json.get('id')),
+                                headers=headers, content_type='application/json')
     assert staff_response.json.get('documentId') == doc_key
     assert staff_response.json.get('id') == affidavit_response.json.get('id')
     assert staff_response.json.get('status') == AffidavitStatus.APPROVED.value
-

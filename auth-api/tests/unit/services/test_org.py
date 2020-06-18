@@ -502,7 +502,8 @@ def test_create_org_by_verified_bceid_user(session, keycloak_mock):  # pylint:di
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.ACTIVE.value
 
-    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(name='Test 123'), user_id=user.id, token_info=token_info)
+    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(name='Test 123'), user_id=user.id,
+                                token_info=token_info)
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.ACTIVE.value
 
@@ -526,6 +527,7 @@ def test_create_org_by_rejected_bceid_user(session, keycloak_mock):  # pylint:di
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.REJECTED.value
 
-    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(name='Test 123'), user_id=user.id, token_info=token_info)
+    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(name='Test 123'), user_id=user.id,
+                                token_info=token_info)
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value

@@ -642,7 +642,7 @@ class TestAffidavit:
     """Test affidavit scenarios."""
 
     @staticmethod
-    def get_test_affidavit_with_contact(doc_id:str='1234567890987654323456789876543456787654345678.txt'):
+    def get_test_affidavit_with_contact(doc_id: str = '1234567890987654323456789876543456787654345678.txt'):
         """Return a dict for affidavit."""
         return {
             'issuer': 'ABC Notaries Inc.',
