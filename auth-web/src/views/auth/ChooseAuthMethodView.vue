@@ -82,6 +82,7 @@
         color="primary"
         class="next-btn font-weight-bold"
         :disabled="authType ==''"
+        @click="goNext()"
       >
         Next
         <v-icon class="ml-2">
@@ -93,9 +94,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { User } from '@/models/user'
-import { VueConstructor } from 'vue'
+import { Component, Vue } from 'vue-property-decorator'
+import { LoginSource, Pages } from '@/util/constants'
+import ConfigHelper from '@/util/config-helper'
 
 @Component({
   name: 'Home',
@@ -107,11 +108,23 @@ export default class ChooseAuthMethodView extends Vue {
   private authType = ''
 
   private selectBCSCAuth () {
-    this.authType = 'BCSC'
+    this.authType = LoginSource.BCSC
   }
 
   private selectBCEIDAuth () {
-    this.authType = 'BCEID'
+    this.authType = LoginSource.BCEID
+  }
+
+  private goNext () {
+  // TODO might need to set some session variables
+    switch (this.authType) {
+      case LoginSource.BCEID:
+        window.location.href = ConfigHelper.getBceIdOsdLink()
+        break
+      case LoginSource.BCSC:
+        this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
+        break
+    }
   }
 }
 </script>
