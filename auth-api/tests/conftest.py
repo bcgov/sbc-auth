@@ -137,10 +137,10 @@ def auto(docker_services, app):
     setup_jwt_manager(app, _JWT)
 
     if app.config['USE_DOCKER_MOCK']:
+        docker_services.start('minio')
         docker_services.start('notify')
         docker_services.start('bcol')
         docker_services.start('proxy')
-        docker_services.start('minio')
 
 
 @pytest.fixture(scope='session')
