@@ -70,7 +70,6 @@
             name="slide-x-transition"
             mode="out-in">
             <router-view
-              class="info-router-view"
               :userProfile="userProfile"
               @login="login()"
               @account-dialog="accountDialog = true"
