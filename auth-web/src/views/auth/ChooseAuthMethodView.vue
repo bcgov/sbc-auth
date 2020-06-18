@@ -117,8 +117,6 @@ export default class ChooseAuthMethodView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import "$assets/scss/theme.scss";
-
   .view-container {
     max-width: 60rem;
   }
