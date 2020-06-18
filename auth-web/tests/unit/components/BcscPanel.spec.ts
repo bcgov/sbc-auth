@@ -11,7 +11,7 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
-describe('MaintainBusinessView.vue', () => {
+describe('BcscPanel.vue', () => {
   let wrapper: any
   let wrapperFactory: any
 
@@ -51,7 +51,7 @@ describe('MaintainBusinessView.vue', () => {
 
   it('doesn\'t render the login or create account link when authenticated', () => {
     const authenticatedBtns = wrapper.vm.$el.querySelectorAll('.v-btn')
-    const createAccountLink = wrapper.vm.$el.querySelectorAll('a')
+    const createAccountLink = wrapper.vm.$el.querySelector('#create-account-link')
 
     // Verify only the Learn More Button is rendered
     expect(authenticatedBtns.length).toStrictEqual(1)
@@ -59,8 +59,7 @@ describe('MaintainBusinessView.vue', () => {
     expect(authenticatedBtns[0].textContent).toContain('Learn More')
 
     // Verify the account create link is not rendered
-    expect(createAccountLink.length).toStrictEqual(1)
-    expect(createAccountLink[0].textContent).not.toEqual('Create a BC Registries Account')
+    expect(createAccountLink).toBeNull()
   })
 
   it('renders the login button and create account link when NOT authenticated', () => {
@@ -68,13 +67,17 @@ describe('MaintainBusinessView.vue', () => {
     const wrapper = wrapperFactory({ userProfile: null })
 
     const authenticatedBtns = wrapper.vm.$el.querySelectorAll('.v-btn')
-    const createAccountLink = wrapper.vm.$el.querySelectorAll('a')
+    const mobileCardLink = wrapper.vm.$el.querySelectorAll('a')
+    const createAccountLink = wrapper.vm.$el.querySelector('#create-account-link')
 
     expect(authenticatedBtns[0]).toBeDefined()
     expect(authenticatedBtns[0].textContent).toContain('Log in with BC Services Card')
 
-    expect(createAccountLink[0]).toBeDefined()
-    expect(createAccountLink[0].textContent).toContain('Create a BC Registries Account')
+    expect(mobileCardLink[0]).toBeDefined()
+    expect(mobileCardLink[0].textContent).toContain('set up a mobile card')
+
+    expect(createAccountLink).toBeDefined()
+    expect(createAccountLink.textContent).toContain('Create a BC Registries Account')
 
     expect(authenticatedBtns[1]).toBeDefined()
     expect(authenticatedBtns[1].textContent).toContain('Learn More')
@@ -94,9 +97,9 @@ describe('MaintainBusinessView.vue', () => {
     expect(bulletListItems[0].textContent).toContain('Bullet 1')
     expect(bulletListItems[1].textContent).toContain('Bullet 2')
 
-    expect(bulletListItems[2].textContent).toContain('Bullet 3')
-    expect(bulletListItems[3].textContent).toContain('Bullet 4')
+    expect(bulletListItems[3].textContent).toContain('Bullet 3')
+    expect(bulletListItems[4].textContent).toContain('Bullet 4')
 
-    expect(bulletListItems.length).toStrictEqual(4)
+    expect(bulletListItems.length).toStrictEqual(5)
   })
 })

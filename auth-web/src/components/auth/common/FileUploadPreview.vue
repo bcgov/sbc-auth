@@ -33,8 +33,14 @@ import { mapActions } from 'vuex'
   }
 })
 export default class FileUploadPreview extends Vue {
+  @Prop() inputFile: File
   private fileUpload = null
 
+  mounted () {
+    if (this.inputFile) {
+      this.fileUpload = this.inputFile
+    }
+  }
   private fileChange (file) {
     this.emitFileSelected(file)
   }

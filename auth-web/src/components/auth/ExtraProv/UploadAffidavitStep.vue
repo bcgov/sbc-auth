@@ -5,16 +5,18 @@
       when authenticated.
     </p>
     <h4 class="my-4">Attach your Notarized Affidavit</h4>
-    <FileUploadPreview @file-selected="fileSelected"></FileUploadPreview>
+    <FileUploadPreview @file-selected="fileSelected" v-bind:input-file="affidavitDoc"></FileUploadPreview>
     <NotaryInformationForm
       :input-notary-info="notaryInformation"
       @notaryinfo-update="updateNotaryInformation"
+      @is-form-valid="isNotaryInformationValidFn"
       class="pt-5"
       v-if="notaryInformation"
     ></NotaryInformationForm>
     <NotaryContactForm
       :input-notary-contact="notaryContact"
       @notarycontact-update="updateNotaryContact"
+      @is-form-valid="isNotaryContactValidFn"
       class="pt-5"
     ></NotaryContactForm>
     <v-row class="mt-8">
@@ -29,7 +31,7 @@
           color="primary"
           class="mr-3"
           :loading="saving"
-          :disabled="saving"
+          :disabled="saving || !isNextValid"
           @click="next"
           data-test="next-button"
         >
@@ -78,18 +80,17 @@ import { getModule } from 'vuex-module-decorators'
       'userProfile',
       'currentUser',
       'notaryInformation',
-      'notaryContact'
+      'notaryContact',
+      'affidavitDoc'
     ])
   },
   methods: {
     ...mapMutations('org', ['setCurrentOrganization', 'setOrgName']),
-    ...mapMutations('user', ['setNotaryInformation', 'setNotaryContact']),
+    ...mapMutations('user', ['setNotaryInformation', 'setNotaryContact', 'setAffidavitDoc']),
     ...mapActions('org', [
-      'createOrg',
-      'syncMembership',
-      'syncOrganization',
-      'isOrgNameAvailable',
-      'changeOrgType'
+    ]),
+    ...mapActions('user', [
+      'uploadPendingDocsToStorage'
     ])
   }
 })
@@ -97,39 +98,41 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
   private orgStore = getModule(OrgModule, this.$store)
   private userStore = getModule(UserModule, this.$store)
   private errorMessage: string = ''
-  private saving = false
-  private notaryInformation!: NotaryInformation
+  private saving: boolean = false
+  private isNotaryContactValid: boolean = false
+  private isNotaryInformationValid: boolean = false
+  private readonly notaryInformation!: NotaryInformation
+  private readonly affidavitDoc!:File
   private readonly notaryContact!: NotaryContact
+  private readonly uploadPendingDocsToStorage!: () => void
   private readonly setNotaryInformation!: (
     notaryInformation: NotaryInformation
   ) => void
+  private readonly setAffidavitDoc!: (
+          affidavitDoc: File
+  ) => void
   private readonly setNotaryContact!: (notaryContact: NotaryContact) => void
   private readonly currentOrganization!: Organization
-  private orgName: string = ''
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
 
-  $refs: {
-    createAccountInfoForm: HTMLFormElement
-  }
-
-  private readonly orgNameRules = [(v) => !!v || 'An account name is required']
-
-  private isFormValid (): boolean {
-    return !!this.orgName
-  }
-
   private async mounted () {
-    if (this.currentOrganization) {
-      this.orgName = this.currentOrganization.name
-    }
     if (!this.notaryInformation) {
       this.setNotaryInformation({ notaryName: '', address: {} })
     }
   }
 
   private async next () {
-    this.stepForward(this.currentOrganization?.orgType === Account.PREMIUM)
+    try {
+      this.saving = true
+      // save the file here so that in the final steps its less network calls to make
+      await this.uploadPendingDocsToStorage()
+      this.stepForward(this.currentOrganization?.orgType === Account.PREMIUM)
+    } catch (error) {
+      this.saving = false
+      // eslint-disable-next-line no-console
+      console.error(error)
+    }
   }
 
   private redirectToNext (organization?: Organization) {
@@ -140,13 +143,12 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
     this.stepBack()
   }
 
-  private goNext () {
+  private async goNext () {
     this.stepForward()
   }
 
   private fileSelected (file) {
-    // eslint-disable-next-line no-console
-    console.log(file)
+    this.setAffidavitDoc(file)
   }
 
   private updateNotaryInformation (notaryInfo: NotaryInformation) {
@@ -155,6 +157,18 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
 
   private updateNotaryContact (notaryContact: NotaryContact) {
     this.setNotaryContact(notaryContact)
+  }
+
+  private get isNextValid () {
+    return this.isNotaryInformationValid
+  }
+
+  private isNotaryContactValidFn (val) {
+    this.isNotaryContactValid = val
+  }
+
+  private isNotaryInformationValidFn (val) {
+    this.isNotaryInformationValid = val
   }
 }
 </script>

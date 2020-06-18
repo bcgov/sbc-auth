@@ -9,7 +9,7 @@
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               {{item.text}}
-              <a href="https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-small-business/%7D"
+              <a href="https://www2.gov.bc.ca/gov/content/employment-business/business/bc-companies/benefit-company"
                class="learn-more-link" target="_blank" rel="noopener noreferrer">
                 {{item.linkText}}
               </a>
@@ -17,11 +17,15 @@
           </v-list-item-content>
         </v-list-item>
         <!-- Panel Btns -->
-        <LearnMoreButton />
+        <learn-more-button
+          :redirectUrl="learnMoreUrl"
+        />
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
-        <v-img src="../../assets/img/Step1_DecideBusiness_x1.jpg" aspect-ratio="1.2" contain></v-img>
+        <a :href="learnMoreUrl" target="_blank">
+          <v-img src="../../assets/img/Step1_DecideBusiness_x2.png" aspect-ratio="1.2" contain></v-img>
+        </a>
       </v-col>
     </v-row>
   </v-container>
@@ -37,7 +41,9 @@ import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
   }
 })
 export default class DecideBusinessView extends Vue {
-  private bulletPoints: Array<any> = [
+  private readonly learnMoreUrl = 'https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-' +
+    'small-business/'
+  private readonly bulletPoints: Array<any> = [
     { text: 'Decide which business structure is most appropriate for you: A few options are sole proprietorship, ' +
       'partnership or incorporation.' },
     { text: 'Each structure has a different legal and financial implications.',
@@ -53,6 +59,10 @@ export default class DecideBusinessView extends Vue {
   #decide-business-info-container {
     padding-top: 0 !important;
     flex-wrap: wrap;
+
+    .v-btn:hover {
+      opacity: .8;
+    }
 
     .list-item {
       align-items: flex-start;
@@ -75,11 +85,11 @@ export default class DecideBusinessView extends Vue {
 
     .learn-more-link {
       font-size: 1rem;
-      color: $BCgoveBueText1 !important;
+      color: $BCgoveBueText1;
     }
 
     .learn-more-link:hover {
-      color: $BCgoveBueText2 !important;
+      color: $BCgoveBueText2;
     }
   }
 </style>

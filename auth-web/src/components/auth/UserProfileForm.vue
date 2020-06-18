@@ -11,8 +11,36 @@
       </div>
     </v-expand-transition>
     <!-- First / Last Name -->
-    <v-row>
-      <v-col cols="12" class="pt-0 pb-0">
+    <v-row v-if="isExtraProvStepper">
+      <v-col cols="6" class="py-0">
+        <v-text-field
+          filled
+          label="First Name"
+          req
+          persistent-hint
+          hint="Your first name as it appears on your affidavit"
+          :rules="firstNameRules"
+          v-model="firstName"
+          data-test="firstName"
+        >
+        </v-text-field>
+      </v-col>
+      <v-col cols="6" class="py-0">
+        <v-text-field
+          filled
+          label="Last Name"
+          req
+          persistent-hint
+          hint="Your last name as it appears on your affidavit"
+          :rules="lastNameRules"
+          v-model="lastName"
+          data-test="lastName"
+        >
+        </v-text-field>
+      </v-col>
+    </v-row>
+    <v-row v-else>
+      <v-col cols="12" class="py-0">
         <h4
           v-bind:class="{'legal-name': !isStepperView}"
           class="mb-1"
@@ -195,7 +223,7 @@
 
 <script lang="ts">
 
-import { Account, LoginSource, Pages, Role } from '@/util/constants'
+import { AccessType, Account, LoginSource, Pages, Role } from '@/util/constants'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
@@ -230,7 +258,8 @@ import { mask } from 'vue-the-mask'
         'createUserContact',
         'updateUserContact',
         'getUserProfile',
-        'createAffidavit'
+        'createAffidavit',
+        'updateUserFirstAndLastName'
       ]),
     ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization'])
   }
@@ -239,6 +268,8 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private readonly createUserContact!: (contact: Contact) => Contact
     private readonly updateUserContact!: (contact: Contact) => Contact
     private readonly getUserProfile!: (identifer: string) => User
+    private readonly updateUserFirstAndLastName!: (user: User) => Contact
+
     private readonly createAffidavit!: () => User
     private firstName = ''
     private lastName = ''
@@ -262,6 +293,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
 
     // this prop is used for conditionally using this form in both account stepper and edit profile pages
     @Prop({ default: false }) isStepperView: boolean
+    @Prop({ default: AccessType.REGULAR }) stepperSource: string
 
     $refs: {
       deactivateUserConfirmationDialog: ModalDialog,
@@ -286,6 +318,18 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private extensionRules = [
       v => !v || (v.length >= 0 || v.length <= 4) || 'Extension is invalid'
     ]
+
+    private firstNameRules = [
+      v => !!v || 'First Name is Required'
+    ]
+
+    private lastNameRules = [
+      v => !!v || 'Last Name is Required'
+    ]
+
+    private get isExtraProvStepper () {
+      return this.isStepperView && (this.stepperSource === AccessType.EXTRA_PROVINCIAL)
+    }
 
     private emailMustMatch (): string {
       return (this.emailAddress === this.confirmedEmailAddress) ? '' : 'Email addresses must match'
@@ -317,14 +361,21 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
 
     private async save () {
       if (this.isFormValid()) {
+        const user:User = {
+          firstname: this.firstName.trim(),
+          lastname: this.lastName.trim()
+        }
         const contact = {
           email: this.emailAddress.toLowerCase(),
           phone: this.phoneNumber,
           phoneExtension: this.extension
         }
         if (this.stepForward) { // On stepper ;so Save the org
-          this.createAccount(contact)
+          this.createAccount(contact, user)
         } else {
+          if (this.currentUser?.loginSource === LoginSource.BCEID) {
+            await this.updateUserFirstAndLastName(user)
+          }
           await this.saveOrUpdateContact(contact)
           await this.getUserProfile('@me')
           // If a token was provided, that means we are in the accept invitation flow
@@ -338,14 +389,14 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       }
     }
 
-    private async createAccount (contact:Contact) {
+    private async createAccount (contact:Contact, user:User) {
       try {
         // for bceid , create affidavit first
         // TODO implement checks for bceid
         if (this.currentUser?.loginSource === LoginSource.BCEID) {
           await this.createAffidavit()
+          await this.updateUserFirstAndLastName(user)
         }
-
         const organization = await this.createOrg()
         await this.saveOrUpdateContact(contact)
         await this.getUserProfile('@me')
