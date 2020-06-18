@@ -2,7 +2,7 @@
   <div>
     <v-container id="step-buttons-container">
       <template v-for="(step, index) in steps">
-        <div class="step" :key="index"  @click="goTo(step)">
+        <div class="step" :key="index"  @click="goTo(step)" v-on:keyup.tab="goTo(step)">
           <v-btn
             fab
             outlined
@@ -12,7 +12,7 @@
             class="step__icon"
             :class="{ 'filled': isCurrentStep(step) }"
             >
-            <v-icon>{{step.step}}</v-icon>
+            <span class="step-number">{{step.step}}</span>
           </v-btn>
           <div class="step__label" :class="{ 'selected': isCurrentStep(step) }">
             {{step.text}}
@@ -118,6 +118,10 @@ export default class Stepper extends Vue {
     flex-direction: column;
     flex: 1;
     align-items: center;
+
+    .step-number {
+      font-size: 1.5rem;
+    }
   }
 
   .step:hover {
