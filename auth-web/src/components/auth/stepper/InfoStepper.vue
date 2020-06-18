@@ -110,7 +110,7 @@ export default class Stepper extends Vue {
 
   .selected {
     color: #212529 !important;
-    border-bottom: 3px solid $BCgoveBueText1!important;
+    border-bottom: 3px solid $BCgoveBueText1 !important;
   }
 
   .step {
@@ -146,7 +146,7 @@ export default class Stepper extends Vue {
     font-weight: bold;
     font-size: 14px;
     margin-top: 10px;
-    padding-bottom: 20px!important;
+    padding-bottom: 20px !important;
     text-align: center;
     border-bottom: 3px solid #DEE2E6;
     border-bottom-left-radius: 0%;
