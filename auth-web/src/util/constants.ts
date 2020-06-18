@@ -29,8 +29,10 @@ export enum Role {
 export enum Pages {
     USER_PROFILE = 'userprofile',
     CREATE_ACCOUNT = 'setup-account',
+    CREATE_EXTRAPROV_ACCOUNT = 'setup-extra-prov-account',
     DUPLICATE_TEAM_MESAGE = 'duplicateteam',
     PENDING_APPROVAL = 'pendingapproval',
+    PENDING_AFFIDAVIT_APPROVAL = 'pendingaffidavitapproval',
     MAIN = 'account',
     SIGNIN = 'signin',
     SIGNOUT = 'signout',
@@ -62,7 +64,8 @@ export enum IdpHint {
 export enum LoginSource {
     BCROS = 'BCROS',
     IDIR = 'IDIR',
-    BCSC = 'BCSC'
+    BCSC = 'BCSC',
+    BCEID = 'BCEID'
 }
 
 export type Actions = 'upgrade' | 'downgrade'

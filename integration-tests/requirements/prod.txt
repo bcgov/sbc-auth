@@ -1,0 +1,5 @@
+pandas
+pytest
+pydantic[dotenv]
+pyleniumio
+lovely-pytest-docker

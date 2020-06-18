@@ -63,10 +63,8 @@
               </v-btn>
             </div>
           </div>
-          <div class="pa-6 align-self-center">
-            <div class="date-range-label mb-6">
-              {{showDateRangeSelected}}
-            </div>
+          <div class="date-range-calendars pb-6">
+            <div class="date-range-label py-6 mx-6 mb-3" v-html="showDateRangeSelected"></div>
             <v-date-picker
               color="primary"
               width="400"
@@ -111,28 +109,26 @@
         @click="exportCSV"
       >Export CSV</v-btn>
     </div>
-    <div class="filter-results d-inline-flex align-center mb-5" v-if="filterArray.length">
-      <div class="filter-results-label py-2 mr-7">{{totalTransactionsCount}} Records found</div>
-      <v-chip
-        class="mr-2 filter-chip"
-        close
-        close-icon="mdi-window-close"
-        color="info"
-        label
-        v-for="filter in filterArray"
-        :key="filter.type"
-        @click:close="clearFilter(filter)"
-      >
-        {{filter.displayText}}
-      </v-chip>
-      <v-btn
-        v-if="filterArray.length"
-        text
-        color="primary"
-        @click="clearFilter('', true)"
-      >
-        Clear all filters
-      </v-btn>
+    <div class="filter-results" :class="{ 'active' : filterArray.length }">
+      <div class="d-flex align-center mb-8">
+        <div class="filter-results-label py-2 mr-7" v-if="filterArray.length">{{totalTransactionsCount}} {{totalTransactionsCount === 1 ? 'record' : 'records'}} found</div>
+        <v-chip close label color="info"
+          class="mr-2 filter-chip"
+          close-icon="mdi-window-close"
+          height="36"
+          v-for="filter in filterArray"
+          :key="filter.type"
+          @click:close="clearFilter(filter)"
+        >
+          {{filter.displayText}}
+        </v-chip>
+        <v-btn outlined color="primary" class="px-2"
+          v-if="filterArray.length"
+          @click="clearFilter('', true)"
+        >
+          Clear all filters
+        </v-btn>
+      </div>
     </div>
     <TransactionsDataTable
       :dateFilter="dateFilterProp"
@@ -144,12 +140,14 @@
 </template>
 
 <script lang="ts">
+import { Account, Pages } from '@/util/constants'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Member, MembershipType, Organization } from '@/models/Organization'
 import { TransactionFilterParams, TransactionTableList } from '@/models/transaction'
+import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
 import TransactionsDataTable from '@/components/auth/TransactionsDataTable.vue'
-import { mapActions } from 'vuex'
 import moment from 'moment'
 
 const DATEFILTER_CODES = {
@@ -168,10 +166,18 @@ const DATEFILTER_CODES = {
     ...mapActions('org', [
       'getTransactionReport'
     ])
+  },
+  computed: {
+    ...mapState('org', [
+      'currentOrganization',
+      'currentMembership'
+    ])
   }
 })
 export default class Transactions extends Mixins(AccountChangeMixin) {
   @Prop({ default: '' }) private orgId: string;
+  private readonly currentMembership!: Member
+  private readonly currentOrganization!: Organization
   private readonly getTransactionReport!: (filterParams: any) => TransactionTableList
   private showDateFilter: boolean = false
   private dateRangeSelected: any = []
@@ -213,25 +219,31 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   }
 
   private initFilter () {
-    this.initDatePicker()
-    this.dateFilterProp = {}
-    this.dateFilterSelectedIndex = null
-    this.dateRangeSelected = []
-    this.folioNumberSearch = this.folioFilterProp = ''
-    this.filterArray = []
-    this.updateTransactionTableCounter++
+    if (this.isTransactionsAllowed) {
+      this.initDatePicker()
+      this.dateFilterProp = {}
+      this.dateFilterSelectedIndex = null
+      this.dateRangeSelected = []
+      this.folioNumberSearch = this.folioFilterProp = ''
+      this.filterArray = []
+      this.updateTransactionTableCounter++
+    } else {
+      // if the account switing happening when the user is already in the transaction page,
+      // redirect to account info if its a basic account
+      this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
+    }
   }
 
   private get showDateRangeSelected () {
     let dateText = ''
     if ((this.dateFilterSelected?.code === DATEFILTER_CODES.TODAY) || (this.dateFilterSelected?.code === DATEFILTER_CODES.YESTERDAY)) {
-      dateText = `${this.dateFilterSelected?.label} - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')}`
+      dateText = `<strong>${this.dateFilterSelected?.label}:</strong> ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')}`
     } else {
-      dateText = `${this.dateFilterSelected?.label} 
-        - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')} 
+      dateText = `<strong>${this.dateFilterSelected?.label}:</strong> 
+      ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')} 
         - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[1], 'MMM DD, YYYY')}`
     }
-    return (this.dateFilterSelected?.code) ? dateText : 'No Dates Selected'
+    return (this.dateFilterSelected?.code) ? dateText : '<strong>No dates selected</strong>'
   }
 
   // apply filter button enable only if the date ranges are selected and start date <= end date
@@ -373,7 +385,12 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
       folioNumber: this.folioFilterProp
     }
     const downloadData = await this.getTransactionReport(filterParams)
-    CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`)
+    CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`, 'text/csv')
+  }
+
+  private get isTransactionsAllowed (): boolean {
+    return (this.currentOrganization?.orgType === Account.PREMIUM) &&
+      [MembershipType.Admin, MembershipType.Coordinator].includes(this.currentMembership.membershipTypeCode)
   }
 }
 </script>
@@ -403,32 +420,39 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
     }
   }
 
-  ::v-deep {
-    .date-picker-disable {
-      .v-date-picker-table {
-        pointer-events: none;
-      }
-    }
-  }
-
   .date-range-options {
-    width: 16rem;
+    width: 15rem;
     border-radius: 0 !important;
     border-right: 1px solid var(--v-grey-lighten1);
   }
 
   .date-range-label {
-    font-weight: 700;
-    font-size: 1.125rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--v-grey-lighten1);
   }
 
   .v-picker.v-card {
-    border: 1px solid var(--v-grey-lighten1);
     box-shadow: none !important;
+  }
+
+  .filter-results {
+    opacity: 0;
+    overflow: hidden;
+    max-height: 0;
+    transition: all ease-out 0.25s;
+  }
+
+  .filter-results.active {
+    opacity: 1;
+    max-height: 4rem;
   }
 
   .filter-results-label {
     font-weight: 700;
+  }
+
+  .v-chip {
+    height: 36px;
   }
 
   ::v-deep {
@@ -448,6 +472,20 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
     .v-input__prepend-inner {
       margin-top: 10px !important;
       margin-right: 5px !important;
+    }
+
+    .date-picker-disable {
+      .v-date-picker-table {
+        pointer-events: none;
+      }
+    }
+
+    .date-range-label strong {
+      margin-right: 0.25rem;
+    }
+
+    .v-progress-linear {
+      margin-top: -2px !important
     }
   }
 </style>

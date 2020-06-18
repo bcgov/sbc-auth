@@ -27,6 +27,7 @@ export interface Organization {
   bcolProfile?:BcolProfile
   bcolAccountDetails?:BcolAccountDetails
   grantAccess?:boolean
+  statusCode?:string
 }
 
 export interface UpdateMemberPayload {
@@ -73,6 +74,13 @@ export enum MembershipStatus {
   'Inactive' = 'INACTIVE',
   'Rejected' = 'REJECTED',
   'Pending' = 'PENDING_APPROVAL'
+}
+
+export enum OrgStatus {
+  'Active' = 'ACTIVE',
+  'Inactive' = 'INACTIVE',
+  'Rejected' = 'REJECTED',
+  'PendingAffidavitReview' = 'PENDING_AFFIDAVIT_REVIEW'
 }
 
 export enum MembershipType {

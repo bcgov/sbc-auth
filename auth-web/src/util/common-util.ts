@@ -59,9 +59,8 @@ export default class CommonUtils {
     return moment(date || new Date()).format('YYYY-MM-DD')
   }
 
-  static fileDownload (data: any, fileName: string) {
-    const blobData = [data]
-    const blob = new Blob(blobData, { type: 'application/octet-stream' })
+  static fileDownload (data: any, fileName: string, fileType: string = 'text/plain') {
+    const blob = new Blob([data], { type: fileType })
     if (typeof window.navigator.msSaveBlob !== 'undefined') {
       // IE workaround for "HTML7007: One or more blob URLs were
       // revoked by closing the blob for which they were created.

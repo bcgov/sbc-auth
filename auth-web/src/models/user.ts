@@ -3,7 +3,7 @@ import { RoleInfo } from '@/models/Organization'
 export interface User {
     firstname: string;
     lastname: string;
-    username: string;
+    username?: string;
     modified?: Date
     userTerms?: UserTerms
 }
@@ -16,4 +16,9 @@ export interface UserTerms {
 export interface UserProfileRequestBody {
     username: string
     password: string
+}
+
+export interface DocumentUpload {
+    preSignedUrl: string
+    key: string
 }

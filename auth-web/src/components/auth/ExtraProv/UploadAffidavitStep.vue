@@ -1,19 +1,27 @@
 <template>
   <div>
-    <p class="mb-7">This will be reviewed by Registries staff and the account will be approved when authenticated.</p>
+    <p class="mb-7">
+      This will be reviewed by Registries staff and the account will be approved
+      when authenticated.
+    </p>
+    <h4 class="my-4">Attach your Notarized Affidavit</h4>
+    <FileUploadPreview @file-selected="fileSelected" v-bind:input-file="affidavitDoc"></FileUploadPreview>
     <NotaryInformationForm
+      :input-notary-info="notaryInformation"
+      @notaryinfo-update="updateNotaryInformation"
+      @is-form-valid="isNotaryInformationValidFn"
       class="pt-5"
+      v-if="notaryInformation"
     ></NotaryInformationForm>
     <NotaryContactForm
+      :input-notary-contact="notaryContact"
+      @notarycontact-update="updateNotaryContact"
+      @is-form-valid="isNotaryContactValidFn"
       class="pt-5"
     ></NotaryContactForm>
     <v-row class="mt-8">
       <v-col cols="12" class="form__btns py-0 d-inline-flex">
-        <v-btn
-          large
-          depressed
-          color="default"
-          @click="goBack">
+        <v-btn large depressed color="default" @click="goBack">
           <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
           <span>Back</span>
         </v-btn>
@@ -23,11 +31,12 @@
           color="primary"
           class="mr-3"
           :loading="saving"
-          :disabled="saving"
+          :disabled="saving || !isNextValid"
           @click="next"
           data-test="next-button"
         >
-          <span>Next
+          <span
+            >Next
             <v-icon class="ml-2">mdi-arrow-right</v-icon>
           </span>
         </v-btn>
@@ -42,17 +51,19 @@
 </template>
 
 <script lang="ts">
-import { Account, Actions, Pages } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { Member, Organization } from '@/models/Organization'
+import { NotaryContact, NotaryInformation } from '@/models/notary'
 import { mapActions, mapMutations, mapState } from 'vuex'
-import BaseAddress from '@/components/auth/BaseAddress.vue'
+import { Account } from '@/util/constants'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
+import FileUploadPreview from '@/components/auth/common/FileUploadPreview.vue'
 import NotaryContactForm from '@/components/auth/NotaryContactForm.vue'
 import NotaryInformationForm from '@/components/auth/NotaryInformationForm.vue'
 import OrgModule from '@/store/modules/org'
+import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
+import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -60,51 +71,68 @@ import { getModule } from 'vuex-module-decorators'
     BcolLogin,
     NotaryInformationForm,
     NotaryContactForm,
-    ConfirmCancelButton
+    ConfirmCancelButton,
+    FileUploadPreview
   },
   computed: {
     ...mapState('org', ['currentOrganization']),
-    ...mapState('user', ['userProfile', 'currentUser'])
+    ...mapState('user', [
+      'userProfile',
+      'currentUser',
+      'notaryInformation',
+      'notaryContact',
+      'affidavitDoc'
+    ])
   },
   methods: {
-    ...mapMutations('org', [
-      'setCurrentOrganization', 'setOrgName'
+    ...mapMutations('org', ['setCurrentOrganization', 'setOrgName']),
+    ...mapMutations('user', ['setNotaryInformation', 'setNotaryContact', 'setAffidavitDoc']),
+    ...mapActions('org', [
     ]),
-    ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization', 'isOrgNameAvailable', 'changeOrgType'])
+    ...mapActions('user', [
+      'uploadPendingDocsToStorage'
+    ])
   }
 })
 export default class UploadAffidavitStep extends Mixins(Steppable) {
   private orgStore = getModule(OrgModule, this.$store)
+  private userStore = getModule(UserModule, this.$store)
   private errorMessage: string = ''
-  private saving = false
-  private readonly createOrg!: () => Promise<Organization>
-  private readonly changeOrgType!: (action:Actions) => Promise<Organization>
-  private readonly syncMembership!: (orgId: number) => Promise<Member>
-  private readonly syncOrganization!: (orgId: number) => Promise<Organization>
-  private readonly isOrgNameAvailable!: (orgName: string) => Promise<boolean>
-  private readonly setCurrentOrganization!: (organization: Organization) => void
+  private saving: boolean = false
+  private isNotaryContactValid: boolean = false
+  private isNotaryInformationValid: boolean = false
+  private readonly notaryInformation!: NotaryInformation
+  private readonly affidavitDoc!:File
+  private readonly notaryContact!: NotaryContact
+  private readonly uploadPendingDocsToStorage!: () => void
+  private readonly setNotaryInformation!: (
+    notaryInformation: NotaryInformation
+  ) => void
+  private readonly setAffidavitDoc!: (
+          affidavitDoc: File
+  ) => void
+  private readonly setNotaryContact!: (notaryContact: NotaryContact) => void
   private readonly currentOrganization!: Organization
-  private orgName: string = ''
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
 
-  $refs: {
-    createAccountInfoForm: HTMLFormElement
-  }
-
-  private readonly orgNameRules = [v => !!v || 'An account name is required']
-  private isFormValid (): boolean {
-    return !!this.orgName
-  }
-
   private async mounted () {
-    if (this.currentOrganization) {
-      this.orgName = this.currentOrganization.name
+    if (!this.notaryInformation) {
+      this.setNotaryInformation({ notaryName: '', address: {} })
     }
   }
 
   private async next () {
-    this.stepForward(this.currentOrganization?.orgType === Account.PREMIUM)
+    try {
+      this.saving = true
+      // save the file here so that in the final steps its less network calls to make
+      await this.uploadPendingDocsToStorage()
+      this.stepForward(this.currentOrganization?.orgType === Account.PREMIUM)
+    } catch (error) {
+      this.saving = false
+      // eslint-disable-next-line no-console
+      console.error(error)
+    }
   }
 
   private redirectToNext (organization?: Organization) {
@@ -115,8 +143,32 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
     this.stepBack()
   }
 
-  private goNext () {
+  private async goNext () {
     this.stepForward()
+  }
+
+  private fileSelected (file) {
+    this.setAffidavitDoc(file)
+  }
+
+  private updateNotaryInformation (notaryInfo: NotaryInformation) {
+    this.setNotaryInformation(notaryInfo)
+  }
+
+  private updateNotaryContact (notaryContact: NotaryContact) {
+    this.setNotaryContact(notaryContact)
+  }
+
+  private get isNextValid () {
+    return this.isNotaryInformationValid
+  }
+
+  private isNotaryContactValidFn (val) {
+    this.isNotaryContactValid = val
+  }
+
+  private isNotaryInformationValidFn (val) {
+    this.isNotaryInformationValid = val
   }
 }
 </script>

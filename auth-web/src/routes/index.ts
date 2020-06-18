@@ -1,5 +1,5 @@
-import { LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
-import { Member, MembershipStatus, Organization } from '@/models/Organization'
+import { Account, LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
+import { Member, MembershipStatus, MembershipType, OrgStatus, Organization } from '@/models/Organization'
 import Router, { Route } from 'vue-router'
 import { AccountSettings } from '@/models/account-settings'
 import { Contact } from '@/models/contact'
@@ -49,6 +49,18 @@ router.beforeEach((to, from, next) => {
         query: { redirect: to.fullPath }
       })
     }
+    if (to.matched.some(record => record.meta.isPremiumOnly)) {
+      const currentOrganization: Organization = (store.state as any)?.org?.currentOrganization
+      const currentMembership: Member = (store.state as any)?.org?.currentMembership
+      // redirect to unauthorized page if the account selected is not Premium
+      if (!(currentOrganization?.orgType === Account.PREMIUM &&
+        [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.membershipTypeCode))) {
+        return next({
+          path: '/unauthorized',
+          query: { redirect: to.fullPath }
+        })
+      }
+    }
   }
 
   // Enforce navigation guards are checked before navigating anywhere else
@@ -76,10 +88,8 @@ router.beforeEach((to, from, next) => {
       !userProfile?.userTerms?.isTermsOfUseAccepted) {
       switch (currentUser?.loginSource) {
         case LoginSource.BCSC:
-          return next({
-            path: `/${Pages.USER_PROFILE_TERMS}`
-          })
         case LoginSource.BCROS:
+        case LoginSource.BCEID:
           return next({
             path: `/${Pages.USER_PROFILE_TERMS}`
           })
@@ -90,8 +100,11 @@ router.beforeEach((to, from, next) => {
       }
     }
 
-    if (to.matched.some(record => record.meta.requiresActiveAccount) && currentUser.loginSource === LoginSource.BCSC) {
-      if (currentAccountSettings && currentMembership.membershipStatus === MembershipStatus.Pending) {
+    if (to.matched.some(record => record.meta.requiresActiveAccount) && (currentUser.loginSource === LoginSource.BCSC || currentUser.loginSource === LoginSource.BCEID)) {
+      const isTheOrgPendingAffidavitReview = currentOrganization?.statusCode === OrgStatus.PendingAffidavitReview
+      if (isTheOrgPendingAffidavitReview) {
+        return next({ path: `${Pages.PENDING_AFFIDAVIT_APPROVAL}` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
+      } else if (currentAccountSettings && currentMembership.membershipStatus === MembershipStatus.Pending) {
         return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}` })
       } else if (!currentOrganization || currentMembership.membershipStatus !== MembershipStatus.Active) {
         return next({ path: `/${Pages.CREATE_ACCOUNT}` })

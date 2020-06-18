@@ -15,6 +15,15 @@
         :disabled="saving"
       />
     </fieldset>
+    <template v-if="isExtraProvUser">
+      <h4 class="mb-4">Mailing Address</h4>
+      <BaseAddress
+              :inputAddress="address"
+              @address-update="updateAddress"
+              @is-form-valid="checkBaseAddressValidity"
+      >
+      </BaseAddress>
+    </template>
 
     <v-divider class="my-10"></v-divider>
 
@@ -55,11 +64,12 @@
 </template>
 
 <script lang="ts">
-import { Account, Actions, Pages } from '@/util/constants'
+import { Account, Actions, LoginSource, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 
+import { Address } from '@/models/address'
 import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
@@ -79,7 +89,7 @@ import { getModule } from 'vuex-module-decorators'
   },
   methods: {
     ...mapMutations('org', [
-      'setCurrentOrganization', 'setOrgName'
+      'setCurrentOrganization', 'setOrgName', 'setCurrentOrganizationAddress'
     ]),
     ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization', 'isOrgNameAvailable', 'changeOrgType'])
   }
@@ -98,6 +108,9 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private orgName: string = ''
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
+  private isBaseAddressValid: boolean = true
+  private readonly currentOrgAddress!: Address
+  private readonly setCurrentOrganizationAddress!: (address: Address) => void
 
   $refs: {
     createAccountInfoForm: HTMLFormElement
@@ -112,6 +125,20 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     if (this.currentOrganization) {
       this.orgName = this.currentOrganization.name
     }
+  }
+  private get address () {
+    return this.currentOrgAddress
+  }
+  private updateAddress (address: Address) {
+    this.setCurrentOrganizationAddress(address)
+  }
+
+  private checkBaseAddressValidity (isValid) {
+    this.isBaseAddressValid = !!isValid
+  }
+
+  private get isExtraProvUser () {
+    return sessionStorage.getItem(SessionStorageKeys.UserAccountType) === LoginSource.BCEID
   }
 
   private async save () {

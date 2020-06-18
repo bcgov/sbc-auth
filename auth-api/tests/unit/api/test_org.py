@@ -43,6 +43,56 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     assert rv.status_code == http_status.HTTP_201_CREATED
 
 
+def test_search_org_by_client(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be searched."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    # system search
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.get('/api/v1/orgs?name={}'.format(TestOrgInfo.org1.get('name')),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.get('/api/v1/orgs?name={}'.format(TestOrgInfo.org1.get('name')),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert bool(orgs) is False
+
+    rv = client.get('/api/v1/orgs?name={}'.format('notanexistingorgname'),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+    # staff search
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get('/api/v1/orgs?name={}'.format(TestOrgInfo.org1.get('name')),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get('/api/v1/orgs?status={}'.format('ACTIVE'),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get('/api/v1/orgs?status={}&type={}'.format('ACTIVE', 'REGULAR'),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
+
+
 def test_add_anonymous_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)

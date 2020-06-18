@@ -10,7 +10,7 @@ coverage:
   status:
     patch: no
     project:
-      default: no
+      default: off
       backend:
         target: 80%
         flags:
