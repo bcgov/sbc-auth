@@ -51,7 +51,7 @@
             </LoginBCSC>
           </v-dialog>
 
-          <v-dialog v-model="oopDialog" max-width="640">
+          <v-dialog v-model="oopDialog" max-width="740">
             <OutOfProvinceDialog
               @close="oopDialog = false"
               @oop = "goToOutOfProvince()"
