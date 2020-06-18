@@ -226,6 +226,8 @@ export default class OrgModule extends VuexModule {
     }
     if (org.bcolProfile) {
       createRequestBody.bcOnlineCredential = org.bcolProfile
+    }
+    if (address) {
       createRequestBody.mailingAddress = address
     }
     const response = await OrgService.createOrg(createRequestBody)
