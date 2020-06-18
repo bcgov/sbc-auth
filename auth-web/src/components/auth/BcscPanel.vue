@@ -1,6 +1,6 @@
 <template>
-  <v-container id="bcsc-container" class="my-10">
-    <h2 class="mt-5">Create an Account to Incorporate</h2>
+  <v-container id="bcsc-container">
+    <h2>Create an Account to Incorporate</h2>
     <p class="my-5">
       Log in securely using your mobile BC Services Card, government's trusted way to access online services
     </p>
@@ -39,17 +39,14 @@
       </v-col>
     </v-row>
     <!-- Panel Btns -->
-    <section>
+    <div class="mt-10">
       <template v-if="!userProfile">
-        <v-btn large color="#fcba19" @click="emitLogin()" class="mt-5">
-          Log in with BC Services Card
+        <v-btn large color="bcgovgold" class="cta-btn font-weight-bold mr-2" to="/choose-authentication-method">
+          Create a BC Registries account
         </v-btn>
-        <p class="my-5" id="create-account-link">New to BC Registries?
-          <a @click="emitAccountDialog()" class="link"><u>Create a BC Registries Account</u></a>
-        </p>
       </template>
       <learn-more-button :redirect-url="learnMoreUrl" />
-    </section>
+    </div>
   </v-container>
 </template>
 

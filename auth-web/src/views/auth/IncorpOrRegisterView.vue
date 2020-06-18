@@ -4,32 +4,34 @@
       <!-- Info Column -->
       <v-col cols="12" md="6">
         <h2>Incorporate or Register</h2>
-        <v-list-item class="list-item">
-          <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
-          <v-list-item-content>
-            <v-list-item-subtitle class="list-item-text">
-              If you have an approved Name Request (NR number), or you want a <numbered-company-tooltip />,
-              you can start your Incorporation Application.
-            </v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
-          <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
-          <v-list-item-content>
-            <v-list-item-subtitle class="list-item-text">
-              {{item.text}}
-            </v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
+        <v-list class="py-0 mt-4 mb-6" color="transparent">
+          <v-list-item class="list-item">
+            <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+            <v-list-item-content>
+              <v-list-item-subtitle class="list-item-text">
+                If you have an approved Name Request (NR number), or you want a <numbered-company-tooltip />,
+                you can start your Incorporation Application.
+              </v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+          <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
+            <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+            <v-list-item-content>
+              <v-list-item-subtitle class="list-item-text">
+                {{item.text}}
+              </v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
         <!-- Panel Btns -->
         <!-- Authenticated -->
         <template v-if="userProfile">
-          <div class="incorporate-btns">
-            <v-btn large color="#003366" class="incorporate-btn mr-2 my-5 white--text"
+          <div class="incorporate-btns d-flex flex-column">
+            <v-btn large dark color="bcgovblue" class="incorporate-btn font-weight-bold mb-7"
               @click="emitManageBusinesses()">
               Incorporate a Named Benefit Company
             </v-btn>
-            <v-btn large color="#003366" class="incorporate-btn mb-5 white--text"
+            <v-btn large dark color="bcgovblue" class="incorporate-btn font-weight-bold mb-7"
               @click="emitManageBusinesses(true)">
               Incorporate a Numbered Benefit Company
             </v-btn>
@@ -37,12 +39,9 @@
         </template>
         <!-- Not Authenticated -->
         <template v-else>
-          <v-btn large color="#fcba19" @click="emitLogin()" class="mt-5">
-            Log in with BC Services Card
+          <v-btn large color="bcgovgold" class="cta-btn font-weight-bold mr-2" to="/choose-authentication-method">
+            Create a BC Registries account
           </v-btn>
-          <p class="my-5">New to BC Registries? <a @click="emitAccountDialog()" class="create-account-link">
-            <u>Create a BC Registries Account</u></a>
-          </p>
         </template>
         <learn-more-button
         :redirect-url="learnMoreUrl"/>
@@ -108,7 +107,6 @@ export default class IncorpOrRegisterView extends Vue {
 
     .list-item {
       align-items: flex-start;
-      margin: .5rem 0;
       padding-left: 0;
     }
 
@@ -125,11 +123,6 @@ export default class IncorpOrRegisterView extends Vue {
       line-height: 1.5rem;
     }
 
-    .v-btn {
-      font-weight: bold;
-      color: $BCgovBlue5;
-    }
-
     .v-btn:hover {
       opacity: .8;
     }
@@ -138,16 +131,7 @@ export default class IncorpOrRegisterView extends Vue {
       flex-direction: column;
 
       .incorporate-btn {
-        justify-content: left;
-      }
-    }
-
-    .create-account-link {
-      font-size: 1rem;
-      color: $BCgoveBueText1;
-
-      :hover {
-        color: $BCgoveBueText2;
+        align-self: flex-start;
       }
     }
   }
