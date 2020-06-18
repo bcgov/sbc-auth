@@ -102,7 +102,6 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         """Mark the affdiavit as approved or rejected."""
         current_app.logger.debug('<find_affidavit_by_org_id ')
         affidavit: AffidavitModel = AffidavitModel.find_by_org_id(org_id)
-
         user: UserModel = UserModel.find_by_jwt_token(token=token_info)
         affidavit.decision_made_by = user.id
         affidavit.decision_made_on = datetime.now()
