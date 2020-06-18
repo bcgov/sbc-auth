@@ -140,6 +140,7 @@ def auto(docker_services, app):
         docker_services.start('notify')
         docker_services.start('bcol')
         docker_services.start('proxy')
+        docker_services.start('minio')
 
 
 @pytest.fixture(scope='session')

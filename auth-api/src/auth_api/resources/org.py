@@ -485,7 +485,6 @@ class OrgStatus(Resource):
 
         try:
             is_approved: bool = request_json.get('statusCode', None) == AffidavitStatus.APPROVED.value
-            print('is_approved ', is_approved)
 
             response, status = OrgService.approve_or_reject(org_id=org_id, is_approved=is_approved,
                                                             token_info=token).as_dict(), http_status.HTTP_200_OK
