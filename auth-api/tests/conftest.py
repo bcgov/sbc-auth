@@ -194,3 +194,25 @@ def nr_mock(monkeypatch):
         }
 
     monkeypatch.setattr('auth_api.services.affiliation.Affiliation._get_nr_details', get_nr)
+
+
+@pytest.fixture()
+def minio_mock(monkeypatch):
+    """Mock minio calls."""
+
+    def get_nr(business_identifier, bearer_token):
+        return {
+            'applicants': {
+                'emailAddress': 'test@test.com',
+                'phoneNumber': '1112223333'
+            },
+            'names': [
+                {
+                    'name': 'TEST INC..',
+                    'state': 'APPROVED'
+                }
+            ],
+            'state': 'APPROVED'
+        }
+
+    monkeypatch.setattr('auth_api.services.minio.MinioService._get_client', get_nr)
