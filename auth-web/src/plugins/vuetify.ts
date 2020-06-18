@@ -39,6 +39,9 @@ export default new Vuetify({
           darken3: '#002049',
           darken4: '#001438'
         },
+        bcgovgold: {
+          base: '#fcba19'
+        },
         navBg: {
           base: '#001438'
         },

@@ -1,8 +1,8 @@
 <template>
   <v-container class="view-container">
     <div class="view-header flex-column mb-10">
-      <h1 class="view-header__title" data-test="account-settings-title">Create a BC Registries Account</h1>
-      <p class="mt-3 mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam at porttitor sem. Aliquam erat volutpat. <span class="lb">Donec placerat nisl magna, et faucibus arcu condimentum sed.</span></p>
+      <h1 class="view-header__title" data-test="account-settings-title">In order to create a BC Registries account, <span class="lb">we need to verify your identity.</span></h1>
+      <p class="mt-5 mb-0">There are two ways you can verify your identity to create a BC Registries account.</p>
     </div>
     <div>
       <v-row>
@@ -62,6 +62,33 @@
         </v-col>
       </v-row>
     </div>
+    <div class="form__btns d-flex mt-10">
+      <v-btn
+        large
+        depressed
+        color="grey lighten-2"
+        class="font-weight-bold"
+        to="/home"
+      >
+        <v-icon class="mr-2">
+          mdi-arrow-left
+        </v-icon>
+        Back to home
+      </v-btn>
+      <v-spacer></v-spacer>
+      <v-btn
+        large
+        depressed
+        color="primary"
+        class="next-btn font-weight-bold"
+        :disabled="authType ==''"
+      >
+        Next
+        <v-icon class="ml-2">
+          mdi-arrow-right
+        </v-icon>
+      </v-btn>
+    </div>
   </v-container>
 </template>
 
@@ -76,7 +103,7 @@ import { VueConstructor } from 'vue'
   }
 })
 
-export default class CreatAccountAuthMethods extends Vue {
+export default class ChooseAuthMethodView extends Vue {
   private authType = ''
 
   private selectBCSCAuth () {
@@ -115,10 +142,6 @@ export default class CreatAccountAuthMethods extends Vue {
     }
   }
 
-  .v-icon {
-    color: var(--v-grey-lighten1) !important;
-  }
-
   .active .v-icon {
     color: var(--v-primary-base) !important;
   }
@@ -133,10 +156,11 @@ export default class CreatAccountAuthMethods extends Vue {
 
   .account-type__icon {
     flex: 0 0 auto;
-  }
 
-  .account-type__icon .v-icon {
-    font-size: 3rem !important;
+    .v-icon {
+      color: var(--v-grey-lighten1) !important;
+      font-size: 3rem !important;
+    }
   }
 
   .account-type__title {

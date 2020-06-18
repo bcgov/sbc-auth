@@ -41,9 +41,10 @@
             </div>
             <!-- Non-authenticated -->
             <div v-else>
-              <v-btn large color="#fcba19" class="cta-btn mr-3"
-                     @click="login()">
-                Log in with BC Services Card
+              <v-btn large color="bcgovgold" class="cta-btn mr-3"
+                to="/choose-authentication-method"
+              >
+                Create an account
               </v-btn>
               <name-request-button />
               <p class="mt-10">New to BC Registries? <a @click="accountDialog = true" class="create-account-link">
