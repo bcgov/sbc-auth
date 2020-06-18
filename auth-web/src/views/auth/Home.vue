@@ -11,6 +11,8 @@ import ConfigHelper from '@/util/config-helper'
 import HomeView from '@/views/auth/HomeView.vue'
 import HomeViewDev from '@/views/auth/HomeViewDev.vue'
 
+// This Component will be removed before launch when we revert to a single HomeView.
+// Currently in place to provide a reactive means of responding to changes of state in the LdFlagging.
 @Component({
   components: {
     HomeView,
