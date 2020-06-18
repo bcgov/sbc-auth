@@ -119,7 +119,8 @@ export default class ChooseAuthMethodView extends Vue {
   // TODO might need to set some session variables
     switch (this.authType) {
       case LoginSource.BCEID:
-        window.location.href = ConfigHelper.getBceIdOsdLink()
+        this.$router.push(`/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE}/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE_INSTRUCTIONS}`)
+        window.scrollTo(0, 0)
         break
       case LoginSource.BCSC:
         this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
