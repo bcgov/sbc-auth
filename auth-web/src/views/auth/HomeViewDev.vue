@@ -16,7 +16,7 @@
 
       <header class="hero-banner">
         <v-container>
-          <h1>Start a Benefit Company and <br> Keep Cooperatives Records up to date</h1>
+          <h1 class="mt-10">Start a Benefit Company and <br> Keep Cooperatives Records up to date</h1>
           <p class="my-10">The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
             and organizations in British Columbia.</p>
           <div class="hero-banner__cta-btns">
@@ -219,8 +219,9 @@ export default class HomeViewDev extends Vue {
     background-color: #ffffff;
     background-image: url('../../assets/img/hero-img-min.jpg');
     background-position:  bottom right;
-    background-size: 85% 105%;
+    background-size: 75% 100%;
     background-repeat: no-repeat;
+    height: 40rem;
 
     h1 {
       margin-bottom: 1.5rem;
