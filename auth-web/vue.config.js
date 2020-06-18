@@ -26,7 +26,7 @@ module.exports = {
     manifestOptions: {
       name: 'Cooperatives Online',
       short_name: 'Cooperatives Online',
-      start_url: '/cooperatives/auth/',
+      start_url: '/business/auth/',
       display: 'standalone',
       theme_color: '#003366',
       background_color: '#fcba19',
