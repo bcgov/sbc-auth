@@ -1,11 +1,9 @@
 <template>
   <v-container class="view-container">
-    <h1 class="view-header__title mb-9">
-      In order to create a BC Registries account, we need <span class="lb">to verify your identity.</span>
-    </h1>
-    <p class="mb-12">
-      There are three steps to verifying and protecting your identity when creating a BC Registries account.
-    </p>
+    <div class="view-header flex-column mb-10">
+      <h1 class="view-header__title">How to verify your identity by a notary</h1>
+      <p class="my-5">There are three steps to verifying and protecting your identity when creating a BC Registries account.</p>
+    </div>
     <v-card
       class="step-card my-6"
       flat
@@ -29,7 +27,7 @@
         color="grey lighten-2"
         depressed
         large
-        @click="goBack"
+        to="/choose-authentication-method"
       >
         <v-icon class="mr-2">
           mdi-arrow-left
@@ -63,7 +61,7 @@ export default class AccountInstructions extends Vue {
     {
       number: 1,
       stepTitle: 'Get an identity affidavit notarized',
-      stepDescription: '<p>Visit your local notary or lawyer to have this document notarized. This is to ensure that no one is impersonating you or committing identity theft.</p><p><strong>Only account administrators are required to verify their identity with a notary.</strong><p>',
+      stepDescription: '<p>Visit your local notary or lawyer to have this document notarized. This is to ensure that no one is impersonating you or committing identity theft.</p><p><em>Only account administrators are required to verify their identity with a notary.</em><p>',
       icon: 'mdi-scale-balance'
     },
     {
@@ -94,7 +92,7 @@ export default class AccountInstructions extends Vue {
 
 <style lang="scss" scoped>
   .view-container {
-    max-width: 58rem;
+    max-width: 60rem;
   }
 
   .step-icon {

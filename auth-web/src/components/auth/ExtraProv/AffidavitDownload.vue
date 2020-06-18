@@ -121,7 +121,7 @@ export default class AffidavitDownload extends Vue {
 
 <style lang="scss" scoped>
   .view-container {
-    max-width: 58rem;
+    max-width: 60rem;
   }
 
   .download-btn {

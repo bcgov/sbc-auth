@@ -8,6 +8,7 @@ import AccountInstructions from '@/components/auth/ExtraProv/AccountInstructions
 import AccountSetupView from '@/views/auth/AccountSetupView.vue'
 import AffidavitDownload from '@/components/auth/ExtraProv/AffidavitDownload.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
+import ChooseAuthMethodView from '@/views/auth/ChooseAuthMethodView.vue'
 import ConfigHelper from '@/util/config-helper'
 import CreateAccountView from '@/views/auth/CreateAccountView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
@@ -172,6 +173,13 @@ export function getRoutes (): RouteConfig[] {
       component: UserProfileView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/choose-authentication-method',
+      name: 'chooseauthmethodview',
+      component: ChooseAuthMethodView,
+      meta: { requiresAuth: false, requiresProfile: false },
+      props: true
     },
     {
       path: '/createaccount',
