@@ -236,7 +236,6 @@ class TestPayment:
         input_data = json.dumps({'dateFilter': {'startDate': '01/01/2020',
                                                 'endDate': '12/31/2020'}, 'folioNumber': ''})
         call_url = f'{testing_config.pay_api_url}/accounts/{testing_config.org_id}/payments/queries?page=1&limit=10'
-        print(f'{testing_config.org_type}')
         logger.action(f'Post {call_url} with {input_data}', is_subaction=True)
         response = requests.post(call_url,
                                  headers={'Authorization': f'Bearer {testing_config.keycloak_token}',
