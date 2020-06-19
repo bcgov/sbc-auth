@@ -25,7 +25,6 @@ import MaintainBusinessView from '@/views/auth/MaintainBusinessView.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
 import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
 import PaymentView from '@/views/pay/PaymentView.vue'
-import PendingAffidavitApprovalView from '@/views/auth/PendingAffidavitApprovalView.vue'
 import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
 import RequestNameView from '@/views/auth/RequestNameView.vue'
@@ -312,13 +311,6 @@ export function getRoutes (): RouteConfig[] {
       path: '/pendingapproval/:team_name?',
       name: 'pendingapproval',
       component: PendingApprovalView,
-      props: true,
-      meta: { requiresAuth: true, requiresProfile: true }
-    },
-    {
-      path: '/pendingaffidavitapproval/:team_name?',
-      name: 'pendingaffidavitapproval',
-      component: PendingAffidavitApprovalView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
     },
