@@ -1,7 +1,10 @@
 <template>
   <v-container>
 
-    <h1 class="my-8">Staff Dashboard</h1>
+    <div class="mt-6 mb-10">
+      <h1 class="mb-2">Staff Dashboard</h1>
+      <p>Search for businesses and manage BC Registries accounts</p>
+    </div>
 
     <v-expand-transition>
       <div v-show="errorMessage">
@@ -14,57 +17,41 @@
       </div>
     </v-expand-transition>
 
-    <v-card class="mb-4" flat>
-      <v-container>
-        <v-card-title class="d-flex flex-column justify-start align-start">
-          <h3 class="mb-3">Search Cooperatives</h3>
-          <p class="intro-text">Enter the cooperative's Incorporation Number below to access their dashboard.</p>
-        </v-card-title>
-        <v-card-text>
-          <v-form ref="searchBusinessForm" v-on:submit.prevent="searchBusiness">
-            <v-text-field
-              filled
-              label="Incorporation Number"
-              hint="example: CP0001234"
-              persistent-hint
-              req
-              @blur="incorpNumFormat"
-              :rules="incorpNumRules"
-              v-model="businessNumber"
-              id="txtBusinessNumber"
-            >
-            </v-text-field>
-            <v-btn
-              large
-              color="primary"
-              class="search-btn mt-0"
-              type="submit"
-              @click="search"
-              :disabled="!isFormValid()"
-              :loading="searchActive"
-            >Search</v-btn>
-          </v-form>
-        </v-card-text>
-      </v-container>
+    <v-card class="mb-4 pa-3" flat>
+      <v-card-title class="d-flex flex-column justify-start align-start">
+        <h2 class="mb-2">Search Cooperatives</h2>
+        <p class="intro-text">Enter the cooperative's Incorporation Number below to access their dashboard.</p>
+      </v-card-title>
+      <v-card-text>
+        <v-form ref="searchBusinessForm" v-on:submit.prevent="searchBusiness">
+          <v-text-field
+            filled
+            label="Incorporation Number"
+            hint="example: CP0001234"
+            persistent-hint
+            dense
+            req
+            @blur="incorpNumFormat"
+            :rules="incorpNumRules"
+            v-model="businessNumber"
+            id="txtBusinessNumber"
+          >
+          </v-text-field>
+          <v-btn
+            color="primary"
+            class="search-btn mt-0"
+            type="submit"
+            @click="search"
+            depressed
+            :disabled="!isFormValid()"
+            :loading="searchActive"
+          >Search</v-btn>
+        </v-form>
+      </v-card-text>
     </v-card>
 
     <!-- Director search -->
-    <v-card class="mb-4" flat v-if="isStaffAdmin">
-      <v-container>
-        <v-card-title class="d-flex flex-column justify-start align-start">
-          <h3 class="mb-3">Create a Director Search Account</h3>
-          <p class="intro-text">Create a Director Search Account to access to custom BC Registry functionality.</p>
-        </v-card-title>
-        <v-card-text>
-          <v-btn
-            x-large
-            color="primary"
-            class="font-weight-bold"
-            @click="gotToCreateAccount"
-          >Create Account</v-btn>
-        </v-card-text>
-      </v-container>
-    </v-card>
+    <StaffAccountManagement v-if="isStaffAdmin"></StaffAccountManagement>
 
   </v-container>
 </template>
@@ -78,6 +65,7 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Role } from '@/util/constants'
+import StaffAccountManagement from '@/components/auth/staff/StaffAccountManagement.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import UserModule from '@/store/modules/user'
 import Vue from 'vue'
@@ -85,7 +73,8 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
-    SupportInfoCard
+    SupportInfoCard,
+    StaffAccountManagement
   },
   methods: {
     ...mapActions('business', ['searchBusiness'])
@@ -144,10 +133,6 @@ export default class SearchBusinessView extends Vue {
     }
   }
 
-  gotToCreateAccount () {
-    this.$router.push({ path: '/staff-setup-account' })
-  }
-
   incorpNumFormat () {
     this.businessNumber = CommonUtils.formatIncorporationNumber(this.businessNumber)
   }
@@ -167,11 +152,13 @@ export default class SearchBusinessView extends Vue {
   }
 
   .search-btn {
-    margin-left: 0.5rem;
+    margin-left: 0.25rem;
     width: 7rem;
-    min-height: 56px;
+    min-height: 54px;
     vertical-align: top;
     font-weight: bold;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
   }
 }
 </style>

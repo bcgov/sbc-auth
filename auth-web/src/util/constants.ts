@@ -22,6 +22,7 @@ export enum Role {
     Edit = 'edit',
     Basic = 'basic',
     StaffAdmin = 'staff_admin',
+    StaffAdminBCOL = 'bcol_staff_admin',
     AnonymousUser = 'anonymous_user',
     Tester = 'tester'
 }
@@ -46,7 +47,8 @@ export enum Pages {
     SETUP_ACCOUNT_OUT_OF_PROVINCE_INSTRUCTIONS = 'instructions',
     SETUP_ACCOUNT_OUT_OF_PROVINCE_DOWNLOAD = 'download',
     EDIT_ACCOUNT_TYPE= '/change-account',
-    STAFF_DASHBOARD= 'searchbusiness'
+    STAFF_DASHBOARD= 'searchbusiness',
+    STAFF_SETUP_ACCOUNT = 'staff-setup-account'
 }
 
 export enum Account {
@@ -97,4 +99,10 @@ export enum AccessType {
     REGULAR = 'REGULAR',
     EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL',
     ANONYMOUS = 'ANONYMOUS'
+}
+
+export enum AccountStatus {
+    ACTIVE = 'ACTIVE',
+    REJECTED = 'REJECTED',
+    PENDING_AFFIDAVIT_REVIEW = 'PENDING_AFFIDAVIT_REVIEW'
 }
