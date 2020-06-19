@@ -47,6 +47,8 @@ class Error(Enum):
     USER_CANT_CREATE_ANONYMOUS_ORG = 'Only staff can create anonymous org', http_status.HTTP_401_UNAUTHORIZED
     USER_CANT_CREATE_EXTRA_PROVINCIAL_ORG = 'Only out of province users can create extra provincial org', \
                                             http_status.HTTP_401_UNAUTHORIZED
+    USER_CANT_CREATE_REGULAR_ORG = 'Only out of province users cannot create regular org', \
+                                   http_status.HTTP_401_UNAUTHORIZED
     USER_ALREADY_EXISTS_IN_KEYCLOAK = 'User Already exists in keycloak', http_status.HTTP_409_CONFLICT
     USER_ALREADY_EXISTS = 'The username is already taken', http_status.HTTP_409_CONFLICT
     FAILED_ADDING_USER_ERROR = 'Adding User Failed', http_status.HTTP_500_INTERNAL_SERVER_ERROR
