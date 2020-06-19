@@ -70,7 +70,7 @@ describe('IncorpOrRegisterView.vue', () => {
     const loginBtn = wrapper.vm.$el.querySelector('.v-btn')
 
     expect(loginBtn).toBeDefined()
-    expect(loginBtn.textContent).toContain('Log in with BC Services Card')
+    expect(loginBtn.textContent).toContain('Create a BC Registries Account')
   })
 
   it('renders the create account link when NOT authenticated', () => {

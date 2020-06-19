@@ -123,7 +123,7 @@ describe('HomeView.vue', () => {
     const createAccountLink = wrapper.vm.$el.querySelector('.create-account-link')
 
     expect(loginBtn).toBeDefined()
-    expect(loginBtn.textContent).toContain('Log in with BC Services Card')
+    expect(loginBtn.textContent).toContain('Create a BC Registries Account')
 
     expect(nameRequestBtn).toBeDefined()
     expect(nameRequestBtn.textContent).toContain('Request a Name')
