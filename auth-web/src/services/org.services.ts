@@ -83,4 +83,12 @@ export default class OrgService {
   static async getAffidavitInfo (orgIdentifier: number): Promise<AxiosResponse<AffidavitInformation>> {
     return axios.get(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/admins/affidavits`)
   }
+
+  static async approvePendingOrg (orgIdentifier: number): Promise<AxiosResponse> {
+    return axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/status`, { statusCode: 'APPROVED' })
+  }
+
+  static async rejectPendingOrg (orgIdentifier: number): Promise<AxiosResponse> {
+    return axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/status`, { statusCode: 'REJECTED' })
+  }
 }

@@ -4,6 +4,7 @@ import ConfigHelper from '@/util/config-helper'
 import { DocumentUpload } from '@/models/user'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
+import mime from 'mime-types'
 
 const axios = addAxiosInterceptors(Axios.create())
 
@@ -20,9 +21,12 @@ export default class DocumentService {
     })
   }
 
-  static async getSignedAffidavit (documentUrl: string, documentId: string): Promise<void> {
-    const data = (await axios.get(documentUrl))
-    CommonUtils.fileDownload(data?.data, documentId, data?.headers['content-type'])
+  static async getSignedAffidavit (documentUrl: string, fileName: string): Promise<void> {
+    const data = await axios.get(documentUrl, {
+      responseType: 'arraybuffer'
+    })
+    const extension = mime.extension(data?.headers['content-type']) || 'file' // Default to .file if mime type is not known
+    CommonUtils.fileDownload(data?.data, `${fileName}.${extension}`, data?.headers['content-type'])
   }
 
   static async getPresignedUrl (fileName: string): Promise<AxiosResponse<DocumentUpload>> {

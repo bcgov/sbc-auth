@@ -27,7 +27,7 @@
               <p class="mb-9">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam at porttitor sem. Aliquam erat volutpat.</p>
               <v-btn x-large="" outlined color="primary" class="font-weight-bold" @click="downloadAffidavit()">
                 <v-icon left class="mr-2">mdi-file-download-outline</v-icon>
-                placeholder.jpg
+                {{ accountUnderReview.name + '-affidavit'}}
               </v-btn>
             </section>
 
@@ -57,15 +57,15 @@
                   </v-alert>
                 </v-col>
               </v-row>
-              <v-row v-if="accountMailingAddress">
+              <v-row v-if="accountUnderReviewAddress">
                 <v-col class="col-12 col-sm-3">
                   Mailing Address
                 </v-col>
                 <v-col>
                   <ul class="mailing-address">
-                    <li>{{ accountMailingAddress.street }}</li>
-                    <li>{{ accountMailingAddress.city }} {{ accountMailingAddress.region }} {{ accountMailingAddress.postalCode }}</li>
-                    <li>{{ accountMailingAddress.country }}</li>
+                    <li>{{ accountUnderReviewAddress.street }}</li>
+                    <li>{{ accountUnderReviewAddress.city }} {{ accountUnderReviewAddress.region }} {{ accountUnderReviewAddress.postalCode }}</li>
+                    <li>{{ accountUnderReviewAddress.country }}</li>
                   </ul>
                 </v-col>
               </v-row>
@@ -74,23 +74,23 @@
             <v-divider class="mt-5 mb-8"></v-divider>
 
             <!-- Account Administrator Section -->
-            <section v-if="accountAdmin">
+            <section v-if="accountUnderReviewAdmin">
               <h2 class="mb-5">3. Account Administrator</h2>
               <v-row>
                 <v-col class="cols-12 col-sm-3 py-2">Given Name(s)</v-col>
-                <v-col class="py-2">{{ accountAdmin.firstname }} {{ accountAdmin.lastname }}</v-col>
+                <v-col class="py-2">{{ accountUnderReviewAdmin.firstname }} {{ accountUnderReviewAdmin.lastname }}</v-col>
               </v-row>
               <v-row>
                 <v-col class="cols-12 col-sm-3 py-2">Username</v-col>
-                <v-col class="py-2">{{ accountAdmin.username }}</v-col>
+                <v-col class="py-2">{{ accountUnderReviewAdmin.username }}</v-col>
               </v-row>
               <v-row>
                 <v-col class="cols-12 col-sm-3 py-2">Email Address</v-col>
-                <v-col class="py-2">{{ accountAdmin.emailAddress }}</v-col>
+                <v-col class="py-2">{{ accountUnderReviewAdminContact.email }}</v-col>
               </v-row>
               <v-row>
                 <v-col class="cols-12 col-sm-3 py-2">Phone Number</v-col>
-                <v-col class="py-2">{{ accountAdmin.phoneNumber }}</v-col>
+                <v-col class="py-2">{{ accountUnderReviewAdminContact.phone }}</v-col>
               </v-row>
             </section>
 
@@ -101,27 +101,27 @@
               <h2 class="mb-5">4. Notary Information</h2>
               <v-row>
                   <v-col class="cols-12 col-sm-3 py-2">Notary Name</v-col>
-                  <v-col class="py-2">{{ notaryName }}</v-col>
+                  <v-col class="py-2">{{ accountNotaryName }}</v-col>
                 </v-row>
-                <v-row v-if="notaryContact">
+                <v-row v-if="accountNotaryContact">
                   <v-col class="cols-12 col-sm-3 py-2">Mailing Address</v-col>
                   <v-col class="py-2">
                     <div>
                       <ul class="mailing-address">
-                        <li>{{ notaryContact.street }}</li>
-                        <li>{{ notaryContact.city }} {{ notaryContact.region }} {{ notaryContact.postalCode }}</li>
-                        <li>{{ notaryContact.country }}</li>
+                        <li>{{ accountNotaryContact.street }}</li>
+                        <li>{{ accountNotaryContact.city }} {{ accountNotaryContact.region }} {{ accountNotaryContact.postalCode }}</li>
+                        <li>{{ accountNotaryContact.country }}</li>
                       </ul>
                     </div>
                     </v-col>
                 </v-row>
                 <v-row>
                   <v-col class="cols-12 col-sm-3 py-2">Email Address</v-col>
-                  <v-col class="py-2">{{ notaryContact.email }}</v-col>
+                  <v-col class="py-2">{{ accountNotaryContact.email }}</v-col>
                 </v-row>
                 <v-row>
                   <v-col class="cols-12 col-sm-3 py-2">Phone Number</v-col>
-                  <v-col class="py-2">{{ notaryContact.phone }}</v-col>
+                  <v-col class="py-2">{{ accountNotaryContact.phone }}</v-col>
                 </v-row>
             </section>
 
@@ -129,11 +129,17 @@
 
             <v-row class="form__btns">
               <v-col class="pb-0">
-                <v-btn large outlined color="success" class="font-weight-bold mr-2">Approve</v-btn>
-                <v-btn large outlined color="red" class="font-weight-bold">Reject</v-btn>
+                <v-btn large :outlined="!approveSelected" color="success" class="font-weight-bold mr-2 select-button" @click="selectApprove()">
+                  <span v-if="approveSelected"><v-icon left class="mr-2">mdi-check</v-icon>Approved</span>
+                  <span v-else>Approve</span>
+                </v-btn>
+                <v-btn large :outlined="!rejectSelected" color="red" class="font-weight-bold white--text select-button" @click="selectReject()">
+                  <span v-if="rejectSelected"><v-icon left class="mr-2">mdi-close</v-icon>Rejected</span>
+                  <span v-else>Reject</span>
+                </v-btn>
               </v-col>
               <v-col class="pb-0 text-right">
-                <v-btn large depressed class="grey lighten-3 font-weight-bold">DONE</v-btn>
+                <v-btn large depressed :loading="isSaving" :disabled="!canSelect" class="grey lighten-3 font-weight-bold" @click="saveSelection()">DONE</v-btn>
               </v-col>
             </v-row>
 
@@ -144,15 +150,21 @@
           <h2 class="mb-5">Account Status</h2>
           <v-row>
             <v-col class="col-12 col-sm-5 py-2">Status</v-col>
-            <v-col class="py-2"></v-col>
+            <v-col class="py-2">{{ statusLabel }}</v-col>
           </v-row>
           <v-row>
-            <v-col class="col-12 col-sm-5 py-2">Approved By</v-col>
-            <v-col class="py-2"></v-col>
+            <v-col class="col-12 col-sm-5 py-2">
+              <span v-if="accountUnderReview.statusCode === 'ACTIVE'">Approved By</span>
+              <span v-if="accountUnderReview.statusCode === 'REJECTED'">Rejected By</span>
+            </v-col>
+            <v-col class="py-2">
+              {{ accountUnderReviewAffidavitInfo.decisionMadeBy }}<br/>
+              {{ formatDate(accountUnderReviewAffidavitInfo.decisionMadeOn) }}
+            </v-col>
           </v-row>
           <v-row>
             <v-col class="col-12 col-sm-5 py-2">Created On</v-col>
-            <v-col class="py-2"></v-col>
+            <v-col class="py-2">{{ formatDate(accountUnderReview.created) }}</v-col>
           </v-row>
         </v-col>
       </v-row>
@@ -161,48 +173,116 @@
 </template>
 
 <script lang="ts">
+import { Account, AccountStatus } from '@/util/constants'
 import { MembershipType, Organization } from '@/models/Organization'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import { Address } from '@/models/address'
+import { AffidavitInformation } from '@/models/affidavit'
 import Component from 'vue-class-component'
 import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
 import OrgService from '@/services/org.services'
 import { Prop } from 'vue-property-decorator'
+import StaffModule from '@/store/modules/staff'
 import { User } from '@/models/user'
 import Vue from 'vue'
+import { getModule } from 'vuex-module-decorators'
+import moment from 'moment'
 
-@Component({})
+@Component({
+  computed: {
+    ...mapState('staff', ['accountUnderReview', 'accountUnderReviewAddress', 'accountUnderReviewAdmin', 'accountUnderReviewAdminContact', 'accountUnderReviewAffidavitInfo']),
+    ...mapGetters('staff', ['accountNotaryName', 'accountNotaryContact', 'affidavitDocumentUrl'])
+  },
+  methods: {
+    ...mapActions('staff', ['syncAccountUnderReview', 'approveAccountUnderReview', 'rejectAccountUnderReview'])
+  }
+})
 export default class ReviewAccountView extends Vue {
   @Prop() orgId: number
-  private isLoading: boolean = true
-  private accountUnderReview: Organization
-  private accountMailingAddress: Address
-  private accountAdmin: User
-  private notaryName: string
-  private notaryContact: Contact
-  private affidavitDocumentUrl: string
-  private affidavidDocumentId: string
+  private staffStore = getModule(StaffModule, this.$store)
+  private isLoading = true
+  private isSaving = false
+  private approveSelected = false
+  private rejectSelected = false
+  private readonly accountUnderReview!: Organization
+  private readonly accountUnderReviewAddress!: Address
+  private readonly accountUnderReviewAdmin!: User
+  private readonly accountUnderReviewAdminContact!: Contact
+  private readonly accountUnderReviewAffidavitInfo!: AffidavitInformation
+  private readonly accountNotaryName!: string
+  private readonly accountNotaryContact!: Contact
+  private readonly affidavitDocumentUrl!: string
+  private readonly syncAccountUnderReview!: (organizationIdentifier: number) => Promise<void>
+  private readonly approveAccountUnderReview!: () => Promise<void>
+  private readonly rejectAccountUnderReview!: () => Promise<void>
+
+  private get canSelect (): boolean {
+    return this.accountUnderReview.statusCode === AccountStatus.PENDING_AFFIDAVIT_REVIEW
+  }
+
+  private get statusLabel (): string {
+    switch (this.accountUnderReview.statusCode) {
+      case AccountStatus.ACTIVE:
+        return 'Approved'
+      case AccountStatus.REJECTED:
+        return 'Rejected'
+      case AccountStatus.PENDING_AFFIDAVIT_REVIEW:
+        return 'Pending'
+      default:
+        return ''
+    }
+  }
+
+  private formatDate (date: Date): string {
+    return moment(date).format('MMM DD, YYYY')
+  }
 
   private async mounted () {
-    this.accountUnderReview = (await OrgService.getOrganization(this.orgId))?.data
-    this.accountMailingAddress = (await OrgService.getContactForOrg(this.orgId))
+    await this.syncAccountUnderReview(this.orgId)
 
-    // Retreive account admin by getting first owner from member list
-    const orgMembers = (await OrgService.getOrgMembers(this.orgId, 'ACTIVE'))?.data
-    this.accountAdmin = orgMembers?.members?.find(member => member.membershipTypeCode === MembershipType.Admin)?.user
+    // Set initial approved/rejected status based on current account
+    switch (this.accountUnderReview.statusCode) {
+      case AccountStatus.ACTIVE:
+        this.approveSelected = true
+        break
+      case AccountStatus.REJECTED:
+        this.rejectSelected = true
+        break
+      default:
+        break
+    }
 
-    // Retreive affidavit submitted by account admin
-    const affidavitInfo = (await OrgService.getAffidavitInfo(this.orgId))?.data
-    this.notaryName = affidavitInfo?.issuer || '-'
-    this.notaryContact = affidavitInfo?.contacts?.length > 0 && affidavitInfo?.contacts[0]
-    this.affidavitDocumentUrl = affidavitInfo.documentUrl
-    this.affidavidDocumentId = affidavitInfo.documentId
     this.isLoading = false
   }
 
   private async downloadAffidavit (): Promise<void> {
     // Invoke document service to get affidavit for current organization
-    DocumentService.getSignedAffidavit(this.affidavitDocumentUrl, this.affidavidDocumentId)
+    DocumentService.getSignedAffidavit(this.affidavitDocumentUrl, `${this.accountUnderReview.name}-affidavit`)
+  }
+
+  private selectApprove (): void {
+    if (this.canSelect) {
+      this.approveSelected = true
+      this.rejectSelected = false
+    }
+  }
+
+  private selectReject (): void {
+    if (this.canSelect) {
+      this.approveSelected = false
+      this.rejectSelected = true
+    }
+  }
+
+  private async saveSelection (): Promise<void> {
+    this.isSaving = true
+    if (this.approveSelected) {
+      await this.approveAccountUnderReview()
+    } else if (this.rejectSelected) {
+      await this.rejectAccountUnderReview()
+    }
+    this.$router.push('/searchbusiness')
   }
 }
 </script>
@@ -248,5 +328,9 @@ export default class ReviewAccountView extends Vue {
     list-style-type: none;
     margin: 0;
     padding: 0;
+  }
+
+  .select-button {
+    width: 8.75rem;
   }
 </style>

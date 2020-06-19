@@ -55,6 +55,13 @@ export enum Account {
     BASIC = 'BASIC',
 }
 
+export enum AccountStatus {
+    ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE',
+    REJECTED = 'REJECTED',
+    PENDING_AFFIDAVIT_REVIEW = 'PENDING_AFFIDAVIT_REVIEW'
+}
+
 export enum IdpHint {
     BCROS = 'bcros',
     IDIR = 'idir',
