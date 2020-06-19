@@ -38,7 +38,7 @@ from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import LoginSource, OrgStatus, OrgType, PaymentType
+from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, PaymentType
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -481,6 +481,28 @@ def test_create_org_by_bceid_user(session, keycloak_mock):  # pylint:disable=unu
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
     assert dictionary['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
+    assert dictionary['accessType'] == AccessType.EXTRA_PROVINCIAL.value
+
+
+def test_create_org_by_in_province_bceid_user(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org can be created."""
+    user = factory_user_model()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    org = OrgService.create_org(TestOrgInfo.org_regular_bceid, user_id=user.id, token_info=token_info)
+    assert org
+    dictionary = org.as_dict()
+    assert dictionary['name'] == TestOrgInfo.org1['name']
+    assert dictionary['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
+    assert dictionary['accessType'] == AccessType.REGULAR_BCEID.value
+
+
+def test_create_org_invalid_access_type_user(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org cannot be created by providing wrong access type."""
+    user = factory_user_model()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    with pytest.raises(BusinessException) as exception:
+        OrgService.create_org(TestOrgInfo.org_regular, user_id=user.id, token_info=token_info)
+    assert exception.value.code == Error.USER_CANT_CREATE_REGULAR_ORG.name
 
 
 def test_create_org_by_verified_bceid_user(session, keycloak_mock):  # pylint:disable=unused-argument

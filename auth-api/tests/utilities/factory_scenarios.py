@@ -21,7 +21,7 @@ from random import choice
 from string import ascii_lowercase, ascii_uppercase
 
 from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.enums import IdpHint, LoginSource
+from auth_api.utils.enums import AccessType, IdpHint, LoginSource
 from config import get_named_config
 
 
@@ -337,6 +337,14 @@ class TestOrgInfo(dict, Enum):
     invalid_name_spaces = {'name': '    '}
     invalid_name_start_space = {'name': '  helo'}
     invalid_name_end_space = {'name': '  helo   '}
+    org_regular_bceid = {
+        'name': 'My Test Org',
+        'accessType': AccessType.REGULAR_BCEID.value
+    }
+    org_regular = {
+        'name': 'My Test Org',
+        'accessType': AccessType.REGULAR.value
+    }
 
     @staticmethod
     def bcol_linked():
