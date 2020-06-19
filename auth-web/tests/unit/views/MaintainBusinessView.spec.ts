@@ -70,7 +70,7 @@ describe('MaintainBusinessView.vue', () => {
     const learnMoreBtn = authenticatedBtns[1]
 
     expect(loginBtn).toBeDefined()
-    expect(loginBtn.textContent).toContain('Log in with BC Services Card')
+    expect(loginBtn.textContent).toContain('Create a BC Registries Account')
 
     expect(learnMoreBtn).toBeDefined()
     expect(learnMoreBtn.textContent).toContain('Learn More')

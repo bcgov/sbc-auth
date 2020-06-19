@@ -96,7 +96,7 @@ export default class BaseAddress extends Vue {
   }
 
   mounted () {
-    if (Object.keys(this.inputAddress).length !== 0) {
+    if (this.inputAddress && Object.keys(this.inputAddress).length !== 0) {
       // directly setting to address probelamatic bcoz of vues reactivity
       Object.keys(this.inputAddress).forEach(key => {
         this.$set(this.address, key, this.inputAddress?.[key])

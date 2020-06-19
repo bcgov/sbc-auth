@@ -20,6 +20,7 @@ from .documents import Documents
 from .entity import Entity
 from .invitation import Invitation
 from .membership import Membership
+from .minio import MinioService
 from .org import Org
 from .permissions import Permissions
 from .products import Product

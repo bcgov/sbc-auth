@@ -8,12 +8,14 @@ import AccountInstructions from '@/components/auth/ExtraProv/AccountInstructions
 import AccountSetupView from '@/views/auth/AccountSetupView.vue'
 import AffidavitDownload from '@/components/auth/ExtraProv/AffidavitDownload.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
+import ChooseAuthMethodView from '@/views/auth/ChooseAuthMethodView.vue'
 import ConfigHelper from '@/util/config-helper'
 import CreateAccountView from '@/views/auth/CreateAccountView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
 import DecideBusinessView from '@/views/auth/DecideBusinessView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
+import ExtraProAccountCreationSuccessView from '@/views/auth/ExtraProAccountCreationSuccessView.vue'
 import ExtraProvInfoView from '@/views/auth/OutOfProvinceAccountView.vue'
 import ExtraProvincialAccountSetupView from '@/views/auth/ExtraProvincialAccountSetupView.vue'
 import Home from '@/views/auth/Home.vue'
@@ -23,10 +25,10 @@ import MaintainBusinessView from '@/views/auth/MaintainBusinessView.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
 import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
 import PaymentView from '@/views/pay/PaymentView.vue'
-import PendingAffidavitApprovalView from '@/views/auth/PendingAffidavitApprovalView.vue'
 import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
 import RequestNameView from '@/views/auth/RequestNameView.vue'
+import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
 import { RouteConfig } from 'vue-router'
 import SearchBusinessView from '@/views/auth/staff/SearchBusinessView.vue'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
@@ -167,11 +169,31 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
+      path: '/review-account/:orgId',
+      name: 'review-account',
+      component: ReviewAccountView,
+      meta: { requiresAuth: true, disabledRoles: [Role.Basic, Role.Public] },
+      props: true
+    },
+    {
+      path: '/setup-extrapro-account-success',
+      name: 'setup-extrapro-account-success',
+      component: ExtraProAccountCreationSuccessView,
+      meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
       path: '/userprofile/:token?',
       name: 'userprofile',
       component: UserProfileView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/choose-authentication-method',
+      name: 'chooseauthmethodview',
+      component: ChooseAuthMethodView,
+      meta: { requiresAuth: false, requiresProfile: false },
+      props: true
     },
     {
       path: '/createaccount',
@@ -289,13 +311,6 @@ export function getRoutes (): RouteConfig[] {
       path: '/pendingapproval/:team_name?',
       name: 'pendingapproval',
       component: PendingApprovalView,
-      props: true,
-      meta: { requiresAuth: true, requiresProfile: true }
-    },
-    {
-      path: '/pendingaffidavitapproval/:team_name?',
-      name: 'pendingaffidavitapproval',
-      component: PendingAffidavitApprovalView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
     },

@@ -57,6 +57,13 @@ export enum Account {
     BASIC = 'BASIC',
 }
 
+export enum AccountStatus {
+    ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE',
+    REJECTED = 'REJECTED',
+    PENDING_AFFIDAVIT_REVIEW = 'PENDING_AFFIDAVIT_REVIEW'
+}
+
 export enum IdpHint {
     BCROS = 'bcros',
     IDIR = 'idir',
@@ -99,10 +106,4 @@ export enum AccessType {
     REGULAR = 'REGULAR',
     EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL',
     ANONYMOUS = 'ANONYMOUS'
-}
-
-export enum AccountStatus {
-    ACTIVE = 'ACTIVE',
-    REJECTED = 'REJECTED',
-    PENDING_AFFIDAVIT_REVIEW = 'PENDING_AFFIDAVIT_REVIEW'
 }
