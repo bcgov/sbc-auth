@@ -13,7 +13,11 @@
     </v-card-title>
     <v-card-text>
       <!-- Tab Navigation -->
-      <v-tabs class="mb-3" v-model="tab" background-color="transparent">
+      <v-tabs
+        class="mb-3"
+        v-model="tab"
+        @change="tabChange"
+        background-color="transparent">
         <v-tab data-test="active-tab">Active</v-tab>
         <template v-if="isStaffAdminBCOL">
           <v-tab data-test="pending-review-tab">
@@ -57,6 +61,12 @@ import StaffPendingAccountsTable from '@/components/auth/staff/StaffPendingAccou
 import StaffRejectedAccountsTable from '@/components/auth/staff/StaffRejectedAccountsTable.vue'
 import { getModule } from 'vuex-module-decorators'
 
+enum TAB_CODE {
+    Active = 'active-tab',
+    PendingReview = 'pending-review-tab',
+    Rejected = 'rejected-tab'
+}
+
 @Component({
   components: {
     StaffActiveAccountsTable,
@@ -82,10 +92,26 @@ export default class StaffAccountManagement extends Vue {
   private readonly syncPendingStaffOrgs!: () => Organization[]
   private readonly syncRejectedStaffOrgs!: () => Organization[]
 
+  private tabs = [
+    {
+      id: 0,
+      tabName: 'Active',
+      code: TAB_CODE.Active
+    },
+    {
+      id: 1,
+      tabName: 'Pending Review',
+      code: TAB_CODE.PendingReview
+    },
+    {
+      id: 2,
+      tabName: 'Rejected',
+      code: TAB_CODE.Rejected
+    }
+  ]
+
   private async mounted () {
     await this.syncActiveStaffOrgs()
-    await this.syncPendingStaffOrgs()
-    await this.syncRejectedStaffOrgs()
   }
 
   gotToCreateAccount () {
@@ -97,8 +123,7 @@ export default class StaffAccountManagement extends Vue {
   }
 
   private get isStaffAdminBCOL () {
-    // TODO remove this negation
-    return !this.currentUser?.roles?.includes(Role.StaffAdminBCOL)
+    return this.currentUser?.roles?.includes(Role.StaffAdminBCOL)
   }
 
   private customSort (items, index, isDescending) {
@@ -111,6 +136,21 @@ export default class StaffAccountManagement extends Vue {
       }
     })
     return items
+  }
+
+  private async tabChange (tabIndex) {
+    const selected = this.tabs.filter((tab) => (tab.id === tabIndex))
+    switch (selected[0]?.code) {
+      case TAB_CODE.Active:
+        await this.syncActiveStaffOrgs()
+        break
+      case TAB_CODE.PendingReview:
+        await this.syncPendingStaffOrgs()
+        break
+      case TAB_CODE.Rejected:
+        await this.syncRejectedStaffOrgs()
+        break
+    }
   }
 }
 </script>

@@ -91,8 +91,7 @@ export default class StaffPendingAccountsTable extends Vue {
   }
 
   private review (item) {
-    // eslint-disable-next-line no-console
-    console.log(item)
+    this.$router.push(`/review-account/${item.id}`)
   }
 }
 </script>

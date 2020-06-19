@@ -88,8 +88,7 @@ export default class StaffRejectedAccountsTable extends Vue {
   }
 
   private view (item) {
-    // eslint-disable-next-line no-console
-    console.log(item)
+    this.$router.push(`/review-account/${item.id}`)
   }
 }
 </script>
