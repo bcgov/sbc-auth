@@ -75,7 +75,7 @@
   "createBCRegistriesAccount": "Create a BC Registries Account",
   "pendingAffidavitReviewTitle": "Thanks for creating the account {team} at BC Registries & Online Services.",
   "pendingAffidvitReviewMessage": "Once your account has been reviewed and approved you will receive\n\nan email allowing you to activate and manage the account. \n\nPlease allow 5 business days for this process.",
-  "extraProdOrgSuccessTitle": "Your BC Registries account has been created and is process being verified by BC Registries staff",
+  "extraProdOrgSuccessTitle": "Your BC Registries account has been created and is being reviewed.",
   "extraProdOrgSuccessMessage": "Once your account has been reviewed and approved you will receive an email allowing you to activate and manage the account. \n\nPlease allow 5 business days for this process."
 
 }
