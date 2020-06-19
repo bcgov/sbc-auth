@@ -1,11 +1,13 @@
 <template>
   <v-container class="view-container">
+    <div class="view-header flex-column">
     <h1 class="view-header__title mb-9">
       Getting your identity affidavit notarized
     </h1>
     <p class="mb-9">
       Download the identity affidavit template below and visit a Notary Public or laywer to have it notarized.
     </p>
+    </div>
     <p class="mb-4">
       <strong>You will need to bring:</strong>
     </p>
