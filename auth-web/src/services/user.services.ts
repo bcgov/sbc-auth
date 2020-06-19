@@ -91,7 +91,7 @@ export default class UserService {
 
   static async createNotaryDetails (documentId: String, notaryInfo: NotaryInformation, notaryContact: NotaryContact, userId: string): Promise<AxiosResponse<User>> {
     const inputrequest = {
-      documentId: documentId || 'testing',
+      documentId: documentId,
       issuer: notaryInfo.notaryName,
       contact: {
         ...notaryInfo.address,

@@ -39,7 +39,7 @@ export default class NotaryInformationForm extends Vue {
   @Prop() inputNotaryInfo: NotaryInformation
   @Prop({ default: false }) disabled: boolean
   private notaryInfo: NotaryInformation = {}
-  private isBaseAddressValid: boolean = true
+  private isBaseAddressValid: boolean = false
   private address:Address = {}
 
   $refs: {

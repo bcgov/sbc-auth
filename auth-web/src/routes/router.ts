@@ -8,12 +8,14 @@ import AccountInstructions from '@/components/auth/ExtraProv/AccountInstructions
 import AccountSetupView from '@/views/auth/AccountSetupView.vue'
 import AffidavitDownload from '@/components/auth/ExtraProv/AffidavitDownload.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
+import ChooseAuthMethodView from '@/views/auth/ChooseAuthMethodView.vue'
 import ConfigHelper from '@/util/config-helper'
 import CreateAccountView from '@/views/auth/CreateAccountView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
 import DecideBusinessView from '@/views/auth/DecideBusinessView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
+import ExtraProAccountCreationSuccessView from '@/views/auth/ExtraProAccountCreationSuccessView.vue'
 import ExtraProvInfoView from '@/views/auth/OutOfProvinceAccountView.vue'
 import ExtraProvincialAccountSetupView from '@/views/auth/ExtraProvincialAccountSetupView.vue'
 import Home from '@/views/auth/Home.vue'
@@ -175,11 +177,24 @@ export function getRoutes (): RouteConfig[] {
       props: true
     },
     {
+      path: '/setup-extrapro-account-success',
+      name: 'setup-extrapro-account-success',
+      component: ExtraProAccountCreationSuccessView,
+      meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
       path: '/userprofile/:token?',
       name: 'userprofile',
       component: UserProfileView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/choose-authentication-method',
+      name: 'chooseauthmethodview',
+      component: ChooseAuthMethodView,
+      meta: { requiresAuth: false, requiresProfile: false },
+      props: true
     },
     {
       path: '/createaccount',

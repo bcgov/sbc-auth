@@ -117,7 +117,7 @@ export default class UserModule extends VuexModule {
   @Action({ rawError: true })
   public async createAffidavit () {
     // Handle doc Id logic
-    const docId = this.context.state['currentOrganization']
+    const docId = this.context.state['affidavitDocId']
     const notaryContact = this.context.state['notaryContact']
     const notaryInfo = this.context.state['notaryInformation']
     const userId = ConfigHelper.getFromSession(SessionStorageKeys.UserKcId)

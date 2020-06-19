@@ -16,7 +16,7 @@
 
       <header class="hero-banner">
         <v-container>
-          <h1>Start a Benefit Company and <br> Keep Cooperatives Records up to date</h1>
+          <h1 class="mt-10">Start a Benefit Company and <br> Keep Cooperatives Records up to date</h1>
           <p class="my-10">The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
             and organizations in British Columbia.</p>
           <div class="hero-banner__cta-btns">
@@ -41,9 +41,10 @@
             </div>
             <!-- Non-authenticated -->
             <div v-else>
-              <v-btn large color="#fcba19" class="cta-btn mr-3"
-                     @click="login()">
-                Log in with BC Services Card
+              <v-btn large color="bcgovgold" class="cta-btn mr-3"
+                to="/choose-authentication-method"
+              >
+                Create an account
               </v-btn>
               <name-request-button />
               <p class="mt-10">New to BC Registries? <a @click="accountDialog = true" class="create-account-link">
@@ -66,7 +67,9 @@
         <v-container>
           <h2>How does it work?</h2>
           <InfoStepper />
-          <transition name="slide-x-transition">
+          <transition
+            name="slide-x-transition"
+            mode="out-in">
             <router-view
               :userProfile="userProfile"
               @login="login()"
@@ -219,8 +222,9 @@ export default class HomeViewDev extends Vue {
     background-color: #ffffff;
     background-image: url('../../assets/img/hero-img-min.jpg');
     background-position:  bottom right;
-    background-size: 85% 105%;
+    background-size: 75% 100%;
     background-repeat: no-repeat;
+    min-height: 40rem;
 
     h1 {
       margin-bottom: 1.5rem;
@@ -300,7 +304,7 @@ export default class HomeViewDev extends Vue {
 
     .container {
       padding-top: 2.5rem;
-      padding-bottom: 3.5rem;
+      min-height: 42.5rem;
     }
 
     h2 {
