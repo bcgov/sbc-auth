@@ -21,7 +21,7 @@ import json
 from unittest.mock import patch
 
 from tests.utilities.factory_scenarios import (
-    TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo)
+    TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo)
 from tests.utilities.factory_utils import factory_auth_header, factory_invitation
 
 from auth_api import status as http_status
@@ -31,7 +31,7 @@ from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
-from auth_api.utils.enums import OrgType
+from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus
 
 
 def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -1105,3 +1105,67 @@ def test_new_business_affiliation(client, jwt, session, keycloak_mock, nr_mock):
     dictionary = json.loads(rv.data)
     assert dictionary['organization']['id'] == org_id
     assert dictionary['business']['businessIdentifier'] == TestAffliationInfo.nr_affiliation['businessIdentifier']
+
+
+def test_get_org_admin_affidavits(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that staff admin can get pending affidavits."""
+    # 1. Create User
+    # 2. Get document signed link
+    # 3. Create affidavit
+    # 4. Create Org
+    # 5. Get the affidavit as a bcol admin
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    document_signature = client.get('/api/v1/documents/test.jpeg/signatures', headers=headers,
+                                    content_type='application/json')
+    doc_key = document_signature.json.get('key')
+    affidavit_response = client.post('/api/v1/users/{}/affidavits'.format(TestJwtClaims.public_user_role.get('sub')),
+                                     headers=headers,
+                                     data=json.dumps(TestAffidavit.get_test_affidavit_with_contact(doc_id=doc_key)),
+                                     content_type='application/json')
+
+    org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()), headers=headers,
+                               content_type='application/json')
+    assert org_response.status_code == http_status.HTTP_201_CREATED
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
+    staff_response = client.get('/api/v1/orgs/{}/admins/affidavits'.format(org_response.json.get('id')),
+                                headers=headers, content_type='application/json')
+    assert staff_response.json.get('documentId') == doc_key
+    assert staff_response.json.get('id') == affidavit_response.json.get('id')
+
+
+def test_approve_org_with_pending_affidavits(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that staff admin can approve pending affidavits."""
+    # 1. Create User
+    # 2. Get document signed link
+    # 3. Create affidavit
+    # 4. Create Org
+    # 5. Get the affidavit as a bcol admin
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    document_signature = client.get('/api/v1/documents/test.jpeg/signatures', headers=headers,
+                                    content_type='application/json')
+    doc_key = document_signature.json.get('key')
+    affidavit_response = client.post('/api/v1/users/{}/affidavits'.format(TestJwtClaims.public_user_role.get('sub')),
+                                     headers=headers,
+                                     data=json.dumps(TestAffidavit.get_test_affidavit_with_contact(doc_id=doc_key)),
+                                     content_type='application/json')
+
+    org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()), headers=headers,
+                               content_type='application/json')
+    assert org_response.status_code == http_status.HTTP_201_CREATED
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
+
+    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
+                                      data=json.dumps({'statusCode': AffidavitStatus.APPROVED.value}),
+                                      headers=headers, content_type='application/json')
+
+    assert org_patch_response.json.get('org_status') == OrgStatus.ACTIVE.value
+
+    staff_response = client.get('/api/v1/orgs/{}/admins/affidavits'.format(org_response.json.get('id')),
+                                headers=headers, content_type='application/json')
+    assert staff_response.json.get('documentId') == doc_key
+    assert staff_response.json.get('id') == affidavit_response.json.get('id')
+    assert staff_response.json.get('status') == AffidavitStatus.APPROVED.value

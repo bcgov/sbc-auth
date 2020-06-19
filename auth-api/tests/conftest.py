@@ -137,9 +137,11 @@ def auto(docker_services, app):
     setup_jwt_manager(app, _JWT)
 
     if app.config['USE_DOCKER_MOCK']:
+        docker_services.start('minio')
         docker_services.start('notify')
         docker_services.start('bcol')
         docker_services.start('proxy')
+        docker_services.wait_for_service('minio', 9000)
 
 
 @pytest.fixture(scope='session')
@@ -194,3 +196,25 @@ def nr_mock(monkeypatch):
         }
 
     monkeypatch.setattr('auth_api.services.affiliation.Affiliation._get_nr_details', get_nr)
+
+
+@pytest.fixture()
+def minio_mock(monkeypatch):
+    """Mock minio calls."""
+
+    def get_nr(business_identifier, bearer_token):
+        return {
+            'applicants': {
+                'emailAddress': 'test@test.com',
+                'phoneNumber': '1112223333'
+            },
+            'names': [
+                {
+                    'name': 'TEST INC..',
+                    'state': 'APPROVED'
+                }
+            ],
+            'state': 'APPROVED'
+        }
+
+    monkeypatch.setattr('auth_api.services.minio.MinioService._get_client', get_nr)
