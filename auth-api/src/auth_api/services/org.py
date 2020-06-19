@@ -15,6 +15,7 @@
 import json
 from typing import Dict, Tuple
 
+from datetime import datetime
 from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
@@ -92,11 +93,11 @@ class Org:  # pylint: disable=too-many-public-methods
         org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.access_type = access_type
         # If the account is anonymous set the billable value as False else True
-        org.billable = access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR.value)
+        org.billable = access_type != AccessType.ANONYMOUS.value
 
         # Set the status based on access type
         # Check if the user is APPROVED else set the org status to PENDING
-        if access_type == AccessType.EXTRA_PROVINCIAL.value \
+        if access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value) \
                 and not AffidavitModel.find_approved_by_user_id(user_id=user_id):
             org.status_code = OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
         org.add_to_session()
@@ -141,8 +142,10 @@ class Org:  # pylint: disable=too-many-public-methods
         if access_type:
             if not is_staff_admin and access_type == AccessType.ANONYMOUS.value:
                 raise BusinessException(Error.USER_CANT_CREATE_ANONYMOUS_ORG, None)
-            if not is_bceid_user and access_type == AccessType.EXTRA_PROVINCIAL:
+            if not is_bceid_user and access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
                 raise BusinessException(Error.USER_CANT_CREATE_EXTRA_PROVINCIAL_ORG, None)
+            if is_bceid_user and access_type not in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
+                raise BusinessException(Error.USER_CANT_CREATE_REGULAR_ORG, None)
         else:
             # If access type is not provided, add default value based on user
             if is_staff_admin:
@@ -464,9 +467,12 @@ class Org:  # pylint: disable=too-many-public-methods
         # Get the org and check what's the current status
         org: OrgModel = OrgModel.find_by_org_id(org_id)
 
+        # Current User
+        user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+
         # If status is PENDING_AFFIDAVIT_REVIEW handle affidavit approve process, else raise error
         if org.status_code == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value:
-            AffidavitService.approve_or_reject(org_id, is_approved, token_info)
+            AffidavitService.approve_or_reject(org_id, is_approved, user)
         else:
             raise BusinessException(Error.INVALID_INPUT, None)
 
@@ -476,6 +482,9 @@ class Org:  # pylint: disable=too-many-public-methods
         else:
             org.status_code = OrgStatus.REJECTED.value
             # TODO Send email notification that it's rejected
+
+        org.decision_made_by = user.username
+        org.decision_made_on = datetime.now()
 
         # TODO Publish to activity stream
 

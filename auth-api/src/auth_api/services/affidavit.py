@@ -98,12 +98,10 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         return affidavit_dict
 
     @staticmethod
-    def approve_or_reject(org_id: int, is_approved: bool, token_info: Dict):
+    def approve_or_reject(org_id: int, is_approved: bool, user: UserModel):
         """Mark the affdiavit as approved or rejected."""
         current_app.logger.debug('<find_affidavit_by_org_id ')
         affidavit: AffidavitModel = AffidavitModel.find_by_org_id(org_id)
-        user: UserModel = UserModel.find_by_jwt_token(token=token_info)
-        # (Andrew) The affidavit table has Char(250) for the data column so assuming it was meant to store username intead of id?
         affidavit.decision_made_by = user.username
         affidavit.decision_made_on = datetime.now()
         affidavit.status_code = AffidavitStatus.APPROVED.value if is_approved else AffidavitStatus.REJECTED.value
