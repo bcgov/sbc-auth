@@ -4,7 +4,7 @@
     <!-- Breadcrumbs / Back Navigation -->
     <nav class="crumbs">
       <div class="pt-5 pb-3">
-        <v-btn large text color="primary" class="back-btn pr-2 pl-1">
+        <v-btn large text color="primary" class="back-btn pr-2 pl-1" @click="goBack()">
           <v-icon small class="mr-1">mdi-arrow-left</v-icon>
           <span>Back to Staff Dashboard</span>
         </v-btn>
@@ -282,6 +282,10 @@ export default class ReviewAccountView extends Vue {
     } else if (this.rejectSelected) {
       await this.rejectAccountUnderReview()
     }
+    this.$router.push('/searchbusiness')
+  }
+
+  private goBack (): void {
     this.$router.push('/searchbusiness')
   }
 }
