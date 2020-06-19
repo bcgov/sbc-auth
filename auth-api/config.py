@@ -154,8 +154,8 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')
     MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY')
     MINIO_ACCESS_SECRET = os.getenv('MINIO_ACCESS_SECRET')
-    MINIO_BUCKET_NAME = os.getenv('MINIO_BUCKET_NAME')
     MINIO_BUCKET_ACCOUNTS = os.getenv('MINIO_BUCKET_ACCOUNTS', 'accounts')
+    MINIO_SECURE = True
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
@@ -266,6 +266,13 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
                       }
 
     BCOL_ACCOUNT_LINK_CHECK = True
+
+    # Minio variables
+    MINIO_ENDPOINT = 'localhost:9000'
+    MINIO_ACCESS_KEY = 'minio'
+    MINIO_ACCESS_SECRET = 'minio123'
+    MINIO_BUCKET_ACCOUNTS = 'accounts'
+    MINIO_SECURE = False
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
