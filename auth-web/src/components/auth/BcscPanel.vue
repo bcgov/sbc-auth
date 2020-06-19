@@ -42,7 +42,7 @@
     <div class="mt-10">
       <template v-if="!userProfile">
         <v-btn large color="bcgovgold" class="cta-btn font-weight-bold mr-2" to="/choose-authentication-method">
-          Create a BC Registries account
+          Create a BC Registries Account
         </v-btn>
       </template>
       <learn-more-button :redirect-url="learnMoreUrl" />

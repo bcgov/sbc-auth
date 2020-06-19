@@ -41,7 +41,7 @@
               <v-btn large color="bcgovgold" class="cta-btn font-weight-bold mr-3"
                 to="/choose-authentication-method"
               >
-                Create a BC Registries account
+                Create a BC Registries Account
               </v-btn>
               <name-request-button />
             </div>
