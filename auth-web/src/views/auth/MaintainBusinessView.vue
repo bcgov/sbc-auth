@@ -4,35 +4,34 @@
       <!-- Info Column -->
       <v-col cols="12" md="6">
         <h2>Manage and Maintain Your Business</h2>
-        <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
-          <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
-          <v-list-item-content>
-            <v-list-item-subtitle class="list-item-text">
-              {{item.text}}
-            </v-list-item-subtitle>
-            <v-list-item class="list-item list-item-sub" v-for="(item, index) in item.subText" :key="`sub-${index}`">
-              <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
-              <v-list-item-content>
-                <v-list-item-subtitle class="list-item-text">
-                  {{item.text}}
-                </v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list-item-content>
-        </v-list-item>
+        <v-list class="py-0 my-4" color="transparent">
+          <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
+            <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+            <v-list-item-content>
+              <v-list-item-subtitle class="list-item-text">
+                {{item.text}}
+              </v-list-item-subtitle>
+              <v-list-item class="list-item list-item-sub" v-for="(item, index) in item.subText" :key="`sub-${index}`">
+                <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+                <v-list-item-content>
+                  <v-list-item-subtitle class="list-item-text">
+                    {{item.text}}
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
         <!-- Panel Btns -->
-        <div class="maintain-info-btns">
-          <v-btn v-if="userProfile" large color="#fcba19" class="my-5"
+        <div class="incorporate-btns">
+          <v-btn large color="bcgovgold" class="cta-btn font-weight-bold mr-3" v-if="userProfile"
             @click="emitManageBusinesses()">
             Manage an Existing Business
           </v-btn>
           <template v-else>
-            <v-btn large color="#fcba19" @click="emitLogin()" class="my-5">
-              Log in with BC Services Card
+            <v-btn large color="bcgovgold" class="cta-btn font-weight-bold mr-3" to="/choose-authentication-method">
+              Create a BC Registries account
             </v-btn>
-            <p>New to BC Registries? <a @click="emitAccountDialog()" class="create-account-link">
-              <u>Create a BC Registries Account</u></a>
-            </p>
           </template>
           <learn-more-button
            :redirect-url="learnMoreUrl"
@@ -98,8 +97,11 @@ export default class MaintainBusinessView extends Vue {
 
     .list-item {
       align-items: flex-start;
-      margin: .5rem 0;
       padding-left: 0;
+    }
+
+    .list-item-text + .list-item {
+      margin-top: 1rem;
     }
 
     .list-item-sub {
@@ -132,15 +134,6 @@ export default class MaintainBusinessView extends Vue {
       .v-btn:hover {
         opacity: .8;
       }
-    }
-
-    .create-account-link {
-      font-size: 1rem;
-      color: $BCgoveBueText1;
-    }
-
-    .create-account-link:hover {
-      color: $BCgoveBueText2;
     }
   }
 </style>
