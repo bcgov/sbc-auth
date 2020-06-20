@@ -157,6 +157,8 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     MINIO_BUCKET_ACCOUNTS = os.getenv('MINIO_BUCKET_ACCOUNTS', 'accounts')
     MINIO_SECURE = True
 
+    STAFF_ADMIN_EMAIL = os.getenv('STAFF_ADMIN_EMAIL')
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False
