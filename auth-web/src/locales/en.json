@@ -39,6 +39,7 @@
   "notAuthorized": "Not Authorized",
   "deniedInvitationMsg": "Your invitation to join the {team} account has been revoked by the administrator",
   "noActiveUsersLabel": "No Active Users",
+  "noActiveAccountsLabel": "No Active Accounts",
   "noTransactionList": "No Transaction Records",
   "pageNotFoundTitle": "Page not found",
   "pageNotFoundMsg": "The page you are looking for has been removed or doesn't exist.",
