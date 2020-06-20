@@ -34,7 +34,7 @@ class UserInfo(BaseModel):
 class TestingSettings(BaseSettings):
     """API settings."""
 
-    ROOT_URL: str = 'https://dev.bcregistry.ca/cooperatives'
+    ROOT_URL: str = 'https://dev.bcregistry.ca/business'
     BCSC_USERS: List[UserInfo] = list()
     BCOL_USERS: List[UserInfo] = list()
     BCEID_USERS: List[UserInfo] = list()

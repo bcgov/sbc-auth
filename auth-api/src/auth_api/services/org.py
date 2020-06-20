@@ -17,6 +17,7 @@ from typing import Dict, Tuple
 
 from datetime import datetime
 from flask import current_app
+from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
@@ -40,6 +41,9 @@ from .authorization import check_auth
 from .contact import Contact as ContactService
 from .keycloak import KeycloakService
 from .rest_service import RestService
+from .notification import send_email
+
+ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
 
 class Org:  # pylint: disable=too-many-public-methods
@@ -64,7 +68,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def create_org(org_info: dict, user_id,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
-                   token_info: Dict = None, bearer_token: str = None):
+                   token_info: Dict = None, bearer_token: str = None, origin_url: str = None):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
         bcol_credential = org_info.pop('bcOnlineCredential', None)
@@ -97,9 +101,13 @@ class Org:  # pylint: disable=too-many-public-methods
 
         # Set the status based on access type
         # Check if the user is APPROVED else set the org status to PENDING
+        # Send an email to staff to remind review the pending account
         if access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value) \
                 and not AffidavitModel.find_approved_by_user_id(user_id=user_id):
             org.status_code = OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
+            user = UserModel.find_by_jwt_token(token=token_info)
+            Org.send_staff_review_account_reminder(user, org.id, origin_url)
+
         org.add_to_session()
 
         # If mailing address is provided, save it
@@ -492,3 +500,26 @@ class Org:  # pylint: disable=too-many-public-methods
 
         current_app.logger.debug('>find_affidavit_by_org_id ')
         return Org(org)
+
+    @staticmethod
+    def send_staff_review_account_reminder(user, org_id, origin_url):
+        """Send staff review account reminder notification."""
+        current_app.logger.debug('<send_staff_review_account_reminder')
+        subject = '[BC Registries & Online Services] An out of province account needs to be approved.'
+        sender = current_app.config.get('MAIL_FROM_ID')
+        recipient = current_app.config.get('STAFF_ADMIN_EMAIL')
+        template = ENV.get_template('email_templates/staff_review_account_email.html')
+        context_path = f'review-account/{org_id}'
+        app_url = '{}/{}'.format(origin_url, context_path)
+        logo_url = f'{origin_url}/{current_app.config.get("REGISTRIES_LOGO_IMAGE_NAME")}'
+
+        try:
+            sent_response = send_email(subject, sender, recipient,
+                                       template.render(url=app_url, user=user, logo_url=logo_url))
+            current_app.logger.debug('<send_staff_review_account_reminder')
+            if not sent_response:
+                current_app.logger.error('<send_staff_review_account_reminder failed')
+                raise BusinessException(Error.FAILED_NOTIFICATION, None)
+        except:  # noqa=B901
+            current_app.logger.error('<send_staff_review_account_reminder failed')
+            raise BusinessException(Error.FAILED_NOTIFICATION, None)

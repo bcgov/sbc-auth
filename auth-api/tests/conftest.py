@@ -168,6 +168,12 @@ def notify_mock(monkeypatch):
 
 
 @pytest.fixture()
+def notify_org_mock(monkeypatch):
+    """Mock send_email."""
+    monkeypatch.setattr('auth_api.services.org.send_email', lambda *args, **kwargs: None)
+
+
+@pytest.fixture()
 def keycloak_mock(monkeypatch):
     """Mock keycloak services."""
     monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.join_account_holders_group',
