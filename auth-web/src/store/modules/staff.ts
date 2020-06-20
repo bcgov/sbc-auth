@@ -1,6 +1,7 @@
 import { AccountType, ProductCode } from '@/models/Staff'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { MembershipType, Organization } from '@/models/Organization'
+import { AccountStatus } from '@/util/constants'
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
 import { Contact } from '@/models/contact'
@@ -16,6 +17,9 @@ import UserService from '@/services/user.services'
 export default class StaffModule extends VuexModule {
   products: ProductCode[] = []
   accountTypes: AccountType[] = []
+  activeStaffOrgs: Organization[] = []
+  pendingStaffOrgs: Organization[] = []
+  rejectedStaffOrgs: Organization[] = []
   accountUnderReview: Organization
   accountUnderReviewAddress: Address
   accountUnderReviewAdmin: User
@@ -42,6 +46,21 @@ export default class StaffModule extends VuexModule {
   @Mutation
   public setAccountTypes (accountType: AccountType[]) {
     this.accountTypes = accountType
+  }
+
+  @Mutation
+  public setActiveStaffOrgs (activeOrgs: Organization[]) {
+    this.activeStaffOrgs = activeOrgs
+  }
+
+  @Mutation
+  public setPendingStaffOrgs (pendingOrgs: Organization[]) {
+    this.pendingStaffOrgs = pendingOrgs
+  }
+
+  @Mutation
+  public setRejectedStaffOrgs (rejectedOrgs: Organization[]) {
+    this.rejectedStaffOrgs = rejectedOrgs
   }
 
   @Mutation
@@ -134,5 +153,23 @@ export default class StaffModule extends VuexModule {
       await OrgService.rejectPendingOrg(orgId)
       await this.context.dispatch('syncAccountUnderReview', orgId)
     }
+  }
+
+  @Action({ commit: 'setActiveStaffOrgs', rawError: true })
+  public async syncActiveStaffOrgs () {
+    const response = await StaffService.getStaffOrgs(AccountStatus.ACTIVE)
+    return response?.data?.orgs || []
+  }
+
+  @Action({ commit: 'setPendingStaffOrgs', rawError: true })
+  public async syncPendingStaffOrgs () {
+    const response = await StaffService.getStaffOrgs(AccountStatus.PENDING_AFFIDAVIT_REVIEW)
+    return response?.data?.orgs || []
+  }
+
+  @Action({ commit: 'setRejectedStaffOrgs', rawError: true })
+  public async syncRejectedStaffOrgs () {
+    const response = await StaffService.getStaffOrgs(AccountStatus.REJECTED)
+    return response?.data?.orgs || []
   }
 }
