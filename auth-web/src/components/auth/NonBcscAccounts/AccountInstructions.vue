@@ -79,7 +79,7 @@ export default class AccountInstructions extends Vue {
   ]
 
   private goToDownload () {
-    this.$router.push(`/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE}/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE_DOWNLOAD}`)
+    this.$router.push(`/${Pages.SETUP_ACCOUNT_NON_BCSC}/${Pages.SETUP_ACCOUNT_NON_BCSC_DOWNLOAD}`)
     window.scrollTo(0, 0)
   }
 

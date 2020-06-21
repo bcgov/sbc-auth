@@ -1,19 +1,13 @@
 
 export enum SessionStorageKeys {
     KeyCloakToken = 'KEYCLOAK_TOKEN',
-    KeyCloakRefreshToken = 'KEYCLOAK_REFRESH_TOKEN',
-    KeyCloakIdToken = 'KEYCLOAK_ID_TOKEN',
     ApiConfigKey = 'AUTH_API_CONFIG',
     BusinessIdentifierKey = 'BUSINESS_IDENTIFIER',
-    UserFullName = 'USER_FULL_NAME',
     UserKcId = 'USER_KC_ID',
-    PreventStorageSync = 'PREVENT_STORAGE_SYNC',
-    AccountName = 'ACCOUNT_NAME',
     UserAccountType = 'USER_ACCOUNT_TYPE',
-    PendingApprovalCount = 'PENDING_APPROVAL_COUNT',
     CurrentAccount = 'CURRENT_ACCOUNT',
-    NamesRequestNumberKey = 'NR_NUMBER',
-    LaunchDarklyFlags = 'LD_FLAGS'
+    LaunchDarklyFlags = 'LD_FLAGS',
+    ExtraProvincialUser = 'EXTRAPROVINCIAL_USER'
 }
 
 export enum Role {
@@ -30,8 +24,7 @@ export enum Role {
 export enum Pages {
     USER_PROFILE = 'userprofile',
     CREATE_ACCOUNT = 'setup-account',
-    CREATE_EXTRAPROV_ACCOUNT = 'setup-extra-prov-account',
-    DUPLICATE_TEAM_MESAGE = 'duplicateteam',
+    CREATE_NON_BCSC_ACCOUNT = 'setup-non-bcsc-account',
     PENDING_APPROVAL = 'pendingapproval',
     PENDING_AFFIDAVIT_APPROVAL = 'pendingaffidavitapproval',
     MAIN = 'account',
@@ -43,9 +36,9 @@ export enum Pages {
     USER_PROFILE_TERMS = 'userprofileterms',
     USER_PROFILE_TERMS_DECLINE = 'unauthorizedtermsdecline',
     HOME = 'home',
-    SETUP_ACCOUNT_OUT_OF_PROVINCE = 'extraprov-info',
-    SETUP_ACCOUNT_OUT_OF_PROVINCE_INSTRUCTIONS = 'instructions',
-    SETUP_ACCOUNT_OUT_OF_PROVINCE_DOWNLOAD = 'download',
+    SETUP_ACCOUNT_NON_BCSC = 'nonbcsc-info',
+    SETUP_ACCOUNT_NON_BCSC_INSTRUCTIONS = 'instructions',
+    SETUP_ACCOUNT_NON_BCSC_DOWNLOAD = 'download',
     EDIT_ACCOUNT_TYPE= '/change-account',
     STAFF_DASHBOARD= 'searchbusiness',
     STAFF_SETUP_ACCOUNT = 'staff-setup-account'
@@ -105,5 +98,6 @@ export enum CorpType {
 export enum AccessType {
     REGULAR = 'REGULAR',
     EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL',
-    ANONYMOUS = 'ANONYMOUS'
+    ANONYMOUS = 'ANONYMOUS',
+    REGULAR_BCEID = 'REGULAR_BCEID'
 }

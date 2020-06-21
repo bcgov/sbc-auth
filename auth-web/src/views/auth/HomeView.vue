@@ -246,15 +246,13 @@ import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
-import ProvinceSelectorDialog from '@/components/auth/common/ProvinceSelectorDialog.vue'
 import { User } from '@/models/user'
 import { VueConstructor } from 'vue'
 
 @Component({
   name: 'Home',
   components: {
-    LoginBCSC,
-    OutOfProvinceDialog: ProvinceSelectorDialog
+    LoginBCSC
   },
   computed: {
     ...mapState('user', ['userProfile', 'currentUser']),
@@ -300,7 +298,7 @@ export default class HomeView extends Vue {
   }
 
   private goToOutOfProvince () {
-    this.$router.push(`/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE}/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE_INSTRUCTIONS}`)
+    this.$router.push(`/${Pages.SETUP_ACCOUNT_NON_BCSC}/${Pages.SETUP_ACCOUNT_NON_BCSC_INSTRUCTIONS}`)
   }
 
   mounted () {

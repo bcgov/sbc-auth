@@ -7,6 +7,7 @@ import { User } from '@/models/user'
 export interface CreateRequestBody {
   name: string,
   typeCode?: string
+  accessType?: string
   bcOnlineCredential?:BcolProfile
   mailingAddress?:Address
 }

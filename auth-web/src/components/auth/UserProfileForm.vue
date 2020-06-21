@@ -404,7 +404,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
         await this.syncMembership(organization.id)
         this.$store.commit('updateHeader')
         if (this.currentUser?.loginSource === LoginSource.BCEID) {
-          this.$router.push('/setup-extrapro-account-success')
+          this.$router.push('/setup-non-bcsc-account-success')
         } else {
           this.$router.push('/setup-account-success')
         }

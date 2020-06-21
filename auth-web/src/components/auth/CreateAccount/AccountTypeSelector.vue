@@ -1,3 +1,4 @@
+import { AccessType } from '@/util/constants'
 <template>
   <div>
     <p class="mb-7" v-if="!isAccountChange">There is no cost to create a BC Registries account. You only pay for the services and products you purchase.</p>
@@ -122,33 +123,38 @@
 
 <script lang="ts">
 
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { AccessType, Account, LoginSource, SessionStorageKeys } from '@/util/constants'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
-import { Account } from '@/util/constants'
+import ConfigHelper from '@/util/config-helper'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
 
-@Component({
-  components: {
-    ConfirmCancelButton
-  },
-  computed: {
-    ...mapState('org', ['currentOrganization', 'accountTypeBeforeChange'])
-  },
-  methods: {
-    ...mapMutations('org', ['setSelectedAccountType', 'setCurrentOrganization', 'resetCurrentOrganisation', 'setAccountTypeBeforeChange'])
-  }
-})
+  @Component({
+    components: {
+      ConfirmCancelButton
+    },
+    computed: {
+      ...mapState('org', ['currentOrganization', 'accountTypeBeforeChange']),
+      ...mapState('user', ['currentUser'])
+    },
+    methods: {
+      ...mapMutations('org', ['setSelectedAccountType', 'setCurrentOrganization', 'resetCurrentOrganisation', 'setAccountTypeBeforeChange', 'setAccessType'])
+    }
+  })
 export default class AccountTypeSelector extends Mixins(Steppable) {
   private readonly ACCOUNT_TYPE = Account
   private selectedAccountType = ''
   private readonly setSelectedAccountType!: (selectedAccountType: Account) => void
   private readonly setAccountTypeBeforeChange!: (accountTypeBeforeChange: string) => void
   private readonly setCurrentOrganization!: (organization: Organization) => void
+    private readonly setAccessType!: (accessType: string) => void
   private readonly currentOrganization!: Organization
   private readonly accountTypeBeforeChange!: string
   private readonly resetCurrentOrganisation!: () => void
+  protected readonly currentUser!: KCUserProfile
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
 
@@ -167,6 +173,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
       } else {
         this.selectedAccountType = this.currentOrganization.orgType
       }
+      this.setAccessType(this.getOrgAccessType())
     }
   }
 
@@ -177,6 +184,12 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
     }
     this.setSelectedAccountType(accountType)
     this.selectedAccountType = accountType
+  }
+
+  private getOrgAccessType () {
+    let isBceidUser = this.currentUser?.loginSource === LoginSource.BCEID
+    let isExtraProvice = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.ExtraProvincialUser || '{}'))
+    return isBceidUser ? (isExtraProvice ? AccessType.EXTRA_PROVINCIAL : AccessType.REGULAR_BCEID) : AccessType.REGULAR
   }
 
   private goNext () {
