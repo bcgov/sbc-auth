@@ -469,7 +469,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return False
 
     @staticmethod
-    def approve_or_reject(org_id: int, is_approved: bool, token_info: Dict):
+    def approve_or_reject(org_id: int, is_approved: bool, token_info: Dict, origin_url: str = None):
         """Mark the affidavit as approved or rejected."""
         current_app.logger.debug('<find_affidavit_by_org_id ')
         # Get the org and check what's the current status
@@ -486,10 +486,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         if is_approved:
             org.status_code = OrgStatus.ACTIVE.value
-            # TODO Send email notification that it's approved
         else:
             org.status_code = OrgStatus.REJECTED.value
-            # TODO Send email notification that it's rejected
 
         org.decision_made_by = user.username
         org.decision_made_on = datetime.now()
@@ -497,6 +495,8 @@ class Org:  # pylint: disable=too-many-public-methods
         # TODO Publish to activity stream
 
         org.save()
+        admin_email = org.members[0].user.email
+        Org.send_approved_rejected_notification(admin_email, org.name, org.status_code, origin_url)
 
         current_app.logger.debug('>find_affidavit_by_org_id ')
         return Org(org)
@@ -522,4 +522,32 @@ class Org:  # pylint: disable=too-many-public-methods
                 raise BusinessException(Error.FAILED_NOTIFICATION, None)
         except:  # noqa=B901
             current_app.logger.error('<send_staff_review_account_reminder failed')
+            raise BusinessException(Error.FAILED_NOTIFICATION, None)
+
+    @staticmethod
+    def send_approved_rejected_notification(receipt_admin_email, org_name, org_status: OrgStatus, origin_url):
+        """Send Approved/Rejected notification to the user."""
+        current_app.logger.debug('<send_approved_rejected_notification')
+        sender = current_app.config.get('MAIL_FROM_ID')
+        if org_status == OrgStatus.ACTIVE.value:
+            template = ENV.get_template('email_templates/nonbcsc_org_approved_notification_email.html')
+            subject = '[BC Registries & Online Services] APPROVED Business Registry Account'
+        elif org_status == OrgStatus.REJECTED.value:
+            template = ENV.get_template('email_templates/nonbcsc_org_rejected_notification_email.html')
+            subject = '[BC Registries & Online Services] YOUR ACTION REQUIRED: ' \
+                      'Business Registry Account cannot be approved'
+        else:
+            return  # dont send mail for any other status change
+        logo_url = f'{origin_url}/{current_app.config.get("REGISTRIES_LOGO_IMAGE_NAME")}'
+        params = {'org_name': org_name}
+        try:
+            sent_response = send_email(subject, sender, receipt_admin_email,
+                                       template.render(url=origin_url, params=params, org_name=org_name,
+                                                       logo_url=logo_url))
+            current_app.logger.debug('<send_approved_rejected_notification')
+            if not sent_response:
+                current_app.logger.error('<send_approved_rejected_notification failed')
+                raise BusinessException(Error.FAILED_NOTIFICATION, None)
+        except:  # noqa=B901
+            current_app.logger.error('<send_approved_rejected_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None)

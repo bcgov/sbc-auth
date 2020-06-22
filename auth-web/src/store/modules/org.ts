@@ -1,4 +1,4 @@
-import { Account, Actions, SessionStorageKeys } from '@/util/constants'
+import { Account, Actions, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import {
   AddUserBody,
@@ -52,11 +52,17 @@ export default class OrgModule extends VuexModule {
   failedUsers: BulkUsersFailed[] = []
   accountTypeBeforeChange = '' // used for detecting the original type of the account which is getting down/up graded
   permissions: string[] = []
+  accessType: string
 
   currentOrgTransactionList: TransactionTableRow[] = []
   @Mutation
   public setCurrentOrgPaymentSettings (currentOrgPaymentSettings:PaymentSettings) {
     this.currentOrgPaymentSettings = currentOrgPaymentSettings
+  }
+
+  @Mutation
+  public setAccessType (accessType:string) {
+    this.accessType = accessType
   }
 
   @Mutation
@@ -222,7 +228,8 @@ export default class OrgModule extends VuexModule {
     const org = this.context.state['currentOrganization']
     const address = this.context.state['currentOrgAddress']
     const createRequestBody: CreateRequestBody = {
-      name: org.name
+      name: org.name,
+      accessType: this.context.state['accessType']
     }
     if (org.bcolProfile) {
       createRequestBody.bcOnlineCredential = org.bcolProfile

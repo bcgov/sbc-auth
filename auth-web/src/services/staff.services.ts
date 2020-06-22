@@ -17,7 +17,7 @@ export default class StaffService {
 
   static async getStaffOrgs (status?: string): Promise<AxiosResponse<Organizations>> {
     let params = new URLSearchParams()
-    params.append('access_type', 'EXTRA_PROVINCIAL')
+    params.append('access_type', 'REGULAR_BCEID,EXTRA_PROVINCIAL')
     if (status) {
       params.append('status', status)
     }

@@ -9,7 +9,7 @@ import { Component, Vue } from 'vue-property-decorator'
 
 @Component({
 })
-export default class ExtraProvInfoView extends Vue {
+export default class NonBcscInfoView extends Vue {
 }
 </script>
 

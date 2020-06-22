@@ -80,7 +80,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
         """Find all orgs with the given type."""
         queries = []
         if access_type:
-            queries.append(Org.access_type == access_type.upper())
+            queries.append(Org.access_type.in_(access_type.split(',')))
         if name:
             queries.append(Org.name.ilike(f'%{name}%'))
         if status:

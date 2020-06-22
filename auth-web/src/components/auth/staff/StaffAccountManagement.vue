@@ -13,7 +13,7 @@
     </v-card-title>
     <v-card-text>
       <!-- Tab Navigation -->
-      <v-tabs
+      <v-tabs grow
         class="mb-3"
         v-model="tab"
         @change="tabChange"
