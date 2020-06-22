@@ -487,9 +487,10 @@ class OrgStatus(Resource):
 
         try:
             is_approved: bool = request_json.get('statusCode', None) == AffidavitStatus.APPROVED.value
-
+            origin = request.environ.get('HTTP_ORIGIN', 'localhost')
             response, status = OrgService.approve_or_reject(org_id=org_id, is_approved=is_approved,
-                                                            token_info=token).as_dict(), http_status.HTTP_200_OK
+                                                            token_info=token,
+                                                            origin_url=origin).as_dict(), http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
