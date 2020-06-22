@@ -46,12 +46,12 @@
                     <div class="bcol-acc__name mt-n1">
                       {{ accountUnderReview.name }}
                     </div>
-                    <ul class="bcol-acc__meta" v-if="accountUnderReview.bcolAccountDetails">
+                    <ul class="bcol-acc__meta" v-if="bcolAccountDetails">
                       <li>
-                        Account No: {{ accountUnderReview.bcolAccountDetails.accountNumber }}
+                        Account No: {{ bcolAccountDetails.bcolAccountId }}
                       </li>
                       <li>
-                        Prime Contact ID: {{ accountUnderReview.bcolAccountDetails.userId }}
+                        Prime Contact ID: {{ bcolAccountDetails.bcolUserId }}
                       </li>
                     </ul>
                   </v-alert>
@@ -234,6 +234,10 @@ export default class ReviewAccountView extends Vue {
     }
   }
 
+  private get bcolAccountDetails () {
+    return (this.accountUnderReview?.payment_settings?.length) ? this.accountUnderReview?.payment_settings[0] : undefined
+  }
+
   private formatDate (date: Date): string {
     return moment(date).format('MMM DD, YYYY')
   }
@@ -308,6 +312,7 @@ export default class ReviewAccountView extends Vue {
     margin: 0;
     padding: 0;
     list-style-type: none;
+    font-size: .925rem;
 
     li {
       position: relative;
