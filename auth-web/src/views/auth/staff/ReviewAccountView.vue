@@ -235,7 +235,7 @@ export default class ReviewAccountView extends Vue {
   }
 
   private get bcolAccountDetails () {
-    return (this.accountUnderReview?.payment_settings?.length) ? this.accountUnderReview?.payment_settings[0] : undefined
+    return (this.accountUnderReview?.payment_settings?.length && this.accountUnderReview?.payment_settings[0].bcolUserId) ? this.accountUnderReview?.payment_settings[0] : undefined
   }
 
   private formatDate (date: Date): string {
