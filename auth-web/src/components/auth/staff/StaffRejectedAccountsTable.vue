@@ -70,7 +70,7 @@ export default class StaffRejectedAccountsTable extends Vue {
       text: 'Rejected By',
       align: 'left',
       sortable: true,
-      value: 'rejectedBy'
+      value: 'decisionMadeBy'
     },
     {
       text: 'Actions',

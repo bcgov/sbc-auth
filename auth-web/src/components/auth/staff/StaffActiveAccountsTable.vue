@@ -70,7 +70,7 @@ export default class StaffActiveAccountsTable extends Vue {
       text: 'Approved By',
       align: 'left',
       sortable: true,
-      value: 'approvedBy'
+      value: 'decisionMadeBy'
     },
     {
       text: 'Actions',
