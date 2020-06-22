@@ -13,7 +13,7 @@
     </v-card-title>
     <v-card-text>
       <!-- Tab Navigation -->
-      <v-tabs grow
+      <v-tabs
         class="mb-3"
         v-model="tab"
         @change="tabChange"
@@ -21,9 +21,19 @@
         <v-tab data-test="active-tab">Active</v-tab>
         <template v-if="isStaffAdminBCOL">
           <v-tab data-test="pending-review-tab">
-            Pending Review
+            <v-badge inline color="primary"
+              :content="pendingReviewCount"
+              :value="pendingReviewCount">
+              Pending Review
+            </v-badge>
           </v-tab>
-          <v-tab data-test="rejected-tab">Rejected</v-tab>
+          <v-tab data-test="rejected-tab">
+            <v-badge inline color="primary"
+              :content="rejectedReviewCount"
+              :value="rejectedReviewCount">
+              Rejected
+            </v-badge>
+          </v-tab>
         </template>
       </v-tabs>
 
@@ -52,7 +62,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { Pages, Role } from '@/util/constants'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
 import StaffActiveAccountsTable from '@/components/auth/staff/StaffActiveAccountsTable.vue'
@@ -81,7 +91,11 @@ enum TAB_CODE {
     ])
   },
   computed: {
-    ...mapState('user', ['currentUser'])
+    ...mapState('user', ['currentUser']),
+    ...mapGetters('staff', [
+      'pendingReviewCount',
+      'rejectedReviewCount'
+    ])
   }
 })
 export default class StaffAccountManagement extends Vue {
@@ -91,6 +105,8 @@ export default class StaffAccountManagement extends Vue {
   private readonly syncActiveStaffOrgs!: () => Organization[]
   private readonly syncPendingStaffOrgs!: () => Organization[]
   private readonly syncRejectedStaffOrgs!: () => Organization[]
+  private readonly pendingReviewCount!: number
+  private readonly rejectedReviewCount!: number
 
   private tabs = [
     {
@@ -112,6 +128,8 @@ export default class StaffAccountManagement extends Vue {
 
   private async mounted () {
     await this.syncActiveStaffOrgs()
+    await this.syncPendingStaffOrgs()
+    await this.syncRejectedStaffOrgs()
   }
 
   gotToCreateAccount () {

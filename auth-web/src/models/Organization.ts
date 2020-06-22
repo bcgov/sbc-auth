@@ -29,6 +29,8 @@ export interface Organization {
   bcolAccountDetails?:BcolAccountDetails
   grantAccess?:boolean
   statusCode?:string
+  decisionMadeBy?: string,
+  contactEmail?: string
 }
 
 export interface UpdateMemberPayload {
