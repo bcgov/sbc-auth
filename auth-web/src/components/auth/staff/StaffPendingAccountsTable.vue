@@ -70,12 +70,6 @@ export default class StaffPendingAccountsTable extends Vue {
       value: 'orgType'
     },
     {
-      text: 'Contact Email',
-      align: 'left',
-      sortable: true,
-      value: 'email'
-    },
-    {
       text: 'Actions',
       align: 'left',
       value: 'action',

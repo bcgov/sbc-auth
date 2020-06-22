@@ -61,12 +61,6 @@ export default class StaffRejectedAccountsTable extends Vue {
       value: 'orgType'
     },
     {
-      text: 'Contact Email',
-      align: 'left',
-      sortable: true,
-      value: 'email'
-    },
-    {
       text: 'Rejected By',
       align: 'left',
       sortable: true,

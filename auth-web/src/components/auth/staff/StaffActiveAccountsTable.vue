@@ -61,12 +61,6 @@ export default class StaffActiveAccountsTable extends Vue {
       value: 'orgType'
     },
     {
-      text: 'Contact Email',
-      align: 'left',
-      sortable: true,
-      value: 'email'
-    },
-    {
       text: 'Approved By',
       align: 'left',
       sortable: true,
