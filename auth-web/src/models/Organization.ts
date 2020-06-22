@@ -30,7 +30,9 @@ export interface Organization {
   grantAccess?:boolean
   statusCode?:string
   decisionMadeBy?: string,
-  contactEmail?: string
+  contactEmail?: string,
+  // eslint-disable-next-line camelcase
+  payment_settings?: any
 }
 
 export interface UpdateMemberPayload {

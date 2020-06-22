@@ -46,12 +46,12 @@
                     <div class="bcol-acc__name mt-n1">
                       {{ accountUnderReview.name }}
                     </div>
-                    <ul class="bcol-acc__meta" v-if="accountUnderReview.bcolAccountDetails">
+                    <ul class="bcol-acc__meta" v-if="bcolAccountDetails">
                       <li>
-                        Account No: {{ accountUnderReview.bcolAccountDetails.accountNumber }}
+                        Account No: {{ bcolAccountDetails.bcolAccountId }}
                       </li>
                       <li>
-                        Prime Contact ID: {{ accountUnderReview.bcolAccountDetails.userId }}
+                        Prime Contact ID: {{ bcolAccountDetails.bcolUserId }}
                       </li>
                     </ul>
                   </v-alert>
@@ -128,7 +128,7 @@
             <v-divider class="mt-8 mb-6"></v-divider>
 
             <v-row class="form__btns">
-              <v-col class="pb-0">
+              <v-col class="pb-0" v-if="isPendingReviewPage">
                 <v-btn large :outlined="!approveSelected" color="success" class="font-weight-bold mr-2 select-button" @click="selectApprove()">
                   <span v-if="approveSelected"><v-icon left class="mr-2">mdi-check</v-icon>Approved</span>
                   <span v-else>Approve</span>
@@ -152,7 +152,7 @@
             <v-col class="col-12 col-sm-5 py-2">Status</v-col>
             <v-col class="py-2">{{ statusLabel }}</v-col>
           </v-row>
-          <v-row>
+          <v-row v-if="!isPendingReviewPage">
             <v-col class="col-12 col-sm-5 py-2">
               <span v-if="accountUnderReview.statusCode === 'ACTIVE'">Approved By</span>
               <span v-if="accountUnderReview.statusCode === 'REJECTED'">Rejected By</span>
@@ -234,6 +234,14 @@ export default class ReviewAccountView extends Vue {
     }
   }
 
+  private get bcolAccountDetails () {
+    return (this.accountUnderReview?.payment_settings?.length && this.accountUnderReview?.payment_settings[0].bcolUserId) ? this.accountUnderReview?.payment_settings[0] : undefined
+  }
+
+  private get isPendingReviewPage () {
+    return this.accountUnderReview?.statusCode === AccountStatus.PENDING_AFFIDAVIT_REVIEW
+  }
+
   private formatDate (date: Date): string {
     return moment(date).format('MMM DD, YYYY')
   }
@@ -308,6 +316,7 @@ export default class ReviewAccountView extends Vue {
     margin: 0;
     padding: 0;
     list-style-type: none;
+    font-size: .925rem;
 
     li {
       position: relative;
