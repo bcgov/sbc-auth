@@ -38,6 +38,14 @@ export default class StaffModule extends VuexModule {
     return this.accountUnderReviewAffidavitInfo?.documentUrl
   }
 
+  public get pendingReviewCount (): number {
+    return this.pendingStaffOrgs?.length || 0
+  }
+
+  public get rejectedReviewCount (): number {
+    return this.rejectedStaffOrgs?.length || 0
+  }
+
   @Mutation
   public setProducts (products: ProductCode[]) {
     this.products = products
