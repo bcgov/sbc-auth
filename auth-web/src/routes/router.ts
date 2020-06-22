@@ -83,7 +83,8 @@ export function getRoutes (): RouteConfig[] {
           props: true,
           meta: {
             showNavBar: true,
-            disabledRoles: [Role.AnonymousUser]
+            disabledRoles: [Role.AnonymousUser],
+            requiresActiveAccount: true
           }
         }]
     },
