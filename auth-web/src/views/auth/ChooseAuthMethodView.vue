@@ -19,14 +19,14 @@
                 I am a resident <span class="lb">of British Columbia</span>
               </div>
               <div class="account-type__details mb-6">
-                Residents of British Columbia can use their government-issued identitification or BC Services Card to verify their identity
+                Residents of British Columbia can use their government-issued BC Services Card to verify their identity
               </div>
               <div>
                 <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card" target="_blank">Learn more about the BC Services card</a>
               </div>
               <!-- State Button (Create Account) -->
               <div class="mt-9 mb-2">
-                <v-btn large :outlined="authType != 'BCSC'" block depressed color="primary" class="font-weight-bold">
+                <v-btn large depressed block color="primary" class="font-weight-bold" :outlined="authType != 'BCSC'">
                    {{ authType == 'BCSC' ? 'SELECTED' : 'SELECT' }}
                 </v-btn>
               </div>
@@ -53,7 +53,7 @@
               </div>
               <!-- State Button (Create Account) -->
               <div class="mt-9 mb-2">
-                <v-btn large :outlined="authType != 'BCEID'" block depressed color="primary" class="font-weight-bold">
+                <v-btn large depressed block color="primary" class="font-weight-bold" :outlined="authType != 'BCEID'">
                   {{ authType == 'BCEID' ? 'SELECTED' : 'SELECT' }}
                 </v-btn>
               </div>
@@ -65,7 +65,6 @@
     <div class="form__btns d-flex mt-10">
       <v-btn
         large
-        depressed
         color="grey lighten-2"
         class="font-weight-bold"
         to="/home"
@@ -78,7 +77,6 @@
       <v-spacer></v-spacer>
       <v-btn
         large
-        depressed
         color="primary"
         class="next-btn font-weight-bold"
         :disabled="authType ==''"
