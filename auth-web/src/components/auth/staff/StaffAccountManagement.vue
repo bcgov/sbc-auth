@@ -21,14 +21,14 @@
         <v-tab data-test="active-tab">Active</v-tab>
         <template v-if="isStaffAdminBCOL">
           <v-tab data-test="pending-review-tab">
-            <v-badge inline color="primary"
+            <v-badge inline color="info"
               :content="pendingReviewCount"
               :value="pendingReviewCount">
               Pending Review
             </v-badge>
           </v-tab>
           <v-tab data-test="rejected-tab">
-            <v-badge inline color="primary"
+            <v-badge inline color="info"
               :content="rejectedReviewCount"
               :value="rejectedReviewCount">
               Rejected
