@@ -18,7 +18,7 @@ import AccountCreateBasic from '@/components/auth/CreateAccount/AccountCreateBas
 import AccountCreatePremium from '@/components/auth/CreateAccount/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/CreateAccount/AccountTypeSelector.vue'
 import CreateAccountInfoForm from '@/components/auth/CreateAccount/CreateAccountInfoForm.vue'
-import UploadAffidavitStep from '@/components/auth/ExtraProv/UploadAffidavitStep.vue'
+import UploadAffidavitStep from '@/components/auth/NonBcscAccounts/UploadAffidavitStep.vue'
 import UserProfileForm from '@/components/auth/UserProfileForm.vue'
 
 @Component({
@@ -31,7 +31,7 @@ import UserProfileForm from '@/components/auth/UserProfileForm.vue'
     Stepper
   }
 })
-export default class ExtraProvincialAccountSetupView extends Vue {
+export default class NonBcscAccountSetupView extends Vue {
   private accountStepperConfig: Array<StepConfiguration> =
     [
       {

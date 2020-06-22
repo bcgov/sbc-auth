@@ -31,7 +31,7 @@
                 </v-btn>
               </div>
               <div class="notary-link">
-                <router-link class="caption" to="/extraprov-info">Verify with a notary instead</router-link>
+                <router-link class="caption"  v-on:click.native="linkToNext" to="/nonbcsc-info">Verify with a notary instead</router-link>
               </div>
             </div>
           </v-card>
@@ -95,7 +95,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { LoginSource, Pages } from '@/util/constants'
+import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import ConfigHelper from '@/util/config-helper'
 
 @Component({
@@ -115,14 +115,20 @@ export default class ChooseAuthMethodView extends Vue {
     this.authType = LoginSource.BCEID
   }
 
+  private linkToNext () {
+    ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'false')
+  }
+
   private goNext () {
   // TODO might need to set some session variables
     switch (this.authType) {
       case LoginSource.BCEID:
-        this.$router.push(`/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE}/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE_INSTRUCTIONS}`)
+        ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'true')
+        this.$router.push(`/${Pages.SETUP_ACCOUNT_NON_BCSC}/${Pages.SETUP_ACCOUNT_NON_BCSC_INSTRUCTIONS}`)
         window.scrollTo(0, 0)
         break
       case LoginSource.BCSC:
+        ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'false') // this flag shouldnt be used for bcsc users.still setting the right value
         this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
         break
     }

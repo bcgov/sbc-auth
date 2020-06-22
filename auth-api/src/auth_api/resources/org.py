@@ -81,7 +81,7 @@ class Orgs(Resource):
         business_identifier = request.args.get('affiliation', None)
         name = request.args.get('name', None)
         status = request.args.get('status', None)
-        access_type = request.args.get('type', None)
+        access_type = request.args.get('access_type', None)
         try:
             response, status = OrgService.search_orgs(business_identifier=business_identifier, access_type=access_type,
                                                       name=name, status=status), \
@@ -487,9 +487,10 @@ class OrgStatus(Resource):
 
         try:
             is_approved: bool = request_json.get('statusCode', None) == AffidavitStatus.APPROVED.value
-
+            origin = request.environ.get('HTTP_ORIGIN', 'localhost')
             response, status = OrgService.approve_or_reject(org_id=org_id, is_approved=is_approved,
-                                                            token_info=token).as_dict(), http_status.HTTP_200_OK
+                                                            token_info=token,
+                                                            origin_url=origin).as_dict(), http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

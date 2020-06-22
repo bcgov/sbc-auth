@@ -27,7 +27,7 @@ import { mapState } from 'vuex'
     ...mapState('org', ['currentOrganization'])
   }
 })
-export default class ExtraProAccountCreationSuccessView extends Vue {
+export default class NonBcscAccountCreationSuccessView extends Vue {
   protected readonly currentOrganization!: Organization
 
   private goTo (page) {
