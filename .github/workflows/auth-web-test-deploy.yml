@@ -3,7 +3,7 @@ name: Auth Web TEST CD
 on:
   push:
     branches:
-      - master
+      - 2.2.1
     paths:
       - "auth-web/**"
 env:
