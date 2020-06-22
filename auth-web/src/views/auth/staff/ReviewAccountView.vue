@@ -13,7 +13,7 @@
 
     <div class="view-header flex-column">
       <h1 class="view-header__title">Review Account</h1>
-      <p class="mt-2 mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+      <p class="mt-2 mb-0">Review and verify details for this account.</p>
     </div>
     <v-card class="mt-8" flat v-if="!isLoading">
       <v-row class="mr-0 ml-0">
@@ -24,7 +24,7 @@
             <!-- Affidavit Section -->
             <section>
               <h2 class="mb-7">1. Download Affidavit</h2>
-              <p class="mb-9">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam at porttitor sem. Aliquam erat volutpat.</p>
+              <p class="mb-9">Download the notarized affidavit associated with this account to verify the account creators identity and associated information.</p>
               <v-btn x-large="" outlined color="primary" class="font-weight-bold" @click="downloadAffidavit()">
                 <v-icon left class="mr-2">mdi-file-download-outline</v-icon>
                 {{ accountUnderReview.name + '-affidavit'}}
