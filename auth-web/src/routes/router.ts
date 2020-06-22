@@ -25,10 +25,10 @@ import MaintainBusinessView from '@/views/auth/MaintainBusinessView.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
 import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
 import PaymentView from '@/views/pay/PaymentView.vue'
-import PendingAffidavitApprovalView from '@/views/auth/PendingAffidavitApprovalView.vue'
 import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
 import RequestNameView from '@/views/auth/RequestNameView.vue'
+import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
 import { RouteConfig } from 'vue-router'
 import SearchBusinessView from '@/views/auth/staff/SearchBusinessView.vue'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
@@ -169,6 +169,13 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
+      path: '/review-account/:orgId',
+      name: 'review-account',
+      component: ReviewAccountView,
+      meta: { requiresAuth: true, disabledRoles: [Role.Basic, Role.Public] },
+      props: true
+    },
+    {
       path: '/setup-extrapro-account-success',
       name: 'setup-extrapro-account-success',
       component: ExtraProAccountCreationSuccessView,
@@ -304,13 +311,6 @@ export function getRoutes (): RouteConfig[] {
       path: '/pendingapproval/:team_name?',
       name: 'pendingapproval',
       component: PendingApprovalView,
-      props: true,
-      meta: { requiresAuth: true, requiresProfile: true }
-    },
-    {
-      path: '/pendingaffidavitapproval/:team_name?',
-      name: 'pendingaffidavitapproval',
-      component: PendingAffidavitApprovalView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
     },

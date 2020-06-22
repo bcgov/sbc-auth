@@ -43,7 +43,7 @@
           color="primary"
           class="mr-3"
           :loading="saving"
-          :disabled="!isFormValid() || saving"
+          :disabled="!isFormValid() || saving  || !isBaseAddressValid"
           @click="save"
           data-test="save-button"
         >
@@ -84,7 +84,7 @@ import { getModule } from 'vuex-module-decorators'
     ConfirmCancelButton
   },
   computed: {
-    ...mapState('org', ['currentOrganization']),
+    ...mapState('org', ['currentOrganization', 'currentOrgAddress']),
     ...mapState('user', ['userProfile', 'currentUser'])
   },
   methods: {
@@ -108,7 +108,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private orgName: string = ''
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
-  private isBaseAddressValid: boolean = true
+  private isBaseAddressValid: boolean = !this.isExtraProvUser
   private readonly currentOrgAddress!: Address
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
 

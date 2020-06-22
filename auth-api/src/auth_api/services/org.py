@@ -15,7 +15,9 @@
 import json
 from typing import Dict, Tuple
 
+from datetime import datetime
 from flask import current_app
+from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
@@ -39,6 +41,9 @@ from .authorization import check_auth
 from .contact import Contact as ContactService
 from .keycloak import KeycloakService
 from .rest_service import RestService
+from .notification import send_email
+
+ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
 
 class Org:  # pylint: disable=too-many-public-methods
@@ -63,7 +68,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def create_org(org_info: dict, user_id,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
-                   token_info: Dict = None, bearer_token: str = None):
+                   token_info: Dict = None, bearer_token: str = None, origin_url: str = None):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
         bcol_credential = org_info.pop('bcOnlineCredential', None)
@@ -92,13 +97,17 @@ class Org:  # pylint: disable=too-many-public-methods
         org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.access_type = access_type
         # If the account is anonymous set the billable value as False else True
-        org.billable = access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR.value)
+        org.billable = access_type != AccessType.ANONYMOUS.value
 
         # Set the status based on access type
         # Check if the user is APPROVED else set the org status to PENDING
-        if access_type == AccessType.EXTRA_PROVINCIAL.value \
+        # Send an email to staff to remind review the pending account
+        if access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value) \
                 and not AffidavitModel.find_approved_by_user_id(user_id=user_id):
             org.status_code = OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
+            user = UserModel.find_by_jwt_token(token=token_info)
+            Org.send_staff_review_account_reminder(user, org.id, origin_url)
+
         org.add_to_session()
 
         # If mailing address is provided, save it
@@ -141,8 +150,10 @@ class Org:  # pylint: disable=too-many-public-methods
         if access_type:
             if not is_staff_admin and access_type == AccessType.ANONYMOUS.value:
                 raise BusinessException(Error.USER_CANT_CREATE_ANONYMOUS_ORG, None)
-            if not is_bceid_user and access_type == AccessType.EXTRA_PROVINCIAL:
+            if not is_bceid_user and access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
                 raise BusinessException(Error.USER_CANT_CREATE_EXTRA_PROVINCIAL_ORG, None)
+            if is_bceid_user and access_type not in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
+                raise BusinessException(Error.USER_CANT_CREATE_REGULAR_ORG, None)
         else:
             # If access type is not provided, add default value based on user
             if is_staff_admin:
@@ -464,9 +475,12 @@ class Org:  # pylint: disable=too-many-public-methods
         # Get the org and check what's the current status
         org: OrgModel = OrgModel.find_by_org_id(org_id)
 
+        # Current User
+        user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+
         # If status is PENDING_AFFIDAVIT_REVIEW handle affidavit approve process, else raise error
         if org.status_code == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value:
-            AffidavitService.approve_or_reject(org_id, is_approved, token_info)
+            AffidavitService.approve_or_reject(org_id, is_approved, user)
         else:
             raise BusinessException(Error.INVALID_INPUT, None)
 
@@ -477,9 +491,35 @@ class Org:  # pylint: disable=too-many-public-methods
             org.status_code = OrgStatus.REJECTED.value
             # TODO Send email notification that it's rejected
 
+        org.decision_made_by = user.username
+        org.decision_made_on = datetime.now()
+
         # TODO Publish to activity stream
 
         org.save()
 
         current_app.logger.debug('>find_affidavit_by_org_id ')
         return Org(org)
+
+    @staticmethod
+    def send_staff_review_account_reminder(user, org_id, origin_url):
+        """Send staff review account reminder notification."""
+        current_app.logger.debug('<send_staff_review_account_reminder')
+        subject = '[BC Registries & Online Services] An out of province account needs to be approved.'
+        sender = current_app.config.get('MAIL_FROM_ID')
+        recipient = current_app.config.get('STAFF_ADMIN_EMAIL')
+        template = ENV.get_template('email_templates/staff_review_account_email.html')
+        context_path = f'review-account/{org_id}'
+        app_url = '{}/{}'.format(origin_url, context_path)
+        logo_url = f'{origin_url}/{current_app.config.get("REGISTRIES_LOGO_IMAGE_NAME")}'
+
+        try:
+            sent_response = send_email(subject, sender, recipient,
+                                       template.render(url=app_url, user=user, logo_url=logo_url))
+            current_app.logger.debug('<send_staff_review_account_reminder')
+            if not sent_response:
+                current_app.logger.error('<send_staff_review_account_reminder failed')
+                raise BusinessException(Error.FAILED_NOTIFICATION, None)
+        except:  # noqa=B901
+            current_app.logger.error('<send_staff_review_account_reminder failed')
+            raise BusinessException(Error.FAILED_NOTIFICATION, None)

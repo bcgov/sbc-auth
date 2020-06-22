@@ -21,7 +21,7 @@ from random import choice
 from string import ascii_lowercase, ascii_uppercase
 
 from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.enums import IdpHint
+from auth_api.utils.enums import AccessType, IdpHint, LoginSource
 from config import get_named_config
 
 
@@ -67,6 +67,21 @@ class TestJwtClaims(dict, Enum):
                 'public_user'
             ]
         }
+    }
+
+    public_bceid_user = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'preferred_username': 'testuser',
+        'realm_access': {
+            'roles': [
+                'public_user',
+                'edit'
+            ]
+        },
+        'loginSource': LoginSource.BCEID.value
     }
 
     edit_user_role = {
@@ -132,6 +147,24 @@ class TestJwtClaims(dict, Enum):
             'roles': [
                 'staff',
                 'staff_admin',
+                'edit'
+            ]
+        },
+        'roles': [
+            'staff', 'staff_admin'
+        ]
+    }
+
+    bcol_admin_role = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': 'Test',
+        'lastname': 'User',
+        'preferred_username': 'testuser',
+        'realm_access': {
+            'roles': [
+                'staff',
+                'bcol_staff_admin',
                 'edit'
             ]
         },
@@ -207,6 +240,7 @@ class TestJwtClaims(dict, Enum):
             ]
         }
     }
+
     anonymous_bcros_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302069',
@@ -303,6 +337,14 @@ class TestOrgInfo(dict, Enum):
     invalid_name_spaces = {'name': '    '}
     invalid_name_start_space = {'name': '  helo'}
     invalid_name_end_space = {'name': '  helo   '}
+    org_regular_bceid = {
+        'name': 'My Test Org',
+        'accessType': AccessType.REGULAR_BCEID.value
+    }
+    org_regular = {
+        'name': 'My Test Org',
+        'accessType': AccessType.REGULAR.value
+    }
 
     @staticmethod
     def bcol_linked():
@@ -313,6 +355,20 @@ class TestOrgInfo(dict, Enum):
                 'userId': 'test',
                 'password': 'password'
             },
+            'mailingAddress': {
+                'street': '1234 Abcd Street',
+                'city': 'Test',
+                'region': 'BC',
+                'postalCode': 'T1T1T1',
+                'country': 'CA'
+            }
+        }
+
+    @staticmethod
+    def org_with_mailing_address(name: str = 'BC ONLINE TECHNICAL TEAM DEVL'):
+        """Return org info for bcol linked info."""
+        return {
+            'name': name,
             'mailingAddress': {
                 'street': '1234 Abcd Street',
                 'city': 'Test',
@@ -588,3 +644,20 @@ class TestBCOLInfo(dict, Enum):
 
     bcol1 = {'bcol_account_id': 'BCOL1'}
     bcol2 = {'bcol_account_id': 'BCOL2'}
+
+
+class TestAffidavit:
+    """Test affidavit scenarios."""
+
+    @staticmethod
+    def get_test_affidavit_with_contact(doc_id: str = '1234567890987654323456789876543456787654345678.txt'):
+        """Return a dict for affidavit."""
+        return {
+            'issuer': 'ABC Notaries Inc.',
+            'documentId': doc_id,
+            'contact': {
+                'email': 'foo@bar.com',
+                'phone': '(555) 555-5555',
+                'phoneExtension': '123'
+            }
+        }
