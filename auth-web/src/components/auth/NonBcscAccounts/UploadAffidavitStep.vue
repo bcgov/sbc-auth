@@ -160,7 +160,7 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
   }
 
   private get isNextValid () {
-    return this.isNotaryInformationValid
+    return this.isNotaryInformationValid && this.isNotaryContactValid
   }
 
   private isNotaryContactValidFn (val) {

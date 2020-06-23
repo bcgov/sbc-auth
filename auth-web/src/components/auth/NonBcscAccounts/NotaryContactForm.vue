@@ -46,6 +46,7 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import CommonUtils from '@/util/common-util'
 import { NotaryContact } from '@/models/notary'
 
 @Component
@@ -59,7 +60,12 @@ export default class NotaryContactForm extends Vue {
   }
 
   private readonly rules = {
-    email: [v => !!v || 'Email is required']
+    email: [val => {
+      if (val) {
+        return !!CommonUtils.validateEmailFormat(val) || 'Email is invalid'
+      }
+      return true
+    }]
   }
 
   mounted () {
