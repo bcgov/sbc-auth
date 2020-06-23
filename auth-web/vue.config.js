@@ -18,14 +18,14 @@ module.exports = {
     }
   },
   pwa: {
-    name: 'Cooperatives Online',
+    name: 'Business Registry',
     themeColor: '#003366',
     msTileColor: '#fcba19',
     appleMobileWebAppCapable: 'yes',
     appleMobileWebAppStatusBarStyle: 'black',
     manifestOptions: {
-      name: 'Cooperatives Online',
-      short_name: 'Cooperatives Online',
+      name: 'Business Registry',
+      short_name: 'Business Registry',
       start_url: '/business/auth/',
       display: 'standalone',
       theme_color: '#003366',
