@@ -90,3 +90,13 @@ def test_documents_returns_latest_always(client, jwt, session):  # pylint:disabl
     assert rv.status_code == http_status.HTTP_200_OK
     assert rv.json.get('content') == html_content_2
     assert rv.json.get('version_id') == version_id_4
+
+
+def test_document_signature_get_returns_200(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert get documents/filename/signatures endpoint returns 200."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
+    file_name = 'test_file.jpeg'
+    rv = client.get(f'/api/v1/documents/{file_name}/signatures', headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('key').startswith('Affidavits/')

@@ -89,7 +89,7 @@ export default class NextPageMixin extends Vue {
         if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
           bceditNextStep = Pages.USER_PROFILE_TERMS
         } else if (!this.currentOrganization && !this.currentMembership) {
-          bceditNextStep = Pages.CREATE_EXTRAPROV_ACCOUNT
+          bceditNextStep = Pages.CREATE_NON_BCSC_ACCOUNT
         } else if (this.currentOrganization && this.currentOrganization.statusCode === OrgStatus.PendingAffidavitReview) {
           bceditNextStep = `${Pages.PENDING_AFFIDAVIT_APPROVAL}/${this.currentAccountSettings?.label}`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {

@@ -6,7 +6,7 @@
         filled
         dense
         v-model="fileUpload"
-        accept="image/*"
+        accept="image/*, .pdf"
         class="file-upload-preview"
         prepend-icon=""
         @change="fileChange"

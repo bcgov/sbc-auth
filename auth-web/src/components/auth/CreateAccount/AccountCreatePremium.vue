@@ -156,7 +156,6 @@ import { getModule } from 'vuex-module-decorators'
     ...mapMutations('org', [
       'setCurrentOrganization',
       'setCurrentOrganizationAddress',
-      'setCurrentOrgAddress',
       'setGrantAccess',
       'resetBcolDetails'
     ]),

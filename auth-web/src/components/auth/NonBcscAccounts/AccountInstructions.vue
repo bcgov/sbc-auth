@@ -2,7 +2,7 @@
   <v-container class="view-container">
     <div class="view-header flex-column mb-10">
       <h1 class="view-header__title">How to verify your identity by a notary</h1>
-      <p class="my-5">There are three steps to verifying and protecting your identity when creating a BC Registries account.</p>
+      <p class="mt-5 mb-3">There are three steps to verifying and protecting your identity when creating a BC Registries account.</p>
     </div>
     <v-card
       class="step-card my-6"
@@ -20,13 +20,12 @@
         </div>
       </v-card-text>
     </v-card>
-    <v-divider class="mt-12"></v-divider>
-    <div class="d-flex mt-10">
+    <v-divider class="my-10"></v-divider>
+    <div class="d-flex">
       <v-btn
-        class="font-weight-bold"
-        color="grey lighten-2"
-        depressed
         large
+        color="grey lighten-2"
+        class="font-weight-bold"
         to="/choose-authentication-method"
       >
         <v-icon class="mr-2">
@@ -36,10 +35,9 @@
       </v-btn>
       <v-spacer></v-spacer>
       <v-btn
-        class="next-btn font-weight-bold"
-        color="primary"
-        depressed
         large
+        color="primary"
+         class="next-btn font-weight-bold"
         @click="goToDownload"
       >
         Next: Download Affidavit
@@ -79,7 +77,7 @@ export default class AccountInstructions extends Vue {
   ]
 
   private goToDownload () {
-    this.$router.push(`/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE}/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE_DOWNLOAD}`)
+    this.$router.push(`/${Pages.SETUP_ACCOUNT_NON_BCSC}/${Pages.SETUP_ACCOUNT_NON_BCSC_DOWNLOAD}`)
     window.scrollTo(0, 0)
   }
 

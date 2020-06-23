@@ -19,15 +19,17 @@ from unittest.mock import patch
 
 import pytest
 from tests.utilities.factory_scenarios import (
-    KeycloakScenario, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestOrgProductsInfo,
-    TestOrgTypeInfo, TestUserInfo)
+    KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
+    TestOrgProductsInfo, TestOrgTypeInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
     factory_org_model, factory_org_service, factory_user_model)
 
+import auth_api.services.notification as notification
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
+from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
@@ -37,7 +39,7 @@ from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import OrgType, PaymentType
+from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, PaymentType
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -93,7 +95,7 @@ def test_update_org(session):  # pylint:disable=unused-argument
     assert dictionary['name'] == TestOrgInfo.org2['name']
 
 
-def test_update__duplicate_org(session):  # pylint:disable=unused-argument
+def test_update_duplicate_org(session):  # pylint:disable=unused-argument
     """Assert that an Org cannot be updated."""
     org = factory_org_service()
 
@@ -469,3 +471,111 @@ def test_create_org_with_a_linked_bcol_details(session, keycloak_mock):  # pylin
     with pytest.raises(BusinessException) as exception:
         OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
     assert exception.value.code == Error.BCOL_ACCOUNT_ALREADY_LINKED.name
+
+
+def test_create_org_by_bceid_user(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org can be created."""
+    user = factory_user_model()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+
+    with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
+        org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id, token_info=token_info)
+        assert org
+        dictionary = org.as_dict()
+        assert dictionary['name'] == TestOrgInfo.org1['name']
+        assert dictionary['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
+        assert dictionary['accessType'] == AccessType.EXTRA_PROVINCIAL.value
+        mock_notify.assert_called()
+
+
+def test_create_org_by_in_province_bceid_user(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org can be created."""
+    user = factory_user_model()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+
+    with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
+        org = OrgService.create_org(TestOrgInfo.org_regular_bceid, user_id=user.id, token_info=token_info)
+        assert org
+        dictionary = org.as_dict()
+        assert dictionary['name'] == TestOrgInfo.org1['name']
+        assert dictionary['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
+        assert dictionary['accessType'] == AccessType.REGULAR_BCEID.value
+        mock_notify.assert_called()
+
+
+def test_create_org_invalid_access_type_user(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org cannot be created by providing wrong access type."""
+    user = factory_user_model()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    with pytest.raises(BusinessException) as exception:
+        OrgService.create_org(TestOrgInfo.org_regular, user_id=user.id, token_info=token_info)
+    assert exception.value.code == Error.USER_CANT_CREATE_REGULAR_ORG.name
+
+
+def test_create_org_by_verified_bceid_user(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org can be created."""
+    # Steps
+    # 1. Create a pending affidavit
+    # 2. Create org
+    # 3. Approve Org, which will mark the affidavit as approved
+    # 4. Same user create new org, which should be ACTIVE.
+    user = factory_user_model()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
+    AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
+
+    with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
+        org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id, token_info=token_info)
+        org_dict = org.as_dict()
+        assert org_dict['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
+        org = OrgService.approve_or_reject(org_dict['id'], is_approved=True, token_info=token_info)
+        org_dict = org.as_dict()
+        assert org_dict['org_status'] == OrgStatus.ACTIVE.value
+
+        org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(name='Test 123'), user_id=user.id,
+                                    token_info=token_info)
+        org_dict = org.as_dict()
+        assert org_dict['org_status'] == OrgStatus.ACTIVE.value
+        mock_notify.assert_called()
+
+
+def test_create_org_by_rejected_bceid_user(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org can be created."""
+    # Steps
+    # 1. Create a pending affidavit
+    # 2. Create org
+    # 3. Reject Org, which will mark the affidavit as rejected
+    # 4. Same user create new org, which should be PENDING_AFFIDAVIT_REVIEW.
+    user = factory_user_model()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
+    AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
+
+    with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
+        org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id, token_info=token_info)
+        org_dict = org.as_dict()
+        assert org_dict['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
+        org = OrgService.approve_or_reject(org_dict['id'], is_approved=False, token_info=token_info)
+        org_dict = org.as_dict()
+        assert org_dict['org_status'] == OrgStatus.REJECTED.value
+
+        org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(name='Test 123'), user_id=user.id,
+                                    token_info=token_info)
+        org_dict = org.as_dict()
+        assert org_dict['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
+        mock_notify.assert_called()
+
+
+def test_send_staff_review_account_reminder_exception(session,
+                                                      notify_org_mock,
+                                                      keycloak_mock):  # pylint:disable=unused-argument
+    """Send a reminder with exception."""
+    user = factory_user_model(TestUserInfo.user_test)
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+    org_dictionary = org.as_dict()
+
+    with patch.object(notification, 'send_email', return_value=False):
+        with pytest.raises(BusinessException) as exception:
+            OrgService.send_staff_review_account_reminder(user, org_dictionary['id'], 'localhost')
+
+    assert exception.value.code == Error.FAILED_NOTIFICATION.name

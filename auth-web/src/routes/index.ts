@@ -103,7 +103,7 @@ router.beforeEach((to, from, next) => {
     if (to.matched.some(record => record.meta.requiresActiveAccount) && (currentUser.loginSource === LoginSource.BCSC || currentUser.loginSource === LoginSource.BCEID)) {
       const isTheOrgPendingAffidavitReview = currentOrganization?.statusCode === OrgStatus.PendingAffidavitReview
       if (isTheOrgPendingAffidavitReview) {
-        return next({ path: `${Pages.PENDING_AFFIDAVIT_APPROVAL}` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
+        return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
       } else if (currentAccountSettings && currentMembership.membershipStatus === MembershipStatus.Pending) {
         return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}` })
       } else if (!currentOrganization || currentMembership.membershipStatus !== MembershipStatus.Active) {

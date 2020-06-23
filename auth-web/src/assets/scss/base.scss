@@ -128,6 +128,12 @@ legend {
   }
 }
 
+// BC gov gold CTA button
+.cta-btn,
+.cta-btn:hover {
+  color: var(--v-bcgovblue-base) !important;
+}
+
 // Helpers
 .nobr {
   white-space: nowrap; // Utility class to prevent orphaned text

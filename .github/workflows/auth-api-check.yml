@@ -35,6 +35,7 @@ jobs:
       EMAIL_TOKEN_SECRET_KEY: "mySecretKey"
       USE_TEST_KEYCLOAK_DOCKER: "YES"
       USE_DOCKER_MOCK: "YES"
+      STAFF_ADMIN_EMAIL: "test@test.com"
     strategy:
       matrix:
         python-version: [3.7, 3.8]
