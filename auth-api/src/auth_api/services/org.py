@@ -510,12 +510,13 @@ class Org:  # pylint: disable=too-many-public-methods
         recipient = current_app.config.get('STAFF_ADMIN_EMAIL')
         template = ENV.get_template('email_templates/staff_review_account_email.html')
         context_path = f'review-account/{org_id}'
-        app_url = '{}/{}'.format(origin_url, context_path)
-        logo_url = f'{origin_url}/{current_app.config.get("REGISTRIES_LOGO_IMAGE_NAME")}'
+        app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
+        review_url = '{}/{}'.format(app_url, context_path)
+        logo_url = f'{app_url}/{current_app.config.get("REGISTRIES_LOGO_IMAGE_NAME")}'
 
         try:
             sent_response = send_email(subject, sender, recipient,
-                                       template.render(url=app_url, user=user, logo_url=logo_url))
+                                       template.render(url=review_url, user=user, logo_url=logo_url))
             current_app.logger.debug('<send_staff_review_account_reminder')
             if not sent_response:
                 current_app.logger.error('<send_staff_review_account_reminder failed')
@@ -538,11 +539,12 @@ class Org:  # pylint: disable=too-many-public-methods
                       'Business Registry Account cannot be approved'
         else:
             return  # dont send mail for any other status change
-        logo_url = f'{origin_url}/{current_app.config.get("REGISTRIES_LOGO_IMAGE_NAME")}'
+        app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
+        logo_url = f'{app_url}/{current_app.config.get("REGISTRIES_LOGO_IMAGE_NAME")}'
         params = {'org_name': org_name}
         try:
             sent_response = send_email(subject, sender, receipt_admin_email,
-                                       template.render(url=origin_url, params=params, org_name=org_name,
+                                       template.render(url=app_url, params=params, org_name=org_name,
                                                        logo_url=logo_url))
             current_app.logger.debug('<send_approved_rejected_notification')
             if not sent_response:
