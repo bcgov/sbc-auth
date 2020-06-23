@@ -35,4 +35,3 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
     status_code = fields.String(data_key='statusCode')
     decision_made_by = fields.String(data_key='decisionMadeBy')
     decision_made_on = fields.String(data_key='decisionMadeOn')
-
