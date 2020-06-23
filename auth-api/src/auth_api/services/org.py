@@ -510,7 +510,7 @@ class Org:  # pylint: disable=too-many-public-methods
         recipient = current_app.config.get('STAFF_ADMIN_EMAIL')
         template = ENV.get_template('email_templates/staff_review_account_email.html')
         context_path = f'review-account/{org_id}'
-        app_url = '{}/{}'.format(origin_url, context_path)
+        app_url = '{}/{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'), context_path)
         logo_url = f'{origin_url}/{current_app.config.get("REGISTRIES_LOGO_IMAGE_NAME")}'
 
         try:
