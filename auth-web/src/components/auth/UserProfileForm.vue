@@ -409,6 +409,8 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
           this.$router.push('/setup-account-success')
         }
       } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err)
         switch (err?.response?.status) {
           case 409:
             this.formError =

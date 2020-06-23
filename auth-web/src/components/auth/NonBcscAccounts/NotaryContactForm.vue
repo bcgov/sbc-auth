@@ -74,6 +74,9 @@ export default class NotaryContactForm extends Vue {
         this.$set(this.notaryContact, key, this.inputNotaryContact?.[key])
       })
     }
+    this.$nextTick(() => {
+      this.isFormValid()
+    })
   }
 
   @Watch('notaryContact', { deep: true })

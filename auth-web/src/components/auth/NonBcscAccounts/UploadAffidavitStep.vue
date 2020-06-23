@@ -5,7 +5,12 @@
       when authenticated.
     </p>
     <h4 class="my-4">Attach your Notarized Affidavit</h4>
-    <FileUploadPreview @file-selected="fileSelected" v-bind:input-file="affidavitDoc"></FileUploadPreview>
+    <FileUploadPreview
+      :maxSize="MAX_FILE_SIZE"
+      v-bind:input-file="affidavitDoc"
+      @file-selected="fileSelected"
+      @is-file-valid="isFileUploadValidFn"
+    ></FileUploadPreview>
     <NotaryInformationForm
       :input-notary-info="notaryInformation"
       @notaryinfo-update="updateNotaryInformation"
@@ -99,8 +104,10 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
   private userStore = getModule(UserModule, this.$store)
   private errorMessage: string = ''
   private saving: boolean = false
+  private MAX_FILE_SIZE = 10000 // 10 MB in KB
   private isNotaryContactValid: boolean = false
   private isNotaryInformationValid: boolean = false
+  private isFileUploadValid: boolean = false
   private readonly notaryInformation!: NotaryInformation
   private readonly affidavitDoc!:File
   private readonly notaryContact!: NotaryContact
@@ -160,7 +167,7 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
   }
 
   private get isNextValid () {
-    return this.isNotaryInformationValid && this.isNotaryContactValid
+    return this.isFileUploadValid && this.isNotaryInformationValid && this.isNotaryContactValid
   }
 
   private isNotaryContactValidFn (val) {
@@ -169,6 +176,10 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
 
   private isNotaryInformationValidFn (val) {
     this.isNotaryInformationValid = val
+  }
+
+  private isFileUploadValidFn (val) {
+    this.isFileUploadValid = val
   }
 }
 </script>
