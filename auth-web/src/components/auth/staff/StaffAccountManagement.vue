@@ -1,62 +1,62 @@
 <template>
-  <v-card class="mb-4 pa-3" flat>
-    <v-card-title class="d-flex align-center">
-      <h2>Account Management</h2>
-      <v-btn
-        v-if="isStaffAdmin"
-        color="primary"
-        class="font-weight-bold"
-        @click="gotToCreateAccount"
-      >
-        <v-icon small class="mr-1">mdi-plus</v-icon>Create Account
-      </v-btn>
-    </v-card-title>
-    <v-card-text>
-      <!-- Tab Navigation -->
-      <v-tabs
-        class="mb-3"
-        v-model="tab"
-        @change="tabChange"
-        background-color="transparent">
-        <v-tab data-test="active-tab">Active</v-tab>
-        <template v-if="isStaffAdminBCOL">
-          <v-tab data-test="pending-review-tab">
-            <v-badge inline color="info"
-              :content="pendingReviewCount"
-              :value="pendingReviewCount">
-              Pending Review
-            </v-badge>
-          </v-tab>
-          <v-tab data-test="rejected-tab">
-            <v-badge inline color="info"
-              :content="rejectedReviewCount"
-              :value="rejectedReviewCount">
-              Rejected
-            </v-badge>
-          </v-tab>
-        </template>
-      </v-tabs>
+  <v-container class="pa-0">
+    <header class="view-header align-center justify-space-between mt-n1 mb-4">
+      <h2 class="view-header__title">Account Management</h2>
+      <div class="view-header__actions">
+        <v-btn large
+          color="primary"
+          class="font-weight-bold"
+          v-if="isStaffAdmin"
+          @click="gotToCreateAccount"
+        >
+          <v-icon small class="mr-1">mdi-plus</v-icon>Create Account
+        </v-btn>
+      </div>
+    </header>
+    <!-- Tab Navigation -->
+    <v-tabs
+      background-color="transparent"
+      class="mb-9"
+      v-model="tab"
+      @change="tabChange">
+      <v-tab data-test="active-tab">Active</v-tab>
+      <template v-if="isStaffAdminBCOL">
+        <v-tab data-test="pending-review-tab">
+          <v-badge inline color="info"
+            :content="pendingReviewCount"
+            :value="pendingReviewCount">
+            Pending Review
+          </v-badge>
+        </v-tab>
+        <v-tab data-test="rejected-tab">
+          <v-badge inline color="info"
+            :content="rejectedReviewCount"
+            :value="rejectedReviewCount">
+            Rejected
+          </v-badge>
+        </v-tab>
+      </template>
+    </v-tabs>
 
-      <!-- Tab Contents -->
-      <v-tabs-items v-model="tab">
-        <v-tab-item>
-          <StaffActiveAccountsTable
-            :columnSort="customSort"
-          />
-        </v-tab-item>
-        <v-tab-item>
-          <StaffPendingAccountsTable
-            :columnSort="customSort"
-          />
-        </v-tab-item>
-        <v-tab-item>
-          <StaffRejectedAccountsTable
-            :columnSort="customSort"
-          />
-        </v-tab-item>
-      </v-tabs-items>
-    </v-card-text>
-  </v-card>
+    <!-- Tab Contents -->
+    <v-tabs-items v-model="tab">
+      <v-tab-item>
+        <StaffActiveAccountsTable
+          :columnSort="customSort"
+        />
+      </v-tab-item>
+      <v-tab-item>
+        <StaffPendingAccountsTable
+          :columnSort="customSort"
+        />
+      </v-tab-item>
+      <v-tab-item>
+        <StaffRejectedAccountsTable
+          :columnSort="customSort"
+        />
+      </v-tab-item>
+    </v-tabs-items>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -174,5 +174,4 @@ export default class StaffAccountManagement extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
 </style>
