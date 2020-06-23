@@ -110,6 +110,7 @@ class AccessType(Enum):
     """Access Types."""
 
     REGULAR = 'REGULAR'
+    REGULAR_BCEID = 'REGULAR_BCEID'
     EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL'
     ANONYMOUS = 'ANONYMOUS'
 

@@ -17,7 +17,8 @@ Basic users will have an internal Org that is not created explicitly, but implic
 """
 
 from flask import current_app
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, and_, func
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, func
+
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
@@ -38,6 +39,8 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     name = Column(String(250), index=True)
     access_type = Column(String(250), index=True, nullable=True)  # for ANONYMOUS ACCESS
     billable = Column('billable', Boolean(), default=True, nullable=False)
+    decision_made_by = Column(String(250))
+    decision_made_on = Column(DateTime, nullable=True)
 
     contacts = relationship('ContactLink', lazy='select')
     org_type = relationship('OrgType')
@@ -77,7 +80,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
         """Find all orgs with the given type."""
         queries = []
         if access_type:
-            queries.append(Org.access_type == access_type.upper())
+            queries.append(Org.access_type.in_(access_type.split(',')))
         if name:
             queries.append(Org.name.ilike(f'%{name}%'))
         if status:

@@ -4,9 +4,9 @@ import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
 import AccountChangeSuccessView from '@/views/auth/AccountChangeSuccessView.vue'
 import AccountChangeView from '@/views/auth/AccountChangeView.vue'
 import AccountCreationSuccessView from '@/views/auth/AccountCreationSuccessView.vue'
-import AccountInstructions from '@/components/auth/ExtraProv/AccountInstructions.vue'
+import AccountInstructions from '@/components/auth/NonBcscAccounts/AccountInstructions.vue'
 import AccountSetupView from '@/views/auth/AccountSetupView.vue'
-import AffidavitDownload from '@/components/auth/ExtraProv/AffidavitDownload.vue'
+import AffidavitDownload from '@/components/auth/NonBcscAccounts/AffidavitDownload.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import ChooseAuthMethodView from '@/views/auth/ChooseAuthMethodView.vue'
 import ConfigHelper from '@/util/config-helper'
@@ -15,20 +15,20 @@ import DashboardView from '@/views/auth/DashboardView.vue'
 import DecideBusinessView from '@/views/auth/DecideBusinessView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
-import ExtraProAccountCreationSuccessView from '@/views/auth/ExtraProAccountCreationSuccessView.vue'
-import ExtraProvInfoView from '@/views/auth/OutOfProvinceAccountView.vue'
-import ExtraProvincialAccountSetupView from '@/views/auth/ExtraProvincialAccountSetupView.vue'
 import Home from '@/views/auth/Home.vue'
 import IncorpOrRegisterView from '@/views/auth/IncorpOrRegisterView.vue'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import MaintainBusinessView from '@/views/auth/MaintainBusinessView.vue'
+import NonBcscAccountCreationSuccessView from '@/views/auth/NonBcscAccountCreationSuccessView.vue'
+import NonBcscAccountSetupView from '@/views/auth/NonBcscAccountSetupView.vue'
+import NonBcscInfoView from '@/views/auth/NonBcscAccountView.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
 import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
 import PaymentView from '@/views/pay/PaymentView.vue'
-import PendingAffidavitApprovalView from '@/views/auth/PendingAffidavitApprovalView.vue'
 import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
 import RequestNameView from '@/views/auth/RequestNameView.vue'
+import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
 import { RouteConfig } from 'vue-router'
 import SearchBusinessView from '@/views/auth/staff/SearchBusinessView.vue'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
@@ -83,7 +83,8 @@ export function getRoutes (): RouteConfig[] {
           props: true,
           meta: {
             showNavBar: true,
-            disabledRoles: [Role.AnonymousUser]
+            disabledRoles: [Role.AnonymousUser],
+            requiresActiveAccount: true
           }
         }]
     },
@@ -130,18 +131,18 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
-      path: '/setup-extra-prov-account',
-      name: 'setup-extra-prov-account',
-      component: ExtraProvincialAccountSetupView,
+      path: '/setup-non-bcsc-account',
+      name: 'setup-non-bcsc-account',
+      component: NonBcscAccountSetupView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
-      path: '/extraprov-info',
-      name: 'extraprov-info',
-      component: ExtraProvInfoView,
+      path: '/nonbcsc-info',
+      name: 'nonbcsc-info',
+      component: NonBcscInfoView,
       props: true,
-      redirect: '/extraprov-info/instructions',
+      redirect: '/nonbcsc-info/instructions',
       meta: { requiresAuth: false, requiresProfile: false },
       children: [
         {
@@ -169,9 +170,16 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
-      path: '/setup-extrapro-account-success',
-      name: 'setup-extrapro-account-success',
-      component: ExtraProAccountCreationSuccessView,
+      path: '/review-account/:orgId',
+      name: 'review-account',
+      component: ReviewAccountView,
+      meta: { requiresAuth: true, disabledRoles: [Role.Basic, Role.Public] },
+      props: true
+    },
+    {
+      path: '/setup-non-bcsc-account-success',
+      name: 'setup-non-bcsc-account-success',
+      component: NonBcscAccountCreationSuccessView,
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
@@ -304,13 +312,6 @@ export function getRoutes (): RouteConfig[] {
       path: '/pendingapproval/:team_name?',
       name: 'pendingapproval',
       component: PendingApprovalView,
-      props: true,
-      meta: { requiresAuth: true, requiresProfile: true }
-    },
-    {
-      path: '/pendingaffidavitapproval/:team_name?',
-      name: 'pendingaffidavitapproval',
-      component: PendingAffidavitApprovalView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
     },

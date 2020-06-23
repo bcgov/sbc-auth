@@ -7,6 +7,7 @@ import { User } from '@/models/user'
 export interface CreateRequestBody {
   name: string,
   typeCode?: string
+  accessType?: string
   bcOnlineCredential?:BcolProfile
   mailingAddress?:Address
 }
@@ -28,6 +29,10 @@ export interface Organization {
   bcolAccountDetails?:BcolAccountDetails
   grantAccess?:boolean
   statusCode?:string
+  decisionMadeBy?: string,
+  contactEmail?: string,
+  // eslint-disable-next-line camelcase
+  payment_settings?: any
 }
 
 export interface UpdateMemberPayload {

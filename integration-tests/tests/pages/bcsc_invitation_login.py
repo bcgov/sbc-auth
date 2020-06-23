@@ -17,10 +17,10 @@ class BCSCInvitationLoginPage(object):
         self.driver.visit(url)
 
     def is_login_button(self):
-        return self.driver.get('.log-in-btn').is_displayed()
+        return self.driver.contains('Log in with BC Services Card').is_displayed()
 
     def click_login_button(self):
-        self.driver.get('.log-in-btn').click()
+        self.driver.contains('Log in with BC Services Card').click()
 
     def is_redirect_to_bcsc(self):
         return self.driver.get('#tile_virtual_device_div_id').is_displayed()

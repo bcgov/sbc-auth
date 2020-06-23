@@ -19,19 +19,19 @@
                 I am a resident <span class="lb">of British Columbia</span>
               </div>
               <div class="account-type__details mb-6">
-                Residents of British Columbia can use their government-issued identitification or BC Services Card to verify their identity
+                Residents of British Columbia can use their government-issued BC Services Card to verify their identity
               </div>
               <div>
                 <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card" target="_blank">Learn more about the BC Services card</a>
               </div>
               <!-- State Button (Create Account) -->
               <div class="mt-9 mb-2">
-                <v-btn large :outlined="authType != 'BCSC'" block depressed color="primary" class="font-weight-bold">
+                <v-btn large depressed block color="primary" class="font-weight-bold" :outlined="authType != 'BCSC'">
                    {{ authType == 'BCSC' ? 'SELECTED' : 'SELECT' }}
                 </v-btn>
               </div>
               <div class="notary-link">
-                <router-link class="caption" to="/extraprov-info">Verify with a notary instead</router-link>
+                <router-link class="caption"  v-on:click.native="linkToNext" to="/nonbcsc-info">Verify with a notary instead</router-link>
               </div>
             </div>
           </v-card>
@@ -53,7 +53,7 @@
               </div>
               <!-- State Button (Create Account) -->
               <div class="mt-9 mb-2">
-                <v-btn large :outlined="authType != 'BCEID'" block depressed color="primary" class="font-weight-bold">
+                <v-btn large depressed block color="primary" class="font-weight-bold" :outlined="authType != 'BCEID'">
                   {{ authType == 'BCEID' ? 'SELECTED' : 'SELECT' }}
                 </v-btn>
               </div>
@@ -65,7 +65,6 @@
     <div class="form__btns d-flex mt-10">
       <v-btn
         large
-        depressed
         color="grey lighten-2"
         class="font-weight-bold"
         to="/home"
@@ -78,7 +77,6 @@
       <v-spacer></v-spacer>
       <v-btn
         large
-        depressed
         color="primary"
         class="next-btn font-weight-bold"
         :disabled="authType ==''"
@@ -95,7 +93,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { LoginSource, Pages } from '@/util/constants'
+import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import ConfigHelper from '@/util/config-helper'
 
 @Component({
@@ -115,14 +113,20 @@ export default class ChooseAuthMethodView extends Vue {
     this.authType = LoginSource.BCEID
   }
 
+  private linkToNext () {
+    ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'false')
+  }
+
   private goNext () {
   // TODO might need to set some session variables
     switch (this.authType) {
       case LoginSource.BCEID:
-        this.$router.push(`/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE}/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE_INSTRUCTIONS}`)
+        ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'true')
+        this.$router.push(`/${Pages.SETUP_ACCOUNT_NON_BCSC}/${Pages.SETUP_ACCOUNT_NON_BCSC_INSTRUCTIONS}`)
         window.scrollTo(0, 0)
         break
       case LoginSource.BCSC:
+        ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'false') // this flag shouldnt be used for bcsc users.still setting the right value
         this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
         break
     }

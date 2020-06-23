@@ -71,7 +71,7 @@ describe('BcscPanel.vue', () => {
     const createAccountLink = wrapper.vm.$el.querySelector('#create-account-link')
 
     expect(authenticatedBtns[0]).toBeDefined()
-    expect(authenticatedBtns[0].textContent).toContain('Log in with BC Services Card')
+    expect(authenticatedBtns[0].textContent).toContain('Create a BC Registries Account')
 
     expect(mobileCardLink[0]).toBeDefined()
     expect(mobileCardLink[0].textContent).toContain('set up a mobile card')

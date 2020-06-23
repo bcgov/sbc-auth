@@ -29,7 +29,7 @@ class Affidavit(BaseModel):
     __tablename__ = 'affidavit'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    document_id = Column(String(50), index=True)
+    document_id = Column(String(60), index=True)
     issuer = Column(String(250))
     status_code = Column(ForeignKey('affidavit_status.code'), nullable=False)
     decision_made_by = Column(String(250))
@@ -46,7 +46,6 @@ class Affidavit(BaseModel):
         return db.session.query(Affidavit) \
             .join(Membership, Membership.user_id == Affidavit.user_id) \
             .join(Org, Org.id == Membership.org_id) \
-            .filter(Org.created_by_id == Membership.user_id) \
             .filter(Org.id == org_id) \
             .one_or_none()  # There should be only one record at most, else throw error
 

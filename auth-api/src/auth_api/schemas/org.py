@@ -33,3 +33,5 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
     access_type = fields.String(data_key='accessType')
     payment_settings = fields.Nested('AccountPaymentSettingsSchema', many=True, data_key='payment_settings')
     status_code = fields.String(data_key='statusCode')
+    decision_made_by = fields.String(data_key='decisionMadeBy')
+    decision_made_on = fields.String(data_key='decisionMadeOn')

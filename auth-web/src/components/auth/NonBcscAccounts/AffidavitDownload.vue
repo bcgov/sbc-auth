@@ -1,63 +1,66 @@
 <template>
   <v-container class="view-container">
-    <h1 class="view-header__title mb-9">
-      Getting your identity affidavit notarized
-    </h1>
-    <p class="mb-9">
-      Download the identity affidavit template below and visit a Notary Public or laywer to have it notarized.
-    </p>
-    <p class="mb-4">
-      <strong>You will need to bring:</strong>
-    </p>
-    <div class="mb-9">
-      <ol>
-        <li>One piece of government-issued photo identification</li>
-        <li>A printed copy of the affidavit template</li>
-        <li>Payment (most notaries and laywers charge a fee for this service. Fees will vary.)</li>
-      </ol>
+    <div class="view-header flex-column mb-10">
+      <h1 class="view-header__title">
+        Getting your identity affidavit notarized
+      </h1>
+      <p class="mt-5 mb-3">
+        Download the identity affidavit template below and visit a Notary Public or laywer to have it notarized.
+      </p>
     </div>
-    <p class="mb-10">
-      Once you have your affidavit notarized, return to this website and continue to the next step. <span class="lb">You will upload your affidavit later in the account creation process.</span>
-    </p>
-    <div class="d-inline-flex flex-column pb-2">
-      <v-btn
-        x-large
-        outlined
-        depressed
-        height="70"
-        class="download-btn text-left"
-        color="primary"
-        @click="downloadAffidavit"
-      >
-        <v-icon
+    <v-card flat class="pa-sm-6 pa-lg-8">
+      <p class="mb-8">
+        <strong>You will need to bring:</strong>
+      </p>
+      <div class="mb-9">
+        <ol>
+          <li>One piece of government-issued photo identification</li>
+          <li>A printed copy of the affidavit template</li>
+          <li>Payment (most notaries and laywers charge a fee for this service. Fees will vary.)</li>
+        </ol>
+      </div>
+      <p class="mb-10">
+        Once you have your affidavit notarized, return to this website and continue to the next step. <span class="lb">You will upload your affidavit later in the account creation process.</span>
+      </p>
+      <div class="d-inline-flex flex-column pb-2">
+        <v-btn
           x-large
-          class="mr-3 ml-n2"
+          outlined
+          depressed
+          height="70"
+          class="download-btn text-left"
+          color="primary"
+          @click="downloadAffidavit"
         >
-          mdi-file-download-outline
-        </v-icon>
-        <div>
-          <strong>Download Identity Affidavit</strong>
-          <div class="file-size mb-1">
-            PDF (100KB)
+          <v-icon
+            x-large
+            class="mr-3 ml-n2"
+          >
+            mdi-file-download-outline
+          </v-icon>
+          <div>
+            <strong>Download Identity Affidavit</strong>
+            <div class="file-size mb-1">
+              PDF (100KB)
+            </div>
           </div>
-        </div>
-      </v-btn>
-      <v-alert
-        dense
-        text
-        type="error"
-        height="42"
-        class="mt-3"
-        v-if="isDownloadFailed"
-      >
-        {{downloadFailedMsg}}
-      </v-alert>
-    </div>
+        </v-btn>
+        <v-alert
+          dense
+          text
+          type="error"
+          height="42"
+          class="mt-3"
+          v-if="isDownloadFailed"
+        >
+          {{downloadFailedMsg}}
+        </v-alert>
+      </div>
+    </v-card>
     <v-divider class="my-10"></v-divider>
     <div class="d-flex">
       <v-btn
         large
-        depressed
         color="grey lighten-2"
         class="font-weight-bold"
         @click="goBack"
@@ -70,7 +73,6 @@
       <v-spacer></v-spacer>
       <v-btn
         large
-        depressed
         color="primary"
         class="font-weight-bold"
         @click="redirectToBceId"
@@ -113,7 +115,7 @@ export default class AffidavitDownload extends Vue {
   }
 
   private goBack () {
-    this.$router.push(`/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE}/${Pages.SETUP_ACCOUNT_OUT_OF_PROVINCE_INSTRUCTIONS}`)
+    this.$router.push(`/${Pages.SETUP_ACCOUNT_NON_BCSC}/${Pages.SETUP_ACCOUNT_NON_BCSC_INSTRUCTIONS}`)
     window.scrollTo(0, 0)
   }
 }
