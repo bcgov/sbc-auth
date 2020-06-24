@@ -3,7 +3,7 @@
     <p class="mb-9" v-if="isStepperView">Enter your contact information. Once your account is created, you may add additional users and assign roles.</p>
     <v-expand-transition>
       <div class="form_alert-container" v-show="formError">
-        <v-alert type="error" class="mb-0"
+        <v-alert type="error" class="mb-3"
                  :value="true"
         >
           {{formError}}
@@ -409,16 +409,23 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
           this.$router.push('/setup-account-success')
         }
       } catch (err) {
-        switch (err.response.status) {
+        // eslint-disable-next-line no-console
+        console.error(err)
+        switch (err?.response?.status) {
           case 409:
             this.formError =
                     'An account with this name already exists. Try a different account name.'
             break
           case 400:
-            if (err.response.data.code === 'MAX_NUMBER_OF_ORGS_LIMIT') {
-              this.formError = 'Maximum number of accounts reached'
-            } else {
-              this.formError = 'Invalid account name'
+            switch (err.response.data?.code) {
+              case 'MAX_NUMBER_OF_ORGS_LIMIT':
+                this.formError = 'Maximum number of accounts reached'
+                break
+              case 'ACTIVE_AFFIDAVIT_EXISTS':
+                this.formError = err.response.data.message || 'Affidavit already exists'
+                break
+              default:
+                this.formError = 'Invalid account name'
             }
             break
           default:
