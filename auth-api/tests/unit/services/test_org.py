@@ -23,7 +23,7 @@ from tests.utilities.factory_scenarios import (
     TestOrgProductsInfo, TestOrgTypeInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
-    factory_org_model, factory_org_service, factory_user_model)
+    factory_org_model, factory_org_service, factory_user_model, factory_user_model_with_contact)
 
 import auth_api.services.notification as notification
 from auth_api.exceptions import BusinessException
@@ -475,7 +475,7 @@ def test_create_org_with_a_linked_bcol_details(session, keycloak_mock):  # pylin
 
 def test_create_org_by_bceid_user(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
-    user = factory_user_model()
+    user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
 
     with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
@@ -490,7 +490,7 @@ def test_create_org_by_bceid_user(session, keycloak_mock):  # pylint:disable=unu
 
 def test_create_org_by_in_province_bceid_user(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
-    user = factory_user_model()
+    user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
 
     with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
@@ -505,7 +505,7 @@ def test_create_org_by_in_province_bceid_user(session, keycloak_mock):  # pylint
 
 def test_create_org_invalid_access_type_user(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an Org cannot be created by providing wrong access type."""
-    user = factory_user_model()
+    user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
     with pytest.raises(BusinessException) as exception:
         OrgService.create_org(TestOrgInfo.org_regular, user_id=user.id, token_info=token_info)
@@ -519,7 +519,7 @@ def test_create_org_by_verified_bceid_user(session, keycloak_mock):  # pylint:di
     # 2. Create org
     # 3. Approve Org, which will mark the affidavit as approved
     # 4. Same user create new org, which should be ACTIVE.
-    user = factory_user_model()
+    user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
@@ -546,7 +546,7 @@ def test_create_org_by_rejected_bceid_user(session, keycloak_mock):  # pylint:di
     # 2. Create org
     # 3. Reject Org, which will mark the affidavit as rejected
     # 4. Same user create new org, which should be PENDING_AFFIDAVIT_REVIEW.
-    user = factory_user_model()
+    user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
@@ -570,7 +570,7 @@ def test_send_staff_review_account_reminder_exception(session,
                                                       notify_org_mock,
                                                       keycloak_mock):  # pylint:disable=unused-argument
     """Send a reminder with exception."""
-    user = factory_user_model(TestUserInfo.user_test)
+    user = factory_user_model_with_contact(TestUserInfo.user_test)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     org_dictionary = org.as_dict()
 
