@@ -95,9 +95,9 @@ export default class UserService {
       issuer: notaryInfo.notaryName,
       contact: {
         ...notaryInfo.address,
-        email: notaryContact.email,
-        phone: notaryContact.phone,
-        phoneExtension: notaryContact.extension
+        email: notaryContact?.email,
+        phone: notaryContact?.phone,
+        phoneExtension: notaryContact?.extension
       }
 
     }

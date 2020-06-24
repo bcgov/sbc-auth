@@ -115,7 +115,7 @@ export default class App extends Mixins(NextPageMixin) {
   private setupNavigationBar (): void {
     this.navigationBarConfig = {
       titleItem: {
-        name: 'Cooperatives Online',
+        name: 'Business Registry',
         url: `/home`,
         meta: {
           requiresAuth: false,
