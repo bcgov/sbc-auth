@@ -482,6 +482,18 @@ class TestEntityInfo(dict, Enum):
         'corpTypeCode': 'TMP'
     }
 
+    temp_business_incoporated = {
+        'businessIdentifier': 'QWERTYUIO',
+        'name': 'BC1234567890',
+        'corpTypeCode': 'TMP'
+    }
+
+    business_incoporated = {
+        'businessIdentifier': 'BC1234567890',
+        'name': 'My New Incorporated Company',
+        'corpTypeCode': 'BC'
+    }
+
 
 class TestAffliationInfo(dict, Enum):
     """Test scenarios of affliation."""
