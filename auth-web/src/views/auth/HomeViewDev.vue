@@ -99,7 +99,7 @@
               <ul class="contact-info__list mb-5">
                 <li><span>Toll Free:</span> {{ $t('techSupportTollFree') }}</li>
                 <li><span>Phone:</span> {{ $t('techSupportPhone') }}</li>
-                <li><span>Email:</span> <a href="mailto:bcregistries@gov.bc.ca?subject=BC Registries - Cooperatives Online Support Request">bcregistries@gov.bc.ca</a></li>
+                <li><span>Email:</span> <a href="mailto:bcregistries@gov.bc.ca?subject=BC Registries - Business Registry Support Request">bcregistries@gov.bc.ca</a></li>
               </ul>
               <p class="mb-0"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
             </v-col>

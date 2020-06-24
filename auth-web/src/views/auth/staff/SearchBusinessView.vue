@@ -1,9 +1,9 @@
 <template>
-  <v-container>
+  <v-container class="view-container">
 
-    <div class="mt-6 mb-10">
-      <h1 class="mb-2">Staff Dashboard</h1>
-      <p>Search for businesses and manage BC Registries accounts</p>
+    <div class="view-header flex-column">
+      <h1 class="view-header__title">Staff Dashboard</h1>
+      <p class="mt-3 mb-0">Search for businesses and manage BC Registries accounts</p>
     </div>
 
     <v-expand-transition>
@@ -17,41 +17,41 @@
       </div>
     </v-expand-transition>
 
-    <v-card class="mb-4 pa-3" flat>
-      <v-card-title class="d-flex flex-column justify-start align-start">
-        <h2 class="mb-2">Search Cooperatives</h2>
-        <p class="intro-text">Enter the cooperative's Incorporation Number below to access their dashboard.</p>
-      </v-card-title>
-      <v-card-text>
-        <v-form ref="searchBusinessForm" v-on:submit.prevent="searchBusiness">
-          <v-text-field
-            filled
-            label="Incorporation Number"
-            hint="example: CP0001234"
-            persistent-hint
-            dense
-            req
-            @blur="incorpNumFormat"
-            :rules="incorpNumRules"
-            v-model="businessNumber"
-            id="txtBusinessNumber"
-          >
-          </v-text-field>
-          <v-btn
-            color="primary"
-            class="search-btn mt-0"
-            type="submit"
-            @click="search"
-            depressed
-            :disabled="!isFormValid()"
-            :loading="searchActive"
-          >Search</v-btn>
-        </v-form>
-      </v-card-text>
+    <v-card flat class="mb-4 pa-8">
+      <div class="view-header flex-column mb-10">
+        <h2 class="view-header__title">Search Cooperatives</h2>
+        <p class="mt-3 mb-0">Enter the cooperative's Incorporation Number below to access their dashboard.</p>
+      </div>
+      <v-form ref="searchBusinessForm" v-on:submit.prevent="searchBusiness">
+        <v-text-field
+          filled
+          label="Incorporation Number"
+          hint="example: CP0001234"
+          persistent-hint
+          dense
+          req
+          @blur="incorpNumFormat"
+          :rules="incorpNumRules"
+          v-model="businessNumber"
+          id="txtBusinessNumber"
+        >
+        </v-text-field>
+        <v-btn
+          color="primary"
+          class="search-btn mt-0"
+          type="submit"
+          @click="search"
+          depressed
+          :disabled="!isFormValid()"
+          :loading="searchActive"
+        >Search</v-btn>
+      </v-form>
     </v-card>
 
     <!-- Director search -->
-    <StaffAccountManagement v-if="isStaffAdmin"></StaffAccountManagement>
+    <v-card flat class="pa-8">
+      <StaffAccountManagement v-if="isStaffAdmin"></StaffAccountManagement>
+    </v-card>
 
   </v-container>
 </template>

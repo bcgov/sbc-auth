@@ -128,7 +128,7 @@
 </template>
 
 <script lang="ts">
-import { Account, Actions, Pages } from '@/util/constants'
+import { Account, Actions, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
@@ -191,8 +191,15 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private async mounted () {
   }
 
+  private get isExtraProvUser () {
+    return sessionStorage.getItem(SessionStorageKeys.UserAccountType) === LoginSource.BCEID
+  }
+
   get grantAccessText () {
-    return `I, ${this.currentUser?.fullName}, confirm that I am authorized to grant access to the account ${this.currentOrganization?.bcolAccountDetails?.orgName}`
+    // https://github.com/bcgov/entity/issues/4178
+    // TODO once above ticket is in pace , remove the if checks
+    const username = this.isExtraProvUser ? '' : `, ${this.currentUser?.fullName},`
+    return `I ${username} confirm that I am authorized to grant access to the account ${this.currentOrganization?.bcolAccountDetails?.orgName}`
   }
 
   get grantAccess () {

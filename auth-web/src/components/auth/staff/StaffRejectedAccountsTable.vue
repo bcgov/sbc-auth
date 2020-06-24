@@ -14,12 +14,10 @@
     <template v-slot:item.action="{ item }">
       <div class="btn-inline">
         <v-btn
-          :data-test="getIndexedTag('reset-password-button', item.id)"
-          depressed
           outlined
           color="primary"
-          class="mr-2 font-weight-bold"
-          small
+          class="action-btn"
+          :data-test="getIndexedTag('reset-password-button', item.id)"
           @click="view(item)"
         >View</v-btn
         >
@@ -71,7 +69,7 @@ export default class StaffRejectedAccountsTable extends Vue {
       align: 'left',
       value: 'action',
       sortable: false,
-      width: '80'
+      width: '120'
     }
   ]
 
@@ -88,12 +86,18 @@ export default class StaffRejectedAccountsTable extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
+::v-deep {
+  table {
+    table-layout: fixed;
 
-.v-list--dense {
-  .v-list-item .v-list-item__title {
-    margin-bottom: 0.25rem;
-    font-weight: 700;
+    td {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
   }
+}
+
+.action-btn {
+  width: 6rem;
 }
 </style>
