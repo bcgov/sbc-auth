@@ -26,7 +26,6 @@ export enum Pages {
     CREATE_ACCOUNT = 'setup-account',
     CREATE_NON_BCSC_ACCOUNT = 'setup-non-bcsc-account',
     PENDING_APPROVAL = 'pendingapproval',
-    PENDING_AFFIDAVIT_APPROVAL = 'pendingaffidavitapproval',
     MAIN = 'account',
     SIGNIN = 'signin',
     SIGNOUT = 'signout',
