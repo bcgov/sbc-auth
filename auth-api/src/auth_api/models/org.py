@@ -18,12 +18,13 @@ Basic users will have an internal Org that is not created explicitly, but implic
 
 from flask import current_app
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, func
-
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, contains_eager
 
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
-
 from .base_model import BaseModel
+from .contact import Contact
+from .contact_link import ContactLink
+from .db import db
 from .org_status import OrgStatus
 from .org_type import OrgType
 
@@ -78,14 +79,18 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
     @classmethod
     def search_org(cls, access_type, name, status):
         """Find all orgs with the given type."""
-        queries = []
+        query = db.session.query(Org) \
+            .outerjoin(ContactLink) \
+            .outerjoin(Contact) \
+            .options(contains_eager('contacts').contains_eager('contact'))
+
         if access_type:
-            queries.append(Org.access_type.in_(access_type.split(',')))
+            query = query.filter(Org.access_type.in_(access_type.split(',')))
         if name:
-            queries.append(Org.name.ilike(f'%{name}%'))
+            query = query.filter(Org.name.ilike(f'%{name}%'))
         if status:
-            queries.append(Org.status_code == status.upper())
-        return cls.query.filter(*queries).all()
+            query = query.filter(Org.status_code == status.upper())
+        return query.all()
 
     @classmethod
     def find_by_org_access_type(cls, org_type):

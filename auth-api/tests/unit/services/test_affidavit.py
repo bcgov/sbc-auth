@@ -23,7 +23,7 @@ from auth_api.services import Org as OrgService
 from auth_api.utils.enums import AffidavitStatus, LoginSource, OrgStatus
 
 from tests.utilities.factory_scenarios import TestJwtClaims, TestAffidavit, TestOrgInfo
-from tests.utilities.factory_utils import factory_user_model
+from tests.utilities.factory_utils import factory_user_model, factory_user_model_with_contact
 
 
 def test_create_affidavit(session, keycloak_mock):  # pylint:disable=unused-argument
@@ -52,7 +52,7 @@ def test_create_affidavit_duplicate(session, keycloak_mock):  # pylint:disable=u
 
 def test_approve_org(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an Affidavit can be approved."""
-    user = factory_user_model()
+    user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
@@ -70,7 +70,7 @@ def test_approve_org(session, keycloak_mock):  # pylint:disable=unused-argument
 
 def test_reject_org(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an Affidavit can be rejected."""
-    user = factory_user_model()
+    user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()

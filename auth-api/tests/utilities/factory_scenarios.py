@@ -81,6 +81,7 @@ class TestJwtClaims(dict, Enum):
                 'edit'
             ]
         },
+        'email': 'test@test.com',
         'loginSource': LoginSource.BCEID.value
     }
 
