@@ -196,6 +196,8 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   }
 
   get grantAccessText () {
+    // https://github.com/bcgov/entity/issues/4178
+    // TODO once above ticket is in pace , remove the if checks
     const username = this.isExtraProvUser ? '' : `, ${this.currentUser?.fullName},`
     return `I ${username} confirm that I am authorized to grant access to the account ${this.currentOrganization?.bcolAccountDetails?.orgName}`
   }
