@@ -20,7 +20,7 @@
         </div>
       </v-card-text>
     </v-card>
-    <v-divider class="my-10"></v-divider>
+    <v-divider class="my-9"></v-divider>
     <div class="d-flex">
       <v-btn
         large
