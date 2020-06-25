@@ -86,7 +86,7 @@
             <v-col cols="12" md="7">
               <h3 class="mb-6">Need more information?</h3>
               <p class="mb-4">To learn more about Cooperative Associations in British Columbia, please
-                <a :href="coopAssocUrl" target="_blank" rel="noopener">
+                <a :href="coopAssocUrl" target="_blank" rel="noopener noreferrer">
                   visit the Cooperative Associations information page
                 </a>.
               </p>
@@ -95,7 +95,7 @@
                 <span>Cooperatives Online Frequently Asked Questions</span>
               </a>
               <p class="mt-4">To learn more about Benefit Companies in British Columbia, please
-                <a :href="bcCompUrl" target="_blank" rel="noopener">
+                <a :href="bcCompUrl" target="_blank" rel="noopener noreferrer">
                   visit the Benefit Companies information page
                 </a>.
               </p>
