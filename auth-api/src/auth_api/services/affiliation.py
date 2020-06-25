@@ -194,6 +194,11 @@ class Affiliation:
         nr_json = Affiliation._get_nr_details(business_identifier, bearer_token)
 
         if nr_json:
+            # Verify corp type
+            corp_type_code = nr_json.get('requestTypeCd')
+            if corp_type_code not in (CorpType.BC.value):
+                raise BusinessException(Error.NR_INVALID_CORP_TYPE, None)
+
             status = nr_json.get('state')
             nr_phone = nr_json.get('applicants').get('phoneNumber')
             nr_email = nr_json.get('applicants').get('emailAddress')
@@ -220,7 +225,7 @@ class Affiliation:
                 entity = EntityService.save_entity({
                     'businessIdentifier': business_identifier,
                     'name': name,
-                    'corpTypeCode': CorpType.NR.value,
+                    'corpTypeCode': corp_type_code,
                     'passCodeClaimed': True
                 })
             # Create an affiliation with org
