@@ -29,7 +29,7 @@ def test_documents_returns_200(client, jwt, session):  # pylint:disable=unused-a
     rv = client.get('/api/v1/documents/termsofuse', headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.json.get('version_id') == '2'
+    assert rv.json.get('version_id') == '3'
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
     rv = client.get('/api/v1/documents/termsofuse', headers=headers, content_type='application/json')
@@ -67,8 +67,8 @@ def test_documents_returns_latest_always(client, jwt, session):  # pylint:disabl
     version_id_1 = '20'  # putting higher numbers so that version number doesnt collide with existing in db
     factory_document_model(version_id_1, 'termsofuse', html_content_1)
 
-    html_content_2 = '<HTML>2</HTML>'
-    version_id_2 = '21'  # putting higher numbers so that version number doesnt collide with existing in db
+    html_content_2 = '<HTML>3</HTML>'
+    version_id_2 = '31'  # putting higher numbers so that version number doesnt collide with existing in db
     factory_document_model(version_id_2, 'termsofuse', html_content_2)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
