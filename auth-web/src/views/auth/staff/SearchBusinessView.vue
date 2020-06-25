@@ -49,7 +49,7 @@
 
     <!-- Director search -->
     <v-card flat class="pa-8">
-      <StaffAccountManagement v-if="isStaffAdmin"></StaffAccountManagement>
+      <StaffAccountManagement v-if="isAdmin"></StaffAccountManagement>
     </v-card>
 
   </v-container>
@@ -87,7 +87,6 @@ export default class SearchBusinessView extends Vue {
   private searchedBusinessNumber = ''
   private searchActive = false
   private errorMessage = ''
-  private isStaffAdmin: boolean = false
   readonly currentUser!: KCUserProfile
 
   private readonly searchBusiness!: (businessNumber: string) => void
@@ -101,8 +100,8 @@ export default class SearchBusinessView extends Vue {
     searchBusinessForm: HTMLFormElement
   }
 
-  async mounted () {
-    this.isStaffAdmin = this.currentUser?.roles?.includes(Role.StaffAdmin)
+  private get isAdmin (): boolean {
+    return (this.currentUser?.roles?.includes(Role.StaffAdmin) || this.currentUser?.roles?.includes(Role.StaffAdminBCOL))
   }
 
   private isFormValid (): boolean {
