@@ -62,7 +62,8 @@
         </v-col>
       </v-row>
     </div>
-    <div class="form__btns d-flex mt-10">
+    <v-divider class="my-6"></v-divider>
+    <div class="form__btns d-flex mt-8">
       <v-btn
         large
         color="grey lighten-2"
@@ -158,12 +159,17 @@ export default class ChooseAuthMethodView extends Vue {
     }
   }
 
-  .active .v-icon {
-    color: var(--v-primary-base) !important;
-  }
-
   .theme--light.v-card.v-card--outlined.active {
     border-color: var(--v-primary-base);
+  }
+
+  .account-card .v-icon {
+    color: var(--v-grey-lighten1) !important;
+    font-size: 3rem !important;
+  }
+
+  .account-card.active .v-icon {
+    color: var(--v-primary-base) !important;
   }
 
   .account-type {
@@ -172,11 +178,6 @@ export default class ChooseAuthMethodView extends Vue {
 
   .account-type__icon {
     flex: 0 0 auto;
-
-    .v-icon {
-      color: var(--v-grey-lighten1) !important;
-      font-size: 3rem !important;
-    }
   }
 
   .account-type__title {

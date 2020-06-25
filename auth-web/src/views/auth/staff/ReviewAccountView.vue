@@ -10,12 +10,12 @@
 
     <div v-if="!isLoading">
       <!-- Breadcrumbs / Back Navigation -->
-      <nav class="crumbs">
-        <div class="pt-5 pb-3">
-          <v-btn large text color="primary" class="back-btn pr-2 pl-1" @click="goBack()">
-            <v-icon small class="mr-1">mdi-arrow-left</v-icon>
+      <nav class="crumbs py-6">
+        <div>
+          <router-link to="/searchbusiness">
+            <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
             <span>Back to Staff Dashboard</span>
-          </v-btn>
+          </router-link>
         </div>
       </nav>
       <div class="view-header flex-column">
@@ -38,15 +38,22 @@
                 </v-btn>
               </section>
 
-              <v-divider class="mt-10 mb-8"></v-divider>
+              <v-divider class="mt-11 mb-8"></v-divider>
 
               <!-- Account Info Section -->
               <section>
                 <h2 class="mb-3">2. Account Information</h2>
-                <v-row>
+                <v-row v-if="accountUnderReview.orgType === 'BASIC'">
                   <v-col class="col-12 col-sm-3">
-                    <span v-if="accountUnderReview.orgType === 'PREMIUM'">Account Name <br/> &amp; BC Online Details</span>
-                    <span v-else>Account Name</span>
+                    Account Name
+                  </v-col>
+                  <v-col>
+                    {{ accountUnderReview.name }}
+                  </v-col>
+                </v-row>
+                <v-row v-else>
+                  <v-col class="col-12 col-sm-3">
+                    <span>Account Name <br/> &amp; BC Online Details</span>
                   </v-col>
                   <v-col>
                     <v-alert dark color="primary" class="bcol-acc mb-0 px-7 py-5">
@@ -132,9 +139,7 @@
                   </v-row>
               </section>
 
-              <v-divider class="mt-8 mb-6"></v-divider>
-
-              <v-row class="form__btns">
+              <!-- <v-row class="form__btns">
                 <v-col class="pb-0" v-if="isPendingReviewPage">
                   <v-btn large :outlined="!approveSelected" color="success" class="font-weight-bold mr-2 select-button" @click="selectApprove()">
                     <span v-if="approveSelected"><v-icon left class="mr-2">mdi-check</v-icon>Approved</span>
@@ -148,33 +153,57 @@
                 <v-col class="pb-0 text-right">
                   <v-btn large depressed :loading="isSaving" :disabled="!canSelect" class="grey lighten-3 font-weight-bold" @click="saveSelection()">DONE</v-btn>
                 </v-col>
-              </v-row>
+              </v-row> -->
 
           </v-col>
 
           <!-- Account Status Column -->
-          <v-col class="col-12 col-md-4 pa-6 pa-md-8">
-            <h2 class="mb-5">Account Status</h2>
-            <v-row>
-              <v-col class="col-12 col-sm-5 py-2">Status</v-col>
-              <v-col class="py-2">{{ statusLabel }}</v-col>
-            </v-row>
-            <v-row v-if="!isPendingReviewPage">
-              <v-col class="col-12 col-sm-5 py-2">
-                <span v-if="accountUnderReview.statusCode === 'ACTIVE'">Approved By</span>
-                <span v-if="accountUnderReview.statusCode === 'REJECTED'">Rejected By</span>
-              </v-col>
-              <v-col class="py-2">
-                {{ accountUnderReviewAffidavitInfo.decisionMadeBy }}<br/>
-                {{ formatDate(accountUnderReviewAffidavitInfo.decisionMadeOn) }}
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col class="col-12 col-sm-5 py-2">Created On</v-col>
-              <v-col class="py-2">{{ formatDate(accountUnderReview.created) }}</v-col>
-            </v-row>
+          <v-col class="col-12 col-md-4 pl-0 pt-8 pr-8 d-flex">
+            <v-divider vertical class="mb-4 mr-8"></v-divider>
+            <div class="flex-grow-1">
+              <h2 class="mb-5">Account Status</h2>
+              <v-row>
+                <v-col class="col-12 col-sm-5 py-2">Status</v-col>
+                <v-col class="py-2">{{ statusLabel }}</v-col>
+              </v-row>
+              <v-row v-if="!isPendingReviewPage">
+                <v-col class="col-12 col-sm-5 py-2">
+                  <span v-if="accountUnderReview.statusCode === 'ACTIVE'">Approved By</span>
+                  <span v-if="accountUnderReview.statusCode === 'REJECTED'">Rejected By</span>
+                </v-col>
+                <v-col class="py-2">
+                  {{ accountUnderReviewAffidavitInfo.decisionMadeBy }}<br/>
+                  {{ formatDate(accountUnderReviewAffidavitInfo.decisionMadeOn) }}
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col class="col-12 col-sm-5 py-2">Created On</v-col>
+                <v-col class="py-2">{{ formatDate(accountUnderReview.created) }}</v-col>
+              </v-row>
+            </div>
           </v-col>
         </v-row>
+
+        <v-container v-if="canSelect" class="pa-8 pt-0">
+          <v-divider class="mb-10"></v-divider>
+          <div class="form-btns d-flex justify-space-between">
+            <div>
+              <v-btn large :outlined="!approveSelected" color="success" class="font-weight-bold mr-2 select-button" @click="selectApprove()">
+                <v-icon left class="mr-3" v-if="approveSelected">mdi-check</v-icon>
+                <span>{{approveSelected ? 'Approved' : 'Approve'}}</span>
+              </v-btn>
+              <v-btn large :outlined="!rejectSelected" color="red" class="font-weight-bold white--text select-button" @click="selectReject()">
+                <v-icon left class="mr-3" v-if="rejectSelected">mdi-close</v-icon>
+                <span>{{rejectSelected ? 'Rejected' : 'Reject'}}</span>
+              </v-btn>
+            </div>
+            <div>
+              <v-btn large color="primary" class="font-weight-bold mr-2" :loading="isSaving" :disabled="!approveSelected && !rejectSelected" @click="saveSelection()">Save and exit</v-btn>
+              <v-btn large depressed to="/searchbusiness">Cancel</v-btn>
+            </div>
+          </div>
+        </v-container>
+
       </v-card>
     </div>
   </v-container>
@@ -308,12 +337,6 @@ export default class ReviewAccountView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  .main-col {
-    border-color: lightgray;
-    border-right-style: solid;
-    border-right-width: 1px;
-  }
-
   // BC Online Account Information
   .bcol-acc__name {
     font-size: 1.125rem;
@@ -353,5 +376,20 @@ export default class ReviewAccountView extends Vue {
 
   .select-button {
     width: 8.75rem;
+  }
+
+  .crumbs a {
+    font-size: 0.875rem;
+    text-decoration: none;
+
+    i {
+      margin-top: -2px;
+    }
+  }
+
+  .crumbs a:hover {
+    span {
+      text-decoration: underline;
+    }
   }
 </style>
