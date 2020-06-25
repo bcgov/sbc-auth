@@ -24,6 +24,15 @@
       @is-form-valid="isNotaryContactValidFn"
       class="pt-5"
     ></NotaryContactForm>
+    <v-alert
+      dense
+      text
+      type="error"
+      class="mt-6"
+      v-if="errorMessage"
+    >
+      {{errorMessage}}
+    </v-alert>
     <v-row class="mt-8">
       <v-col cols="12" class="form__btns py-0 d-inline-flex">
         <v-btn large depressed color="default" @click="goBack">
@@ -124,6 +133,7 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
   @Prop() cancelUrl: string
 
   private async mounted () {
+    this.errorMessage = ''
     if (!this.notaryInformation) {
       this.setNotaryInformation({ notaryName: '', address: {} })
     }
@@ -131,12 +141,14 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
 
   private async next () {
     try {
+      this.errorMessage = ''
       this.saving = true
       // save the file here so that in the final steps its less network calls to make
       await this.uploadPendingDocsToStorage()
       this.stepForward(this.currentOrganization?.orgType === Account.PREMIUM)
     } catch (error) {
       this.saving = false
+      this.errorMessage = `Something happend while uploading the document, please try again`
       // eslint-disable-next-line no-console
       console.error(error)
     }
@@ -155,6 +167,7 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
   }
 
   private fileSelected (file) {
+    this.errorMessage = ''
     this.setAffidavitDoc(file)
   }
 
