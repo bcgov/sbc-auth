@@ -92,12 +92,12 @@ class Affiliation:
         # NR Numbers
         nr_numbers = nr_number_name_dict.keys()
 
-        new_data: list = []
+        filtered_affiliations: list = []
         for entity in data:
             if entity['corpType']['code'] == CorpType.NR.value:
                 # If there is a TMP affiliation present for the NR, do not show NR
                 if not entity['businessIdentifier'] in tmp_business_list:
-                    new_data.append(entity)
+                    filtered_affiliations.append(entity)
 
             elif entity['corpType']['code'] == CorpType.TMP.value:
 
@@ -110,12 +110,12 @@ class Affiliation:
                     if entity['name'] in nr_numbers:
                         entity['name'] = nr_number_name_dict[entity['name']]
 
-                    new_data.append(entity)
+                    filtered_affiliations.append(entity)
             else:
-                new_data.append(entity)
+                filtered_affiliations.append(entity)
 
         current_app.logger.debug('>find_affiliations_by_org_id')
-        return new_data
+        return filtered_affiliations
 
     @staticmethod
     def create_affiliation(org_id, business_identifier, pass_code=None, token_info: Dict = None):
