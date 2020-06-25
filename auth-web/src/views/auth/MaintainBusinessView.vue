@@ -56,8 +56,8 @@
                   </v-list-item>
                   <v-list-item>
                     <v-list-item-content>
-                      <v-list-item-subtitle>Toll Free: 1-877-526-1526</v-list-item-subtitle>
-                      <v-list-item-subtitle class="my-1">Phone: 250 387-7848</v-list-item-subtitle>
+                      <v-list-item-subtitle>Toll Free: <a href="tel:+1-877-526-1526">1-877-526-1526</a></v-list-item-subtitle>
+                      <v-list-item-subtitle class="my-1">Phone: <a href="tel:+1-250-387-7848">250 387-7848</a></v-list-item-subtitle>
                       <v-list-item-subtitle>Email: <a href="mailto:bcregistries@gov.bc.ca?subject=BC Registries and Online Services - Support Request">bcregistries@gov.bc.ca</a></v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
@@ -70,7 +70,7 @@
                   <v-list-item>
                     <v-list-item-content>
                       <v-list-item-subtitle>
-                        <a href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card" rel="noopener noreferrer" target="_blank">
+                        <a :href="faqUrl" rel="noopener noreferrer" target="_blank">
                           Frequently Asked Questions
                         </a>
                       </v-list-item-subtitle>
@@ -104,6 +104,7 @@ import { User } from '@/models/user'
 })
 export default class MaintainBusinessView extends Vue {
   private contactUsPopover = false
+  private readonly faqUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card'
   private readonly learnMoreUrl = 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business-management/permits-licences-and-registration/registries-guides/info_36_com_-_maintaining_your_bc_company.pdf'
   private readonly bulletPoints: Array<any> = [
     { text: 'Once your business is incorporated or registered you are required to keep information about your business up to date with the Registry.' },
