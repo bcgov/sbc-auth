@@ -276,6 +276,8 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     MINIO_BUCKET_ACCOUNTS = 'accounts'
     MINIO_SECURE = False
 
+    STAFF_ADMIN_EMAIL = 'test@test.com'
+
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
     """Production environment configuration."""
