@@ -13,9 +13,9 @@
 # limitations under the License.
 """Service for managing Organization data."""
 import json
+from datetime import datetime
 from typing import Dict, Tuple
 
-from datetime import datetime
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
@@ -31,17 +31,16 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
-from auth_api.schemas import OrgSchema
+from auth_api.schemas import ContactSchema, OrgSchema
 from auth_api.utils.enums import AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentType, Status
 from auth_api.utils.roles import ADMIN, VALID_STATUSES
 from auth_api.utils.util import camelback2snake
-
 from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
 from .contact import Contact as ContactService
 from .keycloak import KeycloakService
-from .rest_service import RestService
 from .notification import send_email
+from .rest_service import RestService
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -455,7 +454,12 @@ class Org:  # pylint: disable=too-many-public-methods
             org_models = OrgModel.search_org(kwargs.get('access_type', None), kwargs.get('name', None),
                                              kwargs.get('status', None))
             for org in org_models:
-                orgs['orgs'].append(Org(org).as_dict())
+                org_dict = Org(org).as_dict()
+                org_dict['contacts'] = []
+                if org.contacts:
+                    org_dict['contacts'].append(
+                        ContactSchema(exclude=('links',)).dump(org.contacts[0].contact, many=False))
+                orgs['orgs'].append(org_dict)
         return orgs
 
     @staticmethod
@@ -495,7 +499,9 @@ class Org:  # pylint: disable=too-many-public-methods
         # TODO Publish to activity stream
 
         org.save()
-        admin_email = org.members[0].user.email
+
+        # Find admin email address
+        admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
         Org.send_approved_rejected_notification(admin_email, org.name, org.status_code, origin_url)
 
         current_app.logger.debug('>find_affidavit_by_org_id ')

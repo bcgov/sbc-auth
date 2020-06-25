@@ -6,22 +6,21 @@
       <p class="mt-3 mb-0">Search for businesses and manage BC Registries accounts</p>
     </div>
 
-    <v-expand-transition>
-      <div v-show="errorMessage">
-        <v-alert
-          type="error"
-          icon="mdi-alert-circle"
-          class="mb-0"
-        >{{errorMessage}} <strong>{{searchedBusinessNumber}}</strong>
-        </v-alert>
-      </div>
-    </v-expand-transition>
-
     <v-card flat class="mb-4 pa-8">
       <div class="view-header flex-column mb-10">
         <h2 class="view-header__title">Search Cooperatives</h2>
         <p class="mt-3 mb-0">Enter the cooperative's Incorporation Number below to access their dashboard.</p>
       </div>
+      <v-expand-transition>
+        <div v-show="errorMessage">
+          <v-alert
+            type="error"
+            icon="mdi-alert-circle"
+            class="mb-0"
+          >{{errorMessage}} <strong>{{searchedBusinessNumber}}</strong>
+          </v-alert>
+        </div>
+      </v-expand-transition>
       <v-form ref="searchBusinessForm" v-on:submit.prevent="searchBusiness">
         <v-text-field
           filled

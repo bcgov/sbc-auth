@@ -18,14 +18,14 @@ Test suite to ensure that the Affiliation service routines are working as expect
 from unittest.mock import patch
 
 import pytest
-from tests.utilities.factory_scenarios import TestEntityInfo, TestOrgTypeInfo
-from tests.utilities.factory_utils import factory_entity_service, factory_org_service
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.services import Affiliation as AffiliationService
+from tests.utilities.factory_scenarios import TestEntityInfo, TestOrgTypeInfo
+from tests.utilities.factory_utils import factory_entity_service, factory_org_service
 
 
 def test_create_affiliation(session, auth_mock):  # pylint:disable=unused-argument
@@ -383,3 +383,64 @@ def test_find_affiliations_for_new_business(session, auth_mock, nr_mock):  # pyl
     assert affiliated_entities
     assert len(affiliated_entities) == 1
     assert affiliated_entities[0]['businessIdentifier'] == business_identifier1
+
+
+def test_find_affiliations_for_new_business_incorporation_complete(session, auth_mock,
+                                                                   nr_mock):  # pylint:disable=unused-argument
+    """Assert that an Affiliation can be created."""
+    # Create 2 entities - 1 with type NR and another one TMP
+    # Affiliate to an org
+    # Get should return only 1 - TMP
+    # Delete NR affiliation
+    # Then delete one affiliation - TMP
+    # Re-add the TMP affiliation with name as the BC...
+
+    nr_entity = factory_entity_service(entity_info=TestEntityInfo.name_request)
+    entity_dictionary1 = nr_entity.as_dict()
+    nr_business_identifier = entity_dictionary1['businessIdentifier']
+
+    tmp_entity = factory_entity_service(entity_info=TestEntityInfo.tenp_business)
+    entity_dictionary2 = tmp_entity.as_dict()
+    tmp_business_identifier = entity_dictionary2['businessIdentifier']
+
+    org_service = factory_org_service()
+    org_dictionary = org_service.as_dict()
+    org_id = org_dictionary['id']
+
+    # create NR affiliation
+    AffiliationService.create_new_business_affiliation(org_id,
+                                                       business_identifier=nr_business_identifier,
+                                                       phone='1112223333')
+    # create second row in affiliation table
+    AffiliationService.create_affiliation(org_id,
+                                          tmp_business_identifier,
+                                          {})
+
+    affiliated_entities = AffiliationService.find_affiliated_entities_by_org_id(org_id)
+
+    assert affiliated_entities
+    assert len(affiliated_entities) == 1
+    assert affiliated_entities[0]['businessIdentifier'] == tmp_business_identifier
+
+    # Delete the NR And TEMP IA affiliation and entities
+    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=tmp_business_identifier)
+    tmp_entity.delete()
+    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=nr_business_identifier)
+    nr_entity.delete()
+
+    # Create entities for a TEMP with name as BC... number and incorporated entity
+    tmp_inc_entity = factory_entity_service(entity_info=TestEntityInfo.temp_business_incoporated)
+    entity_dictionary1 = tmp_inc_entity.as_dict()
+    tmp_business_incorporated_identifier = entity_dictionary1['businessIdentifier']
+    AffiliationService.create_affiliation(org_id, business_identifier=tmp_business_incorporated_identifier)
+
+    inc_entity = factory_entity_service(entity_info=TestEntityInfo.business_incoporated)
+    entity_dictionary1 = inc_entity.as_dict()
+    business_incorporated_identifier = entity_dictionary1['businessIdentifier']
+    AffiliationService.create_affiliation(org_id, business_identifier=business_incorporated_identifier)
+
+    affiliated_entities = AffiliationService.find_affiliated_entities_by_org_id(org_id)
+
+    assert affiliated_entities
+    assert len(affiliated_entities) == 1
+    assert affiliated_entities[0]['businessIdentifier'] == business_incorporated_identifier

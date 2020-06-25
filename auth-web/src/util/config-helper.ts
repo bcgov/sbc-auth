@@ -51,6 +51,10 @@ export default class ConfigHelper {
     return ConfigHelper.getValue('BCEID_OSD_LINK')
   }
 
+  static getAffidavitSize () {
+    return ConfigHelper.getValue('AFFIDAVIT_FILE_SIZE')
+  }
+
   static getAuthAPIUrl () {
     return ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')
   }

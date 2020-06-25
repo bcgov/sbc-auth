@@ -41,7 +41,7 @@
           <div>
             <strong>Download Identity Affidavit</strong>
             <div class="file-size mb-1">
-              PDF (100KB)
+              PDF <span v-once v-if="affidavitSize">({{affidavitSize}})</span>
             </div>
           </div>
         </v-btn>
@@ -57,7 +57,7 @@
         </v-alert>
       </div>
     </v-card>
-    <v-divider class="my-10"></v-divider>
+    <v-divider class="my-9"></v-divider>
     <div class="d-flex">
       <v-btn
         large
@@ -97,6 +97,7 @@ import { Pages } from '@/util/constants'
 export default class AffidavitDownload extends Vue {
   private downloadFailedMsg = 'Failed download'
   private isDownloadFailed = false
+  private affidavitSize = ConfigHelper.getAffidavitSize() || ''
 
   private async downloadAffidavit () {
     try {
