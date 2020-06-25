@@ -1,5 +1,5 @@
 <template>
-  <v-btn large outlined color="bcgovblue" class="font-weight-bold"
+  <v-btn large outlined color="bcgovblue" class="learn-more-btn font-weight-bold"
     :href="redirectUrl"
     target="_blank" rel="noopener noreferrer">
     Learn More
@@ -14,3 +14,13 @@ export default class LearnMoreButton extends Vue {
   @Prop() redirectUrl: string
 }
 </script>
+<style lang="scss" scoped>
+  @import '$assets/scss/theme.scss';
+
+  .learn-more-btn:hover {
+    color: white !important;
+    background: $BCgovBlue5;
+    opacity: .8;
+  }
+
+</style>

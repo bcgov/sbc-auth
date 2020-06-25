@@ -42,6 +42,9 @@ export default new Vuetify({
         bcgovblue2: {
           base: '#38598A'
         },
+        bcgovblueLink: {
+          base: '#1A5A96'
+        },
         bcgovgold: {
           base: '#fcba19'
         },
