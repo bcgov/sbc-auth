@@ -81,6 +81,7 @@ class TestJwtClaims(dict, Enum):
                 'edit'
             ]
         },
+        'email': 'test@test.com',
         'loginSource': LoginSource.BCEID.value
     }
 
@@ -479,6 +480,18 @@ class TestEntityInfo(dict, Enum):
         'businessIdentifier': 'QWERTYUIO',
         'name': 'NR 1234567',
         'corpTypeCode': 'TMP'
+    }
+
+    temp_business_incoporated = {
+        'businessIdentifier': 'QWERTYUIO',
+        'name': 'BC1234567890',
+        'corpTypeCode': 'TMP'
+    }
+
+    business_incoporated = {
+        'businessIdentifier': 'BC1234567890',
+        'name': 'My New Incorporated Company',
+        'corpTypeCode': 'BC'
     }
 
 

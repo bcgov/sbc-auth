@@ -30,6 +30,7 @@ def send_email(subject: str, sender: str, recipients: str, html_body: str):  # p
             'body': html_body
         }
     }
+
     notify_response = RestService.post(notify_url, data=notify_body)
     current_app.logger.info('send_email notify_response')
     if notify_response:
