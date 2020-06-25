@@ -1,6 +1,6 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import BcscPanel from '@/components/auth/BcscPanel.vue'
-import HomeViewDev from '@/views/auth/HomeViewDev.vue'
+import HomeView from '@/views/auth/HomeView.vue'
 import InfoStepper from '@/components/auth/stepper/InfoStepper.vue'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
 import TestimonialQuotes from '@/components/auth/TestimonialQuotes.vue'
@@ -62,7 +62,7 @@ describe('HomeView.vue', () => {
       }
     })
 
-    wrapper = mount(HomeViewDev, {
+    wrapper = mount(HomeView, {
       store,
       localVue,
       router,
