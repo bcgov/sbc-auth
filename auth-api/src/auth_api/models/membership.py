@@ -20,7 +20,7 @@ from sqlalchemy import Column, ForeignKey, Integer, and_, desc, func
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.enums import Status
-from auth_api.utils.roles import ADMIN, COORDINATOR, VALID_STATUSES, VALID_ORG_STATUSES
+from auth_api.utils.roles import ADMIN, COORDINATOR, USER, VALID_STATUSES, VALID_ORG_STATUSES
 
 from .base_model import BaseModel
 from .db import db
@@ -157,3 +157,23 @@ class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
         count_q = query.statement.with_only_columns([func.count()]).order_by(None)
         count = query.session.execute(count_q).scalar()
         return count
+
+    def reset(self):
+        """Reset member."""
+        if self.membership_type_code == 'ADMIN':
+            # if an org only have one admin, we need to prompt a coordiantor or user to admin to avoid failure.
+            members = self.find_members_by_org_id_by_status_by_roles(self.org_id, (ADMIN, ADMIN))
+            count_members = len(members)
+            if count_members == 1:
+                members = self.find_members_by_org_id_by_status_by_roles(self.org_id, (COORDINATOR, USER))
+                for member in members:
+                    member.membership_type_code = 'ADMIN'
+                    db.session.add(member)
+                    db.session.commit()
+                    member.modified_by = None
+                    member.modified_by_id = None
+                    db.session.add(member)
+                    db.session.commit()
+                    break
+
+        super().reset()

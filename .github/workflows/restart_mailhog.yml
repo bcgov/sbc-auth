@@ -1,0 +1,25 @@
+name: Restart Mailhog service
+
+on:
+  schedule:
+    # At 23:30 every day.
+    - cron: "30 23 * * *"
+
+jobs:
+  restart-mailhog:
+    runs-on: ubuntu-latest
+    if: github.repository == 'bcgov/sbc-auth'
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install tools
+        run: |
+          ./scripts/install_tools.sh
+          oc version
+          op --version
+      - name: Login Openshift and Restart mailhog
+        run: |
+          oc ${{ secrets.oc_parameters }}
+          oc project ${{ secrets.OPENSHIFT_REPOSITORY_DEV }}
+          oc scale --replicas=0 deployment/mailhog
+          oc scale --replicas=1 deployment/mailhog
