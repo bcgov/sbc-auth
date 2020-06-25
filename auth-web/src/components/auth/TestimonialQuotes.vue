@@ -1,6 +1,7 @@
 <template>
   <section id="testimonials-container">
     <v-container class="quote-container">
+<!--      <div class="fading"> *REMOVED UNTIL SECOND QUOTE IS PROVIDED* -->
       <div>
         <p class="quote-text">{{quotes[quoteIndex].text}}</p>
         <p class="quote-author">&ndash; {{quotes[quoteIndex].author}}</p>

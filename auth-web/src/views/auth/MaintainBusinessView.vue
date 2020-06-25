@@ -46,7 +46,7 @@
                   <v-list-item class="pb-3">
                     <v-list-item-title class="popover-title mt-5 font-weight-bold">Don't have a Passcode for your Cooperative<br>Association?</v-list-item-title>
                     <v-list-item-action class="mt-0">
-                      <v-icon @click="contactUs = false" color="bcgovblueLink">mdi-close</v-icon>
+                      <v-icon @click="contactUsPopover = false" color="bcgovblueLink">mdi-close</v-icon>
                     </v-list-item-action>
                   </v-list-item>
                   <v-list-item>
