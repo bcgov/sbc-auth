@@ -37,7 +37,7 @@
            :redirect-url="learnMoreUrl"
           />
           <p v-if="!userProfile" class="mt-5">Don't have your Cooperative Passcode?
-            <v-menu top offset-y v-model="contactUs" :close-on-content-click="false" attach="#maintain-info-container">
+            <v-menu top offset-y v-model="contactUsPopover" :close-on-content-click="false" attach="#maintain-info-container">
               <template v-slot:activator="{ on, attrs }">
                 <span v-bind="attrs" v-on="on" class="popover-activator">Contact Us</span>
               </template>
@@ -99,7 +99,7 @@ import { User } from '@/models/user'
   }
 })
 export default class MaintainBusinessView extends Vue {
-  private contactUs = false
+  private contactUsPopover = false
   private readonly learnMoreUrl = 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business-management/permits-licences-and-registration/registries-guides/info_36_com_-_maintaining_your_bc_company.pdf'
   private readonly bulletPoints: Array<any> = [
     { text: 'Once your business is incorporated or registered you are required to keep information about your business up to date with the Registry.' },
