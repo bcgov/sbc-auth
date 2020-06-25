@@ -15,7 +15,7 @@ import DashboardView from '@/views/auth/DashboardView.vue'
 import DecideBusinessView from '@/views/auth/DecideBusinessView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
-import Home from '@/views/auth/Home.vue'
+import HomeView from '@/views/auth/HomeView.vue'
 import IncorpOrRegisterView from '@/views/auth/IncorpOrRegisterView.vue'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import MaintainBusinessView from '@/views/auth/MaintainBusinessView.vue'
@@ -58,9 +58,29 @@ export function getRoutes (): RouteConfig[] {
     {
       path: '/home',
       name: 'home',
-      component: Home,
-      children: getEnvChildRoutes(),
-      meta: { showNavBar: !ConfigHelper.getLaunchFeatureFlag() }
+      component: HomeView,
+      children: [
+        {
+          path: '',
+          redirect: 'decide-business'
+        },
+        {
+          path: 'decide-business',
+          component: DecideBusinessView
+        },
+        {
+          path: 'request-name',
+          component: RequestNameView
+        },
+        {
+          path: 'incorporate-or-register',
+          component: IncorpOrRegisterView
+        },
+        {
+          path: 'maintain-business',
+          component: MaintainBusinessView
+        }
+      ]
     },
     {
       path: '/business',
@@ -347,35 +367,4 @@ export function getRoutes (): RouteConfig[] {
   ]
 
   return routes
-}
-
-// Get the child routes depending on environment
-const getEnvChildRoutes = () => {
-  return ConfigHelper.getLaunchFeatureFlag() ? [
-    {
-      path: '',
-      redirect: 'decide-business'
-    },
-    {
-      path: 'decide-business',
-      component: DecideBusinessView,
-      meta: { showNavBar: false }
-    },
-    {
-      path: 'request-name',
-      component: RequestNameView,
-      meta: { showNavBar: false }
-    },
-    {
-      path: 'incorporate-or-register',
-      component: IncorpOrRegisterView,
-      meta: { showNavBar: false }
-    },
-    {
-      path: 'maintain-business',
-      component: MaintainBusinessView,
-      meta: { showNavBar: false }
-    }
-  ]
-    : []
 }

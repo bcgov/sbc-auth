@@ -37,7 +37,7 @@
            :redirect-url="learnMoreUrl"
           />
           <p v-if="!userProfile" class="mt-5">Don't have your Cooperative Passcode?
-            <v-menu top :offset-y="true" v-model="contactUs" :close-on-content-click="false" attach="#maintain-info-container">
+            <v-menu top offset-y v-model="contactUs" :close-on-content-click="false" attach="#maintain-info-container">
               <template v-slot:activator="{ on, attrs }">
                 <span v-bind="attrs" v-on="on" class="popover-activator">Contact Us</span>
               </template>
