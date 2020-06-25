@@ -69,7 +69,11 @@
                   </v-list-item>
                   <v-list-item>
                     <v-list-item-content>
-                      <v-list-item-subtitle><a href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card" target="_blank">Frequently Asked Questions</a></v-list-item-subtitle>
+                      <v-list-item-subtitle>
+                        <a href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card" rel="noopener noreferrer" target="_blank">
+                          Frequently Asked Questions
+                        </a>
+                      </v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
                 </v-list>
