@@ -10,5 +10,6 @@
   "LAUNCH_DARKLY_ENV_KEY": "5db9da115f58e008123cd783",
   "BCEID_OSD_LINK": "https://www.test.bceid.ca/os/?7686&SkipTo=Basic",
   "FILE_SERVER_URL":"http://minio-1rdehl-dev.pathfinder.gov.bc.ca/public",
-  "NRO_URL": "https://dev.bcregistrynames.gov.bc.ca/nro/"
+  "NRO_URL": "https://dev.bcregistrynames.gov.bc.ca/nro/",
+  "AFFIDAVIT_FILE_SIZE": "73KB"
 }
