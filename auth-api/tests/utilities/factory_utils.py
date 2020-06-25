@@ -24,6 +24,7 @@ from tests.utilities.factory_scenarios import (
 from auth_api.models import AccountPaymentSettings as AccountPaymentModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
+from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Documents as DocumentsModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
@@ -68,10 +69,34 @@ def factory_user_model(user_info: dict = TestUserInfo.user1):
                      lastname=user_info['lastname'],
                      roles=user_info['roles'],
                      keycloak_guid=user_info.get('keycloak_guid', None),
-                     type=user_info.get('access_type', None)
+                     type=user_info.get('access_type', None),
+                     email='test@test.com'
                      )
 
     user.save()
+    return user
+
+
+def factory_user_model_with_contact(user_info: dict = TestUserInfo.user1):
+    """Produce a user model."""
+    user = UserModel(username=user_info['username'],
+                     firstname=user_info['firstname'],
+                     lastname=user_info['lastname'],
+                     roles=user_info['roles'],
+                     keycloak_guid=user_info.get('keycloak_guid', None),
+                     type=user_info.get('access_type', None),
+                     email='test@test.com'
+                     )
+
+    user.save()
+
+    contact = factory_contact_model()
+    contact.save()
+    contact_link = ContactLinkModel()
+    contact_link.contact = contact
+    contact_link.user = user
+    contact_link.save()
+
     return user
 
 

@@ -28,7 +28,6 @@ from auth_api.services.org import Org as OrgService
 from auth_api.utils.enums import CorpType, NRNameStatus, NRStatus
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
-
 from .rest_service import RestService
 
 
@@ -89,17 +88,34 @@ class Affiliation:
                                for d in data if d['corpType']['code'] == CorpType.NR.value}
         # Create a list of all temporary business names
         tmp_business_list = [d['name'] for d in data if d['corpType']['code'] == CorpType.TMP.value]
-        # Filter all affiliations with business identifier in tmp_business_list and tis Name Request
-        data = list(filter(lambda aff: (not (aff['corpType']['code'] == CorpType.NR.value and aff['businessIdentifier']
-                                             in tmp_business_list)), data))
-        # Replace the name of temporary business registration with NR Name
+
+        # NR Numbers
         nr_numbers = nr_number_name_dict.keys()
-        for affiliation in data:
-            if affiliation['corpType']['code'] == CorpType.TMP.value and affiliation['name'] in nr_numbers:
-                affiliation['name'] = nr_number_name_dict[affiliation['name']]
+
+        filtered_affiliations: list = []
+        for entity in data:
+            if entity['corpType']['code'] == CorpType.NR.value:
+                # If there is a TMP affiliation present for the NR, do not show NR
+                if not entity['businessIdentifier'] in tmp_business_list:
+                    filtered_affiliations.append(entity)
+
+            elif entity['corpType']['code'] == CorpType.TMP.value:
+
+                # If affiliation is not for a named company IA, and not a Numbered company
+                # (name and businessIdentifier same)
+                # --> Its a Temp affiliation with incorporation complete.
+                # In this case, a TMP affiliation will be there but the name will be BC...
+                if entity['name'] in nr_numbers or entity['name'] == entity['businessIdentifier']:
+                    # If temp affiliation is for an NR, change the name to NR's name
+                    if entity['name'] in nr_numbers:
+                        entity['name'] = nr_number_name_dict[entity['name']]
+
+                    filtered_affiliations.append(entity)
+            else:
+                filtered_affiliations.append(entity)
 
         current_app.logger.debug('>find_affiliations_by_org_id')
-        return data
+        return filtered_affiliations
 
     @staticmethod
     def create_affiliation(org_id, business_identifier, pass_code=None, token_info: Dict = None):
