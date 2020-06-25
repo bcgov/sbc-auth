@@ -41,7 +41,7 @@
           <div>
             <strong>Download Identity Affidavit</strong>
             <div class="file-size mb-1">
-              PDF (100KB)
+              PDF (73KB)
             </div>
           </div>
         </v-btn>
