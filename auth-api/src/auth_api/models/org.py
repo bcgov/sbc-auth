@@ -18,9 +18,11 @@ Basic users will have an internal Org that is not created explicitly, but implic
 
 from flask import current_app
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, func
-from sqlalchemy.orm import relationship, contains_eager
+from sqlalchemy.orm import contains_eager, relationship
 
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
+from auth_api.utils.roles import VALID_STATUSES
+
 from .base_model import BaseModel
 from .contact import Contact
 from .contact_link import ContactLink
@@ -29,7 +31,7 @@ from .org_status import OrgStatus
 from .org_type import OrgType
 
 
-class Org(BaseModel):  # pylint: disable=too-few-public-methods
+class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """Model for an Org record."""
 
     __tablename__ = 'org'
@@ -122,3 +124,18 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods
         """Deletes/Inactivates an org."""
         self.status_code = OrgStatusEnum.INACTIVE.value
         self.save()
+
+    def reset(self):
+        """Reset an org."""
+        # Delete the record if no other member in this account, otherwise need to update the user.
+        count_members = len([member for member in self.members if member.status in VALID_STATUSES])
+        if count_members > 1 or len(self.affiliated_entities) >= 1:
+            # need to remove user and put the user of next member in this account
+            self.created_by = None
+            self.created_by_id = None
+            for member in self.members:
+                self.modified_by_id = member.user_id
+                break
+            self.save()
+        else:
+            super().reset()
