@@ -41,9 +41,10 @@ class CorpType(Enum):
     """Corp Types."""
 
     NR = 'NR'
-    CP = 'CP'
+    CP = 'CP'  # cooperative
     TMP = 'TMP'
-    BC = 'BC'
+    BC = 'BC'  # bcomp
+    CR = 'CR'  # corporation
 
 
 class RequiredAction(Enum):

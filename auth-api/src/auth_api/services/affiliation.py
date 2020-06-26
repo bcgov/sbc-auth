@@ -171,8 +171,9 @@ class Affiliation:
         return Affiliation(affiliation)
 
     @staticmethod
-    def create_new_business_affiliation(org_id, business_identifier=None,  # pylint: disable=too-many-arguments
-                                        email=None, phone=None, token_info: Dict = None, bearer_token: str = None):
+    def create_new_business_affiliation(org_id,  # pylint: disable=too-many-arguments, too-many-locals
+                                        business_identifier=None, email=None, phone=None, token_info: Dict = None,
+                                        bearer_token: str = None):
         """Initiate a new incorporation."""
         # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
@@ -194,6 +195,11 @@ class Affiliation:
         nr_json = Affiliation._get_nr_details(business_identifier, bearer_token)
 
         if nr_json:
+            # Verify corp type
+            corp_type_code = nr_json.get('requestTypeCd')
+            if corp_type_code not in (CorpType.BC.value, CorpType.CR.value):
+                raise BusinessException(Error.NR_INVALID_CORP_TYPE, None)
+
             status = nr_json.get('state')
             nr_phone = nr_json.get('applicants').get('phoneNumber')
             nr_email = nr_json.get('applicants').get('emailAddress')
@@ -220,7 +226,7 @@ class Affiliation:
                 entity = EntityService.save_entity({
                     'businessIdentifier': business_identifier,
                     'name': name,
-                    'corpTypeCode': CorpType.NR.value,
+                    'corpTypeCode': corp_type_code,
                     'passCodeClaimed': True
                 })
             # Create an affiliation with org
