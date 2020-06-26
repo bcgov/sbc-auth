@@ -1069,6 +1069,26 @@ def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:dis
     assert rv.json.get('orgType') == OrgType.PREMIUM.value
     assert rv.json.get('name') == TestOrgInfo.bcol_linked()['name']
 
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+
+    org_search_response = client.get(f"/api/v1/orgs?name={TestOrgInfo.bcol_linked()['name']}",
+                                     headers=headers, content_type='application/json')
+
+    assert len(org_search_response.json.get('orgs')) == 1
+    assert org_search_response.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(org_search_response.data)
+    assert orgs.get('orgs')[0].get('name') == TestOrgInfo.bcol_linked()['name']
+    account_id = orgs.get('orgs')[0].get('payment_settings')[0].get('bcolAccountId')
+
+    # do a search with bcol account id and name
+    org_search_response = client.get(
+        f"/api/v1/orgs?name={TestOrgInfo.bcol_linked()['name']}&bcolAccountId={account_id}",
+        headers=headers, content_type='application/json')
+    orgs = json.loads(org_search_response.data)
+    assert orgs.get('orgs')[0].get('name') == TestOrgInfo.bcol_linked()['name']
+    new_account_id = orgs.get('orgs')[0].get('payment_settings')[0].get('bcolAccountId')
+    assert account_id == new_account_id
+
 
 def test_add_bcol_linked_org_failure_mailing_address(client, jwt, session,
                                                      keycloak_mock):  # pylint:disable=unused-argument
