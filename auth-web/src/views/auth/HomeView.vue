@@ -83,22 +83,30 @@
       <div class="contact-info-container">
         <v-container>
           <v-row>
-            <v-col cols="12" md="8">
+            <v-col cols="12" md="7">
               <h3 class="mb-6">Need more information?</h3>
-              <p class="mb-4">To learn more about Cooperative Associations in British Columbia, please visit the Cooperative Associations information page on the <a href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations" target="_blank" rel="noopener">BC Government website</a>.</p>
+              <p class="mb-4">To learn more about Cooperative Associations in British Columbia, please
+                <a :href="coopAssocUrl" target="_blank" rel="noopener noreferrer">
+                  visit the Cooperative Associations information page
+                </a>.
+              </p>
               <a class="link-w-icon" href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card"
                  target="_blank" rel="noopener noreferrer">
-                <v-icon small class="mr-2">mdi-open-in-new</v-icon>
-                <span>Frequently Asked Questions</span>
+                <span>Cooperatives Online Frequently Asked Questions</span>
               </a>
+              <p class="mt-4">To learn more about Benefit Companies in British Columbia, please
+                <a :href="bcCompUrl" target="_blank" rel="noopener noreferrer">
+                  visit the Benefit Companies information page
+                </a>.
+              </p>
             </v-col>
 
-            <v-col cols="12" md="4">
+            <v-col cols="12" md="5">
               <h3 class="mb-6">Contact Us</h3>
               <p class="mb-5">For support or questions about this application, contact us at:</p>
               <ul class="contact-info__list mb-5">
-                <li><span>Toll Free:</span> {{ $t('techSupportTollFree') }}</li>
-                <li><span>Phone:</span> {{ $t('techSupportPhone') }}</li>
+                <li><span>Toll Free:</span><a :href="`tel:+${$t('techSupportTollFree')}`">{{ $t('techSupportTollFree') }}</a></li>
+                <li><span>Phone:</span> <a :href="`tel:+1${$t('techSupportPhone')}`">{{ $t('techSupportPhone') }}</a></li>
                 <li><span>Email:</span> <a href="mailto:bcregistries@gov.bc.ca?subject=BC Registries - Business Registry Support Request">bcregistries@gov.bc.ca</a></li>
               </ul>
               <p class="mb-0"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
@@ -151,7 +159,8 @@ export default class HomeView extends Vue {
   private accountDialog = false
   private isDirSearchUser: boolean = false
   private readonly resetCurrentOrganisation!: () => void
-
+  private readonly coopAssocUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations'
+  private readonly bcCompUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/bc-companies/benefit-company'
   private get showManageBusinessesBtn (): boolean {
     return this.currentAccountSettings && this.currentMembership?.membershipStatus === MembershipStatus.Active
   }
@@ -487,7 +496,8 @@ export default class HomeView extends Vue {
     }
 
     a {
-      color: $BCgovGold5;
+      color: white;
+      font-weight: normal;
     }
   }
 
