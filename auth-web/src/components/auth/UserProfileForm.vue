@@ -40,12 +40,12 @@
       </v-col>
     </v-row>
     <v-row v-else>
-      <v-col cols="12" class="py-0">
+      <v-col cols="12" class="py-0 mb-4">
         <h4
           v-bind:class="{'legal-name': !isStepperView}"
           class="mb-1"
         >{{firstName}} {{lastName}}</h4>
-        <div class="mb-6">This is your legal name as it appears on your BC Services Card.</div>
+        <div class="mb-2" v-if="!isBCEIDUser">This is your legal name as it appears on your BC Services Card.</div>
       </v-col>
     </v-row>
     <!-- Email Address -->
@@ -331,6 +331,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       return this.isStepperView && (this.stepperSource === AccessType.EXTRA_PROVINCIAL)
     }
 
+    private get isBCEIDUser (): boolean {
+      return this.currentUser?.loginSource === LoginSource.BCEID
+    }
+
     private emailMustMatch (): string {
       return (this.emailAddress === this.confirmedEmailAddress) ? '' : 'Email addresses must match'
     }
@@ -374,7 +378,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
         if (this.stepForward) { // On stepper ;so Save the org
           this.createAccount(contact, user)
         } else {
-          if (this.currentUser?.loginSource === LoginSource.BCEID) {
+          if (this.isBCEIDUser) {
             await this.updateUserFirstAndLastName(user)
           }
           await this.saveOrUpdateContact(contact)
@@ -394,7 +398,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       try {
         // for bceid , create affidavit first
         // TODO implement checks for bceid
-        if (this.currentUser?.loginSource === LoginSource.BCEID) {
+        if (this.isBCEIDUser) {
           await this.createAffidavit()
           await this.updateUserFirstAndLastName(user)
         }
@@ -404,7 +408,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
         await this.syncOrganization(organization.id)
         await this.syncMembership(organization.id)
         this.$store.commit('updateHeader')
-        if (this.currentUser?.loginSource === LoginSource.BCEID) {
+        if (this.isBCEIDUser) {
           this.$router.push('/setup-non-bcsc-account-success')
         } else {
           this.$router.push('/setup-account-success')
