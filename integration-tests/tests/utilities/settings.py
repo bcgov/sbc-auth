@@ -40,7 +40,7 @@ class TestingSettings(BaseSettings):
     BCEID_USERS: List[UserInfo] = list()
     ACCESS_SETUP: Dict = {
             "BASIC": {
-                "BCSC": {"ADMIN": 1, "COORDINATOR": 1},
+                "BCSC": {"ADMIN": 1, "COORDINATOR": 0},
                 "BCEID": {"ADMIN": 0, "COORDINATOR": 0},
                 "BUSINESS": {"cooperatives": 1, "benefitcompany": 1, "namerequest": 1},
                 "PAYMENT": {"transaction": 2}
