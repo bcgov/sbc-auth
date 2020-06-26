@@ -197,7 +197,7 @@ class Affiliation:
         if nr_json:
             # Verify corp type
             corp_type_code = nr_json.get('requestTypeCd')
-            if corp_type_code not in (CorpType.BC.value):  # pylint: disable=superfluous-parens
+            if corp_type_code not in (CorpType.BC.value, CorpType.CR.value):
                 raise BusinessException(Error.NR_INVALID_CORP_TYPE, None)
 
             status = nr_json.get('state')
