@@ -29,6 +29,7 @@
           depressed
           height="70"
           class="download-btn text-left"
+          data-test="download-affidavit-btn"
           color="primary"
           @click="downloadAffidavit"
         >
@@ -63,6 +64,7 @@
         large
         color="grey lighten-2"
         class="font-weight-bold"
+        data-test="back-btn"
         @click="goBack"
       >
         <v-icon class="mr-2">
@@ -74,13 +76,20 @@
       <v-btn
         large
         color="primary"
+        class="font-weight-bold mr-2"
+        data-test="use-existing-bceid-btn"
+        @click="signinUsingBCeID"
+      >
+        Login using existing BCeID
+      </v-btn>
+      <v-btn
+        large
+        color="primary"
         class="font-weight-bold"
+        data-test="register-bceid-btn"
         @click="redirectToBceId"
       >
-        Next: Register a BCeID
-        <v-icon class="ml-2">
-          mdi-arrow-right
-        </v-icon>
+        Register a new BCeID
       </v-btn>
     </div>
   </v-container>
@@ -88,10 +97,10 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { IdpHint, Pages } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import DocumentService from '@/services/document.services'
-import { Pages } from '@/util/constants'
 
 @Component
 export default class AffidavitDownload extends Vue {
@@ -113,6 +122,10 @@ export default class AffidavitDownload extends Vue {
 
   private redirectToBceId () {
     window.location.href = ConfigHelper.getBceIdOsdLink()
+  }
+
+  private signinUsingBCeID () {
+    this.$router.push(`/${Pages.SIGNIN}/${IdpHint.BCEID}`)
   }
 
   private goBack () {
