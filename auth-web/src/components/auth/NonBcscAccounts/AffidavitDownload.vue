@@ -80,7 +80,7 @@
         data-test="use-existing-bceid-btn"
         @click="signinUsingBCeID"
       >
-        Use Existing BCeID
+        Login using existing BCeID
       </v-btn>
       <v-btn
         large
@@ -89,10 +89,7 @@
         data-test="register-bceid-btn"
         @click="redirectToBceId"
       >
-        Next: Register a BCeID
-        <v-icon class="ml-2">
-          mdi-arrow-right
-        </v-icon>
+        Register a new BCeID
       </v-btn>
     </div>
   </v-container>
