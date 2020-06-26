@@ -131,11 +131,12 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instanc
         count_members = len([member for member in self.members if member.status in VALID_STATUSES])
         if count_members > 1 or len(self.affiliated_entities) >= 1:
             # need to remove user and put the user of next member in this account
+            for member in self.members:
+                if member.user_id != self.created_by_id:
+                    self.modified_by_id = member.user_id
+                    break
             self.created_by = None
             self.created_by_id = None
-            for member in self.members:
-                self.modified_by_id = member.user_id
-                break
             self.save()
         else:
             super().reset()
