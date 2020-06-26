@@ -59,7 +59,8 @@ export enum AccountStatus {
 export enum IdpHint {
     BCROS = 'bcros',
     IDIR = 'idir',
-    BCSC = 'bcsc'
+    BCSC = 'bcsc',
+    BCEID = 'bceid'
 }
 
 export enum LoginSource {
