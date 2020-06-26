@@ -82,9 +82,10 @@ class Orgs(Resource):
         name = request.args.get('name', None)
         status = request.args.get('status', None)
         access_type = request.args.get('access_type', None)
+        bcol_account_id = request.args.get('bcolAccountId', None)
         try:
             response, status = OrgService.search_orgs(business_identifier=business_identifier, access_type=access_type,
-                                                      name=name, status=status), \
+                                                      name=name, status=status, bcol_account_id=bcol_account_id), \
                                http_status.HTTP_200_OK
 
             # If public user is searching , return 200 with empty results if orgs exist

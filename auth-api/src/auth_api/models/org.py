@@ -15,7 +15,6 @@
 
 Basic users will have an internal Org that is not created explicitly, but implicitly upon User account creation.
 """
-
 from flask import current_app
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, func
 from sqlalchemy.orm import contains_eager, relationship
@@ -23,6 +22,7 @@ from sqlalchemy.orm import contains_eager, relationship
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.roles import VALID_STATUSES
 
+from .account_payment_settings import AccountPaymentSettings as AccountPaymentSettingsModel
 from .base_model import BaseModel
 from .contact import Contact
 from .contact_link import ContactLink
@@ -79,7 +79,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instanc
         return cls.query.filter_by(id=org_id).first()
 
     @classmethod
-    def search_org(cls, access_type, name, status):
+    def search_org(cls, access_type, name, status, bcol_account_id):
         """Find all orgs with the given type."""
         query = db.session.query(Org) \
             .outerjoin(ContactLink) \
@@ -92,6 +92,11 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instanc
             query = query.filter(Org.name.ilike(f'%{name}%'))
         if status:
             query = query.filter(Org.status_code == status.upper())
+        if bcol_account_id:
+            query = query.join(AccountPaymentSettingsModel).filter(and_(
+                AccountPaymentSettingsModel.bcol_account_id == bcol_account_id,
+                AccountPaymentSettingsModel.is_active.is_(True)))
+
         return query.all()
 
     @classmethod
