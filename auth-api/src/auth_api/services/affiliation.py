@@ -226,7 +226,7 @@ class Affiliation:
                 entity = EntityService.save_entity({
                     'businessIdentifier': business_identifier,
                     'name': name,
-                    'corpTypeCode': corp_type_code,
+                    'corpTypeCode': CorpType.NR.value,
                     'passCodeClaimed': True
                 })
             # Create an affiliation with org
