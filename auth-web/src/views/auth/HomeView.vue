@@ -1,7 +1,7 @@
 <template>
   <div>
     <article>
-      <v-alert color="grey lighten-3" class="covid-alert">
+      <v-alert dark color="bcgovblue2" class="mb-0">
         <v-container>
           <p class="title font-weight-bold">Special Notice Regarding COVID-19 and Annual General Meetings</p>
           <p>In these uncertain times, it is important that individuals and organizations follow the guidelines
@@ -14,32 +14,37 @@
         </v-container>
       </v-alert>
 
-      <header class="hero-banner">
+      <header class="hero-banner d-flex align-center" :class="{'auth': userProfile}">
         <v-container>
-          <h1>Welcome to Business Registry<sup>Beta</sup></h1>
-          <p>File your BC cooperative association's annual reports and maintain your registered office addresses and director information.</p>
-
-          <div class="hero-banner__cta-btns">
+          <h1>Start a Benefit Company and Keep <br>Cooperatives Records up to date</h1>
+          <p class="mt-7 mb-11">The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
+            and organizations in British Columbia.</p>
+          <div class="hero-banner__cta-btns mb-2">
             <!-- Authenticated -->
-            <div v-if="userProfile">
-              <v-btn large color="#fcba19" class="cta-btn"
-                @click="goToManageBusinesses()">
-                Manage Businesses
+            <div v-if="userProfile" class="cta-btns-authenticated">
+              <name-request-button :isWide="true" />
+              <v-btn large dark color="bcgovblue" class="font-weight-bold"
+                     @click="goToManageBusinesses()">
+                Incorporate a Named Benefit Company
               </v-btn>
-              <v-btn large outlined color="#ffffff"
-                class="cta-btn"
-                v-if="!isDirSearchUser"
-                @click="oopDialog = true">
-                Create a new BC Registries Account
+              <v-btn large dark color="bcgovblue" class="font-weight-bold"
+                     @click="goToManageBusinesses(true)">
+                Incorporate a Numbered Benefit Company
+              </v-btn>
+              <v-btn large color="bcgovgold" class="font-weight-bold"
+                     @click="goToManageBusinesses()">
+                Manage an Existing Business
               </v-btn>
             </div>
-
             <!-- Non-authenticated -->
-            <v-btn large color="#fcba19" class="cta-btn"
-              v-if="!userProfile"
-              @click="oopDialog = true">
-              Create a BC Registries Account
-            </v-btn>
+            <div v-else>
+              <v-btn large color="bcgovgold" class="cta-btn font-weight-bold mr-3"
+                to="/choose-authentication-method"
+              >
+                Create a BC Registries Account
+              </v-btn>
+              <name-request-button />
+            </div>
           </div>
 
           <v-dialog v-model="accountDialog" max-width="640">
@@ -50,182 +55,58 @@
               </template>
             </LoginBCSC>
           </v-dialog>
-
-          <v-dialog v-model="oopDialog" max-width="740">
-            <OutOfProvinceDialog
-              @close="oopDialog = false"
-              @oop = "goToOutOfProvince()"
-              @bc-not-signed-in = "oopDialog = false; accountDialog = true"
-              @bc-signed-in = "createAccount()"
-              :signed-in = "!!userProfile"
-            />
-          </v-dialog>
-
         </v-container>
       </header>
-      <div class="how-to-container">
-        <v-container>
-          <section>
-            <h2>How do I file?</h2>
-            <section>
-              <v-card flat class="section-card">
-                <v-row>
-                  <v-col sm="12" md="8" class="section-card__inner">
-                    <div class="section-card__icon">
-                      <v-icon>mdi-shield-check</v-icon>
-                    </div>
-                    <div class="section-card__text">
-                      <h3>1. &nbsp;Log in with your BC Services Card</h3>
-                      <p class="mb-0">You must securely log in with your BC Services Card, government’s trusted way to access online services. It typically takes five minutes or less to <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card/set-up-mobile-card" target="_blank" rel="noopener noreferrer">set up</a> your mobile card, and the only information BC Registries can access from your card is your legal name.</p>
-                    </div>
-                  </v-col>
-                  <v-col sm="12" md="4" class="section-card__links">
-                    <ul class="mb-0">
-                      <li>
-                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card" target="_blank" rel="noopener noreferrer">
-                          <v-icon small>mdi-open-in-new</v-icon>
-                          <span>What is a Mobile BC <span class="nobr">Services Card?</span></span>
-                        </v-btn>
-                      </li>
-                      <li>
-                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card/login-with-mobile-card" target="_blank" rel="noopener noreferrer">
-                          <v-icon small>mdi-open-in-new</v-icon>
-                          <span>How do I log in with my BC <span class="nobr">Services Card?</span></span>
-                        </v-btn>
-                      </li>
-                      <li>
-                        <v-btn text color="primary" href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/get-a-card" target="_blank" rel="noopener noreferrer">
-                          <v-icon small>mdi-open-in-new</v-icon>
-                          <span>I don't have a BC <span class="nobr">Services Card</span></span>
-                        </v-btn>
-                      </li>
-                    </ul>
-                  </v-col>
-                </v-row>
-              </v-card>
-            </section>
-            <section>
-              <v-card flat class="section-card">
-                <v-row>
-                  <v-col sm="12" md="8" class="section-card__inner">
-                    <div class="section-card__icon">
-                      <v-icon>mdi-lock-open</v-icon>
-                    </div>
-                    <div class="section-card__text">
-                      <h3>2. &nbsp;Authorize to file for a cooperative</h3>
-                      <p class="mb-0">You will need to authorize to manage a cooperative by providing the <strong>Incorporation Number</strong> and <strong>Passcode</strong> located in the <strong>Access Letter</strong> you received in the mail from BC Registries.</p>
-                    </div>
-                  </v-col>
-                  <v-col sm="12" md="4" class="section-card__links">
-                    <ul class="mb-0">
-                      <li>
-                        <v-btn text color="primary" @click.stop="noPasscodeDialog = true">
-                          <v-icon small>mdi-open-in-new</v-icon>
-                          <span>I lost or forgot my cooperative passcode</span>
-                        </v-btn>
-                      </li>
-                      <li>
-                        <v-btn text color="primary" @click.stop="noPasscodeDialog = true">
-                          <v-icon small>mdi-open-in-new</v-icon>
-                          <span>I didn't receive my <span class="nobr">Access Letter</span></span>
-                        </v-btn>
-                      </li>
-                    </ul>
-
-                    <!-- No Passcode Dialog -->
-                    <v-dialog width="640" v-model="noPasscodeDialog">
-                      <v-card>
-                        <v-card-title>Don't have a Passcode?</v-card-title>
-                        <v-card-text>
-                          <p class="mb-7">If you have not received your Access Letter from BC Registries, or have lost your Passcode, please contact us at:</p>
-                          <ul class="contact-info__list mb-7">
-                            <li>
-                              <span>Toll Free:</span> {{ $t('techSupportTollFree') }}
-                            </li>
-                            <li>
-                              <span>Phone:</span> {{ $t('techSupportPhone') }}
-                            </li>
-                            <li>
-                              <span>Email:</span> <a v-bind:href="'mailto:' + $t('techSupportEmail') + '?subject=' + $t('techSupportEmailSubject')">{{ $t('techSupportEmail') }}</a>
-                            </li>
-                          </ul>
-                          <p class="mb-7"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
-                          <a class="link-w-icon" href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card"
-                             target="_blank" rel="noopener noreferrer">
-                            <v-icon small class="mr-2">mdi-open-in-new</v-icon>
-                            <span>Frequently Asked Questions</span>
-                          </a>
-                        </v-card-text>
-                        <v-card-actions>
-                          <v-spacer></v-spacer>
-                          <v-btn large color="primary" @click="noPasscodeDialog = false">OK</v-btn>
-                        </v-card-actions>
-                      </v-card>
-                    </v-dialog>
-
-                  </v-col>
-                </v-row>
-              </v-card>
-            </section>
-            <section>
-              <v-card flat class="section-card">
-                <v-row>
-                  <v-col sm="12" md="8" class="section-card__inner">
-                    <div class="section-card__icon">
-                      <v-icon>mdi-clipboard-check</v-icon>
-                    </div>
-                    <div class="section-card__text">
-                      <h3>3. &nbsp;Complete your cooperative's filings</h3>
-                      <p class="mb-0">Once you have logged in and are authorized to manage a cooperative, simply click on the cooperative you want to do work for, and complete your filings.</p>
-                    </div>
-                  </v-col>
-                  <v-col sm="12" md="4" class="section-card__links">
-                    <ul class="static-links mb-0">
-                      <li>
-                        <v-icon small>mdi-check</v-icon>
-                        <span>Annual Reports</span>
-                      </li>
-                      <li>
-                        <v-icon small>mdi-check</v-icon>
-                        <span>Manage Office Addresses</span>
-                      </li>
-                      <li>
-                        <v-icon small>mdi-check</v-icon>
-                        <span>Manage Director Information</span>
-                      </li>
-                    </ul>
-                  </v-col>
-                </v-row>
-              </v-card>
-
-              <div class="cta-container">
-                <v-btn large color="#fcba19" class="cta-btn" active-class="cta-btn--active" @click="goToManageBusinesses()" v-if="userProfile">Manage Businesses</v-btn>
-                <v-btn large color="#fcba19" class="cta-btn" active-class="cta-btn--active" @click="login()" v-if="!userProfile">Log in with BC Services Card</v-btn>
-              </div>
-
-            </section>
-          </section>
+      <div class="how-to-container py-6">
+        <v-container class="py-10">
+          <h2>How does it work?</h2>
+          <InfoStepper />
+          <transition
+            name="slide-x-transition"
+            mode="out-in">
+            <router-view
+              :userProfile="userProfile"
+              @login="login()"
+              @account-dialog="accountDialog = true"
+              @manage-businesses="goToManageBusinesses($event)"/>
+          </transition>
         </v-container>
+      </div>
+      <TestimonialQuotes />
+      <div class="bcsc-container py-6">
+        <BcscPanel class="my-10"
+          :userProfile="userProfile"
+          @login="login()"
+          @account-dialog="accountDialog = true"
+        />
       </div>
       <div class="contact-info-container">
         <v-container>
           <v-row>
-            <v-col cols="12" md="8">
+            <v-col cols="12" md="7">
               <h3 class="mb-6">Need more information?</h3>
-              <p class="mb-4">To learn more about Cooperative Associations in British Columbia, please visit the Cooperative Associations information page on the <a href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations" target="_blank" rel="noopener">BC Government website</a>.</p>
+              <p class="mb-4">To learn more about Cooperative Associations in British Columbia, please
+                <a :href="coopAssocUrl" target="_blank" rel="noopener noreferrer">
+                  visit the Cooperative Associations information page
+                </a>.
+              </p>
               <a class="link-w-icon" href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card"
                  target="_blank" rel="noopener noreferrer">
-                <v-icon small class="mr-2">mdi-open-in-new</v-icon>
-                <span>Frequently Asked Questions</span>
+                <span>Cooperatives Online Frequently Asked Questions</span>
               </a>
+              <p class="mt-4">To learn more about Benefit Companies in British Columbia, please
+                <a :href="bcCompUrl" target="_blank" rel="noopener noreferrer">
+                  visit the Benefit Companies information page
+                </a>.
+              </p>
             </v-col>
 
-            <v-col cols="12" md="4">
+            <v-col cols="12" md="5">
               <h3 class="mb-6">Contact Us</h3>
               <p class="mb-5">For support or questions about this application, contact us at:</p>
               <ul class="contact-info__list mb-5">
-                <li><span>Toll Free:</span> {{ $t('techSupportTollFree') }}</li>
-                <li><span>Phone:</span> {{ $t('techSupportPhone') }}</li>
+                <li><span>Toll Free:</span><a :href="`tel:+${$t('techSupportTollFree')}`">{{ $t('techSupportTollFree') }}</a></li>
+                <li><span>Phone:</span> <a :href="`tel:+1${$t('techSupportPhone')}`">{{ $t('techSupportPhone') }}</a></li>
                 <li><span>Email:</span> <a href="mailto:bcregistries@gov.bc.ca?subject=BC Registries - Business Registry Support Request">bcregistries@gov.bc.ca</a></li>
               </ul>
               <p class="mb-0"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
@@ -239,20 +120,26 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
-import { Member, MembershipStatus, Organization } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { LoginSource, Pages } from '@/util/constants'
+import { Member, MembershipStatus } from '@/models/Organization'
+import { mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
-import ConfigHelper from '@/util/config-helper'
+import BcscPanel from '@/components/auth/BcscPanel.vue'
+import InfoStepper from '@/components/auth/stepper/InfoStepper.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LoginBCSC from '@/components/auth/LoginBCSC.vue'
+import NameRequestButton from '@/components/auth/common/NameRequestButton.vue'
+import TestimonialQuotes from '@/components/auth/TestimonialQuotes.vue'
 import { User } from '@/models/user'
-import { VueConstructor } from 'vue'
 
 @Component({
   name: 'Home',
   components: {
-    LoginBCSC
+    NameRequestButton,
+    BcscPanel,
+    InfoStepper,
+    LoginBCSC,
+    TestimonialQuotes
   },
   computed: {
     ...mapState('user', ['userProfile', 'currentUser']),
@@ -262,7 +149,6 @@ import { VueConstructor } from 'vue'
     ...mapMutations('org', ['resetCurrentOrganisation'])
   }
 })
-
 export default class HomeView extends Vue {
   private readonly userProfile!: User
   private readonly currentAccountSettings!: AccountSettings
@@ -271,11 +157,10 @@ export default class HomeView extends Vue {
   private readonly currentUser!: KCUserProfile
   private noPasscodeDialog = false
   private accountDialog = false
-  private oopDialog = false
   private isDirSearchUser: boolean = false
-  private isStaffUser: boolean = false
   private readonly resetCurrentOrganisation!: () => void
-
+  private readonly coopAssocUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations'
+  private readonly bcCompUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/bc-companies/benefit-company'
   private get showManageBusinessesBtn (): boolean {
     return this.currentAccountSettings && this.currentMembership?.membershipStatus === MembershipStatus.Active
   }
@@ -284,8 +169,11 @@ export default class HomeView extends Vue {
     return !!this.currentAccountSettings
   }
 
-  private goToManageBusinesses (): void {
-    this.$router.push(`/${Pages.MAIN}/${this.currentAccountSettings.id}`)
+  private goToManageBusinesses (isNumberedCompanyRequest: boolean = false): void {
+    let manageBusinessUrl: any = { path: `/${Pages.MAIN}/${this.currentAccountSettings.id}` }
+    if (isNumberedCompanyRequest) manageBusinessUrl.query = { isNumberedCompanyRequest }
+
+    this.$router.push(manageBusinessUrl)
   }
 
   private createAccount (): void {
@@ -297,16 +185,8 @@ export default class HomeView extends Vue {
     this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
   }
 
-  private goToOutOfProvince () {
-    this.$router.push(`/${Pages.SETUP_ACCOUNT_NON_BCSC}/${Pages.SETUP_ACCOUNT_NON_BCSC_INSTRUCTIONS}`)
-  }
-
   mounted () {
     this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
-    this.isStaffUser = (this.currentUser?.loginSource === LoginSource.IDIR)
-    if (this.isStaffUser) {
-      this.$router.push(`/${Pages.STAFF_DASHBOARD}`)
-    }
   }
 }
 </script>
@@ -337,10 +217,18 @@ export default class HomeView extends Vue {
     font-size: 2rem;
   }
 
+  .v-btn:hover {
+    opacity: .8;
+  }
+
   // Hero Banner
   .hero-banner {
-    color: #ffffff;
-    background-color: $BCgovBlue5;
+    color: $gray9;
+    background-color: #ffffff;
+    background-image: url('../../assets/img/hero-img-min.jpg');
+    background-position:  bottom right;
+    background-size: 75%;
+    background-repeat: no-repeat;
 
     h1 {
       margin-bottom: 1.5rem;
@@ -362,30 +250,120 @@ export default class HomeView extends Vue {
 
     p {
       max-width: 40rem;
-      margin-bottom: 2.5rem;
+      margin: 1.5rem 0;
       font-size: 1rem;
     }
 
     .container {
-      padding-top: 3rem;
-      padding-bottom: 3.75rem;
+      padding: 2rem 1.5rem;
+    }
+  }
+
+  @media only screen and (max-width: 640px) {
+    .hero-banner {
+      background-image: none;
+    }
+  }
+
+  @media (min-width: 960px) {
+    .hero-banner {
+      height: 30rem;
+      background-size: 900px;
+    }
+
+    .hero-banner.auth {
+      height: 38rem;
+      background-size: 1100px;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .hero-banner {
+      height: 30rem;
+      background-size: 900px;
+    }
+
+    .hero-banner.auth {
+      height: 38rem;
+      background-size: 1100px;
+    }
+  }
+
+  @media (min-width: 1264px) and (min-height: 900px) {
+    .hero-banner {
+      background-size: 950px;
+    }
+
+    .hero-banner.auth {
+      background-size: 1150px;
+    }
+  }
+
+  @media (min-width: 1360px) {
+    .hero-banner {
+      .container {
+        padding: 2rem 1rem;
+      }
+    }
+  }
+
+  @media (min-width: 1700px) {
+    .hero-banner {
+      background-size: 1150px;
+    }
+
+    .hero-banner.auth {
+      background-size: 1300px;
+    }
+  }
+
+  @media (min-width: 1920px) {
+    .hero-banner {
+      background-size: 1320px;
+      background-position-x: right;
+      background-position-y: -240px;
+    }
+
+    .hero-banner.auth {
+      background-size: 1520px;
+      background-position-x: right;
+      background-position-y: -240px;
     }
   }
 
   .hero-banner__cta-btns {
-    .cta-btn + .cta-btn {
-      margin-left: 0.5rem;
+    display: flex;
+
+    .cta-btn {
+      flex: 0 0 100%;
+    }
+
+    .cta-btns-authenticated, .cta-btns-authenticated > div {
+      display: flex;
+      max-width: 350px;
+      flex-wrap: wrap;
+      margin-bottom: 13px;
+
+      .v-btn {
+        flex: 0 0 100%;
+        margin-bottom: 13px;
+      }
+    }
+
+    .create-account-link {
+      font-size: 1rem;
+      color: $BCgoveBueText1 !important;
+
+      :hover {
+        color: $BCgoveBueText2 !important;
+      }
     }
   }
 
   // How to Section
   .how-to-container {
-    background: $gray2;
-
-    .container {
-      padding-top: 2.5rem;
-      padding-bottom: 3.5rem;
-    }
+    background: $BCgovBG;
+    width: 100%;
 
     h2 {
       text-align: center;
@@ -518,7 +496,8 @@ export default class HomeView extends Vue {
     }
 
     a {
-      color: $BCgovGold5;
+      color: white;
+      font-weight: normal;
     }
   }
 
@@ -578,6 +557,10 @@ export default class HomeView extends Vue {
 
   .app-footer {
     border-bottom: none !important;
+  }
+
+  .v-list {
+    background-color: transparent;
   }
 
 </style>
