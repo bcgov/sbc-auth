@@ -15,6 +15,7 @@
     </header>
     <!-- Tab Navigation -->
     <v-tabs
+      v-if="isStaffAdminBCOL"
       background-color="transparent"
       class="mb-9"
       v-model="tab"
