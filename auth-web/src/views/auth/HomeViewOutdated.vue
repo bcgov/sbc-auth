@@ -28,16 +28,14 @@
               </v-btn>
               <v-btn large outlined color="#ffffff"
                 class="cta-btn"
-                v-if="!isDirSearchUser"
-                @click="oopDialog = true">
+                v-if="!isDirSearchUser" to="/choose-authentication-method">
                 Create a new BC Registries Account
               </v-btn>
             </div>
 
             <!-- Non-authenticated -->
             <v-btn large color="#fcba19" class="cta-btn"
-              v-if="!userProfile"
-              @click="oopDialog = true">
+              v-if="!userProfile" to="/choose-authentication-method">
               Create a BC Registries Account
             </v-btn>
           </div>
