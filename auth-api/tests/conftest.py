@@ -198,7 +198,8 @@ def nr_mock(monkeypatch):
                     'state': 'APPROVED'
                 }
             ],
-            'state': 'APPROVED'
+            'state': 'APPROVED',
+            'requestTypeCd': 'BC'
         }
 
     monkeypatch.setattr('auth_api.services.affiliation.Affiliation._get_nr_details', get_nr)
