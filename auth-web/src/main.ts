@@ -37,8 +37,9 @@ async function syncSession () {
   let path = window.location.pathname
   let isSigningIn = path.includes('/signin') || path.includes('/signin-redirect') || path.includes('/signin-redirect-full')
   if (!isSigningIn) {
-    debugger
-    await Vue.prototype.$tokenService.init(null).catch(err => {
+    await Vue.prototype.$tokenService.init(null).then(() =>
+      Vue.prototype.$tokenService.scheduleRefreshTimer()
+    ).catch(err => {
       if (err.message !== 'NOT_AUTHENTICATED') {
         throw err
       }
