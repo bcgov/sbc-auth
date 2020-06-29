@@ -7,7 +7,8 @@ export enum SessionStorageKeys {
     UserAccountType = 'USER_ACCOUNT_TYPE',
     CurrentAccount = 'CURRENT_ACCOUNT',
     LaunchDarklyFlags = 'LD_FLAGS',
-    ExtraProvincialUser = 'EXTRAPROVINCIAL_USER'
+    ExtraProvincialUser = 'EXTRAPROVINCIAL_USER',
+    SessionSynced = 'SESSION_SYNCED'
 }
 
 export enum Role {
