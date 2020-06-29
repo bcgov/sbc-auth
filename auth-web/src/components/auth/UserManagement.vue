@@ -3,7 +3,7 @@
     <header class="view-header align-center mt-n1 mb-5">
       <h2 class="view-header__title">Team Members</h2>
       <div class="view-header__actions">
-        <v-btn color="primary" class="font-weight-bold" large v-can:INVITE_MEMBERS.hide @click="showInviteUsersModal()" data-test="invite-people-button">
+        <v-btn color="primary" class="font-weight-bold" large v-if="!isBCEIDUser" v-can:INVITE_MEMBERS.hide @click="showInviteUsersModal()" data-test="invite-people-button">
           <v-icon small class="ml-n1">mdi-plus</v-icon>
           <span>Invite People</span>
         </v-btn>
@@ -143,10 +143,11 @@ import { EventBus } from '@/event-bus'
 import { Invitation } from '@/models/Invitation'
 import InvitationsDataTable from '@/components/auth/InvitationsDataTable.vue'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { LoginSource } from '@/util/constants'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import PendingMemberDataTable from '@/components/auth/PendingMemberDataTable.vue'
-import { SessionStorageKeys } from '@/util/constants'
 import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vue'
 import { getModule } from 'vuex-module-decorators'
 
@@ -159,6 +160,7 @@ import { getModule } from 'vuex-module-decorators'
     ModalDialog
   },
   computed: {
+    ...mapState('user', ['currentUser']),
     ...mapState('org', [
       'resending',
       'sentInvitations',
@@ -193,6 +195,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   private readonly syncPendingOrgMembers!: () => Member[]
   private readonly syncPendingOrgInvitations!: () => Invitation[]
   private readonly syncActiveOrgMembers!: () => Member[]
+  readonly currentUser!: KCUserProfile
 
   // PROTOTYPE TAB ICON (PENDING APPROVAL)
   private readonly pendingOrgMembers!: Member[]
@@ -240,6 +243,9 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   private async resend (invitation: Invitation) {
     await this.resendInvitation(invitation)
     this.showSuccessModal()
+  }
+  private get isBCEIDUser (): boolean {
+    return this.currentUser?.loginSource === LoginSource.BCEID
   }
 
   private showConfirmRemoveInviteModal (invitation: Invitation) {
