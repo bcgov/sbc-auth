@@ -158,9 +158,17 @@ export default class App extends Mixins(NextPageMixin) {
     }
   }
 
+  private async created () {
+    // If session is synced, then sync user details
+    if (ConfigHelper.getFromSession(SessionStorageKeys.SessionSynced)) {
+      this.loadUserInfo()
+      await this.syncUser()
+      this.setupNavigationBar()
+      this.$store.commit('loadComplete')
+    }
+  }
+
   private async mounted (): Promise<void> {
-    // set keycloak config file's location to the sbc-common-components
-    await KeyCloakService.setKeycloakConfigUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
     this.showLoading = false
 
     EventBus.$on('show-toast', (eventInfo: Event) => {
@@ -197,8 +205,7 @@ export default class App extends Mixins(NextPageMixin) {
       await this.syncUser()
       this.setupNavigationBar()
       try {
-        await this.tokenService.init(this.$store)
-        this.tokenService.scheduleRefreshTimer()
+        this.initTokenService()
       } catch (e) {
         // eslint-disable-next-line no-console
         console.log('Could not initialize token refresher: ' + e)
@@ -209,6 +216,11 @@ export default class App extends Mixins(NextPageMixin) {
       }
     }
     this.$store.commit('loadComplete')
+  }
+
+  private async initTokenService () {
+    await this.tokenService.init(this.$store)
+    this.tokenService.scheduleRefreshTimer()
   }
 }
 
