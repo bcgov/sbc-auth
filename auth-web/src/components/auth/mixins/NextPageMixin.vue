@@ -130,8 +130,8 @@ export default class NextPageMixin extends Vue {
 
   protected async syncUser () {
     // eslint-disable-next-line no-console
-    this.setCurrentAccountSettings(this.getAccountFromSession())
     await this.syncUserProfile()
+    this.setCurrentAccountSettings(this.getAccountFromSession())
     if (this.currentAccountSettings) {
       await this.syncMembership(this.currentAccountSettings.id)
       // await this.syncOrganization(this.currentAccountSettings.id)
