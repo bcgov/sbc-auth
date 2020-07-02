@@ -3,6 +3,7 @@ import '@mdi/font/css/materialdesignicons.min.css' // icon library (https://mate
 import 'regenerator-runtime/runtime' // to use transpiled generator functions
 import './registerServiceWorker'
 import App from './App.vue'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -34,9 +35,7 @@ async function syncSession () {
   await KeyCloakService.setKeycloakConfigUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
 
   // Initialize token service which will do a check-sso to initiate session
-  let path = window.location.pathname
-  let isSigningIn = path.includes('/signin') || path.includes('/signin-redirect') || path.includes('/signin-redirect-full')
-  if (!isSigningIn) {
+  if (!CommonUtils.isSigningIn() && !CommonUtils.isSigningOut()) {
     await Vue.prototype.$tokenService.init(null).then(() =>
       Vue.prototype.$tokenService.scheduleRefreshTimer()
     ).catch(err => {
