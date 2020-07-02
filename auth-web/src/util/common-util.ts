@@ -89,4 +89,13 @@ export default class CommonUtils {
       }, 200)
     }
   }
+
+  static isSigningIn ():boolean {
+    const path = window.location.pathname
+    return path.includes('/signin') || path.includes('/signin-redirect') || path.includes('/signin-redirect-full')
+  }
+  static isSigningOut ():boolean {
+    const path = window.location.pathname
+    return path.includes('/signout')
+  }
 }

@@ -38,6 +38,7 @@ import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import BusinessModule from '@/store/modules/business'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
@@ -102,12 +103,6 @@ export default class App extends Mixins(NextPageMixin) {
     header: SbcHeader
   }
 
-  get signingIn (): boolean {
-    return this.$route.name === 'signin' ||
-           this.$route.name === 'signin-redirect' ||
-           this.$route.name === 'signin-redirect-full'
-  }
-
   get showNavigationBar (): boolean {
     return this.$route.meta.showNavBar
   }
@@ -160,7 +155,7 @@ export default class App extends Mixins(NextPageMixin) {
 
   private async created () {
     // If session is synced, then sync user details
-    if (ConfigHelper.getFromSession(SessionStorageKeys.SessionSynced)) {
+    if (ConfigHelper.getFromSession(SessionStorageKeys.SessionSynced) === 'true' && !CommonUtils.isSigningIn() && !CommonUtils.isSigningOut()) {
       this.loadUserInfo()
       await this.syncUser()
       this.setupNavigationBar()
