@@ -73,6 +73,19 @@ class Authorization(db.Model):
             .first()
 
     @classmethod
+    def find_user_authorization_by_business_number_and_product(cls, business_identifier: str, product_code: str):
+        """Return authorization view object using corp type and business identifier.
+
+        Mainly used for service accounts.Sorted using the membership since service accounts gets all access
+
+        """
+        return cls.query.filter_by(product_code=product_code, business_identifier=business_identifier) \
+            .order_by(expression.case(((Authorization.org_membership == ADMIN, 1),
+                                       (Authorization.org_membership == COORDINATOR, 2),
+                                       (Authorization.org_membership == USER, 3)))) \
+            .first()
+
+    @classmethod
     def find_user_authorization_by_org_id(cls, keycloak_guid: uuid, org_id: int):
         """Return authorization view object."""
         return cls.query.filter_by(keycloak_guid=keycloak_guid, org_id=org_id).one_or_none()

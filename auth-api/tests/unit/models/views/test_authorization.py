@@ -19,9 +19,11 @@ import uuid
 
 from tests.utilities.factory_scenarios import TestUserInfo
 from tests.utilities.factory_utils import (
-    factory_affiliation_model, factory_entity_model, factory_membership_model, factory_org_model, factory_user_model)
+    factory_affiliation_model, factory_entity_model, factory_membership_model, factory_org_model, factory_product_model,
+    factory_user_model)
 
 from auth_api.models.views.authorization import Authorization
+from auth_api.utils.enums import ProductCode
 
 
 def test_find_user_authorization_by_business_number(session):  # pylint:disable=unused-argument
@@ -196,3 +198,18 @@ def test_find_all_user_authorizations_for_empty(session):  # pylint:disable=unus
     authorizations = Authorization.find_all_authorizations_for_user(str(user.keycloak_guid))
     assert authorizations is not None
     assert authorizations[0].business_identifier is None
+
+
+def test_find_user_authorization_by_business_number_product(session):  # pylint:disable=unused-argument
+    """Assert that authorization view is returning result."""
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+    authorization = Authorization.find_user_authorization_by_business_number_and_product(entity.business_identifier,
+                                                                                         ProductCode.DIR_SEARCH.value)
+
+    assert authorization is not None
+    assert authorization.product_code == ProductCode.DIR_SEARCH.value
