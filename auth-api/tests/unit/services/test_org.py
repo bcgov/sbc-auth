@@ -39,7 +39,7 @@ from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, PaymentType
+from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, PaymentType, ProductCode
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -67,7 +67,7 @@ def test_create_product_single_subscription(session, keycloak_mock):  # pylint:d
     assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
-    subscriptions = ProductService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products1, )
+    subscriptions = ProductService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products1)
     assert len(subscriptions) == 1
     assert subscriptions[0].product_code == TestOrgProductsInfo.org_products1['subscriptions'][0]['productCode']
 
@@ -79,7 +79,7 @@ def test_create_product_multiple_subscription(session, keycloak_mock):  # pylint
     assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
-    subscriptions = ProductService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products2, )
+    subscriptions = ProductService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products2)
     assert len(subscriptions) == 2
     assert subscriptions[0].product_code == TestOrgProductsInfo.org_products2['subscriptions'][0]['productCode']
     assert subscriptions[1].product_code == TestOrgProductsInfo.org_products2['subscriptions'][1]['productCode']
@@ -579,3 +579,20 @@ def test_send_staff_review_account_reminder_exception(session,
             OrgService.send_staff_review_account_reminder(user, org_dictionary['id'], 'localhost')
 
     assert exception.value.code == Error.FAILED_NOTIFICATION.name
+
+
+def test_add_product(session):  # pylint:disable=unused-argument
+    """Assert that a product can be add into product subscription table."""
+    org = factory_org_service()
+    org_dictionary = org.as_dict()
+
+    subscriptions = OrgService.add_product(org_dictionary['id'], token_info=None)
+    assert subscriptions is None
+
+    subscriptions = OrgService.add_product(org_dictionary['id'], token_info=TestJwtClaims.public_user_role)
+    assert len(subscriptions) == 1
+    assert subscriptions[0].product_code == ProductCode.BUSINESS.value
+
+    subscriptions = OrgService.add_product(org_dictionary['id'], token_info=TestJwtClaims.system_role)
+    assert len(subscriptions) == 1
+    assert subscriptions[0].product_code == TestJwtClaims.system_role['product_code']

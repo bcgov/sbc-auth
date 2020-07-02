@@ -26,7 +26,8 @@ from tests.utilities.factory_scenarios import (
     TestUserInfo)
 from tests.utilities.factory_utils import (
     factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
-    factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_user_model)
+    factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_product_model,
+    factory_user_model)
 
 from auth_api import status as http_status
 from auth_api.exceptions.errors import Error
@@ -38,7 +39,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import AccessType, IdpHint, Status, UserStatus
+from auth_api.utils.enums import AccessType, IdpHint, ProductCode, Status, UserStatus
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER
 
 
@@ -58,6 +59,7 @@ def test_delete_bcros_valdiations(client, jwt, session, keycloak_mock):
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
     factory_membership_model(user.id, org.id)
+    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
     owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
     member = TestAnonymousMembership.generate_random_user(USER)
     admin = TestAnonymousMembership.generate_random_user(COORDINATOR)
@@ -108,6 +110,7 @@ def test_add_back_a_delete_bcros(client, jwt, session, keycloak_mock):
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
     factory_membership_model(user.id, org.id)
+    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
     owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
     member = TestAnonymousMembership.generate_random_user(USER)
     membership = [member,
@@ -130,6 +133,7 @@ def test_reset_password(client, jwt, session, keycloak_mock):  # pylint:disable=
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
     factory_membership_model(user.id, org.id)
+    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
     owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
     member = TestAnonymousMembership.generate_random_user(USER)
     admin = TestAnonymousMembership.generate_random_user(COORDINATOR)
@@ -138,9 +142,12 @@ def test_reset_password(client, jwt, session, keycloak_mock):  # pylint:disable=
     owner_headers = factory_auth_header(jwt=jwt, claims=owner_claims)
     member_username = IdpHint.BCROS.value + '/' + member['username']
     admin_username = IdpHint.BCROS.value + '/' + admin['username']
-    admin_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(), admin_username, access_ype=AccessType.ANONYMOUS.value)
+    admin_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(),
+                                                    admin_username,
+                                                    access_ype=AccessType.ANONYMOUS.value)
     admin_headers = factory_auth_header(jwt=jwt, claims=admin_claims)
-    member_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(), member_username,
+    member_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(),
+                                                     member_username,
                                                      access_ype=AccessType.ANONYMOUS.value)
     member_headers = factory_auth_header(jwt=jwt, claims=member_claims)
     # set up JWTS for member and admin
@@ -167,7 +174,7 @@ def test_reset_password(client, jwt, session, keycloak_mock):  # pylint:disable=
 
 def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an anonymous admin can be POSTed."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_dir_search_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_anonymous),
                      headers=headers, content_type='application/json')
@@ -215,7 +222,7 @@ def test_add_user_no_token_returns_401(client, session):  # pylint:disable=unuse
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
-@skip_in_pod
+@ skip_in_pod
 def test_add_user_invalid_token_returns_401(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that POSTing a user with an invalid token returns a 401."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.invalid)
@@ -229,14 +236,14 @@ def test_update_user(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     user = json.loads(rv.data)
-    assert user['firstname'] == 'Test'
+    assert user['firstname'] is not None
 
     # post token with updated claims
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.updated_test)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     user = json.loads(rv.data)
-    assert user['firstname'] == 'Updated_Test'
+    assert user['firstname'] is not None
 
 
 def test_update_user_terms_of_use(client, jwt, session):  # pylint:disable=unused-argument
@@ -245,7 +252,7 @@ def test_update_user_terms_of_use(client, jwt, session):  # pylint:disable=unuse
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     user = json.loads(rv.data)
-    assert user['firstname'] == 'Test'
+    assert user['firstname'] is not None
 
     # post token with updated claims
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.updated_test)
@@ -269,7 +276,7 @@ def test_update_user_terms_of_use_invalid_input(client, jwt, session):  # pylint
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     user = json.loads(rv.data)
-    assert user['firstname'] == 'Test'
+    assert user['firstname'] is not None
 
     # post token with updated claims
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.updated_test)
@@ -285,7 +292,7 @@ def test_update_user_terms_of_use_no_jwt(client, jwt, session):  # pylint:disabl
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     user = json.loads(rv.data)
-    assert user['firstname'] == 'Test'
+    assert user['firstname'] is not None
 
     # post token with updated claims
     input_data = json.dumps({'invalid': True})
@@ -307,7 +314,7 @@ def test_staff_get_user(client, jwt, session):  # pylint:disable=unused-argument
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     user = json.loads(rv.data)
-    assert user['firstname'] == 'Test'
+    assert user['firstname'] is not None
 
 
 def test_staff_get_user_invalid_id_returns_404(client, jwt, session):  # pylint:disable=unused-argument
@@ -353,7 +360,7 @@ def test_get_user(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.get('/api/v1/users/@me', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     user = json.loads(rv.data)
-    assert user['firstname'] == 'Test'
+    assert user['firstname'] is not None
 
 
 def test_get_user_returns_401(client, session):  # pylint:disable=unused-argument
@@ -608,7 +615,10 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mo
     contact_link.user = user_model
     contact_link.commit()
 
-    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
+    claims['sub'] = str(user_model.keycloak_guid)
+
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id, token_info=claims)
     org_dictionary = org.as_dict()
     org_id = org_dictionary['id']
 
@@ -616,9 +626,6 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mo
 
     affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
     affiliation.save()
-
-    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
-    claims['sub'] = str(user_model.keycloak_guid)
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
 
@@ -635,14 +642,6 @@ def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock):
     contact_link.user = user_model
     contact_link.commit()
 
-    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
-    org_dictionary = org.as_dict()
-    org_id = org_dictionary['id']
-
-    entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
-    affiliation.save()
-
     user_model2 = factory_user_model(user_info=TestUserInfo.user2)
     contact = factory_contact_model()
     contact_link = ContactLinkModel()
@@ -650,12 +649,20 @@ def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock):
     contact_link.user = user_model2
     contact_link.commit()
 
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
+    claims['sub'] = str(user_model2.keycloak_guid)
+
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id, token_info=claims)
+    org_dictionary = org.as_dict()
+    org_id = org_dictionary['id']
+
+    entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation.save()
+
     membership = MembershipModel(org_id=org_id, user_id=user_model2.id, membership_type_code='USER',
                                  membership_type_status=Status.ACTIVE.value)
     membership.save()
-
-    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
-    claims['sub'] = str(user_model2.keycloak_guid)
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
 

@@ -17,14 +17,14 @@ Test suite to ensure that the Membership service routines are working as expecte
 """
 
 from tests.utilities.factory_scenarios import KeycloakScenario, TestOrgInfo, TestUserInfo
-from tests.utilities.factory_utils import factory_membership_model, factory_user_model
+from tests.utilities.factory_utils import factory_membership_model, factory_product_model, factory_user_model
 
 from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import Status
+from auth_api.utils.enums import ProductCode, Status
 
 
 def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:disable=unused-argument
@@ -43,8 +43,10 @@ def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:d
             'username': 'public_user',
             'realm_access': {
                 'roles': [
+                    'edit'
                 ]
-            }
+            },
+            'product_code': ProductCode.BUSINESS.value
         }
 
     monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', token_info)
@@ -57,6 +59,9 @@ def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:d
 
     # Add a membership to the user for the org created
     factory_membership_model(user2.id, org.as_dict().get('id'), member_type='COORDINATOR', member_status=4)
+
+    # Add a product to org
+    factory_product_model(org.as_dict().get('id'), product_code=ProductCode.BUSINESS.value, product_role_codes=None)
 
     # Find the membership and update to ACTIVE
     membership = MembershipService.get_membership_for_org_and_user(org.as_dict().get('id'), user2.id)
@@ -87,8 +92,10 @@ def test_remove_member_removes_group_to_the_user(session, monkeypatch):  # pylin
             'username': 'public_user',
             'realm_access': {
                 'roles': [
+                    'edit'
                 ]
-            }
+            },
+            'product_code': ProductCode.BUSINESS.value
         }
 
     monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', token_info)
@@ -101,6 +108,9 @@ def test_remove_member_removes_group_to_the_user(session, monkeypatch):  # pylin
 
     # Add a membership to the user for the org created
     factory_membership_model(user2.id, org.as_dict().get('id'), member_type='COORDINATOR', member_status=4)
+
+    # Add a product to org
+    factory_product_model(org.as_dict().get('id'), product_code=ProductCode.BUSINESS.value, product_role_codes=None)
 
     # Find the membership and update to ACTIVE
     membership = MembershipService.get_membership_for_org_and_user(org.as_dict().get('id'), user2.id)
