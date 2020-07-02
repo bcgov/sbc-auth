@@ -91,11 +91,11 @@ export default class CommonUtils {
   }
 
   static isSigningIn ():boolean {
-    let path = window.location.pathname
+    const path = window.location.pathname
     return path.includes('/signin') || path.includes('/signin-redirect') || path.includes('/signin-redirect-full')
   }
   static isSigningOut ():boolean {
-    let path = window.location.pathname
+    const path = window.location.pathname
     return path.includes('/signout')
   }
 }
