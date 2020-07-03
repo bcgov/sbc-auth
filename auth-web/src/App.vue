@@ -38,6 +38,7 @@ import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import BusinessModule from '@/store/modules/business'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
@@ -102,12 +103,6 @@ export default class App extends Mixins(NextPageMixin) {
     header: SbcHeader
   }
 
-  get signingIn (): boolean {
-    return this.$route.name === 'signin' ||
-           this.$route.name === 'signin-redirect' ||
-           this.$route.name === 'signin-redirect-full'
-  }
-
   get showNavigationBar (): boolean {
     return this.$route.meta.showNavBar
   }
@@ -158,9 +153,17 @@ export default class App extends Mixins(NextPageMixin) {
     }
   }
 
+  private async created () {
+    // If session is synced, then sync user details
+    if (ConfigHelper.getFromSession(SessionStorageKeys.SessionSynced) === 'true' && !CommonUtils.isSigningIn() && !CommonUtils.isSigningOut()) {
+      this.loadUserInfo()
+      await this.syncUser()
+      this.setupNavigationBar()
+      this.$store.commit('loadComplete')
+    }
+  }
+
   private async mounted (): Promise<void> {
-    // set keycloak config file's location to the sbc-common-components
-    await KeyCloakService.setKeycloakConfigUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
     this.showLoading = false
 
     EventBus.$on('show-toast', (eventInfo: Event) => {
@@ -193,12 +196,11 @@ export default class App extends Mixins(NextPageMixin) {
   private async setup () {
     // Header added modules to store so can access mapped actions now
     if (this.$store.getters['auth/isAuthenticated']) {
-      this.loadUserInfo()
-      await this.syncUser()
-      this.setupNavigationBar()
       try {
-        await this.tokenService.init(this.$store)
-        this.tokenService.scheduleRefreshTimer()
+        this.initTokenService()
+        this.loadUserInfo()
+        await this.syncUser()
+        this.setupNavigationBar()
       } catch (e) {
         // eslint-disable-next-line no-console
         console.log('Could not initialize token refresher: ' + e)
@@ -209,6 +211,11 @@ export default class App extends Mixins(NextPageMixin) {
       }
     }
     this.$store.commit('loadComplete')
+  }
+
+  private async initTokenService () {
+    await this.tokenService.init(this.$store)
+    this.tokenService.scheduleRefreshTimer()
   }
 }
 
