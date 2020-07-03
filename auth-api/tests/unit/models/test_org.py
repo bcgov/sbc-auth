@@ -61,7 +61,7 @@ def test_org_create_from_dictionary(session):  # pylint:disable=unused-argument
         'name': 'My Test Org'
     }
 
-    org_model = OrgModel.create_from_dict(org_info)
+    org_model = OrgModel.create_from_dict(org_info).save()
     assert org_model
     assert org_model.id
     assert org_model.name == org_info['name']
@@ -108,7 +108,7 @@ def test_create_from_dict(session):  # pylint:disable=unused-argument
         'name': 'My Test Org'
     }
 
-    result_org = OrgModel.create_from_dict(org_info)
+    result_org = OrgModel.create_from_dict(org_info).save()
 
     assert result_org.id is not None
 
