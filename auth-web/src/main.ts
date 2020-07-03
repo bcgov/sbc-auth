@@ -36,9 +36,7 @@ async function syncSession () {
 
   // Initialize token service which will do a check-sso to initiate session
   if (!CommonUtils.isSigningIn() && !CommonUtils.isSigningOut()) {
-    await Vue.prototype.$tokenService.init(null).then(() =>
-      Vue.prototype.$tokenService.scheduleRefreshTimer()
-    ).catch(err => {
+    await Vue.prototype.$tokenService.init(null).then(() => {}).catch(err => {
       if (err.message !== 'NOT_AUTHENTICATED') {
         throw err
       }

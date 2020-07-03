@@ -37,6 +37,7 @@ import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
+import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import BusinessModule from '@/store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -68,7 +69,8 @@ import { getModule } from 'vuex-module-decorators'
   },
   computed: {
     ...mapState('org', ['currentAccountSettings']),
-    ...mapState('user', ['currentUser'])
+    ...mapState('user', ['currentUser']),
+    ...mapGetters('auth', ['isAuthenticated'])
   },
   methods: {
     ...mapMutations('org', ['setCurrentOrganization']),
@@ -76,6 +78,7 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class App extends Mixins(NextPageMixin) {
+  private authModule = getModule(AuthModule, this.$store)
   private readonly setCurrentOrganization!: (org: Organization) => void
   private readonly isAuthenticated!: boolean
   private readonly loadUserInfo!: () => KCUserProfile
@@ -186,7 +189,7 @@ export default class App extends Mixins(NextPageMixin) {
   }
 
   private setLogOutUrl () {
-    this.logoutUrl = sessionStorage.getItem(SessionStorageKeys.UserAccountType) === LoginSource.BCROS ? ConfigHelper.getBcrosURL() : ''
+    this.logoutUrl = (this.$store.getters['auth/currentLoginSource'] === LoginSource.BCROS) ? ConfigHelper.getBcrosURL() : ''
   }
 
   private destroyed () {
@@ -215,7 +218,6 @@ export default class App extends Mixins(NextPageMixin) {
 
   private async initTokenService () {
     await this.tokenService.init(this.$store)
-    this.tokenService.scheduleRefreshTimer()
   }
 }
 

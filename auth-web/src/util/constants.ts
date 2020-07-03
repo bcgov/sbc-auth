@@ -3,8 +3,6 @@ export enum SessionStorageKeys {
     KeyCloakToken = 'KEYCLOAK_TOKEN',
     ApiConfigKey = 'AUTH_API_CONFIG',
     BusinessIdentifierKey = 'BUSINESS_IDENTIFIER',
-    UserKcId = 'USER_KC_ID',
-    UserAccountType = 'USER_ACCOUNT_TYPE',
     CurrentAccount = 'CURRENT_ACCOUNT',
     LaunchDarklyFlags = 'LD_FLAGS',
     ExtraProvincialUser = 'EXTRAPROVINCIAL_USER',
