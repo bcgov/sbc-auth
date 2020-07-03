@@ -69,7 +69,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instanc
             else:
                 org.org_type = OrgType.get_default_type()
             org.org_status = OrgStatus.get_default_status()
-            org.save()
+            org.flush()
             return org
         return None
 
