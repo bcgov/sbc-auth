@@ -9,7 +9,6 @@
         @account-switch-started="startAccountSwitch"
         @account-switch-completed="completeAccountSwitch"
         @hook:mounted="setup"
-        idpHint="bcsc"
         ref="header" :redirect-on-logout="logoutUrl">
         <template v-slot:login-button-text>
           Log in with BC Services Card
@@ -54,7 +53,6 @@ import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
-import TokenService from 'sbc-common-components/src/services/token.services'
 import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
@@ -82,7 +80,6 @@ export default class App extends Mixins(NextPageMixin) {
   private readonly setCurrentOrganization!: (org: Organization) => void
   private readonly isAuthenticated!: boolean
   private readonly loadUserInfo!: () => KCUserProfile
-  private tokenService = new TokenService()
   private businessStore = getModule(BusinessModule, this.$store)
   private showNotification = false
   private notificationText = ''
@@ -203,7 +200,7 @@ export default class App extends Mixins(NextPageMixin) {
       await this.syncUser()
       this.setupNavigationBar()
       try {
-        this.initTokenService()
+        await KeyCloakService.initializeToken(this.$store)
       } catch (e) {
         // eslint-disable-next-line no-console
         console.log('Could not initialize token refresher: ' + e)
@@ -214,10 +211,6 @@ export default class App extends Mixins(NextPageMixin) {
       }
     }
     this.$store.commit('loadComplete')
-  }
-
-  private async initTokenService () {
-    await this.tokenService.init(this.$store)
   }
 }
 
