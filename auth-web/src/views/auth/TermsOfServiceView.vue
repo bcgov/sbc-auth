@@ -98,7 +98,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
     this.isLoading = true
     try {
       await this.updateCurrentUserTerms({
-        termsOfUseAcceptedVersion: this.termsOfUse.version_id,
+        termsOfUseAcceptedVersion: this.termsOfUse.versionId,
         isTermsOfUseAccepted: true
       })
       const userTerms = await this.saveUserTerms()

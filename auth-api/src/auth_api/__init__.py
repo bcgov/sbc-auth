@@ -17,11 +17,14 @@ This module is the API for the Authroization system.
 """
 
 import os
+import json
 
 import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports,wrong-import-order; conflicts with Flake8
+from humps.main import camelize
 from flask import Flask
 from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler  # noqa: I001
+from sbc_common_components.utils.camel_case_response import convert_to_camel
 
 from auth_api import models
 from auth_api.extensions import mail
@@ -70,6 +73,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     def add_version(response):  # pylint: disable=unused-variable
         version = get_run_version()
         response.headers['API'] = f'auth_api/{version}'
+        if response.headers['Content-Type'] == 'application/json':
+            response.set_data(json.dumps(camelize(json.loads(response.get_data()))))
         return response
 
     register_shellcontext(app)

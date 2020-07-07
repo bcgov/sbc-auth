@@ -29,5 +29,3 @@ class AuthorizationSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
         exclude = ['entity_name', 'keycloak_guid', 'org_id', 'org_type']
 
     org_membership = fields.String(data_key='orgMembership')
-    business_identifier = fields.String(data_key='businessIdentifier')
-    business_identifier = fields.String(data_key='businessIdentifier')

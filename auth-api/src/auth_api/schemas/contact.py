@@ -31,4 +31,3 @@ class ContactSchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too
 
     email = fields.String(data_key='email')
     phone = fields.String(data_key='phone')
-    phone_extension = fields.String(data_key='phoneExtension')
