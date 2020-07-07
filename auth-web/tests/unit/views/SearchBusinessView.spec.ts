@@ -1,5 +1,4 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import BusinessModule from '@/store/modules/business'
 import SearchBusinessView from '@/views/auth/staff/SearchBusinessView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -9,9 +8,7 @@ import Vuex from 'vuex'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
-jest.mock('axios', () => ({
-  post: jest.fn(() => Promise.resolve({ data: { access_token: 'abcd', refresh_token: 'efgh', registries_trace_id: '12345abcde' } }))
-}))
+jest.mock('../../../src/services/org.services')
 
 describe('SearchBusinessView.vue', () => {
   let cmp

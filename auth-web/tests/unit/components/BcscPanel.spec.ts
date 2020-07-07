@@ -2,6 +2,7 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import BcscPanel from '@/components/auth/BcscPanel.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import Vue from 'vue'
+import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
@@ -18,6 +19,8 @@ describe('BcscPanel.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
+    localVue.use(VueRouter)
+    const router = new VueRouter()
 
     const store = new Vuex.Store({})
 
@@ -25,6 +28,7 @@ describe('BcscPanel.vue', () => {
       return mount(BcscPanel, {
         localVue,
         store,
+        router,
         vuetify,
         propsData: {
           ...propsData
@@ -51,7 +55,7 @@ describe('BcscPanel.vue', () => {
 
   it('doesn\'t render the login or create account link when authenticated', () => {
     const authenticatedBtns = wrapper.vm.$el.querySelectorAll('.v-btn')
-    const createAccountLink = wrapper.vm.$el.querySelector('#create-account-link')
+    const createAccountLink = wrapper.vm.$el.querySelector('.cta-btn')
 
     // Verify only the Learn More Button is rendered
     expect(authenticatedBtns.length).toStrictEqual(1)
@@ -68,7 +72,7 @@ describe('BcscPanel.vue', () => {
 
     const authenticatedBtns = wrapper.vm.$el.querySelectorAll('.v-btn')
     const mobileCardLink = wrapper.vm.$el.querySelectorAll('a')
-    const createAccountLink = wrapper.vm.$el.querySelector('#create-account-link')
+    const createAccountLink = wrapper.vm.$el.querySelector('.cta-btn')
 
     expect(authenticatedBtns[0]).toBeDefined()
     expect(authenticatedBtns[0].textContent).toContain('Create a BC Registries Account')
