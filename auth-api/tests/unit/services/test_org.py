@@ -484,7 +484,7 @@ def test_create_org_by_bceid_user(session, keycloak_mock):  # pylint:disable=unu
         dictionary = org.as_dict()
         assert dictionary['name'] == TestOrgInfo.org1['name']
         assert dictionary['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
-        assert dictionary['accessType'] == AccessType.EXTRA_PROVINCIAL.value
+        assert dictionary['access_type'] == AccessType.EXTRA_PROVINCIAL.value
         mock_notify.assert_called()
 
 
@@ -499,7 +499,7 @@ def test_create_org_by_in_province_bceid_user(session, keycloak_mock):  # pylint
         dictionary = org.as_dict()
         assert dictionary['name'] == TestOrgInfo.org1['name']
         assert dictionary['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
-        assert dictionary['accessType'] == AccessType.REGULAR_BCEID.value
+        assert dictionary['access_type'] == AccessType.REGULAR_BCEID.value
         mock_notify.assert_called()
 
 
