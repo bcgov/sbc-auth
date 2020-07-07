@@ -169,3 +169,13 @@ class LoginSource(Enum):
     BCEID = 'BCEID'
     STAFF = 'IDIR'
     BCROS = 'BCROS'
+
+
+class ProductCode(Enum):
+    """Product code."""
+
+    BUSINESS = 'BUSINESS'
+    VS = 'VS'
+    BCA = 'BCA'
+    PPR = 'PPR'
+    DIR_SEARCH = 'DIR_SEARCH'

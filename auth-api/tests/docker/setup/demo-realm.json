@@ -664,6 +664,19 @@
           }
         },
         {
+          "name": "product_code",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "claim.name": "product_code",
+            "claim.value": "BUSINESS",
+            "userinfo.token.claim": "false"
+          }
+        },
+        {
           "name": "username",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-property-mapper",
