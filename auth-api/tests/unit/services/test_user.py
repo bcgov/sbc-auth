@@ -376,7 +376,7 @@ def test_add_contact_to_user(session):  # pylint: disable=unused-argument
 
     assert contact['email'] == TestContactInfo.contact1['email']
     assert contact['phone'] == TestContactInfo.contact1['phone']
-    assert contact['phoneExtension'] == TestContactInfo.contact1['phoneExtension']
+    assert contact['phone_extension'] == TestContactInfo.contact1['phoneExtension']
 
 
 def test_add_contact_user_no_user(session):  # pylint: disable=unused-argument

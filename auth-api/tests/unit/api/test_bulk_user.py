@@ -108,7 +108,7 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
 
     assert len(rv.json['users']) == 2
     assert schema_utils.validate(rv.json, 'anonymous_user_response')
-    assert rv.json['users'][0]['http_status'] == 409
-    assert rv.json['users'][1]['http_status'] == 409
+    assert rv.json['users'][0]['httpStatus'] == 409
+    assert rv.json['users'][1]['httpStatus'] == 409
     assert rv.json['users'][0]['error'] == 'The username is already taken'
     assert rv.json['users'][1]['error'] == 'The username is already taken'
