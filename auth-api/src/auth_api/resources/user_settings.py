@@ -14,7 +14,7 @@
 """API endpoints for managing a User resource."""
 import json
 
-from flask import g
+from flask import g, jsonify
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
@@ -58,7 +58,7 @@ class SettingsResource(Resource):  # pylint: disable=too-few-public-methods
                 response, status = json.dumps([]), http_status.HTTP_200_OK
             else:
                 all_settings = UserSettingsService.fetch_user_settings(user.identifier)
-                response, status = UserSettingsSchema(many=True).dumps(all_settings), http_status.HTTP_200_OK
+                response, status = jsonify(UserSettingsSchema(many=True).dump(all_settings)), http_status.HTTP_200_OK
 
         except BusinessException:
             response, status = json.dumps([]), http_status.HTTP_200_OK
