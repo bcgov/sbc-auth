@@ -24,7 +24,6 @@ from humps.main import camelize
 from flask import Flask
 from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler  # noqa: I001
-from sbc_common_components.utils.camel_case_response import convert_to_camel
 
 from auth_api import models
 from auth_api.extensions import mail
