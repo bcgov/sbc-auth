@@ -107,8 +107,6 @@ class Org:  # pylint: disable=too-many-public-methods
             user = UserModel.find_by_jwt_token(token=token_info)
             Org.send_staff_review_account_reminder(user, org.id, origin_url)
 
-        org.add_to_session()
-
         # If mailing address is provided, save it
         if mailing_address:
             Org.add_contact_to_org(mailing_address, org)

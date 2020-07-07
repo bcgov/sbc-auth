@@ -196,11 +196,11 @@ export default class App extends Mixins(NextPageMixin) {
   private async setup () {
     // Header added modules to store so can access mapped actions now
     if (this.$store.getters['auth/isAuthenticated']) {
-      this.loadUserInfo()
-      await this.syncUser()
-      this.setupNavigationBar()
       try {
         await KeyCloakService.initializeToken(this.$store)
+        this.loadUserInfo()
+        await this.syncUser()
+        this.setupNavigationBar()
       } catch (e) {
         // eslint-disable-next-line no-console
         console.log('Could not initialize token refresher: ' + e)
