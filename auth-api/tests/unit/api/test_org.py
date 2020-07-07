@@ -1185,7 +1185,7 @@ def test_approve_org_with_pending_affidavits(client, jwt, session, keycloak_mock
                                       data=json.dumps({'statusCode': AffidavitStatus.APPROVED.value}),
                                       headers=headers, content_type='application/json')
 
-    assert org_patch_response.json.get('org_status') == OrgStatus.ACTIVE.value
+    assert org_patch_response.json.get('orgStatus') == OrgStatus.ACTIVE.value
 
     staff_response = client.get('/api/v1/orgs/{}/admins/affidavits'.format(org_response.json.get('id')),
                                 headers=headers, content_type='application/json')
