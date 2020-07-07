@@ -20,11 +20,11 @@ class TestPayment:
         """Test get fee."""
         load_data = get_test_data(testing_config.test_data['fee_schedule'])
         call_url = f'{testing_config.pay_api_url}/fees/{load_data["corp_type_code"]}/{load_data["filing_type_code"]}'
-        logger.action(f'Get {call_url}', is_subaction=True)
+        logger.debug(f'[ACTION] Get {call_url}')
         response = requests.get(call_url,
                                 headers={'Authorization': f'Bearer {testing_config.keycloak_token}'})
         assert response.status_code == 200
-        logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
 
     def test_create_creditcard_payment(self, testing_config, logger):
         """Test creating creaditcard payment."""
@@ -54,13 +54,13 @@ class TestPayment:
             }
         })
         call_url = f'{testing_config.pay_api_url}/payment-requests'
-        logger.action(f'Post {call_url} with {input_data}', is_subaction=True)
+        logger.debug(f'[ACTION] Post {call_url} with {input_data}')
         response = requests.post(call_url,
                                  headers={'Authorization': f'Bearer {testing_config.keycloak_token}',
                                           'Content-Type': 'application/json'},
                                  data=input_data)
         assert response.status_code == 201
-        logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
         response_json = response.json()
         testing_config.payment_id = response_json.get('id')
         testing_config.invoice_id = response_json.get('invoices')[0].get('id')
@@ -68,29 +68,29 @@ class TestPayment:
     def test_get_payment(self, testing_config, logger):
         """Test get payment."""
         call_url = f'{testing_config.pay_api_url}/payment-requests/{testing_config.payment_id}'
-        logger.action(f'Get {call_url}', is_subaction=True)
+        logger.debug(f'[ACTION] Get {call_url}')
         response = requests.get(call_url,
                                 headers={'Authorization': f'Bearer {testing_config.keycloak_token}'})
         assert response.status_code == 200
-        logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
 
     def test_get_invoices(self, testing_config, logger):
         """Test get invovices."""
         call_url = f'{testing_config.pay_api_url}/payment-requests/{testing_config.payment_id}/invoices'
-        logger.action(f'Get {call_url}', is_subaction=True)
+        logger.debug(f'[ACTION] Get {call_url}')
         response = requests.get(call_url,
                                 headers={'Authorization': f'Bearer {testing_config.keycloak_token}'})
         assert response.status_code == 200
-        logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
 
     def test_get_invoice(self, testing_config, logger):
         """Test get invovices."""
         call_url = f'{testing_config.pay_api_url}/payment-requests/{testing_config.payment_id}/invoices/{testing_config.invoice_id}'
-        logger.action(f'Get {call_url}', is_subaction=True)
+        logger.debug(f'[ACTION] Get {call_url}')
         response = requests.get(call_url,
                                 headers={'Authorization': f'Bearer {testing_config.keycloak_token}'})
         assert response.status_code == 200
-        logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
 
     def test_update_payment(self, testing_config, logger):
         load_data = get_test_data(testing_config.test_data['invitation'])
@@ -119,13 +119,13 @@ class TestPayment:
             }
         })
         call_url = f'{testing_config.pay_api_url}/payment-requests/{testing_config.payment_id}'
-        logger.action(f'Get {call_url} with {input_data}', is_subaction=True)
+        logger.debug(f'[ACTION] Get {call_url} with {input_data}')
         response = requests.put(call_url,
                                 headers={'Authorization': f'Bearer {testing_config.keycloak_token}',
                                          'Content-Type': 'application/json'},
                                 data=input_data)
         assert response.status_code == 200
-        logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
         response_json = response.json()
 
     def test_create_transaction(self, testing_config, logger):
@@ -134,32 +134,32 @@ class TestPayment:
             "payReturnUrl": f"{get_path_settings().PAYMENT_RETURN}"
         })
         call_url = f'{testing_config.pay_api_url}/payment-requests/{testing_config.payment_id}/transactions'
-        logger.action(f'Post {call_url} with {input_data}', is_subaction=True)
+        logger.debug(f'[ACTION] Post {call_url} with {input_data}')
         response = requests.post(call_url,
                                  headers={'Authorization': f'Bearer {testing_config.keycloak_token}',
                                           'Content-Type': 'application/json'},
                                  data=input_data)
         assert response.status_code == 201
-        logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
         response_json = response.json()
         testing_config.transaction_id = response_json.get('id')
         testing_config.pay_system_url = response_json.get('paySystemUrl')
 
     def test_get_transactions(self, testing_config, logger):
         call_url = f'{testing_config.pay_api_url}/payment-requests/{testing_config.payment_id}/transactions'
-        logger.action(f'Get {call_url}', is_subaction=True)
+        logger.debug(f'[ACTION] Get {call_url}')
         response = requests.get(call_url,
                                 headers={'Authorization': f'Bearer {testing_config.keycloak_token}'})
         assert response.status_code == 200
-        logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
         response_json = response.json()
 
     def test_get_paybc_status(self, testing_config, logger):
         call_url = f'{testing_config.status_api_url}/status/PAYBC'
-        logger.action(f'Get {call_url}', is_subaction=True)
+        logger.debug(f'[ACTION] Get {call_url}')
         response = requests.get(call_url)
         assert response.status_code == 200
-        logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
         response_json = response.json()
         testing_config.paybc_status = response_json.get('currentStatus')
 
@@ -180,21 +180,21 @@ class TestPayment:
     def test_update_transaction(self, testing_config, logger):
         input_data = json.dumps({})
         call_url = f'{testing_config.pay_api_url}/payment-requests/{testing_config.payment_id}/transactions/{testing_config.transaction_id}'
-        logger.action(f'Patch {call_url} with {input_data}', is_subaction=True)
+        logger.debug(f'[ACTION] Patch {call_url} with {input_data}')
         response = requests.patch(call_url,
                                   headers={'Authorization': f'Bearer {testing_config.keycloak_token}',
                                            'Content-Type': 'application/json'},
                                   data=input_data)
         assert response.status_code == 200
-        logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
 
     def test_get_transaction(self, testing_config, logger):
         call_url = f'{testing_config.pay_api_url}/payment-requests/{testing_config.payment_id}/transactions/{testing_config.transaction_id}'
-        logger.action(f'Get {call_url}', is_subaction=True)
+        logger.debug(f'[ACTION] Get {call_url}')
         response = requests.get(call_url,
                                 headers={'Authorization': f'Bearer {testing_config.keycloak_token}'})
         assert response.status_code == 200
-        logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
         response_json = response.json()
         testing_config.payment_status = response_json.get('statusCode')
 
@@ -206,13 +206,13 @@ class TestPayment:
             "fileName": "director-change"
         })
         call_url = f'{testing_config.pay_api_url}/payment-requests/{testing_config.payment_id}/receipts'
-        logger.action(f'Post {call_url} with {input_data}', is_subaction=True)
+        logger.debug(f'[ACTION] Post {call_url} with {input_data}')
         response = requests.post(call_url,
                                  headers={'Authorization': f'Bearer {testing_config.keycloak_token}',
                                           'Content-Type': 'application/json'},
                                  data=input_data)
         assert response.status_code == 201
-        logger.action(f'Response: {response.status_code}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code}')
 
     @pytest.mark.skip_payment_status('COMPLETED')
     def test_generate_receipt_with_payment_and_invoice_id(self, testing_config, logger):
@@ -222,13 +222,13 @@ class TestPayment:
             "fileName": "director-change"
         })
         call_url = f'{testing_config.pay_api_url}/payment-requests/{testing_config.payment_id}/invoices/{testing_config.invoice_id}/receipts'
-        logger.action(f'Post {call_url} with {input_data}', is_subaction=True)
+        logger.debug(f'[ACTION] Post {call_url} with {input_data}')
         response = requests.post(call_url,
                                  headers={'Authorization': f'Bearer {testing_config.keycloak_token}',
                                           'Content-Type': 'application/json'},
                                  data=input_data)
         assert response.status_code == 201
-        logger.action(f'Response: {response.status_code}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code}')
 
     @pytest.mark.skip_org_type('BASIC')
     def test_get_transactions(self, testing_config, logger):
@@ -236,22 +236,22 @@ class TestPayment:
         input_data = json.dumps({'dateFilter': {'startDate': '01/01/2020',
                                                 'endDate': '12/31/2020'}, 'folioNumber': ''})
         call_url = f'{testing_config.pay_api_url}/accounts/{testing_config.org_id}/payments/queries?page=1&limit=10'
-        logger.action(f'Post {call_url} with {input_data}', is_subaction=True)
+        logger.debug(f'[ACTION] Post {call_url} with {input_data}')
         response = requests.post(call_url,
                                  headers={'Authorization': f'Bearer {testing_config.keycloak_token}',
                                           'Content-Type': 'application/json'},
                                  data=input_data)
         assert response.status_code == 200
-        logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
 
     def test_delete_completed_payment(self, testing_config, logger):
         """Test delete the payment with 'COMPLETED"""
         call_url = f'{testing_config.pay_api_url}/payment-requests/{testing_config.payment_id}'
-        logger.action(f'Delete {call_url}', is_subaction=True)
+        logger.debug(f'[ACTION] Delete {call_url}')
         response = requests.delete(call_url,
                                    headers={'Authorization': f'Bearer {testing_config.keycloak_token}'})
         if testing_config.payment_status == 'COMPLETED':
             assert response.status_code == 400
         else:
             assert response.status_code == 202
-        logger.action(f'Response: {response.status_code} {response.json()}', is_subaction=True)
+        logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
