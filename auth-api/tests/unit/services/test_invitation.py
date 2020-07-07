@@ -44,7 +44,7 @@ def test_as_dict(session, auth_mock, keycloak_mock):  # pylint:disable=unused-ar
         invitation_info = factory_invitation(org_dictionary['id'])
         invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
         invitation_dictionary = invitation.as_dict()
-        assert invitation_dictionary['recipientEmail'] == invitation_info['recipientEmail']
+        assert invitation_dictionary['recipient_email'] == invitation_info['recipientEmail']
 
 
 def test_create_invitation(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument

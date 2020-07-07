@@ -59,8 +59,8 @@ class AnonymousUser(Resource):
                 return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
             membership_details = {
-                'email': invitation['recipientEmail'],
-                'membershipType': invitation['membership'][0]['membershipType'],
+                'email': invitation['recipient_email'],
+                'membershipType': invitation['membership'][0]['membership_type'],
                 'update_password_on_login': False
             }
             membership_details.update(request_json)
