@@ -178,7 +178,7 @@ export default class App extends Mixins(NextPageMixin) {
 
     // Listen for event from signin component so it can initiate setup
     this.$root.$on('signin-complete', async (callback) => {
-      await this.setup()
+      await this.setup(true)
       // set logout url on first time sigin
       this.setLogOutUrl()
       callback()
@@ -193,11 +193,13 @@ export default class App extends Mixins(NextPageMixin) {
     this.$root.$off('signin-complete')
   }
 
-  private async setup () {
+  private async setup (isSigninComplete?: boolean) {
     // Header added modules to store so can access mapped actions now
     if (this.$store.getters['auth/isAuthenticated']) {
       try {
-        await KeyCloakService.initializeToken(this.$store)
+        if (!isSigninComplete) {
+          await KeyCloakService.initializeToken(this.$store)
+        }
         this.loadUserInfo()
         await this.syncUser()
         this.setupNavigationBar()
