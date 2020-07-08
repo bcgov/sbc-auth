@@ -17,8 +17,10 @@ This module is the API for the Authroization system.
 """
 
 import os
+import json
 
 import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports,wrong-import-order; conflicts with Flake8
+from humps.main import camelize
 from flask import Flask
 from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler  # noqa: I001
@@ -67,10 +69,18 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     ExceptionHandler(app)
 
     @app.after_request
-    def add_version(response):  # pylint: disable=unused-variable
+    def handle_after_request(response):  # pylint: disable=unused-variable
+        add_version(response)
+        camelize_json(response)
+        return response
+
+    def add_version(response):
         version = get_run_version()
         response.headers['API'] = f'auth_api/{version}'
-        return response
+
+    def camelize_json(response):
+        if response.headers['Content-Type'] == 'application/json':
+            response.set_data(json.dumps(camelize(json.loads(response.get_data()))))
 
     register_shellcontext(app)
 
@@ -79,6 +89,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
 def setup_jwt_manager(app, jwt_manager):
     """Use flask app to configure the JWTManager to work for a particular Realm."""
+
     def get_roles(a_dict):
         return a_dict['realm_access']['roles']  # pragma: no cover
 
@@ -89,6 +100,7 @@ def setup_jwt_manager(app, jwt_manager):
 
 def register_shellcontext(app):
     """Register shell context objects."""
+
     def shell_context():
         """Shell context objects."""
         return {'app': app, 'jwt': JWT, 'db': db, 'models': models}  # pragma: no cover

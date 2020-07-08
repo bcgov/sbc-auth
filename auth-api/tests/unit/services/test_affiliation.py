@@ -32,7 +32,7 @@ def test_create_affiliation(session, auth_mock):  # pylint:disable=unused-argume
     """Assert that an Affiliation can be created."""
     entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
     entity_dictionary = entity_service.as_dict()
-    business_identifier = entity_dictionary['businessIdentifier']
+    business_identifier = entity_dictionary['business_identifier']
 
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
@@ -50,7 +50,7 @@ def test_create_affiliation_no_org(session, auth_mock):  # pylint:disable=unused
     """Assert that an Affiliation can not be created without org."""
     entity_service = factory_entity_service()
     entity_dictionary = entity_service.as_dict()
-    business_identifier = entity_dictionary['businessIdentifier']
+    business_identifier = entity_dictionary['business_identifier']
 
     with pytest.raises(BusinessException) as exception:
         AffiliationService.create_affiliation(None, business_identifier, {})
@@ -72,7 +72,7 @@ def test_create_affiliation_implicit(session, auth_mock):  # pylint:disable=unus
     """Assert that an Affiliation can not be created when org is BASIC."""
     entity_service1 = factory_entity_service()
     entity_dictionary1 = entity_service1.as_dict()
-    business_identifier1 = entity_dictionary1['businessIdentifier']
+    business_identifier1 = entity_dictionary1['business_identifier']
 
     org_service = factory_org_service(org_type_info=TestOrgTypeInfo.implicit)
     org_dictionary = org_service.as_dict()
@@ -93,7 +93,7 @@ def test_create_affiliation_with_passcode(session, auth_mock):  # pylint:disable
     """Assert that an Affiliation can be created."""
     entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
     entity_dictionary = entity_service.as_dict()
-    business_identifier = entity_dictionary['businessIdentifier']
+    business_identifier = entity_dictionary['business_identifier']
 
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
@@ -112,7 +112,7 @@ def test_create_affiliation_with_passcode_no_passcode_input(session, auth_mock):
     """Assert that an Affiliation can not be created with a passcode entity and no passcode input parameter."""
     entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_passcode)
     entity_dictionary = entity_service.as_dict()
-    business_identifier = entity_dictionary['businessIdentifier']
+    business_identifier = entity_dictionary['business_identifier']
 
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
@@ -128,7 +128,7 @@ def test_create_affiliation_exists(session, auth_mock):  # pylint:disable=unused
     """Assert that an Affiliation can not be created affiliation exists."""
     entity_service1 = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
     entity_dictionary1 = entity_service1.as_dict()
-    business_identifier1 = entity_dictionary1['businessIdentifier']
+    business_identifier1 = entity_dictionary1['business_identifier']
 
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
@@ -148,11 +148,11 @@ def test_find_affiliated_entities_by_org_id(session, auth_mock):  # pylint:disab
     """Assert that an Affiliation can be created."""
     entity_service1 = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
     entity_dictionary1 = entity_service1.as_dict()
-    business_identifier1 = entity_dictionary1['businessIdentifier']
+    business_identifier1 = entity_dictionary1['business_identifier']
 
     entity_service2 = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock2)
     entity_dictionary2 = entity_service2.as_dict()
-    business_identifier2 = entity_dictionary2['businessIdentifier']
+    business_identifier2 = entity_dictionary2['business_identifier']
 
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
@@ -173,7 +173,7 @@ def test_find_affiliated_entities_by_org_id(session, auth_mock):  # pylint:disab
 
     assert affiliated_entities
     assert len(affiliated_entities) == 2
-    assert affiliated_entities[0]['businessIdentifier'] == entity_dictionary2['businessIdentifier']
+    assert affiliated_entities[0]['business_identifier'] == entity_dictionary2['business_identifier']
 
 
 def test_find_affiliated_entities_by_org_id_no_org(session, auth_mock):  # pylint:disable=unused-argument
@@ -204,7 +204,7 @@ def test_delete_affiliation(session, auth_mock):  # pylint:disable=unused-argume
     """Assert that an affiliation can be deleted."""
     entity_service = factory_entity_service(TestEntityInfo.entity_lear_mock)
     entity_dictionary = entity_service.as_dict()
-    business_identifier = entity_dictionary['businessIdentifier']
+    business_identifier = entity_dictionary['business_identifier']
 
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
@@ -225,7 +225,7 @@ def test_delete_affiliation_no_org(session, auth_mock):  # pylint:disable=unused
     """Assert that an affiliation can not be deleted without org."""
     entity_service = factory_entity_service(TestEntityInfo.entity_lear_mock)
     entity_dictionary = entity_service.as_dict()
-    business_identifier = entity_dictionary['businessIdentifier']
+    business_identifier = entity_dictionary['business_identifier']
 
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
@@ -246,7 +246,7 @@ def test_delete_affiliation_no_entity(session, auth_mock):  # pylint:disable=unu
     """Assert that an affiliation can not be deleted without entity."""
     entity_service = factory_entity_service(TestEntityInfo.entity_lear_mock)
     entity_dictionary = entity_service.as_dict()
-    business_identifier = entity_dictionary['businessIdentifier']
+    business_identifier = entity_dictionary['business_identifier']
 
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
@@ -267,7 +267,7 @@ def test_delete_affiliation_no_affiliation(session, auth_mock):  # pylint:disabl
     """Assert that an affiliation can not be deleted without affiliation."""
     entity_service = factory_entity_service(TestEntityInfo.entity_lear_mock)
     entity_dictionary = entity_service.as_dict()
-    business_identifier = entity_dictionary['businessIdentifier']
+    business_identifier = entity_dictionary['business_identifier']
 
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
@@ -289,7 +289,7 @@ def test_delete_affiliation_implicit(session, auth_mock):  # pylint:disable=unus
     """Assert that an affiliation can be deleted."""
     entity_service = factory_entity_service(TestEntityInfo.entity_lear_mock)
     entity_dictionary = entity_service.as_dict()
-    business_identifier = entity_dictionary['businessIdentifier']
+    business_identifier = entity_dictionary['business_identifier']
 
     org_service = factory_org_service(org_type_info=TestOrgTypeInfo.implicit)
     org_dictionary = org_service.as_dict()
@@ -316,7 +316,7 @@ def test_create_new_business(session, auth_mock, nr_mock):  # pylint:disable=unu
     affiliation = AffiliationService.create_new_business_affiliation(org_id, business_identifier=business_identifier,
                                                                      email='test@test.com', phone='1112223333')
     assert affiliation
-    assert affiliation.as_dict()['business']['businessIdentifier'] == business_identifier
+    assert affiliation.as_dict()['business']['business_identifier'] == business_identifier
 
 
 def test_create_new_business_invalid_contact(session, auth_mock, nr_mock):  # pylint:disable=unused-argument
@@ -351,11 +351,11 @@ def test_find_affiliations_for_new_business(session, auth_mock, nr_mock):  # pyl
 
     entity_service1 = factory_entity_service(entity_info=TestEntityInfo.name_request)
     entity_dictionary1 = entity_service1.as_dict()
-    business_identifier1 = entity_dictionary1['businessIdentifier']
+    business_identifier1 = entity_dictionary1['business_identifier']
 
     entity_service2 = factory_entity_service(entity_info=TestEntityInfo.tenp_business)
     entity_dictionary2 = entity_service2.as_dict()
-    business_identifier2 = entity_dictionary2['businessIdentifier']
+    business_identifier2 = entity_dictionary2['business_identifier']
 
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
@@ -374,7 +374,7 @@ def test_find_affiliations_for_new_business(session, auth_mock, nr_mock):  # pyl
 
     assert affiliated_entities
     assert len(affiliated_entities) == 1
-    assert affiliated_entities[0]['businessIdentifier'] == business_identifier2
+    assert affiliated_entities[0]['business_identifier'] == business_identifier2
 
     AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier2)
 
@@ -382,7 +382,7 @@ def test_find_affiliations_for_new_business(session, auth_mock, nr_mock):  # pyl
 
     assert affiliated_entities
     assert len(affiliated_entities) == 1
-    assert affiliated_entities[0]['businessIdentifier'] == business_identifier1
+    assert affiliated_entities[0]['business_identifier'] == business_identifier1
 
 
 def test_find_affiliations_for_new_business_incorporation_complete(session, auth_mock,
@@ -397,11 +397,11 @@ def test_find_affiliations_for_new_business_incorporation_complete(session, auth
 
     nr_entity = factory_entity_service(entity_info=TestEntityInfo.name_request)
     entity_dictionary1 = nr_entity.as_dict()
-    nr_business_identifier = entity_dictionary1['businessIdentifier']
+    nr_business_identifier = entity_dictionary1['business_identifier']
 
     tmp_entity = factory_entity_service(entity_info=TestEntityInfo.tenp_business)
     entity_dictionary2 = tmp_entity.as_dict()
-    tmp_business_identifier = entity_dictionary2['businessIdentifier']
+    tmp_business_identifier = entity_dictionary2['business_identifier']
 
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
@@ -420,7 +420,7 @@ def test_find_affiliations_for_new_business_incorporation_complete(session, auth
 
     assert affiliated_entities
     assert len(affiliated_entities) == 1
-    assert affiliated_entities[0]['businessIdentifier'] == tmp_business_identifier
+    assert affiliated_entities[0]['business_identifier'] == tmp_business_identifier
 
     # Delete the NR And TEMP IA affiliation and entities
     AffiliationService.delete_affiliation(org_id=org_id, business_identifier=tmp_business_identifier)
@@ -431,16 +431,16 @@ def test_find_affiliations_for_new_business_incorporation_complete(session, auth
     # Create entities for a TEMP with name as BC... number and incorporated entity
     tmp_inc_entity = factory_entity_service(entity_info=TestEntityInfo.temp_business_incoporated)
     entity_dictionary1 = tmp_inc_entity.as_dict()
-    tmp_business_incorporated_identifier = entity_dictionary1['businessIdentifier']
+    tmp_business_incorporated_identifier = entity_dictionary1['business_identifier']
     AffiliationService.create_affiliation(org_id, business_identifier=tmp_business_incorporated_identifier)
 
     inc_entity = factory_entity_service(entity_info=TestEntityInfo.business_incoporated)
     entity_dictionary1 = inc_entity.as_dict()
-    business_incorporated_identifier = entity_dictionary1['businessIdentifier']
+    business_incorporated_identifier = entity_dictionary1['business_identifier']
     AffiliationService.create_affiliation(org_id, business_identifier=business_incorporated_identifier)
 
     affiliated_entities = AffiliationService.find_affiliated_entities_by_org_id(org_id)
 
     assert affiliated_entities
     assert len(affiliated_entities) == 1
-    assert affiliated_entities[0]['businessIdentifier'] == business_incorporated_identifier
+    assert affiliated_entities[0]['business_identifier'] == business_incorporated_identifier

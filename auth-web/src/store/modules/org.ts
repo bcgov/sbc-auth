@@ -458,7 +458,7 @@ export default class OrgModule extends VuexModule {
         let successUsers: BulkUsersSuccess[] = []
         let failedUsers: BulkUsersFailed[] = []
         users.forEach((user) => {
-          if (user.http_status === 201) {
+          if (user.httpStatus === 201) {
             const password = (addUserBody.users.find(({ username }) => username === user.firstname))?.password
             successUsers.push({
               username: user.firstname,

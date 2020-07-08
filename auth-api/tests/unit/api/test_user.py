@@ -123,7 +123,7 @@ def test_add_back_a_delete_bcros(client, jwt, session, keycloak_mock):
     kc_user = KeycloakService.get_user_by_username(member.get('username'))
     assert kc_user.enabled is False
     user_model = UserService.find_by_username(member_user_id)
-    assert user_model.as_dict().get('userStatus') == UserStatus.INACTIVE.value
+    assert user_model.as_dict().get('user_status') == UserStatus.INACTIVE.value
     membership = MembershipModel.find_membership_by_userid(user_model.identifier)
     assert membership.status == Status.INACTIVE.value
 

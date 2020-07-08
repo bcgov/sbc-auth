@@ -57,7 +57,7 @@ def test_user_save_by_token(session):  # pylint: disable=unused-argument
     assert user is not None
     dictionary = user.as_dict()
     assert dictionary['username'] == TestJwtClaims.user_test['preferred_username']
-    assert dictionary['keycloakGuid'] == TestJwtClaims.user_test['sub']
+    assert dictionary['keycloak_guid'] == TestJwtClaims.user_test['sub']
 
 
 def test_bcros_user_save_by_token(session):  # pylint: disable=unused-argument
@@ -66,7 +66,7 @@ def test_bcros_user_save_by_token(session):  # pylint: disable=unused-argument
     assert user is not None
     dictionary = user.as_dict()
     assert dictionary['username'] == TestJwtClaims.anonymous_bcros_role['preferred_username']
-    assert dictionary['keycloakGuid'] == TestJwtClaims.anonymous_bcros_role['sub']
+    assert dictionary['keycloak_guid'] == TestJwtClaims.anonymous_bcros_role['sub']
 
 
 def test_bcros_user_update_by_token(session):  # pylint: disable=unused-argument
@@ -74,13 +74,13 @@ def test_bcros_user_update_by_token(session):  # pylint: disable=unused-argument
     user_model = factory_user_model(TestUserInfo.user_bcros)
     user = UserService(user_model)
     dictionary = user.as_dict()
-    assert dictionary.get('keycloakGuid', None) is None
+    assert dictionary.get('keycloak_guid', None) is None
 
     user = UserService.save_from_jwt_token(TestJwtClaims.anonymous_bcros_role)
     assert user is not None
     dictionary = user.as_dict()
     assert dictionary['username'] == TestJwtClaims.anonymous_bcros_role['preferred_username']
-    assert dictionary['keycloakGuid'] == TestJwtClaims.anonymous_bcros_role['sub']
+    assert dictionary['keycloak_guid'] == TestJwtClaims.anonymous_bcros_role['sub']
 
 
 def test_user_save_by_token_no_token(session):  # pylint: disable=unused-argument
@@ -383,7 +383,7 @@ def test_add_contact_to_user(session):  # pylint: disable=unused-argument
 
     assert contact['email'] == TestContactInfo.contact1['email']
     assert contact['phone'] == TestContactInfo.contact1['phone']
-    assert contact['phoneExtension'] == TestContactInfo.contact1['phoneExtension']
+    assert contact['phone_extension'] == TestContactInfo.contact1['phoneExtension']
 
 
 def test_add_contact_user_no_user(session):  # pylint: disable=unused-argument
@@ -428,7 +428,7 @@ def test_update_terms_of_use_for_user(session):  # pylint: disable=unused-argume
 
     updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 1)
     dictionary = updated_user.as_dict()
-    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
+    assert dictionary['user_terms']['isTermsOfUseAccepted'] is True
 
 
 def test_terms_of_service_prev_version(session):  # pylint: disable=unused-argument
@@ -438,22 +438,22 @@ def test_terms_of_service_prev_version(session):  # pylint: disable=unused-argum
     # update TOS with old version
     updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 1)
     dictionary = updated_user.as_dict()
-    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
+    assert dictionary['user_terms']['isTermsOfUseAccepted'] is True
 
     # accepted version from previous step was old.so comparison should return false
     updated_user = UserService.save_from_jwt_token(TestJwtClaims.user_test)
     dictionary = updated_user.as_dict()
-    assert dictionary['userTerms']['isTermsOfUseAccepted'] is False
+    assert dictionary['user_terms']['isTermsOfUseAccepted'] is False
 
     # update TOS with latest version
     updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 3)  # 3 is the latest for now
     dictionary = updated_user.as_dict()
-    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
+    assert dictionary['user_terms']['isTermsOfUseAccepted'] is True
 
     # accepted version from previous step is latest.so comparison should return true
     updated_user = UserService.save_from_jwt_token(TestJwtClaims.user_test)
     dictionary = updated_user.as_dict()
-    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
+    assert dictionary['user_terms']['isTermsOfUseAccepted'] is True
 
 
 def test_update_contact_for_user_no_user(session):  # pylint: disable=unused-argument
@@ -530,7 +530,7 @@ def test_user_find_by_token(session):  # pylint: disable=unused-argument
     assert found_user is not None
     dictionary = found_user.as_dict()
     assert dictionary['username'] == TestJwtClaims.user_test['preferred_username']
-    assert dictionary['keycloakGuid'] == TestJwtClaims.user_test['sub']
+    assert dictionary['keycloak_guid'] == TestJwtClaims.user_test['sub']
 
 
 def test_user_find_by_username(session):  # pylint: disable=unused-argument

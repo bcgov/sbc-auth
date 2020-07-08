@@ -30,5 +30,3 @@ class AccountPaymentSettingsSchema(BaseSchema):  # pylint: disable=too-many-ance
         exclude = ['is_active', 'preferred_payment', 'created', 'created_by', 'id', 'modified', 'org']
 
     preferred_payment_code = fields.String(data_key='preferredPayment')
-    bcol_account_id = fields.String(data_key='bcolAccountId')
-    bcol_user_id = fields.String(data_key='bcolUserId')

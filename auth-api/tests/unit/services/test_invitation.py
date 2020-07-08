@@ -44,7 +44,7 @@ def test_as_dict(session, auth_mock, keycloak_mock):  # pylint:disable=unused-ar
         invitation_info = factory_invitation(org_dictionary['id'])
         invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
         invitation_dictionary = invitation.as_dict()
-        assert invitation_dictionary['recipientEmail'] == invitation_info['recipientEmail']
+        assert invitation_dictionary['recipient_email'] == invitation_info['recipientEmail']
 
 
 def test_create_invitation(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
@@ -56,7 +56,7 @@ def test_create_invitation(session, auth_mock, keycloak_mock):  # pylint:disable
         invitation_info = factory_invitation(org_dictionary['id'])
         invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '')
         invitation_dictionary = invitation.as_dict()
-        assert invitation_dictionary['recipientEmail'] == invitation_info['recipientEmail']
+        assert invitation_dictionary['recipient_email'] == invitation_info['recipientEmail']
         assert invitation_dictionary['id']
         mock_notify.assert_called()
 
@@ -71,7 +71,7 @@ def test_find_invitation_by_id(session, auth_mock, keycloak_mock):  # pylint:dis
         new_invitation = InvitationService.create_invitation(invitation_info, User(user), {}, '').as_dict()
         invitation = InvitationService.find_invitation_by_id(new_invitation['id']).as_dict()
         assert invitation
-        assert invitation['recipientEmail'] == invitation_info['recipientEmail']
+        assert invitation['recipient_email'] == invitation_info['recipientEmail']
 
 
 def test_find_invitation_by_id_exception(session, auth_mock):  # pylint:disable=unused-argument
