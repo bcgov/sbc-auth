@@ -31,8 +31,7 @@ export interface Organization {
   statusCode?:string
   decisionMadeBy?: string,
   contactEmail?: string,
-  // eslint-disable-next-line camelcase
-  payment_settings?: any
+  paymentSettings?: any
 }
 
 export interface UpdateMemberPayload {
@@ -129,8 +128,7 @@ export interface BulkUsersFailed {
 }
 
 export interface BulkUserResponse {
-  // eslint-disable-next-line camelcase
-  http_status: number,
+  httpStatus: number,
   username: string,
   created?: string,
   error?: string,
