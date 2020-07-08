@@ -17,10 +17,10 @@ from marshmallow import fields
 
 from auth_api.models import Affidavit as AffidavitModel
 
-from .camel_case_schema import CamelCaseSchema
+from .base_schema import BaseSchema
 
 
-class AffidavitSchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class AffidavitSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the affidavit model."""
 
     class Meta:  # pylint: disable=too-few-public-methods

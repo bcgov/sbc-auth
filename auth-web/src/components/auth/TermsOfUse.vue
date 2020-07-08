@@ -43,7 +43,7 @@ export default class TermsOfUse extends Vue {
         this.termsContent = response.data.content
         this.setTermsOfUse(response.data)
         const hasLatestTermsAccepted = this.hasAcceptedLatestTos(
-          response.data.version_id
+          response.data.versionId
         )
         if (!hasLatestTermsAccepted) {
           this.$emit('update_version')

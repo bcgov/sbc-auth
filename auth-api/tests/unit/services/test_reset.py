@@ -52,8 +52,8 @@ def test_reset(session, auth_mock):  # pylint: disable=unused-argument
     found_entity = EntityService.find_by_entity_id(entity.id)
     assert found_entity is not None
     dictionary = found_entity.as_dict()
-    assert dictionary['businessIdentifier'] == TestEntityInfo.entity1['businessIdentifier']
-    assert not dictionary['passCodeClaimed']
+    assert dictionary['business_identifier'] == TestEntityInfo.entity1['businessIdentifier']
+    assert not dictionary['pass_code_claimed']
 
     found_memeber = MembershipService.get_members_for_org(org.id)
     assert found_memeber is None
