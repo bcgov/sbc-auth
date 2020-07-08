@@ -69,12 +69,18 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     ExceptionHandler(app)
 
     @app.after_request
-    def add_version(response):  # pylint: disable=unused-variable
+    def handle_after_request(response):  # pylint: disable=unused-variable
+        add_version(response)
+        camelize_json(response)
+        return response
+
+    def add_version(response):
         version = get_run_version()
         response.headers['API'] = f'auth_api/{version}'
+
+    def camelize_json(response):
         if response.headers['Content-Type'] == 'application/json':
             response.set_data(json.dumps(camelize(json.loads(response.get_data()))))
-        return response
 
     register_shellcontext(app)
 
@@ -83,6 +89,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
 def setup_jwt_manager(app, jwt_manager):
     """Use flask app to configure the JWTManager to work for a particular Realm."""
+
     def get_roles(a_dict):
         return a_dict['realm_access']['roles']  # pragma: no cover
 
@@ -93,6 +100,7 @@ def setup_jwt_manager(app, jwt_manager):
 
 def register_shellcontext(app):
     """Register shell context objects."""
+
     def shell_context():
         """Shell context objects."""
         return {'app': app, 'jwt': JWT, 'db': db, 'models': models}  # pragma: no cover
