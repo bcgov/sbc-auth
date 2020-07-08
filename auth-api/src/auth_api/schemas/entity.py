@@ -17,11 +17,11 @@ from marshmallow import fields
 
 from auth_api.models import Entity as EntityModel
 
-from .camel_case_schema import CamelCaseSchema
+from .base_schema import BaseSchema
 from .corp_type import CorpTypeSchema
 
 
-class EntitySchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class EntitySchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """Used to manage the default mapping between JSON and the Entity model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
@@ -30,9 +30,5 @@ class EntitySchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-
         model = EntityModel
         exclude = ('id', 'pass_code')
 
-    business_identifier = fields.String(data_key='businessIdentifier')
-    business_number = fields.String(data_key='businessNumber')
-    pass_code_claimed = fields.Boolean(data_key='passCodeClaimed')
     contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
-    folio_number = fields.String(data_key='folioNumber')
     corp_type = fields.Nested(CorpTypeSchema, many=False)

@@ -203,7 +203,7 @@ def test_get_invitations(session, auth_mock, keycloak_mock):  # pylint:disable=u
                                                              TestJwtClaims.public_user_role)
         assert response
         assert len(response) == 1
-        assert response[0].recipient_email == invitation.as_dict()['recipientEmail']
+        assert response[0].recipient_email == invitation.as_dict()['recipient_email']
 
 
 def test_get_owner_count_one_owner(session, keycloak_mock):  # pylint:disable=unused-argument
@@ -255,7 +255,7 @@ def test_delete_org_with_affiliation_fail(session, auth_mock, keycloak_mock):  #
 
     entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
     entity_dictionary = entity_service.as_dict()
-    business_identifier = entity_dictionary['businessIdentifier']
+    business_identifier = entity_dictionary['business_identifier']
     AffiliationService.create_affiliation(org_id, business_identifier,
                                           TestEntityInfo.entity_lear_mock['passCode'],
                                           {})
@@ -484,7 +484,7 @@ def test_create_org_by_bceid_user(session, keycloak_mock):  # pylint:disable=unu
         dictionary = org.as_dict()
         assert dictionary['name'] == TestOrgInfo.org1['name']
         assert dictionary['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
-        assert dictionary['accessType'] == AccessType.EXTRA_PROVINCIAL.value
+        assert dictionary['access_type'] == AccessType.EXTRA_PROVINCIAL.value
         mock_notify.assert_called()
 
 
@@ -499,7 +499,7 @@ def test_create_org_by_in_province_bceid_user(session, keycloak_mock):  # pylint
         dictionary = org.as_dict()
         assert dictionary['name'] == TestOrgInfo.org1['name']
         assert dictionary['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
-        assert dictionary['accessType'] == AccessType.REGULAR_BCEID.value
+        assert dictionary['access_type'] == AccessType.REGULAR_BCEID.value
         mock_notify.assert_called()
 
 

@@ -84,28 +84,28 @@ class Affiliation:
 
         # 3806 : Filter out the NR affiliation if there is IA affiliation for the same NR.
         # Dict with key as NR number and value as name
-        nr_number_name_dict = {d['businessIdentifier']: d['name']
-                               for d in data if d['corpType']['code'] == CorpType.NR.value}
+        nr_number_name_dict = {d['business_identifier']: d['name']
+                               for d in data if d['corp_type']['code'] == CorpType.NR.value}
         # Create a list of all temporary business names
-        tmp_business_list = [d['name'] for d in data if d['corpType']['code'] == CorpType.TMP.value]
+        tmp_business_list = [d['name'] for d in data if d['corp_type']['code'] == CorpType.TMP.value]
 
         # NR Numbers
         nr_numbers = nr_number_name_dict.keys()
 
         filtered_affiliations: list = []
         for entity in data:
-            if entity['corpType']['code'] == CorpType.NR.value:
+            if entity['corp_type']['code'] == CorpType.NR.value:
                 # If there is a TMP affiliation present for the NR, do not show NR
-                if not entity['businessIdentifier'] in tmp_business_list:
+                if not entity['business_identifier'] in tmp_business_list:
                     filtered_affiliations.append(entity)
 
-            elif entity['corpType']['code'] == CorpType.TMP.value:
+            elif entity['corp_type']['code'] == CorpType.TMP.value:
 
                 # If affiliation is not for a named company IA, and not a Numbered company
                 # (name and businessIdentifier same)
                 # --> Its a Temp affiliation with incorporation complete.
                 # In this case, a TMP affiliation will be there but the name will be BC...
-                if entity['name'] in nr_numbers or entity['name'] == entity['businessIdentifier']:
+                if entity['name'] in nr_numbers or entity['name'] == entity['business_identifier']:
                     # If temp affiliation is for an NR, change the name to NR's name
                     if entity['name'] in nr_numbers:
                         entity['name'] = nr_number_name_dict[entity['name']]
@@ -136,7 +136,7 @@ class Affiliation:
         already_claimed = False
 
         # Authorized if the entity has been claimed
-        if entity.as_dict()['passCodeClaimed']:
+        if entity.as_dict()['pass_code_claimed']:
             authorized = False
             already_claimed = True
 
@@ -188,7 +188,7 @@ class Affiliation:
 
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         # If entity already exists and is already affiliated to an org, throw error
-        if entity and entity.as_dict()['passCodeClaimed']:
+        if entity and entity.as_dict()['pass_code_claimed']:
             raise BusinessException(Error.NR_CONSUMED, None)
 
         # Call the legal-api to verify the NR details

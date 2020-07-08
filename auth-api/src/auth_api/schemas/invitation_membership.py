@@ -17,10 +17,10 @@ from marshmallow import fields
 
 from auth_api.models import InvitationMembership as InvitationMembershipModel
 
-from .camel_case_schema import CamelCaseSchema
+from .base_schema import BaseSchema
 
 
-class InvitationMembershipSchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class InvitationMembershipSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the Invitation Membership model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
