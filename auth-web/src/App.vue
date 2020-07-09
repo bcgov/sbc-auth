@@ -9,7 +9,6 @@
         @account-switch-started="startAccountSwitch"
         @account-switch-completed="completeAccountSwitch"
         @hook:mounted="setup"
-        idpHint="bcsc"
         ref="header" :redirect-on-logout="logoutUrl">
         <template v-slot:login-button-text>
           Log in with BC Services Card
@@ -37,6 +36,7 @@ import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
+import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import BusinessModule from '@/store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -53,7 +53,6 @@ import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
-import TokenService from 'sbc-common-components/src/services/token.services'
 import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
@@ -68,7 +67,8 @@ import { getModule } from 'vuex-module-decorators'
   },
   computed: {
     ...mapState('org', ['currentAccountSettings']),
-    ...mapState('user', ['currentUser'])
+    ...mapState('user', ['currentUser']),
+    ...mapGetters('auth', ['isAuthenticated'])
   },
   methods: {
     ...mapMutations('org', ['setCurrentOrganization']),
@@ -76,10 +76,10 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class App extends Mixins(NextPageMixin) {
+  private authModule = getModule(AuthModule, this.$store)
   private readonly setCurrentOrganization!: (org: Organization) => void
   private readonly isAuthenticated!: boolean
   private readonly loadUserInfo!: () => KCUserProfile
-  private tokenService = new TokenService()
   private businessStore = getModule(BusinessModule, this.$store)
   private showNotification = false
   private notificationText = ''
@@ -178,7 +178,7 @@ export default class App extends Mixins(NextPageMixin) {
 
     // Listen for event from signin component so it can initiate setup
     this.$root.$on('signin-complete', async (callback) => {
-      await this.setup()
+      await this.setup(true)
       // set logout url on first time sigin
       this.setLogOutUrl()
       callback()
@@ -186,18 +186,20 @@ export default class App extends Mixins(NextPageMixin) {
   }
 
   private setLogOutUrl () {
-    this.logoutUrl = sessionStorage.getItem(SessionStorageKeys.UserAccountType) === LoginSource.BCROS ? ConfigHelper.getBcrosURL() : ''
+    this.logoutUrl = (this.$store.getters['auth/currentLoginSource'] === LoginSource.BCROS) ? ConfigHelper.getBcrosURL() : ''
   }
 
   private destroyed () {
     this.$root.$off('signin-complete')
   }
 
-  private async setup () {
+  private async setup (isSigninComplete?: boolean) {
     // Header added modules to store so can access mapped actions now
     if (this.$store.getters['auth/isAuthenticated']) {
       try {
-        this.initTokenService()
+        if (!isSigninComplete) {
+          await KeyCloakService.initializeToken(this.$store)
+        }
         this.loadUserInfo()
         await this.syncUser()
         this.setupNavigationBar()
@@ -211,11 +213,6 @@ export default class App extends Mixins(NextPageMixin) {
       }
     }
     this.$store.commit('loadComplete')
-  }
-
-  private async initTokenService () {
-    await this.tokenService.init(this.$store)
-    this.tokenService.scheduleRefreshTimer()
   }
 }
 

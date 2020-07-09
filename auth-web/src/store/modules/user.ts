@@ -120,7 +120,7 @@ export default class UserModule extends VuexModule {
     const docId = this.context.state['affidavitDocId']
     const notaryContact = this.context.state['notaryContact']
     const notaryInfo = this.context.state['notaryInformation']
-    const userId = ConfigHelper.getFromSession(SessionStorageKeys.UserKcId)
+    const userId = this.context.rootGetters['auth/keycloakGuid']
     // TODO handle error cases
     await UserService.createNotaryDetails(docId, notaryInfo, notaryContact, userId)
   }
@@ -133,7 +133,7 @@ export default class UserModule extends VuexModule {
       const response = await DocumentService.getPresignedUrl(file.name)
       const doc:DocumentUpload = response?.data
       this.context.commit('setAffidavitDocId', doc.key) // need this while creating org
-      const userId = ConfigHelper.getFromSession(SessionStorageKeys.UserKcId)
+      const userId = this.context.rootGetters['auth/keycloakGuid']
       const res = await DocumentService.uplpoadToUrl(doc.preSignedUrl, file, doc.key, userId)
     }
   }
