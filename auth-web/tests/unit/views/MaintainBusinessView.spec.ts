@@ -2,6 +2,7 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import MaintainBusinessView from '@/views/auth/MaintainBusinessView.vue'
 import Vue from 'vue'
+import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
@@ -18,6 +19,8 @@ describe('MaintainBusinessView.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
+    localVue.use(VueRouter)
+    const router = new VueRouter()
 
     const store = new Vuex.Store({})
 
@@ -25,9 +28,13 @@ describe('MaintainBusinessView.vue', () => {
       return mount(MaintainBusinessView, {
         localVue,
         store,
+        router,
         vuetify,
         propsData: {
           ...propsData
+        },
+        mocks: {
+          $t: (mock) => mock
         }
       })
     }
@@ -70,7 +77,7 @@ describe('MaintainBusinessView.vue', () => {
     const learnMoreBtn = authenticatedBtns[1]
 
     expect(loginBtn).toBeDefined()
-    expect(loginBtn.textContent).toContain('Create a BC Registries Account')
+    expect(loginBtn.textContent).toContain('Create a BC Registries account')
 
     expect(learnMoreBtn).toBeDefined()
     expect(learnMoreBtn.textContent).toContain('Learn More')

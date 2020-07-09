@@ -1,8 +1,9 @@
 <template>
   <sbc-signin
     :idp-hint="idpHint"
+    :in-auth="true"
     :redirect-url-login-fail="redirectUrlLoginFail"
-    @sync-user-profile-ready="authenticationComplete()"
+    @sync-user-profile-ready="authenticationComplete"
   ></sbc-signin>
 </template>
 <script lang="ts">
@@ -38,16 +39,19 @@ export default class Signin extends Mixins(NextPageMixin) {
   @Prop({ default: '' }) redirectUrl: string
   @Prop({ default: '' }) redirectUrlLoginFail: string
 
-  private async authenticationComplete () {
+  private async authenticationComplete (isRedirectToCreateAccount = false) {
     await this.loadUserInfo()
     // Check if user is authenticated, and redirect according to specified redirect
     // or fallback to default route for their login source
     if (this.$store.getters['auth/isAuthenticated']) {
       this.$root.$emit('signin-complete', () => {
-        if (this.redirectUrl) {
-          this.redirectTo(decodeURIComponent(CommonUtils.isUrl(this.redirectUrl) ? this.redirectUrl : `/${this.redirectUrl}`))
-        } else {
-          this.redirectTo(this.getNextPageUrl())
+        // isRedirectToCreateAccount: if true, redirection already happend from sbc-common-components
+        if (!isRedirectToCreateAccount) {
+          if (this.redirectUrl) {
+            this.redirectTo(decodeURIComponent(CommonUtils.isUrl(this.redirectUrl) ? this.redirectUrl : `/${this.redirectUrl}`))
+          } else {
+            this.redirectTo(this.getNextPageUrl())
+          }
         }
       })
     }
