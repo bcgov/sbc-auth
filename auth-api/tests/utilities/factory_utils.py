@@ -243,10 +243,11 @@ def factory_product_model(org_id: str,
     subscription.save()
 
     # Save product roles
-    for role_code in product_role_codes:
-        product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role_code, product_code)
-        product_role = ProductSubscriptionRoleModel(product_subscription_id=subscription.id,
-                                                    product_role_id=product_role_code.id)
-        product_role.save()
+    if product_role_codes:
+        for role_code in product_role_codes:
+            product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role_code, product_code)
+            product_role = ProductSubscriptionRoleModel(product_subscription_id=subscription.id,
+                                                        product_role_id=product_role_code.id)
+            product_role.save()
 
     return subscription

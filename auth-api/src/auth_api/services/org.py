@@ -18,7 +18,6 @@ from typing import Dict, Tuple
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
-from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException, CustomException
@@ -32,15 +31,20 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import ContactSchema, OrgSchema
-from auth_api.utils.enums import AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentType, Status
-from auth_api.utils.roles import ADMIN, VALID_STATUSES
+from auth_api.utils.enums import (
+    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentType, ProductCode, Status)
+from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role
 from auth_api.utils.util import camelback2snake
+from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+
 from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
 from .contact import Contact as ContactService
 from .keycloak import KeycloakService
 from .notification import send_email
+from .products import Product as ProductService
 from .rest_service import RestService
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -107,8 +111,6 @@ class Org:  # pylint: disable=too-many-public-methods
             user = UserModel.find_by_jwt_token(token=token_info)
             Org.send_staff_review_account_reminder(user, org.id, origin_url)
 
-        org.add_to_session()
-
         # If mailing address is provided, save it
         if mailing_address:
             Org.add_contact_to_org(mailing_address, org)
@@ -118,7 +120,10 @@ class Org:  # pylint: disable=too-many-public-methods
 
         Org.add_payment_settings(org.id, bcol_account_number, bcol_user_id)
 
+        Org.add_product(org.id, token_info)
+
         org.save()
+
         current_app.logger.info(f'<created_org org_id:{org.id}')
 
         return Org(org)
@@ -559,3 +564,20 @@ class Org:  # pylint: disable=too-many-public-methods
         except:  # noqa=B901
             current_app.logger.error('<send_approved_rejected_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None)
+
+    @staticmethod
+    def add_product(org_id, token_info: Dict = None):
+        """Add product subscription."""
+        if token_info:
+            # set as defalut type
+            product_code = ProductCode.BUSINESS.value
+
+            # Token is from service account, get the product code claim
+            if Role.SYSTEM.value in token_info.get('realm_access').get('roles'):
+                product_code = token_info.get('product_code', None)
+
+            if product_code:
+                product_subscription = {'subscriptions': [{'productCode': product_code}]}
+                subscriptions = ProductService.create_product_subscription(org_id, product_subscription)
+                return subscriptions
+        return None

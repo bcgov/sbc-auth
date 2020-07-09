@@ -15,10 +15,10 @@
 
 from auth_api.models import InvitationStatus as InvitationStatusModel
 
-from .camel_case_schema import CamelCaseSchema
+from .base_schema import BaseSchema
 
 
-class InvitationStatusSchema(CamelCaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class InvitationStatusSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the Invitation Status model."""
 
     class Meta:  # pylint: disable=too-few-public-methods

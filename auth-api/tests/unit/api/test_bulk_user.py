@@ -26,7 +26,7 @@ from tests.utilities.factory_utils import factory_auth_header, factory_invitatio
 from auth_api import status as http_status
 from auth_api.schemas import utils as schema_utils
 from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.enums import IdpHint
+from auth_api.utils.enums import IdpHint, ProductCode
 from config import get_named_config
 
 
@@ -45,7 +45,7 @@ def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
 
 def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org admin can create members."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_dir_search_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
 
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_anonymous),
@@ -78,7 +78,8 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
             'roles': []
         },
         'roles': [],
-        'accessType': 'ANONYMOUS'
+        'accessType': 'ANONYMOUS',
+        'product_code': ProductCode.DIR_SEARCH.value
     }
     headers = factory_auth_header(jwt=jwt, claims=invited_user_token)
 
@@ -91,12 +92,11 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
     rv = client.post('/api/v1/bulk/users', headers=headers,
                      data=json.dumps(user_input),
                      content_type='application/json')
-
     assert len(rv.json['users']) == 2
     assert schema_utils.validate(rv.json, 'anonymous_user_response')
 
-    assert rv.json['users'][0]['http_status'] == 201
-    assert rv.json['users'][0]['http_status'] == 201
+    assert rv.json['users'][0]['httpStatus'] == 201
+    assert rv.json['users'][0]['httpStatus'] == 201
     assert rv.json['users'][0]['error'] == ''
     assert rv.json['users'][1]['error'] == ''
     assert rv.json['users'][0]['username'] == IdpHint.BCROS.value + '/' + user_input['users'][0]['username']
@@ -108,7 +108,7 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
 
     assert len(rv.json['users']) == 2
     assert schema_utils.validate(rv.json, 'anonymous_user_response')
-    assert rv.json['users'][0]['http_status'] == 409
-    assert rv.json['users'][1]['http_status'] == 409
+    assert rv.json['users'][0]['httpStatus'] == 409
+    assert rv.json['users'][1]['httpStatus'] == 409
     assert rv.json['users'][0]['error'] == 'The username is already taken'
     assert rv.json['users'][1]['error'] == 'The username is already taken'

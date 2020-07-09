@@ -29,13 +29,13 @@ def test_documents_returns_200(client, jwt, session):  # pylint:disable=unused-a
     rv = client.get('/api/v1/documents/termsofuse', headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.json.get('version_id') == '3'
+    assert rv.json.get('versionId') == '3'
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
     rv = client.get('/api/v1/documents/termsofuse', headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.json.get('version_id') == 'd1'
+    assert rv.json.get('versionId') == 'd1'
 
 
 def test_invalid_documents_returns_404(client, jwt, session):  # pylint:disable=unused-argument
@@ -58,7 +58,7 @@ def test_documents_returns_200_for_some_type(client, jwt, session):  # pylint:di
 
     assert rv.status_code == http_status.HTTP_200_OK
     assert rv.json.get('content') == html_content
-    assert rv.json.get('version_id') == version_id
+    assert rv.json.get('versionId') == version_id
 
 
 def test_documents_returns_latest_always(client, jwt, session):  # pylint:disable=unused-argument
@@ -76,7 +76,7 @@ def test_documents_returns_latest_always(client, jwt, session):  # pylint:disabl
 
     assert rv.status_code == http_status.HTTP_200_OK
     assert rv.json.get('content') == html_content_2
-    assert rv.json.get('version_id') == version_id_2
+    assert rv.json.get('versionId') == version_id_2
 
     version_id_3 = 'd30'  # putting higher numbers so that version number doesnt collide with existing in db
     factory_document_model(version_id_3, 'termsofuse_directorsearch', html_content_1)
@@ -89,7 +89,7 @@ def test_documents_returns_latest_always(client, jwt, session):  # pylint:disabl
 
     assert rv.status_code == http_status.HTTP_200_OK
     assert rv.json.get('content') == html_content_2
-    assert rv.json.get('version_id') == version_id_4
+    assert rv.json.get('versionId') == version_id_4
 
 
 def test_document_signature_get_returns_200(client, jwt, session):  # pylint:disable=unused-argument

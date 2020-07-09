@@ -23,7 +23,8 @@ from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAnonymousMembership, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
     TestUserInfo)
 from tests.utilities.factory_utils import (
-    factory_contact_model, factory_entity_model, factory_membership_model, factory_org_model, factory_user_model)
+    factory_contact_model, factory_entity_model, factory_membership_model, factory_org_model, factory_product_model,
+    factory_user_model)
 from werkzeug.exceptions import HTTPException
 
 from auth_api.exceptions import BusinessException
@@ -36,7 +37,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.enums import IdpHint, Status
+from auth_api.utils.enums import IdpHint, ProductCode, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER
 
 
@@ -56,7 +57,7 @@ def test_user_save_by_token(session):  # pylint: disable=unused-argument
     assert user is not None
     dictionary = user.as_dict()
     assert dictionary['username'] == TestJwtClaims.user_test['preferred_username']
-    assert dictionary['keycloakGuid'] == TestJwtClaims.user_test['sub']
+    assert dictionary['keycloak_guid'] == TestJwtClaims.user_test['sub']
 
 
 def test_bcros_user_save_by_token(session):  # pylint: disable=unused-argument
@@ -65,7 +66,7 @@ def test_bcros_user_save_by_token(session):  # pylint: disable=unused-argument
     assert user is not None
     dictionary = user.as_dict()
     assert dictionary['username'] == TestJwtClaims.anonymous_bcros_role['preferred_username']
-    assert dictionary['keycloakGuid'] == TestJwtClaims.anonymous_bcros_role['sub']
+    assert dictionary['keycloak_guid'] == TestJwtClaims.anonymous_bcros_role['sub']
 
 
 def test_bcros_user_update_by_token(session):  # pylint: disable=unused-argument
@@ -73,13 +74,13 @@ def test_bcros_user_update_by_token(session):  # pylint: disable=unused-argument
     user_model = factory_user_model(TestUserInfo.user_bcros)
     user = UserService(user_model)
     dictionary = user.as_dict()
-    assert dictionary.get('keycloakGuid', None) is None
+    assert dictionary.get('keycloak_guid', None) is None
 
     user = UserService.save_from_jwt_token(TestJwtClaims.anonymous_bcros_role)
     assert user is not None
     dictionary = user.as_dict()
     assert dictionary['username'] == TestJwtClaims.anonymous_bcros_role['preferred_username']
-    assert dictionary['keycloakGuid'] == TestJwtClaims.anonymous_bcros_role['sub']
+    assert dictionary['keycloak_guid'] == TestJwtClaims.anonymous_bcros_role['sub']
 
 
 def test_user_save_by_token_no_token(session):  # pylint: disable=unused-argument
@@ -110,6 +111,7 @@ def test_reset_password(session, auth_mock, keycloak_mock):  # pylint:disable=un
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model()
     factory_membership_model(user.id, org.id)
+    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
     claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
     membership = [TestAnonymousMembership.generate_random_user(USER)]
     users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
@@ -125,6 +127,7 @@ def test_reset_password_by_member(session, auth_mock, keycloak_mock):  # pylint:
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model()
     factory_membership_model(user.id, org.id)
+    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
     admin_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
     membership = [TestAnonymousMembership.generate_random_user(USER)]
     users = UserService.create_user_and_add_membership(membership, org.id, token_info=admin_claims)
@@ -234,6 +237,7 @@ def test_create_user_and_add_membership_admin_bulk_mode(session, auth_mock,
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model()
     factory_membership_model(user.id, org.id)
+    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
     claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
     membership = [TestAnonymousMembership.generate_random_user(USER)]
     users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
@@ -253,6 +257,7 @@ def test_create_user_add_membership_reenable(session, auth_mock, keycloak_mock):
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model()
     factory_membership_model(user.id, org.id)
+    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
     claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
     anon_member = TestAnonymousMembership.generate_random_user(USER)
     membership = [anon_member]
@@ -289,6 +294,7 @@ def test_create_user_add_membership_reenable(session, auth_mock, keycloak_mock):
                              org_status_info=None, payment_type_info=None)
 
     factory_membership_model(user.id, org2.id)
+    factory_product_model(org2.id, product_code=ProductCode.DIR_SEARCH.value)
     users = UserService.create_user_and_add_membership(membership, org2.id, token_info=claims)
     assert users['users'][0]['http_status'] == 409
     assert users['users'][0]['error'] == 'The username is already taken'
@@ -319,6 +325,7 @@ def test_create_user_and_add_membership_admin_bulk_mode_multiple(session, auth_m
     org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
     user = factory_user_model()
     factory_membership_model(user.id, org.id)
+    factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
     claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
     membership = [TestAnonymousMembership.generate_random_user(USER),
                   TestAnonymousMembership.generate_random_user(COORDINATOR)]
@@ -376,7 +383,7 @@ def test_add_contact_to_user(session):  # pylint: disable=unused-argument
 
     assert contact['email'] == TestContactInfo.contact1['email']
     assert contact['phone'] == TestContactInfo.contact1['phone']
-    assert contact['phoneExtension'] == TestContactInfo.contact1['phoneExtension']
+    assert contact['phone_extension'] == TestContactInfo.contact1['phoneExtension']
 
 
 def test_add_contact_user_no_user(session):  # pylint: disable=unused-argument
@@ -421,7 +428,7 @@ def test_update_terms_of_use_for_user(session):  # pylint: disable=unused-argume
 
     updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 1)
     dictionary = updated_user.as_dict()
-    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
+    assert dictionary['user_terms']['isTermsOfUseAccepted'] is True
 
 
 def test_terms_of_service_prev_version(session):  # pylint: disable=unused-argument
@@ -431,22 +438,22 @@ def test_terms_of_service_prev_version(session):  # pylint: disable=unused-argum
     # update TOS with old version
     updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 1)
     dictionary = updated_user.as_dict()
-    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
+    assert dictionary['user_terms']['isTermsOfUseAccepted'] is True
 
     # accepted version from previous step was old.so comparison should return false
     updated_user = UserService.save_from_jwt_token(TestJwtClaims.user_test)
     dictionary = updated_user.as_dict()
-    assert dictionary['userTerms']['isTermsOfUseAccepted'] is False
+    assert dictionary['user_terms']['isTermsOfUseAccepted'] is False
 
     # update TOS with latest version
     updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 3)  # 3 is the latest for now
     dictionary = updated_user.as_dict()
-    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
+    assert dictionary['user_terms']['isTermsOfUseAccepted'] is True
 
     # accepted version from previous step is latest.so comparison should return true
     updated_user = UserService.save_from_jwt_token(TestJwtClaims.user_test)
     dictionary = updated_user.as_dict()
-    assert dictionary['userTerms']['isTermsOfUseAccepted'] is True
+    assert dictionary['user_terms']['isTermsOfUseAccepted'] is True
 
 
 def test_update_contact_for_user_no_user(session):  # pylint: disable=unused-argument
@@ -523,7 +530,7 @@ def test_user_find_by_token(session):  # pylint: disable=unused-argument
     assert found_user is not None
     dictionary = found_user.as_dict()
     assert dictionary['username'] == TestJwtClaims.user_test['preferred_username']
-    assert dictionary['keycloakGuid'] == TestJwtClaims.user_test['sub']
+    assert dictionary['keycloak_guid'] == TestJwtClaims.user_test['sub']
 
 
 def test_user_find_by_username(session):  # pylint: disable=unused-argument
@@ -534,11 +541,10 @@ def test_user_find_by_username(session):  # pylint: disable=unused-argument
     user = UserService.find_by_username(None)
     assert user is None
 
-    user = UserService.find_by_username(TestUserInfo.user_test['username'])
-
+    user = UserService.find_by_username(TestUserInfo.user1['username'])
     assert user is not None
     dictionary = user.as_dict()
-    assert dictionary['username'] == TestUserInfo.user_test['username']
+    assert dictionary['username'] == TestUserInfo.user1['username']
 
 
 def test_user_find_by_username_no_model_object(session):  # pylint: disable=unused-argument

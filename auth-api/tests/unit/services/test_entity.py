@@ -31,7 +31,7 @@ def test_as_dict(session):  # pylint:disable=unused-argument
     entity = EntityService(entity_model)
 
     dictionary = entity.as_dict()
-    assert dictionary['businessIdentifier'] == TestEntityInfo.entity1['businessIdentifier']
+    assert dictionary['business_identifier'] == TestEntityInfo.entity1['businessIdentifier']
 
 
 def test_save_entity_new(session):  # pylint:disable=unused-argument
@@ -46,7 +46,7 @@ def test_save_entity_new(session):  # pylint:disable=unused-argument
 
     assert entity is not None
     dictionary = entity.as_dict()
-    assert dictionary['businessIdentifier'] == TestEntityInfo.entity_passcode['businessIdentifier']
+    assert dictionary['business_identifier'] == TestEntityInfo.entity_passcode['businessIdentifier']
 
 
 def test_save_entity_existing(session):  # pylint:disable=unused-argument
@@ -73,7 +73,7 @@ def test_save_entity_existing(session):  # pylint:disable=unused-argument
 
     assert updated_entity
     assert updated_entity.as_dict()['name'] == updated_entity_info['name']
-    assert updated_entity.as_dict()['businessNumber'] == updated_entity_info['businessNumber']
+    assert updated_entity.as_dict()['business_number'] == updated_entity_info['businessNumber']
 
 
 def test_update_entity_existing_success(session):  # pylint:disable=unused-argument
@@ -87,7 +87,7 @@ def test_update_entity_existing_success(session):  # pylint:disable=unused-argum
     })
 
     assert entity
-    assert entity.as_dict()['corpType']['code'] == 'BC'
+    assert entity.as_dict()['corp_type']['code'] == 'BC'
 
     updated_entity_info = {
         'businessIdentifier': TestEntityInfo.bc_entity_passcode4['businessIdentifier'],
@@ -98,13 +98,13 @@ def test_update_entity_existing_success(session):  # pylint:disable=unused-argum
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
 
-    updated_entity = EntityService.update_entity(entity.as_dict().get('businessIdentifier'), updated_entity_info,
+    updated_entity = EntityService.update_entity(entity.as_dict().get('business_identifier'), updated_entity_info,
                                                  {'loginSource': '', 'realm_access': {'roles': ['system']},
                                                   'corp_type': 'BC'})
 
     assert updated_entity
     assert updated_entity.as_dict()['name'] == updated_entity_info['name']
-    assert updated_entity.as_dict()['businessNumber'] == updated_entity_info['businessNumber']
+    assert updated_entity.as_dict()['business_number'] == updated_entity_info['businessNumber']
 
 
 def test_update_entity_existing_failures(session):  # pylint:disable=unused-argument
@@ -118,7 +118,7 @@ def test_update_entity_existing_failures(session):  # pylint:disable=unused-argu
     })
 
     assert entity
-    assert entity.as_dict()['corpType']['code'] == 'BC'
+    assert entity.as_dict()['corp_type']['code'] == 'BC'
 
     updated_entity_info = {
         'businessIdentifier': TestEntityInfo.bc_entity_passcode4['businessIdentifier'],
@@ -151,7 +151,7 @@ def test_entity_find_by_business_id(session, auth_mock):  # pylint:disable=unuse
 
     assert entity is not None
     dictionary = entity.as_dict()
-    assert dictionary['businessIdentifier'] == TestEntityInfo.entity1['businessIdentifier']
+    assert dictionary['business_identifier'] == TestEntityInfo.entity1['businessIdentifier']
 
 
 def test_entity_find_by_business_id_no_model(session, auth_mock):  # pylint:disable=unused-argument
@@ -170,7 +170,7 @@ def test_entity_find_by_entity_id(session, auth_mock):  # pylint:disable=unused-
 
     assert entity is not None
     dictionary = entity.as_dict()
-    assert dictionary['businessIdentifier'] == TestEntityInfo.entity1['businessIdentifier']
+    assert dictionary['business_identifier'] == TestEntityInfo.entity1['businessIdentifier']
 
 
 def test_entity_find_by_entity_id_no_id(session, auth_mock):  # pylint:disable=unused-argument

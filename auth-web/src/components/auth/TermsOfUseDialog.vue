@@ -96,7 +96,7 @@ export default class TermsOfUseDialog extends Vue {
   async mounted () {
     const response = await documentService.getTermsOfService('termsofuse')
     this.content = response.data.content
-    this.version = response.data.version_id
+    this.version = response.data.versionId
   }
 
   get tooltipTxt () {

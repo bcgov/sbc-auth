@@ -23,7 +23,7 @@
         "default": {},
         "examples": [
           {
-            "http_status": 201,
+            "httpStatus": 201,
             "firstname": "firsst2usssaser2ss2dsd38",
             "contacts": [],
             "created": "2020-03-28T17:59:30.208643+00:00",
@@ -48,19 +48,19 @@
             },
             "error": "",
             "userStatus": 1.0,
-            "http_status": 201,
+            "httpStatus": 201,
             "firstname": "testuser",
             "contacts": []
           },
           {
             "error": "The username is already taken",
-            "http_status": 409,
+            "httpStatus": 409,
             "username": "testuser"
           }
         ],
         "required": [
           "error",
-          "http_status",
+          "httpStatus",
           "username"
         ],
         "properties": {
@@ -107,8 +107,8 @@
               "2020-03-28T17:59:30.208666+00:00"
             ]
           },
-          "http_status": {
-            "$id": "#/properties/users/items/properties/http_status",
+          "httpStatus": {
+            "$id": "#/properties/users/items/properties/httpStatus",
             "type": "integer",
             "title": "The Status Schema",
             "default": 0,

@@ -25,6 +25,7 @@ from tests.utilities.factory_utils import (
 from werkzeug.exceptions import HTTPException
 
 from auth_api.services.authorization import Authorization, check_auth
+from auth_api.utils.enums import ProductCode
 from auth_api.utils.roles import ADMIN, STAFF, STAFF_ADMIN, USER
 
 
@@ -75,24 +76,25 @@ def test_get_user_authorizations_for_entity_service_account(session):
     user = factory_user_model()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
+    factory_product_model(org.id, product_code=ProductCode.BUSINESS.value, product_role_codes=None)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
 
-    # Test for service accounts with correct corp type
+    # Test for service accounts with correct product code
     authorization = Authorization.get_user_authorizations_for_entity(
-        {'loginSource': '', 'realm_access': {'roles': ['system']}, 'corp_type': 'CP'},
+        {'loginSource': '', 'realm_access': {'roles': ['system']}, 'product_code': ProductCode.BUSINESS.value},
         entity.business_identifier)
     assert bool(authorization) is True
     assert authorization.get('orgMembership', None) == 'ADMIN'
 
-    # Test for service accounts with wrong corp type
+    # Test for service accounts with wrong product code
     authorization = Authorization.get_user_authorizations_for_entity(
-        {'loginSource': '', 'realm_access': {'roles': ['system']}, 'corp_type': 'INVALIDCP'},
+        {'loginSource': '', 'realm_access': {'roles': ['system']}, 'product_code': 'INVALIDCP'},
         entity.business_identifier)
     assert bool(authorization) is False
     assert authorization.get('orgMembership', None) is None
 
-    # Test for service accounts with no corp type
+    # Test for service accounts with no product code
     authorization = Authorization.get_user_authorizations_for_entity(
         {'loginSource': '', 'realm_access': {'roles': ['system']}},
         entity.business_identifier)
@@ -123,6 +125,7 @@ def test_check_auth(session):  # pylint:disable=unused-argument
     user = factory_user_model()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
+    factory_product_model(org.id, product_code=ProductCode.BUSINESS.value, product_role_codes=None)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
 
@@ -145,12 +148,15 @@ def test_check_auth(session):  # pylint:disable=unused-argument
                equals_role=STAFF)
 
     # Test for staff role
-    check_auth({'realm_access': {'roles': ['staff']}, 'sub': str(user.keycloak_guid)}, one_of_roles=[STAFF])
+    check_auth({'realm_access': {'roles': ['staff']}, 'sub': str(user.keycloak_guid),
+                'product_code': ProductCode.BUSINESS.value}, one_of_roles=[STAFF])
     # Test for owner role
-    check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, one_of_roles=[ADMIN],
+    check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid),
+                'product_code': ProductCode.BUSINESS.value}, one_of_roles=[ADMIN],
                business_identifier=entity.business_identifier)
     # Test for owner role with org id
-    check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid)}, one_of_roles=[ADMIN],
+    check_auth({'realm_access': {'roles': ['public']}, 'sub': str(user.keycloak_guid),
+                'product_code': ProductCode.BUSINESS.value}, one_of_roles=[ADMIN],
                org_id=org.id)
 
     # Test for exception, check for auth if resource is available for STAFF users
@@ -189,11 +195,12 @@ def test_check_auth_for_service_account_valid_with_org_id(session):  # pylint:di
     user = factory_user_model()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
+    factory_product_model(org.id, product_code=ProductCode.BUSINESS.value, product_role_codes=None)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
 
     # Test for service account with CP corp type
-    check_auth({'realm_access': {'roles': ['system']}, 'corp_type': 'CP'}, org_id=org.id)
+    check_auth({'realm_access': {'roles': ['system']}, 'product_code': ProductCode.BUSINESS.value}, org_id=org.id)
 
 
 def test_check_auth_for_service_account_valid_with_business_id(session):  # pylint:disable=unused-argument
@@ -201,11 +208,12 @@ def test_check_auth_for_service_account_valid_with_business_id(session):  # pyli
     user = factory_user_model()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
+    factory_product_model(org.id, product_code=ProductCode.BUSINESS.value, product_role_codes=None)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
 
     # Test for service account with CP corp type
-    check_auth({'realm_access': {'roles': ['system']}, 'corp_type': 'CP'},
+    check_auth({'realm_access': {'roles': ['system']}, 'product_code': ProductCode.BUSINESS.value},
                business_identifier=entity.business_identifier)
 
 
