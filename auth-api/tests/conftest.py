@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
+import time
+
 import pytest
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
@@ -142,6 +144,7 @@ def auto(docker_services, app):
         docker_services.start('bcol')
         docker_services.start('proxy')
         docker_services.wait_for_service('minio', 9000)
+        time.sleep(10)
 
 
 @pytest.fixture(scope='session')
@@ -198,7 +201,8 @@ def nr_mock(monkeypatch):
                     'state': 'APPROVED'
                 }
             ],
-            'state': 'APPROVED'
+            'state': 'APPROVED',
+            'requestTypeCd': 'BC'
         }
 
     monkeypatch.setattr('auth_api.services.affiliation.Affiliation._get_nr_details', get_nr)

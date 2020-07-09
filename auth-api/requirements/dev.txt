@@ -21,3 +21,4 @@ autopep8
 pydocstyle
 FreezeGun
 lovely-pytest-docker
+Faker
