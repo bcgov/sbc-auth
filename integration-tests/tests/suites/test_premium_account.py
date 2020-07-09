@@ -29,7 +29,7 @@ class TestPremiumAccount:
                                 headers={'Authorization': f'Bearer {testing_config.keycloak_token}'})
         assert response.status_code == 200
         response_json = response.json()
-        testing_config.terms_version = response_json.get('version_id')
+        testing_config.terms_version = response_json.get('versionId')
 
     def test_accept_terms(self, testing_config, logger):
         """Test accept termofuser."""
