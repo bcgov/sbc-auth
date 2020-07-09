@@ -73,24 +73,40 @@
         Back
       </v-btn>
       <v-spacer></v-spacer>
-      <v-btn
-        large
-        color="primary"
-        class="font-weight-bold mr-2"
-        data-test="use-existing-bceid-btn"
-        @click="signinUsingBCeID"
-      >
-        Login using existing BCeID
-      </v-btn>
-      <v-btn
-        large
-        color="primary"
-        class="font-weight-bold"
-        data-test="register-bceid-btn"
-        @click="redirectToBceId"
-      >
-        Register a new BCeID
-      </v-btn>
+      <template v-if="isAuthenticated">
+        <v-btn
+          large
+          color="primary"
+          class="font-weight-bold mr-2"
+          data-test="use-existing-bceid-btn"
+          @click="continueNext"
+        >
+          Continue
+          <v-icon class="ml-2">
+            mdi-arrow-right
+          </v-icon>
+        </v-btn>
+      </template>
+      <template v-else>
+        <v-btn
+          large
+          color="primary"
+          class="font-weight-bold mr-2"
+          data-test="use-existing-bceid-btn"
+          @click="signinUsingBCeID"
+        >
+          Login using existing BCeID
+        </v-btn>
+        <v-btn
+          large
+          color="primary"
+          class="font-weight-bold"
+          data-test="register-bceid-btn"
+          @click="redirectToBceId"
+        >
+          Register a new BCeID
+        </v-btn>
+      </template>
     </div>
   </v-container>
 </template>
@@ -98,12 +114,23 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { IdpHint, Pages } from '@/util/constants'
+import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import DocumentService from '@/services/document.services'
+import { getModule } from 'vuex-module-decorators'
+import { mapGetters } from 'vuex'
 
-@Component
+@Component({
+  computed: {
+    ...mapGetters('auth', [
+      'isAuthenticated'
+    ])
+  }
+})
 export default class AffidavitDownload extends Vue {
+  private authModule = getModule(AuthModule, this.$store)
+  private readonly isAuthenticated!: boolean
   private downloadFailedMsg = 'Failed download'
   private isDownloadFailed = false
   private affidavitSize = ConfigHelper.getAffidavitSize() || ''
@@ -126,6 +153,10 @@ export default class AffidavitDownload extends Vue {
 
   private signinUsingBCeID () {
     this.$router.push(`/${Pages.SIGNIN}/${IdpHint.BCEID}`)
+  }
+
+  private continueNext () {
+    this.$router.push(`/${Pages.CREATE_NON_BCSC_ACCOUNT}`)
   }
 
   private goBack () {

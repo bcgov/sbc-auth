@@ -43,7 +43,7 @@ export default class PendingApprovalView extends Vue {
   }
 
   get isExtraPro () {
-    return sessionStorage.getItem(SessionStorageKeys.UserAccountType) === LoginSource.BCEID
+    return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
   }
 
   get title () {
