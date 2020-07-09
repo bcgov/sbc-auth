@@ -17,4 +17,5 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: test command
         run: |
+          lsb_release -a
           oc --version
