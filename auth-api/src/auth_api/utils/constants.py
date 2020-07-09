@@ -17,3 +17,6 @@
 GROUP_PUBLIC_USERS = 'public_users'
 GROUP_ACCOUNT_HOLDERS = 'account_holders'
 GROUP_ANONYMOUS_USERS = 'anonymous_users'
+
+# Affidavit folder
+AFFIDAVIT_FOLDER_NAME = 'Affidavits'

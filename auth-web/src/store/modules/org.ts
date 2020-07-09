@@ -1,4 +1,4 @@
-import { Account, Actions, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
+import { Account, Actions, LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import {
   AddUserBody,
@@ -8,6 +8,10 @@ import {
   CreateRequestBody as CreateOrgRequestBody,
   CreateRequestBody,
   Member,
+  MembershipStatus,
+  MembershipType,
+  OrgFilterParams,
+  OrgList,
   Organization,
   UpdateMemberPayload
 } from '@/models/Organization'
@@ -18,9 +22,12 @@ import { TransactionFilterParams, TransactionTableList, TransactionTableRow } fr
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BcolService from '@/services/bcol.services'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
 import { PaymentSettings } from '@/models/PaymentSettings'
@@ -186,11 +193,35 @@ export default class OrgModule extends VuexModule {
 
   @Action({ rawError: true })
   public async syncMembership (orgId: number): Promise<Member> {
-    const response = await UserService.getMembership(orgId)
-    const membership:Member = response?.data
+    let permissions:String[] = []
+    let response
+    let membership:Member = null
+    const kcUserProfile = KeyCloakService.getUserInfo()
+    if (!kcUserProfile.roles.includes(Role.Staff)) {
+      response = await UserService.getMembership(orgId)
+      membership = response?.data
+      const res = await PermissionService.getPermissions(membership.membershipTypeCode)
+      permissions = res?.data
+    } else {
+      // TODO Check for better approach
+      // Create permissions to enable actions for staff
+      if (kcUserProfile.roles.includes(Role.StaffManageAccounts)) {
+        permissions = CommonUtils.getAdminPermissions()
+      } else if (kcUserProfile.roles.includes(Role.StaffViewAccounts)) {
+        permissions = CommonUtils.getViewOnlyPermissions()
+      }
+      // Create an empty membership model for staff. Map view_account as User and manage_accounts as Admin
+      const membershipTypeCode = kcUserProfile.roles.includes(Role.StaffManageAccounts) ? MembershipType.Admin : (kcUserProfile.roles.includes(Role.StaffViewAccounts) ? MembershipType.User : null)
+      membership = {
+        membershipTypeCode: membershipTypeCode,
+        id: null,
+        membershipStatus: MembershipStatus.Active,
+        user: null
+      }
+    }
+    permissions = permissions || []
     this.context.commit('setCurrentMembership', membership)
-    const res = await PermissionService.getPermissions(membership.membershipTypeCode)
-    this.context.commit('setPermissions', res?.data)
+    this.context.commit('setPermissions', permissions)
     return response?.data
   }
 
@@ -240,18 +271,22 @@ export default class OrgModule extends VuexModule {
     const response = await OrgService.createOrg(createRequestBody)
     const organization = response?.data
     this.context.commit('setCurrentOrganization', organization)
-    if (organization) { // avoid junk
-      const usersettings: UserSettings = {
-        id: organization.id.toString(),
-        label: organization.name,
-        type: 'ACCOUNT',
-        urlorigin: '',
-        urlpath: `/account/${organization.id}/settings`,
-        accountType: organization.orgType
-      }
-      ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify(usersettings))
-    }
+    await this.addOrgSettings(organization)
     return response?.data
+  }
+
+  @Action({ rawError: true })
+  public async addOrgSettings (org: Organization): Promise<UserSettings> {
+    const accountSettings: UserSettings = {
+      id: org?.id.toString(),
+      label: org?.name,
+      type: 'ACCOUNT',
+      urlorigin: '',
+      urlpath: `/account/${org?.id}/settings`,
+      accountType: org?.orgType
+    }
+    ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify(accountSettings))
+    return accountSettings
   }
 
   @Mutation

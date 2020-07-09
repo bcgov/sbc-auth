@@ -337,7 +337,7 @@ def test_staff_search_users(client, jwt, session):  # pylint:disable=unused-argu
     assert rv.status_code == http_status.HTTP_201_CREATED
 
     # Search on all users as a staff user
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
     rv = client.get('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     users = json.loads(rv.data)

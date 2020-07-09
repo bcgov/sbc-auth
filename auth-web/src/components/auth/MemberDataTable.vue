@@ -267,7 +267,7 @@ export default class MemberDataTable extends Vue {
 
   private canRemove (memberToRemove: Member): boolean {
     // Can't remove yourself
-    if (this.currentMembership.user.username === memberToRemove.user.username) {
+    if (this.currentMembership.user?.username === memberToRemove.user.username) {
       return false
     }
 
@@ -293,7 +293,7 @@ export default class MemberDataTable extends Vue {
   }
 
   private canLeave (member: Member): boolean {
-    if (this.currentMembership.user.username !== member.user.username) {
+    if (this.currentMembership.user?.username !== member.user.username) {
       return false
     }
     return true

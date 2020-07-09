@@ -174,7 +174,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/review-account/:orgId',
       name: 'review-account',
       component: ReviewAccountView,
-      meta: { requiresAuth: true, disabledRoles: [Role.Basic, Role.Public] },
+      meta: { requiresAuth: true, allowedRoles: [Role.StaffManageAccounts] },
       props: true
     },
     {

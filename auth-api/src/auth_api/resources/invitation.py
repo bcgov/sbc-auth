@@ -40,7 +40,8 @@ class Invitations(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles(
+        [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def post():
         """Send a new invitation using the details in request and saves the invitation."""
         token = g.jwt_oidc_token_info
@@ -81,7 +82,7 @@ class Invitation(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def patch(invitation_id):
         """Update the invitation specified by the provided id as retried."""
         token = g.jwt_oidc_token_info
@@ -101,7 +102,8 @@ class Invitation(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles(
+        [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def delete(invitation_id):
         """Delete the specified invitation."""
         token = g.jwt_oidc_token_info

@@ -1,6 +1,7 @@
 /**
  * Place to put all the custom utility methods
  */
+import { Permission } from '@/util/constants'
 import moment from 'moment'
 
 export default class CommonUtils {
@@ -97,5 +98,22 @@ export default class CommonUtils {
   static isSigningOut ():boolean {
     const path = window.location.pathname
     return path.includes('/signout')
+  }
+
+  static getAdminPermissions (): string[] {
+    return [
+      Permission.REMOVE_BUSINESS,
+      Permission.CHANGE_ADDRESS,
+      Permission.CHANGE_ORG_NAME,
+      Permission.INVITE_MEMBERS,
+      Permission.CHANGE_ACCOUNT_TYPE,
+      Permission.CHANGE_ROLE,
+      Permission.RESET_PASSWORD
+    ]
+  }
+  static getViewOnlyPermissions (): string[] {
+    return [
+      Permission.VIEW_ACCOUNT
+    ]
   }
 }
