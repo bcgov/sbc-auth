@@ -2,7 +2,6 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import BcscPanel from '@/components/auth/BcscPanel.vue'
 import HomeView from '@/views/auth/HomeView.vue'
 import InfoStepper from '@/components/auth/stepper/InfoStepper.vue'
-import LoginBCSC from '@/components/auth/LoginBCSC.vue'
 import TestimonialQuotes from '@/components/auth/TestimonialQuotes.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -89,12 +88,11 @@ describe('HomeView.vue', () => {
   })
 
   it('renders the correct buttons when authenticated', () => {
-    const bannerBtns = wrapper.vm.$el.querySelectorAll('.cta-btn')
+    const bannerBtns = wrapper.vm.$el.querySelectorAll('.cta-btn-auth')
     const nameRequestBtn = wrapper.vm.$el.querySelector('.btn-name-request')
     const namedCompBtn = bannerBtns[0]
     const numberedCompBtn = bannerBtns[1]
     const manageBusinessBtn = bannerBtns[2]
-    const loginBtn = bannerBtns[3]
 
     expect(nameRequestBtn).toBeDefined()
     expect(nameRequestBtn.textContent).toContain('Request a Name')
@@ -107,9 +105,6 @@ describe('HomeView.vue', () => {
 
     expect(manageBusinessBtn).toBeDefined()
     expect(manageBusinessBtn.textContent).toContain('Manage an Existing Business')
-
-    // Verify the the login btn is undefined
-    expect(loginBtn).toBeUndefined()
   })
 
   it('renders the correct buttons when not authenticated', async () => {
@@ -120,7 +115,7 @@ describe('HomeView.vue', () => {
     const loginBtn = bannerBtns[0]
     const nameRequestBtn = wrapper.vm.$el.querySelector('.btn-name-request')
 
-    const createAccountLink = wrapper.vm.$el.querySelector('.create-account-link')
+    const createAccountLink = wrapper.vm.$el.querySelector('.cta-btn')
 
     expect(loginBtn).toBeDefined()
     expect(loginBtn.textContent).toContain('Create a BC Registries Account')
@@ -130,21 +125,5 @@ describe('HomeView.vue', () => {
 
     expect(createAccountLink).toBeDefined()
     expect(createAccountLink.textContent).toContain('Create a BC Registries Account')
-  })
-
-  it('renders the LoginBCSC when the create account dialog is called', async () => {
-    userModule.state.userProfile = null
-
-    const createAccountLink = wrapper.vm.$el.querySelector('.create-account-link')
-
-    expect(createAccountLink).toBeDefined()
-    expect(createAccountLink.textContent).toContain('Create a BC Registries Account')
-
-    // Verify Dialog and LoginBCSC are not rendered until called
-    expect(wrapper.find(LoginBCSC).exists()).toBe(false)
-
-    await createAccountLink.click()
-
-    expect(wrapper.find(LoginBCSC).exists()).toBe(true)
   })
 })
