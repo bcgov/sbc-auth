@@ -71,6 +71,20 @@ class TestJwtClaims(dict, Enum):
         }
     }
 
+    public_account_holder_user = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': fake.first_name(),
+        'lastname': fake.last_name(),
+        'preferred_username': fake.user_name(),
+        'realm_access': {
+            'roles': [
+                'public_user',
+                'account_holder'
+            ]
+        }
+    }
+
     public_bceid_user = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
@@ -140,6 +154,21 @@ class TestJwtClaims(dict, Enum):
         }
     }
 
+    staff_manage_accounts_role = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': fake.first_name(),
+        'lastname': fake.last_name(),
+        'preferred_username': fake.user_name(),
+        'realm_access': {
+            'roles': [
+                'staff',
+                'view_accounts',
+                'manage_accounts'
+            ]
+        }
+    }
+
     staff_admin_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
@@ -149,12 +178,11 @@ class TestJwtClaims(dict, Enum):
         'realm_access': {
             'roles': [
                 'staff',
-                'staff_admin',
-                'edit'
+                'create_accounts'
             ]
         },
         'roles': [
-            'staff', 'staff_admin'
+            'staff', 'edit', 'create_accounts'
         ]
     }
 
@@ -167,12 +195,13 @@ class TestJwtClaims(dict, Enum):
         'realm_access': {
             'roles': [
                 'staff',
-                'staff_admin',
+                'create_accounts',
                 'edit'
             ]
         },
         'roles': [
-            'staff', 'staff_admin'
+            'staff',
+            'create_accounts'
         ]
     }
 
@@ -185,12 +214,14 @@ class TestJwtClaims(dict, Enum):
         'realm_access': {
             'roles': [
                 'staff',
-                'bcol_staff_admin',
-                'edit'
+                'manage_accounts',
+                'view_accounts'
             ]
         },
         'roles': [
-            'staff', 'staff_admin'
+            'staff',
+            'manage_accounts',
+            'view_accounts'
         ]
     }
 

@@ -29,7 +29,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.enums import AccessType, AffidavitStatus, ChangeType, NotificationType, Status
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF_ADMIN, USER, Role
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF, USER, Role
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('orgs', description='Endpoints for organization management')
@@ -45,7 +45,7 @@ class Orgs(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.PUBLIC_USER.value, Role.STAFF_ADMIN.value, Role.SYSTEM.value])
+    @_JWT.has_one_of_roles([Role.PUBLIC_USER.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.SYSTEM.value])
     def post():
         """Post a new org using the request body.
 
@@ -74,7 +74,7 @@ class Orgs(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get():
         """Search orgs."""
         # Search based on request arguments
@@ -112,7 +112,7 @@ class Org(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get(org_id):
         """Get the org specified by the provided id."""
         org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=ALL_ALLOWED_ROLES)
@@ -126,7 +126,8 @@ class Org(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles(
+        [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def put(org_id):
         """Update the org specified by the provided id with the request body."""
         request_json = request.get_json()
@@ -138,9 +139,9 @@ class Org(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
         try:
             org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
-                                            allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF_ADMIN))
+                                            allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
             if org and org.as_dict().get('accessType', None) == AccessType.ANONYMOUS.value and \
-                    Role.STAFF_ADMIN.value not in token.get('realm_access').get('roles'):
+                    Role.STAFF_CREATE_ACCOUNTS.value not in token.get('realm_access').get('roles'):
                 return {'message': 'The organisation can only be updated by a staff admin.'}, \
                        http_status.HTTP_401_UNAUTHORIZED
             if org:
@@ -159,7 +160,7 @@ class Org(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def delete(org_id):
         """Inactivates the org if it has no active members or affiliations."""
         token = g.jwt_oidc_token_info
@@ -179,12 +180,12 @@ class OrgPaymentSettings(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get(org_id):
         """Retrieve the set of payment settings associated with the specified org."""
         try:
             payment_settings = OrgService.get_payment_settings_for_org(org_id, g.jwt_oidc_token_info,
-                                                                       allowed_roles=CLIENT_AUTH_ROLES)
+                                                                       allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
             response, status = AccountPaymentSettingsSchema().dump(payment_settings), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -199,7 +200,7 @@ class OrgContacts(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get(org_id):
         """Retrieve the set of contacts associated with the specified org."""
         try:
@@ -211,7 +212,7 @@ class OrgContacts(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def post(org_id):
         """Create a new contact for the specified org."""
         request_json = request.get_json()
@@ -228,7 +229,7 @@ class OrgContacts(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def put(org_id):
         """Update an existing contact for the specified org."""
         request_json = request.get_json()
@@ -244,7 +245,7 @@ class OrgContacts(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def delete(org_id):
         """Delete the contact info for the specified org."""
         try:
@@ -260,7 +261,7 @@ class OrgAffiliations(Resource):
     """Resource for managing affiliations for an org."""
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def post(org_id):
@@ -289,7 +290,7 @@ class OrgAffiliations(Resource):
         return response, status
 
     @staticmethod
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def get(org_id):
@@ -311,7 +312,7 @@ class OrgAffiliation(Resource):
     """Resource for managing a single affiliation between an org and an entity."""
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def delete(org_id, business_identifier):
@@ -333,7 +334,7 @@ class OrgMembers(Resource):
     """Resource for managing a set of members for a single organization."""
 
     @staticmethod
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def get(org_id):
@@ -364,7 +365,7 @@ class OrgMember(Resource):
     """Resource for managing a single membership record between an org and a user."""
 
     @staticmethod
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def patch(org_id, membership_id):  # pylint:disable=unused-argument
@@ -382,7 +383,9 @@ class OrgMember(Resource):
             if membership_status is not None:
                 updated_fields_dict['membership_status'] = \
                     MembershipService.get_membership_status_by_code(membership_status)
+
             membership = MembershipService.find_membership_by_id(membership_id, token)
+
             is_own_membership = membership.as_dict()['user']['username'] == \
                 UserService.find_by_jwt_token(token).as_dict()['username']
             if not membership:
@@ -391,6 +394,7 @@ class OrgMember(Resource):
             else:
                 response, status = membership.update_membership(updated_fields=updated_fields_dict, token_info=token
                                                                 ).as_dict(), http_status.HTTP_200_OK
+
                 # if user status changed to active , mail the user
                 if membership_status == Status.ACTIVE.name:
                     membership.send_notification_to_member(origin, NotificationType.MEMBERSHIP_APPROVED.value)
@@ -403,7 +407,7 @@ class OrgMember(Resource):
             return response, status
 
     @staticmethod
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def delete(org_id, membership_id):  # pylint:disable=unused-argument
@@ -430,7 +434,7 @@ class OrgInvitations(Resource):
     """Resource for managing a set of invitations for a single organization."""
 
     @staticmethod
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def get(org_id):
@@ -455,7 +459,7 @@ class OrgAdminAffidavits(Resource):
     """Resource for managing affidavits for the admins in an org."""
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.BCOL_STAFF_ADMIN.value])
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def get(org_id):
@@ -476,7 +480,7 @@ class OrgStatus(Resource):
     """Resource for changing the status of org."""
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.BCOL_STAFF_ADMIN.value])
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def patch(org_id):

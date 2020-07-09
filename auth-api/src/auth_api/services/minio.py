@@ -17,13 +17,14 @@ from datetime import timedelta
 
 from flask import current_app
 from minio import Minio
+from auth_api.utils.constants import AFFIDAVIT_FOLDER_NAME
 
 
 class MinioService:
     """Document Storage class."""
 
     @staticmethod
-    def create_signed_put_url(file_name: str, prefix_key: str = 'Affidavits') -> dict:
+    def create_signed_put_url(file_name: str, prefix_key: str = AFFIDAVIT_FOLDER_NAME) -> dict:
         """Return a pre-signed URL for new doc upload."""
         current_app.logger.debug(f'Creating pre-signed URL for {file_name}')
         minio_client: Minio = MinioService._get_client()

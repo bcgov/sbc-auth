@@ -124,7 +124,7 @@ def test_validate_token(client, jwt, session, keycloak_mock):  # pylint:disable=
 
 def test_accept_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an invitation can be accepted."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
     client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')

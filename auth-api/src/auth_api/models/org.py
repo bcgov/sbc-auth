@@ -79,7 +79,8 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instanc
         return cls.query.filter_by(id=org_id).first()
 
     @classmethod
-    def search_org(cls, access_type, name, status, bcol_account_id):
+    def search_org(cls, access_type, name, status, bcol_account_id,  # pylint: disable=too-many-arguments
+                   page: int, limit: int):
         """Find all orgs with the given type."""
         query = db.session.query(Org) \
             .outerjoin(ContactLink) \
@@ -97,7 +98,9 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instanc
                 AccountPaymentSettingsModel.bcol_account_id == bcol_account_id,
                 AccountPaymentSettingsModel.is_active.is_(True)))
 
-        return query.all()
+        # Add pagination
+        pagination = query.paginate(per_page=limit, page=page)
+        return pagination.items, pagination.total
 
     @classmethod
     def find_by_org_access_type(cls, org_type):
