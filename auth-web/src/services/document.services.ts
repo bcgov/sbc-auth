@@ -17,6 +17,9 @@ export default class DocumentService {
       responseType: 'arraybuffer',
       headers: {
         'Accept': 'application/pdf'
+      },
+      transformRequest: (data, headers) => {
+        delete headers.common['Authorization']
       }
     })
   }
