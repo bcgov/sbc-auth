@@ -17,13 +17,16 @@ export enum Role {
     StaffAdmin = 'staff_admin',
     StaffAdminBCOL = 'bcol_staff_admin',
     AnonymousUser = 'anonymous_user',
-    Tester = 'tester'
+    Tester = 'tester',
+    AccountHolder = 'account_holder',
+    PublicUser = 'public_user'
 }
 
 export enum Pages {
     USER_PROFILE = 'userprofile',
     CREATE_ACCOUNT = 'setup-account',
     CREATE_NON_BCSC_ACCOUNT = 'setup-non-bcsc-account',
+    CHOOSE_AUTH_METHOD = 'choose-authentication-method',
     PENDING_APPROVAL = 'pendingapproval',
     MAIN = 'account',
     SIGNIN = 'signin',
