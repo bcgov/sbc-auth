@@ -1,0 +1,19 @@
+name: PR Labeler
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  pr-labeler:
+    runs-on: ubuntu-latest
+    steps:
+      #- uses: TimonVS/pr-labeler-action@v3
+      #  with:
+      #    configuration-path: .github/pr-labeler.yml # optional, .github/pr-labeler.yml is the default value
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/verify-pr-label-action@v1.0.0
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          valid-labels: "bug, enhancement, feature"
