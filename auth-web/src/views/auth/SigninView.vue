@@ -8,7 +8,7 @@
 </template>
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { IdpHint, Pages, Role, SessionStorageKeys } from '@/util/constants'
+import { IdpHint, Pages, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
@@ -39,21 +39,19 @@ export default class Signin extends Mixins(NextPageMixin) {
   @Prop({ default: '' }) redirectUrl: string
   @Prop({ default: '' }) redirectUrlLoginFail: string
 
-  private async authenticationComplete () {
-    const userInfo = await this.loadUserInfo()
+  private async authenticationComplete (isRedirectToCreateAccount = false) {
+    await this.loadUserInfo()
     // Check if user is authenticated, and redirect according to specified redirect
     // or fallback to default route for their login source
     if (this.$store.getters['auth/isAuthenticated']) {
       this.$root.$emit('signin-complete', () => {
-        if (this.redirectUrl) {
-          if (userInfo?.roles?.includes(Role.PublicUser) && !userInfo?.roles?.includes(Role.AccountHolder)) {
-            // TODO later: need to store this redirect url and handle during the redirection from TOS page
-            this.redirectTo(this.getNextPageUrl())
-          } else {
+        // isRedirectToCreateAccount: if true, redirection already happend from sbc-common-components
+        if (!isRedirectToCreateAccount) {
+          if (this.redirectUrl) {
             this.redirectTo(decodeURIComponent(CommonUtils.isUrl(this.redirectUrl) ? this.redirectUrl : `/${this.redirectUrl}`))
+          } else {
+            this.redirectTo(this.getNextPageUrl())
           }
-        } else {
-          this.redirectTo(this.getNextPageUrl())
         }
       })
     }
