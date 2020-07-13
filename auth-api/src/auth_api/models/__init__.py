@@ -15,12 +15,15 @@
 """This exports all of the models and schemas used by the application."""
 from sqlalchemy import event  # noqa: I001
 from sqlalchemy.engine import Engine  # noqa: I001, I003, I004
+
 # noqa: I004
 # noqa: I001, I003, I004
 from sbc_common_components.tracing.db_tracing import DBTracing  # noqa: I001, I004
 
-from .affiliation import Affiliation
 from .account_payment_settings import AccountPaymentSettings
+from .affidavit import Affidavit
+from .affidavit_status import AffidavitStatus
+from .affiliation import Affiliation
 from .contact import Contact
 from .contact_link import ContactLink
 from .corp_type import CorpType
@@ -29,8 +32,8 @@ from .documents import Documents
 from .entity import Entity
 from .invitation import Invitation
 from .invitation_membership import InvitationMembership
-from .invite_status import InvitationStatus
 from .invitation_type import InvitationType
+from .invite_status import InvitationStatus
 from .membership import Membership
 from .membership_status_code import MembershipStatusCode
 from .membership_type import MembershipType
@@ -39,16 +42,15 @@ from .org_settings import OrgSettings
 from .org_status import OrgStatus
 from .org_type import OrgType
 from .payment_type import PaymentType
-from .product_type_code import ProductTypeCode
+from .permissions import Permissions
 from .product_code import ProductCode
-from .product_subscription_role import ProductSubscriptionRole
 from .product_role_code import ProductRoleCode
 from .product_subscription import ProductSubscription
+from .product_subscription_role import ProductSubscriptionRole
+from .product_type_code import ProductTypeCode
 from .user import User
-from .affidavit import Affidavit
-from .affidavit_status import AffidavitStatus
 from .user_settings import UserSettings
 from .user_status_code import UserStatusCode
-from .permissions import Permissions
+
 
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)

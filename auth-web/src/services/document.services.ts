@@ -13,13 +13,11 @@ export default class DocumentService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/documents/termsofuse`)
   }
   static async getAffidavitPdf (): Promise<AxiosResponse> {
-    return axios.get(`${ConfigHelper.getFileServerUrl()}/affidavit_v1.pdf`, {
+    var instance = Axios.create()
+    return instance.get(`${ConfigHelper.getFileServerUrl()}/affidavit_v1.pdf`, {
       responseType: 'arraybuffer',
       headers: {
         'Accept': 'application/pdf'
-      },
-      transformRequest: (data, headers) => {
-        delete headers.common['Authorization']
       }
     })
   }
