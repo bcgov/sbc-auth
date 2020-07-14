@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "433fa9b5-4fb1-47b7-8e58-f862044c8eab",
+		"_postman_id": "6413c15d-b201-44e3-a1da-6052fd69220d",
 		"name": "auth-api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -14,7 +14,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "80235dd8-8fd2-4a9b-a4f9-1044683caa08",
 								"exec": [
 									"pm.test(\"response is ok\", function () {",
 									"    pm.response.to.have.status(201);",
@@ -32,8 +32,7 @@
 									"});",
 									"",
 									"pm.test(\"Verify payload\",  () => {",
-									"    pm.expect(pm.response.text()).to.include(\"firstname\");",
-									"    pm.expect(pm.response.text()).to.include(\"lastname\");",
+									"    pm.expect(pm.response.text()).to.include(\"keycloakGuid\");",
 									"    pm.expect(pm.response.text()).to.include(\"username\");",
 									"});",
 									"",
@@ -43,7 +42,9 @@
 									"postman.setEnvironmentVariable('userToken', auth_token);",
 									"",
 									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"username\", jsonData.username);"
+									"pm.environment.set(\"username\", jsonData.username);",
+									"pm.environment.set(\"user_guid\", jsonData.keycloakGuid);",
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -101,7 +102,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "c2b33758-d4ed-4183-91dc-6faa99e55a04",
+								"id": "03a4ffbe-3f1c-468f-82ed-4f5813550919",
 								"exec": [
 									"pm.test(\"response is ok\", function () {",
 									"    pm.response.to.have.status(200);",
@@ -119,8 +120,6 @@
 									"});",
 									"",
 									"pm.test(\"Verify payload\",  () => {",
-									"    pm.expect(pm.response.text()).to.include(\"firstname\");",
-									"    pm.expect(pm.response.text()).to.include(\"lastname\");",
 									"    pm.expect(pm.response.text()).to.include(\"username\");",
 									"});",
 									"",
@@ -160,15 +159,167 @@
 					"response": []
 				},
 				{
+					"name": "Get Last version of TermOfUse",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f599cb3b-74ec-4ecf-9a36-d4beb95dc1f7",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    //pm.response.to.have.jsonBody(\"\"); ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"term_version\", jsonData.versionId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/documents/termsofuse",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"documents",
+								"termsofuse"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Accept TermOfUse",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7ea7f5a9-64b2-4fbe-a902-f48722af6979",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    //pm.response.to.have.jsonBody(\"\"); ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									"",
+									"pm.test(\"Verify payload\",  () => {",
+									"    pm.expect(pm.response.text()).to.include(\"userTerms\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"termsversion\": \"{{term_version}}\", \r\n\"istermsaccepted\": true}"
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/users/@me",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"@me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Add contact to user profile (me)",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "82f72f03-ab35-4d60-8c64-f60d5ed9ff8e",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -240,10 +391,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "3156e073-f1a5-4d02-9ac7-42c60bfb5ae5",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -315,10 +466,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "a42ba944-41dd-435d-a862-129d5585be4f",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -390,10 +541,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "c9e8d881-f721-4ab7-bee2-91aed868beeb",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -460,15 +611,248 @@
 					"response": []
 				},
 				{
-					"name": "Add entity",
+					"name": "Create an account",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "3ef5984d-8b6d-460a-a641-46f93a03bd59",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									"",
+									"pm.test(\"Verify payload\",  () => {",
+									"    pm.expect(pm.response.text()).to.include(\"id\");",
+									"    //pm.expect(pm.response.text()).to.include(\"affiliatedEntities\")",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"org_identifier\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"{{test_org_name}}\"\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/orgs",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"orgs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a specific account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "d31ee585-a045-4c99-811e-5441df4b6f4b",
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"userId\", jsonData.id);",
+									"",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    //pm.response.to.have.jsonBody(\"\"); ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									"",
+									"pm.test(\"Verify payload\",  () => {",
+									"    pm.expect(pm.response.text()).to.include(\"id\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"orgs",
+								"{{org_identifier}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update a specific acount",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9559c052-b74e-4fa6-bc7b-4ab3711b2bd2",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response is ok\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"response should be okay to process\", function () { \r",
+									"    pm.response.to.not.be.error; \r",
+									"    pm.response.to.not.have.jsonBody(\"error\"); \r",
+									"});\r",
+									"\r",
+									"pm.test(\"response must be valid and have a body\", function () {\r",
+									"     // assert that the response has a valid JSON body\r",
+									"     pm.response.to.be.withBody;\r",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify payload\",  () => {\r",
+									"    pm.expect(pm.response.text()).to.include(\"id\");\r",
+									"    //pm.expect(pm.response.text()).to.include(\"affiliatedEntities\")\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"{{test_org_name_updated}}\"\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"orgs",
+								"{{org_identifier}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add contact to account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7b2f4179-d7cc-4402-aebd-1fa5f5ceadb1",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -488,11 +872,8 @@
 									"});",
 									"",
 									"pm.test(\"Verify payload\",  () => {",
-									"    pm.expect(pm.response.text()).to.include(\"businessIdentifier\");",
-									"});",
-									"",
-									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"entity_identifier\", jsonData.id);"
+									"    pm.expect(pm.response.text()).to.include(\"email\");",
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -520,17 +901,207 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{  \r\n   \"businessIdentifier\": \"{{business_identifier}}\",\r\n   \"name\": \"{{business_name}}\",\r\n   \"businessNumber\": \"{{business_number}}\",\r\n   \"passCode\": \"{{entity_passcode}}\",\r\n   \"corpTypeCode\": \"CP\",\r\n   \"folioNumber\": \"12345678\"\r\n}"
+							"raw": "{  \r\n   \"email\": \"{{sample_email}}\",\r\n   \"phone\": \"{{sample_phone}}\",\r\n   \"phoneExtension\": \"{{sample_extension}}\"\r\n}"
 						},
 						"url": {
-							"raw": "{{api_url}}/api/v1/entities",
+							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}/contacts",
 							"host": [
 								"{{api_url}}"
 							],
 							"path": [
 								"api",
 								"v1",
-								"entities"
+								"orgs",
+								"{{org_identifier}}",
+								"contacts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create an affiliation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "424e9862-a887-4b29-9b16-91a23018c9d2",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"username\", jsonData.username);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n   \"businessIdentifier\": \"{{business_identifier}}\",\r\n   \"passCode\": \"{{entity_passcode}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"orgs",
+								"{{org_identifier}}",
+								"affiliations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete an affiliation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6734297b-fe49-46d1-92e5-07de5a91e871",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    //pm.response.to.have.jsonBody(\"\"); ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations/{{business_identifier}}",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"orgs",
+								"{{org_identifier}}",
+								"affiliations",
+								"{{business_identifier}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create back an affiliation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6991d0c5-7d58-413a-a562-44c3c39df25b",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"username\", jsonData.username);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{userToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n   \"businessIdentifier\": \"{{business_identifier}}\",\r\n   \"passCode\": \"{{entity_passcode}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"orgs",
+								"{{org_identifier}}",
+								"affiliations"
 							]
 						}
 					},
@@ -542,13 +1113,13 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "93c004bb-fb57-4c25-a564-5826280f680e",
 								"exec": [
 									"var jsonData = pm.response.json();",
 									"pm.environment.set(\"userId\", jsonData.id);",
 									"",
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -621,13 +1192,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "36e0dc51-4fac-4866-a9d6-398d3f9c484a",
 								"exec": [
-									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"userId\", jsonData.id);",
-									"",
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -700,10 +1268,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "74e8e515-3614-4143-8394-01a3a81facb3",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -777,10 +1345,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "62fd2426-a609-4aae-9694-188fb94675ea",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -854,10 +1422,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "c20790f0-3e48-4475-b9f9-5b83488340f3",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -927,10 +1495,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "cfb1fb52-36d3-4b6e-a90b-d47910fed1b7",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -999,553 +1567,15 @@
 					"response": []
 				},
 				{
-					"name": "Create an account",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "58bd542c-3498-4e98-8d28-9fe2eb62ea3b",
-								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
-									"});",
-									"",
-									"pm.test(\"response is ok\", function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test(\"response should be okay to process\", function () { ",
-									"    pm.response.to.not.be.error; ",
-									"    pm.response.to.not.have.jsonBody(\"error\"); ",
-									"});",
-									"",
-									"pm.test(\"response must be valid and have a body\", function () {",
-									"     // assert that the response has a valid JSON body",
-									"     pm.response.to.be.withBody;",
-									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
-									"});",
-									"",
-									"pm.test(\"Verify payload\",  () => {",
-									"    pm.expect(pm.response.text()).to.include(\"id\");",
-									"    //pm.expect(pm.response.text()).to.include(\"affiliatedEntities\")",
-									"});",
-									"",
-									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"org_identifier\", jsonData.id);"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{userToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"name\": \"{{test_org_name}}\"\n}"
-						},
-						"url": {
-							"raw": "{{api_url}}/api/v1/orgs",
-							"host": [
-								"{{api_url}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"orgs"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create additional account",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "58bd542c-3498-4e98-8d28-9fe2eb62ea3b",
-								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
-									"});",
-									"",
-									"pm.test(\"response is ok\", function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test(\"response should be okay to process\", function () { ",
-									"    pm.response.to.not.be.error; ",
-									"    pm.response.to.not.have.jsonBody(\"error\"); ",
-									"});",
-									"",
-									"pm.test(\"response must be valid and have a body\", function () {",
-									"     // assert that the response has a valid JSON body",
-									"     pm.response.to.be.withBody;",
-									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
-									"});",
-									"",
-									"pm.test(\"Verify payload\",  () => {",
-									"    pm.expect(pm.response.text()).to.include(\"id\");",
-									"    //pm.expect(pm.response.text()).to.include(\"affiliatedEntities\")",
-									"});",
-									"",
-									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"org_identifier_additional\", jsonData.id);"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{userToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"name\": \"{{test_org_name}} second\"\n}"
-						},
-						"url": {
-							"raw": "{{api_url}}/api/v1/orgs",
-							"host": [
-								"{{api_url}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"orgs"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get a specific org",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
-								"exec": [
-									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"userId\", jsonData.id);",
-									"",
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
-									"});",
-									"",
-									"pm.test(\"response is ok\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"response should be okay to process\", function () { ",
-									"    pm.response.to.not.be.error; ",
-									"    //pm.response.to.have.jsonBody(\"\"); ",
-									"    pm.response.to.not.have.jsonBody(\"error\"); ",
-									"});",
-									"",
-									"pm.test(\"response must be valid and have a body\", function () {",
-									"     // assert that the response has a valid JSON body",
-									"     pm.response.to.be.withBody;",
-									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
-									"});",
-									"",
-									"pm.test(\"Verify payload\",  () => {",
-									"    pm.expect(pm.response.text()).to.include(\"id\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{userToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/x-www-form-urlencoded"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}",
-							"host": [
-								"{{api_url}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"orgs",
-								"{{org_identifier}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update a specific org",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{userToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"name\": \"{{test_org_name_updated}}\"\n}"
-						},
-						"url": {
-							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}",
-							"host": [
-								"{{api_url}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"orgs",
-								"{{org_identifier}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Add contact to org",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
-								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
-									"});",
-									"",
-									"pm.test(\"response is ok\", function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"pm.test(\"response should be okay to process\", function () { ",
-									"    pm.response.to.not.be.error; ",
-									"    //pm.response.to.have.jsonBody(\"\"); ",
-									"    pm.response.to.not.have.jsonBody(\"error\"); ",
-									"});",
-									"",
-									"pm.test(\"response must be valid and have a body\", function () {",
-									"     // assert that the response has a valid JSON body",
-									"     pm.response.to.be.withBody;",
-									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
-									"});",
-									"",
-									"pm.test(\"Verify payload\",  () => {",
-									"    pm.expect(pm.response.text()).to.include(\"email\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{userToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{  \r\n   \"email\": \"{{sample_email}}\",\r\n   \"phone\": \"{{sample_phone}}\",\r\n   \"phoneExtension\": \"{{sample_extension}}\"\r\n}"
-						},
-						"url": {
-							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}/contacts",
-							"host": [
-								"{{api_url}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"orgs",
-								"{{org_identifier}}",
-								"contacts"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create an affiliation",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
-								"exec": [
-									"var auth_token = pm.request.getHeaders()['Authorization'];",
-									"auth_token = auth_token.replace('Bearer ', '');",
-									"postman.setEnvironmentVariable('userToken', auth_token);",
-									"",
-									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"username\", jsonData.username);"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{userToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n   \"businessIdentifier\": \"{{business_identifier}}\",\r\n   \"passCode\": \"{{entity_passcode}}\"\r\n}"
-						},
-						"url": {
-							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations",
-							"host": [
-								"{{api_url}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"orgs",
-								"{{org_identifier}}",
-								"affiliations"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete an affiliation",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
-								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
-									"});",
-									"",
-									"pm.test(\"response is ok\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"response should be okay to process\", function () { ",
-									"    pm.response.to.not.be.error; ",
-									"    //pm.response.to.have.jsonBody(\"\"); ",
-									"    pm.response.to.not.have.jsonBody(\"error\"); ",
-									"});",
-									"",
-									"pm.test(\"response must be valid and have a body\", function () {",
-									"     // assert that the response has a valid JSON body",
-									"     pm.response.to.be.withBody;",
-									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{userToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations/{{business_identifier}}",
-							"host": [
-								"{{api_url}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"orgs",
-								"{{org_identifier}}",
-								"affiliations",
-								"{{business_identifier}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create back an affiliation",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
-								"exec": [
-									"var auth_token = pm.request.getHeaders()['Authorization'];",
-									"auth_token = auth_token.replace('Bearer ', '');",
-									"postman.setEnvironmentVariable('userToken', auth_token);",
-									"",
-									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"username\", jsonData.username);"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{userToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n   \"businessIdentifier\": \"{{business_identifier}}\",\r\n   \"passCode\": \"{{entity_passcode}}\"\r\n}"
-						},
-						"url": {
-							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier}}/affiliations",
-							"host": [
-								"{{api_url}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"orgs",
-								"{{org_identifier}}",
-								"affiliations"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Get entities affiliated with an org",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "fe748302-fd2c-4bb5-a692-092e5bff94f2",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -1610,15 +1640,15 @@
 					"response": []
 				},
 				{
-					"name": "Get orgs for user (me)",
+					"name": "Get accounts for user (me)",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "372765f2-b1ab-46b1-928c-eb86b620b471",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -1687,8 +1717,12 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "6937c0d7-ff05-4faf-8615-90638ebd52c4",
 								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
 									"pm.test(\"response is ok\", function () {",
 									"    pm.response.to.have.status(201);",
 									"});",
@@ -1739,7 +1773,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{  \r\n   \"recipientEmail\": \"{{member_email}}\",\r\n   \"sentDate\": \"{{current_timestamp}}\",\r\n   \"membership\": [\r\n   \t\t{\r\n   \t\t\t\"membershipType\": \"MEMBER\",\r\n   \t\t\t\"orgId\": {{org_identifier}}\r\n   \t\t}\r\n   \t]\r\n}"
+							"raw": "{  \r\n   \"recipientEmail\": \"{{member_email}}\",\r\n   \"sentDate\": \"{{current_timestamp}}\",\r\n   \"membership\": [\r\n   \t\t{\r\n   \t\t\t\"membershipType\": \"USER\",\r\n   \t\t\t\"orgId\": {{org_identifier}}\r\n   \t\t}\r\n   \t]\r\n}"
 						},
 						"url": {
 							"raw": "{{api_url}}/api/v1/invitations",
@@ -1761,10 +1795,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "c17708a1-0325-46f7-8b21-b1991a1270d2",
+								"id": "bf868de5-e81a-4da4-affe-56b9538eb180",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -1827,13 +1861,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "8b9e7b2e-caf9-41ef-8cb6-ab26514b346f",
 								"exec": [
-									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"userId\", jsonData.id);",
-									"",
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -1905,83 +1936,6 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "Update contact for entity Copy",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
-								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
-									"});",
-									"",
-									"pm.test(\"response is ok\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"response should be okay to process\", function () { ",
-									"    pm.response.to.not.be.error; ",
-									"    //pm.response.to.have.jsonBody(\"\"); ",
-									"    pm.response.to.not.have.jsonBody(\"error\"); ",
-									"});",
-									"",
-									"pm.test(\"response must be valid and have a body\", function () {",
-									"     // assert that the response has a valid JSON body",
-									"     pm.response.to.be.withBody;",
-									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
-									"});",
-									"",
-									"pm.test(\"Verify payload\",  () => {",
-									"    pm.expect(pm.response.text()).to.include(\"businessIdentifier\");",
-									"    pm.expect(pm.response.text()).to.include(\"contacts\");",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{userToken}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{  \r\n   \"email\": \"{{sample_updated_email}}\",\r\n   \"phone\": \"{{sample_phone}}\",\r\n   \"phoneExtension\": \"{{sample_extension}}\"\r\n}"
-						},
-						"url": {
-							"raw": "{{api_url}}/api/v1/entities/{{business_identifier}}/contacts",
-							"host": [
-								"{{api_url}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"entities",
-								"{{business_identifier}}",
-								"contacts"
-							]
-						}
-					},
-					"response": []
 				}
 			],
 			"description": "The suit handles following cases\n\n1) Login Owner",
@@ -1989,7 +1943,7 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "f0439800-c800-4b5c-ba3d-054da6d9942f",
+						"id": "28151390-d62a-4313-9c00-f80ff656f216",
 						"type": "text/javascript",
 						"exec": [
 							"var current_timestamp = new Date()",
@@ -2035,7 +1989,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "0285ff56-6d02-41ff-971b-6dc195287c95",
+						"id": "6227f6ec-fde6-4caf-a359-1aa938f8d42b",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -2054,8 +2008,12 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "362d4d65-c1bf-4774-8bdd-5c5f814b25e4",
 								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
 									"pm.test(\"response is ok\", function () {",
 									"    pm.response.to.have.status(201);",
 									"});",
@@ -2081,9 +2039,7 @@
 									"var auth_token = pm.request.getHeaders()['Authorization'];",
 									"auth_token = auth_token.replace('Bearer ', '');",
 									"postman.setEnvironmentVariable('memberToken', auth_token);",
-									"",
-									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"username\", jsonData.username);"
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -2141,10 +2097,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "15302c02-ec56-471a-bee9-2ea9349780de",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -2216,10 +2172,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "50064553-46fd-4d90-a5a9-35690fa4386d",
+								"id": "4c9ba407-806a-435a-a050-1836343c5bb8",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -2266,10 +2222,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "50064553-46fd-4d90-a5a9-35690fa4386d",
+								"id": "8fedf978-8442-4d74-b74d-b5cb8e94e119",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -2350,7 +2306,7 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "ea73587d-be81-4b59-9dbd-056148082e90",
+						"id": "5b9f02aa-ad45-45e0-ba12-2d0473b27e90",
 						"type": "text/javascript",
 						"exec": [
 							"var current_timestamp = new Date()",
@@ -2396,7 +2352,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "fb73c79d-eabf-43f3-89e1-c8ddb2a3286c",
+						"id": "8e33be8e-ee8b-4be2-9ccb-45cf9aa21180",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -2415,11 +2371,8 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "114c5c5a-8c4b-4ae4-9d57-7d150d48edeb",
 								"exec": [
-									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"userId\", jsonData.id);",
-									"",
 									"pm.test(\"Response time is less than 5000ms\", function () {",
 									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
 									"});",
@@ -2506,7 +2459,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "d1a6bcaf-6909-43b3-8836-1c742855b4e2",
+								"id": "8e666297-407d-4ae9-9199-90ca705c535c",
 								"exec": [
 									"pm.test(\"Response time is less than 5000ms\", function () {",
 									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
@@ -2558,7 +2511,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"role\": \"OWNER\"\n}",
+							"raw": "{\n\t\"status\": \"ACTIVE\",\n\t\"role\": \"USER\",\n\t\"notifyuser\": \"NO\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2588,7 +2541,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "b85684eb-20ee-4b1e-a130-d1509a7c5d03",
 								"exec": [
 									"pm.test(\"Response time is less than 5000ms\", function () {",
 									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
@@ -2637,10 +2590,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "d1a6bcaf-6909-43b3-8836-1c742855b4e2",
+								"id": "930cf86b-9710-48cc-818e-2e841b84801f",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -2689,7 +2642,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"role\": \"OWNER\"\n}",
+							"raw": "{\n\t\"role\": \"ADMIN\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2718,7 +2671,7 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "70a64349-2436-44a7-a450-e0155851bc43",
+						"id": "282d3ada-ef97-4cd1-86d6-61de706832c1",
 						"type": "text/javascript",
 						"exec": [
 							"var current_timestamp = new Date()",
@@ -2763,7 +2716,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "02856df1-10e1-40aa-a523-9ca2eff8439f",
+						"id": "f9445bef-18d0-47d9-b727-689f190c9cfa",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -2774,6 +2727,545 @@
 			"protocolProfileBehavior": []
 		},
 		{
+			"name": "Extra Provincial BCEID",
+			"item": [
+				{
+					"name": "Login as BCEID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7846cdf7-904b-46d6-b98b-a5542963b227",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									"",
+									"pm.test(\"Verify payload\",  () => {",
+									"    pm.expect(pm.response.text()).to.include(\"username\");",
+									"});",
+									"",
+									"",
+									"var auth_token = pm.request.getHeaders()['Authorization'];",
+									"auth_token = auth_token.replace('Bearer ', '');",
+									"postman.setEnvironmentVariable('bceidToken', auth_token);",
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"bceid_guid\", jsonData.keycloakGuid);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "accessToken",
+									"value": "{{bceidAccessToken}}",
+									"type": "string"
+								},
+								{
+									"key": "tokenType",
+									"value": "bearer",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/users",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add contact to user profile (me)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b6544bb5-12ef-4c54-b343-b0f4ab96d3ea",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    //pm.response.to.have.jsonBody(\"\"); ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									"",
+									"pm.test(\"Verify payload\",  () => {",
+									"    pm.expect(pm.response.text()).to.include(\"email\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bceidToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{  \r\n   \"email\": \"{{sample_email}}\",\r\n   \"phone\": \"{{sample_phone}}\",\r\n   \"phoneExtension\": \"{{sample_extension}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/users/contacts",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"contacts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create extra provincial account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "68c2e08d-e4c5-429c-9529-ad69e24e4fa3",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									"",
+									"pm.test(\"Verify payload\",  () => {",
+									"    pm.expect(pm.response.text()).to.include(\"id\");",
+									"    //pm.expect(pm.response.text()).to.include(\"affiliatedEntities\")",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"org_identifier_additional\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bceidToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{test_extra_provincial_name}}\",\n\t\"accessType\": \"EXTRA_PROVINCIAL\"\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/orgs",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"orgs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add contact to extra provincial account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "5c43593e-f860-4a74-8916-e13022c8e306",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    //pm.response.to.have.jsonBody(\"\"); ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									"",
+									"pm.test(\"Verify payload\",  () => {",
+									"    pm.expect(pm.response.text()).to.include(\"email\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bceidToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{  \r\n   \"email\": \"{{sample_email}}\",\r\n   \"phone\": \"{{sample_phone}}\",\r\n   \"phoneExtension\": \"{{sample_extension}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier_additional}}/contacts",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"orgs",
+								"{{org_identifier_additional}}",
+								"contacts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get document signatures",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cef4cf9c-fe47-4ec0-ac9a-2d2809bd096d",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    //pm.response.to.have.jsonBody(\"\"); ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									"",
+									"pm.test(\"Verify payload\",  () => {",
+									"    pm.expect(pm.response.text()).to.include(\"key\");",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"documnent_key\", jsonData.key);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bceidToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/documents/{{file_name}}/signatures",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"documents",
+								"{{file_name}}",
+								"signatures"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add user affidavit",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "54fd5060-6b72-46cb-8adc-efb96b7bc8af",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    //pm.response.to.have.jsonBody(\"\"); ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									"",
+									"pm.test(\"Verify payload\",  () => {",
+									"    pm.expect(pm.response.text()).to.include(\"email\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bceidToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n   \"issuer\": \"ABC Notaries Inc.\",\r\n   \"documentId\": \"{{documnent_key}}\",\r\n   \"contact\": {\r\n         \"email\": \"foo@bar.com\",\r\n         \"phone\": \"(555) 555-5555\",\r\n         \"phoneExtension\": \"123\"\r\n   }\r\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/users/{{bceid_guid}}/affidavits",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{bceid_guid}}",
+								"affidavits"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "7f776321-3c5e-403f-aa91-1443b727863f",
+						"type": "text/javascript",
+						"exec": [
+							"var current_timestamp = new Date()",
+							"postman.setEnvironmentVariable(\"current_timestamp\", current_timestamp.toISOString());",
+							"",
+							"function getvar(variableName) {",
+							"    let value = pm.variables.get(variableName);",
+							"    if (!value) throw new Error(",
+							"        `Variable '${variableName}' is not defined.`);",
+							"        return value;",
+							"    }",
+							"    ",
+							"    let tokenUrl = getvar('token_url');",
+							"    let accountId = getvar('service-account-bceid-id');",
+							"    let accountSecret = getvar('service-account-bceid-secret');",
+							"    ",
+							"    let getTokenRequest = {",
+							"    method: 'POST',",
+							"    url: tokenUrl,",
+							"    header: {",
+							"        'content-type': 'application/x-www-form-urlencoded',",
+							"        'Authorization': 'Basic '+ btoa(accountId+':'+accountSecret)",
+							"    },",
+							"    ",
+							"    body: 'grant_type=client_credentials'",
+							"",
+							"};",
+							"",
+							"pm.sendRequest(getTokenRequest, (err, response) => {",
+							"    let jsonResponse = response.json(),",
+							"    newAccessToken = jsonResponse.access_token;",
+							"    ",
+							"    console.log({ err, jsonResponse, newAccessToken })",
+							"    ",
+							"    pm.environment.set('bceidAccessToken', newAccessToken);",
+							"    pm.variables.set('bceidAccessToken', newAccessToken);",
+							"",
+							"});",
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "4fcddcda-418d-403c-bd21-4286aa61f1d0",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
 			"name": "Staff endpoints",
 			"item": [
 				{
@@ -2782,8 +3274,12 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "79b9394a-874e-4397-8c86-919889c30514",
 								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
 									"pm.test(\"response is ok\", function () {",
 									"    pm.response.to.have.status(201);",
 									"});",
@@ -2807,9 +3303,7 @@
 									"var auth_token = pm.request.getHeaders()['Authorization'];",
 									"auth_token = auth_token.replace('Bearer ', '');",
 									"postman.setEnvironmentVariable('staffToken', auth_token);",
-									"",
-									"var jsonData = pm.response.json();",
-									"pm.environment.set(\"username\", jsonData.username);"
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -2867,8 +3361,12 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "92f21fda-badd-426a-9c9e-2f71ddb1cd90",
+								"id": "df1dcdd2-1082-4730-99d0-72aedf26ef3a",
 								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
 									"pm.test(\"response is ok\", function () {",
 									"    pm.response.to.have.status(200);",
 									"});",
@@ -2920,13 +3418,167 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Get admin Affidavits",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "62aca49e-c425-4edf-aa69-c6691ae97322",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    //pm.response.to.have.jsonBody(\"\"); ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									"",
+									"pm.test(\"Verify payload\",  () => {",
+									"    pm.expect(pm.response.text()).to.include(\"documentId\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{staffToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier_additional}}/admins/affidavits",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"orgs",
+								"{{org_identifier_additional}}",
+								"admins",
+								"affidavits"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Approv pending Affdavit",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e4519a7c-c1f8-44f0-bfac-f028cfea0c4d",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"response should be okay to process\", function () { ",
+									"    pm.response.to.not.be.error; ",
+									"    //pm.response.to.have.jsonBody(\"\"); ",
+									"    pm.response.to.not.have.jsonBody(\"error\"); ",
+									"});",
+									"",
+									"pm.test(\"response must be valid and have a body\", function () {",
+									"     // assert that the response has a valid JSON body",
+									"     pm.response.to.be.withBody;",
+									"     pm.response.to.be.json; // this assertion also checks if a body  exists, so the above check is not needed",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{staffToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"statusCode\": \"APPROVED\"\r\n}"
+						},
+						"url": {
+							"raw": "{{api_url}}/api/v1/orgs/{{org_identifier_additional}}/status",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"orgs",
+								"{{org_identifier_additional}}",
+								"status"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"event": [
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "14abfca5-5fd7-42fd-a81c-d5fbf611eca3",
+						"id": "c72b1978-5994-48d8-91d9-9ed57416b88a",
 						"type": "text/javascript",
 						"exec": [
 							"var current_timestamp = new Date()",
@@ -2972,7 +3624,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "87a0cd78-905e-43c7-9809-58e0679b3428",
+						"id": "7f69ae8a-5da3-4502-bf47-a43b0702107a",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -2991,10 +3643,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "c25489a1-c90c-4d05-931c-dd9b670c0c67",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -3051,10 +3703,10 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "97eb4336-4202-49a2-8ae5-92c7c1a04dc2",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
@@ -3106,23 +3758,83 @@
 					"response": []
 				},
 				{
-					"name": "Reset staff Data",
+					"name": "Reset bceid user data",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
-								"id": "a27660f6-b1e5-473c-8149-e5309b672fa7",
+								"id": "d5c27ae1-bf11-4e00-b138-dd7365465c8b",
 								"exec": [
-									"pm.test(\"Response time is less than 5000ms\", function () {",
-									"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
 									"});",
 									"",
 									"pm.test(\"response is ok\", function () {",
 									"    pm.response.to.have.status(204);",
 									"});",
 									"",
-									"postman.setEnvironmentVariable('memberToken', '');",
-									"postman.setEnvironmentVariable('memberAccessToken', '');"
+									"postman.setEnvironmentVariable('bceidToken', '');",
+									"postman.setEnvironmentVariable('bceidAccessToken', '');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bceidToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{api_url}}/test/reset",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"test",
+								"reset"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset staff Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e4cff5d8-cd2b-4824-8846-c6591bd8f9b5",
+								"exec": [
+									"pm.test(\"Response time is less than 10000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(10000);",
+									"});",
+									"",
+									"pm.test(\"response is ok\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"postman.setEnvironmentVariable('staffToken', '');",
+									"postman.setEnvironmentVariable('staffAccessToken', '');"
 								],
 								"type": "text/javascript"
 							}
