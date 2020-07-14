@@ -96,14 +96,20 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import ConfigHelper from '@/util/config-helper'
+import { mapGetters } from 'vuex'
 
 @Component({
-  name: 'Home',
-  components: {
+  computed: {
+    ...mapGetters('auth', [
+      'isAuthenticated',
+      'currentLoginSource'
+    ])
   }
 })
 
 export default class ChooseAuthMethodView extends Vue {
+  private readonly isAuthenticated!: boolean
+  private readonly currentLoginSource!: string
   private authType = ''
 
   private selectBCSCAuth () {
@@ -119,7 +125,7 @@ export default class ChooseAuthMethodView extends Vue {
   }
 
   private goNext () {
-  // TODO might need to set some session variables
+    // TODO might need to set some session variables
     switch (this.authType) {
       case LoginSource.BCEID:
         ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'true')
@@ -128,7 +134,15 @@ export default class ChooseAuthMethodView extends Vue {
         break
       case LoginSource.BCSC:
         ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'false') // this flag shouldnt be used for bcsc users.still setting the right value
-        this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
+        if (this.isAuthenticated) {
+          if (this.currentLoginSource === LoginSource.BCEID) {
+            this.$router.push(`/${Pages.SETUP_ACCOUNT_NON_BCSC}`)
+          } else {
+            this.$router.push(`/${Pages.CREATE_ACCOUNT}`)
+          }
+        } else {
+          this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
+        }
         break
     }
   }
