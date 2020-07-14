@@ -74,7 +74,6 @@ class Org:  # pylint: disable=too-many-public-methods
     def create_org(org_info: dict, user_id,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
                    token_info: Dict = None, bearer_token: str = None, origin_url: str = None):
         """Create a new organization."""
-        print('1111')
         current_app.logger.debug('<create_org ')
         bcol_credential = org_info.pop('bcOnlineCredential', None)
         mailing_address = org_info.pop('mailingAddress', None)
@@ -86,7 +85,6 @@ class Org:  # pylint: disable=too-many-public-methods
             bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token).json()
             bcol_account_number = bcol_response.get('accountNumber')
             bcol_user_id = bcol_response.get('userId')
-        print('22222')
 
         org_info['typeCode'] = OrgType.PREMIUM.value if bcol_account_number else OrgType.BASIC.value
 
@@ -94,7 +92,6 @@ class Org:  # pylint: disable=too-many-public-methods
         is_bceid_user = token_info and token_info.get('loginSource', None) == LoginSource.BCEID.value
 
         Org.validate_account_limit(is_staff_admin, user_id)
-        print('33333')
 
         access_type = Org.validate_access_type(is_bceid_user, is_staff_admin, org_info)
 
@@ -105,7 +102,6 @@ class Org:  # pylint: disable=too-many-public-methods
         org.access_type = access_type
         # If the account is anonymous set the billable value as False else True
         org.billable = access_type != AccessType.ANONYMOUS.value
-        print('44444')
 
         # Set the status based on access type
         # Check if the user is APPROVED else set the org status to PENDING
@@ -461,8 +457,8 @@ class Org:  # pylint: disable=too-many-public-methods
             if affiliation:
                 orgs['orgs'].append(Org(OrgModel.find_by_org_id(affiliation.org_id)).as_dict())
         else:
-            page: int = int(kwargs.get('page', 1))
-            limit: int = int(kwargs.get('limit', 10))
+            page: int = int(kwargs.get('page'))
+            limit: int = int(kwargs.get('limit'))
             org_models, total = OrgModel.search_org(
                 kwargs.get('access_type', None),
                 kwargs.get('name', None),

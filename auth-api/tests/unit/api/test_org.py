@@ -1227,3 +1227,31 @@ def test_search_orgs_with_pending_affidavits(client, jwt, session, keycloak_mock
                                      headers=headers, content_type='application/json')
 
     assert len(org_search_response.json.get('orgs')) == 1
+
+
+def test_search_org_pagination(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that pagination works."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                headers=headers, content_type='application/json')
+    client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org2),
+                headers=headers, content_type='application/json')
+    client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org3),
+                headers=headers, content_type='application/json')
+
+    # staff search
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
+    rv = client.get('/api/v1/orgs?page=1&limit=10',
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert orgs.get('total') == 3
+    assert len(orgs.get('orgs')) == 3
+
+    rv = client.get('/api/v1/orgs?page=1&limit=2',
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert orgs.get('total') == 3
+    assert len(orgs.get('orgs')) == 2

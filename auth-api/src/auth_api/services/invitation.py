@@ -70,10 +70,7 @@ class Invitation:
         org = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        # if org.access_type == AccessType.ANONYMOUS.value:
-        #     check_auth(token_info, org_id=org_id, equals_role=STAFF_ADMIN)
-        # elif \
-        # if org.access_type == AccessType.REGULAR.value:
+
         check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
         org_name = org.name

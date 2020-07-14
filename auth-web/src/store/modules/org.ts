@@ -10,8 +10,6 @@ import {
   Member,
   MembershipStatus,
   MembershipType,
-  OrgFilterParams,
-  OrgList,
   Organization,
   UpdateMemberPayload
 } from '@/models/Organization'
@@ -26,7 +24,6 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
@@ -193,7 +190,7 @@ export default class OrgModule extends VuexModule {
 
   @Action({ rawError: true })
   public async syncMembership (orgId: number): Promise<Member> {
-    let permissions:String[] = []
+    let permissions:string[] = []
     let response
     let membership:Member = null
     const kcUserProfile = KeyCloakService.getUserInfo()
@@ -203,7 +200,7 @@ export default class OrgModule extends VuexModule {
       const res = await PermissionService.getPermissions(membership.membershipTypeCode)
       permissions = res?.data
     } else {
-      // TODO Check for better approach
+      // Check for better approach
       // Create permissions to enable actions for staff
       if (kcUserProfile.roles.includes(Role.StaffManageAccounts)) {
         permissions = CommonUtils.getAdminPermissions()
@@ -211,7 +208,13 @@ export default class OrgModule extends VuexModule {
         permissions = CommonUtils.getViewOnlyPermissions()
       }
       // Create an empty membership model for staff. Map view_account as User and manage_accounts as Admin
-      const membershipTypeCode = kcUserProfile.roles.includes(Role.StaffManageAccounts) ? MembershipType.Admin : (kcUserProfile.roles.includes(Role.StaffViewAccounts) ? MembershipType.User : null)
+      let membershipTypeCode = null
+      if (kcUserProfile.roles.includes(Role.StaffManageAccounts)) {
+        membershipTypeCode = MembershipType.Admin
+      } else if (kcUserProfile.roles.includes(Role.StaffViewAccounts)) {
+        membershipTypeCode = MembershipType.User
+      }
+
       membership = {
         membershipTypeCode: membershipTypeCode,
         id: null,

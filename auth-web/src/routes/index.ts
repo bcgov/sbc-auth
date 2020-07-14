@@ -84,9 +84,8 @@ router.beforeEach((to, from, next) => {
     const currentOrganization: Organization = (store.state as any)?.org?.currentOrganization
     const currentMembership: Member = (store.state as any)?.org?.currentMembership
     const currentUser: KCUserProfile = (store.state as any)?.user?.currentUser
-    const isStaff: boolean = KeyCloakService.decodeToken()?.realm_access.roles.includes(Role.Staff)
     if (to.matched.some(record => record.meta.requiresProfile) &&
-      !userProfile?.userTerms?.isTermsOfUseAccepted && !isStaff) {
+      !userProfile?.userTerms?.isTermsOfUseAccepted) {
       switch (currentUser?.loginSource) {
         case LoginSource.BCSC:
         case LoginSource.BCROS:
