@@ -20,6 +20,5 @@ jobs:
       - name: Login Openshift and Restart mailhog
         run: |
           oc ${{ secrets.oc_parameters }}
-          oc project ${{ secrets.OPENSHIFT_REPOSITORY_DEV }}
-          oc scale --replicas=0 deployment/mailhog
-          oc scale --replicas=1 deployment/mailhog
+          oc scale --replicas=0 deployment/mailhog -n ${{ secrets.OPENSHIFT_REPOSITORY_DEV }}
+          oc scale --replicas=1 deployment/mailhog -n ${{ secrets.OPENSHIFT_REPOSITORY_DEV }}

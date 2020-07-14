@@ -47,11 +47,5 @@ project you agree to abide by its terms.
 
 # Testing Thanks
 
-Thanks to BrowserStack for Testing Tool support via OpenSource Licensing
-
-[![BrowserStack](browserstack-logo-white-small.png)](http://browserstack.com/)
-
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=sbc-auth)
-
-
 
