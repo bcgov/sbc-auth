@@ -1,6 +1,6 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
-import { LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
+import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, OrgStatus, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
