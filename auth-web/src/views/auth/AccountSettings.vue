@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Breadcrumbs / Back Navigation -->
-    <nav class="crumbs" v-if="isDirSearchUser">
+    <nav class="crumbs" v-if="isDirSearchUser" aria-labelledby="dirSearchNav">
       <v-container class="pt-5 pb-4">
         <v-btn large text color="primary" class="back-btn pr-2 pl-1" :href="dirSearchUrl">
           <v-icon small class="mr-1">mdi-arrow-left</v-icon>
@@ -10,7 +10,7 @@
       </v-container>
     </nav>
 
-    <nav class="crumbs" v-if="isStaff">
+    <nav class="crumbs" v-if="isStaff" aria-labelledby="staffNav">
       <v-container class="pt-5 pb-4">
         <v-btn large text color="primary" class="back-btn pr-2 pl-1" @click="handleBackButton()">
           <v-icon small class="mr-1">mdi-arrow-left</v-icon>

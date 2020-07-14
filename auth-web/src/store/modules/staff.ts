@@ -1,6 +1,6 @@
 import { AccountType, ProductCode } from '@/models/Staff'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { MembershipType, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
+import { MembershipType, OrgFilterParams, Organization } from '@/models/Organization'
 import { AccountStatus } from '@/util/constants'
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
