@@ -54,3 +54,4 @@ Thanks to BrowserStack for Testing Tool support via OpenSource Licensing
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=sbc-auth)
 
 
+

@@ -1,6 +1,7 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import MemberDataTable from '@/components/auth/MemberDataTable.vue'
 import OrgModule from '@/store/modules/org'
+import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
@@ -48,6 +49,9 @@ describe('MemberDataTable.vue', () => {
       namespaced: true,
       state: {
         currentUser: { 'userName': 'test' }
+      },
+      actions: {
+        getRoleInfo: jest.fn()
       }
     }
     const businessModule = {

@@ -3,8 +3,6 @@ export enum SessionStorageKeys {
     KeyCloakToken = 'KEYCLOAK_TOKEN',
     ApiConfigKey = 'AUTH_API_CONFIG',
     BusinessIdentifierKey = 'BUSINESS_IDENTIFIER',
-    UserKcId = 'USER_KC_ID',
-    UserAccountType = 'USER_ACCOUNT_TYPE',
     CurrentAccount = 'CURRENT_ACCOUNT',
     LaunchDarklyFlags = 'LD_FLAGS',
     ExtraProvincialUser = 'EXTRAPROVINCIAL_USER',
@@ -22,13 +20,16 @@ export enum Role {
     StaffManageAccounts = 'manage_accounts',
     AnonymousUser = 'anonymous_user',
     StaffViewAccounts = 'view_accounts',
-    Tester = 'tester'
+    Tester = 'tester',
+    AccountHolder = 'account_holder',
+    PublicUser = 'public_user'
 }
 
 export enum Pages {
     USER_PROFILE = 'userprofile',
     CREATE_ACCOUNT = 'setup-account',
     CREATE_NON_BCSC_ACCOUNT = 'setup-non-bcsc-account',
+    CHOOSE_AUTH_METHOD = 'choose-authentication-method',
     PENDING_APPROVAL = 'pendingapproval',
     MAIN = 'account',
     SIGNIN = 'signin',

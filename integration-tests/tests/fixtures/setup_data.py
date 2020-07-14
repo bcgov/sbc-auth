@@ -34,7 +34,7 @@ def tested_user(request) -> TestedUser:
 @pytest.fixture(scope='class')
 def login_session(test_case, py_config, selenium, tested_user, request) -> SessionStorage:
     """Access login pages to get the session storage values."""
-    py = Pylenium(py_config, test_case.logger)
+    py = Pylenium(py_config)
     params = request.param
     if params['loginAs'] in ['ADMIN']:
         login_page = BCSCLoginPage(py)
@@ -83,7 +83,7 @@ def testing_config(login_session) -> TestingConfig:
 def log_test_name(logger, request):
     """Log the test name when test it."""
     test_name = request.node.name
-    logger.step(f'{test_name}')
+    logger.debug(f'[STEP] {test_name}')
 
 
 @pytest.yield_fixture(scope='class')
