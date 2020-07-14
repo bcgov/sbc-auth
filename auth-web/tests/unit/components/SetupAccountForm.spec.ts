@@ -54,6 +54,10 @@ describe('SetupAccountForm.vue', () => {
             'desc': 'PUBLIC'
           }
         ]
+      },
+      actions: {
+        getProducts: jest.fn(),
+        getAccountTypes: jest.fn()
       }
     }
 

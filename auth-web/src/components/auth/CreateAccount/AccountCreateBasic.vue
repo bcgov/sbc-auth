@@ -138,7 +138,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   }
 
   private get isExtraProvUser () {
-    return sessionStorage.getItem(SessionStorageKeys.UserAccountType) === LoginSource.BCEID
+    return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
   }
 
   private async save () {

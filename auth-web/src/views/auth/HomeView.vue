@@ -23,15 +23,15 @@
             <!-- Authenticated -->
             <div v-if="userProfile" class="cta-btns-authenticated">
               <name-request-button :isWide="true" />
-              <v-btn large dark color="bcgovblue" class="font-weight-bold"
+              <v-btn large dark color="bcgovblue" class="cta-btn-auth font-weight-bold"
                      @click="goToManageBusinesses()">
                 Incorporate a Named Benefit Company
               </v-btn>
-              <v-btn large dark color="bcgovblue" class="font-weight-bold"
+              <v-btn large dark color="bcgovblue" class="cta-btn-auth font-weight-bold"
                      @click="goToManageBusinesses(true)">
                 Incorporate a Numbered Benefit Company
               </v-btn>
-              <v-btn large color="bcgovgold" class="font-weight-bold"
+              <v-btn large color="bcgovgold" class="cta-btn-auth font-weight-bold"
                      @click="goToManageBusinesses()">
                 Manage an Existing Business
               </v-btn>
@@ -50,7 +50,7 @@
           <v-dialog v-model="accountDialog" max-width="640">
             <LoginBCSC>
               <template v-slot:actions>
-                <v-btn large color="primary" @click="login()">Log in</v-btn>
+                <v-btn large color="primary" class="login-btn" @click="login()">Log in</v-btn>
                 <v-btn large depressed color="default" @click="accountDialog = false">Cancel</v-btn>
               </template>
             </LoginBCSC>

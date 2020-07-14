@@ -1,8 +1,9 @@
 <template>
   <sbc-signin
     :idp-hint="idpHint"
+    :in-auth="true"
     :redirect-url-login-fail="redirectUrlLoginFail"
-    @sync-user-profile-ready="authenticationComplete()"
+    @sync-user-profile-ready="authenticationComplete"
   ></sbc-signin>
 </template>
 <script lang="ts">
