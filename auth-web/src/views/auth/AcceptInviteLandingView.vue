@@ -1,13 +1,19 @@
 <template>
   <div>
     <template v-if="!invalidInvitationToken && !tokenError && !otherError">
-      <div v-if="isCreateUserProfile">
+      <div v-if="loginSource == loginSourceenum.BCROS">
         <create-user-profile-landing
           :token="token"
           :orgName="orgName"
         ></create-user-profile-landing>
       </div>
-      <div v-if="!isCreateUserProfile">
+      <div v-if="loginSource == loginSourceenum.BCEID">
+        <bceid-invite-landing
+                :token="token"
+                :orgName="orgName"
+        ></bceid-invite-landing>
+      </div>
+      <div  v-if="loginSource == loginSourceenum.BCSC">
         <interim-landing :summary="$t('acceptInviteLandingTitle')" :description="$t('acceptInviteLandingMessage')" icon="mdi-login-variant" showHomePageBtn="false">
           <template v-slot:actions>
             <v-btn v-if="!isUserSignedIn()" large link color="primary" @click="redirectToSignin()">{{ $t('loginBtnLabel') }}</v-btn>
@@ -30,12 +36,13 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
+import BceidInviteLanding from '@/components/auth/BceidInviteLanding.vue'
 import ConfigHelper from '@/util/config-helper'
 import CreateUserProfileLanding from '@/components/auth/CreateUserProfileLanding.vue'
 import { EmptyResponse } from '@/models/global'
 import InterimLanding from '@/components/auth/InterimLanding.vue'
+import { LoginSource } from '@/util/constants'
 import OrgModule from '@/store/modules/org'
-import { Pages } from '@/util/constants'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -46,6 +53,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('org', ['validateInvitationToken'])
   },
   components: {
+    BceidInviteLanding,
     InterimLanding,
     CreateUserProfileLanding
   }
@@ -56,13 +64,22 @@ export default class AcceptInviteLandingView extends Vue {
 
   @Prop() token: string
   @Prop({ default: '' }) orgName: string
+  @Prop({ default: LoginSource.BCSC }) loginSource: string
 
   private otherError: boolean = false
   private isCreateUserProfile: boolean = false
 
   private mounted () {
-    this.isCreateUserProfile = (this.$route?.name === Pages.CREATE_USER_PROFILE)
+    // if no value for loginSource , defaulted to bcsc
+    // if loginSource =bcros , take them to create user profile
+    // if loginSource bcsc , stay in the page , show inivtation accept screen
+    // if loginSource = bceid ,take to bceid login page
+    this.isCreateUserProfile = (this.loginSource === LoginSource.BCROS)
     this.validateToken()
+  }
+
+  get loginSourceenum () {
+    return LoginSource
   }
 
   private isUserSignedIn (): boolean {

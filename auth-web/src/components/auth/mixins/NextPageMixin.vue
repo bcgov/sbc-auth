@@ -82,12 +82,21 @@ export default class NextPageMixin extends Vue {
         return `/${nextStep}`
       case LoginSource.BCEID:
         let bceidNextStep = '/'
+        let invToken = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.InvitationToken || '{}'))
+        let bceditNextStep = '/'
+        // if they are in invitation flow [check session storage], take them to
         // Redirect to TOS if no terms accepted
         // for invited users , handle user profile
         // Redirect to create team if no orgs
         // Redirect to dashboard otherwise
         if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
           bceidNextStep = Pages.USER_PROFILE_TERMS
+        // eslint-disable-next-line no-console
+        console.log('-invTokeninvTokeninvToken', invToken)
+        if (invToken) {
+          bceditNextStep = `${Pages.CONFIRM_TOKEN}/${invToken}`
+        } else if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
+          bceditNextStep = Pages.USER_PROFILE_TERMS
         } else if (!this.currentOrganization && !this.currentMembership) {
           bceidNextStep = Pages.CHOOSE_AUTH_METHOD
         } else if (this.currentOrganization && this.currentOrganization.statusCode === OrgStatus.PendingAffidavitReview) {

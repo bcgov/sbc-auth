@@ -191,6 +191,58 @@ class OrgPaymentSettings(Resource):
         return response, status
 
 
+@cors_preflight('GET,POST,PUT,OPTIONS')
+@API.route('/<string:org_id>/login_options', methods=['GET', 'POST', 'PUT', 'OPTIONS'])
+class OrgLoginOptions(Resource):
+    """Resource for managing org login options."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def get(org_id):
+        """Retrieve the set of payment settings associated with the specified org."""
+        try:
+            login_options = OrgService.get_login_options_for_org(org_id, g.jwt_oidc_token_info,
+                                                                 allowed_roles=CLIENT_AUTH_ROLES)
+            response, status = jsonify({'loginOption': login_options.login_source}), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def post(org_id):
+        """Create a new login type for the specified org."""
+        request_json = request.get_json()
+        login_option_val = request_json.get('loginOption')
+        # TODO may be add validation here
+        try:
+            login_option = OrgService.add_login_option(org_id, login_option_val, g.jwt_oidc_token_info)
+            response, status = jsonify({'login_option': login_option.login_source}), http_status.HTTP_201_CREATED
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def put(org_id):
+        """Update a new login type for the specified org."""
+        request_json = request.get_json()
+        login_option_val = request_json.get('loginOption')
+        # TODO may be add validation here
+        try:
+            login_option = OrgService.update_login_option(org_id, login_option_val, g.jwt_oidc_token_info)
+            response, status = jsonify({'login_option': login_option.login_source}), http_status.HTTP_201_CREATED
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+
 @cors_preflight('GET,DELETE,POST,PUT,OPTIONS')
 @API.route('/<string:org_id>/contacts', methods=['GET', 'DELETE', 'POST', 'PUT', 'OPTIONS'])
 class OrgContacts(Resource):
@@ -384,7 +436,7 @@ class OrgMember(Resource):
                     MembershipService.get_membership_status_by_code(membership_status)
             membership = MembershipService.find_membership_by_id(membership_id, token)
             is_own_membership = membership.as_dict()['user']['username'] == \
-                UserService.find_by_jwt_token(token).as_dict()['username']
+                                UserService.find_by_jwt_token(token).as_dict()['username']
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND

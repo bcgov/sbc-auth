@@ -55,6 +55,9 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instanc
     payment_settings = relationship('AccountPaymentSettings', cascade='all,delete,delete-orphan',
                                     primaryjoin='and_(Org.id == AccountPaymentSettings.org_id, '
                                                 'AccountPaymentSettings.is_active == True)', lazy='select')
+    login_options = relationship('AccountLoginOptions', cascade='all,delete,delete-orphan',
+                                    primaryjoin='and_(Org.id == AccountLoginOptions.org_id, '
+                                                'AccountLoginOptions.is_active == True)', lazy='select')
 
     @classmethod
     def create_from_dict(cls, org_info: dict):

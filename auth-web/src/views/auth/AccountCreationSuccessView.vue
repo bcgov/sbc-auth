@@ -10,8 +10,8 @@
             <strong>BC Registries Home</strong>
           </v-btn>
           <strong class="mx-3">or</strong>
-          <v-btn large color="primary" @click="goTo('team-members')">
-            <strong>Add Team Members</strong>
+          <v-btn large color="primary" @click="goTo('setup-team')">
+            <strong>Set up team</strong>
           </v-btn>
         </div>
       </v-col>
@@ -39,6 +39,8 @@ export default class AccountCreationSuccessView extends Vue {
       case 'home': this.$router.push('/')
         break
       case 'team-members': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
+        break
+      case 'setup-team': this.$router.push(`account-login-options-info`)
         break
     }
   }

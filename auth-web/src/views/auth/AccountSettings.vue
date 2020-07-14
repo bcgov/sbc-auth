@@ -49,6 +49,12 @@
                   </v-list-item-icon>
                   <v-list-item-title>Team Members</v-list-item-title>
                 </v-list-item>
+                <v-list-item dense class="py-1 px-8" :to="accountAuthUrl" data-test="user-auth-nav-item">
+                  <v-list-item-icon>
+                    <v-icon color="link" left>mdi-two-factor-authentication</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-title>User Authentication</v-list-item-title>
+                </v-list-item>
                 <v-list-item dense class="py-1 px-8"
                   v-if="showTransactions"
                   :to="transactionUrl"
@@ -111,6 +117,10 @@ export default class AccountSettings extends Vue {
 
   private get teamMembersUrl (): string {
     return `/account/${this.orgId}/settings/team-members`
+  }
+
+  private get accountAuthUrl (): string {
+    return `/account/${this.orgId}/settings/account-login-option`
   }
 
   private get transactionUrl (): string {

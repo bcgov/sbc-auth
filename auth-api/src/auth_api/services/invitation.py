@@ -23,6 +23,7 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
@@ -30,14 +31,13 @@ from auth_api.models import OrgSettings as OrgSettingsModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
-from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, Status
+from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, Status, LoginSource
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF_ADMIN, USER
 from config import get_named_config
 
 from .authorization import check_auth
 from .membership import Membership as MembershipService
 from .notification import send_email
-
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -78,13 +78,22 @@ class Invitation:
         org_name = org.name
         invitation_type = InvitationType.DIRECTOR_SEARCH.value if org.access_type == AccessType.ANONYMOUS.value \
             else InvitationType.STANDARD.value
+        mandatory_login_source = ''
+        if org.access_type == AccessType.ANONYMOUS:
+            mandatory_login_source = LoginSource.BCROS.value
+        else:
+            role = invitation_info['membership'][0]['membershipType']
+            account_login_options = AccountLoginOptionsModel.find_active_by_org_id(org.id)
+            mandatory_login_source = LoginSource.BCSC.value if role == ADMIN else getattr(account_login_options,
+                                                                                          'login_source', LoginSource.BCSC.value)
 
         invitation = InvitationModel.create_from_dict(invitation_info, user.identifier, invitation_type)
         confirmation_token = Invitation.generate_confirmation_token(invitation.id, invitation.type)
         invitation.token = confirmation_token
+        invitation.login_source = mandatory_login_source
         invitation.save()
         Invitation.send_invitation(invitation, org_name, user.as_dict(),
-                                   '{}/{}'.format(invitation_origin, context_path))
+                                   '{}/{}'.format(invitation_origin, context_path), mandatory_login_source)
         return Invitation(invitation)
 
     def update_invitation(self, user, token_info: Dict, invitation_origin):
@@ -101,7 +110,7 @@ class Invitation:
         updated_invitation = self._model.update_invitation_as_retried()
         org_name = OrgModel.find_by_org_id(self._model.membership[0].org_id).name
         Invitation.send_invitation(updated_invitation, org_name, user.as_dict(),
-                                   '{}/{}'.format(invitation_origin, context_path))
+                                   '{}/{}'.format(invitation_origin, context_path), self._model.login_source)
         return Invitation(updated_invitation)
 
     @staticmethod
@@ -182,10 +191,10 @@ class Invitation:
             raise BusinessException(Error.FAILED_INVITATION, None)
 
     @staticmethod
-    def send_invitation(invitation: InvitationModel, org_name, user, app_url):
+    def send_invitation(invitation: InvitationModel, org_name, user, app_url, login_source):
         """Send the email notification."""
         current_app.logger.debug('<send_invitation')
-        mail_configs = Invitation.get_invitation_configs(invitation.type, org_name)
+        mail_configs = Invitation._get_invitation_configs(invitation.type, org_name, login_source)
         subject = mail_configs.get('subject').format(user['firstname'], user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
@@ -206,15 +215,16 @@ class Invitation:
         current_app.logger.debug('>send_invitation')
 
     @staticmethod
-    def get_invitation_configs(invitation_type, org_name):
+    def _get_invitation_configs(invitation_type, org_name, login_source):
         """Get the config for different email types."""
+        token_confirm_path = f'{org_name}/validatetoken/{login_source}'
         director_search_configs = {
-            'token_confirm_path': f'{org_name}/dirsearch/validatetoken',
+            'token_confirm_path': token_confirm_path,
             'template_name': 'dirsearch_business_invitation_email',
             'subject': 'Your BC Registries Account has been created',
         }
         default_configs = {
-            'token_confirm_path': 'validatetoken',
+            'token_confirm_path': token_confirm_path,
             'template_name': 'business_invitation_email',
             'subject': '[BC Registries & Online Services] {} {} has invited you to join an account',
 

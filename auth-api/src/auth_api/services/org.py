@@ -22,6 +22,7 @@ from jinja2 import Environment, FileSystemLoader
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException, CustomException
 from auth_api.exceptions.errors import Error
+from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
 from auth_api.models import AccountPaymentSettings as AccountPaymentModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
@@ -44,7 +45,6 @@ from .keycloak import KeycloakService
 from .notification import send_email
 from .products import Product as ProductService
 from .rest_service import RestService
-
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -348,6 +348,54 @@ class Org:  # pylint: disable=too-many-public-methods
         # Check authorization for the user
         check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
         return AccountPaymentModel.find_active_by_org_id(org_id)
+
+    @staticmethod
+    def get_login_options_for_org(org_id, token_info: Dict = None, allowed_roles: Tuple = None):
+        """Get the payment settings for the given org."""
+        current_app.logger.debug('get_login_options(>')
+        org = OrgModel.find_by_org_id(org_id)
+        if org is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # Check authorization for the user
+        check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
+        return AccountLoginOptionsModel.find_active_by_org_id(org_id)
+
+    @staticmethod
+    def add_login_option(org_id, login_source, token_info: Dict = None):
+        """Create a new contact for this org."""
+        # check for existing contact (only one contact per org for now)
+        current_app.logger.debug('>add_contact')
+        org = OrgModel.find_by_org_id(org_id)
+        if org is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        check_auth(token_info, one_of_roles=ADMIN, org_id=org_id)
+
+        login_option = AccountLoginOptionsModel(login_source=login_source, org_id=org_id)
+        login_option.save()
+        return login_option
+
+    @staticmethod
+    def update_login_option(org_id, login_source, token_info: Dict = None):
+        """Create a new contact for this org."""
+        # check for existing contact (only one contact per org for now)
+        current_app.logger.debug('>add_contact')
+        org = OrgModel.find_by_org_id(org_id)
+        if org is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        check_auth(token_info, one_of_roles=ADMIN, org_id=org_id)
+
+        existing_login_option = AccountLoginOptionsModel.find_active_by_org_id(org_id)
+        if existing_login_option is not None:
+            existing_login_option.is_active = False
+            existing_login_option.add_to_session()
+
+        login_option = AccountLoginOptionsModel(login_source=login_source, org_id=org_id)
+        login_option.add_to_session()
+        login_option.commit()
+        return login_option
 
     @staticmethod
     def get_contacts(org_id):
