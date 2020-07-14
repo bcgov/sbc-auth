@@ -1,7 +1,7 @@
 Flask-Mail==0.9.1
 Flask-Migrate==2.5.3
 Flask-Moment==0.10.0
-Flask-SQLAlchemy==2.4.3
+Flask-SQLAlchemy==2.4.4
 Flask-Script==2.0.6
 Flask==1.1.2
 Jinja2==2.11.2
@@ -45,7 +45,7 @@ python-jose==3.1.0
 pytz==2020.1
 requests==2.24.0
 rsa==4.6
-sentry-sdk==0.16.0
+sentry-sdk==0.16.1
 six==1.15.0
 threadloop==1.0.2
 thrift==0.13.0
