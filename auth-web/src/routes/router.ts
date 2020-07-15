@@ -111,8 +111,8 @@ export function getRoutes (): RouteConfig[] {
           component: teamManagement
         },
         {
-          path: 'account-login-option',
-          name: 'account-login-option',
+          path: 'login-option',
+          name: 'login-option',
           component: accountLoginOption
         },
         {

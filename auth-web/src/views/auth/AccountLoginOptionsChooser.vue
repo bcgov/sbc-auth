@@ -10,25 +10,15 @@
       </p>
     </div>
     <account-login-option-chooser @auth-type-selected="setLoginOption"></account-login-option-chooser>
-    <div class="form__btns d-flex mt-8">
+    <div class="d-flex mt-8 justify-end ">
       <v-btn
         large
         color="primary"
-        class="next-btn font-weight-bold"
+        class="font-weight-bold"
         :disabled="authType == ''"
         @click="submit()"
       >
         Add Team Members
-      </v-btn>
-      <v-spacer></v-spacer>
-      <v-btn
-              large
-              color="primary"
-              class="next-btn font-weight-bold"
-              :disabled="authType == ''"
-              @click="submit()"
-      >
-        Choose Later
       </v-btn>
     </div>
   </v-container>
@@ -73,9 +63,6 @@ export default class AccountLoginOptionsChooser extends Mixins(AccountChangeMixi
 
   private submit () {
     this.updateLoginOption(this.authType)
-    this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
-  }
-  private chooseLater () {
     this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
   }
 }

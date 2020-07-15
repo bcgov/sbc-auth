@@ -194,7 +194,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   private readonly syncPendingOrgInvitations!: () => Invitation[]
   private readonly syncActiveOrgMembers!: () => Member[]
   readonly currentUser!: KCUserProfile
-  private readonly currentOrganization!: Organization
+  protected readonly currentOrganization!: Organization
 
   // PROTOTYPE TAB ICON (PENDING APPROVAL)
   private readonly pendingOrgMembers!: Member[]
@@ -230,7 +230,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
       await this.syncMemberLoginOption(this.currentOrganization.id)
     }
     if (!this.memberLoginOption) {
-      await this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-login-option`)
+      await this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/login-option`)
     }
   }
 
