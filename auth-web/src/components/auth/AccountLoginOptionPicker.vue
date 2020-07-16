@@ -25,7 +25,7 @@
               <div>
                 <a
                   href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card"
-                  target="_blank"
+                  target="_blank" rel="noopener noreferrer"
                   >Learn more about the BC Services card</a
                 >
               </div>

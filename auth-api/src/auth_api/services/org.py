@@ -366,7 +366,7 @@ class Org:  # pylint: disable=too-many-public-methods
     def add_login_option(org_id, login_source, token_info: Dict = None):
         """Create a new contact for this org."""
         # check for existing contact (only one contact per org for now)
-        current_app.logger.debug('>add_contact')
+        current_app.logger.debug('>add_login_option')
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -381,7 +381,7 @@ class Org:  # pylint: disable=too-many-public-methods
     def update_login_option(org_id, login_source, token_info: Dict = None):
         """Create a new contact for this org."""
         # check for existing contact (only one contact per org for now)
-        current_app.logger.debug('>add_contact')
+        current_app.logger.debug('>update_login_option')
         org = OrgModel.find_by_org_id(org_id)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
