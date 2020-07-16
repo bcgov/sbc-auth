@@ -27,7 +27,6 @@ from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
-from auth_api.models import OrgSettings as OrgSettingsModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
