@@ -98,7 +98,7 @@ export default class OrgService {
   }
 
   public static async updateMemberLoginOption (orgId: number, loginOption:string): Promise<string> {
-    let response = await axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/login_options`, {
+    const response = await axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/login_options`, {
       'loginOption': loginOption
     })
     return response.data?.loginOption
