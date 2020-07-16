@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Account, LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, OrgStatus, Organization } from '@/models/Organization'
 import Router, { Route } from 'vue-router'
@@ -92,6 +93,8 @@ router.beforeEach((to, from, next) => {
         case LoginSource.BCSC:
         case LoginSource.BCROS:
         case LoginSource.BCEID:
+          // eslint-disable-next-line no-console
+          console.log('[Navigation Guard] Redirecting user to TOS since user has not accepted one')
           return next({
             path: `/${Pages.USER_PROFILE_TERMS}`
           })
@@ -105,10 +108,13 @@ router.beforeEach((to, from, next) => {
     if (to.matched.some(record => record.meta.requiresActiveAccount) && (currentUser.loginSource === LoginSource.BCSC || currentUser.loginSource === LoginSource.BCEID)) {
       const isTheOrgPendingAffidavitReview = currentOrganization?.statusCode === OrgStatus.PendingAffidavitReview
       if (isTheOrgPendingAffidavitReview) {
+        console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since user has pending affidavits')
         return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
       } else if (currentAccountSettings && currentMembership.membershipStatus === MembershipStatus.Pending) {
+        console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since users membership status is pending')
         return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}` })
       } else if (!currentOrganization || currentMembership.membershipStatus !== MembershipStatus.Active) {
+        console.log('[Navigation Guard] Redirecting user to Create Account since users nerither has account nor an active status')
         return next({ path: `/${Pages.CREATE_ACCOUNT}` })
       }
     }

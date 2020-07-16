@@ -1,6 +1,6 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
-import { LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
+import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, OrgStatus, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
@@ -81,17 +81,24 @@ export default class NextPageMixin extends Vue {
         }
         return `/${nextStep}`
       case LoginSource.BCEID:
-        let bceidNextStep = '/'
+        // if they are in invitation flow [check session storage], take them to
         // Redirect to TOS if no terms accepted
         // for invited users , handle user profile
         // Redirect to create team if no orgs
         // Redirect to dashboard otherwise
-        if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
+        let bceidNextStep = '/'
+        let invToken = ConfigHelper.getFromSession(SessionStorageKeys.InvitationToken)
+        if (invToken) {
+          bceidNextStep = `${Pages.CONFIRM_TOKEN}/${invToken}`
+          ConfigHelper.removeFromSession(SessionStorageKeys.InvitationToken)
+        } else if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
+          bceidNextStep = Pages.USER_PROFILE_TERMS
+        } else if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
           bceidNextStep = Pages.USER_PROFILE_TERMS
         } else if (!this.currentOrganization && !this.currentMembership) {
           bceidNextStep = Pages.CHOOSE_AUTH_METHOD
         } else if (this.currentOrganization && this.currentOrganization.statusCode === OrgStatus.PendingAffidavitReview) {
-          bceidNextStep = `${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}`
+          bceidNextStep = `${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}/true`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
           bceidNextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
         } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {

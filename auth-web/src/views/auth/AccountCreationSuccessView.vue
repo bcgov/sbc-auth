@@ -10,7 +10,10 @@
             <strong>BC Registries Home</strong>
           </v-btn>
           <strong class="mx-3">or</strong>
-          <v-btn large color="primary" @click="goTo('team-members')">
+          <v-btn large color="primary" v-if="isRegularAccount" @click="goTo('setup-team')">
+            <strong>Set up team</strong>
+          </v-btn>
+          <v-btn large color="primary"  v-if="!isRegularAccount" @click="goTo('team-members')">
             <strong>Add Team Members</strong>
           </v-btn>
         </div>
@@ -20,7 +23,9 @@
 </template>
 
 <script lang="ts">
-import { Component } from 'vue-property-decorator'
+
+import { Component, Mixins } from 'vue-property-decorator'
+import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
 import Vue from 'vue'
@@ -31,7 +36,7 @@ import { mapState } from 'vuex'
     ...mapState('org', ['currentOrganization'])
   }
 })
-export default class AccountCreationSuccessView extends Vue {
+export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
   protected readonly currentOrganization!: Organization
 
   private goTo (page) {
@@ -39,6 +44,8 @@ export default class AccountCreationSuccessView extends Vue {
       case 'home': this.$router.push('/')
         break
       case 'team-members': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
+        break
+      case 'setup-team': this.$router.push(`account-login-options-info`)
         break
     }
   }
