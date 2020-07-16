@@ -31,8 +31,9 @@ from auth_api.models import OrgSettings as OrgSettingsModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
+from auth_api.utils.roles import STAFF
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, Status, LoginSource
-from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF_ADMIN, USER
+from auth_api.utils.roles import ADMIN, COORDINATOR, USER
 from config import get_named_config
 
 from .authorization import check_auth
@@ -70,10 +71,8 @@ class Invitation:
         org = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        if org.access_type == AccessType.ANONYMOUS.value:
-            check_auth(token_info, org_id=org_id, equals_role=STAFF_ADMIN)
-        elif org.access_type == AccessType.REGULAR.value:
-            check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR))
+
+        check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
         org_name = org.name
         invitation_type = InvitationType.DIRECTOR_SEARCH.value if org.access_type == AccessType.ANONYMOUS.value \
@@ -103,7 +102,7 @@ class Invitation:
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         for membership in self._model.membership:
             org_id = membership.org_id
-            check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR))
+            check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
         # TODO doesnt work when invited to multiple teams.. Re-work the logic when multiple teams introduced
         confirmation_token = Invitation.generate_confirmation_token(self._model.id, self._model.type)
@@ -168,7 +167,7 @@ class Invitation:
         # Ensure that the current user is an ADMIN or COORDINATOR on each org in the invite being retrieved
         for membership in invitation.membership:
             org_id = membership.org_id
-            check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR))
+            check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
         return Invitation(invitation)
 

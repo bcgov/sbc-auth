@@ -18,6 +18,7 @@ from typing import Dict, Tuple
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
+from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException, CustomException
@@ -36,7 +37,7 @@ from auth_api.utils.enums import (
     AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentType, ProductCode, Status)
 from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role
 from auth_api.utils.util import camelback2snake
-from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+
 
 from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
@@ -87,7 +88,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         org_info['typeCode'] = OrgType.PREMIUM.value if bcol_account_number else OrgType.BASIC.value
 
-        is_staff_admin = token_info and 'staff_admin' in token_info.get('realm_access').get('roles')
+        is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in token_info.get('realm_access').get('roles')
         is_bceid_user = token_info and token_info.get('loginSource', None) == LoginSource.BCEID.value
 
         Org.validate_account_limit(is_staff_admin, user_id)
@@ -504,8 +505,14 @@ class Org:  # pylint: disable=too-many-public-methods
             if affiliation:
                 orgs['orgs'].append(Org(OrgModel.find_by_org_id(affiliation.org_id)).as_dict())
         else:
-            org_models = OrgModel.search_org(kwargs.get('access_type', None), kwargs.get('name', None),
-                                             kwargs.get('status', None), kwargs.get('bcol_account_id', None))
+            page: int = int(kwargs.get('page'))
+            limit: int = int(kwargs.get('limit'))
+            org_models, total = OrgModel.search_org(
+                kwargs.get('access_type', None),
+                kwargs.get('name', None),
+                kwargs.get('status', None),
+                kwargs.get('bcol_account_id', None),
+                page, limit)
             for org in org_models:
                 org_dict = Org(org).as_dict()
                 org_dict['contacts'] = []
@@ -513,6 +520,11 @@ class Org:  # pylint: disable=too-many-public-methods
                     org_dict['contacts'].append(
                         ContactSchema(exclude=('links',)).dump(org.contacts[0].contact, many=False))
                 orgs['orgs'].append(org_dict)
+
+            orgs['total'] = total
+            orgs['page'] = page
+            orgs['limit'] = limit
+
         return orgs
 
     @staticmethod

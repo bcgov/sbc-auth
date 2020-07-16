@@ -1,7 +1,7 @@
 Flask-Mail==0.9.1
 Flask-Migrate==2.5.3
 Flask-Moment==0.10.0
-Flask-SQLAlchemy==2.4.3
+Flask-SQLAlchemy==2.4.4
 Flask-Script==2.0.6
 Flask==1.1.2
 Jinja2==2.11.2
@@ -25,6 +25,7 @@ flask-marshmallow==0.11.0
 flask-restplus==0.13.0
 gunicorn==20.0.4
 idna==2.10
+importlib-metadata==1.7.0
 itsdangerous==1.1.0
 jaeger-client==4.3.0
 jsonschema==3.2.0
@@ -44,10 +45,11 @@ python-jose==3.1.0
 pytz==2020.1
 requests==2.24.0
 rsa==4.6
-sentry-sdk==0.16.0
+sentry-sdk==0.16.1
 six==1.15.0
 threadloop==1.0.2
 thrift==0.13.0
 tornado==6.0.4
 urllib3==1.25.9
+zipp==3.1.0
 -e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components-2.0.0&subdirectory=python

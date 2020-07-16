@@ -29,7 +29,7 @@ from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
 from auth_api.utils.enums import NotificationType, Status
-from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR
+from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF
 from config import get_named_config
 
 from .authorization import check_auth
@@ -139,7 +139,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             # Ensure that this user is an COORDINATOR or ADMIN on the org associated with this membership
             # or that the membership is for the current user
             if membership.user.username != token_info.get('username'):
-                check_auth(org_id=membership.org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN))
+                check_auth(org_id=membership.org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN, STAFF))
             return Membership(membership)
         return None
 
@@ -184,7 +184,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         """Update an existing membership with the given role."""
         # Ensure that this user is an COORDINATOR or ADMIN on the org associated with this membership
         current_app.logger.debug('<update_membership')
-        check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN))
+        check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN, STAFF))
 
         # bceid Members cant be ADMIN's.Unless they have an affidavit approved.
         # TODO when multiple teams for bceid are present , do if the user has affidavit present check
@@ -194,7 +194,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
         # Ensure that a member does not upgrade a member to ADMIN from COORDINATOR unless they are an ADMIN themselves
         if self._model.membership_type.code == COORDINATOR and updated_fields.get('membership_type', None) == ADMIN:
-            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN))
+            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, STAFF))
 
         # No one can change an ADMIN's status, only option is ADMIN to leave the team. #2319
         if updated_fields.get('membership_status', None) \
