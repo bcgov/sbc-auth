@@ -88,6 +88,8 @@ router.beforeEach((to, from, next) => {
     if (to.matched.some(record => record.meta.requiresProfile) &&
       !userProfile?.userTerms?.isTermsOfUseAccepted) {
       switch (currentUser?.loginSource) {
+        case LoginSource.IDIR:
+          break
         case LoginSource.BCSC:
         case LoginSource.BCROS:
         case LoginSource.BCEID:

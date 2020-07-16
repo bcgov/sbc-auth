@@ -139,3 +139,17 @@ export interface BulkUserResponse {
 export interface BulkUserResponseBody {
   users: BulkUserResponse[]
 }
+
+export interface OrgList {
+  orgs: Organization[]
+  limit: number
+  page: number
+  total: number
+}
+
+export interface OrgFilterParams {
+  status: string
+  name?: string
+  pageNumber?: number
+  pageLimit?: number
+}

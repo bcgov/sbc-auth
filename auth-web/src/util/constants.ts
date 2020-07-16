@@ -15,9 +15,12 @@ export enum Role {
     Public = 'public_user',
     Edit = 'edit',
     Basic = 'basic',
-    StaffAdmin = 'staff_admin',
-    StaffAdminBCOL = 'bcol_staff_admin',
+    // StaffAdmin = 'create_accounts',
+    StaffCreateAccounts = 'create_accounts',
+    // StaffAdminBCOL = 'manage_accounts',
+    StaffManageAccounts = 'manage_accounts',
     AnonymousUser = 'anonymous_user',
+    StaffViewAccounts = 'view_accounts',
     Tester = 'tester',
     AccountHolder = 'account_holder',
     PublicUser = 'public_user'
@@ -43,7 +46,7 @@ export enum Pages {
     EDIT_ACCOUNT_TYPE= '/change-account',
     STAFF_DASHBOARD= 'searchbusiness',
     STAFF_SETUP_ACCOUNT = 'staff-setup-account',
-    CONFIRM_TOKEN = 'confirmtoken'
+    CONFIRM_TOKEN = 'confirmtoken',
 }
 
 export enum Account {
@@ -103,4 +106,15 @@ export enum AccessType {
     EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL',
     ANONYMOUS = 'ANONYMOUS',
     REGULAR_BCEID = 'REGULAR_BCEID'
+}
+
+export enum Permission {
+    REMOVE_BUSINESS = 'REMOVE_BUSINESS',
+    CHANGE_ADDRESS = 'CHANGE_ADDRESS',
+    CHANGE_ORG_NAME = 'CHANGE_ORG_NAME',
+    INVITE_MEMBERS = 'INVITE_MEMBERS',
+    CHANGE_ACCOUNT_TYPE = 'CHANGE_ACCOUNT_TYPE',
+    CHANGE_ROLE = 'CHANGE_ROLE',
+    RESET_PASSWORD = 'RESET_PASSWORD',
+    VIEW_ACCOUNT = 'VIEW_ACCOUNT'
 }
