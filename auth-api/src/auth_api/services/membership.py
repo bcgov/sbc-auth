@@ -160,7 +160,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             # TODO how to check properly if user is bceid user
             is_bceid_user = self._model.user.username.find('@bceid') > 0
             if is_bceid_user:
-                template_name = 'membership_approved_notification_email.html'
+                template_name = 'membership_approved_notification_email_for_bceid.html'
             else:
                 template_name = 'membership_approved_notification_email.html'
             params = {'org_name': org_name}
