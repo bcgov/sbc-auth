@@ -146,7 +146,7 @@ class InvitationAction(Resource):
                                    http_status.HTTP_401_UNAUTHORIZED
             else:
                 invitation_id = InvitationService.validate_token(invitation_token).as_dict().get('id')
-                response, status = InvitationService.accept_invitation(invitation_id, user, origin).as_dict(), \
+                response, status = InvitationService.accept_invitation(invitation_id, user, origin, token_info= token).as_dict(), \
                                    http_status.HTTP_200_OK  # noqa:E127
 
         except BusinessException as exception:

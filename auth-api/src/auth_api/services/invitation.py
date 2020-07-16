@@ -78,14 +78,15 @@ class Invitation:
         org_name = org.name
         invitation_type = InvitationType.DIRECTOR_SEARCH.value if org.access_type == AccessType.ANONYMOUS.value \
             else InvitationType.STANDARD.value
-        mandatory_login_source = ''
-        if org.access_type == AccessType.ANONYMOUS:
+        if org.access_type == AccessType.ANONYMOUS:  # anonymous account never get bceid or bcsc choices
             mandatory_login_source = LoginSource.BCROS.value
         else:
+            default_login_option_based_on_accesstype = LoginSource.BCSC.value if org.access_type == AccessType.REGULAR else LoginSource.BCEID.value
             role = invitation_info['membership'][0]['membershipType']
             account_login_options = AccountLoginOptionsModel.find_active_by_org_id(org.id)
             mandatory_login_source = LoginSource.BCSC.value if role == ADMIN else getattr(account_login_options,
-                                                                                          'login_source', LoginSource.BCSC.value)
+                                                                                          'login_source',
+                                                                                          default_login_option_based_on_accesstype)
 
         invitation = InvitationModel.create_from_dict(invitation_info, user.identifier, invitation_type)
         confirmation_token = Invitation.generate_confirmation_token(invitation.id, invitation.type)
@@ -194,7 +195,7 @@ class Invitation:
     def send_invitation(invitation: InvitationModel, org_name, user, app_url, login_source):
         """Send the email notification."""
         current_app.logger.debug('<send_invitation')
-        mail_configs = Invitation._get_invitation_configs(invitation.type, org_name, login_source)
+        mail_configs = Invitation._get_invitation_configs(org_name, login_source)
         subject = mail_configs.get('subject').format(user['firstname'], user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
@@ -215,13 +216,18 @@ class Invitation:
         current_app.logger.debug('>send_invitation')
 
     @staticmethod
-    def _get_invitation_configs(invitation_type, org_name, login_source):
+    def _get_invitation_configs(org_name, login_source):
         """Get the config for different email types."""
         token_confirm_path = f'{org_name}/validatetoken/{login_source}'
         director_search_configs = {
             'token_confirm_path': token_confirm_path,
             'template_name': 'dirsearch_business_invitation_email',
             'subject': 'Your BC Registries Account has been created',
+        }
+        bceid_configs = {
+            'token_confirm_path': token_confirm_path,
+            'template_name': 'business_invitation_email_for_bceid',
+            'subject': '[BC Registries & Online Services] {} {} has invited you to join an account',
         }
         default_configs = {
             'token_confirm_path': token_confirm_path,
@@ -230,9 +236,10 @@ class Invitation:
 
         }
         mail_configs = {
-            'DIRECTOR_SEARCH': director_search_configs
+            'BCROS': director_search_configs,
+            'BCEID': bceid_configs,
         }
-        return mail_configs.get(invitation_type, default_configs)
+        return mail_configs.get(login_source, default_configs)
 
     @staticmethod
     def generate_confirmation_token(invitation_id, invitation_type=''):
@@ -278,7 +285,7 @@ class Invitation:
         return Invitation(invitation)
 
     @staticmethod
-    def accept_invitation(invitation_id, user, origin, add_membership: bool = True):
+    def accept_invitation(invitation_id, user, origin, add_membership: bool = True, token_info: Dict = None):
         """Add user, role and org from the invitation to membership."""
         current_app.logger.debug('>accept_invitation')
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
@@ -289,6 +296,11 @@ class Invitation:
             raise BusinessException(Error.ACTIONED_INVITATION, None)
         if invitation.invitation_status_code == 'EXPIRED':
             raise BusinessException(Error.EXPIRED_INVITATION, None)
+
+        if token_info is not None:  # bcros comes with out token
+            login_source = token_info.get('loginSource', None)
+            if invitation.login_source != login_source:
+                raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
 
         if add_membership:
             for membership in invitation.membership:
