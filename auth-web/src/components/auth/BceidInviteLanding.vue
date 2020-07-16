@@ -107,8 +107,7 @@ export default class BceidInviteLanding extends Vue {
   }
   private loginWithBceid () {
     ConfigHelper.addToSession(SessionStorageKeys.InvitationToken, this.token)
-    let redirectUrl = ConfigHelper.getSelfURL() + '/confirmtoken/' + this.token
-    this.$router.push('/signin/bceid/' + encodeURIComponent(redirectUrl))
+    this.$router.push('/signin/bceid/')
   }
 
   private async mounted () {
