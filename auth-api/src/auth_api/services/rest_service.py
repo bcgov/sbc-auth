@@ -54,7 +54,7 @@ class RestService:
         response = None
         try:
             response = requests.post(endpoint, data=data, headers=headers,
-                                     timeout=current_app.config.get('CONNECT_TIMEOUT'))
+                                     timeout=current_app.config.get('CONNECT_TIMEOUT', 10))
             if raise_for_status:
                 response.raise_for_status()
         except (ReqConnectionError, ConnectTimeout) as exc:
