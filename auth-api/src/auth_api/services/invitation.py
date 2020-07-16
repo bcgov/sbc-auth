@@ -218,6 +218,7 @@ class Invitation:
     @staticmethod
     def _get_invitation_configs(org_name, login_source):
         """Get the config for different email types."""
+        login_source = login_source or LoginSource.BCSC.value
         token_confirm_path = f'{org_name}/validatetoken/{login_source}'
         director_search_configs = {
             'token_confirm_path': token_confirm_path,
