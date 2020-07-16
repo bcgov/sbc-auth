@@ -331,7 +331,7 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true }
     },
     {
-      path: '/pendingapproval/:team_name?',
+      path: '/pendingapproval/:teamName?/:pendingAffidavit?',
       name: 'pendingapproval',
       component: PendingApprovalView,
       props: true,
