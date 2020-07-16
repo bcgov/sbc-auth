@@ -157,7 +157,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         elif notification_type == NotificationType.MEMBERSHIP_APPROVED.value:
             subject = '[BC Registries & Online Services] Welcome to the account {}'. \
                 format(org_name)
-            is_bceid_user = self._model.user.username.find('@bceid') > 0  # TODO how to check properly if user is bceid user
+            # TODO how to check properly if user is bceid user
+            is_bceid_user = self._model.user.username.find('@bceid') > 0
             if is_bceid_user:
                 template_name = 'membership_approved_notification_email.html'
             else:

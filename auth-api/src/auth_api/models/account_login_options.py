@@ -11,16 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This manages the login options for an account/org.
+"""This manages the login options for an account/org."""
 
-"""
-
-from flask import current_app
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
-from .payment_type import PaymentType
 
 
 class AccountLoginOptions(BaseModel):  # pylint: disable=too-few-public-methods
