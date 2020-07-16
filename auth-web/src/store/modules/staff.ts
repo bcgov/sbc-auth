@@ -1,6 +1,6 @@
 import { AccountType, ProductCode } from '@/models/Staff'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { MembershipType, Organization } from '@/models/Organization'
+import { MembershipType, OrgFilterParams, Organization } from '@/models/Organization'
 import { AccountStatus } from '@/util/constants'
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
@@ -179,5 +179,19 @@ export default class StaffModule extends VuexModule {
   public async syncRejectedStaffOrgs () {
     const response = await StaffService.getStaffOrgs(AccountStatus.REJECTED)
     return response?.data?.orgs || []
+  }
+
+  @Action({ rawError: true })
+  public async searchOrgs (filterParams: OrgFilterParams) {
+    const response = await StaffService.searchOrgs(filterParams)
+    if (response?.data) {
+      return {
+        limit: response.data.limit,
+        page: response.data.page,
+        total: response.data.total,
+        orgs: response.data.orgs
+      }
+    }
+    return {}
   }
 }

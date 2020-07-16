@@ -1,11 +1,20 @@
 <template>
   <div>
     <!-- Breadcrumbs / Back Navigation -->
-    <nav class="crumbs" v-if="isDirSearchUser">
+    <nav class="crumbs" v-if="isDirSearchUser" aria-labelledby="dirSearchNav">
       <v-container class="pt-5 pb-4">
         <v-btn large text color="primary" class="back-btn pr-2 pl-1" :href="dirSearchUrl">
           <v-icon small class="mr-1">mdi-arrow-left</v-icon>
           <span>Director Search Home</span>
+        </v-btn>
+      </v-container>
+    </nav>
+
+    <nav class="crumbs" v-if="isStaff" aria-labelledby="staffNav">
+      <v-container class="pt-5 pb-4">
+        <v-btn large text color="primary" class="back-btn pr-2 pl-1" @click="handleBackButton()">
+          <v-icon small class="mr-1">mdi-arrow-left</v-icon>
+          <span>Back to Staff Dashboard</span>
         </v-btn>
       </v-container>
     </nav>
@@ -23,15 +32,20 @@
         <v-btn large icon color="secondary"
           class="back-btn mr-3"
           @click="handleBackButton()"
-          v-if="!isDirSearchUser"
+          v-if="!isDirSearchUser && !isStaff"
           data-test="account-settings-back-button">
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
-        <div>
+        <div v-if="!isStaff">
           <h1 class="view-header__title" data-test="account-settings-title">Account Settings</h1>
           <p class="mt-3 mb-0">Manage account information and users of this account</p>
         </div>
+        <div v-if="isStaff">
+          <h1 class="view-header__title" data-test="account-settings-title">{{currentOrganization.name}}</h1>
+          <p class="mt-3 mb-0">Manage account settings, team members, and view transactions for this account</p>
+        </div>
       </div>
+
       <v-card flat class="account-settings-card" data-test="account-settings-card">
         <v-container class="nav-container py-8 px-0">
           <v-navigation-drawer floating permanent width="auto" data-test="account-nav-drawer">
@@ -73,7 +87,7 @@
 
 <script lang="ts">
 
-import { Account, LoginSource } from '@/util/constants'
+import { Account, LoginSource, Pages, Role } from '@/util/constants'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, MembershipType, Organization } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
@@ -102,7 +116,12 @@ export default class AccountSettings extends Vue {
   private dirSearchUrl = ConfigHelper.getSearchApplicationUrl()
 
   private handleBackButton (): void {
-    this.$router.push(`/account/${this.orgId}/business`)
+    const backTo = this.isStaff() ? Pages.STAFF_DASHBOARD : `/account/${this.orgId}/business`
+    this.$router.push(backTo)
+  }
+
+  private isStaff ():boolean {
+    return this.currentUser.roles.includes(Role.Staff)
   }
 
   private get accountInfoUrl (): string {

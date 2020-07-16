@@ -20,15 +20,20 @@ from .enums import Status, OrgStatus
 class Role(Enum):
     """User Role."""
 
-    STAFF = 'staff'
-    VIEWER = 'viewer'
+    VIEWER = 'view'
     EDITOR = 'edit'
+    PUBLIC_USER = 'public_user'
+    ACCOUNT_HOLDER = 'account_holder'
+
     SYSTEM = 'system'
     TESTER = 'tester'
-    ACCOUNT_HOLDER = 'account_holder'
-    STAFF_ADMIN = 'staff_admin'
-    PUBLIC_USER = 'public_user'
-    BCOL_STAFF_ADMIN = 'bcol_staff_admin'
+
+    STAFF = 'staff'
+    STAFF_VIEW_ACCOUNTS = 'view_accounts'
+    STAFF_MANAGE_ACCOUNTS = 'manage_accounts'
+    STAFF_SEARCH = 'search'
+    STAFF_CREATE_ACCOUNTS = 'create_accounts'
+    STAFF_MANAGE_BUSINESS = 'manage_business'
 
 
 # Membership types
@@ -36,11 +41,11 @@ STAFF = 'STAFF'
 COORDINATOR = 'COORDINATOR'
 ADMIN = 'ADMIN'
 USER = 'USER'
-STAFF_ADMIN = 'STAFF_ADMIN'
+
 
 VALID_STATUSES = (Status.ACTIVE.value, Status.PENDING_APPROVAL.value)
 VALID_ORG_STATUSES = (OrgStatus.ACTIVE.value, OrgStatus.PENDING_AFFIDAVIT_REVIEW.value)
 
 CLIENT_ADMIN_ROLES = (COORDINATOR, ADMIN)
 CLIENT_AUTH_ROLES = (*CLIENT_ADMIN_ROLES, USER)
-ALL_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF, STAFF_ADMIN)
+ALL_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF)

@@ -6,7 +6,7 @@
         <v-btn large
           color="primary"
           class="font-weight-bold"
-          v-if="isStaffAdmin"
+          v-if="canCreateAccounts"
           @click="gotToCreateAccount"
         >
           <v-icon small class="mr-1">mdi-plus</v-icon>Create Account
@@ -15,13 +15,13 @@
     </header>
     <!-- Tab Navigation -->
     <v-tabs
-      v-if="isStaffAdminBCOL"
+      v-if="canViewAccounts"
       background-color="transparent"
       class="mb-9"
       v-model="tab"
       @change="tabChange">
       <v-tab data-test="active-tab">Active</v-tab>
-      <template v-if="isStaffAdminBCOL">
+      <template v-if="canManageAccounts">
         <v-tab data-test="pending-review-tab">
           <v-badge inline color="info"
             :content="pendingReviewCount"
@@ -86,7 +86,6 @@ enum TAB_CODE {
   },
   methods: {
     ...mapActions('staff', [
-      'syncActiveStaffOrgs',
       'syncPendingStaffOrgs',
       'syncRejectedStaffOrgs'
     ])
@@ -103,7 +102,6 @@ export default class StaffAccountManagement extends Vue {
   private staffStore = getModule(StaffModule, this.$store)
   private tab = 0
   private readonly currentUser!: KCUserProfile
-  private readonly syncActiveStaffOrgs!: () => Organization[]
   private readonly syncPendingStaffOrgs!: () => Organization[]
   private readonly syncRejectedStaffOrgs!: () => Organization[]
   private readonly pendingReviewCount!: number
@@ -128,7 +126,6 @@ export default class StaffAccountManagement extends Vue {
   ]
 
   private async mounted () {
-    await this.syncActiveStaffOrgs()
     await this.syncPendingStaffOrgs()
     await this.syncRejectedStaffOrgs()
   }
@@ -137,12 +134,16 @@ export default class StaffAccountManagement extends Vue {
     this.$router.push({ path: `/${Pages.STAFF_SETUP_ACCOUNT}` })
   }
 
-  private get isStaffAdmin () {
-    return this.currentUser?.roles?.includes(Role.StaffAdmin)
+  private get canManageAccounts () {
+    return this.currentUser?.roles?.includes(Role.StaffManageAccounts)
   }
 
-  private get isStaffAdminBCOL () {
-    return this.currentUser?.roles?.includes(Role.StaffAdminBCOL)
+  private get canCreateAccounts () {
+    return this.currentUser?.roles?.includes(Role.StaffCreateAccounts)
+  }
+
+  private get canViewAccounts () {
+    return this.currentUser?.roles?.includes(Role.StaffViewAccounts)
   }
 
   private customSort (items, index, isDescending) {
@@ -160,9 +161,6 @@ export default class StaffAccountManagement extends Vue {
   private async tabChange (tabIndex) {
     const selected = this.tabs.filter((tab) => (tab.id === tabIndex))
     switch (selected[0]?.code) {
-      case TAB_CODE.Active:
-        await this.syncActiveStaffOrgs()
-        break
       case TAB_CODE.PendingReview:
         await this.syncPendingStaffOrgs()
         break

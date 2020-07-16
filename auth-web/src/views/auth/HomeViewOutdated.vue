@@ -303,7 +303,7 @@ export default class HomeViewOutdated extends Vue {
     this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
     this.isStaffUser = (this.currentUser?.loginSource === LoginSource.IDIR)
     if (this.isStaffUser) {
-      this.$router.push(`/${Pages.STAFF_DASHBOARD}`)
+      this.$router.push(Pages.STAFF_DASHBOARD)
     }
   }
 }
