@@ -297,7 +297,7 @@ class Invitation:
         if invitation.invitation_status_code == 'EXPIRED':
             raise BusinessException(Error.EXPIRED_INVITATION, None)
 
-        if getattr(token_info,'loginSource', None) is not None:  # bcros comes with out token
+        if getattr(token_info, 'loginSource', None) is not None:  # bcros comes with out token
             login_source = token_info.get('loginSource', None)
             if invitation.login_source != login_source:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
