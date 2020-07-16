@@ -196,6 +196,7 @@ class TestJwtClaims(dict, Enum):
             'roles': [
                 'staff',
                 'create_accounts',
+                'view_accounts',
                 'edit'
             ]
         },
