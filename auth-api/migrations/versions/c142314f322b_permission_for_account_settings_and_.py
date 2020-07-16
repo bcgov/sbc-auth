@@ -27,14 +27,14 @@ def upgrade():
     op.bulk_insert(
         permissions_table,
         [
-            {'id': '13', 'membership_type_code': 'ADMIN', 'actions': 'SET_AUTH_OPTIONS'},
-            {'id': '14', 'membership_type_code': 'ADMIN', 'actions': 'TRANSACTION_HISTORY'},
-            {'id': '15', 'membership_type_code': 'COORDINATOR', 'actions': 'TRANSACTION_HISTORY'}
+            {'id': '14', 'membership_type_code': 'ADMIN', 'actions': 'SET_AUTH_OPTIONS'},
+            {'id': '15', 'membership_type_code': 'ADMIN', 'actions': 'TRANSACTION_HISTORY'},
+            {'id': '16', 'membership_type_code': 'COORDINATOR', 'actions': 'TRANSACTION_HISTORY'}
         ]
     )
 
 
 def downgrade():
-    op.execute('delete from permissions where id=13')
     op.execute('delete from permissions where id=14')
     op.execute('delete from permissions where id=15')
+    op.execute('delete from permissions where id=16')
