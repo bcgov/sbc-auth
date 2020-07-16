@@ -81,7 +81,7 @@ class Invitation:
             mandatory_login_source = LoginSource.BCROS.value
         else:
             default_login_option_based_on_accesstype = LoginSource.BCSC.value if \
-                org.access_type == AccessType.REGULAR else LoginSource.BCEID.value
+                org.access_type == AccessType.REGULAR.value else LoginSource.BCEID.value
             role = invitation_info['membership'][0]['membershipType']
             account_login_options = AccountLoginOptionsModel.find_active_by_org_id(org.id)
             mandatory_login_source = LoginSource.BCSC.value if \
@@ -297,7 +297,7 @@ class Invitation:
         if invitation.invitation_status_code == 'EXPIRED':
             raise BusinessException(Error.EXPIRED_INVITATION, None)
 
-        if token_info is not None:  # bcros comes with out token
+        if getattr(token_info,'loginSource', None) is not None:  # bcros comes with out token
             login_source = token_info.get('loginSource', None)
             if invitation.login_source != login_source:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
