@@ -36,13 +36,11 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
   private readonly getUserProfile!: (identifier: string) => Promise<User>
   protected readonly userContact!: Contact
   protected readonly userProfile!: User
-  private isCreateUserProfile: boolean = false
 
   @Prop() token: string
   private inviteError: boolean = false
 
   private async mounted () {
-    this.isCreateUserProfile = (this.$route?.name === Pages.DIRSEARCH_CONFIRM_TOKEN)
     await this.getUserProfile('@me')
     await this.accept()
   }
