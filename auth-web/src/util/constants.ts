@@ -6,7 +6,8 @@ export enum SessionStorageKeys {
     CurrentAccount = 'CURRENT_ACCOUNT',
     LaunchDarklyFlags = 'LD_FLAGS',
     ExtraProvincialUser = 'EXTRAPROVINCIAL_USER',
-    SessionSynced = 'SESSION_SYNCED'
+    SessionSynced = 'SESSION_SYNCED',
+    InvitationToken = 'INV_TOKEN'
 }
 
 export enum Role {
@@ -36,7 +37,6 @@ export enum Pages {
     SIGNOUT = 'signout',
     CREATE_USER_PROFILE = 'createuserprofile',
     SEARCH_BUSINESS = 'searchbusiness',
-    DIRSEARCH_CONFIRM_TOKEN = 'dirsearch-confirmtoken',
     USER_PROFILE_TERMS = 'userprofileterms',
     USER_PROFILE_TERMS_DECLINE = 'unauthorizedtermsdecline',
     HOME = 'home',
@@ -44,8 +44,9 @@ export enum Pages {
     SETUP_ACCOUNT_NON_BCSC_INSTRUCTIONS = 'instructions',
     SETUP_ACCOUNT_NON_BCSC_DOWNLOAD = 'download',
     EDIT_ACCOUNT_TYPE= '/change-account',
-    STAFF_DASHBOARD= '/searchbusiness',
-    STAFF_SETUP_ACCOUNT = 'staff-setup-account'
+    STAFF_DASHBOARD= 'searchbusiness',
+    STAFF_SETUP_ACCOUNT = 'staff-setup-account',
+    CONFIRM_TOKEN = 'confirmtoken',
 }
 
 export enum Account {

@@ -44,6 +44,7 @@ class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Tempora
     invitation_status = relationship('InvitationStatus', foreign_keys=[invitation_status_code])
     sender = relationship('User', foreign_keys=[sender_id])
     membership = relationship('InvitationMembership', cascade='all,delete')
+    login_source = Column(String(20), nullable=True)
 
     @hybrid_property
     def expires_on(self):

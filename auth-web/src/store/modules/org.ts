@@ -57,8 +57,10 @@ export default class OrgModule extends VuexModule {
   accountTypeBeforeChange = '' // used for detecting the original type of the account which is getting down/up graded
   permissions: string[] = []
   accessType: string
+  memberLoginOption = ''
 
   currentOrgTransactionList: TransactionTableRow[] = []
+
   @Mutation
   public setCurrentOrgPaymentSettings (currentOrgPaymentSettings:PaymentSettings) {
     this.currentOrgPaymentSettings = currentOrgPaymentSettings
@@ -67,6 +69,11 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setAccessType (accessType:string) {
     this.accessType = accessType
+  }
+
+  @Mutation
+  public setMemberLoginOption (memberLoginOption:string) {
+    this.memberLoginOption = memberLoginOption
   }
 
   @Mutation
@@ -189,6 +196,13 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
+  public async syncMemberLoginOption (orgId: number): Promise<string> {
+    const response = await OrgService.getMemberLoginOption(orgId)
+    this.context.commit('setMemberLoginOption', response)
+    return response
+  }
+
+  @Action({ rawError: true })
   public async syncMembership (orgId: number): Promise<Member> {
     let permissions:string[] = []
     let response
@@ -237,6 +251,14 @@ export default class OrgModule extends VuexModule {
     const response = await OrgService.createOrg(createRequestBody)
     this.context.commit('setCurrentOrganization', response?.data)
     return response?.data
+  }
+
+  @Action({ rawError: true })
+  public async updateLoginOption (loginOption: string): Promise<string> {
+    const org:Organization = this.context.state['currentOrganization']
+    const newLoginOption = await OrgService.updateMemberLoginOption(org.id, loginOption)
+    this.context.commit('setMemberLoginOption', loginOption)
+    return newLoginOption
   }
 
   @Action({ rawError: true })

@@ -63,8 +63,14 @@
                   </v-list-item-icon>
                   <v-list-item-title>Team Members</v-list-item-title>
                 </v-list-item>
+                <v-list-item dense class="py-1 px-8" :to="accountAuthUrl"  v-if="isRegularAccount" v-can:SET_AUTH_OPTIONS.hide data-test="user-auth-nav-item">
+                  <v-list-item-icon>
+                    <v-icon color="link" left>mdi-two-factor-authentication</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-title>User Authentication</v-list-item-title>
+                </v-list-item>
                 <v-list-item dense class="py-1 px-8"
-                  v-if="showTransactions"
+                  v-if="isPremiumAccount" v-can:TRANSACTION_HISTORY.hide
                   :to="transactionUrl"
                   data-test="transactions-nav-item"
                 >
@@ -87,29 +93,30 @@
 
 <script lang="ts">
 
-import { Account, LoginSource, Pages, Role } from '@/util/constants'
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { Member, MembershipType, Organization } from '@/models/Organization'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { LoginSource, Pages, Role } from '@/util/constants'
+import { Member, MembershipType } from '@/models/Organization'
+import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+
 import { mapState } from 'vuex'
 
-@Component({
-  computed: {
-    ...mapState('user', [
-      'currentUser'
-    ]),
-    ...mapState('org', [
-      'currentOrganization',
-      'currentMembership'
-    ])
-  }
-})
-export default class AccountSettings extends Vue {
+  @Component({
+    computed: {
+      ...mapState('user', [
+        'currentUser'
+      ]),
+      ...mapState('org', [
+        'currentOrganization',
+        'currentMembership'
+      ])
+    }
+  })
+export default class AccountSettings extends Mixins(AccountMixin) {
   @Prop({ default: '' }) private orgId: string
   private readonly currentMembership!: Member
-  private readonly currentOrganization!: Organization
   private readonly currentUser!: KCUserProfile
   private isLoading = true
   private isDirSearchUser: boolean = false
@@ -132,6 +139,10 @@ export default class AccountSettings extends Vue {
     return `/account/${this.orgId}/settings/team-members`
   }
 
+  private get accountAuthUrl (): string {
+    return `/account/${this.orgId}/settings/login-option`
+  }
+
   private get transactionUrl (): string {
     return `/account/${this.orgId}/settings/transactions`
   }
@@ -140,10 +151,6 @@ export default class AccountSettings extends Vue {
     return (LaunchDarklyService.getFlag('transaction-history') || false) &&
       this.isPremiumAccount &&
       [MembershipType.Admin, MembershipType.Coordinator].includes(this.currentMembership.membershipTypeCode)
-  }
-
-  private get isPremiumAccount (): boolean {
-    return this.currentOrganization?.orgType === Account.PREMIUM
   }
 
   private mounted () {

@@ -68,6 +68,7 @@ class Error(Enum):
 
     ACTIVE_AFFIDAVIT_EXISTS = 'Cannot upload new affidavit as a Pending affidavit is present.', \
                               http_status.HTTP_400_BAD_REQUEST
+    BCEID_USERS_CANT_BE_OWNERS = 'BCEID Users cant be owners', http_status.HTTP_400_BAD_REQUEST
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""
