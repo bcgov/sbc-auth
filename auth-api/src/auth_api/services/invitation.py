@@ -317,18 +317,12 @@ class Invitation:
                 if existing_membership:
                     raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
-                # user needs to get approval
-                is_auto_approval = OrgSettingsModel.is_admin_auto_approved_invitees(membership.org_id)
-                if is_auto_approval:
-                    membership_model.status = Status.ACTIVE.value
-                else:
-                    membership_model.status = Status.PENDING_APPROVAL.value
+                membership_model.status = Status.PENDING_APPROVAL.value
                 membership_model.save()
-                if not is_auto_approval:
-                    try:
-                        Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
-                    except BusinessException as exception:
-                        current_app.logger.error('<send_notification_to_admin failed', exception.message)
+                try:
+                    Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
+                except BusinessException as exception:
+                    current_app.logger.error('<send_notification_to_admin failed', exception.message)
         invitation.accepted_date = datetime.now()
         invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')
         invitation.save()
