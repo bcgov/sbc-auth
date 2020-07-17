@@ -31,6 +31,7 @@ def upgrade():
             {'id': '17', 'membership_type_code': 'USER', 'actions': 'VIEW_ADDRESS'}
         ]
     )
+    op.execute('update org set access_type=\'REGULAR\' where access_type is null')
 
 
 def downgrade():
