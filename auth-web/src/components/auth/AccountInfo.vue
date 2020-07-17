@@ -76,7 +76,7 @@
 
         <template v-if="isPremiumAccount && currentOrgAddress">
           <h4 class="mb-4">Mailing Address</h4>
-          <BaseAddress
+          <BaseAddress v-can:CHANGE_ADDRESS.hide
                   :inputAddress="currentOrgAddress"
                   @key-down="keyDown()"
                   @address-update="updateAddress"
@@ -84,6 +84,12 @@
                   :key="addressKey"
           >
           </BaseAddress>
+          <div class="value value__title" aria-labelledby="mailingAddress" v-if="address" v-can:VIEW_ADDRESS.hide>
+            <div>{{ address.street }}</div>
+            <div v-if="address.streetAdditional">{{ address.streetAdditional }}</div>
+            <div>{{ address.city }}, {{ address.region }}  {{ address.postalCode }}</div>
+            <div>{{ address.country}}</div>
+          </div>
         </template>
 
         <v-divider class="mt-3 mb-10" v-if="editEnabled"></v-divider>
