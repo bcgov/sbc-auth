@@ -221,10 +221,11 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
     await this.syncActiveOrgMembers()
     await this.syncPendingOrgInvitations()
     await this.syncPendingOrgMembers()
-    await this.redirectIfNoAuthMethodSetup()
+    // await this.redirectIfNoAuthMethodSetup()
     this.isLoading = false
   }
 
+  // unused for now..Keeping it there for some time if requirement again changes
   private async redirectIfNoAuthMethodSetup () {
     if (!this.memberLoginOption) {
       await this.syncMemberLoginOption(this.currentOrganization.id)
