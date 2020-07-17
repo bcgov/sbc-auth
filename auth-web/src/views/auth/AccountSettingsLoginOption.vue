@@ -17,12 +17,16 @@
     <div class="form__btns d-flex mt-6 mb-4">
       <v-btn
         large
-        color="primary"
-        class="next-btn font-weight-bold"
-        :disabled="authType == ''"
+        class="save-btn"
+        v-bind:class="{ disabled: isBtnSaved }"
+        :color="isBtnSaved ? 'success' : 'primary'"
+        :disabled="disableSaveBtn"
         @click="submit()"
       >
-        Save
+        <v-expand-x-transition>
+          <v-icon v-show="isBtnSaved">mdi-check</v-icon>
+        </v-expand-x-transition>
+        <span class="save-btn__label">{{ (isBtnSaved) ? 'Saved' : 'Save' }}</span>
       </v-btn>
     </div>
   </v-container>
@@ -55,7 +59,8 @@ import { LoginSource } from '@/util/constants'
   }
 })
 export default class AccountSettingsLoginOption extends Mixins(AccountChangeMixin) {
-  private btnLabel = 'Save'
+  private isBtnSaved = false
+  private disableSaveBtn = true
   private readonly updateLoginOption!: (loginType:string) => Promise<string>
   private authType = LoginSource.BCSC.toString()
 
@@ -63,6 +68,8 @@ export default class AccountSettingsLoginOption extends Mixins(AccountChangeMixi
 
   setLoginOption (loginType:string) {
     this.authType = loginType
+    this.disableSaveBtn = false
+    this.isBtnSaved = false
     // this scroll to bottom is needed since the save button can be missed since its out of view port
     window.scrollTo({
       top: document.body.scrollHeight,
@@ -70,8 +77,17 @@ export default class AccountSettingsLoginOption extends Mixins(AccountChangeMixi
     })
   }
 
-  private submit () {
-    this.updateLoginOption(this.authType)
+  private async submit () {
+    this.isBtnSaved = false
+    try {
+      await this.updateLoginOption(this.authType)
+      this.isBtnSaved = true
+    } catch (err) {
+      this.isBtnSaved = false
+      this.disableSaveBtn = false
+      // eslint-disable-next-line no-console
+      console.error('Error', err)
+    }
   }
 }
 </script>
@@ -162,11 +178,6 @@ export default class AccountSettingsLoginOption extends Mixins(AccountChangeMixi
 
 .save-btn.disabled {
   pointer-events: none;
-}
-
-.save-btn__label {
-  padding-left: 0.2rem;
-  padding-right: 0.2rem;
 }
 
 .change-account-link {
