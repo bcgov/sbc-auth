@@ -2,7 +2,9 @@
   <v-container class="view-container">
     <div class="view-header flex-column mb-10">
       <h1 class="view-header__title">Log in to BC Registries</h1>
-      <p class="mt-2 mb-3">Don't have a BC Registries account? Create an account</p>
+      <p class="mt-2 mb-3">Don't have a BC Registries account?
+        <a class="text-decoration-underline" @click="goToCreateAccount">Create an account</a>
+      </p>
     </div>
     <v-row>
       <v-col
@@ -82,8 +84,8 @@ export default class AuthenticationOptionsView extends Vue {
     }
   }
 
-  private goToAccountSettings () {
-    this.$router.push(`/home`)
+  private goToCreateAccount () {
+    this.$router.push(`/${Pages.CHOOSE_AUTH_METHOD}`)
   }
 }
 </script>
