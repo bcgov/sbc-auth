@@ -53,9 +53,11 @@ router.beforeEach((to, from, next) => {
     if (to.matched.some(record => record.meta.isPremiumOnly)) {
       const currentOrganization: Organization = (store.state as any)?.org?.currentOrganization
       const currentMembership: Member = (store.state as any)?.org?.currentMembership
+      const currentUser: KCUserProfile = (store.state as any)?.user?.currentUser
       // redirect to unauthorized page if the account selected is not Premium
       if (!(currentOrganization?.orgType === Account.PREMIUM &&
-        [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.membershipTypeCode))) {
+        [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.membershipTypeCode)) &&
+        currentUser?.loginSource !== LoginSource.IDIR) {
         return next({
           path: '/unauthorized',
           query: { redirect: to.fullPath }
