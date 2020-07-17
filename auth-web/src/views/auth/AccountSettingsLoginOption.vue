@@ -41,7 +41,7 @@ import { LoginSource } from '@/util/constants'
 
 @Component({
   components: {
-    AccountLoginOptionChooser: AccountLoginOptionPicker,
+    AccountLoginOptionChooser: AccountLoginOptionPicker
   },
   computed: {
     ...mapState('org', [
