@@ -1,16 +1,20 @@
 <template>
   <v-container class="view-container">
-    <div class="view-header flex-column mb-10">
+    <div class="view-header flex-column mb-6">
       <h1 class="view-header__title" data-test="account-settings-title">
         User Authentication
       </h1>
-      <p class="mt-5 mb-0">
-        There are two different ways that your team can log in. Review the
-        options below to learn more and make a selection for your team.
-      </p>
+      <v-alert
+        class="mt-10"
+        icon="mdi-information-outline"
+        type="info">
+        Changing your authentication method will only effect new users invited to this account. Authentication for administrators and existing users will not be effected.
+      </v-alert>
     </div>
-    <account-login-option-chooser @auth-type-selected="setLoginOption"></account-login-option-chooser>
-    <div class="form__btns d-flex mt-8">
+    <account-login-option-chooser
+      class="mx-8"
+      @auth-type-selected="setLoginOption"></account-login-option-chooser>
+    <div class="form__btns d-flex mt-6 mb-4">
       <v-btn
         large
         color="primary"
@@ -18,7 +22,7 @@
         :disabled="authType == ''"
         @click="submit()"
       >
-        Apply
+        Save
       </v-btn>
     </div>
   </v-container>
@@ -59,6 +63,11 @@ export default class AccountSettingsLoginOption extends Mixins(AccountChangeMixi
 
   setLoginOption (loginType:string) {
     this.authType = loginType
+    // this scroll to bottom is needed since the save button can be missed since its out of view port
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth'
+    })
   }
 
   private submit () {

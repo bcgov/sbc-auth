@@ -1,16 +1,14 @@
 <template>
   <v-container class="view-container">
     <div class="view-header flex-column mb-10">
-      <h1 class="view-header__title" data-test="account-settings-title">
-        Choose authentication for your team
-      </h1>
-      <p class="mt-5 mb-0">
-        There are two different ways that your team can log in. Review the options below to learn more and make
-        a selection for your team.
+      <h1 class="view-header__title">Choose authentication for your team</h1>
+      <p class="mt-2 mb-3">There are two different ways that your team can log in. Review the options below to learn more and make
+        a selection for your team. You will be able to access authentication methods for your team in your
+        <a class="text-decoration-underline" @click="goToAccountSettings">account settings.</a>
       </p>
     </div>
     <account-login-option-chooser @auth-type-selected="setLoginOption"></account-login-option-chooser>
-    <div class="d-flex mt-8 justify-end ">
+    <div class="d-flex mt-8 justify-end">
       <v-btn
         large
         color="primary"
@@ -65,11 +63,19 @@ export default class AccountLoginOptionsChooser extends Mixins(AccountChangeMixi
     this.updateLoginOption(this.authType)
     this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
   }
+
+  private goToAccountSettings () {
+    this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/login-option`)
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
+
+.view-container {
+  max-width: 60rem;
+}
 
 .v-application p {
   margin-bottom: 3rem;
