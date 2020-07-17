@@ -6,7 +6,7 @@
           {{ errorMessage }}
         </v-alert>
 
-        <ul class="nv-list" v-can:VIEW_ACCOUNT.show>
+        <ul class="nv-list" v-can:VIEW_ACCOUNT.hide>
           <li class="nv-list-item mb-10">
             <div class="name" id="accountName">Account Name</div>
             <div class="value" aria-labelledby="accountName">
@@ -57,7 +57,7 @@
           </li>
         </ul>
 
-        <fieldset v-if="!isPremiumAccount" v-can:CHANGE_ORG_NAME.show>
+        <fieldset v-if="!isPremiumAccount" v-can:CHANGE_ORG_NAME.hide>
           <legend class="mb-4">Account Details</legend>
           <v-text-field
             filled
