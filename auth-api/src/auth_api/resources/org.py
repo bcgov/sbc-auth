@@ -208,8 +208,9 @@ class OrgLoginOptions(Resource):
         """Retrieve the set of payment settings associated with the specified org."""
         try:
             login_options = OrgService.get_login_options_for_org(org_id, g.jwt_oidc_token_info,
-                                                                 allowed_roles=CLIENT_AUTH_ROLES)
-            response, status = jsonify({'loginOption': login_options.login_source}), http_status.HTTP_200_OK
+                                                                 allowed_roles=ALL_ALLOWED_ROLES)
+            response, status = jsonify(
+                {'loginOption': login_options.login_source if login_options else None}), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

@@ -108,12 +108,14 @@ export default class CommonUtils {
       Permission.INVITE_MEMBERS,
       Permission.CHANGE_ACCOUNT_TYPE,
       Permission.CHANGE_ROLE,
-      Permission.RESET_PASSWORD
+      Permission.RESET_PASSWORD,
+      Permission.TRANSACTION_HISTORY
     ]
   }
   static getViewOnlyPermissions (): string[] {
     return [
-      Permission.VIEW_ACCOUNT
+      Permission.VIEW_ACCOUNT,
+      Permission.VIEW_ADDRESS
     ]
   }
 }
