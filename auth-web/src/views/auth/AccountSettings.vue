@@ -123,11 +123,11 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   private dirSearchUrl = ConfigHelper.getSearchApplicationUrl()
 
   private handleBackButton (): void {
-    const backTo = this.isStaff() ? Pages.STAFF_DASHBOARD : `/account/${this.orgId}/business`
+    const backTo = this.isStaff ? Pages.STAFF_DASHBOARD : `/account/${this.orgId}/business`
     this.$router.push(backTo)
   }
 
-  private isStaff ():boolean {
+  private get isStaff ():boolean {
     return this.currentUser.roles.includes(Role.Staff)
   }
 
