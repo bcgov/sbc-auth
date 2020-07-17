@@ -365,7 +365,7 @@ class MembershipResource(Resource):
     """Resource for managing a user's org membership."""
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value, Role.ACCOUNT_HOLDER.value])
+    @_JWT.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     @cors.crossdomain(origin='*')
     def get(org_id):
         """Get the membership for the given org and user."""

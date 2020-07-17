@@ -1,13 +1,18 @@
 <template>
     <div class="value__title">
-      <p  v-for="(member, index) in getActiveAdmins()" v-bind:key="index + 1">
-        <span> {{ member.user.firstname }} {{ member.user.lastname }} </span>
-        <span>( </span>
-        <span>{{ member.user.contacts[0].email }} </span>
-        <span v-if="member.user.contacts[0].phone">, {{ member.user.contacts[0].phone }} </span>
-        <span v-if="member.user.contacts[0].phoneExtension"> - {{ member.user.contacts[0].phoneExtension }} </span>
-        <span> )</span>
-      </p>
+      <div  v-for="(member, index) in getActiveAdmins()" v-bind:key="index + 1">
+        <p v-if="!anonAccount">
+          <span> {{ member.user.firstname }} {{ member.user.lastname }} </span>
+          <span>( </span>
+          <span v-if="member.user.contacts[0].email">{{ member.user.contacts[0].email }} </span>
+          <span v-if="member.user.contacts[0].phone">, {{ member.user.contacts[0].phone }} </span>
+          <span v-if="member.user.contacts[0].phoneExtension"> - {{ member.user.contacts[0].phoneExtension }} </span>
+          <span> )</span>
+        </p>
+        <p v-else>
+          <span> {{ member.user.username }} </span>
+        </p>
+      </div>
     </div>
 </template>
 
@@ -21,11 +26,13 @@ import {
   RoleInfo
 } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
+import { AccessType } from '@/util/constants'
 
 @Component({
   computed: {
     ...mapState('org', [
-      'activeOrgMembers'
+      'activeOrgMembers',
+      'currentOrganization'
     ])
   },
   methods: {
@@ -36,6 +43,7 @@ import { mapActions, mapState } from 'vuex'
 export default class OrgAdminContact extends Vue {
   private activeOrgMembers!: Member[]
   private readonly syncActiveOrgMembers!: () => Member[]
+  private readonly currentOrganization!: Organization
 
   private async mounted () {
     this.syncActiveOrgMembers()
@@ -44,6 +52,11 @@ export default class OrgAdminContact extends Vue {
   private getActiveAdmins (): Member[] {
     return this.activeOrgMembers.filter(member => member.membershipTypeCode === MembershipType.Admin)
   }
+
+  get anonAccount (): boolean {
+    return this.currentOrganization?.accessType === AccessType.ANONYMOUS
+  }
+
 }
 </script>
 
