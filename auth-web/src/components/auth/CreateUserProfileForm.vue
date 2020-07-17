@@ -201,7 +201,7 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
     }
 
     private redirectToSignin () {
-      let redirectUrl = ConfigHelper.getSelfURL() + '/dirsearch/confirmtoken/' + this.token
+      let redirectUrl = ConfigHelper.getSelfURL() + '/confirmtoken/' + this.token
       this.$router.push('/signin/bcros/' + encodeURIComponent(redirectUrl))
     }
 
