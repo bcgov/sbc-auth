@@ -15,12 +15,23 @@
     </header>
     <!-- Tab Navigation -->
     <v-tabs
-      v-if="canViewAccounts"
       background-color="transparent"
       class="mb-9"
       v-model="tab"
       @change="tabChange">
-      <v-tab data-test="active-tab">Active</v-tab>
+      <v-tab data-test="active-tab"
+        v-if="canViewAccounts">Active</v-tab>
+
+      <template v-if="canCreateAccounts">
+        <v-tab data-test="invitations-tab">
+          <v-badge inline color="info"
+            :content="pendingInvitationsCount"
+            :value="pendingInvitationsCount">
+            Invitations
+          </v-badge>
+        </v-tab>
+      </template>
+
       <template v-if="canManageAccounts">
         <v-tab data-test="pending-review-tab">
           <v-badge inline color="info"
@@ -47,6 +58,11 @@
         />
       </v-tab-item>
       <v-tab-item>
+        <StaffPendingAccountInvitationsTable
+          :columnSort="customSort"
+        />
+      </v-tab-item>
+      <v-tab-item>
         <StaffPendingAccountsTable
           :columnSort="customSort"
         />
@@ -68,6 +84,7 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
 import StaffActiveAccountsTable from '@/components/auth/staff/StaffActiveAccountsTable.vue'
 import StaffModule from '@/store/modules/staff'
+import StaffPendingAccountInvitationsTable from '@/components/auth/staff/StaffPendingAccountInvitationsTable.vue'
 import StaffPendingAccountsTable from '@/components/auth/staff/StaffPendingAccountsTable.vue'
 import StaffRejectedAccountsTable from '@/components/auth/staff/StaffRejectedAccountsTable.vue'
 import { getModule } from 'vuex-module-decorators'
@@ -75,26 +92,30 @@ import { getModule } from 'vuex-module-decorators'
 enum TAB_CODE {
     Active = 'active-tab',
     PendingReview = 'pending-review-tab',
-    Rejected = 'rejected-tab'
+    Rejected = 'rejected-tab',
+    Invitations = 'invitations-tab'
 }
 
 @Component({
   components: {
     StaffActiveAccountsTable,
     StaffPendingAccountsTable,
-    StaffRejectedAccountsTable
+    StaffRejectedAccountsTable,
+    StaffPendingAccountInvitationsTable
   },
   methods: {
     ...mapActions('staff', [
       'syncPendingStaffOrgs',
-      'syncRejectedStaffOrgs'
+      'syncRejectedStaffOrgs',
+      'syncPendingInvitationOrgs'
     ])
   },
   computed: {
     ...mapState('user', ['currentUser']),
     ...mapGetters('staff', [
       'pendingReviewCount',
-      'rejectedReviewCount'
+      'rejectedReviewCount',
+      'pendingInvitationsCount'
     ])
   }
 })
@@ -104,8 +125,11 @@ export default class StaffAccountManagement extends Vue {
   private readonly currentUser!: KCUserProfile
   private readonly syncPendingStaffOrgs!: () => Organization[]
   private readonly syncRejectedStaffOrgs!: () => Organization[]
+  private readonly syncPendingInvitationOrgs!: () => Organization[]
+
   private readonly pendingReviewCount!: number
   private readonly rejectedReviewCount!: number
+  private readonly pendingInvitationsCount!: number
 
   private tabs = [
     {
@@ -115,11 +139,16 @@ export default class StaffAccountManagement extends Vue {
     },
     {
       id: 1,
+      tabName: 'Invitations',
+      code: TAB_CODE.Invitations
+    },
+    {
+      id: 2,
       tabName: 'Pending Review',
       code: TAB_CODE.PendingReview
     },
     {
-      id: 2,
+      id: 3,
       tabName: 'Rejected',
       code: TAB_CODE.Rejected
     }
@@ -128,6 +157,7 @@ export default class StaffAccountManagement extends Vue {
   private async mounted () {
     await this.syncPendingStaffOrgs()
     await this.syncRejectedStaffOrgs()
+    await this.syncPendingInvitationOrgs()
   }
 
   gotToCreateAccount () {
@@ -166,6 +196,11 @@ export default class StaffAccountManagement extends Vue {
         break
       case TAB_CODE.Rejected:
         await this.syncRejectedStaffOrgs()
+        break
+      case TAB_CODE.Invitations:
+        await this.syncPendingInvitationOrgs()
+        break
+      default:
         break
     }
   }

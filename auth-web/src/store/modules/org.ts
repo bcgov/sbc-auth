@@ -395,7 +395,7 @@ export default class OrgModule extends VuexModule {
       this.context.commit('setTokenErrorStatus', false)
       return response && response.data ? response.data : undefined
     } catch (err) {
-      if (err.response.status === 400) {
+      if (err.response.status === 400 || err.response.status === 404) {
         this.context.commit('setTokenErrorStatus', false)
         this.context.commit('setInvalidTokenStatus', true)
       } else {

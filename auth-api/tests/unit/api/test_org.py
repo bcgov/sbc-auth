@@ -30,7 +30,7 @@ from auth_api.services import User as UserService
 from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus
 from tests.utilities.factory_scenarios import (
     TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo)
-from tests.utilities.factory_utils import factory_auth_header, factory_invitation
+from tests.utilities.factory_utils import factory_auth_header, factory_invitation, factory_invitation_anonymous
 
 
 def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -1255,3 +1255,33 @@ def test_search_org_pagination(client, jwt, session, keycloak_mock):  # pylint:d
     orgs = json.loads(rv.data)
     assert orgs.get('total') == 3
     assert len(orgs.get('orgs')) == 2
+
+
+def test_search_org_invitations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that pagination works."""
+    # Create 2 anonymous org invitations
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_dir_search_role)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_anonymous),
+                     headers=headers, content_type='application/json')
+
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    client.post('/api/v1/invitations', data=json.dumps(factory_invitation_anonymous(org_id=org_id)),
+                headers=headers, content_type='application/json')
+
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_anonymous_2),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    client.post('/api/v1/invitations', data=json.dumps(factory_invitation_anonymous(org_id=org_id)),
+                headers=headers, content_type='application/json')
+
+    # staff search
+    rv = client.get('/api/v1/orgs?status={}'.format(OrgStatus.PENDING_ACTIVATION.value),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert len(orgs.get('orgs')) == 2
+    assert len(orgs.get('orgs')[0].get('invitations')) == 1

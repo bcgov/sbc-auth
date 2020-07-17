@@ -19,7 +19,7 @@ from flask import current_app
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, func
 from sqlalchemy.orm import contains_eager, relationship
 
-from auth_api.utils.enums import OrgStatus as OrgStatusEnum
+from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, OrgStatus as OrgStatusEnum
 from auth_api.utils.roles import VALID_STATUSES
 
 from .account_payment_settings import AccountPaymentSettings as AccountPaymentSettingsModel
@@ -27,6 +27,8 @@ from .base_model import BaseModel
 from .contact import Contact
 from .contact_link import ContactLink
 from .db import db
+from .invitation import InvitationMembership
+from .invitation import Invitation
 from .org_status import OrgStatus
 from .org_type import OrgType
 
@@ -63,6 +65,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instanc
     def create_from_dict(cls, org_info: dict):
         """Create a new Org from the provided dictionary."""
         if org_info:
+
             org = Org(**org_info)
             current_app.logger.debug(
                 'Creating org from dictionary {}'.format(org_info)
@@ -73,6 +76,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instanc
                 org.org_type = OrgType.get_default_type()
             org.org_status = OrgStatus.get_default_status()
             org.flush()
+
             return org
         return None
 
@@ -96,6 +100,17 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instanc
             query = query.filter(Org.name.ilike(f'%{name}%'))
         if status:
             query = query.filter(Org.status_code == status.upper())
+            # If status is active, need to exclude the dir search orgs who haven't accepted the invitation yet
+            if status == OrgStatusEnum.ACTIVE.value:
+                pending_inv_subquery = db.session.query(Org.id) \
+                    .outerjoin(InvitationMembership, InvitationMembership.org_id == Org.id) \
+                    .outerjoin(Invitation, Invitation.id == InvitationMembership.invitation_id) \
+                    .filter(Invitation.invitation_status_code == InvitationStatus.PENDING.value,
+                            Invitation.type == InvitationType.DIRECTOR_SEARCH.value) \
+                    .filter(Org.access_type == AccessType.ANONYMOUS.value)
+
+                query = query.filter(Org.id.notin_(pending_inv_subquery))
+
         if bcol_account_id:
             query = query.join(AccountPaymentSettingsModel).filter(and_(
                 AccountPaymentSettingsModel.bcol_account_id == bcol_account_id,
@@ -106,6 +121,23 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instanc
         return pagination.items, pagination.total
 
     @classmethod
+    def search_pending_activation_orgs(cls, name):
+        """Find all orgs with the given type."""
+        query = db.session.query(Org) \
+            .outerjoin(InvitationMembership, InvitationMembership.org_id == Org.id) \
+            .outerjoin(Invitation, Invitation.id == InvitationMembership.invitation_id) \
+            .options(contains_eager('invitations').contains_eager('invitation')) \
+            .filter(Invitation.invitation_status_code == InvitationStatus.PENDING.value,
+                    Invitation.type == InvitationType.DIRECTOR_SEARCH.value,
+                    Org.status_code == OrgStatusEnum.ACTIVE.value) \
+            .filter(Org.access_type == AccessType.ANONYMOUS.value)
+
+        if name:
+            query = query.filter(Org.name.ilike(f'%{name}%'))
+        orgs = query.all()
+        return orgs, len(orgs)
+
+    @classmethod
     def find_by_org_access_type(cls, org_type):
         """Find all orgs with the given type."""
         return cls.query.filter_by(access_type=org_type).all()
@@ -114,7 +146,7 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instanc
     def find_similar_org_by_name(cls, name, org_id=None):
         """Find an Org instance that matches the provided name."""
         # TODO: add more fancy comparison
-        query = cls.query.filter(Org.name.ilike(f'%{name}%'))
+        query = cls.query.filter(Org.name.ilike(f'%{name}%')).filter(Org.status_code != OrgStatusEnum.INACTIVE.value)
         if org_id:
             query = query.filter(Org.id != org_id)
         return query.first()

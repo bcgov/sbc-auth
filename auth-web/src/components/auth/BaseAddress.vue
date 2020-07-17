@@ -1,6 +1,6 @@
 <template>
   <v-form ref="baseAddressForm" lazy-validation>
-    <fieldset v-if="address">
+    <fieldset v-if="address" v-can:CHANGE_ADDRESS.hide>
       <v-row>
         <v-col cols="12" class="py-0">
           <v-text-field
@@ -68,6 +68,12 @@
         </v-col>
       </v-row>
     </fieldset>
+    <div class="value value__title" aria-labelledby="mailingAddress" v-if="address" v-can:VIEW_ADDRESS.hide>
+      <div>{{ address.street }}</div>
+      <div v-if="address.streetAdditional">{{ address.streetAdditional }}</div>
+      <div>{{ address.city }}, {{ address.region }}  {{ address.postalCode }}</div>
+      <div>{{ address.country}}</div>
+    </div>
   </v-form>
 </template>
 

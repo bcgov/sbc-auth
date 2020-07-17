@@ -32,10 +32,10 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
-from auth_api.schemas import ContactSchema, OrgSchema
+from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
 from auth_api.utils.enums import (
     AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentType, ProductCode, Status)
-from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role
+from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF
 from auth_api.utils.util import camelback2snake
 
 
@@ -95,7 +95,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         access_type = Org.validate_access_type(is_bceid_user, is_staff_admin, org_info)
 
-        if not bcol_account_number:  # Allow duplicate names if premium
+        if bcol_account_number is None:  # Allow duplicate names if premium
             Org.raise_error_if_duplicate_name(org_info['name'])
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
@@ -305,7 +305,7 @@ class Org:  # pylint: disable=too-many-public-methods
         """
         # Check authorization for the user
         current_app.logger.debug('<org Inactivated')
-        check_auth(token_info, one_of_roles=ADMIN, org_id=org_id)
+        check_auth(token_info, one_of_roles=(ADMIN, STAFF), org_id=org_id)
 
         org: OrgModel = OrgModel.find_by_org_id(org_id)
         if not org:
@@ -315,7 +315,8 @@ class Org:  # pylint: disable=too-many-public-methods
         if count_members > 1 or len(org.affiliated_entities) >= 1:
             raise BusinessException(Error.ORG_CANNOT_BE_DISSOLVED, None)
 
-        org.delete()
+        org.status_code = OrgStatus.INACTIVE.value
+        org.save()
 
         # Remove user from thr group if the user doesn't have any other orgs membership
         user = UserModel.find_by_jwt_token(token=token_info)
@@ -386,7 +387,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        check_auth(token_info, one_of_roles=ADMIN, org_id=org_id)
+        check_auth(token_info, one_of_roles=(ADMIN, STAFF), org_id=org_id)
 
         existing_login_option = AccountLoginOptionsModel.find_active_by_org_id(org_id)
         if existing_login_option is not None:
@@ -505,20 +506,38 @@ class Org:  # pylint: disable=too-many-public-methods
             if affiliation:
                 orgs['orgs'].append(Org(OrgModel.find_by_org_id(affiliation.org_id)).as_dict())
         else:
+            include_invitations: bool = False
+
             page: int = int(kwargs.get('page'))
             limit: int = int(kwargs.get('limit'))
-            org_models, total = OrgModel.search_org(
-                kwargs.get('access_type', None),
-                kwargs.get('name', None),
-                kwargs.get('status', None),
-                kwargs.get('bcol_account_id', None),
-                page, limit)
+            status: str = kwargs.get('status', None)
+            name: str = kwargs.get('name', None)
+
+            search_args = (kwargs.get('access_type', None),
+                           name,
+                           status,
+                           kwargs.get('bcol_account_id', None),
+                           page, limit)
+
+            if status and status == OrgStatus.PENDING_ACTIVATION.value:
+                org_models, total = OrgModel.search_pending_activation_orgs(name)
+                include_invitations = True
+            else:
+                org_models, total = OrgModel.search_org(*search_args)
+
             for org in org_models:
                 org_dict = Org(org).as_dict()
                 org_dict['contacts'] = []
+                org_dict['invitations'] = []
+
                 if org.contacts:
                     org_dict['contacts'].append(
                         ContactSchema(exclude=('links',)).dump(org.contacts[0].contact, many=False))
+
+                if include_invitations and org.invitations:
+                    org_dict['invitations'].append(
+                        InvitationSchema(exclude=('membership',)).dump(org.invitations[0].invitation, many=False))
+
                 orgs['orgs'].append(org_dict)
 
             orgs['total'] = total
