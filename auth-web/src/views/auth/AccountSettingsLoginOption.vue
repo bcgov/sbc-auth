@@ -37,13 +37,11 @@ import { Component, Mixins } from 'vue-property-decorator'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountLoginOptionPicker from '@/components/auth/AccountLoginOptionPicker.vue'
-import BaseAddress from '@/components/auth/BaseAddress.vue'
 import { LoginSource } from '@/util/constants'
 
 @Component({
   components: {
     AccountLoginOptionChooser: AccountLoginOptionPicker,
-    BaseAddress
   },
   computed: {
     ...mapState('org', [
