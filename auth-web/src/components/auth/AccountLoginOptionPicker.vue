@@ -10,6 +10,7 @@
         flat
         outlined
         hover
+        elevation="1"
         class="account-card text-center pa-7 d-flex flex-column"
         @click="selectAuthType(authOption.type)"
         :class="{ 'active': authType === authOption.type }"
