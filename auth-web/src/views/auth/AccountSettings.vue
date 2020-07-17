@@ -65,7 +65,7 @@
                 </v-list-item>
                 <v-list-item dense class="py-1 px-8" :to="accountAuthUrl"  v-if="isRegularAccount" v-can:SET_AUTH_OPTIONS.hide data-test="user-auth-nav-item">
                   <v-list-item-icon>
-                    <v-icon color="link" left>mdi-two-factor-authentication</v-icon>
+                    <v-icon color="link" left>mdi-shield-account-outline</v-icon>
                   </v-list-item-icon>
                   <v-list-item-title>User Authentication</v-list-item-title>
                 </v-list-item>
