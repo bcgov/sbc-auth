@@ -5,6 +5,8 @@ import { AccountStatus } from '@/util/constants'
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
 import { Contact } from '@/models/contact'
+import { Invitation } from '@/models/Invitation'
+import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
 import StaffService from '@/services/staff.services'
 import { User } from '@/models/user'
@@ -20,6 +22,7 @@ export default class StaffModule extends VuexModule {
   activeStaffOrgs: Organization[] = []
   pendingStaffOrgs: Organization[] = []
   rejectedStaffOrgs: Organization[] = []
+  pendingInvitationOrgs: Organization[] = []
   accountUnderReview: Organization
   accountUnderReviewAddress: Address
   accountUnderReviewAdmin: User
@@ -46,6 +49,10 @@ export default class StaffModule extends VuexModule {
     return this.rejectedStaffOrgs?.length || 0
   }
 
+  public get pendingInvitationsCount (): number {
+    return this.pendingInvitationOrgs?.length || 0
+  }
+
   @Mutation
   public setProducts (products: ProductCode[]) {
     this.products = products
@@ -69,6 +76,11 @@ export default class StaffModule extends VuexModule {
   @Mutation
   public setRejectedStaffOrgs (rejectedOrgs: Organization[]) {
     this.rejectedStaffOrgs = rejectedOrgs
+  }
+
+  @Mutation
+  public setPendingInvitationOrgs (pendingInvitationOrgs: Organization[]) {
+    this.pendingInvitationOrgs = pendingInvitationOrgs
   }
 
   @Mutation
@@ -193,5 +205,28 @@ export default class StaffModule extends VuexModule {
       }
     }
     return {}
+  }
+
+  @Action({ commit: 'setPendingInvitationOrgs', rawError: true })
+  public async syncPendingInvitationOrgs () {
+    const response = await StaffService.getStaffOrgs(AccountStatus.PENDING_ACTIVATION)
+    return response?.data?.orgs || []
+  }
+
+  @Action({ rawError: true })
+  public async resendPendingOrgInvitation (invitation: Invitation) {
+    return InvitationService.resendInvitation(invitation)
+  }
+
+  @Action({ rawError: true })
+  public async deleteOrg (org: Organization) {
+    const invResponse = await InvitationService.deleteInvitation(org.invitations[0].id)
+    if (!invResponse || invResponse.status !== 200 || !invResponse.data) {
+      throw Error('Unable to delete invitation')
+    }
+    const orgResponse = await OrgService.deactivateOrg(org.id)
+    if (!orgResponse || orgResponse.status !== 204) {
+      throw Error('Unable to delete org')
+    }
   }
 }
