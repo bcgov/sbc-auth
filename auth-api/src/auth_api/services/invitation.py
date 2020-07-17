@@ -76,7 +76,7 @@ class Invitation:
         org_name = org.name
         invitation_type = InvitationType.DIRECTOR_SEARCH.value if org.access_type == AccessType.ANONYMOUS.value \
             else InvitationType.STANDARD.value
-        if org.access_type == AccessType.ANONYMOUS:  # anonymous account never get bceid or bcsc choices
+        if org.access_type == AccessType.ANONYMOUS.value:  # anonymous account never get bceid or bcsc choices
             mandatory_login_source = LoginSource.BCROS.value
         else:
             default_login_option_based_on_accesstype = LoginSource.BCSC.value if \
