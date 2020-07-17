@@ -56,7 +56,6 @@ export default class OrgAdminContact extends Vue {
   get anonAccount (): boolean {
     return this.currentOrganization?.accessType === AccessType.ANONYMOUS
   }
-
 }
 </script>
 
