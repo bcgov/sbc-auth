@@ -75,9 +75,9 @@
           </v-text-field>
         </fieldset>
 
-        <template v-if="isPremiumAccount && currentOrgAddress">
-          <h4 class="mb-4">Mailing Address</h4>
-          <BaseAddress v-can:CHANGE_ADDRESS.hide
+        <template v-if="currentOrgAddress && (isAddressViewable || isAddressEditable)">
+          <h4 class="mb-4" >Mailing Address</h4>
+          <BaseAddress v-if="isAddressEditable"
                   :inputAddress="currentOrgAddress"
                   @key-down="keyDown()"
                   @address-update="updateAddress"
@@ -85,11 +85,13 @@
                   :key="addressKey"
           >
           </BaseAddress>
-          <div class="value value__title" aria-labelledby="mailingAddress" v-if="currentOrgAddress" v-can:VIEW_ADDRESS.hide>
-            <div>{{ currentOrgAddress.street }}</div>
-            <div v-if="currentOrgAddress.streetAdditional">{{ currentOrgAddress.streetAdditional }}</div>
-            <div>{{ currentOrgAddress.city }}, {{ currentOrgAddress.region }}  {{ currentOrgAddress.postalCode }}</div>
-            <div>{{ currentOrgAddress.country}}</div>
+          <div v-if="isAddressViewable">
+            <div class="value value__title" aria-labelledby="mailingAddress" v-if="currentOrgAddress" >
+              <div>{{ currentOrgAddress.street }}</div>
+              <div v-if="currentOrgAddress.streetAdditional">{{ currentOrgAddress.streetAdditional }}</div>
+              <div>{{ currentOrgAddress.city }}, {{ currentOrgAddress.region }}  {{ currentOrgAddress.postalCode }}</div>
+              <div>{{ currentOrgAddress.country}}</div>
+            </div>
           </div>
         </template>
 
@@ -305,6 +307,14 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
 
   get editEnabled () : boolean {
     return [Permission.CHANGE_ADDRESS, Permission.CHANGE_ORG_NAME].some(per => this.permissions.includes(per))
+  }
+
+  get isAddressEditable () : boolean {
+    return [Permission.CHANGE_ADDRESS].some(per => this.permissions.includes(per))
+  }
+
+  get isAddressViewable () : boolean {
+    return [Permission.VIEW_ADDRESS].some(per => this.permissions.includes(per))
   }
 }
 </script>

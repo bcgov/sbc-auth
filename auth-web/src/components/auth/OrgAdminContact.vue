@@ -5,13 +5,15 @@
         <div>
           {{ member.user.firstname }} {{ member.user.lastname }}
         </div>
-        <div v-if="member.user.contacts[0].email">
-          {{ member.user.contacts[0].email }}
+        <div v-if="member.user.contacts">
+          <div v-if="member.user.contacts[0].email">
+            {{ member.user.contacts[0].email }}
+          </div>
+          <div v-if="member.user.contacts[0].phone">
+            {{ member.user.contacts[0].phone }}
+          </div>
+          <div v-if="member.user.contacts[0].phoneExtension"> - {{ member.user.contacts[0].phoneExtension }}</div>
         </div>
-        <div v-if="member.user.contacts[0].phone">
-          {{ member.user.contacts[0].phone }}
-        </div>
-        <div v-if="member.user.contacts[0].phoneExtension"> - {{ member.user.contacts[0].phoneExtension }}</div>
       </div>
       <div v-else>
         {{ member.user.username }}
