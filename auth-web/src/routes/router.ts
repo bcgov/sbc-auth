@@ -9,6 +9,7 @@ import AccountLoginOptionsChooser from '@/views/auth/AccountLoginOptionsChooser.
 import AccountLoginOptionsInfo from '@/views/auth/AccountLoginOptionsInfo.vue'
 import AccountSetupView from '@/views/auth/AccountSetupView.vue'
 import AffidavitDownload from '@/components/auth/NonBcscAccounts/AffidavitDownload.vue'
+import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import ChooseAuthMethodView from '@/views/auth/ChooseAuthMethodView.vue'
 import ConfigHelper from '@/util/config-helper'
@@ -215,6 +216,12 @@ export function getRoutes (): RouteConfig[] {
       path: '/account-login-options-info',
       component: AccountLoginOptionsInfo,
       meta: { requiresAuth: true, requiresProfile: true },
+      props: true
+    },
+    {
+      path: '/authentication-options',
+      component: AuthenticationOptionsView,
+      meta: { requiresAuth: false },
       props: true
     },
     {
