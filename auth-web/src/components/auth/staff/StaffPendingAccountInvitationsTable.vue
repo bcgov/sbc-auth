@@ -16,20 +16,30 @@
         {{formatDate(item.invitations[0].expiresOn, 'MMM DD, YYYY')}}
       </template>
       <template v-slot:item.contactEmail="{ item }">
-        {{item.invitations[0].recipientEmail}}
+        <!-- {{item.invitations[0].recipientEmail}} -->
+        <a v-bind:href="'mailto:' + item.invitations[0].recipientEmail">
+          {{item.invitations[0].recipientEmail}}
+        </a>
       </template>
       <template v-slot:item.action="{ item }">
-        <div class="btn-inline">
+        <div class="table-actions">
           <v-btn
             outlined
             color="primary"
             class="action-btn"
             :data-test="getIndexedTag('resend-invitation-button', item.id)"
             @click="resend(item.invitations[0])"
-          >Resend</v-btn
           >
-          <v-btn icon @click="showConfirmRemoveInviteModal(item)">
-            <v-icon>mdi-delete</v-icon>
+            Resend
+          </v-btn
+          >
+          <v-btn
+            outlined
+            color="primary"
+            class="action-btn"
+            @click="showConfirmRemoveInviteModal(item)"
+          >
+            Remove
           </v-btn>
         </div>
       </template>
@@ -100,6 +110,13 @@ export default class StaffPendingAccountInvitationsTable extends Vue {
 
   private readonly headerAccounts = [
     {
+      text: 'Expiry Date',
+      align: 'left',
+      value: 'expires',
+      sortable: false,
+      width: '150'
+    },
+    {
       text: 'Name',
       align: 'left',
       sortable: true,
@@ -124,18 +141,11 @@ export default class StaffPendingAccountInvitationsTable extends Vue {
       value: 'createdBy'
     },
     {
-      text: 'Expires',
-      align: 'left',
-      value: 'expires',
-      sortable: false,
-      width: '120'
-    },
-    {
       text: 'Actions',
       align: 'left',
       value: 'action',
       sortable: false,
-      width: '200'
+      width: '210'
     }
   ]
 
@@ -194,7 +204,9 @@ export default class StaffPendingAccountInvitationsTable extends Vue {
   }
 }
 
-.action-btn {
-  width: 6rem;
+.table-actions {
+  .v-btn + .v-btn {
+    margin-left: 0.25rem;
+  }
 }
 </style>

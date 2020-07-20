@@ -22,16 +22,15 @@
     </template>
 
     <template v-slot:item.action="{ item }">
-      <div class="btn-inline">
-        <v-btn
-          outlined
-          color="primary"
-          class="action-btn"
-          :data-test="getIndexedTag('view-account-button', item.id)"
-          @click="view(item)"
-        >View</v-btn
-        >
-      </div>
+      <v-btn
+        outlined
+        color="primary"
+        class="action-btn"
+        :data-test="getIndexedTag('view-account-button', item.id)"
+        @click="view(item)"
+      >
+        View
+      </v-btn>
     </template>
   </v-data-table>
 </template>
@@ -88,7 +87,7 @@ export default class StaffActiveAccountsTable extends Vue {
       align: 'left',
       value: 'action',
       sortable: false,
-      width: '120'
+      width: '105'
     }
   ]
 
@@ -156,6 +155,6 @@ export default class StaffActiveAccountsTable extends Vue {
 }
 
 .action-btn {
-  width: 6rem;
+  width: 5rem;
 }
 </style>
