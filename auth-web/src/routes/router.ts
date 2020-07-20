@@ -5,8 +5,11 @@ import AccountChangeSuccessView from '@/views/auth/AccountChangeSuccessView.vue'
 import AccountChangeView from '@/views/auth/AccountChangeView.vue'
 import AccountCreationSuccessView from '@/views/auth/AccountCreationSuccessView.vue'
 import AccountInstructions from '@/components/auth/NonBcscAccounts/AccountInstructions.vue'
+import AccountLoginOptionsChooser from '@/views/auth/AccountLoginOptionsChooser.vue'
+import AccountLoginOptionsInfo from '@/views/auth/AccountLoginOptionsInfo.vue'
 import AccountSetupView from '@/views/auth/AccountSetupView.vue'
 import AffidavitDownload from '@/components/auth/NonBcscAccounts/AffidavitDownload.vue'
+import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import ChooseAuthMethodView from '@/views/auth/ChooseAuthMethodView.vue'
 import ConfigHelper from '@/util/config-helper'
@@ -53,6 +56,7 @@ export function getRoutes (): RouteConfig[] {
   const accountSettings = () => import(/* webpackChunkName: "account-settings" */ '../views/auth/AccountSettings.vue')
   const accountInfo = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/AccountInfo.vue')
   const teamManagement = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/TeamManagement.vue')
+  const accountLoginOption = () => import(/* webpackChunkName: "account-settings" */ '../views/auth/AccountSettingsLoginOption.vue')
   const transaction = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/Transactions.vue')
   const routes = [
     { path: '/', name: 'root', redirect: 'home' },
@@ -106,6 +110,11 @@ export function getRoutes (): RouteConfig[] {
           path: 'team-members',
           name: 'team-members',
           component: teamManagement
+        },
+        {
+          path: 'login-option',
+          name: 'login-option',
+          component: accountLoginOption
         },
         {
           path: 'transactions',
@@ -174,7 +183,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/review-account/:orgId',
       name: 'review-account',
       component: ReviewAccountView,
-      meta: { requiresAuth: true, disabledRoles: [Role.Basic, Role.Public] },
+      meta: { requiresAuth: true, allowedRoles: [Role.StaffManageAccounts] },
       props: true
     },
     {
@@ -198,6 +207,24 @@ export function getRoutes (): RouteConfig[] {
       props: true
     },
     {
+      path: '/account-login-options-chooser',
+      component: AccountLoginOptionsChooser,
+      meta: { requiresAuth: true, requiresProfile: true },
+      props: true
+    },
+    {
+      path: '/account-login-options-info',
+      component: AccountLoginOptionsInfo,
+      meta: { requiresAuth: true, requiresProfile: true },
+      props: true
+    },
+    {
+      path: '/authentication-options',
+      component: AuthenticationOptionsView,
+      meta: { requiresAuth: false },
+      props: true
+    },
+    {
       path: '/createaccount',
       name: 'createaccount',
       component: CreateAccountView,
@@ -213,9 +240,8 @@ export function getRoutes (): RouteConfig[] {
     {
       path: '/validatetoken/:token',
       name: 'validatetoken',
-      component: AcceptInviteLandingView,
-      props: true,
-      meta: { requiresAuth: false, disabledRoles: [Role.Staff] }
+      // to handle old invitation; removable this after a month of this release
+      redirect: '/undefined/validatetoken/BCSC/:token'
     },
     {
       path: '/confirmtoken/:token',
@@ -225,20 +251,22 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, disabledRoles: [Role.Staff] }
     },
     {
+      // to handle old invitation; removable this after a month of this release
       path: '/:orgName/dirsearch/validatetoken/:token',
       name: 'createuserprofile',
+      redirect: '/undefined/BCROS/:token'
+    },
+    {
+      path: '/:orgName/validatetoken/:loginSource/:token',
       component: AcceptInviteLandingView,
       props: true,
       meta: { requiresAuth: false }
     },
-    {
-      path: '/dirsearch/confirmtoken/:token',
-      name: 'dirsearch-confirmtoken',
-      component: AcceptInviteView,
+    { path: '/signin/:idpHint',
+      name: 'signin',
+      component: SigninView,
       props: true,
-      meta: { requiresAuth: true }
-    },
-    { path: '/signin/:idpHint', name: 'signin', component: SigninView, props: true, meta: { requiresAuth: false } },
+      meta: { requiresAuth: false } },
     {
       path: '/signin/:idpHint/:redirectUrl',
       name: 'signin-redirect',
@@ -310,7 +338,7 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true }
     },
     {
-      path: '/pendingapproval/:team_name?',
+      path: '/pendingapproval/:teamName?/:pendingAffidavit?',
       name: 'pendingapproval',
       component: PendingApprovalView,
       props: true,

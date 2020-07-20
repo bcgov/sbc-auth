@@ -122,7 +122,7 @@ class Users(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.STAFF.value])
+    @_JWT.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value])
     def get():
         """Return a set of users based on search query parameters (staff only)."""
         search_email = request.args.get('email', '')
@@ -146,7 +146,7 @@ class UserStaff(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.STAFF.value])
+    @_JWT.requires_auth
     def get(username):
         """Return the user profile associated with the provided username."""
         user = UserService.find_by_username(username)
@@ -339,7 +339,7 @@ class UserOrgs(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get():
         """Get a list of orgs that the current user is associated with."""
         token = g.jwt_oidc_token_info
@@ -365,7 +365,7 @@ class MembershipResource(Resource):
     """Resource for managing a user's org membership."""
 
     @staticmethod
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     @cors.crossdomain(origin='*')
     def get(org_id):
         """Get the membership for the given org and user."""

@@ -18,10 +18,12 @@ from typing import Dict, Tuple
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
+from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException, CustomException
 from auth_api.exceptions.errors import Error
+from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
 from auth_api.models import AccountPaymentSettings as AccountPaymentModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
@@ -30,12 +32,12 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
-from auth_api.schemas import ContactSchema, OrgSchema
+from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
 from auth_api.utils.enums import (
     AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentType, ProductCode, Status)
-from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role
+from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF
 from auth_api.utils.util import camelback2snake
-from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+
 
 from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
@@ -44,7 +46,6 @@ from .keycloak import KeycloakService
 from .notification import send_email
 from .products import Product as ProductService
 from .rest_service import RestService
-
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -87,14 +88,14 @@ class Org:  # pylint: disable=too-many-public-methods
 
         org_info['typeCode'] = OrgType.PREMIUM.value if bcol_account_number else OrgType.BASIC.value
 
-        is_staff_admin = token_info and 'staff_admin' in token_info.get('realm_access').get('roles')
+        is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in token_info.get('realm_access').get('roles')
         is_bceid_user = token_info and token_info.get('loginSource', None) == LoginSource.BCEID.value
 
         Org.validate_account_limit(is_staff_admin, user_id)
 
         access_type = Org.validate_access_type(is_bceid_user, is_staff_admin, org_info)
 
-        if not bcol_account_number:  # Allow duplicate names if premium
+        if bcol_account_number is None:  # Allow duplicate names if premium
             Org.raise_error_if_duplicate_name(org_info['name'])
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
@@ -304,7 +305,7 @@ class Org:  # pylint: disable=too-many-public-methods
         """
         # Check authorization for the user
         current_app.logger.debug('<org Inactivated')
-        check_auth(token_info, one_of_roles=ADMIN, org_id=org_id)
+        check_auth(token_info, one_of_roles=(ADMIN, STAFF), org_id=org_id)
 
         org: OrgModel = OrgModel.find_by_org_id(org_id)
         if not org:
@@ -314,7 +315,8 @@ class Org:  # pylint: disable=too-many-public-methods
         if count_members > 1 or len(org.affiliated_entities) >= 1:
             raise BusinessException(Error.ORG_CANNOT_BE_DISSOLVED, None)
 
-        org.delete()
+        org.status_code = OrgStatus.INACTIVE.value
+        org.save()
 
         # Remove user from thr group if the user doesn't have any other orgs membership
         user = UserModel.find_by_jwt_token(token=token_info)
@@ -348,6 +350,54 @@ class Org:  # pylint: disable=too-many-public-methods
         # Check authorization for the user
         check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
         return AccountPaymentModel.find_active_by_org_id(org_id)
+
+    @staticmethod
+    def get_login_options_for_org(org_id, token_info: Dict = None, allowed_roles: Tuple = None):
+        """Get the payment settings for the given org."""
+        current_app.logger.debug('get_login_options(>')
+        org = OrgModel.find_by_org_id(org_id)
+        if org is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # Check authorization for the user
+        check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
+        return AccountLoginOptionsModel.find_active_by_org_id(org_id)
+
+    @staticmethod
+    def add_login_option(org_id, login_source, token_info: Dict = None):
+        """Create a new contact for this org."""
+        # check for existing contact (only one contact per org for now)
+        current_app.logger.debug('>add_login_option')
+        org = OrgModel.find_by_org_id(org_id)
+        if org is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        check_auth(token_info, one_of_roles=ADMIN, org_id=org_id)
+
+        login_option = AccountLoginOptionsModel(login_source=login_source, org_id=org_id)
+        login_option.save()
+        return login_option
+
+    @staticmethod
+    def update_login_option(org_id, login_source, token_info: Dict = None):
+        """Create a new contact for this org."""
+        # check for existing contact (only one contact per org for now)
+        current_app.logger.debug('>update_login_option')
+        org = OrgModel.find_by_org_id(org_id)
+        if org is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        check_auth(token_info, one_of_roles=(ADMIN, STAFF), org_id=org_id)
+
+        existing_login_option = AccountLoginOptionsModel.find_active_by_org_id(org_id)
+        if existing_login_option is not None:
+            existing_login_option.is_active = False
+            existing_login_option.add_to_session()
+
+        login_option = AccountLoginOptionsModel(login_source=login_source, org_id=org_id)
+        login_option.add_to_session()
+        login_option.commit()
+        return login_option
 
     @staticmethod
     def get_contacts(org_id):
@@ -456,15 +506,44 @@ class Org:  # pylint: disable=too-many-public-methods
             if affiliation:
                 orgs['orgs'].append(Org(OrgModel.find_by_org_id(affiliation.org_id)).as_dict())
         else:
-            org_models = OrgModel.search_org(kwargs.get('access_type', None), kwargs.get('name', None),
-                                             kwargs.get('status', None), kwargs.get('bcol_account_id', None))
+            include_invitations: bool = False
+
+            page: int = int(kwargs.get('page'))
+            limit: int = int(kwargs.get('limit'))
+            status: str = kwargs.get('status', None)
+            name: str = kwargs.get('name', None)
+
+            search_args = (kwargs.get('access_type', None),
+                           name,
+                           status,
+                           kwargs.get('bcol_account_id', None),
+                           page, limit)
+
+            if status and status == OrgStatus.PENDING_ACTIVATION.value:
+                org_models, total = OrgModel.search_pending_activation_orgs(name)
+                include_invitations = True
+            else:
+                org_models, total = OrgModel.search_org(*search_args)
+
             for org in org_models:
                 org_dict = Org(org).as_dict()
                 org_dict['contacts'] = []
+                org_dict['invitations'] = []
+
                 if org.contacts:
                     org_dict['contacts'].append(
                         ContactSchema(exclude=('links',)).dump(org.contacts[0].contact, many=False))
+
+                if include_invitations and org.invitations:
+                    org_dict['invitations'].append(
+                        InvitationSchema(exclude=('membership',)).dump(org.invitations[0].invitation, many=False))
+
                 orgs['orgs'].append(org_dict)
+
+            orgs['total'] = total
+            orgs['page'] = page
+            orgs['limit'] = limit
+
         return orgs
 
     @staticmethod

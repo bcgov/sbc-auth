@@ -1,17 +1,36 @@
 <template>
-  <v-container>
+  <v-container class="view-container">
     <v-row justify="center">
       <v-col cols="12" sm="6" class="text-center">
-        <v-icon size="42" color="grey darken-3" class="mb-6">mdi-check</v-icon>
-        <h1 class="mb-5">{{$t('bcscAccountCreationSuccessTitle')}}</h1>
-        <p class="mb-9">{{$t('bcscAccountCreationSuccessSubtext')}}</p>
-        <div>
-          <v-btn large color="primary" @click="goTo('home')">
-            <strong>BC Registries Home</strong>
+        <v-icon size="48" color="primary" class="mb-6">mdi-check</v-icon>
+        <h1>{{$t('bcscAccountCreationSuccessTitle')}}</h1>
+        <p class="mt-8 mb-10">{{$t('bcscAccountCreationSuccessSubtext')}}</p>
+        <div class="btns">
+          <v-btn
+            large
+            color="primary"
+            class="action-btn font-weight-bold"
+            @click="goTo('home')">
+            Home
           </v-btn>
-          <strong class="mx-3">or</strong>
-          <v-btn large color="primary" @click="goTo('team-members')">
-            <strong>Add Team Members</strong>
+          <span class="mx-3">or</span>
+          <v-btn
+            large
+            color="primary"
+            class="action-btn font-weight-bold"
+            v-if="isRegularAccount"
+            @click="goTo('setup-team')"
+          >
+            Set up team
+          </v-btn>
+          <v-btn
+            large
+            color="primary"
+            class="action-btn font-weight-bold"
+            v-if="!isRegularAccount"
+            @click="goTo('team-members')"
+          >
+            Add Team Members
           </v-btn>
         </div>
       </v-col>
@@ -20,7 +39,9 @@
 </template>
 
 <script lang="ts">
-import { Component } from 'vue-property-decorator'
+
+import { Component, Mixins } from 'vue-property-decorator'
+import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
 import Vue from 'vue'
@@ -31,7 +52,7 @@ import { mapState } from 'vuex'
     ...mapState('org', ['currentOrganization'])
   }
 })
-export default class AccountCreationSuccessView extends Vue {
+export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
   protected readonly currentOrganization!: Organization
 
   private goTo (page) {
@@ -39,6 +60,8 @@ export default class AccountCreationSuccessView extends Vue {
       case 'home': this.$router.push('/')
         break
       case 'team-members': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
+        break
+      case 'setup-team': this.$router.push(`account-login-options-info`)
         break
     }
   }
@@ -48,8 +71,7 @@ export default class AccountCreationSuccessView extends Vue {
 <style lang="scss" scoped>
   @import "$assets/scss/theme.scss";
 
-  .container {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+  .action-btn {
+    width: 8rem;
   }
 </style>

@@ -266,6 +266,6 @@ def test_send_invitation_exception(session, notify_mock, keycloak_mock):  # pyli
 
     with patch.object(notification, 'send_email', return_value=False):
         with pytest.raises(BusinessException) as exception:
-            InvitationService.send_invitation(invitation, org_dictionary['name'], user_dictionary, '')
+            InvitationService.send_invitation(invitation, org_dictionary['name'], user_dictionary, '', '')
 
     assert exception.value.code == Error.FAILED_INVITATION.name

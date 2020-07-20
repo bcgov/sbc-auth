@@ -20,7 +20,7 @@ from typing import Dict
 from flask import abort
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
-from auth_api.utils.roles import STAFF, STAFF_ADMIN, Role
+from auth_api.utils.roles import STAFF, Role
 
 
 class Authorization:
@@ -41,12 +41,12 @@ class Authorization:
         auth = None
         token_roles = token_info.get('realm_access').get('roles')
 
-        if 'staff' in token_roles and 'edit' in token_roles:
+        if Role.STAFF.value in token_roles:
             if expanded:
                 # Query Authorization view by business identifier
                 auth = AuthorizationView.find_user_authorization_by_business_number(business_identifier)
                 auth_response = Authorization(auth).as_dict(expanded)
-            auth_response['roles'] = ['edit', 'view']
+            auth_response['roles'] = token_roles
 
         elif Role.SYSTEM.value in token_roles:
             # a service account in keycloak should have product_code claim setup.
@@ -121,15 +121,7 @@ class Authorization:
 
 def check_auth(token_info: Dict, **kwargs):
     """Check if user is authorized to perform action on the service."""
-    if 'staff_admin' in token_info.get('realm_access').get('roles'):
-        # Staff admin should get all access as of Staff
-        if STAFF in kwargs.get('one_of_roles', []) and STAFF_ADMIN not in kwargs.get('one_of_roles', None):
-            kwargs.get('one_of_roles').append(STAFF_ADMIN)
-        if kwargs.get('equals_role', None) == STAFF:
-            kwargs.pop('equals_role', None)
-            kwargs['one_of_roles'] = (STAFF, STAFF_ADMIN)
-        _check_for_roles(STAFF_ADMIN, kwargs)
-    elif 'staff' in token_info.get('realm_access').get('roles'):
+    if Role.STAFF.value in token_info.get('realm_access').get('roles'):
         _check_for_roles(STAFF, kwargs)
     elif Role.SYSTEM.value in token_info.get('realm_access').get('roles'):
         business_identifier = kwargs.get('business_identifier', None)

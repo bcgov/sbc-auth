@@ -30,7 +30,7 @@ from auth_api.services import User as UserService
 from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus
 from tests.utilities.factory_scenarios import (
     TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo)
-from tests.utilities.factory_utils import factory_auth_header, factory_invitation
+from tests.utilities.factory_utils import factory_auth_header, factory_invitation, factory_invitation_anonymous
 
 
 def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -70,21 +70,21 @@ def test_search_org_by_client(client, jwt, session, keycloak_mock):  # pylint:di
     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
 
     # staff search
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
     rv = client.get('/api/v1/orgs?name={}'.format(TestOrgInfo.org1.get('name')),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     orgs = json.loads(rv.data)
     assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
 
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
     rv = client.get('/api/v1/orgs?status={}'.format('ACTIVE'),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     orgs = json.loads(rv.data)
     assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
 
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
     rv = client.get('/api/v1/orgs?status={}&type={}'.format('ACTIVE', 'REGULAR'),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
@@ -262,6 +262,7 @@ def test_get_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
     rv = client.get('/api/v1/orgs/{}'.format(org_id),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
@@ -284,7 +285,7 @@ def test_get_org_no_auth_returns_401(client, jwt, session, keycloak_mock):  # py
 
 def test_get_org_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that attempting to retrieve a non-existent org returns a 404."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
     rv = client.get('/api/v1/orgs/{}'.format(999),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
@@ -299,6 +300,8 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
+    # User will get a new role once the account is created
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
     rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo'}),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
@@ -401,6 +404,7 @@ def test_upgrade_downgrade_reattach_bcol_todifferent_org(client, jwt, session,
                     content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
 
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
     rv = client.get('/api/v1/orgs/{}'.format(org_id),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
@@ -476,6 +480,8 @@ def test_get_org_payment_settings(client, jwt, session, keycloak_mock):  # pylin
 
     assert rv.status_code == http_status.HTTP_201_CREATED
     assert rv.json.get('orgType') == OrgType.PREMIUM.value
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
 
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
@@ -868,7 +874,7 @@ def test_update_anon_org(client, jwt, session, keycloak_mock):  # pylint:disable
     rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo2'}),
                     headers=public_headers, content_type='application/json')
     # not an admin/owner..so unauthorized will be thrown when trying to access it
-    assert rv.status_code == http_status.HTTP_403_FORBIDDEN
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
 def test_update_member(client, jwt, session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
@@ -1069,7 +1075,7 @@ def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:dis
     assert rv.json.get('orgType') == OrgType.PREMIUM.value
     assert rv.json.get('name') == TestOrgInfo.bcol_linked()['name']
 
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
 
     org_search_response = client.get(f"/api/v1/orgs?name={TestOrgInfo.bcol_linked()['name']}",
                                      headers=headers, content_type='application/json')
@@ -1221,3 +1227,61 @@ def test_search_orgs_with_pending_affidavits(client, jwt, session, keycloak_mock
                                      headers=headers, content_type='application/json')
 
     assert len(org_search_response.json.get('orgs')) == 1
+
+
+def test_search_org_pagination(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that pagination works."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                headers=headers, content_type='application/json')
+    client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org2),
+                headers=headers, content_type='application/json')
+    client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org3),
+                headers=headers, content_type='application/json')
+
+    # staff search
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
+    rv = client.get('/api/v1/orgs?page=1&limit=10',
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert orgs.get('total') == 3
+    assert len(orgs.get('orgs')) == 3
+
+    rv = client.get('/api/v1/orgs?page=1&limit=2',
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert orgs.get('total') == 3
+    assert len(orgs.get('orgs')) == 2
+
+
+def test_search_org_invitations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that pagination works."""
+    # Create 2 anonymous org invitations
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_dir_search_role)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_anonymous),
+                     headers=headers, content_type='application/json')
+
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    client.post('/api/v1/invitations', data=json.dumps(factory_invitation_anonymous(org_id=org_id)),
+                headers=headers, content_type='application/json')
+
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_anonymous_2),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    client.post('/api/v1/invitations', data=json.dumps(factory_invitation_anonymous(org_id=org_id)),
+                headers=headers, content_type='application/json')
+
+    # staff search
+    rv = client.get('/api/v1/orgs?status={}'.format(OrgStatus.PENDING_ACTIVATION.value),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert len(orgs.get('orgs')) == 2
+    assert len(orgs.get('orgs')[0].get('invitations')) == 1

@@ -6,7 +6,7 @@
         <v-btn large
           color="primary"
           class="font-weight-bold"
-          v-if="isStaffAdmin"
+          v-if="canCreateAccounts"
           @click="gotToCreateAccount"
         >
           <v-icon small class="mr-1">mdi-plus</v-icon>Create Account
@@ -15,22 +15,39 @@
     </header>
     <!-- Tab Navigation -->
     <v-tabs
-      v-if="isStaffAdminBCOL"
       background-color="transparent"
       class="mb-9"
       v-model="tab"
       @change="tabChange">
-      <v-tab data-test="active-tab">Active</v-tab>
-      <template v-if="isStaffAdminBCOL">
+      <v-tab data-test="active-tab"
+        v-if="canViewAccounts">Active</v-tab>
+
+      <template v-if="canCreateAccounts">
+        <v-tab data-test="invitations-tab">
+          <v-badge
+            inline
+            color="primary"
+            :content="pendingInvitationsCount"
+            :value="pendingInvitationsCount">
+            Invitations
+          </v-badge>
+        </v-tab>
+      </template>
+
+      <template v-if="canManageAccounts">
         <v-tab data-test="pending-review-tab">
-          <v-badge inline color="info"
+          <v-badge
+            inline
+            color="primary"
             :content="pendingReviewCount"
             :value="pendingReviewCount">
             Pending Review
           </v-badge>
         </v-tab>
         <v-tab data-test="rejected-tab">
-          <v-badge inline color="info"
+          <v-badge
+            inline
+            color="primary"
             :content="rejectedReviewCount"
             :value="rejectedReviewCount">
             Rejected
@@ -43,6 +60,11 @@
     <v-tabs-items v-model="tab">
       <v-tab-item>
         <StaffActiveAccountsTable
+          :columnSort="customSort"
+        />
+      </v-tab-item>
+      <v-tab-item>
+        <StaffPendingAccountInvitationsTable
           :columnSort="customSort"
         />
       </v-tab-item>
@@ -68,6 +90,7 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
 import StaffActiveAccountsTable from '@/components/auth/staff/StaffActiveAccountsTable.vue'
 import StaffModule from '@/store/modules/staff'
+import StaffPendingAccountInvitationsTable from '@/components/auth/staff/StaffPendingAccountInvitationsTable.vue'
 import StaffPendingAccountsTable from '@/components/auth/staff/StaffPendingAccountsTable.vue'
 import StaffRejectedAccountsTable from '@/components/auth/staff/StaffRejectedAccountsTable.vue'
 import { getModule } from 'vuex-module-decorators'
@@ -75,27 +98,30 @@ import { getModule } from 'vuex-module-decorators'
 enum TAB_CODE {
     Active = 'active-tab',
     PendingReview = 'pending-review-tab',
-    Rejected = 'rejected-tab'
+    Rejected = 'rejected-tab',
+    Invitations = 'invitations-tab'
 }
 
 @Component({
   components: {
     StaffActiveAccountsTable,
     StaffPendingAccountsTable,
-    StaffRejectedAccountsTable
+    StaffRejectedAccountsTable,
+    StaffPendingAccountInvitationsTable
   },
   methods: {
     ...mapActions('staff', [
-      'syncActiveStaffOrgs',
       'syncPendingStaffOrgs',
-      'syncRejectedStaffOrgs'
+      'syncRejectedStaffOrgs',
+      'syncPendingInvitationOrgs'
     ])
   },
   computed: {
     ...mapState('user', ['currentUser']),
     ...mapGetters('staff', [
       'pendingReviewCount',
-      'rejectedReviewCount'
+      'rejectedReviewCount',
+      'pendingInvitationsCount'
     ])
   }
 })
@@ -103,11 +129,13 @@ export default class StaffAccountManagement extends Vue {
   private staffStore = getModule(StaffModule, this.$store)
   private tab = 0
   private readonly currentUser!: KCUserProfile
-  private readonly syncActiveStaffOrgs!: () => Organization[]
   private readonly syncPendingStaffOrgs!: () => Organization[]
   private readonly syncRejectedStaffOrgs!: () => Organization[]
+  private readonly syncPendingInvitationOrgs!: () => Organization[]
+
   private readonly pendingReviewCount!: number
   private readonly rejectedReviewCount!: number
+  private readonly pendingInvitationsCount!: number
 
   private tabs = [
     {
@@ -117,32 +145,41 @@ export default class StaffAccountManagement extends Vue {
     },
     {
       id: 1,
+      tabName: 'Invitations',
+      code: TAB_CODE.Invitations
+    },
+    {
+      id: 2,
       tabName: 'Pending Review',
       code: TAB_CODE.PendingReview
     },
     {
-      id: 2,
+      id: 3,
       tabName: 'Rejected',
       code: TAB_CODE.Rejected
     }
   ]
 
   private async mounted () {
-    await this.syncActiveStaffOrgs()
     await this.syncPendingStaffOrgs()
     await this.syncRejectedStaffOrgs()
+    await this.syncPendingInvitationOrgs()
   }
 
   gotToCreateAccount () {
     this.$router.push({ path: `/${Pages.STAFF_SETUP_ACCOUNT}` })
   }
 
-  private get isStaffAdmin () {
-    return this.currentUser?.roles?.includes(Role.StaffAdmin)
+  private get canManageAccounts () {
+    return this.currentUser?.roles?.includes(Role.StaffManageAccounts)
   }
 
-  private get isStaffAdminBCOL () {
-    return this.currentUser?.roles?.includes(Role.StaffAdminBCOL)
+  private get canCreateAccounts () {
+    return this.currentUser?.roles?.includes(Role.StaffCreateAccounts)
+  }
+
+  private get canViewAccounts () {
+    return this.currentUser?.roles?.includes(Role.StaffViewAccounts)
   }
 
   private customSort (items, index, isDescending) {
@@ -160,14 +197,16 @@ export default class StaffAccountManagement extends Vue {
   private async tabChange (tabIndex) {
     const selected = this.tabs.filter((tab) => (tab.id === tabIndex))
     switch (selected[0]?.code) {
-      case TAB_CODE.Active:
-        await this.syncActiveStaffOrgs()
-        break
       case TAB_CODE.PendingReview:
         await this.syncPendingStaffOrgs()
         break
       case TAB_CODE.Rejected:
         await this.syncRejectedStaffOrgs()
+        break
+      case TAB_CODE.Invitations:
+        await this.syncPendingInvitationOrgs()
+        break
+      default:
         break
     }
   }

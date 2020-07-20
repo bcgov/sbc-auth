@@ -12,16 +12,15 @@
       Loading...
     </template>
     <template v-slot:item.action="{ item }">
-      <div class="btn-inline">
         <v-btn
           outlined
           color="primary"
           class="action-btn"
           :data-test="getIndexedTag('reset-password-button', item.id)"
           @click="view(item)"
-        >View</v-btn
         >
-      </div>
+          View
+        </v-btn>
     </template>
   </v-data-table>
 </template>
@@ -69,7 +68,7 @@ export default class StaffRejectedAccountsTable extends Vue {
       align: 'left',
       value: 'action',
       sortable: false,
-      width: '120'
+      width: '105'
     }
   ]
 
@@ -98,6 +97,6 @@ export default class StaffRejectedAccountsTable extends Vue {
 }
 
 .action-btn {
-  width: 6rem;
+  width: 5rem;
 }
 </style>

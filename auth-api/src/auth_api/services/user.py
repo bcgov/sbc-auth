@@ -36,7 +36,7 @@ from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils import util
 from auth_api.utils.enums import AccessType, DocumentType, IdpHint, LoginSource, OrgStatus, Status, UserStatus
-from auth_api.utils.roles import ADMIN, CLIENT_ADMIN_ROLES, COORDINATOR, STAFF
+from auth_api.utils.roles import ADMIN, CLIENT_ADMIN_ROLES, COORDINATOR, STAFF, Role
 from auth_api.utils.util import camelback2snake
 
 from .contact import Contact as ContactService
@@ -230,7 +230,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         if admin_user_membership.membership_type_code in [ADMIN]:
             is_valid_action = True
         # staff admin deleteion
-        is_staff_admin = token_info and 'staff_admin' in token_info.get('realm_access').get('roles')
+        is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in token_info.get('realm_access').get('roles')
         if is_staff_admin:
             is_valid_action = True
         # self deletion

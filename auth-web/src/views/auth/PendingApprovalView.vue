@@ -1,15 +1,17 @@
 <template>
   <div>
+    --{{pendingAffidavit}}
     <template v-if="isDenied">
-      <interim-landing :summary="$t('notAuthorized')" :description="$t('deniedInvitationMsg', { team: $route.params.team_name })" icon="mdi-alert-circle-outline" iconColor="error">
+
+      <interim-landing :summary="$t('notAuthorized')" :description="$t('deniedInvitationMsg', { team: teamName })" icon="mdi-alert-circle-outline" iconColor="error">
       </interim-landing>
     </template>
     <template v-else>
-      <div v-if="$route.params.team_name">
-        <interim-landing :summary="$t(title, { team: $route.params.team_name })" :description="$t(description)" icon="mdi-information-outline">
+      <div v-if="teamName">
+        <interim-landing :summary="$t(title, { team: teamName })" :description="$t(description)" icon="mdi-information-outline">
         </interim-landing>
       </div>
-      <div v-if="!$route.params.team_name">
+      <div v-if="!teamName">
         <interim-landing :summary="$t('noPendingInvitationTitle')" :description="$t('noPendingInvitationMsg')" icon="mdi-information-outline">
         </interim-landing>
       </div>
@@ -18,9 +20,9 @@
 </template>
 
 <script lang="ts">
-import { LoginSource, SessionStorageKeys } from '@/util/constants'
+import { Component, Prop } from 'vue-property-decorator'
 import { Member, MembershipStatus } from '@/models/Organization'
-import { Component } from 'vue-property-decorator'
+
 import InterimLanding from '@/components/auth/InterimLanding.vue'
 import Vue from 'vue'
 import { mapState } from 'vuex'
@@ -37,20 +39,18 @@ import { mapState } from 'vuex'
 export default class PendingApprovalView extends Vue {
   protected readonly currentMembership!: Member
   private isDenied: boolean = false
+  @Prop({ default: '' }) teamName: string
+  @Prop({ default: '' }) pendingAffidavit: string
 
   mounted () {
     this.isDenied = (this.currentMembership?.membershipStatus === MembershipStatus.Rejected || this.currentMembership?.membershipStatus === MembershipStatus.Inactive)
   }
 
-  get isExtraPro () {
-    return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
-  }
-
   get title () {
-    return this.isExtraPro ? 'pendingAffidavitReviewTitle' : 'pendingInvitationTitle'
+    return this.pendingAffidavit === 'true' ? 'pendingAffidavitReviewTitle' : 'pendingInvitationTitle'
   }
   get description () {
-    return this.isExtraPro ? 'pendingAffidvitReviewMessage' : 'pendingInvitationMsg'
+    return this.pendingAffidavit === 'true' ? 'pendingAffidvitReviewMessage' : 'pendingInvitationMsg'
   }
 }
 </script>
