@@ -116,8 +116,6 @@ export default class StaffActiveAccountsTable extends Vue {
     }
     const activeAccountsResp = await this.searchOrgs(this.orgFilter)
     this.activeOrgs = activeAccountsResp.orgs
-    // eslint-disable-next-line no-console
-    console.log(this.activeOrgs)
     this.totalAccountsCount = activeAccountsResp?.total || 0
   }
 
