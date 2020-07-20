@@ -1,5 +1,8 @@
 <template>
-  <v-container class="view-container pt-0">
+  <v-container
+    class="view-container"
+    :class="{ 'crumbs-visible' : isDirSearchUser || isStaff }"
+  >
 
     <!-- Director Search - Breadcrumbs / Back Navigation -->
     <nav class="crumbs py-6" v-if="isDirSearchUser" aria-labelledby="dirSearchNav">
@@ -67,7 +70,7 @@
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-shield-account-outline</v-icon>
                 </v-list-item-icon>
-                <v-list-item-title>User Authentication</v-list-item-title>
+                <v-list-item-title>Authentication</v-list-item-title>
               </v-list-item>
               <v-list-item dense class="py-1 px-8"
                 v-if="isPremiumAccount" v-can:TRANSACTION_HISTORY.hide
@@ -216,5 +219,9 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     span {
       text-decoration: underline;
     }
+  }
+
+  .crumbs-visible {
+    padding-top: 0 !important;
   }
 </style>

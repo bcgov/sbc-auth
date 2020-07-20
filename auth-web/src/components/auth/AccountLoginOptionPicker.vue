@@ -1,30 +1,29 @@
 <template>
   <v-row>
     <v-col
+      sm="12"
+      md="6"
       class="d-flex align-stretch"
-      sm="12" md="6"
       v-for="authOption in authOptions"
       :key="authOption.type"
     >
       <v-card
-        flat
-        outlined
-        hover
-        elevation="1"
-        class="account-card text-center pa-7 d-flex flex-column"
-        @click="selectAuthType(authOption.type)"
+        class="account-card elevation-2 pa-10 pt-9 d-flex flex-column text-center"
         :class="{ 'active': authType === authOption.type }"
+        flat
+        hover
+        @click="selectAuthType(authOption.type)"
       >
         <div class="account-type__icon mb-6 mt-2">
           <v-icon color="grey">{{authOption.icon}}</v-icon>
         </div>
-        <div class="account-type__title mb-6">
+        <div class="account-type__title font-weight-bold mb-6">
           {{authOption.title}}
         </div>
-        <div class="account-type__details mb-6 mx-4">
+        <div class="account-type__details mb-10">
           {{authOption.description}}
         </div>
-        <div class="mt-9 mb-2">
+        <div class="account-type__buttons">
           <v-btn
             large
             depressed
@@ -140,9 +139,14 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
       font-size: 4rem;
     }
   }
+
+  .account-type__details {
+    flex: 1 0 auto;
+  }
+
   .account-type__title {
+    line-height: 1.25;
     font-size: 1.5rem;
-    font-weight: 600;
   }
 }
 </style>
