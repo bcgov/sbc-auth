@@ -48,9 +48,10 @@
             </v-alert>
           </li>
         </ul>
+
         <ul class="nv-list">
-          <li class="nv-list-item mb-12">
-            <div class="name" id="adminContact">Admin Contact</div>
+          <li class="nv-list-item mb-8">
+            <div class="name" id="adminContact">Account Contact</div>
             <div class="value" aria-labelledby="adminContact">
               <OrgAdminContact></OrgAdminContact>
             </div>

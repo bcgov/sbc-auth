@@ -19,11 +19,11 @@
         <v-btn
           outlined
           color="primary"
-          class="action-btn"
           :data-test="getIndexedTag('reset-password-button', item.id)"
           @click="review(item)"
-        >Review</v-btn
         >
+          Review
+        </v-btn>
       </div>
     </template>
   </v-data-table>
@@ -50,11 +50,11 @@ export default class StaffPendingAccountsTable extends Vue {
 
   private readonly headerAccounts = [
     {
-      text: 'Date Submitted',
+      text: 'Date Submittted',
       align: 'left',
       sortable: true,
       value: 'created',
-      width: 150
+      width: '150'
     },
     {
       text: 'Name',
@@ -73,7 +73,7 @@ export default class StaffPendingAccountsTable extends Vue {
       align: 'left',
       value: 'action',
       sortable: false,
-      width: '120'
+      width: '105'
     }
   ]
 
@@ -102,6 +102,6 @@ export default class StaffPendingAccountsTable extends Vue {
 }
 
 .action-btn {
-  width: 6rem;
+  width: 5rem;
 }
 </style>

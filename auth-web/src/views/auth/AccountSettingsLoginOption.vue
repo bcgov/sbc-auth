@@ -2,7 +2,7 @@
   <v-container class="view-container">
     <div class="view-header flex-column mb-6">
       <h1 class="view-header__title" data-test="account-settings-title">
-        User Authentication
+        Authentication
       </h1>
       <v-alert
         class="mt-10"
@@ -13,8 +13,11 @@
     </div>
     <account-login-option-chooser
       class="mx-8"
-      @auth-type-selected="setLoginOption"></account-login-option-chooser>
-    <div class="form__btns d-flex mt-6 mb-4">
+      @auth-type-selected="setLoginOption"
+    >
+    </account-login-option-chooser>
+    <v-divider class="mt-6"></v-divider>
+    <div class="form__btns d-flex">
       <v-btn
         large
         class="save-btn"
