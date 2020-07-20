@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>Enter email addresses to invite team members. Team members will be required to sign in with their <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank">BC Services Card</a>.</p>
+    <p>Enter email addresses to invite team members.</p>
     <v-form ref="form" class="mt-9">
       <div class="invite-list">
         <transition-group name="slide-y-transition">

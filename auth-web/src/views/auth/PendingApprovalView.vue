@@ -1,6 +1,5 @@
 <template>
   <div>
-    --{{pendingAffidavit}}
     <template v-if="isDenied">
 
       <interim-landing :summary="$t('notAuthorized')" :description="$t('deniedInvitationMsg', { team: teamName })" icon="mdi-alert-circle-outline" iconColor="error">
