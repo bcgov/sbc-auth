@@ -123,12 +123,6 @@ export default class StaffPendingAccountInvitationsTable extends Vue {
       value: 'name'
     },
     {
-      text: 'Type',
-      align: 'left',
-      sortable: true,
-      value: 'orgType'
-    },
-    {
       text: 'Contact Email',
       align: 'left',
       sortable: true,
