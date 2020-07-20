@@ -93,12 +93,12 @@ export default class OrgService {
   }
 
   public static async getMemberLoginOption (orgId: number): Promise<string> {
-    const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/login_options`)
+    const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/login-options`)
     return response.data?.loginOption
   }
 
   public static async updateMemberLoginOption (orgId: number, loginOption:string): Promise<string> {
-    const response = await axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/login_options`, {
+    const response = await axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/login-options`, {
       'loginOption': loginOption
     })
     return response.data?.loginOption
