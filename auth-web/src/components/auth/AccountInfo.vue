@@ -84,11 +84,11 @@
                   :key="addressKey"
           >
           </BaseAddress>
-          <div class="value value__title" aria-labelledby="mailingAddress" v-if="address" v-can:VIEW_ADDRESS.hide>
-            <div>{{ address.street }}</div>
-            <div v-if="address.streetAdditional">{{ address.streetAdditional }}</div>
-            <div>{{ address.city }}, {{ address.region }}  {{ address.postalCode }}</div>
-            <div>{{ address.country}}</div>
+          <div class="value value__title" aria-labelledby="mailingAddress" v-if="currentOrgAddress" v-can:VIEW_ADDRESS.hide>
+            <div>{{ currentOrgAddress.street }}</div>
+            <div v-if="currentOrgAddress.streetAdditional">{{ currentOrgAddress.streetAdditional }}</div>
+            <div>{{ currentOrgAddress.city }}, {{ currentOrgAddress.region }}  {{ currentOrgAddress.postalCode }}</div>
+            <div>{{ currentOrgAddress.country}}</div>
           </div>
         </template>
 
