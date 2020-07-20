@@ -116,6 +116,8 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instanc
                 AccountPaymentSettingsModel.bcol_account_id == bcol_account_id,
                 AccountPaymentSettingsModel.is_active.is_(True)))
 
+        query = query.order_by(Org.created.desc())
+
         # Add pagination
         pagination = query.paginate(per_page=limit, page=page)
         return pagination.items, pagination.total
@@ -134,6 +136,9 @@ class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instanc
 
         if name:
             query = query.filter(Org.name.ilike(f'%{name}%'))
+
+        query = query.order_by(Org.created.desc())
+
         orgs = query.all()
         return orgs, len(orgs)
 
