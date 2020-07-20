@@ -28,7 +28,7 @@ from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
-from auth_api.utils.enums import NotificationType, Status
+from auth_api.utils.enums import NotificationType, Status, LoginSource
 from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF
 from config import get_named_config
 
@@ -189,8 +189,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
         # bceid Members cant be ADMIN's.Unless they have an affidavit approved.
         # TODO when multiple teams for bceid are present , do if the user has affidavit present check
-        is_bceid_user = self._model.user.username.find('@bceid') > 0  # TODO how to check properly if user is bceid user
-        if is_bceid_user and updated_fields.get('membership_type', None).code == ADMIN:
+        is_bceid_user = self._model.user.login_source == LoginSource.BCEID.value
+        if is_bceid_user and getattr(updated_fields.get('membership_type', None), 'code', None) == ADMIN:
             raise BusinessException(Error.BCEID_USERS_CANT_BE_OWNERS, None)
 
         # Ensure that a member does not upgrade a member to ADMIN from COORDINATOR unless they are an ADMIN themselves
