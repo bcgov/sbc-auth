@@ -31,3 +31,4 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
 
     org_type = fields.Pluck('OrgTypeSchema', 'code', data_key='orgType')
     payment_settings = fields.Nested('AccountPaymentSettingsSchema', many=True, data_key='payment_settings')
+    status_code = fields.String(data_key='status_code')

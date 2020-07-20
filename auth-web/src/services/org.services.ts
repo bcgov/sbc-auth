@@ -91,4 +91,16 @@ export default class OrgService {
   static async rejectPendingOrg (orgIdentifier: number): Promise<AxiosResponse> {
     return axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/status`, { statusCode: 'REJECTED' })
   }
+
+  public static async getMemberLoginOption (orgId: number): Promise<string> {
+    const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/login-options`)
+    return response.data?.loginOption
+  }
+
+  public static async updateMemberLoginOption (orgId: number, loginOption:string): Promise<string> {
+    const response = await axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/login-options`, {
+      'loginOption': loginOption
+    })
+    return response.data?.loginOption
+  }
 }

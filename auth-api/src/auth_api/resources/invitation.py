@@ -26,7 +26,6 @@ from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
 
-
 API = Namespace('invitations', description='Endpoints for invitations management')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
@@ -40,7 +39,8 @@ class Invitations(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles(
+        [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def post():
         """Send a new invitation using the details in request and saves the invitation."""
         token = g.jwt_oidc_token_info
@@ -81,7 +81,7 @@ class Invitation(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_JWT.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def patch(invitation_id):
         """Update the invitation specified by the provided id as retried."""
         token = g.jwt_oidc_token_info
@@ -101,7 +101,8 @@ class Invitation(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles(
+        [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def delete(invitation_id):
         """Delete the specified invitation."""
         token = g.jwt_oidc_token_info
@@ -146,7 +147,8 @@ class InvitationAction(Resource):
                                    http_status.HTTP_401_UNAUTHORIZED
             else:
                 invitation_id = InvitationService.validate_token(invitation_token).as_dict().get('id')
-                response, status = InvitationService.accept_invitation(invitation_id, user, origin).as_dict(), \
+                response, status = InvitationService.accept_invitation(invitation_id, user, origin,
+                                                                       token_info=token).as_dict(), \
                                    http_status.HTTP_200_OK  # noqa:E127
 
         except BusinessException as exception:

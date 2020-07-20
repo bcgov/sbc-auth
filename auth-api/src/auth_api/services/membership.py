@@ -29,7 +29,7 @@ from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
 from auth_api.utils.enums import NotificationType, Status
-from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR
+from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF
 from config import get_named_config
 
 from .authorization import check_auth
@@ -37,7 +37,6 @@ from .keycloak import KeycloakService
 from .notification import send_email
 from .org import Org as OrgService
 from .user import User as UserService
-
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -140,7 +139,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             # Ensure that this user is an COORDINATOR or ADMIN on the org associated with this membership
             # or that the membership is for the current user
             if membership.user.username != token_info.get('username'):
-                check_auth(org_id=membership.org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN))
+                check_auth(org_id=membership.org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN, STAFF))
             return Membership(membership)
         return None
 
@@ -158,7 +157,12 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         elif notification_type == NotificationType.MEMBERSHIP_APPROVED.value:
             subject = '[BC Registries & Online Services] Welcome to the account {}'. \
                 format(org_name)
-            template_name = 'membership_approved_notification_email.html'
+            # TODO how to check properly if user is bceid user
+            is_bceid_user = self._model.user.username.find('@bceid') > 0
+            if is_bceid_user:
+                template_name = 'membership_approved_notification_email_for_bceid.html'
+            else:
+                template_name = 'membership_approved_notification_email.html'
             params = {'org_name': org_name}
         sender = CONFIG.MAIL_FROM_ID
         template = ENV.get_template(f'email_templates/{template_name}')
@@ -181,11 +185,17 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         """Update an existing membership with the given role."""
         # Ensure that this user is an COORDINATOR or ADMIN on the org associated with this membership
         current_app.logger.debug('<update_membership')
-        check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN))
+        check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN, STAFF))
+
+        # bceid Members cant be ADMIN's.Unless they have an affidavit approved.
+        # TODO when multiple teams for bceid are present , do if the user has affidavit present check
+        is_bceid_user = self._model.user.username.find('@bceid') > 0  # TODO how to check properly if user is bceid user
+        if is_bceid_user and updated_fields.get('membership_type', None).code == ADMIN:
+            raise BusinessException(Error.BCEID_USERS_CANT_BE_OWNERS, None)
 
         # Ensure that a member does not upgrade a member to ADMIN from COORDINATOR unless they are an ADMIN themselves
         if self._model.membership_type.code == COORDINATOR and updated_fields.get('membership_type', None) == ADMIN:
-            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN))
+            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, STAFF))
 
         # No one can change an ADMIN's status, only option is ADMIN to leave the team. #2319
         if updated_fields.get('membership_status', None) \

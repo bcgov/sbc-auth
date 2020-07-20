@@ -11,7 +11,7 @@
       </div>
     </v-expand-transition>
     <!-- First / Last Name -->
-    <v-row v-if="isExtraProvStepper">
+    <v-row v-if="isInEditNameMode">
       <v-col cols="6" class="py-0">
         <v-text-field
           filled
@@ -327,8 +327,9 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       v => !!v || 'Last Name is Required'
     ]
 
-    private get isExtraProvStepper () {
-      return this.isStepperView && (this.stepperSource === AccessType.EXTRA_PROVINCIAL)
+    private get isInEditNameMode () {
+      // isExtraProvStepperOr
+      return this.token || (this.isStepperView && (this.stepperSource === AccessType.EXTRA_PROVINCIAL))
     }
 
     private get isBCEIDUser (): boolean {

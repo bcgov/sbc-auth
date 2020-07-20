@@ -3,7 +3,7 @@
     <header class="view-header align-center mt-n1 mb-5">
       <h2 class="view-header__title">Team Members</h2>
       <div class="view-header__actions">
-        <v-btn color="primary" class="font-weight-bold" large v-if="!isBCEIDUser" v-can:INVITE_MEMBERS.hide @click="showInviteUsersModal()" data-test="invite-people-button">
+        <v-btn color="primary" class="font-weight-bold" large v-can:INVITE_MEMBERS.hide @click="showInviteUsersModal()" data-test="invite-people-button">
           <v-icon small class="ml-n1">mdi-plus</v-icon>
           <span>Invite People</span>
         </v-btn>
@@ -131,25 +131,20 @@
 </template>
 
 <script lang="ts">
-import { ActiveUserRecord, Member, MembershipStatus, MembershipType, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
-import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import MemberDataTable, { ChangeRolePayload } from '@/components/auth/MemberDataTable.vue'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { LoginSource, Pages } from '@/util/constants'
+import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
-import { Business } from '@/models/business'
-import ConfigHelper from '@/util/config-helper'
-import { Event } from '@/models/event'
-import { EventBus } from '@/event-bus'
+import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { Invitation } from '@/models/Invitation'
 import InvitationsDataTable from '@/components/auth/InvitationsDataTable.vue'
 import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import { LoginSource } from '@/util/constants'
+import MemberDataTable from '@/components/auth/MemberDataTable.vue'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
-import OrgModule from '@/store/modules/org'
 import PendingMemberDataTable from '@/components/auth/PendingMemberDataTable.vue'
 import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vue'
-import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
@@ -164,7 +159,9 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('org', [
       'resending',
       'sentInvitations',
-      'pendingOrgMembers'
+      'pendingOrgMembers',
+      'memberLoginOption',
+      'currentOrganization'
     ]),
     ...mapState('business', ['currentBusiness'])
   },
@@ -174,11 +171,12 @@ import { getModule } from 'vuex-module-decorators'
       'deleteInvitation',
       'syncPendingOrgInvitations',
       'syncPendingOrgMembers',
-      'syncActiveOrgMembers'
+      'syncActiveOrgMembers',
+      'syncMemberLoginOption'
     ])
   }
 })
-export default class UserManagement extends Mixins(AccountChangeMixin, TeamManagementMixin) {
+export default class UserManagement extends Mixins(AccountChangeMixin, TeamManagementMixin, AccountMixin) {
   @Prop({ default: '' }) private orgId: string;
 
   private tab = null
@@ -186,9 +184,9 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   private memberToBeApproved: Member
   private invitationToBeRemoved: Invitation
 
-  private readonly currentBusiness!: Business
-  private readonly resending!: boolean
   private readonly sentInvitations!: Invitation[]
+  private readonly memberLoginOption!: string
+  private readonly syncMemberLoginOption!: (currentAccount: number) => string
 
   private readonly resendInvitation!: (invitation: Invitation) => void
   private readonly deleteInvitation!: (invitationId: number) => void
@@ -196,6 +194,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   private readonly syncPendingOrgInvitations!: () => Invitation[]
   private readonly syncActiveOrgMembers!: () => Member[]
   readonly currentUser!: KCUserProfile
+  protected readonly currentOrganization!: Organization
 
   // PROTOTYPE TAB ICON (PENDING APPROVAL)
   private readonly pendingOrgMembers!: Member[]
@@ -222,7 +221,18 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
     await this.syncActiveOrgMembers()
     await this.syncPendingOrgInvitations()
     await this.syncPendingOrgMembers()
+    // await this.redirectIfNoAuthMethodSetup()
     this.isLoading = false
+  }
+
+  // unused for now..Keeping it there for some time if requirement again changes
+  private async redirectIfNoAuthMethodSetup () {
+    if (!this.memberLoginOption) {
+      await this.syncMemberLoginOption(this.currentOrganization.id)
+    }
+    if (!this.memberLoginOption) {
+      await this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/login-option`)
+    }
   }
 
   private showInviteUsersModal () {
