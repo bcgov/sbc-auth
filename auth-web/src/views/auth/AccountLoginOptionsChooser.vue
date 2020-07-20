@@ -1,8 +1,8 @@
 <template>
   <v-container class="view-container">
-    <div class="view-header flex-column mb-10">
+    <div class="view-header flex-column">
       <h1 class="view-header__title">Choose authentication for your team</h1>
-      <p class="mt-2 mb-3">There are two different ways that your team can log in. Review the options below to learn more and make
+      <p class="mt-3 mb-0">There are two different ways that your team can log in. Review the options below to learn more and make
         a selection for your team. You will be able to access authentication methods for your team in your
         <a class="text-decoration-underline" @click="goToAccountSettings">account settings.</a>
       </p>
@@ -75,10 +75,6 @@ export default class AccountLoginOptionsChooser extends Mixins(AccountChangeMixi
 
 .view-container {
   max-width: 60rem;
-}
-
-.v-application p {
-  margin-bottom: 3rem;
 }
 
 .nv-list {

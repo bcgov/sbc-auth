@@ -1,20 +1,36 @@
 <template>
-  <v-container>
+  <v-container class="view-container">
     <v-row justify="center">
       <v-col cols="12" sm="6" class="text-center">
-        <v-icon size="42" color="grey darken-3" class="mb-6">mdi-check</v-icon>
-        <h1 class="mb-5">{{$t('bcscAccountCreationSuccessTitle')}}</h1>
-        <p class="mb-9">{{$t('bcscAccountCreationSuccessSubtext')}}</p>
-        <div>
-          <v-btn large color="primary" @click="goTo('home')">
-            <strong>BC Registries Home</strong>
+        <v-icon size="48" color="primary" class="mb-6">mdi-check</v-icon>
+        <h1>{{$t('bcscAccountCreationSuccessTitle')}}</h1>
+        <p class="mt-8 mb-10">{{$t('bcscAccountCreationSuccessSubtext')}}</p>
+        <div class="btns">
+          <v-btn
+            large
+            color="primary"
+            class="action-btn font-weight-bold"
+            @click="goTo('home')">
+            Home
           </v-btn>
-          <strong class="mx-3">or</strong>
-          <v-btn large color="primary" v-if="isRegularAccount" @click="goTo('setup-team')">
-            <strong>Set up team</strong>
+          <span class="mx-3">or</span>
+          <v-btn
+            large
+            color="primary"
+            class="action-btn font-weight-bold"
+            v-if="isRegularAccount"
+            @click="goTo('setup-team')"
+          >
+            Set up team
           </v-btn>
-          <v-btn large color="primary"  v-if="!isRegularAccount" @click="goTo('team-members')">
-            <strong>Add Team Members</strong>
+          <v-btn
+            large
+            color="primary"
+            class="action-btn font-weight-bold"
+            v-if="!isRegularAccount"
+            @click="goTo('team-members')"
+          >
+            Add Team Members
           </v-btn>
         </div>
       </v-col>
@@ -55,8 +71,7 @@ export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
 <style lang="scss" scoped>
   @import "$assets/scss/theme.scss";
 
-  .container {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+  .action-btn {
+    width: 8rem;
   }
 </style>
