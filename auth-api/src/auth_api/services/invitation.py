@@ -122,7 +122,7 @@ class Invitation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         for membership in invitation.membership:
             org_id = membership.org_id
-            check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR))
+            check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
         invitation.delete()
 
     @staticmethod
