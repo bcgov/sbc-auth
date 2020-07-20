@@ -55,7 +55,7 @@ class User(BaseModel):
     type = Column('type', String(200), nullable=True)
     status = Column(ForeignKey('user_status_code.id'))
     idp_userid = Column('idp_userid', String(256), index=True)
-    login_source = Column('type', String(200), nullable=False)
+    login_source = Column('login_source', String(200), nullable=True)
 
     contacts = relationship('ContactLink', primaryjoin='User.id == ContactLink.user_id', lazy='select')
     orgs = relationship('Membership',
@@ -93,7 +93,7 @@ class User(BaseModel):
                 keycloak_guid=token.get('sub', None),
                 created=datetime.datetime.now(),
                 roles=token.get('roles', None),
-                login_source=token.get('loginSource')
+                login_source=token.get('loginSource', None)
             )
             current_app.logger.debug(
                 'Creating user from JWT:{}; User:{}'.format(token, user)
@@ -124,6 +124,7 @@ class User(BaseModel):
 
                 # If this user is marked as Inactive, this login will re-activate them
                 user.status = UserStatus.ACTIVE.value
+                user.login_source = token.get('login_source', user.login_source)
 
                 if token.get('idp_userid', None):
                     user.idp_userid = token.get('idp_userid')
