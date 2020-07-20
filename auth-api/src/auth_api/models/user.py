@@ -55,6 +55,7 @@ class User(BaseModel):
     type = Column('type', String(200), nullable=True)
     status = Column(ForeignKey('user_status_code.id'))
     idp_userid = Column('idp_userid', String(256), index=True)
+    login_source = Column('type', String(200), nullable=False)
 
     contacts = relationship('ContactLink', primaryjoin='User.id == ContactLink.user_id', lazy='select')
     orgs = relationship('Membership',
@@ -91,7 +92,8 @@ class User(BaseModel):
                 email=token.get('email', None),
                 keycloak_guid=token.get('sub', None),
                 created=datetime.datetime.now(),
-                roles=token.get('roles', None)
+                roles=token.get('roles', None),
+                login_source=token.get('loginSource')
             )
             current_app.logger.debug(
                 'Creating user from JWT:{}; User:{}'.format(token, user)
