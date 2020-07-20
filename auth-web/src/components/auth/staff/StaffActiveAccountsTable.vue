@@ -133,7 +133,7 @@ export default class StaffActiveAccountsTable extends Vue {
       return 'Director Search'
     }
     if (org.accessType === AccessType.EXTRA_PROVINCIAL) {
-      return orgTypeDisplay + '(out-of-province)'
+      return orgTypeDisplay + ' (out-of-province)'
     }
     return orgTypeDisplay
   }

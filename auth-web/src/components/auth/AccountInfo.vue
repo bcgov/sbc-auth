@@ -1,5 +1,8 @@
 <template>
   <v-container class="pa-0">
+    <header class="view-header mb-9">
+      <h2 class="view-header__title">Account Info</h2>
+    </header>
     <div>
       <v-form ref="editAccountForm">
         <v-alert type="error" class="mb-6" v-show="errorMessage">
@@ -31,26 +34,28 @@
               </div>
             </div>
           </li>
-          <li class="nv-list-item mb-12" v-if="isPremiumAccount">
-            <div class="name mb-3" id="accountName">Linked BC Online Account Details</div>
-            <v-alert dark color="primary" class="bcol-acc px-7 py-5">
-              <div class="bcol-acc__name">
-                {{ currentOrganization.name }}
-              </div>
-              <ul class="bcol-acc__meta" v-if="isPremiumAccount && currentOrgPaymentSettings">
-                <li>
-                  BC Online Account No: {{currentOrgPaymentSettings.bcolAccountId}}
-                </li>
-                <li>
-                  Prime Contact ID: {{currentOrgPaymentSettings.bcolUserId}}
-                </li>
-              </ul>
-            </v-alert>
+          <li class="nv-list-item mb-6" v-if="isPremiumAccount">
+            <div class="name mt-3" id="accountName">Linked BC Online Account Details</div>
+            <div class="value">
+              <v-alert dark color="primary" class="py-3 px-4">
+                <div class="font-weight-bold">
+                  {{ currentOrganization.name }}
+                </div>
+                <ul class="bcol-acc__meta" v-if="isPremiumAccount && currentOrgPaymentSettings">
+                  <li>
+                    BC Online Account No: {{currentOrgPaymentSettings.bcolAccountId}}
+                  </li>
+                  <li>
+                    Prime Contact ID: {{currentOrgPaymentSettings.bcolUserId}}
+                  </li>
+                </ul>
+              </v-alert>
+            </div>
           </li>
         </ul>
 
-        <ul class="nv-list">
-          <li class="nv-list-item mb-8">
+        <ul class="nv-list mb-10">
+          <li class="nv-list-item">
             <div class="name" id="adminContact">Account Contact</div>
             <div class="value" aria-labelledby="adminContact">
               <OrgAdminContact></OrgAdminContact>
@@ -58,68 +63,83 @@
           </li>
         </ul>
 
-        <fieldset v-if="!isPremiumAccount" v-can:CHANGE_ORG_NAME.hide>
-          <legend class="mb-4">Account Details</legend>
-          <v-text-field
-            filled
-            clearable
-            required
-            label="Account Name"
-            :rules="accountNameRules"
-            v-can:CHANGE_ORG_NAME.disable
-            :disabled="!canChangeAccountName()"
-            v-if="!isPremiumAccount"
-            v-model="orgName"
-            v-on:keydown="enableBtn()"
-          >
-          </v-text-field>
-        </fieldset>
+        <ul class="nv-list" v-if="!isPremiumAccount" v-can:CHANGE_ORG_NAME.hide>
+          <li class="nv-list-item">
+              <div class="name">
+                Account Details
+              </div>
+              <div class="value">
+                <v-text-field
+                filled
+                clearable
+                required
+                label="Account Name"
+                :rules="accountNameRules"
+                v-can:CHANGE_ORG_NAME.disable
+                :disabled="!canChangeAccountName()"
+                v-if="!isPremiumAccount"
+                v-model="orgName"
+                v-on:keydown="enableBtn()"
+                >
+                </v-text-field>
+              </div>
+          </li>
+        </ul>
 
         <template v-if="currentOrgAddress && (isAddressViewable || isAddressEditable)">
-          <h4 class="mb-4" >Mailing Address</h4>
-          <BaseAddress v-if="isAddressEditable"
+          <ul class="nv-list">
+            <li class="nv-list-item">
+              <div class="name">
+                Mailing Address
+              </div>
+              <div class="value">
+                <BaseAddress v-if="isAddressEditable"
                   :inputAddress="currentOrgAddress"
                   @key-down="keyDown()"
                   @address-update="updateAddress"
                   @is-form-valid="checkBaseAddressValidity"
                   :key="addressKey"
-          >
-          </BaseAddress>
-          <div v-if="isAddressViewable">
-            <div class="value value__title" aria-labelledby="mailingAddress" v-if="currentOrgAddress" >
-              <div>{{ currentOrgAddress.street }}</div>
-              <div v-if="currentOrgAddress.streetAdditional">{{ currentOrgAddress.streetAdditional }}</div>
-              <div>{{ currentOrgAddress.city }}, {{ currentOrgAddress.region }}  {{ currentOrgAddress.postalCode }}</div>
-              <div>{{ currentOrgAddress.country}}</div>
-            </div>
-          </div>
+                >
+                </BaseAddress>
+                <div v-if="isAddressViewable">
+                  <div class="value value__title" aria-labelledby="mailingAddress" v-if="currentOrgAddress" >
+                    <div>{{ currentOrgAddress.street }}</div>
+                    <div v-if="currentOrgAddress.streetAdditional">{{ currentOrgAddress.streetAdditional }}</div>
+                    <div>{{ currentOrgAddress.city }}, {{ currentOrgAddress.region }}  {{ currentOrgAddress.postalCode }}</div>
+                    <div>{{ currentOrgAddress.country}}</div>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ul>
         </template>
 
-        <v-divider class="mt-3 mb-10" v-if="editEnabled"></v-divider>
-
-        <div class="form__btns" v-if="editEnabled">
-          <v-btn
-            large
-            class="save-btn"
-            v-bind:class="{ disabled: btnLabel == 'Saved' }"
-            :color="btnLabel == 'Saved' ? 'success' : 'primary'"
-            :disabled="!isSaveEnabled()"
-            :loading="btnLabel == 'Saving'"
-            @click="updateDetails()"
-          >
-            <v-expand-x-transition>
-              <v-icon v-show="btnLabel == 'Saved'">mdi-check</v-icon>
-            </v-expand-x-transition>
-            <span class="save-btn__label">{{ btnLabel }}</span>
-          </v-btn>
-          <v-btn
-            large
-            depressed
-            class="ml-2"
-            color="default"
-            @click="resetForm"
-            data-test="reset-button"
-          >Reset</v-btn>
+        <div v-if="editEnabled">
+          <v-divider class="mt-3 mb-10"></v-divider>
+          <div class="form__btns">
+            <v-btn
+              large
+              class="save-btn"
+              v-bind:class="{ disabled: btnLabel == 'Saved' }"
+              :color="btnLabel == 'Saved' ? 'success' : 'primary'"
+              :disabled="!isSaveEnabled()"
+              :loading="btnLabel == 'Saving'"
+              @click="updateDetails()"
+            >
+              <v-expand-x-transition>
+                <v-icon v-show="btnLabel == 'Saved'">mdi-check</v-icon>
+              </v-expand-x-transition>
+              <span class="save-btn__label">{{ btnLabel }}</span>
+            </v-btn>
+            <v-btn
+              large
+              depressed
+              class="ml-2"
+              color="default"
+              @click="resetForm"
+              data-test="reset-button"
+            >Reset</v-btn>
+          </div>
         </div>
       </v-form>
     </div>
@@ -333,6 +353,7 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
 }
 
 .nv-list-item {
+  display: flex;
   vertical-align: top;
 
   .name, .value {
@@ -341,8 +362,12 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
   }
 
   .name {
-    min-width: 10rem;
-    font-weight: 700;
+    flex: 0 0 auto;
+    width: 12rem;
+  }
+
+  .value {
+    flex: 1 1 auto;
   }
 }
 
