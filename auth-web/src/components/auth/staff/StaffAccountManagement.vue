@@ -24,7 +24,9 @@
 
       <template v-if="canCreateAccounts">
         <v-tab data-test="invitations-tab">
-          <v-badge inline color="info"
+          <v-badge
+            inline
+            color="primary"
             :content="pendingInvitationsCount"
             :value="pendingInvitationsCount">
             Invitations
@@ -34,14 +36,18 @@
 
       <template v-if="canManageAccounts">
         <v-tab data-test="pending-review-tab">
-          <v-badge inline color="info"
+          <v-badge
+            inline
+            color="primary"
             :content="pendingReviewCount"
             :value="pendingReviewCount">
             Pending Review
           </v-badge>
         </v-tab>
         <v-tab data-test="rejected-tab">
-          <v-badge inline color="info"
+          <v-badge
+            inline
+            color="primary"
             :content="rejectedReviewCount"
             :value="rejectedReviewCount">
             Rejected

@@ -1,19 +1,23 @@
 <template>
-    <div class="value__title">
-      <div  v-for="(member, index) in getActiveAdmins()" v-bind:key="index + 1">
-        <p v-if="!anonAccount">
-          <span> {{ member.user.firstname }} {{ member.user.lastname }} </span>
-          <span>( </span>
-          <span v-if="member.user.contacts[0].email">{{ member.user.contacts[0].email }} </span>
-          <span v-if="member.user.contacts[0].phone">, {{ member.user.contacts[0].phone }} </span>
-          <span v-if="member.user.contacts[0].phoneExtension"> - {{ member.user.contacts[0].phoneExtension }} </span>
-          <span> )</span>
-        </p>
-        <p v-else>
-          <span> {{ member.user.username }} </span>
-        </p>
+  <div class="value__title">
+    <div  v-for="(member, index) in getActiveAdmins()" v-bind:key="index + 1">
+      <div v-if="!anonAccount">
+        <div>
+          {{ member.user.firstname }} {{ member.user.lastname }}
+        </div>
+        <div v-if="member.user.contacts[0].email">
+          {{ member.user.contacts[0].email }}
+        </div>
+        <div v-if="member.user.contacts[0].phone">
+          {{ member.user.contacts[0].phone }}
+        </div>
+        <div v-if="member.user.contacts[0].phoneExtension"> - {{ member.user.contacts[0].phoneExtension }}</div>
+      </div>
+      <div v-else>
+        {{ member.user.username }}
       </div>
     </div>
+  </div>
 </template>
 
 <script lang="ts">
