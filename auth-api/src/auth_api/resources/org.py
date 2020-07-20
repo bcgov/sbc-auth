@@ -196,7 +196,7 @@ class OrgPaymentSettings(Resource):
 
 
 @cors_preflight('GET,POST,PUT,OPTIONS')
-@API.route('/<string:org_id>/login_options', methods=['GET', 'POST', 'PUT', 'OPTIONS'])
+@API.route('/<string:org_id>/login-options', methods=['GET', 'POST', 'PUT', 'OPTIONS'])
 class OrgLoginOptions(Resource):
     """Resource for managing org login options."""
 
