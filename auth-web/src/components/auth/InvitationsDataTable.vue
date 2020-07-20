@@ -18,8 +18,8 @@
       <span :data-test="getIndexedTag('invitation-expires', item.index)">{{ formatDate (item.expiresOn) }}</span>
     </template>
     <template v-slot:item.action="{ item }">
-      <v-btn :data-test="getIndexedTag('resend-button', item.index)" small color="primary" class="mr-2" @click="resend(item)">Resend</v-btn>
-      <v-btn :data-test="getIndexedTag('remove-button', item.index)" depressed small @click="confirmRemoveInvite(item)">Remove</v-btn>
+      <v-btn :data-test="getIndexedTag('resend-button', item.index)" outlined color="primary" class="action-btn" @click="resend(item)">Resend</v-btn>
+      <v-btn :data-test="getIndexedTag('remove-button', item.index)" outlined color="primary" class="action-btn" @click="confirmRemoveInvite(item)">Remove</v-btn>
     </template>
   </v-data-table>
 </template>
@@ -58,10 +58,9 @@ export default class InvitationsDataTable extends Vue {
     },
     {
       text: 'Actions',
-      align: 'left',
+      align: 'right',
       value: 'action',
-      sortable: false,
-      width: '193'
+      sortable: false
     }
   ]
 
