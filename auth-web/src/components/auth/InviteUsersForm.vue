@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>Enter email addresses to invite team members. Team members will be required to sign in with their <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank">BC Services Card</a>.</p>
+    <p>Enter email addresses to invite team members.</p>
     <v-form ref="form" class="mt-9">
       <div class="invite-list">
         <transition-group name="slide-y-transition">
@@ -80,6 +80,8 @@ import { Component, Emit, Vue } from 'vue-property-decorator'
 import { Member, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { Invitation } from '@/models/Invitation'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { LoginSource } from '@/util/constants'
 import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
 
@@ -92,7 +94,7 @@ interface InvitationInfo {
 @Component({
   computed: {
     ...mapState('org', ['currentOrganization', 'currentMembership', 'pendingOrgInvitations']),
-    ...mapState('user', ['roleInfos'])
+    ...mapState('user', ['roleInfos', 'currentUser'])
   },
   methods: {
     ...mapMutations('org', ['resetInvitations']),
@@ -104,6 +106,7 @@ export default class InviteUsersForm extends Vue {
   private loading = false
   private readonly currentOrganization!: Organization
   private readonly currentMembership!: Member
+  private readonly currentUser!: KCUserProfile
   private readonly pendingOrgInvitations!: Invitation[]
   private readonly resetInvitations!: () => void
   private readonly createInvitation!: (Invitation) => Promise<void>
@@ -115,8 +118,9 @@ export default class InviteUsersForm extends Vue {
   }
 
   private get availableRoles () {
-    if (this.currentMembership.membershipTypeCode !== MembershipType.Admin) {
-      return this.roles.filter(role => role.name !== 'Admin')
+    if ((this.currentMembership.membershipTypeCode !== MembershipType.Admin) ||
+      (this.currentUser?.loginSource === LoginSource.BCEID)) {
+      return this.roles.filter(role => role.name !== MembershipType.Admin)
     }
     return this.roles
   }
