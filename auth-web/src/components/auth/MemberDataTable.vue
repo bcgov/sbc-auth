@@ -51,7 +51,7 @@
                   ? confirmChangeRole(item, role.name)
                   : ''
               "
-              :disabled="!isRoleEnabled(role)"
+              :disabled="!isRoleEnabled(role, item)"
               v-bind:class="{
                 'primary--text v-item--active v-list-item--active':
                   item.membershipTypeCode.toUpperCase() ===
@@ -121,7 +121,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account } from '@/util/constants'
+import { AccessType, Account, LoginSource } from '@/util/constants'
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import {
   Member,
@@ -216,7 +216,11 @@ export default class MemberDataTable extends Vue {
     }))
   }
 
-  private isRoleEnabled (role: RoleInfo): boolean {
+  private isRoleEnabled (role: RoleInfo, member: Member): boolean {
+    // BCeID delegates cannot be upgraded to admins
+    if ((member?.user?.loginSource === LoginSource.BCEID) && (role.name === MembershipType.Admin)) {
+      return false
+    }
     switch (this.currentMembership.membershipTypeCode) {
       case MembershipType.Admin:
         return true
