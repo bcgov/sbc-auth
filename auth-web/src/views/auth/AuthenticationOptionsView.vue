@@ -1,9 +1,8 @@
 <template>
-  <div>
-    <SbcAuthenticationOptions
-      :in-auth="true"
-    ></SbcAuthenticationOptions>
-  </div>
+  <SbcAuthenticationOptions
+    :in-auth="true"
+  >
+  </SbcAuthenticationOptions>
 </template>
 
 <script lang="ts">
