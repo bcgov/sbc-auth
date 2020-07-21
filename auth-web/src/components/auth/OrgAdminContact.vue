@@ -10,9 +10,8 @@
             {{ member.user.contacts[0].email }}
           </div>
           <div v-if="member.user.contacts[0].phone">
-            {{ member.user.contacts[0].phone }}
+            {{ member.user.contacts[0].phone }} <span v-if="member.user.contacts[0].phoneExtension">ext. {{ member.user.contacts[0].phoneExtension }}</span>
           </div>
-          <div v-if="member.user.contacts[0].phoneExtension"> - {{ member.user.contacts[0].phoneExtension }}</div>
         </div>
       </div>
       <div v-else>
