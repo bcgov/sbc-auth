@@ -1,18 +1,18 @@
 <template>
   <v-container class="view-container">
-    <div class="view-header flex-column mb-10">
+    <div class="view-header flex-column mb-9">
       <h1 class="view-header__title" data-test="account-settings-title">In order to create a BC Registries account, <span class="lb">we need to verify your identity.</span></h1>
       <p class="mt-5 mb-0">There are two ways you can verify your identity to create a BC Registries account.</p>
     </div>
     <div>
       <v-row>
         <v-col class="d-flex align-stretch" sm="12" md="6">
-          <v-card flat outlined hover class="account-card text-center px-10 pt-9 pb-12 elevation-2 d-flex"
+          <v-card flat outlined hover class="account-card text-center pa-10 elevation-2 d-flex"
             @click="selectBCSCAuth()"
             :class="{'active': authType == 'BCSC'}"
             >
             <div class="account-type d-flex flex-column">
-              <div class="account-type__icon mb-6">
+              <div class="account-type__icon mb-8">
                 <v-icon>mdi-map-marker</v-icon>
               </div>
               <div class="account-type__title mb-6">
@@ -21,11 +21,11 @@
               <div class="account-type__details mb-6">
                 Residents of British Columbia can use their government-issued BC Services Card to verify their identity
               </div>
-              <div>
+              <div class="mb-10">
                 <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card" target="_blank">Learn more about the BC Services card</a>
               </div>
               <!-- State Button (Create Account) -->
-              <div class="mt-9 mb-2">
+              <div class="mb-4">
                 <v-btn large depressed block color="primary" class="font-weight-bold" :outlined="authType != 'BCSC'">
                    {{ authType == 'BCSC' ? 'SELECTED' : 'SELECT' }}
                 </v-btn>
@@ -37,7 +37,7 @@
           </v-card>
         </v-col>
         <v-col class="d-flex align-stretch" sm="12" md="6">
-          <v-card flat outlined hover class="account-card text-center px-10 pt-9 pb-12 elevation-2 d-flex"
+          <v-card flat outlined hover class="account-card text-center pa-10 elevation-2 d-flex"
             @click="selectBCEIDAuth()"
             :class="{'active': authType == 'BCEID'}"
             >
@@ -52,7 +52,7 @@
                 Non-BC residents must log into the BC Registries with a registered BCeID account, and verify their identity by a notarized affidavit.
               </div>
               <!-- State Button (Create Account) -->
-              <div class="mt-9 mb-2">
+              <div class="mb-4">
                 <v-btn large depressed block color="primary" class="font-weight-bold" :outlined="authType != 'BCEID'">
                   {{ authType == 'BCEID' ? 'SELECTED' : 'SELECT' }}
                 </v-btn>
@@ -163,9 +163,14 @@ export default class ChooseAuthMethodView extends Vue {
     flex-direction: column;
     position: relative;
     background-color: #ffffff !important;
+    transition: all ease-out 0.2s;
 
     &:hover {
       border-color: var(--v-primary-base) !important;
+
+      .v-icon {
+        color: var(--v-primary-base) !important;
+      }
     }
 
     &.active {
