@@ -301,15 +301,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
 
   ::v-deep {
     .v-data-table td {
-      padding-top: 1rem;
-      padding-bottom: 1rem;
       height: auto;
-      vertical-align: top;
-    }
-
-    .v-list-item__title {
-      display: block;
-      font-weight: 700;
     }
 
     .v-badge--inline .v-badge__wrapper {

@@ -32,7 +32,7 @@
         <div class="product-purchased font-weight-bold"
           :data-test="getIndexedTag('transaction-name', item.index)"
           >
-          <div class="product-name"
+          <div class="product-name font-weight-bold"
             v-for="(name, nameIndex) in item.transactionNames"
             :key="nameIndex">
             {{ name }}
@@ -104,35 +104,35 @@ export default class TransactionsDataTable extends Vue {
       align: 'left',
       sortable: false,
       value: 'folioNumber',
-      width: 115
+      width: '140'
     },
     {
       text: 'Initiated By',
       align: 'left',
       sortable: false,
       value: 'initiatedBy',
-      width: 200
+      width: '200'
     },
     {
       text: 'Date',
       align: 'left',
       value: 'transactionDate',
       sortable: false,
-      width: 115
+      width: '115'
     },
     {
       text: 'Total Amount',
       align: 'right',
       value: 'totalAmount',
       sortable: false,
-      width: 125
+      width: '125'
     },
     {
       text: 'Status',
       align: 'left',
       value: 'status',
       sortable: false,
-      width: 115
+      width: '120'
     }
   ]
 
@@ -143,11 +143,11 @@ export default class TransactionsDataTable extends Vue {
     },
     {
       status: TransactionStatus.PENDING.toUpperCase(),
-      description: 'Transaction is Pending'
+      description: 'Transaction is pending'
     },
     {
       status: TransactionStatus.CANCELLED.toUpperCase(),
-      description: 'Transaction is Cancelled'
+      description: 'Transaction is cancelled'
     }
   ]
 
@@ -208,9 +208,6 @@ export default class TransactionsDataTable extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '~vuetify/src/styles/styles.sass';
-@import '$assets/scss/theme.scss';
-
 .v-list--dense {
   .v-list-item {
     padding-top: 0.25rem;
@@ -221,17 +218,6 @@ export default class TransactionsDataTable extends Vue {
     margin-bottom: 0.25rem;
     font-weight: 700;
   }
-}
-
-.status-pending {
-  color: map-get($grey, darken-1);
-}
-
-.status-paid {
-  color: map-get($green, darken-1);
-}
-.status-deleted {
-  color: map-get($red, lighten-2);
 }
 
 .status-tooltip-icon {
@@ -254,30 +240,23 @@ export default class TransactionsDataTable extends Vue {
 }
 
 ::v-deep {
+  td {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+    height: auto;
+    vertical-align: top;
+    overflow: hidden;
+  }
+
   .transaction-list {
     .v-data-table-header {
       margin-bottom: -2px;
-
-      th {
-        font-weight: 600;
-        color: #000
-      }
-    }
-
-    td {
-      padding-top: 1rem;
-      padding-bottom: 1rem;
-      height: auto;
-      vertical-align: top;
-      overflow: hidden;
     }
 
     .product-name {
-      display: block;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-weight: 700;
     }
   }
 }
