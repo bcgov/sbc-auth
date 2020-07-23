@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    ------{{isAnonymousAccount()}}
     <UserManagement
       v-if="!isAnonymousAccount()"
      ></UserManagement>
@@ -50,8 +51,7 @@ export default class TeamManagement extends Mixins(NextPageMixin) {
   }
   private isAnonymousAccount (): boolean {
     return this.currentOrganization &&
-            this.currentOrganization.accessType === AccessType.ANONYMOUS &&
-            !this.currentUser.roles.includes(Role.Staff)
+            this.currentOrganization.accessType === AccessType.ANONYMOUS
   }
 }
 </script>
