@@ -82,3 +82,28 @@ export default class PendingMemberDataTable extends Vue {
   private confirmDenyMember (member: Member) {}
 }
 </script>
+
+<style lang="scss" scoped>
+::v-deep {
+  td {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+    height: auto;
+  }
+}
+
+.v-list--dense {
+  .v-list-item .v-list-item__title {
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+  }
+}
+
+.role-list {
+  width: 20rem;
+}
+
+.user-role-desc {
+  white-space: normal !important;
+}
+</style>
