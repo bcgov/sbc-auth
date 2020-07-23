@@ -1,0 +1,26 @@
+tag-template: "v$NEXT_PATCH_VERSION"
+categories:
+  - title: "🚀 Features"
+    labels:
+      - "feature"
+      - "enhancement"
+  - title: "🐛 Bug Fixes"
+    labels:
+      - "bug"
+  - title: "📝 Documentation"
+    label: "documentation"
+  - title: "🔨 Maintenance"
+    labels:
+      - "devops"
+      - "maintenance"
+exclude-labels:
+  - "skip-changelog"
+change-template: "- #$NUMBER: $TITLE "
+template: |
+  ## What' new
+
+  $CHANGES
+
+  ## Thanks to
+
+  $CONTRIBUTORS

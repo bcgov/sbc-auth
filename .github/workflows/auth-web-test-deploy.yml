@@ -49,11 +49,10 @@ jobs:
         working-directory: ./auth-web
         run: |
           oc ${{ secrets.oc_parameters }}
-          oc project ${{ secrets.OPENSHIFT_REPOSITORY_TEST }}
       - name: Rollout new deployment
         working-directory: ./auth-web
         run: |
-          oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -w
+          oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -n ${{ secrets.OPENSHIFT_REPOSITORY_TEST }} -w
       - name: Rocket.Chat Notification
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
         if: always()
