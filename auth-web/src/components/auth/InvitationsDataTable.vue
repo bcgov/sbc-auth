@@ -9,17 +9,43 @@
     :no-data-text="$t('noPendingInvitesLabel')"
   >
     <template v-slot:item.recipientEmail="{ item }" >
-      <span :data-test="getIndexedTag('invitation-email', item.index)">{{ item.recipientEmail }}</span>
+      <span :data-test="getIndexedTag('invitation-email', item.index)"
+      >
+        {{ item.recipientEmail }}
+      </span>
     </template>
     <template v-slot:item.sentDate="{ item }">
-      <span :data-test="getIndexedTag('invitation-sent', item.index)">{{ formatDate (item.sentDate) }}</span>
+      <span
+        :data-test="getIndexedTag('invitation-sent', item.index)"
+      >
+        {{ formatDate (item.sentDate) }}
+      </span>
     </template>
     <template v-slot:item.expiresOn="{ item }">
-      <span :data-test="getIndexedTag('invitation-expires', item.index)">{{ formatDate (item.expiresOn) }}</span>
+      <span
+        :data-test="getIndexedTag('invitation-expires', item.index)"
+      >
+        {{ formatDate (item.expiresOn) }}
+      </span>
     </template>
     <template v-slot:item.action="{ item }">
-      <v-btn :data-test="getIndexedTag('resend-button', item.index)" outlined color="primary" class="action-btn" @click="resend(item)">Resend</v-btn>
-      <v-btn :data-test="getIndexedTag('remove-button', item.index)" outlined color="primary" class="action-btn" @click="confirmRemoveInvite(item)">Remove</v-btn>
+      <v-btn
+        outlined
+        color="primary"
+        class="mr-1"
+        :data-test="getIndexedTag('resend-button', item.index)"
+        @click="resend(item)"
+      >
+        Resend
+      </v-btn>
+      <v-btn
+        outlined
+        color="primary"
+        :data-test="getIndexedTag('remove-button', item.index)"
+        @click="confirmRemoveInvite(item)"
+      >
+        Remove
+      </v-btn>
     </template>
   </v-data-table>
 </template>
@@ -48,19 +74,22 @@ export default class InvitationsDataTable extends Vue {
       text: 'Invitation Sent',
       align: 'left',
       sortable: true,
-      value: 'sentDate'
+      value: 'sentDate',
+      width: '160'
     },
     {
       text: 'Expires',
       align: 'left',
       sortable: true,
-      value: 'expiresOn'
+      value: 'expiresOn',
+      width: '160'
     },
     {
       text: 'Actions',
-      align: 'right',
+      align: 'left',
       value: 'action',
-      sortable: false
+      sortable: false,
+      width: '210'
     }
   ]
 
@@ -84,3 +113,13 @@ export default class InvitationsDataTable extends Vue {
   private resend (invitation: Invitation) {}
 }
 </script>
+
+<style lang="scss" scoped>
+::v-deep {
+  td {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+    height: auto;
+  }
+}
+</style>
