@@ -1,9 +1,9 @@
 <template>
   <v-container class="view-container">
     <div class="view-header flex-column mb-6">
-      <h1 class="view-header__title" data-test="account-settings-title">
+      <h2 class="view-header__title" data-test="account-settings-title">
         Authentication
-      </h1>
+      </h2>
       <v-alert
         class="mt-10"
         icon="mdi-information-outline"
