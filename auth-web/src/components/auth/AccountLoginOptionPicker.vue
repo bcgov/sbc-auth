@@ -8,19 +8,20 @@
       :key="authOption.type"
     >
       <v-card
-        class="account-card elevation-2 pa-10 pt-9 d-flex flex-column text-center"
-        :class="{ 'active': authType === authOption.type }"
         flat
+        outlined
         hover
+        class="account-card elevation-2 pa-10 d-flex flex-column text-center"
+        :class="{ 'active': authType === authOption.type }"
         @click="selectAuthType(authOption.type)"
       >
-        <div class="account-type__icon mb-6 mt-2">
+        <div class="account-type__icon mb-8">
           <v-icon color="grey">{{authOption.icon}}</v-icon>
         </div>
         <div class="account-type__title font-weight-bold mb-6">
           {{authOption.title}}
         </div>
-        <div class="account-type__details mb-10">
+        <div class="account-type__details mb-12">
           {{authOption.description}}
         </div>
         <div class="account-type__buttons">
@@ -84,7 +85,7 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
       title: 'BC Services Card',
       description: `Use your BC Services Card with a mobile app or 
                     a USB card reader to verify your identity.`,
-      icon: 'mdi-smart-card-outline'
+      icon: 'mdi-account-card-details-outline'
     },
     {
       type: LoginSource.BCEID,
@@ -115,38 +116,57 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
 </script>
 
 <style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
+  @import '$assets/scss/theme.scss';
 
-.account-card {
-  &:hover {
-    border-color: var(--v-primary-base) !important;
-    .account-type__icon {
+  .account-card {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background-color: #ffffff !important;
+    transition: all ease-out 0.2s;
+
+    &:hover {
+      border-color: var(--v-primary-base) !important;
+
       .v-icon {
         color: var(--v-primary-base) !important;
       }
     }
-  }
-  &.active {
-    box-shadow: 0 0 0 2px inset var(--v-primary-base), 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12) !important;
-    .account-type__icon {
-      .v-icon {
-        color: var(--v-primary-base) !important;
-      }
+
+    &.active {
+      box-shadow: 0 0 0 2px inset var(--v-primary-base), 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12) !important;
     }
   }
+
+  .theme--light.v-card.v-card--outlined.active {
+    border-color: var(--v-primary-base);
+  }
+
+  .account-card .v-icon {
+    color: var(--v-grey-lighten1) !important;
+    font-size: 3rem !important;
+  }
+
+  .account-card.active .v-icon {
+    color: var(--v-primary-base) !important;
+  }
+
+  .account-type {
+    flex: 1 1 auto;
+  }
+
   .account-type__icon {
-    .v-icon {
-      font-size: 4rem;
-    }
-  }
-
-  .account-type__details {
-    flex: 1 0 auto;
+    flex: 0 0 auto;
   }
 
   .account-type__title {
-    line-height: 1.25;
+    flex: 0 0 auto;
+    line-height: 1.75rem;
     font-size: 1.5rem;
+    font-weight: 700;
   }
-}
+
+  .account-type__details {
+    flex: 1 1 auto;
+  }
 </style>
