@@ -51,7 +51,7 @@ jobs:
           ./scripts/install_tools.sh
           op --version
           vaults='[{"vault": "relationship","application": ["integration-test"]}]'
-          ./scripts/1pass_env.sh ${{ secrets.op_parameters }} -e "${TAG_NAME}" -v "${vaults}"
+          ./scripts/1pass.sh ${{ secrets.op_parameters }} -m "env"  -e "${TAG_NAME}" -v "${vaults}"
       - name: Get pip cache dir
         id: pip-cache
         run: |
@@ -88,7 +88,7 @@ jobs:
           ./scripts/install_tools.sh
           op --version
           vaults='[{"vault": "relationship","application": ["integration-test"]}]'
-          ./scripts/1pass_env.sh ${{ secrets.op_parameters }} -e "${TAG_NAME}" -v "${vaults}"
+          ./scripts/1pass.sh ${{ secrets.op_parameters }} -m "env" -e "${TAG_NAME}" -v "${vaults}"
       - name: Get pip cache dir
         id: pip-cache
         run: |
@@ -125,7 +125,7 @@ jobs:
           ./scripts/install_tools.sh
           op --version
           vaults='[{"vault": "relationship","application": ["integration-test"]}]'
-          ./scripts/1pass_env.sh ${{ secrets.op_parameters }} -e "${TAG_NAME}" -v "${vaults}"
+          ./scripts/1pass.sh ${{ secrets.op_parameters }} -m "env" -e "${TAG_NAME}" -v "${vaults}"
       - name: Get pip cache dir
         id: pip-cache
         run: |
@@ -162,7 +162,7 @@ jobs:
           ./scripts/install_tools.sh
           op --version
           vaults='[{"vault": "relationship","application": ["integration-test"]}]'
-          ./scripts/1pass_env.sh ${{ secrets.op_parameters }} -e "${TAG_NAME}" -v "${vaults}"
+          ./scripts/1pass.sh ${{ secrets.op_parameters }} -m "env" -e "${TAG_NAME}" -v "${vaults}"
       - name: Get pip cache dir
         id: pip-cache
         run: |
@@ -199,7 +199,7 @@ jobs:
           ./scripts/install_tools.sh
           op --version
           vaults='[{"vault": "relationship","application": ["integration-test"]}]'
-          ./scripts/1pass_env.sh ${{ secrets.op_parameters }} -e "${TAG_NAME}" -v "${vaults}"
+          ./scripts/1pass.sh ${{ secrets.op_parameters }} -m "env" -e "${TAG_NAME}" -v "${vaults}"
       - name: Get pip cache dir
         id: pip-cache
         run: |
