@@ -1,0 +1,40 @@
+#When do we want to deploy to Test environment
+name: Main repo PR label check
+
+on:
+  pull_request:
+    types: [opened, synchronize, review_requested]
+    branches:
+      - master
+
+jobs:
+  main-repo-pr-check:
+    runs-on: ubuntu-latest
+    if: github.repository == 'bcgov/sbc-auth'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install tools
+        run: |
+          ./scripts/install_tools.sh
+          oc version
+          op --version
+      - name: Compare dev and test 1password vaults
+        id: compare
+        working-directory: .
+        run: |
+          vaults='[{ "vault": "shared", "application": ["keycloak", "jwt", "email", "nats"]}, {"vault": "relationship","application": ["postgres-auth", "auth-api", "postgres-notify", "notify-api", "sentry"]}]'
+          ./scripts/1pass.sh ${{ secrets.op_parameters }} -m "compare" -e "dev test" -v "${vaults}"
+      - name: print envs
+        run: |
+          echo "${{ env.approval }}"
+          echo "${{ env.message }}"
+      - uses: pwei1018/bcrs-ci-actions@v1.0.1
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          pr-approval: "${{ env.approval }}"
+          pr-message: "${{ env.message }}"
+      - uses: jesusvasquez333/verify-pr-label-action@v1.1.0
+        if: env.approval == 'true'
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          valid-labels: "bug, enhancement, feature, fix, devops, documentation, maintenance"

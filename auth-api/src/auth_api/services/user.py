@@ -159,7 +159,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             if len(memberships) > 1 or memberships[0].get('membershipType') not in [ADMIN, COORDINATOR]:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
         else:
-            check_auth(org_id=org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN))
+            check_auth(org_id=org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN, STAFF))
         # check if anonymous org ;these actions cannot be performed on normal orgs
         org = OrgModel.find_by_org_id(org_id)
         if not org or org.access_type != AccessType.ANONYMOUS.value:
