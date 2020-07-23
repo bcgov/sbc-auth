@@ -153,6 +153,7 @@ class IdpHint(Enum):
     """IdpHint for user login."""
 
     BCROS = 'bcros'
+    BCEID = 'bceid'
 
 
 class InvitationStatus(Enum):

@@ -856,7 +856,8 @@
           "query-groups",
           "query-users",
           "view-authorization",
-          "view-users"
+          "view-users",
+          "view-realm"
         ],
         "account": [
           "view-profile",
