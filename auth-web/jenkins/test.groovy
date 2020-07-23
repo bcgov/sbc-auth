@@ -23,7 +23,6 @@ import groovy.json.*
 
 // define constants - values sent in as env vars from whatever calls this pipeline
 def APP_NAME = 'auth-web'
-def SOURCE_TAG = 'dev'
 def DESTINATION_TAG = 'test'
 def TOOLS_TAG = 'tools'
 
@@ -49,17 +48,16 @@ node {
     def old_version
 
     try {
-        stage("Tag ${APP_NAME}:${DESTINATION_TAG}") {
+        stage("Build ${APP_NAME}-${DESTINATION_TAG}") {
             script {
                 openshift.withCluster() {
-                    openshift.withProject("${NAMESPACE_DEPLOY}") {
-                        old_version = openshift.selector('dc', "${APP_NAME}-${DESTINATION_TAG}").object().status.latestVersion
-                    }
-                }
-                openshift.withCluster() {
                     openshift.withProject("${NAMESPACE_BUILD}") {
-                        echo "Tagging ${APP_NAME} for deployment to ${DESTINATION_TAG} ..."
-                        openshift.tag("${APP_NAME}:${SOURCE_TAG}", "${APP_NAME}:${DESTINATION_TAG}")
+                        echo "Building ${APP_NAME}-${DESTINATION_TAG} ..."
+                        def build = openshift.selector("bc", "${APP_NAME}-${DESTINATION_TAG}").startBuild()
+                        build.untilEach {
+                            return it.object().status.phase == "Running"
+                        }
+                        build.logs('-f')
                     }
                 }
             }
@@ -68,7 +66,6 @@ node {
         echo e.getMessage()
         build_ok = false
     }
-
 
     if (build_ok) {
         try {
