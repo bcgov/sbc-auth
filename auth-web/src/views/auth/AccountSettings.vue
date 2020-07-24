@@ -50,8 +50,8 @@
     </div>
 
     <v-card flat class="account-settings-card" data-test="account-settings-card">
-      <v-container class="nav-container py-8 px-0">
-        <v-navigation-drawer floating permanent width="auto" data-test="account-nav-drawer">
+      <v-container class="nav-container py-8 pr-0 pl-4">
+        <v-navigation-drawer permanent width="auto" data-test="account-nav-drawer">
           <v-list class="py-0">
             <v-list-item-group color="primary">
               <v-list-item dense class="py-1 px-8" :to="accountInfoUrl" data-test="account-info-nav-item">
@@ -173,7 +173,6 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     flex: 0 0 auto;
     width: 17rem;
     border-radius: 0 !important;
-    border-right: 1px solid var(--v-grey-lighten2);
   }
 
   .v-list-item .v-list-item__title {
