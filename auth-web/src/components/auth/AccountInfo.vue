@@ -54,7 +54,7 @@
           </li>
         </ul>
 
-        <ul class="nv-list mb-10">
+        <ul class="nv-list mb-10" v-can:VIEW_ADMIN_CONTACT.hide>
           <li class="nv-list-item">
             <div class="name" id="adminContact">Account Contact</div>
             <div class="value" aria-labelledby="adminContact">
