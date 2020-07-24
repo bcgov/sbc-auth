@@ -33,8 +33,3 @@ jobs:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           pr-approval: "${{ env.approval }}"
           pr-message: "${{ env.message }}"
-      - uses: jesusvasquez333/verify-pr-label-action@v1.1.0
-        if: env.approval == 'true'
-        with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-          valid-labels: "bug, enhancement, feature, fix, devops, documentation, maintenance"
