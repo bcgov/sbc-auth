@@ -1,0 +1,17 @@
+#When do we want to deploy to DEV environment
+name: PR label check
+
+on:
+  pull_request:
+    types: [opened, synchronize, labeled, unlabeled]
+    branches:
+      - development
+
+jobs:
+  pr-label-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: yogevbd/enforce-label-action@master
+        with:
+          REQUIRED_LABELS_ANY: "bug,enhancement,feature,fix,devops,documentation,maintenance,skip-changelog"
