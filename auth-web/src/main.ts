@@ -8,6 +8,7 @@ import ConfigHelper from '@/util/config-helper'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import Vue from 'vue'
+import Vuelidate from 'vuelidate'
 import can from '@/directives/can'
 import { getRoutes } from './routes/router'
 import i18n from './plugins/i18n'
@@ -16,6 +17,7 @@ import store from './store'
 import vuetify from './plugins/vuetify'
 
 Vue.config.productionTip = false
+Vue.use(Vuelidate)
 
 /**
  * The server side configs are necessary for app to work , since they are reference in templates and all

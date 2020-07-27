@@ -1,8 +1,8 @@
-import { Address } from '@/models/address'
+import { Address, IAddress } from '@/models/address'
 
 export interface NotaryInformation {
     notaryName?: string
-    address?:Address
+    address?: IAddress
     key?: string
 }
 
