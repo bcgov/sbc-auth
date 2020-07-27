@@ -19,6 +19,7 @@ from flask_restplus import Namespace, Resource, cors
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.services.keycloak import KeycloakService
 from auth_api.services import ResetTestData as ResetService
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
@@ -30,8 +31,8 @@ TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
 
 
-@cors_preflight('POST,OPTIONS')
-@API.route('', methods=['POST', 'OPTIONS'])
+@cors_preflight('POST, PUT, OPTIONS')
+@API.route('', methods=['POST', 'PUT', 'OPTIONS'])
 class Reset(Resource):
     """Cleanup test data by the provided token."""
 
@@ -46,6 +47,21 @@ class Reset(Resource):
 
         try:
             ResetService.reset(token)
+            response, status = '', http_status.HTTP_204_NO_CONTENT
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.requires_auth
+    def put():
+        """Add tester role to the user during integration test."""
+        token = g.jwt_oidc_token_info
+
+        try:
+            KeycloakService.assign_realm_role_to_user(token.get('sub'), Role.TESTER.value)
             response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
