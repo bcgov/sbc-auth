@@ -205,7 +205,7 @@ class KeycloakService:
 
     @staticmethod
     def delete_user(keycloak_guid: str = None):
-        """Delete user from Keycloak by username."""
+        """Delete user from Keycloak. Only for reseting BCeID user purpose."""
         if not keycloak_guid:
             keycloak_guid: Dict = KeycloakService._get_token_info().get('sub')
 
@@ -213,7 +213,7 @@ class KeycloakService:
 
     @staticmethod
     def assign_realm_role_to_user(keycloak_guid: str = None, role: str = None):
-        """Remove one time password setting for bceid user from the keycloak."""
+        """Assign a role to user from the keycloak. Only for reseting BCeID user purpose."""
         if not keycloak_guid:
             keycloak_guid: Dict = KeycloakService._get_token_info().get('sub')
 
@@ -298,7 +298,7 @@ class KeycloakService:
 
     @staticmethod
     def _delete_user(user_id: str):
-        """Remove user from the keycloak."""
+        """Remove user from the keycloak. Only for reseting BCeID user purpose."""
         config = current_app.config
         base_url = config.get('KEYCLOAK_BASE_URL')
         realm = config.get('KEYCLOAK_REALMNAME')
@@ -315,7 +315,7 @@ class KeycloakService:
 
     @staticmethod
     def _assign_realm_role(user_id: str, role: str):
-        """Remove one time password setting for bceid user from the keycloak."""
+        """Assign a role to user from the keycloak. Only for reseting BCeID user purpose."""
         config = current_app.config
         base_url = config.get('KEYCLOAK_BASE_URL')
         realm = config.get('KEYCLOAK_REALMNAME')
