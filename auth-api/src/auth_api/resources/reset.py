@@ -30,8 +30,8 @@ TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
 
 
-@cors_preflight('POST,OPTIONS')
-@API.route('', methods=['POST', 'OPTIONS'])
+@cors_preflight('POST, PUT, OPTIONS')
+@API.route('', methods=['POST', 'PUT', 'OPTIONS'])
 class Reset(Resource):
     """Cleanup test data by the provided token."""
 
