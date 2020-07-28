@@ -226,24 +226,3 @@ def test_remove_from_account_holders_group(session):
     for group in user_groups:
         groups.append(group.get('name'))
     assert GROUP_ACCOUNT_HOLDERS not in groups
-
-
-def test_delete_user(session):
-    """Assert that the user get deleted in keycloak."""
-    request = KeycloakScenario.create_user_request()
-    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
-    user_id = user.id
-    KEYCLOAK_SERVICE.delete_user(user_id)
-    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
-    assert user is None
-
-
-def test_assign_role(session):
-    """Assert that the otp credential type for user get deleted in keycloak."""
-    request = KeycloakScenario.create_user_request()
-    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
-    user_id = user.id
-    KEYCLOAK_SERVICE.assign_realm_role_to_user(user_id, 'tester')
-    assert True

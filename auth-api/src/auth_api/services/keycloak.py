@@ -15,7 +15,6 @@
 
 from typing import Dict
 
-import json
 import requests
 from flask import current_app, g
 
@@ -204,23 +203,6 @@ class KeycloakService:
         KeycloakService._remove_user_from_group(keycloak_guid, GROUP_ACCOUNT_HOLDERS)
 
     @staticmethod
-    def delete_user(keycloak_guid: str = None):
-        """Delete user from Keycloak. Only for reseting BCeID user purpose."""
-        if not keycloak_guid:
-            keycloak_guid: Dict = KeycloakService._get_token_info().get('sub')
-
-        KeycloakService._delete_user(keycloak_guid)
-
-    @staticmethod
-    def assign_realm_role_to_user(keycloak_guid: str = None, role: str = None):
-        """Assign a role to user from the keycloak. Only for reseting BCeID user purpose."""
-        if not keycloak_guid:
-            keycloak_guid: Dict = KeycloakService._get_token_info().get('sub')
-
-        if keycloak_guid and role:
-            KeycloakService._assign_realm_role(keycloak_guid, role)
-
-    @staticmethod
     def _add_user_to_group(user_id: str, group_name: str):
         """Add user to the keycloak group."""
         config = current_app.config
@@ -295,46 +277,3 @@ class KeycloakService:
     @staticmethod
     def _get_token_info():
         return g.jwt_oidc_token_info
-
-    @staticmethod
-    def _delete_user(user_id: str):
-        """Remove user from the keycloak. Only for reseting BCeID user purpose."""
-        config = current_app.config
-        base_url = config.get('KEYCLOAK_BASE_URL')
-        realm = config.get('KEYCLOAK_REALMNAME')
-        # Create an admin token
-        admin_token = KeycloakService._get_admin_token()
-
-        headers = {
-            'Content-Type': ContentType.JSON.value,
-            'Authorization': f'Bearer {admin_token}'
-        }
-        delete_user_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}'
-        response = requests.delete(delete_user_url, headers=headers)
-        response.raise_for_status()
-
-    @staticmethod
-    def _assign_realm_role(user_id: str, role: str):
-        """Assign a role to user from the keycloak. Only for reseting BCeID user purpose."""
-        config = current_app.config
-        base_url = config.get('KEYCLOAK_BASE_URL')
-        realm = config.get('KEYCLOAK_REALMNAME')
-        # Create an admin token
-        admin_token = KeycloakService._get_admin_token()
-
-        headers = {
-            'Content-Type': ContentType.JSON.value,
-            'Authorization': f'Bearer {admin_token}'
-        }
-
-        get_role_url = f'{base_url}/auth/admin/realms/{realm}/roles/{role}'
-        response = requests.get(get_role_url, headers=headers)
-        input_data = json.dumps([
-            {
-                'id': response.json().get('id'),
-                'name': role
-            }
-        ])
-        assign_role_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/role-mappings/realm'
-        response = requests.post(assign_role_url, headers=headers, data=input_data)
-        response.raise_for_status()
