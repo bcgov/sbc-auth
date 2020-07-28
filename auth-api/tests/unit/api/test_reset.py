@@ -19,14 +19,13 @@ Test-Suite to ensure that the /tester/reset endpoint is working as expected.
 import json
 from unittest.mock import patch
 
-from tests.utilities.factory_scenarios import KeycloakScenario, TestJwtClaims, TestOrgInfo
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.services import ResetTestData as ResetDataService
-from auth_api.services.keycloak import KeycloakService
 
 
 def test_reset(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -56,26 +55,4 @@ def test_reset_returns_exception(client, jwt, session):  # pylint:disable=unused
     with patch.object(ResetDataService, 'reset', side_effect=BusinessException(Error.UNDEFINED_ERROR, None)):
         headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.tester_role)
         rv = client.post('/test/reset', headers=headers, content_type='application/json')
-        assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
-
-
-def test_add_role(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert the endpoint can reset the test data."""
-    request = KeycloakScenario.create_user_request()
-    keycloak_service = KeycloakService()
-    keycloak_service.add_user(request, return_if_exists=True)
-    user = keycloak_service.get_user_by_username(request.user_name)
-    user_id = user.id
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_real_user(user_id))
-    rv = client.put('/test/reset', headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
-
-
-def test_add_role_returns_exception(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert that the code type can not be fetched and with expcetion."""
-    with patch.object(KeycloakService,
-                      'assign_realm_role_to_user',
-                      side_effect=BusinessException(Error.UNDEFINED_ERROR, None)):
-        headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.tester_role)
-        rv = client.put('/test/reset', headers=headers, content_type='application/json')
         assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
