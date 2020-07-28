@@ -5,7 +5,7 @@
   "VUE_APP_LEGAL_ROOT_API": "https://legal-api-dev.pathfinder.gov.bc.ca/api/v1",
   "VUE_APP_STATUS_ROOT_API": "https://status-api-dev.pathfinder.gov.bc.ca/api/v1",
   "VUE_APP_PATH_NEW_BUSINESS": "https://business-create-dev.pathfinder.gov.bc.ca/businesses/",
-  "DIRECTOR_SEARCH_URL": "https://search-web-dev-1rdehl-dev.pathfinder.gov.bc.ca/",
+  "DIRECTOR_SEARCH_URL": "https://dev.bcregistry.ca/directorsearch/",
   "VUE_APP_AUTH_RESET_API": "http://auth-api-dev.pathfinder.gov.bc.ca/test/reset",
   "LAUNCH_DARKLY_ENV_KEY": "5db9da115f58e008123cd783",
   "BCEID_OSD_LINK": "https://www.test.bceid.ca/os/?7686&SkipTo=Basic",

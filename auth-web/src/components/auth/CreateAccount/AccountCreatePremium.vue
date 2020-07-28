@@ -69,24 +69,15 @@
                   </div>
                 </li>
               </ul>
-                <!--
-                <v-text-field
-                  filled
-                  label="Account Name"
-                  v-model.trim="currentOrganization.name"
-                  persistent-hint
-                  disabled
-                  data-test="account-name"
-                >
-                </v-text-field>
-                -->
               <h4 class="mb-4">Mailing Address</h4>
-              <BaseAddress
-                :inputAddress="address"
-                @address-update="updateAddress"
-                @is-form-valid="checkBaseAddressValidity"
-              >
-              </BaseAddress>
+              <base-address
+                ref="mailingAddress"
+                :editing="true"
+                :schema="baseAddressSchema"
+                :address="baseAddress"
+                @update:address="updateBaseAddress"
+                @valid="checkBaseAddressValidity"
+              />
             </template>
           </div>
         </v-expand-transition>
@@ -129,17 +120,19 @@
 
 <script lang="ts">
 import { Account, Actions, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
+import { Address, IAddress } from '@/models/address'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
-import { Address } from '@/models/address'
-import BaseAddress from '@/components/auth/BaseAddress.vue'
+import BaseAddress from 'sbc-common-components/src/components/BaseAddress.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
+import CommonUtils from '@/util/common-util'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
+import { addressSchema } from '@/schemas'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -188,7 +181,13 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   @Prop() cancelUrl: string
   @Prop() isAccountChange: boolean
 
+  private baseAddress: IAddress = {} as IAddress
+  private baseAddressSchema: {} = addressSchema
+
   private async mounted () {
+    if (this.currentOrgAddress) {
+      this.baseAddress = CommonUtils.convertAddressForComponent(this.currentOrgAddress)
+    }
   }
 
   private get isExtraProvUser () {
@@ -230,6 +229,12 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   }
   private updateAddress (address: Address) {
     this.setCurrentOrganizationAddress(address)
+  }
+  private updateBaseAddress (val: IAddress) {
+    if (JSON.stringify(val) !== JSON.stringify({})) {
+      const address = { ...CommonUtils.convertAddressForAuth(val) }
+      this.setCurrentOrganizationAddress(address)
+    }
   }
   private async save () {
     // TODO Handle edit mode as well here

@@ -14,12 +14,6 @@
           </v-text-field>
         </v-col>
       </v-row>
-      <!-- <BaseAddress v-if="address"
-              v-bind:inputAddress="address"
-              @address-update="updateAddress"
-              @is-form-valid="checkBaseAddressValidity" :key="addressJson"
-      >
-      </BaseAddress> -->
       <base-address
         ref="notaryAddress"
         :editing="true"
@@ -35,7 +29,6 @@
 <script lang="ts">
 import { Address, IAddress } from '@/models/address'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-// import BaseAddress from '@/components/auth/BaseAddress.vue'
 import BaseAddress from 'sbc-common-components/src/components/BaseAddress.vue'
 import { NotaryInformation } from '@/models/notary'
 import { addressSchema } from '@/schemas'
@@ -79,9 +72,6 @@ export default class NotaryInformationForm extends Vue {
         .forEach(key => {
           this.$set(this.notaryInfo, key, this.inputNotaryInfo?.[key])
         })
-      // Object.keys(this.inputNotaryInfo?.address)?.forEach(key => {
-      //   this.$set(this.address, key, this.inputNotaryInfo?.address?.[key])
-      // })
       this.notaryAddress = { ...this.inputNotaryInfo?.address }
     }
   }

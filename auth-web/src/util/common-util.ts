@@ -1,6 +1,7 @@
 /**
  * Place to put all the custom utility methods
  */
+import { Address, IAddress } from '@/models/address'
 import { Permission } from '@/util/constants'
 import moment from 'moment'
 
@@ -117,5 +118,29 @@ export default class CommonUtils {
       Permission.VIEW_ACCOUNT,
       Permission.VIEW_ADDRESS
     ]
+  }
+  // for converting address object of sbc-auth to as needed for BaseAddress component
+  static convertAddressForComponent (address: Address) : IAddress {
+    return {
+      addressCity: address.city,
+      addressCountry: address.country,
+      addressRegion: address.region,
+      deliveryInstructions: address.deliveryInstructions,
+      postalCode: address.postalCode,
+      streetAddress: address.street,
+      streetAddressAdditional: address.streetAdditional
+    }
+  }
+  // for converting address object of BaseAddress component to as needed for sbc-auth
+  static convertAddressForAuth (iaddress: IAddress) : Address {
+    return {
+      city: iaddress.addressCity,
+      country: iaddress.addressCountry,
+      region: iaddress.addressRegion,
+      deliveryInstructions: iaddress.deliveryInstructions,
+      postalCode: iaddress.postalCode,
+      street: iaddress.streetAddress,
+      streetAdditional: iaddress.streetAddressAdditional
+    }
   }
 }
