@@ -25,7 +25,9 @@ Vue.use(Vuelidate)
  */
 ConfigHelper.saveConfigToSessionStorage().then(async (data) => {
   // Initializing Launch Darkly services
-  await LaunchDarklyService.init(ConfigHelper.getValue('LAUNCH_DARKLY_ENV_KEY'))
+  await LaunchDarklyService.init(ConfigHelper.getValue('LAUNCH_DARKLY_ENV_KEY'));
+  // addressCompleteKey is for canada post address lookup, which is to be used in sbc-common-components
+  (<any>window).addressCompleteKey = ConfigHelper.getValue('ADDRESS_COMPLETE_KEY')
   await syncSession()
   renderVue()
 })
