@@ -11,7 +11,7 @@
       <div class="view-header align-center">
         <h1 class="view-header__title">Manage Businesses</h1>
         <div class="view-header__actions">
-          <v-menu v-if="showAddNameRequestDropdown">
+          <v-menu>
             <template v-slot:activator="{ on }">
               <v-btn
                 color="primary"
@@ -43,16 +43,6 @@
               </v-list-item>
             </v-list>
           </v-menu>
-          <v-btn
-            large
-            color="primary"
-            @click="showAddBusinessModal()"
-            data-test="add-business-button"
-            v-else
-          >
-            <v-icon small>mdi-plus</v-icon>
-            <span>Add Existing Business</span>
-          </v-btn>
         </div>
       </div>
 
@@ -207,10 +197,6 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     confirmDeleteDialog: ModalDialog
     addBusinessDialog: ModalDialog
     addNRDialog: ModalDialog
-  }
-
-  private get showAddNameRequestDropdown (): boolean {
-    return LaunchDarklyService.getFlag('show-add-nr-dropdown') || false
   }
 
   private async mounted () {
