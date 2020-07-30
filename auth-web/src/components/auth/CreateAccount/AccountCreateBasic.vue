@@ -17,12 +17,12 @@
     </fieldset>
     <template v-if="isExtraProvUser">
       <h4 class="mb-4">Mailing Address</h4>
-      <base-address
+      <base-address-form
         ref="mailingAddress"
         :editing="true"
         :schema="baseAddressSchema"
-        :address="baseAddress"
-        @update:address="updateBaseAddress"
+        :address="address"
+        @update:address="updateAddress"
         @valid="checkBaseAddressValidity"
       />
     </template>
@@ -67,14 +67,12 @@
 
 <script lang="ts">
 import { Account, Actions, LoginSource, SessionStorageKeys } from '@/util/constants'
-import { Address, BaseAddressModel } from '@/models/address'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
-
-import BaseAddress from 'sbc-common-components/src/components/BaseAddress.vue'
+import { Address } from '@/models/address'
+import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
-import CommonUtils from '@/util/common-util'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
@@ -84,7 +82,7 @@ import { getModule } from 'vuex-module-decorators'
 @Component({
   components: {
     BcolLogin,
-    BaseAddress,
+    BaseAddressForm,
     ConfirmCancelButton
   },
   computed: {
@@ -116,7 +114,6 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private readonly currentOrgAddress!: Address
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
 
-  private baseAddress: BaseAddressModel = {} as BaseAddressModel
   private baseAddressSchema: {} = addressSchema
 
   $refs: {
@@ -129,9 +126,6 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   }
 
   private async mounted () {
-    if (this.currentOrgAddress) {
-      this.baseAddress = CommonUtils.convertAddressForComponent(this.currentOrgAddress)
-    }
     if (this.currentOrganization) {
       this.orgName = this.currentOrganization.name
     }
@@ -141,13 +135,6 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   }
   private updateAddress (address: Address) {
     this.setCurrentOrganizationAddress(address)
-  }
-
-  private updateBaseAddress (val: BaseAddressModel) {
-    if (JSON.stringify(val) !== JSON.stringify({})) {
-      const address = CommonUtils.convertAddressForAuth(val)
-      this.setCurrentOrganizationAddress(address)
-    }
   }
 
   private checkBaseAddressValidity (isValid) {

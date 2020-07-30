@@ -93,12 +93,12 @@
                 Mailing Address
               </div>
               <div class="value">
-                <base-address
+                <base-address-form
                   ref="mailingAddress"
                   :editing="isBaseAddressEditMode"
                   :schema="baseAddressSchema"
-                  :address="baseAddress"
-                  @update:address="updateBaseAddress"
+                  :address="currentOrgAddress"
+                  @update:address="updateAddress"
                   @valid="checkBaseAddressValidity"
                 />
               </div>
@@ -140,7 +140,6 @@
 
 <script lang="ts">
 import { AccessType, Account, Pages, Permission, SessionStorageKeys } from '@/util/constants'
-import { Address, BaseAddressModel } from '@/models/address'
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import {
   CreateRequestBody,
@@ -151,8 +150,8 @@ import {
 import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { AccountSettings } from '@/models/account-settings'
-import BaseAddress from 'sbc-common-components/src/components/BaseAddress.vue'
-import CommonUtils from '@/util/common-util'
+import { Address } from '@/models/address'
+import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfigHelper from '@/util/config-helper'
 import OrgAdminContact from '@/components/auth/OrgAdminContact.vue'
 import OrgModule from '@/store/modules/org'
@@ -162,7 +161,7 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
-    BaseAddress,
+    BaseAddressForm,
     OrgAdminContact
   },
   computed: {
@@ -199,7 +198,6 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private isBaseAddressValid: boolean = false
 
-  private baseAddress: BaseAddressModel = {} as BaseAddressModel
   private baseAddressSchema: {} = addressSchema
 
   private isFormValid (): boolean {
@@ -230,23 +228,12 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
     this.enableBtn()
   }
 
-  private updateBaseAddress (val: BaseAddressModel) {
-    if (JSON.stringify(val) !== JSON.stringify({})) {
-      const address = CommonUtils.convertAddressForAuth(val)
-      this.setCurrentOrganizationAddress(address)
-      this.enableBtn()
-    }
-  }
-
   private async setup () {
     const accountSettings = this.getAccountFromSession()
     this.orgName = this.currentOrganization?.name || ''
     if (this.isPremiumAccount) {
       await this.syncPaymentSettings(accountSettings.id)
       await this.syncAddress()
-      if (this.currentOrgAddress) {
-        this.baseAddress = CommonUtils.convertAddressForComponent(this.currentOrgAddress)
-      }
     }
   }
 

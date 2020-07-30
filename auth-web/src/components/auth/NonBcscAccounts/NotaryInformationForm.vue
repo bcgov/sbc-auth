@@ -14,7 +14,7 @@
           </v-text-field>
         </v-col>
       </v-row>
-      <base-address
+      <base-address-form
         ref="notaryAddress"
         :editing="true"
         :schema="notaryAddressSchema"
@@ -27,15 +27,15 @@
 </template>
 
 <script lang="ts">
-import { Address, BaseAddressModel } from '@/models/address'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import BaseAddress from 'sbc-common-components/src/components/BaseAddress.vue'
+import { Address } from '@/models/address'
+import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import { NotaryInformation } from '@/models/notary'
 import { addressSchema } from '@/schemas'
 
 @Component({
   components: {
-    BaseAddress
+    BaseAddressForm
   }
 })
 export default class NotaryInformationForm extends Vue {
@@ -44,7 +44,7 @@ export default class NotaryInformationForm extends Vue {
   private notaryInfo: NotaryInformation = {}
   private isNotaryAddressValid: boolean = false
 
-  private notaryAddress: BaseAddressModel = {} as BaseAddressModel
+  private notaryAddress: Address = {} as Address
   private notaryAddressSchema: {} = addressSchema
 
   $refs: {
@@ -55,7 +55,7 @@ export default class NotaryInformationForm extends Vue {
     notaryName: [v => !!v || 'Name of Notary is required']
   }
 
-  private updateNotaryAddress (val: BaseAddressModel) {
+  private updateNotaryAddress (val: Address) {
     this.notaryInfo.address = { ...val }
     return this.emitNotaryInformation()
   }
@@ -65,7 +65,7 @@ export default class NotaryInformationForm extends Vue {
     this.emitNotaryInformation()
   }
 
-  mounted () {
+  beforeMount () {
     if (this.inputNotaryInfo) {
       Object.keys(this.inputNotaryInfo)
         .filter(key => key !== 'address')
