@@ -110,8 +110,7 @@ export default class TransactionsDataTable extends Vue {
       text: 'Initiated By',
       align: 'left',
       sortable: false,
-      value: 'initiatedBy',
-      width: '200'
+      value: 'initiatedBy'
     },
     {
       text: 'Date',
@@ -263,7 +262,6 @@ export default class TransactionsDataTable extends Vue {
 
 thead + thead {
   position: absolute;
-  width: 100%;
   top: -2px;
 }
 </style>
