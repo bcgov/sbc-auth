@@ -1309,9 +1309,9 @@ paths:
                 example1:
                   value:
                     orgs:
-                    - id: '1234'
-                      name: Mock Account
-                      preferred_payment: CC
+                      - id: '1234'
+                        name: Mock Account
+                        preferred_payment: CC
 
                 CP0002000:
                   value:
@@ -3438,7 +3438,7 @@ paths:
         in: path
         required: true
         schema:
-         type: string
+          type: string
     get:
       responses:
         '200':
