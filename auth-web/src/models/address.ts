@@ -9,7 +9,7 @@ export interface Address {
   key?: string
 }
 
-export interface IAddress {
+export interface BaseAddressModel {
   addressCity: string
   addressCountry: string
   addressRegion: string

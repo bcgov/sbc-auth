@@ -120,7 +120,7 @@
 
 <script lang="ts">
 import { Account, Actions, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
-import { Address, IAddress } from '@/models/address'
+import { Address, BaseAddressModel } from '@/models/address'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
@@ -181,7 +181,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   @Prop() cancelUrl: string
   @Prop() isAccountChange: boolean
 
-  private baseAddress: IAddress = {} as IAddress
+  private baseAddress: BaseAddressModel = {} as BaseAddressModel
   private baseAddressSchema: {} = addressSchema
 
   private async mounted () {
@@ -230,7 +230,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private updateAddress (address: Address) {
     this.setCurrentOrganizationAddress(address)
   }
-  private updateBaseAddress (val: IAddress) {
+  private updateBaseAddress (val: BaseAddressModel) {
     if (JSON.stringify(val) !== JSON.stringify({})) {
       const address = { ...CommonUtils.convertAddressForAuth(val) }
       this.setCurrentOrganizationAddress(address)

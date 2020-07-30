@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { Address, IAddress } from '@/models/address'
+import { Address, BaseAddressModel } from '@/models/address'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import BaseAddress from 'sbc-common-components/src/components/BaseAddress.vue'
 import { NotaryInformation } from '@/models/notary'
@@ -44,7 +44,7 @@ export default class NotaryInformationForm extends Vue {
   private notaryInfo: NotaryInformation = {}
   private isNotaryAddressValid: boolean = false
 
-  private notaryAddress: IAddress = {} as IAddress
+  private notaryAddress: BaseAddressModel = {} as BaseAddressModel
   private notaryAddressSchema: {} = addressSchema
 
   $refs: {
@@ -55,7 +55,7 @@ export default class NotaryInformationForm extends Vue {
     notaryName: [v => !!v || 'Name of Notary is required']
   }
 
-  private updateNotaryAddress (val) {
+  private updateNotaryAddress (val: BaseAddressModel) {
     this.notaryInfo.address = { ...val }
     return this.emitNotaryInformation()
   }

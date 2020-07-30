@@ -140,7 +140,7 @@
 
 <script lang="ts">
 import { AccessType, Account, Pages, Permission, SessionStorageKeys } from '@/util/constants'
-import { Address, IAddress } from '@/models/address'
+import { Address, BaseAddressModel } from '@/models/address'
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import {
   CreateRequestBody,
@@ -199,7 +199,7 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private isBaseAddressValid: boolean = false
 
-  private baseAddress: IAddress = {} as IAddress
+  private baseAddress: BaseAddressModel = {} as BaseAddressModel
   private baseAddressSchema: {} = addressSchema
 
   private isFormValid (): boolean {
@@ -230,7 +230,7 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
     this.enableBtn()
   }
 
-  private updateBaseAddress (val: IAddress) {
+  private updateBaseAddress (val: BaseAddressModel) {
     if (JSON.stringify(val) !== JSON.stringify({})) {
       const address = CommonUtils.convertAddressForAuth(val)
       this.setCurrentOrganizationAddress(address)

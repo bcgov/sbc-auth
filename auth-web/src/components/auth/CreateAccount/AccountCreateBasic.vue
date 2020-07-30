@@ -67,7 +67,7 @@
 
 <script lang="ts">
 import { Account, Actions, LoginSource, SessionStorageKeys } from '@/util/constants'
-import { Address, IAddress } from '@/models/address'
+import { Address, BaseAddressModel } from '@/models/address'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
@@ -116,7 +116,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private readonly currentOrgAddress!: Address
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
 
-  private baseAddress: IAddress = {} as IAddress
+  private baseAddress: BaseAddressModel = {} as BaseAddressModel
   private baseAddressSchema: {} = addressSchema
 
   $refs: {
@@ -143,7 +143,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     this.setCurrentOrganizationAddress(address)
   }
 
-  private updateBaseAddress (val: IAddress) {
+  private updateBaseAddress (val: BaseAddressModel) {
     if (JSON.stringify(val) !== JSON.stringify({})) {
       const address = CommonUtils.convertAddressForAuth(val)
       this.setCurrentOrganizationAddress(address)

@@ -1,7 +1,7 @@
 /**
  * Place to put all the custom utility methods
  */
-import { Address, IAddress } from '@/models/address'
+import { Address, BaseAddressModel } from '@/models/address'
 import { Permission } from '@/util/constants'
 import moment from 'moment'
 
@@ -120,7 +120,7 @@ export default class CommonUtils {
     ]
   }
   // for converting address object of sbc-auth to as needed for BaseAddress component
-  static convertAddressForComponent (address: Address) : IAddress {
+  static convertAddressForComponent (address: Address) : BaseAddressModel {
     return {
       addressCity: address.city,
       addressCountry: address.country,
@@ -132,7 +132,7 @@ export default class CommonUtils {
     }
   }
   // for converting address object of BaseAddress component to as needed for sbc-auth
-  static convertAddressForAuth (iaddress: IAddress) : Address {
+  static convertAddressForAuth (iaddress: BaseAddressModel) : Address {
     return {
       city: iaddress.addressCity,
       country: iaddress.addressCountry,
