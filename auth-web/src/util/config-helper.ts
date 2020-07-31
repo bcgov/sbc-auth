@@ -103,8 +103,4 @@ export default class ConfigHelper {
   static accountSettingsRoute () {
     return `/account/${JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}').id || 0}/settings`
   }
-
-  static getLaunchFeatureFlag () {
-    return LaunchDarklyService.getFlag('incorporations-launch-feature')
-  }
 }
