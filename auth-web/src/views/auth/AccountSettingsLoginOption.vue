@@ -12,7 +12,6 @@
       </v-alert>
     </div>
     <account-login-option-chooser
-      class="mx-8"
       @auth-type-selected="setLoginOption"
     >
     </account-login-option-chooser>

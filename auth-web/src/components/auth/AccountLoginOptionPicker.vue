@@ -2,9 +2,9 @@
  <div>
   <v-row>
     <v-col
-      sm="12"
-      md="6"
-      class="d-flex align-stretch"
+      xs="12"
+      sm="6"
+      class="d-flex"
       v-for="authOption in authOptions"
       :key="authOption.type"
     >
@@ -12,7 +12,7 @@
         flat
         outlined
         hover
-        class="account-card elevation-2 pa-10 d-flex flex-column text-center"
+        class="account-card elevation-2 pa-8 d-flex flex-column text-center"
         :class="{ 'active': authType === authOption.type }"
       >
         <div class="account-type__icon mb-8">
@@ -21,7 +21,7 @@
         <div class="account-type__title font-weight-bold mb-6">
           {{authOption.title}}
         </div>
-        <div class="account-type__details mb-12">
+        <div class="account-type__details mb-10">
           {{authOption.description}}
         </div>
         <div class="account-type__buttons">
@@ -161,6 +161,7 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
     display: flex;
     flex-direction: column;
     position: relative;
+    width: 100%;
     background-color: #ffffff !important;
     transition: all ease-out 0.2s;
 

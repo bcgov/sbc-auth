@@ -1,9 +1,13 @@
 <template>
-  <v-dialog content-class="learn-more-dialog" v-model="isDialogOpen">
-    <v-card class="d-flex">
+  <v-dialog
+    content-class="learn-more-dialog"
+    :fullscreen="$vuetify.breakpoint.xs || $vuetify.breakpoint.sm"
+    v-model="isDialogOpen">
+    <v-card
+      class="learn-more-content d-flex">
 
       <!-- Left Panel -->
-      <div class="left-panel flex-grow-0 flex-shrink-0 pa-10">
+      <div class="left-panel pa-8">
         <div class="body-2 font-weight-bold text-uppercase text--secondary mb-5">Authentication Options</div>
         <h1 class="mb-8">
           BCeID and 2-factor authentication app
@@ -15,10 +19,9 @@
         </ul>
         <v-btn
           large
-          depressed
           block
           color="primary"
-          class="font-weight-bold mb-3"
+          class="font-weight-bold"
           @click="select()"
         >
           SELECT
@@ -28,32 +31,71 @@
       <v-divider vertical />
 
       <!-- Right Panel -->
-      <div class="right-panel pa-10">
-        <h2 class="mt-n1 mb-11">How It works</h2>
+      <div class="right-panel pa-8">
+        <h2 class="mt-n1 mb-8">How It works</h2>
         <ul class="steps">
           <li>
             <div class="step-content">
-              <v-img class="step-img" src="@/assets/img/learn-more/email.jpg" alt="Receive an email invitation"></v-img>
+              <v-img
+                class="step-img"
+                src="@/assets/img/learn-more/email.jpg"
+                alt="Receive an email invitation">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
-                Receive an email invitation from an account administrator.
+                Receive an email invitation from an account administrator or coordinator.
               </div>
             </div>
           </li>
           <li>
             <div class="step-content">
-              <v-img class="step-img" src="@/assets/img/learn-more/login-form.jpg" alt="Create an account or login with a BCeID"></v-img>
+              <v-img
+                class="step-img"
+                src="@/assets/img/learn-more/login-form.jpg"
+                alt="Create an account or login with a BCeID">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
-                Create a BCeID account or log in with an existing BCeID account.
+                Create a BCeID account OR log in with an existing Basic BCeID account.
               </div>
             </div>
           </li>
           <li>
             <div class="step-content">
-              <v-img class="step-img" src="@/assets/img/learn-more/mobile-download.jpg" alt="Download an authenticator app"></v-img>
+              <v-img
+                class="step-img"
+                src="@/assets/img/learn-more/mobile-download.jpg"
+                alt="Download an authenticator app">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
@@ -63,27 +105,66 @@
           </li>
           <li>
             <div class="step-content">
-              <v-img class="step-img" src="@/assets/img/learn-more/qr-code.jpg" alt="Register authenticator"></v-img>
+              <v-img
+                class="step-img"
+                src="@/assets/img/learn-more/qr-code.jpg"
+                alt="Register authenticator">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
-                Register authenticator by taking a photo of the QR code on the website with the app.
+                Open the authentication app and scan the QR code on the website.
               </div>
             </div>
           </li>
           <li>
             <div class="step-content">
-              <v-img class="step-img" src="@/assets/img/learn-more/desktop-code.jpg" alt="Enter a one-time password"></v-img>
+              <v-img
+                class="step-img"
+                src="@/assets/img/learn-more/desktop-code.jpg"
+                alt="Enter a one-time password">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
-                Enter the one-time password you receive in your authenticator app.
+                Enter the one-time code you receive in your authenticator app into the website.
               </div>
             </div>
           </li>
           <li>
             <div class="step-content">
-              <v-img class="step-img" src="@/assets/img/learn-more/user-profile.jpg" alt="Agree to terms and create user profile"></v-img>
+              <v-img
+                class="step-img"
+                src="@/assets/img/learn-more/user-profile.jpg"
+                alt="Agree to terms and create user profile">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
@@ -93,11 +174,24 @@
           </li>
           <li>
             <div class="step-content">
-             <v-img class="step-img" src="@/assets/img/learn-more/success.jpg" alt="BCeID and 2-factor Authentication Step 7"></v-img>
+              <v-img
+                class="step-img"
+                src="@/assets/img/learn-more/success.jpg"
+                alt="BCeID and 2-factor Authentication Step 7">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3">
-                Continue to BC Registries applications.
+                Access BC Registries applications.
               </div>
             </div>
           </li>
@@ -137,14 +231,30 @@ export default class LearnMoreBCEID extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  $step-content-width: 9.5rem;
+  $step-content-width: 10.5rem;
 
   ::v-deep .learn-more-dialog {
     max-width: 1400px;
   }
 
-  .left-panel {
-    width: 25rem;
+  .learn-more-content {
+    flex-direction: row;
+
+    .left-panel {
+      flex: 0 0 auto;
+      width: 25rem;
+    }
+  }
+
+  .v-dialog--fullscreen .learn-more-content {
+    flex-direction: column;
+    border-radius: 0 !important;
+
+    .left-panel {
+      flex: 1 1 auto;
+      width: auto;
+      border-bottom: 1px solid var(--v-grey-lighten2)
+    }
   }
 
   .steps {
@@ -159,7 +269,6 @@ export default class LearnMoreBCEID extends Vue {
       flex: 0 0 auto;
       position: relative;
       margin: 0 2rem;
-      max-width: 25%;
       vertical-align: top;
     }
   }

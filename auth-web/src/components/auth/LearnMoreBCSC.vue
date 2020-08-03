@@ -1,9 +1,12 @@
 <template>
-  <v-dialog content-class="learn-more-dialog" v-model="isDialogOpen">
-    <v-card class="d-flex">
+  <v-dialog
+    content-class="learn-more-dialog"
+    :fullscreen="$vuetify.breakpoint.xs || $vuetify.breakpoint.sm"
+    v-model="isDialogOpen">
+    <v-card class="learn-more-content d-flex">
 
       <!-- Left Panel -->
-      <div class="left-panel flex-grow-0 flex-shrink-0 pa-10">
+      <div class="left-panel flex-grow-0 flex-shrink-0 pa-8">
         <div class="body-2 font-weight-bold text-uppercase text--secondary mb-5">Authentication Options</div>
         <h1 class="mb-8">
           BC Services Card
@@ -15,10 +18,9 @@
         </ul>
         <v-btn
           large
-          depressed
           block
           color="primary"
-          class="font-weight-bold mb-3"
+          class="font-weight-bold"
           @click="select()"
         >
           SELECT
@@ -28,12 +30,26 @@
       <v-divider vertical />
 
       <!-- Right Panel -->
-      <div class="pa-10">
-        <h2 class="mt-n1 mb-11">How It works - Mobile Card</h2>
+      <div class="pa-8">
+        <h2 class="mt-n1 mb-9">How It works - Mobile Card</h2>
         <ul class="steps">
           <li>
             <div class="step-content">
-             <v-img src="@/assets/img/learn-more/mobile-download.jpg" alt="Download the BC Services Card app"></v-img>
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/mobile-download.jpg"
+                alt="Download the BC Services Card app">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="primary lighten-5"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
@@ -43,7 +59,21 @@
           </li>
           <li>
             <div class="step-content">
-             <v-img src="@/assets/img/learn-more/bcsc-code.jpg" alt="Scan or enter serial number"></v-img>
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/bcsc-code.jpg"
+                alt="Scan or enter serial number">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
@@ -53,7 +83,21 @@
           </li>
           <li>
             <div class="step-content">
-             <v-img src="@/assets/img/learn-more/verify-identity.jpg" alt="Verify your card"></v-img>
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/verify-identity.jpg"
+                alt="Verify your card">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
@@ -63,40 +107,123 @@
           </li>
           <li>
             <div class="step-content">
-             <v-img src="@/assets/img/learn-more/log-in.jpg" alt="Log in to BC Registries"></v-img>
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/log-in.jpg"
+                alt="Log in to BC Registries">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
-                Log in via BC Registries
+                Log in to BC Registries using the BC Service Card option.
               </div>
             </div>
           </li>
           <li>
             <div class="step-content">
-             <v-img src="@/assets/img/learn-more/mobile-code.jpg" alt="Choose mobile card and get pairing code"></v-img>
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/desktop-code.jpg"
+                alt="Choose mobile card and get pairing code">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
-                Choose to use a 'Mobile card' and get a pairing code
+                Choose to use a "Mobile card" and get a pairing code
               </div>
             </div>
           </li>
           <li>
             <div class="step-content">
-             <v-img src="@/assets/img/learn-more/success.jpg" alt="Continue to system"></v-img>
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/mobile-code.jpg"
+                alt="Choose mobile card and get pairing code">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
+              <div class="step-line mt-2">
+              </div>
+              <div class="step-text body-2 mt-3 mb-8">
+                Enter the pairing code into the BC Services Card app on your device
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="step-content">
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/success.jpg"
+                alt="Continue to system">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3">
-                Once logged in, continue to system.
+                Verify your device and continue to BC Registries.
               </div>
             </div>
           </li>
         </ul>
-        <h2 class="my-11">How it works - Card Reader</h2>
+
+        <v-divider />
+
+        <h2 class="mt-8 mb-9">How it works - Card Reader</h2>
         <ul class="steps">
           <li>
             <div class="step-content">
-             <v-img class="step-img" src="@/assets/img/learn-more/person-desk.jpg" alt="Visit a Service BC Centre"></v-img>
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/person-desk.jpg"
+                alt="Visit a Service BC Centre">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
@@ -106,7 +233,21 @@
           </li>
           <li>
             <div class="step-content">
-             <v-img class="step-img" src="@/assets/img/learn-more/log-in.jpg" alt="Log in to BC Registries"></v-img>
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/log-in.jpg"
+                alt="Log in to BC Registries">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
@@ -116,7 +257,21 @@
           </li>
           <li>
             <div class="step-content">
-             <v-img class="step-img" src="@/assets/img/learn-more/usb-key.jpg" alt="Choose USB Card Reader option"></v-img>
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/usb-key.jpg"
+                alt="Choose USB Card Reader option">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
@@ -126,27 +281,69 @@
           </li>
           <li>
             <div class="step-content">
-             <v-img class="step-img" src="@/assets/img/learn-more/desktop-download.jpg" alt="Download and install desktop app"></v-img>
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/desktop-download.jpg"
+                alt="Download and install desktop app">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
-                Download and install the desktop app, promoted when you insert the usb key.
+                Download and install the BC Services Card Reader software, then insert the USB card reader.
               </div>
             </div>
           </li>
           <li>
             <div class="step-content">
-              <v-img class="step-img" src="@/assets/img/learn-more/usb-card.jpg" alt="Hold card against USB card reader"></v-img>
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/usb-card.jpg"
+                alt="Hold card against USB card reader">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3">
-                Open the app and hold card flat against the USB card reader until a success notification appears.
+                Open the BC Services Card Reader software and hold card flat against the USB card reader until a success notification appears.
               </div>
             </div>
           </li>
           <li>
             <div class="step-content">
-              <v-img class="step-img" src="@/assets/img/learn-more/desktop-code.jpg" alt="Enter passcode"></v-img>
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/desktop-code.jpg"
+                alt="Enter passcode">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3">
@@ -156,11 +353,25 @@
           </li>
           <li>
             <div class="step-content">
-              <v-img class="step-img" src="@/assets/img/learn-more/success.jpg" alt="Continue to system"></v-img>
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/success.jpg"
+                alt="Continue to system">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3">
-                Once logged in, continue to system.
+                Access BC Registries applications.
               </div>
             </div>
           </li>
@@ -200,15 +411,30 @@ export default class LearnMoreBCSC extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  $step-content-width: 9.5rem;
-  $step-line-height: 6px;
+  $step-content-width: 10.5rem;
 
   ::v-deep .learn-more-dialog {
     max-width: 1400px;
   }
 
-  .left-panel {
-    width: 25rem;
+  .learn-more-content {
+    flex-direction: row;
+
+    .left-panel {
+      flex: 0 0 auto;
+      width: 25rem;
+    }
+  }
+
+  .v-dialog--fullscreen .learn-more-content {
+    flex-direction: column;
+    border-radius: 0 !important;
+
+    .left-panel {
+      flex: 1 1 auto;
+      width: auto;
+      border-bottom: 1px solid var(--v-grey-lighten2)
+    }
   }
 
   .steps {
@@ -223,7 +449,6 @@ export default class LearnMoreBCSC extends Vue {
       flex: 0 0 auto;
       position: relative;
       margin: 0 2rem;
-      max-width: 25%;
       vertical-align: top;
     }
   }
@@ -236,6 +461,7 @@ export default class LearnMoreBCSC extends Vue {
   .step-img {
     width: $step-content-width;
     height: $step-content-width;
+    background-color: var(--v-grey-lighten4);
   }
 
   .step-text {
@@ -244,7 +470,7 @@ export default class LearnMoreBCSC extends Vue {
 
   .step-line {
     position: relative;
-    height: $step-line-height;
+    height: 8px;
     background: gold;
 
     &::before {
@@ -252,8 +478,8 @@ export default class LearnMoreBCSC extends Vue {
       position: absolute;
       bottom: 0;
       left: -3rem;
-      width: 1.5rem;
-      height: $step-line-height;
+      width: 2rem;
+      height: 8px;
       background: #666;
     }
 
@@ -261,11 +487,11 @@ export default class LearnMoreBCSC extends Vue {
       content: ' ';
       position: absolute;
       left: -1.5rem;
-      bottom: -5px;
-      width: 16px;
-      height: 16px;
+      bottom: -7px;
+      width: 1rem;
+      height: 22px;
       border-style: solid;
-      border-width: 8px 0 8px 8px;
+      border-width: 11px 0 11px 11px;
       border-color: transparent transparent transparent #666;
     }
   }
