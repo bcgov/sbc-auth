@@ -569,7 +569,7 @@ paths:
       - name: org_id
         in: path
         required: true
-        schema: 
+        schema:
           type: string
     get:
       responses:
@@ -1103,7 +1103,7 @@ paths:
         - orgs
       summary: Get the org specified by the provided id.
       description: Get the org specified by the provided id.
-    
+
   /orgs:
     post:
       responses:
@@ -1309,9 +1309,9 @@ paths:
                 example1:
                   value:
                     orgs:
-                    - id: '1234'
-                      name: Mock Account
-                      preferred_payment: CC
+                      - id: '1234'
+                        name: Mock Account
+                        preferred_payment: CC
 
                 CP0002000:
                   value:
@@ -2200,7 +2200,7 @@ paths:
                           type: string
                         id:
                           type: string
-                          
+
                   recipientEmail:
                     #$id: '#/properties/recipientEmail'
                     type: string
@@ -3159,6 +3159,8 @@ paths:
                   value: 'application:prod'
                 CP0001237:
                   value: 'application:prod'
+                CP0001239:
+                  value: 'application:prod'
             Access-Control-Allow-Origin:
               schema:
                 type: string
@@ -3302,6 +3304,18 @@ paths:
                         methodOfPayment: CC
                         bcOnlineUserId: ''
                         bcOnlineAccountId: ''
+                CP0001239:
+                  value:
+                    orgMembership: OWNER
+                    roles:
+                      - view
+                      - edit
+                    business:
+                      folioNumber: MOCK1234
+                      name: Mock Business
+                    account:
+                      id: '1234'
+                      name: Mock Account
         default:
           description: unexpected error
           content:
@@ -3331,6 +3345,8 @@ paths:
             value: CP0001238
           CP0002000:
             value: CP0002000
+          CP0001239:
+            value: CP0001239
   '/accounts/{account_id}/products/{product_code}/authorizations':
     get:
       summary: Get authorizations for the account per product
@@ -3422,7 +3438,7 @@ paths:
         in: path
         required: true
         schema:
-         type: string
+          type: string
     get:
       responses:
         '200':
@@ -5348,7 +5364,7 @@ components:
         - sentDate
         - status
         - token
-    orgMembershipRequest: 
+    orgMembershipRequest:
       title: orgMembershipRequest
       type: object
       properties:

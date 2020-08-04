@@ -3,6 +3,7 @@ import Axios, { AxiosResponse } from 'axios'
 import { Contact, Contacts } from '@/models/contact'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
 import { User, UserProfileRequestBody } from '@/models/user'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
 

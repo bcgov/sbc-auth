@@ -99,6 +99,7 @@
         <v-btn
           outlined
           color="primary"
+          class="mr-1"
           :data-test="getIndexedTag('reset-password-button', item.index)"
           v-can:RESET_PASSWORD.hide
           v-show="anonAccount"
