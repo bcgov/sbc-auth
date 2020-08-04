@@ -82,7 +82,6 @@ def test_create_org_assert_payment_types(session, keycloak_mock):  # pylint:disa
     assert payment_settings['preferredPayment'] == PaymentType.DIRECT_PAY.value
 
 
-
 def test_create_product_single_subscription(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model()

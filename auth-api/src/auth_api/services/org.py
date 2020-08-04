@@ -38,7 +38,6 @@ from auth_api.utils.enums import (
 from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF
 from auth_api.utils.util import camelback2snake
 
-
 from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
 from .contact import Contact as ContactService
@@ -181,7 +180,8 @@ class Org:  # pylint: disable=too-many-public-methods
         """Add payment settings for the org."""
         payment_settings = AccountPaymentModel.create_from_dict({
             'org_id': org_id,
-            'preferred_payment_code': PaymentType.BCOL.value if bcol_account_number else Org._get_default_payment_method_for_creditcard(),
+            'preferred_payment_code':
+                PaymentType.BCOL.value if bcol_account_number else Org._get_default_payment_method_for_creditcard(),
             'bcol_user_id': bcol_user_id,
             'bcol_account_id': bcol_account_number
         })
@@ -191,7 +191,6 @@ class Org:  # pylint: disable=too-many-public-methods
     def _get_default_payment_method_for_creditcard():
         return PaymentType.DIRECT_PAY.value if current_app.config.get(
             'DIRECT_PAY_ENABLED') else PaymentType.CREDIT_CARD.value
-
 
     @staticmethod
     def get_bcol_details(bcol_credential: Dict, org_info: Dict = None, bearer_token: str = None, org_id=None):
