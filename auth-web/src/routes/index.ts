@@ -12,14 +12,6 @@ import store from '@/store'
 
 Vue.use(Router)
 
-function mapReturnPayVars (route: any) {
-  return {
-    paymentId: route.params.paymentId,
-    transactionId: route.params.transactionId,
-    receiptNum: !route.query.receipt_number ? '' : route.query.receipt_number
-  }
-}
-
 const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL
