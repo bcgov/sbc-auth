@@ -112,12 +112,17 @@ router.beforeEach((to, from, next) => {
       if (isTheOrgPendingAffidavitReview) {
         console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since user has pending affidavits')
         return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
-      } else if (currentAccountSettings && currentMembership.membershipStatus === MembershipStatus.Pending) {
+      } else if (currentAccountSettings && currentMembership?.membershipStatus === MembershipStatus.Pending) {
         console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since users membership status is pending')
         return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}` })
-      } else if (!currentOrganization || currentMembership.membershipStatus !== MembershipStatus.Active) {
+      } else if (!currentOrganization || currentMembership?.membershipStatus !== MembershipStatus.Active) {
         console.log('[Navigation Guard] Redirecting user to Create Account since users nerither has account nor an active status')
-        return next({ path: `/${Pages.CREATE_ACCOUNT}` })
+        switch (currentUser?.loginSource) {
+          case LoginSource.BCSC:
+            return next({ path: `/${Pages.CREATE_ACCOUNT}` })
+          case LoginSource.BCEID:
+            return next({ path: `/${Pages.CREATE_NON_BCSC_ACCOUNT}` })
+        }
       }
     }
     originalTarget ? next(originalTarget) : next()

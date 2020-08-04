@@ -93,22 +93,14 @@
                 Mailing Address
               </div>
               <div class="value">
-                <BaseAddress v-if="isAddressEditable"
-                  :inputAddress="currentOrgAddress"
-                  @key-down="keyDown()"
-                  @address-update="updateAddress"
-                  @is-form-valid="checkBaseAddressValidity"
-                  :key="addressKey"
-                >
-                </BaseAddress>
-                <div v-if="isAddressViewable">
-                  <div class="value value__title" aria-labelledby="mailingAddress" v-if="currentOrgAddress" >
-                    <div>{{ currentOrgAddress.street }}</div>
-                    <div v-if="currentOrgAddress.streetAdditional">{{ currentOrgAddress.streetAdditional }}</div>
-                    <div>{{ currentOrgAddress.city }}, {{ currentOrgAddress.region }}  {{ currentOrgAddress.postalCode }}</div>
-                    <div>{{ currentOrgAddress.country}}</div>
-                  </div>
-                </div>
+                <base-address-form
+                  ref="mailingAddress"
+                  :editing="isBaseAddressEditMode"
+                  :schema="baseAddressSchema"
+                  :address="currentOrgAddress"
+                  @update:address="updateAddress"
+                  @valid="checkBaseAddressValidity"
+                />
               </div>
             </li>
           </ul>
@@ -159,16 +151,17 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
-import BaseAddress from '@/components/auth/BaseAddress.vue'
+import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfigHelper from '@/util/config-helper'
 import OrgAdminContact from '@/components/auth/OrgAdminContact.vue'
 import OrgModule from '@/store/modules/org'
 import { PaymentSettings } from '@/models/PaymentSettings'
+import { addressSchema } from '@/schemas'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
-    BaseAddress,
+    BaseAddressForm,
     OrgAdminContact
   },
   computed: {
@@ -204,6 +197,8 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
   private errorMessage: string = ''
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private isBaseAddressValid: boolean = false
+
+  private baseAddressSchema: {} = addressSchema
 
   private isFormValid (): boolean {
     return !!this.orgName || this.orgName === this.currentOrganization?.name
@@ -335,6 +330,15 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
 
   get isAddressViewable () : boolean {
     return [Permission.VIEW_ADDRESS].some(per => this.permissions.includes(per))
+  }
+
+  get isBaseAddressEditMode () : boolean {
+    if (this.isAddressEditable) {
+      return true
+    } else if (this.isAddressViewable) {
+      return false
+    }
+    return false
   }
 }
 </script>
