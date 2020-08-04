@@ -288,6 +288,7 @@ class TestJwtClaims(dict, Enum):
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
+        'loginSource': 'BCSC',
         'realm_access': {
             'roles': [
                 'tester'
@@ -309,6 +310,21 @@ class TestJwtClaims(dict, Enum):
             ]
         },
         'product_code': 'DIR_SEARCH'
+    }
+
+    tester_bceid_role = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': fake.first_name(),
+        'lastname': fake.last_name(),
+        'preferred_username': fake.user_name(),
+        'user_name': fake.user_name(),
+        'loginSource': 'BCEID',
+        'realm_access': {
+            'roles': [
+                'tester'
+            ]
+        }
     }
 
     @staticmethod
@@ -340,10 +356,10 @@ class TestJwtClaims(dict, Enum):
             'username': 'CP1234567',
             'realm_access': {
                 'roles': [
-                    'edit', 'uma_authorization', 'staff'
+                    'edit', 'uma_authorization', 'staff', 'tester'
                 ]
             },
-            'roles': ['edit', 'uma_authorization', 'staff'],
+            'roles': ['edit', 'uma_authorization', 'staff', 'tester'],
             'loginSource': source
         }
 
@@ -646,6 +662,14 @@ class TestUserInfo(dict, Enum):
         'keycloak_guid': uuid.uuid4(),
         'access_type': 'ANONYMOUS',
     }
+    user_bceid_tester = {
+        'username': f'{fake.user_name()}@{IdpHint.BCEID.value}',
+        'firstname': fake.first_name(),
+        'lastname': fake.last_name(),
+        'roles': '{edit, uma_authorization, tester}',
+        'keycloak_guid': uuid.uuid4(),
+        'access_type': 'BCEID',
+    }
 
     @staticmethod
     def get_user_with_kc_guid(kc_guid: str):
@@ -673,6 +697,18 @@ class KeycloakScenario:
         create_user_request.last_name = 'test_last'
         create_user_request.email = f'{user_name}@gov.bc.ca'
         create_user_request.attributes = {'corp_type': 'CP', 'source': 'BCSC'}
+        create_user_request.enabled = True
+        return create_user_request
+
+    @staticmethod
+    def create_user_by_user_info(user_info: dict):
+        """Return create user request."""
+        create_user_request = KeycloakUser()
+        create_user_request.user_name = user_info['preferred_username']
+        create_user_request.password = 'Test@123'
+        create_user_request.first_name = user_info['firstname']
+        create_user_request.last_name = user_info['lastname']
+        create_user_request.attributes = {'source': user_info['loginSource']}
         create_user_request.enabled = True
         return create_user_request
 

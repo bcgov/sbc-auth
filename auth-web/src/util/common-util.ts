@@ -110,13 +110,15 @@ export default class CommonUtils {
       Permission.CHANGE_ACCOUNT_TYPE,
       Permission.CHANGE_ROLE,
       Permission.RESET_PASSWORD,
-      Permission.TRANSACTION_HISTORY
+      Permission.TRANSACTION_HISTORY,
+      Permission.VIEW_ADMIN_CONTACT
     ]
   }
   static getViewOnlyPermissions (): string[] {
     return [
       Permission.VIEW_ACCOUNT,
-      Permission.VIEW_ADDRESS
+      Permission.VIEW_ADDRESS,
+      Permission.VIEW_ADMIN_CONTACT
     ]
   }
   // for converting address object of sbc-auth to as needed for BaseAddress component

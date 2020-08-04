@@ -254,7 +254,7 @@ export function getRoutes (): RouteConfig[] {
       // to handle old invitation; removable this after a month of this release
       path: '/:orgName/dirsearch/validatetoken/:token',
       name: 'createuserprofile',
-      redirect: '/undefined/BCROS/:token'
+      redirect: '/:orgName/validatetoken/BCROS/:token'
     },
     {
       path: '/:orgName/validatetoken/:loginSource/:token',
