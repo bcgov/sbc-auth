@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="notaryInformationForm" lazy-validation>
+  <v-form ref="notaryInformationForm">
     <fieldset v-if="notaryInfo">
       <legend class="mb-4">Notary Information</legend>
       <v-row>
@@ -14,12 +14,14 @@
           </v-text-field>
         </v-col>
       </v-row>
-      <BaseAddress v-if="address"
-              v-bind:inputAddress="address"
-              @address-update="updateAddress"
-              @is-form-valid="checkBaseAddressValidity" :key="addressJson"
-      >
-      </BaseAddress>
+      <base-address-form
+        ref="notaryAddress"
+        :editing="true"
+        :schema="notaryAddressSchema"
+        :address="notaryAddress"
+        @update:address="updateNotaryAddress"
+        @valid="notaryAddressValidity"
+      />
     </fieldset>
   </v-form>
 </template>
@@ -27,20 +29,23 @@
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Address } from '@/models/address'
-import BaseAddress from '@/components/auth/BaseAddress.vue'
+import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import { NotaryInformation } from '@/models/notary'
+import { addressSchema } from '@/schemas'
 
 @Component({
   components: {
-    BaseAddress
+    BaseAddressForm
   }
 })
 export default class NotaryInformationForm extends Vue {
   @Prop() inputNotaryInfo: NotaryInformation
   @Prop({ default: false }) disabled: boolean
   private notaryInfo: NotaryInformation = {}
-  private isBaseAddressValid: boolean = false
-  private address:Address = {}
+  private isNotaryAddressValid: boolean = false
+
+  private notaryAddress: Address = {} as Address
+  private notaryAddressSchema: {} = addressSchema
 
   $refs: {
     notaryInformationForm: HTMLFormElement,
@@ -50,26 +55,24 @@ export default class NotaryInformationForm extends Vue {
     notaryName: [v => !!v || 'Name of Notary is required']
   }
 
-  private updateAddress (address: Address) {
-    this.notaryInfo.address = address
+  private updateNotaryAddress (val: Address) {
+    this.notaryInfo.address = { ...val }
     return this.emitNotaryInformation()
   }
 
-  get addressJson () {
-    // TODO fix the reactivity issue
-    return JSON.stringify(this.address)
+  private notaryAddressValidity (isValid: boolean) {
+    this.isNotaryAddressValid = isValid
+    this.emitNotaryInformation()
   }
 
-  mounted () {
+  beforeMount () {
     if (this.inputNotaryInfo) {
       Object.keys(this.inputNotaryInfo)
         .filter(key => key !== 'address')
         .forEach(key => {
           this.$set(this.notaryInfo, key, this.inputNotaryInfo?.[key])
         })
-      Object.keys(this.inputNotaryInfo.address).forEach(key => {
-        this.$set(this.address, key, this.inputNotaryInfo?.address?.[key])
-      })
+      this.notaryAddress = { ...this.inputNotaryInfo?.address }
     }
   }
 
@@ -84,13 +87,9 @@ export default class NotaryInformationForm extends Vue {
     return this.notaryInfo
   }
 
-  private checkBaseAddressValidity (isValid) {
-    this.isBaseAddressValid = !!isValid
-  }
-
   @Emit('is-form-valid')
   isFormValid () {
-    return this.$refs.notaryInformationForm.validate() && this.isBaseAddressValid
+    return this.$refs.notaryInformationForm?.validate() && this.isNotaryAddressValid
   }
 }
 </script>

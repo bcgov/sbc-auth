@@ -2,7 +2,7 @@ import { Address } from '@/models/address'
 
 export interface NotaryInformation {
     notaryName?: string
-    address?:Address
+    address?: Address
     key?: string
 }
 

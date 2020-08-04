@@ -17,12 +17,14 @@
     </fieldset>
     <template v-if="isExtraProvUser">
       <h4 class="mb-4">Mailing Address</h4>
-      <BaseAddress
-              :inputAddress="address"
-              @address-update="updateAddress"
-              @is-form-valid="checkBaseAddressValidity"
-      >
-      </BaseAddress>
+      <base-address-form
+        ref="mailingAddress"
+        :editing="true"
+        :schema="baseAddressSchema"
+        :address="address"
+        @update:address="updateAddress"
+        @valid="checkBaseAddressValidity"
+      />
     </template>
 
     <v-divider class="my-10"></v-divider>
@@ -68,19 +70,19 @@ import { Account, Actions, LoginSource, SessionStorageKeys } from '@/util/consta
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
-
 import { Address } from '@/models/address'
-import BaseAddress from '@/components/auth/BaseAddress.vue'
+import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
+import { addressSchema } from '@/schemas'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
     BcolLogin,
-    BaseAddress,
+    BaseAddressForm,
     ConfirmCancelButton
   },
   computed: {
@@ -111,6 +113,8 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private isBaseAddressValid: boolean = !this.isExtraProvUser
   private readonly currentOrgAddress!: Address
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
+
+  private baseAddressSchema: {} = addressSchema
 
   $refs: {
     createAccountInfoForm: HTMLFormElement
