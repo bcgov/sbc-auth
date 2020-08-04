@@ -149,12 +149,6 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     return `/account/${this.orgId}/settings/transactions`
   }
 
-  private get showTransactions (): boolean {
-    return (LaunchDarklyService.getFlag('transaction-history') || false) &&
-      this.isPremiumAccount &&
-      [MembershipType.Admin, MembershipType.Coordinator].includes(this.currentMembership.membershipTypeCode)
-  }
-
   private mounted () {
     this.isLoading = false
     this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)

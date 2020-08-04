@@ -63,9 +63,34 @@ export function getRoutes (): RouteConfig[] {
     {
       path: '/home',
       name: 'home',
-      component: getEnvHomeView(),
-      children: getEnvChildRoutes(),
-      meta: { showNavBar: !ConfigHelper.getLaunchFeatureFlag() }
+      component: HomeView,
+      children: [
+        {
+          path: '',
+          redirect: 'decide-business'
+        },
+        {
+          path: 'decide-business',
+          component: DecideBusinessView,
+          meta: { showNavBar: false }
+        },
+        {
+          path: 'request-name',
+          component: RequestNameView,
+          meta: { showNavBar: false }
+        },
+        {
+          path: 'incorporate-or-register',
+          component: IncorpOrRegisterView,
+          meta: { showNavBar: false }
+        },
+        {
+          path: 'maintain-business',
+          component: MaintainBusinessView,
+          meta: { showNavBar: false }
+        }
+      ],
+      meta: { showNavBar: false }
     },
     {
       path: '/business',
@@ -376,40 +401,4 @@ export function getRoutes (): RouteConfig[] {
   ]
 
   return routes
-}
-
-// Get the HomeView depending on environment
-const getEnvHomeView = () => {
-  return ConfigHelper.getLaunchFeatureFlag() ? HomeView : HomeViewOutdated
-}
-
-// Get the child routes depending on environment
-const getEnvChildRoutes = () => {
-  return ConfigHelper.getLaunchFeatureFlag() ? [
-    {
-      path: '',
-      redirect: 'decide-business'
-    },
-    {
-      path: 'decide-business',
-      component: DecideBusinessView,
-      meta: { showNavBar: false }
-    },
-    {
-      path: 'request-name',
-      component: RequestNameView,
-      meta: { showNavBar: false }
-    },
-    {
-      path: 'incorporate-or-register',
-      component: IncorpOrRegisterView,
-      meta: { showNavBar: false }
-    },
-    {
-      path: 'maintain-business',
-      component: MaintainBusinessView,
-      meta: { showNavBar: false }
-    }
-  ]
-    : []
 }
