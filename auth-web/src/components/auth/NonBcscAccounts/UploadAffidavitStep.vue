@@ -69,6 +69,7 @@ import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { Account } from '@/util/constants'
+import { Address } from '@/models/address'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import FileUploadPreview from '@/components/auth/common/FileUploadPreview.vue'
@@ -135,7 +136,7 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
   private async mounted () {
     this.errorMessage = ''
     if (!this.notaryInformation) {
-      this.setNotaryInformation({ notaryName: '', address: {} })
+      this.setNotaryInformation({ notaryName: '', address: {} as Address })
     }
   }
 

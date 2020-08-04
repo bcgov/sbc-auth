@@ -69,24 +69,15 @@
                   </div>
                 </li>
               </ul>
-                <!--
-                <v-text-field
-                  filled
-                  label="Account Name"
-                  v-model.trim="currentOrganization.name"
-                  persistent-hint
-                  disabled
-                  data-test="account-name"
-                >
-                </v-text-field>
-                -->
               <h4 class="mb-4">Mailing Address</h4>
-              <BaseAddress
-                :inputAddress="address"
-                @address-update="updateAddress"
-                @is-form-valid="checkBaseAddressValidity"
-              >
-              </BaseAddress>
+              <base-address-form
+                ref="mailingAddress"
+                :editing="true"
+                :schema="baseAddressSchema"
+                :address="address"
+                @update:address="updateAddress"
+                @valid="checkBaseAddressValidity"
+              />
             </template>
           </div>
         </v-expand-transition>
@@ -134,18 +125,19 @@ import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { Address } from '@/models/address'
-import BaseAddress from '@/components/auth/BaseAddress.vue'
+import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import BcolLogin from '@/components/auth/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
+import { addressSchema } from '@/schemas'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
     BcolLogin,
-    BaseAddress,
+    BaseAddressForm,
     ConfirmCancelButton
   },
   computed: {
@@ -188,8 +180,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   @Prop() cancelUrl: string
   @Prop() isAccountChange: boolean
 
-  private async mounted () {
-  }
+  private baseAddressSchema: {} = addressSchema
 
   private get isExtraProvUser () {
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
@@ -225,12 +216,15 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private unlinkAccounts () {
     this.resetBcolDetails()
   }
+
   private get linked () {
     return !!this.currentOrganization?.bcolAccountDetails
   }
+
   private updateAddress (address: Address) {
     this.setCurrentOrganizationAddress(address)
   }
+
   private async save () {
     // TODO Handle edit mode as well here
     this.goNext()
