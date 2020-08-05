@@ -18,7 +18,7 @@ Test-Suite to ensure that the reset data Service is working as expected.
 """
 
 import pytest
-from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestUserInfo
+from tests.utilities.factory_scenarios import KeycloakScenario, TestEntityInfo, TestJwtClaims, TestUserInfo
 from tests.utilities.factory_utils import (
     factory_entity_model, factory_membership_model, factory_org_model, factory_user_model)
 
@@ -29,6 +29,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import ResetTestData as ResetDataService
 from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
+from auth_api.services.keycloak import KeycloakService
 
 
 def test_reset(session, auth_mock):  # pylint: disable=unused-argument
@@ -77,3 +78,23 @@ def test_reset_user_without_tester_role(session, auth_mock):  # pylint: disable=
 
     found_org = OrgService.find_by_org_id(org.id)
     assert found_org is not None
+
+
+def test_reset_bceid_user(session, auth_mock):  # pylint: disable=unused-argument
+    """Assert that reset data from a bceid user."""
+    keycloak_service = KeycloakService()
+    request = KeycloakScenario.create_user_by_user_info(TestJwtClaims.tester_bceid_role)
+    keycloak_service.add_user(request, return_if_exists=True)
+    user = keycloak_service.get_user_by_username(request.user_name)
+    assert user is not None
+    user_id = user.id
+    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token['keycloak_guid'] = user_id
+    user = factory_user_model(user_info=user_with_token)
+    org = factory_org_model(user_id=user.id)
+
+    response = ResetDataService.reset(TestJwtClaims.get_test_user(user_id, 'BCEID'))
+    assert response is None
+
+    found_org = OrgService.find_by_org_id(org.id)
+    assert found_org is None
