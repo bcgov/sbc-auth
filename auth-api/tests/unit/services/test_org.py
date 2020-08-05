@@ -18,6 +18,8 @@ Test suite to ensure that the Org service routines are working as expected.
 from unittest.mock import patch
 
 import pytest
+from flask import current_app
+
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
     TestOrgProductsInfo, TestOrgTypeInfo, TestUserInfo)
@@ -58,6 +60,26 @@ def test_create_org(session, keycloak_mock):  # pylint:disable=unused-argument
     assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
+
+
+def test_create_org_assert_payment_types(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org can be created."""
+    user = factory_user_model()
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+    assert org
+    dictionary = org.as_dict()
+    assert dictionary['name'] == TestOrgInfo.org1['name']
+    payment_settings = dictionary['payment_settings'][0]
+    assert payment_settings
+    assert payment_settings['preferredPayment'] == PaymentType.CREDIT_CARD.value
+    current_app.config['DIRECT_PAY_ENABLED'] = True
+    org1 = OrgService.create_org(TestOrgInfo.org2, user_id=user.id)
+    assert org1
+    dictionary = org1.as_dict()
+    assert dictionary['name'] == TestOrgInfo.org2['name']
+    payment_settings = dictionary['payment_settings'][0]
+    assert payment_settings
+    assert payment_settings['preferredPayment'] == PaymentType.DIRECT_PAY.value
 
 
 def test_create_product_single_subscription(session, keycloak_mock):  # pylint:disable=unused-argument

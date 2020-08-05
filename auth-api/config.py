@@ -159,6 +159,9 @@ class _Config(object):  # pylint: disable=too-few-public-methods
 
     STAFF_ADMIN_EMAIL = os.getenv('STAFF_ADMIN_EMAIL')
 
+    # Till direct pay is fully ready , keep this value false
+    DIRECT_PAY_ENABLED = os.getenv('DIRECT_PAY_ENABLED', 'False').lower() == 'true'
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False
