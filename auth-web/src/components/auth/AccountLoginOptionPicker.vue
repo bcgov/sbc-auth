@@ -1,9 +1,10 @@
 <template>
+ <div>
   <v-row>
     <v-col
-      sm="12"
-      md="6"
-      class="d-flex align-stretch"
+      xs="12"
+      sm="6"
+      class="d-flex"
       v-for="authOption in authOptions"
       :key="authOption.type"
     >
@@ -11,9 +12,8 @@
         flat
         outlined
         hover
-        class="account-card elevation-2 pa-10 d-flex flex-column text-center"
+        class="account-card elevation-2 pa-8 d-flex flex-column text-center"
         :class="{ 'active': authType === authOption.type }"
-        @click="selectAuthType(authOption.type)"
       >
         <div class="account-type__icon mb-8">
           <v-icon color="grey">{{authOption.icon}}</v-icon>
@@ -21,7 +21,7 @@
         <div class="account-type__title font-weight-bold mb-6">
           {{authOption.title}}
         </div>
-        <div class="account-type__details mb-12">
+        <div class="account-type__details mb-10">
           {{authOption.description}}
         </div>
         <div class="account-type__buttons">
@@ -30,15 +30,30 @@
             depressed
             block
             color="primary"
+            class="font-weight-bold mb-3"
+            outlined
+            @click="selectLearnMore(authOption.type)"
+          >
+            LEARN MORE
+          </v-btn>
+          <v-btn
+            large
+            depressed
+            block
+            color="primary"
             class="font-weight-bold"
             :outlined="authType != authOption.type"
+            @click="selectAuthType(authOption.type)"
           >
             {{ authType == authOption.type ? 'SELECTED' : 'SELECT' }}
           </v-btn>
         </div>
-      </v-card>
-    </v-col>
-  </v-row>
+       </v-card>
+      </v-col>
+    </v-row>
+    <LearnMoreBCSC ref="bcscLearnMoreDialog" @bcsc-selected="selectAuthType('BCSC')" />
+    <LearnMoreBCEID ref="bceidLearnMoreDialog" @bceid-selected="selectAuthType('BCEID')" />
+  </div>
 </template>
 
 <script lang="ts">
@@ -46,11 +61,15 @@ import { Component, Emit, Mixins } from 'vue-property-decorator'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
+import LearnMoreBCEID from '@/components/auth/LearnMoreBCEID.vue'
+import LearnMoreBCSC from '@/components/auth/LearnMoreBCSC.vue'
 import { LoginSource } from '@/util/constants'
 import { Organization } from '@/models/Organization'
 
 @Component({
   components: {
+    LearnMoreBCEID,
+    LearnMoreBCSC
   },
   computed: {
     ...mapState('org', [
@@ -68,16 +87,16 @@ import { Organization } from '@/models/Organization'
 })
 export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin, AccountMixin) {
   private btnLabel = 'Save'
-  private readonly memberLoginOption!: string
+  private readonly memberLoginOption!: LoginSource
   private readonly syncMemberLoginOption!: (currentAccount: number) => string
   protected readonly syncOrganization!: (
     currentAccount: number
   ) => Promise<Organization>
-  private readonly updateLoginOption!: (loginType:string) => Promise<string>
+  private readonly updateLoginOption!: (loginType: string) => Promise<string>
 
   private errorMessage: string = ''
 
-  private authType = LoginSource.BCSC.toString()
+  private authType = LoginSource.BCSC
 
   private authOptions = [
     {
@@ -96,10 +115,30 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
     }
   ]
 
+  $refs: {
+    bcscLearnMoreDialog: LearnMoreBCSC,
+    bceidLearnMoreDialog: LearnMoreBCEID
+  }
+
   @Emit('auth-type-selected')
-  private selectAuthType (type:string) {
-    this.authType = type
-    return type
+  private selectAuthType (authType: LoginSource) {
+    this.authType = authType
+    return authType
+  }
+
+  private selectLearnMore (authType: LoginSource) {
+    switch (authType) {
+      case LoginSource.BCSC:
+        // open up BCSC learn more dialog
+        this.$refs.bcscLearnMoreDialog.open()
+        break
+      case LoginSource.BCEID:
+        // open up BCEID learn more dialog
+        this.$refs.bceidLearnMoreDialog.open()
+        break
+      default:
+        // do nothing
+    }
   }
 
   private get loginSourceEnum () {
@@ -122,6 +161,7 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
     display: flex;
     flex-direction: column;
     position: relative;
+    width: 100%;
     background-color: #ffffff !important;
     transition: all ease-out 0.2s;
 
