@@ -29,12 +29,12 @@ describe('PaymentReturnView.vue', () => {
       propsData: {
         paymentId: 'somepaymentId',
         transactionId: 'sometransactionId',
-        receiptNum: 'somereceiptNum'
+        payResponseUrl: 'someResponseUrl'
       },
       mocks: { $t }
     })
 
-    expect(PaymentServices.updateTransaction).toBeCalledWith('somepaymentId', 'sometransactionId', 'somereceiptNum')
+    expect(PaymentServices.updateTransaction).toBeCalledWith('somepaymentId', 'sometransactionId', 'someResponseUrl')
   })
   it('service is not invoked when no params are present', () => {
     PaymentServices.updateTransaction = jest.fn().mockResolvedValue({})
@@ -56,7 +56,7 @@ describe('PaymentReturnView.vue', () => {
       propsData: {
         paymentId: 'somepaymentId',
         transactionId: 'sometransactionId',
-        receiptNum: 'somereceiptNum'
+        payResponseUrl: 'someResponseUrl'
       },
       mocks: { $t }
     })
