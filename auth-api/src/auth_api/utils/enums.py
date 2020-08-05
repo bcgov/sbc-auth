@@ -61,6 +61,7 @@ class PaymentType(Enum):
 
     CREDIT_CARD = 'CC'
     BCOL = 'DRAWDOWN'
+    DIRECT_PAY = 'DIRECT_PAY'
 
 
 class OrgType(Enum):
