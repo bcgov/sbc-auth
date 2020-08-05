@@ -45,10 +45,14 @@ import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
 
 function mapReturnPayVars (route: any) {
+  let payResponseUrl = window.location.search
+  if (payResponseUrl && payResponseUrl.charAt(0) === '?') {
+    payResponseUrl = payResponseUrl.substr(1)
+  }
   return {
     paymentId: route.params.paymentId,
     transactionId: route.params.transactionId,
-    receiptNum: !route.query.receipt_number ? '' : route.query.receipt_number
+    payResponseUrl: payResponseUrl
   }
 }
 

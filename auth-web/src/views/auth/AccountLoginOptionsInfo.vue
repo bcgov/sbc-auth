@@ -4,24 +4,27 @@
           <h1 class="view-header__title">Before you get started</h1>
           <p class="mt-3 mb-3">It's important to understand the basic rules for users on your BC Registries account.</p>
         </div>
-        <v-card
-          class="step-card my-6"
-          flat
-          v-for="step in steps"
-          :key="step.number"
-        >
-          <v-card-text class="pt-4 pb-4 pb-lg-5 px-6 px-lg-8 d-inline-flex align-center">
-            <v-icon
-              x-large
-              color="blue-grey darken-1"
-              class="step-icon mt-2 mr-10 ml-3">
-              {{step.icon}}
-            </v-icon>
-            <div>
-              <h2 class="mt-3 mb-4">{{step.stepTitle}}</h2>
-              <div v-html="step.stepDescription"></div>
+        <v-card flat class="pt-10 py-11 px-10">
+          <section
+            v-for="step in steps"
+            :key="step.number"
+          >
+            <div class="d-flex">
+              <div class="step-icon-container pr-6 text-center">
+                <v-icon
+                  x-large
+                  color="blue-grey darken-1"
+                  class="step-icon">
+                  {{step.icon}}
+                </v-icon>
+              </div>
+              <div>
+                <h2 class="mb-4" v-html="step.stepTitle"></h2>
+                <p class="mb-0" v-html="step.stepDescription"></p>
+              </div>
             </div>
-          </v-card-text>
+            <v-divider class="mt-10 mb-9"/>
+          </section>
         </v-card>
         <div class="d-flex justify-center mt-12 mb-4">
           <v-btn
@@ -51,23 +54,23 @@ export default class AccountLoginOptionsInfo extends Vue {
     private readonly steps = [
       {
         number: 1,
-        stepTitle: 'Account administrators must log in with their BC Services Card',
-        stepDescription: `<p>All account administrators are required to use the BC Services Card to verify their identity.
-                            We do this to ensure that no one is impersonating you or committing identity theft.<p>`,
+        stepTitle: 'Account administrators must log in with their <span class="lb">BC Services Card.</span>',
+        stepDescription: `All account administrators are required to use the BC Services Card to verify their identity.
+                          <span class="lb">We do this to ensure that no one is impersonating you or committing identity theft.</span>`,
         icon: 'mdi-shield-account-outline'
       },
       {
         number: 2,
         stepTitle: 'Team Member Login Methods',
-        stepDescription: `<p>As the preferred method of authentication, your team members do not need to remember passwords with the BC Services Card. 
-                    Alternatively you can choose to have them login with a BCeID username and password, combined with a third-party authenticator app. 
-                    These options are explained on the following page.</p>`,
+        stepDescription: `As the preferred method of authentication, your team members do not need to remember passwords with the BC Services Card. 
+                          Alternatively you can choose to have them login with a BCeID username and password, combined with a third-party authenticator app. 
+                          These options are explained on the following page.`,
         icon: 'mdi-account-group-outline'
       },
       {
         number: 3,
         stepTitle: 'Secure your account',
-        stepDescription: '<p>Secure your account from fraudsters with 2-factor authentication.</p>',
+        stepDescription: 'Secure your account from fraudsters with 2-factor authentication.',
         icon: 'mdi-two-factor-authentication'
       }
     ]
@@ -89,9 +92,18 @@ export default class AccountLoginOptionsInfo extends Vue {
     max-width: 60rem;
   }
 
+  .step-icon-container {
+    flex: 0 0 auto;
+    width: 7rem;
+  }
+
   .step-icon {
     align-self: flex-start;
     font-size: 3rem !important;
+  }
+
+  h2 {
+    line-height: 1.4;
   }
 
   @media (max-width: 599px) {
@@ -113,5 +125,13 @@ export default class AccountLoginOptionsInfo extends Vue {
 
   .action-btn {
     width: 6rem;
+  }
+
+  ::v-deep .lb {
+    display: block;
+  }
+
+  section:last-child .v-divider {
+    display: none;
   }
 </style>

@@ -8,7 +8,7 @@
       </p>
     </div>
     <account-login-option-chooser @auth-type-selected="setLoginOption"></account-login-option-chooser>
-    <div class="d-flex mt-8 justify-end">
+    <div class="d-flex mt-10 justify-center">
       <v-btn
         large
         color="primary"
