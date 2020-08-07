@@ -2,7 +2,7 @@
 name: PR label check
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, labeled, unlabeled]
     branches:
       - development
@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: jesusvasquez333/verify-pr-label-action@v1.1.0
+      - uses: yogevbd/enforce-label-action@master
         with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-          valid-labels: "bug,enhancement,feature,fix,devops,documentation,maintenance,skip-changelog"
+          REQUIRED_LABELS_ANY: "bug,enhancement,feature,fix,devops,documentation,maintenance,skip-changelog"
