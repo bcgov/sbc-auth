@@ -93,10 +93,13 @@ export default class NextPageMixin extends Vue {
           ConfigHelper.removeFromSession(SessionStorageKeys.InvitationToken)
         } else if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
           bceidNextStep = Pages.USER_PROFILE_TERMS
-        } else if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
-          bceidNextStep = Pages.USER_PROFILE_TERMS
         } else if (!this.currentOrganization && !this.currentMembership) {
-          bceidNextStep = Pages.CHOOSE_AUTH_METHOD
+          let isExtraProv = ConfigHelper.getFromSession(SessionStorageKeys.ExtraProvincialUser)
+          if (isExtraProv) {
+            bceidNextStep = Pages.CREATE_NON_BCSC_ACCOUNT
+          } else {
+            bceidNextStep = Pages.CHOOSE_AUTH_METHOD
+          }
         } else if (this.currentOrganization && this.currentOrganization.statusCode === OrgStatus.PendingAffidavitReview) {
           bceidNextStep = `${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}/true`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
