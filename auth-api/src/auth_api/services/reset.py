@@ -13,7 +13,8 @@
 # limitations under the License.
 """Service for reset test data."""
 from typing import Dict
-
+from auth_api.services.keycloak import KeycloakService
+from auth_api.utils.enums import LoginSource
 from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.utils.roles import Role
@@ -45,3 +46,9 @@ class ResetTestData:  # pylint:disable=too-few-public-methods
                     user.modified_by = None
                     user.modified_by_id = None
                     user.reset()
+
+                # Reset opt from keycloak if from BCEID
+                login_source = token_info.get('loginSource', None)
+
+                if login_source == LoginSource.BCEID.value:
+                    KeycloakService.reset_otp(token_info.get('sub'))

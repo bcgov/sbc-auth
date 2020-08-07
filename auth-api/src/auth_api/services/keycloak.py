@@ -13,6 +13,7 @@
 # limitations under the License.
 """Utils for keycloak administration."""
 
+import json
 from typing import Dict
 
 import requests
@@ -203,6 +204,14 @@ class KeycloakService:
         KeycloakService._remove_user_from_group(keycloak_guid, GROUP_ACCOUNT_HOLDERS)
 
     @staticmethod
+    def reset_otp(keycloak_guid: str = None):
+        """Reset user one time  password from Keycloak."""
+        if not keycloak_guid:
+            keycloak_guid: Dict = KeycloakService._get_token_info().get('sub')
+
+        KeycloakService._reset_otp(keycloak_guid)
+
+    @staticmethod
     def _add_user_to_group(user_id: str, group_name: str):
         """Add user to the keycloak group."""
         config = current_app.config
@@ -277,3 +286,43 @@ class KeycloakService:
     @staticmethod
     def _get_token_info():
         return g.jwt_oidc_token_info
+
+    @staticmethod
+    def _reset_otp(user_id: str):
+        """Reset user one time  password from Keycloak."""
+        config = current_app.config
+        base_url = config.get('KEYCLOAK_BASE_URL')
+        realm = config.get('KEYCLOAK_REALMNAME')
+        # Create an admin token
+        admin_token = KeycloakService._get_admin_token()
+
+        headers = {
+            'Content-Type': ContentType.JSON.value,
+            'Authorization': f'Bearer {admin_token}'
+        }
+        # step 1: add required action as configure otp
+        configure_otp_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}'
+        input_data = json.dumps(
+            {
+                'id': user_id,
+                'requiredActions': ['CONFIGURE_TOTP']
+            }
+        )
+
+        response = requests.put(configure_otp_url, headers=headers, data=input_data)
+
+        if response.status_code == 204:
+            # step 2: disable otp credential for Keycloak version under 8
+            disable_otp_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/disable-credential-types'
+            input_data = json.dumps(['otp'])
+            response = requests.put(disable_otp_url, headers=headers, data=input_data)
+            # if keycloak version is above 8 it will throw 415 error
+            if response.status_code == 415:
+                # step 3: delete otp credential for keyclaok version above 8
+                get_credentials_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/credentials'
+                response = requests.get(get_credentials_url, headers=headers)
+                for credential in response.json():
+                    if credential['type'] == 'otp':
+                        delete_credential_url = f'{get_credentials_url}/{credential["id"]}'
+                        response = requests.delete(delete_credential_url, headers=headers)
+        response.raise_for_status()

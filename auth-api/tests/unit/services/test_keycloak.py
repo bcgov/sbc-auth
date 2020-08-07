@@ -17,7 +17,7 @@
 Test-Suite to ensure that the Business Service is working as expected.
 """
 
-from tests.utilities.factory_scenarios import KeycloakScenario
+from tests.utilities.factory_scenarios import KeycloakScenario, TestJwtClaims
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -226,3 +226,13 @@ def test_remove_from_account_holders_group(session):
     for group in user_groups:
         groups.append(group.get('name'))
     assert GROUP_ACCOUNT_HOLDERS not in groups
+
+
+def test_reset_otp(session):
+    """Assert that the user otp configuration get reset in keycloak."""
+    request = KeycloakScenario.create_user_by_user_info(user_info=TestJwtClaims.tester_bceid_role)
+    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
+    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
+    user_id = user.id
+    KEYCLOAK_SERVICE.reset_otp(user_id)
+    assert True
