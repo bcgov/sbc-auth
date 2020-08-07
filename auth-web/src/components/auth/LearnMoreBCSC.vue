@@ -53,7 +53,7 @@
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
-                Download the BC Services Card app and choose 'add card'.
+                Download the BC Services Card app and choose "Set up Mobile Card".
               </div>
             </div>
           </li>
@@ -77,7 +77,7 @@
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
-                Enter your card by scanning or entering your serial number.
+                Scan or enter the barcode on the back of your card with the app and enter your birthdate.
               </div>
             </div>
           </li>
@@ -101,7 +101,7 @@
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
-                Verify your card either through a video call or in-person at a Service BC location.
+                Complete a one-time security check by video or in person to verify your identity.
               </div>
             </div>
           </li>
@@ -125,31 +125,7 @@
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
-                Log in to BC Registries using the BC Service Card option.
-              </div>
-            </div>
-          </li>
-          <li>
-            <div class="step-content">
-              <v-img
-                contain
-                class="step-img"
-                src="@/assets/img/learn-more/desktop-code.jpg"
-                alt="Choose mobile card and get pairing code">
-                <template v-slot:placeholder>
-                  <v-row
-                    class="fill-height ma-0"
-                    align="center"
-                    justify="center"
-                  >
-                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
-                  </v-row>
-                </template>
-              </v-img>
-              <div class="step-line mt-2">
-              </div>
-              <div class="step-text body-2 mt-3 mb-8">
-                Choose to use a "Mobile card" and get a pairing code
+                Log in to BC Registries using the BC Services Card option, and select "Use a Mobile Card".
               </div>
             </div>
           </li>
@@ -173,7 +149,54 @@
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3 mb-8">
-                Enter the pairing code into the BC Services Card app on your device
+                Open the BC Services Card app and enter the pairing code you see on the website.
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="step-content">
+              <v-img
+                contain
+                class="step-img"
+                src="@/assets/img/learn-more/log-in.jpg"
+                alt="Log in to BC Registries">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
+              <div class="step-line mt-2">
+              </div>
+              <div class="step-text body-2 mt-3 mb-8">
+                Log in to BC Registries using the BC Services Card option, and select "Use a Mobile Card".
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="step-content">
+              <v-img
+                class="step-img"
+                src="@/assets/img/learn-more/user-profile.jpg"
+                alt="Agree to terms and create user profile">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
+              <div class="step-line mt-2">
+              </div>
+              <div class="step-text body-2 mt-3 mb-8">
+                Agree to terms of use, create user profile.
               </div>
             </div>
           </li>
@@ -197,7 +220,7 @@
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3">
-                Verify your device and continue to BC Registries.
+                Continue to BC Registries.
               </div>
             </div>
           </li>
@@ -414,7 +437,7 @@ export default class LearnMoreBCSC extends Vue {
   $step-content-width: 10.5rem;
 
   ::v-deep .learn-more-dialog {
-    max-width: 1400px;
+    max-width: 1600px;
   }
 
   .learn-more-content {

@@ -34,7 +34,7 @@
       <div class="right-panel pa-8">
         <h2 class="mt-n1 mb-8">How It works</h2>
         <ul class="steps">
-          <li>
+          <!-- <li>
             <div class="step-content">
               <v-img
                 class="step-img"
@@ -54,6 +54,29 @@
               </div>
               <div class="step-text body-2 mt-3 mb-8">
                 Receive an email invitation from an account administrator or coordinator.
+              </div>
+            </div>
+          </li> -->
+          <li>
+            <div class="step-content">
+              <v-img
+                class="step-img"
+                src="@/assets/img/learn-more/mobile-download.jpg"
+                alt="Download an authenticator app">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
+              <div class="step-line mt-2">
+              </div>
+              <div class="step-text body-2 mt-3 mb-8">
+                Download an authenticator app such as Microsoft or Google Authenticator.
               </div>
             </div>
           </li>
@@ -77,29 +100,6 @@
               </div>
               <div class="step-text body-2 mt-3 mb-8">
                 Create a BCeID account OR log in with an existing Basic BCeID account.
-              </div>
-            </div>
-          </li>
-          <li>
-            <div class="step-content">
-              <v-img
-                class="step-img"
-                src="@/assets/img/learn-more/mobile-download.jpg"
-                alt="Download an authenticator app">
-                <template v-slot:placeholder>
-                  <v-row
-                    class="fill-height ma-0"
-                    align="center"
-                    justify="center"
-                  >
-                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
-                  </v-row>
-                </template>
-              </v-img>
-              <div class="step-line mt-2">
-              </div>
-              <div class="step-text body-2 mt-3 mb-8">
-                Download an authenticator app such as Microsoft or Google Authenticator.
               </div>
             </div>
           </li>
@@ -191,7 +191,7 @@
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3">
-                Access BC Registries applications.
+                Continue to BC Registries.
               </div>
             </div>
           </li>
