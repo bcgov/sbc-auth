@@ -63,21 +63,23 @@
           :columnSort="customSort"
         />
       </v-tab-item>
-      <v-tab-item>
+      <v-tab-item v-if="canCreateAccounts">
         <StaffPendingAccountInvitationsTable
           :columnSort="customSort"
         />
       </v-tab-item>
-      <v-tab-item>
-        <StaffPendingAccountsTable
-          :columnSort="customSort"
-        />
-      </v-tab-item>
-      <v-tab-item>
-        <StaffRejectedAccountsTable
-          :columnSort="customSort"
-        />
-      </v-tab-item>
+      <template v-if="canManageAccounts">
+        <v-tab-item>
+          <StaffPendingAccountsTable
+            :columnSort="customSort"
+          />
+        </v-tab-item>
+        <v-tab-item>
+          <StaffRejectedAccountsTable
+            :columnSort="customSort"
+          />
+        </v-tab-item>
+      </template>
     </v-tabs-items>
   </v-container>
 </template>
