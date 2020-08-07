@@ -122,3 +122,7 @@ export enum Permission {
     TRANSACTION_HISTORY = 'TRANSACTION_HISTORY',
     VIEW_ADMIN_CONTACT = 'VIEW_ADMIN_CONTACT',
 }
+
+export enum LDFlags {
+    AuthLearnMore = 'auth-options-learn-more'
+}
