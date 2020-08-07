@@ -26,6 +26,7 @@
         </div>
         <div class="account-type__buttons">
           <v-btn
+            v-if="showLearnMore"
             large
             depressed
             block
@@ -58,12 +59,13 @@
 
 <script lang="ts">
 import { Component, Emit, Mixins } from 'vue-property-decorator'
+import { LDFlags, LoginSource } from '@/util/constants'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LearnMoreBCEID from '@/components/auth/LearnMoreBCEID.vue'
 import LearnMoreBCSC from '@/components/auth/LearnMoreBCSC.vue'
-import { LoginSource } from '@/util/constants'
 import { Organization } from '@/models/Organization'
 
 @Component({
@@ -139,6 +141,10 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
       default:
         // do nothing
     }
+  }
+
+  private get showLearnMore (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.AuthLearnMore) || false
   }
 
   private get loginSourceEnum () {
