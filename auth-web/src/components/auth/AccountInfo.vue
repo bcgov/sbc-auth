@@ -9,23 +9,23 @@
           {{ errorMessage }}
         </v-alert>
 
-        <ul class="nv-list" v-can:VIEW_ACCOUNT.hide>
-          <li class="nv-list-item mb-10">
+        <div v-can:VIEW_ACCOUNT.hide>
+          <div class="nv-list-item mb-10">
             <div class="name" id="accountName">Account Name</div>
             <div class="value" aria-labelledby="accountName">
               <div class="value__title">{{ currentOrganization.name }}</div>
             </div>
-          </li>
-          <li class="nv-list-item mb-10">
+          </div>
+          <div class="nv-list-item mb-10">
             <div class="name" id="accountStatus">Status</div>
             <div class="value" aria-labelledby="accountStatus">
               <div class="value__title">{{ currentOrganization.orgStatus }}</div>
             </div>
-          </li>
-        </ul>
+          </div>
+        </div>
 
-        <ul class="nv-list" v-show="!anonAccount">
-          <li class="nv-list-item mb-10">
+        <template v-show="!anonAccount">
+          <div class="nv-list-item mb-10">
             <div class="name" id="accountType">Account Type</div>
             <div class="value" aria-labelledby="accountType">
               <div class="value__title">{{ isPremiumAccount ? 'Premium' : 'Basic' }}</div>
@@ -33,8 +33,8 @@
                 <router-link :to="editAccountUrl" v-can:CHANGE_ACCOUNT_TYPE.hide >Change account type</router-link>
               </div>
             </div>
-          </li>
-          <li class="nv-list-item mb-6" v-if="isPremiumAccount">
+          </div>
+          <div class="nv-list-item mb-6" v-if="isPremiumAccount">
             <div class="name mt-3" id="accountName">Linked BC Online Account Details</div>
             <div class="value">
               <v-alert dark color="primary" class="py-3 px-4">
@@ -51,60 +51,52 @@
                 </ul>
               </v-alert>
             </div>
-          </li>
-        </ul>
-
-        <ul class="nv-list mb-10" v-can:VIEW_ADMIN_CONTACT.hide>
-          <li class="nv-list-item">
-            <div class="name" id="adminContact">Account Contact</div>
-            <div class="value" aria-labelledby="adminContact">
-              <OrgAdminContact></OrgAdminContact>
-            </div>
-          </li>
-        </ul>
-
-        <ul class="nv-list" v-if="!isPremiumAccount" v-can:CHANGE_ORG_NAME.hide>
-          <li class="nv-list-item">
-              <div class="name">
-                Account Details
-              </div>
-              <div class="value">
-                <v-text-field
-                filled
-                clearable
-                required
-                label="Account Name"
-                :rules="accountNameRules"
-                v-can:CHANGE_ORG_NAME.disable
-                :disabled="!canChangeAccountName()"
-                v-if="!isPremiumAccount"
-                v-model="orgName"
-                v-on:keydown="enableBtn()"
-                >
-                </v-text-field>
-              </div>
-          </li>
-        </ul>
-
-        <template v-if="currentOrgAddress && (isAddressViewable || isAddressEditable)">
-          <ul class="nv-list">
-            <li class="nv-list-item">
-              <div class="name">
-                Mailing Address
-              </div>
-              <div class="value">
-                <base-address-form
-                  ref="mailingAddress"
-                  :editing="isBaseAddressEditMode"
-                  :schema="baseAddressSchema"
-                  :address="currentOrgAddress"
-                  @update:address="updateAddress"
-                  @valid="checkBaseAddressValidity"
-                />
-              </div>
-            </li>
-          </ul>
+          </div>
         </template>
+
+        <div class="nv-list-item mb-10" v-can:VIEW_ADMIN_CONTACT.hide>
+          <div class="name" id="adminContact">Account Contact</div>
+          <div class="value" aria-labelledby="adminContact">
+            <OrgAdminContact></OrgAdminContact>
+          </div>
+        </div>
+
+        <div class="nv-list-item" v-if="!isPremiumAccount" v-can:CHANGE_ORG_NAME.hide>
+          <div class="name">
+            Account Details
+          </div>
+          <div class="value">
+            <v-text-field
+            filled
+            clearable
+            required
+            label="Account Name"
+            :rules="accountNameRules"
+            v-can:CHANGE_ORG_NAME.disable
+            :disabled="!canChangeAccountName()"
+            v-if="!isPremiumAccount"
+            v-model="orgName"
+            v-on:keydown="enableBtn()"
+            >
+            </v-text-field>
+          </div>
+        </div>
+
+        <div class="nv-list-item" v-if="baseAddress && (isAddressViewable || isAddressEditable)">
+          <div class="name">
+            Mailing Address
+          </div>
+          <div class="value">
+            <base-address-form
+              ref="mailingAddress"
+              :editing="isBaseAddressEditMode"
+              :schema="baseAddressSchema"
+              :address="baseAddress"
+              @update:address="updateAddress"
+              @valid="checkBaseAddressValidity"
+            />
+          </div>
+        </div>
 
         <div v-if="editEnabled">
           <v-divider class="mt-3 mb-10"></v-divider>
@@ -204,10 +196,6 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
     return !!this.orgName || this.orgName === this.currentOrganization?.name
   }
 
-  get addressKey () {
-    return JSON.stringify(this.currentOrgAddress)
-  }
-
   get editAccountUrl () {
     return Pages.EDIT_ACCOUNT_TYPE
   }
@@ -216,11 +204,15 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
     const accountSettings = this.getAccountFromSession()
     await this.syncOrganization(accountSettings.id)
     this.setAccountChangedHandler(this.setup)
-    this.setup()
+    await this.setup()
   }
 
   private keyDown (address: Address) {
     this.enableBtn()
+  }
+
+  private get baseAddress () {
+    return this.currentOrgAddress
   }
 
   private updateAddress (address: Address) {
@@ -289,7 +281,7 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
       name: this.orgName
     }
     if (this.isPremiumAccount) {
-      createRequestBody.mailingAddress = this.currentOrgAddress
+      createRequestBody.mailingAddress = { ...this.baseAddress }
     }
     try {
       await this.updateOrg(createRequestBody)
