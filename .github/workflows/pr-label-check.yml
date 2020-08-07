@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/verify-pr-label-action@v1.0.0
+      - uses: jesusvasquez333/verify-pr-label-action@v1.1.0
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           valid-labels: "bug,enhancement,feature,fix,devops,documentation,maintenance,skip-changelog"
