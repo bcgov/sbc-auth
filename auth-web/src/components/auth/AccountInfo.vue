@@ -82,20 +82,23 @@
           </div>
         </div>
 
-        <div class="nv-list-item" v-if="baseAddress && (isAddressViewable || isAddressEditable)">
-          <div class="name">
-            Mailing Address
-          </div>
-          <div class="value">
-            <base-address-form
-              ref="mailingAddress"
-              :editing="isBaseAddressEditMode"
-              :schema="baseAddressSchema"
-              :address="baseAddress"
-              @update:address="updateAddress"
-              @valid="checkBaseAddressValidity"
-            />
-          </div>
+        <div class="nv-list-item" v-if="(isAddressEditable || isAddressViewable)">
+          <!-- template warpper is required here inorder to keep the placement of divs correctly(to resolve flickering issue when updating the address) -->
+          <template v-if="baseAddress">
+            <div class="name">
+              Mailing Address
+            </div>
+            <div class="value">
+              <base-address-form
+                ref="mailingAddress"
+                :editing="isBaseAddressEditMode"
+                :schema="baseAddressSchema"
+                :address="baseAddress"
+                @update:address="updateAddress"
+                @valid="checkBaseAddressValidity"
+              />
+            </div>
+          </template>
         </div>
 
         <div v-if="editEnabled">
@@ -215,6 +218,10 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
     return this.currentOrgAddress
   }
 
+  private set baseAddress (address) {
+    this.setCurrentOrganizationAddress(address)
+  }
+
   private updateAddress (address: Address) {
     this.setCurrentOrganizationAddress(address)
     this.enableBtn()
@@ -226,6 +233,9 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
     if (this.isPremiumAccount) {
       await this.syncPaymentSettings(accountSettings.id)
       await this.syncAddress()
+    } else {
+      // inorder to hide the address if not premium account
+      this.baseAddress = null
     }
   }
 
