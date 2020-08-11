@@ -25,7 +25,7 @@ import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.
 export default class PaymentReturnView extends Vue {
         @Prop() paymentId: string
         @Prop() transactionId: string
-        @Prop() receiptNum: string
+        @Prop() payResponseUrl: string
         returnUrl:string
         errorMessage:string = ''
         // show modal when paybc is down..otherwise [all unhandled technical error , show plain text error message..]
@@ -36,7 +36,7 @@ export default class PaymentReturnView extends Vue {
             this.errorMessage = this.$t('payNoParams').toString()
             return
           }
-          PaymentServices.updateTransaction(this.paymentId, this.transactionId, this.receiptNum)
+          PaymentServices.updateTransaction(this.paymentId, this.transactionId, this.payResponseUrl)
             .then(response => {
               this.returnUrl = response.data.clientSystemUrl
               if (response.data.paySystemReasonCode && response.data.paySystemReasonCode === 'SERVICE_UNAVAILABLE') {
