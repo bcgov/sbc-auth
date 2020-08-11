@@ -156,30 +156,6 @@
           <li>
             <div class="step-content">
               <v-img
-                contain
-                class="step-img"
-                src="@/assets/img/learn-more/log-in.jpg"
-                alt="Log in to BC Registries">
-                <template v-slot:placeholder>
-                  <v-row
-                    class="fill-height ma-0"
-                    align="center"
-                    justify="center"
-                  >
-                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
-                  </v-row>
-                </template>
-              </v-img>
-              <div class="step-line mt-2">
-              </div>
-              <div class="step-text body-2 mt-3 mb-8">
-                Log in to BC Registries using the BC Services Card option, and select "Use a Mobile Card".
-              </div>
-            </div>
-          </li>
-          <li>
-            <div class="step-content">
-              <v-img
                 class="step-img"
                 src="@/assets/img/learn-more/user-profile.jpg"
                 alt="Agree to terms and create user profile">
@@ -377,6 +353,29 @@
           <li>
             <div class="step-content">
               <v-img
+                class="step-img"
+                src="@/assets/img/learn-more/user-profile.jpg"
+                alt="Agree to terms and create user profile">
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular indeterminate color="grey"></v-progress-circular>
+                  </v-row>
+                </template>
+              </v-img>
+              <div class="step-line mt-2">
+              </div>
+              <div class="step-text body-2 mt-3 mb-8">
+                Agree to terms of use, create user profile.
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="step-content">
+              <v-img
                 contain
                 class="step-img"
                 src="@/assets/img/learn-more/success.jpg"
@@ -394,7 +393,7 @@
               <div class="step-line mt-2">
               </div>
               <div class="step-text body-2 mt-3">
-                Access BC Registries applications.
+                Continue to BC Registries.
               </div>
             </div>
           </li>
