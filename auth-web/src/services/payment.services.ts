@@ -42,9 +42,8 @@ export default class PaymentService {
     return axios.post(url, filterParams, { headers })
   }
 
-  static getGLCodeList (glcodeFilter?: any): AxiosPromise<GLCodeResponse> {
-    let params = new URLSearchParams()
-    return axios.get(`${ConfigHelper.getPayAPIURL()}/fees/distributions`, { params })
+  static getGLCodeList (): AxiosPromise<GLCodeResponse> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/fees/distributions`)
   }
 
   static getGLCodeFiling (distributionCodeId: string): AxiosPromise<FilingTypeResponse> {

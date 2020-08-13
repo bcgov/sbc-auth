@@ -146,8 +146,8 @@
               <ul>
                 <li
                   v-for="filing in filingTypes"
-                  :key="filing"
-                >{{filing}}</li>
+                  :key="filing.feeScheduleId"
+                >{{filing.corpType}}/{{filing.filingType}}</li>
               </ul>
             </v-col>
           </v-row>
@@ -175,7 +175,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { FilingType, GLCode } from '@/models/Staff'
 import StaffModule from '@/store/modules/staff'
 import { getModule } from 'vuex-module-decorators'
@@ -195,26 +195,16 @@ export default class GLCodeDetailsModal extends Vue {
   private readonly updateGLCodeFiling!: (glcodeFilingData: GLCode) => any
   private isOpen = false
   private glcodeDetails: GLCode = {} as GLCode
-  private filingTypes: string[] = []
+  private filingTypes: FilingType[] = []
 
   public async open (selectedData) {
     if (selectedData?.distributionCodeId) {
-      this.filingTypes = await this.getFilingTypesList(selectedData.distributionCodeId)
+      this.filingTypes = await this.getGLCodeFiling(selectedData.distributionCodeId)
       this.glcodeDetails = { ...selectedData }
       this.isOpen = true
     } else {
       // eslint-disable-next-line no-console
       console.error('distributionCodeId not found!')
-    }
-  }
-
-  private async getFilingTypesList (distributionCodeId) {
-    const glcodeFilings: FilingType[] = await this.getGLCodeFiling(distributionCodeId)
-    if (glcodeFilings.length) {
-      const filings = glcodeFilings.map(val => val.filingType)
-      return filings
-    } else {
-      return []
     }
   }
 
@@ -225,9 +215,21 @@ export default class GLCodeDetailsModal extends Vue {
   }
 
   private async save () {
+    // removing null key-values to aviod error from backend
+    for (const key in this.glcodeDetails) {
+      if (this.glcodeDetails[key] === null) {
+        delete this.glcodeDetails[key]
+      }
+    }
     const updated = await this.updateGLCodeFiling(this.glcodeDetails)
-    // eslint-disable-next-line no-console
-    console.log(updated)
+    if (updated.distributionCodeId) {
+      this.close()
+      this.refreshGLCodeTable()
+    }
+  }
+
+  @Emit('refresh-glcode-table')
+  refreshGLCodeTable () {
   }
 }
 </script>

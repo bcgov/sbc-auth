@@ -232,8 +232,8 @@ export default class StaffModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async getGLCodeList (filterParams: any) {
-    const response = await PaymentService.getGLCodeList(filterParams)
+  public async getGLCodeList () {
+    const response = await PaymentService.getGLCodeList()
     return response?.data?.items || []
   }
 
@@ -246,6 +246,6 @@ export default class StaffModule extends VuexModule {
   @Action({ rawError: true })
   public async updateGLCodeFiling (glcodeFilingData: GLCode) {
     const response = await PaymentService.updateGLCodeFiling(glcodeFilingData)
-    return response?.data?.items || {}
+    return response?.data || {}
   }
 }

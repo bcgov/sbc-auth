@@ -30,6 +30,7 @@
     </v-data-table>
     <GLCodeDetailsModal
       ref="glcodeDetailsModal"
+      @refresh-glcode-table="refreshTable"
     >
     </GLCodeDetailsModal>
   </div>
@@ -57,7 +58,7 @@ import { getModule } from 'vuex-module-decorators'
 export default class GLCodesDataTable extends Vue {
   private staffStore = getModule(StaffModule, this.$store)
   @Prop({ default: '' }) private folioFilter: string
-  private readonly getGLCodeList!: (filterParams: any) => GLCode[]
+  private readonly getGLCodeList!: () => GLCode[]
 
   private glCodeList: GLCode[] = [];
   private formatDate = CommonUtils.formatDisplayDate
@@ -113,17 +114,9 @@ export default class GLCodesDataTable extends Vue {
     glcodeDetailsModal: GLCodeDetailsModal
   }
 
-  private async loadGLCodeList (pageNumber?: number, itemsPerPage?: number) {
+  private async loadGLCodeList () {
     this.isDataLoading = true
-    const filterParams = {
-      filterPayload: {
-        dateFilter: null,
-        folioNumber: this.folioFilter
-      },
-      pageNumber: pageNumber,
-      pageLimit: itemsPerPage
-    }
-    this.glCodeList = await this.getGLCodeList(filterParams)
+    this.glCodeList = await this.getGLCodeList()
     this.isDataLoading = false
   }
 
@@ -145,6 +138,10 @@ export default class GLCodesDataTable extends Vue {
 
   private viewDetails (item) {
     this.$refs.glcodeDetailsModal.open(item)
+  }
+
+  private async refreshTable () {
+    await this.loadGLCodeList()
   }
 }
 </script>
