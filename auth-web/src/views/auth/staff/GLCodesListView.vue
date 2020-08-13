@@ -1,9 +1,10 @@
 <template>
-  <v-container>
+  <v-container class="pa-8">
     <header class="view-header mb-8">
       <h2 class="view-header__title">General Ledger Codes</h2>
     </header>
-    <div class="filter-bar d-flex mb-8">
+    <!-- The below code is for filter, can be enabled once filter story is available -->
+    <div class="filter-bar d-flex mb-8" v-if="false">
       <div class="client-search-filter d-inline-flex search-input-with-btn">
         <v-text-field
           dense
@@ -26,21 +27,21 @@
         >Apply</v-btn>
       </div>
     </div>
-    <div class="filter-results" :class="{ 'active' : filterArray.length }">
+    <div class="filter-results" :class="{ 'active' : clientSearchProp.length }">
       <div class="d-flex align-center mb-8">
-        <div class="filter-results-label py-2 mr-7" v-if="filterArray.length">{{totalTransactionsCount}} {{totalTransactionsCount === 1 ? 'record' : 'records'}} found</div>
+        <div class="filter-results-label py-2 mr-7" v-if="clientSearchProp.length">{{totalGLRecordCount}} {{totalGLRecordCount === 1 ? 'record' : 'records'}} found</div>
         <v-chip close label color="info"
           class="mr-2 filter-chip"
           close-icon="mdi-window-close"
           height="36"
-          v-for="filter in filterArray"
-          :key="filter.type"
+          v-for="filter in clientSearchProp"
+          :key="filter"
           @click:close="clearFilter(filter)"
         >
-          {{filter.displayText}}
+          {{filter}}
         </v-chip>
         <v-btn outlined color="primary" class="px-2"
-          v-if="filterArray.length"
+          v-if="clientSearchProp.length"
           @click="clearFilter('', true)"
         >
           Clear all filters
@@ -48,85 +49,48 @@
       </div>
     </div>
     <GLCodesDataTable
-      :dateFilter="dateFilterProp"
-      :folioFilter="clientSearchProp"
+      :clientSearch="clientSearchProp"
       :key="updateGLCodeTableCounter"
     ></GLCodesDataTable>
   </v-container>
 </template>
 
 <script lang="ts">
-import { Account, Pages } from '@/util/constants'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { Member, MembershipType, Organization } from '@/models/Organization'
-import { TransactionFilterParams, TransactionTableList } from '@/models/transaction'
-import { mapActions, mapState } from 'vuex'
-import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
-import CommonUtils from '@/util/common-util'
 import GLCodesDataTable from '@/components/auth/staff/GLCodesDataTable.vue'
-import moment from 'moment'
 
 @Component({
   components: {
     GLCodesDataTable
-  },
-  methods: {
-    ...mapActions('org', [
-      'getTransactionReport'
-    ])
-  },
-  computed: {
-    ...mapState('org', [
-      'currentOrganization',
-      'currentMembership'
-    ])
   }
 })
-export default class GLCodesListView extends Mixins(AccountChangeMixin) {
-  @Prop({ default: '' }) private orgId: string;
-  private readonly currentMembership!: Member
-  private readonly currentOrganization!: Organization
-  private readonly getTransactionReport!: (filterParams: any) => TransactionTableList
-  private showDateFilter: boolean = false
-  private dateRangeSelected: any = []
-  private dateFilterSelectedIndex: number = null
-  private dateFilterSelected: any = {}
-  private dateFilterProp: any = {}
-  private clientSearchProp: string = ''
+export default class GLCodesListView extends Vue {
+  private clientSearchProp: string[] = []
   private updateGLCodeTableCounter: number = 0
   private clientSearch: string = ''
   private filterArray = []
-  private totalTransactionsCount: number = 0
-  private pickerDate: string = ''
+  private totalGLRecordCount: number = 0
 
   private async mounted () {
   }
 
   private clearFilter (filter, isAll: boolean = false) {
+    this.clientSearch = ''
     if (isAll) {
-      // this.initFilter()
+      this.clientSearchProp = []
     } else {
-      switch (filter.type) {
-        case 'DATE':
-          this.dateFilterProp = {}
-          this.dateFilterSelectedIndex = null
-          this.dateRangeSelected = []
-          break
-        case 'FOLIO':
-          this.clientSearch = this.clientSearchProp = ''
-          break
-      }
-      const index = this.filterArray.findIndex((elem) => elem.type === filter.type)
+      const index = this.clientSearchProp.findIndex((elem) => elem === filter)
       if (index > -1) {
         this.filterArray.splice(index, 1)
       }
-      this.updateGLCodeTableCounter++
     }
+    this.updateGLCodeTableCounter++
   }
 
   private applyClientSearchFilter () {
-    this.clientSearchProp = this.clientSearch
+    this.clientSearchProp.push(this.clientSearch)
     this.updateGLCodeTableCounter++
+    this.clientSearch = ''
   }
 }
 </script>
