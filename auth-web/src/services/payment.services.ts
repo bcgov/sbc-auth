@@ -1,4 +1,5 @@
 import Axios, { AxiosPromise } from 'axios'
+import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
 import { TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 import ConfigHelper from '@/util/config-helper'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
@@ -39,5 +40,18 @@ export default class PaymentService {
     }
     const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/reports`
     return axios.post(url, filterParams, { headers })
+  }
+
+  static getGLCodeList (glcodeFilter?: any): AxiosPromise<GLCodeResponse> {
+    let params = new URLSearchParams()
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/fees/distributions`, { params })
+  }
+
+  static getGLCodeFiling (distributionCodeId: string): AxiosPromise<FilingTypeResponse> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/fees/distributions/${distributionCodeId}/schedules`)
+  }
+
+  static updateGLCodeFiling (glcodeFilingData: GLCode): AxiosPromise<GLCodeResponse> {
+    return axios.put(`${ConfigHelper.getPayAPIURL()}/fees/distributions/${glcodeFilingData.distributionCodeId}`, glcodeFilingData)
   }
 }
