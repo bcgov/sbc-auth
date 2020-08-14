@@ -18,6 +18,7 @@ import DashboardView from '@/views/auth/DashboardView.vue'
 import DecideBusinessView from '@/views/auth/DecideBusinessView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
+import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import HomeView from '@/views/auth/HomeView.vue'
 import HomeViewOutdated from '@/views/auth/HomeViewOutdated.vue'
 import IncorpOrRegisterView from '@/views/auth/IncorpOrRegisterView.vue'
@@ -349,6 +350,13 @@ export function getRoutes (): RouteConfig[] {
       path: '/searchbusiness',
       name: 'searchbusiness',
       component: SearchBusinessView,
+      props: true,
+      meta: { requiresAuth: true, allowedRoles: [Role.Staff] }
+    },
+    {
+      path: '/glcodelist',
+      name: 'glcodelist',
+      component: GLCodesListView,
       props: true,
       meta: { requiresAuth: true, allowedRoles: [Role.Staff] }
     },
