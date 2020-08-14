@@ -53,7 +53,7 @@ export default class CommonUtils {
 
   // Formatting date in the desired format for displaying in the template
   static formatDisplayDate (date: Date, format?: string) {
-    return moment(date).format(format || 'MM-DD-YYYY')
+    return (date) ? moment(date).format(format || 'MM-DD-YYYY') : ''
   }
 
   // Formatting date in the desired format for vue date pickers
