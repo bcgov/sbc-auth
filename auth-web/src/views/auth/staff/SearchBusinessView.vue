@@ -48,8 +48,30 @@
     </v-card>
 
     <!-- Director search -->
-    <v-card flat class="pa-8">
+    <v-card flat class="mb-4 pa-8">
       <StaffAccountManagement v-if="canViewAccounts"></StaffAccountManagement>
+    </v-card>
+
+    <!-- GL Codes -->
+
+    <v-card flat class="mb-4 px-8 py-6" v-if="canViewGLCodes">
+      <v-row class="view-header flex-row mb-0">
+        <v-col>
+          <h2 class="view-header__title">
+            General Ledger Codes
+          </h2>
+        </v-col>
+        <v-col class="text-right">
+          <v-btn
+            large
+            color="primary"
+            class="font-weight-bold"
+            @click="gotToGLCodes"
+          >
+            View General Ledger Codes
+          </v-btn>
+        </v-col>
+      </v-row>
     </v-card>
 
   </v-container>
@@ -104,6 +126,10 @@ export default class SearchBusinessView extends Vue {
     return (this.currentUser?.roles?.includes(Role.StaffViewAccounts))
   }
 
+  private get canViewGLCodes (): boolean {
+    return (this.currentUser?.roles?.includes(Role.AdminStaff))
+  }
+
   private isFormValid (): boolean {
     return !!this.businessNumber && this.$refs.searchBusinessForm.validate()
   }
@@ -133,6 +159,10 @@ export default class SearchBusinessView extends Vue {
 
   incorpNumFormat () {
     this.businessNumber = CommonUtils.formatIncorporationNumber(this.businessNumber)
+  }
+
+  gotToGLCodes () {
+    this.$router.push('/glcodelist')
   }
 }
 </script>
