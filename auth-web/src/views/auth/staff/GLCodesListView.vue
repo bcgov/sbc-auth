@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-8">
+  <v-container class="pa-0">
     <header class="view-header mb-8">
       <h2 class="view-header__title">General Ledger Codes</h2>
     </header>
