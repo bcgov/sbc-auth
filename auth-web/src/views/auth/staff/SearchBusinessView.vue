@@ -54,24 +54,8 @@
 
     <!-- GL Codes -->
 
-    <v-card flat class="mb-4 px-8 py-6" v-if="canViewGLCodes">
-      <v-row class="view-header flex-row mb-0">
-        <v-col>
-          <h2 class="view-header__title">
-            General Ledger Codes
-          </h2>
-        </v-col>
-        <v-col class="text-right">
-          <v-btn
-            large
-            color="primary"
-            class="font-weight-bold"
-            @click="gotToGLCodes"
-          >
-            View General Ledger Codes
-          </v-btn>
-        </v-col>
-      </v-row>
+     <v-card flat class="mb-4 pa-8">
+      <GLCodesListView v-if="canViewGLCodes"></GLCodesListView>
     </v-card>
 
   </v-container>
@@ -84,6 +68,7 @@ import { mapActions, mapState } from 'vuex'
 import BusinessModule from '@/store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
+import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Role } from '@/util/constants'
 import StaffAccountManagement from '@/components/auth/staff/StaffAccountManagement.vue'
@@ -94,6 +79,7 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
+    GLCodesListView,
     SupportInfoCard,
     StaffAccountManagement
   },

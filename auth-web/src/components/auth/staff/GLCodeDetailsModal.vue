@@ -1,185 +1,211 @@
 <template>
-  <v-row justify="center">
-    <v-dialog
-      v-model="isOpen"
-      persistent
-      max-width="900px"
-    >
-      <v-card class="pa-2">
-        <v-card-title>
-          <h3>General Ledger Code Details</h3>
-          <v-btn
-            large
-            icon
-            @click="close"
-          >
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
-        <v-card-text>
-          <v-row class="mb-4">
-            <v-col cols="12" sm="4">
-              <div class="gl-code-label">Effective Dates</div>
-            </v-col>
-            <v-col cols="12" sm="4">
-              <v-text-field
-                filled
-                label="Start Date"
-                v-model="glcodeDetails.startDate"
+  <v-dialog
+    v-model="isOpen"
+    persistent
+    max-width="900px"
+  >
+    <v-card>
+      <v-card-title class="pb-4">
+        <h3>General Ledger Code Details</h3>
+        <v-btn
+          large
+          icon
+          @click="close"
+        >
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-card-title>
+      <v-card-text>
+
+        <v-tabs v-model="tab" class="mb-7">
+          <v-tab>Details</v-tab>
+          <v-tab>Associated Filing Types</v-tab>
+        </v-tabs>
+
+        <v-tabs-items v-model="tab">
+          <v-tab-item>
+
+            <div class="pt-4">
+
+            <!-- Effective Dates -->
+            <fieldset>
+              <legend>Effective Dates</legend>
+              <v-row>
+                <v-col cols="12" sm="6" class="col">
+                  <v-text-field
+                    filled
+                    hide-details
+                    label="Start Date"
+                    v-model="glcodeDetails.startDate"
+                  >
+                  </v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" class="col">
+                  <v-text-field
+                    filled
+                    hide-details
+                    label="End Date"
+                    v-model="glcodeDetails.endDate"
+                  >
+                  </v-text-field>
+                </v-col>
+              </v-row>
+            </fieldset>
+
+            <!-- General Information -->
+            <fieldset class="mt-6">
+              <legend>General Information</legend>
+              <v-row>
+                <v-col cols="12" sm="6" class="col">
+                  <v-text-field
+                    filled
+                    hide-details
+                    label="Client Number"
+                    v-model="glcodeDetails.client"
+                  >
+                  </v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" class="col">
+                  <v-text-field
+                    filled
+                    hide-details
+                    label="Responsibility Center"
+                    v-model="glcodeDetails.responsibilityCentre"
+                  >
+                  </v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" class="col">
+                  <v-text-field
+                    filled
+                    hide-details
+                    label="Service Line"
+                    v-model="glcodeDetails.serviceLine"
+                  >
+                  </v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" class="col">
+                  <v-text-field
+                    filled
+                    hide-details
+                    label="STOB (Standard Object of Expense)"
+                    v-model="glcodeDetails.stob"
+                  >
+                  </v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" class="col">
+                  <v-text-field
+                    filled
+                    hide-details
+                    label="Project Code"
+                    v-model="glcodeDetails.projectCode"
+                  >
+                  </v-text-field>
+                </v-col>
+              </v-row>
+            </fieldset>
+
+            <!-- Service Fee Information -->
+            <fieldset class="mt-6">
+              <legend>
+                Service Fee Information
+              </legend>
+              <v-row>
+                <v-col cols="12" sm="6" class="col">
+                  <v-text-field
+                    filled
+                    hide-details
+                    label="Client Number"
+                    v-model="glcodeDetails.serviceFeeClient"
+                  >
+                  </v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" class="col">
+                  <v-text-field
+                    filled
+                    hide-details
+                    label="Responsibility Center"
+                    v-model="glcodeDetails.serviceFeeResponsibilityCentre"
+                  >
+                  </v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" class="col">
+                  <v-text-field
+                    filled
+                    hide-details
+                    label="Service Line"
+                    v-model="glcodeDetails.serviceFeeLine"
+                  >
+                  </v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" class="col">
+                  <v-text-field
+                    filled
+                    hide-details
+                    label="STOB (Standard Object of Expense)"
+                    v-model="glcodeDetails.serviceFeeStob"
+                  >
+                  </v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" class="col">
+                  <v-text-field
+                    filled
+                    hide-details
+                    label="Project Code"
+                    v-model="glcodeDetails.serviceFeeProjectCode"
+                  >
+                  </v-text-field>
+                </v-col>
+              </v-row>
+            </fieldset>
+
+            </div>
+
+            <v-divider class="mt-6 mb-8"></v-divider>
+
+            <div class="d-flex">
+              <v-spacer></v-spacer>
+              <v-btn
+                large
+                color="primary"
+                class="font-weight-bold mr-2"
+                @click="save"
+                width="100"
               >
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" sm="4">
-              <v-text-field
-                filled
-                label="End Date"
-                v-model="glcodeDetails.endDate"
+                Save
+              </v-btn>
+              <v-btn
+                large
+                depressed
+                @click="close"
+                width="100"
               >
-              </v-text-field>
-            </v-col>
-          </v-row>
-          <v-row class="mb-10">
-            <v-col cols="12" sm="4">
-              <div class="gl-code-label">General Information</div>
-            </v-col>
-            <v-col cols="12" sm="4">
-              <v-text-field
-                filled
-                hide-details
-                label="Client Number"
-                v-model="glcodeDetails.client"
-              >
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" sm="4">
-              <v-text-field
-                filled
-                hide-details
-                label="Responsibility Center"
-                v-model="glcodeDetails.responsibilityCentre"
-              >
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" sm="4" offset-sm="4">
-              <v-text-field
-                filled
-                hide-details
-                label="Service Line"
-                v-model="glcodeDetails.serviceLine"
-              >
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" sm="4">
-              <v-text-field
-                filled
-                hide-details
-                label="STOB(Standard Object of Expense)"
-                v-model="glcodeDetails.stob"
-              >
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" sm="4" offset-sm="4">
-              <v-text-field
-                filled
-                hide-details
-                label="Project Code"
-                v-model="glcodeDetails.projectCode"
-              >
-              </v-text-field>
-            </v-col>
-          </v-row>
-          <v-row class="mb-10">
-            <v-col cols="12" sm="4">
-              <div class="gl-code-label">Service Fee Information</div>
-            </v-col>
-            <v-col cols="12" sm="4">
-              <v-text-field
-                filled
-                hide-details
-                label="Client Number"
-                v-model="glcodeDetails.serviceFeeClient"
-              >
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" sm="4">
-              <v-text-field
-                filled
-                hide-details
-                label="Responsibility Center"
-                v-model="glcodeDetails.serviceFeeResponsibilityCentre"
-              >
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" sm="4" offset-sm="4">
-              <v-text-field
-                filled
-                hide-details
-                label="Service Line"
-                v-model="glcodeDetails.serviceFeeLine"
-              >
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" sm="4">
-              <v-text-field
-                filled
-                hide-details
-                label="STOB(Standard Object of Expense)"
-                v-model="glcodeDetails.serviceFeeStob"
-              >
-              </v-text-field>
-            </v-col>
-            <v-col cols="12" sm="4" offset-sm="4">
-              <v-text-field
-                filled
-                hide-details
-                label="Project Code"
-                v-model="glcodeDetails.serviceFeeProjectCode"
-              >
-              </v-text-field>
-            </v-col>
-          </v-row>
-          <v-row class="mb-10">
-            <v-col cols="12" sm="4">
-              <div class="gl-code-label">Associated Filing Types</div>
-            </v-col>
-            <v-col cols="12" sm="4">
-              <ul>
-                <li
-                  v-for="filing in filingTypes"
-                  :key="filing.feeScheduleId"
-                >{{filing.corpType}}/{{filing.filingType}}</li>
-              </ul>
-            </v-col>
-          </v-row>
-          <v-divider></v-divider>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="primary"
-            depressed
-            @click="save"
-            width="90"
-            class="font-weight-bold"
-          >Save</v-btn>
-          <v-btn
-            depressed
-            @click="close"
-            width="90"
-            class="font-weight-bold"
-          >Cancel</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-row>
+                Cancel
+              </v-btn>
+            </div>
+
+          </v-tab-item>
+          <v-tab-item>
+            <v-data-table
+              :headers="filingTypeHeaders"
+              :items="filingTypes"
+              item-key="feeScheduleId"
+              hide-default-footer
+            >
+            </v-data-table>
+          </v-tab-item>
+        </v-tabs-items>
+
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { FilingType, GLCode } from '@/models/Staff'
+import { mapActions, mapState } from 'vuex'
 import StaffModule from '@/store/modules/staff'
 import { getModule } from 'vuex-module-decorators'
-import { mapActions } from 'vuex'
 
 @Component({
   methods: {
@@ -196,6 +222,7 @@ export default class GLCodeDetailsModal extends Vue {
   private isOpen = false
   private glcodeDetails: GLCode = {} as GLCode
   private filingTypes: FilingType[] = []
+  private tab = null
 
   public async open (selectedData) {
     if (selectedData?.distributionCodeId) {
@@ -207,6 +234,21 @@ export default class GLCodeDetailsModal extends Vue {
       console.error('distributionCodeId not found!')
     }
   }
+
+  private readonly filingTypeHeaders = [
+    {
+      text: 'Corporation Type',
+      align: 'left',
+      sortable: false,
+      value: 'corpType'
+    },
+    {
+      text: 'Filing Type',
+      align: 'left',
+      sortable: false,
+      value: 'filingType'
+    }
+  ]
 
   public close () {
     this.glcodeDetails = {} as GLCode
