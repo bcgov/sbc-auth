@@ -18,8 +18,8 @@
         <div class="btn-inline">
           <v-btn
             outlined
-            small
             color="primary"
+            class="action-btn"
             :data-test="getIndexedTag('details-button', item.distributionCodeId)"
             @click="viewDetails(item)"
           >
@@ -91,13 +91,13 @@ export default class GLCodesDataTable extends Vue {
     },
     {
       text: 'Project Code',
-      align: 'right',
+      align: 'left',
       value: 'projectCode',
       sortable: false
     },
     {
       text: 'Modified',
-      align: 'right',
+      align: 'left',
       value: 'updatedOn',
       sortable: false
     },
@@ -147,61 +147,18 @@ export default class GLCodesDataTable extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.v-list--dense {
-  .v-list-item {
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
-  }
-
-  .v-list-item .v-list-item__title {
-    margin-bottom: 0.25rem;
-    font-weight: 700;
-  }
-}
-
-.status-tooltip-icon {
-  margin-top: -4px;
-  margin-right: 5px;
-  margin-left: 2px;
-}
-
-.v-tooltip__content:before {
-  content: ' ';
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  margin-left: -10px;
-  width: 20px;
-  height: 20px;
-  border-width: 10px 10px 10px 10px;
-  border-style: solid;
-  border-color: transparent transparent var(--v-grey-darken4) transparent;
-}
-
 ::v-deep {
-  td {
-    padding-top: 1rem !important;
-    padding-bottom: 1rem !important;
-    height: auto;
-    vertical-align: top;
-    overflow: hidden;
-  }
+  table {
+    table-layout: fixed;
 
-  .glcodes-list {
-    .v-data-table-header {
-      margin-bottom: -2px;
-    }
-
-    .product-name {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    td {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
     }
   }
 }
 
-thead + thead {
-  position: absolute;
-  top: -2px;
+.action-btn {
+  width: 5rem;
 }
 </style>
