@@ -70,6 +70,12 @@ import moment from 'moment'
     ...mapActions('org', [
       'getStatementsList'
     ])
+  },
+  computed: {
+    ...mapState('org', [
+      'currentOrganization',
+      'currentMembership'
+    ])
   }
 })
 export default class Statements extends Mixins(AccountChangeMixin) {
@@ -118,7 +124,11 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   }
 
   private async initialize () {
-    await this.loadStatementsList(1, this.ITEMS_PER_PAGE * 2)
+    if (!this.isStatementsAllowed) {
+      // if the account switing happening when the user is already in the statements page,
+      // redirect to account info if its a basic account
+      this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
+    }
   }
 
   formatDateRange (date1, date2) {
