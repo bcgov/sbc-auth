@@ -63,6 +63,7 @@ export function getRoutes (): RouteConfig[] {
   const teamManagement = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/TeamManagement.vue')
   const accountLoginOption = () => import(/* webpackChunkName: "account-settings" */ '../views/auth/AccountSettingsLoginOption.vue')
   const transaction = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/Transactions.vue')
+  const statements = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/Statements.vue')
   const routes = [
     { path: '/', name: 'root', redirect: 'home' },
     {
@@ -150,6 +151,14 @@ export function getRoutes (): RouteConfig[] {
           path: 'transactions',
           name: 'transactions',
           component: transaction,
+          meta: {
+            isPremiumOnly: true
+          }
+        },
+        {
+          path: 'statements',
+          name: 'statements',
+          component: statements,
           meta: {
             isPremiumOnly: true
           }
