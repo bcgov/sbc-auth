@@ -39,8 +39,10 @@
           </div>
         </div>
         <div class="product-suite"
-          :data-test="getIndexedTag('transaction-sub', item.index)"
-        >Business Registry</div>
+          :data-test="getIndexedTag('transaction-incorp-number', item.index)"
+        >
+          Incorporation Number: {{ item.businessIdentifier }}
+        </div>
       </template>
       <template v-slot:item.transactionDate="{ item }">
         {{formatDate(item.transactionDate)}}
@@ -131,7 +133,7 @@ export default class TransactionsDataTable extends Vue {
       align: 'left',
       value: 'status',
       sortable: false,
-      width: '120'
+      width: '115'
     }
   ]
 
