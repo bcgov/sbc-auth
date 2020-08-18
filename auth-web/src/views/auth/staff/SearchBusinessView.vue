@@ -48,8 +48,14 @@
     </v-card>
 
     <!-- Director search -->
-    <v-card flat class="pa-8">
+    <v-card flat class="mb-4 pa-8">
       <StaffAccountManagement v-if="canViewAccounts"></StaffAccountManagement>
+    </v-card>
+
+    <!-- GL Codes -->
+
+     <v-card flat class="mb-4 pa-8">
+      <GLCodesListView v-if="canViewGLCodes"></GLCodesListView>
     </v-card>
 
   </v-container>
@@ -62,6 +68,7 @@ import { mapActions, mapState } from 'vuex'
 import BusinessModule from '@/store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
+import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Role } from '@/util/constants'
 import StaffAccountManagement from '@/components/auth/staff/StaffAccountManagement.vue'
@@ -72,6 +79,7 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
+    GLCodesListView,
     SupportInfoCard,
     StaffAccountManagement
   },
@@ -104,6 +112,10 @@ export default class SearchBusinessView extends Vue {
     return (this.currentUser?.roles?.includes(Role.StaffViewAccounts))
   }
 
+  private get canViewGLCodes (): boolean {
+    return (this.currentUser?.roles?.includes(Role.AdminStaff))
+  }
+
   private isFormValid (): boolean {
     return !!this.businessNumber && this.$refs.searchBusinessForm.validate()
   }
@@ -133,6 +145,10 @@ export default class SearchBusinessView extends Vue {
 
   incorpNumFormat () {
     this.businessNumber = CommonUtils.formatIncorporationNumber(this.businessNumber)
+  }
+
+  gotToGLCodes () {
+    this.$router.push('/glcodelist')
   }
 }
 </script>

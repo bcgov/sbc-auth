@@ -1,4 +1,4 @@
-import { AccountType, ProductCode } from '@/models/Staff'
+import { AccountType, GLCode, ProductCode } from '@/models/Staff'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { MembershipType, OrgFilterParams, Organization } from '@/models/Organization'
 import { AccountStatus } from '@/util/constants'
@@ -8,6 +8,7 @@ import { Contact } from '@/models/contact'
 import { Invitation } from '@/models/Invitation'
 import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
+import PaymentService from '@/services/payment.services'
 import StaffService from '@/services/staff.services'
 import { User } from '@/models/user'
 import UserService from '@/services/user.services'
@@ -228,5 +229,23 @@ export default class StaffModule extends VuexModule {
     if (!orgResponse || orgResponse.status !== 204) {
       throw Error('Unable to delete org')
     }
+  }
+
+  @Action({ rawError: true })
+  public async getGLCodeList () {
+    const response = await PaymentService.getGLCodeList()
+    return response?.data?.items || []
+  }
+
+  @Action({ rawError: true })
+  public async getGLCodeFiling (distributionCodeId: string) {
+    const response = await PaymentService.getGLCodeFiling(distributionCodeId)
+    return response?.data?.items || []
+  }
+
+  @Action({ rawError: true })
+  public async updateGLCodeFiling (glcodeFilingData: GLCode) {
+    const response = await PaymentService.updateGLCodeFiling(glcodeFilingData)
+    return response?.data || {}
   }
 }
