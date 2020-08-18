@@ -1,4 +1,5 @@
 import Axios, { AxiosPromise } from 'axios'
+import { StatementFilterParams, StatementListResponse } from '@/models/statement'
 import { TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 import ConfigHelper from '@/util/config-helper'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
@@ -39,5 +40,17 @@ export default class PaymentService {
     }
     const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/reports`
     return axios.post(url, filterParams, { headers })
+  }
+
+  static getStatementsList (accountId: string, filterParams: StatementFilterParams): AxiosPromise<StatementListResponse> {
+    let params = new URLSearchParams()
+    if (filterParams.pageNumber) {
+      params.append('page', filterParams.pageNumber.toString())
+    }
+    if (filterParams.pageLimit) {
+      params.append('limit', filterParams.pageLimit.toString())
+    }
+    const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements`
+    return axios.get(url, { params })
   }
 }

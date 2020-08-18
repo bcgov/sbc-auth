@@ -74,11 +74,21 @@
               </v-list-item>
               <v-list-item dense class="py-1 px-8"
                 v-if="isPremiumAccount" v-can:TRANSACTION_HISTORY.hide
+                :to="statementsUrl"
+                data-test="statements-nav-item"
+              >
+                <v-list-item-icon>
+                  <v-icon color="link" left>mdi-file-document-outline</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Statements</v-list-item-title>
+              </v-list-item>
+              <v-list-item dense class="py-1 px-8"
+                v-if="isPremiumAccount" v-can:TRANSACTION_HISTORY.hide
                 :to="transactionUrl"
                 data-test="transactions-nav-item"
               >
                 <v-list-item-icon>
-                  <v-icon color="link" left>mdi-file-document-outline</v-icon>
+                  <v-icon color="link" left>mdi-format-list-bulleted</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Transactions</v-list-item-title>
               </v-list-item>
@@ -147,6 +157,10 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   private get transactionUrl (): string {
     return `/account/${this.orgId}/settings/transactions`
+  }
+
+  private get statementsUrl (): string {
+    return `/account/${this.orgId}/settings/statements`
   }
 
   private mounted () {

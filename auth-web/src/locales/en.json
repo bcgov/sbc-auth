@@ -41,6 +41,7 @@
   "noActiveUsersLabel": "No Active Users",
   "noActiveAccountsLabel": "No Active Accounts",
   "noTransactionList": "No Transaction Records",
+  "noStatementsList": "No Statement Records",
   "pageNotFoundTitle": "Page not found",
   "pageNotFoundMsg": "The page you are looking for has been removed or doesn't exist.",
   "singleOwnerErrorTitle": "Unable to Leave account",
