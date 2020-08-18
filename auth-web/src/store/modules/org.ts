@@ -30,6 +30,7 @@ import PaymentService from '@/services/payment.services'
 import { PaymentSettings } from '@/models/PaymentSettings'
 import PermissionService from '@/services/permission.services'
 import StaffService from '@/services/staff.services'
+import { StatementFilterParams } from '@/models/statement'
 import UserService from '@/services/user.services'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 
@@ -591,6 +592,12 @@ export default class OrgModule extends VuexModule {
       })
     })
     return transactionTableData
+  }
+
+  @Action({ rawError: true })
+  public async getStatementsList (filterParams: StatementFilterParams) {
+    const response = await PaymentService.getStatementsList(this.context.state['currentOrganization'].id, filterParams)
+    return response?.data
   }
 
   @Action({ rawError: true })
