@@ -23,7 +23,7 @@
         </template>
         <template v-slot:[`item.dateRange`]="{ item }">
           <div class="font-weight-bold">
-            {{formatDateRange(item.startDate, item.endDate)}}
+            {{formatDateRange(item.fromDate, item.toDate)}}
           </div>
         </template>
         <template v-slot:[`item.action`]="{ item }">
@@ -118,7 +118,7 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   }
 
   private async initialize () {
-    await this.loadStatementsList(this.PAGINATION_COUNTER_STEP, this.ITEMS_PER_PAGE)
+    await this.loadStatementsList(1, this.ITEMS_PER_PAGE * 2)
   }
 
   formatDateRange (date1, date2) {

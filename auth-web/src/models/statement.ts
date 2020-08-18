@@ -1,8 +1,9 @@
 export interface StatementListItem {
-  endDate: string
+  createdOn: string
   frequency: string
-  id: number,
-  startDate: string
+  fromDate: string
+  id: number
+  toDate: string
 }
 
 export interface StatementFilterParams {
