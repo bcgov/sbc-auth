@@ -23,7 +23,8 @@ export enum Role {
     StaffViewAccounts = 'view_accounts',
     Tester = 'tester',
     AccountHolder = 'account_holder',
-    PublicUser = 'public_user'
+    PublicUser = 'public_user',
+    AdminStaff = 'admin'
 }
 
 export enum Pages {
