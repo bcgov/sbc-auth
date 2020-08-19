@@ -2,6 +2,14 @@
   <v-container>
     <header class="view-header mb-8">
       <h2 class="view-header__title">Statements</h2>
+      <v-btn
+        depressed
+        color="grey lighten-3"
+        @click.stop="openSettings"
+      >
+        <v-icon small class="mr-2">mdi-settings</v-icon>
+        Statement Settings
+      </v-btn>
     </header>
     <div>
       <v-data-table
@@ -52,6 +60,59 @@
         </template>
       </v-data-table>
     </div>
+    <v-dialog
+      v-model="isSettingsModalOpen"
+      max-width="600"
+    >
+      <v-card class="pa-2">
+        <v-card-title class="headline">
+          Configure Statements
+          <v-btn
+            icon
+            @click="closeSettings"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+
+        <v-card-text>
+          <div>
+            <h4 class="mb-2">Statement Frequency</h4>
+            <p>Choose the frequency of your statements.</p>
+            <v-checkbox
+              v-for="frequency in frequencies"
+              :key="frequency.frequencyCode"
+              v-model="frequencySelected"
+              :label="frequency.frequencyLabel"
+              :value="frequency.frequencyCode"
+              hide-details
+              class="mt-2"
+            ></v-checkbox>
+          </div>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn
+            color="primary"
+            width="90"
+            @click="updateFrequency"
+          >
+            Save
+          </v-btn>
+
+          <v-btn
+            color="primary"
+            outlined
+            width="90"
+            @click="closeSettings"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -90,6 +151,8 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private tableDataOptions: any = {}
   private isDataLoading: boolean = false
   private statementsList: StatementListItem[] = []
+  private isSettingsModalOpen: boolean = false
+  private frequencySelected = []
 
   private readonly headerStatements = [
     {
@@ -111,6 +174,21 @@ export default class Statements extends Mixins(AccountChangeMixin) {
       align: 'right',
       sortable: false,
       value: 'action'
+    }
+  ]
+
+  private readonly frequencies = [
+    {
+      frequencyLabel: 'Daily',
+      frequencyCode: 'DAILY'
+    },
+    {
+      frequencyLabel: 'Weekly',
+      frequencyCode: 'WEEKLY'
+    },
+    {
+      frequencyLabel: 'Monthly',
+      frequencyCode: 'MONTHLY'
     }
   ]
 
@@ -191,6 +269,19 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private downloadStatement (item, type) {
     // eslint-disable-next-line no-console
     console.log(item, type)
+  }
+
+  private openSettings () {
+    this.isSettingsModalOpen = true
+  }
+
+  private closeSettings () {
+    this.isSettingsModalOpen = false
+  }
+
+  private updateFrequency () {
+    // update frequency
+    this.isSettingsModalOpen = false
   }
 }
 </script>
