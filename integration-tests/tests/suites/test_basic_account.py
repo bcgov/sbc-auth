@@ -10,7 +10,7 @@ from tests.utilities.settings import get_settings, get_test_data, setup_access_d
 
 
 @pytest.mark.incremental
-@pytest.mark.parametrize('login_session', setup_access_data('BASIC', ['BCSC', 'BCEID']), indirect=True, scope='class')
+@pytest.mark.parametrize('login_session', setup_access_data('BASIC', ['BCSC']), indirect=True, scope='class')
 @pytest.mark.usefixtures('setup_data')
 class TestBasicAccount(TestPayment):
     """Basic account test suite."""

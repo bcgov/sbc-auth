@@ -2,8 +2,8 @@ name: Integration Testing DEV
 
 on:
   schedule:
-    # At minute 1 past every 4th hour.
-    - cron: "01 */4 * * *"
+    # At 20:30.
+    - cron: "30 20 * * *"
 
 jobs:
   setup-job:
@@ -248,11 +248,24 @@ jobs:
           pip install junitparser
           output=$(python analysis_test_results.py)
           echo "::set-output name=summary::$output"
+      - if: steps.analysis.outputs.summary != ''
+        run: |
+          exit 1
       - uses: LouisBrunner/checks-action@v0.1.0
         if: always()
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: Test results
-          conclusion: failure
+          conclusion: ${{ job.status }}
           output: '{ "summary": "${{ steps.analysis.outputs.summary }}" }'
           annotations: ${{ steps.annotations.outputs.summary }}
+      - name: Rocket.Chat Notification
+        uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
+        if: failure()
+        with:
+          type: ${{ job.status }}
+          job_name: "*Integration Testing failed*"
+          channel: "#relationship-developers"
+          url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
+          commit: false
+          token: ${{ secrets.GITHUB_TOKEN }}
