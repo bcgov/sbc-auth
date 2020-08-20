@@ -11,10 +11,10 @@
       <template v-slot:loading>
         Loading...
       </template>
-      <template v-slot:item.updatedOn="{ item }">
-        {{formatDate(item.updatedOn)}}
+      <template v-slot:[`item.updatedOn`]="{ item }">
+        {{formatDate(item.updatedOn, 'MMM DD, YYYY')}}
       </template>
-      <template v-slot:item.action="{ item }">
+      <template v-slot:[`item.action`]="{ item }">
         <div class="btn-inline">
           <v-btn
             outlined

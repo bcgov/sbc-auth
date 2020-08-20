@@ -32,22 +32,58 @@
               <legend>Effective Dates</legend>
               <v-row>
                 <v-col cols="12" sm="6" class="col">
-                  <v-text-field
-                    filled
-                    hide-details
-                    label="Start Date"
-                    v-model="glcodeDetails.startDate"
+                  <v-menu
+                    v-model="startDatePicker"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    max-width="290px"
+                    min-width="290px"
                   >
-                  </v-text-field>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        v-model="startDateFormatted"
+                        label="Start Date"
+                        filled
+                        hide-details
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="glcodeDetails.startDate"
+                      no-title
+                      @input="startDatePicker = false"
+                    ></v-date-picker>
+                  </v-menu>
                 </v-col>
                 <v-col cols="12" sm="6" class="col">
-                  <v-text-field
-                    filled
-                    hide-details
-                    label="End Date"
-                    v-model="glcodeDetails.endDate"
+                  <v-menu
+                    v-model="endDatePicker"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    max-width="290px"
+                    min-width="290px"
                   >
-                  </v-text-field>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        v-model="endDateFormatted"
+                        label="End Date"
+                        filled
+                        hide-details
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="glcodeDetails.endDate"
+                      no-title
+                      @input="endDatePicker = false"
+                    ></v-date-picker>
+                  </v-menu>
                 </v-col>
               </v-row>
             </fieldset>
@@ -206,6 +242,7 @@ import { FilingType, GLCode } from '@/models/Staff'
 import { mapActions, mapState } from 'vuex'
 import StaffModule from '@/store/modules/staff'
 import { getModule } from 'vuex-module-decorators'
+import moment from 'moment'
 
 @Component({
   methods: {
@@ -223,6 +260,8 @@ export default class GLCodeDetailsModal extends Vue {
   private glcodeDetails: GLCode = {} as GLCode
   private filingTypes: FilingType[] = []
   private tab = null
+  private startDatePicker: boolean = false
+  private endDatePicker: boolean = false
 
   public async open (selectedData) {
     if (selectedData?.distributionCodeId) {
@@ -254,6 +293,14 @@ export default class GLCodeDetailsModal extends Vue {
     this.glcodeDetails = {} as GLCode
     this.filingTypes = []
     this.isOpen = false
+  }
+
+  private get startDateFormatted () {
+    return this.glcodeDetails?.startDate ? moment(this.glcodeDetails.startDate).format('MMM DD, YYYY') : ''
+  }
+
+  private get endDateFormatted () {
+    return this.glcodeDetails?.endDate ? moment(this.glcodeDetails.endDate).format('MMM DD, YYYY') : ''
   }
 
   private async save () {
