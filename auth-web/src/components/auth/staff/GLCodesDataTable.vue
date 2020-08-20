@@ -12,7 +12,7 @@
         Loading...
       </template>
       <template v-slot:[`item.updatedOn`]="{ item }">
-        {{formatDate(item.updatedOn, 'MMM DD, YYYY')}}
+        {{formatDate(item.updatedOn)}}
       </template>
       <template v-slot:[`item.action`]="{ item }">
         <div class="btn-inline">
