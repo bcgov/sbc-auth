@@ -21,7 +21,7 @@
         {{header.text}}
         <v-tooltip bottom color="grey darken-4">
           <template v-slot:activator="{ on }">
-            <v-icon class="status-tooltip-icon" v-on="on">mdi-information-outline</v-icon>
+            <v-icon small class="status-tooltip-icon" v-on="on">mdi-information-outline</v-icon>
           </template>
           <div v-for="(status, index) in transactionStatus" :key="index">
             {{status.status}} - {{status.description}}
@@ -38,7 +38,7 @@
             {{ name }}
           </div>
         </div>
-        <div class="product-suite"
+        <div v-if="item.businessIdentifier"
           :data-test="getIndexedTag('transaction-incorp-number', item.index)"
         >
           Incorporation Number: {{ item.businessIdentifier }}
@@ -106,7 +106,7 @@ export default class TransactionsDataTable extends Vue {
       align: 'left',
       sortable: false,
       value: 'folioNumber',
-      width: '140'
+      width: '120'
     },
     {
       text: 'Initiated By',
@@ -133,7 +133,7 @@ export default class TransactionsDataTable extends Vue {
       align: 'left',
       value: 'status',
       sortable: false,
-      width: '115'
+      width: '110'
     }
   ]
 
