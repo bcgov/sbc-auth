@@ -1,7 +1,8 @@
-from xml.sax.saxutils import escape
-from junitparser import Element, Attr, TestCase, TestSuite
-from junitparser import JUnitXml
 import os
+import sys
+from xml.sax.saxutils import escape
+
+from junitparser import Attr, Element, JUnitXml
 
 
 def html_decode(s):
@@ -31,33 +32,39 @@ class FailureElement(Element):
     message = Attr()
 
 
-skipped = SkippedElement()
-failure = FailureElement()
+def analysis():
+    skipped = SkippedElement()
+    failure = FailureElement()
 
-newxml = JUnitXml()
-for filename in os.listdir('./test_results'):
-    # Only get xml files
-    if not filename.endswith('.xml'):
-        continue
-    fullname = os.path.join('./test_results', filename)
-    xml = JUnitXml.fromfile(fullname)
-    newxml += xml
+    newxml = JUnitXml()
+    for filename in os.listdir('./test_results'):
+        # Only get xml files
+        if not filename.endswith('.xml'):
+            continue
+        fullname = os.path.join('./test_results', filename)
+        xml = JUnitXml.fromfile(fullname)
+        newxml += xml
 
-output = []
+    output = []
 
-for suite in newxml:
-    # handle suites
-    for testcase in suite:
-        testcase.append(failure)
-        testcase.child(FailureElement)
-        for fail in testcase.iterchildren(FailureElement):
-            detail = {"test suite": testcase.classname,
-                      "test case": testcase.name,
-                      "failure message": html_decode(fail.message)}
-            output.append(detail)
-        # testcase.append(skipped)
-        # testcase.child(SkippedElement)
-        # for skip in testcase.iterchildren(SkippedElement):
-            #print(f'    {skip.message}')
+    for suite in newxml:
+        # handle suites
+        for testcase in suite:
+            testcase.append(failure)
+            testcase.child(FailureElement)
+            for fail in testcase.iterchildren(FailureElement):
+                detail = {"test suite": testcase.classname,
+                          "test case": testcase.name,
+                          "failure message": html_decode(fail.message)}
+                output.append(detail)
 
-print(output)
+    return output
+
+
+if __name__ == '__main__':
+    result: list = analysis()
+    if len(result) > 0:
+        print(result)
+        sys.exit(1)
+
+    sys.exit()
