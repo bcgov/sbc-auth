@@ -296,11 +296,11 @@ export default class GLCodeDetailsModal extends Vue {
   }
 
   private get startDateFormatted () {
-    return this.glcodeDetails?.startDate ? moment(this.glcodeDetails.startDate).format('MMM DD, YYYY') : ''
+    return this.glcodeDetails?.startDate ? moment(this.glcodeDetails.startDate).format('MM-DD-YYYY') : ''
   }
 
   private get endDateFormatted () {
-    return this.glcodeDetails?.endDate ? moment(this.glcodeDetails.endDate).format('MMM DD, YYYY') : ''
+    return this.glcodeDetails?.endDate ? moment(this.glcodeDetails.endDate).format('MM-DD-YYYY') : ''
   }
 
   private async save () {
