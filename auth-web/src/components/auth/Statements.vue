@@ -76,18 +76,66 @@
         </v-card-title>
 
         <v-card-text>
-          <div>
+          <div class="mb-2">
             <h4 class="mb-2">Statement Frequency</h4>
             <p>Choose the frequency of your statements.</p>
-            <v-checkbox
-              v-for="frequency in frequencies"
-              :key="frequency.frequencyCode"
+            <v-radio-group
               v-model="frequencySelected"
-              :label="frequency.frequencyLabel"
-              :value="frequency.frequencyCode"
-              hide-details
-              class="mt-2"
+            >
+              <v-radio
+                v-for="frequency in frequencies"
+                :key="frequency.frequencyCode"
+                :label="frequency.frequencyLabel"
+                :value="frequency.frequencyCode"
+                class="mb-3"
+              >
+              </v-radio>
+            </v-radio-group>
+          </div>
+          <div class="mb-3">
+            <h4 class="mb-2">Statement Notifications</h4>
+            <v-checkbox
+              v-model="sendStatementNotifications"
+              label="Send email notifications when account statements are available"
             ></v-checkbox>
+          </div>
+          <div class="mb-1" v-if="sendStatementNotifications">
+            <h4 class="mb-2">Notification Recipients</h4>
+            <p>Enter the Team Members you want to receive statement notifications</p>
+            <div
+              class="mb-4"
+              v-if="emailReceipientList.length">
+              <v-divider></v-divider>
+              <v-simple-table>
+                <template v-slot:default>
+                  <tbody>
+                    <tr v-for="(item, index) in emailReceipientList" :key="index">
+                      <td>
+                        {{item}}
+                      </td>
+                      <td>
+                        {{index}} some@some.com
+                      </td>
+                      <td class="text-right">
+                        <v-btn
+                          icon
+                          @click="removeEmailReceipient(item)"
+                        >
+                          <v-icon>mdi-close</v-icon>
+                        </v-btn>
+                      </td>
+                    </tr>
+                  </tbody>
+                </template>
+              </v-simple-table>
+            </div>
+            <v-text-field
+              v-model="emailReceipientInput"
+              label="Team Member Name"
+              filled
+              append-icon="mdi-plus-box"
+              @click:append="addEmailReceipient"
+            ></v-text-field>
           </div>
         </v-card-text>
 
@@ -152,7 +200,10 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private isDataLoading: boolean = false
   private statementsList: StatementListItem[] = []
   private isSettingsModalOpen: boolean = false
-  private frequencySelected = []
+  private frequencySelected: string = ''
+  private sendStatementNotifications: boolean = false
+  private emailReceipientInput: string = ''
+  private emailReceipientList = []
 
   private readonly headerStatements = [
     {
@@ -272,6 +323,7 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   }
 
   private openSettings () {
+    this.frequencySelected = this.frequencies[1].frequencyCode
     this.isSettingsModalOpen = true
   }
 
@@ -282,6 +334,19 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private updateFrequency () {
     // update frequency
     this.isSettingsModalOpen = false
+  }
+
+  private addEmailReceipient () {
+    // add Email Receipient
+    this.emailReceipientList.push(this.emailReceipientInput)
+    this.emailReceipientInput = ''
+  }
+
+  private removeEmailReceipient (item) {
+    const index = this.emailReceipientList.indexOf(item)
+    if (index > -1) {
+      this.emailReceipientList.splice(index, 1)
+    }
   }
 }
 </script>
