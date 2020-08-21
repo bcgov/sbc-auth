@@ -601,6 +601,18 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
+  public async getStatementSettings () {
+    const response = await PaymentService.getStatementSettings(this.context.state['currentOrganization'].id)
+    return response?.data || {}
+  }
+
+  @Action({ rawError: true })
+  public async updateStatementSettings (statementFrequency) {
+    const response = await PaymentService.updateStatementSettings(this.context.state['currentOrganization'].id, statementFrequency)
+    return response?.data || {}
+  }
+
+  @Action({ rawError: true })
   public async resetAccountSetupProgress (): Promise<void> {
     this.context.commit('setGrantAccess', false)
     this.context.commit('setCurrentOrganization', undefined)

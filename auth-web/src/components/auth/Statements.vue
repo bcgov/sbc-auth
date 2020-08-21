@@ -5,7 +5,7 @@
       <v-btn
         depressed
         color="grey lighten-3"
-        @click.stop="openSettings"
+        @click.stop="openSettingsModal"
       >
         <v-icon small class="mr-2">mdi-settings</v-icon>
         Statement Settings
@@ -60,107 +60,9 @@
         </template>
       </v-data-table>
     </div>
-    <v-dialog
-      v-model="isSettingsModalOpen"
-      max-width="600"
-    >
-      <v-card class="pa-2">
-        <v-card-title class="headline">
-          Configure Statements
-          <v-btn
-            icon
-            @click="closeSettings"
-          >
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
-
-        <v-card-text>
-          <div class="mb-2">
-            <h4 class="mb-2">Statement Frequency</h4>
-            <p>Choose the frequency of your statements.</p>
-            <v-radio-group
-              v-model="frequencySelected"
-            >
-              <v-radio
-                v-for="frequency in frequencies"
-                :key="frequency.frequencyCode"
-                :label="frequency.frequencyLabel"
-                :value="frequency.frequencyCode"
-                class="mb-3"
-              >
-              </v-radio>
-            </v-radio-group>
-          </div>
-          <div class="mb-3">
-            <h4 class="mb-2">Statement Notifications</h4>
-            <v-checkbox
-              v-model="sendStatementNotifications"
-              label="Send email notifications when account statements are available"
-            ></v-checkbox>
-          </div>
-          <div class="mb-1" v-if="sendStatementNotifications">
-            <h4 class="mb-2">Notification Recipients</h4>
-            <p>Enter the Team Members you want to receive statement notifications</p>
-            <div
-              class="mb-4"
-              v-if="emailReceipientList.length">
-              <v-divider></v-divider>
-              <v-simple-table>
-                <template v-slot:default>
-                  <tbody>
-                    <tr v-for="(item, index) in emailReceipientList" :key="index">
-                      <td>
-                        {{item}}
-                      </td>
-                      <td>
-                        {{index}} some@some.com
-                      </td>
-                      <td class="text-right">
-                        <v-btn
-                          icon
-                          @click="removeEmailReceipient(item)"
-                        >
-                          <v-icon>mdi-close</v-icon>
-                        </v-btn>
-                      </td>
-                    </tr>
-                  </tbody>
-                </template>
-              </v-simple-table>
-            </div>
-            <v-text-field
-              v-model="emailReceipientInput"
-              label="Team Member Name"
-              filled
-              append-icon="mdi-plus-box"
-              @click:append="addEmailReceipient"
-            ></v-text-field>
-          </div>
-        </v-card-text>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-
-          <v-btn
-            color="primary"
-            width="90"
-            @click="updateFrequency"
-          >
-            Save
-          </v-btn>
-
-          <v-btn
-            color="primary"
-            outlined
-            width="90"
-            @click="closeSettings"
-          >
-            Cancel
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <StatementsSettings
+      ref="statementSettingsModal"
+    ></StatementsSettings>
   </v-container>
 </template>
 
@@ -172,9 +74,13 @@ import { StatementFilterParams, StatementListItem, StatementListResponse } from 
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
+import StatementsSettings from '@/components/auth/StatementsSettings.vue'
 import moment from 'moment'
 
 @Component({
+  components: {
+    StatementsSettings
+  },
   methods: {
     ...mapActions('org', [
       'getStatementsList'
@@ -199,11 +105,10 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private tableDataOptions: any = {}
   private isDataLoading: boolean = false
   private statementsList: StatementListItem[] = []
-  private isSettingsModalOpen: boolean = false
-  private frequencySelected: string = ''
-  private sendStatementNotifications: boolean = false
-  private emailReceipientInput: string = ''
-  private emailReceipientList = []
+
+  $refs: {
+    statementSettingsModal: StatementsSettings
+  }
 
   private readonly headerStatements = [
     {
@@ -225,21 +130,6 @@ export default class Statements extends Mixins(AccountChangeMixin) {
       align: 'right',
       sortable: false,
       value: 'action'
-    }
-  ]
-
-  private readonly frequencies = [
-    {
-      frequencyLabel: 'Daily',
-      frequencyCode: 'DAILY'
-    },
-    {
-      frequencyLabel: 'Weekly',
-      frequencyCode: 'WEEKLY'
-    },
-    {
-      frequencyLabel: 'Monthly',
-      frequencyCode: 'MONTHLY'
     }
   ]
 
@@ -322,31 +212,8 @@ export default class Statements extends Mixins(AccountChangeMixin) {
     console.log(item, type)
   }
 
-  private openSettings () {
-    this.frequencySelected = this.frequencies[1].frequencyCode
-    this.isSettingsModalOpen = true
-  }
-
-  private closeSettings () {
-    this.isSettingsModalOpen = false
-  }
-
-  private updateFrequency () {
-    // update frequency
-    this.isSettingsModalOpen = false
-  }
-
-  private addEmailReceipient () {
-    // add Email Receipient
-    this.emailReceipientList.push(this.emailReceipientInput)
-    this.emailReceipientInput = ''
-  }
-
-  private removeEmailReceipient (item) {
-    const index = this.emailReceipientList.indexOf(item)
-    if (index > -1) {
-      this.emailReceipientList.splice(index, 1)
-    }
+  private openSettingsModal () {
+    this.$refs.statementSettingsModal.openSettings()
   }
 }
 </script>
