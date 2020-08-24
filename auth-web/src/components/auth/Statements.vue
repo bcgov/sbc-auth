@@ -29,24 +29,27 @@
         <template v-slot:[`item.action`]="{ item }">
           <div class="btn-inline">
             <v-btn
-              outlined
-              small
+              text
               color="primary"
-              class="font-weight-bold mr-2"
+              class="mr-1"
+              aria-label="Download CSV Statement"
+              title="Download CSV Statement"
               :data-test="getIndexedTag('csv-button', item.id)"
               @click="downloadStatement(item, 'CSV')"
             >
-              CSV
+              <v-icon class="ml-n2">mdi-file-table-outline</v-icon>
+              <span class="ml-n1 font-weight-bold">CSV</span>
             </v-btn>
             <v-btn
-              outlined
-              small
+              text
               color="primary"
-              class="font-weight-bold"
+              aria-label="Download PDF Statement"
+              title="Download PDF Statement"
               :data-test="getIndexedTag('pdf-button', item.id)"
               @click="downloadStatement(item, 'PDF')"
             >
-              PDF
+              <v-icon class="ml-n2">mdi-file-pdf-outline</v-icon>
+              <span class="ml-n1 font-weight-bold">PDF</span>
             </v-btn>
           </div>
         </template>
@@ -96,15 +99,13 @@ export default class Statements extends Mixins(AccountChangeMixin) {
       text: 'Date',
       align: 'left',
       sortable: false,
-      value: 'dateRange',
-      width: '270'
+      value: 'dateRange'
     },
     {
       text: 'Frequency',
       align: 'left',
       sortable: false,
-      value: 'frequency',
-      width: '140'
+      value: 'frequency'
     },
     {
       text: 'Downloads',
@@ -203,8 +204,8 @@ export default class Statements extends Mixins(AccountChangeMixin) {
 }
 
 .statement-list {
-    .v-data-table-header {
-      margin-bottom: -2px;
-    }
+  .v-data-table-header {
+    margin-bottom: -2px;
+  }
 }
 </style>

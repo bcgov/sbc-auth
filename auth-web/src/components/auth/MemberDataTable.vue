@@ -1,4 +1,5 @@
 <template>
+  <div>
   <v-data-table
     v-if="roleInfos"
     :mobile-breakpoint="1024"
@@ -31,11 +32,13 @@
 
     <!-- Role Column Template -->
     <template v-slot:item.role="{ item }">
-      <v-menu>
+      <v-menu
+        transition="slide-y-transition">
         <template v-slot:activator="{ on }">
           <v-btn
             text
             class="ml-n4 pr-2"
+            aria-label="Select User Role"
             v-on="on"
             :disabled="!canChangeRole(item)"
             :data-test="getIndexedTag('role-selector', item.index)"
@@ -44,7 +47,7 @@
             <v-icon depressed>mdi-menu-down</v-icon>
           </v-btn>
         </template>
-        <v-list dense class="role-list">
+        <v-list dense class="role-list" role="user role list">
           <v-item-group>
             <v-list-item
               class="py-1"
@@ -95,40 +98,107 @@
 
     <!-- Actions Column Template -->
     <template v-slot:item.action="{ item }">
-      <div class="btn-inline">
-        <v-btn
-          outlined
-          color="primary"
-          class="mr-1"
-          :data-test="getIndexedTag('reset-password-button', item.index)"
-          v-can:RESET_PASSWORD.hide
-          v-show="anonAccount"
-          @click="resetPassword(item)"
-        >
-          Reset Password
-        </v-btn>
-        <v-btn
-          outlined
-          color="primary"
-          :data-test="getIndexedTag('remove-user-button', item.index)"
-          v-show="canRemove(item)"
-          @click="confirmRemoveMember(item)"
-        >
-          Remove
-        </v-btn>
-        <v-btn
-          outlined
-          color="primary"
-          :data-test="getIndexedTag('leave-team-button', item.index)"
-          v-show="canLeave(item)"
-          @click="confirmLeaveTeam(item)"
-        >
-          <span v-if="!canDissolve()">Leave</span>
-          <span v-if="canDissolve()">Dissolve</span>
-        </v-btn>
-      </div>
+
+      <!-- Reset Authenticator -->
+      <v-btn
+        icon
+        class="mr-1"
+        aria-label="Reset Authenticator"
+        title="Reset Authenticator"
+        @click="showResetAuthDialog()">
+        <v-icon>mdi-lock-reset</v-icon>
+      </v-btn>
+
+      <!-- Reset Password -->
+      <v-btn
+        icon
+        class="mr-1"
+        aria-label="Reset User Password"
+        title="Reset User Password"
+        v-can:RESET_PASSWORD.hide
+        v-show="anonAccount"
+        :data-test="getIndexedTag('reset-password-button', item.index)"
+        @click="resetPassword(item)"
+      >
+        <v-icon>mdi-lock-reset</v-icon>
+      </v-btn>
+
+      <!-- Remove User -->
+      <v-btn
+        icon
+        aria-label="Remove User"
+        title="Remove User"
+        v-show="canRemove(item)"
+        :data-test="getIndexedTag('remove-user-button', item.index)"
+        @click="confirmRemoveMember(item)"
+      >
+        <v-icon>mdi-trash-can-outline</v-icon>
+      </v-btn>
+
+      <!-- Leave Account -->
+      <v-btn
+        icon
+        :aria-label="canDissolve() ? 'Dissolve Account' : 'Leave Account'"
+        :title="canDissolve() ? 'Dissolve Account' : 'Leave Account'"
+        v-show="canLeave(item)"
+        :data-test="getIndexedTag('leave-team-button', item.index)"
+        @click="confirmLeaveTeam(item)"
+      >
+        <v-icon>mdi-trash-can-outline</v-icon>
+      </v-btn>
+
     </template>
   </v-data-table>
+
+  <v-snackbar
+    bottom
+    color="primary"
+    class="mb-6"
+    v-model="snackbar"
+  >
+    Authenticator reset for BCREGTEST Kerry NINETEEN
+    <v-btn
+      icon
+      dark
+      aria-label="Close Notification"
+      title="Close Notification"
+      @click="snackbar = false"
+    >
+      <v-icon>mdi-close</v-icon>
+    </v-btn>
+  </v-snackbar>
+
+  <ModalDialog
+    ref="resetAuthDialog"
+    icon="mdi-check"
+    title="Reset Authenticator"
+    text="Resetting this team members authenticator will require them log in and enter a new one-time password in their authenticator app."
+    dialog-class="notify-dialog"
+    max-width="600"
+  >
+    <template v-slot:icon>
+      <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+    </template>
+    <template v-slot:actions>
+      <v-btn
+        large
+        color="error"
+        class="font-weight-bold"
+        @click="resetAuth()"
+      >
+        Reset
+      </v-btn>
+      <v-btn
+        large
+        depressed
+        @click="closeResetAuthDialog()"
+      >
+        Cancel
+      </v-btn>
+    </template>
+  </ModalDialog>
+
+  </div>
 </template>
 
 <script lang="ts">
@@ -144,6 +214,7 @@ import {
 import { mapActions, mapState } from 'vuex'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
+import ModalDialog from '@/components/auth/ModalDialog.vue'
 
 export interface ChangeRolePayload {
   member: Member
@@ -151,6 +222,9 @@ export interface ChangeRolePayload {
 }
 
 @Component({
+  components: {
+    ModalDialog
+  },
   computed: {
     ...mapState('business', ['businesses']),
     ...mapState('org', [
@@ -193,10 +267,10 @@ export default class MemberDataTable extends Vue {
     },
     {
       text: 'Actions',
-      align: 'left',
+      align: 'right',
       value: 'action',
       sortable: false,
-      width: '120'
+      width: '140'
     }
   ]
 
@@ -410,6 +484,27 @@ export default class MemberDataTable extends Vue {
     return (
       this.currentMembership?.user?.username === member.user.username || false
     )
+  }
+
+  // PROTOTYPE RESET AUTHENTICATOR
+  $refs: {
+    resetAuthDialog: ModalDialog
+  }
+
+  private confirmResetAuthDialog = false
+  private snackbar = false
+
+  private showResetAuthDialog () {
+    this.$refs.resetAuthDialog.open()
+  }
+
+  private resetAuth () {
+    this.snackbar = true
+    this.$refs.resetAuthDialog.close()
+  }
+
+  private closeResetAuthDialog () {
+    this.$refs.resetAuthDialog.close()
   }
 }
 </script>

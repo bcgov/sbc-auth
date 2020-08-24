@@ -3,9 +3,14 @@
     <header class="view-header align-center mt-n1 mb-5">
       <h2 class="view-header__title">Team Members</h2>
       <div class="view-header__actions">
-        <v-btn color="primary" class="font-weight-bold" large v-can:INVITE_MEMBERS.hide @click="showInviteUsersModal()" data-test="invite-people-button">
+        <v-btn
+          large
+          color="primary"
+          class="font-weight-bold"
+          v-can:INVITE_MEMBERS.hide @click="showInviteUsersModal()"
+          data-test="invite-people-button">
           <v-icon small class="ml-n1">mdi-plus</v-icon>
-          <span>Invite People</span>
+          <span>Invite Team Members</span>
         </v-btn>
       </div>
     </header>
@@ -78,8 +83,21 @@
         <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:actions>
-        <v-btn large color="primary" @click="confirmHandler()">{{ primaryActionText }}</v-btn>
-        <v-btn large color="default" @click="close($refs.confirmActionDialog)">{{ secondaryActionText }}</v-btn>
+        <v-btn
+          large
+          color="error"
+          class="font-weight-bold"
+          @click="confirmHandler()"
+        >
+          {{ primaryActionText }}
+        </v-btn>
+        <v-btn
+          large
+          depressed
+          @click="close($refs.confirmActionDialog)"
+        >
+          {{ secondaryActionText }}
+        </v-btn>
       </template>
     </ModalDialog>
 
@@ -121,10 +139,17 @@
       max-width="640"
     >
       <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+        <v-icon large color="primary">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:actions>
-        <v-btn large color="error" @click="close($refs.errorDialog)">OK</v-btn>
+        <v-btn
+          large
+          color="primary"
+          class="font-weight-bold"
+          @click="close($refs.errorDialog)"
+        >
+          OK
+        </v-btn>
       </template>
     </ModalDialog>
   </v-container>
@@ -263,7 +288,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
     this.confirmActionText = `Are you sure wish to remove the invite to ${invitation.recipientEmail}?`
     this.invitationToBeRemoved = invitation
     this.confirmHandler = this.removeInvite
-    this.primaryActionText = 'Remove'
+    this.primaryActionText = 'Yes'
     this.$refs.confirmActionDialog.open()
   }
 

@@ -13,12 +13,39 @@
       Loading...
     </template>
     <template v-slot:item.name="{ item }">
-      <v-list-item-title class="user-name" :data-test="getIndexedTag('pending-user-name', item.index)">{{ item.user.firstname }} {{ item.user.lastname }}</v-list-item-title>
-      <v-list-item-subtitle :data-test="getIndexedTag('pending-email', item.index)" v-if="item.user.contacts && item.user.contacts.length > 0">{{ item.user.contacts[0].email }}</v-list-item-subtitle>
+      <div
+        class="user-name font-weight-bold"
+        :data-test="getIndexedTag('pending-user-name', item.index)"
+      >
+        {{ item.user.firstname }} {{ item.user.lastname }}
+      </div>
+      <div
+        :data-test="getIndexedTag('pending-email', item.index)"
+        v-if="item.user.contacts && item.user.contacts.length > 0"
+      >
+        {{ item.user.contacts[0].email }}
+      </div>
     </template>
     <template v-slot:item.action="{ item }">
-      <v-btn :data-test="getIndexedTag('approve-button', item.index)" small color="primary" class="mr-2" @click="confirmApproveMember(item)">Approve</v-btn>
-      <v-btn :data-test="getIndexedTag('deny-button', item.index)" depressed small @click="confirmDenyMember(item)">Deny</v-btn>
+      <v-btn
+        icon
+        class="mr-1"
+        aria-label="Approve user access to this account"
+        title="Approve user access to this account"
+        :data-test="getIndexedTag('approve-button', item.index)"
+        @click="confirmApproveMember(item)"
+      >
+        <v-icon>mdi-check-circle-outline</v-icon>
+      </v-btn>
+      <v-btn
+        icon
+        aria-label="Deny access to this account"
+        title="Deny access to this account"
+        :data-test="getIndexedTag('deny-button', item.index)"
+        @click="confirmDenyMember(item)"
+      >
+        <v-icon>mdi-close-circle-outline</v-icon>
+      </v-btn>
     </template>
   </v-data-table>
 </template>
@@ -45,10 +72,9 @@ export default class PendingMemberDataTable extends Vue {
     },
     {
       text: 'Actions',
-      align: 'left',
+      align: 'right',
       value: 'action',
-      sortable: false,
-      width: '195'
+      sortable: false
     }
   ]
 
@@ -97,10 +123,6 @@ export default class PendingMemberDataTable extends Vue {
     margin-bottom: 0.25rem;
     font-weight: 700;
   }
-}
-
-.role-list {
-  width: 20rem;
 }
 
 .user-role-desc {
