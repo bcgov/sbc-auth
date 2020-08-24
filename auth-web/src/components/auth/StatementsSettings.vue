@@ -20,6 +20,7 @@
           <p>Choose the frequency of your statements.</p>
           <v-radio-group
             v-model="frequencySelected"
+            @change="frequencyChanged"
           >
             <v-radio
               v-for="frequency in frequencies"
@@ -94,6 +95,7 @@
           color="primary"
           width="90"
           @click="updateSettings"
+          :disabled="isSaveButtonDisabled"
         >
           Save
         </v-btn>
@@ -125,20 +127,21 @@ import { StatementListItem } from '@/models/statement'
   },
   computed: {
     ...mapState('org', [
-      'currentOrganization',
-      'currentMembership'
+      'currentStatementSettings'
     ])
   }
 })
 export default class StatementsSettings extends Vue {
   private readonly getStatementSettings!: () => any
   private readonly updateStatementSettings!: (statementFrequency: StatementListItem) => any
+  private readonly currentStatementSettings!: StatementListItem
   private isSettingsModalOpen: boolean = false
   private frequencySelected: string = ''
   private sendStatementNotifications: boolean = false
   private emailReceipientInput: string = ''
   private emailReceipientList = []
   private errorMessage: string = ''
+  private isSaveButtonDisabled: boolean = true
 
   private readonly frequencies = [
     {
@@ -161,6 +164,7 @@ export default class StatementsSettings extends Vue {
 
   public async openSettings () {
     this.errorMessage = ''
+    this.isSaveButtonDisabled = true
     const settings = await this.getStatementSettings()
     this.frequencySelected = settings?.frequency || this.frequencies[1].frequencyCode
     this.isSettingsModalOpen = true
@@ -178,6 +182,10 @@ export default class StatementsSettings extends Vue {
     } catch (error) {
       this.errorMessage = 'Failed to update the settings, please try again.'
     }
+  }
+
+  private frequencyChanged (frequency) {
+    this.isSaveButtonDisabled = (frequency === this.currentStatementSettings?.frequency)
   }
 
   private addEmailReceipient () {
