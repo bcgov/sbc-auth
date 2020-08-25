@@ -3,11 +3,13 @@
     <header class="view-header mb-8">
       <h2 class="view-header__title">Statements</h2>
       <v-btn
+        large
         depressed
-        color="grey lighten-3"
+        aria-label="Statement Settings"
+        title="Open Statement Settings"
         @click.stop="openSettingsModal"
       >
-        <v-icon small class="mr-2">mdi-settings</v-icon>
+        <v-icon small class="mr-2 ml-n1">mdi-settings</v-icon>
         Statement Settings
       </v-btn>
     </header>
@@ -35,12 +37,13 @@
           </div>
         </template>
         <template v-slot:[`item.action`]="{ item }">
-          <div class="btn-inline">
+          <div>
             <v-btn
               outlined
-              small
               color="primary"
               class="font-weight-bold mr-2"
+              aria-label="Download CSV"
+              title="Download statement as a CSV file"
               :data-test="getIndexedTag('csv-button', item.id)"
               @click="downloadStatement(item, 'CSV')"
             >
@@ -48,9 +51,10 @@
             </v-btn>
             <v-btn
               outlined
-              small
               color="primary"
               class="font-weight-bold"
+              aria-label="Download PDF"
+              title="Download statement as a PDF file"
               :data-test="getIndexedTag('pdf-button', item.id)"
               @click="downloadStatement(item, 'PDF')"
             >
@@ -115,15 +119,13 @@ export default class Statements extends Mixins(AccountChangeMixin) {
       text: 'Date',
       align: 'left',
       sortable: false,
-      value: 'dateRange',
-      width: '270'
+      value: 'dateRange'
     },
     {
       text: 'Frequency',
       align: 'left',
       sortable: false,
-      value: 'frequency',
-      width: '140'
+      value: 'frequency'
     },
     {
       text: 'Downloads',

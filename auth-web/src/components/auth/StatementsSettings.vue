@@ -3,11 +3,14 @@
     v-model="isSettingsModalOpen"
     max-width="600"
   >
-    <v-card class="pa-2">
-      <v-card-title class="headline">
-        Configure Statements
+    <v-card >
+      <v-card-title>
+        Statement Settings
         <v-btn
+          large
           icon
+          aria-label="Close Dialog"
+          title="Close Dialog"
           @click="closeSettings"
         >
           <v-icon>mdi-close</v-icon>
@@ -15,9 +18,11 @@
       </v-card-title>
 
       <v-card-text>
-        <div class="mb-2">
-          <h4 class="mb-2">Statement Frequency</h4>
-          <p>Choose the frequency of your statements.</p>
+
+        <!-- Statement Frequency-->
+        <fieldset class="mb-5">
+          <legend>Statement Period</legend>
+          <div class="mt-1">Set how often you want to receive statements for this account.</div>
           <v-radio-group
             v-model="frequencySelected"
             @change="frequencyChanged"
@@ -27,60 +32,77 @@
               :key="frequency.frequencyCode"
               :label="frequency.frequencyLabel"
               :value="frequency.frequencyCode"
-              class="mb-3"
             >
             </v-radio>
           </v-radio-group>
-        </div>
-        <div class="mb-3">
-          <h4 class="mb-2">Statement Notifications</h4>
+        </fieldset>
+
+        <!-- Statement Notifications -->
+        <fieldset class="mb-5">
+          <legend>Statement Notifications</legend>
           <v-checkbox
+            class="mt-2 mb-0"
             v-model="sendStatementNotifications"
             label="Send email notifications when account statements are available"
           ></v-checkbox>
-        </div>
-        <div class="mb-1" v-if="sendStatementNotifications">
-          <h4 class="mb-2">Notification Recipients</h4>
-          <p>Enter the Team Members you want to receive statement notifications</p>
-          <div
-            class="mb-4"
-            v-if="emailReceipientList.length">
-            <v-divider></v-divider>
-            <v-simple-table>
-              <template v-slot:default>
-                <tbody>
-                  <tr v-for="(item, index) in emailReceipientList" :key="index">
-                    <td>
-                      {{item}}
-                    </td>
-                    <td>
-                      {{index}} some@some.com
-                    </td>
-                    <td class="text-right">
-                      <v-btn
-                        icon
-                        @click="removeEmailReceipient(item)"
-                      >
-                        <v-icon>mdi-close</v-icon>
-                      </v-btn>
-                    </td>
-                  </tr>
-                </tbody>
-              </template>
-            </v-simple-table>
-          </div>
-          <v-text-field
-            v-model="emailReceipientInput"
-            label="Team Member Name"
-            filled
-            append-icon="mdi-plus-box"
-            @click:append="addEmailReceipient"
-          ></v-text-field>
-        </div>
+        </fieldset>
+
+        <!-- Notification Recipients -->
+        <v-expand-transition>
+          <fieldset v-if="sendStatementNotifications">
+            <legend>Notification Recipients</legend>
+            <div class="mt-2 mb-6">Manage which team members will receive statement notifications.</div>
+
+            <!-- Recipient List -->
+            <v-expand-transition>
+              <div v-if="emailReceipientList.length">
+                <v-divider></v-divider>
+                <v-simple-table>
+                  <template v-slot:default>
+                    <tbody>
+                      <tr v-for="(item, index) in emailReceipientList" :key="index">
+                        <td>
+                          {{item}}
+                        </td>
+                        <td>
+                          {{index}} some@some.com
+                        </td>
+                        <td class="text-right">
+                          <v-btn
+                            icon
+                            small
+                            class="remove-user-btn"
+                            aria-label="Remove Recipient"
+                            title="Remove recipient from notifications list"
+                            @click="removeEmailReceipient(item)"
+                          >
+                            <v-icon>mdi-trash-can-outline</v-icon>
+                          </v-btn>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </template>
+                </v-simple-table>
+              </div>
+            </v-expand-transition>
+
+            <!-- Recipient Input -->
+            <v-text-field
+              filled
+              hide-details
+              label="Team Member Name"
+              append-icon="mdi-plus-box"
+              v-model="emailReceipientInput"
+              @click:append="addEmailReceipient"
+            ></v-text-field>
+          </fieldset>
+        </v-expand-transition>
+
+        <!-- Alert -->
         <v-alert
-          class="mb-0"
-          dense
           text
+          dense
+          class="mb-0"
           type="error"
           v-if="errorMessage"
         >
@@ -90,10 +112,12 @@
 
       <v-card-actions>
         <v-spacer></v-spacer>
-
         <v-btn
+          large
           color="primary"
           width="90"
+          aria-label="Save Settings"
+          title="Save Statement Settings"
           @click="updateSettings"
           :disabled="isSaveButtonDisabled"
         >
@@ -101,9 +125,11 @@
         </v-btn>
 
         <v-btn
-          color="primary"
-          outlined
+          large
+          depressed
           width="90"
+          aria-label="Cancel"
+          title="Cancel"
           @click="closeSettings"
         >
           Cancel
@@ -204,4 +230,11 @@ export default class StatementsSettings extends Vue {
 </script>
 
 <style lang="scss" scoped>
+  .remove-user-btn {
+    margin-right: -6px;
+  }
+
+  table tr:hover {
+    background: transparent !important;
+  }
 </style>
