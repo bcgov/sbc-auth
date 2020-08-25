@@ -16,6 +16,7 @@ import {
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
+import { StatementFilterParams, StatementListItem } from '@/models/statement'
 import { TransactionFilterParams, TransactionTableList, TransactionTableRow } from '@/models/transaction'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
@@ -30,7 +31,6 @@ import PaymentService from '@/services/payment.services'
 import { PaymentSettings } from '@/models/PaymentSettings'
 import PermissionService from '@/services/permission.services'
 import StaffService from '@/services/staff.services'
-import { StatementFilterParams } from '@/models/statement'
 import UserService from '@/services/user.services'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 
@@ -60,6 +60,7 @@ export default class OrgModule extends VuexModule {
   accessType: string
   memberLoginOption = ''
 
+  currentStatementSettings: StatementListItem = {} as StatementListItem
   currentOrgTransactionList: TransactionTableRow[] = []
 
   @Mutation
@@ -178,6 +179,11 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentOrgTransactionList (transactionResp: TransactionTableList) {
     this.currentOrgTransactionList = transactionResp.transactionsList
+  }
+
+  @Mutation
+  public setStatementSettings (settings: StatementListItem) {
+    this.currentStatementSettings = settings
   }
 
   @Action({ rawError: true })
@@ -598,6 +604,18 @@ export default class OrgModule extends VuexModule {
   public async getStatementsList (filterParams: StatementFilterParams) {
     const response = await PaymentService.getStatementsList(this.context.state['currentOrganization'].id, filterParams)
     return response?.data
+  }
+
+  @Action({ commit: 'setStatementSettings', rawError: true })
+  public async getStatementSettings () {
+    const response = await PaymentService.getStatementSettings(this.context.state['currentOrganization'].id)
+    return response?.data || {}
+  }
+
+  @Action({ rawError: true })
+  public async updateStatementSettings (statementFrequency) {
+    const response = await PaymentService.updateStatementSettings(this.context.state['currentOrganization'].id, statementFrequency)
+    return response?.data || {}
   }
 
   @Action({ rawError: true })

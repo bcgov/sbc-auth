@@ -2,6 +2,14 @@
   <v-container>
     <header class="view-header mb-8">
       <h2 class="view-header__title">Statements</h2>
+      <v-btn
+        depressed
+        color="grey lighten-3"
+        @click.stop="openSettingsModal"
+      >
+        <v-icon small class="mr-2">mdi-settings</v-icon>
+        Statement Settings
+      </v-btn>
     </header>
     <div>
       <v-data-table
@@ -52,6 +60,9 @@
         </template>
       </v-data-table>
     </div>
+    <StatementsSettings
+      ref="statementSettingsModal"
+    ></StatementsSettings>
   </v-container>
 </template>
 
@@ -63,9 +74,13 @@ import { StatementFilterParams, StatementListItem, StatementListResponse } from 
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
+import StatementsSettings from '@/components/auth/StatementsSettings.vue'
 import moment from 'moment'
 
 @Component({
+  components: {
+    StatementsSettings
+  },
   methods: {
     ...mapActions('org', [
       'getStatementsList'
@@ -90,6 +105,10 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private tableDataOptions: any = {}
   private isDataLoading: boolean = false
   private statementsList: StatementListItem[] = []
+
+  $refs: {
+    statementSettingsModal: StatementsSettings
+  }
 
   private readonly headerStatements = [
     {
@@ -191,6 +210,10 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private downloadStatement (item, type) {
     // eslint-disable-next-line no-console
     console.log(item, type)
+  }
+
+  private openSettingsModal () {
+    this.$refs.statementSettingsModal.openSettings()
   }
 }
 </script>
