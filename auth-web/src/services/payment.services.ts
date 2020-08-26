@@ -59,6 +59,14 @@ export default class PaymentService {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/settings`)
   }
 
+  static getStatement (accountId: string, statementId: string, type: string): AxiosPromise<any> {
+    const headers = {
+      'Accept': (type === 'CSV') ? 'text/csv' : 'application/pdf'
+    }
+    const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/${statementId}`
+    return axios.get(url, { headers })
+  }
+
   static updateStatementSettings (accountId: string, updateBody): AxiosPromise<StatementListItem> {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/settings`, updateBody)
   }

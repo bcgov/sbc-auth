@@ -87,7 +87,8 @@ import moment from 'moment'
   },
   methods: {
     ...mapActions('org', [
-      'getStatementsList'
+      'getStatementsList',
+      'getStatement'
     ])
   },
   computed: {
@@ -102,6 +103,7 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private readonly currentMembership!: Member
   private readonly currentOrganization!: Organization
   private readonly getStatementsList!: (filterParams: StatementFilterParams) => StatementListResponse
+  private readonly getStatement!: (statementParams: any) => any
   private readonly ITEMS_PER_PAGE = 5
   private readonly PAGINATION_COUNTER_STEP = 4
   private formatDate = CommonUtils.formatDisplayDate
@@ -209,9 +211,13 @@ export default class Statements extends Mixins(AccountChangeMixin) {
     return `${tag}-${index}`
   }
 
-  private downloadStatement (item, type) {
-    // eslint-disable-next-line no-console
-    console.log(item, type)
+  private async downloadStatement (item, type) {
+    const downloadData = await this.getStatement({ statementId: item.id, type: type })
+    if (type === 'CSV') {
+      CommonUtils.fileDownload(downloadData, `test.csv`, 'text/csv')
+    } else if (type === 'PDF') {
+      CommonUtils.fileDownload(downloadData, `test.pdf`, 'application/pdf')
+    }
   }
 
   private openSettingsModal () {

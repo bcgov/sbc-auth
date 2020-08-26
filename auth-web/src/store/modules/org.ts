@@ -606,6 +606,12 @@ export default class OrgModule extends VuexModule {
     return response?.data
   }
 
+  @Action({ rawError: true })
+  public async getStatement (statementParams) {
+    const response = await PaymentService.getStatement(this.context.state['currentOrganization'].id, statementParams.statementId, statementParams.type)
+    return response?.data || {}
+  }
+
   @Action({ commit: 'setStatementSettings', rawError: true })
   public async getStatementSettings () {
     const response = await PaymentService.getStatementSettings(this.context.state['currentOrganization'].id)
