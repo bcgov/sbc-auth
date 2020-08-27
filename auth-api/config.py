@@ -162,6 +162,9 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     # Till direct pay is fully ready , keep this value false
     DIRECT_PAY_ENABLED = os.getenv('DIRECT_PAY_ENABLED', 'False').lower() == 'true'
 
+    # Config value to disable activity logs
+    DISABLE_ACTIVITY_LOGS = os.getenv('DISABLE_ACTIVITY_LOGS', 'False').lower() == 'true'
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False

@@ -213,7 +213,6 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             if value is not None:
                 setattr(self._model, key, value)
         self._model.save()
-        self._model.commit()
         # Add to account_holders group in keycloak
         Membership._add_or_remove_group(self._model)
         current_app.logger.debug('>update_membership')
@@ -233,7 +232,6 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         self._model.membership_status = MembershipStatusCodeModel.get_membership_status_by_code('INACTIVE')
         current_app.logger.info(f'<deactivate_membership for {self._model.user.username}')
         self._model.save()
-        self._model.commit()
         # Remove from account_holders group in keycloak
         Membership._add_or_remove_group(self._model)
 

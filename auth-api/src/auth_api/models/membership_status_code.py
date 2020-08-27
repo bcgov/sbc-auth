@@ -27,7 +27,7 @@ class MembershipStatusCode(BaseModel):  # pylint: disable=too-few-public-methods
     __tablename__ = 'membership_status_code'
 
     id = Column(Integer, primary_key=True, autoincrement=False)
-    name = Column(String(15))
+    name = Column(String(25))
     description = Column(String(100))
 
     @classmethod

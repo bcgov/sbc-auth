@@ -22,14 +22,14 @@ from sqlalchemy.orm import relationship
 from auth_api.utils.enums import Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER, VALID_STATUSES, VALID_ORG_STATUSES
 
-from .base_model import BaseModel
+from .base_model import VersionedModel
 from .db import db
 from .membership_status_code import MembershipStatusCode
 from .membership_type import MembershipType
 from .org import Org as OrgModel
 
 
-class Membership(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """Model for a Membership model.  Associates Users and Orgs."""
 
     __tablename__ = 'membership'

@@ -5,6 +5,7 @@ Flask-Mail
 Flask-Script
 Flask-Moment
 Flask-SQLAlchemy
+SQLAlchemy-Continuum
 Flask-RESTplus
 flask-marshmallow==0.11.0
 flask-jwt-oidc>=0.1.5
@@ -21,3 +22,4 @@ jaeger-client
 Werkzeug==0.16.1
 minio
 pyhumps
+sqlalchemy-utils

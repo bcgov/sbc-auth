@@ -270,6 +270,8 @@ class User:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('save_from_jwt_token')
         if not token:
             return None
+        request_json = {} if not request_json else request_json
+
         is_anonymous_user = token.get('accessType', None) == AccessType.ANONYMOUS.value
         if not is_anonymous_user:
             existing_user = UserModel.find_by_jwt_token(token)
@@ -281,7 +283,8 @@ class User:  # pylint: disable=too-many-instance-attributes
         if existing_user is None:
             user_model = UserModel.create_from_jwt_token(token, first_name, last_name)
         else:
-            user_model = UserModel.update_from_jwt_token(existing_user, token, first_name, last_name)
+            user_model = UserModel.update_from_jwt_token(existing_user, token, first_name, last_name,
+                                                         is_login=request_json.get('isLogin', False))
 
         if not user_model:
             return None
@@ -303,7 +306,6 @@ class User:  # pylint: disable=too-many-instance-attributes
     def _get_names(existing_user, request_json, token):
         # For BCeID, IDIM doesn't want to use the names from token
         if token.get('loginSource', None) == LoginSource.BCEID.value:
-            request_json = {} if not request_json else request_json
             first_name: str = request_json.get('firstName', existing_user.firstname) if existing_user \
                 else request_json.get('firstName', None)
             last_name: str = request_json.get('lastName', existing_user.lastname) if existing_user \
@@ -346,13 +348,11 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         contact = ContactModel(**camelback2snake(contact_info))
         contact = contact.flush()
-        contact.commit()
 
         contact_link = ContactLinkModel()
         contact_link.user = user
         contact_link.contact = contact
-        contact_link = contact_link.flush()
-        contact_link.commit()
+        contact_link.save()
 
         return ContactService(contact)
 
@@ -373,8 +373,7 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         contact = contact_link.contact
         contact.update_from_dict(**camelback2snake(contact_info))
-        contact = contact.flush()
-        contact.commit()
+        contact = contact.save()
 
         # return the updated contact
         return ContactService(contact)
