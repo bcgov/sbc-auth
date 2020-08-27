@@ -220,13 +220,11 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private async downloadStatement (item, type) {
     this.isLoading = true // to avoid rapid download clicks
     try {
-      const downloadData = await this.getStatement({ statementId: item.id, type: type })
-      const fileName = `bcregistry-statement-${item.id}-${moment().format('MM-DD-YYYY')}`
-      if (type === 'CSV') {
-        CommonUtils.fileDownload(downloadData, `${fileName}.csv`, 'text/csv')
-      } else if (type === 'PDF') {
-        CommonUtils.fileDownload(downloadData, `${fileName}.pdf`, 'application/pdf')
-      }
+      const downloadType = (type === 'CSV') ? 'text/csv' : 'application/pdf'
+      const response = await this.getStatement({ statementId: item.id, type: downloadType })
+      const contentDispArr = response?.headers['content-disposition'].split('=')
+      const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-statement-${type.toLowerCase()}`
+      CommonUtils.fileDownload(response.data, fileName, downloadType)
       this.isLoading = false
     } catch (error) {
       this.isLoading = false

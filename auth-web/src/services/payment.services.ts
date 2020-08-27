@@ -40,7 +40,7 @@ export default class PaymentService {
       'Accept': 'text/csv'
     }
     const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/reports`
-    return axios.post(url, filterParams, { headers })
+    return axios.post(url, filterParams, { headers, responseType: 'blob' as 'json' })
   }
 
   static getStatementsList (accountId: string, filterParams: StatementFilterParams): AxiosPromise<StatementListResponse> {
@@ -61,10 +61,10 @@ export default class PaymentService {
 
   static getStatement (accountId: string, statementId: string, type: string): AxiosPromise<any> {
     const headers = {
-      'Accept': (type === 'CSV') ? 'text/csv' : 'application/pdf'
+      'Accept': type
     }
     const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/${statementId}`
-    return axios.get(url, { headers })
+    return axios.get(url, { headers, responseType: 'blob' as 'json' })
   }
 
   static updateStatementSettings (accountId: string, updateBody): AxiosPromise<StatementListItem> {
