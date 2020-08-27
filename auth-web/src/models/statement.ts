@@ -17,3 +17,17 @@ export interface StatementListResponse {
   page: number
   total: number
 }
+
+export interface StatementRecipient {
+  authUserId: number
+  email: string
+  firstname: string
+  lastname: string
+  name?: string
+}
+
+export interface StatementNotificationSettings {
+  authAccountName?: string
+  statementNotificationEnabled: boolean
+  recipients: StatementRecipient[]
+}

@@ -1,5 +1,10 @@
 <template>
   <v-container>
+    <v-fade-transition>
+      <div v-if="isLoading" class="loading-container transparent">
+        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+      </div>
+    </v-fade-transition>
     <header class="view-header mb-8">
       <h2 class="view-header__title">Statements</h2>
       <v-btn
@@ -87,7 +92,8 @@ import moment from 'moment'
   },
   methods: {
     ...mapActions('org', [
-      'getStatementsList'
+      'getStatementsList',
+      'getStatement'
     ])
   },
   computed: {
@@ -102,6 +108,7 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private readonly currentMembership!: Member
   private readonly currentOrganization!: Organization
   private readonly getStatementsList!: (filterParams: StatementFilterParams) => StatementListResponse
+  private readonly getStatement!: (statementParams: any) => any
   private readonly ITEMS_PER_PAGE = 5
   private readonly PAGINATION_COUNTER_STEP = 4
   private formatDate = CommonUtils.formatDisplayDate
@@ -109,6 +116,7 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private tableDataOptions: any = {}
   private isDataLoading: boolean = false
   private statementsList: StatementListItem[] = []
+  private isLoading: boolean = false
 
   $refs: {
     statementSettingsModal: StatementsSettings
@@ -209,9 +217,20 @@ export default class Statements extends Mixins(AccountChangeMixin) {
     return `${tag}-${index}`
   }
 
-  private downloadStatement (item, type) {
-    // eslint-disable-next-line no-console
-    console.log(item, type)
+  private async downloadStatement (item, type) {
+    this.isLoading = true // to avoid rapid download clicks
+    try {
+      const downloadData = await this.getStatement({ statementId: item.id, type: type })
+      const fileName = `bcregistry-statement-${item.id}-${moment().format('MM-DD-YYYY')}`
+      if (type === 'CSV') {
+        CommonUtils.fileDownload(downloadData, `${fileName}.csv`, 'text/csv')
+      } else if (type === 'PDF') {
+        CommonUtils.fileDownload(downloadData, `${fileName}.pdf`, 'application/pdf')
+      }
+      this.isLoading = false
+    } catch (error) {
+      this.isLoading = false
+    }
   }
 
   private openSettingsModal () {
