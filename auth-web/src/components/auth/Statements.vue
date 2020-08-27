@@ -1,5 +1,10 @@
 <template>
   <v-container>
+    <v-fade-transition>
+      <div v-if="isLoading" class="loading-container transparent">
+        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+      </div>
+    </v-fade-transition>
     <header class="view-header mb-8">
       <h2 class="view-header__title">Statements</h2>
       <v-btn
@@ -111,6 +116,7 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private tableDataOptions: any = {}
   private isDataLoading: boolean = false
   private statementsList: StatementListItem[] = []
+  private isLoading: boolean = false
 
   $refs: {
     statementSettingsModal: StatementsSettings
@@ -212,11 +218,18 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   }
 
   private async downloadStatement (item, type) {
-    const downloadData = await this.getStatement({ statementId: item.id, type: type })
-    if (type === 'CSV') {
-      CommonUtils.fileDownload(downloadData, `test.csv`, 'text/csv')
-    } else if (type === 'PDF') {
-      CommonUtils.fileDownload(downloadData, `test.pdf`, 'application/pdf')
+    this.isLoading = true // to avoid rapid download clicks
+    try {
+      const downloadData = await this.getStatement({ statementId: item.id, type: type })
+      const fileName = `bcregistry-statement-${item.id}-${moment().format('MM-DD-YYYY')}`
+      if (type === 'CSV') {
+        CommonUtils.fileDownload(downloadData, `${fileName}.csv`, 'text/csv')
+      } else if (type === 'PDF') {
+        CommonUtils.fileDownload(downloadData, `${fileName}.pdf`, 'application/pdf')
+      }
+      this.isLoading = false
+    } catch (error) {
+      this.isLoading = false
     }
   }
 
