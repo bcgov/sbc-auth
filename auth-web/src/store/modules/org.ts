@@ -16,7 +16,7 @@ import {
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
-import { StatementFilterParams, StatementListItem } from '@/models/statement'
+import { StatementFilterParams, StatementListItem, StatementNotificationSettings } from '@/models/statement'
 import { TransactionFilterParams, TransactionTableList, TransactionTableRow } from '@/models/transaction'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
@@ -61,6 +61,7 @@ export default class OrgModule extends VuexModule {
   memberLoginOption = ''
 
   currentStatementSettings: StatementListItem = {} as StatementListItem
+  currentStatementNotificationSettings: StatementNotificationSettings = {} as StatementNotificationSettings
   currentOrgTransactionList: TransactionTableRow[] = []
 
   @Mutation
@@ -184,6 +185,11 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setStatementSettings (settings: StatementListItem) {
     this.currentStatementSettings = settings
+  }
+
+  @Mutation
+  public setStatementNotificationSettings (settings: StatementNotificationSettings) {
+    this.currentStatementNotificationSettings = settings
   }
 
   @Action({ rawError: true })
@@ -621,6 +627,18 @@ export default class OrgModule extends VuexModule {
   @Action({ rawError: true })
   public async updateStatementSettings (statementFrequency) {
     const response = await PaymentService.updateStatementSettings(this.context.state['currentOrganization'].id, statementFrequency)
+    return response?.data || {}
+  }
+
+  @Action({ commit: 'setStatementNotificationSettings', rawError: true })
+  public async getStatementRecipients () {
+    const response = await PaymentService.getStatementRecipients(this.context.state['currentOrganization'].id)
+    return response?.data || {}
+  }
+
+  @Action({ rawError: true })
+  public async updateStatementNotifications (statementNotification) {
+    const response = await PaymentService.updateStatementNotifications(this.context.state['currentOrganization'].id, statementNotification)
     return response?.data || {}
   }
 

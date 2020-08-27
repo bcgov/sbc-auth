@@ -1,6 +1,6 @@
 import Axios, { AxiosPromise } from 'axios'
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
-import { StatementFilterParams, StatementListItem, StatementListResponse } from '@/models/statement'
+import { StatementFilterParams, StatementListItem, StatementListResponse, StatementNotificationSettings } from '@/models/statement'
 import { TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 import ConfigHelper from '@/util/config-helper'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
@@ -69,6 +69,14 @@ export default class PaymentService {
 
   static updateStatementSettings (accountId: string, updateBody): AxiosPromise<StatementListItem> {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/settings`, updateBody)
+  }
+
+  static getStatementRecipients (accountId: string): AxiosPromise<StatementNotificationSettings> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/notifications`)
+  }
+
+  static updateStatementNotifications (accountId: string, updateBody): AxiosPromise<StatementNotificationSettings> {
+    return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/notifications`, updateBody)
   }
 
   static getGLCodeList (): AxiosPromise<GLCodeResponse> {
