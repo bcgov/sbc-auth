@@ -55,6 +55,7 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     SENTRY_DSN = os.getenv('SENTRY_DSN')
 
     SERVICE_SCHEDULE = os.getenv('SERVICE_SCHEDULE')
+    PAYBC_OUTAGE_MESSAGE = os.getenv('PAYBC_OUTAGE_MESSAGE')
 
     TESTING = False
     DEBUG = True
@@ -90,6 +91,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     ]
 
     SERVICE_SCHEDULE = json.dumps(schedule_json)
+    PAYBC_OUTAGE_MESSAGE = 'Test'
 
     DEBUG = True
     TESTING = True
