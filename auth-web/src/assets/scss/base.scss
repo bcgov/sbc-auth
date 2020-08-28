@@ -150,4 +150,7 @@ legend {
   bottom: 0;
   z-index: 2;
   background: $gray2;
+  &.transparent {
+    background: #bdbdbd4d !important;
+  }
 }
