@@ -140,7 +140,7 @@ export default class UserModule extends VuexModule {
 
   @Action({ rawError: true })
   public async syncUserProfile () {
-    const userResponse = await UserService.syncUserProfile()
+    const userResponse = await UserService.getUserProfile('@me')
     if (userResponse && userResponse.data && (userResponse.status === 200 || userResponse.status === 201)) {
       // Refresh token to get the new token with additional roles
       KeyCloakService.refreshToken()
