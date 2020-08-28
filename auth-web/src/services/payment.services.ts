@@ -1,6 +1,6 @@
 import Axios, { AxiosPromise } from 'axios'
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
-import { StatementFilterParams, StatementListResponse } from '@/models/statement'
+import { StatementFilterParams, StatementListItem, StatementListResponse, StatementNotificationSettings } from '@/models/statement'
 import { TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 import ConfigHelper from '@/util/config-helper'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
@@ -40,7 +40,7 @@ export default class PaymentService {
       'Accept': 'text/csv'
     }
     const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/reports`
-    return axios.post(url, filterParams, { headers })
+    return axios.post(url, filterParams, { headers, responseType: 'blob' as 'json' })
   }
 
   static getStatementsList (accountId: string, filterParams: StatementFilterParams): AxiosPromise<StatementListResponse> {
@@ -53,6 +53,30 @@ export default class PaymentService {
     }
     const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements`
     return axios.get(url, { params })
+  }
+
+  static getStatementSettings (accountId: string): AxiosPromise<StatementListItem> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/settings`)
+  }
+
+  static getStatement (accountId: string, statementId: string, type: string): AxiosPromise<any> {
+    const headers = {
+      'Accept': type
+    }
+    const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/${statementId}`
+    return axios.get(url, { headers, responseType: 'blob' as 'json' })
+  }
+
+  static updateStatementSettings (accountId: string, updateBody): AxiosPromise<StatementListItem> {
+    return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/settings`, updateBody)
+  }
+
+  static getStatementRecipients (accountId: string): AxiosPromise<StatementNotificationSettings> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/notifications`)
+  }
+
+  static updateStatementNotifications (accountId: string, updateBody): AxiosPromise<StatementNotificationSettings> {
+    return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/notifications`, updateBody)
   }
 
   static getGLCodeList (): AxiosPromise<GLCodeResponse> {

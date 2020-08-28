@@ -1,9 +1,9 @@
 export interface StatementListItem {
-  createdOn: string
+  createdOn?: string
   frequency: string
-  fromDate: string
-  id: number
-  toDate: string
+  fromDate?: string
+  id?: number
+  toDate?: string
 }
 
 export interface StatementFilterParams {
@@ -16,4 +16,18 @@ export interface StatementListResponse {
   limit: number
   page: number
   total: number
+}
+
+export interface StatementRecipient {
+  authUserId: number
+  email: string
+  firstname: string
+  lastname: string
+  name?: string
+}
+
+export interface StatementNotificationSettings {
+  authAccountName?: string
+  statementNotificationEnabled: boolean
+  recipients: StatementRecipient[]
 }
