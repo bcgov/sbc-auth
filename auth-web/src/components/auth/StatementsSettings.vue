@@ -133,6 +133,7 @@
             title="Save Statement Settings"
             @click="updateSettings"
             :disabled="!enableSaveBtn"
+            :loading="isSaving"
           >
             Save
           </v-btn>
@@ -150,6 +151,22 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-snackbar
+      v-model="showToast"
+      :timeout="2000"
+    >
+      Successfully updated the statement settings
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          color="blue"
+          text
+          v-bind="attrs"
+          @click="showToast = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -199,6 +216,8 @@ export default class StatementsSettings extends Vue {
   private isRecipientListChanged: boolean = false
   private recipientAutoCompleteList: StatementRecipient[] = []
   private isLoading: boolean = false
+  private isSaving: boolean = false
+  private showToast: boolean = false
 
   private readonly frequencies = [
     {
@@ -264,6 +283,7 @@ export default class StatementsSettings extends Vue {
   private async updateSettings () {
     this.errorMessage = ''
     try {
+      this.isSaving = true
       if (this.isFrequencyChanged) {
         await this.updateStatementSettings({ 'frequency': this.frequencySelected })
       }
@@ -284,9 +304,12 @@ export default class StatementsSettings extends Vue {
         }
         await this.updateStatementNotifications(statementNotification)
       }
+      this.showToast = true
+      this.isSaving = false
       this.isSettingsModalOpen = false
     } catch (error) {
       this.errorMessage = 'Failed to update the settings, please try again.'
+      this.isSaving = false
     }
   }
 
