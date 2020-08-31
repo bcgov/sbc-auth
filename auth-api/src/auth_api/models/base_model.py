@@ -15,12 +15,13 @@
 
 import datetime
 
-from flask import g
+from flask import g, current_app
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
+from sqlalchemy_continuum.plugins.flask import fetch_remote_addr
 
-from .db import db
+from .db import db, activity_plugin
 
 
 class BaseModel(db.Model):
@@ -106,22 +107,27 @@ class BaseModel(db.Model):
         """Save and flush."""
         db.session.add(self)
         db.session.flush()
+        self.create_activity(self)
         return self
 
     def add_to_session(self):
         """Save and flush."""
-        db.session.add(self)
-        return self
+        return self.flush()
 
     def save(self):
         """Save and commit."""
         db.session.add(self)
+        db.session.flush()
+        self.create_activity(self)
         db.session.commit()
+
         return self
 
     def delete(self):
         """Delete and commit."""
         db.session.delete(self)
+        db.session.flush()
+        self.create_activity(self, is_delete=True)
         db.session.commit()
 
     @staticmethod
@@ -134,6 +140,23 @@ class BaseModel(db.Model):
         if self:
             db.session.delete(self)
             db.session.commit()
+
+    @classmethod
+    def create_activity(cls, obj, is_delete=False):
+        """Create activity records if the model is versioned."""
+        if isinstance(obj, VersionedModel) and not current_app.config.get('DISABLE_ACTIVITY_LOGS'):
+            if is_delete:
+                verb = 'delete'
+            else:
+                verb = 'update' if obj.modified_by is not None else 'create'
+
+            activity = activity_plugin.activity_cls(verb=verb, object=obj, data={
+                'user_name': g.jwt_oidc_token_info.get('preferred_username',
+                                                       None) if g and 'jwt_oidc_token_info' in g else None,
+                'remote_addr': fetch_remote_addr()
+            })
+
+            db.session.add(activity)
 
 
 class BaseCodeModel(BaseModel):
@@ -155,3 +178,13 @@ class BaseCodeModel(BaseModel):
     def default(cls):  # pylint:disable=no-self-argument, # noqa: N805
         """Return column for default."""
         return Column(Boolean(), default=False, nullable=False)
+
+
+class VersionedModel(BaseModel):
+    """This class manages all of the base code, type or status model functions."""
+
+    __abstract__ = True
+
+    __versioned__ = {
+        'exclude': ['modified', 'modified_by_id', 'modified_by', 'created']
+    }

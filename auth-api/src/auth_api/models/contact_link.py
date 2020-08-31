@@ -21,10 +21,10 @@ which requires this type of linkage to avoid duplication.
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import VersionedModel
 
 
-class ContactLink(BaseModel):  # pylint: disable=too-few-public-methods
+class ContactLink(VersionedModel):  # pylint: disable=too-few-public-methods
     """This class manages linkages between contacts and other data entities."""
 
     __tablename__ = 'contact_link'

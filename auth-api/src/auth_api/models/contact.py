@@ -20,10 +20,10 @@ physical addresses, emails, and phone numbers.
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import VersionedModel
 
 
-class Contact(BaseModel):  # pylint: disable=too-few-public-methods
+class Contact(VersionedModel):  # pylint: disable=too-few-public-methods
     """This class manages contact information for orgs and entities."""
 
     __tablename__ = 'contact'

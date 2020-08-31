@@ -13,10 +13,11 @@
 # limitations under the License.
 """Service for reset test data."""
 from typing import Dict
-from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.enums import LoginSource
+
 from auth_api.models import User as UserModel
 from auth_api.models import db
+from auth_api.services.keycloak import KeycloakService
+from auth_api.utils.enums import LoginSource
 from auth_api.utils.roles import Role
 
 
@@ -29,17 +30,19 @@ class ResetTestData:  # pylint:disable=too-few-public-methods
     @staticmethod
     def reset(token_info: Dict):
         """Cleanup all the data from all tables create by the provided user id."""
-        if Role.TESTER.value in token_info.get('realm_access').get('roles'):
+        if Role.TESTER.value in token_info.get('realm_access').get('roles'):  # pylint: disable=too-many-nested-blocks
             user = UserModel.find_by_jwt_token(token_info)
             if user:
                 # TODO need to find a way to avoid using protected function
                 for model_class in db.Model._decl_class_registry.values():  # pylint:disable=protected-access
-                    if hasattr(model_class, 'created_by_id'):
-                        for model in model_class.query.filter_by(created_by_id=user.id).all():
-                            model.reset()
-                    if hasattr(model_class, 'modified_by_id'):
-                        for model in model_class.query.filter_by(modified_by_id=user.id).all():
-                            model.reset()
+                    # skip version classes
+                    if not (hasattr(model_class, 'transaction_id') and hasattr(model_class, 'end_transaction_id')):
+                        if hasattr(model_class, 'created_by_id'):
+                            for model in model_class.query.filter_by(created_by_id=user.id).all():
+                                model.reset()
+                        if hasattr(model_class, 'modified_by_id'):
+                            for model in model_class.query.filter_by(modified_by_id=user.id).all():
+                                model.reset()
                 # check the user is still exists or not
                 user = UserModel.find_by_jwt_token(token_info)
                 if user:
