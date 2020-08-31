@@ -16,6 +16,7 @@ import {
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
+import { StatementFilterParams, StatementListItem, StatementNotificationSettings } from '@/models/statement'
 import { TransactionFilterParams, TransactionTableList, TransactionTableRow } from '@/models/transaction'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
@@ -59,6 +60,8 @@ export default class OrgModule extends VuexModule {
   accessType: string
   memberLoginOption = ''
 
+  currentStatementSettings: StatementListItem = {} as StatementListItem
+  currentStatementNotificationSettings: StatementNotificationSettings = {} as StatementNotificationSettings
   currentOrgTransactionList: TransactionTableRow[] = []
 
   @Mutation
@@ -177,6 +180,16 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentOrgTransactionList (transactionResp: TransactionTableList) {
     this.currentOrgTransactionList = transactionResp.transactionsList
+  }
+
+  @Mutation
+  public setStatementSettings (settings: StatementListItem) {
+    this.currentStatementSettings = settings
+  }
+
+  @Mutation
+  public setStatementNotificationSettings (settings: StatementNotificationSettings) {
+    this.currentStatementNotificationSettings = settings
   }
 
   @Action({ rawError: true })
@@ -583,6 +596,7 @@ export default class OrgModule extends VuexModule {
         id: transaction.id,
         transactionNames: transactionNames,
         folioNumber: transaction?.invoice?.folioNumber || '',
+        businessIdentifier: transaction?.invoice?.businessIdentifier || '',
         initiatedBy: transaction.createdName,
         transactionDate: transaction.createdOn,
         totalAmount: (transaction?.invoice?.total || 0).toFixed(2),
@@ -590,6 +604,42 @@ export default class OrgModule extends VuexModule {
       })
     })
     return transactionTableData
+  }
+
+  @Action({ rawError: true })
+  public async getStatementsList (filterParams: StatementFilterParams) {
+    const response = await PaymentService.getStatementsList(this.context.state['currentOrganization'].id, filterParams)
+    return response?.data
+  }
+
+  @Action({ rawError: true })
+  public async getStatement (statementParams) {
+    const response = await PaymentService.getStatement(this.context.state['currentOrganization'].id, statementParams.statementId, statementParams.type)
+    return response || {}
+  }
+
+  @Action({ commit: 'setStatementSettings', rawError: true })
+  public async getStatementSettings () {
+    const response = await PaymentService.getStatementSettings(this.context.state['currentOrganization'].id)
+    return response?.data || {}
+  }
+
+  @Action({ rawError: true })
+  public async updateStatementSettings (statementFrequency) {
+    const response = await PaymentService.updateStatementSettings(this.context.state['currentOrganization'].id, statementFrequency)
+    return response?.data || {}
+  }
+
+  @Action({ commit: 'setStatementNotificationSettings', rawError: true })
+  public async getStatementRecipients () {
+    const response = await PaymentService.getStatementRecipients(this.context.state['currentOrganization'].id)
+    return response?.data || {}
+  }
+
+  @Action({ rawError: true })
+  public async updateStatementNotifications (statementNotification) {
+    const response = await PaymentService.updateStatementNotifications(this.context.state['currentOrganization'].id, statementNotification)
+    return response?.data || {}
   }
 
   @Action({ rawError: true })

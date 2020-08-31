@@ -29,9 +29,10 @@ class TestPayment:
     def test_create_creditcard_payment(self, testing_config, logger):
         """Test creating creaditcard payment."""
         load_data = get_test_data(testing_config.test_data['creditcard'])
+        testing_config.payment_method = load_data['methodOfPayment']
         input_data = json.dumps({
             "paymentInfo": {
-                "methodOfPayment": load_data['methodOfPayment']
+                "methodOfPayment": testing_config.payment_method
             },
             "businessInfo": {
                 "businessIdentifier": testing_config.business_identifier,
@@ -64,6 +65,7 @@ class TestPayment:
         response_json = response.json()
         testing_config.payment_id = response_json.get('id')
         testing_config.invoice_id = response_json.get('invoices')[0].get('id')
+        testing_config.payment_method = load_data['methodOfPayment']
 
     def test_get_payment(self, testing_config, logger):
         """Test get payment."""
@@ -93,10 +95,9 @@ class TestPayment:
         logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
 
     def test_update_payment(self, testing_config, logger):
-        load_data = get_test_data(testing_config.test_data['invitation'])
         input_data = json.dumps({
             "paymentInfo": {
-                "methodOfPayment": "CC"
+                "methodOfPayment": testing_config.payment_method
             },
             "businessInfo": {
                 "businessIdentifier": testing_config.business_identifier,
@@ -119,14 +120,13 @@ class TestPayment:
             }
         })
         call_url = f'{testing_config.pay_api_url}/payment-requests/{testing_config.payment_id}'
-        logger.debug(f'[ACTION] Get {call_url} with {input_data}')
+        logger.debug(f'[ACTION] Put {call_url} with {input_data}')
         response = requests.put(call_url,
                                 headers={'Authorization': f'Bearer {testing_config.keycloak_token}',
                                          'Content-Type': 'application/json'},
                                 data=input_data)
         assert response.status_code == 200
         logger.debug(f'[ACTION] Response: {response.status_code} {response.json()}')
-        response_json = response.json()
 
     def test_create_transaction(self, testing_config, logger):
         input_data = json.dumps({

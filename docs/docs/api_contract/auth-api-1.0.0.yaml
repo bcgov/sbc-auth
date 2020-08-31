@@ -792,6 +792,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/contact'
+              examples:
+                example1:
+                  value:
+                    contacts:
+                      - city: Westbank
+                        country: CA
+                        created: '2020-05-14T17:33:04.315908+00:00'
+                        createdBy: BCREGTEST Bena THIRTEEN
+                        links:
+                        - 713
+                        modified: '2020-08-07T23:55:56.576008+00:00'
+                        modifiedBy: BCREGTEST Bena THIRTEEN
+                        postalCode: V4T 2A5
+                        region: BC
+                        street: 66-2098 Boucherie Rd
+                        streetAdditional: First
 
           headers:
             X-Application-Context:

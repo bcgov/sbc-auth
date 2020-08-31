@@ -19,12 +19,12 @@ An Affiliation is between an Org and an Entity.
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import VersionedModel
 from .db import db
 from .entity import Entity as EntityModel
 
 
-class Affiliation(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Affiliation."""
 
     __tablename__ = 'affiliation'
