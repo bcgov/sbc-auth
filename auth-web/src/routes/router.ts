@@ -18,6 +18,7 @@ import DashboardView from '@/views/auth/DashboardView.vue'
 import DecideBusinessView from '@/views/auth/DecideBusinessView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
+import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import HomeView from '@/views/auth/HomeView.vue'
 import HomeViewOutdated from '@/views/auth/HomeViewOutdated.vue'
 import IncorpOrRegisterView from '@/views/auth/IncorpOrRegisterView.vue'
@@ -45,10 +46,14 @@ import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
 
 function mapReturnPayVars (route: any) {
+  let payResponseUrl = window.location.search
+  if (payResponseUrl && payResponseUrl.charAt(0) === '?') {
+    payResponseUrl = payResponseUrl.substr(1)
+  }
   return {
     paymentId: route.params.paymentId,
     transactionId: route.params.transactionId,
-    receiptNum: !route.query.receipt_number ? '' : route.query.receipt_number
+    payResponseUrl: payResponseUrl
   }
 }
 
@@ -58,6 +63,7 @@ export function getRoutes (): RouteConfig[] {
   const teamManagement = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/TeamManagement.vue')
   const accountLoginOption = () => import(/* webpackChunkName: "account-settings" */ '../views/auth/AccountSettingsLoginOption.vue')
   const transaction = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/Transactions.vue')
+  const statements = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/Statements.vue')
   const routes = [
     { path: '/', name: 'root', redirect: 'home' },
     {
@@ -145,6 +151,14 @@ export function getRoutes (): RouteConfig[] {
           path: 'transactions',
           name: 'transactions',
           component: transaction,
+          meta: {
+            isPremiumOnly: true
+          }
+        },
+        {
+          path: 'statements',
+          name: 'statements',
+          component: statements,
           meta: {
             isPremiumOnly: true
           }
@@ -345,6 +359,13 @@ export function getRoutes (): RouteConfig[] {
       path: '/searchbusiness',
       name: 'searchbusiness',
       component: SearchBusinessView,
+      props: true,
+      meta: { requiresAuth: true, allowedRoles: [Role.Staff] }
+    },
+    {
+      path: '/glcodelist',
+      name: 'glcodelist',
+      component: GLCodesListView,
       props: true,
       meta: { requiresAuth: true, allowedRoles: [Role.Staff] }
     },

@@ -50,35 +50,51 @@
     </div>
 
     <v-card flat class="account-settings-card" data-test="account-settings-card">
-      <v-container class="nav-container py-8 pr-0 pl-4">
+      <v-container class="nav-container py-7 pl-4">
         <v-navigation-drawer permanent width="auto" data-test="account-nav-drawer">
           <v-list class="py-0">
             <v-list-item-group color="primary">
-              <v-list-item dense class="py-1 px-8" :to="accountInfoUrl" data-test="account-info-nav-item">
+
+              <!-- Manage Account -->
+              <v-subheader>MANAGE ACCOUNT</v-subheader>
+              <v-list-item dense class="py-1 px-6" :to="accountInfoUrl" data-test="account-info-nav-item">
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-information-outline</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Account Info</v-list-item-title>
               </v-list-item>
-              <v-list-item dense class="py-1 px-8" :to="teamMembersUrl" data-test="team-members-nav-item">
+              <v-list-item dense class="py-1 px-6" :to="teamMembersUrl" data-test="team-members-nav-item">
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-account-group-outline</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Team Members</v-list-item-title>
               </v-list-item>
-              <v-list-item dense class="py-1 px-8" :to="accountAuthUrl"  v-if="isRegularAccount" v-can:SET_AUTH_OPTIONS.hide data-test="user-auth-nav-item">
+              <v-list-item dense class="py-1 px-6" :to="accountAuthUrl"  v-if="isRegularAccount" v-can:SET_AUTH_OPTIONS.hide data-test="user-auth-nav-item">
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-shield-account-outline</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Authentication</v-list-item-title>
               </v-list-item>
-              <v-list-item dense class="py-1 px-8"
+
+              <!-- Account Activity -->
+              <v-subheader class="mt-4">ACCOUNT ACTIVITY</v-subheader>
+              <v-list-item dense class="py-1 px-6"
+                v-if="isPremiumAccount" v-can:TRANSACTION_HISTORY.hide
+                :to="statementsUrl"
+                data-test="statements-nav-item"
+              >
+                <v-list-item-icon>
+                  <v-icon color="link" left>mdi-file-document-outline</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Statements</v-list-item-title>
+              </v-list-item>
+              <v-list-item dense class="py-1 px-6"
                 v-if="isPremiumAccount" v-can:TRANSACTION_HISTORY.hide
                 :to="transactionUrl"
                 data-test="transactions-nav-item"
               >
                 <v-list-item-icon>
-                  <v-icon color="link" left>mdi-file-document-outline</v-icon>
+                  <v-icon color="link" left>mdi-format-list-bulleted</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Transactions</v-list-item-title>
               </v-list-item>
@@ -149,6 +165,10 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     return `/account/${this.orgId}/settings/transactions`
   }
 
+  private get statementsUrl (): string {
+    return `/account/${this.orgId}/settings/statements`
+  }
+
   private mounted () {
     this.isLoading = false
     this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
@@ -167,6 +187,11 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     flex: 0 0 auto;
     width: 17rem;
     border-radius: 0 !important;
+  }
+
+  .v-subheader {
+    color: var(--v-grey-darken4) !important;
+    font-weight: bold;
   }
 
   .v-list-item .v-list-item__title {

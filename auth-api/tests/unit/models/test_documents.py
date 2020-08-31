@@ -36,7 +36,7 @@ def test_documents_with_insert_some_type(session):
     """
     html_content = '<HTML>'
     # putting higher numbers so that version number doesnt collide with existing in db
-    doc = Documents(version_id=20, type='sometype', content=html_content)
+    doc = Documents(version_id=20, type='sometype', content=html_content, content_type='text/html')
     session.add(doc)
     session.commit()
 

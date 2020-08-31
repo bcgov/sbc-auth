@@ -13,7 +13,7 @@
 # limitations under the License.
 """Service for managing Product and Product Subscription data."""
 
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 from flask import current_app
 
@@ -34,7 +34,7 @@ class Product:
     """
 
     @staticmethod
-    def create_product_subscription(org_id, subscription_data: Tuple[Dict[str, Any]]):
+    def create_product_subscription(org_id, subscription_data: Dict[str, Any], is_new_transaction: bool = True):
         """Create product subscription for the user.
 
         create product subscription first
@@ -55,24 +55,31 @@ class Product:
                 subscriptions_model_list.append(product_subscription)
             else:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)
-            if subscription.get('productRoles'):
-                for role in subscription.get('productRoles'):
-                    product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role, product_code)
-                    if product_role_code:
-                        ProductSubscriptionRoleModel(product_subscription_id=product_subscription.id,
-                                                     product_role_id=product_role_code.id).save()
-            else:  # empty product roles ;give subscription to everything
-                product_roles = ProductRoleCodeModel.find_all_roles_by_product_code(product_code)
-                obj = []
-                for role in product_roles:
-                    obj.append(ProductSubscriptionRoleModel(product_subscription_id=product_subscription.id,
-                                                            product_role_id=role.id))
 
-                db.session.bulk_save_objects(obj)
-                db.session.commit()
+            Product._create_roles(is_new_transaction, product_code, product_subscription, subscription)
 
         # TODO return something better/useful.may be return the whole model from db
         return subscriptions_model_list
+
+    @staticmethod
+    def _create_roles(is_new_transaction, product_code, product_subscription, subscription):
+        """Create Product Roles."""
+        if subscription.get('productRoles'):
+            for role in subscription.get('productRoles'):
+                product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role, product_code)
+                if product_role_code:
+                    ProductSubscriptionRoleModel(product_subscription_id=product_subscription.id,
+                                                 product_role_id=product_role_code.id).save()
+        else:  # empty product roles ;give subscription to everything
+            product_roles = ProductRoleCodeModel.find_all_roles_by_product_code(product_code)
+            obj = []
+            for role in product_roles:
+                obj.append(ProductSubscriptionRoleModel(product_subscription_id=product_subscription.id,
+                                                        product_role_id=role.id))
+            db.session.bulk_save_objects(obj)
+
+            if is_new_transaction:  # Commit the transaction if it's a new transaction
+                db.session.commit()
 
     @staticmethod
     def get_products():
