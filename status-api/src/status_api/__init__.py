@@ -19,11 +19,11 @@ import os
 
 import sentry_sdk
 from flask import Flask
-from sentry_sdk.integrations.flask import FlaskIntegration  # pylint: disable=ungrouped-imports
-
-from config import CONFIGURATION, _Config
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler  # noqa: I001
 from sbc_common_components.utils.camel_case_response import convert_to_camel
+from sentry_sdk.integrations.flask import FlaskIntegration  # pylint: disable=ungrouped-imports
+
+from config import CONFIGURATION, _Config  # pylint: disable=import-error
 from status_api import models
 from status_api.jwt_wrapper import JWTWrapper
 from status_api.utils.run_version import get_run_version
