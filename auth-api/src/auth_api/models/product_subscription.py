@@ -19,10 +19,10 @@ The ProductSubscription object connects Org models to one or more ProductSubscri
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import VersionedModel
 
 
-class ProductSubscription(BaseModel):  # pylint: disable=too-few-public-methods
+class ProductSubscription(VersionedModel):  # pylint: disable=too-few-public-methods
     """Model for a Product Subscription model."""
 
     __tablename__ = 'product_subscription'

@@ -17,13 +17,13 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.enums import AffidavitStatus
-from .base_model import BaseModel
+from .base_model import VersionedModel
 from .db import db
 from .membership import Membership
 from .org import Org
 
 
-class Affidavit(BaseModel):
+class Affidavit(VersionedModel):
     """This is the model for a Affidavit."""
 
     __tablename__ = 'affidavit'

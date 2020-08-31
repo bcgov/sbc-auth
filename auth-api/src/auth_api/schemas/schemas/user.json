@@ -25,6 +25,15 @@
           "Doe"
         ],
         "pattern": "^(.*)$"
+      },
+      "isLogin": {
+        "$id": "#/properties/isLogin",
+        "type": "boolean",
+        "title": "Is Login",
+        "default": "",
+        "examples": [
+          true, false
+        ]
       }
     }
   }

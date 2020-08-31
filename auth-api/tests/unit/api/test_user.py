@@ -42,7 +42,6 @@ from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
 from auth_api.utils.enums import AccessType, IdpHint, ProductCode, Status, UserStatus
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER
 
-
 KEYCLOAK_SERVICE = KeycloakService()
 
 
@@ -222,7 +221,7 @@ def test_add_user_no_token_returns_401(client, session):  # pylint:disable=unuse
     assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
-@ skip_in_pod
+@skip_in_pod
 def test_add_user_invalid_token_returns_401(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that POSTing a user with an invalid token returns a 401."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.invalid)
@@ -716,3 +715,19 @@ def test_add_bceid_user(client, jwt, session):  # pylint:disable=unused-argument
     }))
     assert rv.status_code == http_status.HTTP_201_CREATED
     assert rv.json.get('firstname') == 'John-New'
+
+
+def test_user_post_during_login(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a user can be POSTed."""
+    # Create a user by POST, then create same user with login flag and make sure the login date is different
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    login_time = rv.json.get('loginTime')
+    # Call the same endpoint again and confirm logn time is same
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    assert login_time == rv.json.get('loginTime')
+
+    # Call same endpoint with login flag and assert login time is different
+    rv = client.post('/api/v1/users', headers=headers, data=json.dumps({'isLogin': True}),
+                     content_type='application/json')
+    assert login_time != rv.json.get('loginTime')

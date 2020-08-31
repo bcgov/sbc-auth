@@ -20,11 +20,11 @@ from flask import current_app
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import VersionedModel
 from .payment_type import PaymentType
 
 
-class AccountPaymentSettings(BaseModel):  # pylint: disable=too-few-public-methods
+class AccountPaymentSettings(VersionedModel):  # pylint: disable=too-few-public-methods
     """Model for payment settings record."""
 
     __tablename__ = 'account_payment_settings'
