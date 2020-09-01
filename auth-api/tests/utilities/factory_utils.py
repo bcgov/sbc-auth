@@ -224,11 +224,12 @@ def factory_invitation_anonymous(org_id,
     }
 
 
-def factory_document_model(version_id, doc_type, content):
+def factory_document_model(version_id, doc_type, content, content_type='text/html'):
     """Produce a Document model."""
     document = DocumentsModel(version_id=version_id,
                               type=doc_type,
-                              content=content)
+                              content=content,
+                              content_type=content_type)
 
     document.save()
     return document

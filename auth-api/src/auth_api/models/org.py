@@ -23,7 +23,7 @@ from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, O
 from auth_api.utils.roles import VALID_STATUSES
 
 from .account_payment_settings import AccountPaymentSettings as AccountPaymentSettingsModel
-from .base_model import BaseModel
+from .base_model import VersionedModel
 from .contact import Contact
 from .contact_link import ContactLink
 from .db import db
@@ -33,7 +33,7 @@ from .org_status import OrgStatus
 from .org_type import OrgType
 
 
-class Org(BaseModel):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
+class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """Model for an Org record."""
 
     __tablename__ = 'org'

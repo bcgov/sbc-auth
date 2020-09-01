@@ -1,15 +1,14 @@
 <template>
   <v-container>
     <v-fade-transition>
-      <div v-if="isLoading" class="loading-container transparent">
+      <div v-if="isLoading" class="loading-container">
         <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
       </div>
     </v-fade-transition>
-    <header class="view-header mb-8">
+    <header class="view-header mb-6">
       <h2 class="view-header__title">Statements</h2>
       <v-btn
         large
-        depressed
         aria-label="Statement Settings"
         title="Open Statement Settings"
         @click.stop="openSettingsModal"
@@ -245,8 +244,12 @@ export default class Statements extends Mixins(AccountChangeMixin) {
 }
 
 .statement-list {
-    .v-data-table-header {
-      margin-bottom: -2px;
-    }
+  .v-data-table-header {
+    margin-bottom: -2px;
+  }
+}
+
+.loading-container {
+  background: rgba(255,255,255, 0.8);
 }
 </style>

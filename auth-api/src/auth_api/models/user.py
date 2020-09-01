@@ -19,12 +19,12 @@ A User stores basic information from a KeyCloak user (including the KeyCloak GUI
 import datetime
 
 from flask import current_app
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, and_, or_
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String
+from sqlalchemy import Integer, and_, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.enums import AccessType, Status, UserStatus
-
 from .base_model import BaseModel
 from .db import db
 from .membership import Membership as MembershipModel
@@ -36,6 +36,10 @@ class User(BaseModel):
     """This is the model for a User."""
 
     __tablename__ = 'user'
+
+    __versioned__ = {
+        'exclude': ['modified', 'modified_by_id', 'modified_by', 'created']
+    }
 
     id = Column(Integer, primary_key=True)
     username = Column('username', String(100), index=True)
@@ -56,14 +60,13 @@ class User(BaseModel):
     status = Column(ForeignKey('user_status_code.id'))
     idp_userid = Column('idp_userid', String(256), index=True)
     login_source = Column('login_source', String(200), nullable=True)
+    login_time = Column(DateTime, default=None, nullable=True)
 
     contacts = relationship('ContactLink', primaryjoin='User.id == ContactLink.user_id', lazy='select')
     orgs = relationship('Membership',
-                        primaryjoin='and_(User.id == Membership.user_id, \
-                        or_(Membership.status == ' + str(Status.ACTIVE.value) +
-                        ', Membership.status == ' + str(
-                            Status.PENDING_APPROVAL.value) + '))',
-                        lazy='select')  # noqa:E127
+                        primaryjoin='and_(User.id == Membership.user_id,  or_(Membership.status == ' + str(
+                            Status.ACTIVE.value) + ', Membership.status == ' + str(
+                                Status.PENDING_APPROVAL.value) + '))', lazy='select')  # noqa:E127
 
     terms_of_use_version = relationship('Documents', foreign_keys=[terms_of_use_accepted_version], uselist=False,
                                         lazy='select')
@@ -100,37 +103,59 @@ class User(BaseModel):
             )
             user.status = UserStatusCode.get_default_type()
             user.idp_userid = token.get('idp_userid', None)
+            user.login_time = datetime.datetime.now()
             user.save()
             return user
         return None
 
     @classmethod
-    def update_from_jwt_token(cls, user, token: dict, first_name: str, last_name: str):
+    def update_from_jwt_token(cls, user, token: dict,  # pylint:disable=too-many-arguments
+                              first_name: str, last_name: str, is_login: bool = False):
         """Update a User from the provided JWT."""
-        if token:
-            if user:
-                user.username = token.get('preferred_username', user.username)
-                user.firstname = first_name
-                user.lastname = last_name
-                user.email = token.get('email', user.email)
-                user.modified = datetime.datetime.now()
-                user.roles = token.get('roles', user.roles)
-                if token.get('accessType', None) == AccessType.ANONYMOUS.value:  # update kcguid for anonymous users
-                    user.keycloak_guid = token.get('sub', user.keycloak_guid)
+        if token is None or user is None:
+            return None
 
-                current_app.logger.debug(
-                    'Updating user from JWT:{}; User:{}'.format(token, user)
-                )
+        # Do not save if nothing has been changed
+        # pylint: disable=too-many-boolean-expressions
+        if not is_login \
+                and user.username == token.get('preferred_username', user.username) \
+                and user.firstname == first_name \
+                and user.lastname == last_name \
+                and user.email == token.get('email', user.email) \
+                and str(user.keycloak_guid) == token.get('sub', user.keycloak_guid) \
+                and user.status == UserStatus.ACTIVE.value \
+                and user.login_source == token.get('login_source', user.login_source) \
+                and user.idp_userid == token.get('idp_userid', None):
+            return user
 
-                # If this user is marked as Inactive, this login will re-activate them
-                user.status = UserStatus.ACTIVE.value
-                user.login_source = token.get('login_source', user.login_source)
+        current_app.logger.debug(
+            'Updating user from JWT:{}; User:{}'.format(token, user)
+        )
 
-                if token.get('idp_userid', None):
-                    user.idp_userid = token.get('idp_userid')
-                cls.commit()
-                return user
-        return None
+        user.username = token.get('preferred_username', user.username)
+
+        user.firstname = first_name
+        user.lastname = last_name
+        user.email = token.get('email', user.email)
+
+        user.modified = datetime.datetime.now()
+        user.roles = token.get('roles', user.roles)
+        if token.get('accessType', None) == AccessType.ANONYMOUS.value:  # update kcguid for anonymous users
+            user.keycloak_guid = token.get('sub', user.keycloak_guid)
+
+        # If this user is marked as Inactive, this login will re-activate them
+        user.status = UserStatus.ACTIVE.value
+        user.login_source = token.get('login_source', user.login_source)
+
+        # If this is a request during login, update login_time
+        if is_login:
+            user.login_time = datetime.datetime.now()
+
+        user.idp_userid = token.get('idp_userid')
+
+        cls.commit()
+
+        return user
 
     @classmethod
     def find_users(cls, first_name, last_name, email):
@@ -153,7 +178,7 @@ class User(BaseModel):
                     is_terms_accepted, terms_of_use_version)
             )
 
-            cls.commit()
+            cls.save(user)
             return user
         return None
 
