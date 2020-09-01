@@ -19,10 +19,10 @@ This is a mapping between status codes and descriptions for Org objects.
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import VersionedModel
 
 
-class OrgSettings(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
+class OrgSettings(VersionedModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Org Settings record."""
 
     __tablename__ = 'org_settings'

@@ -16,10 +16,10 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import VersionedModel
 
 
-class AccountLoginOptions(BaseModel):  # pylint: disable=too-few-public-methods
+class AccountLoginOptions(VersionedModel):  # pylint: disable=too-few-public-methods
     """Model for Account login options."""
 
     __tablename__ = 'account_login_options'

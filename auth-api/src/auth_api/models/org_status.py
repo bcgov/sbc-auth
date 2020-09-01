@@ -16,6 +16,9 @@
 This is a mapping between status codes and descriptions for Org objects.
 """
 
+from sqlalchemy import Column, String
+from sqlalchemy.ext.declarative import declared_attr
+
 from .base_model import BaseCodeModel
 
 
@@ -23,6 +26,11 @@ class OrgStatus(BaseCodeModel):  # pylint: disable=too-few-public-methods # Temp
     """This is the model for an Org Status record."""
 
     __tablename__ = 'org_status'
+
+    @declared_attr
+    def code(cls):  # pylint:disable=no-self-argument, # noqa: N805
+        """Return column for code."""
+        return Column(String(30), primary_key=True)
 
     @classmethod
     def get_default_status(cls):

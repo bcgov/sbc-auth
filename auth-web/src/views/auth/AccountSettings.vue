@@ -50,11 +50,13 @@
     </div>
 
     <v-card flat class="account-settings-card" data-test="account-settings-card">
-      <v-container class="nav-container py-8 pl-4">
+      <v-container class="nav-container py-7 pl-4">
         <v-navigation-drawer permanent width="auto" data-test="account-nav-drawer">
+
+          <!-- Manage Account -->
           <v-list class="py-0">
             <v-list-item-group color="primary">
-              <v-subheader class="acc-settings-subheader">MANAGE ACCOUNT</v-subheader>
+              <v-subheader>MANAGE ACCOUNT</v-subheader>
               <v-list-item dense class="py-1 px-6" :to="accountInfoUrl" data-test="account-info-nav-item">
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-information-outline</v-icon>
@@ -73,9 +75,14 @@
                 </v-list-item-icon>
                 <v-list-item-title>Authentication</v-list-item-title>
               </v-list-item>
-              <v-subheader class="acc-settings-subheader">ACCOUNT ACTIVITY</v-subheader>
+            </v-list-item-group>
+          </v-list>
+
+          <!-- Account Activity -->
+          <v-list v-if="isPremiumAccount" v-can:TRANSACTION_HISTORY.hide>
+            <v-list-item-group color="primary">
+              <v-subheader class="mt-4">ACCOUNT ACTIVITY</v-subheader>
               <v-list-item dense class="py-1 px-6"
-                v-if="isPremiumAccount" v-can:TRANSACTION_HISTORY.hide
                 :to="statementsUrl"
                 data-test="statements-nav-item"
               >
@@ -85,7 +92,6 @@
                 <v-list-item-title>Statements</v-list-item-title>
               </v-list-item>
               <v-list-item dense class="py-1 px-6"
-                v-if="isPremiumAccount" v-can:TRANSACTION_HISTORY.hide
                 :to="transactionUrl"
                 data-test="transactions-nav-item"
               >
@@ -96,6 +102,7 @@
               </v-list-item>
             </v-list-item-group>
           </v-list>
+
         </v-navigation-drawer>
       </v-container>
       <transition name="fade" mode="out-in">
@@ -177,29 +184,17 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   .account-settings-card {
     display: flex;
-    .acc-settings-subheader {
-      font-weight: 600;
-      color: #000;
-      padding-left: 0px;
-      &:not(:first-child) {
-        margin-top: 21px;
-      }
-    }
-    .v-list-item {
-      margin-bottom: 4px;
-      &:not(.v-list-item--active):not(.v-list-item--disabled) {
-        color: $gray6 !important;
-      }
-      .v-list-item__title {
-        font-weight: 600;
-      }
-    }
   }
 
   .nav-container {
     flex: 0 0 auto;
     width: 17rem;
     border-radius: 0 !important;
+  }
+
+  .v-subheader {
+    color: var(--v-grey-darken4) !important;
+    font-weight: bold;
   }
 
   .v-list-item .v-list-item__title {

@@ -68,9 +68,18 @@ class Status:
                             current_status = 'False'
                             up_time = available[0].timestamp
 
+            # Add any custom message is provided
+            custom = service_schedule[0].get('custom', None)
+            if custom is not None:
+                if (Status._get_local_outage_time(custom['start'])
+                        <= check_date_local
+                        < Status._get_local_outage_time(custom['end'])):
+                    response['custom_message'] = custom['message']
+
             response['current_status'] = current_status
             if up_time:
                 response['next_up_time'] = up_time
+                response['message'] = current_app.config.get('PAYBC_OUTAGE_MESSAGE')
 
         return response
 
@@ -110,8 +119,12 @@ class Status:
 
         if 'outage' in service_schedule[0]:
             for outage_time in service_schedule[0]['outage']:
-                start_date = arrow.get(outage_time['start'], 'YYYY-MM-DD HH:mm').replace(tzinfo=LOCAL_TIMEZONE)
-                end_date = arrow.get(outage_time['end'], 'YYYY-MM-DD HH:mm').replace(tzinfo=LOCAL_TIMEZONE)
+                start_date = Status._get_local_outage_time(outage_time['start'])
+                end_date = Status._get_local_outage_time(outage_time['end'])
                 date_outages.append([start_date, end_date])
 
         return date_outages
+
+    @staticmethod
+    def _get_local_outage_time(outage_time: str):
+        return arrow.get(outage_time, 'YYYY-MM-DD HH:mm').replace(tzinfo=LOCAL_TIMEZONE)
