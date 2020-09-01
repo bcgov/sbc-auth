@@ -1,15 +1,16 @@
 <template>
   <div>
     <v-fade-transition>
-      <div v-if="isLoading" class="loading-container transparent">
+      <div v-if="isLoading" class="loading-container">
         <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
       </div>
     </v-fade-transition>
     <v-dialog
+      :persistent="enableSaveBtn"
+      max-width="640"
       v-model="isSettingsModalOpen"
-      max-width="600"
     >
-      <v-card >
+      <v-card>
         <v-card-title>
           Statement Settings
           <v-btn
@@ -28,7 +29,7 @@
           <!-- Statement Frequency-->
           <fieldset class="mb-5">
             <legend>Statement Period</legend>
-            <div class="mt-1">Set how often you want to receive statements for this account.</div>
+            <div class="mt-2">Set how often statements are generated for this account.</div>
             <v-radio-group
               v-model="frequencySelected"
               @change="frequencyChanged"
@@ -57,8 +58,7 @@
           <!-- Notification Recipients -->
           <v-expand-transition>
             <fieldset v-if="sendStatementNotifications">
-              <legend>Notification Recipients</legend>
-              <div class="mt-2 mb-6">Manage which team members will receive statement notifications.</div>
+              <legend class="mb-4">Notification Recipients</legend>
 
               <!-- Recipient List -->
               <v-expand-transition>
@@ -77,13 +77,12 @@
                           <td class="text-right">
                             <v-btn
                               icon
-                              small
                               class="remove-user-btn"
                               aria-label="Remove Recipient"
                               title="Remove recipient from notifications list"
                               @click="removeEmailReceipient(item)"
                             >
-                              <v-icon small>mdi-trash-can-outline</v-icon>
+                              <v-icon>mdi-trash-can-outline</v-icon>
                             </v-btn>
                           </td>
                         </tr>
@@ -95,18 +94,27 @@
 
               <!-- Recipient Input -->
               <v-autocomplete
-                append-icon="mdi-plus-box"
-                v-model="emailRecipientInput"
-                @click:append="addEmailReceipient"
+                filled
                 hide-details
+                label="Team Member Name"
+                v-model="emailRecipientInput"
                 :items="recipientAutoCompleteList"
                 no-data-text="No team members available"
                 item-text="name"
                 return-object
-                filled
-                label="Team Member Name"
-                class="mt-3"
               >
+                <template v-slot:append-outer>
+                  <v-btn
+                    icon
+                    color="primary"
+                    class="add-recipient-btn"
+                    @click="addEmailReceipient"
+                  >
+                  <v-icon>
+                    mdi-plus-box
+                  </v-icon>
+                  </v-btn>
+                </template>
               </v-autocomplete>
             </fieldset>
           </v-expand-transition>
@@ -152,20 +160,21 @@
       </v-card>
     </v-dialog>
     <v-snackbar
-      v-model="showToast"
-      :timeout="2000"
+      bottom
+      multi-line
+      :timeout="6000"
+      class="mb-6"
+      v-model="showStatementNotification"
     >
-      Successfully updated the statement settings
-      <template v-slot:action="{ attrs }">
-        <v-btn
-          color="blue"
-          text
-          v-bind="attrs"
-          @click="showToast = false"
-        >
-          Close
-        </v-btn>
-      </template>
+      Statement Settings updated
+      <v-btn
+        dark
+        icon
+        aria-label="Close Notification"
+        title="Close Notification Message"
+        @click="showStatementNotification = false">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
     </v-snackbar>
   </div>
 </template>
@@ -217,7 +226,7 @@ export default class StatementsSettings extends Vue {
   private recipientAutoCompleteList: StatementRecipient[] = []
   private isLoading: boolean = false
   private isSaving: boolean = false
-  private showToast: boolean = false
+  private showStatementNotification: boolean = false
 
   private readonly frequencies = [
     {
@@ -304,7 +313,7 @@ export default class StatementsSettings extends Vue {
         }
         await this.updateStatementNotifications(statementNotification)
       }
-      this.showToast = true
+      this.showStatementNotification = true
       this.isSaving = false
       this.isSettingsModalOpen = false
     } catch (error) {
@@ -364,7 +373,12 @@ export default class StatementsSettings extends Vue {
     background: transparent !important;
   }
 
-  .loading-transparent {
-    background: #bdbdbd4d !important;
+  .loading-container {
+    background: rgba(255,255,255, 0.8);
+  }
+
+  .add-recipient-btn {
+    margin-top: -5px;
+    margin-right: 10px;
   }
 </style>
