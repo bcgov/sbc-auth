@@ -102,18 +102,13 @@
                 no-data-text="No team members available"
                 item-text="name"
                 return-object
+                :menu-props="{ closeOnContentClick: true }"
+                @update:list-index="selectFromListUsingKey"
               >
-                <template v-slot:append-outer>
-                  <v-btn
-                    icon
-                    color="primary"
-                    class="add-recipient-btn"
-                    @click="addEmailReceipient"
-                  >
-                  <v-icon>
-                    mdi-plus-box
-                  </v-icon>
-                  </v-btn>
+                <template v-slot:item="{ item }">
+                  <v-list-item-content @click="addEmailReceipient(item)">
+                    <v-list-item-title v-text="item.name"></v-list-item-title>
+                  </v-list-item-content>
                 </template>
               </v-autocomplete>
             </fieldset>
@@ -330,7 +325,7 @@ export default class StatementsSettings extends Vue {
     this.isNotificationChanged = (notification !== this.currentStatementNotificationSettings.statementNotificationEnabled)
   }
 
-  private recipientListChanged () {
+  private setRecipientListChanged () {
     this.isRecipientListChanged = (JSON.stringify(this.emailRecipientList) !== JSON.stringify(this.currentStatementNotificationSettings.recipients))
   }
 
@@ -338,16 +333,19 @@ export default class StatementsSettings extends Vue {
     return (this.isFrequencyChanged || this.isNotificationChanged || this.isRecipientListChanged)
   }
 
-  private addEmailReceipient () {
-    if (this.emailRecipientInput.authUserId) {
-      this.emailRecipientList.push({ ...this.emailRecipientInput })
-      this.recipientListChanged()
+  private addEmailReceipient (item) {
+    if (item.authUserId) {
+      this.emailRecipientList.push({ ...item })
+      this.setRecipientListChanged()
       // remove the added receipient from autocomplete list
-      const recipientIndex = this.recipientAutoCompleteList.findIndex((recipient) => recipient.authUserId === this.emailRecipientInput.authUserId)
+      const recipientIndex = this.recipientAutoCompleteList.findIndex((recipient) => recipient.authUserId === item.authUserId)
       if (recipientIndex > -1) {
         this.recipientAutoCompleteList.splice(recipientIndex, 1)
       }
-      this.emailRecipientInput = {} as StatementRecipient
+      // required this delay to clear the selected item from input field
+      setTimeout(() => {
+        this.emailRecipientInput = {} as StatementRecipient
+      }, 100)
     }
   }
 
@@ -356,10 +354,17 @@ export default class StatementsSettings extends Vue {
     if (index > -1) {
       this.emailRecipientList.splice(index, 1)
     }
-    this.recipientListChanged()
+    this.setRecipientListChanged()
     // add the removed item back to auto complete list
     item.name = `${item.firstname || ''} ${item.lastname || ''}`
     this.recipientAutoCompleteList.push(item)
+  }
+
+  // for selecting the receipient from the list using keyboard
+  private selectFromListUsingKey (itemIndex) {
+    if (itemIndex > -1) {
+      this.addEmailReceipient(this.emailRecipientInput)
+    }
   }
 }
 </script>
