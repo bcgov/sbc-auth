@@ -39,8 +39,8 @@
                 :value="frequency.frequency"
               >
                 <template v-slot:label>
-                  <span>{{frequency.frequency}}</span>
-                  <span v-if="showFrequencyChangeDate(frequency)"> - Frequency will change starting {{formatDate(frequency.startDate)}}</span>
+                  <span>{{capitalizeLabel(frequency.frequency)}}</span>
+                  <span v-if="showFrequencyChangeDate(frequency)" class="ml-1"> - Frequency will change starting {{formatDate(frequency.startDate)}}</span>
                 </template>
               </v-radio>
             </v-radio-group>
@@ -338,6 +338,10 @@ export default class StatementsSettings extends Vue {
 
   private showFrequencyChangeDate (frequency) {
     return (frequency.frequency === this.frequencySelected) && (frequency.frequency !== this.statementSettings?.currentFrequency?.frequency)
+  }
+
+  private capitalizeLabel (value) {
+    return (typeof value === 'string') ? `${value.charAt(0)}${value.slice(1).toLowerCase()}` : ''
   }
 
   private addEmailReceipient () {
