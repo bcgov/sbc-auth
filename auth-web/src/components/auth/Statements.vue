@@ -156,6 +156,8 @@ export default class Statements extends Mixins(AccountChangeMixin) {
       // if the account switing happening when the user is already in the statements page,
       // redirect to account info if its a basic account
       this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
+    } else {
+      await this.loadStatementsList()
     }
   }
 
