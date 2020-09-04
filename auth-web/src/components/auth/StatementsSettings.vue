@@ -178,7 +178,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import { Member, Organization } from '@/models/Organization'
+import { Member, MembershipType, Organization } from '@/models/Organization'
 import {
   StatementListItem,
   StatementNotificationSettings,
@@ -262,7 +262,7 @@ export default class StatementsSettings extends Vue {
     this.activeOrgMembers.forEach((member) => {
       const recipientIndex = this.emailRecipientList.findIndex((emailRecipient) => (emailRecipient.authUserId === member.id))
       // add to auto complete only if the member is not already saved
-      if (recipientIndex < 0) {
+      if ((recipientIndex < 0) && (member.membershipTypeCode !== MembershipType.User)) {
         this.recipientAutoCompleteList.push({
           authUserId: member.id,
           firstname: member.user?.firstname,
