@@ -24,8 +24,7 @@
           </v-btn>
         </v-card-title>
 
-        <v-card-text>
-
+        <v-card-text v-if="statementSettings">
           <!-- Statement Frequency-->
           <fieldset class="mb-5">
             <legend>Statement Period</legend>
@@ -35,10 +34,10 @@
               @change="frequencyChanged"
             >
               <v-radio
-                v-for="frequency in frequencies"
-                :key="frequency.frequencyCode"
-                :label="frequency.frequencyLabel"
-                :value="frequency.frequencyCode"
+                v-for="frequency in statementSettings.frequencies"
+                :key="frequency.frequency"
+                :label="`${frequency.frequency} The change will take effect on ${formatDate(frequency.startDate)}`"
+                :value="frequency.frequency"
               >
               </v-radio>
             </v-radio-group>
@@ -182,13 +181,19 @@
 <script lang="ts">
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
-import { StatementListItem, StatementNotificationSettings, StatementRecipient } from '@/models/statement'
+import {
+  StatementListItem,
+  StatementNotificationSettings,
+  StatementRecipient,
+  StatementSettings
+} from '@/models/statement'
 import { mapActions, mapState } from 'vuex'
+import moment from 'moment'
 
 @Component({
   methods: {
     ...mapActions('org', [
-      'getStatementSettings',
+      'fetchStatementSettings',
       'getStatementRecipients',
       'updateStatementSettings',
       'syncActiveOrgMembers',
@@ -197,7 +202,7 @@ import { mapActions, mapState } from 'vuex'
   },
   computed: {
     ...mapState('org', [
-      'currentStatementSettings',
+      'statementSettings',
       'currentStatementNotificationSettings',
       'activeOrgMembers',
       'currentOrganization'
@@ -205,7 +210,7 @@ import { mapActions, mapState } from 'vuex'
   }
 })
 export default class StatementsSettings extends Vue {
-  private readonly getStatementSettings!: () => StatementListItem
+  private readonly fetchStatementSettings!: () => StatementSettings
   private readonly getStatementRecipients!: () => StatementNotificationSettings
   private readonly updateStatementSettings!: (statementFrequency: StatementListItem) => any
   private readonly updateStatementNotifications!: (statementNotification: StatementNotificationSettings) => any
@@ -228,21 +233,6 @@ export default class StatementsSettings extends Vue {
   private isSaving: boolean = false
   private showStatementNotification: boolean = false
 
-  private readonly frequencies = [
-    {
-      frequencyLabel: 'Daily',
-      frequencyCode: 'DAILY'
-    },
-    {
-      frequencyLabel: 'Weekly',
-      frequencyCode: 'WEEKLY'
-    },
-    {
-      frequencyLabel: 'Monthly',
-      frequencyCode: 'MONTHLY'
-    }
-  ]
-
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
@@ -255,9 +245,11 @@ export default class StatementsSettings extends Vue {
       this.isNotificationChanged = false
       this.isRecipientListChanged = false
       await this.syncActiveOrgMembers()
-      const settings = await this.getStatementSettings()
+      debugger
+      const settings = await this.fetchStatementSettings()
+      debugger
       const statementRecipients = await this.getStatementRecipients()
-      this.frequencySelected = settings?.frequency || this.frequencies[1].frequencyCode
+      this.frequencySelected = settings?.currentFrequency?.frequency || settings.frequencies[0].frequency
       this.sendStatementNotifications = statementRecipients.statementNotificationEnabled
       this.emailRecipientList = [ ...statementRecipients.recipients ]
       await this.prepareAutoCompleteList()
@@ -336,6 +328,10 @@ export default class StatementsSettings extends Vue {
 
   private get enableSaveBtn () {
     return (this.isFrequencyChanged || this.isNotificationChanged || this.isRecipientListChanged)
+  }
+
+  private formatDate (value) {
+    return moment(String(value)).format('MM/DD/YYYY')
   }
 
   private addEmailReceipient () {
