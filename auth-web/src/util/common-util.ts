@@ -111,6 +111,7 @@ export default class CommonUtils {
       Permission.CHANGE_ROLE,
       Permission.RESET_PASSWORD,
       Permission.TRANSACTION_HISTORY,
+      Permission.MANAGE_STATEMENTS,
       Permission.VIEW_ADMIN_CONTACT
     ]
   }

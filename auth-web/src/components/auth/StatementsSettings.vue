@@ -264,7 +264,7 @@ export default class StatementsSettings extends Vue {
       // add to auto complete only if the member is not already saved
       if ((recipientIndex < 0) && (member.membershipTypeCode !== MembershipType.User)) {
         this.recipientAutoCompleteList.push({
-          authUserId: member.id,
+          authUserId: member.user?.id,
           firstname: member.user?.firstname,
           lastname: member.user?.lastname,
           name: `${member.user?.firstname || ''} ${member.user?.lastname || ''}`,
