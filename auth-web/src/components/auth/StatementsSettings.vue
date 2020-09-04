@@ -25,7 +25,6 @@
         </v-card-title>
 
         <v-card-text>
-
           <!-- Statement Frequency-->
           <fieldset class="mb-5">
             <legend>Statement Period</legend>
@@ -35,11 +34,14 @@
               @change="frequencyChanged"
             >
               <v-radio
-                v-for="frequency in frequencies"
-                :key="frequency.frequencyCode"
-                :label="frequency.frequencyLabel"
-                :value="frequency.frequencyCode"
+                v-for="frequency in statementSettings.frequencies"
+                :key="frequency.frequency"
+                :value="frequency.frequency"
               >
+                <template v-slot:label>
+                  <span>{{capitalizeLabel(frequency.frequency)}}</span>
+                  <span v-if="showFrequencyChangeDate(frequency)" class="ml-1"> - Frequency will change starting {{formatDate(frequency.startDate)}}</span>
+                </template>
               </v-radio>
             </v-radio-group>
           </fieldset>
@@ -177,13 +179,20 @@
 <script lang="ts">
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
-import { StatementListItem, StatementNotificationSettings, StatementRecipient } from '@/models/statement'
+import {
+  StatementListItem,
+  StatementNotificationSettings,
+  StatementRecipient,
+  StatementSettings
+} from '@/models/statement'
 import { mapActions, mapState } from 'vuex'
+import CommonUtils from '@/util/common-util'
+import moment from 'moment'
 
 @Component({
   methods: {
     ...mapActions('org', [
-      'getStatementSettings',
+      'fetchStatementSettings',
       'getStatementRecipients',
       'updateStatementSettings',
       'syncActiveOrgMembers',
@@ -192,7 +201,7 @@ import { mapActions, mapState } from 'vuex'
   },
   computed: {
     ...mapState('org', [
-      'currentStatementSettings',
+      'statementSettings',
       'currentStatementNotificationSettings',
       'activeOrgMembers',
       'currentOrganization'
@@ -200,12 +209,12 @@ import { mapActions, mapState } from 'vuex'
   }
 })
 export default class StatementsSettings extends Vue {
-  private readonly getStatementSettings!: () => StatementListItem
+  private readonly fetchStatementSettings!: () => StatementSettings
   private readonly getStatementRecipients!: () => StatementNotificationSettings
   private readonly updateStatementSettings!: (statementFrequency: StatementListItem) => any
   private readonly updateStatementNotifications!: (statementNotification: StatementNotificationSettings) => any
   private readonly syncActiveOrgMembers!: () => Member[]
-  private readonly currentStatementSettings!: StatementListItem
+  private readonly statementSettings!: StatementSettings
   private readonly currentStatementNotificationSettings!: StatementNotificationSettings
   private readonly currentOrganization!: Organization
   private activeOrgMembers!: Member[]
@@ -223,21 +232,6 @@ export default class StatementsSettings extends Vue {
   private isSaving: boolean = false
   private showStatementNotification: boolean = false
 
-  private readonly frequencies = [
-    {
-      frequencyLabel: 'Daily',
-      frequencyCode: 'DAILY'
-    },
-    {
-      frequencyLabel: 'Weekly',
-      frequencyCode: 'WEEKLY'
-    },
-    {
-      frequencyLabel: 'Monthly',
-      frequencyCode: 'MONTHLY'
-    }
-  ]
-
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
@@ -250,9 +244,9 @@ export default class StatementsSettings extends Vue {
       this.isNotificationChanged = false
       this.isRecipientListChanged = false
       await this.syncActiveOrgMembers()
-      const settings = await this.getStatementSettings()
+      const settings = await this.fetchStatementSettings()
       const statementRecipients = await this.getStatementRecipients()
-      this.frequencySelected = settings?.frequency || this.frequencies[1].frequencyCode
+      this.frequencySelected = settings?.currentFrequency?.frequency || settings?.frequencies[0].frequency
       this.sendStatementNotifications = statementRecipients.statementNotificationEnabled
       this.emailRecipientList = [ ...statementRecipients.recipients ]
       await this.prepareAutoCompleteList()
@@ -318,7 +312,7 @@ export default class StatementsSettings extends Vue {
   }
 
   private frequencyChanged (frequency) {
-    this.isFrequencyChanged = (frequency !== this.currentStatementSettings?.frequency)
+    this.isFrequencyChanged = (frequency !== this.statementSettings?.currentFrequency?.frequency)
   }
 
   private toggleStatementNotification (notification) {
@@ -331,6 +325,18 @@ export default class StatementsSettings extends Vue {
 
   private get enableSaveBtn () {
     return (this.isFrequencyChanged || this.isNotificationChanged || this.isRecipientListChanged)
+  }
+
+  private formatDate (value) {
+    return CommonUtils.formatDisplayDate(new Date(value))
+  }
+
+  private showFrequencyChangeDate (frequency) {
+    return (frequency.frequency === this.frequencySelected) && (frequency.frequency !== this.statementSettings?.currentFrequency?.frequency)
+  }
+
+  private capitalizeLabel (value) {
+    return (typeof value === 'string') ? `${value.charAt(0)}${value.slice(1).toLowerCase()}` : ''
   }
 
   private addEmailReceipient (item) {

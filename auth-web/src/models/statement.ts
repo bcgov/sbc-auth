@@ -6,6 +6,16 @@ export interface StatementListItem {
   toDate?: string
 }
 
+export interface StatementSettings {
+  currentFrequency?: StatementListItem
+  frequencies: Frequencies[]
+}
+
+export interface Frequencies {
+  frequency: string
+  startDate: string
+}
+
 export interface StatementFilterParams {
   pageNumber?: number
   pageLimit?: number
