@@ -60,10 +60,9 @@ export default class OrgModule extends VuexModule {
   accessType: string
   memberLoginOption = ''
 
-  // currentStatementSettings: StatementListItem = {} as StatementListItem
   currentStatementNotificationSettings: StatementNotificationSettings = {} as StatementNotificationSettings
   currentOrgTransactionList: TransactionTableRow[] = []
-  statementSettings: StatementSettings = undefined
+  statementSettings: StatementSettings = {} as StatementSettings
 
   @Mutation
   public setCurrentOrgPaymentSettings (currentOrgPaymentSettings:PaymentSettings) {
@@ -622,7 +621,6 @@ export default class OrgModule extends VuexModule {
   @Action({ commit: 'setStatementSettings', rawError: true })
   public async fetchStatementSettings () {
     const response = await PaymentService.getStatementSettings(this.context.state['currentOrganization'].id)
-    debugger
     return response?.data || {}
   }
 
