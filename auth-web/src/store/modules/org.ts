@@ -16,7 +16,7 @@ import {
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
-import { StatementFilterParams, StatementListItem, StatementNotificationSettings } from '@/models/statement'
+import { StatementFilterParams, StatementListItem, StatementNotificationSettings, StatementSettings } from '@/models/statement'
 import { TransactionFilterParams, TransactionTableList, TransactionTableRow } from '@/models/transaction'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
@@ -60,9 +60,9 @@ export default class OrgModule extends VuexModule {
   accessType: string
   memberLoginOption = ''
 
-  currentStatementSettings: StatementListItem = {} as StatementListItem
   currentStatementNotificationSettings: StatementNotificationSettings = {} as StatementNotificationSettings
   currentOrgTransactionList: TransactionTableRow[] = []
+  statementSettings: StatementSettings = {} as StatementSettings
 
   @Mutation
   public setCurrentOrgPaymentSettings (currentOrgPaymentSettings:PaymentSettings) {
@@ -183,8 +183,8 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
-  public setStatementSettings (settings: StatementListItem) {
-    this.currentStatementSettings = settings
+  public setStatementSettings (statementSettings: StatementSettings) {
+    this.statementSettings = statementSettings
   }
 
   @Mutation
@@ -619,7 +619,7 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ commit: 'setStatementSettings', rawError: true })
-  public async getStatementSettings () {
+  public async fetchStatementSettings () {
     const response = await PaymentService.getStatementSettings(this.context.state['currentOrganization'].id)
     return response?.data || {}
   }
