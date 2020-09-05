@@ -260,7 +260,7 @@ export default class StatementsSettings extends Vue {
   // prepare list for org members as required for the auto complete component
   private async prepareAutoCompleteList () {
     this.activeOrgMembers.forEach((member) => {
-      const recipientIndex = this.emailRecipientList.findIndex((emailRecipient) => (emailRecipient.authUserId === member.id))
+      const recipientIndex = this.emailRecipientList.findIndex((emailRecipient) => (emailRecipient.authUserId === member?.user?.id))
       // add to auto complete only if the member is not already saved
       if ((recipientIndex < 0) && (member.membershipTypeCode !== MembershipType.User)) {
         this.recipientAutoCompleteList.push({
