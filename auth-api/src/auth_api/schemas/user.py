@@ -28,7 +28,6 @@ class UserSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-pub
 
         model = UserModel
         exclude = (
-            'id',
             'orgs',
             'is_terms_of_use_accepted',
             'terms_of_use_accepted_version',
