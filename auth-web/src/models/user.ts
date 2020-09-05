@@ -9,6 +9,7 @@ export interface User {
     contacts?: Contact[]
     email?: string,
     loginSource?: string
+    id?: number
 }
 
 export interface UserTerms {

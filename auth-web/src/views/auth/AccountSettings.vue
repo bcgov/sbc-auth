@@ -79,7 +79,7 @@
           </v-list>
 
           <!-- Account Activity -->
-          <v-list v-if="isPremiumAccount" v-can:TRANSACTION_HISTORY.hide>
+          <v-list v-if="isPremiumAccount" v-can:MANAGE_STATEMENTS.hide>
             <v-list-item-group color="primary">
               <v-subheader class="mt-4">ACCOUNT ACTIVITY</v-subheader>
               <v-list-item dense class="py-1 px-6"
