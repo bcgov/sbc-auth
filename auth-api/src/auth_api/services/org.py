@@ -558,6 +558,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def filter_access_type(access_type_str, roles, token_info):
+        """Find Access Type."""
         is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in roles or \
                          Role.STAFF_MANAGE_ACCOUNTS in roles
         access_type = [] if not access_type_str else access_type_str.split(',')
