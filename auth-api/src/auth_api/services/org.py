@@ -498,7 +498,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return MembershipModel.find_orgs_for_user(user_id, valid_statuses)
 
     @staticmethod
-    def search_orgs(**kwargs):
+    def search_orgs(**kwargs):  # pylint: disable=too-many-locals
         """Search for orgs based on input parameters."""
         orgs = {'orgs': []}
         if kwargs.get('business_identifier', None):
@@ -513,14 +513,20 @@ class Org:  # pylint: disable=too-many-public-methods
             limit: int = int(kwargs.get('limit'))
             status: str = kwargs.get('status', None)
             name: str = kwargs.get('name', None)
-
-            search_args = (kwargs.get('access_type', None),
+            # https://github.com/bcgov/entity/issues/4786
+            access_type, is_staff_admin = Org.refine_access_type(kwargs.get('access_type', None),
+                                                                 kwargs.get('token', None))
+            search_args = (access_type,
                            name,
                            status,
                            kwargs.get('bcol_account_id', None),
                            page, limit)
 
             if status and status == OrgStatus.PENDING_ACTIVATION.value:
+                # only staff admin can see director search accounts
+                # https://github.com/bcgov/entity/issues/4786
+                if not is_staff_admin:
+                    raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
                 org_models, total = OrgModel.search_pending_activation_orgs(name)
                 include_invitations = True
             else:
@@ -546,6 +552,22 @@ class Org:  # pylint: disable=too-many-public-methods
             orgs['limit'] = limit
 
         return orgs
+
+    @staticmethod
+    def refine_access_type(access_type_str, token_info):
+        """Find Access Type."""
+        roles = token_info.get('realm_access').get('roles')
+
+        is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in roles or \
+            Role.STAFF_MANAGE_ACCOUNTS in roles
+        access_type = [] if not access_type_str else access_type_str.split(',')
+        if not is_staff_admin:
+            if len(access_type) < 1:
+                # pass everything except DIRECTOR SEARCH
+                access_type = [item.value for item in AccessType if item != AccessType.ANONYMOUS]
+            else:
+                access_type.remove(AccessType.ANONYMOUS.value)
+        return access_type, is_staff_admin
 
     @staticmethod
     def bcol_account_link_check(bcol_account_id, org_id=None):

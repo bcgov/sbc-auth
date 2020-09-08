@@ -3,17 +3,21 @@
     <v-row>
       <v-col cols="5" class="d-flex flex-row pt-0 mb-3">
         <v-text-field
-          filled
-          placeholder="Account Name"
-          hide-details
           dense
-          class="mr-2"
+          filled
+          single-line
+          hide-details
+          height="43"
+          placeholder="Account Name"
+          class="mr-2 body-2"
           v-model="accountNameFilterInput"
         ></v-text-field>
         <v-btn
-          height="40"
+          large
           depressed
           color="primary"
+          aria-label="Apply Filter"
+          title="Apply Account Name Filter"
           @click="applyNameFilter"
           :disabled="!accountNameFilterInput"
         >
@@ -23,12 +27,14 @@
     </v-row>
     <div class="filter-results" :class="{ 'active' : appliedFilterValue }">
       <div class="d-flex align-center mb-8">
-        <div class="filter-results-label py-2 mr-7" v-if="activeOrgs.length">{{totalAccountsCount}} {{totalAccountsCount === 1 ? 'record' : 'records'}} found</div>
+        <div class="filter-results-label py-2 mr-7">{{totalAccountsCount}} {{totalAccountsCount === 1 ? 'record' : 'records'}} found</div>
         <v-chip
           close
           label
           color="info"
           close-icon="mdi-window-close"
+          aria-label="Clear Filter"
+          title="Clear Account Name Filter"
           @click:close="clearAppliedFilter()"
         >
           {{appliedFilterValue}}
@@ -227,11 +233,12 @@ export default class StaffActiveAccountsTable extends Vue {
   opacity: 0;
   overflow: hidden;
   max-height: 0;
-  transition: all ease-out 0.5s;
-  &.active {
-    opacity: 1;
-    max-height: 4rem;
-  }
+  transition: all ease-out 0.25s;
+}
+
+.filter-results.active {
+  opacity: 1;
+  max-height: 4rem;
 }
 
 .filter-results-label {
