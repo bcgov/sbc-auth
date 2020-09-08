@@ -498,7 +498,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return MembershipModel.find_orgs_for_user(user_id, valid_statuses)
 
     @staticmethod
-    def search_orgs(**kwargs):
+    def search_orgs(**kwargs):  # pylint: disable=too-many-locals
         """Search for orgs based on input parameters."""
         orgs = {'orgs': []}
         if kwargs.get('business_identifier', None):
@@ -514,13 +514,28 @@ class Org:  # pylint: disable=too-many-public-methods
             status: str = kwargs.get('status', None)
             name: str = kwargs.get('name', None)
 
-            search_args = (kwargs.get('access_type', None),
+            roles = getattr(kwargs.get('token', None), 'roles', [])
+            # https://github.com/bcgov/entity/issues/4786
+            is_staff_admin = Role.STAFF_CREATE_ACCOUNTS.value in roles or Role.STAFF_MANAGE_ACCOUNTS in roles
+            access_type = kwargs.get('access_type', None)
+            if not is_staff_admin:
+                if access_type is None:
+                    # pass everything except DIRECTOR SEARCH
+                    access_type = [item.value for item in AccessType if item != AccessType.ANONYMOUS]
+                else:
+                    access_type.remove(AccessType.ANONYMOUS.value)
+
+            search_args = (access_type,
                            name,
                            status,
                            kwargs.get('bcol_account_id', None),
                            page, limit)
 
             if status and status == OrgStatus.PENDING_ACTIVATION.value:
+                # only staff admin can see director search accounts
+                # https://github.com/bcgov/entity/issues/4786
+                if not is_staff_admin:
+                    return None
                 org_models, total = OrgModel.search_pending_activation_orgs(name)
                 include_invitations = True
             else:
