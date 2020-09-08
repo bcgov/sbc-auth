@@ -513,12 +513,9 @@ class Org:  # pylint: disable=too-many-public-methods
             limit: int = int(kwargs.get('limit'))
             status: str = kwargs.get('status', None)
             name: str = kwargs.get('name', None)
-            access_type_str = kwargs.get('access_type', None)
-            token_info = kwargs.get('token', None)
-            roles = token_info.get('realm_access').get('roles')
             # https://github.com/bcgov/entity/issues/4786
-            access_type, is_staff_admin = Org.filter_access_type(access_type_str, roles, token_info)
-
+            access_type, is_staff_admin = Org.refine_access_type(kwargs.get('access_type', None),
+                                                                 kwargs.get('token', None))
             search_args = (access_type,
                            name,
                            status,
@@ -557,8 +554,10 @@ class Org:  # pylint: disable=too-many-public-methods
         return orgs
 
     @staticmethod
-    def filter_access_type(access_type_str, roles, token_info):
+    def refine_access_type(access_type_str, token_info):
         """Find Access Type."""
+        roles = token_info.get('realm_access').get('roles')
+
         is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in roles or \
             Role.STAFF_MANAGE_ACCOUNTS in roles
         access_type = [] if not access_type_str else access_type_str.split(',')
