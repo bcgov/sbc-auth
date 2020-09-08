@@ -102,7 +102,8 @@ export interface RoleInfo {
   name: string
   desc: string,
   displayName: string,
-  displayOrder: number
+  displayOrder: number,
+  label: string
 }
 
 export interface AddUserBody {

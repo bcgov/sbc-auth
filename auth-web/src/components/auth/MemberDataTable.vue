@@ -15,7 +15,7 @@
     </template>
 
     <!-- Name Column Template -->
-    <template v-slot:item.name="{ item }">
+    <template v-slot:[`item.name`]="{ item }">
       <div
         class="user-name font-weight-bold"
         :data-test="getIndexedTag('user-name', item.index)"
@@ -31,7 +31,7 @@
     </template>
 
     <!-- Role Column Template -->
-    <template v-slot:item.role="{ item }">
+    <template v-slot:[`item.role`]="{ item }">
       <v-menu
         transition="slide-y-transition">
         <template v-slot:activator="{ on }">
@@ -90,14 +90,14 @@
 
     <!-- Date Column Template -->
     <template
-      v-slot:item.lastActive="{ item }"
+      v-slot:[`item.lastActive`]="{ item }"
       :data-test="getIndexedTag('last-active', item.index)"
     >
       {{ formatDate(item.user.modified) }}
     </template>
 
     <!-- Actions Column Template -->
-    <template v-slot:item.action="{ item }">
+    <template v-slot:[`item.action`]="{ item }">
 
       <!-- Reset Authenticator -->
       <v-btn
