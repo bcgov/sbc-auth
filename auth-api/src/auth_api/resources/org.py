@@ -87,13 +87,14 @@ class Orgs(Resource):
         limit = request.args.get('limit', 10)
 
         try:
+            token = g.jwt_oidc_token_info
             response, status = OrgService.search_orgs(business_identifier=business_identifier, access_type=access_type,
                                                       name=name, status=status, bcol_account_id=bcol_account_id,
-                                                      page=page, limit=limit), http_status.HTTP_200_OK
+                                                      page=page, limit=limit, token=token), http_status.HTTP_200_OK
 
             # If public user is searching , return 200 with empty results if orgs exist
             # Else return 204
-            token = g.jwt_oidc_token_info
+
             is_public_user = Role.PUBLIC_USER.value in token.get('realm_access').get('roles')
             if is_public_user:  # public user cant get the details in search.Gets only status of orgs
                 if response and response.get('orgs'):

@@ -95,7 +95,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
             .options(contains_eager('contacts').contains_eager('contact'))
 
         if access_type:
-            query = query.filter(Org.access_type.in_(access_type.split(',')))
+            query = query.filter(Org.access_type.in_(access_type))
         if name:
             query = query.filter(Org.name.ilike(f'%{name}%'))
         if status:
