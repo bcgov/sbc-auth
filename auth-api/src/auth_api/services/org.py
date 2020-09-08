@@ -37,7 +37,6 @@ from auth_api.utils.enums import (
     AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentType, ProductCode, Status)
 from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF
 from auth_api.utils.util import camelback2snake
-
 from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
 from .contact import Contact as ContactService
@@ -122,7 +121,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         Org.add_product(org.id, token_info)
 
-        org.save()
+        org.commit()
 
         current_app.logger.info(f'<created_org org_id:{org.id}')
 
@@ -400,8 +399,7 @@ class Org:  # pylint: disable=too-many-public-methods
             existing_login_option.add_to_session()
 
         login_option = AccountLoginOptionsModel(login_source=login_source, org_id=org_id)
-        login_option.add_to_session()
-        login_option.commit()
+        login_option.save()
         return login_option
 
     @staticmethod
@@ -432,13 +430,11 @@ class Org:  # pylint: disable=too-many-public-methods
 
         contact = ContactModel(**camelback2snake(contact_info))
         contact = contact.flush()
-        contact.commit()
 
         contact_link = ContactLinkModel()
         contact_link.contact = contact
         contact_link.org = org
-        contact_link = contact_link.flush()
-        contact_link.commit()
+        contact_link.save()
         current_app.logger.debug('<add_contact')
 
         return ContactService(contact)
@@ -458,7 +454,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         contact = contact_link.contact
         contact.update_from_dict(**camelback2snake(contact_info))
-        contact.commit()
+        contact.save()
         current_app.logger.debug('<update_contact ')
 
         # return the updated contact
@@ -662,6 +658,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
             if product_code:
                 product_subscription = {'subscriptions': [{'productCode': product_code}]}
-                subscriptions = ProductService.create_product_subscription(org_id, product_subscription)
+                subscriptions = ProductService.create_product_subscription(org_id, product_subscription,
+                                                                           is_new_transaction=False)
                 return subscriptions
         return None

@@ -154,12 +154,12 @@ class Entity:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
         contact = ContactModel(**camelback2snake(contact_info))
-        contact.commit()
+        contact.flush()
 
         contact_link = ContactLinkModel()
         contact_link.contact = contact
         contact_link.entity = self._model
-        contact_link.commit()
+        contact_link.save()
 
         return self
 
@@ -172,7 +172,7 @@ class Entity:
 
         contact = contact_link.contact
         contact.update_from_dict(**camelback2snake(contact_info))
-        contact.commit()
+        contact.save()
 
         return self
 

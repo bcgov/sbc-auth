@@ -38,7 +38,8 @@
             {{ name }}
           </div>
         </div>
-        <div v-if="item.businessIdentifier"
+        <div
+          v-if="item.businessIdentifier"
           :data-test="getIndexedTag('transaction-incorp-number', item.index)"
         >
           Incorporation Number: {{ item.businessIdentifier }}

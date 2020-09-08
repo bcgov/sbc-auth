@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the Status Service layer is working as expected.
 """
+from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import arrow
@@ -264,3 +265,53 @@ def test_check_status_with_outage(app):
         assert response is not None
         assert response['service'] == service_name
         assert response['current_status'] == 'False'
+        assert response['message'] == 'Test'
+
+
+def test_check_status_with_custom(app):
+    """Assert that the function returns schedules."""
+    time_yday = datetime.now() - timedelta(days=1)
+    time_tomorrow = time_yday + timedelta(days=2)
+
+    time_str = arrow.get(time_yday).replace(tzinfo='US/Pacific').strftime('%Y-%m-%d %H:%M')
+    time_tomorrow_str = arrow.get(time_tomorrow).replace(tzinfo='US/Pacific').strftime('%Y-%m-%d %H:%M')
+
+    schedule_json = [
+        {
+            'custom': {
+                'start': time_str, 'end': time_tomorrow_str, 'message': 'Test-Warning'
+            }
+
+        }
+    ]
+
+    with app.app_context():
+        service_name = 'PAYBC'
+        # Test the custom message for today
+        check_date: arrow.Arrow = arrow.get(datetime.now())
+
+        mock_get_schedule = patch('status_api.services.status.Status.get_schedules')
+        mock_get = mock_get_schedule.start()
+        mock_get.return_value = schedule_json
+        response = StatusService().check_status(service_name=service_name, check_date=check_date)
+        mock_get.stop()
+
+        # match outage windows
+        assert response is not None
+        assert response['service'] == service_name
+        assert response['custom_message'] == 'Test-Warning'
+
+        # Test the custom message for 1 day and 1 sec from now and custom_message should not be present
+        time_day_after = time_tomorrow + timedelta(days=1)
+        check_date: arrow.Arrow = arrow.get(time_day_after)
+
+        mock_get_schedule = patch('status_api.services.status.Status.get_schedules')
+        mock_get = mock_get_schedule.start()
+        mock_get.return_value = schedule_json
+        response = StatusService().check_status(service_name=service_name, check_date=check_date)
+        mock_get.stop()
+
+        # match outage windows
+        assert response is not None
+        assert response['service'] == service_name
+        assert response.get('custom_message', None) is None

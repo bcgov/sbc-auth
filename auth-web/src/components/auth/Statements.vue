@@ -1,7 +1,21 @@
 <template>
   <v-container>
-    <header class="view-header mb-8">
+    <v-fade-transition>
+      <div v-if="isLoading" class="loading-container">
+        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+      </div>
+    </v-fade-transition>
+    <header class="view-header mb-6">
       <h2 class="view-header__title">Statements</h2>
+      <v-btn
+        large
+        aria-label="Statement Settings"
+        title="Open Statement Settings"
+        @click.stop="openSettingsModal"
+      >
+        <v-icon small class="mr-2 ml-n1">mdi-settings</v-icon>
+        Statement Settings
+      </v-btn>
     </header>
     <div>
       <v-data-table
@@ -27,13 +41,13 @@
           </div>
         </template>
         <template v-slot:[`item.action`]="{ item }">
-          <div class="btn-inline">
+          <div>
             <v-btn
               text
               color="primary"
               class="mr-1"
-              aria-label="Download CSV Statement"
-              title="Download CSV Statement"
+              aria-label="Download CSV"
+              title="Download statement as a CSV file"
               :data-test="getIndexedTag('csv-button', item.id)"
               @click="downloadStatement(item, 'CSV')"
             >
@@ -43,8 +57,8 @@
             <v-btn
               text
               color="primary"
-              aria-label="Download PDF Statement"
-              title="Download PDF Statement"
+              aria-label="Download PDF"
+              title="Download statement as a PDF file"
               :data-test="getIndexedTag('pdf-button', item.id)"
               @click="downloadStatement(item, 'PDF')"
             >
@@ -55,6 +69,9 @@
         </template>
       </v-data-table>
     </div>
+    <StatementsSettings
+      ref="statementSettingsModal"
+    ></StatementsSettings>
   </v-container>
 </template>
 
@@ -66,12 +83,17 @@ import { StatementFilterParams, StatementListItem, StatementListResponse } from 
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
+import StatementsSettings from '@/components/auth/StatementsSettings.vue'
 import moment from 'moment'
 
 @Component({
+  components: {
+    StatementsSettings
+  },
   methods: {
     ...mapActions('org', [
-      'getStatementsList'
+      'getStatementsList',
+      'getStatement'
     ])
   },
   computed: {
@@ -86,6 +108,7 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private readonly currentMembership!: Member
   private readonly currentOrganization!: Organization
   private readonly getStatementsList!: (filterParams: StatementFilterParams) => StatementListResponse
+  private readonly getStatement!: (statementParams: any) => any
   private readonly ITEMS_PER_PAGE = 5
   private readonly PAGINATION_COUNTER_STEP = 4
   private formatDate = CommonUtils.formatDisplayDate
@@ -93,6 +116,11 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   private tableDataOptions: any = {}
   private isDataLoading: boolean = false
   private statementsList: StatementListItem[] = []
+  private isLoading: boolean = false
+
+  $refs: {
+    statementSettingsModal: StatementsSettings
+  }
 
   private readonly headerStatements = [
     {
@@ -129,6 +157,8 @@ export default class Statements extends Mixins(AccountChangeMixin) {
       // if the account switing happening when the user is already in the statements page,
       // redirect to account info if its a basic account
       this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
+    } else {
+      await this.loadStatementsList()
     }
   }
 
@@ -189,9 +219,22 @@ export default class Statements extends Mixins(AccountChangeMixin) {
     return `${tag}-${index}`
   }
 
-  private downloadStatement (item, type) {
-    // eslint-disable-next-line no-console
-    console.log(item, type)
+  private async downloadStatement (item, type) {
+    this.isLoading = true // to avoid rapid download clicks
+    try {
+      const downloadType = (type === 'CSV') ? 'text/csv' : 'application/pdf'
+      const response = await this.getStatement({ statementId: item.id, type: downloadType })
+      const contentDispArr = response?.headers['content-disposition'].split('=')
+      const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-statement-${type.toLowerCase()}`
+      CommonUtils.fileDownload(response.data, fileName, downloadType)
+      this.isLoading = false
+    } catch (error) {
+      this.isLoading = false
+    }
+  }
+
+  private openSettingsModal () {
+    this.$refs.statementSettingsModal.openSettings()
   }
 }
 </script>
@@ -207,5 +250,9 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   .v-data-table-header {
     margin-bottom: -2px;
   }
+}
+
+.loading-container {
+  background: rgba(255,255,255, 0.8);
 }
 </style>

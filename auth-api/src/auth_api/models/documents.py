@@ -29,7 +29,7 @@ class Documents(BaseModel):
 
     # TODO version concept is not well refined..this is the first version..refine it
     version_id = Column(String(10), primary_key=True, autoincrement=False)
-    type = Column('type', String(20), nullable=False)
+    type = Column('type', String(30), nullable=False)
     content_type = Column('content_type', String(20), nullable=False)
     content = Column('content', Text)
 

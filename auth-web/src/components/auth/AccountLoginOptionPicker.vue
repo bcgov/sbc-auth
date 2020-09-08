@@ -14,6 +14,7 @@
         hover
         class="account-card elevation-2 pa-8 d-flex flex-column text-center"
         :class="{ 'active': authType === authOption.type }"
+        @click="selectAuthType(authOption.type)"
       >
         <div class="account-type__icon mb-8">
           <v-icon color="grey">{{authOption.icon}}</v-icon>
@@ -132,7 +133,7 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
     switch (authType) {
       case LoginSource.BCSC:
         // open up BCSC learn more dialog
-        this.$refs.bcscLearnMoreDialog.open()
+        window.open('https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card', '_blank')
         break
       case LoginSource.BCEID:
         // open up BCEID learn more dialog

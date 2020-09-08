@@ -50,10 +50,12 @@
     </div>
 
     <v-card flat class="account-settings-card" data-test="account-settings-card">
-      <v-container class="nav-container py-8 pr-0 pl-4">
+      <v-container class="nav-container py-7 pl-4">
         <v-navigation-drawer permanent width="auto" data-test="account-nav-drawer">
           <v-list class="py-0" role="navigation" aria-label="Account Navigation">
+          <!-- Manage Account -->
             <v-list-item-group color="primary">
+              <v-subheader>MANAGE ACCOUNT</v-subheader>
               <v-list-item
                 dense
                 class="py-1 px-8"
@@ -88,11 +90,17 @@
                 </v-list-item-icon>
                 <v-list-item-title>Authentication</v-list-item-title>
               </v-list-item>
+            </v-list-item-group>
+          </v-list>
+
+          <!-- Account Activity -->
+          <v-list v-if="isPremiumAccount" v-can:MANAGE_STATEMENTS.hide>
+            <v-list-item-group color="primary">
+              <v-subheader class="mt-4">ACCOUNT ACTIVITY</v-subheader>
               <v-list-item
                 dense
                 class="py-1 px-8"
                 aria-label="Account Statements"
-                v-if="isPremiumAccount" v-can:TRANSACTION_HISTORY.hide
                 :to="statementsUrl"
                 data-test="statements-nav-item"
               >
@@ -105,7 +113,6 @@
                 dense
                 class="py-1 px-8"
                 aria-label="Account Transactions"
-                v-if="isPremiumAccount" v-can:TRANSACTION_HISTORY.hide
                 :to="transactionUrl"
                 data-test="transactions-nav-item"
               >
@@ -203,6 +210,11 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     flex: 0 0 auto;
     width: 17rem;
     border-radius: 0 !important;
+  }
+
+  .v-subheader {
+    color: var(--v-grey-darken4) !important;
+    font-weight: bold;
   }
 
   .v-list-item .v-list-item__title {
