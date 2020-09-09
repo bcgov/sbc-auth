@@ -64,6 +64,7 @@
     "vue-class-component": "^7.1.0",
     "vue-cli-plugin-vuetify": "^2.0.3",
     "vue-template-compiler": "^2.6.10",
+    "vue-test-utils-helpers": "git+https://github.com/AmpleOrganics/vue-test-utils-helpers.git",
     "vuex-module-decorators": "^0.10.1",
     "workbox-webpack-plugin": "^4.3.1"
   }

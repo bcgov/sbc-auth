@@ -8,6 +8,7 @@
     :items-per-page="5"
     :hide-default-footer="indexedOrgMembers.length <= 5"
     :custom-sort="customSortActive"
+    class="member-data-table"
     :no-data-text="$t('noActiveUsersLabel')"
   >
     <template v-slot:loading>
@@ -24,6 +25,7 @@
       </div>
       <div
         :data-test="getIndexedTag('business-id', item.index)"
+        class="contact-email"
         v-if="item.user.contacts && item.user.contacts.length > 0"
         >
           {{ item.user.contacts[0].email }}
