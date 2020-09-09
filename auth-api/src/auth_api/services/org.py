@@ -558,8 +558,8 @@ class Org:  # pylint: disable=too-many-public-methods
         """Find Access Type."""
         roles = token_info.get('realm_access').get('roles')
 
-        is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in roles or \
-            Role.STAFF_MANAGE_ACCOUNTS in roles
+        is_staff_admin = token_info and (Role.STAFF_CREATE_ACCOUNTS.value in roles or
+                                         Role.STAFF_MANAGE_ACCOUNTS.value in roles)
         access_type = [] if not access_type_str else access_type_str.split(',')
         if not is_staff_admin:
             if len(access_type) < 1:
