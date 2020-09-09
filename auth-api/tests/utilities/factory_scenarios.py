@@ -154,6 +154,20 @@ class TestJwtClaims(dict, Enum):
         }
     }
 
+    staff_view_accounts_role = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': fake.first_name(),
+        'lastname': fake.last_name(),
+        'preferred_username': fake.user_name(),
+        'realm_access': {
+            'roles': [
+                'staff',
+                'view_accounts'
+            ]
+        }
+    }
+
     staff_manage_accounts_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
@@ -178,6 +192,7 @@ class TestJwtClaims(dict, Enum):
         'realm_access': {
             'roles': [
                 'staff',
+                'view_accounts',
                 'create_accounts'
             ]
         },
@@ -401,7 +416,7 @@ class TestOrgInfo(dict, Enum):
     org3 = {'name': 'Third Orgs'}
     org4 = {'name': 'fourth Orgs'}
     org5 = {'name': 'fifth Orgs'}
-    org_anonymous = {'name': 'My Test Org', 'accessType': 'ANONYMOUS'}
+    org_anonymous = {'name': 'My Test Anon Org', 'accessType': 'ANONYMOUS'}
     org_anonymous_2 = {'name': 'Another test org', 'accessType': 'ANONYMOUS'}
     invalid = {'foo': 'bar'}
     invalid_name_space = {'name': ''}
