@@ -363,7 +363,7 @@ def test_upgrade_anon_org_fail(client, jwt, session, keycloak_mock):  # pylint:d
     dictionary = json.loads(rv.data)
     assert rv.status_code == http_status.HTTP_201_CREATED
     assert rv.json.get('orgType') == OrgType.BASIC.value
-    assert rv.json.get('name') == TestOrgInfo.org1.get('name')
+    assert rv.json.get('name') == TestOrgInfo.org_anonymous.get('name')
 
     org_id = dictionary['id']
     # upgrade with same data
@@ -385,6 +385,7 @@ def test_upgrade_org(client, jwt, session, keycloak_mock):  # pylint:disable=unu
                      headers=headers, content_type='application/json')
 
     dictionary = json.loads(rv.data)
+    print('dictionary-----------------------------------------',dictionary)
     assert rv.status_code == http_status.HTTP_201_CREATED
     assert rv.json.get('orgType') == OrgType.BASIC.value
     assert rv.json.get('name') == TestOrgInfo.org1.get('name')
