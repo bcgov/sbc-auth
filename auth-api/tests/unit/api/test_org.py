@@ -92,6 +92,43 @@ def test_search_org_by_client(client, jwt, session, keycloak_mock):  # pylint:di
     assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
 
 
+def test_search_org_for_dir_search(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be searched."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_dir_search_role)
+
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_anonymous),
+                     headers=headers, content_type='application/json')
+
+    # staff search with manage account role gets both ORG
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
+    rv = client.get('/api/v1/orgs',
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert len(orgs.get('orgs')) == 2
+
+    # staff search with staff_admin_role gets both ORG
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    rv = client.get('/api/v1/orgs',
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert len(orgs.get('orgs')) == 2
+
+    # staff search with out manage account role gets only normal org
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_view_accounts_role)
+    rv = client.get('/api/v1/orgs',
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    orgs = json.loads(rv.data)
+    assert len(orgs.get('orgs')) == 1
+
+
 def test_add_anonymous_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
