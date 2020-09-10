@@ -23,7 +23,7 @@ import uuid
 from tests import skip_in_pod
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAnonymousMembership, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
-    TestUserInfo)
+    TestUserInfo, TestOrgTypeInfo)
 from tests.utilities.factory_utils import (
     factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
     factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_product_model,
@@ -691,6 +691,73 @@ def test_add_user_adds_to_account_holders_group(client, jwt, session):  # pylint
     for group in user_groups:
         groups.append(group.get('name'))
     assert GROUP_ACCOUNT_HOLDERS in groups
+
+
+def test_delete_otp_for_user(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that a user can be POSTed."""
+    # ADMIN
+    admin_user = factory_user_model(user_info=TestUserInfo.user1)
+    org = factory_org_model(org_info=TestOrgInfo.org_regular_bceid)
+    factory_membership_model(admin_user.id, org.id)
+    admin_claims = TestJwtClaims.get_test_real_user(admin_user.keycloak_guid)
+    admin_headers = factory_auth_header(jwt=jwt, claims=admin_claims)
+
+    # COORDINATOR
+    coordinator_user = factory_user_model(user_info=TestUserInfo.user2)
+    factory_membership_model(coordinator_user.id, org.id, member_type=COORDINATOR)
+    coordinator_claims = TestJwtClaims.get_test_real_user(coordinator_user.keycloak_guid)
+    coordinator_headers = factory_auth_header(jwt=jwt, claims=coordinator_claims)
+
+    # just a member
+    member_user = factory_user_model(user_info=TestUserInfo.user3)
+    factory_membership_model(member_user.id, org.id, member_type=USER)
+    user_claims = TestJwtClaims.get_test_real_user(member_user.keycloak_guid)
+    user_headers = factory_auth_header(jwt=jwt, claims=user_claims)
+
+    request = KeycloakScenario.create_user_by_user_info(user_info=TestJwtClaims.tester_bceid_role)
+    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
+    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
+    assert 'CONFIGURE_TOTP' not in json.loads(user.value()).get('requiredActions', None)
+    user_id = user.id
+    # Create user, org and membserhip in DB
+    user = factory_user_model(TestUserInfo.get_bceid_user_with_kc_guid(user_id))
+    factory_membership_model(user.id, org.id)
+
+    # staff with manage accounts otp reset
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
+    rv = client.delete(f'api/v1/users/{user.username}/otp', headers=headers)
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+    user1 = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
+
+    assert 'CONFIGURE_TOTP' in json.loads(user1.value()).get('requiredActions')
+
+    # staff with basic access cant do otp reset
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.delete(f'api/v1/users/{user.username}/otp', headers=headers)
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+    #  admin can do otp reset
+    rv = client.delete(f'api/v1/users/{user.username}/otp', headers=admin_headers)
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+    #  coordinator can do otp reset
+    rv = client.delete(f'api/v1/users/{user.username}/otp', headers=coordinator_headers)
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+    #  user can not do otp reset
+    rv = client.delete(f'api/v1/users/{user.username}/otp', headers=user_headers)
+    assert rv.status_code == http_status.HTTP_403_FORBIDDEN
+
+    # another org admin cant do
+    admin_user1 = factory_user_model(user_info=TestUserInfo.user_test)
+    org1 = factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit, org_status_info=None,
+                             payment_type_info=None)
+    factory_membership_model(admin_user1.id, org1.id)
+    admin_claims = TestJwtClaims.get_test_real_user(admin_user1.keycloak_guid)
+    admin1_headers = factory_auth_header(jwt=jwt, claims=admin_claims)
+    rv = client.delete(f'api/v1/users/{user.username}/otp', headers=admin1_headers)
+    assert rv.status_code == http_status.HTTP_403_FORBIDDEN
 
 
 def test_add_bceid_user(client, jwt, session):  # pylint:disable=unused-argument

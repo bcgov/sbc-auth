@@ -339,7 +339,7 @@ class TestJwtClaims(dict, Enum):
             'preferred_username': preferred_username,
             'realm_access': {
                 'roles': [
-                    'edit'
+                    'edit', 'public_user'
                 ]
             }
         }
@@ -670,6 +670,19 @@ class TestUserInfo(dict, Enum):
         'keycloak_guid': uuid.uuid4(),
         'access_type': 'BCEID',
     }
+
+    @staticmethod
+    def get_bceid_user_with_kc_guid(kc_guid: str):
+        """Return user with keycloak guid."""
+        return {
+            'username': fake.user_name(),
+            'firstname': fake.first_name(),
+            'lastname': fake.last_name(),
+            'roles': '{edit, uma_authorization, staff}',
+            'keycloak_guid': kc_guid,
+            'access_type': 'BCEID',
+            'login_source': LoginSource.BCEID.value
+        }
 
     @staticmethod
     def get_user_with_kc_guid(kc_guid: str):

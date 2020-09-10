@@ -70,7 +70,8 @@ def factory_user_model(user_info: dict = TestUserInfo.user1):
                      roles=user_info['roles'],
                      keycloak_guid=user_info.get('keycloak_guid', None),
                      type=user_info.get('access_type', None),
-                     email='test@test.com'
+                     email='test@test.com',
+                     login_source=user_info.get('login_source', None),
                      )
 
     user.save()

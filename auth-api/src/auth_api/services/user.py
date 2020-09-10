@@ -181,6 +181,20 @@ class User:  # pylint: disable=too-many-instance-attributes
         return user_model
 
     @staticmethod
+    def delete_otp_for_user(user_name, token_info: Dict = None):
+        """Reset the OTP of the user."""
+        # TODO - handle when the multiple teams implemented for bceid..
+        user = UserModel.find_by_username(user_name)
+        membership = MembershipModel.find_membership_by_userid(user.id)
+        org_id = membership.org_id
+        check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+        try:
+            KeycloakService.reset_otp(str(user.keycloak_guid))
+        except HTTPError as err:
+            current_app.logger.error('update_user in keycloak failed {}', err)
+            raise BusinessException(Error.UNDEFINED_ERROR, err)
+
+    @staticmethod
     def reset_password_for_anon_user(user_info: dict, user_name, token_info: Dict = None):
         """Reset the password of the user."""
         user = UserModel.find_by_username(user_name)
