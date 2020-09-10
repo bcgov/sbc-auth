@@ -107,7 +107,9 @@
         class="mr-1"
         aria-label="Reset Authenticator"
         title="Reset Authenticator"
-        @click="showResetAuthDialog()">
+        v-can:RESET_OTP.hide
+        v-show="canResetAuthenticator(item)"
+        @click="showResetAuthenticatorDialog(item)">
         <v-icon>mdi-lock-reset</v-icon>
       </v-btn>
 
@@ -156,22 +158,23 @@
     bottom
     color="primary"
     class="mb-6"
-    v-model="snackbar"
+    v-model="showResetSnackBar"
+    :timeout="SNACKBAR_TIMEOUT"
   >
-    Authenticator reset for BCREGTEST Kerry NINETEEN
+    Authenticator reset for {{selectedUsername()}}
     <v-btn
       icon
       dark
       aria-label="Close Notification"
       title="Close Notification"
-      @click="snackbar = false"
+      @click="showResetSnackBar = false"
     >
       <v-icon>mdi-close</v-icon>
     </v-btn>
   </v-snackbar>
 
   <ModalDialog
-    ref="resetAuthDialog"
+    ref="resetAuthenticatorDialog"
     icon="mdi-check"
     title="Reset Authenticator"
     text="Resetting this team members authenticator will require them log in and enter a new one-time password in their authenticator app."
@@ -186,7 +189,7 @@
         large
         color="error"
         class="font-weight-bold"
-        @click="resetAuth()"
+        @click="resetAuthenticator()"
       >
         Reset
       </v-btn>
@@ -234,10 +237,15 @@ export interface ChangeRolePayload {
       'currentMembership',
       'currentOrganization'
     ]),
-    ...mapState('user', ['roleInfos'])
+    ...mapState('user', [
+      'roleInfos'
+    ])
   },
   methods: {
-    ...mapActions('user', ['getRoleInfo'])
+    ...mapActions('user', [
+      'getRoleInfo',
+      'resetOTPAuthenticator'
+    ])
   }
 })
 export default class MemberDataTable extends Vue {
@@ -246,7 +254,18 @@ export default class MemberDataTable extends Vue {
   private readonly currentMembership!: Member
   private readonly currentOrganization!: Organization
   private readonly getRoleInfo!: () => Promise<RoleInfo[]>
+  private readonly resetOTPAuthenticator!: (username: string) => any
   private readonly roleInfos!: RoleInfo[]
+  private readonly SNACKBAR_TIMEOUT: number = 3000 // milliseconds
+  private confirmResetAuthDialog = false
+  private showResetSnackBar = false
+  private selectedUserForReset = undefined
+
+  private formatDate = CommonUtils.formatDisplayDate
+
+  $refs: {
+    resetAuthenticatorDialog: ModalDialog
+  }
 
   private readonly headerMembers = [
     {
@@ -275,8 +294,6 @@ export default class MemberDataTable extends Vue {
       width: '140'
     }
   ]
-
-  private formatDate = CommonUtils.formatDisplayDate
 
   private async mounted () {
     // need not to reload everytime .roles seldom changes
@@ -390,6 +407,10 @@ export default class MemberDataTable extends Vue {
     return true
   }
 
+  private canResetAuthenticator (member: Member): boolean {
+    return (member.user.loginSource === LoginSource.BCEID)
+  }
+
   private ownerCount (): number {
     return this.activeOrgMembers.filter(
       member => member.membershipTypeCode === MembershipType.Admin
@@ -488,25 +509,34 @@ export default class MemberDataTable extends Vue {
     )
   }
 
-  // PROTOTYPE RESET AUTHENTICATOR
-  $refs: {
-    resetAuthDialog: ModalDialog
+  private selectedUsername () {
+    return `${this.selectedUserForReset?.user?.firstname} ${this.selectedUserForReset?.user?.lastname}`
   }
 
-  private confirmResetAuthDialog = false
-  private snackbar = false
-
-  private showResetAuthDialog () {
-    this.$refs.resetAuthDialog.open()
+  private showResetAuthenticatorDialog (item) {
+    this.selectedUserForReset = item
+    this.$refs.resetAuthenticatorDialog.open()
   }
 
-  private resetAuth () {
-    this.snackbar = true
-    this.$refs.resetAuthDialog.close()
+  private async resetAuthenticator () {
+    try {
+      await this.resetOTPAuthenticator(this.selectedUserForReset?.user?.username)
+      this.showResetSnackBar = true
+      this.$refs.resetAuthenticatorDialog.close()
+      // wait for the SNACKBAR_TIMEOUT value before unsetting the selectedUserForReset,
+      // for rendering the name correctly in the snackbar
+      setTimeout(() => {
+        this.selectedUserForReset = undefined
+      }, this.SNACKBAR_TIMEOUT)
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
+    }
   }
 
   private closeResetAuthDialog () {
-    this.$refs.resetAuthDialog.close()
+    this.$refs.resetAuthenticatorDialog.close()
+    this.selectedUserForReset = undefined
   }
 }
 </script>
