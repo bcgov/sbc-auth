@@ -27,8 +27,8 @@ def upgrade():
     op.bulk_insert(
         permissions_table,
         [
-            {'id': '20', 'membership_type_code': 'ADMIN', 'actions': 'RESET_OTP'},
-            {'id': '21', 'membership_type_code': 'COORDINATOR', 'actions': 'RESET_OTP'}
+            {'id': '22', 'membership_type_code': 'ADMIN', 'actions': 'RESET_OTP'},
+            {'id': '23', 'membership_type_code': 'COORDINATOR', 'actions': 'RESET_OTP'}
         ]
     )
 
