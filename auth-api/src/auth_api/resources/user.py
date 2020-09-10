@@ -138,6 +138,32 @@ class Users(Resource):
         return response, status
 
 
+@cors_preflight('GET,OPTIONS,DELETE')
+@API.route('/<path:username>/otp', methods=['GET', 'OPTIONS', 'DELETE'])
+class UserOtp(Resource):
+    """Resource for managing the bceid of user by a STAFF/ADMIN user."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    def delete(username):
+        """Delete/Reset the OTP of user profile associated with the provided username."""
+        try:
+            user = UserService.find_by_username(username)
+            if user is None:
+                response, status = {'message': 'User {} does not exist.'.format(username)}, \
+                                   http_status.HTTP_404_NOT_FOUND
+            elif user.as_dict().get('login_source', None) != LoginSource.BCEID.value:
+                response, status = {'Only BCEID users has OTP', http_status.HTTP_400_BAD_REQUEST}
+            else:
+                UserService.delete_otp_for_user(username, token_info=g.jwt_oidc_token_info)
+                response, status = '', http_status.HTTP_204_NO_CONTENT
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+
 @cors_preflight('GET,OPTIONS,DELETE,PATCH')
 @API.route('/<path:username>', methods=['GET', 'OPTIONS', 'DELETE', 'PATCH'])
 class UserStaff(Resource):
