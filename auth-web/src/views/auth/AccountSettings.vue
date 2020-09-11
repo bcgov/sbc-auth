@@ -52,24 +52,39 @@
     <v-card flat class="account-settings-card" data-test="account-settings-card">
       <v-container class="nav-container py-7 pl-4">
         <v-navigation-drawer permanent width="auto" data-test="account-nav-drawer">
-
+          <v-list class="py-0" role="navigation" aria-label="Account Navigation">
           <!-- Manage Account -->
-          <v-list class="py-0">
             <v-list-item-group color="primary">
               <v-subheader>MANAGE ACCOUNT</v-subheader>
-              <v-list-item dense class="py-1 px-6" :to="accountInfoUrl" data-test="account-info-nav-item">
+              <v-list-item
+                dense
+                class="py-1 px-8"
+                aria-label="Account Information"
+                :to="accountInfoUrl"
+                data-test="account-info-nav-item">
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-information-outline</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Account Info</v-list-item-title>
               </v-list-item>
-              <v-list-item dense class="py-1 px-6" :to="teamMembersUrl" data-test="team-members-nav-item">
+              <v-list-item
+                dense
+                class="py-1 px-8"
+                aria-label="Account Team Members"
+                :to="teamMembersUrl"
+                data-test="team-members-nav-item">
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-account-group-outline</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Team Members</v-list-item-title>
               </v-list-item>
-              <v-list-item dense class="py-1 px-6" :to="accountAuthUrl"  v-if="isRegularAccount" v-can:SET_AUTH_OPTIONS.hide data-test="user-auth-nav-item">
+              <v-list-item
+                dense
+                class="py-1 px-8"
+                aria-label="Team Member Authentication Methods"
+                :to="accountAuthUrl"
+                v-if="isRegularAccount"
+                v-can:SET_AUTH_OPTIONS.hide data-test="user-auth-nav-item">
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-shield-account-outline</v-icon>
                 </v-list-item-icon>
@@ -82,7 +97,10 @@
           <v-list v-if="isPremiumAccount" v-can:MANAGE_STATEMENTS.hide>
             <v-list-item-group color="primary">
               <v-subheader class="mt-4">ACCOUNT ACTIVITY</v-subheader>
-              <v-list-item dense class="py-1 px-6"
+              <v-list-item
+                dense
+                class="py-1 px-8"
+                aria-label="Account Statements"
                 :to="statementsUrl"
                 data-test="statements-nav-item"
               >
@@ -91,7 +109,10 @@
                 </v-list-item-icon>
                 <v-list-item-title>Statements</v-list-item-title>
               </v-list-item>
-              <v-list-item dense class="py-1 px-6"
+              <v-list-item
+                dense
+                class="py-1 px-8"
+                aria-label="Account Transactions"
                 :to="transactionUrl"
                 data-test="transactions-nav-item"
               >
@@ -102,7 +123,6 @@
               </v-list-item>
             </v-list-item-group>
           </v-list>
-
         </v-navigation-drawer>
       </v-container>
       <transition name="fade" mode="out-in">
