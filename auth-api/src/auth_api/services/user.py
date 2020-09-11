@@ -208,7 +208,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         subject = '[BC Registries & Online Services] Authenticator Has Been Reset'
         app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
         logo_url = f'{app_url}/{current_app.config.get("REGISTRIES_LOGO_IMAGE_NAME")}'
-        context_path = f'signin/bceid'
+        context_path = 'signin/bceid'
         login_url = '{}/{}'.format(app_url, context_path)
         try:
             sent_response = send_email(subject, sender, receipt_email,
