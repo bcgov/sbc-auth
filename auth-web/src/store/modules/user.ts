@@ -85,6 +85,11 @@ export default class UserModule extends VuexModule {
     this.userContact = userContact
   }
 
+  @Mutation
+  public setTermsOfUse (termsOfUse: TermsOfUseDocument) {
+    this.termsOfUse = termsOfUse
+  }
+
   @Action({ commit: 'setCurrentUser' })
   public loadUserInfo () {
     // Load User Info
@@ -204,8 +209,9 @@ export default class UserModule extends VuexModule {
     }
   }
 
-  @Mutation
-  public setTermsOfUse (termsOfUse: TermsOfUseDocument) {
-    this.termsOfUse = termsOfUse
+  @Action({ rawError: true })
+  public async resetOTPAuthenticator (username: string) {
+    const response = await UserService.resetOTPAuthenticator(username)
+    return response?.data || {}
   }
 }

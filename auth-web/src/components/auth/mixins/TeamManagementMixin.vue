@@ -74,7 +74,7 @@ export default class TeamManagementMixin extends Vue {
       this.primaryActionText = 'Deny'
     } else {
       this.confirmActionTitle = this.$t('confirmRemoveMemberTitle').toString()
-      this.confirmActionText = `Are you sure you want to remove ${member.user.firstname} from the account?`
+      this.confirmActionText = `Are you sure you want to remove ${member.user.firstname} from this account?`
       this.confirmHandler = this.removeMember
       this.primaryActionText = 'Yes'
     }

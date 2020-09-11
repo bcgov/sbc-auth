@@ -29,23 +29,30 @@
       </span>
     </template>
     <template v-slot:item.action="{ item }">
+
+      <!-- Resend Invitation -->
       <v-btn
-        outlined
-        color="primary"
+        icon
         class="mr-1"
+        aria-label="Resend invitation"
+        title="Resend Invitation"
         :data-test="getIndexedTag('resend-button', item.index)"
         @click="resend(item)"
       >
-        Resend
+        <v-icon>mdi-email-send-outline</v-icon>
       </v-btn>
+
+      <!-- Remove Invitation -->
       <v-btn
-        outlined
-        color="primary"
+        icon
+        aria-label="Remove Invitation"
+        title="Remove Invitation"
         :data-test="getIndexedTag('remove-button', item.index)"
         @click="confirmRemoveInvite(item)"
       >
-        Remove
+        <v-icon>mdi-trash-can-outline</v-icon>
       </v-btn>
+
     </template>
   </v-data-table>
 </template>
@@ -74,22 +81,19 @@ export default class InvitationsDataTable extends Vue {
       text: 'Invitation Sent',
       align: 'left',
       sortable: true,
-      value: 'sentDate',
-      width: '160'
+      value: 'sentDate'
     },
     {
       text: 'Expires',
       align: 'left',
       sortable: true,
-      value: 'expiresOn',
-      width: '160'
+      value: 'expiresOn'
     },
     {
       text: 'Actions',
-      align: 'left',
+      align: 'right',
       value: 'action',
-      sortable: false,
-      width: '210'
+      sortable: false
     }
   ]
 
@@ -120,6 +124,10 @@ export default class InvitationsDataTable extends Vue {
     padding-top: 1rem !important;
     padding-bottom: 1rem !important;
     height: auto;
+  }
+
+  .v-tooltip__content {
+    font-size: 10px !important;
   }
 }
 </style>
