@@ -1,4 +1,4 @@
-name: UI Lint and Test
+name: Auth web CI
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ on:
       - "auth-web/**"
 
 jobs:
-  build:
+  auth-web-ci:
     runs-on: ubuntu-latest
 
     strategy:
@@ -51,4 +51,3 @@ jobs:
           npm run build
         env:
           CI: true
-
