@@ -14,9 +14,6 @@ on:
         required: true
         default: "dev"
 
-env:
-  IMAGE_NAME: auth-web
-
 jobs:
   auth-web-dev:
     runs-on: ubuntu-latest
@@ -37,30 +34,18 @@ jobs:
         run: |
           echo "::set-env name=TAG_NAME::dev"
 
-      - name: Login Openshift
-        run: |
-          oc login ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }} --token=${{ secrets.OPENSHIFT_SA_TOKEN }}
-
-      - name: Build image
-        run: docker build . --file Dockerfile --tag image
-        working-directory: ./auth-web
-
-      - name: Log into registry
-        run: echo "${{ secrets.OPENSHIFT_SA_TOKEN }}" | docker login ${{ secrets.OPENSHIFT_DOCKER_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
-
-      - name: Push image
-        working-directory: ./auth-web
-        run: |
-          IMAGE_ID=${{ secrets.OPENSHIFT_DOCKER_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY}}-tools/$IMAGE_NAME
-          docker tag image $IMAGE_ID:latest
-          docker push $IMAGE_ID:latest
-          docker image tag $IMAGE_ID:latest $IMAGE_ID:$TAG_NAME
-          docker push $IMAGE_ID:$TAG_NAME
-
-      - name: Rollout new deployment
-        working-directory: ./auth-web
-        run: |
-          oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -n "${{ secrets.OPENSHIFT_REPOSITORY}}-${TAG_NAME}" -w
+      - uses: pwei1018/bcrs-cd-action@1.1.0
+        with:
+          WORKING_DIRECTORY: "./auth-web"
+          APP_NAME: "auth-web"
+          VAULTS: ""
+          SKIP_OP: "true"
+          OP_PARAMETERS: ""
+          OPENSHIFT_LOGIN_REGISTRY: ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }}
+          OPENSHIFT_DOCKER_REGISTRY: ${{ secrets.OPENSHIFT_DOCKER_REGISTRY }}
+          OPENSHIFT_SA_NAME: ${{ secrets.OPENSHIFT_SA_NAME }}
+          OPENSHIFT_SA_TOKEN: ${{ secrets.OPENSHIFT_SA_TOKEN }}
+          OPENSHIFT_REPOSITORY: ${{ secrets.OPENSHIFT_REPOSITORY }}
 
       - name: Rocket.Chat Notification
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
