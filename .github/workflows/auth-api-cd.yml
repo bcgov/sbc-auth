@@ -51,7 +51,7 @@ jobs:
         working-directory: .
         run: |
           vaults='[{ "vault": "shared", "application": ["keycloak", "jwt"]}, {"vault": "relationship","application": ["postgres-auth", "auth-api", "sentry"]}]'
-          ./scripts/1pass.sh ${{ secrets.op_parameters }} -m "secret" -e "${TAG_NAME}" -v "${vaults}" -a "${IMAGE_NAME}-${TAG_NAME}" -n "${{ secrets.OPENSHIFT_REPOSITORY}}_${TAG_NAME}"
+          ./scripts/1pass.sh ${{ secrets.op_parameters }} -m "secret" -e "${TAG_NAME}" -v "${vaults}" -a "${IMAGE_NAME}-${TAG_NAME}" -n ${{ secrets.OPENSHIFT_REPOSITORY}}_${TAG_NAME}
 
       - name: Log into registry
         run: echo "${{ secrets.OPENSHIFT_SA_TOKEN }}" | docker login ${{ secrets.OPENSHIFT_DOCKER_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
@@ -64,7 +64,7 @@ jobs:
       - name: Push image
         working-directory: ./auth-api
         run: |
-          IMAGE_ID=${{ secrets.OPENSHIFT_DOCKER_REGISTRY }}/"${{ secrets.OPENSHIFT_REPOSITORY}}_tools"/$IMAGE_NAME
+          IMAGE_ID=${{ secrets.OPENSHIFT_DOCKER_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY}}_tools/$IMAGE_NAME
           docker tag image $IMAGE_ID:latest
           docker push $IMAGE_ID:latest
           docker image tag $IMAGE_ID:latest $IMAGE_ID:$TAG_NAME
@@ -73,7 +73,7 @@ jobs:
       - name: Rollout new deployment
         working-directory: ./auth-api
         run: |
-          oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -n "${{ secrets.OPENSHIFT_REPOSITORY}}_${TAG_NAME}" -w
+          oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -n ${{ secrets.OPENSHIFT_REPOSITORY}}_${TAG_NAME} -w
 
       - name: Rocket.Chat Notification
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
