@@ -16,6 +16,7 @@
 
 Test-Suite to ensure that the User Service is working as expected.
 """
+import json
 from unittest.mock import patch
 
 import pytest
@@ -136,6 +137,26 @@ def test_reset_password_by_member(session, auth_mock, keycloak_mock):  # pylint:
     with pytest.raises(HTTPException) as excinfo:
         UserService.reset_password_for_anon_user(user_info, user_name, token_info=TestJwtClaims.public_user_role)
         assert excinfo.exception.code == 403
+
+
+def test_delete_otp_for_user(session, auth_mock, keycloak_mock):
+    """Assert that the otp cant be reset."""
+    kc_service = KeycloakService()
+    org = factory_org_model(org_info=TestOrgInfo.org_anonymous)
+    admin_user = factory_user_model()
+    factory_membership_model(admin_user.id, org.id)
+    admin_claims = TestJwtClaims.get_test_real_user(admin_user.keycloak_guid)
+    membership = [TestAnonymousMembership.generate_random_user(USER)]
+    keycloak_service = KeycloakService()
+    request = KeycloakScenario.create_user_request()
+    request.user_name = membership[0]['username']
+    keycloak_service.add_user(request)
+    user = kc_service.get_user_by_username(request.user_name)
+    user = factory_user_model(TestUserInfo.get_bceid_user_with_kc_guid(user.id))
+    factory_membership_model(user.id, org.id)
+    UserService.delete_otp_for_user(user.username, admin_claims)
+    user1 = kc_service.get_user_by_username(request.user_name)
+    assert 'CONFIGURE_TOTP' in json.loads(user1.value()).get('requiredActions')
 
 
 def test_create_user_and_add_same_user_name_error_in_kc(session, auth_mock,

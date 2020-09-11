@@ -43,26 +43,27 @@
         <template v-slot:[`item.action`]="{ item }">
           <div>
             <v-btn
-              outlined
+              text
               color="primary"
-              class="font-weight-bold mr-2"
+              class="mr-1"
               aria-label="Download CSV"
               title="Download statement as a CSV file"
               :data-test="getIndexedTag('csv-button', item.id)"
               @click="downloadStatement(item, 'CSV')"
             >
-              CSV
+              <v-icon class="ml-n2">mdi-file-table-outline</v-icon>
+              <span class="ml-n1 font-weight-bold">CSV</span>
             </v-btn>
             <v-btn
-              outlined
+              text
               color="primary"
-              class="font-weight-bold"
               aria-label="Download PDF"
               title="Download statement as a PDF file"
               :data-test="getIndexedTag('pdf-button', item.id)"
               @click="downloadStatement(item, 'PDF')"
             >
-              PDF
+              <v-icon class="ml-n2">mdi-file-pdf-outline</v-icon>
+              <span class="ml-n1 font-weight-bold">PDF</span>
             </v-btn>
           </div>
         </template>

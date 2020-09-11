@@ -1,4 +1,5 @@
 <template>
+  <div>
   <v-data-table
     v-if="roleInfos"
     :mobile-breakpoint="1024"
@@ -7,6 +8,7 @@
     :items-per-page="5"
     :hide-default-footer="indexedOrgMembers.length <= 5"
     :custom-sort="customSortActive"
+    class="member-data-table"
     :no-data-text="$t('noActiveUsersLabel')"
   >
     <template v-slot:loading>
@@ -14,7 +16,7 @@
     </template>
 
     <!-- Name Column Template -->
-    <template v-slot:item.name="{ item }">
+    <template v-slot:[`item.name`]="{ item }">
       <div
         class="user-name font-weight-bold"
         :data-test="getIndexedTag('user-name', item.index)"
@@ -23,6 +25,7 @@
       </div>
       <div
         :data-test="getIndexedTag('business-id', item.index)"
+        class="contact-email"
         v-if="item.user.contacts && item.user.contacts.length > 0"
         >
           {{ item.user.contacts[0].email }}
@@ -30,12 +33,14 @@
     </template>
 
     <!-- Role Column Template -->
-    <template v-slot:item.role="{ item }">
-      <v-menu>
+    <template v-slot:[`item.role`]="{ item }">
+      <v-menu
+        transition="slide-y-transition">
         <template v-slot:activator="{ on }">
           <v-btn
             text
             class="ml-n4 pr-2"
+            aria-label="Select User Role"
             v-on="on"
             :disabled="!canChangeRole(item)"
             :data-test="getIndexedTag('role-selector', item.index)"
@@ -44,7 +49,7 @@
             <v-icon depressed>mdi-menu-down</v-icon>
           </v-btn>
         </template>
-        <v-list dense class="role-list">
+        <v-list dense class="role-list" role="user role list">
           <v-item-group>
             <v-list-item
               class="py-1"
@@ -87,48 +92,118 @@
 
     <!-- Date Column Template -->
     <template
-      v-slot:item.lastActive="{ item }"
+      v-slot:[`item.lastActive`]="{ item }"
       :data-test="getIndexedTag('last-active', item.index)"
     >
       {{ formatDate(item.user.modified) }}
     </template>
 
     <!-- Actions Column Template -->
-    <template v-slot:item.action="{ item }">
-      <div class="btn-inline">
-        <v-btn
-          outlined
-          color="primary"
-          class="mr-1"
-          :data-test="getIndexedTag('reset-password-button', item.index)"
-          v-can:RESET_PASSWORD.hide
-          v-show="anonAccount"
-          @click="resetPassword(item)"
-        >
-          Reset Password
-        </v-btn>
-        <v-btn
-          outlined
-          color="primary"
-          :data-test="getIndexedTag('remove-user-button', item.index)"
-          v-show="canRemove(item)"
-          @click="confirmRemoveMember(item)"
-        >
-          Remove
-        </v-btn>
-        <v-btn
-          outlined
-          color="primary"
-          :data-test="getIndexedTag('leave-team-button', item.index)"
-          v-show="canLeave(item)"
-          @click="confirmLeaveTeam(item)"
-        >
-          <span v-if="!canDissolve()">Leave</span>
-          <span v-if="canDissolve()">Dissolve</span>
-        </v-btn>
-      </div>
+    <template v-slot:[`item.action`]="{ item }">
+
+      <!-- Reset Authenticator -->
+      <v-btn
+        icon
+        class="mr-1"
+        aria-label="Reset Authenticator"
+        title="Reset Authenticator"
+        v-can:RESET_OTP.hide
+        v-show="canResetAuthenticator(item)"
+        @click="showResetAuthenticatorDialog(item)">
+        <v-icon>mdi-lock-reset</v-icon>
+      </v-btn>
+
+      <!-- Reset Password -->
+      <v-btn
+        icon
+        class="mr-1"
+        aria-label="Reset User Password"
+        title="Reset User Password"
+        v-can:RESET_PASSWORD.hide
+        v-show="anonAccount"
+        :data-test="getIndexedTag('reset-password-button', item.index)"
+        @click="resetPassword(item)"
+      >
+        <v-icon>mdi-lock-reset</v-icon>
+      </v-btn>
+
+      <!-- Remove User -->
+      <v-btn
+        icon
+        aria-label="Remove User"
+        title="Remove User"
+        v-show="canRemove(item)"
+        :data-test="getIndexedTag('remove-user-button', item.index)"
+        @click="confirmRemoveMember(item)"
+      >
+        <v-icon>mdi-trash-can-outline</v-icon>
+      </v-btn>
+
+      <!-- Leave Account -->
+      <v-btn
+        icon
+        :aria-label="canDissolve() ? 'Dissolve Account' : 'Leave Account'"
+        :title="canDissolve() ? 'Dissolve Account' : 'Leave Account'"
+        v-show="canLeave(item)"
+        :data-test="getIndexedTag('leave-team-button', item.index)"
+        @click="confirmLeaveTeam(item)"
+      >
+        <v-icon>mdi-trash-can-outline</v-icon>
+      </v-btn>
+
     </template>
   </v-data-table>
+
+  <v-snackbar
+    bottom
+    color="primary"
+    class="mb-6"
+    v-model="showResetSnackBar"
+    :timeout="SNACKBAR_TIMEOUT"
+  >
+    Authenticator reset for {{selectedUsername()}}
+    <v-btn
+      icon
+      dark
+      aria-label="Close Notification"
+      title="Close Notification"
+      @click="showResetSnackBar = false"
+    >
+      <v-icon>mdi-close</v-icon>
+    </v-btn>
+  </v-snackbar>
+
+  <ModalDialog
+    ref="resetAuthenticatorDialog"
+    icon="mdi-check"
+    title="Reset Authenticator"
+    text="Resetting this team members authenticator will require them log in and enter a new one-time password in their authenticator app."
+    dialog-class="notify-dialog"
+    max-width="600"
+  >
+    <template v-slot:icon>
+      <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+    </template>
+    <template v-slot:actions>
+      <v-btn
+        large
+        color="error"
+        class="font-weight-bold"
+        @click="resetAuthenticator()"
+      >
+        Reset
+      </v-btn>
+      <v-btn
+        large
+        depressed
+        @click="closeResetAuthDialog()"
+      >
+        Cancel
+      </v-btn>
+    </template>
+  </ModalDialog>
+
+  </div>
 </template>
 
 <script lang="ts">
@@ -144,6 +219,7 @@ import {
 import { mapActions, mapState } from 'vuex'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
+import ModalDialog from '@/components/auth/ModalDialog.vue'
 
 export interface ChangeRolePayload {
   member: Member
@@ -151,6 +227,9 @@ export interface ChangeRolePayload {
 }
 
 @Component({
+  components: {
+    ModalDialog
+  },
   computed: {
     ...mapState('business', ['businesses']),
     ...mapState('org', [
@@ -158,10 +237,15 @@ export interface ChangeRolePayload {
       'currentMembership',
       'currentOrganization'
     ]),
-    ...mapState('user', ['roleInfos'])
+    ...mapState('user', [
+      'roleInfos'
+    ])
   },
   methods: {
-    ...mapActions('user', ['getRoleInfo'])
+    ...mapActions('user', [
+      'getRoleInfo',
+      'resetOTPAuthenticator'
+    ])
   }
 })
 export default class MemberDataTable extends Vue {
@@ -170,7 +254,18 @@ export default class MemberDataTable extends Vue {
   private readonly currentMembership!: Member
   private readonly currentOrganization!: Organization
   private readonly getRoleInfo!: () => Promise<RoleInfo[]>
+  private readonly resetOTPAuthenticator!: (username: string) => any
   private readonly roleInfos!: RoleInfo[]
+  private readonly SNACKBAR_TIMEOUT: number = 3000 // milliseconds
+  private confirmResetAuthDialog = false
+  private showResetSnackBar = false
+  private selectedUserForReset = undefined
+
+  private formatDate = CommonUtils.formatDisplayDate
+
+  $refs: {
+    resetAuthenticatorDialog: ModalDialog
+  }
 
   private readonly headerMembers = [
     {
@@ -193,14 +288,12 @@ export default class MemberDataTable extends Vue {
     },
     {
       text: 'Actions',
-      align: 'left',
+      align: 'right',
       value: 'action',
       sortable: false,
-      width: '120'
+      width: '140'
     }
   ]
-
-  private formatDate = CommonUtils.formatDisplayDate
 
   private async mounted () {
     // need not to reload everytime .roles seldom changes
@@ -314,6 +407,10 @@ export default class MemberDataTable extends Vue {
     return true
   }
 
+  private canResetAuthenticator (member: Member): boolean {
+    return (member.user.loginSource === LoginSource.BCEID)
+  }
+
   private ownerCount (): number {
     return this.activeOrgMembers.filter(
       member => member.membershipTypeCode === MembershipType.Admin
@@ -410,6 +507,36 @@ export default class MemberDataTable extends Vue {
     return (
       this.currentMembership?.user?.username === member.user.username || false
     )
+  }
+
+  private selectedUsername () {
+    return `${this.selectedUserForReset?.user?.firstname} ${this.selectedUserForReset?.user?.lastname}`
+  }
+
+  private showResetAuthenticatorDialog (item) {
+    this.selectedUserForReset = item
+    this.$refs.resetAuthenticatorDialog.open()
+  }
+
+  private async resetAuthenticator () {
+    try {
+      await this.resetOTPAuthenticator(this.selectedUserForReset?.user?.username)
+      this.showResetSnackBar = true
+      this.$refs.resetAuthenticatorDialog.close()
+      // wait for the SNACKBAR_TIMEOUT value before unsetting the selectedUserForReset,
+      // for rendering the name correctly in the snackbar
+      setTimeout(() => {
+        this.selectedUserForReset = undefined
+      }, this.SNACKBAR_TIMEOUT)
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
+    }
+  }
+
+  private closeResetAuthDialog () {
+    this.$refs.resetAuthenticatorDialog.close()
+    this.selectedUserForReset = undefined
   }
 }
 </script>

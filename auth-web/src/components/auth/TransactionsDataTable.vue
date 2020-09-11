@@ -107,7 +107,7 @@ export default class TransactionsDataTable extends Vue {
       align: 'left',
       sortable: false,
       value: 'folioNumber',
-      width: '140'
+      width: '120'
     },
     {
       text: 'Initiated By',
@@ -134,7 +134,7 @@ export default class TransactionsDataTable extends Vue {
       align: 'left',
       value: 'status',
       sortable: false,
-      width: '115'
+      width: '110'
     }
   ]
 

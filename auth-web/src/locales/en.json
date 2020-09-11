@@ -26,7 +26,7 @@
   "dirSearchUnauthorizedMsg": "You must agree to the Terms of Use before you can access this application.",
   "confirmRemoveMemberTitle": "Remove Team Member",
   "confirmRoleChangeTitle": "Confirm Role Change",
-  "confirmRemoveInviteTitle": "Confirm Invite Removal",
+  "confirmRemoveInviteTitle": "Remove Invitation",
   "confirmApproveMemberTitle": "Confirm Member Approval",
   "confirmDenyMemberTitle": "Confirm Member Denial",
   "noPendingApprovalLabel": "No Pending Approvals",

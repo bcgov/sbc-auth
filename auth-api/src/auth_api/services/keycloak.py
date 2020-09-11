@@ -312,17 +312,10 @@ class KeycloakService:
         response = requests.put(configure_otp_url, headers=headers, data=input_data)
 
         if response.status_code == 204:
-            # step 2: disable otp credential for Keycloak version under 8
-            disable_otp_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/disable-credential-types'
-            input_data = json.dumps(['otp'])
-            response = requests.put(disable_otp_url, headers=headers, data=input_data)
-            # if keycloak version is above 8 it will throw 415 error
-            if response.status_code == 415:
-                # step 3: delete otp credential for keyclaok version above 8
-                get_credentials_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/credentials'
-                response = requests.get(get_credentials_url, headers=headers)
-                for credential in response.json():
-                    if credential['type'] == 'otp':
-                        delete_credential_url = f'{get_credentials_url}/{credential["id"]}'
-                        response = requests.delete(delete_credential_url, headers=headers)
+            get_credentials_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/credentials'
+            response = requests.get(get_credentials_url, headers=headers)
+            for credential in response.json():
+                if credential['type'] == 'otp':
+                    delete_credential_url = f'{get_credentials_url}/{credential["id"]}'
+                    response = requests.delete(delete_credential_url, headers=headers)
         response.raise_for_status()
