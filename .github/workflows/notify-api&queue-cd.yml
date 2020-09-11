@@ -8,6 +8,12 @@ on:
     paths:
       - "notify-api/**"
       - "queue_services/notify-queue/**"
+  workflow_dispatch:
+    inputs:
+      environement:
+        description: "Environment (dev/test)"
+        required: true
+        default: "dev"
 
 jobs:
   notify-api-cd:
