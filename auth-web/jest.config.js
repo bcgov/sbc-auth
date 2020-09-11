@@ -28,8 +28,10 @@ module.exports = {
   testURL: 'http://localhost/',
   globals: {
     'ts-jest': {
-      babelConfig: true,
-      isolatedModules: true
+      diagnostics: false,
+      isolatedModules: true,
+      babelConfig: true
     }
-  }
+  },
+  preset: '@vue/cli-plugin-unit-jest/presets/typescript-and-babel'
 }
