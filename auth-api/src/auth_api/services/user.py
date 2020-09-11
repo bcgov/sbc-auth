@@ -198,7 +198,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         except HTTPError as err:
             current_app.logger.error('update_user in keycloak failed {}', err)
             raise BusinessException(Error.UNDEFINED_ERROR, err)
-    
+
     @staticmethod
     def send_otp_authenticator_reset_notification(receipt_email, origin_url):
         """Send Authenticator reset notification to the user."""
