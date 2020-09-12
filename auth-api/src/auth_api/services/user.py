@@ -200,7 +200,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             raise BusinessException(Error.UNDEFINED_ERROR, err)
 
     @staticmethod
-    def send_otp_authenticator_reset_notification(receipt_email, origin_url):
+    def send_otp_authenticator_reset_notification(recipient_email, origin_url):
         """Send Authenticator reset notification to the user."""
         current_app.logger.debug('<send_otp_authenticator_reset_notification')
         sender = current_app.config.get('MAIL_FROM_ID')
@@ -211,7 +211,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         context_path = 'signin/bceid'
         login_url = '{}/{}'.format(app_url, context_path)
         try:
-            sent_response = send_email(subject, sender, receipt_email,
+            sent_response = send_email(subject, sender, recipient_email,
                                        template.render(url=login_url, logo_url=logo_url))
             current_app.logger.debug('<send_otp_authenticator_reset_notification')
             if not sent_response:
