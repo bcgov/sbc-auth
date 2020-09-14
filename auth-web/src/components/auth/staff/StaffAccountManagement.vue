@@ -58,7 +58,10 @@
 
     <!-- Tab Contents -->
     <v-tabs-items v-model="tab">
-      <router-view></router-view>
+      <!--keep alive added so that tab switiching doesnt cause unnecessary database calls -->
+      <keep-alive>
+        <router-view></router-view>
+      </keep-alive>
     </v-tabs-items>
   </v-container>
 </template>

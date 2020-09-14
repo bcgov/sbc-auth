@@ -373,19 +373,23 @@ export function getRoutes (): RouteConfig[] {
         },
         {
           path: 'active',
-          component: StaffActiveAccountsTable
+          component: StaffActiveAccountsTable,
+          name: 'active'
         },
         {
           path: 'invitations',
-          component: StaffPendingAccountInvitationsTable
+          component: StaffPendingAccountInvitationsTable,
+          name: 'invitations'
         },
         {
           path: 'review',
-          component: StaffPendingAccountsTable
+          component: StaffPendingAccountsTable,
+          name: 'review'
         },
         {
           path: 'rejected',
-          component: StaffRejectedAccountsTable
+          component: StaffRejectedAccountsTable,
+          name: 'rejected'
         }
       ]
     },
