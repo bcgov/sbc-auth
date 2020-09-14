@@ -20,6 +20,7 @@ from typing import Dict, List
 
 from flask import current_app
 from requests import HTTPError
+from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
@@ -42,6 +43,9 @@ from auth_api.utils.util import camelback2snake
 from .contact import Contact as ContactService
 from .documents import Documents as DocumentService
 from .keycloak import KeycloakService
+from .notification import send_email
+
+ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -181,7 +185,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         return user_model
 
     @staticmethod
-    def delete_otp_for_user(user_name, token_info: Dict = None):
+    def delete_otp_for_user(user_name, token_info: Dict = None, origin_url: str = None):
         """Reset the OTP of the user."""
         # TODO - handle when the multiple teams implemented for bceid..
         user = UserModel.find_by_username(user_name)
@@ -190,9 +194,32 @@ class User:  # pylint: disable=too-many-instance-attributes
         check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, COORDINATOR, STAFF))
         try:
             KeycloakService.reset_otp(str(user.keycloak_guid))
+            User.send_otp_authenticator_reset_notification(user.email, origin_url)
         except HTTPError as err:
             current_app.logger.error('update_user in keycloak failed {}', err)
             raise BusinessException(Error.UNDEFINED_ERROR, err)
+
+    @staticmethod
+    def send_otp_authenticator_reset_notification(recipient_email, origin_url):
+        """Send Authenticator reset notification to the user."""
+        current_app.logger.debug('<send_otp_authenticator_reset_notification')
+        sender = current_app.config.get('MAIL_FROM_ID')
+        template = ENV.get_template('email_templates/otp_authenticator_reset_notification_email.html')
+        subject = '[BC Registries & Online Services] Authenticator Has Been Reset'
+        app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
+        logo_url = f'{app_url}/{current_app.config.get("REGISTRIES_LOGO_IMAGE_NAME")}'
+        context_path = 'signin/bceid'
+        login_url = '{}/{}'.format(app_url, context_path)
+        try:
+            sent_response = send_email(subject, sender, recipient_email,
+                                       template.render(url=login_url, logo_url=logo_url))
+            current_app.logger.debug('<send_otp_authenticator_reset_notification')
+            if not sent_response:
+                current_app.logger.error('<send_otp_authenticator_reset_notification failed')
+                raise BusinessException(Error.FAILED_NOTIFICATION, None)
+        except:  # noqa=B901
+            current_app.logger.error('<send_otp_authenticator_reset_notification failed')
+            raise BusinessException(Error.FAILED_NOTIFICATION, None)
 
     @staticmethod
     def reset_password_for_anon_user(user_info: dict, user_name, token_info: Dict = None):
