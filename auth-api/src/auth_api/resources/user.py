@@ -157,7 +157,8 @@ class UserOtp(Resource):
             elif user.as_dict().get('login_source', None) != LoginSource.BCEID.value:
                 response, status = {'Only BCEID users has OTP', http_status.HTTP_400_BAD_REQUEST}
             else:
-                UserService.delete_otp_for_user(username, token_info=g.jwt_oidc_token_info)
+                origin_url = request.environ.get('HTTP_ORIGIN', 'localhost')
+                UserService.delete_otp_for_user(username, token_info=g.jwt_oidc_token_info, origin_url=origin_url)
                 response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
