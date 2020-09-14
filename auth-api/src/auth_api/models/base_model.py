@@ -186,5 +186,5 @@ class VersionedModel(BaseModel):
     __abstract__ = True
 
     __versioned__ = {
-        'exclude': ['modified', 'modified_by_id', 'modified_by', 'created']
+        'exclude': []
     }
