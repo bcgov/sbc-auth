@@ -90,7 +90,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('user', ['currentUser'])
   }
 })
-export default class SearchBusinessView extends Vue {
+export default class StaffDashboardView extends Vue {
   private businessNumber = ''
   private searchedBusinessNumber = ''
   private searchActive = false

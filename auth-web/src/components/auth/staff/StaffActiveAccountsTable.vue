@@ -111,7 +111,7 @@ export default class StaffActiveAccountsTable extends Vue {
     {
       text: 'Name',
       align: 'left',
-      sortable: true,
+      fable: true,
       value: 'name'
     },
     {

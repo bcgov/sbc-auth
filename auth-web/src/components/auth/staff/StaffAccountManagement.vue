@@ -19,11 +19,11 @@
       class="mb-9"
       v-model="tab"
       @change="tabChange">
-      <v-tab data-test="active-tab"
+      <v-tab data-test="active-tab" to="/staff-dashboard/active"
         v-if="canViewAccounts">Active</v-tab>
 
       <template v-if="canCreateAccounts">
-        <v-tab data-test="invitations-tab">
+        <v-tab data-test="invitations-tab" to="/staff-dashboard/invitations">
           <v-badge
             inline
             color="primary"
@@ -35,7 +35,7 @@
       </template>
 
       <template v-if="canManageAccounts">
-        <v-tab data-test="pending-review-tab">
+        <v-tab data-test="pending-review-tab" to="/staff-dashboard/review">
           <v-badge
             inline
             color="primary"
@@ -44,7 +44,7 @@
             Pending Review
           </v-badge>
         </v-tab>
-        <v-tab data-test="rejected-tab">
+        <v-tab data-test="rejected-tab" to="/staff-dashboard/rejected">
           <v-badge
             inline
             color="primary"
@@ -58,28 +58,7 @@
 
     <!-- Tab Contents -->
     <v-tabs-items v-model="tab">
-      <v-tab-item>
-        <StaffActiveAccountsTable
-          :columnSort="customSort"
-        />
-      </v-tab-item>
-      <v-tab-item v-if="canCreateAccounts">
-        <StaffPendingAccountInvitationsTable
-          :columnSort="customSort"
-        />
-      </v-tab-item>
-      <template v-if="canManageAccounts">
-        <v-tab-item>
-          <StaffPendingAccountsTable
-            :columnSort="customSort"
-          />
-        </v-tab-item>
-        <v-tab-item>
-          <StaffRejectedAccountsTable
-            :columnSort="customSort"
-          />
-        </v-tab-item>
-      </template>
+      <router-view></router-view>
     </v-tabs-items>
   </v-container>
 </template>

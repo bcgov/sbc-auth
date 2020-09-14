@@ -40,6 +40,11 @@ import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.
 import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
+import StaffActiveAccountsTable from '@/components/auth/staff/StaffActiveAccountsTable.vue'
+import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
+import StaffPendingAccountInvitationsTable from '@/components/auth/staff/StaffPendingAccountInvitationsTable.vue'
+import StaffPendingAccountsTable from '@/components/auth/staff/StaffPendingAccountsTable.vue'
+import StaffRejectedAccountsTable from '@/components/auth/staff/StaffRejectedAccountsTable.vue'
 import TermsOfServiceDeclineView from '@/views/auth/TermsOfServiceDeclineView.vue'
 import TermsOfServiceView from '@/views/auth/TermsOfServiceView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
@@ -356,11 +361,38 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: false }
     },
     {
+      path: '/staff-dashboard',
+      name: 'staff-dashboard',
+      component: StaffDashboardView,
+      props: true,
+      meta: { requiresAuth: true, allowedRoles: [Role.Staff] },
+      children: [
+        {
+          path: '',
+          redirect: 'active'
+        },
+        {
+          path: 'active',
+          component: StaffActiveAccountsTable
+        },
+        {
+          path: 'invitations',
+          component: StaffPendingAccountInvitationsTable
+        },
+        {
+          path: 'review',
+          component: StaffPendingAccountsTable
+        },
+        {
+          path: 'rejected',
+          component: StaffRejectedAccountsTable
+        }
+      ]
+    },
+    {
       path: '/searchbusiness',
       name: 'searchbusiness',
-      component: SearchBusinessView,
-      props: true,
-      meta: { requiresAuth: true, allowedRoles: [Role.Staff] }
+      redirect: '/staff-dashboard'
     },
     {
       path: '/glcodelist',
