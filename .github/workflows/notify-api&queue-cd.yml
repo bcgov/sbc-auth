@@ -39,43 +39,18 @@ jobs:
         run: |
           echo "::set-env name=TAG_NAME::dev"
 
-      - name: Install tools
-        run: |
-          ./scripts/install_tools.sh
-          oc version
-          op --version
-
-      - name: Login Openshift
-        run: |
-          oc login ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }} --token=${{ secrets.OPENSHIFT_SA_TOKEN }}
-
-      - name: Set Deployment Environement Variables
-        working-directory: .
-        run: |
-          vaults='[{ "vault": "shared", "application": ["jwt", "email", "nats"]}, {"vault": "relationship","application": ["postgres-notify", "notify-api", "sentry"]}]'
-          ./scripts/1pass.sh ${{ secrets.op_parameters }} -m "secret" -e "${TAG_NAME}" -v "${vaults}" -a "${IMAGE_NAME}-${TAG_NAME}" -n "${{ secrets.OPENSHIFT_REPOSITORY}}-${TAG_NAME}"
-
-      - name: Log into registry
-        run: echo "${{ secrets.OPENSHIFT_SA_TOKEN }}" | docker login ${{ secrets.OPENSHIFT_DOCKER_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
-
-      - name: Build image
-        working-directory: ./notify-api
-        run: |
-          docker build . --file Dockerfile --tag image
-
-      - name: Push image
-        working-directory: ./notify-api
-        run: |
-          IMAGE_ID=${{ secrets.OPENSHIFT_DOCKER_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY}}-tools/$IMAGE_NAME
-          docker tag image $IMAGE_ID:latest
-          docker push $IMAGE_ID:latest
-          docker image tag $IMAGE_ID:latest $IMAGE_ID:$TAG_NAME
-          docker push $IMAGE_ID:$TAG_NAME
-
-      - name: Rollout new deployment
-        working-directory: ./notify-api
-        run: |
-          oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -n "${{ secrets.OPENSHIFT_REPOSITORY}}-${TAG_NAME}" -w
+      - uses: pwei1018/bcrs-cd-action@1.1.0
+        with:
+          WORKING_DIRECTORY: "./notify-api"
+          APP_NAME: "notify-api"
+          VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"jwt\", \"email\", \"nats\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-notify\", \"notify-api\", \"sentry\"]}]'
+          SKIP_OP: "false"
+          OP_PARAMETERS: ${{ secrets.OP_PARAMETERS }}
+          OPENSHIFT_LOGIN_REGISTRY: ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }}
+          OPENSHIFT_DOCKER_REGISTRY: ${{ secrets.OPENSHIFT_DOCKER_REGISTRY }}
+          OPENSHIFT_SA_NAME: ${{ secrets.OPENSHIFT_SA_NAME }}
+          OPENSHIFT_SA_TOKEN: ${{ secrets.OPENSHIFT_SA_TOKEN }}
+          OPENSHIFT_REPOSITORY: ${{ secrets.OPENSHIFT_REPOSITORY }}
 
       - name: Rocket.Chat Notification
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
@@ -112,43 +87,18 @@ jobs:
         run: |
           echo "::set-env name=TAG_NAME::dev"
 
-      - name: Install tools
-        run: |
-          ./scripts/install_tools.sh
-          oc version
-          op --version
-
-      - name: Login Openshift
-        run: |
-          oc login ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }} --token=${{ secrets.OPENSHIFT_SA_TOKEN }}
-
-      - name: Set Deployment Environement Variables
-        working-directory: .
-        run: |
-          vaults='[{ "vault": "shared", "application": ["email", "nats"]}, {"vault": "relationship","application": ["postgres-notify", "notify-api", "notify-queue"]}]'
-          ./scripts/1pass.sh ${{ secrets.op_parameters }} -m "secret" -e "${TAG_NAME}" -v "${vaults}" -a "${IMAGE_NAME}-${TAG_NAME}" -n "${{ secrets.OPENSHIFT_REPOSITORY}}-${TAG_NAME}"
-
-      - name: Log into registry
-        run: echo "${{ secrets.OPENSHIFT_SA_TOKEN }}" | docker login ${{ secrets.OPENSHIFT_DOCKER_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
-
-      - name: Build image
-        working-directory: ./queue_services/notify-queue
-        run: |
-          docker build . --file Dockerfile --tag image
-
-      - name: Push image
-        working-directory: ./queue_services/notify-queue
-        run: |
-          IMAGE_ID=${{ secrets.OPENSHIFT_DOCKER_REGISTRY }}/${{ secrets.OPENSHIFT_REPOSITORY}}-tools/$IMAGE_NAME
-          docker tag image $IMAGE_ID:latest
-          docker push $IMAGE_ID:latest
-          docker image tag $IMAGE_ID:latest $IMAGE_ID:$TAG_NAME
-          docker push $IMAGE_ID:$TAG_NAME
-
-      - name: Rollout new deployment
-        working-directory: ./queue_services/notify-queue
-        run: |
-          oc rollout status dc/$IMAGE_NAME-${TAG_NAME} -n "${{ secrets.OPENSHIFT_REPOSITORY}}-${TAG_NAME}" -w
+      - uses: pwei1018/bcrs-cd-action@1.1.0
+        with:
+          WORKING_DIRECTORY: "./queue_services/notify-queue"
+          APP_NAME: "notify-queue"
+          VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"email\", \"nats\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-notify\", \"notify-api\", \"notify-queue\"]}]'
+          SKIP_OP: "false"
+          OP_PARAMETERS: ${{ secrets.OP_PARAMETERS }}
+          OPENSHIFT_LOGIN_REGISTRY: ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }}
+          OPENSHIFT_DOCKER_REGISTRY: ${{ secrets.OPENSHIFT_DOCKER_REGISTRY }}
+          OPENSHIFT_SA_NAME: ${{ secrets.OPENSHIFT_SA_NAME }}
+          OPENSHIFT_SA_TOKEN: ${{ secrets.OPENSHIFT_SA_TOKEN }}
+          OPENSHIFT_REPOSITORY: ${{ secrets.OPENSHIFT_REPOSITORY }}
 
       - name: Rocket.Chat Notification
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
