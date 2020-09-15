@@ -46,5 +46,17 @@ export default class PaginationMixin extends Vue {
   protected get getPaginationOptions () {
     return [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
   }
+
+  private customSort (items, index, isDescending) {
+    const isDesc = isDescending.length > 0 && isDescending[0]
+    items.sort((a, b) => {
+      if (isDesc) {
+        return a[index[0]] < b[index[0]] ? -1 : 1
+      } else {
+        return b[index[0]] < a[index[0]] ? -1 : 1
+      }
+    })
+    return items
+  }
 }
 </script>

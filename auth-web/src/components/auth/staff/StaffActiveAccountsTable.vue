@@ -85,12 +85,11 @@ import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorato
 import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
+import { DataOptions } from 'vuetify'
 import OrgModule from '@/store/modules/org'
+import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import { getModule } from 'vuex-module-decorators'
-import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import { DataOptions } from 'vuetify'
 
 @Component({
   methods: {

@@ -163,18 +163,6 @@ export default class StaffAccountManagement extends Vue {
     return this.currentUser?.roles?.includes(Role.StaffViewAccounts)
   }
 
-  private customSort (items, index, isDescending) {
-    const isDesc = isDescending.length > 0 && isDescending[0]
-    items.sort((a, b) => {
-      if (isDesc) {
-        return a[index[0]] < b[index[0]] ? -1 : 1
-      } else {
-        return b[index[0]] < a[index[0]] ? -1 : 1
-      }
-    })
-    return items
-  }
-
   private async tabChange (tabIndex) {
     const selected = this.tabs.filter((tab) => (tab.id === tabIndex))
     switch (selected[0]?.code) {
