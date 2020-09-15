@@ -39,7 +39,7 @@ jobs:
         run: |
           echo "::set-env name=TAG_NAME::dev"
 
-      - uses: pwei1018/bcrs-cd-action@1.1.0
+      - uses: pwei1018/bcrs-cd-action@latest
         with:
           WORKING_DIRECTORY: "./notify-api"
           APP_NAME: "notify-api"
@@ -87,7 +87,7 @@ jobs:
         run: |
           echo "::set-env name=TAG_NAME::dev"
 
-      - uses: pwei1018/bcrs-cd-action@1.1.0
+      - uses: pwei1018/bcrs-cd-action@latest
         with:
           WORKING_DIRECTORY: "./queue_services/notify-queue"
           APP_NAME: "notify-queue"
