@@ -81,7 +81,7 @@
 
 <script lang="ts">
 import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
@@ -89,6 +89,8 @@ import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import { getModule } from 'vuex-module-decorators'
+import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
+import { DataOptions } from 'vuetify'
 
 @Component({
   methods: {
@@ -96,7 +98,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('staff', ['searchOrgs'])
   }
 })
-export default class StaffActiveAccountsTable extends Vue {
+export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   private orgStore = getModule(OrgModule, this.$store)
 
   private activeOrgs: Organization[] = []
@@ -137,10 +139,8 @@ export default class StaffActiveAccountsTable extends Vue {
 
   private formatDate = CommonUtils.formatDisplayDate
 
-  private readonly ITEMS_PER_PAGE = 10
-  private readonly PAGINATION_COUNTER_STEP = 4
   private totalAccountsCount = 0
-  private tableDataOptions: any = {}
+  private tableDataOptions: Partial<DataOptions> = {}
   private orgFilter: OrgFilterParams
   private accountNameFilterInput: string = ''
   private appliedFilterValue: string = ''
@@ -150,13 +150,16 @@ export default class StaffActiveAccountsTable extends Vue {
     return `${tag}-${index}`
   }
 
-  private get getPaginationOptions () {
-    return [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
-  }
-
   @Watch('tableDataOptions', { deep: true })
   async getAccounts (val, oldVal) {
     await this.getOrgs(val?.page, val?.itemsPerPage)
+  }
+
+  mounted () {
+    this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
+    if (this.hasCachedPageInfo) {
+      this.tableDataOptions = this.getAndPruneCachedPageInfo()
+    }
   }
 
   private async getOrgs (page: number = 1, pageLimit: number = this.ITEMS_PER_PAGE) {
@@ -178,6 +181,7 @@ export default class StaffActiveAccountsTable extends Vue {
   }
 
   private async view (org: Organization) {
+    this.cachePageInfo(this.tableDataOptions)
     let orgId:number = org.id
     await this.syncOrganization(orgId)
     await this.addOrgSettings(org)

@@ -81,6 +81,7 @@ import { Invitation } from '@/models/Invitation'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import { Organization } from '@/models/Organization'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
+import { DataOptions } from 'vuetify'
 
 @Component({
   components: {
@@ -108,7 +109,7 @@ export default class StaffPendingAccountInvitationsTable extends Mixins(Paginati
   private readonly resendPendingOrgInvitation!: (invitation: Invitation) => void
   private readonly syncPendingInvitationOrgs!: () => Organization[]
   private readonly deleteOrg!: (org: Organization) => void
-  private tableDataOptions = {}
+  private tableDataOptions : Partial<DataOptions> = {}
 
   private orgToBeRemoved: Organization = null
 

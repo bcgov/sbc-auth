@@ -36,6 +36,7 @@ import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import { Organization } from '@/models/Organization'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
+import { DataOptions } from 'vuetify'
 
 @Component({
   computed: {
@@ -49,7 +50,7 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
 
   @Prop({ default: undefined }) private columnSort: any;
 
-  private tableDataOptions = {}
+  private tableDataOptions: Partial<DataOptions> = {}
 
   private readonly headerAccounts = [
     {
@@ -87,15 +88,13 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
 
   mounted () {
     this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
-    const paginationOptions = JSON.parse(sessionStorage.getItem('pagination_options') || '{}')
-    if (Object.keys(paginationOptions).length !== 0) {
-      this.tableDataOptions = paginationOptions
-      sessionStorage.removeItem('pagination_options')
+    if (this.hasCachedPageInfo) {
+      this.tableDataOptions = this.getAndPruneCachedPageInfo()
     }
   }
 
   private view (item) {
-    sessionStorage.setItem('pagination_options', JSON.stringify(this.tableDataOptions))
+    this.cachePageInfo(this.tableDataOptions)
     this.$router.push(`/review-account/${item.id}`)
   }
 }
