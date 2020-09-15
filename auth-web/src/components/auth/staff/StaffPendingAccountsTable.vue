@@ -3,10 +3,14 @@
     class="user-list"
     :headers="headerAccounts"
     :items="pendingStaffOrgs"
-    :items-per-page="5"
-    :hide-default-footer="pendingStaffOrgs.length <= 5"
+    :items-per-page.sync="tableDataOptions.itemsPerPage"
+    :hide-default-footer="pendingStaffOrgs.length <= tableDataOptions.itemsPerPage"
     :custom-sort="columnSort"
     :no-data-text="$t('noActiveAccountsLabel')"
+    :footer-props="{
+        itemsPerPageOptions: getPaginationOptions
+      }"
+    :options.sync="tableDataOptions"
   >
     <template v-slot:loading>
       Loading...
@@ -31,10 +35,11 @@
 
 <script lang="ts">
 import { AccessType, Account } from '@/util/constants'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import { Organization } from '@/models/Organization'
+import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 
 @Component({
   computed: {
@@ -43,10 +48,11 @@ import { Organization } from '@/models/Organization'
     ])
   }
 })
-export default class StaffPendingAccountsTable extends Vue {
+export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
   private readonly pendingStaffOrgs!: Organization[]
 
   @Prop({ default: undefined }) private columnSort: any;
+  private tableDataOptions = {}
 
   private readonly headerAccounts = [
     {
@@ -79,11 +85,21 @@ export default class StaffPendingAccountsTable extends Vue {
 
   private formatDate = CommonUtils.formatDisplayDate
 
+  mounted () {
+    this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
+    const paginationOptions = JSON.parse(sessionStorage.getItem('pagination_options') || '{}')
+    if (Object.keys(paginationOptions).length !== 0) {
+      this.tableDataOptions = paginationOptions
+      sessionStorage.removeItem('pagination_options')
+    }
+  }
+
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
 
   private review (item) {
+    sessionStorage.setItem('pagination_options', JSON.stringify(this.tableDataOptions))
     this.$router.push(`/review-account/${item.id}`)
   }
 }
