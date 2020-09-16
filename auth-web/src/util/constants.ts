@@ -8,7 +8,8 @@ export enum SessionStorageKeys {
     ExtraProvincialUser = 'EXTRAPROVINCIAL_USER',
     SessionSynced = 'SESSION_SYNCED',
     InvitationToken = 'INV_TOKEN',
-    PaginationOptions = 'pagination_options'
+    PaginationOptions = 'PAGINATION_OPTIONS',
+    PaginationNumberOfItems = 'PAGINATION_NUMBER_OF_ITEMS'
 }
 
 export enum Role {

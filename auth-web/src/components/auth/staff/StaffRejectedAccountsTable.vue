@@ -11,6 +11,7 @@
         itemsPerPageOptions: getPaginationOptions
       }"
     :options.sync="tableDataOptions"
+    @update:items-per-page="saveItemsPerPage"
   >
     <template v-slot:loading>
       Loading...
@@ -30,13 +31,12 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account } from '@/util/constants'
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
+import { DataOptions } from 'vuetify'
 import { Organization } from '@/models/Organization'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import { DataOptions } from 'vuetify'
+import { mapState } from 'vuex'
 
 @Component({
   computed: {

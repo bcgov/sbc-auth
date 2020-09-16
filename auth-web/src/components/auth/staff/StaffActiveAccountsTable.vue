@@ -53,6 +53,7 @@
         itemsPerPageOptions: getPaginationOptions
       }"
       :loading="isTableLoading"
+      @update:items-per-page="saveItemsPerPage"
     >
       <template v-slot:loading>
         Loading...
@@ -161,7 +162,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     }
   }
 
-  private async getOrgs (page: number = 1, pageLimit: number = this.ITEMS_PER_PAGE) {
+  private async getOrgs (page: number = 1, pageLimit: number = this.numberOfItems) {
     try {
       this.orgFilter = {
         status: AccountStatus.ACTIVE,

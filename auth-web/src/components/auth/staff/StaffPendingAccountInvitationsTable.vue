@@ -4,7 +4,7 @@
       class="user-list"
       :headers="headerAccounts"
       :items="pendingInvitationOrgs"
-      :items-per-page.sync="tableDataOptions.itemsPerPage"
+      :items-per-page.sync="numberOfItems"
       :hide-default-footer="pendingInvitationOrgs.length <= tableDataOptions.itemsPerPage"
       :custom-sort="columnSort"
       :no-data-text="$t('noPendingAccountsLabel')"
@@ -12,6 +12,7 @@
         itemsPerPageOptions: getPaginationOptions
       }"
       :options.sync="tableDataOptions"
+      @update:items-per-page="saveItemsPerPage"
     >
       <template v-slot:loading>
         Loading...

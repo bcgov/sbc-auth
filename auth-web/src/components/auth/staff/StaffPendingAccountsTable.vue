@@ -11,6 +11,7 @@
         itemsPerPageOptions: getPaginationOptions
       }"
     :options.sync="tableDataOptions"
+    @update:items-per-page="saveItemsPerPage"
   >
     <template v-slot:loading>
       Loading...

@@ -9,18 +9,31 @@ import Vue from 'vue'
 @Component({
 })
 export default class PaginationMixin extends Vue {
-  protected readonly ITEMS_PER_PAGE = 10
+  protected readonly DEFAULT_ITEMS_PER_PAGE = 5
   protected readonly PAGINATION_COUNTER_STEP = 4
 
   DEFAULT_DATA_OPTIONS:DataOptions = {
     page: 1,
-    itemsPerPage: this.ITEMS_PER_PAGE,
+    itemsPerPage: this.numberOfItems,
     sortBy: [],
     sortDesc: [],
     groupBy: [],
     groupDesc: [],
     multiSort: false,
     mustSort: false
+  }
+
+  get numberOfItems () {
+    return this.getNumberOfItemsFromSessionStorage() || this.DEFAULT_ITEMS_PER_PAGE
+  }
+
+  private getNumberOfItemsFromSessionStorage (): number|undefined {
+    let items = +ConfigHelper.getFromSession(SessionStorageKeys.PaginationNumberOfItems)
+    return !isNaN(items) ? items : undefined
+  }
+
+  saveItemsPerPage (val) {
+    ConfigHelper.addToSession(SessionStorageKeys.PaginationNumberOfItems, val)
   }
 
   cachePageInfo (tableDataOptions: Partial<DataOptions>) {
@@ -33,7 +46,7 @@ export default class PaginationMixin extends Vue {
   }
 
   getAndPruneCachedPageInfo ():Partial<DataOptions> |undefined {
-    const paginationOptions = JSON.parse(sessionStorage.getItem('pagination_options') || '{}')
+    const paginationOptions = JSON.parse(SessionStorageKeys.PaginationOptions || '{}')
     if (Object.keys(paginationOptions).length !== 0) {
       // not ideal; but okay to do as long as signature conveys it
       ConfigHelper.removeFromSession(SessionStorageKeys.PaginationOptions)
@@ -44,7 +57,7 @@ export default class PaginationMixin extends Vue {
   }
 
   protected get getPaginationOptions () {
-    return [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
+    return [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.DEFAULT_ITEMS_PER_PAGE * (index + 1))
   }
 
   private customSort (items, index, isDescending) {
