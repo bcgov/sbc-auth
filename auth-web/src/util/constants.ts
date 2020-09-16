@@ -9,7 +9,8 @@ export enum SessionStorageKeys {
     SessionSynced = 'SESSION_SYNCED',
     InvitationToken = 'INV_TOKEN',
     PaginationOptions = 'PAGINATION_OPTIONS',
-    PaginationNumberOfItems = 'PAGINATION_NUMBER_OF_ITEMS'
+    PaginationNumberOfItems = 'PAGINATION_NUMBER_OF_ITEMS',
+    OrgSearchFilter = 'ORG_SEARCH_FILTER'
 }
 
 export enum Role {

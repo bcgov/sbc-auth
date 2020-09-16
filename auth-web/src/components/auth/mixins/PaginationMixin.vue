@@ -46,7 +46,7 @@ export default class PaginationMixin extends Vue {
   }
 
   getAndPruneCachedPageInfo ():Partial<DataOptions> |undefined {
-    const paginationOptions = JSON.parse(SessionStorageKeys.PaginationOptions || '{}')
+    const paginationOptions = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.PaginationOptions) || '{}')
     if (Object.keys(paginationOptions).length !== 0) {
       // not ideal; but okay to do as long as signature conveys it
       ConfigHelper.removeFromSession(SessionStorageKeys.PaginationOptions)

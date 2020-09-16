@@ -86,6 +86,7 @@ import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorato
 import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
 import OrgModule from '@/store/modules/org'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
@@ -160,6 +161,12 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     if (this.hasCachedPageInfo) {
       this.tableDataOptions = this.getAndPruneCachedPageInfo()
     }
+    const searchFilterIfAny = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter)
+    // eslint-disable-next-line no-console
+    console.log('-----vsearchFilterIfAny-', searchFilterIfAny)
+    if (searchFilterIfAny) {
+      this.appliedFilterValue = searchFilterIfAny
+    }
   }
 
   private async getOrgs (page: number = 1, pageLimit: number = this.numberOfItems) {
@@ -205,12 +212,14 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     this.appliedFilterValue = this.accountNameFilterInput
     await this.getOrgs()
     this.accountNameFilterInput = ''
+    ConfigHelper.addToSession(SessionStorageKeys.OrgSearchFilter, this.appliedFilterValue)
     this.isTableLoading = false
   }
 
   private async clearAppliedFilter () {
     this.isTableLoading = true
     this.appliedFilterValue = ''
+    ConfigHelper.addToSession(SessionStorageKeys.OrgSearchFilter, this.appliedFilterValue)
     await this.getOrgs()
     this.isTableLoading = false
   }
