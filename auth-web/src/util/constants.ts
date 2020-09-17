@@ -7,7 +7,10 @@ export enum SessionStorageKeys {
     LaunchDarklyFlags = 'LD_FLAGS',
     ExtraProvincialUser = 'EXTRAPROVINCIAL_USER',
     SessionSynced = 'SESSION_SYNCED',
-    InvitationToken = 'INV_TOKEN'
+    InvitationToken = 'INV_TOKEN',
+    PaginationOptions = 'PAGINATION_OPTIONS',
+    PaginationNumberOfItems = 'PAGINATION_NUMBER_OF_ITEMS',
+    OrgSearchFilter = 'ORG_SEARCH_FILTER'
 }
 
 export enum Role {

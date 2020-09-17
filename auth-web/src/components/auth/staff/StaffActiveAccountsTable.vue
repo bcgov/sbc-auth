@@ -25,7 +25,7 @@
         </v-btn>
       </v-col>
     </v-row>
-    <div class="filter-results" :class="{ 'active' : appliedFilterValue }">
+    <div class="filter-results" :class="{ 'active' : appliedFilterValue }" v-if="!isTableLoading">
       <div class="d-flex align-center mb-8">
         <div class="filter-results-label py-2 mr-7">{{totalAccountsCount}} {{totalAccountsCount === 1 ? 'record' : 'records'}} found</div>
         <v-chip
@@ -53,6 +53,7 @@
         itemsPerPageOptions: getPaginationOptions
       }"
       :loading="isTableLoading"
+      @update:items-per-page="saveItemsPerPage"
     >
       <template v-slot:loading>
         Loading...
@@ -81,12 +82,14 @@
 
 <script lang="ts">
 import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
+import { DataOptions } from 'vuetify'
 import OrgModule from '@/store/modules/org'
+import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import { getModule } from 'vuex-module-decorators'
 
@@ -96,7 +99,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapActions('staff', ['searchOrgs'])
   }
 })
-export default class StaffActiveAccountsTable extends Vue {
+export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   private orgStore = getModule(OrgModule, this.$store)
 
   private activeOrgs: Organization[] = []
@@ -104,8 +107,6 @@ export default class StaffActiveAccountsTable extends Vue {
   private readonly addOrgSettings!: (org: Organization) => Promise<UserSettings>
   private readonly syncMembership!: (orgId: number) => Promise<Member>
   private readonly searchOrgs!: (filterParams: OrgFilterParams) => OrgList
-
-  @Prop({ default: undefined }) private columnSort: any;
 
   private readonly headerAccounts = [
     {
@@ -137,10 +138,8 @@ export default class StaffActiveAccountsTable extends Vue {
 
   private formatDate = CommonUtils.formatDisplayDate
 
-  private readonly ITEMS_PER_PAGE = 10
-  private readonly PAGINATION_COUNTER_STEP = 4
   private totalAccountsCount = 0
-  private tableDataOptions: any = {}
+  private tableDataOptions: Partial<DataOptions> = {}
   private orgFilter: OrgFilterParams
   private accountNameFilterInput: string = ''
   private appliedFilterValue: string = ''
@@ -150,22 +149,27 @@ export default class StaffActiveAccountsTable extends Vue {
     return `${tag}-${index}`
   }
 
-  private get getPaginationOptions () {
-    return [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
-  }
-
   @Watch('tableDataOptions', { deep: true })
   async getAccounts (val, oldVal) {
     await this.getOrgs(val?.page, val?.itemsPerPage)
   }
 
-  private async getOrgs (page: number = 1, pageLimit: number = this.ITEMS_PER_PAGE) {
+  mounted () {
+    this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
+    if (this.hasCachedPageInfo) {
+      this.tableDataOptions = this.getAndPruneCachedPageInfo()
+    }
+  }
+
+  private async getOrgs (page: number = 1, pageLimit: number = this.numberOfItems) {
+    // set this variable so that the chip is shown
+    this.appliedFilterValue = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
     try {
       this.orgFilter = {
         status: AccountStatus.ACTIVE,
         pageNumber: page,
         pageLimit: pageLimit,
-        name: this.appliedFilterValue || ''
+        name: this.appliedFilterValue
       }
       const activeAccountsResp = await this.searchOrgs(this.orgFilter)
       this.activeOrgs = activeAccountsResp.orgs
@@ -178,6 +182,7 @@ export default class StaffActiveAccountsTable extends Vue {
   }
 
   private async view (org: Organization) {
+    this.cachePageInfo(this.tableDataOptions)
     let orgId:number = org.id
     await this.syncOrganization(orgId)
     await this.addOrgSettings(org)
@@ -198,7 +203,7 @@ export default class StaffActiveAccountsTable extends Vue {
 
   private async applyNameFilter () {
     this.isTableLoading = true
-    this.appliedFilterValue = this.accountNameFilterInput
+    this.setSearchFilterToStorage(this.accountNameFilterInput)
     await this.getOrgs()
     this.accountNameFilterInput = ''
     this.isTableLoading = false
@@ -206,9 +211,12 @@ export default class StaffActiveAccountsTable extends Vue {
 
   private async clearAppliedFilter () {
     this.isTableLoading = true
-    this.appliedFilterValue = ''
+    this.setSearchFilterToStorage('')
     await this.getOrgs()
     this.isTableLoading = false
+  }
+  private setSearchFilterToStorage (val:string):void {
+    ConfigHelper.addToSession(SessionStorageKeys.OrgSearchFilter, val)
   }
 }
 </script>
