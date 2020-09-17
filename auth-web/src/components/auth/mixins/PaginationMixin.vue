@@ -23,6 +23,10 @@ export default class PaginationMixin extends Vue {
     mustSort: false
   }
 
+  /**
+   * returns the number of items for the paginator.
+   * IF there is a value which user chosen, it takes preference
+   */
   get numberOfItems () {
     return this.getNumberOfItemsFromSessionStorage() || this.DEFAULT_ITEMS_PER_PAGE
   }
@@ -40,11 +44,19 @@ export default class PaginationMixin extends Vue {
     ConfigHelper.addToSession(SessionStorageKeys.PaginationOptions, JSON.stringify(tableDataOptions))
   }
 
+  /**
+   * Helps to retain the current page information when the user went to detailed page and pressed refresh.
+   */
   get hasCachedPageInfo ():boolean {
     const paginationOptions = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.PaginationOptions) || '{}')
     return Object.keys(paginationOptions).length !== 0
   }
 
+  /**
+   * Return the pagination option.
+   * Removes from session storage ; b
+   *    because the information should be used only once when user comes back from detail page to list view.
+   */
   getAndPruneCachedPageInfo ():Partial<DataOptions> |undefined {
     const paginationOptions = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.PaginationOptions) || '{}')
     if (Object.keys(paginationOptions).length !== 0) {
@@ -58,18 +70,6 @@ export default class PaginationMixin extends Vue {
 
   protected get getPaginationOptions () {
     return [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.DEFAULT_ITEMS_PER_PAGE * (index + 1))
-  }
-
-  private customSort (items, index, isDescending) {
-    const isDesc = isDescending.length > 0 && isDescending[0]
-    items.sort((a, b) => {
-      if (isDesc) {
-        return a[index[0]] < b[index[0]] ? -1 : 1
-      } else {
-        return b[index[0]] < a[index[0]] ? -1 : 1
-      }
-    })
-    return items
   }
 }
 </script>

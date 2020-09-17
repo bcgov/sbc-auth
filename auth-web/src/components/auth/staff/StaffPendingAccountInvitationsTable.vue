@@ -114,7 +114,7 @@ export default class StaffPendingAccountInvitationsTable extends Mixins(Paginati
 
   private orgToBeRemoved: Organization = null
 
-  @Prop({ default: undefined }) private columnSort: any;
+  private columnSort = CommonUtils.customSort
 
   mounted () {
     this.tableDataOptions = this.DEFAULT_DATA_OPTIONS

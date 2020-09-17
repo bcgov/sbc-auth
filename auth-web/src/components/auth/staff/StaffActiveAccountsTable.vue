@@ -108,8 +108,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   private readonly syncMembership!: (orgId: number) => Promise<Member>
   private readonly searchOrgs!: (filterParams: OrgFilterParams) => OrgList
 
-  @Prop({ default: undefined }) private columnSort: any;
-
   private readonly headerAccounts = [
     {
       text: 'Name',

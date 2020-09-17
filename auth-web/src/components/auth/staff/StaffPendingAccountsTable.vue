@@ -52,7 +52,7 @@ import { mapState } from 'vuex'
 export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
   private readonly pendingStaffOrgs!: Organization[]
 
-  @Prop({ default: undefined }) private columnSort: any;
+  private columnSort = CommonUtils.customSort
   private tableDataOptions: Partial<DataOptions> = {}
 
   private readonly headerAccounts = [

@@ -48,7 +48,7 @@ import { mapState } from 'vuex'
 export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) {
   private readonly rejectedStaffOrgs!: Organization[]
 
-  @Prop({ default: undefined }) private columnSort: any;
+  private columnSort = CommonUtils.customSort
 
   private tableDataOptions: Partial<DataOptions> = {}
 
