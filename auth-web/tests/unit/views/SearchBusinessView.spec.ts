@@ -1,5 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import SearchBusinessView from '@/views/auth/staff/SearchBusinessView.vue'
+import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -10,7 +10,7 @@ Vue.use(VueRouter)
 
 jest.mock('../../../src/services/org.services')
 
-describe('SearchBusinessView.vue', () => {
+describe('StaffDashboardView.vue', () => {
   let cmp
   var ob = {
     'VUE_APP_COPS_REDIRECT_URL': 'http://localhost:8081',
@@ -66,7 +66,7 @@ describe('SearchBusinessView.vue', () => {
 
     let vuetify = new Vuetify({})
 
-    cmp = mount(SearchBusinessView, {
+    cmp = mount(StaffDashboardView, {
       store,
       localVue,
       vuetify,
