@@ -25,7 +25,7 @@
         </v-btn>
       </v-col>
     </v-row>
-    <div class="filter-results" :class="{ 'active' : appliedFilterValue }">
+    <div class="filter-results" :class="{ 'active' : appliedFilterValue }" v-if="!isTableLoading">
       <div class="d-flex align-center mb-8">
         <div class="filter-results-label py-2 mr-7">{{totalAccountsCount}} {{totalAccountsCount === 1 ? 'record' : 'records'}} found</div>
         <v-chip
