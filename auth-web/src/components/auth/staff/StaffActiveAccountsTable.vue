@@ -112,7 +112,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     {
       text: 'Name',
       align: 'left',
-      fable: true,
+      sortable: true,
       value: 'name'
     },
     {
