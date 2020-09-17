@@ -208,7 +208,7 @@
 
 <script lang="ts">
 import { AccessType, Account, LoginSource } from '@/util/constants'
-import { Component, Emit, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import {
   Member,
   MembershipStatus,
@@ -249,6 +249,7 @@ export interface ChangeRolePayload {
   }
 })
 export default class MemberDataTable extends Vue {
+  @Prop({ default: '' }) private userNamefilterText: string
   private readonly businesses!: Business[]
   private activeOrgMembers!: Member[]
   private readonly currentMembership!: Member
@@ -307,17 +308,35 @@ export default class MemberDataTable extends Vue {
   }
 
   private get indexedOrgMembers () {
-    // eslint-disable-next-line no-console
-    var self = this
-    this.activeOrgMembers.forEach(function (element) {
-      element.roleDisplayName = self.roleInfos.find(
-        role => role.name === element.membershipTypeCode
+    let orgMembers = []
+    if (this.userNamefilterText) {
+      // filter if the filter by username prop is available
+      orgMembers = this.activeOrgMembers.filter((element) => {
+        const username = `${element.user?.firstname || ''} ${element.user?.lastname || ''}`.trim()
+        const found = username.match(new RegExp(this.userNamefilterText, 'i'))
+        if (found?.length) {
+          return element
+        }
+      })
+      this.filteredMembersCount(orgMembers.length)
+    } else {
+      orgMembers = this.activeOrgMembers
+    }
+    // map org members list with custom index and role mapping
+    return orgMembers.map((item, index) => {
+      item.roleDisplayName = this.roleInfos.find(
+        role => role.name === item.membershipTypeCode
       ).displayName
+      return {
+        index,
+        ...item
+      }
     })
-    return this.activeOrgMembers.map((item, index) => ({
-      index,
-      ...item
-    }))
+  }
+
+  @Emit()
+  private filteredMembersCount (count: number) {
+    return count
   }
 
   private isRoleEnabled (role: RoleInfo, member: Member): boolean {
