@@ -161,21 +161,17 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     if (this.hasCachedPageInfo) {
       this.tableDataOptions = this.getAndPruneCachedPageInfo()
     }
-    const searchFilterIfAny = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter)
-    // eslint-disable-next-line no-console
-    console.log('-----vsearchFilterIfAny-', searchFilterIfAny)
-    if (searchFilterIfAny) {
-      this.appliedFilterValue = searchFilterIfAny
-    }
   }
 
   private async getOrgs (page: number = 1, pageLimit: number = this.numberOfItems) {
+    // set this variable so that the chip is shown
+    this.appliedFilterValue = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
     try {
       this.orgFilter = {
         status: AccountStatus.ACTIVE,
         pageNumber: page,
         pageLimit: pageLimit,
-        name: this.appliedFilterValue || ''
+        name: this.appliedFilterValue
       }
       const activeAccountsResp = await this.searchOrgs(this.orgFilter)
       this.activeOrgs = activeAccountsResp.orgs
@@ -209,19 +205,20 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
 
   private async applyNameFilter () {
     this.isTableLoading = true
-    this.appliedFilterValue = this.accountNameFilterInput
+    this.setSearchFilterToStorage(this.accountNameFilterInput)
     await this.getOrgs()
     this.accountNameFilterInput = ''
-    ConfigHelper.addToSession(SessionStorageKeys.OrgSearchFilter, this.appliedFilterValue)
     this.isTableLoading = false
   }
 
   private async clearAppliedFilter () {
     this.isTableLoading = true
-    this.appliedFilterValue = ''
-    ConfigHelper.addToSession(SessionStorageKeys.OrgSearchFilter, this.appliedFilterValue)
+    this.setSearchFilterToStorage('')
     await this.getOrgs()
     this.isTableLoading = false
+  }
+  private setSearchFilterToStorage (val:string):void {
+    ConfigHelper.addToSession(SessionStorageKeys.OrgSearchFilter, val)
   }
 }
 </script>
