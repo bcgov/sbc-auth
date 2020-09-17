@@ -3,10 +3,15 @@
     class="user-list"
     :headers="headerAccounts"
     :items="rejectedStaffOrgs"
-    :items-per-page="5"
-    :hide-default-footer="rejectedStaffOrgs.length <= 5"
+    :items-per-page.sync="tableDataOptions.itemsPerPage"
+    :hide-default-footer="rejectedStaffOrgs.length <= tableDataOptions.itemsPerPage"
     :custom-sort="columnSort"
     :no-data-text="$t('noActiveAccountsLabel')"
+    :footer-props="{
+        itemsPerPageOptions: getPaginationOptions
+      }"
+    :options.sync="tableDataOptions"
+    @update:items-per-page="saveItemsPerPage"
   >
     <template v-slot:loading>
       Loading...
@@ -26,11 +31,12 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account } from '@/util/constants'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
+import { DataOptions } from 'vuetify'
 import { Organization } from '@/models/Organization'
+import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
+import { mapState } from 'vuex'
 
 @Component({
   computed: {
@@ -39,10 +45,12 @@ import { Organization } from '@/models/Organization'
     ])
   }
 })
-export default class StaffRejectedAccountsTable extends Vue {
+export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) {
   private readonly rejectedStaffOrgs!: Organization[]
 
-  @Prop({ default: undefined }) private columnSort: any;
+  private columnSort = CommonUtils.customSort
+
+  private tableDataOptions: Partial<DataOptions> = {}
 
   private readonly headerAccounts = [
     {
@@ -78,7 +86,15 @@ export default class StaffRejectedAccountsTable extends Vue {
     return `${tag}-${index}`
   }
 
+  mounted () {
+    this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
+    if (this.hasCachedPageInfo) {
+      this.tableDataOptions = this.getAndPruneCachedPageInfo()
+    }
+  }
+
   private view (item) {
+    this.cachePageInfo(this.tableDataOptions)
     this.$router.push(`/review-account/${item.id}`)
   }
 }

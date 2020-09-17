@@ -12,7 +12,7 @@
       <!-- Breadcrumbs / Back Navigation -->
       <nav class="crumbs py-6">
         <div>
-          <router-link to="/searchbusiness">
+          <router-link :to="accountUnderReview.statusCode === 'REJECTED' ? '/staff-dashboard/rejected' : '/staff-dashboard/review'">
             <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
             <span>Back to Staff Dashboard</span>
           </router-link>

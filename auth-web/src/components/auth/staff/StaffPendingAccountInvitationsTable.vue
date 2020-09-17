@@ -4,10 +4,15 @@
       class="user-list"
       :headers="headerAccounts"
       :items="pendingInvitationOrgs"
-      :items-per-page="5"
-      :hide-default-footer="pendingInvitationOrgs.length <= 5"
+      :items-per-page.sync="numberOfItems"
+      :hide-default-footer="pendingInvitationOrgs.length <= tableDataOptions.itemsPerPage"
       :custom-sort="columnSort"
       :no-data-text="$t('noPendingAccountsLabel')"
+      :footer-props="{
+        itemsPerPageOptions: getPaginationOptions
+      }"
+      :options.sync="tableDataOptions"
+      @update:items-per-page="saveItemsPerPage"
     >
       <template v-slot:loading>
         Loading...
@@ -68,14 +73,16 @@
 
 <script lang="ts">
 import { AccessType, Account } from '@/util/constants'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
+import { DataOptions } from 'vuetify'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
 import { Invitation } from '@/models/Invitation'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import { Organization } from '@/models/Organization'
+import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 
 @Component({
   components: {
@@ -94,7 +101,7 @@ import { Organization } from '@/models/Organization'
     ])
   }
 })
-export default class StaffPendingAccountInvitationsTable extends Vue {
+export default class StaffPendingAccountInvitationsTable extends Mixins(PaginationMixin) {
   $refs: {
     confirmActionDialog: ModalDialog
   }
@@ -103,10 +110,15 @@ export default class StaffPendingAccountInvitationsTable extends Vue {
   private readonly resendPendingOrgInvitation!: (invitation: Invitation) => void
   private readonly syncPendingInvitationOrgs!: () => Organization[]
   private readonly deleteOrg!: (org: Organization) => void
+  private tableDataOptions : Partial<DataOptions> = {}
 
   private orgToBeRemoved: Organization = null
 
-  @Prop({ default: undefined }) private columnSort: any;
+  private columnSort = CommonUtils.customSort
+
+  mounted () {
+    this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
+  }
 
   private readonly headerAccounts = [
     {
