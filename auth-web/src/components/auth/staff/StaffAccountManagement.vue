@@ -19,11 +19,11 @@
       class="mb-9"
       v-model="tab"
       @change="tabChange">
-      <v-tab data-test="active-tab"
+      <v-tab data-test="active-tab" :to=pagesEnum.STAFF_DASHBOARD_ACTIVE
         v-if="canViewAccounts">Active</v-tab>
 
       <template v-if="canCreateAccounts">
-        <v-tab data-test="invitations-tab">
+        <v-tab data-test="invitations-tab" :to=pagesEnum.STAFF_DASHBOARD_INVITATIONS>
           <v-badge
             inline
             color="primary"
@@ -35,7 +35,7 @@
       </template>
 
       <template v-if="canManageAccounts">
-        <v-tab data-test="pending-review-tab">
+        <v-tab data-test="pending-review-tab" :to=pagesEnum.STAFF_DASHBOARD_REVIEW>
           <v-badge
             inline
             color="primary"
@@ -44,7 +44,7 @@
             Pending Review
           </v-badge>
         </v-tab>
-        <v-tab data-test="rejected-tab">
+        <v-tab data-test="rejected-tab" :to=pagesEnum.STAFF_DASHBOARD_REJECTED>
           <v-badge
             inline
             color="primary"
@@ -58,28 +58,7 @@
 
     <!-- Tab Contents -->
     <v-tabs-items v-model="tab">
-      <v-tab-item>
-        <StaffActiveAccountsTable
-          :columnSort="customSort"
-        />
-      </v-tab-item>
-      <v-tab-item v-if="canCreateAccounts">
-        <StaffPendingAccountInvitationsTable
-          :columnSort="customSort"
-        />
-      </v-tab-item>
-      <template v-if="canManageAccounts">
-        <v-tab-item>
-          <StaffPendingAccountsTable
-            :columnSort="customSort"
-          />
-        </v-tab-item>
-        <v-tab-item>
-          <StaffRejectedAccountsTable
-            :columnSort="customSort"
-          />
-        </v-tab-item>
-      </template>
+        <router-view></router-view>
     </v-tabs-items>
   </v-container>
 </template>
@@ -138,6 +117,7 @@ export default class StaffAccountManagement extends Vue {
   private readonly pendingReviewCount!: number
   private readonly rejectedReviewCount!: number
   private readonly pendingInvitationsCount!: number
+  private pagesEnum = Pages
 
   private tabs = [
     {
@@ -182,18 +162,6 @@ export default class StaffAccountManagement extends Vue {
 
   private get canViewAccounts () {
     return this.currentUser?.roles?.includes(Role.StaffViewAccounts)
-  }
-
-  private customSort (items, index, isDescending) {
-    const isDesc = isDescending.length > 0 && isDescending[0]
-    items.sort((a, b) => {
-      if (isDesc) {
-        return a[index[0]] < b[index[0]] ? -1 : 1
-      } else {
-        return b[index[0]] < a[index[0]] ? -1 : 1
-      }
-    })
-    return items
   }
 
   private async tabChange (tabIndex) {

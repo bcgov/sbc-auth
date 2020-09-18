@@ -1,4 +1,4 @@
-import { Role, SessionStorageKeys } from '@/util/constants'
+import { Pages, Role, SessionStorageKeys } from '@/util/constants'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
 import AccountChangeSuccessView from '@/views/auth/AccountChangeSuccessView.vue'
@@ -20,7 +20,6 @@ import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import HomeView from '@/views/auth/HomeView.vue'
-import HomeViewOutdated from '@/views/auth/HomeViewOutdated.vue'
 import IncorpOrRegisterView from '@/views/auth/IncorpOrRegisterView.vue'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import MaintainBusinessView from '@/views/auth/MaintainBusinessView.vue'
@@ -35,11 +34,15 @@ import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
 import RequestNameView from '@/views/auth/RequestNameView.vue'
 import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
 import { RouteConfig } from 'vue-router'
-import SearchBusinessView from '@/views/auth/staff/SearchBusinessView.vue'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
 import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
+import StaffActiveAccountsTable from '@/components/auth/staff/StaffActiveAccountsTable.vue'
+import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
+import StaffPendingAccountInvitationsTable from '@/components/auth/staff/StaffPendingAccountInvitationsTable.vue'
+import StaffPendingAccountsTable from '@/components/auth/staff/StaffPendingAccountsTable.vue'
+import StaffRejectedAccountsTable from '@/components/auth/staff/StaffRejectedAccountsTable.vue'
 import TermsOfServiceDeclineView from '@/views/auth/TermsOfServiceDeclineView.vue'
 import TermsOfServiceView from '@/views/auth/TermsOfServiceView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
@@ -356,11 +359,42 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: false }
     },
     {
-      path: '/searchbusiness',
-      name: 'searchbusiness',
-      component: SearchBusinessView,
+      path: Pages.STAFF_DASHBOARD,
+      name: 'staff-dashboard',
+      component: StaffDashboardView,
       props: true,
-      meta: { requiresAuth: true, allowedRoles: [Role.Staff] }
+      meta: { requiresAuth: true, allowedRoles: [Role.Staff] },
+      children: [
+        {
+          path: '',
+          redirect: 'active'
+        },
+        {
+          path: 'active',
+          component: StaffActiveAccountsTable,
+          name: 'active'
+        },
+        {
+          path: 'invitations',
+          component: StaffPendingAccountInvitationsTable,
+          name: 'invitations'
+        },
+        {
+          path: 'review',
+          component: StaffPendingAccountsTable,
+          name: 'review'
+        },
+        {
+          path: 'rejected',
+          component: StaffRejectedAccountsTable,
+          name: 'rejected'
+        }
+      ]
+    },
+    {
+      path: Pages.STAFF_DASHBOARD_OLD,
+      name: 'searchbusiness',
+      redirect: Pages.STAFF_DASHBOARD
     },
     {
       path: '/glcodelist',

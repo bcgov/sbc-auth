@@ -17,7 +17,7 @@
     <!-- Staff - Breadcrumbs / Back Navigation -->
     <nav class="crumbs py-6" v-if="isStaff" aria-labelledby="staffNav">
       <div>
-        <router-link to="/searchbusiness">
+        <router-link :to=pagesEnum.STAFF_DASHBOARD>
           <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
           <span>Back to Staff Dashboard</span>
         </router-link>
@@ -162,6 +162,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   private isLoading = true
   private isDirSearchUser: boolean = false
   private dirSearchUrl = ConfigHelper.getSearchApplicationUrl()
+  private readonly pagesEnum = Pages
 
   private handleBackButton (): void {
     const backTo = this.isStaff ? Pages.STAFF_DASHBOARD : `/account/${this.orgId}/business`
