@@ -12,7 +12,7 @@
     <template v-slot:loading>
       Loading...
     </template>
-    <template v-slot:item.name="{ item }">
+    <template v-slot:[`item.name`]="{ item }">
       <div
         class="user-name font-weight-bold"
         :data-test="getIndexedTag('pending-user-name', item.index)"
@@ -26,7 +26,7 @@
         {{ item.user.contacts[0].email }}
       </div>
     </template>
-    <template v-slot:item.action="{ item }">
+    <template v-slot:[`item.action`]="{ item }">
       <v-btn
         icon
         class="mr-1"
@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import { Member } from '@/models/Organization'
 import moment from 'moment'
@@ -62,6 +62,7 @@ import moment from 'moment'
   }
 })
 export default class PendingMemberDataTable extends Vue {
+  @Prop({ default: '' }) private userNamefilterText: string
   private readonly pendingOrgMembers!: Member[]
   private readonly headerPendingMembers = [
     {
@@ -83,10 +84,30 @@ export default class PendingMemberDataTable extends Vue {
   }
 
   private get indexedPendingMembers () {
-    return this.pendingOrgMembers.map((item, index) => ({
+    let pendingMembers = []
+    if (this.userNamefilterText) {
+      // filter if the filter by username prop is available
+      pendingMembers = this.pendingOrgMembers.filter((element) => {
+        const username = `${element.user?.firstname || ''} ${element.user?.lastname || ''}`.trim()
+        const found = username.match(new RegExp(this.userNamefilterText, 'i'))
+        if (found?.length) {
+          return element
+        }
+      })
+      this.filteredMembersCount(pendingMembers.length)
+    } else {
+      pendingMembers = this.pendingOrgMembers
+    }
+    // map org members list with custom index and role mapping
+    return pendingMembers.map((item, index) => ({
       index,
       ...item
     }))
+  }
+
+  @Emit()
+  private filteredMembersCount (count: number) {
+    return count
   }
 
   private customSortPending (items, index, isDescending) {

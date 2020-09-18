@@ -7,7 +7,10 @@ export enum SessionStorageKeys {
     LaunchDarklyFlags = 'LD_FLAGS',
     ExtraProvincialUser = 'EXTRAPROVINCIAL_USER',
     SessionSynced = 'SESSION_SYNCED',
-    InvitationToken = 'INV_TOKEN'
+    InvitationToken = 'INV_TOKEN',
+    PaginationOptions = 'PAGINATION_OPTIONS',
+    PaginationNumberOfItems = 'PAGINATION_NUMBER_OF_ITEMS',
+    OrgSearchFilter = 'ORG_SEARCH_FILTER'
 }
 
 export enum Role {
@@ -45,9 +48,15 @@ export enum Pages {
     SETUP_ACCOUNT_NON_BCSC_INSTRUCTIONS = 'instructions',
     SETUP_ACCOUNT_NON_BCSC_DOWNLOAD = 'download',
     EDIT_ACCOUNT_TYPE= '/change-account',
-    STAFF_DASHBOARD= '/searchbusiness',
+    STAFF_DASHBOARD_OLD= '/searchbusiness',
     STAFF_SETUP_ACCOUNT = 'staff-setup-account',
     CONFIRM_TOKEN = 'confirmtoken',
+    STAFF_DASHBOARD = '/staff/dashboard',
+    STAFF_DASHBOARD_ACTIVE = '/staff/dashboard/active',
+    STAFF_DASHBOARD_REVIEW = '/staff/dashboard/review',
+    STAFF_DASHBOARD_REJECTED = '/staff/dashboard/rejected',
+    STAFF_DASHBOARD_INVITATIONS = '/staff/dashboard/invitations'
+
 }
 
 export enum Account {
