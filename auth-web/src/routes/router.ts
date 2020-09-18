@@ -1,4 +1,4 @@
-import { Role, SessionStorageKeys } from '@/util/constants'
+import { Pages, Role, SessionStorageKeys } from '@/util/constants'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
 import AccountChangeSuccessView from '@/views/auth/AccountChangeSuccessView.vue'
@@ -359,7 +359,7 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: false }
     },
     {
-      path: '/staff-dashboard',
+      path: Pages.STAFF_DASHBOARD,
       name: 'staff-dashboard',
       component: StaffDashboardView,
       props: true,
@@ -392,9 +392,9 @@ export function getRoutes (): RouteConfig[] {
       ]
     },
     {
-      path: '/searchbusiness',
+      path: Pages.STAFF_DASHBOARD_OLD,
       name: 'searchbusiness',
-      redirect: '/staff-dashboard'
+      redirect: Pages.STAFF_DASHBOARD
     },
     {
       path: '/glcodelist',
