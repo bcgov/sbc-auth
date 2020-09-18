@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <header class="view-header align-center">
+    <header class="view-header align-center mb-5">
       <h2 class="view-header__title">Team Members</h2>
       <div class="view-header__actions">
         <v-btn
@@ -15,6 +15,12 @@
         </v-btn>
       </div>
     </header>
+
+    <SearchFilterInput
+      :filterParams="searchFilter"
+      :filteredRecordsCount="teamMembersCount"
+      @filter-texts="setAppliedFilterValue"
+    ></SearchFilterInput>
 
     <!-- Team member listing -->
     <MemberDataTable
@@ -33,6 +39,8 @@
         showConfirmDissolveModal($refs.confirmActionDialog)
       "
       @single-owner-error="showSingleOwnerErrorModal($refs.errorDialog)"
+      :userNamefilterText="appliedFilterValue"
+      @filtered-members-count="filteredTeamMembersCount"
     />
 
     <!-- Add Users Dialog -->
@@ -229,6 +237,8 @@ import AddUsersSuccess from '@/components/auth/AddUsersSuccess.vue'
 import MemberDataTable from '@/components/auth/MemberDataTable.vue'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import PasswordReset from '@/components/auth/PasswordReset.vue'
+import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
+import { SearchFilterParam } from '@/models/searchfilter'
 import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vue'
 import { User } from '../../models/user'
 
@@ -238,7 +248,8 @@ import { User } from '../../models/user'
     MemberDataTable,
     ModalDialog,
     AddUsersForm,
-    AddUsersSuccess
+    AddUsersSuccess,
+    SearchFilterInput
   },
   computed: {
     ...mapState('org', ['createdUsers', 'failedUsers'])
@@ -260,6 +271,17 @@ export default class AnonymousUserManagement extends Mixins(
   private readonly failedUsers!: BulkUsersFailed[]
   private user: User = { firstname: '', lastname: '', username: '' }
   private action = ''
+  private appliedFilterValue: string = ''
+  private teamMembersCount = 0
+  private searchFilter: SearchFilterParam[] = [
+    {
+      id: 'username',
+      placeholder: 'User Name',
+      labelKey: 'Name',
+      appliedFilterValue: '',
+      filterInput: ''
+    }
+  ]
 
   $refs: {
     successDialog: ModalDialog
@@ -312,6 +334,14 @@ export default class AnonymousUserManagement extends Mixins(
         .length + this.createdUsers.length} Team Members Added`
     }
     this.$refs.addUsersSuccessDialog.open()
+  }
+
+  private setAppliedFilterValue (filter: SearchFilterParam[]) {
+    this.appliedFilterValue = filter[0].appliedFilterValue
+  }
+
+  private filteredTeamMembersCount (count: number) {
+    this.teamMembersCount = count
   }
 }
 </script>
