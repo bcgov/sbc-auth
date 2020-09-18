@@ -28,7 +28,7 @@
         </v-btn>
       </v-col>
     </v-row>
-    <div class="filter-results" :class="{ 'active' : showFilteredChips }">
+    <div class="filter-results" :class="{ 'active' : (showFilteredChips && isDataFetchCompleted) }">
       <div class="d-flex align-center mb-8">
         <div class="filter-results-label py-2 mr-7">{{filteredRecordsCount}} {{filteredRecordsCount === 1 ? 'record' : 'records'}} found</div>
         <div
@@ -79,6 +79,7 @@ export default class SearchFilterInput extends Vue {
   @Prop({ default: '' }) filterPlaceHolder: string
   @Prop({ default: '' }) filterLabelKey: string
   @Prop({ default: [] as SearchFilterParam[] }) filterParams: SearchFilterParam[]
+  @Prop({ default: true }) isDataFetchCompleted: boolean
 
   private filterInput: string = ''
   private appliedFilterValue: string = ''
