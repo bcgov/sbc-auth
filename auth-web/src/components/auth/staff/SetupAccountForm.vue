@@ -129,6 +129,7 @@ import { mapActions, mapState } from 'vuex'
 import { CreateRequestBody as InvitationRequestBody } from '@/models/Invitation'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
+import { Pages } from '@/util/constants'
 import StaffModule from '@/store/modules/staff'
 import { getModule } from 'vuex-module-decorators'
 
@@ -255,7 +256,7 @@ export default class SetupAccountForm extends Vue {
   }
 
   private cancel () {
-    this.$router.push({ path: '/searchbusiness' })
+    this.$router.push({ path: Pages.STAFF_DASHBOARD })
   }
 
   showEntityNotFoundModal (msg?) {

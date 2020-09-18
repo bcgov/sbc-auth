@@ -27,6 +27,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Invitation } from '@/models/Invitation'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
+import { Pages } from '@/util/constants'
 import { getModule } from 'vuex-module-decorators'
 import { mapState } from 'vuex'
 
@@ -48,7 +49,7 @@ export default class SetupAccountSuccessView extends Vue {
   }
 
   goToDashboard () {
-    this.$router.push({ path: '/searchbusiness' })
+    this.$router.push({ path: Pages.STAFF_DASHBOARD })
   }
 }
 </script>

@@ -9,7 +9,7 @@ import Vue from 'vue'
 @Component({
 })
 export default class PaginationMixin extends Vue {
-  protected readonly DEFAULT_ITEMS_PER_PAGE = 5
+  protected readonly DEFAULT_ITEMS_PER_PAGE = 10
   protected readonly PAGINATION_COUNTER_STEP = 4
 
   DEFAULT_DATA_OPTIONS:DataOptions = {
