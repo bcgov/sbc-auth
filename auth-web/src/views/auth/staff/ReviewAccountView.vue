@@ -12,7 +12,7 @@
       <!-- Breadcrumbs / Back Navigation -->
       <nav class="crumbs py-6">
         <div>
-          <router-link :to="accountUnderReview.statusCode === 'REJECTED' ? '/staff-dashboard/rejected' : '/staff-dashboard/review'">
+          <router-link :to="accountUnderReview.statusCode === accountStatusEnum.REJECTED ? pagesEnum.STAFF_DASHBOARD_REJECTED: pagesEnum.STAFF_DASHBOARD_REVIEW">
             <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
             <span>Back to Staff Dashboard</span>
           </router-link>
@@ -199,7 +199,7 @@
             </div>
             <div>
               <v-btn large color="primary" class="font-weight-bold mr-2" :loading="isSaving" :disabled="!approveSelected && !rejectSelected" @click="saveSelection()">Save and exit</v-btn>
-              <v-btn large depressed to="/searchbusiness">Cancel</v-btn>
+              <v-btn large depressed :to=pagesEnum.STAFF_DASHBOARD>Cancel</v-btn>
             </div>
           </div>
         </v-container>
@@ -210,7 +210,7 @@
 </template>
 
 <script lang="ts">
-import { Account, AccountStatus } from '@/util/constants'
+import { Account, AccountStatus, Pages } from '@/util/constants'
 import { MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { Address } from '@/models/address'
@@ -271,6 +271,14 @@ export default class ReviewAccountView extends Vue {
     }
   }
 
+  private get pagesEnum () {
+    return Pages
+  }
+
+  private get accountStatusEnum () {
+    return AccountStatus
+  }
+
   private get bcolAccountDetails () {
     return (this.accountUnderReview?.paymentSettings?.length && this.accountUnderReview?.paymentSettings[0].bcolUserId) ? this.accountUnderReview?.paymentSettings[0] : undefined
   }
@@ -327,11 +335,11 @@ export default class ReviewAccountView extends Vue {
     } else if (this.rejectSelected) {
       await this.rejectAccountUnderReview()
     }
-    this.$router.push('/searchbusiness')
+    this.$router.push(Pages.STAFF_DASHBOARD)
   }
 
   private goBack (): void {
-    this.$router.push('/searchbusiness')
+    this.$router.push(Pages.STAFF_DASHBOARD)
   }
 }
 </script>

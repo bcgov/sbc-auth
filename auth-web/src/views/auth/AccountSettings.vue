@@ -17,7 +17,7 @@
     <!-- Staff - Breadcrumbs / Back Navigation -->
     <nav class="crumbs py-6" v-if="isStaff" aria-labelledby="staffNav">
       <div>
-        <router-link to="/searchbusiness">
+        <router-link :to=pagesEnum.STAFF_DASHBOARD>
           <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
           <span>Back to Staff Dashboard</span>
         </router-link>
@@ -170,6 +170,10 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   private get isStaff ():boolean {
     return this.currentUser.roles.includes(Role.Staff)
+  }
+
+  private get pagesEnum () {
+    return Pages
   }
 
   private get accountInfoUrl (): string {
