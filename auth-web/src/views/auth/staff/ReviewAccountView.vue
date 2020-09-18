@@ -253,6 +253,8 @@ export default class ReviewAccountView extends Vue {
   private readonly syncAccountUnderReview!: (organizationIdentifier: number) => Promise<void>
   private readonly approveAccountUnderReview!: () => Promise<void>
   private readonly rejectAccountUnderReview!: () => Promise<void>
+  private readonly pagesEnum = Pages
+  private readonly accountStatusEnum = AccountStatus
 
   private get canSelect (): boolean {
     return this.accountUnderReview.statusCode === AccountStatus.PENDING_AFFIDAVIT_REVIEW
@@ -269,14 +271,6 @@ export default class ReviewAccountView extends Vue {
       default:
         return ''
     }
-  }
-
-  private get pagesEnum () {
-    return Pages
-  }
-
-  private get accountStatusEnum () {
-    return AccountStatus
   }
 
   private get bcolAccountDetails () {

@@ -162,6 +162,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   private isLoading = true
   private isDirSearchUser: boolean = false
   private dirSearchUrl = ConfigHelper.getSearchApplicationUrl()
+  private readonly pagesEnum = Pages
 
   private handleBackButton (): void {
     const backTo = this.isStaff ? Pages.STAFF_DASHBOARD : `/account/${this.orgId}/business`
@@ -170,10 +171,6 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   private get isStaff ():boolean {
     return this.currentUser.roles.includes(Role.Staff)
-  }
-
-  private get pagesEnum () {
-    return Pages
   }
 
   private get accountInfoUrl (): string {

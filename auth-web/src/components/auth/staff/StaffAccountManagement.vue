@@ -117,6 +117,7 @@ export default class StaffAccountManagement extends Vue {
   private readonly pendingReviewCount!: number
   private readonly rejectedReviewCount!: number
   private readonly pendingInvitationsCount!: number
+  private pagesEnum = Pages
 
   private tabs = [
     {
@@ -145,10 +146,6 @@ export default class StaffAccountManagement extends Vue {
     await this.syncPendingStaffOrgs()
     await this.syncRejectedStaffOrgs()
     await this.syncPendingInvitationOrgs()
-  }
-
-  private get pagesEnum () {
-    return Pages
   }
 
   gotToCreateAccount () {
