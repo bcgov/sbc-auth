@@ -19,11 +19,11 @@
       class="mb-9"
       v-model="tab"
       @change="tabChange">
-      <v-tab data-test="active-tab" to="/staff-dashboard/active"
+      <v-tab data-test="active-tab" :to=pagesEnum.STAFF_DASHBOARD_ACTIVE
         v-if="canViewAccounts">Active</v-tab>
 
       <template v-if="canCreateAccounts">
-        <v-tab data-test="invitations-tab" to="/staff-dashboard/invitations">
+        <v-tab data-test="invitations-tab" :to=pagesEnum.STAFF_DASHBOARD_INVITATIONS>
           <v-badge
             inline
             color="primary"
@@ -35,7 +35,7 @@
       </template>
 
       <template v-if="canManageAccounts">
-        <v-tab data-test="pending-review-tab" to="/staff-dashboard/review">
+        <v-tab data-test="pending-review-tab" :to=pagesEnum.STAFF_DASHBOARD_REVIEW>
           <v-badge
             inline
             color="primary"
@@ -44,7 +44,7 @@
             Pending Review
           </v-badge>
         </v-tab>
-        <v-tab data-test="rejected-tab" to="/staff-dashboard/rejected">
+        <v-tab data-test="rejected-tab" :to=pagesEnum.STAFF_DASHBOARD_REJECTED>
           <v-badge
             inline
             color="primary"
@@ -117,6 +117,7 @@ export default class StaffAccountManagement extends Vue {
   private readonly pendingReviewCount!: number
   private readonly rejectedReviewCount!: number
   private readonly pendingInvitationsCount!: number
+  private pagesEnum = Pages
 
   private tabs = [
     {
