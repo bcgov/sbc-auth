@@ -15,59 +15,11 @@
       </div>
     </header>
 
-    <v-row>
-      <v-col cols="5" class="d-flex flex-row pt-0 mb-3">
-        <v-text-field
-          dense
-          filled
-          single-line
-          hide-details
-          height="43"
-          placeholder="User Name"
-          class="mr-2 body-2"
-          v-model="userNameFilterInput"
-          @keydown.enter="applyUserFilter"
-        ></v-text-field>
-        <v-btn
-          large
-          depressed
-          color="primary"
-          aria-label="Apply Filter"
-          title="Apply User Name Filter"
-          @click="applyUserFilter"
-          :disabled="!userNameFilterInput"
-        >
-          Apply Filter
-        </v-btn>
-      </v-col>
-    </v-row>
-    <div class="filter-results" :class="{ 'active' : appliedFilterValue }">
-      <div class="d-flex align-center mb-8">
-        <div class="filter-results-label py-2 mr-7">{{filteredMembersCount}} {{filteredMembersCount === 1 ? 'record' : 'records'}} found</div>
-        <v-chip
-          close
-          label
-          color="info"
-          close-icon="mdi-window-close"
-          aria-label="Clear Filter"
-          title="Clear User Name Filter"
-          @click:close="clearAppliedFilter"
-        >
-          Name: {{appliedFilterValue}}
-        </v-chip>
-        <v-btn
-          class="ml-3"
-          small
-          depressed
-          outlined
-          height="32"
-          color="info"
-          @click="clearAppliedFilter"
-        >
-          Clear Filters
-        </v-btn>
-      </div>
-    </div>
+    <SearchFilterInput
+      :filterParams="searchFilter"
+      :filteredRecordsCount="filteredMembersCount"
+      @filter-texts="setAppliedFilterValue"
+    ></SearchFilterInput>
 
     <!-- Tab Navigation -->
     <v-tabs class="mb-5" v-model="tab" background-color="transparent">
@@ -227,6 +179,8 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import MemberDataTable from '@/components/auth/MemberDataTable.vue'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import PendingMemberDataTable from '@/components/auth/PendingMemberDataTable.vue'
+import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
+import { SearchFilterParam } from '@/models/searchfilter'
 import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vue'
 
 @Component({
@@ -235,7 +189,8 @@ import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vu
     InvitationsDataTable,
     PendingMemberDataTable,
     InviteUsersForm,
-    ModalDialog
+    ModalDialog,
+    SearchFilterInput
   },
   computed: {
     ...mapState('user', ['currentUser']),
@@ -278,10 +233,18 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   private readonly syncActiveOrgMembers!: () => Member[]
   readonly currentUser!: KCUserProfile
   protected readonly currentOrganization!: Organization
-  private userNameFilterInput: string = ''
   private appliedFilterValue: string = ''
   private teamMembersCount = 0
   private pendingMembersCount = 0
+  private searchFilter: SearchFilterParam[] = [
+    {
+      id: 'username',
+      placeholder: 'User Name',
+      labelKey: 'Name',
+      appliedFilterValue: '',
+      filterInput: ''
+    }
+  ]
 
   // PROTOTYPE TAB ICON (PENDING APPROVAL)
   private readonly pendingOrgMembers!: Member[]
@@ -377,13 +340,8 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
     this.$refs.confirmActionDialog.close()
   }
 
-  private async applyUserFilter () {
-    this.appliedFilterValue = this.userNameFilterInput
-    this.userNameFilterInput = ''
-  }
-
-  private async clearAppliedFilter () {
-    this.appliedFilterValue = ''
+  private setAppliedFilterValue (filter: SearchFilterParam[]) {
+    this.appliedFilterValue = filter[0].appliedFilterValue
   }
 
   private filteredTeamMembersCount (count: number) {
