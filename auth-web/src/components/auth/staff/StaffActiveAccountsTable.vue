@@ -1,46 +1,11 @@
 <template>
   <div>
-    <v-row>
-      <v-col cols="5" class="d-flex flex-row pt-0 mb-3">
-        <v-text-field
-          dense
-          filled
-          single-line
-          hide-details
-          height="43"
-          placeholder="Account Name"
-          class="mr-2 body-2"
-          v-model="accountNameFilterInput"
-        ></v-text-field>
-        <v-btn
-          large
-          depressed
-          color="primary"
-          aria-label="Apply Filter"
-          title="Apply Account Name Filter"
-          @click="applyNameFilter"
-          :disabled="!accountNameFilterInput"
-        >
-          Apply Filter
-        </v-btn>
-      </v-col>
-    </v-row>
-    <div class="filter-results" :class="{ 'active' : appliedFilterValue }" v-if="!isTableLoading">
-      <div class="d-flex align-center mb-8">
-        <div class="filter-results-label py-2 mr-7">{{totalAccountsCount}} {{totalAccountsCount === 1 ? 'record' : 'records'}} found</div>
-        <v-chip
-          close
-          label
-          color="info"
-          close-icon="mdi-window-close"
-          aria-label="Clear Filter"
-          title="Clear Account Name Filter"
-          @click:close="clearAppliedFilter()"
-        >
-          {{appliedFilterValue}}
-        </v-chip>
-      </div>
-    </div>
+    <SearchFilterInput
+      :filterParams="searchFilter"
+      :filteredRecordsCount="totalAccountsCount"
+      @filter-texts="setAppliedFilterValue"
+      :isDataFetchCompleted="!isTableLoading"
+    ></SearchFilterInput>
     <v-data-table
       class="account-list"
       :headers="headerAccounts"
@@ -90,10 +55,15 @@ import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
 import OrgModule from '@/store/modules/org'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
+import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
+import { SearchFilterParam } from '@/models/searchfilter'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
+  components: {
+    SearchFilterInput
+  },
   methods: {
     ...mapActions('org', ['syncOrganization', 'addOrgSettings', 'syncMembership']),
     ...mapActions('staff', ['searchOrgs'])
@@ -107,6 +77,15 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   private readonly addOrgSettings!: (org: Organization) => Promise<UserSettings>
   private readonly syncMembership!: (orgId: number) => Promise<Member>
   private readonly searchOrgs!: (filterParams: OrgFilterParams) => OrgList
+  private searchFilter: SearchFilterParam[] = [
+    {
+      id: 'accountname',
+      placeholder: 'Account Name',
+      labelKey: '',
+      appliedFilterValue: '',
+      filterInput: ''
+    }
+  ]
 
   private readonly headerAccounts = [
     {
@@ -141,8 +120,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   private totalAccountsCount = 0
   private tableDataOptions: Partial<DataOptions> = {}
   private orgFilter: OrgFilterParams
-  private accountNameFilterInput: string = ''
-  private appliedFilterValue: string = ''
   private isTableLoading: boolean = false
 
   private getIndexedTag (tag, index): string {
@@ -163,13 +140,14 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
 
   private async getOrgs (page: number = 1, pageLimit: number = this.numberOfItems) {
     // set this variable so that the chip is shown
-    this.appliedFilterValue = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
+    const appliedFilterValue = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
+    this.searchFilter[0].appliedFilterValue = appliedFilterValue
     try {
       this.orgFilter = {
         status: AccountStatus.ACTIVE,
         pageNumber: page,
         pageLimit: pageLimit,
-        name: this.appliedFilterValue
+        name: appliedFilterValue
       }
       const activeAccountsResp = await this.searchOrgs(this.orgFilter)
       this.activeOrgs = activeAccountsResp.orgs
@@ -201,22 +179,15 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     return orgTypeDisplay
   }
 
-  private async applyNameFilter () {
-    this.isTableLoading = true
-    this.setSearchFilterToStorage(this.accountNameFilterInput)
-    await this.getOrgs()
-    this.accountNameFilterInput = ''
-    this.isTableLoading = false
-  }
-
-  private async clearAppliedFilter () {
-    this.isTableLoading = true
-    this.setSearchFilterToStorage('')
-    await this.getOrgs()
-    this.isTableLoading = false
-  }
   private setSearchFilterToStorage (val:string):void {
     ConfigHelper.addToSession(SessionStorageKeys.OrgSearchFilter, val)
+  }
+
+  private async setAppliedFilterValue (filter: SearchFilterParam[]) {
+    this.isTableLoading = true
+    this.setSearchFilterToStorage(filter[0].appliedFilterValue)
+    await this.getOrgs()
+    this.isTableLoading = false
   }
 }
 </script>
