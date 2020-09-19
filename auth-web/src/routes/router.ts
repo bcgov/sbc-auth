@@ -392,6 +392,11 @@ export function getRoutes (): RouteConfig[] {
       ]
     },
     {
+      path: Pages.STAFF,
+      name: 'staff',
+      redirect: Pages.STAFF_DASHBOARD
+    },
+    {
       path: Pages.STAFF_DASHBOARD_OLD,
       name: 'searchbusiness',
       redirect: Pages.STAFF_DASHBOARD

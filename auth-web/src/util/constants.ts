@@ -51,6 +51,7 @@ export enum Pages {
     STAFF_DASHBOARD_OLD= '/searchbusiness',
     STAFF_SETUP_ACCOUNT = 'staff-setup-account',
     CONFIRM_TOKEN = 'confirmtoken',
+    STAFF = '/staff',
     STAFF_DASHBOARD = '/staff/dashboard',
     STAFF_DASHBOARD_ACTIVE = '/staff/dashboard/active',
     STAFF_DASHBOARD_REVIEW = '/staff/dashboard/review',
