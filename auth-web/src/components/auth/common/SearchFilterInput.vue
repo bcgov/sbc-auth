@@ -8,10 +8,10 @@
           single-line
           hide-details
           height="43"
+          class="filter-input mr-2 body-2"
           v-for="filter in filterParams"
           :key="filter.id"
           :placeholder="filter.placeholder"
-          class="mr-2 body-2 filter-input"
           v-model="filter.filterInput"
           @keydown.enter="applyFilter"
         ></v-text-field>
@@ -31,34 +31,31 @@
     </v-row>
     <div class="filter-results" :class="{ 'active' : (showFilteredChips && isDataFetchCompleted) }">
       <div class="d-flex align-center mb-8">
-        <div class="filter-results-label py-2 mr-7">{{filteredRecordsCount}} {{filteredRecordsCount === 1 ? 'record' : 'records'}} found</div>
+        <div class="filter-results-label py-2 mr-4">{{filteredRecordsCount}} {{filteredRecordsCount === 1 ? 'record' : 'records'}} found</div>
         <div
           v-for="filter in filterParams"
           :key="filter.id"
-          class="mr-3"
+          class="mr-2"
         >
           <v-chip
             close
             label
-            color="info"
+            color="primary"
             v-if="filter.appliedFilterValue"
             close-icon="mdi-window-close"
             aria-label="Clear Filter"
             :title="`Clear ${filter.placeholder} Filter`"
             @click:close="clearAppliedFilter(filter)"
           >
-            <template v-if="filter.labelKey">{{filter.labelKey}}:</template> {{filter.appliedFilterValue}}
+            <template v-if="filter.labelKey"><span class="mr-1">{{filter.labelKey}}:</span></template>{{filter.appliedFilterValue}}
           </v-chip>
         </div>
         <v-btn
-          class="ml-2"
-          small
-          depressed
           outlined
-          height="32"
-          color="info"
-          aria-label="Clear All Filters"
-          title="Clear All Filters"
+          color="primary"
+          class="px-2"
+          aria-label="Clear all filters"
+          title="Clear all filters"
           @click="clearAllFilters"
         >
           Clear Filters
@@ -126,6 +123,9 @@ export default class SearchFilterInput extends Vue {
 </script>
 
 <style lang="scss" scoped>
+  .filter-input {
+    max-width: 20rem;
+  }
 
   .filter-results {
     opacity: 0;
@@ -141,5 +141,9 @@ export default class SearchFilterInput extends Vue {
 
   .filter-results-label {
     font-weight: 700;
+  }
+
+  .v-chip {
+    height: 36px !important;
   }
 </style>
