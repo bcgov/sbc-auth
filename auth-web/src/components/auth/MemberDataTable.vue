@@ -177,7 +177,7 @@
     ref="resetAuthenticatorDialog"
     icon="mdi-check"
     title="Reset Authenticator"
-    text="Resetting this team members authenticator will require them log in and enter a new one-time password in their authenticator app."
+    text="Resetting this team members authenticator will require them to log in and enter a new one-time password in their authenticator app."
     dialog-class="notify-dialog"
     max-width="600"
   >

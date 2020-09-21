@@ -276,8 +276,8 @@ export default class AnonymousUserManagement extends Mixins(
   private searchFilter: SearchFilterParam[] = [
     {
       id: 'username',
-      placeholder: 'User Name',
-      labelKey: 'Name',
+      placeholder: 'Team Member',
+      labelKey: 'Team Member',
       appliedFilterValue: '',
       filterInput: ''
     }
