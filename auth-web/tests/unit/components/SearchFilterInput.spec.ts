@@ -1,12 +1,9 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import { toBeDisabled, toHaveAttribute, toHaveValue } from '@testing-library/jest-dom/matchers'
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-
-expect.extend({ toHaveAttribute, toHaveValue, toBeDisabled })
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -80,9 +77,9 @@ describe('SearchFilterInput.vue', () => {
 
   it('renders the input fields with correct values and apply filter disabled', () => {
     const renderedInputs = wrapper.vm.$el.querySelectorAll('.filter-input')
-    expect(renderedInputs[0].getElementsByTagName('input')[0]).toHaveValue('')
-    expect(renderedInputs[1].getElementsByTagName('input')[0]).toHaveValue('')
-    expect(wrapper.vm.$el.querySelector('.apply-filter-btn')).toBeDisabled()
+    expect(renderedInputs[0].getElementsByTagName('input')[0].value).toBe('')
+    expect(renderedInputs[1].getElementsByTagName('input')[0].value).toBe('')
+    expect(wrapper.find('.apply-filter-btn').is('[disabled]')).toBe(true)
   })
 
   it('input username in the search field', async () => {
@@ -90,6 +87,6 @@ describe('SearchFilterInput.vue', () => {
     userNameSearchField.element.value = 'Jon Snow'
     userNameSearchField.trigger('input')
     await wrapper.vm.$nextTick()
-    expect(wrapper.vm.$el.querySelector('.apply-filter-btn')).toBeDisabled()
+    expect(wrapper.find('.apply-filter-btn').is('[disabled]')).toBe(true)
   })
 })
