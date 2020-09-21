@@ -46,6 +46,7 @@ jobs:
           OPENSHIFT_SA_NAME: ${{ secrets.OPENSHIFT_SA_NAME }}
           OPENSHIFT_SA_TOKEN: ${{ secrets.OPENSHIFT_SA_TOKEN }}
           OPENSHIFT_REPOSITORY: ${{ secrets.OPENSHIFT_REPOSITORY }}
+          OPENSHIFT_REPOSITORY_DEPLOYMENT: ${{ secrets.OPENSHIFT_REPOSITORY }}
 
       - name: Rocket.Chat Notification
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
