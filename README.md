@@ -12,7 +12,7 @@ For more information on the API please refer to:
 
 For more information on the web component refer to:
 
-[auth-web\Readme](auth-web/README.md)
+[auth-web\Readme](auth-web/README.md) 
 
 For more information on the Notify API component refer to:
 
