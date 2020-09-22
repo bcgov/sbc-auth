@@ -146,7 +146,7 @@ class UserOtp(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value, Role.STAFF_VIEW_ACCOUNTS.value])
     def delete(username):
         """Delete/Reset the OTP of user profile associated with the provided username."""
         try:
