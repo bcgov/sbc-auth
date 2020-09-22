@@ -120,7 +120,8 @@ export default class CommonUtils {
     return [
       Permission.VIEW_ACCOUNT,
       Permission.VIEW_ADDRESS,
-      Permission.VIEW_ADMIN_CONTACT
+      Permission.VIEW_ADMIN_CONTACT,
+      Permission.RESET_OTP
     ]
   }
   // for converting address object of sbc-auth to as needed for BaseAddress component
