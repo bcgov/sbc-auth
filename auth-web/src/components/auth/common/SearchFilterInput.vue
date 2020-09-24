@@ -2,19 +2,30 @@
   <div>
     <v-row>
       <v-col :cols="colCount" class="d-flex flex-row pt-0 mb-3">
-        <v-text-field
-          dense
-          filled
-          single-line
-          hide-details
-          height="43"
-          class="filter-input mr-2 body-2"
+        <div
           v-for="filter in filterParams"
           :key="filter.id"
-          :placeholder="filter.placeholder"
-          v-model="filter.filterInput"
-          @keydown.enter="applyFilter"
-        ></v-text-field>
+        >
+          <template v-if="isDateRange(filter)">
+            <DateRangeFilter
+              :dateFilterProp="filter.appliedFilterValue"
+              @emit-date-filter="applyDateFilter($event, filter)"
+            >
+            </DateRangeFilter>
+          </template>
+          <v-text-field
+            v-else
+            dense
+            filled
+            single-line
+            hide-details
+            height="43"
+            class="filter-input mr-2 body-2"
+            :placeholder="filter.placeholder"
+            v-model="filter.filterInput"
+            @keydown.enter="applyFilter"
+          ></v-text-field>
+        </div>
         <v-btn
           large
           depressed
@@ -46,7 +57,15 @@
             :title="`Clear ${filter.placeholder} Filter`"
             @click:close="clearAppliedFilter(filter)"
           >
-            <template v-if="filter.labelKey"><span class="mr-1">{{filter.labelKey}}:</span></template>{{filter.appliedFilterValue}}
+            <template v-if="filter.labelKey">
+              <span class="mr-1">{{filter.labelKey}}:</span>
+            </template>
+            <template v-if="isDateRange(filter)">
+              {{getDateFilterLabel(filter.appliedFilterValue)}}
+            </template>
+            <template v-else>
+              {{filter.appliedFilterValue}}
+            </template>
           </v-chip>
         </div>
         <v-btn
@@ -66,15 +85,18 @@
 
 <script lang="ts">
 import { Component, Emit, Prop } from 'vue-property-decorator'
+import CommonUtils from '@/util/common-util'
+import DateRangeFilter from '@/components/auth/common/DateRangeFilter.vue'
 import { SearchFilterParam } from '@/models/searchfilter'
 import Vue from 'vue'
 
 @Component({
+  components: {
+    DateRangeFilter
+  }
 })
 export default class SearchFilterInput extends Vue {
   @Prop({ default: 0 }) filteredRecordsCount: number
-  @Prop({ default: '' }) filterPlaceHolder: string
-  @Prop({ default: '' }) filterLabelKey: string
   @Prop({ default: [] as SearchFilterParam[] }) filterParams: SearchFilterParam[]
   @Prop({ default: true }) isDataFetchCompleted: boolean
 
@@ -122,6 +144,21 @@ export default class SearchFilterInput extends Vue {
   private get colCount () {
     // TODO: may change later once the filter input design finalized
     return (this.filterParams.length * 2) + 4
+  }
+
+  private applyDateFilter (dateRangeObj, filter) {
+    filter.appliedFilterValue = dateRangeObj
+    this.filterTexts()
+  }
+
+  private isDateRange (filter) {
+    return (filter.id === 'daterange')
+  }
+
+  private getDateFilterLabel (appliedFilterValue) {
+    return (appliedFilterValue?.startDate === appliedFilterValue?.endDate)
+      ? CommonUtils.formatDisplayDate(new Date(appliedFilterValue?.startDate))
+      : `${CommonUtils.formatDisplayDate(new Date(appliedFilterValue?.startDate))} - ${CommonUtils.formatDisplayDate(new Date(appliedFilterValue?.endDate))}`
   }
 }
 </script>
