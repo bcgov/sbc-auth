@@ -21,6 +21,7 @@
           color="primary"
           aria-label="Apply Filter"
           title="Apply Filter"
+          class="apply-filter-btn"
           @click="applyFilter"
           :disabled="!isApplyFilterEnabled"
         >
@@ -73,13 +74,8 @@ import Vue from 'vue'
 })
 export default class SearchFilterInput extends Vue {
   @Prop({ default: 0 }) filteredRecordsCount: number
-  @Prop({ default: '' }) filterPlaceHolder: string
-  @Prop({ default: '' }) filterLabelKey: string
   @Prop({ default: [] as SearchFilterParam[] }) filterParams: SearchFilterParam[]
   @Prop({ default: true }) isDataFetchCompleted: boolean
-
-  private filterInput: string = ''
-  private appliedFilterValue: string = ''
 
   private applyFilter () {
     this.filterParams.forEach((filter) => {
