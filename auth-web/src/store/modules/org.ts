@@ -17,7 +17,7 @@ import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
 import { StatementFilterParams, StatementListItem, StatementNotificationSettings, StatementSettings } from '@/models/statement'
-import { TransactionFilterParams, TransactionTableList, TransactionTableRow } from '@/models/transaction'
+import { TransactionFilter, TransactionFilterParams, TransactionTableList, TransactionTableRow } from '@/models/transaction'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BcolService from '@/services/bcol.services'
@@ -578,7 +578,7 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async getTransactionReport (filterParams: any) {
+  public async getTransactionReport (filterParams: TransactionFilter) {
     const response = await PaymentService.getTransactionReports(this.context.state['currentOrganization'].id, filterParams)
     return response?.data
   }

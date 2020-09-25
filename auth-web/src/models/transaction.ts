@@ -35,16 +35,17 @@ export interface LineItem {
   waivedFees: number
 }
 
-export interface TransactionDateFilter {
+export interface TransactionFilter {
   dateFilter: {
     startDate: string
     endDate: string
   },
-  folioNumber?: string
+  folioNumber?: string,
+  createdBy?: string,
 }
 
 export interface TransactionFilterParams {
-  filterPayload: TransactionDateFilter
+  filterPayload: TransactionFilter
   pageNumber?: number
   pageLimit?: number
 }
