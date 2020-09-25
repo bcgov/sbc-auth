@@ -7,7 +7,7 @@ import {
   StatementNotificationSettings,
   StatementSettings
 } from '@/models/statement'
-import { TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
+import { TransactionFilter, TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 import ConfigHelper from '@/util/config-helper'
 import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
 
@@ -41,7 +41,7 @@ export default class PaymentService {
     return axios.post(url, filterParams.filterPayload, { params })
   }
 
-  static getTransactionReports (accountId: string, filterParams: any): AxiosPromise<any> {
+  static getTransactionReports (accountId: string, filterParams: TransactionFilter): AxiosPromise<any> {
     const headers = {
       'Accept': 'text/csv'
     }

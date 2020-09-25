@@ -17,7 +17,7 @@
       <template v-slot:loading>
         Loading...
       </template>
-      <template v-slot:header.status="{ header }">
+      <template v-slot:[`header.status`]="{ header }">
         {{header.text}}
         <v-tooltip bottom color="grey darken-4">
           <template v-slot:activator="{ on }">
@@ -28,7 +28,7 @@
           </div>
         </v-tooltip>
       </template>
-      <template v-slot:item.transactionNames="{ item }">
+      <template v-slot:[`item.transactionNames`]="{ item }">
         <div class="product-purchased font-weight-bold"
           :data-test="getIndexedTag('transaction-name', item.index)"
           >
@@ -45,15 +45,15 @@
           Incorporation Number: {{ item.businessIdentifier }}
         </div>
       </template>
-      <template v-slot:item.transactionDate="{ item }">
+      <template v-slot:[`item.transactionDate`]="{ item }">
         {{formatDate(item.transactionDate)}}
       </template>
-      <template v-slot:item.totalAmount="{ item }">
+      <template v-slot:[`item.totalAmount`]="{ item }">
         <div class="font-weight-bold">
           ${{item.totalAmount}}
         </div>
       </template>
-      <template v-slot:item.status="{ item }">
+      <template v-slot:[`item.status`]="{ item }">
         {{item.status}}
       </template>
     </v-data-table>
@@ -64,7 +64,7 @@
 import { Account, TransactionStatus } from '@/util/constants'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
-import { Transaction, TransactionFilterParams, TransactionListResponse, TransactionTableList, TransactionTableRow } from '@/models/transaction'
+import { Transaction, TransactionFilter, TransactionFilterParams, TransactionListResponse, TransactionTableList, TransactionTableRow } from '@/models/transaction'
 import { mapActions, mapState } from 'vuex'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
@@ -82,8 +82,7 @@ import CommonUtils from '@/util/common-util'
   }
 })
 export default class TransactionsDataTable extends Vue {
-  @Prop({ default: undefined }) private dateFilter: any;
-  @Prop({ default: '' }) private folioFilter: string;
+  @Prop({ default: () => ({} as TransactionFilter) }) private transactionFilters: TransactionFilter;
   private readonly currentOrganization!: Organization
   private readonly getTransactionList!: (filterParams: TransactionFilterParams) => TransactionTableList
 
@@ -160,10 +159,7 @@ export default class TransactionsDataTable extends Vue {
   private async loadTransactionList (pageNumber?: number, itemsPerPage?: number) {
     this.isDataLoading = true
     const filterParams: TransactionFilterParams = {
-      filterPayload: {
-        dateFilter: this.dateFilter,
-        folioNumber: this.folioFilter
-      },
+      filterPayload: this.transactionFilters,
       pageNumber: pageNumber,
       pageLimit: itemsPerPage
     }
