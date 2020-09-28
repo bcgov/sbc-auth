@@ -1,14 +1,6 @@
 import CommonUtil from '@/util/common-util'
 import { Permission } from '@/util/constants'
 
-const setPathName = (url) => {
-  global.window = Object.create(window)
-  Object.defineProperty(window, 'location', {
-    value: {
-      pathname: url
-    }
-  })
-}
 const dateStr = new Date('2020-10-22 00:00:00 PDT')
 
 describe('Common Util Test', () => {
@@ -42,6 +34,14 @@ describe('Common Util Test', () => {
     { id: 1, name: 'Bruce Wayne', alterEgo: 'Batman' },
     { id: 3, name: 'Barry Allen', alterEgo: 'Flash' }
   ]
+
+  const { pathname } = window.location
+
+  beforeEach(async () => {
+    // mock the window.location.pathname function
+    delete window.location
+    window.location = { pathname: jest.fn() } as any
+  })
 
   it('is isUrl [positive]', () => {
     expect(CommonUtil.isUrl('http://localhost:8000')).toBe(true)
@@ -128,13 +128,13 @@ describe('Common Util Test', () => {
   })
 
   it('is path is signIn', () => {
-    setPathName('business/auth/signin')
+    window.location.pathname = 'http://localhost:8000/business/auth/signin'
     expect(CommonUtil.isSigningIn()).toBe(true)
   })
 
   it('is path is signOut', () => {
-    setPathName('business/auth/signout')
-    expect(CommonUtil.isSigningOut()).toBe(false)
+    window.location.pathname = 'http://localhost:8000/business/auth/signout'
+    expect(CommonUtil.isSigningOut()).toBe(true)
   })
 
   it('is doing custom sort correctly', () => {
@@ -143,5 +143,9 @@ describe('Common Util Test', () => {
 
   it('is doing custom sort dec correctly', () => {
     expect(CommonUtil.customSort(items, ['name'], [true])).toMatchObject(sortedDec)
+  })
+
+  afterEach(() => {
+    window.location.pathname = pathname
   })
 })
