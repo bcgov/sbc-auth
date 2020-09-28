@@ -167,7 +167,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { LoginSource, Pages } from '@/util/constants'
+import { LoginSource, Pages, SearchFilterCodes } from '@/util/constants'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
@@ -238,7 +238,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   private pendingMembersCount = 0
   private searchFilter: SearchFilterParam[] = [
     {
-      id: 'username',
+      id: SearchFilterCodes.USERNAME,
       placeholder: 'Team Member',
       labelKey: 'Team Member',
       appliedFilterValue: '',
