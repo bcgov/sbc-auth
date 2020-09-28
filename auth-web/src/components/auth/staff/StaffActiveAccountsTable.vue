@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, AccountStatus, SearchFilterCodes, SessionStorageKeys } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
@@ -79,7 +79,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   private readonly searchOrgs!: (filterParams: OrgFilterParams) => OrgList
   private searchFilter: SearchFilterParam[] = [
     {
-      id: 'accountname',
+      id: SearchFilterCodes.ACCOUNTNAME,
       placeholder: 'Account Name',
       labelKey: '',
       appliedFilterValue: '',

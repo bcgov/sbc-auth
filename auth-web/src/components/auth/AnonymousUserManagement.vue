@@ -237,6 +237,7 @@ import AddUsersSuccess from '@/components/auth/AddUsersSuccess.vue'
 import MemberDataTable from '@/components/auth/MemberDataTable.vue'
 import ModalDialog from '@/components/auth/ModalDialog.vue'
 import PasswordReset from '@/components/auth/PasswordReset.vue'
+import { SearchFilterCodes } from '@/util/constants'
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import { SearchFilterParam } from '@/models/searchfilter'
 import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vue'
@@ -275,7 +276,7 @@ export default class AnonymousUserManagement extends Mixins(
   private teamMembersCount = 0
   private searchFilter: SearchFilterParam[] = [
     {
-      id: 'username',
+      id: SearchFilterCodes.USERNAME,
       placeholder: 'Team Member',
       labelKey: 'Team Member',
       appliedFilterValue: '',

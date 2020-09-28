@@ -1,4 +1,5 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { SearchFilterCodes } from '@/util/constants'
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -16,14 +17,14 @@ describe('SearchFilterInput.vue', () => {
 
   const filterParams = [
     {
-      id: 'username',
+      id: SearchFilterCodes.USERNAME,
       placeholder: 'User Name',
       labelKey: 'Name',
       appliedFilterValue: '',
       filterInput: ''
     },
     {
-      id: 'folio',
+      id: SearchFilterCodes.FOLIONUMBER,
       placeholder: 'Folio Number',
       labelKey: 'Folio',
       appliedFilterValue: '',

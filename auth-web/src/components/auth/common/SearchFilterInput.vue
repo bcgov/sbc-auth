@@ -88,6 +88,7 @@
 import { Component, Emit, Prop } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
 import DateRangeFilter from '@/components/auth/common/DateRangeFilter.vue'
+import { SearchFilterCodes } from '@/util/constants'
 import { SearchFilterParam } from '@/models/searchfilter'
 import Vue from 'vue'
 
@@ -150,7 +151,7 @@ export default class SearchFilterInput extends Vue {
   }
 
   private isDateRange (filter) {
-    return (filter.id === 'daterange')
+    return (filter.id === SearchFilterCodes.DATERANGE)
   }
 
   private getDateFilterLabel (appliedFilterValue) {

@@ -146,4 +146,11 @@ export enum DateFilterCodes {
     LASTWEEK = 'LASTWEEK',
     LASTMONTH = 'LASTMONTH',
     CUSTOMRANGE = 'CUSTOMRANGE'
-  }
+}
+
+export enum SearchFilterCodes {
+    DATERANGE = 'daterange',
+    USERNAME = 'username',
+    ACCOUNTNAME = 'accountname',
+    FOLIONUMBER = 'folio'
+}
