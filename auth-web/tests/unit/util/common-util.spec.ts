@@ -9,6 +9,7 @@ const setPathName = (url) => {
     }
   })
 }
+const dateStr = new Date('2020-10-22 00:00:00 PDT')
 
 describe('Common Util Test', () => {
   const addressComp = {
@@ -97,13 +98,13 @@ describe('Common Util Test', () => {
   })
 
   it('is format display date correctly', () => {
-    expect(CommonUtil.formatDisplayDate(new Date('2020-10-22'))).toBe('10-21-2020')
-    expect(CommonUtil.formatDisplayDate(new Date('2020-10-22'), 'DD/MM/YYYY')).toBe('21/10/2020')
+    expect(CommonUtil.formatDisplayDate(dateStr)).toBe('10-22-2020')
+    expect(CommonUtil.formatDisplayDate(dateStr, 'DD/MM/YYYY')).toBe('22/10/2020')
     expect(CommonUtil.formatDisplayDate(null)).toBe('')
   })
 
   it('is format datepicker date correctly', () => {
-    expect(CommonUtil.formatDatePickerDate(new Date('2020-10-22'))).toBe('2020-10-21')
+    expect(CommonUtil.formatDatePickerDate(dateStr)).toBe('2020-10-22')
   })
 
   it('is getAdminPermissions correctly', () => {
