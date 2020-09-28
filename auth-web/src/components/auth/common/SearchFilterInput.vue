@@ -46,12 +46,12 @@
         <div
           v-for="filter in filterParams"
           :key="filter.id"
-          class="mr-2"
         >
           <v-chip
             close
             label
             color="primary"
+            class="mr-2"
             v-if="filter.appliedFilterValue"
             close-icon="mdi-window-close"
             aria-label="Clear Filter"

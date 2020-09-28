@@ -14,6 +14,7 @@
         :filterParams="searchFilter"
         :filteredRecordsCount="totalTransactionsCount"
         @filter-texts="setAppliedFilterValue"
+        :isDataFetchCompleted="isTransactionFetchDone"
       ></SearchFilterInput>
     </div>
     <TransactionsDataTable
@@ -69,6 +70,7 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   private totalTransactionsCount: number = 0
   private searchFilter: SearchFilterParam[] = []
   private transactionFilterProp: TransactionFilter = {} as TransactionFilter
+  private isTransactionFetchDone: boolean = false
 
   private async mounted () {
     this.setAccountChangedHandler(this.initFilter)
@@ -86,8 +88,8 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
       },
       {
         id: FILTER_KEYS.USERNAME,
-        placeholder: 'User Name',
-        labelKey: 'Name',
+        placeholder: 'Initiated By',
+        labelKey: 'Initiated By',
         appliedFilterValue: '',
         filterInput: ''
       },
@@ -99,6 +101,7 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
         filterInput: ''
       }
     ]
+    this.isTransactionFetchDone = false
   }
 
   private setAppliedFilterValue (filters: SearchFilterParam[]) {
@@ -115,6 +118,7 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
           break
       }
     })
+    this.isTransactionFetchDone = false
     this.updateTransactionTableCounter++
   }
 
@@ -131,6 +135,7 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
 
   private setTotalTransactionCount (value) {
     this.totalTransactionsCount = value
+    this.isTransactionFetchDone = true
   }
 
   private async exportCSV () {
