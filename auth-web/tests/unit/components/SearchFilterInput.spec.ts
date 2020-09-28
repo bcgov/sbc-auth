@@ -32,11 +32,14 @@ describe('SearchFilterInput.vue', () => {
   ]
   let filteredRecordsCount = 0
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  const app = document.createElement('div')
+  app.setAttribute('data-app', 'true')
+  document.body.append(app)
 
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
+    localVue.use(Vuetify)
 
     const vuetify = new Vuetify({})
 
@@ -47,7 +50,8 @@ describe('SearchFilterInput.vue', () => {
         filterParams: filterParams,
         filteredRecordsCount: filteredRecordsCount
       },
-      sync: false
+      sync: false,
+      attachToDocument: true
     })
 
     jest.resetModules()
@@ -65,7 +69,7 @@ describe('SearchFilterInput.vue', () => {
 
   it('confirm search field count as per the prop given', () => {
     const filterCount = wrapper.vm.$props.filterParams.length
-    const renderedInputs = wrapper.vm.$el.querySelectorAll('.filter-input')
+    const renderedInputs = wrapper.findAll('.filter-input')
     expect(renderedInputs?.length).toEqual(filterCount)
   })
 
