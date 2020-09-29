@@ -165,6 +165,13 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     # Config value to disable activity logs
     DISABLE_ACTIVITY_LOGS = os.getenv('DISABLE_ACTIVITY_LOGS', 'False').lower() == 'true'
 
+    # Service account details
+    KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv(('KEYCLOAK_SERVICE_ACCOUNT_ID'))
+    KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
+
+    # pay-API URL
+    PAY_API_URL = os.getenv('PAY_API_URL')
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False
