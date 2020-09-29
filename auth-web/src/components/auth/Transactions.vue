@@ -14,6 +14,7 @@
         :filterParams="searchFilter"
         :filteredRecordsCount="totalTransactionsCount"
         @filter-texts="setAppliedFilterValue"
+        :isDataFetchCompleted="isTransactionFetchDone"
       ></SearchFilterInput>
     </div>
     <TransactionsDataTable
@@ -25,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import { Account, Pages } from '@/util/constants'
+import { Account, Pages, SearchFilterCodes } from '@/util/constants'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { Member, MembershipType, Organization } from '@/models/Organization'
 import { TransactionFilter, TransactionFilterParams, TransactionTableList } from '@/models/transaction'
@@ -36,12 +37,6 @@ import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import { SearchFilterParam } from '@/models/searchfilter'
 import TransactionsDataTable from '@/components/auth/TransactionsDataTable.vue'
 import moment from 'moment'
-
-const FILTER_KEYS = {
-  DATERANGE: 'daterange',
-  USERNAME: 'username',
-  FOLIONUMBER: 'folio'
-}
 
 @Component({
   components: {
@@ -69,6 +64,7 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   private totalTransactionsCount: number = 0
   private searchFilter: SearchFilterParam[] = []
   private transactionFilterProp: TransactionFilter = {} as TransactionFilter
+  private isTransactionFetchDone: boolean = false
 
   private async mounted () {
     this.setAccountChangedHandler(this.initFilter)
@@ -78,43 +74,45 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   private initializeFilters () {
     this.searchFilter = [
       {
-        id: FILTER_KEYS.DATERANGE,
+        id: SearchFilterCodes.DATERANGE,
         placeholder: 'Date Range',
         labelKey: 'Date',
         appliedFilterValue: '',
         filterInput: ''
       },
       {
-        id: FILTER_KEYS.USERNAME,
-        placeholder: 'User Name',
-        labelKey: 'Name',
+        id: SearchFilterCodes.USERNAME,
+        placeholder: 'Initiated By',
+        labelKey: 'Initiated By',
         appliedFilterValue: '',
         filterInput: ''
       },
       {
-        id: FILTER_KEYS.FOLIONUMBER,
+        id: SearchFilterCodes.FOLIONUMBER,
         placeholder: 'Folio #',
         labelKey: 'Folio',
         appliedFilterValue: '',
         filterInput: ''
       }
     ]
+    this.isTransactionFetchDone = false
   }
 
   private setAppliedFilterValue (filters: SearchFilterParam[]) {
     filters.forEach(filter => {
       switch (filter.id) {
-        case FILTER_KEYS.DATERANGE:
+        case SearchFilterCodes.DATERANGE:
           this.transactionFilterProp.dateFilter = filter.appliedFilterValue || {}
           break
-        case FILTER_KEYS.FOLIONUMBER:
+        case SearchFilterCodes.FOLIONUMBER:
           this.transactionFilterProp.folioNumber = filter.appliedFilterValue
           break
-        case FILTER_KEYS.USERNAME:
+        case SearchFilterCodes.USERNAME:
           this.transactionFilterProp.createdBy = filter.appliedFilterValue
           break
       }
     })
+    this.isTransactionFetchDone = false
     this.updateTransactionTableCounter++
   }
 
@@ -131,6 +129,7 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
 
   private setTotalTransactionCount (value) {
     this.totalTransactionsCount = value
+    this.isTransactionFetchDone = true
   }
 
   private async exportCSV () {

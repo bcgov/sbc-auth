@@ -139,3 +139,18 @@ export enum Permission {
 export enum LDFlags {
     AuthLearnMore = 'auth-options-learn-more'
 }
+
+export enum DateFilterCodes {
+    TODAY = 'TODAY',
+    YESTERDAY = 'YESTERDAY',
+    LASTWEEK = 'LASTWEEK',
+    LASTMONTH = 'LASTMONTH',
+    CUSTOMRANGE = 'CUSTOMRANGE'
+}
+
+export enum SearchFilterCodes {
+    DATERANGE = 'daterange',
+    USERNAME = 'username',
+    ACCOUNTNAME = 'accountname',
+    FOLIONUMBER = 'folio'
+}

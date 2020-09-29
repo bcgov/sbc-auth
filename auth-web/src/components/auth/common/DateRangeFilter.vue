@@ -7,7 +7,7 @@
       <v-btn
         depressed
         large
-        class="mr-2 px-3"
+        class="mr-2 px-3 date-range-btn"
         color="default"
         v-on="on"
         @click="openDateFilter"
@@ -43,7 +43,7 @@
         <div class="date-filter-btns px-6 mt-4 d-flex flex-end">
           <v-btn large
             color="primary"
-            class="font-weight-bold flex-grow-1"
+            class="font-weight-bold flex-grow-1 apply-btn"
             :disabled="!isApplyFilterBtnValid"
             @click="applyDateFilter"
           >
@@ -52,7 +52,7 @@
           <v-btn large
             outlined
             color="primary"
-            class="flex-grow-1 ml-2"
+            class="flex-grow-1 ml-2 cancel-btn"
             @click="showDateFilter=false"
           >
             Cancel
@@ -81,16 +81,11 @@
 <script lang="ts">
 import { Component, Emit, Prop } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
+import { DateFilterCodes } from '@/util/constants'
 import Vue from 'vue'
 import moment from 'moment'
 
-const DATEFILTER_CODES = {
-  TODAY: 'TODAY',
-  YESTERDAY: 'YESTERDAY',
-  LASTWEEK: 'LASTWEEK',
-  LASTMONTH: 'LASTMONTH',
-  CUSTOMRANGE: 'CUSTOMRANGE'
-}
+export const DATEFILTER_CODES = DateFilterCodes
 
 @Component({})
 export default class DateRangeFilter extends Vue {
