@@ -87,7 +87,7 @@ def test_update_entity_existing_success(session):  # pylint:disable=unused-argum
     })
 
     assert entity
-    assert entity.as_dict()['corp_type']['code'] == 'BC'
+    assert entity.as_dict()['corp_type']['code'] == 'BEN'
 
     updated_entity_info = {
         'businessIdentifier': TestEntityInfo.bc_entity_passcode4['businessIdentifier'],
@@ -100,7 +100,7 @@ def test_update_entity_existing_success(session):  # pylint:disable=unused-argum
 
     updated_entity = EntityService.update_entity(entity.as_dict().get('business_identifier'), updated_entity_info,
                                                  {'loginSource': '', 'realm_access': {'roles': ['system']},
-                                                  'corp_type': 'BC'})
+                                                  'corp_type': 'BEN'})
 
     assert updated_entity
     assert updated_entity.as_dict()['name'] == updated_entity_info['name']
@@ -118,7 +118,7 @@ def test_update_entity_existing_failures(session):  # pylint:disable=unused-argu
     })
 
     assert entity
-    assert entity.as_dict()['corp_type']['code'] == 'BC'
+    assert entity.as_dict()['corp_type']['code'] == 'BEN'
 
     updated_entity_info = {
         'businessIdentifier': TestEntityInfo.bc_entity_passcode4['businessIdentifier'],

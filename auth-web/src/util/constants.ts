@@ -101,7 +101,7 @@ export enum FilingTypes {
 }
 
 export enum LegalTypes {
-    BCOMP = 'BC',
+    BCOMP = 'BEN',
     COOP = 'CP',
     CORP = 'CR'
 }
@@ -109,7 +109,7 @@ export enum LegalTypes {
 export enum CorpType {
     COOP = 'CP',
     NEW_BUSINESS = 'TMP',
-    BCOMP = 'BC',
+    BCOMP = 'BEN',
     NAME_REQUEST = 'NR'
 }
 
