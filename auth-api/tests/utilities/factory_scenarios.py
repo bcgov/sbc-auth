@@ -533,12 +533,12 @@ class TestEntityInfo(dict, Enum):
     bc_entity_passcode3 = {'businessIdentifier': 'CP123456890',
                            'businessNumber': '791861078BC0002',
                            'name': 'BarFoo, Inc.3',
-                           'passCode': '222222222', 'corpTypeCode': 'BEN'}
+                           'passCode': '222222222', 'corpTypeCode': 'BC'}
 
     bc_entity_passcode4 = {'businessIdentifier': 'CP123456891',
                            'businessNumber': '791861078BC0003',
                            'name': 'BarFoo, Inc.4',
-                           'passCode': '222222222', 'corpTypeCode': 'BEN'}
+                           'passCode': '222222222', 'corpTypeCode': 'BC'}
 
     invalid = {'foo': 'bar'}
 
@@ -576,7 +576,7 @@ class TestEntityInfo(dict, Enum):
     business_incoporated = {
         'businessIdentifier': 'BC1234567890',
         'name': 'My New Incorporated Company',
-        'corpTypeCode': 'BEN'
+        'corpTypeCode': 'BC'
     }
 
 
