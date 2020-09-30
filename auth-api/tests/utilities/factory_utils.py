@@ -21,7 +21,6 @@ from tests.utilities.factory_scenarios import (
     JWT_HEADER, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgStatusInfo, TestOrgTypeInfo,
     TestPaymentTypeInfo, TestUserInfo)
 
-from auth_api.models import AccountPaymentSettings as AccountPaymentModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
@@ -142,13 +141,11 @@ def factory_org_model(org_info: dict = TestOrgInfo.org1,
     org.access_type = org_info.get('accessType', '')
     org.org_status = org_status
     org.created_by_id = user_id
+    org.bcol_account_id = bcol_info.get('bcol_account_id', '')
+    org.bcol_user_id = bcol_info.get('bcol_user_id', '')
     org.save()
 
-    account_payment = AccountPaymentModel()
-    account_payment.preferred_payment = preferred_payment
-    account_payment.org = org
-    account_payment.bcol_account_id = bcol_info['bcol_account_id']
-    account_payment.save()
+    org.bcol_account_id = bcol_info['bcol_account_id']
 
     return org
 
