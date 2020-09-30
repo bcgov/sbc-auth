@@ -22,7 +22,6 @@ from sqlalchemy.orm import contains_eager, relationship
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, OrgStatus as OrgStatusEnum
 from auth_api.utils.roles import VALID_STATUSES
 
-from .account_payment_settings import AccountPaymentSettings as AccountPaymentSettingsModel
 from .base_model import VersionedModel
 from .contact import Contact
 from .contact_link import ContactLink
@@ -56,9 +55,6 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     affiliated_entities = relationship('Affiliation', lazy='select')
     invitations = relationship('InvitationMembership', cascade='all,delete,delete-orphan', lazy='select')
     products = relationship('ProductSubscription', cascade='all,delete,delete-orphan', lazy='select')
-    payment_settings = relationship('AccountPaymentSettings', cascade='all,delete,delete-orphan',
-                                    primaryjoin='and_(Org.id == AccountPaymentSettings.org_id, '
-                                                'AccountPaymentSettings.is_active == True)', lazy='select')
     login_options = relationship('AccountLoginOptions', cascade='all,delete,delete-orphan',
                                  primaryjoin='and_(Org.id == AccountLoginOptions.org_id, '
                                              'AccountLoginOptions.is_active == True)', lazy='select')
@@ -119,9 +115,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
                 query = query.filter(Org.id.notin_(pending_inv_subquery))
 
         if bcol_account_id:
-            query = query.join(AccountPaymentSettingsModel).filter(and_(
-                AccountPaymentSettingsModel.bcol_account_id == bcol_account_id,
-                AccountPaymentSettingsModel.is_active.is_(True)))
+            query = query.filter(Org.bcol_account_id == bcol_account_id)
 
         query = query.order_by(Org.created.desc())
 

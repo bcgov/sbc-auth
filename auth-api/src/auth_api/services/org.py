@@ -176,7 +176,6 @@ class Org:  # pylint: disable=too-many-public-methods
     def create_payment_settings(org_model: OrgModel, payment_info: str, is_new_org: bool = True):
         """Add payment settings for the org."""
         pay_url = current_app.config.get('PAY_API_URL')
-
         pay_request = {
             'accountId': org_model.id,
             'accountName': org_model.name,
@@ -277,10 +276,9 @@ class Org:  # pylint: disable=too-many-public-methods
     @staticmethod
     def _map_response_to_org(bcol_response, org_info):
         org_info.update({
-            'bcol_account_number': bcol_response.get('accountNumber'),
+            'bcol_account_id': bcol_response.get('accountNumber'),
             'bcol_user_id': bcol_response.get('userId'),
             'name': bcol_response.get('orgName')
-
         })
 
     @staticmethod
@@ -301,15 +299,19 @@ class Org:  # pylint: disable=too-many-public-methods
             existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'], self._model.id)
             if existing_similar__org is not None:
                 raise BusinessException(Error.DATA_CONFLICT, None)
+        is_premium = False
 
         bcol_credential = org_info.pop('bcOnlineCredential', None)
         mailing_address = org_info.pop('mailingAddress', None)
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
-        bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token).json()
-        Org._map_response_to_org(bcol_response, org_info)
-        payment_type = PaymentType.BCOL.value
-        Org.create_payment_settings(self, payment_type, False)
+        if bcol_credential:
+            bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token).json()
+            Org._map_response_to_org(bcol_response, org_info)
+            is_premium = True
+
+        payment_type = PaymentType.BCOL.value if is_premium else Org._get_default_payment_method_for_creditcard()
+        Org.create_payment_settings(self._model, payment_type, False)
 
         # Update mailing address
         if mailing_address:
@@ -581,7 +583,7 @@ class Org:  # pylint: disable=too-many-public-methods
     def bcol_account_link_check(bcol_account_id, org_id=None):
         """Validate the BCOL id is linked or not. If already linked, return True."""
         if current_app.config.get('BCOL_ACCOUNT_LINK_CHECK'):
-            org = OrgModel.find_by_bcol_account_id(bcol_account_id, org_id)
+            org = OrgModel.find_by_bcol_id(bcol_account_id)
             if org and org.id != org_id:  # check if already taken up by different org
                 return True
 
