@@ -34,12 +34,12 @@ def upgrade():
     org_list: List[Org] = conn.execute(f"select * from org o where status_code = 'ACTIVE';")
 
     token = RestService.get_service_account_token()
-    print('token--------------------------' , token)
+    print('token--------------------------', token)
 
     account_payment_list: List[AccountPaymentSettingsDeprecated] = conn.execute(
         f"select * from account_payment_settings where is_active;")
     account_payment_dict: Dict[int, AccountPaymentSettingsDeprecated] = {account_payment.org_id: account_payment for
-                                                               account_payment in account_payment_list}
+                                                                         account_payment in account_payment_list}
 
     pay_url = current_app.config.get('PAY_API_URL')
 
