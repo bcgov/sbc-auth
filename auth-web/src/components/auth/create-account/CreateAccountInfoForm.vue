@@ -1,7 +1,7 @@
 <template>
   <v-form ref="createAccountInfoForm" lazy-validation>
-    <account-premium-create v-if="isPremium()" :stepForward="stepForward" :stepBack="stepBack"></account-premium-create>
-    <account-basic-create v-if="!isPremium()" :stepForward="stepForward" :stepBack="stepBack"></account-basic-create>
+    <account-create-premium v-if="isPremium()" :stepForward="stepForward" :stepBack="stepBack"></account-create-premium>
+    <account-create-basic v-if="!isPremium()" :stepForward="stepForward" :stepBack="stepBack"></account-create-basic>
   </v-form>
 </template>
 
@@ -12,8 +12,8 @@ import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import { Account } from '@/util/constants'
-import AccountBasicCreate from '@/components/auth/CreateAccount/AccountCreateBasic.vue'
-import AccountPremiumCreate from '@/components/auth/CreateAccount/AccountCreatePremium.vue'
+import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
+import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/stepper/Steppable.vue'
@@ -21,8 +21,8 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
-    AccountPremiumCreate,
-    AccountBasicCreate
+    AccountCreatePremium,
+    AccountCreateBasic
   },
   computed: {
     ...mapState('org', ['currentOrganization']),
