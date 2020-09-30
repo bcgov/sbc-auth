@@ -34,6 +34,7 @@ def upgrade():
     org_list: List[Org] = conn.execute(f"select * from org o where status_code = 'ACTIVE';")
 
     token = RestService.get_service_account_token()
+    print('token--------------------------' , token)
 
     account_payment_list: List[AccountPaymentSettingsDeprecated] = conn.execute(
         f"select * from account_payment_settings where is_active;")

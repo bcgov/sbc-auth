@@ -270,6 +270,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
 
     NOTIFY_API_URL = 'http://localhost:8080/notify-api/api/v1'
     BCOL_API_URL = 'http://localhost:8080/bcol-api/api/v1'
+    PAY_API_URL = 'http://localhost:8080/pay-api/api/v1'
 
     # If any value is present in this flag, starts up a keycloak docker
     USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)
