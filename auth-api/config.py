@@ -260,6 +260,9 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     KEYCLOAK_REALMNAME = KEYCLOAK_BCROS_REALMNAME = os.getenv('KEYCLOAK_TEST_REALMNAME')
     JWT_OIDC_AUDIENCE = os.getenv('JWT_OIDC_TEST_AUDIENCE')
     JWT_OIDC_CLIENT_SECRET = os.getenv('JWT_OIDC_TEST_CLIENT_SECRET')
+    # Service account details
+    KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv(('KEYCLOAK_SERVICE_ACCOUNT_ID'))
+    KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
 
     # Legal-API URL
     LEGAL_API_URL = 'https://mock-auth-tools.pathfinder.gov.bc.ca/rest/legal-api/2.7/api/v1'
