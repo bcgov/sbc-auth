@@ -25,7 +25,6 @@ from urllib3.util.retry import Retry
 from auth_api.exceptions import ServiceUnavailableException
 from auth_api.utils.enums import AuthHeaderType, ContentType
 
-
 RETRY_ADAPTER = HTTPAdapter(max_retries=Retry(total=5, backoff_factor=1, status_forcelist=[404]))
 
 
@@ -55,6 +54,48 @@ class RestService:
         try:
             response = requests.post(endpoint, data=data, headers=headers,
                                      timeout=current_app.config.get('CONNECT_TIMEOUT', 10))
+            if raise_for_status:
+                response.raise_for_status()
+        except (ReqConnectionError, ConnectTimeout) as exc:
+            current_app.logger.error('---Error on POST---')
+            current_app.logger.error(exc)
+            raise ServiceUnavailableException(exc)
+        except HTTPError as exc:
+            current_app.logger.error(
+                'HTTPError on POST with status code {}'.format(response.status_code if response else ''))
+            if response and response.status_code >= 500:
+                raise ServiceUnavailableException(exc)
+            raise exc
+        finally:
+            current_app.logger.debug(response.headers if response else 'Empty Response Headers')
+            current_app.logger.info('response : {}'.format(response.text if response else ''))
+
+        current_app.logger.debug('>post')
+        return response
+
+    @staticmethod
+    def put(endpoint, token=None,  # pylint: disable=too-many-arguments
+            auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
+            content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True):
+        """POST service."""
+        current_app.logger.debug('<post')
+
+        if not token:
+            token = _get_token()
+
+        headers = {
+            'Authorization': auth_header_type.value.format(token),
+            'Content-Type': content_type.value
+        }
+        if content_type == ContentType.JSON:
+            data = json.dumps(data)
+
+        current_app.logger.debug('Endpoint : {}'.format(endpoint))
+        current_app.logger.debug('headers : {}'.format(headers))
+        response = None
+        try:
+            response = requests.put(endpoint, data=data, headers=headers,
+                                    timeout=current_app.config.get('CONNECT_TIMEOUT', 10))
             if raise_for_status:
                 response.raise_for_status()
         except (ReqConnectionError, ConnectTimeout) as exc:
@@ -112,6 +153,19 @@ class RestService:
 
         current_app.logger.debug('>GET')
         return response
+
+    @staticmethod
+    def get_service_account_token() -> str:
+        """Generate a service account token."""
+        kc_service_id = current_app.config.get('KEYCLOAK_SERVICE_ACCOUNT_ID')
+        kc_secret = current_app.config.get('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
+        issuer_url = current_app.config.get('JWT_OIDC_ISSUER')
+        # https://sso-dev.pathfinder.gov.bc.ca/auth/realms/fcf0kpqr/protocol/openid-connect/token
+        token_url = issuer_url + '/protocol/openid-connect/token'
+        auth_response = requests.post(token_url, auth=(kc_service_id, kc_secret), headers={
+            'Content-Type': ContentType.FORM_URL_ENCODED.value}, data='grant_type=client_credentials')
+        auth_response.raise_for_status()
+        return auth_response.json().get('access_token')
 
 
 def _get_token() -> str:

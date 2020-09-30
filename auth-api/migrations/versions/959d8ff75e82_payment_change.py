@@ -11,7 +11,7 @@ import sqlalchemy as sa
 from alembic import op
 from flask import current_app
 
-from auth_api.models import AccountPaymentSettings, Org
+from auth_api.models import AccountPaymentSettingsDeprecated, Org
 from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import OrgType
 
@@ -35,9 +35,9 @@ def upgrade():
 
     token = RestService.get_service_account_token()
 
-    account_payment_list: List[AccountPaymentSettings] = conn.execute(
+    account_payment_list: List[AccountPaymentSettingsDeprecated] = conn.execute(
         f"select * from account_payment_settings where is_active;")
-    account_payment_dict: Dict[int, AccountPaymentSettings] = {account_payment.org_id: account_payment for
+    account_payment_dict: Dict[int, AccountPaymentSettingsDeprecated] = {account_payment.org_id: account_payment for
                                                                account_payment in account_payment_list}
 
     pay_url = current_app.config.get('PAY_API_URL')

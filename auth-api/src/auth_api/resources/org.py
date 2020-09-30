@@ -19,7 +19,7 @@ from flask_restplus import Namespace, Resource, cors
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
-from auth_api.schemas import AccountPaymentSettingsSchema, InvitationSchema, MembershipSchema
+from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Affiliation as AffiliationService
@@ -29,7 +29,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.enums import AccessType, AffidavitStatus, ChangeType, NotificationType, Status
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF, USER, Role
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('orgs', description='Endpoints for organization management')
@@ -171,26 +171,6 @@ class Org(Resource):
         try:
             OrgService.delete_org(org_id, token)
             response, status = '', http_status.HTTP_204_NO_CONTENT
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-        return response, status
-
-
-@cors_preflight('GET,OPTIONS')
-@API.route('/<string:org_id>/payment_settings', methods=['GET', 'OPTIONS'])
-class OrgPaymentSettings(Resource):
-    """Resource for managing org payment settings."""
-
-    @staticmethod
-    @TRACER.trace()
-    @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
-    def get(org_id):
-        """Retrieve the set of payment settings associated with the specified org."""
-        try:
-            payment_settings = OrgService.get_payment_settings_for_org(org_id, g.jwt_oidc_token_info,
-                                                                       allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
-            response, status = AccountPaymentSettingsSchema().dump(payment_settings), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

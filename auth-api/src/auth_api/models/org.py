@@ -46,6 +46,8 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     billable = Column('billable', Boolean(), default=True, nullable=False)
     decision_made_by = Column(String(250))
     decision_made_on = Column(DateTime, nullable=True)
+    bcol_user_id = Column(String(20))
+    bcol_account_id = Column(String(20))
 
     contacts = relationship('ContactLink', lazy='select')
     org_type = relationship('OrgType')
@@ -84,6 +86,11 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     def find_by_org_id(cls, org_id):
         """Find an Org instance that matches the provided id."""
         return cls.query.filter_by(id=org_id).first()
+
+    @classmethod
+    def find_by_bcol_id(cls, bcol_account_id):
+        """Find an Org instance that matches the provided id."""
+        return cls.query.filter_by(bcol_account_id=bcol_account_id).first()
 
     @classmethod
     def search_org(cls, access_type, name, status, bcol_account_id,  # pylint: disable=too-many-arguments

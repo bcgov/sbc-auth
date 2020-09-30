@@ -41,12 +41,12 @@
                 <div class="font-weight-bold">
                   {{ currentOrganization.name }}
                 </div>
-                <ul class="bcol-acc__meta" v-if="isPremiumAccount && currentOrgPaymentSettings">
+                <ul class="bcol-acc__meta" v-if="isPremiumAccount">
                   <li>
-                    BC Online Account No: {{currentOrgPaymentSettings.bcolAccountId}}
+                    BC Online Account No: {{currentOrganization.bcolAccountId}}
                   </li>
                   <li>
-                    Prime Contact ID: {{currentOrgPaymentSettings.bcolUserId}}
+                    Prime Contact ID: {{currentOrganization.bcolUserId}}
                   </li>
                 </ul>
               </v-alert>
@@ -150,7 +150,6 @@ import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfigHelper from '@/util/config-helper'
 import OrgAdminContact from '@/components/auth/OrgAdminContact.vue'
 import OrgModule from '@/store/modules/org'
-import { PaymentSettings } from '@/models/PaymentSettings'
 import { addressSchema } from '@/schemas'
 import { getModule } from 'vuex-module-decorators'
 
@@ -164,12 +163,11 @@ import { getModule } from 'vuex-module-decorators'
       'currentOrganization',
       'currentMembership',
       'currentOrgAddress',
-      'currentOrgPaymentSettings',
       'permissions'
     ])
   },
   methods: {
-    ...mapActions('org', ['updateOrg', 'syncAddress', 'syncOrganization', 'syncPaymentSettings']),
+    ...mapActions('org', ['updateOrg', 'syncAddress', 'syncOrganization']),
     ...mapMutations('org', ['setCurrentOrganizationAddress'])
   }
 })
@@ -178,7 +176,6 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
   private btnLabel = 'Save'
   private readonly currentOrganization!: Organization
   private readonly currentOrgAddress!: Address
-  private readonly currentOrgPaymentSettings!: PaymentSettings
   private readonly currentMembership!: Member
   private readonly permissions!: string[]
 
@@ -187,7 +184,6 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
   ) => Promise<Organization>
   private readonly syncAddress!: () => Address
   protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
-  protected readonly syncPaymentSettings!: (currentAccount: number) => Promise<PaymentSettings>
   private orgName = ''
   private errorMessage: string = ''
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
@@ -231,7 +227,6 @@ export default class AccountInfoEdit extends Mixins(AccountChangeMixin) {
     const accountSettings = this.getAccountFromSession()
     this.orgName = this.currentOrganization?.name || ''
     if (this.isPremiumAccount) {
-      await this.syncPaymentSettings(accountSettings.id)
       await this.syncAddress()
     } else {
       // inorder to hide the address if not premium account
