@@ -5,8 +5,6 @@ Revises: 48b340d1fe8b
 Create Date: 2020-04-24 14:54:04.506292
 
 """
-from alembic import op
-import sqlalchemy as sa
 from auth_api.utils.custom_sql import CustomSql
 from alembic import op
 import sqlalchemy as sa

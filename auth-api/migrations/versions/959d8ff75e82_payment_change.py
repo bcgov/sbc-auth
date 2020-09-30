@@ -31,13 +31,14 @@ def upgrade():
     # iterate over each org and invoke payment api to create payment records
 
     conn = op.get_bind()
-    org_list: List[Org] = conn.execute(f"select * from org o where status_code = 'ACTIVE';")
+    org_res = conn.execute(f"select * from org o where status_code = 'ACTIVE';")
+    org_list: List[Org]  = org_res.fetchall()
 
     token = RestService.get_service_account_token()
-    print('token--------------------------', token)
 
-    account_payment_list: List[AccountPaymentSettingsDeprecated] = conn.execute(
+    acc_res = conn.execute(
         f"select * from account_payment_settings where is_active;")
+    account_payment_list: List[AccountPaymentSettingsDeprecated] = acc_res.fetchall()
     account_payment_dict: Dict[int, AccountPaymentSettingsDeprecated] = {account_payment.org_id: account_payment for
                                                                          account_payment in account_payment_list}
 
