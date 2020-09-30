@@ -190,7 +190,7 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_request['bcolUserId'] = org_model.bcol_user_id
 
         # invoke pay-api
-        token = Org._get_service_account_token()
+        token = RestService.get_service_account_token()
         if is_new_org:
             RestService.post(endpoint=f'{pay_url}/accounts',
                              data=pay_request, token=token, raise_for_status=True)
