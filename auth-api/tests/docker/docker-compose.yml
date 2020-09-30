@@ -32,6 +32,7 @@ services:
     depends_on:
       - notify
       - bcol
+      - pay
 
   notify:
     image: stoplight/prism:3.3.0
@@ -44,6 +45,12 @@ services:
     command: >
       mock -p 4010 --host 0.0.0.0
       https://raw.githubusercontent.com/bcgov/sbc-pay/development/docs/docs/api_contract/bcol-api-1.0.0.yaml
+
+  pay:
+    image: stoplight/prism:3.3.0
+    command: >
+      mock -p 4010 --host 0.0.0.0
+      https://raw.githubusercontent.com/saravanpa-aot/sbc-pay/spec/docs/docs/api_contract/pay-api-1.0.0.yaml
 
   minio:
     image: 'bitnami/minio:latest'

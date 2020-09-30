@@ -74,6 +74,7 @@ class Org:  # pylint: disable=too-many-public-methods
         current_app.logger.debug('<create_org ')
         bcol_credential = org_info.pop('bcOnlineCredential', None)
         mailing_address = org_info.pop('mailingAddress', None)
+        is_premium = False
 
         # If the account is created using BCOL credential, verify its valid bc online account
         if bcol_credential:
