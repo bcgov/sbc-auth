@@ -32,11 +32,12 @@ class RestService:
     """Service to invoke Rest services which uses OAuth 2.0 implementation."""
 
     @staticmethod
-    def post(endpoint, token=None,  # pylint: disable=too-many-arguments
-             auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
-             content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True):
-        """POST service."""
-        current_app.logger.debug('<post')
+    def _invoke(rest_method, endpoint, token=None,  # pylint: disable=too-many-arguments
+                auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
+                content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True):
+        """Invoke different method depending on the input."""
+        # just to avoid the duplicate code for PUT and POSt
+        current_app.logger.debug(f'<_invoke-{rest_method}')
 
         if not token:
             token = _get_token()
@@ -52,8 +53,9 @@ class RestService:
         current_app.logger.debug('headers : {}'.format(headers))
         response = None
         try:
-            response = requests.post(endpoint, data=data, headers=headers,
-                                     timeout=current_app.config.get('CONNECT_TIMEOUT', 10))
+            invoke_rest_method = getattr(requests, rest_method)
+            response = invoke_rest_method(endpoint, data=data, headers=headers,
+                                          timeout=current_app.config.get('CONNECT_TIMEOUT', 10))
             if raise_for_status:
                 response.raise_for_status()
         except (ReqConnectionError, ConnectTimeout) as exc:
@@ -74,46 +76,20 @@ class RestService:
         return response
 
     @staticmethod
+    def post(endpoint, token=None,  # pylint: disable=too-many-arguments
+             auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
+             content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True):
+        """POST service."""
+        current_app.logger.debug('<post')
+        return RestService._invoke('post', endpoint, token, auth_header_type, content_type, data, raise_for_status)
+
+    @staticmethod
     def put(endpoint, token=None,  # pylint: disable=too-many-arguments
             auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
             content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True):
         """POST service."""
         current_app.logger.debug('<post')
-
-        if not token:
-            token = _get_token()
-
-        headers = {
-            'Authorization': auth_header_type.value.format(token),
-            'Content-Type': content_type.value
-        }
-        if content_type == ContentType.JSON:
-            data = json.dumps(data)
-
-        current_app.logger.debug('Endpoint : {}'.format(endpoint))
-        current_app.logger.debug('headers : {}'.format(headers))
-        response = None
-        try:
-            response = requests.put(endpoint, data=data, headers=headers,
-                                    timeout=current_app.config.get('CONNECT_TIMEOUT', 10))
-            if raise_for_status:
-                response.raise_for_status()
-        except (ReqConnectionError, ConnectTimeout) as exc:
-            current_app.logger.error('---Error on POST---')
-            current_app.logger.error(exc)
-            raise ServiceUnavailableException(exc)
-        except HTTPError as exc:
-            current_app.logger.error(
-                'HTTPError on POST with status code {}'.format(response.status_code if response else ''))
-            if response and response.status_code >= 500:
-                raise ServiceUnavailableException(exc)
-            raise exc
-        finally:
-            current_app.logger.debug(response.headers if response else 'Empty Response Headers')
-            current_app.logger.info('response : {}'.format(response.text if response else ''))
-
-        current_app.logger.debug('>post')
-        return response
+        return RestService._invoke('put', endpoint, token, auth_header_type, content_type, data, raise_for_status)
 
     @staticmethod
     def get(endpoint, token=None, auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
