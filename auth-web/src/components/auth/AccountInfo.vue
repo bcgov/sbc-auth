@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-0">
+  <v-container>
     <header class="view-header mb-9">
       <h2 class="view-header__title">Account Info</h2>
     </header>
@@ -136,12 +136,7 @@
 <script lang="ts">
 import { AccessType, Account, Pages, Permission, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
-import {
-  CreateRequestBody,
-  Member,
-  MembershipType,
-  Organization
-} from '@/models/Organization'
+import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { AccountSettings } from '@/models/account-settings'

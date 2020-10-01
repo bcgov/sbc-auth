@@ -1,31 +1,31 @@
 <template>
-  <v-container class="pa-0">
-    <header class="view-header align-center mt-n1 mb-5">
+  <div>
+    <header class="view-header align-center mt-n1 mb-7">
       <h2 class="view-header__title">Team Members</h2>
-      <div class="view-header__actions">
-        <v-btn
-          large
-          color="primary"
-          class="font-weight-bold"
-          v-can:INVITE_MEMBERS.hide @click="showInviteUsersModal()"
-          data-test="invite-people-button">
-          <v-icon small class="ml-n1">mdi-plus</v-icon>
-          <span>Invite Team Members</span>
-        </v-btn>
-      </div>
+      <v-btn
+        large
+        color="primary"
+        class="ml-auto"
+        v-can:INVITE_MEMBERS.hide @click="showInviteUsersModal()"
+        data-test="invite-people-button">
+        <v-icon small class="ml-n2">mdi-plus</v-icon>
+        <span>Invite Team Members</span>
+      </v-btn>
     </header>
 
-    <SearchFilterInput
+    <SearchFilterInput class="mb-4"
       :filterParams="searchFilter"
       :filteredRecordsCount="filteredMembersCount"
       @filter-texts="setAppliedFilterValue"
     ></SearchFilterInput>
 
     <!-- Tab Navigation -->
-    <v-tabs class="mb-5" v-model="tab" background-color="transparent">
+    <v-tabs class="mb-8" v-model="tab" background-color="transparent">
       <v-tab data-test="active-tab">Active</v-tab>
       <v-tab data-test="pending-approval-tab" v-can:INVITE_MEMBERS.hide>
-        <v-badge inline color="error"
+        <v-badge
+          inline
+          color="primary"
           :content="pendingApprovalCount"
           :value="pendingApprovalCount">
           Pending Approval
@@ -162,7 +162,7 @@
         </v-btn>
       </template>
     </ModalDialog>
-  </v-container>
+  </div>
 </template>
 
 <script lang="ts">
@@ -371,6 +371,10 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   }
 
   ::v-deep {
+    .v-data-table th {
+      white-space: nowrap;
+    }
+
     .v-data-table td {
       height: auto;
     }
@@ -393,21 +397,5 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
         margin-bottom: 0 !important;
       }
     }
-  }
-
-  .filter-results {
-    opacity: 0;
-    overflow: hidden;
-    max-height: 0;
-    transition: all ease-out 0.25s;
-  }
-
-  .filter-results.active {
-    opacity: 1;
-    max-height: 4rem;
-  }
-
-  .filter-results-label {
-    font-weight: 700;
   }
 </style>

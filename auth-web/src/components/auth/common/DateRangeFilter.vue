@@ -5,16 +5,16 @@
   >
     <template v-slot:activator="{ on }">
       <v-btn
+        block
         depressed
         large
-        class="mr-2 px-3 date-range-btn"
+        class="date-range-btn justify-start px-3"
         color="default"
         v-on="on"
         @click="openDateFilter"
-        height="45"
       >
         <v-icon class="mr-2">mdi-calendar-range</v-icon>
-        Date Range
+        <span class="flex-grow-1 text-left">Date Range</span>
         <v-icon class="ml-1">mdi-menu-down</v-icon>
       </v-btn>
     </template>
@@ -188,11 +188,11 @@ export default class DateRangeFilter extends Vue {
   private get showDateRangeSelected () {
     let dateText = ''
     if ((this.dateFilterSelected?.code === DATEFILTER_CODES.TODAY) || (this.dateFilterSelected?.code === DATEFILTER_CODES.YESTERDAY)) {
-      dateText = `<strong>${this.dateFilterSelected?.label}:</strong> ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')}`
+      dateText = `<strong>${this.dateFilterSelected?.label}:</strong> ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MM-DD-YYYY')}`
     } else {
       dateText = `<strong>${this.dateFilterSelected?.label}:</strong> 
-      ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MMM DD, YYYY')} 
-        - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[1], 'MMM DD, YYYY')}`
+      ${CommonUtils.formatDisplayDate(this.dateRangeSelected[0], 'MM-DD-YYYY')} 
+        - ${CommonUtils.formatDisplayDate(this.dateRangeSelected[1], 'MM-DD-YYYY')}`
     }
     return (this.dateFilterSelected?.code) ? dateText : '<strong>No dates selected</strong>'
   }
