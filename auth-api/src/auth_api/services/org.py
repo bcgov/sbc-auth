@@ -254,7 +254,7 @@ class Org:  # pylint: disable=too-many-public-methods
             # remove the bcol payment details from payment table
             org_info['bcol_account_id'] = ''
             org_info['bcol_user_id'] = ''
-
+            payment_type = Org._get_default_payment_method_for_creditcard()
             # TODO Add the pay-api call here
             Org.__delete_contact(self._model)
 
@@ -264,13 +264,13 @@ class Org:  # pylint: disable=too-many-public-methods
             bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
             payment_type = PaymentType.BCOL.value
-            Org._create_payment_settings(self._model, payment_type, False)
 
             # If mailing address is provided, save it
             if mailing_address:
                 self.add_contact_to_org(mailing_address, self._model)
 
         self._model.update_org_from_dict(camelback2snake(org_info), exclude=('status_code'))
+        Org._create_payment_settings(self._model, payment_type, False)
         return self
 
     @staticmethod
@@ -310,9 +310,6 @@ class Org:  # pylint: disable=too-many-public-methods
             Org._map_response_to_org(bcol_response, org_info)
             is_premium = True
 
-        payment_type = PaymentType.BCOL.value if is_premium else Org._get_default_payment_method_for_creditcard()
-        Org._create_payment_settings(self._model, payment_type, False)
-
         # Update mailing address
         if mailing_address:
             contact = self._model.contacts[0].contact
@@ -320,6 +317,9 @@ class Org:  # pylint: disable=too-many-public-methods
             contact.save()
         if self._model.type_code != OrgType.PREMIUM.value:
             self._model.update_org_from_dict(camelback2snake(org_info))
+
+        payment_type = PaymentType.BCOL.value if is_premium else Org._get_default_payment_method_for_creditcard()
+        Org._create_payment_settings(self._model, payment_type, False)
         current_app.logger.debug('>update_org ')
         return self
 
