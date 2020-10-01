@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <div>
     <header class="view-header align-center mb-5">
       <h2 class="view-header__title">Team Members</h2>
       <div class="view-header__actions">
@@ -16,7 +16,7 @@
       </div>
     </header>
 
-    <SearchFilterInput
+    <SearchFilterInput class="mb-6"
       :filterParams="searchFilter"
       :filteredRecordsCount="teamMembersCount"
       @filter-texts="setAppliedFilterValue"
@@ -221,7 +221,7 @@
         <v-btn large color="error" @click="close($refs.errorDialog)">OK</v-btn>
       </template>
     </ModalDialog>
-  </v-container>
+  </div>
 </template>
 
 <script lang="ts">
@@ -348,35 +348,24 @@ export default class AnonymousUserManagement extends Mixins(
 </script>
 
 <style lang="scss" scoped>
-.view-header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-.v-text-field {
-  margin: 2px;
-}
-
-::v-deep {
-  .v-data-table td {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    height: auto;
-    vertical-align: top;
+  .view-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
   }
 
-  .v-list-item__title {
-    display: block;
-    font-weight: 700;
-  }
+  ::v-deep {
+    .v-data-table td {
+      height: auto;
+    }
 
-  .v-badge--inline .v-badge__wrapper {
-    margin-left: 0;
+    .v-badge--inline .v-badge__wrapper {
+      margin-left: 0;
 
-    .v-badge__badge {
-      margin-right: -0.25rem;
-      margin-left: 0.25rem;
+      .v-badge__badge {
+        margin-right: -0.25rem;
+        margin-left: 0.25rem;
+      }
     }
   }
-}
 </style>

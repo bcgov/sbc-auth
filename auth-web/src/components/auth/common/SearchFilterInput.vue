@@ -1,84 +1,85 @@
 <template>
   <div>
-    <v-row>
-      <v-col :cols="colCount" class="d-flex flex-row pt-0 mb-3">
-        <div
-          v-for="filter in filterParams"
-          :key="filter.id"
-        >
-          <template v-if="isDateRange(filter)">
-            <DateRangeFilter
-              :dateFilterProp="filter.appliedFilterValue"
-              @emit-date-filter="applyDateFilter($event, filter)"
-            >
-            </DateRangeFilter>
-          </template>
-          <v-text-field
-            v-else
-            dense
-            filled
-            single-line
-            hide-details
-            height="43"
-            class="filter-input mr-2 body-2"
-            :placeholder="filter.placeholder"
-            v-model="filter.filterInput"
-            @keydown.enter="applyFilter"
-          ></v-text-field>
-        </div>
-        <v-btn
-          large
-          depressed
-          color="primary"
-          aria-label="Apply Filter"
-          title="Apply Filter"
-          class="apply-filter-btn"
-          @click="applyFilter"
-          :disabled="!isApplyFilterEnabled"
-        >
-          Apply Filter
-        </v-btn>
-      </v-col>
-    </v-row>
-    <div class="filter-results" :class="{ 'active' : (showFilteredChips && isDataFetchCompleted) }">
-      <div class="d-flex align-center mb-8">
-        <div class="filter-results-label py-2 mr-4">{{filteredRecordsCount}} {{filteredRecordsCount === 1 ? 'record' : 'records'}} found</div>
-        <div
-          v-for="filter in filterParams"
-          :key="filter.id"
-        >
-          <v-chip
-            close
-            label
-            color="primary"
-            class="mr-2"
-            v-if="filter.appliedFilterValue"
-            close-icon="mdi-window-close"
-            aria-label="Clear Filter"
-            :title="`Clear ${filter.placeholder} Filter`"
-            @click:close="clearAppliedFilter(filter)"
+    <div class="filter-bar mx-n1">
+      <div class="filter-item mb-3 px-1"
+        v-for="filter in filterParams"
+        :key="filter.id"
+      >
+        <template v-if="isDateRange(filter)">
+          <DateRangeFilter
+            :dateFilterProp="filter.appliedFilterValue"
+            @emit-date-filter="applyDateFilter($event, filter)"
           >
-            <template v-if="filter.labelKey">
-              <span class="mr-1">{{filter.labelKey}}:</span>
-            </template>
-            <template v-if="isDateRange(filter)">
-              {{getDateFilterLabel(filter.appliedFilterValue)}}
-            </template>
-            <template v-else>
-              {{filter.appliedFilterValue}}
-            </template>
-          </v-chip>
+          </DateRangeFilter>
+        </template>
+        <v-text-field
+          v-else
+          dense
+          filled
+          single-line
+          hide-details
+          height="43"
+          class="filter-input"
+          :placeholder="filter.placeholder"
+          v-model="filter.filterInput"
+          @keydown.enter="applyFilter"
+        ></v-text-field>
+      </div>
+      <v-btn
+        large
+        color="primary"
+        aria-label="Apply Filter"
+        title="Apply Filter"
+        class="apply-filter-btn mx-1 mb-3"
+        @click="applyFilter"
+        :disabled="!isApplyFilterEnabled"
+      >
+        Apply Filter
+      </v-btn>
+    </div>
+    <div class="filter-results" :class="{ 'active' : (showFilteredChips && isDataFetchCompleted) }">
+      <div class="filter-results-inner pt-4 pt-md-3">
+        <div class="filter-results-label mb-1 mb-md-0 mr-4">{{filteredRecordsCount}} {{filteredRecordsCount === 1 ? 'record' : 'records'}} found</div>
+        <div class="filter-results-chips mx-n1">
+          <div
+            v-for="filter in filterParams"
+            :key="filter.id"
+          >
+            <v-chip
+              label
+              close
+              close-icon="mdi-window-close"
+              class="ma-1"
+              color="primary"
+              v-if="filter.appliedFilterValue"
+              aria-label="Clear Filter"
+              :title="`Clear ${filter.placeholder} filter`"
+              @click:close="clearAppliedFilter(filter)"
+            >
+              <template v-if="filter.labelKey">
+                <span class="mr-1">{{filter.labelKey}}:</span>
+              </template>
+              <template v-if="isDateRange(filter)">
+                {{getDateFilterLabel(filter.appliedFilterValue)}}
+              </template>
+              <template v-else>
+                {{filter.appliedFilterValue}}
+              </template>
+            </v-chip>
+          </div>
+          <v-btn
+            small
+            outlined
+            color="primary"
+            class="ma-1 px-2"
+            height="32"
+            aria-label="Clear all filters"
+            title="Clear all filters"
+            @click="clearAllFilters"
+          >
+            Clear all filters
+          </v-btn>
         </div>
-        <v-btn
-          outlined
-          color="primary"
-          class="px-2"
-          aria-label="Clear all filters"
-          title="Clear all filters"
-          @click="clearAllFilters"
-        >
-          Clear Filters
-        </v-btn>
       </div>
     </div>
   </div>
@@ -163,8 +164,36 @@ export default class SearchFilterInput extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  .filter-input {
-    max-width: 20rem;
+  ::v-deep {
+    .v-text-field__slot input {
+      font-size: 0.875rem;
+    }
+
+    .v-label {
+      font-size: 0.875rem !important;
+      top: 12px !important;
+    }
+
+    .v-input__prepend-inner {
+      margin-top: 10px !important;
+      margin-right: 5px !important;
+    }
+  }
+
+  .filter-item {
+    flex: 1 1 auto;
+  }
+
+  @media (min-width: 1024px) {
+    .filter-bar {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .filter-item {
+      max-width: 12rem;
+      flex: 0 0 auto;
+    }
   }
 
   .filter-results {
@@ -176,14 +205,24 @@ export default class SearchFilterInput extends Vue {
 
   .filter-results.active {
     opacity: 1;
-    max-height: 4rem;
+    max-height: 12rem;
   }
 
   .filter-results-label {
     font-weight: 700;
   }
 
-  .v-chip {
-    height: 36px !important;
+  .filter-results-chips {
+    div {
+      display: inline-block;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .filter-results-inner {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
   }
 </style>

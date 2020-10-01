@@ -9,12 +9,13 @@
       <h2 class="view-header__title">Statements</h2>
       <v-btn
         large
+        depressed
         aria-label="Statement Settings"
         title="Open Statement Settings"
         @click.stop="openSettingsModal"
       >
         <v-icon small class="mr-2 ml-n1">mdi-settings</v-icon>
-        Statement Settings
+        Settings
       </v-btn>
     </header>
     <div>
