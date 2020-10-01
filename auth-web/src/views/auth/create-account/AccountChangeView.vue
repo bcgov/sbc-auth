@@ -14,11 +14,11 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import Stepper, { StepConfiguration } from '@/components/auth/stepper/Stepper.vue'
 import { mapActions, mapState } from 'vuex'
-import AccountCreateBasic from '@/components/auth/CreateAccount/AccountCreateBasic.vue'
-import AccountCreatePremium from '@/components/auth/CreateAccount/AccountCreatePremium.vue'
-import AccountTypeSelector from '@/components/auth/CreateAccount/AccountTypeSelector.vue'
+import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
+import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
+import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
 import ConfigHelper from '@/util/config-helper'
-import CreateAccountInfoForm from '@/components/auth/CreateAccount/CreateAccountInfoForm.vue'
+import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import UserProfileForm from '@/components/auth/UserProfileForm.vue'
 
 @Component({
@@ -31,7 +31,7 @@ import UserProfileForm from '@/components/auth/UserProfileForm.vue'
     Stepper
   }
 })
-export default class AccountSetupView extends Vue {
+export default class AccountChangeView extends Vue {
   private stepperConfig: Array<StepConfiguration> =
     [
       {

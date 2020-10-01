@@ -343,10 +343,8 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
 .bcol-auth {
   max-width: 40rem;
 
-  ::v-deep {
-    .v-input__slot {
-      align-items: flex-start;
-    }
+  ::v-deep .v-input__slot{
+    align-items: flex-start;
   }
 }
 
