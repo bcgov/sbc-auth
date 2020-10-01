@@ -1,7 +1,6 @@
 <template>
   <v-container
-    class="view-container"
-    :class="{ 'crumbs-visible' : isDirSearchUser || isStaff }"
+    class="view-container pt-0"
   >
 
     <!-- Director Search - Breadcrumbs / Back Navigation -->
@@ -24,6 +23,22 @@
       </div>
     </nav>
 
+    <!-- Back Button -->
+
+    <nav class="crumbs py-6" v-if="!isDirSearchUser && !isStaff">
+      <div>
+        <a href="javascript:void()"
+          data-test="account-settings-back-button"
+          @click="handleBackButton()"
+        >
+          <v-icon small
+            color="primary"
+            class="mr-1">mdi-arrow-left</v-icon>
+          <span>Manage Businesses</span>
+        </a>
+      </div>
+    </nav>
+
     <!-- Loading status -->
     <v-fade-transition>
       <div class="loading-container" v-if="isLoading">
@@ -31,34 +46,22 @@
       </div>
     </v-fade-transition>
 
-    <div class="view-header">
-      <v-btn large icon color="secondary"
-        class="back-btn mr-3"
-        @click="handleBackButton()"
-        v-if="!isDirSearchUser && !isStaff"
-        data-test="account-settings-back-button">
-        <v-icon>mdi-arrow-left</v-icon>
-      </v-btn>
-      <div v-if="!isStaff">
-        <h1 class="view-header__title" data-test="account-settings-title">Account Settings</h1>
-        <p class="mt-3 mb-0">Manage account information and users of this account</p>
-      </div>
-      <div v-if="isStaff">
-        <h1 class="view-header__title" data-test="account-settings-title">{{currentOrganization.name}}</h1>
-        <p class="mt-3 mb-0">Manage account settings, team members, and view transactions for this account</p>
-      </div>
+    <div class="view-header flex-column">
+      <h1 class="view-header__title" data-test="account-settings-title">{{currentOrganization.name}}</h1>
+      <p class="mt-3 mb-0" v-if="isPremiumAccount">Manage account information, and view account activity.</p>
+      <p class="mt-3 mb-0" v-else>Manage account information, team members, and authentication settings.</p>
     </div>
 
     <v-card flat class="account-settings-card" data-test="account-settings-card">
-      <v-container class="nav-container py-7 pl-4">
+      <v-container class="nav-container py-6 pr-0 pl-8">
         <v-navigation-drawer permanent width="auto" data-test="account-nav-drawer">
           <v-list class="py-0" role="navigation" aria-label="Account Navigation">
           <!-- Manage Account -->
             <v-list-item-group color="primary">
-              <v-subheader>MANAGE ACCOUNT</v-subheader>
+              <v-subheader class="px-0">MANAGE ACCOUNT</v-subheader>
               <v-list-item
                 dense
-                class="py-1 px-8"
+                class="py-1 px-4"
                 aria-label="Account Information"
                 :to="accountInfoUrl"
                 data-test="account-info-nav-item">
@@ -69,7 +72,7 @@
               </v-list-item>
               <v-list-item
                 dense
-                class="py-1 px-8"
+                class="py-1 px-4"
                 aria-label="Account Team Members"
                 :to="teamMembersUrl"
                 data-test="team-members-nav-item">
@@ -80,7 +83,7 @@
               </v-list-item>
               <v-list-item
                 dense
-                class="py-1 px-8"
+                class="py-1 px-4"
                 aria-label="Team Member Authentication Methods"
                 :to="accountAuthUrl"
                 v-if="isRegularAccount"
@@ -96,10 +99,10 @@
           <!-- Account Activity -->
           <v-list v-if="isPremiumAccount" v-can:MANAGE_STATEMENTS.hide>
             <v-list-item-group color="primary">
-              <v-subheader class="mt-4">ACCOUNT ACTIVITY</v-subheader>
+              <v-subheader class="mt-2 px-0">ACCOUNT ACTIVITY</v-subheader>
               <v-list-item
                 dense
-                class="py-1 px-8"
+                class="py-1 px-4"
                 aria-label="Account Statements"
                 :to="statementsUrl"
                 data-test="statements-nav-item"
@@ -111,7 +114,7 @@
               </v-list-item>
               <v-list-item
                 dense
-                class="py-1 px-8"
+                class="py-1 px-4"
                 aria-label="Account Transactions"
                 :to="transactionUrl"
                 data-test="transactions-nav-item"
@@ -126,7 +129,7 @@
         </v-navigation-drawer>
       </v-container>
       <transition name="fade" mode="out-in">
-        <router-view class="account-settings__content px-10 py-9"></router-view>
+        <router-view class="account-settings__content pt-7 pb-10 px-10"></router-view>
       </transition>
     </v-card>
   </v-container>
@@ -209,7 +212,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   .nav-container {
     flex: 0 0 auto;
-    width: 17rem;
+    width: 17.75rem;
     border-radius: 0 !important;
   }
 

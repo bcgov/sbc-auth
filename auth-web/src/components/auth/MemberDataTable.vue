@@ -2,7 +2,6 @@
   <div>
   <v-data-table
     v-if="roleInfos"
-    :mobile-breakpoint="1024"
     :headers="headerMembers"
     :items="indexedOrgMembers"
     :items-per-page="5"
@@ -292,7 +291,7 @@ export default class MemberDataTable extends Vue {
       align: 'right',
       value: 'action',
       sortable: false,
-      width: '140'
+      width: '120'
     }
   ]
 

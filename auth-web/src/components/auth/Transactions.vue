@@ -1,23 +1,22 @@
 <template>
-  <v-container>
-    <header class="view-header mb-6">
+  <v-container class="transaction-container">
+    <header class="view-header align-center mb-7">
       <h2 class="view-header__title">Transactions</h2>
       <v-btn
         large
         color="primary"
-        class="font-weight-bold"
+        class="font-weight-bold ml-auto"
         @click="exportCSV"
       >Export CSV</v-btn>
     </header>
-    <div>
-      <SearchFilterInput
-        :filterParams="searchFilter"
-        :filteredRecordsCount="totalTransactionsCount"
-        @filter-texts="setAppliedFilterValue"
-        :isDataFetchCompleted="isTransactionFetchDone"
-      ></SearchFilterInput>
-    </div>
+    <SearchFilterInput
+      :filterParams="searchFilter"
+      :filteredRecordsCount="totalTransactionsCount"
+      @filter-texts="setAppliedFilterValue"
+      :isDataFetchCompleted="isTransactionFetchDone"
+    ></SearchFilterInput>
     <TransactionsDataTable
+      class="mt-4"
       :transactionFilters="transactionFilterProp"
       :key="updateTransactionTableCounter"
       @total-transaction-count="setTotalTransactionCount"
@@ -82,15 +81,15 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
       },
       {
         id: SearchFilterCodes.USERNAME,
-        placeholder: 'Initiated By',
-        labelKey: 'Initiated By',
+        placeholder: 'Initiated by',
+        labelKey: 'Initiated by',
         appliedFilterValue: '',
         filterInput: ''
       },
       {
         id: SearchFilterCodes.FOLIONUMBER,
-        placeholder: 'Folio #',
-        labelKey: 'Folio',
+        placeholder: 'Folio Number',
+        labelKey: 'Folio Number',
         appliedFilterValue: '',
         filterInput: ''
       }
@@ -152,6 +151,10 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
     justify-content: space-between;
   }
 
+  .transaction-container {
+    overflow: hidden;
+  }
+
   .folio-number-field {
     border-top-right-radius: 0px;
     border-bottom-right-radius: 0px;
@@ -208,20 +211,6 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   ::v-deep {
     .v-text-field--outlined.v-input--dense .v-label {
       top: 14px !important;
-    }
-
-    .v-text-field__slot input {
-      font-size: 0.875rem;
-    }
-
-    .v-label {
-      font-size: 0.875rem !important;
-      top: 12px !important;
-    }
-
-    .v-input__prepend-inner {
-      margin-top: 10px !important;
-      margin-right: 5px !important;
     }
 
     .date-picker-disable {

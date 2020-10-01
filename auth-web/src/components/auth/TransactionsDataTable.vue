@@ -46,7 +46,7 @@
         </div>
       </template>
       <template v-slot:[`item.transactionDate`]="{ item }">
-        {{formatDate(item.transactionDate)}}
+        <span style="white-space: nowrap;">{{formatDate(item.transactionDate)}}</span>
       </template>
       <template v-slot:[`item.totalAmount`]="{ item }">
         <div class="font-weight-bold">
@@ -102,31 +102,30 @@ export default class TransactionsDataTable extends Vue {
       value: 'transactionNames'
     },
     {
-      text: 'Folio #',
+      text: 'Folio Number',
       align: 'left',
       sortable: false,
-      value: 'folioNumber',
-      width: '120'
+      value: 'folioNumber'
     },
     {
-      text: 'Initiated By',
+      text: 'Initiated by',
       align: 'left',
       sortable: false,
-      value: 'initiatedBy'
+      value: 'initiatedBy',
+      width: '170'
     },
     {
       text: 'Date',
       align: 'left',
       value: 'transactionDate',
       sortable: false,
-      width: '115'
+      width: '110'
     },
     {
       text: 'Total Amount',
       align: 'right',
       value: 'totalAmount',
-      sortable: false,
-      width: '125'
+      sortable: false
     },
     {
       text: 'Status',
@@ -238,6 +237,10 @@ export default class TransactionsDataTable extends Vue {
 }
 
 ::v-deep {
+  th {
+    white-space: nowrap;
+  }
+
   td {
     padding-top: 1rem !important;
     padding-bottom: 1rem !important;

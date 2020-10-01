@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="team-mgmt-container">
     <UserManagement
       v-if="!isAnonymousAccount()"
      ></UserManagement>
@@ -49,5 +49,7 @@ export default class TeamManagement extends Mixins(NextPageMixin) {
 </script>
 
 <style lang="scss" scoped>
-
+  .team-mgmt-container {
+    overflow: hidden;
+  }
 </style>
