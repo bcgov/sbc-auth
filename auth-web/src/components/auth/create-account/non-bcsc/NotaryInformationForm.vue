@@ -93,5 +93,3 @@ export default class NotaryInformationForm extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>
