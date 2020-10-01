@@ -13,10 +13,10 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import Stepper, { StepConfiguration } from '@/components/auth/stepper/Stepper.vue'
-import AccountCreateBasic from '@/components/auth/CreateAccount/AccountCreateBasic.vue'
-import AccountCreatePremium from '@/components/auth/CreateAccount/AccountCreatePremium.vue'
-import AccountTypeSelector from '@/components/auth/CreateAccount/AccountTypeSelector.vue'
-import CreateAccountInfoForm from '@/components/auth/CreateAccount/CreateAccountInfoForm.vue'
+import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
+import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
+import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
+import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 
 import UserProfileForm from '@/components/auth/UserProfileForm.vue'
 
