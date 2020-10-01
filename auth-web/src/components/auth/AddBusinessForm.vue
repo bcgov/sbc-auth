@@ -85,7 +85,7 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 import BusinessModule from '@/store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
-import HelpDialog from '@/components/auth/HelpDialog.vue'
+import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { Organization } from '@/models/Organization'
 import { getModule } from 'vuex-module-decorators'
 

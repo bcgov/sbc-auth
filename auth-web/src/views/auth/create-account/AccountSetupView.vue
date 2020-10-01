@@ -12,7 +12,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import Stepper, { StepConfiguration } from '@/components/auth/stepper/Stepper.vue'
+import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'

@@ -7,7 +7,7 @@
         <a class="text-decoration-underline" @click="goToAccountSettings">account settings.</a>
       </p>
     </div>
-    <account-login-option-chooser @auth-type-selected="setLoginOption"></account-login-option-chooser>
+    <account-login-option-picker @auth-type-selected="setLoginOption"></account-login-option-picker>
     <div class="d-flex mt-10 justify-center">
       <v-btn
         large
@@ -27,12 +27,12 @@ import { Component, Mixins } from 'vue-property-decorator'
 import { LoginSource, Pages } from '@/util/constants'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
-import AccountLoginOptionPicker from '@/components/auth/AccountLoginOptionPicker.vue'
+import AccountLoginOptionPicker from '@/components/auth/common/AccountLoginOptionPicker.vue'
 import { Organization } from '@/models/Organization'
 
 @Component({
   components: {
-    AccountLoginOptionChooser: AccountLoginOptionPicker
+    AccountLoginOptionPicker
   },
   computed: {
     ...mapState('org', [

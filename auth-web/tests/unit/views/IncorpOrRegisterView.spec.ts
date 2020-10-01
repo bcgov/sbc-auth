@@ -1,5 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import IncorpOrRegisterView from '@/views/auth/IncorpOrRegisterView.vue'
+import IncorpOrRegisterView from '@/views/auth/home/IncorpOrRegisterView.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
 import Vue from 'vue'

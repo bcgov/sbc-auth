@@ -1,5 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import DecideBusinessView from '@/views/auth/DecideBusinessView.vue'
+import DecideBusinessView from '@/views/auth/home/DecideBusinessView.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'

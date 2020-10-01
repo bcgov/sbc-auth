@@ -15,14 +15,14 @@ import ChooseAuthMethodView from '@/views/auth/ChooseAuthMethodView.vue'
 import ConfigHelper from '@/util/config-helper'
 import CreateAccountView from '@/views/auth/CreateAccountView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
-import DecideBusinessView from '@/views/auth/DecideBusinessView.vue'
+import DecideBusinessView from '@/views/auth/home/DecideBusinessView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
-import HomeView from '@/views/auth/HomeView.vue'
-import IncorpOrRegisterView from '@/views/auth/IncorpOrRegisterView.vue'
+import HomeView from '@/views/auth/home/HomeView.vue'
+import IncorpOrRegisterView from '@/views/auth/home/IncorpOrRegisterView.vue'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
-import MaintainBusinessView from '@/views/auth/MaintainBusinessView.vue'
+import MaintainBusinessView from '@/views/auth/home/MaintainBusinessView.vue'
 import NonBcscAccountCreationSuccessView from '@/views/auth/create-account/non-bcsc/NonBcscAccountCreationSuccessView.vue'
 import NonBcscAccountSetupView from '@/views/auth/create-account/non-bcsc/NonBcscAccountSetupView.vue'
 import NonBcscInfoView from '@/views/auth/create-account/non-bcsc/NonBcscInfoView.vue'
@@ -31,18 +31,18 @@ import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
 import PaymentView from '@/views/pay/PaymentView.vue'
 import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
-import RequestNameView from '@/views/auth/RequestNameView.vue'
+import RequestNameView from '@/views/auth/home/RequestNameView.vue'
 import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
 import { RouteConfig } from 'vue-router'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
 import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
-import StaffActiveAccountsTable from '@/components/auth/staff/StaffActiveAccountsTable.vue'
+import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
 import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
-import StaffPendingAccountInvitationsTable from '@/components/auth/staff/StaffPendingAccountInvitationsTable.vue'
-import StaffPendingAccountsTable from '@/components/auth/staff/StaffPendingAccountsTable.vue'
-import StaffRejectedAccountsTable from '@/components/auth/staff/StaffRejectedAccountsTable.vue'
+import StaffPendingAccountInvitationsTable from '@/components/auth/staff/account-management/StaffPendingAccountInvitationsTable.vue'
+import StaffPendingAccountsTable from '@/components/auth/staff/account-management/StaffPendingAccountsTable.vue'
+import StaffRejectedAccountsTable from '@/components/auth/staff/account-management/StaffRejectedAccountsTable.vue'
 import TermsOfServiceDeclineView from '@/views/auth/TermsOfServiceDeclineView.vue'
 import TermsOfServiceView from '@/views/auth/TermsOfServiceView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
@@ -62,11 +62,11 @@ function mapReturnPayVars (route: any) {
 
 export function getRoutes (): RouteConfig[] {
   const accountSettings = () => import(/* webpackChunkName: "account-settings" */ '../views/auth/AccountSettings.vue')
-  const accountInfo = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/AccountInfo.vue')
-  const teamManagement = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/TeamManagement.vue')
-  const accountLoginOption = () => import(/* webpackChunkName: "account-settings" */ '../views/auth/AccountSettingsLoginOption.vue')
-  const transaction = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/Transactions.vue')
-  const statements = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/Statements.vue')
+  const accountInfo = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/account-info/AccountInfo.vue')
+  const teamManagement = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/team-management/TeamManagement.vue')
+  const accountLoginOption = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/login-options/AccountSettingsLoginOption.vue')
+  const transaction = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/transaction/Transactions.vue')
+  const statements = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/statement/Statements.vue')
   const routes = [
     { path: '/', name: 'root', redirect: 'home' },
     {

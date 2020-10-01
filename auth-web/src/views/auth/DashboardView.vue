@@ -9,7 +9,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import EntityManagement from '@/components/auth/EntityManagement.vue'
-import TeamManagement from '@/components/auth/TeamManagement.vue'
+import TeamManagement from '@/components/auth/account-settings/team-management/TeamManagement.vue'
 
   @Component({
     name: 'Dashboard',

@@ -25,7 +25,7 @@
           :custom-sort="customSort"
           :calculate-widths="true"
         >
-          <template v-slot:item.info="{ item }">
+          <template v-slot:[`item.info`]="{ item }">
             <div class="meta">
               <v-list-item-title v-if="isNumberedIncorporationApplication(item)">Numbered Benefit Company</v-list-item-title>
               <v-list-item-title v-if="!isNumberedIncorporationApplication(item)">{{ item.name }}</v-list-item-title>
@@ -34,7 +34,7 @@
               <v-list-item-subtitle v-if="isTemporaryBusinessRegistration(item.corpType.code)">Incorporation Application</v-list-item-subtitle>
             </div>
           </template>
-          <template v-slot:item.action="{ item }">
+          <template v-slot:[`item.action`]="{ item }">
             <div class="actions">
               <v-btn small color="primary" @click="goToDashboard(item)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Open</v-btn>
               <!-- <v-btn small depressed @click="editContact(item)" title="Edit Business Profile" data-test="edit-contact-button">Edit</v-btn> -->
@@ -55,7 +55,7 @@ import { Member, MembershipStatus, MembershipType, Organization, RemoveBusinessP
 import { mapActions, mapMutations, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import OrgModule from '@/store/modules/org'
-import TeamManagement from '@/components/auth/TeamManagement.vue'
+import TeamManagement from '@/components/auth/account-settings/team-management/TeamManagement.vue'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({

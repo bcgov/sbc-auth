@@ -48,7 +48,7 @@ import { AddUserBody, Member, Organization } from '@/models/Organization'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
-import ModalDialog from '@/components/auth/ModalDialog.vue'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PasswordRequirementAlert from '@/components/auth/common/PasswordRequirementAlert.vue'
 import { User } from '../../models/user'
 
