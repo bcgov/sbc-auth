@@ -18,7 +18,6 @@ Test suite to ensure that the Org service routines are working as expected.
 from unittest.mock import patch
 
 import pytest
-from flask import current_app
 
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
@@ -41,7 +40,7 @@ from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, PaymentType, ProductCode
+from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, ProductCode
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -69,17 +68,8 @@ def test_create_org_assert_payment_types(session, keycloak_mock):  # pylint:disa
     assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
-    payment_settings = dictionary['payment_settings'][0]
-    assert payment_settings
-    assert payment_settings['preferredPayment'] == PaymentType.CREDIT_CARD.value
-    current_app.config['DIRECT_PAY_ENABLED'] = True
-    org1 = OrgService.create_org(TestOrgInfo.org2, user_id=user.id)
-    assert org1
-    dictionary = org1.as_dict()
-    assert dictionary['name'] == TestOrgInfo.org2['name']
-    payment_settings = dictionary['payment_settings'][0]
-    assert payment_settings
-    assert payment_settings['preferredPayment'] == PaymentType.DIRECT_PAY.value
+    assert dictionary.get('bcol_user_id', None) is None
+    assert dictionary.get('bcol_account_id', None) is None
 
 
 def test_create_product_single_subscription(session, keycloak_mock):  # pylint:disable=unused-argument
@@ -450,11 +440,10 @@ def test_create_org_with_linked_bcol_account(session, keycloak_mock):  # pylint:
     org = OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
     assert org
     dictionary = org.as_dict()
-    payment_settings = dictionary['payment_settings'][0]
-    assert payment_settings
-    assert payment_settings['preferredPayment'] == PaymentType.BCOL.value
     assert dictionary['name'] == TestOrgInfo.bcol_linked()['name']
     assert dictionary['orgType'] == OrgType.PREMIUM.value
+    assert dictionary['bcol_user_id'] is not None
+    assert dictionary['bcol_account_id'] is not None
 
 
 def test_create_org_with_invalid_name_than_bcol_account(session, keycloak_mock):  # pylint:disable=unused-argument

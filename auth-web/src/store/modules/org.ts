@@ -28,7 +28,6 @@ import InvitationService from '@/services/invitation.services'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
-import { PaymentSettings } from '@/models/PaymentSettings'
 import PermissionService from '@/services/permission.services'
 import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
@@ -50,7 +49,6 @@ export default class OrgModule extends VuexModule {
   activeOrgMembers: Member[] = []
   pendingOrgMembers: Member[] = []
   pendingOrgInvitations: Invitation[] = []
-  currentOrgPaymentSettings:PaymentSettings =undefined
   invalidInvitationToken = false
   tokenError = false
   createdUsers: BulkUsersSuccess[] = []
@@ -63,11 +61,6 @@ export default class OrgModule extends VuexModule {
   currentStatementNotificationSettings: StatementNotificationSettings = {} as StatementNotificationSettings
   currentOrgTransactionList: TransactionTableRow[] = []
   statementSettings: StatementSettings = {} as StatementSettings
-
-  @Mutation
-  public setCurrentOrgPaymentSettings (currentOrgPaymentSettings:PaymentSettings) {
-    this.currentOrgPaymentSettings = currentOrgPaymentSettings
-  }
 
   @Mutation
   public setAccessType (accessType:string) {
@@ -481,12 +474,6 @@ export default class OrgModule extends VuexModule {
   public async syncActiveOrgMembers () {
     const response = await OrgService.getOrgMembers(this.context.state['currentOrganization'].id, 'ACTIVE')
     return response.data && response.data.members ? response.data.members : []
-  }
-
-  @Action({ commit: 'setCurrentOrgPaymentSettings', rawError: true })
-  public async syncPaymentSettings () {
-    const response = await OrgService.getPaymentSettings(this.context.state['currentOrganization'].id)
-    return response.data
   }
 
   @Action({ rawError: true })
