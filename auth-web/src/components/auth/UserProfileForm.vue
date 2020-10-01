@@ -457,7 +457,15 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       if (this.isStepperView) {
         this.$router.push('/')
       } else {
-        window.history.back()
+        this.navigateBack()
+      }
+    }
+
+    private navigateBack (): void {
+      if (this.currentOrganization) {
+        this.$router.push(`/account/${this.currentOrganization.id}`)
+      } else {
+        this.$router.push('/home')
       }
     }
 
