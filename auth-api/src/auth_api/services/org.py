@@ -117,7 +117,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         Org.add_product(org.id, token_info)
         payment_type = PaymentType.BCOL.value if is_premium else Org._get_default_payment_method_for_creditcard()
-        Org.create_payment_settings(org, payment_type, True)
+        Org._create_payment_settings(org, payment_type, True)
 
         org.commit()
 
@@ -173,7 +173,7 @@ class Org:  # pylint: disable=too-many-public-methods
             raise BusinessException(Error.DATA_CONFLICT, None)
 
     @staticmethod
-    def create_payment_settings(org_model: OrgModel, payment_info: str, is_new_org: bool = True):
+    def _create_payment_settings(org_model: OrgModel, payment_info: str, is_new_org: bool = True):
         """Add payment settings for the org."""
         pay_url = current_app.config.get('PAY_API_URL')
         pay_request = {
@@ -252,7 +252,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 Org.raise_error_if_duplicate_name(org_info['name'])
 
             # remove the bcol payment details from payment table
-            org_info['bcol_account_number'] = ''
+            org_info['bcol_account_id'] = ''
             org_info['bcol_user_id'] = ''
 
             # TODO Add the pay-api call here
@@ -261,10 +261,10 @@ class Org:  # pylint: disable=too-many-public-methods
         if action == ChangeType.UPGRADE.value:
             if org_info.get('typeCode') != OrgType.PREMIUM.value or bcol_credential is None:
                 raise BusinessException(Error.INVALID_INPUT, None)
-            bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token).json()
+            bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
             payment_type = PaymentType.BCOL.value
-            Org.create_payment_settings(self, payment_type, False)
+            Org._create_payment_settings(self._model, payment_type, False)
 
             # If mailing address is provided, save it
             if mailing_address:
@@ -306,12 +306,12 @@ class Org:  # pylint: disable=too-many-public-methods
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
         if bcol_credential:
-            bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token).json()
+            bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
             is_premium = True
 
         payment_type = PaymentType.BCOL.value if is_premium else Org._get_default_payment_method_for_creditcard()
-        Org.create_payment_settings(self._model, payment_type, False)
+        Org._create_payment_settings(self._model, payment_type, False)
 
         # Update mailing address
         if mailing_address:
