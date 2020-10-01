@@ -38,6 +38,3 @@ export default class StepperStub extends Mixins(Steppable) {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-</style>
