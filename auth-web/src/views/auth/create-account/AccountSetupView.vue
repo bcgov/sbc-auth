@@ -18,7 +18,7 @@ import AccountCreatePremium from '@/components/auth/create-account/AccountCreate
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 
-import UserProfileForm from '@/components/auth/UserProfileForm.vue'
+import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 
   @Component({
     components: {

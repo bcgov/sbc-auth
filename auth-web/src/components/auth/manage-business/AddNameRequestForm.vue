@@ -221,7 +221,7 @@ export default class AddNameRequestForm extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '../../assets/scss/theme.scss';
+@import '$assets/scss/theme.scss';
   .lost-passcode-btn {
     margin-right: auto;
   }
