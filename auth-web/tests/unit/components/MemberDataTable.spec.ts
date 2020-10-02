@@ -1,5 +1,5 @@
 import { Wrapper, createLocalVue, mount, shallowMount } from '@vue/test-utils'
-import MemberDataTable from '@/components/auth/MemberDataTable.vue'
+import MemberDataTable from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
 import OrgModule from '@/store/modules/org'
 import OrgService from '../../../src/services/org.services'
 import UserModule from '@/store/modules/user'

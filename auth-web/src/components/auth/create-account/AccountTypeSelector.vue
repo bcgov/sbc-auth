@@ -130,7 +130,7 @@ import ConfigHelper from '@/util/config-helper'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
-import Steppable from '@/components/auth/stepper/Steppable.vue'
+import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 
   @Component({
     components: {

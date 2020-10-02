@@ -12,14 +12,14 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import Stepper, { StepConfiguration } from '@/components/auth/stepper/Stepper.vue'
+import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { AccessType } from '@/util/constants'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
-import UserProfileForm from '@/components/auth/UserProfileForm.vue'
+import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 
 @Component({
   components: {

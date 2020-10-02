@@ -5,7 +5,7 @@
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator'
-import InterimLanding from '@/components/auth/InterimLanding.vue'
+import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 
 import Vue from 'vue'
 
