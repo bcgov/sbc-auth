@@ -58,8 +58,10 @@ def upgrade():
             }
         }
         if is_premium := org.type_code == OrgType.PREMIUM.value:
-            pay_request['bcolAccountNumber'] = getattr(account_payment_detail, 'bcol_account_id', '')
-            pay_request['bcolUserId'] = getattr(account_payment_detail, 'bcol_user_id', '')
+            bcol_account_number = getattr(account_payment_detail, 'bcol_account_id', '')
+            bcol_user_id = getattr(account_payment_detail, 'bcol_user_id', '')
+            pay_request['bcolAccountNumber'] = bcol_account_number
+            pay_request['bcolUserId'] = bcol_user_id
 
         accounts_url = f'{pay_url}/accounts/{org.id}'
         RestService.put(endpoint=accounts_url,
@@ -67,8 +69,8 @@ def upgrade():
 
         if is_premium:
             op.execute(
-                f"update org set bcol_account_id = '{account_payment_detail.bcol_account_id}' , "
-                f"bcol_user_id = '{account_payment_detail.bcol_user_id}' where id={org.id}")
+                f"update org set bcol_account_id = '{bcol_account_number}' , "
+                f"bcol_user_id = '{bcol_user_id}' where id={org.id}")
     # ### end Alembic commands ###
 
 
