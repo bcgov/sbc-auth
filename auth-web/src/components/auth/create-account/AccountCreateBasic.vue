@@ -72,16 +72,14 @@ import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
-import BcolLogin from '@/components/auth/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import OrgModule from '@/store/modules/org'
-import Steppable from '@/components/auth/stepper/Steppable.vue'
+import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { addressSchema } from '@/schemas'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
-    BcolLogin,
     BaseAddressForm,
     ConfirmCancelButton
   },

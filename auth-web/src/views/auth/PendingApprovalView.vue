@@ -22,7 +22,7 @@
 import { Component, Prop } from 'vue-property-decorator'
 import { Member, MembershipStatus } from '@/models/Organization'
 
-import InterimLanding from '@/components/auth/InterimLanding.vue'
+import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import Vue from 'vue'
 import { mapState } from 'vuex'
 

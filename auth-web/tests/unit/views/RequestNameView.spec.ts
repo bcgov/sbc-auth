@@ -1,7 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
-import RequestNameView from '@/views/auth/RequestNameView.vue'
+import RequestNameView from '@/views/auth/home/RequestNameView.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'

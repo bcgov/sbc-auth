@@ -112,7 +112,7 @@
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
-import ModalDialog from '@/components/auth/ModalDialog.vue'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import { Organization } from '@/models/Organization'
 import { UserProfileRequestBody } from '@/models/user'

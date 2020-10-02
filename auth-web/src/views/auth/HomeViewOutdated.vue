@@ -243,7 +243,7 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LoginBCSC from '@/components/auth/LoginBCSC.vue'
+import LoginBCSC from '@/components/auth/home/LoginBCSC.vue'
 import { User } from '@/models/user'
 import { VueConstructor } from 'vue'
 

@@ -72,7 +72,7 @@
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import CreateUserProfileForm from '@/components/auth/CreateUserProfileForm.vue'
-import InterimLanding from '@/components/auth/InterimLanding.vue'
+import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import { SessionStorageKeys } from '@/util/constants'
 import Vue from 'vue'
 

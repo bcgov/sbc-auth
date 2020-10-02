@@ -1,6 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import BusinessModule from '@/store/modules/business'
-import InvitationsDataTable from '@/components/auth/InvitationsDataTable.vue'
+import InvitationsDataTable from '@/components/auth/account-settings/team-management/InvitationsDataTable.vue'
 import UserService from '../../../src/services/user.services'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
