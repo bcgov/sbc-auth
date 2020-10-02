@@ -13,7 +13,7 @@ from flask import current_app
 
 from auth_api.models import AccountPaymentSettingsDeprecated, Org
 from auth_api.services.rest_service import RestService
-from auth_api.utils.enums import OrgType
+from auth_api.utils.enums import OrgType, PaymentType
 
 revision = '959d8ff75e82'
 down_revision = '66ae9d618842'
@@ -32,7 +32,7 @@ def upgrade():
 
     conn = op.get_bind()
     org_res = conn.execute(f"select * from org o where status_code = 'ACTIVE';")
-    org_list: List[Org]  = org_res.fetchall()
+    org_list: List[Org] = org_res.fetchall()
 
     token = RestService.get_service_account_token()
 
@@ -43,6 +43,8 @@ def upgrade():
                                                                          account_payment in account_payment_list}
 
     pay_url = current_app.config.get('PAY_API_URL')
+    default_type = PaymentType.DIRECT_PAY.value if current_app.config.get(
+        'DIRECT_PAY_ENABLED') else PaymentType.CREDIT_CARD.value
 
     for org in org_list:
         # invoke pay-api for each org
@@ -51,13 +53,13 @@ def upgrade():
             'accountId': org.id,
             'accountName': org.name,
             'paymentInfo': {
-                'methodOfPayment': account_payment_detail.preferred_payment_code,
+                'methodOfPayment': getattr(account_payment_detail, 'preferred_payment_code', default_type),
                 'billable': org.billable
             }
         }
         if is_premium := org.type_code == OrgType.PREMIUM.value:
-            pay_request['bcolAccountNumber'] = account_payment_detail.bcol_account_id
-            pay_request['bcolUserId'] = account_payment_detail.bcol_user_id
+            pay_request['bcolAccountNumber'] = getattr(account_payment_detail, 'bcol_account_id', '')
+            pay_request['bcolUserId'] = getattr(account_payment_detail, 'bcol_user_id', '')
 
         accounts_url = f'{pay_url}/accounts/{org.id}'
         RestService.put(endpoint=accounts_url,
