@@ -15,10 +15,12 @@
 
 Test suite to ensure that the Org service routines are working as expected.
 """
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import pytest
+from requests import Response
 
+from auth_api.services.rest_service import RestService
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
     TestOrgProductsInfo, TestOrgTypeInfo, TestUserInfo)
@@ -40,7 +42,7 @@ from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, ProductCode
+from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, ProductCode, PaymentType
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -59,6 +61,59 @@ def test_create_org(session, keycloak_mock):  # pylint:disable=unused-argument
     assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
+
+
+def test_create_basic_org_assert_pay_request_is_correct(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
+    user = factory_user_model()
+    with patch.object(RestService, 'post') as mock_post:
+        org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+        assert org
+        dictionary = org.as_dict()
+        assert dictionary['name'] == TestOrgInfo.org1['name']
+        mock_post.assert_called()
+        actual_data = mock_post.call_args.kwargs.get('data')
+        expected_data = {
+            'accountId': dictionary.get('id'),
+            'accountName': dictionary.get('name'),
+            'paymentInfo': {
+                'methodOfPayment': OrgService._get_default_payment_method_for_creditcard(),
+                'billable': True
+            }
+
+        }
+        assert expected_data == actual_data
+
+
+def test_create_premium_org_assert_pay_request_is_correct(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
+    bcol_response = Mock(spec=Response)
+    bcol_response.json.return_value = {'userId': 'PB25020', 'accountNumber': '180670',
+                                       'orgName': 'BC ONLINE TECHNICAL TEAM DEVL'}
+    bcol_response.status_code = 200
+
+    pay_api_response = Mock(spec=Response)
+    pay_api_response.status_code = 201
+
+    with patch.object(RestService, 'post', side_effect=[bcol_response, pay_api_response]) as mock_post:
+        user = factory_user_model()
+        org = OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
+        assert org
+        dictionary = org.as_dict()
+        mock_post.assert_called()
+        actual_data = mock_post.call_args_list[1].kwargs.get('data')
+        expected_data = {
+            'accountId': dictionary.get('id'),
+            'accountName': TestOrgInfo.bcol_linked().get('name'),
+            'paymentInfo': {
+                'methodOfPayment': PaymentType.BCOL.value,
+                'billable': True
+            },
+            'bcolAccountNumber': dictionary.get('bcol_account_id'),
+            'bcolUserId': dictionary.get('bcol_user_id')
+
+        }
+        assert actual_data == expected_data
 
 
 def test_create_org_assert_payment_types(session, keycloak_mock):  # pylint:disable=unused-argument
