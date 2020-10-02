@@ -70,7 +70,6 @@ import { NotaryContact, NotaryInformation } from '@/models/notary'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { Account } from '@/util/constants'
 import { Address } from '@/models/address'
-import BcolLogin from '@/components/auth/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import FileUploadPreview from '@/components/auth/common/FileUploadPreview.vue'
 import NotaryContactForm from '@/components/auth/create-account/non-bcsc/NotaryContactForm.vue'
@@ -83,7 +82,6 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
-    BcolLogin,
     NotaryInformationForm,
     NotaryContactForm,
     ConfirmCancelButton,

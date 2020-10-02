@@ -50,7 +50,7 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PasswordRequirementAlert from '@/components/auth/common/PasswordRequirementAlert.vue'
-import { User } from '../../models/user'
+import { User } from '@/models/user'
 
 @Component({
   components: {
