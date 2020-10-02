@@ -40,22 +40,10 @@
                     </div>
                   </div>
                   </v-list-item-title>
-                <!--
-                <v-list-item-subtitle>Temporary Password: {{ user.password }}</v-list-item-subtitle>
-                -->
               </v-list-item-content>
             </v-list-item>
           </template>
         </v-list>
-        <!--
-        <li class="d-flex justify-start pa-4" v-for="user in createdUsers" :key="user.username">
-          <v-icon color="success" class="mr-5">mdi-check</v-icon>
-          <div>
-            <div class="caption">Username / Password</div>
-            <div><strong>{{ user.username }} / {{ user.password }}</strong></div>
-          </div>
-        </li>
-        -->
       </template>
 
       <template v-if="failedUsers.length">
@@ -88,24 +76,6 @@
           </template>
         </v-list>
       </template>
-
-      <!-- Failed Users List -->
-      <!--
-      <template v-if="failedUsers.length">
-        <p>{{ failedUsers.length }} {{ failedUsers.length > 1 ? 'Team Members' : 'Team Member' }} could not be added to this account.</p>
-        <div>
-          <ul class="team-member__list">
-            <li class="d-flex justify-start pa-4" v-for="user in failedUsers" :key="user.username">
-              <v-icon color="error" class="mr-5">mdi-alert-circle-outline</v-icon>
-              <div>
-                <div class="caption">Username / Error Message</div>
-                <div><strong>{{ user.username }}</strong> ({{ user.error }})</div>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </template>
-      -->
 
       <!-- Login Address -->
       <div class="mt-6" v-if="createdUsers.length">
