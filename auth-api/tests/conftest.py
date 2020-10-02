@@ -142,6 +142,7 @@ def auto(docker_services, app):
         docker_services.start('minio')
         docker_services.start('notify')
         docker_services.start('bcol')
+        docker_services.start('pay')
         docker_services.start('proxy')
         docker_services.wait_for_service('minio', 9000)
         time.sleep(10)

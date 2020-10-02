@@ -31,7 +31,9 @@ export interface Organization {
   statusCode?:string
   decisionMadeBy?: string,
   contactEmail?: string,
-  paymentSettings?: any
+  paymentSettings?: any,
+  bcolAccountId?: string,
+  bcolUserId?: string
 }
 
 export interface UpdateMemberPayload {

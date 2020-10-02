@@ -42,7 +42,6 @@ class Authorization(db.Model):
     product_code = Column(String)
     roles = Column(String)
     org_name = Column(String)
-    preferred_payment_code = Column(String)
     bcol_user_id = Column(String)
     bcol_account_id = Column(String)
     folio_number = Column(String)
