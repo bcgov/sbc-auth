@@ -17,6 +17,7 @@ import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBa
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
+import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 
@@ -27,6 +28,7 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
       AccountTypeSelector,
       AccountCreateBasic,
       AccountCreatePremium,
+      PaymentMethodSelector,
       Stepper
     }
   })
@@ -58,6 +60,12 @@ export default class AccountSetupView extends Vue {
         componentProps: {
           isStepperView: true
         }
+      },
+      {
+        title: 'Select payment method',
+        stepName: 'Payment Method',
+        component: PaymentMethodSelector,
+        componentProps: {}
       }
     ]
 }
