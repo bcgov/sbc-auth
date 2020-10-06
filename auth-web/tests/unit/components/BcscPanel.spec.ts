@@ -1,5 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import BcscPanel from '@/components/auth/BcscPanel.vue'
+import BcscPanel from '@/components/auth/home/BcscPanel.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'

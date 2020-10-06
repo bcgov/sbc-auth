@@ -44,7 +44,7 @@ import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
-import UserProfileForm from '@/components/auth/UserProfileForm.vue'
+import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
 

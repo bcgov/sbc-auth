@@ -29,7 +29,7 @@ class InvitationMembershipSchema(BaseSchema):  # pylint: disable=too-many-ancest
         model = InvitationMembershipModel
 
     org = fields.Nested('OrgSchema', exclude=['contacts', 'created', 'created_by', 'affiliated_entities', 'invitations',
-                                              'members', 'modified', 'payment_settings', 'org_status',
+                                              'members', 'modified', 'org_status',
                                               'org_type'])
 
     invitation = fields.Nested('InvitationSchema', only=('id', 'recipient_email', 'sent_date', 'expires_on', 'status'))

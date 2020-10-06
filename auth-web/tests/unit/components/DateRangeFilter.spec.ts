@@ -116,7 +116,7 @@ describe('DateRangeFilter.vue', () => {
     const start = moment().format('YYYY-MM-DD')
     wrapper.vm.$data.dateFilterSelected = wrapper.vm.$data.dateFilterRanges.find((filterRange) => (filterRange.code === DateFilterCodes.TODAY))
     wrapper.vm.$data.dateRangeSelected = ['2020-09-19', '2020-09-19']
-    expect(wrapper.vm.showDateRangeSelected).toBe('<strong>Today:</strong> Sep 19, 2020')
+    expect(wrapper.vm.showDateRangeSelected).toBe('<strong>Today:</strong> 09-19-2020')
   })
 
   it('initialize before opening date filter model ', () => {

@@ -1,5 +1,5 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-import InviteUsersForm from '@/components/auth/InviteUsersForm.vue'
+import InviteUsersForm from '@/components/auth/account-settings/team-management/InviteUsersForm.vue'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'

@@ -1,5 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import PasswordReset from '@/components/auth/PasswordReset.vue'
+import PasswordReset from '@/components/auth/account-settings/team-management/PasswordReset.vue'
 import { User } from '@/models/user'
 import Vue from 'vue'
 import Vuetify from 'vuetify'

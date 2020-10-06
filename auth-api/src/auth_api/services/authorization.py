@@ -111,7 +111,6 @@ class Authorization:
                 'name': self._model.org_name,
                 'accountType': self._model.org_type,
                 'paymentPreference': {
-                    'methodOfPayment': self._model.preferred_payment_code,
                     'bcOnlineUserId': self._model.bcol_user_id,
                     'bcOnlineAccountId': self._model.bcol_account_id
                 }
