@@ -576,17 +576,17 @@ export default class OrgModule extends VuexModule {
     let transactionTableData = []
     transactionList.forEach(transaction => {
       let transactionNames = []
-      transaction?.invoice?.lineItems?.forEach(lineItem => {
+      transaction?.lineItems?.forEach(lineItem => {
         transactionNames.push(lineItem.description)
       })
       transactionTableData.push({
         id: transaction.id,
         transactionNames: transactionNames,
-        folioNumber: transaction?.invoice?.folioNumber || '',
-        businessIdentifier: transaction?.invoice?.businessIdentifier || '',
+        folioNumber: transaction?.folioNumber || '',
+        businessIdentifier: transaction?.businessIdentifier || '',
         initiatedBy: transaction.createdName,
         transactionDate: transaction.createdOn,
-        totalAmount: (transaction?.invoice?.total || 0).toFixed(2),
+        totalAmount: (transaction?.total || 0).toFixed(2),
         status: transaction.statusCode
       })
     })

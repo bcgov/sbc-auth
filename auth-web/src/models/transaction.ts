@@ -2,18 +2,12 @@ export interface Transaction {
   createdName: string
   createdOn: string
   id: number,
-  invoice: Invoice,
   paymentMethod: string
-  paymentSystem: string
   statusCode: string
   updatedName: string
   updatedOn: string
-}
-
-export interface Invoice {
   businessIdentifier: string
   folioNumber: string
-  id: number
   lineItems: LineItem[]
   paid: number
   refund: number
