@@ -60,12 +60,12 @@
                       <div class="bcol-acc__name mt-n1">
                         {{ accountUnderReview.name }}
                       </div>
-                      <ul class="bcol-acc__meta" v-if="bcolAccountDetails">
+                      <ul class="bcol-acc__meta" v-if="accountUnderReview.bcolAccountId">
                         <li>
-                          Account No: {{ bcolAccountDetails.bcolAccountId }}
+                          Account No: {{ accountUnderReview.bcolAccountId }}
                         </li>
                         <li>
-                          Prime Contact ID: {{ bcolAccountDetails.bcolUserId }}
+                          Prime Contact ID: {{ accountUnderReview.bcolUserId }}
                         </li>
                       </ul>
                     </v-alert>
@@ -271,10 +271,6 @@ export default class ReviewAccountView extends Vue {
       default:
         return ''
     }
-  }
-
-  private get bcolAccountDetails () {
-    return (this.accountUnderReview?.paymentSettings?.length && this.accountUnderReview?.paymentSettings[0].bcolUserId) ? this.accountUnderReview?.paymentSettings[0] : undefined
   }
 
   private get isPendingReviewPage () {

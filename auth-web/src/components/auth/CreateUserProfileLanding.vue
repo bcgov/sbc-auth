@@ -42,7 +42,7 @@
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import CreateUserProfileForm from '@/components/auth/CreateUserProfileForm.vue'
-import InterimLanding from '@/components/auth/InterimLanding.vue'
+import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import Vue from 'vue'
 
 @Component({

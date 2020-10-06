@@ -165,6 +165,13 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     # Config value to disable activity logs
     DISABLE_ACTIVITY_LOGS = os.getenv('DISABLE_ACTIVITY_LOGS', 'False').lower() == 'true'
 
+    # Service account details
+    KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_ID')
+    KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
+
+    # pay-API URL
+    PAY_API_URL = os.getenv('PAY_API_URL')
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     TESTING = False
@@ -253,12 +260,17 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     KEYCLOAK_REALMNAME = KEYCLOAK_BCROS_REALMNAME = os.getenv('KEYCLOAK_TEST_REALMNAME')
     JWT_OIDC_AUDIENCE = os.getenv('JWT_OIDC_TEST_AUDIENCE')
     JWT_OIDC_CLIENT_SECRET = os.getenv('JWT_OIDC_TEST_CLIENT_SECRET')
+    JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_TEST_ISSUER')
+    # Service account details
+    KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')
+    KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
 
     # Legal-API URL
     LEGAL_API_URL = 'https://mock-auth-tools.pathfinder.gov.bc.ca/rest/legal-api/2.7/api/v1'
 
     NOTIFY_API_URL = 'http://localhost:8080/notify-api/api/v1'
     BCOL_API_URL = 'http://localhost:8080/bcol-api/api/v1'
+    PAY_API_URL = 'http://localhost:8080/pay-api/api/v1'
 
     # If any value is present in this flag, starts up a keycloak docker
     USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)

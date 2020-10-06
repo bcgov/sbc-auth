@@ -51,7 +51,7 @@ class Product:
             product_code = subscription.get('productCode')
             product = ProductCodeModel.find_by_code(product_code)
             if product:
-                product_subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code).save()
+                product_subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code).flush()
                 subscriptions_model_list.append(product_subscription)
             else:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)

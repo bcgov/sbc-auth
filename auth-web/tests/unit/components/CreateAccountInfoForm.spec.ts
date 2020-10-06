@@ -1,5 +1,5 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-import CreateAccountInfoForm from '@/components/auth/CreateAccount/CreateAccountInfoForm.vue'
+import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import OrgModule from '@/store/modules/org'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'

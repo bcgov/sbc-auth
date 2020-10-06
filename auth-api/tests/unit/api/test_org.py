@@ -524,11 +524,6 @@ def test_get_org_payment_settings(client, jwt, session, keycloak_mock):  # pylin
     org_id = dictionary['id']
     rv = client.get('/api/v1/orgs/{}/contacts'.format(org_id), headers=headers)
 
-    # Update with same data
-    rv = client.get('/api/v1/orgs/{}/payment_settings'.format(org_id), headers=headers)
-    assert rv.status_code == http_status.HTTP_200_OK
-    dictionary = json.loads(rv.data)
-
 
 def test_update_org_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can not be updated and return 400 error via PUT."""
@@ -1121,7 +1116,7 @@ def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:dis
     assert org_search_response.status_code == http_status.HTTP_200_OK
     orgs = json.loads(org_search_response.data)
     assert orgs.get('orgs')[0].get('name') == TestOrgInfo.bcol_linked()['name']
-    account_id = orgs.get('orgs')[0].get('paymentSettings')[0].get('bcolAccountId')
+    account_id = orgs.get('orgs')[0].get('bcolAccountId')
 
     # do a search with bcol account id and name
     org_search_response = client.get(
@@ -1129,7 +1124,7 @@ def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:dis
         headers=headers, content_type='application/json')
     orgs = json.loads(org_search_response.data)
     assert orgs.get('orgs')[0].get('name') == TestOrgInfo.bcol_linked()['name']
-    new_account_id = orgs.get('orgs')[0].get('paymentSettings')[0].get('bcolAccountId')
+    new_account_id = orgs.get('orgs')[0].get('bcolAccountId')
     assert account_id == new_account_id
 
 
