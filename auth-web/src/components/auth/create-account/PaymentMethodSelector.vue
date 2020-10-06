@@ -14,7 +14,7 @@
         >
         <v-row class="align-center">
           <v-col cols="9">
-            <div class="font-weight-bold mb-1">{{payment.title}}</div>
+            <div class="font-weight-bold mb-1 payment-title">{{payment.title}}</div>
             <div>{{payment.subtitle}}</div>
           </v-col>
           <v-col class="text-right">
@@ -122,7 +122,7 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   }
 
   private save () {
-
+    // create account here
   }
 }
 </script>
