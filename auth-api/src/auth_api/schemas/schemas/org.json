@@ -41,6 +41,15 @@
         ],
         "pattern": "^(.*)$"
       },
+       "paymentType": {
+        "$id": "#/properties/accessType",
+        "type": "string",
+        "title": "Payment Type",
+        "examples": [
+          "PAD", "BCOL", "CC", "ONLINE_BANKING"
+        ],
+        "enum": ["PAD", "BCOL", "CC", "ONLINE_BANKING"]
+      },
       "bcOnlineCredential": {
         "oneOf": [
           {
