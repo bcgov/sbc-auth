@@ -85,6 +85,29 @@ def test_create_basic_org_assert_pay_request_is_correct(session, keycloak_mock):
         assert expected_data == actual_data
 
 
+def test_create_basic_org_assert_pay_request_is_correct_online_banking(session,
+                                                                       keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
+    user = factory_user_model()
+    with patch.object(RestService, 'post') as mock_post:
+        org = OrgService.create_org(TestOrgInfo.org_onlinebanking, user_id=user.id)
+        assert org
+        dictionary = org.as_dict()
+        assert dictionary['name'] == TestOrgInfo.org1['name']
+        mock_post.assert_called()
+        actual_data = mock_post.call_args.kwargs.get('data')
+        expected_data = {
+            'accountId': dictionary.get('id'),
+            'accountName': dictionary.get('name'),
+            'paymentInfo': {
+                'methodOfPayment': PaymentType.ONLINE_BANKING.value,
+                'billable': True
+            }
+
+        }
+        assert expected_data == actual_data
+
+
 def test_create_premium_org_assert_pay_request_is_correct(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
     bcol_response = Mock(spec=Response)
