@@ -43,7 +43,7 @@
         <v-btn
           large
           color="primary"
-          class="mr-3"
+          class="mr-3 save-btn"
           :loading="saving"
           :disabled="!isFormValid() || saving  || !isBaseAddressValid"
           @click="save"
