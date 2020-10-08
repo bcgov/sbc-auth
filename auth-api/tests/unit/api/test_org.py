@@ -347,10 +347,30 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
 
     rv = client.post('/api/v1/orgs', data=json.dumps({'name': 'helo-duplicate'}),
                      headers=headers, content_type='application/json')
+    rv = client.get(f'/api/v1/orgs/{org_id}/contacts', headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    # assert no contacts
+    assert len(dictionary.get('contacts')) == 0
 
     rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo-duplicate'}),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_409_CONFLICT
+
+    # update mailig address
+    org_with_mailing_address = TestOrgInfo.org_with_mailing_address(name='someame')
+    rv = client.put(f'/api/v1/orgs/{org_id}', data=json.dumps(org_with_mailing_address), headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    rv = client.get(f'/api/v1/orgs/{org_id}/contacts', headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    actual_mailing_address = org_with_mailing_address.get('mailingAddress')
+    assert actual_mailing_address.get('city') == dictionary['contacts'][0].get('city')
+    assert actual_mailing_address.get('postalCode') == dictionary['contacts'][0].get('postalCode')
 
 
 def test_upgrade_anon_org_fail(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
