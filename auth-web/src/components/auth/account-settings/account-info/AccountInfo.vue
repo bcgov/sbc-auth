@@ -221,12 +221,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private async setup () {
     const accountSettings = this.getAccountFromSession()
     this.orgName = this.currentOrganization?.name || ''
-    if (this.isPremiumAccount) {
-      await this.syncAddress()
-    } else {
-      // inorder to hide the address if not premium account
-      this.baseAddress = null
-    }
+    await this.syncAddress()
   }
 
   protected getAccountFromSession (): AccountSettings {
@@ -280,7 +275,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     let createRequestBody: CreateRequestBody = {
       name: this.orgName
     }
-    if (this.isPremiumAccount) {
+    if (this.baseAddress) {
       createRequestBody.mailingAddress = { ...this.baseAddress }
     }
     try {

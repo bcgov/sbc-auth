@@ -335,11 +335,16 @@ class Org:  # pylint: disable=too-many-public-methods
             Org._map_response_to_org(bcol_response, org_info)
             is_premium = True
 
-        # Update mailing address
+        # Update mailing address Or create new one
         if mailing_address:
-            contact = self._model.contacts[0].contact
-            contact.update_from_dict(**camelback2snake(mailing_address))
-            contact.save()
+            contacts = self._model.contacts
+            if len(contacts) > 0:
+                contact = self._model.contacts[0].contact
+                contact.update_from_dict(**camelback2snake(mailing_address))
+                contact.save()
+            else:
+                Org.add_contact_to_org(mailing_address, self._model)
+
         if self._model.type_code != OrgType.PREMIUM.value:
             self._model.update_org_from_dict(camelback2snake(org_info))
 
