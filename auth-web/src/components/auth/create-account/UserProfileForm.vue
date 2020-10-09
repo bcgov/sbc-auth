@@ -143,8 +143,23 @@
           color="primary"
           class="save-continue-button mr-2"
           :disabled='!isFormValid()'
-          @click="save" data-test="save-button">
-          {{(isStepperView) ? 'Create Account' : 'Save'}}
+          v-if="!isStepperView"
+          @click="save"
+          data-test="save-button"
+        >
+          Save
+        </v-btn>
+        <v-btn
+          large
+          color="primary"
+          class="save-continue-button mr-3"
+          :disabled='!isFormValid()'
+          @click="next"
+          v-if="isStepperView"
+          data-test="next-button"
+        >
+          Next
+          <v-icon class="ml-2">mdi-arrow-right</v-icon>
         </v-btn>
         <ConfirmCancelButton
           :showConfirmPopup="isStepperView"
@@ -224,9 +239,10 @@
 <script lang="ts">
 
 import { AccessType, Account, LoginSource, Pages, Role } from '@/util/constants'
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { User, UserProfileData } from '@/models/user'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Contact } from '@/models/contact'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
@@ -234,7 +250,6 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 
-import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
 import UserService from '@/services/user.services'
 import configHelper from '@/util/config-helper'
@@ -253,6 +268,7 @@ import { mask } from 'vue-the-mask'
     ...mapState('org', ['currentOrganization'])
   },
   methods: {
+    ...mapMutations('user', ['setUserProfileData']),
     ...mapActions('user',
       [
         'createUserContact',
@@ -265,10 +281,11 @@ import { mask } from 'vue-the-mask'
   }
 })
 export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
-    private readonly createUserContact!: (contact: Contact) => Contact
+    private readonly createUserContact!: (contact?: Contact) => Contact
     private readonly updateUserContact!: (contact: Contact) => Contact
     private readonly getUserProfile!: (identifer: string) => User
-    private readonly updateUserFirstAndLastName!: (user: User) => Contact
+    private readonly updateUserFirstAndLastName!: (user?: User) => Contact
+    private readonly setUserProfileData!: (userProfile: UserProfileData) => void
 
     private readonly createAffidavit!: () => User
     private firstName = ''
@@ -376,22 +393,38 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
           phone: this.phoneNumber,
           phoneExtension: this.extension
         }
-        if (this.stepForward) { // On stepper ;so Save the org
-          this.createAccount(contact, user)
-        } else {
-          if (this.isBCEIDUser) {
-            await this.updateUserFirstAndLastName(user)
-          }
-          await this.saveOrUpdateContact(contact)
-          await this.getUserProfile('@me')
-          // If a token was provided, that means we are in the accept invitation flow
-          // so redirect to /confirmtoken
-          if (this.token) {
-            this.$router.push('/confirmtoken/' + this.token)
-            return
-          }
-          this.redirectToNext()
+        if (this.isBCEIDUser) {
+          await this.updateUserFirstAndLastName(user)
         }
+        await this.saveOrUpdateContact(contact)
+        await this.getUserProfile('@me')
+        // If a token was provided, that means we are in the accept invitation flow
+        // so redirect to /confirmtoken
+        if (this.token) {
+          this.$router.push('/confirmtoken/' + this.token)
+          return
+        }
+        this.redirectToNext()
+      }
+    }
+
+    private next () {
+      const userProfile = {
+        firstname: this.firstName.trim(),
+        lastname: this.lastName.trim(),
+        email: this.emailAddress.toLowerCase(),
+        phone: this.phoneNumber,
+        phoneExtension: this.extension
+      }
+      this.setUserProfileData(userProfile)
+      this.stepForward()
+    }
+
+    @Emit('final-step-action')
+    private emitStepperData (contact:Contact, user:User) {
+      return {
+        contact,
+        user
       }
     }
 

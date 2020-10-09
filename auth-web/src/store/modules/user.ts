@@ -1,5 +1,5 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { DocumentUpload, User } from '@/models/user'
+import { DocumentUpload, User, UserProfileData } from '@/models/user'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -10,6 +10,7 @@ import { RoleInfo } from '@/models/Organization'
 import { SessionStorageKeys } from '@/util/constants'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import UserService from '@/services/user.services'
+import { use } from 'vue/types/umd'
 
 export interface UserTerms {
   isTermsOfUseAccepted: boolean
@@ -29,6 +30,7 @@ export default class UserModule extends VuexModule {
   notaryContact: NotaryContact = undefined
   affidavitDocId:string = '' // the guid of the doc which you get from the server side
   affidavitDoc:File = undefined
+  userProfileData: UserProfileData = undefined
 
   redirectAfterLoginUrl: string = ''
   roleInfos: RoleInfo[] = undefined
@@ -88,6 +90,11 @@ export default class UserModule extends VuexModule {
   @Mutation
   public setTermsOfUse (termsOfUse: TermsOfUseDocument) {
     this.termsOfUse = termsOfUse
+  }
+
+  @Mutation
+  public setUserProfileData (userProfile: UserProfileData) {
+    this.userProfileData = userProfile
   }
 
   @Action({ commit: 'setCurrentUser' })
@@ -163,8 +170,14 @@ export default class UserModule extends VuexModule {
   }
 
   @Action({ commit: 'setUserContact' })
-  public async createUserContact (contact: Contact) {
-    const response = await UserService.createContact(contact)
+  public async createUserContact (contact?: Contact) {
+    const userProfile = this.context.state['userProfileData']
+    const userContact: Contact = contact || {
+      phone: userProfile?.phone,
+      email: userProfile?.email,
+      phoneExtension: userProfile?.phoneExtension
+    }
+    const response = await UserService.createContact(userContact)
     if (response && response.data && response.status === 201) {
       return response.data
     }
@@ -189,8 +202,9 @@ export default class UserModule extends VuexModule {
   }
 
   @Action({ commit: 'setUserProfile' })
-  public async updateUserFirstAndLastName (user: User) {
-    const response = await UserService.updateUserProfile(user.firstname, user.lastname)
+  public async updateUserFirstAndLastName (user?: User) {
+    const updateUser: any = user || this.context.state['userProfileData']
+    const response = await UserService.updateUserProfile(updateUser.firstname, updateUser.lastname)
     if (response && response.data && response.status === 200) {
       return response.data
     }

@@ -45,6 +45,7 @@ export default class OrgModule extends VuexModule {
   currentAccountSettings: AccountSettings = undefined
   currentOrganization: Organization = undefined
   currentOrgAddress:Address = undefined
+  currentOrgPaymentType: string = undefined
   currentMembership: Member = undefined
   activeOrgMembers: Member[] = []
   pendingOrgMembers: Member[] = []
@@ -185,6 +186,16 @@ export default class OrgModule extends VuexModule {
     this.currentStatementNotificationSettings = settings
   }
 
+  @Mutation
+  public setCurrentOrganizationAddress (address: Address | undefined) {
+    this.currentOrgAddress = (address) ? JSON.parse(JSON.stringify(address)) : undefined
+  }
+
+  @Mutation
+  public setCurrentOrganizationPaymentType (paymentType: string) {
+    this.currentOrgPaymentType = paymentType
+  }
+
   @Action({ rawError: true })
   public async resetCurrentOrganization (): Promise<void> {
     this.context.commit('setCurrentOrganization', undefined)
@@ -289,6 +300,7 @@ export default class OrgModule extends VuexModule {
   public async createOrg (): Promise<Organization> {
     const org = this.context.state['currentOrganization']
     const address = this.context.state['currentOrgAddress']
+    const paymentType = this.context.state['currentOrgPaymentType']
     const createRequestBody: CreateRequestBody = {
       name: org.name,
       accessType: this.context.state['accessType']
@@ -298,6 +310,9 @@ export default class OrgModule extends VuexModule {
     }
     if (address) {
       createRequestBody.mailingAddress = address
+    }
+    if (paymentType) {
+      createRequestBody.paymentType = paymentType
     }
     const response = await OrgService.createOrg(createRequestBody)
     const organization = response?.data
@@ -318,11 +333,6 @@ export default class OrgModule extends VuexModule {
     }
     ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify(accountSettings))
     return accountSettings
-  }
-
-  @Mutation
-  public setCurrentOrganizationAddress (address: Address | undefined) {
-    this.currentOrgAddress = (address) ? JSON.parse(JSON.stringify(address)) : undefined
   }
 
   @Action({ rawError: true })
