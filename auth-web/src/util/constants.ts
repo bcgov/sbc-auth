@@ -154,3 +154,11 @@ export enum SearchFilterCodes {
     ACCOUNTNAME = 'accountname',
     FOLIONUMBER = 'folio'
 }
+
+export enum PaymentTypes {
+    CREDIT_CARD = 'CC',
+    BCOL = 'DRAWDOWN',
+    DIRECT_PAY = 'DIRECT_PAY',
+    ONLINE_BANKING = 'ONLINE_BANKING',
+    PAD = 'PAD'
+}

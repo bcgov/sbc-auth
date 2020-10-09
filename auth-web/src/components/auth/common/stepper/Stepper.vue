@@ -21,6 +21,7 @@
             :is="currentStep.component"
             v-bind="getPropsForStep(step)"
             keep-alive
+            @final-step-action="finalStepAction"
           />
         </template>
       </div>
@@ -29,7 +30,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from 'vue-property-decorator'
+import { Component, Emit, Prop } from 'vue-property-decorator'
 import StepperStub from '@/components/auth/common/stepper/StepperStub.vue'
 import Vue from 'vue'
 
@@ -121,6 +122,11 @@ export default class Stepper extends Vue {
 
   private async beforeMount () {
     this.steps = this.stepperConfiguration || this.defaultSteps
+  }
+
+  @Emit('final-step-action')
+  private finalStepAction (stepperData) {
+    return stepperData
   }
 }
 </script>
