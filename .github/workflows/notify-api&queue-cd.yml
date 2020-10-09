@@ -43,7 +43,7 @@ jobs:
         with:
           WORKING_DIRECTORY: "./notify-api"
           APP_NAME: "notify-api"
-          VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"jwt\", \"email\", \"nats\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-notify\", \"notify-api\", \"sentry\"]}]'
+          VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"email\", \"nats\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-notify\", \"notify-api\", \"sentry\", \"jwt\"]}]'
           SKIP_OP: "false"
           OP_PARAMETERS: ${{ secrets.OP_PARAMETERS }}
           OPENSHIFT_LOGIN_REGISTRY: ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }}

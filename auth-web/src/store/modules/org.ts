@@ -45,6 +45,7 @@ export default class OrgModule extends VuexModule {
   currentAccountSettings: AccountSettings = undefined
   currentOrganization: Organization = undefined
   currentOrgAddress:Address = undefined
+  currentOrgPaymentType: string = undefined
   currentMembership: Member = undefined
   activeOrgMembers: Member[] = []
   pendingOrgMembers: Member[] = []
@@ -185,6 +186,16 @@ export default class OrgModule extends VuexModule {
     this.currentStatementNotificationSettings = settings
   }
 
+  @Mutation
+  public setCurrentOrganizationAddress (address: Address | undefined) {
+    this.currentOrgAddress = (address) ? JSON.parse(JSON.stringify(address)) : undefined
+  }
+
+  @Mutation
+  public setCurrentOrganizationPaymentType (paymentType: string) {
+    this.currentOrgPaymentType = paymentType
+  }
+
   @Action({ rawError: true })
   public async resetCurrentOrganization (): Promise<void> {
     this.context.commit('setCurrentOrganization', undefined)
@@ -289,6 +300,7 @@ export default class OrgModule extends VuexModule {
   public async createOrg (): Promise<Organization> {
     const org = this.context.state['currentOrganization']
     const address = this.context.state['currentOrgAddress']
+    const paymentMethod = this.context.state['currentOrgPaymentType']
     const createRequestBody: CreateRequestBody = {
       name: org.name,
       accessType: this.context.state['accessType']
@@ -298,6 +310,9 @@ export default class OrgModule extends VuexModule {
     }
     if (address) {
       createRequestBody.mailingAddress = address
+    }
+    if (paymentMethod) {
+      createRequestBody.paymentMethod = paymentMethod
     }
     const response = await OrgService.createOrg(createRequestBody)
     const organization = response?.data
@@ -318,11 +333,6 @@ export default class OrgModule extends VuexModule {
     }
     ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify(accountSettings))
     return accountSettings
-  }
-
-  @Mutation
-  public setCurrentOrganizationAddress (address: Address | undefined) {
-    this.currentOrgAddress = (address) ? JSON.parse(JSON.stringify(address)) : undefined
   }
 
   @Action({ rawError: true })
@@ -480,12 +490,12 @@ export default class OrgModule extends VuexModule {
   public async syncAddress () {
     const contact = await OrgService.getContactForOrg(this.context.state['currentOrganization'].id)
     // the contact model has lot of values which are not address..strip them off
-    const address:Address = { region: contact.region,
-      city: contact.city,
-      postalCode: contact.postalCode,
-      country: contact.country,
-      street: contact.street,
-      streetAdditional: contact.streetAdditional }
+    const address:Address = { region: contact?.region,
+      city: contact?.city,
+      postalCode: contact?.postalCode,
+      country: contact?.country,
+      street: contact?.street,
+      streetAdditional: contact?.streetAdditional }
     this.context.commit('setCurrentOrganizationAddress', address)
   }
 
@@ -576,17 +586,17 @@ export default class OrgModule extends VuexModule {
     let transactionTableData = []
     transactionList.forEach(transaction => {
       let transactionNames = []
-      transaction?.invoice?.lineItems?.forEach(lineItem => {
+      transaction?.lineItems?.forEach(lineItem => {
         transactionNames.push(lineItem.description)
       })
       transactionTableData.push({
         id: transaction.id,
         transactionNames: transactionNames,
-        folioNumber: transaction?.invoice?.folioNumber || '',
-        businessIdentifier: transaction?.invoice?.businessIdentifier || '',
+        folioNumber: transaction?.folioNumber || '',
+        businessIdentifier: transaction?.businessIdentifier || '',
         initiatedBy: transaction.createdName,
         transactionDate: transaction.createdOn,
-        totalAmount: (transaction?.invoice?.total || 0).toFixed(2),
+        totalAmount: (transaction?.total || 0).toFixed(2),
         status: transaction.statusCode
       })
     })
