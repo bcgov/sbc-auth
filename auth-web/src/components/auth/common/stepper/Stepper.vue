@@ -21,7 +21,7 @@
             :is="currentStep.component"
             v-bind="getPropsForStep(step)"
             keep-alive
-            @final-step-action="finalStepAction"
+            @final-step-action="emitFinalStepAction"
           />
         </template>
       </div>
@@ -125,7 +125,7 @@ export default class Stepper extends Vue {
   }
 
   @Emit('final-step-action')
-  private finalStepAction (stepperData) {
+  private emitFinalStepAction (stepperData) {
     return stepperData
   }
 }
