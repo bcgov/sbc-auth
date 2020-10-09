@@ -300,7 +300,7 @@ export default class OrgModule extends VuexModule {
   public async createOrg (): Promise<Organization> {
     const org = this.context.state['currentOrganization']
     const address = this.context.state['currentOrgAddress']
-    const paymentType = this.context.state['currentOrgPaymentType']
+    const paymentMethod = this.context.state['currentOrgPaymentType']
     const createRequestBody: CreateRequestBody = {
       name: org.name,
       accessType: this.context.state['accessType']
@@ -311,8 +311,8 @@ export default class OrgModule extends VuexModule {
     if (address) {
       createRequestBody.mailingAddress = address
     }
-    if (paymentType) {
-      createRequestBody.paymentType = paymentType
+    if (paymentMethod) {
+      createRequestBody.paymentMethod = paymentMethod
     }
     const response = await OrgService.createOrg(createRequestBody)
     const organization = response?.data

@@ -194,8 +194,14 @@ export default class UserModule extends VuexModule {
   }
 
   @Action({ commit: 'setUserContact' })
-  public async updateUserContact (contact: Contact) {
-    const response = await UserService.updateContact(contact)
+  public async updateUserContact (contact?: Contact) {
+    const userProfile = this.context.state['userProfileData']
+    const userContact: Contact = contact || {
+      phone: userProfile?.phone,
+      email: userProfile?.email,
+      phoneExtension: userProfile?.phoneExtension
+    }
+    const response = await UserService.updateContact(userContact)
     if (response && response.data && response.status === 200) {
       return response.data
     }

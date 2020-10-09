@@ -39,6 +39,7 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
+import { mapActions, mapState } from 'vuex'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
@@ -52,7 +53,6 @@ import PaymentMethodSelector from '@/components/auth/create-account/PaymentMetho
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
-import { mapActions } from 'vuex'
 
 @Component({
   components: {
@@ -64,6 +64,11 @@ import { mapActions } from 'vuex'
     PaymentMethodSelector,
     Stepper,
     ModalDialog
+  },
+  computed: {
+    ...mapState('user', [
+      'userContact'
+    ])
   },
   methods: {
     ...mapActions('user',
@@ -84,8 +89,10 @@ import { mapActions } from 'vuex'
 })
 export default class AccountSetupView extends Vue {
   private readonly currentUser!: KCUserProfile
+  protected readonly userContact!: Contact
   private readonly createOrg!: () => Promise<Organization>
   private readonly createUserContact!: (contact?: Contact) => Contact
+  private readonly updateUserContact!: (contact?: Contact) => Contact
   private readonly getUserProfile!: (identifer: string) => User
   readonly syncOrganization!: (orgId: number) => Promise<Organization>
   readonly syncMembership!: (orgId: number) => Promise<Member>
@@ -135,7 +142,7 @@ export default class AccountSetupView extends Vue {
   private async createAccount () {
     try {
       const organization = await this.createOrg()
-      await this.createUserContact()
+      await this.saveOrUpdateContact()
       await this.getUserProfile('@me')
       await this.syncOrganization(organization.id)
       await this.syncMembership(organization.id)
@@ -166,6 +173,14 @@ export default class AccountSetupView extends Vue {
                   'An error occurred while attempting to create your account.'
       }
       this.$refs.errorDialog.open()
+    }
+  }
+
+  private async saveOrUpdateContact () {
+    if (this.userContact) {
+      await this.updateUserContact()
+    } else {
+      await this.createUserContact()
     }
   }
 

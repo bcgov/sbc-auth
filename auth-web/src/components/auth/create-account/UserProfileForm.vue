@@ -282,7 +282,7 @@ import { mask } from 'vue-the-mask'
 })
 export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private readonly createUserContact!: (contact?: Contact) => Contact
-    private readonly updateUserContact!: (contact: Contact) => Contact
+    private readonly updateUserContact!: (contact?: Contact) => Contact
     private readonly getUserProfile!: (identifer: string) => User
     private readonly updateUserFirstAndLastName!: (user?: User) => Contact
     private readonly setUserProfileData!: (userProfile: UserProfileData) => void
