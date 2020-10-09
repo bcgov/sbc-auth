@@ -41,6 +41,15 @@
         ],
         "pattern": "^(.*)$"
       },
+       "paymentMethod": {
+        "$id": "#/properties/paymentMethod",
+        "type": "string",
+        "title": "Payment Method",
+        "examples": [
+          "PAD", "BCOL", "CC", "ONLINE_BANKING"
+        ],
+        "enum": ["PAD", "BCOL", "CC", "ONLINE_BANKING"]
+      },
       "bcOnlineCredential": {
         "oneOf": [
           {
