@@ -42,6 +42,25 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     assert rv.status_code == http_status.HTTP_201_CREATED
 
 
+def test_add_basic_org_with_online_banking(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_onlinebanking),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+
+def test_add_basic_org_with_pad_throws_error(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    org_info = {'name': 'My Test Org', 'paymentType': 'PAD'}
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(org_info),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+
+
 def test_search_org_by_client(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be searched."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)

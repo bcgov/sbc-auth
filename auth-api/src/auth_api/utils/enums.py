@@ -56,12 +56,14 @@ class RequiredAction(Enum):
     UPDATE_PASSWORD = 'UPDATE_PASSWORD'
 
 
-class PaymentType(Enum):
+class PaymentMethod(Enum):
     """Payment types."""
 
     CREDIT_CARD = 'CC'
     BCOL = 'DRAWDOWN'
     DIRECT_PAY = 'DIRECT_PAY'
+    ONLINE_BANKING = 'ONLINE_BANKING'
+    PAD = 'PAD'
 
 
 class OrgType(Enum):
