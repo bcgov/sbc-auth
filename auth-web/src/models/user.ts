@@ -26,3 +26,11 @@ export interface DocumentUpload {
     preSignedUrl: string
     key: string
 }
+
+export interface UserProfileData {
+    firstname: string;
+    lastname: string;
+    email: string;
+    phone: string;
+    phoneExtension?: string;
+}
