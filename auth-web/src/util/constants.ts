@@ -137,7 +137,8 @@ export enum Permission {
 }
 
 export enum LDFlags {
-    AuthLearnMore = 'auth-options-learn-more'
+    AuthLearnMore = 'auth-options-learn-more',
+    PaymentTypeAccountCreation = 'payment-type-in-account-creation'
 }
 
 export enum DateFilterCodes {
