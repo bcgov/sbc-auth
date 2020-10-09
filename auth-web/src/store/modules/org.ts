@@ -480,12 +480,12 @@ export default class OrgModule extends VuexModule {
   public async syncAddress () {
     const contact = await OrgService.getContactForOrg(this.context.state['currentOrganization'].id)
     // the contact model has lot of values which are not address..strip them off
-    const address:Address = { region: contact.region,
-      city: contact.city,
-      postalCode: contact.postalCode,
-      country: contact.country,
-      street: contact.street,
-      streetAdditional: contact.streetAdditional }
+    const address:Address = { region: contact?.region,
+      city: contact?.city,
+      postalCode: contact?.postalCode,
+      country: contact?.country,
+      street: contact?.street,
+      streetAdditional: contact?.streetAdditional }
     this.context.commit('setCurrentOrganizationAddress', address)
   }
 

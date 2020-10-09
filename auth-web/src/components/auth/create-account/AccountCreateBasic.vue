@@ -15,7 +15,7 @@
         :disabled="saving"
       />
     </fieldset>
-    <template v-if="isExtraProvUser">
+    <template>
       <h4 class="mb-4">Mailing Address</h4>
       <base-address-form
         ref="mailingAddress"
@@ -43,7 +43,7 @@
         <v-btn
           large
           color="primary"
-          class="mr-3"
+          class="mr-3 save-btn"
           :loading="saving"
           :disabled="!isFormValid() || saving  || !isBaseAddressValid"
           @click="save"
@@ -108,7 +108,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private orgName: string = ''
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
-  private isBaseAddressValid: boolean = !this.isExtraProvUser
+  private isBaseAddressValid = false
   private readonly currentOrgAddress!: Address
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
 
