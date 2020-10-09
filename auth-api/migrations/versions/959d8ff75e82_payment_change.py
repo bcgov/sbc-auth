@@ -13,7 +13,7 @@ from flask import current_app
 
 from auth_api.models import AccountPaymentSettingsDeprecated, Org
 from auth_api.services.rest_service import RestService
-from auth_api.utils.enums import OrgType, PaymentType
+from auth_api.utils.enums import OrgType, PaymentMethod
 
 revision = '959d8ff75e82'
 down_revision = '66ae9d618842'
@@ -43,8 +43,8 @@ def upgrade():
                                                                          account_payment in account_payment_list}
 
     pay_url = current_app.config.get('PAY_API_URL')
-    default_type = PaymentType.DIRECT_PAY.value if current_app.config.get(
-        'DIRECT_PAY_ENABLED') else PaymentType.CREDIT_CARD.value
+    default_type = PaymentMethod.DIRECT_PAY.value if current_app.config.get(
+        'DIRECT_PAY_ENABLED') else PaymentMethod.CREDIT_CARD.value
 
     for org in org_list:
         # invoke pay-api for each org
