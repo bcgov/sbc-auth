@@ -10,7 +10,7 @@ export interface CreateRequestBody {
   accessType?: string
   bcOnlineCredential?:BcolProfile
   mailingAddress?:Address
-  paymentType?: string
+  paymentMethod?: string
 }
 
 export interface Organizations
