@@ -58,6 +58,7 @@
           class="save-continue-button mr-2 font-weight-bold"
           @click="save"
           data-test="save-button"
+          :disabled="!selectedPaymentMethod"
         >
           Create Account
         </v-btn>
@@ -70,27 +71,36 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
+import OrgModule from '@/store/modules/org'
+import { PaymentTypes } from '@/util/constants'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { mapMutations } from 'vuex'
 
 @Component({
   components: {
     ConfirmCancelButton
+  },
+  methods: {
+    ...mapMutations('org', [
+      'setCurrentOrganizationPaymentType'
+    ])
   }
 })
 export default class PaymentMethodSelector extends Mixins(Steppable) {
+  private readonly setCurrentOrganizationPaymentType!: (paymentType: string) => void
   private selectedPaymentMethod: string = ''
   private paymentMethods = [
     {
-      type: 'creditcard',
+      type: PaymentTypes.CREDIT_CARD,
       title: 'Credit Card',
       subtitle: 'Pay for transactions individually with your credit card.',
       description: `You don't need to provide any credit card information with your account. Credit card information will be requested when you are ready to complete a transaction.`,
       isSelected: false
     },
     {
-      type: 'onlinebanking',
+      type: PaymentTypes.ONLINE_BANKING,
       title: 'Online Banking',
       subtitle: 'Pay for products and services through your financial institutions website.',
       description: `
@@ -122,7 +132,12 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   }
 
   private save () {
-    // create account here
+    this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
+    this.createAccount()
+  }
+
+  @Emit('final-step-action')
+  private createAccount () {
   }
 }
 </script>
