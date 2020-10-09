@@ -41,10 +41,10 @@
         ],
         "pattern": "^(.*)$"
       },
-       "paymentType": {
-        "$id": "#/properties/accessType",
+       "paymentMethod": {
+        "$id": "#/properties/paymentMethod",
         "type": "string",
-        "title": "Payment Type",
+        "title": "Payment Method",
         "examples": [
           "PAD", "BCOL", "CC", "ONLINE_BANKING"
         ],

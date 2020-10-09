@@ -56,7 +56,7 @@ class RequiredAction(Enum):
     UPDATE_PASSWORD = 'UPDATE_PASSWORD'
 
 
-class PaymentType(Enum):
+class PaymentMethod(Enum):
     """Payment types."""
 
     CREDIT_CARD = 'CC'

@@ -42,7 +42,7 @@ from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, ProductCode, PaymentType
+from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, ProductCode, PaymentMethod
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -100,7 +100,7 @@ def test_create_basic_org_assert_pay_request_is_correct_online_banking(session,
             'accountId': dictionary.get('id'),
             'accountName': dictionary.get('name'),
             'paymentInfo': {
-                'methodOfPayment': PaymentType.ONLINE_BANKING.value,
+                'methodOfPayment': PaymentMethod.ONLINE_BANKING.value,
                 'billable': True
             }
 
@@ -129,7 +129,7 @@ def test_create_premium_org_assert_pay_request_is_correct(session, keycloak_mock
             'accountId': dictionary.get('id'),
             'accountName': TestOrgInfo.bcol_linked().get('name'),
             'paymentInfo': {
-                'methodOfPayment': PaymentType.BCOL.value,
+                'methodOfPayment': PaymentMethod.BCOL.value,
                 'billable': True
             },
             'bcolAccountNumber': dictionary.get('bcol_account_id'),

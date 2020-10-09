@@ -33,7 +33,7 @@ from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
 from auth_api.utils.enums import (
-    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentType, ProductCode, Status)
+    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod, ProductCode, Status)
 from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF
 from auth_api.utils.util import camelback2snake
 from .affidavit import Affidavit as AffidavitService
@@ -74,7 +74,7 @@ class Org:  # pylint: disable=too-many-public-methods
         current_app.logger.debug('<create_org ')
         bcol_credential = org_info.pop('bcOnlineCredential', None)
         mailing_address = org_info.pop('mailingAddress', None)
-        selected_payment_type = org_info.pop('paymentType', None)
+        selected_payment_method = org_info.pop('paymentMethod', None)
         is_premium = False
 
         # If the account is created using BCOL credential, verify its valid bc online account
@@ -118,8 +118,8 @@ class Org:  # pylint: disable=too-many-public-methods
         Org.create_membership(access_type, is_staff_admin, org, user_id)
 
         Org.add_product(org.id, token_info)
-        payment_type = Org._validate_and_get_payment_type(selected_payment_type, org_type)
-        Org._create_payment_settings(org, payment_type, True)
+        payment_method = Org._validate_and_get_payment_method(selected_payment_method, org_type)
+        Org._create_payment_settings(org, payment_method, True)
 
         org.commit()
 
@@ -128,15 +128,15 @@ class Org:  # pylint: disable=too-many-public-methods
         return Org(org)
 
     @staticmethod
-    def _validate_and_get_payment_type(selected_payment_type: str, org_type: OrgType):
+    def _validate_and_get_payment_method(selected_payment_type: str, org_type: OrgType):
 
         # TODO whats a  better place for this
         org_payment_method_mapping = {
             OrgType.BASIC: (
-                PaymentType.CREDIT_CARD.value, PaymentType.DIRECT_PAY.value, PaymentType.ONLINE_BANKING.value),
+                PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIRECT_PAY.value, PaymentMethod.ONLINE_BANKING.value),
             OrgType.PREMIUM: (
-                PaymentType.CREDIT_CARD.value, PaymentType.DIRECT_PAY.value, PaymentType.ONLINE_BANKING.value,
-                PaymentType.PAD.value, PaymentType.BCOL.value)
+                PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIRECT_PAY.value,
+                PaymentMethod.PAD.value, PaymentMethod.BCOL.value)
         }
         if selected_payment_type:
             valid_types = org_payment_method_mapping.get(org_type, [])
@@ -145,7 +145,7 @@ class Org:  # pylint: disable=too-many-public-methods
             else:
                 raise BusinessException(Error.INVALID_INPUT, None)
         else:
-            payment_type = PaymentType.BCOL.value if\
+            payment_type = PaymentMethod.BCOL.value if\
                 org_type == OrgType.PREMIUM else Org._get_default_payment_method_for_creditcard()
         return payment_type
 
@@ -224,8 +224,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def _get_default_payment_method_for_creditcard():
-        return PaymentType.DIRECT_PAY.value if current_app.config.get(
-            'DIRECT_PAY_ENABLED') else PaymentType.CREDIT_CARD.value
+        return PaymentMethod.DIRECT_PAY.value if current_app.config.get(
+            'DIRECT_PAY_ENABLED') else PaymentMethod.CREDIT_CARD.value
 
     @staticmethod
     def get_bcol_details(bcol_credential: Dict, org_info: Dict = None, bearer_token: str = None, org_id=None):
@@ -287,7 +287,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 raise BusinessException(Error.INVALID_INPUT, None)
             bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
-            payment_type = PaymentType.BCOL.value
+            payment_type = PaymentMethod.BCOL.value
 
             # If mailing address is provided, save it
             if mailing_address:
@@ -327,7 +327,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         bcol_credential = org_info.pop('bcOnlineCredential', None)
         mailing_address = org_info.pop('mailingAddress', None)
-        selected_payment_type = org_info.pop('paymentType', None)
+        selected_payment_method = org_info.pop('paymentMethod', None)
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
         if bcol_credential:
@@ -344,7 +344,7 @@ class Org:  # pylint: disable=too-many-public-methods
             self._model.update_org_from_dict(camelback2snake(org_info))
 
         org_type: OrgType = OrgType.PREMIUM if is_premium else OrgType.BASIC
-        payment_type = Org._validate_and_get_payment_type(selected_payment_type, org_type)
+        payment_type = Org._validate_and_get_payment_method(selected_payment_method, org_type)
         Org._create_payment_settings(self._model, payment_type, False)
         current_app.logger.debug('>update_org ')
         return self
