@@ -19,6 +19,7 @@ import AccountCreatePremium from '@/components/auth/create-account/AccountCreate
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
 import ConfigHelper from '@/util/config-helper'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
+import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 
 @Component({
@@ -28,6 +29,7 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
     AccountTypeSelector,
     AccountCreateBasic,
     AccountCreatePremium,
+    PremiumChooser,
     Stepper
   }
 })
@@ -41,14 +43,14 @@ export default class AccountChangeView extends Vue {
         componentProps: { 'isAccountChange': true, 'cancelUrl': ConfigHelper.accountSettingsRoute() }
       },
       {
-        title: 'Account Settings',
-        stepName: 'Account Settings',
+        title: 'Account Information',
+        stepName: 'Account Information',
         component: AccountCreateBasic,
         componentProps: { 'isAccountChange': true, 'cancelUrl': ConfigHelper.accountSettingsRoute() },
         alternate: {
-          title: 'Account Settings',
-          stepName: 'Account Settings',
-          component: AccountCreatePremium,
+          title: 'Account Information',
+          stepName: 'Account Information',
+          component: PremiumChooser,
           componentProps: { 'isAccountChange': true, 'cancelUrl': ConfigHelper.accountSettingsRoute() }
         }
       }
