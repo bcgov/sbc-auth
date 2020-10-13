@@ -15,7 +15,7 @@
         :disabled="saving"
       />
     </fieldset>
-    <fieldset>
+    <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep ">
       <legend class="mb-3">Mailing Address</legend>
       <base-address-form
         ref="mailingAddress"
@@ -66,13 +66,14 @@
 </template>
 
 <script lang="ts">
-import { Account, Actions, LoginSource, SessionStorageKeys } from '@/util/constants'
+import { Account, Actions, LDFlags, LoginSource, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { addressSchema } from '@/schemas'
@@ -108,7 +109,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private orgName: string = ''
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
-  private isBaseAddressValid = false
+  private isBaseAddressValid = !this.isExtraProvUser && !this.enablePaymentMethodSelectorStep
   private readonly currentOrgAddress!: Address
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
 
@@ -128,6 +129,10 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
       this.orgName = this.currentOrganization.name
     }
   }
+  private get enablePaymentMethodSelectorStep (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+  }
+
   private get address () {
     return this.currentOrgAddress
   }
