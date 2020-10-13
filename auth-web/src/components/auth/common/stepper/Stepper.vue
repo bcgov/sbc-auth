@@ -1,6 +1,6 @@
 <template>
   <v-stepper class="stepper d-flex" v-model="currentStepNumber">
-    <v-container class="stepper-nav pa-6">
+    <v-container class="stepper-nav py-6 px-8">
       <template v-for="step in steps">
         <v-stepper-step
           class="pa-3"

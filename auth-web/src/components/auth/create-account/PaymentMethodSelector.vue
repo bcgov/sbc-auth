@@ -1,42 +1,46 @@
 <template>
   <div>
-    <p class="mb-8">
+    <p class="mb-10">
       Select the payment method for this account.
     </p>
     <div>
       <v-card
-        class="payment-card px-6 py-3 mb-4"
-        :class="{'selected': isPaymentSelected(payment)}"
         flat
-        :outlined="!isPaymentSelected(payment)"
+        outlined
+        hover
+        class="payment-card py-8 px-8 mb-4"
+        :class="{'selected': isPaymentSelected(payment)}"
         v-for="payment in paymentMethods"
         :key="payment.type"
-        >
-        <v-row class="align-center">
-          <v-col cols="9">
-            <div class="font-weight-bold mb-1 payment-title">{{payment.title}}</div>
+        @click="selectPayment(payment)"
+      >
+        <div class="d-flex">
+          <div class="flex--grow">
+            <div class="title font-weight-bold mt-n2 payment-title">{{payment.title}}</div>
             <div>{{payment.subtitle}}</div>
-          </v-col>
-          <v-col class="text-right">
-            <v-btn
-              depressed
-              :outlined="!isPaymentSelected(payment)"
-              class="font-weight-bold"
-              color="primary"
-              width="100"
-              @click="selectPayment(payment)"
-            >
-              {{(isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT'}}
-            </v-btn>
-          </v-col>
-        </v-row>
-        <v-expand-transition>
-          <div
-            class="my-3"
-            v-html="payment.description"
-            v-if="isPaymentSelected(payment)">
           </div>
-        </v-expand-transition>
+          <v-btn
+            large
+            depressed
+            color="primary"
+            width="120"
+            class="font-weight-bold ml-auto"
+            :outlined="!isPaymentSelected(payment)"
+            @click="selectPayment(payment)"
+          >
+            {{(isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT'}}
+          </v-btn>
+        </div>
+        <div>
+          <v-expand-transition>
+            <div v-if="isPaymentSelected(payment)">
+              <v-divider class="transparent-divider mb-4"></v-divider>
+              <div
+                v-html="payment.description">
+              </div>
+            </div>
+          </v-expand-transition>
+        </div>
       </v-card>
     </div>
     <v-divider class="my-10"></v-divider>
@@ -143,7 +147,6 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
 </script>
 
 <style lang="scss" scoped>
-@import "$assets/scss/theme.scss";
 .payment-card {
   &:hover {
     border-color: var(--v-primary-base) !important;
@@ -152,5 +155,13 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   &.selected {
     box-shadow: 0 0 0 2px inset var(--v-primary-base), 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12) !important;
   }
+}
+
+.theme--light.v-card.v-card--outlined.selected {
+  border-color: var(--v-primary-base);
+}
+
+.transparent-divider {
+  border-color: transparent !important;
 }
 </style>
