@@ -134,7 +134,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, Pages, Permission, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, LDFlags, Pages, Permission, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
@@ -143,6 +143,7 @@ import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfigHelper from '@/util/config-helper'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
 import OrgModule from '@/store/modules/org'
 import { addressSchema } from '@/schemas'
@@ -221,7 +222,12 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private async setup () {
     const accountSettings = this.getAccountFromSession()
     this.orgName = this.currentOrganization?.name || ''
-    await this.syncAddress()
+    if (this.isPremiumAccount || this.enablePaymentMethodSelectorStep) {
+      await this.syncAddress()
+    } else {
+      // inorder to hide the address if not premium account
+      this.baseAddress = null
+    }
   }
 
   protected getAccountFromSession (): AccountSettings {
@@ -253,16 +259,20 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   private isSaveEnabled () {
-    if (this.currentOrganization?.orgType === Account.BASIC) {
-      return this.isFormValid()
-    }
-    if (this.isPremiumAccount) {
+    if (this.isPremiumAccount || this.enablePaymentMethodSelectorStep) {
       // org name is read only ;the only thing which they can change is address
       // detect any change in address
       return this.isBaseAddressValid
     }
+    if (this.currentOrganization?.orgType === Account.BASIC) {
+      return this.isFormValid()
+    }
     // nothing can be changed in anonymous org
     return false
+  }
+
+  private get enablePaymentMethodSelectorStep (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
   }
 
   private enableBtn () {

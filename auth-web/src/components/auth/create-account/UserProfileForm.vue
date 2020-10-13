@@ -158,8 +158,11 @@
           v-if="isStepperView"
           data-test="next-button"
         >
-          Next
-          <v-icon class="ml-2">mdi-arrow-right</v-icon>
+          <span v-if="enablePaymentMethodSelectorStep">
+            Next
+            <v-icon class="ml-2">mdi-arrow-right</v-icon>
+          </span>
+          <span v-if="!enablePaymentMethodSelectorStep">Create Account</span>
         </v-btn>
         <ConfirmCancelButton
           :showConfirmPopup="isStepperView"
@@ -238,7 +241,7 @@
 
 <script lang="ts">
 
-import { AccessType, Account, LoginSource, Pages, Role } from '@/util/constants'
+import { AccessType, Account, LDFlags, LoginSource, Pages, Role } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { User, UserProfileData } from '@/models/user'
@@ -246,10 +249,10 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Contact } from '@/models/contact'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-
 import UserModule from '@/store/modules/user'
 import UserService from '@/services/user.services'
 import configHelper from '@/util/config-helper'
@@ -353,6 +356,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       return this.currentUser?.loginSource === LoginSource.BCEID
     }
 
+    private get enablePaymentMethodSelectorStep (): boolean {
+      return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+    }
+
     private emailMustMatch (): string {
       return (this.emailAddress === this.confirmedEmailAddress) ? '' : 'Email addresses must match'
     }
@@ -417,61 +424,17 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
         phoneExtension: this.extension
       }
       this.setUserProfileData(userProfile)
-      this.stepForward()
+
+      // if payment method selector ld flag is enabled, the navigate to next step, otherwise emit & create account
+      if (this.enablePaymentMethodSelectorStep) {
+        this.stepForward()
+      } else {
+        this.createAccount()
+      }
     }
 
     @Emit('final-step-action')
-    private emitStepperData (contact:Contact, user:User) {
-      return {
-        contact,
-        user
-      }
-    }
-
-    private async createAccount (contact:Contact, user:User) {
-      try {
-        // for bceid , create affidavit first
-        // TODO implement checks for bceid
-        if (this.isBCEIDUser) {
-          await this.createAffidavit()
-          await this.updateUserFirstAndLastName(user)
-        }
-        const organization = await this.createOrg()
-        await this.saveOrUpdateContact(contact)
-        await this.getUserProfile('@me')
-        await this.syncOrganization(organization.id)
-        await this.syncMembership(organization.id)
-        this.$store.commit('updateHeader')
-        if (this.isBCEIDUser) {
-          this.$router.push('/setup-non-bcsc-account-success')
-        } else {
-          this.$router.push('/setup-account-success')
-        }
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err)
-        switch (err?.response?.status) {
-          case 409:
-            this.formError =
-                    'An account with this name already exists. Try a different account name.'
-            break
-          case 400:
-            switch (err.response.data?.code) {
-              case 'MAX_NUMBER_OF_ORGS_LIMIT':
-                this.formError = 'Maximum number of accounts reached'
-                break
-              case 'ACTIVE_AFFIDAVIT_EXISTS':
-                this.formError = err.response.data.message || 'Affidavit already exists'
-                break
-              default:
-                this.formError = 'Invalid account name'
-            }
-            break
-          default:
-            this.formError =
-                    'An error occurred while attempting to create your account.'
-        }
-      }
+    private createAccount () {
     }
 
     private async saveOrUpdateContact (contact:Contact) {
