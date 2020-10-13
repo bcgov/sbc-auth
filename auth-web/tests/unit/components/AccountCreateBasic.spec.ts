@@ -1,11 +1,11 @@
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
+import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
