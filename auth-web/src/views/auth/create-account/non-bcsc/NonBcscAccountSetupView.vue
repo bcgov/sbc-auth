@@ -36,17 +36,18 @@
 </template>
 
 <script lang="ts">
+import { AccessType, LDFlags } from '@/util/constants'
 import { Component, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'vuex'
-import { AccessType } from '@/util/constants'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
@@ -138,14 +139,24 @@ export default class NonBcscAccountSetupView extends Vue {
           isStepperView: true,
           stepperSource: AccessType.EXTRA_PROVINCIAL
         }
-      },
-      {
+      }
+    ]
+
+  private beforeMount () {
+    if (this.enablePaymentMethodSelectorStep) {
+      const paymentMethodStep = {
         title: 'Select payment method',
         stepName: 'Payment Method',
         component: PaymentMethodSelector,
         componentProps: {}
       }
-    ]
+      this.accountStepperConfig.push(paymentMethodStep)
+    }
+  }
+
+  private get enablePaymentMethodSelectorStep (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+  }
 
   private async createAccount () {
     try {
