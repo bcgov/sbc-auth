@@ -1,6 +1,7 @@
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
+import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -21,6 +22,7 @@ describe('AccountCreateBasic.vue', () => {
     localVue.use(Vuex)
     localVue.use(VueRouter)
     const router = new VueRouter()
+    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'payment-type-in-account-creation': true, 'auth-options-learn-more': true, 'enable-ltd-and-ulc-affiliate': true })
     const orgModule = {
       namespaced: true,
       state: {
