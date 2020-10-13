@@ -15,8 +15,8 @@
         :disabled="saving"
       />
     </fieldset>
-    <template>
-      <h4 class="mb-4">Mailing Address</h4>
+    <fieldset>
+      <legend class="mb-3">Mailing Address</legend>
       <base-address-form
         ref="mailingAddress"
         :editing="true"
@@ -25,7 +25,7 @@
         @update:address="updateAddress"
         @valid="checkBaseAddressValidity"
       />
-    </template>
+    </fieldset>
 
     <v-divider class="my-10"></v-divider>
 
