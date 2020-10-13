@@ -5,6 +5,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
@@ -21,6 +22,7 @@ describe('AccountCreateBasic.vue', () => {
     localVue.use(Vuex)
     localVue.use(VueRouter)
     const router = new VueRouter()
+    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'payment-type-in-account-creation': true, 'auth-options-learn-more': true, 'enable-ltd-and-ulc-affiliate': true })
     const orgModule = {
       namespaced: true,
       state: {
