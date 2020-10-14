@@ -14,7 +14,6 @@
         </v-container>
       </v-alert>
 
-
       <header class="hero-banner d-flex align-center" :class="{'auth': userProfile}">
         <v-container>
           <h1>Start a Benefit Company and Keep <br>Cooperatives Records up to date</h1>
