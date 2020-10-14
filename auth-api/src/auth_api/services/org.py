@@ -659,7 +659,7 @@ class Org:  # pylint: disable=too-many-public-methods
     def send_staff_review_account_reminder(user, org_id, origin_url):
         """Send staff review account reminder notification."""
         current_app.logger.debug('<send_staff_review_account_reminder')
-        subject = '[BC Registries & Online Services] An out of province account needs to be approved.'
+        subject = '[BC Registries and Online Services] An out of province account needs to be approved.'
         sender = current_app.config.get('MAIL_FROM_ID')
         recipient = current_app.config.get('STAFF_ADMIN_EMAIL')
         template = ENV.get_template('email_templates/staff_review_account_email.html')
@@ -686,10 +686,10 @@ class Org:  # pylint: disable=too-many-public-methods
         sender = current_app.config.get('MAIL_FROM_ID')
         if org_status == OrgStatus.ACTIVE.value:
             template = ENV.get_template('email_templates/nonbcsc_org_approved_notification_email.html')
-            subject = '[BC Registries & Online Services] APPROVED Business Registry Account'
+            subject = '[BC Registries and Online Services] APPROVED Business Registry Account'
         elif org_status == OrgStatus.REJECTED.value:
             template = ENV.get_template('email_templates/nonbcsc_org_rejected_notification_email.html')
-            subject = '[BC Registries & Online Services] YOUR ACTION REQUIRED: ' \
+            subject = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
                       'Business Registry Account cannot be approved'
         else:
             return  # dont send mail for any other status change

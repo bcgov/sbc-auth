@@ -205,7 +205,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('<send_otp_authenticator_reset_notification')
         sender = current_app.config.get('MAIL_FROM_ID')
         template = ENV.get_template('email_templates/otp_authenticator_reset_notification_email.html')
-        subject = '[BC Registries & Online Services] Authenticator Has Been Reset'
+        subject = '[BC Registries and Online Services] Authenticator Has Been Reset'
         app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
         logo_url = f'{app_url}/{current_app.config.get("REGISTRIES_LOGO_IMAGE_NAME")}'
         context_path = 'signin/bceid'
