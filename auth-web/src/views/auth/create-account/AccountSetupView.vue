@@ -2,7 +2,7 @@
   <v-container class="view-container">
     <div class="view-header flex-column">
       <h1 class="view-header__title">{{$t('createBCRegistriesAccount')}}</h1>
-      <p class="mt-3 mb-0">Create an account to access BC Registries products and services.</p>
+      <p class="mt-3 mb-0 text--secondary">Create an account to access BC Registries products and services.</p>
     </div>
     <v-card flat>
       <Stepper
@@ -113,13 +113,13 @@ export default class AccountSetupView extends Vue {
         componentProps: {}
       },
       {
-        title: 'Account Settings',
-        stepName: 'Account Settings',
+        title: 'Account Info',
+        stepName: 'Account Info',
         component: AccountCreateBasic,
         componentProps: {},
         alternate: {
-          title: 'Account Settings',
-          stepName: 'Account Settings',
+          title: 'Account Info',
+          stepName: 'Account Info',
           component: AccountCreatePremium,
           componentProps: {}
         }
