@@ -28,10 +28,10 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 CONFIGURATION = {
-    'development': 'config.DevConfig',
-    'testing': 'config.TestConfig',
-    'production': 'config.ProdConfig',
-    'default': 'config.ProdConfig'
+    'development': 'auth_api.config.DevConfig',
+    'testing': 'auth_api.config.TestConfig',
+    'production': 'auth_api.config.ProdConfig',
+    'default': 'auth_api.config.ProdConfig'
 }
 
 
