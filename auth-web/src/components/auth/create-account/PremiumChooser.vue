@@ -14,7 +14,7 @@
       :step-back="stepBack"
     />
     <v-divider />
-    <v-row class="my-5" v-if="premiumSelected !== 'yes'">
+    <v-row class="my-5" v-if="!premiumSelected">
       <v-col cols="12" class="form__btns py-0 d-inline-flex">
         <v-btn
           large
@@ -50,8 +50,8 @@
 
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
+import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
-import AccountInfoNonLinked from '@/components/auth/create-account/AccountInfoNonLinked.vue'
 import { Actions } from '@/util/constants'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Organization } from '@/models/Organization'
@@ -61,7 +61,7 @@ import Vue from 'vue'
 
 @Component({
   components: {
-    AccountInfoNonLinked,
+    AccountCreateBasic,
     ConfirmCancelButton
   },
   computed: {
@@ -87,14 +87,14 @@ export default class PremiumChooser extends Mixins(Steppable) {
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
 
   $refs: {
-    activeComponent: AccountCreatePremium | AccountInfoNonLinked
+    activeComponent: AccountCreatePremium | AccountCreateBasic
   }
 
   private loadComponent () {
     if (this.premiumSelected === 'yes') {
       this.currentComponent = AccountCreatePremium
     } else if (this.premiumSelected === 'no') {
-      this.currentComponent = AccountInfoNonLinked
+      this.currentComponent = AccountCreateBasic
     } else {
       this.currentComponent = null
     }
@@ -133,7 +133,7 @@ export default class PremiumChooser extends Mixins(Steppable) {
 
   private async save () {
     if (this.premiumSelected === 'no') {
-      await (this.$refs.activeComponent as AccountInfoNonLinked).updateDetails()
+      await (this.$refs.activeComponent as AccountCreateBasic).save()
     }
     this.goNext()
   }
