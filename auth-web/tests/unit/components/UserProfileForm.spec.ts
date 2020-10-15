@@ -1,6 +1,6 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import TermsOfUseDialog from '@/components/auth/TermsOfUseDialog.vue'
+import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import UserModule from '@/store/modules/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 import Vue from 'vue'

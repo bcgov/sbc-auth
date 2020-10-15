@@ -64,6 +64,7 @@ export enum Account {
     // ANONYMOUS = 'ANONYMOUS',
     PREMIUM = 'PREMIUM',
     BASIC = 'BASIC',
+    UNLINKED_PREMIUM = 'UNLINKED_PREMIUM', // premium accounts without bcol linking
 }
 
 export enum AccountStatus {
