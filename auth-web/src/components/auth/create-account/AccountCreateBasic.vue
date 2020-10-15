@@ -148,7 +148,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
   }
 
-  private async save () {
+  public async save () {
     // Validate form, and then create an team with this user a member
     if (this.isFormValid()) {
       // if its not account change , do check for duplicate
