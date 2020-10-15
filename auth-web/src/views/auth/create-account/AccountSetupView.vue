@@ -2,7 +2,7 @@
   <v-container class="view-container">
     <div class="view-header flex-column">
       <h1 class="view-header__title">{{$t('createBCRegistriesAccount')}}</h1>
-      <p class="mt-3 mb-0">Create an account to access BC Registries products and services.</p>
+      <p class="mt-3 mb-0 text--secondary">Create an account to access BC Registries products and services.</p>
     </div>
     <v-card flat>
       <Stepper
@@ -37,6 +37,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { LDFlags, LoginSource } from '@/util/constants'
 import { Member, Organization } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'vuex'
@@ -46,7 +47,7 @@ import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSel
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import { LoginSource } from '@/util/constants'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
@@ -112,13 +113,13 @@ export default class AccountSetupView extends Vue {
         componentProps: {}
       },
       {
-        title: 'Account Settings',
-        stepName: 'Account Settings',
+        title: 'Account Info',
+        stepName: 'Account Info',
         component: AccountCreateBasic,
         componentProps: {},
         alternate: {
-          title: 'Account Settings',
-          stepName: 'Account Settings',
+          title: 'Account Info',
+          stepName: 'Account Info',
           component: AccountCreatePremium,
           componentProps: {}
         }
@@ -130,14 +131,24 @@ export default class AccountSetupView extends Vue {
         componentProps: {
           isStepperView: true
         }
-      },
-      {
+      }
+    ]
+
+  private beforeMount () {
+    if (this.enablePaymentMethodSelectorStep) {
+      const paymentMethodStep = {
         title: 'Select payment method',
         stepName: 'Payment Method',
         component: PaymentMethodSelector,
         componentProps: {}
       }
-    ]
+      this.stepperConfig.push(paymentMethodStep)
+    }
+  }
+
+  private get enablePaymentMethodSelectorStep (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+  }
 
   private async createAccount () {
     try {

@@ -174,7 +174,7 @@ class Invitation:
     @staticmethod
     def send_admin_notification(user, url, recipient_email_list, org_name):
         """Send the admin email notification."""
-        subject = '[BC Registries & Online Services] {} {} has responded for the invitation to join the account {}'. \
+        subject = '[BC Registries and Online Services] {} {} has responded for the invitation to join the account {}'. \
             format(user['firstname'], user['firstname'], org_name)
         sender = CONFIG.MAIL_FROM_ID
         try:
@@ -227,12 +227,12 @@ class Invitation:
         bceid_configs = {
             'token_confirm_path': token_confirm_path,
             'template_name': 'business_invitation_email_for_bceid',
-            'subject': '[BC Registries & Online Services] {} {} has invited you to join an account',
+            'subject': '[BC Registries and Online Services] {} {} has invited you to join an account',
         }
         default_configs = {
             'token_confirm_path': token_confirm_path,
             'template_name': 'business_invitation_email',
-            'subject': '[BC Registries & Online Services] {} {} has invited you to join an account',
+            'subject': '[BC Registries and Online Services] {} {} has invited you to join an account',
 
         }
         mail_configs = {

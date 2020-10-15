@@ -1,6 +1,6 @@
 <template>
-  <v-stepper class="stepper d-flex" v-model="currentStepNumber">
-    <v-container class="stepper-nav pa-6">
+  <v-stepper class="stepper d-flex elevation-2" v-model="currentStepNumber">
+    <v-container class="stepper-nav pa-10 pr-0">
       <template v-for="step in steps">
         <v-stepper-step
           class="pa-3"
@@ -8,13 +8,14 @@
           :complete="currentStepNumber > getStepIndex(step)"
           :step="getStepIndex(step)"
         >{{ getStepName(step) }}</v-stepper-step>
-        <v-divider vertical class="mt-n1 mb-n1" :key="`${getStepIndex(step)}-divider`" v-if="step !== steps"></v-divider>
+        <v-divider vertical class="step-divider mt-n1 mb-n1" :key="`${getStepIndex(step)}-divider`" v-if="step !== steps"></v-divider>
       </template>
     </v-container>
-    <v-container class="stepper-content pa-10">
+    <v-divider vertical class="my-10"></v-divider>
+    <v-container class="stepper-content pa-12">
       <div v-for="step in steps" :key="getStepIndex(step)" class="flex-grow">
         <template v-if="getStepIndex(step) === currentStepNumber">
-          <div class="stepper-content__count mb-1">Step {{currentStepNumber}} of {{steps.length}}</div>
+          <div class="stepper-content__count mb-1 text--secondary">Step {{currentStepNumber}} of {{steps.length}}</div>
           <h2 class="stepper-content__title mb-3">{{getStepTitle(step)}}</h2>
           <component
             class="pa-0"
@@ -132,66 +133,51 @@ export default class Stepper extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  @import "$assets/scss/theme.scss";
-
-  .stepper-nav {
-    flex: 0 0 auto;
-    width: 18rem;
-    border-right: 1px solid var(--v-grey-lighten2);
-    background-color: var(--v-grey-lighten6);
-
-    hr:last-child {
-      display: none;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    .stepper-nav {
-      display: none;
-    }
-  }
-
-  .stepper-content {
-    flex: 1 1 auto;
-
-    &__count {
-      color: var(--v-grey-darken1);
-      text-transform: uppercase;
-      font-size: 0.9375rem;
-      font-weight: bold;
-    }
-  }
-
-  // Stepper
-   $step-icon-size: 2rem;
-   $step-font-size: 0.8375rem;
-   $step-divider-height: 2rem;
+  // Stepper Navigation
+  $step-font-size: 0.875rem;
+  $step-icon-size: 2rem;
+  $step-divider-height: 2rem;
 
   .v-stepper {
     box-shadow: none;
     overflow: visible;
 
-    .v-divider {
+    .step-divider {
       margin-left: 1.7rem;
       height: $step-divider-height;
       min-height: $step-divider-height;
       max-height: $step-divider-height;
-      border-width: 1px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .stepper {
+      display: none;
     }
   }
 
   .v-stepper__step {
     border-radius: 4px;
-    font-size: $step-font-size;
-    font-weight: 700;
     pointer-events: none;
+    opacity: 0.5;
+    font-weight: 700;
+    transition: all ease-out 0.5s;
+
+    + .v-divider {
+      opacity: 0.5;
+    }
 
     ::v-deep {
       .v-stepper__step__step {
         margin-right: 1rem;
         width: $step-icon-size;
         height: $step-icon-size;
-        min-width: $step-icon-size
+        min-width: $step-icon-size;
+      }
+
+      .v-stepper__label {
+        font-size: $step-font-size;
+        text-shadow: none !important;
       }
     }
   }
@@ -199,11 +185,17 @@ export default class Stepper extends Vue {
   .v-stepper__step:focus,
   .v-stepper__step:active {
     outline: none;
-    box-shadow: 0 0 0 1px var(--v-primary-base);
+
+    .v-stepper__label {
+      text-shadow: none !important;
+      color: var(--v-primary-base) !important;
+    }
   }
 
   .v-stepper__step:hover,
   .v-stepper__step--active {
+    opacity: 1;
+
     ::v-deep {
       .v-stepper__label {
         text-shadow: none !important;
@@ -213,18 +205,125 @@ export default class Stepper extends Vue {
   }
 
   .v-stepper__step--complete {
-    ::v-deep {
-      .v-stepper__step__step {
-        border: 2px solid var(--v-primary-base) !important;
-        background-color: transparent !important;
-      }
-      .v-icon {
-        color: var(--v-primary-base) !important;
-      }
+    opacity: 1;
+
+    .v-stepper__label {
+      opacity: 0.5;
     }
 
     + .v-divider {
-      border-color: var(--v-primary-base);
+      border-color: var(--v-primary-base) !important;
+      opacity: 1;
+    }
+  }
+
+  .stepper-nav {
+    flex: 0 0 auto;
+    width: 20rem;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+
+    hr:last-child {
+      display: none;
+    }
+  }
+
+  // Primary Stepper
+  $stepper-primary-color: var(--v-primary-base) !important;
+  $stepper-primary-font-color: #ffffff !important;
+  $stepper-primary-divider-height: 2rem;
+  $stepper-primary-divider-color: #ffffff !important;
+
+  .stepper-nav.primary {
+    background-color: $stepper-primary-color;
+
+    .v-stepper__step {
+      + .v-divider {
+        border-color: $stepper-primary-divider-color;
+      }
+
+      ::v-deep {
+        .v-stepper__step__step {
+          color: $stepper-primary-color;
+          background-color: $stepper-primary-font-color;
+        }
+
+        .v-stepper__label {
+          color: $stepper-primary-font-color;
+        }
+      }
+
+      &:hover,
+      &--active,
+      &--complete {
+        color: $stepper-primary-color;
+      }
+    }
+
+    .v-stepper__step--complete {
+      ::v-deep {
+        .v-stepper__step__step {
+
+          .v-icon {
+            color: $stepper-primary-color;
+          }
+        }
+      }
+    }
+  }
+
+  // Error Stepper
+  $stepper-error-color: var(--v-error-base) !important;
+  $stepper-error-font-color: #ffffff !important;
+  $stepper-error-divider-height: 2rem;
+  $stepper-error-divider-color: #ffffff !important;
+
+  .stepper-nav.error {
+    background-color: $stepper-error-color;
+
+    .v-stepper__step {
+      + .v-divider {
+        border-color: $stepper-error-divider-color;
+      }
+
+      ::v-deep {
+        .v-stepper__step__step {
+          color: $stepper-error-color;
+          background-color: $stepper-error-font-color;
+        }
+
+        .v-stepper__label {
+          color: $stepper-error-font-color;
+        }
+      }
+
+      &:hover,
+      &--active,
+      &--complete {
+        color: $stepper-error-color;
+      }
+    }
+
+    .v-stepper__step--complete {
+      ::v-deep {
+        .v-stepper__step__step {
+
+          .v-icon {
+            color: $stepper-error-color;
+          }
+        }
+      }
+    }
+  }
+
+  // Stepper Content
+  .stepper-content {
+    flex: 1 1 auto;
+
+    &__count {
+      text-transform: uppercase;
+      font-size: 0.875rem;
+      font-weight: bold;
     }
   }
 
