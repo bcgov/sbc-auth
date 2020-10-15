@@ -31,7 +31,7 @@ from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.models import db, ma
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
-from config import CONFIGURATION, _Config
+from auth_api.config import CONFIGURATION, _Config
 
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first
 

@@ -24,7 +24,7 @@ from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.models import User
-from config import get_named_config
+from auth_api.config import get_named_config
 
 
 def factory_invitation_model(session, status, sent_date=datetime.now()):
