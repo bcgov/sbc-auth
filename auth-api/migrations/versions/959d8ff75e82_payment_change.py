@@ -34,7 +34,7 @@ def upgrade():
     org_res = conn.execute(f"select * from org o where status_code = 'ACTIVE';")
     org_list: List[Org] = org_res.fetchall()
 
-    token = RestService.get_service_account_token()
+
 
     acc_res = conn.execute(
         f"select * from account_payment_settings where is_active;")
@@ -45,7 +45,8 @@ def upgrade():
     pay_url = current_app.config.get('PAY_API_URL')
     default_type = PaymentMethod.DIRECT_PAY.value if current_app.config.get(
         'DIRECT_PAY_ENABLED') else PaymentMethod.CREDIT_CARD.value
-
+    if len(org_list) > 0:
+        token = RestService.get_service_account_token()
     for org in org_list:
         # invoke pay-api for each org
         account_payment_detail = account_payment_dict.get(org.id)
