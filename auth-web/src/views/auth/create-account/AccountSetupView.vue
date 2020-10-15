@@ -51,6 +51,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
+import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
 import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
@@ -64,7 +65,8 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
     AccountCreatePremium,
     PaymentMethodSelector,
     Stepper,
-    ModalDialog
+    ModalDialog,
+    PremiumChooser
   },
   computed: {
     ...mapState('user', [
@@ -113,14 +115,14 @@ export default class AccountSetupView extends Vue {
         componentProps: {}
       },
       {
-        title: 'Account Info',
-        stepName: 'Account Info',
+        title: 'Account Information',
+        stepName: 'Account Information',
         component: AccountCreateBasic,
         componentProps: {},
         alternate: {
-          title: 'Account Info',
-          stepName: 'Account Info',
-          component: AccountCreatePremium,
+          title: 'Account Information',
+          stepName: 'Account Information',
+          component: PremiumChooser,
           componentProps: {}
         }
       },
