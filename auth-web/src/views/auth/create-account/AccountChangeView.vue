@@ -19,6 +19,8 @@ import AccountCreatePremium from '@/components/auth/create-account/AccountCreate
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
 import ConfigHelper from '@/util/config-helper'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
+import { LDFlags } from '@/util/constants'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 
@@ -50,11 +52,22 @@ export default class AccountChangeView extends Vue {
         alternate: {
           title: 'Account Information',
           stepName: 'Account Information',
-          component: PremiumChooser,
+          component: AccountCreatePremium,
           componentProps: { 'isAccountChange': true, 'cancelUrl': ConfigHelper.accountSettingsRoute() }
         }
       }
     ]
+
+  private beforeMount () {
+    if (this.enablePaymentMethodSelectorStep) {
+      // use the new premium chooser account when flag is enabled
+      this.stepperConfig[1].alternate.component = PremiumChooser
+    }
+  }
+
+  private get enablePaymentMethodSelectorStep (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+  }
 }
 </script>
 
