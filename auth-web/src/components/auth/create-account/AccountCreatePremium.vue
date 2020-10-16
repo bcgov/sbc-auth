@@ -1,7 +1,8 @@
 <template>
   <v-container>
     <v-form ref="createAccountInfoForm" lazy-validation>
-      <p class="mb-6">
+      <h3 class="my-3">Link with an existing BC Online Account</h3>
+      <p class="my-6">
         You must be the Prime Contact to link this account with your existing BC Online account.
       </p>
       <p class="mb-6">

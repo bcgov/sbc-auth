@@ -10,7 +10,6 @@
             color="default"
             v-model="termsAccepted"
             required
-            :disabled="termsAccepted || !canCheckTerms"
           >
             <template v-slot:label>
               <div class="terms-checkbox-label" v-on="on">
@@ -31,7 +30,16 @@
       </v-tooltip>
       <v-dialog scrollable width="1024" v-model="termsDialog" :persistent="true">
         <v-card>
-          <v-card-title>Terms of Use</v-card-title>
+          <v-card-title>
+            <h2>Terms of Use</h2>
+            <v-btn
+              large
+              icon
+              @click="closeDialog"
+            >
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </v-card-title>
           <v-card-text id="scroll-target" data-test="scroll-area">
             <div v-scroll:#scroll-target="onScroll" style="height: 2000px;">
               <terms-of-use
@@ -56,7 +64,7 @@
               depressed
               color="primary"
               class="agree-btn"
-              @click="termsDialog = false"
+              @click="closeDialog"
               data-test="close-button"
             >
               <span>Close</span>
@@ -114,6 +122,10 @@ export default class TermsOfUseDialog extends Vue {
 
   private openDialog () {
     this.termsDialog = true
+  }
+
+  private closeDialog () {
+    this.termsDialog = false
   }
 
   private onScroll (e) {

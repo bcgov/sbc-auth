@@ -150,12 +150,12 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         template_name = ''
         params = {}
         if notification_type == NotificationType.ROLE_CHANGED.value:
-            subject = '[BC Registries & Online Services] Your Role has been changed'
+            subject = '[BC Registries and Online Services] Your Role has been changed'
             template_name = 'role_changed_notification_email.html'
             params = {'org_name': org_name, 'role': self._model.membership_type.code,
                       'label': self._model.membership_type.label}
         elif notification_type == NotificationType.MEMBERSHIP_APPROVED.value:
-            subject = '[BC Registries & Online Services] Welcome to the account {}'. \
+            subject = '[BC Registries and Online Services] Welcome to the account {}'. \
                 format(org_name)
             # TODO how to check properly if user is bceid user
             is_bceid_user = self._model.user.username.find('@bceid') > 0
