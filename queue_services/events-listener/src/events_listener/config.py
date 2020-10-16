@@ -98,7 +98,7 @@ class _Config():  # pylint: disable=too-few-public-methods
     }
 
     SUBSCRIPTION_OPTIONS = {
-        'subject': os.getenv('NATS_SUBJECT', ' account.events'),
+        'subject': os.getenv('NATS_SUBJECT', 'account.events'),
         'queue': os.getenv('NATS_QUEUE', 'account.events.worker'),
         'durable_name': os.getenv('NATS_QUEUE', 'account-events-worker') + '_durable',
     }
