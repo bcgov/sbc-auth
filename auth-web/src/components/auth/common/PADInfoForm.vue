@@ -49,7 +49,6 @@
 </template>
 
 <script lang="ts">
-import { Account, PaymentTypes } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
