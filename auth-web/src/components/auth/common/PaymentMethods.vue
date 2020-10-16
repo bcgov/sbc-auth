@@ -66,6 +66,7 @@
 <script lang="ts">
 import { Account, PaymentTypes } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
+import ConfigHelper from '@/util/config-helper'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import { Organization } from '@/models/Organization'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
@@ -123,11 +124,7 @@ export default class PaymentMethodSelector extends Vue {
   private paymentTypes = PaymentTypes
 
   // this object can define the payment methods allowed for each account tyoes
-  private paymentsPerAccountType = {
-    [Account.BASIC]: [ PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING ],
-    [Account.PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ],
-    [Account.UNLINKED_PREMIUM]: [ PaymentTypes.PAD ]
-  }
+  private paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
 
   private get allowedPaymentMethods () {
     const paymentMethods = []
