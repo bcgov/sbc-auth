@@ -122,7 +122,7 @@ export default class AccountSetupView extends Vue {
         alternate: {
           title: 'Account Information',
           stepName: 'Account Information',
-          component: PremiumChooser,
+          component: AccountCreatePremium,
           componentProps: {}
         }
       },
@@ -145,6 +145,8 @@ export default class AccountSetupView extends Vue {
         componentProps: {}
       }
       this.stepperConfig.push(paymentMethodStep)
+      // use the new premium chooser account when flag is enabled
+      this.stepperConfig[1].alternate.component = PremiumChooser
     }
   }
 
