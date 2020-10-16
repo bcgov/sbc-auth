@@ -53,7 +53,7 @@ jobs:
         if: failure()
         with:
           type: ${{ job.status }}
-          job_name: "*Events Listener Built and Deployed to ${{env.TAG_NAME}}*"
+          job_name: "*Account Mailer Built and Deployed to ${{env.TAG_NAME}}*"
           channel: "#registries-bot"
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           commit: true
