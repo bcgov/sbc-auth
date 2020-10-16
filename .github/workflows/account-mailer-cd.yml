@@ -1,4 +1,4 @@
-name: Events Listener Queue CD
+name: Account Mailer Queue CD
 
 on:
   push:
@@ -38,7 +38,7 @@ jobs:
         with:
           WORKING_DIRECTORY: "./queue_services/account-mailer"
           APP_NAME: "account-mailer"
-          VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"nats\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-pay\", \"account-mailer\"]}]'
+            VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"nats\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-pay\", \"account-mailer\"]}]'
           SKIP_OP: "false"
           OP_PARAMETERS: ${{ secrets.OP_PARAMETERS }}
           OPENSHIFT_LOGIN_REGISTRY: ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }}

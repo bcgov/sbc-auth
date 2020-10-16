@@ -38,7 +38,7 @@ jobs:
         with:
           WORKING_DIRECTORY: "./queue_services/events-listener"
           APP_NAME: "events-listener"
-          VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"nats\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-pay\", \"events-listener\"]}]'
+          VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"nats\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-pay\", \"account-events-listener\"]}]'
           SKIP_OP: "false"
           OP_PARAMETERS: ${{ secrets.OP_PARAMETERS }}
           OPENSHIFT_LOGIN_REGISTRY: ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }}

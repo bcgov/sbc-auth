@@ -8,7 +8,7 @@ on:
       - "queue_services/events-listener/**"
 
 jobs:
-  events-listener-queue_service-ci:
+  events-listener-cd:
     runs-on: ubuntu-latest
     defaults:
       run:

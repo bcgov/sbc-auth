@@ -1,4 +1,4 @@
-name: Events Listener Queue CI
+name: Account Mailer Queue CI
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ on:
       - "queue_services/account-mailer/**"
 
 jobs:
-  account-mailer-queue_service-ci:
+  account-mailer-ci:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -48,7 +48,7 @@ jobs:
           pip install -r requirements/dev.txt
       - name: Lint with pylint
         run: |
-          pylint --rcfile=setup.cfg --disable=C0301,W0511 src/events_listener
+          pylint --rcfile=setup.cfg --disable=C0301,W0511 src/account_mailer
       # - name: Lint with flake8
       #   run: |
       #     flake8 src/events_listener tests
@@ -61,6 +61,6 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           file: ./queue_services/account-mailer/coverage.xml
-          flags: eventlistenerqueue
+          flags: accountmailerqueue
           name: codecov-account-mailer
           fail_ci_if_error: true
