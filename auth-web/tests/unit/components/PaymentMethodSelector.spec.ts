@@ -1,4 +1,6 @@
+import { Account, PaymentTypes } from '@/util/constants'
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import OrgModule from '@/store/modules/org'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -24,9 +26,23 @@ describe('PaymentMethodSelector.vue', () => {
 
     const vuetify = new Vuetify({})
 
+    const orgModule = {
+      namespaced: true,
+      state: {
+        currentOrganization: {},
+        currentOrgType: Account.BASIC
+      },
+      actions: OrgModule.actions,
+      mutations: OrgModule.mutations,
+      getters: OrgModule.getters
+    }
+
     const store = new Vuex.Store({
       state: {},
-      strict: false
+      strict: false,
+      modules: {
+        org: orgModule
+      }
     })
 
     wrapper = mount(PaymentMethodSelector, {
@@ -51,54 +67,16 @@ describe('PaymentMethodSelector.vue', () => {
     expect(wrapper.find('.payment-card')).toBeTruthy()
   })
 
-  it('should render both payment card types', () => {
-    expect(wrapper.findAll('.payment-card').length).toBe(2)
+  it('should render payment page subtitle', () => {
+    expect(wrapper.find('.payment-page-sub')).toBeTruthy()
   })
 
-  it('should render both payment card types', () => {
-    expect(wrapper.findAll('.payment-card').length).toBe(2)
-  })
-
-  it('should render payment card types correctly', () => {
-    const paymentMethods = wrapper.vm.$data.paymentMethods
-    const paymentCards = wrapper.findAll('.payment-card')
-    expect(paymentCards.at(0).find('.payment-title').text()).toBe(paymentMethods[0].title)
-    expect(paymentCards.at(1).find('.payment-title').text()).toBe(paymentMethods[1].title)
-  })
-
-  it('should select payment card types correctly', async () => {
-    const paymentCard1 = wrapper.findAll('.payment-card').at(0)
-    const selectButton = paymentCard1.find('.v-btn')
-    expect(selectButton.text()).toBe('SELECT')
-    selectButton.trigger('click')
-    await wrapper.vm.$nextTick()
-    expect(selectButton.text()).toBe('SELECTED')
-  })
-
-  it('should set selectedPaymentMethod correctly', async () => {
-    const paymentCard1 = wrapper.findAll('.payment-card').at(0)
-    const selectButton = paymentCard1.find('.v-btn')
-    expect(selectButton.text()).toBe('SELECT')
-    selectButton.trigger('click')
-    await wrapper.vm.$nextTick()
-    expect(wrapper.vm.$data.selectedPaymentMethod).toBe(wrapper.vm.$data.paymentMethods[0].type)
+  it('should render payment page subtitle correctly', () => {
+    expect(wrapper.find('.payment-page-sub').text()).toBe(wrapper.vm.pageSubTitle)
   })
 
   it('should select payment method correctly', () => {
-    wrapper.vm.selectPayment(wrapper.vm.$data.paymentMethods[0])
-    expect(wrapper.vm.$data.selectedPaymentMethod).toBe(wrapper.vm.$data.paymentMethods[0].type)
-  })
-
-  it('should return the payment selected correctly', () => {
-    const method1 = wrapper.vm.$data.paymentMethods[0]
-    wrapper.vm.selectPayment(method1)
-    expect(wrapper.vm.isPaymentSelected(method1)).toBe(true)
-  })
-
-  it('should return the payment selected correctly [negative]', () => {
-    const method1 = wrapper.vm.$data.paymentMethods[0]
-    const method2 = wrapper.vm.$data.paymentMethods[1]
-    wrapper.vm.selectPayment(method1)
-    expect(wrapper.vm.isPaymentSelected(method2)).toBe(false)
+    wrapper.vm.setSelectedPayment(PaymentTypes.CREDIT_CARD)
+    expect(wrapper.vm.$data.selectedPaymentMethod).toBe(PaymentTypes.CREDIT_CARD)
   })
 })
