@@ -5,6 +5,7 @@
     </p>
     <PaymentMethods
       :currentOrgType="currentOrganizationType"
+      :currentOrganization="currentOrganization"
       @payment-method-selected="setSelectedPayment"
     ></PaymentMethods>
     <v-divider class="my-10"></v-divider>
@@ -75,10 +76,6 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
 
   private goBack () {
     this.stepBack()
-  }
-
-  private goNext () {
-    this.stepForward()
   }
 
   private setSelectedPayment (payment) {
