@@ -30,6 +30,13 @@
                     @emit-pre-auth-debit-info="getPADInfo"
                   ></PADInfoForm>
                 </div>
+                <div v-else-if="(payment.type === paymentTypes.BCOL)">
+                  <!-- showing BCOL details banner -->
+                  <LinkedBCOLBanner
+                    :bcolAccountName="currentOrganization.name"
+                    :bcolAccountDetails="currentOrganization.bcolAccountDetails"
+                  ></LinkedBCOLBanner>
+                </div>
                 <div v-else
                   v-html="payment.description">
                 </div>
@@ -59,6 +66,9 @@
 <script lang="ts">
 import { Account, PaymentTypes } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
+import ConfigHelper from '@/util/config-helper'
+import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
+import { Organization } from '@/models/Organization'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 
 const PAYMENT_METHODS = {
@@ -109,13 +119,12 @@ const PAYMENT_METHODS = {
 })
 export default class PaymentMethodSelector extends Vue {
   @Prop({ default: '' }) currentOrgType: string
+  @Prop({ default: undefined }) currentOrganization: Organization
   private selectedPaymentMethod: string = ''
   private paymentTypes = PaymentTypes
-  private paymentsPerAccountType = {
-    [Account.BASIC]: [ PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING ],
-    [Account.PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ],
-    [Account.UNLINKED_PREMIUM]: [ PaymentTypes.PAD ]
-  }
+
+  // this object can define the payment methods allowed for each account tyoes
+  private paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
 
   private get allowedPaymentMethods () {
     const paymentMethods = []

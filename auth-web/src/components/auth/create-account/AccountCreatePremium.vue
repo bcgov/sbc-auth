@@ -13,35 +13,12 @@
       </p>
       <BcolLogin @account-link-successful="onLink" v-show="!linked"></BcolLogin>
       <template v-if="linked">
-        <v-alert dark color="primary" icon="mdi-check" class="py-4 pr-8 pl-4" v-model="linked">
-          <div class="bcol-acc d-flex justify-space-between align-center">
-            <div v-if="currentOrganization.bcolAccountDetails">
-              <div class="bcol-acc__link-status mb-3">Account Linked!</div>
-              <div class="bcol-acc__name">
-                {{ currentOrganization.name }}
-              </div>
-              <ul class="bcol-acc__meta">
-                <li>
-                  Account No: {{ currentOrganization.bcolAccountDetails.accountNumber }}
-                </li>
-                <li>
-                  Prime Contact ID: {{ currentOrganization.bcolAccountDetails.userId }}
-                </li>
-              </ul>
-            </div>
-            <div>
-              <v-btn
-                large
-                outlined
-                class="font-weight-bold"
-                @click="unlinkAccounts()"
-                data-test="dialog-save-button"
-              >
-                Unlink Account
-              </v-btn>
-            </div>
-          </div>
-        </v-alert>
+        <LinkedBCOLBanner
+          :bcolAccountName="currentOrganization.name"
+          :bcolAccountDetails="currentOrganization.bcolAccountDetails"
+          :showUnlinkAccountBtn="true"
+          @unlink-account="unlinkAccount"
+        ></LinkedBCOLBanner>
         <v-checkbox color="primary" v-model="grantAccess" class="bcol-auth mt-8 ml-3">
           <template v-slot:label>
             <div class="bcol-auth__label" v-html="grantAccessText"></div>
@@ -130,6 +107,7 @@ import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { addressSchema } from '@/schemas'
@@ -139,7 +117,8 @@ import { getModule } from 'vuex-module-decorators'
   components: {
     BcolLogin,
     BaseAddressForm,
-    ConfirmCancelButton
+    ConfirmCancelButton,
+    LinkedBCOLBanner
   },
   computed: {
     ...mapState('org', ['currentOrganization', 'currentOrgAddress']),
@@ -214,7 +193,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     return this.currentOrgAddress
   }
 
-  private unlinkAccounts () {
+  private unlinkAccount () {
     this.resetBcolDetails()
   }
 
