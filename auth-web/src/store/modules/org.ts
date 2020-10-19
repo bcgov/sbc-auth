@@ -46,6 +46,7 @@ export default class OrgModule extends VuexModule {
   currentOrganization: Organization = undefined
   currentOrgAddress:Address = undefined
   currentOrgPaymentType: string = undefined
+  currentOrganizationType: string = undefined
   currentMembership: Member = undefined
   activeOrgMembers: Member[] = []
   pendingOrgMembers: Member[] = []
@@ -194,6 +195,11 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentOrganizationPaymentType (paymentType: string) {
     this.currentOrgPaymentType = paymentType
+  }
+
+  @Mutation
+  public setCurrentOrganizationType (orgType: string) {
+    this.currentOrganizationType = orgType
   }
 
   @Action({ rawError: true })
@@ -644,5 +650,6 @@ export default class OrgModule extends VuexModule {
     this.context.commit('setGrantAccess', false)
     this.context.commit('setCurrentOrganization', undefined)
     this.context.commit('setSelectedAccountType', undefined)
+    this.context.commit('setCurrentOrganizationType', undefined)
   }
 }

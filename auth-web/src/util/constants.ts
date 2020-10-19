@@ -159,7 +159,7 @@ export enum SearchFilterCodes {
 
 export enum PaymentTypes {
     CREDIT_CARD = 'CC',
-    BCOL = 'DRAWDOWN',
+    BCOL = 'BCOL',
     DIRECT_PAY = 'DIRECT_PAY',
     ONLINE_BANKING = 'ONLINE_BANKING',
     PAD = 'PAD'

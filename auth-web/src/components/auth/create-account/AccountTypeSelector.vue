@@ -137,11 +137,22 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
       ConfirmCancelButton
     },
     computed: {
-      ...mapState('org', ['currentOrganization', 'accountTypeBeforeChange']),
+      ...mapState('org', [
+        'currentOrganization',
+        'accountTypeBeforeChange',
+        'currentOrganizationType'
+      ]),
       ...mapState('user', ['currentUser'])
     },
     methods: {
-      ...mapMutations('org', ['setSelectedAccountType', 'setCurrentOrganization', 'resetCurrentOrganisation', 'setAccountTypeBeforeChange', 'setAccessType'])
+      ...mapMutations('org', [
+        'setSelectedAccountType',
+        'setCurrentOrganization',
+        'setCurrentOrganizationType',
+        'resetCurrentOrganisation',
+        'setAccountTypeBeforeChange',
+        'setAccessType'
+      ])
     }
   })
 export default class AccountTypeSelector extends Mixins(Steppable) {
@@ -150,9 +161,11 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   private readonly setSelectedAccountType!: (selectedAccountType: Account) => void
   private readonly setAccountTypeBeforeChange!: (accountTypeBeforeChange: string) => void
   private readonly setCurrentOrganization!: (organization: Organization) => void
-    private readonly setAccessType!: (accessType: string) => void
+  private readonly setCurrentOrganizationType!: (orgType: string) => void
+  private readonly setAccessType!: (accessType: string) => void
   private readonly currentOrganization!: Organization
   private readonly accountTypeBeforeChange!: string
+  private readonly currentOrganizationType!: string
   private readonly resetCurrentOrganisation!: () => void
   protected readonly currentUser!: KCUserProfile
   @Prop() isAccountChange: boolean
@@ -183,6 +196,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
       this.resetCurrentOrganisation()
     }
     this.setSelectedAccountType(accountType)
+    this.setCurrentOrganizationType(accountType)
     this.selectedAccountType = accountType
   }
 

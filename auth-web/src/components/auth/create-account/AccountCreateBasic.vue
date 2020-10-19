@@ -85,7 +85,11 @@ import { getModule } from 'vuex-module-decorators'
     ConfirmCancelButton
   },
   computed: {
-    ...mapState('org', ['currentOrganization', 'currentOrgAddress']),
+    ...mapState('org', [
+      'currentOrganization',
+      'currentOrgAddress',
+      'currentOrganizationType'
+    ]),
     ...mapState('user', ['userProfile', 'currentUser'])
   },
   methods: {
@@ -99,6 +103,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private orgStore = getModule(OrgModule, this.$store)
   private errorMessage: string = ''
   private saving = false
+  private isBasicAccount: boolean = true
   private readonly createOrg!: () => Promise<Organization>
   private readonly changeOrgType!: (action:Actions) => Promise<Organization>
   private readonly syncMembership!: (orgId: number) => Promise<Member>
@@ -111,6 +116,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   @Prop() cancelUrl: string
   private isBaseAddressValid = !this.isExtraProvUser && !this.enablePaymentMethodSelectorStep
   private readonly currentOrgAddress!: Address
+  private readonly currentOrganizationType!: string
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
 
   private baseAddressSchema: {} = addressSchema
@@ -128,7 +134,9 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     if (this.currentOrganization) {
       this.orgName = this.currentOrganization.name
     }
+    this.isBasicAccount = (this.currentOrganizationType === Account.BASIC)
   }
+
   private get enablePaymentMethodSelectorStep (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
   }
@@ -162,9 +170,10 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
           return
         }
       }
+      const orgType = (this.isBasicAccount) ? Account.BASIC : Account.PREMIUM
       if (this.isAccountChange) {
         try {
-          const org: Organization = { name: this.orgName, orgType: Account.BASIC, id: this.currentOrganization.id }
+          const org: Organization = { name: this.orgName, orgType: orgType, id: this.currentOrganization.id }
           this.setCurrentOrganization(org)
           this.saving = true
           const organization = await this.changeOrgType('downgrade')
@@ -178,7 +187,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
           this.errorMessage = 'An error occurred while attempting to create your account.'
         }
       } else {
-        const org: Organization = { name: this.orgName, orgType: Account.BASIC }
+        const org: Organization = { name: this.orgName, orgType: orgType }
         this.setCurrentOrganization(org)
         // check if the name is avaialble
         this.stepForward()
