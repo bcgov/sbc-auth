@@ -18,7 +18,7 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 
 from auth_api.models import Documents as DocumentsModel
 from auth_api.schemas import DocumentSchema
-from config import get_named_config
+from auth_api.config import get_named_config
 
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)

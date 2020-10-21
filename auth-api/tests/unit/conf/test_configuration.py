@@ -19,8 +19,7 @@ from importlib import reload
 
 import pytest
 
-import config
-
+import auth_api.config as config
 
 # testdata pattern is ({str: environment}, {expected return value})
 TEST_ENVIRONMENT_DATA = [
