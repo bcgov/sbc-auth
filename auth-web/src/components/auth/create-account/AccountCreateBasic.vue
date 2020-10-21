@@ -134,7 +134,9 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     if (this.currentOrganization) {
       this.orgName = this.currentOrganization.name
     }
-    this.isBasicAccount = (this.currentOrganizationType === Account.BASIC)
+    if (this.enablePaymentMethodSelectorStep) {
+      this.isBasicAccount = (this.currentOrganizationType === Account.BASIC)
+    }
   }
 
   private get enablePaymentMethodSelectorStep (): boolean {
