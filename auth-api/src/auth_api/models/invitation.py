@@ -19,7 +19,7 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
-from config import get_named_config
+from auth_api.config import get_named_config
 
 from .base_model import BaseModel
 from .db import db
