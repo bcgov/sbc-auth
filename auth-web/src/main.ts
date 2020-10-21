@@ -33,7 +33,8 @@ ConfigHelper.saveConfigToSessionStorage().then(async (data) => {
 })
 
 async function syncSession () {
-  await KeyCloakService.setKeycloakConfigUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json`)
+  let random = new Date().toISOString().substring(0, 10)
+  await KeyCloakService.setKeycloakConfigUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json?${random}`)
 
   // Initialize token service which will do a check-sso to initiate session
   if (!CommonUtils.isSigningIn() && !CommonUtils.isSigningOut()) {
