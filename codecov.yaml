@@ -18,6 +18,8 @@ coverage:
           - notifyapi
           - notifyqueue
           - statusapi
+          - eventlistenerqueue
+          - accountmailer
       ui:
         target: 35%
         flags:
@@ -59,4 +61,12 @@ flags:
   authweb:
     paths:
       - auth-web/src
+    carryforward: true
+  eventlistenerqueue:
+    paths:
+      - queue_services/events-listener/src/events_listener
+    carryforward: true
+  accountmailer:
+    paths:
+      - queue_services/account-mailer/src/account_mailer
     carryforward: true
