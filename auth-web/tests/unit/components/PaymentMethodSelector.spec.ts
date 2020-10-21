@@ -67,6 +67,14 @@ describe('PaymentMethodSelector.vue', () => {
     expect(wrapper.find('.payment-card')).toBeTruthy()
   })
 
+  it('should render payment page subtitle', () => {
+    expect(wrapper.find('.payment-page-sub')).toBeTruthy()
+  })
+
+  it('should render payment page subtitle correctly', () => {
+    expect(wrapper.find('.payment-page-sub').text()).toBe(wrapper.vm.pageSubTitle)
+  })
+
   it('should select payment method correctly', () => {
     wrapper.vm.setSelectedPayment(PaymentTypes.CREDIT_CARD)
     expect(wrapper.vm.$data.selectedPaymentMethod).toBe(PaymentTypes.CREDIT_CARD)

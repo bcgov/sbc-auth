@@ -1,7 +1,7 @@
 <template>
   <div>
-    <p class="mb-12">
-      Select the payment method for this account.
+    <p class="mb-12 payment-page-sub">
+      {{pageSubTitle}}
     </p>
     <PaymentMethods
       :currentOrgType="currentOrganizationType"
@@ -42,6 +42,7 @@
 <script lang="ts">
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
+import { Account } from '@/util/constants'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
@@ -55,7 +56,8 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
   },
   computed: {
     ...mapState('org', [
-      'currentOrganization'
+      'currentOrganization',
+      'currentOrganizationType'
     ])
   },
   methods: {
@@ -67,15 +69,17 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 export default class PaymentMethodSelector extends Mixins(Steppable) {
   private readonly setCurrentOrganizationPaymentType!: (paymentType: string) => void
   private readonly currentOrganization!: Organization
-  private currentOrganizationType: string = ''
+  private readonly currentOrganizationType!: string
   private selectedPaymentMethod: string = ''
-
-  private mounted () {
-    this.currentOrganizationType = this.currentOrganization?.orgType
-  }
 
   private goBack () {
     this.stepBack()
+  }
+
+  private get pageSubTitle () {
+    return (this.currentOrganizationType === Account.UNLINKED_PREMIUM)
+      ? 'Set up your pre-authorized debit account to automatically make payments when they are due.'
+      : 'Select the payment method for this account.'
   }
 
   private setSelectedPayment (payment) {
