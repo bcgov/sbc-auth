@@ -76,8 +76,8 @@ class Org:  # pylint: disable=too-many-public-methods
         bcol_credential = org_info.pop('bcOnlineCredential', None)
         mailing_address = org_info.pop('mailingAddress', None)
         payment_info = org_info.pop('paymentInfo', None)
-        selected_payment_method = payment_info.get('paymentMethod', None)
-        org_type = org_info.get('typeCode', None)
+        selected_payment_method = getattr(payment_info, 'paymentMethod', None)
+        org_type = org_info.get('typeCode', OrgType.BASIC.value)
 
         # If the account is created using BCOL credential, verify its valid bc online account
         if bcol_credential:
@@ -121,8 +121,9 @@ class Org:  # pylint: disable=too-many-public-methods
         payment_account_status: PaymentAccountStatus = Org._create_payment_settings(org, payment_info, payment_method,
                                                                                     mailing_address, True)
 
-        if payment_account_status == PaymentAccountStatus.FAILED:
-            raise BusinessException(Error.ACCOUNT_CREATION_FAILED_IN_PAY, None)
+        # TODO do we have to check anything like this below?
+        # if payment_account_status == PaymentAccountStatus.FAILED:
+        # raise BusinessException(Error.ACCOUNT_CREATION_FAILED_IN_PAY, None)
 
         org.commit()
 
