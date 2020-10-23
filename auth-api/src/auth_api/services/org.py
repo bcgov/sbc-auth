@@ -118,8 +118,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         Org.add_product(org.id, token_info)
         payment_method = Org._validate_and_get_payment_method(selected_payment_method, org_type)
-        payment_account_status: PaymentAccountStatus = Org._create_payment_settings(org, payment_info, payment_method,
-                                                                                    mailing_address, True)
+        Org._create_payment_settings(org, payment_info, payment_method, mailing_address, True)
 
         # TODO do we have to check anything like this below?
         # if payment_account_status == PaymentAccountStatus.FAILED:
