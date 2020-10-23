@@ -226,10 +226,10 @@ def test_add_same_org_409(client, jwt, session, keycloak_mock):  # pylint:disabl
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.status_code == http_status.HTTP_201_CREATED, "created first org"
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_409_CONFLICT
+    assert rv.status_code == http_status.HTTP_409_CONFLICT, "created duplicates org"
 
 
 def test_add_org_invalid_returns_400(client, jwt, session):  # pylint:disable=unused-argument
@@ -502,7 +502,7 @@ def test_upgrade_downgrade_reattach_bcol_todifferent_org(client, jwt, session,
     assert rv.json.get('name') == bcol_account.get('name')
 
 
-def test_downgrade_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_downgrade_org(client, jwt, session, keycloak_mock):  # pylint:disable=unusfed-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')

@@ -75,8 +75,8 @@ class Org:  # pylint: disable=too-many-public-methods
         # bcol is treated like an access type as well;so its outside the scheme
         bcol_credential = org_info.pop('bcOnlineCredential', None)
         mailing_address = org_info.pop('mailingAddress', None)
-        payment_info = org_info.pop('paymentInfo', None)
-        selected_payment_method = getattr(payment_info, 'paymentMethod', None)
+        payment_info = org_info.pop('paymentInfo', {})
+        selected_payment_method = payment_info.get('paymentMethod', None)
         org_type = org_info.get('typeCode', OrgType.BASIC.value)
 
         # If the account is created using BCOL credential, verify its valid bc online account
@@ -91,8 +91,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         access_type = Org.validate_access_type(is_bceid_user, is_staff_admin, org_info)
 
-        is_premium = OrgType.PREMIUM if org_type else OrgType.BASIC
-        if not is_premium:  # Allow duplicate names if premium
+        duplicate_check = org_type == OrgType.BASIC.value
+        if duplicate_check:  # Allow duplicate names if premium
             Org.raise_error_if_duplicate_name(org_info['name'])
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
@@ -117,7 +117,7 @@ class Org:  # pylint: disable=too-many-public-methods
         Org.create_membership(access_type, is_staff_admin, org, user_id)
 
         Org.add_product(org.id, token_info)
-        payment_method = Org._validate_and_get_payment_method(selected_payment_method, org_type)
+        payment_method = Org._validate_and_get_payment_method(selected_payment_method, OrgType[org_type])
         Org._create_payment_settings(org, payment_info, payment_method, mailing_address, True)
 
         # TODO do we have to check anything like this below?
@@ -349,7 +349,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         bcol_credential = org_info.pop('bcOnlineCredential', None)
         mailing_address = org_info.pop('mailingAddress', None)
-        selected_payment_method = org_info.pop('paymentMethod', None)
+        payment_info = org_info.pop('paymentInfo', {})
+        selected_payment_method = payment_info.get('paymentMethod', None)
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
         if bcol_credential:
@@ -372,7 +373,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         org_type: OrgType = OrgType.PREMIUM if is_premium else OrgType.BASIC
         payment_type = Org._validate_and_get_payment_method(selected_payment_method, org_type)
-        Org._create_payment_settings(self._model, payment_type, mailing_address, False)
+        Org._create_payment_settings(self._model, payment_info, payment_type, mailing_address, False)
         current_app.logger.debug('>update_org ')
         return self
 
