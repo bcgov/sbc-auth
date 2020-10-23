@@ -133,7 +133,8 @@ def test_create_premium_org_assert_pay_request_is_correct(session, keycloak_mock
                 'billable': True
             },
             'bcolAccountNumber': dictionary.get('bcol_account_id'),
-            'bcolUserId': dictionary.get('bcol_user_id')
+            'bcolUserId': dictionary.get('bcol_user_id'),
+            'contactInfo': TestOrgInfo.bcol_linked().get('mailingAddress')
 
         }
         assert actual_data == expected_data

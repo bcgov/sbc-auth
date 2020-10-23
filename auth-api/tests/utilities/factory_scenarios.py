@@ -22,7 +22,7 @@ from random import choice
 from string import ascii_lowercase, ascii_uppercase
 
 from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.enums import AccessType, IdpHint, LoginSource, ProductCode
+from auth_api.utils.enums import AccessType, IdpHint, LoginSource, ProductCode, OrgType
 from auth_api.config import get_named_config
 
 fake = Faker()
@@ -412,7 +412,8 @@ class TestOrgInfo(dict, Enum):
     """Test scenarios of org."""
 
     org1 = {'name': 'My Test Org'}
-    org_onlinebanking = {'name': 'My Test Org', 'paymentMethod': 'ONLINE_BANKING'}
+
+    org_onlinebanking = {'name': 'My Test Org', 'paymentInfo': {'paymentMethod': 'ONLINE_BANKING'}}
     org2 = {'name': 'My Test Updated Org'}
     org3 = {'name': 'Third Orgs'}
     org4 = {'name': 'fourth Orgs'}
@@ -448,7 +449,8 @@ class TestOrgInfo(dict, Enum):
                 'region': 'BC',
                 'postalCode': 'T1T1T1',
                 'country': 'CA'
-            }
+            },
+            'typeCode': OrgType.PREMIUM.value
         }
 
     @staticmethod
