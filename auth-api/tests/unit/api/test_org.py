@@ -226,10 +226,10 @@ def test_add_same_org_409(client, jwt, session, keycloak_mock):  # pylint:disabl
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_201_CREATED, "created first org"
+    assert rv.status_code == http_status.HTTP_201_CREATED, 'created first org'
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_409_CONFLICT, "created duplicates org"
+    assert rv.status_code == http_status.HTTP_409_CONFLICT, 'not able to create duplicates org'
 
 
 def test_add_org_invalid_returns_400(client, jwt, session):  # pylint:disable=unused-argument
