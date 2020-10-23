@@ -4,11 +4,12 @@
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
           <v-checkbox
-            v-on:change="emitStatus()"
+            v-on:change="emitTermsAcceptanceStatus"
             v-on="on"
             class="terms-checkbox"
             color="default"
             v-model="termsAccepted"
+            :disabled="!canCheckTerms"
             required
           >
             <template v-slot:label>
@@ -42,9 +43,9 @@
           </v-card-title>
           <v-card-text id="scroll-target" data-test="scroll-area">
             <div v-scroll:#scroll-target="onScroll" style="height: 2000px;">
-              <terms-of-use
-                :content="content"
-              ></terms-of-use>
+              <TermsOfUse
+                :tosType="tosType"
+              ></TermsOfUse>
             </div>
           </v-card-text>
           <v-card-actions>
@@ -54,7 +55,7 @@
               color="primary"
               class="agree-btn"
               :disabled="!atBottom"
-              @click="termsDialog = false; termsAccepted = true; emitStatus()"
+              @click="agreeToTerms"
               data-test="accept-button"
             >
               <span>Agree to Terms</span>
@@ -78,45 +79,46 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
 import { User } from '@/models/user'
 import documentService from '@/services/document.services.ts'
 import { getModule } from 'vuex-module-decorators'
-import { mapState } from 'vuex'
 
 @Component({
   components: {
     TermsOfUse
   },
   computed: {
-    ...mapState('user', ['userProfile'])
+    ...mapState('user', [
+      'userHasToAcceptTOS'
+    ])
   }
 })
 export default class TermsOfUseDialog extends Vue {
-  private readonly userProfile!: User
-  private termsDialog = false
-  private termsAccepted = false
-  private content: string = ''
-  private version: string = ''
+  @Prop({ default: 'termsofuse' }) tosType: string
+  @Prop({ default: false }) isUserTOS: boolean
+  protected readonly userHasToAcceptTOS!: boolean
+  private termsDialog: boolean = true
+  private termsAccepted: boolean = false
   private canCheckTerms: boolean = false
-  private atBottom = false
-
-  async mounted () {
-    const response = await documentService.getTermsOfService('termsofuse')
-    this.content = response.data.content
-    this.version = response.data.versionId
-  }
+  private atBottom: boolean = false
 
   get tooltipTxt () {
     return 'Please read and agree to the Terms Of Use'
   }
 
-  @Watch('version')
-  onDocVersionChanged (val: string, oldVal: string) {
-    if (val === this.userProfile.userTerms.termsOfUseAcceptedVersion) {
-      this.termsAccepted = true
-      this.canCheckTerms = true
-      this.emitStatus()
+  private mounted () {
+    this.termsDialog = false
+    if (this.isUserTOS && this.userHasToAcceptTOS) {
+      this.agreeToTerms()
+    }
+  }
+
+  @Watch('userHasToAcceptTOS', { deep: true })
+  updateTermsAccepted (val, oldVal) {
+    if (this.isUserTOS && val) {
+      this.agreeToTerms()
     }
   }
 
@@ -132,12 +134,16 @@ export default class TermsOfUseDialog extends Vue {
     this.atBottom = (e.target.scrollHeight - e.target.scrollTop) <= (e.target.offsetHeight + 25)
   }
 
-  @Emit('terms-updated')
-  private emitStatus () {
-    return {
-      termsVersion: this.version,
-      isTermsAccepted: this.termsAccepted
-    }
+  private agreeToTerms () {
+    this.termsDialog = false
+    this.termsAccepted = true
+    this.canCheckTerms = true
+    this.emitTermsAcceptanceStatus()
+  }
+
+  @Emit('terms-acceptance-status')
+  private emitTermsAcceptanceStatus () {
+    return this.termsAccepted
   }
 }
 </script>
