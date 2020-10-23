@@ -5,16 +5,6 @@ Revises: 06c7acc047fa
 Create Date: 2020-10-22 17:05:30.367190
 
 """
-from typing import List, Dict
-
-import sqlalchemy as sa
-from alembic import op
-from flask import current_app
-
-from auth_api.models import AccountPaymentSettingsDeprecated, Org
-from auth_api.services.rest_service import RestService
-from auth_api.utils.enums import OrgType, PaymentMethod
-
 
 # revision identifiers, used by Alembic.
 revision = '18a4955730f9'
