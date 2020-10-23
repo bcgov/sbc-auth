@@ -1,6 +1,7 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { DocumentUpload, User, UserProfileData } from '@/models/user'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
@@ -10,7 +11,6 @@ import { RoleInfo } from '@/models/Organization'
 import { SessionStorageKeys } from '@/util/constants'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import UserService from '@/services/user.services'
-import { use } from 'vue/types/umd'
 
 export interface UserTerms {
   isTermsOfUseAccepted: boolean
@@ -26,6 +26,7 @@ export default class UserModule extends VuexModule {
   userProfile: User = undefined
   userContact: Contact = undefined
   termsOfUse: TermsOfUseDocument = undefined
+  userHasToAcceptTOS: boolean = false
   notaryInformation: NotaryInformation = undefined
   notaryContact: NotaryContact = undefined
   affidavitDocId:string = '' // the guid of the doc which you get from the server side
@@ -90,6 +91,14 @@ export default class UserModule extends VuexModule {
   @Mutation
   public setTermsOfUse (termsOfUse: TermsOfUseDocument) {
     this.termsOfUse = termsOfUse
+    const userTOS = this.userProfile?.userTerms?.termsOfUseAcceptedVersion
+    if (!userTOS) {
+      this.userHasToAcceptTOS = true
+    } else {
+      const currentlyAcceptedTermsVersion = CommonUtils.extractAndConvertStringToNumber(userTOS)
+      const latestVersionNumber = CommonUtils.extractAndConvertStringToNumber(termsOfUse?.versionId)
+      this.userHasToAcceptTOS = (currentlyAcceptedTermsVersion === latestVersionNumber)
+    }
   }
 
   @Mutation
@@ -233,5 +242,11 @@ export default class UserModule extends VuexModule {
   public async resetOTPAuthenticator (username: string) {
     const response = await UserService.resetOTPAuthenticator(username)
     return response?.data || {}
+  }
+
+  @Action({ commit: 'setTermsOfUse', rawError: true })
+  public async getTermsOfUse (docType: string = 'termsofuse') {
+    const response = await DocumentService.getTermsOfService(docType)
+    return response?.data
   }
 }

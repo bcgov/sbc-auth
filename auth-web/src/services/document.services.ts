@@ -10,8 +10,9 @@ const axios = addAxiosInterceptors(Axios.create())
 
 export default class DocumentService {
   static async getTermsOfService (identifier: string): Promise<AxiosResponse<TermsOfUseDocument>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/documents/termsofuse`)
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/documents/${identifier}`)
   }
+
   static async getAffidavitPdf (): Promise<AxiosResponse> {
     var instance = Axios.create()
     return instance.get(`${ConfigHelper.getFileServerUrl()}/affidavit_v1.pdf`, {

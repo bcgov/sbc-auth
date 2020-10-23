@@ -23,7 +23,7 @@ from string import ascii_lowercase, ascii_uppercase
 
 from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils.enums import AccessType, IdpHint, LoginSource, ProductCode
-from config import get_named_config
+from auth_api.config import get_named_config
 
 fake = Faker()
 

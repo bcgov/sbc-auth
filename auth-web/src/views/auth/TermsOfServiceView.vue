@@ -18,7 +18,9 @@
       </div>
       <v-card flat>
         <v-card-text class="pa-sm-6 pa-md-8 pa-lg-8 pa-xl-8">
-          <terms-of-use @update_version="showUpdateBanner()"></terms-of-use>
+          <TermsOfUse
+            @tos-version-updated="showUpdateBanner"
+          ></TermsOfUse>
         </v-card-text>
         <v-card-actions class="terms-of-use-btns justify-center pt-0 pb-9">
           <v-btn

@@ -30,7 +30,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
 from auth_api.utils.enums import NotificationType, Status, LoginSource
 from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF
-from config import get_named_config
+from auth_api.config import get_named_config
 
 from .authorization import check_auth
 from .keycloak import KeycloakService
