@@ -66,6 +66,14 @@ class PaymentMethod(Enum):
     PAD = 'PAD'
 
 
+class PaymentAccountStatus(Enum):
+    """Payment types."""
+
+    CREATED = 'CREATED'
+    PENDING = 'PENDING'
+    FAILED = 'FAILED'
+
+
 class OrgType(Enum):
     """Org types."""
 
