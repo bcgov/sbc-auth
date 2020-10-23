@@ -1,7 +1,13 @@
 <template>
 <v-container>
   <v-form ref="premiumAccountChooser" lazy-validation>
-    <p class="mt-3">Do you want to link this account with an existing BC Online Account? <a href="">Learn more</a></p>
+    <p class="mt-3">Do you want to link this account with an existing BC Online Account?
+      <v-btn
+        text
+        class="learn-more-btn"
+        color="primary"
+        @click="learnMoreDialog = true">Learn more</v-btn>
+    </p>
     <v-radio-group class="mb-3" @change="loadComponent" v-model="isBcolSelected">
       <v-radio label="Yes" value="yes" />
       <v-radio label="No" value="no" />
@@ -42,8 +48,65 @@
       </v-row>
     </template>
   </v-form>
-</v-container>
+  <!-- Learn More Popup -->
+  <v-dialog
+    v-model="learnMoreDialog"
+    max-width="500"
+  >
+    <v-card>
+      <v-card-title class="headline">
+        <h2>Linking your BC Online account</h2>
+        <v-btn
+          large
+          icon
+          @click="closeLearnMore"
+        >
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-card-title>
 
+      <v-card-text>
+        <p>
+          When you link your BC Online, you get:
+        </p>
+        <ul>
+          <li>
+            <strong>Contact Info</strong> - reuse your account contact information from BC Online for your new premium account
+          </li>
+          <li>
+            <strong>Payment</strong> - the option to select your BC Online deposit account as a payment option
+          </li>
+          <li>
+            <strong>Reporting</strong> - all transactions done by your team in this new application will appear in your BC Online statement reports, provided you choose your BC Online deposit account as your payment option
+          </li>
+        </ul>
+        <p>
+          You do not get:
+        </p>
+        <ul>
+          <li>
+            To migrate over your userIDs from BC Online
+          </li>
+        </ul>
+        <p class="pt-2">Linking a BC Online account, requires an existing BC Online account (3-5 days to setup) and the Prime Contact credentials to complete.</p>
+        <v-btn text color="primary" class="bcol-link px-2" href="https://www.bconline.gov.bc.ca/" target="_blank" rel="noopener noreferrer">
+          <v-icon>mdi-help-circle-outline</v-icon>
+          <span>How do I get a BC Online Account?</span>
+        </v-btn>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          color="default"
+          depressed
+          @click="closeLearnMore"
+        >
+          OK
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+</v-container>
 </template>
 
 <script lang="ts">
@@ -94,6 +157,7 @@ export default class PremiumChooser extends Mixins(Steppable) {
   private readonly setCurrentOrganizationType!: (orgType: string) => void
   private readonly changeOrgType!: (action: Actions) => Promise<Organization>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
+  private learnMoreDialog: boolean = false
 
   $refs: {
     activeComponent: AccountCreatePremium | AccountCreateBasic
@@ -126,9 +190,43 @@ export default class PremiumChooser extends Mixins(Steppable) {
       this.$router.push({ path: '/home' })
     }
   }
+
+  private closeLearnMore () {
+    this.learnMoreDialog = false
+  }
 }
 </script>
 
 <style lang="scss" scoped>
+.learn-more-btn {
+  padding-left: 0 !important;
+  text-decoration: underline !important;
+}
 
+.v-btn.bcol-link {
+  text-align: left;
+
+  .v-icon {
+    margin-top: 0.1rem;
+    margin-right: 0.5rem;
+  }
+
+  span {
+    text-decoration: underline;
+  }
+}
+
+ul {
+  list-style: none; /* Remove default bullets */
+  margin-bottom: 16px;
+}
+
+ul li::before {
+  content: "\2022";  /* Add content: \2022 is the CSS Code/unicode for a bullet */
+  color: var(--v-primary-base);
+  font-weight: 700;
+  display: inline-block;
+  width: 1.5rem;
+  margin-left: -1.5rem;
+}
 </style>
