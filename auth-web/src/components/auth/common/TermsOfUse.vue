@@ -15,42 +15,41 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { mapMutations, mapState } from 'vuex'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { mapActions, mapMutations, mapState } from 'vuex'
+import CommonUtils from '@/util/common-util'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { User } from '@/models/user'
 import documentService from '@/services/document.services.ts'
 
 @Component({
   computed: {
-    ...mapState('user', ['termsOfUse', 'userProfile'])
+    ...mapState('user', [
+      'termsOfUse',
+      'userProfile',
+      'userHasToAcceptTOS'
+    ])
   },
   methods: {
-    ...mapMutations('user', ['setTermsOfUse'])
+    ...mapActions('user', [
+      'getTermsOfUse'
+    ])
   }
 })
 export default class TermsOfUse extends Vue {
-  private readonly setTermsOfUse!: (terms: TermsOfUseDocument) => void
+  private readonly getTermsOfUse!: (docType?: string) => TermsOfUseDocument
   private termsContent = ''
   protected readonly userProfile!: User
+  protected readonly userHasToAcceptTOS!: boolean
 
-  @Prop({ default: '' }) private content: string
+  @Prop({ default: 'termsofuse' }) tosType: string
 
   async mounted () {
-    if (!this.content) {
-      const response = await documentService.getTermsOfService('termsofuse')
-      if (response.data) {
-        this.termsContent = response.data.content
-        this.setTermsOfUse(response.data)
-        const hasLatestTermsAccepted = this.hasAcceptedLatestTos(
-          response.data.versionId
-        )
-        if (!hasLatestTermsAccepted) {
-          this.$emit('update_version')
-        }
-      }
-    } else {
-      this.termsContent = this.content
+    const termsOfService = await this.getTermsOfUse(this.tosType)
+    this.termsContent = termsOfService.content
+    const hasLatestTermsAccepted = this.hasAcceptedLatestTos(termsOfService.versionId)
+    if (!hasLatestTermsAccepted) {
+      this.$emit('tos-version-updated')
     }
   }
 
@@ -60,17 +59,14 @@ export default class TermsOfUse extends Vue {
     Or else 'd1' will be,l 'd2' . But 'd2' wont be less than ' d10 '!!!  '
     */
 
-    if (!this.userProfile.userTerms?.termsOfUseAcceptedVersion) {
+    const userTOS = this.userProfile?.userTerms?.termsOfUseAcceptedVersion
+
+    if (!userTOS) {
       return true
     }
-    const currerntlyAcceptedTermsVersion = Number(
-      this.userProfile.userTerms.termsOfUseAcceptedVersion.replace(/\D/g, '')
-    )
-    const latestVersionNumber = Number(latestVersionId.replace(/\D/g, ''))
-    return (
-      this.userProfile.userTerms.isTermsOfUseAccepted &&
-      currerntlyAcceptedTermsVersion > latestVersionNumber
-    )
+    const currentlyAcceptedTermsVersion = CommonUtils.extractAndConvertStringToNumber(userTOS)
+    const latestVersionNumber = CommonUtils.extractAndConvertStringToNumber(latestVersionId)
+    return (currentlyAcceptedTermsVersion > latestVersionNumber)
   }
 }
 </script>
