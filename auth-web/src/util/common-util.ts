@@ -160,4 +160,8 @@ export default class CommonUtils {
     })
     return items
   }
+
+  static extractAndConvertStringToNumber (str: string) {
+    return Number(str.replace(/\D/g, ''))
+  }
 }

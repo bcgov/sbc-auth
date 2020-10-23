@@ -1,64 +1,85 @@
 <template>
   <div>
-    <v-card
-      outlined
-      hover
-      class="payment-card py-8 px-8 mb-4 elevation-1"
-      :class="{'selected': isPaymentSelected(payment)}"
-      v-for="payment in allowedPaymentMethods"
-      :key="payment.type"
-      @click="selectPayment(payment)"
-    >
-      <div class="d-flex">
-        <div class="mt-n2 mr-8">
-          <v-icon x-large color="primary">{{payment.icon}}</v-icon>
-        </div>
-
-        <div>
-          <div>
-            <div class="title font-weight-bold mt-n2 payment-title">{{payment.title}}</div>
-            <div>{{payment.subtitle}}</div>
+    <template v-if="!isPADOnly">
+      <v-card
+        outlined
+        hover
+        class="payment-card py-8 px-8 mb-4 elevation-1"
+        :class="{'selected': isPaymentSelected(payment)}"
+        v-for="payment in allowedPaymentMethods"
+        :key="payment.type"
+        @click="selectPayment(payment)"
+      >
+        <div class="d-flex">
+          <div class="mt-n2 mr-8">
+            <v-icon x-large color="primary">{{payment.icon}}</v-icon>
           </div>
-          <v-expand-transition>
-            <div v-if="isPaymentSelected(payment)">
-              <div class="pt-6">
-                <v-divider class="mb-6"></v-divider>
-                <div v-if="(payment.type === paymentTypes.PAD)">
-                  <!-- showing PAD form for PAD selection -->
-                  <PADInfoForm
-                    :padInformation="{}"
-                    @emit-pre-auth-debit-info="getPADInfo"
-                  ></PADInfoForm>
-                </div>
-                <div v-else
-                  v-html="payment.description">
+
+          <div class="payment-card-contents">
+            <div>
+              <div class="title font-weight-bold mt-n2 payment-title">{{payment.title}}</div>
+              <div>{{payment.subtitle}}</div>
+            </div>
+            <v-expand-transition>
+              <div v-if="isPaymentSelected(payment)">
+                <div class="pt-6">
+                  <v-divider class="mb-6"></v-divider>
+                  <div v-if="(payment.type === paymentTypes.PAD)">
+                    <!-- showing PAD form for PAD selection -->
+                    <PADInfoForm
+                      :padInformation="{}"
+                      @emit-pre-auth-debit-info="getPADInfo"
+                    ></PADInfoForm>
+                  </div>
+                  <div v-else-if="(payment.type === paymentTypes.BCOL)">
+                    <!-- showing BCOL details banner -->
+                    <LinkedBCOLBanner
+                      :bcolAccountName="currentOrganization.name"
+                      :bcolAccountDetails="currentOrganization.bcolAccountDetails"
+                    ></LinkedBCOLBanner>
+                  </div>
+                  <div v-else
+                    v-html="payment.description">
+                  </div>
                 </div>
               </div>
-            </div>
-          </v-expand-transition>
-        </div>
+            </v-expand-transition>
+          </div>
 
-        <div class="ml-auto pl-8">
-        <v-btn
-          depressed
-          color="primary"
-          width="120"
-          class="font-weight-bold"
-          :outlined="!isPaymentSelected(payment)"
-          @click="selectPayment(payment)"
-          :aria-label="'Select' + ' ' + payment.title"
-        >
-          <span>{{(isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT'}}</span>
-        </v-btn>
+          <div class="ml-auto pl-8">
+          <v-btn
+            depressed
+            color="primary"
+            width="120"
+            class="font-weight-bold"
+            :outlined="!isPaymentSelected(payment)"
+            @click="selectPayment(payment)"
+            :aria-label="'Select' + ' ' + payment.title"
+          >
+            <span>{{(isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT'}}</span>
+          </v-btn>
+          </div>
         </div>
-      </div>
-    </v-card>
+      </v-card>
+    </template>
+    <!-- showing PAD form without card selector for single payment types -->
+    <v-row v-else>
+      <v-col cols="9">
+        <PADInfoForm
+          :padInformation="{}"
+          @emit-pre-auth-debit-info="getPADInfo"
+        ></PADInfoForm>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
 <script lang="ts">
 import { Account, PaymentTypes } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
+import ConfigHelper from '@/util/config-helper'
+import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
+import { Organization } from '@/models/Organization'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 
 const PAYMENT_METHODS = {
@@ -104,18 +125,18 @@ const PAYMENT_METHODS = {
 
 @Component({
   components: {
-    PADInfoForm
+    PADInfoForm,
+    LinkedBCOLBanner
   }
 })
 export default class PaymentMethodSelector extends Vue {
   @Prop({ default: '' }) currentOrgType: string
+  @Prop({ default: undefined }) currentOrganization: Organization
   private selectedPaymentMethod: string = ''
   private paymentTypes = PaymentTypes
-  private paymentsPerAccountType = {
-    [Account.BASIC]: [ PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING ],
-    [Account.PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ],
-    [Account.UNLINKED_PREMIUM]: [ PaymentTypes.PAD ]
-  }
+
+  // this object can define the payment methods allowed for each account tyoes
+  private paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
 
   private get allowedPaymentMethods () {
     const paymentMethods = []
@@ -126,6 +147,10 @@ export default class PaymentMethodSelector extends Vue {
       })
     }
     return paymentMethods
+  }
+
+  private get isPADOnly () {
+    return (this.currentOrgType === Account.UNLINKED_PREMIUM)
   }
 
   private selectPayment (payment) {
@@ -169,5 +194,9 @@ export default class PaymentMethodSelector extends Vue {
 
 .transparent-divider {
   border-color: transparent !important;
+}
+
+.payment-card-contents {
+  width: 100%;
 }
 </style>

@@ -43,13 +43,14 @@
           ></v-text-field>
         </v-col>
       </v-row>
-      <TermsOfUseDialog></TermsOfUseDialog>
+      <TermsOfUseDialog
+        @terms-acceptance-status="isTermsAccepted"
+      ></TermsOfUseDialog>
     </v-form>
   </div>
 </template>
 
 <script lang="ts">
-import { Account, PaymentTypes } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
@@ -68,6 +69,7 @@ export default class PADInfoForm extends Vue {
   private transitNumber: string = ''
   private institutionNumber: string = ''
   private accountNumber: string = ''
+  private isTOSAccepted: boolean = false
 
   $refs: {
     preAuthDebitForm: HTMLFormElement,
@@ -96,13 +98,15 @@ export default class PADInfoForm extends Vue {
 
   @Emit()
   private emitPreAuthDebitInfo () {
-    // eslint-disable-next-line no-console
-    console.log(this.$refs.preAuthDebitForm.validate())
     return {
       transitNumber: this.transitNumber,
       institutionNumber: this.institutionNumber,
       accountNumber: this.accountNumber
     }
+  }
+
+  private isTermsAccepted (isAccepted) {
+    this.isTOSAccepted = isAccepted
   }
 }
 </script>

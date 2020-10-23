@@ -1,6 +1,5 @@
+import { Account, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import Axios from 'axios'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { SessionStorageKeys } from './constants'
 
 /**
  * the configs are used since process.env doesnt play well when we hae only one build config and multiple deployments..so going for this
@@ -102,5 +101,13 @@ export default class ConfigHelper {
 
   static accountSettingsRoute () {
     return `/account/${JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}').id || 0}/settings`
+  }
+
+  static paymentsAllowedPerAccountType () {
+    return {
+      [Account.BASIC]: [ PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING ],
+      [Account.PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ],
+      [Account.UNLINKED_PREMIUM]: [ PaymentTypes.PAD ]
+    }
   }
 }

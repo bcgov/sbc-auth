@@ -33,7 +33,7 @@ from auth_api.services.user import User as UserService
 from auth_api.utils.roles import STAFF
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, Status, LoginSource
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER
-from config import get_named_config
+from auth_api.config import get_named_config
 
 from .authorization import check_auth
 from .membership import Membership as MembershipService
