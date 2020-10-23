@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/payment_info",
+  "type": "object",
+  "required": [],
+  "properties": {
+    "paymentMethod": {
+      "$id": "#/properties/paymentMethod",
+      "type": "string",
+      "title": "Method of payment",
+      "enum": ["CC", "DRAWDOWN","DIRECT_PAY", "ONLINE_BANKING", "PAD", "EFT", "WIRE", "EJV"],
+      "examples": [
+        "CC"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "bankTransitNumber": {
+      "$id": "#/properties/bankTransitNumber",
+      "type": "string",
+      "title": "Bank Transit Number",
+      "pattern": "^(.*)$"
+    },
+    "bankInstitutionNumber": {
+      "$id": "#/properties/bankInstitutionNumber",
+      "type": "string",
+      "title": "Bank Institution Number",
+      "pattern": "^(.*)$"
+    },
+    "bankAccountNumber": {
+      "$id": "#/properties/bankAccountNumber",
+      "type": "string",
+      "title": "Bank Account Number",
+      "pattern": "^(.*)$"
+    }
+  }
+}
