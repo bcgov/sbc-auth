@@ -35,7 +35,7 @@ def upgrade():
     org_list: List[Org] = org_res.fetchall()
 
     token = RestService.get_service_account_token()
-
+    print('token------------------',token)
     acc_res = conn.execute(
         f"select * from account_payment_settings where is_active;")
     account_payment_list: List[AccountPaymentSettingsDeprecated] = acc_res.fetchall()
@@ -64,6 +64,7 @@ def upgrade():
             pay_request['bcolUserId'] = bcol_user_id
 
         accounts_url = f'{pay_url}/accounts/{org.id}'
+        print(f'--------------------------------{pay_request}---{org.id}-')
         RestService.put(endpoint=accounts_url,
                         data=pay_request, token=token, raise_for_status=False)
 
