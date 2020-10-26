@@ -92,7 +92,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     def find_by_org_name(cls, org_name):
         """Find Org that matches the provided name and not in INACTIVE status."""
         query = db.session.query(Org).filter(Org.status_code != OrgStatusEnum.INACTIVE.value, Org.name == org_name)
-        return query
+        return query.all()
 
     @classmethod
     def search_org(cls, access_type, name, status, bcol_account_id,  # pylint: disable=too-many-arguments

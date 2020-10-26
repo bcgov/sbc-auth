@@ -264,8 +264,6 @@ def test_find_org_by_name(session, auth_mock):  # pylint:disable=unused-argument
 
     found_org = OrgService.find_by_org_name(org_name)
 
-    print(found_org)
-
     assert found_org
     assert found_org.get('orgs')[0].get('name') == org_name
 
