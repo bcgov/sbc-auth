@@ -40,7 +40,7 @@ import { BcolAccountDetails } from '@/models/bcol'
 export default class LinkedBCOLBanner extends Vue {
   @Prop({ default: false }) showUnlinkAccountBtn: boolean
   @Prop({ default: '' }) bcolAccountName: string
-  @Prop({ default: {} as BcolAccountDetails }) bcolAccountDetails: BcolAccountDetails
+  @Prop({ default: () => ({} as BcolAccountDetails) }) bcolAccountDetails: BcolAccountDetails
 
   @Emit()
   private unlinkAccount () {

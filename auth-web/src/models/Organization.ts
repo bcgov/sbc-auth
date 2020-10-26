@@ -10,7 +10,14 @@ export interface CreateRequestBody {
   accessType?: string
   bcOnlineCredential?:BcolProfile
   mailingAddress?:Address
-  paymentMethod?: string
+  paymentInfo?: PaymentInfo
+}
+
+export interface PaymentInfo {
+  type: string
+  bankTransitNumber?: string
+  bankInstitutionNumber?: string
+  bankAccountNumber?: string
 }
 
 export interface Organizations
@@ -35,6 +42,13 @@ export interface Organization {
   paymentSettings?: any,
   bcolAccountId?: string,
   bcolUserId?: string
+}
+
+export interface PADInfo {
+  bankAccountNumber: string;
+  bankInstitutionNumber: string;
+  bankTransitNumber: string;
+  isTOSAccepted?: boolean;
 }
 
 export interface UpdateMemberPayload {

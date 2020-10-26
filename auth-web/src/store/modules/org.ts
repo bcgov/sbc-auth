@@ -11,6 +11,7 @@ import {
   MembershipStatus,
   MembershipType,
   Organization,
+  PADInfo,
   UpdateMemberPayload
 } from '@/models/Organization'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
@@ -46,6 +47,7 @@ export default class OrgModule extends VuexModule {
   currentOrganization: Organization = undefined
   currentOrgAddress:Address = undefined
   currentOrgPaymentType: string = undefined
+  currentOrgPADInfo: PADInfo = undefined
   currentOrganizationType: string = undefined
   currentMembership: Member = undefined
   activeOrgMembers: Member[] = []
@@ -202,6 +204,11 @@ export default class OrgModule extends VuexModule {
     this.currentOrganizationType = orgType
   }
 
+  @Mutation
+  public setCurrentOrganizationPADInfo (padInfo: PADInfo) {
+    this.currentOrgPADInfo = padInfo
+  }
+
   @Action({ rawError: true })
   public async resetCurrentOrganization (): Promise<void> {
     this.context.commit('setCurrentOrganization', undefined)
@@ -304,12 +311,15 @@ export default class OrgModule extends VuexModule {
 
   @Action({ rawError: true })
   public async createOrg (): Promise<Organization> {
-    const org = this.context.state['currentOrganization']
+    const org: Organization = this.context.state['currentOrganization']
     const address = this.context.state['currentOrgAddress']
     const paymentMethod = this.context.state['currentOrgPaymentType']
+    const padInfo: PADInfo = this.context.state['currentOrgPADInfo']
+
     const createRequestBody: CreateRequestBody = {
       name: org.name,
-      accessType: this.context.state['accessType']
+      accessType: this.context.state['accessType'],
+      typeCode: org.orgType
     }
     if (org.bcolProfile) {
       createRequestBody.bcOnlineCredential = org.bcolProfile
@@ -318,7 +328,14 @@ export default class OrgModule extends VuexModule {
       createRequestBody.mailingAddress = address
     }
     if (paymentMethod) {
-      createRequestBody.paymentMethod = paymentMethod
+      createRequestBody.paymentInfo = {
+        type: paymentMethod
+      }
+    }
+    if (padInfo && createRequestBody.paymentInfo) {
+      createRequestBody.paymentInfo.bankTransitNumber = padInfo.bankTransitNumber
+      createRequestBody.paymentInfo.bankInstitutionNumber = padInfo.bankInstitutionNumber
+      createRequestBody.paymentInfo.bankAccountNumber = padInfo.bankAccountNumber
     }
     const response = await OrgService.createOrg(createRequestBody)
     const organization = response?.data
@@ -651,5 +668,7 @@ export default class OrgModule extends VuexModule {
     this.context.commit('setCurrentOrganization', undefined)
     this.context.commit('setSelectedAccountType', undefined)
     this.context.commit('setCurrentOrganizationType', undefined)
+    this.context.commit('setCurrentOrganizationPaymentType', undefined)
+    this.context.commit('setCurrentOrganizationPADInfo', undefined)
   }
 }

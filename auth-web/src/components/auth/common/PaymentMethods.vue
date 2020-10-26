@@ -27,7 +27,7 @@
                   <div v-if="(payment.type === paymentTypes.PAD)">
                     <!-- showing PAD form for PAD selection -->
                     <PADInfoForm
-                      :padInformation="{}"
+                      @is-pre-auth-debit-form-valid="isPADValid"
                       @emit-pre-auth-debit-info="getPADInfo"
                     ></PADInfoForm>
                   </div>
@@ -67,6 +67,7 @@
       <v-col cols="9">
         <PADInfoForm
           :padInformation="{}"
+          @is-pre-auth-debit-form-valid="isPADValid"
           @emit-pre-auth-debit-info="getPADInfo"
         ></PADInfoForm>
       </v-col>
@@ -77,9 +78,9 @@
 <script lang="ts">
 import { Account, PaymentTypes } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Organization, PADInfo } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
-import { Organization } from '@/models/Organization'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 
 const PAYMENT_METHODS = {
@@ -134,6 +135,7 @@ export default class PaymentMethodSelector extends Vue {
   @Prop({ default: undefined }) currentOrganization: Organization
   private selectedPaymentMethod: string = ''
   private paymentTypes = PaymentTypes
+  private padInfo: PADInfo = {} as PADInfo
 
   // this object can define the payment methods allowed for each account tyoes
   private paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
@@ -155,7 +157,17 @@ export default class PaymentMethodSelector extends Vue {
 
   private selectPayment (payment) {
     this.selectedPaymentMethod = payment.type
-    this.paymentMethodSelected()
+    /**
+     * emit the paymentMethodSelected() from here only if its not PAD,
+     * for PAD, emit the paymentMethodSelected from the isPADValid method.
+     * so that the 'create account' button can be enabled once valid PAD details are entered.
+     * also, for single payment options (isPADOnly), this select method wont get fired,
+     * so emitting the selection from isPADValid would help there as well.
+     * IMP: check for PaymentTypes.PAD instead of 'isPADOnly' here, since that condition can change in future.
+     */
+    if (payment.type !== PaymentTypes.PAD) {
+      this.paymentMethodSelected()
+    }
   }
 
   private isPaymentSelected (payment) {
@@ -167,9 +179,15 @@ export default class PaymentMethodSelector extends Vue {
     return this.selectedPaymentMethod
   }
 
-  private getPADInfo (padInfo) {
-    // eslint-disable-next-line no-console
-    console.log(padInfo)
+  private getPADInfo (padInfo: PADInfo) {
+    this.padInfo = padInfo
+  }
+
+  private isPADValid (isValid) {
+    if (isValid) {
+      this.selectedPaymentMethod = PaymentTypes.PAD
+      this.paymentMethodSelected()
+    }
   }
 }
 </script>
