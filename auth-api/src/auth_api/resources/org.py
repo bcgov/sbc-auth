@@ -538,3 +538,23 @@ class OrgStatus(Resource):
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 
         return response, status
+
+
+@cors_preflight('GET,OPTIONS')
+@API.route('/<string:org_id>/payment_info', methods=['GET', 'OPTIONS'])
+class OrgPaymentSettings(Resource):
+    """Resource for getting org payment info."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    def get(org_id):
+        """Retrieve the set of payment settings associated with the specified org."""
+        try:
+            org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
+                                            allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+            response, status = org.get_payment_info(), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status

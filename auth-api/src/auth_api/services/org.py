@@ -404,6 +404,14 @@ class Org:  # pylint: disable=too-many-public-methods
             KeycloakService.remove_from_account_holders_group(user.keycloak_guid)
         current_app.logger.debug('org Inactivated>')
 
+    def get_payment_info(self):
+        """Return the Payment Details for an org by calling Pay API."""
+        pay_url = current_app.config.get('PAY_API_URL')
+        # invoke pay-api
+        token = RestService.get_service_account_token()
+        response = RestService.get(endpoint=f'{pay_url}/accounts/{self._model.id}', token=token, retry_on_failure=True)
+        return response.json()
+
     @staticmethod
     def find_by_org_id(org_id, token_info: Dict = None, allowed_roles: Tuple = None):
         """Find and return an existing organization with the provided id."""
