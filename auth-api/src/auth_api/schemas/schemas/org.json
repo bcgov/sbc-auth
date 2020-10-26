@@ -6,7 +6,6 @@
     "title": "Org",
     "additionalProperties": false,
     "required": [
-      "name"
     ],
     "dependencies": {
       "bcOnlineCredential": { "required": ["mailingAddress"] }

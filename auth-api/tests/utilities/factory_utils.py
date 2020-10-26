@@ -151,7 +151,7 @@ def factory_org_model(org_info: dict = TestOrgInfo.org1,
 
 
 def factory_org_service(org_info: dict = TestOrgInfo.org1,
-                        org_type_info: dict = TestOrgTypeInfo.test_type,
+                        org_type_info: dict = TestOrgTypeInfo.implicit,
                         org_status_info: dict = TestOrgStatusInfo.test_status,
                         payment_type_info: dict = TestPaymentTypeInfo.test_type,
                         bcol_info: dict = TestBCOLInfo.bcol1):
