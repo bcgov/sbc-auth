@@ -44,6 +44,7 @@
         </v-col>
       </v-row>
       <TermsOfUseDialog
+        :isAlreadyAccepted="isTermsOfServiceAccepted"
         @terms-acceptance-status="isTermsAccepted"
       ></TermsOfUseDialog>
     </v-form>
@@ -53,6 +54,7 @@
 <script lang="ts">
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
+import { PADInfo } from '@/models/Organization'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import { mask } from 'vue-the-mask'
 
@@ -62,10 +64,22 @@ import { mask } from 'vue-the-mask'
   },
   components: {
     TermsOfUseDialog
+  },
+  computed: {
+    ...mapState('org', [
+      'currentOrgPADInfo'
+    ])
+  },
+  methods: {
+    ...mapMutations('org', [
+      'setCurrentOrganizationPADInfo'
+    ])
   }
 })
 export default class PADInfoForm extends Vue {
-  @Prop({ default: {} }) padInformation: any
+  @Prop({ default: () => ({} as PADInfo) }) padInformation: any
+  private readonly currentOrgPADInfo!: PADInfo
+  private readonly setCurrentOrganizationPADInfo!: (padInfo: PADInfo) => void
   private transitNumber: string = ''
   private institutionNumber: string = ''
   private accountNumber: string = ''
@@ -91,22 +105,43 @@ export default class PADInfoForm extends Vue {
   ]
 
   private mounted () {
-    this.transitNumber = this.padInformation?.transitNumber || ''
-    this.institutionNumber = this.padInformation?.institutionNumber || ''
-    this.accountNumber = this.padInformation?.accountNumber || ''
+    const padInfo: PADInfo = (Object.keys(this.padInformation).length) ? this.padInformation : this.currentOrgPADInfo
+    this.transitNumber = padInfo?.bankTransitNumber || ''
+    this.institutionNumber = padInfo?.bankInstitutionNumber || ''
+    this.accountNumber = padInfo?.bankAccountNumber || ''
+    this.isTOSAccepted = padInfo?.isTOSAccepted || false
+    this.$nextTick(() => {
+      if (this.isTOSAccepted) {
+        this.isPreAuthDebitFormValid()
+      }
+    })
+  }
+
+  private get isTermsOfServiceAccepted () {
+    return (Object.keys(this.padInformation).length) ? this.padInformation.isTOSAccepted : this.currentOrgPADInfo?.isTOSAccepted
   }
 
   @Emit()
   private emitPreAuthDebitInfo () {
-    return {
-      transitNumber: this.transitNumber,
-      institutionNumber: this.institutionNumber,
-      accountNumber: this.accountNumber
+    const padInfo: PADInfo = {
+      bankTransitNumber: this.transitNumber,
+      bankInstitutionNumber: this.institutionNumber,
+      bankAccountNumber: this.accountNumber,
+      isTOSAccepted: this.isTOSAccepted
     }
+    this.isPreAuthDebitFormValid()
+    this.setCurrentOrganizationPADInfo(padInfo)
+    return padInfo
+  }
+
+  @Emit()
+  private isPreAuthDebitFormValid () {
+    return (this.$refs.preAuthDebitForm?.validate() && this.isTOSAccepted) || false
   }
 
   private isTermsAccepted (isAccepted) {
     this.isTOSAccepted = isAccepted
+    this.emitPreAuthDebitInfo()
   }
 }
 </script>

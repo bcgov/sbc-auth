@@ -138,7 +138,6 @@ import Vue from 'vue'
       'setCurrentOrganizationType'
     ]),
     ...mapActions('org', [
-      'createOrg',
       'syncMembership',
       'syncOrganization',
       'changeOrgType'
