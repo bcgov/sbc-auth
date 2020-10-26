@@ -22,7 +22,7 @@ from random import choice
 from string import ascii_lowercase, ascii_uppercase
 
 from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.enums import AccessType, IdpHint, LoginSource, ProductCode, OrgType
+from auth_api.utils.enums import AccessType, IdpHint, LoginSource, ProductCode, OrgType, PaymentMethod
 from auth_api.config import get_named_config
 
 fake = Faker()
@@ -390,6 +390,15 @@ class TestPaymentTypeInfo(dict, Enum):
     """Test scenarios of payment type."""
 
     test_type = {'code': 'TEST', 'desc': 'Test'}
+
+
+class TestPaymentMethodInfo(dict, Enum):
+    """Test scenarios of payment type."""
+
+    @staticmethod
+    def get_payment_method_input(payment_method: PaymentMethod = PaymentMethod.CREDIT_CARD):
+        """Return payment info payload."""
+        return {'paymentInfo': {'paymentMethod': payment_method.value}}
 
 
 class TestAnonymousMembership(dict, Enum):
