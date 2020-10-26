@@ -341,25 +341,24 @@ class Org:  # pylint: disable=too-many-public-methods
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
 
-        if self._model.type_code != OrgType.PREMIUM.value:
+        has_org_updates: bool = False  # update the org table if this variable is set true
+
+        is_name_getting_updated = 'name' in org_info and self._model.type_code == OrgType.BASIC.value
+        if is_name_getting_updated:
             existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'], self._model.id)
             if existing_similar__org is not None:
                 raise BusinessException(Error.DATA_CONFLICT, None)
-        is_premium = False
+            has_org_updates = True
 
-        bcol_credential = org_info.pop('bcOnlineCredential', None)
-        mailing_address = org_info.pop('mailingAddress', None)
-        payment_info = org_info.pop('paymentInfo', {})
-        selected_payment_method = payment_info.get('paymentMethod', None)
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
-        if bcol_credential:
+        if bcol_credential := org_info.pop('bcOnlineCredential', None):
             bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
-            is_premium = True
+            has_org_updates = True
 
         # Update mailing address Or create new one
-        if mailing_address:
+        if mailing_address := org_info.pop('mailingAddress', None):
             contacts = self._model.contacts
             if len(contacts) > 0:
                 contact = self._model.contacts[0].contact
@@ -368,13 +367,14 @@ class Org:  # pylint: disable=too-many-public-methods
             else:
                 Org.add_contact_to_org(mailing_address, self._model)
 
-        if self._model.type_code != OrgType.PREMIUM.value:
+        if has_org_updates:
             self._model.update_org_from_dict(camelback2snake(org_info))
 
-        org_type: OrgType = OrgType.PREMIUM if is_premium else OrgType.BASIC
-        payment_type = Org._validate_and_get_payment_method(selected_payment_method, org_type)
-        Org._create_payment_settings(self._model, payment_info, payment_type, mailing_address, False)
-        current_app.logger.debug('>update_org ')
+        if payment_info := org_info.pop('paymentInfo', {}):
+            selected_payment_method = payment_info.get('paymentMethod', None)
+            payment_type = Org._validate_and_get_payment_method(selected_payment_method, OrgType[self._model.type_code])
+            Org._create_payment_settings(self._model, payment_info, payment_type, mailing_address, False)
+            current_app.logger.debug('>update_org ')
         return self
 
     @staticmethod
