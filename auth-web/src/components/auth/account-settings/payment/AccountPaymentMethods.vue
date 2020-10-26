@@ -1,26 +1,23 @@
 <template>
-  <div>
-    <p class="mb-12 payment-page-sub">
-      {{pageSubTitle}}
-    </p>
+  <v-container class="view-container">
+    <div class="view-header flex-column mb-6">
+      <h2 class="view-header__title" data-test="account-settings-title">
+        Payment Methods
+      </h2>
+      <p class="mt-3 payment-page-sub">
+        Manage your pre-authorized debit payments for this account.
+      </p>
+    </div>
     <PaymentMethods
-      :currentOrgType="currentOrganizationType"
+      v-if="selectedPaymentMethod"
+      :currentOrgType="savedOrganizationType"
       :currentOrganization="currentOrganization"
-      :currentSelectedPaymentMethod="currentOrgPaymentType"
+      :currentSelectedPaymentMethod="selectedPaymentMethod"
       @payment-method-selected="setSelectedPayment"
     ></PaymentMethods>
     <v-divider class="my-10"></v-divider>
      <v-row>
       <v-col class="py-0 d-inline-flex">
-        <v-btn
-          large
-          depressed
-          color="default"
-          @click="goBack"
-        >
-          <v-icon left class="mr-2">mdi-arrow-left</v-icon>
-          <span>Back</span>
-        </v-btn>
         <v-spacer></v-spacer>
         <v-btn
           large
@@ -30,21 +27,18 @@
           data-test="save-button"
           :disabled="!selectedPaymentMethod"
         >
-          Create Account
+          Save
         </v-btn>
-        <ConfirmCancelButton
-          showConfirmPopup="true"
-        ></ConfirmCancelButton>
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
-import { mapMutations, mapState } from 'vuex'
+import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import { Account } from '@/util/constants'
-import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
+import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
@@ -52,51 +46,48 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 
 @Component({
   components: {
-    ConfirmCancelButton,
     PaymentMethods
   },
   computed: {
     ...mapState('org', [
-      'currentOrganization',
-      'currentOrganizationType',
-      'currentOrgPaymentType'
+      'currentOrganization'
     ])
   },
   methods: {
     ...mapMutations('org', [
       'setCurrentOrganizationPaymentType'
+    ]),
+    ...mapActions('org', [
+      'getOrgPayments'
     ])
   }
 })
-export default class PaymentMethodSelector extends Mixins(Steppable) {
+export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   private readonly setCurrentOrganizationPaymentType!: (paymentType: string) => void
+  private readonly getOrgPayments!: () => any
   private readonly currentOrganization!: Organization
-  private readonly currentOrganizationType!: string
-  private readonly currentOrgPaymentType!: string
+  private savedOrganizationType: string = ''
   private selectedPaymentMethod: string = ''
-
-  private goBack () {
-    this.stepBack()
-  }
-
-  private get pageSubTitle () {
-    return (this.currentOrganizationType === Account.UNLINKED_PREMIUM)
-      ? 'Set up your pre-authorized debit account to automatically make payments when they are due.'
-      : 'Select the payment method for this account.'
-  }
 
   private setSelectedPayment (payment) {
     this.selectedPaymentMethod = payment
-    this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
+  }
+
+  private async mounted () {
+    this.setAccountChangedHandler(await this.initialize)
+    await this.initialize()
+  }
+
+  private async initialize () {
+    this.savedOrganizationType =
+      ((this.currentOrganization?.orgType === Account.PREMIUM) && !this.currentOrganization?.bcolAccountId)
+        ? Account.UNLINKED_PREMIUM : this.currentOrganization.orgType
+    const orgPayments = await this.getOrgPayments()
+    this.selectedPaymentMethod = orgPayments?.paymentMethod || ''
   }
 
   private save () {
     this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
-    this.createAccount()
-  }
-
-  @Emit('final-step-action')
-  private createAccount () {
   }
 }
 </script>

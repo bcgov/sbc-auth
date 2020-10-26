@@ -147,7 +147,7 @@ export default class NonBcscAccountSetupView extends Vue {
   private beforeMount () {
     if (this.enablePaymentMethodSelectorStep) {
       const paymentMethodStep = {
-        title: 'Select payment method',
+        title: 'Payment Method',
         stepName: 'Payment Method',
         component: PaymentMethodSelector,
         componentProps: {}
