@@ -132,7 +132,6 @@ import { getModule } from 'vuex-module-decorators'
       'resetBcolDetails'
     ]),
     ...mapActions('org', [
-      'createOrg',
       'syncMembership',
       'syncOrganization',
       'changeOrgType'
@@ -146,7 +145,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private errorMessage: string = ''
   private saving = false
   private isBaseAddressValid: boolean = true
-  private readonly createOrg!: () => Promise<Organization>
   private readonly currentOrgAddress!: Address
   private readonly syncMembership!: (orgId: number) => Promise<Member>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
