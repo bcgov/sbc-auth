@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p class="mb-12 payment-page-sub">
+    <p class="payment-page-sub mb-9">
       {{pageSubTitle}}
     </p>
     <PaymentMethods

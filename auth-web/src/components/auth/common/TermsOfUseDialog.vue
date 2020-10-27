@@ -1,80 +1,76 @@
 <template>
-  <v-row>
-    <v-col sm="12">
-      <v-tooltip bottom>
-        <template v-slot:activator="{ on }">
-          <v-checkbox
-            v-on:change="emitTermsAcceptanceStatus"
-            v-on="on"
-            class="terms-checkbox"
-            color="default"
-            v-model="termsAccepted"
-            :disabled="!canCheckTerms"
-            required
-          >
-            <template v-slot:label>
-              <div class="terms-checkbox-label" v-on="on">
-                <span>I have read and agreed to the</span>
-                <v-btn
-                  text
-                  link
-                  color="primary"
-                  class="pr-1 pl-1"
-                  @click.stop="openDialog()"
-                  data-test="terms-of-use-checkbox"
-                >Terms of Use</v-btn>
+  <div>
+    <v-tooltip bottom color="grey darken-4">
+      <template v-slot:activator="{ on }">
+        <v-checkbox
+          color="primary"
+          class="terms-checkbox ma-0 pa-0"
+          hide-details
+          v-model="termsAccepted"
+          v-on:change="emitTermsAcceptanceStatus"
+          v-on="on"
+          :disabled="!canCheckTerms"
+          required
+        >
+          <template v-slot:label>
+            <span>I have read and agreed to the</span>
+            <v-btn
+              text
+              color="primary"
+              class="terms-checkbox-label-btn"
+              @click.stop="openDialog()"
+              data-test="terms-of-use-checkbox"
+              v-on="on"
+            >
+              Terms of Use
+            </v-btn>
+          </template>
+        </v-checkbox>
+        <v-dialog scrollable width="1024" v-model="termsDialog" :persistent="true">
+          <v-card>
+            <v-card-title>
+              <h2>Terms of Use</h2>
+              <v-btn
+                large
+                icon
+                @click="closeDialog"
+              >
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+            </v-card-title>
+            <v-card-text id="scroll-target" data-test="scroll-area">
+              <div v-scroll:#scroll-target="onScroll" style="height: 2000px;">
+                <TermsOfUse
+                  :tosType="tosType"
+                ></TermsOfUse>
               </div>
-            </template>
-          </v-checkbox>
-        </template>
-        <span>{{tooltipTxt}}</span>
-      </v-tooltip>
-      <v-dialog scrollable width="1024" v-model="termsDialog" :persistent="true">
-        <v-card>
-          <v-card-title>
-            <h2>Terms of Use</h2>
-            <v-btn
-              large
-              icon
-              @click="closeDialog"
-            >
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </v-card-title>
-          <v-card-text id="scroll-target" data-test="scroll-area">
-            <div v-scroll:#scroll-target="onScroll" style="height: 2000px;">
-              <TermsOfUse
-                :tosType="tosType"
-              ></TermsOfUse>
-            </div>
-          </v-card-text>
-          <v-card-actions>
-            <v-btn
-              large
-              depressed
-              color="primary"
-              class="agree-btn"
-              :disabled="!atBottom"
-              @click="agreeToTerms"
-              data-test="accept-button"
-            >
-              <span>Agree to Terms</span>
-            </v-btn>
-            <v-btn
-              large
-              depressed
-              color="primary"
-              class="agree-btn"
-              @click="closeDialog"
-              data-test="close-button"
-            >
-              <span>Close</span>
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-col>
-  </v-row>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn
+                large
+                color="primary"
+                class="agree-btn"
+                :disabled="!atBottom"
+                @click="agreeToTerms"
+                data-test="accept-button"
+              >
+                <span>Agree to Terms</span>
+              </v-btn>
+              <v-btn
+                large
+                depressed
+                @click="closeDialog"
+                data-test="close-button"
+              >
+                Close
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </template>
+      <span>{{tooltipTxt}}</span>
+    </v-tooltip>
+  </div>
 </template>
 
 <script lang="ts">
@@ -155,46 +151,52 @@ export default class TermsOfUseDialog extends Vue {
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
 
-// Tighten up some of the spacing between rows
-[class^='col'] {
-  padding-top: 0;
-  padding-bottom: 0;
-}
+  // Tighten up some of the spacing between rows
+  [class^='col'] {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 
-.terms-checkbox {
-  pointer-events: auto !important;
-}
+  .terms-checkbox {
+    pointer-events: auto !important;
+  }
 
-.form__btns {
-  display: flex;
-  justify-content: flex-end;
-}
+  .form__btns {
+    display: flex;
+    justify-content: flex-end;
+  }
 
-.terms-checkbox-label {
-  display: flex;
-  align-items: center;
-  margin-top: -0.1rem;
-
-  .v-btn {
+  .terms-checkbox-label-btn {
     height: auto !important;
-    margin-left: 0.1rem;
-    padding: 0;
+    padding: 0.25rem !important;
+    font-size: 1rem !important;
     text-decoration: underline;
-    font-size: 1rem;
   }
-}
 
-.v-card__actions {
-  justify-content: center;
+  .v-card__actions {
+    justify-content: center;
 
-  .v-btn {
-    width: 10rem;
+    .v-btn {
+      width: 8rem;
+    }
   }
-}
 
-.terms-container ::v-deep {
-  article {
-    background: $gray1;
+  .terms-container ::v-deep {
+    article {
+      background: $gray1;
+    }
   }
-}
+
+  .v-tooltip__content:before {
+    content: ' ';
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    margin-left: -10px;
+    width: 20px;
+    height: 20px;
+    border-width: 10px 10px 10px 10px;
+    border-style: solid;
+    border-color: transparent transparent var(--v-grey-darken4) transparent;
+  }
 </style>

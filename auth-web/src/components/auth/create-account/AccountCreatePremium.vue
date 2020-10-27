@@ -1,99 +1,81 @@
 <template>
-  <v-container>
-    <v-form ref="createAccountInfoForm" lazy-validation>
-      <h3 class="my-3">Link with an existing BC Online Account</h3>
-      <p class="my-6">
-        You must be the Prime Contact to link this account with your existing BC Online account.
+  <v-form ref="createAccountInfoForm" lazy-validation>
+    <h3 class="mt-n1 mb-5">Link with an existing BC Online account</h3>
+
+    <div v-show="!linked">
+      <p class="mb-4">Linking accounts will import your organization’s contact and drawdown account information. Linking accounts <strong>will not import</strong> your existing users or any businesses you manage. You can invite team members and add businesses once your account is set up successfully.</p>
+      <p class="mb-8">You must be the <strong>Prime Contact</strong> to link this account with your existing BC Online account.</p>
+      <BcolLogin @account-link-successful="onLink"></BcolLogin>
+    </div>
+
+    <template v-if="linked">
+      <p class="mb-8">
+        The following information will be imported from your existing BC Online account. Review your account <br> information below and update if needed.
       </p>
-      <p class="mb-6">
-        Linking accounts imports your organization’s contact and drawdown account information.
-      </p>
-      <p class="mb-10">
-        Linking accounts <strong>does not</strong> import your existing users or any businesses you manage. You can invite team members and add businesses once your account is set up successfully.
-      </p>
-      <BcolLogin @account-link-successful="onLink" v-show="!linked"></BcolLogin>
-      <template v-if="linked">
-        <LinkedBCOLBanner
-          :bcolAccountName="currentOrganization.name"
-          :bcolAccountDetails="currentOrganization.bcolAccountDetails"
-          :showUnlinkAccountBtn="true"
-          @unlink-account="unlinkAccount"
-        ></LinkedBCOLBanner>
-        <v-checkbox color="primary" v-model="grantAccess" class="bcol-auth mt-8 ml-3">
+      <LinkedBCOLBanner class="mb-9"
+        :bcolAccountName="currentOrganization.name"
+        :bcolAccountDetails="currentOrganization.bcolAccountDetails"
+        :showUnlinkAccountBtn="true"
+        @unlink-account="unlinkAccount"
+      ></LinkedBCOLBanner>
+
+      <fieldset>
+        <legend class="mb-3">Mailing Address</legend>
+        <base-address-form
+          ref="mailingAddress"
+          :editing="true"
+          :schema="baseAddressSchema"
+          :address="address"
+          @update:address="updateAddress"
+          @valid="checkBaseAddressValidity"
+        />
+      </fieldset>
+
+      <fieldset>
+        <legend>Authorization</legend>
+        <v-checkbox
+          color="primary"
+          class="bcol-auth ml-2"
+          v-model="grantAccess">
           <template v-slot:label>
             <div class="bcol-auth__label" v-html="grantAccessText"></div>
           </template>
         </v-checkbox>
-        <v-expand-transition>
-          <div v-if="grantAccess">
-            <v-divider class="mt-4 mb-10"></v-divider>
-            <template>
-              <v-row class="mt-6">
-                <v-col cols="12">
-                  <h3 class="mb-3">Account Information</h3>
-                  <p class="mb-10">
-                    The following information will be imported from your existing BC Online account. Review your account <br> information below and update if needed.
-                  </p>
-                </v-col>
-              </v-row>
-              <ul class="nv-list mb-2">
-                <li class="nv-list-item mb-10">
-                  <div class="name" id="accountType">Account Name</div>
-                  <div class="value" aria-labelledby="accountType">
-                    <div class="value__title">
-                      <div class="mb-1">{{ currentOrganization.name }}</div>
-                      <div class="text--secondary subtitle-2">Linked accounts will use your existing BC Online Account name</div>
-                    </div>
-                  </div>
-                </li>
-              </ul>
-              <h4 class="mb-4">Mailing Address</h4>
-              <base-address-form
-                ref="mailingAddress"
-                :editing="true"
-                :schema="baseAddressSchema"
-                :address="address"
-                @update:address="updateAddress"
-                @valid="checkBaseAddressValidity"
-              />
-            </template>
-          </div>
-        </v-expand-transition>
+      </fieldset>
 
-        <v-alert type="error" class="mb-6" v-show="errorMessage">
-          {{ errorMessage }}
-        </v-alert>
-      </template>
+      <v-alert type="error" class="mb-6" v-show="errorMessage">
+        {{ errorMessage }}
+      </v-alert>
+    </template>
 
-      <v-divider class="mt-4 mb-10"></v-divider>
+    <v-divider class="mt-4 mb-10"></v-divider>
 
-      <v-row>
-        <v-col cols="12" class="form__btns py-0 d-inline-flex">
-          <v-btn
-            large
-            depressed
-            color="default"
-            @click="goBack">
-            <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
-            Back
-          </v-btn>
-          <v-spacer></v-spacer>
-          <v-btn class="mr-3" large depressed color="primary" :loading="saving" :disabled="!grantAccess || saving || !isBaseAddressValid" @click="save">
-            <span v-if="!isAccountChange">Next
-             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
-            </span>
-            <span v-if="isAccountChange">Change Account</span>
+    <v-row>
+      <v-col cols="12" class="form__btns py-0 d-inline-flex">
+        <v-btn
+          large
+          depressed
+          color="default"
+          @click="goBack">
+          <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
+          Back
+        </v-btn>
+        <v-spacer></v-spacer>
+        <v-btn class="mr-3" large depressed color="primary" :loading="saving" :disabled="!grantAccess || saving || !isBaseAddressValid" @click="save">
+          <span v-if="!isAccountChange">Next
+            <v-icon right class="ml-1">mdi-arrow-right</v-icon>
+          </span>
+          <span v-if="isAccountChange">Change Account</span>
+        </v-btn>
+        <ConfirmCancelButton
+          :showConfirmPopup="linked"
+          :clear-current-org="!isAccountChange"
+          :target-route="cancelUrl"
+        ></ConfirmCancelButton>
+      </v-col>
+    </v-row>
 
-          </v-btn>
-          <ConfirmCancelButton
-            :showConfirmPopup="linked"
-            :clear-current-org="!isAccountChange"
-            :target-route="cancelUrl"
-          ></ConfirmCancelButton>
-        </v-col>
-      </v-row>
-    </v-form>
-  </v-container>
+  </v-form>
 </template>
 
 <script lang="ts">

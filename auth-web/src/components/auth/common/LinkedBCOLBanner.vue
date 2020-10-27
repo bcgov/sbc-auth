@@ -2,11 +2,11 @@
   <v-alert
     dark
     color="primary"
-    class="pa-5"
+    class="ma-0 py-3 px-5"
   >
     <div class="bcol-acc d-flex justify-space-between align-center">
       <div v-if="bcolAccountDetails">
-        <div class="bcol-acc__name">
+        <div class="bcol-acc__name font-weight-bold">
           {{ bcolAccountName }}
         </div>
         <ul class="bcol-acc__meta">
@@ -52,11 +52,6 @@ export default class LinkedBCOLBanner extends Vue {
 .bcol-acc {
   margin-top: 1px;
   margin-bottom: 2px;
-}
-
-.bcol-acc__name {
-  font-size: 1.125rem;
-  font-weight: 700;
 }
 
 .bcol-acc__meta {

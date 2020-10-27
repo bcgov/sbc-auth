@@ -23,8 +23,8 @@
             <v-expand-transition>
               <div v-if="isPaymentSelected(payment)">
                 <div class="pt-6">
-                  <v-divider class="mb-6"></v-divider>
                   <div v-if="(payment.type === paymentTypes.PAD)">
+                    <v-divider class="mb-6"></v-divider>
                     <!-- showing PAD form for PAD selection -->
                     <PADInfoForm
                       @is-pre-auth-debit-form-valid="isPADValid"
@@ -38,8 +38,9 @@
                       :bcolAccountDetails="currentOrganization.bcolAccountDetails"
                     ></LinkedBCOLBanner>
                   </div>
-                  <div v-else
-                    v-html="payment.description">
+                  <div v-else>
+                    <v-divider class="mb-6"></v-divider>
+                    <div v-html="payment.description"></div>
                   </div>
                 </div>
               </div>
@@ -64,7 +65,7 @@
     </template>
     <!-- showing PAD form without card selector for single payment types -->
     <v-row v-else>
-      <v-col cols="9">
+      <v-col cols="9" class="py-0">
         <PADInfoForm
           :padInformation="{}"
           @is-pre-auth-debit-form-valid="isPADValid"
@@ -94,7 +95,7 @@ const PAYMENT_METHODS = {
   },
   [PaymentTypes.PAD]: {
     type: PaymentTypes.PAD,
-    icon: 'mdi-credit-card-outline',
+    icon: 'mdi-bank-outline',
     title: 'Pre-authorized Debit',
     subtitle: 'Automatically debit a bank account when payments are due.',
     description: '',
@@ -102,7 +103,7 @@ const PAYMENT_METHODS = {
   },
   [PaymentTypes.BCOL]: {
     type: PaymentTypes.BCOL,
-    icon: 'mdi-credit-card-outline',
+    icon: 'mdi-link-variant',
     title: 'BC Online',
     subtitle: 'Use your linked BC Online account for payment.',
     description: '',
