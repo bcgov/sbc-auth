@@ -6,7 +6,6 @@
     "title": "Org",
     "additionalProperties": false,
     "required": [
-      "name"
     ],
     "dependencies": {
       "bcOnlineCredential": { "required": ["mailingAddress"] }
@@ -30,6 +29,7 @@
         "examples": [
           "BASIC", "PREMIUM"
         ],
+        "enum": ["BASIC", "PREMIUM"],
         "pattern": "^(.*)$"
       },
       "accessType": {
@@ -40,15 +40,6 @@
           "ANONYMOUS", "EXTRA_PROVINCIAL"
         ],
         "pattern": "^(.*)$"
-      },
-       "paymentMethod": {
-        "$id": "#/properties/paymentMethod",
-        "type": "string",
-        "title": "Payment Method",
-        "examples": [
-          "PAD", "BCOL", "CC", "ONLINE_BANKING"
-        ],
-        "enum": ["PAD", "DRAWDOWN", "CC", "ONLINE_BANKING"]
       },
       "bcOnlineCredential": {
         "oneOf": [
@@ -61,6 +52,13 @@
         "oneOf": [
           {
             "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/mailing_address"
+          }
+        ]
+      },
+      "paymentInfo": {
+        "oneOf": [
+          {
+            "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/payment_info"
           }
         ]
       }

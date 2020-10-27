@@ -27,9 +27,10 @@ from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
-from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus
+from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus, PaymentMethod
 from tests.utilities.factory_scenarios import (
-    TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo)
+    TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
+    TestPaymentMethodInfo)
 from tests.utilities.factory_utils import factory_auth_header, factory_invitation, factory_invitation_anonymous
 
 
@@ -226,10 +227,10 @@ def test_add_same_org_409(client, jwt, session, keycloak_mock):  # pylint:disabl
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.status_code == http_status.HTTP_201_CREATED, 'created first org'
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_409_CONFLICT
+    assert rv.status_code == http_status.HTTP_409_CONFLICT, 'not able to create duplicates org'
 
 
 def test_add_org_invalid_returns_400(client, jwt, session):  # pylint:disable=unused-argument
@@ -392,6 +393,26 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     assert actual_mailing_address.get('postalCode') == dictionary['contacts'][0].get('postalCode')
 
 
+def test_update_org_payment_method_for_basic_org(client, jwt, session, keycloak_mock):
+    """Assert that an orgs payment details can be updated via PUT."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    new_payment_method = TestPaymentMethodInfo.get_payment_method_input(PaymentMethod.ONLINE_BANKING)
+    rv = client.put(f'/api/v1/orgs/{org_id}', data=json.dumps(new_payment_method), headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    new_payment_method = {'paymentInfo': {'paymentMethod': PaymentMethod.BCOL.value}}
+    rv = client.put(f'/api/v1/orgs/{org_id}', data=json.dumps(new_payment_method), headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST, 'Assert BCOL cant be used for Basic Account'
+
+
 def test_upgrade_anon_org_fail(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
@@ -502,7 +523,7 @@ def test_upgrade_downgrade_reattach_bcol_todifferent_org(client, jwt, session,
     assert rv.json.get('name') == bcol_account.get('name')
 
 
-def test_downgrade_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_downgrade_org(client, jwt, session, keycloak_mock):  # pylint:disable=unusfed-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')

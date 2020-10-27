@@ -98,6 +98,7 @@ import { getModule } from 'vuex-module-decorators'
 export default class TermsOfUseDialog extends Vue {
   @Prop({ default: 'termsofuse' }) tosType: string
   @Prop({ default: false }) isUserTOS: boolean
+  @Prop({ default: false }) isAlreadyAccepted: boolean
   protected readonly userHasToAcceptTOS!: boolean
   private termsDialog: boolean = true
   private termsAccepted: boolean = false
@@ -112,6 +113,9 @@ export default class TermsOfUseDialog extends Vue {
     this.termsDialog = false
     if (this.isUserTOS && this.userHasToAcceptTOS) {
       this.agreeToTerms()
+    }
+    if (this.isAlreadyAccepted) {
+      this.termsAccepted = this.canCheckTerms = true
     }
   }
 

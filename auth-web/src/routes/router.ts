@@ -65,6 +65,7 @@ export function getRoutes (): RouteConfig[] {
   const accountInfo = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/account-info/AccountInfo.vue')
   const teamManagement = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/team-management/TeamManagement.vue')
   const accountLoginOption = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/login-options/AccountSettingsLoginOption.vue')
+  const accountPaymentOption = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/payment/AccountPaymentMethods.vue')
   const transaction = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/transaction/Transactions.vue')
   const statements = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/statement/Statements.vue')
   const routes = [
@@ -149,6 +150,11 @@ export function getRoutes (): RouteConfig[] {
           path: 'login-option',
           name: 'login-option',
           component: accountLoginOption
+        },
+        {
+          path: 'payment-option',
+          name: 'payment-option',
+          component: accountPaymentOption
         },
         {
           path: 'transactions',

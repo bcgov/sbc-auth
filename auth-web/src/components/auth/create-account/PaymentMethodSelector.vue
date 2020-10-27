@@ -6,6 +6,7 @@
     <PaymentMethods
       :currentOrgType="currentOrganizationType"
       :currentOrganization="currentOrganization"
+      :currentSelectedPaymentMethod="currentOrgPaymentType"
       @payment-method-selected="setSelectedPayment"
     ></PaymentMethods>
     <v-divider class="my-10"></v-divider>
@@ -57,7 +58,8 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
   computed: {
     ...mapState('org', [
       'currentOrganization',
-      'currentOrganizationType'
+      'currentOrganizationType',
+      'currentOrgPaymentType'
     ])
   },
   methods: {
@@ -70,6 +72,7 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   private readonly setCurrentOrganizationPaymentType!: (paymentType: string) => void
   private readonly currentOrganization!: Organization
   private readonly currentOrganizationType!: string
+  private readonly currentOrgPaymentType!: string
   private selectedPaymentMethod: string = ''
 
   private goBack () {
@@ -84,6 +87,7 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
 
   private setSelectedPayment (payment) {
     this.selectedPaymentMethod = payment
+    this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
   }
 
   private save () {

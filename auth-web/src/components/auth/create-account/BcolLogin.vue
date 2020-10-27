@@ -69,7 +69,7 @@ import { mapActions, mapState } from 'vuex'
     ...mapState('org', ['currentOrganization'])
   },
   methods: {
-    ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization', 'validateBcolAccount'])
+    ...mapActions('org', ['syncMembership', 'syncOrganization', 'validateBcolAccount'])
   }
 })
 export default class BcolLogin extends Vue {
