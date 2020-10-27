@@ -78,6 +78,31 @@ def test_org_find_by_id(session):  # pylint:disable=unused-argument
     assert found_org.name == org.name
 
 
+def test_org_find_by_name(session):  # pylint:disable=unused-argument
+    """Assert that an Org can retrieved by its name."""
+    org = factory_org_model(name='My Test Org', session=session)
+    session.add(org)
+    session.commit()
+
+    found_org = OrgModel.find_by_org_name(org.name)
+    assert found_org
+
+    for org1 in found_org:
+        assert org1.name == org.name
+
+
+def test_org_find_by_name_inactive(session):  # pylint:disable=unused-argument
+    """Assert that an inactive Org can not be retrieved by its name."""
+    org = factory_org_model(name='My Test Org', session=session)
+    session.add(org)
+    session.commit()
+
+    org.delete()
+
+    found_org = OrgModel.find_by_org_name(org.name)
+    assert len(found_org) == 0
+
+
 def test_update_org_from_dict(session):  # pylint:disable=unused-argument
     """Assert that an Org can be updated from a dictionary."""
     org = factory_org_model(name='My Test Org', session=session)

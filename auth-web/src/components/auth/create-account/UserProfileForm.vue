@@ -280,7 +280,7 @@ import { mask } from 'vue-the-mask'
         'createAffidavit',
         'updateUserFirstAndLastName'
       ]),
-    ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization'])
+    ...mapActions('org', ['syncMembership', 'syncOrganization'])
   }
 })
 export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
@@ -303,7 +303,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private isDeactivating = false
     @Prop() token: string
     readonly currentOrganization!: Organization
-    private readonly createOrg!: () => Promise<Organization>
     readonly syncMembership!: (orgId: number) => Promise<Member>
     readonly syncOrganization!: (orgId: number) => Promise<Organization>
     private readonly ACCOUNT_TYPE = Account

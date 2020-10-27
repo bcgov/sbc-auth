@@ -96,7 +96,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapMutations('org', [
       'setCurrentOrganization', 'setOrgName', 'setCurrentOrganizationAddress'
     ]),
-    ...mapActions('org', ['createOrg', 'syncMembership', 'syncOrganization', 'isOrgNameAvailable', 'changeOrgType'])
+    ...mapActions('org', ['syncMembership', 'syncOrganization', 'isOrgNameAvailable', 'changeOrgType'])
   }
 })
 export default class AccountCreateBasic extends Mixins(Steppable) {
@@ -104,7 +104,6 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private errorMessage: string = ''
   private saving = false
   private isBasicAccount: boolean = true
-  private readonly createOrg!: () => Promise<Organization>
   private readonly changeOrgType!: (action:Actions) => Promise<Organization>
   private readonly syncMembership!: (orgId: number) => Promise<Member>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>

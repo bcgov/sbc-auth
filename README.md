@@ -48,3 +48,4 @@ project you agree to abide by its terms.
 # Testing Thanks
 
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=sbc-auth)
+

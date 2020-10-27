@@ -23,7 +23,7 @@ from requests import Response
 from auth_api.services.rest_service import RestService
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
-    TestOrgProductsInfo, TestOrgTypeInfo, TestUserInfo)
+    TestOrgProductsInfo, TestOrgTypeInfo, TestUserInfo, TestPaymentMethodInfo)
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
     factory_org_model, factory_org_service, factory_user_model, factory_user_model_with_contact)
@@ -85,6 +85,46 @@ def test_create_basic_org_assert_pay_request_is_correct(session, keycloak_mock):
         assert expected_data == actual_data
 
 
+def test_update_basic_org_assert_pay_request_is_correct(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that while org updation , pay-api gets called with proper data for basic accounts."""
+    user = factory_user_model()
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+    with patch.object(RestService, 'put') as mock_put:
+        new_payment_method = TestPaymentMethodInfo.get_payment_method_input(PaymentMethod.ONLINE_BANKING)
+        org = OrgService.update_org(org, new_payment_method)
+        assert org
+        dictionary = org.as_dict()
+        mock_put.assert_called()
+        actual_data = mock_put.call_args.kwargs.get('data')
+        expected_data = {
+            'accountId': dictionary.get('id'),
+            'accountName': dictionary.get('name'),
+            'paymentInfo': {
+                'methodOfPayment': PaymentMethod.ONLINE_BANKING.value,
+                'billable': True
+            }
+
+        }
+        assert expected_data == actual_data, 'updating to Online Banking works.'
+
+        new_payment_method = TestPaymentMethodInfo.get_payment_method_input(PaymentMethod.DIRECT_PAY)
+        org = OrgService.update_org(org, new_payment_method)
+        assert org
+        dictionary = org.as_dict()
+        mock_put.assert_called()
+        actual_data = mock_put.call_args.kwargs.get('data')
+        expected_data = {
+            'accountId': dictionary.get('id'),
+            'accountName': dictionary.get('name'),
+            'paymentInfo': {
+                'methodOfPayment': PaymentMethod.DIRECT_PAY.value,
+                'billable': True
+            }
+
+        }
+        assert expected_data == actual_data, 'updating bank  to Credit Card works.'
+
+
 def test_create_basic_org_assert_pay_request_is_correct_online_banking(session,
                                                                        keycloak_mock):  # pylint:disable=unused-argument
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
@@ -133,7 +173,8 @@ def test_create_premium_org_assert_pay_request_is_correct(session, keycloak_mock
                 'billable': True
             },
             'bcolAccountNumber': dictionary.get('bcol_account_id'),
-            'bcolUserId': dictionary.get('bcol_user_id')
+            'bcolUserId': dictionary.get('bcol_user_id'),
+            'contactInfo': TestOrgInfo.bcol_linked().get('mailingAddress')
 
         }
         assert actual_data == expected_data
@@ -213,6 +254,18 @@ def test_find_org_by_id_no_org(session, auth_mock):  # pylint:disable=unused-arg
     """Assert that an org which does not exist cannot be retrieved."""
     org = OrgService.find_by_org_id(99)
     assert org is None
+
+
+def test_find_org_by_name(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be retrieved by its name."""
+    org = factory_org_service()
+    dictionary = org.as_dict()
+    org_name = dictionary['name']
+
+    found_org = OrgService.find_by_org_name(org_name)
+
+    assert found_org
+    assert found_org.get('orgs')[0].get('name') == org_name
 
 
 def test_add_contact(session):  # pylint:disable=unused-argument

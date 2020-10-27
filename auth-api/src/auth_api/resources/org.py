@@ -85,12 +85,17 @@ class Orgs(Resource):
         bcol_account_id = request.args.get('bcolAccountId', None)
         page = request.args.get('page', 1)
         limit = request.args.get('limit', 10)
+        validate_name = request.args.get('validateName', 'False')
 
         try:
             token = g.jwt_oidc_token_info
-            response, status = OrgService.search_orgs(business_identifier=business_identifier, access_type=access_type,
-                                                      name=name, status=status, bcol_account_id=bcol_account_id,
-                                                      page=page, limit=limit, token=token), http_status.HTTP_200_OK
+            if validate_name.upper() == 'TRUE':
+                response, status = OrgService.find_by_org_name(name), http_status.HTTP_200_OK
+            else:
+                response, status = OrgService.search_orgs(business_identifier=business_identifier,
+                                                          access_type=access_type, name=name,
+                                                          status=status, bcol_account_id=bcol_account_id, page=page,
+                                                          limit=limit, token=token), http_status.HTTP_200_OK
 
             # If public user is searching , return 200 with empty results if orgs exist
             # Else return 204
@@ -537,4 +542,24 @@ class OrgStatus(Resource):
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 
+        return response, status
+
+
+@cors_preflight('GET,OPTIONS')
+@API.route('/<string:org_id>/payment_info', methods=['GET', 'OPTIONS'])
+class OrgPaymentSettings(Resource):
+    """Resource for getting org payment info."""
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    def get(org_id):
+        """Retrieve the set of payment settings associated with the specified org."""
+        try:
+            org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
+                                            allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+            response, status = org.get_payment_info(), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

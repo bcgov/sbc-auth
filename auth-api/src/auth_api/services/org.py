@@ -33,7 +33,7 @@ from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
 from auth_api.utils.enums import (
-    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod, ProductCode, Status)
+    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod, ProductCode, Status, PaymentAccountStatus)
 from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF
 from auth_api.utils.util import camelback2snake
 from .affidavit import Affidavit as AffidavitService
@@ -72,19 +72,17 @@ class Org:  # pylint: disable=too-many-public-methods
                    token_info: Dict = None, bearer_token: str = None, origin_url: str = None):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
+        # bcol is treated like an access type as well;so its outside the scheme
         bcol_credential = org_info.pop('bcOnlineCredential', None)
         mailing_address = org_info.pop('mailingAddress', None)
-        selected_payment_method = org_info.pop('paymentMethod', None)
-        is_premium = False
+        payment_info = org_info.pop('paymentInfo', {})
+        selected_payment_method = payment_info.get('paymentMethod', None)
+        org_type = org_info.get('typeCode', OrgType.BASIC.value)
 
         # If the account is created using BCOL credential, verify its valid bc online account
         if bcol_credential:
             bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token).json()
-            is_premium = True
             Org._map_response_to_org(bcol_response, org_info)
-
-        org_type: OrgType = OrgType.PREMIUM if is_premium else OrgType.BASIC
-        org_info['typeCode'] = org_type.value
 
         is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in token_info.get('realm_access').get('roles')
         is_bceid_user = token_info and token_info.get('loginSource', None) == LoginSource.BCEID.value
@@ -93,7 +91,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         access_type = Org.validate_access_type(is_bceid_user, is_staff_admin, org_info)
 
-        if not is_premium:  # Allow duplicate names if premium
+        duplicate_check = org_type == OrgType.BASIC.value
+        if duplicate_check:  # Allow duplicate names if premium
             Org.raise_error_if_duplicate_name(org_info['name'])
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
@@ -118,8 +117,12 @@ class Org:  # pylint: disable=too-many-public-methods
         Org.create_membership(access_type, is_staff_admin, org, user_id)
 
         Org.add_product(org.id, token_info)
-        payment_method = Org._validate_and_get_payment_method(selected_payment_method, org_type)
-        Org._create_payment_settings(org, payment_method, True)
+        payment_method = Org._validate_and_get_payment_method(selected_payment_method, OrgType[org_type])
+        Org._create_payment_settings(org, payment_info, payment_method, mailing_address, True)
+
+        # TODO do we have to check anything like this below?
+        # if payment_account_status == PaymentAccountStatus.FAILED:
+        # raise BusinessException(Error.ACCOUNT_CREATION_FAILED_IN_PAY, None)
 
         org.commit()
 
@@ -128,7 +131,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return Org(org)
 
     @staticmethod
-    def _validate_and_get_payment_method(selected_payment_type: str, org_type: OrgType):
+    def _validate_and_get_payment_method(selected_payment_type: str, org_type: OrgType) -> str:
 
         # TODO whats a  better place for this
         org_payment_method_mapping = {
@@ -145,7 +148,7 @@ class Org:  # pylint: disable=too-many-public-methods
             else:
                 raise BusinessException(Error.INVALID_INPUT, None)
         else:
-            payment_type = PaymentMethod.BCOL.value if\
+            payment_type = PaymentMethod.BCOL.value if \
                 org_type == OrgType.PREMIUM else Org._get_default_payment_method_for_creditcard()
         return payment_type
 
@@ -197,30 +200,49 @@ class Org:  # pylint: disable=too-many-public-methods
             raise BusinessException(Error.DATA_CONFLICT, None)
 
     @staticmethod
-    def _create_payment_settings(org_model: OrgModel, payment_info: str, is_new_org: bool = True):
+    def _create_payment_settings(org_model: OrgModel, payment_info: dict, payment_method: str,
+                                 mailing_address=None,
+                                 is_new_org: bool = True) -> PaymentAccountStatus:
         """Add payment settings for the org."""
         pay_url = current_app.config.get('PAY_API_URL')
         pay_request = {
             'accountId': org_model.id,
             'accountName': org_model.name,
             'paymentInfo': {
-                'methodOfPayment': payment_info,
+                'methodOfPayment': payment_method,
                 'billable': org_model.billable
             }
         }
+
+        if mailing_address:
+            pay_request['contactInfo'] = mailing_address
 
         if org_model.bcol_account_id:
             pay_request['bcolAccountNumber'] = org_model.bcol_account_id
             pay_request['bcolUserId'] = org_model.bcol_user_id
 
+        if payment_method == PaymentMethod.PAD.value:  # PAD has bank related details
+            pay_request['paymentInfo']['bankTransitNumber'] = payment_info.get('bankTransitNumber', None)
+            pay_request['paymentInfo']['bankInstitutionNumber'] = payment_info.get('bankInstitutionNumber', None)
+            pay_request['paymentInfo']['bankAccountNumber'] = payment_info.get('bankAccountNumber', None)
+
         # invoke pay-api
         token = RestService.get_service_account_token()
         if is_new_org:
-            RestService.post(endpoint=f'{pay_url}/accounts',
-                             data=pay_request, token=token, raise_for_status=True)
+            response = RestService.post(endpoint=f'{pay_url}/accounts',
+                                        data=pay_request, token=token, raise_for_status=True)
         else:
-            RestService.put(endpoint=f'{pay_url}/accounts/{org_model.id}',
-                            data=pay_request, token=token, raise_for_status=True)
+            response = RestService.put(endpoint=f'{pay_url}/accounts/{org_model.id}',
+                                       data=pay_request, token=token, raise_for_status=True)
+
+        if response == http_status.HTTP_200_OK:
+            payment_account_status = PaymentAccountStatus.CREATED
+        elif response == http_status.HTTP_202_ACCEPTED:
+            payment_account_status = PaymentAccountStatus.PENDING
+        else:
+            payment_account_status = PaymentAccountStatus.FAILED
+
+        return payment_account_status
 
     @staticmethod
     def _get_default_payment_method_for_creditcard():
@@ -294,7 +316,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 self.add_contact_to_org(mailing_address, self._model)
 
         self._model.update_org_from_dict(camelback2snake(org_info), exclude=('status_code'))
-        Org._create_payment_settings(self._model, payment_type, False)
+        Org._create_payment_settings(self._model, None, payment_type, mailing_address, False)
         return self
 
     @staticmethod
@@ -319,24 +341,24 @@ class Org:  # pylint: disable=too-many-public-methods
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
 
-        if self._model.type_code != OrgType.PREMIUM.value:
+        has_org_updates: bool = False  # update the org table if this variable is set true
+
+        is_name_getting_updated = 'name' in org_info and self._model.type_code == OrgType.BASIC.value
+        if is_name_getting_updated:
             existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'], self._model.id)
             if existing_similar__org is not None:
                 raise BusinessException(Error.DATA_CONFLICT, None)
-        is_premium = False
+            has_org_updates = True
 
-        bcol_credential = org_info.pop('bcOnlineCredential', None)
-        mailing_address = org_info.pop('mailingAddress', None)
-        selected_payment_method = org_info.pop('paymentMethod', None)
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
-        if bcol_credential:
+        if bcol_credential := org_info.pop('bcOnlineCredential', None):
             bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
-            is_premium = True
+            has_org_updates = True
 
         # Update mailing address Or create new one
-        if mailing_address:
+        if mailing_address := org_info.pop('mailingAddress', None):
             contacts = self._model.contacts
             if len(contacts) > 0:
                 contact = self._model.contacts[0].contact
@@ -345,13 +367,14 @@ class Org:  # pylint: disable=too-many-public-methods
             else:
                 Org.add_contact_to_org(mailing_address, self._model)
 
-        if self._model.type_code != OrgType.PREMIUM.value:
+        if has_org_updates:
             self._model.update_org_from_dict(camelback2snake(org_info))
 
-        org_type: OrgType = OrgType.PREMIUM if is_premium else OrgType.BASIC
-        payment_type = Org._validate_and_get_payment_method(selected_payment_method, org_type)
-        Org._create_payment_settings(self._model, payment_type, False)
-        current_app.logger.debug('>update_org ')
+        if payment_info := org_info.pop('paymentInfo', {}):
+            selected_payment_method = payment_info.get('paymentMethod', None)
+            payment_type = Org._validate_and_get_payment_method(selected_payment_method, OrgType[self._model.type_code])
+            Org._create_payment_settings(self._model, payment_info, payment_type, mailing_address, False)
+            current_app.logger.debug('>update_org ')
         return self
 
     @staticmethod
@@ -381,6 +404,14 @@ class Org:  # pylint: disable=too-many-public-methods
             KeycloakService.remove_from_account_holders_group(user.keycloak_guid)
         current_app.logger.debug('org Inactivated>')
 
+    def get_payment_info(self):
+        """Return the Payment Details for an org by calling Pay API."""
+        pay_url = current_app.config.get('PAY_API_URL')
+        # invoke pay-api
+        token = RestService.get_service_account_token()
+        response = RestService.get(endpoint=f'{pay_url}/accounts/{self._model.id}', token=token, retry_on_failure=True)
+        return response.json()
+
     @staticmethod
     def find_by_org_id(org_id, token_info: Dict = None, allowed_roles: Tuple = None):
         """Find and return an existing organization with the provided id."""
@@ -395,6 +426,23 @@ class Org:  # pylint: disable=too-many-public-methods
         check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
 
         return Org(org_model)
+
+    @staticmethod
+    def find_by_org_name(org_name):
+        """Find and return an existing organization with the provided name."""
+        if org_name is None:
+            return None
+
+        org_model = OrgModel.find_by_org_name(org_name)
+        if not org_model:
+            return None
+
+        orgs = {'orgs': []}
+
+        for org in org_model:
+            orgs['orgs'].append(Org(org).as_dict())
+
+        return orgs
 
     @staticmethod
     def get_login_options_for_org(org_id, token_info: Dict = None, allowed_roles: Tuple = None):

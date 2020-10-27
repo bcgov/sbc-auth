@@ -93,6 +93,17 @@
                 </v-list-item-icon>
                 <v-list-item-title>Authentication</v-list-item-title>
               </v-list-item>
+              <v-list-item
+                dense
+                class="py-1 px-4"
+                aria-label="Payment Methods"
+                :to="getUrl('payment-option')"
+                data-test="user-auth-nav-item">
+                <v-list-item-icon>
+                  <v-icon color="link" left>mdi-currency-usd</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Payment Methods</v-list-item-title>
+              </v-list-item>
             </v-list-item-group>
           </v-list>
 
@@ -194,6 +205,10 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   private get statementsUrl (): string {
     return `/account/${this.orgId}/settings/statements`
+  }
+
+  private getUrl (page) {
+    return `/account/${this.orgId}/settings/${page}`
   }
 
   private mounted () {
