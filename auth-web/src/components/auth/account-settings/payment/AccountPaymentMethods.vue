@@ -95,7 +95,6 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
     this.isBtnSaved = false
     this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
     const createRequestBody: CreateRequestBody = {
-      name: this.currentOrganization.name,
       paymentInfo: {
         paymentMethod: this.selectedPaymentMethod
       }
