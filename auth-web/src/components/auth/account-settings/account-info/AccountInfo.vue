@@ -193,8 +193,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     await this.syncOrganization(accountSettings.id)
     this.setAccountChangedHandler(this.setup)
     await this.setup()
-    // eslint-disable-next-line no-console
-    console.log(this.currentOrganization)
   }
 
   private keyDown (address: Address) {
