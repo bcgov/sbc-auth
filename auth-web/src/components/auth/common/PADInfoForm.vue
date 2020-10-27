@@ -1,9 +1,9 @@
 <template>
   <div>
-    <h4>Banking Information</h4>
+    <h4 class="mb-4">Banking Information</h4>
     <v-form ref="preAuthDebitForm">
       <v-row>
-        <v-col cols="6">
+        <v-col cols="6" class="py-0">
           <v-text-field
             label="Transit Number"
             filled
@@ -13,10 +13,9 @@
             v-model="transitNumber"
             @change="emitPreAuthDebitInfo"
             v-mask="'#####'"
-            dense
           ></v-text-field>
         </v-col>
-        <v-col cols="6">
+        <v-col cols="6" class="py-0">
           <v-text-field
             label="Institution Number"
             filled
@@ -26,10 +25,9 @@
             v-model="institutionNumber"
             @change="emitPreAuthDebitInfo"
             v-mask="'###'"
-            dense
           ></v-text-field>
         </v-col>
-        <v-col cols="12" class="pt-0">
+        <v-col cols="12" class="py-0">
           <v-text-field
             label="Account Number"
             filled
@@ -39,14 +37,19 @@
             v-model="accountNumber"
             @change="emitPreAuthDebitInfo"
             v-mask="'############'"
-            dense
           ></v-text-field>
         </v-col>
       </v-row>
-      <TermsOfUseDialog
-        :isAlreadyAccepted="isTermsOfServiceAccepted"
-        @terms-acceptance-status="isTermsAccepted"
-      ></TermsOfUseDialog>
+      <v-row>
+        <v-col class="pb-0">
+          <div class="terms-container">
+            <TermsOfUseDialog
+              :isAlreadyAccepted="isTermsOfServiceAccepted"
+              @terms-acceptance-status="isTermsAccepted"
+            ></TermsOfUseDialog>
+          </div>
+        </v-col>
+      </v-row>
     </v-form>
   </div>
 </template>
@@ -145,3 +148,9 @@ export default class PADInfoForm extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .terms-container {
+    height: 2rem;
+  }
+</style>
