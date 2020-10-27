@@ -256,6 +256,18 @@ def test_find_org_by_id_no_org(session, auth_mock):  # pylint:disable=unused-arg
     assert org is None
 
 
+def test_find_org_by_name(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be retrieved by its name."""
+    org = factory_org_service()
+    dictionary = org.as_dict()
+    org_name = dictionary['name']
+
+    found_org = OrgService.find_by_org_name(org_name)
+
+    assert found_org
+    assert found_org.get('orgs')[0].get('name') == org_name
+
+
 def test_add_contact(session):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an org."""
     org = factory_org_service()

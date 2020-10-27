@@ -428,6 +428,23 @@ class Org:  # pylint: disable=too-many-public-methods
         return Org(org_model)
 
     @staticmethod
+    def find_by_org_name(org_name):
+        """Find and return an existing organization with the provided name."""
+        if org_name is None:
+            return None
+
+        org_model = OrgModel.find_by_org_name(org_name)
+        if not org_model:
+            return None
+
+        orgs = {'orgs': []}
+
+        for org in org_model:
+            orgs['orgs'].append(Org(org).as_dict())
+
+        return orgs
+
+    @staticmethod
     def get_login_options_for_org(org_id, token_info: Dict = None, allowed_roles: Tuple = None):
         """Get the payment settings for the given org."""
         current_app.logger.debug('get_login_options(>')
