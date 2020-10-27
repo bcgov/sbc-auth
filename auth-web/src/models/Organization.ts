@@ -14,7 +14,7 @@ export interface CreateRequestBody {
 }
 
 export interface PaymentInfo {
-  type: string
+  paymentMethod: string
   bankTransitNumber?: string
   bankInstitutionNumber?: string
   bankAccountNumber?: string

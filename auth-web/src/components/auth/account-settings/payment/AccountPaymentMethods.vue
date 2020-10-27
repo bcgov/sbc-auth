@@ -97,7 +97,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
     const createRequestBody: CreateRequestBody = {
       name: this.currentOrganization.name,
       paymentInfo: {
-        type: this.selectedPaymentMethod
+        paymentMethod: this.selectedPaymentMethod
       }
     }
     try {

@@ -335,7 +335,7 @@ export default class OrgModule extends VuexModule {
     }
     if (paymentMethod) {
       createRequestBody.paymentInfo = {
-        type: paymentMethod
+        paymentMethod: paymentMethod
       }
     }
     if (padInfo && createRequestBody.paymentInfo) {
