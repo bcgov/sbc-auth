@@ -9,7 +9,7 @@ export interface BcolAccountDetails {
     accountNumber: string
     authCode?: string
     authCodeDesc?: string
-    accountType: string
+    accountType?: string
     accountTypeDesc?: string
     gstStatus?: string
     gstStatusDesc?: string

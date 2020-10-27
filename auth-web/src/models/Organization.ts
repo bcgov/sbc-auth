@@ -5,7 +5,7 @@ import { Invitation } from '@/models/Invitation'
 import { User } from '@/models/user'
 
 export interface CreateRequestBody {
-  name: string,
+  name?: string,
   typeCode?: string
   accessType?: string
   bcOnlineCredential?:BcolProfile
@@ -14,7 +14,7 @@ export interface CreateRequestBody {
 }
 
 export interface PaymentInfo {
-  type: string
+  paymentMethod: string
   bankTransitNumber?: string
   bankInstitutionNumber?: string
   bankAccountNumber?: string
