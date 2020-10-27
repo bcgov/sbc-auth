@@ -152,6 +152,12 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentOrganization (organization: Organization | undefined) {
     this.currentOrganization = organization
+    if (organization.bcolAccountId && organization.bcolUserId) {
+      this.currentOrganization.bcolAccountDetails = {
+        accountNumber: organization.bcolAccountId,
+        userId: organization.bcolUserId
+      }
+    }
   }
 
   @Mutation
@@ -329,7 +335,7 @@ export default class OrgModule extends VuexModule {
     }
     if (paymentMethod) {
       createRequestBody.paymentInfo = {
-        type: paymentMethod
+        paymentMethod: paymentMethod
       }
     }
     if (padInfo && createRequestBody.paymentInfo) {
@@ -660,6 +666,14 @@ export default class OrgModule extends VuexModule {
   public async updateStatementNotifications (statementNotification) {
     const response = await PaymentService.updateStatementNotifications(this.context.state['currentOrganization'].id, statementNotification)
     return response?.data || {}
+  }
+
+  @Action({ rawError: true })
+  public async getOrgPayments () {
+    const response = await OrgService.getOrgPayments(this.context.state['currentOrganization'].id)
+    const paymentType = response?.data?.paymentMethod || undefined
+    this.context.commit('setCurrentOrganizationPaymentType', paymentType)
+    return response?.data
   }
 
   @Action({ rawError: true })

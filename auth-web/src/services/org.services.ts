@@ -98,4 +98,8 @@ export default class OrgService {
     })
     return response.data?.loginOption
   }
+
+  static async getOrgPayments (orgId: number): Promise<AxiosResponse> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/payment_info`)
+  }
 }
