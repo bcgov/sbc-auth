@@ -12,6 +12,7 @@ import {
   MembershipType,
   Organization,
   PADInfo,
+  PADInfoValidation,
   UpdateMemberPayload
 } from '@/models/Organization'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
@@ -152,7 +153,8 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentOrganization (organization: Organization | undefined) {
     this.currentOrganization = organization
-    if (organization.bcolAccountId && organization.bcolUserId) {
+    // for keeping a constant format for BCOL account banner
+    if (organization?.bcolAccountId && organization?.bcolUserId) {
       this.currentOrganization.bcolAccountDetails = {
         accountNumber: organization.bcolAccountId,
         userId: organization.bcolUserId
@@ -347,6 +349,14 @@ export default class OrgModule extends VuexModule {
     const organization = response?.data
     this.context.commit('setCurrentOrganization', organization)
     await this.addOrgSettings(organization)
+    return response?.data
+  }
+
+  @Action({ rawError: true })
+  public async validatePADInfo (): Promise<PADInfoValidation> {
+    const padInfo: PADInfo = { ...this.context.state['currentOrgPADInfo'] }
+    delete padInfo.isTOSAccepted
+    const response = await PaymentService.verifyPADInfo(padInfo)
     return response?.data
   }
 

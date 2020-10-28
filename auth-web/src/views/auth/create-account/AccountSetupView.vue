@@ -7,7 +7,8 @@
     <v-card flat>
       <Stepper
         :stepper-configuration="stepperConfig"
-        @final-step-action="createAccount"
+        :isLoading="isLoading"
+        @final-step-action="verifyAndCreateAccount"
       ></Stepper>
     </v-card>
     <!-- Alert Dialog (Error) -->
@@ -37,8 +38,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { LDFlags, LoginSource } from '@/util/constants'
-import { Member, Organization } from '@/models/Organization'
+import { LDFlags, LoginSource, PaymentTypes } from '@/util/constants'
+import { Member, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'vuex'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
@@ -71,6 +72,9 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
   computed: {
     ...mapState('user', [
       'userContact'
+    ]),
+    ...mapState('org', [
+      'currentOrgPaymentType'
     ])
   },
   methods: {
@@ -85,6 +89,7 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
     ...mapActions('org',
       [
         'createOrg',
+        'validatePADInfo',
         'syncMembership',
         'syncOrganization'
       ])
@@ -92,8 +97,10 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
 })
 export default class AccountSetupView extends Vue {
   private readonly currentUser!: KCUserProfile
+  private readonly currentOrgPaymentType!: string
   protected readonly userContact!: Contact
   private readonly createOrg!: () => Promise<Organization>
+  private readonly validatePADInfo!: () => Promise<PADInfoValidation>
   private readonly createUserContact!: (contact?: Contact) => Contact
   private readonly updateUserContact!: (contact?: Contact) => Contact
   private readonly getUserProfile!: (identifer: string) => User
@@ -101,6 +108,7 @@ export default class AccountSetupView extends Vue {
   readonly syncMembership!: (orgId: number) => Promise<Member>
   private errorTitle = 'Account creation failed'
   private errorText = ''
+  private isLoading: boolean = false
 
   $refs: {
     errorDialog: ModalDialog
@@ -154,7 +162,47 @@ export default class AccountSetupView extends Vue {
     return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
   }
 
+  private async verifyAndCreateAccount () {
+    this.isLoading = true
+    try {
+      if (this.currentOrgPaymentType === PaymentTypes.PAD) {
+        const verifyPad: PADInfoValidation = await this.validatePADInfo()
+        if (verifyPad.statusCode === 200) {
+          if (verifyPad.isValid) {
+            // create account if PAD info is valid
+            this.createAccount()
+          } else {
+            this.isLoading = false
+            this.errorText = 'Bank information validation failed'
+            if (verifyPad.message?.length) {
+              let msgList = ''
+              verifyPad.message.forEach((msg) => {
+                msgList += `<li>${msg}</li>`
+              })
+              this.errorText = `<ul style="list-style-type: none;">${msgList}</ul>`
+            }
+            this.$refs.errorDialog.open()
+          }
+        } else {
+          // Throw the error and proceed to create account in the catch section if status code is not OK
+          throw new Error(`status code : ${verifyPad.statusCode}`)
+        }
+      } else {
+        /** Proceed to createAccount if payment type is not PAD */
+        this.createAccount()
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('PAD Verification API Failed! - ', err)
+      /**
+       * Create Account if PAD verification failed due to any reason other than invalid format
+       */
+      this.createAccount()
+    }
+  }
+
   private async createAccount () {
+    this.isLoading = true
     try {
       const organization = await this.createOrg()
       await this.saveOrUpdateContact()
@@ -166,6 +214,7 @@ export default class AccountSetupView extends Vue {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
+      this.isLoading = false
       switch (err?.response?.status) {
         case 409:
           this.errorText =
@@ -204,7 +253,3 @@ export default class AccountSetupView extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  @import "$assets/scss/theme.scss";
-</style>

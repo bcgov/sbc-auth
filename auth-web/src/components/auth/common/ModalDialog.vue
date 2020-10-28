@@ -17,7 +17,9 @@
         </span>
       </v-card-title>
       <v-card-text>
-        <slot name="text">{{ text }}</slot>
+        <slot name="text">
+          <div v-html="text"></div>
+        </slot>
       </v-card-text>
         <v-card-actions v-if="showActions">
         <slot name="actions">
