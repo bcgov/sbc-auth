@@ -24,7 +24,7 @@
             :rules="institutionNumberRules"
             v-model="institutionNumber"
             @change="emitPreAuthDebitInfo"
-            v-mask="'###'"
+            v-mask="'####'"
           ></v-text-field>
         </v-col>
         <v-col cols="12" class="py-0">
@@ -99,7 +99,8 @@ export default class PADInfoForm extends Vue {
 
   private institutionNumberRules = [
     v => !!v || 'Institution Number is required',
-    v => (v.length === 3) || 'Institution Number should be 3 digits'
+    // TODO: change to 3 once get the confirmation from CAS
+    v => (v.length === 4) || 'Institution Number should be 3 digits'
   ]
 
   private accountNumberRules = [

@@ -1,5 +1,6 @@
 import Axios, { AxiosPromise } from 'axios'
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
+import { PADInfo, PADInfoValidation } from '@/models/Organization'
 import {
   StatementFilterParams,
   StatementListItem,
@@ -95,5 +96,9 @@ export default class PaymentService {
 
   static updateGLCodeFiling (glcodeFilingData: GLCode): AxiosPromise<GLCodeResponse> {
     return axios.put(`${ConfigHelper.getPayAPIURL()}/fees/distributions/${glcodeFilingData.distributionCodeId}`, glcodeFilingData)
+  }
+
+  static verifyPADInfo (padInfo: PADInfo): AxiosPromise<PADInfoValidation> {
+    return axios.post(`${ConfigHelper.getPayAPIURL()}/bank-accounts/verifications`, padInfo)
   }
 }
