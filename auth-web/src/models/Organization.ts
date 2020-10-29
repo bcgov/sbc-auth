@@ -51,6 +51,17 @@ export interface PADInfo {
   isTOSAccepted?: boolean;
 }
 
+export interface PADInfoValidation {
+  accountNumber?: string;
+  bankName?: string;
+  bankNumber?: string;
+  branchNumber?: string;
+  isValid?: boolean;
+  message?: string []
+  statusCode: number
+  transitAddress?: string
+}
+
 export interface UpdateMemberPayload {
   memberId: number
   role?: string
