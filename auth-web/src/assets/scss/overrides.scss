@@ -107,3 +107,8 @@ input:-webkit-autofill:active {
 .v-application--is-ltr .v-list-item__icon:first-child {
   margin-right: 1rem;
 }
+
+// Radio Buttons
+.v-radio {
+  align-self: flex-start;
+}
