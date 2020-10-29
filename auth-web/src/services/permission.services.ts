@@ -1,8 +1,6 @@
-import Axios, { AxiosResponse } from 'axios'
+import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
-import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
-
-const axios = addAxiosInterceptors(Axios.create())
+import { axios } from '@/util/http-util.ts'
 
 export default class PermissionService {
   static async getPermissions (role: string): Promise<AxiosResponse<string[]>> {
