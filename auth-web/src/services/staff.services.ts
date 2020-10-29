@@ -1,10 +1,8 @@
 import { AccountType, ProductCode, Products, ProductsRequestBody } from '@/models/Staff'
-import Axios, { AxiosResponse } from 'axios'
 import { OrgFilterParams, OrgList, Organizations } from '@/models/Organization'
+import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
-import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
-
-const axios = addAxiosInterceptors(Axios.create())
+import { axios } from '@/util/http-util.ts'
 
 export default class StaffService {
   static async getProducts (): Promise<AxiosResponse<ProductCode[]>> {

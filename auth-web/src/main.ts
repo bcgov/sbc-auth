@@ -2,12 +2,14 @@ import 'core-js/stable' // to polyfill ECMAScript features
 import '@mdi/font/css/materialdesignicons.min.css' // icon library (https://materialdesignicons.com/)
 import 'regenerator-runtime/runtime' // to use transpiled generator functions
 import './registerServiceWorker'
+import * as Sentry from '@sentry/browser'
 import App from './App.vue'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import Vue from 'vue'
+import { Vue as VueIntegration } from '@sentry/integrations'
 import Vuelidate from 'vuelidate'
 import can from '@/directives/can'
 import { getRoutes } from './routes/router'
@@ -28,6 +30,12 @@ ConfigHelper.saveConfigToSessionStorage().then(async (data) => {
   await LaunchDarklyService.init(ConfigHelper.getValue('LAUNCH_DARKLY_ENV_KEY'));
   // addressCompleteKey is for canada post address lookup, which is to be used in sbc-common-components
   (<any>window).addressCompleteKey = ConfigHelper.getValue('ADDRESS_COMPLETE_KEY')
+  // initialize Sentry
+  console.info('Initializing Sentry...') // eslint-disable-line no-console
+  Sentry.init({
+    dsn: ConfigHelper.getValue('SENTRY_DSN'),
+    integrations: [new VueIntegration({ Vue, attachProps: true, logErrors: true })]
+  })
   await syncSession()
   renderVue()
 })

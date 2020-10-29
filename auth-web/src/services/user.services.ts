@@ -1,13 +1,10 @@
 import { AddUsersToOrgBody, BulkUserResponseBody, Member, Organizations, RoleInfo } from '@/models/Organization'
-import Axios, { AxiosResponse } from 'axios'
 import { Contact, Contacts } from '@/models/contact'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
 import { User, UserProfileRequestBody } from '@/models/user'
-import CommonUtils from '@/util/common-util'
+import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
-import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
-
-const axios = addAxiosInterceptors(Axios.create())
+import { axios } from '@/util/http-util.ts'
 
 export default class UserService {
   static async getUserProfile (identifier: string): Promise<AxiosResponse<User>> {
