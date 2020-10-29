@@ -7,7 +7,8 @@
     <v-card flat>
       <Stepper
         :stepper-configuration="accountStepperConfig"
-        @final-step-action="createAccount"
+        @final-step-action="verifyAndCreateAccount"
+        :isLoading="isLoading"
       ></Stepper>
     </v-card>
     <!-- Alert Dialog (Error) -->
@@ -36,9 +37,9 @@
 </template>
 
 <script lang="ts">
-import { AccessType, LDFlags } from '@/util/constants'
+import { AccessType, LDFlags, PaymentTypes } from '@/util/constants'
 import { Component, Vue } from 'vue-property-decorator'
-import { Member, Organization } from '@/models/Organization'
+import { Member, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'vuex'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
@@ -70,6 +71,9 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
   computed: {
     ...mapState('user', [
       'userContact'
+    ]),
+    ...mapState('org', [
+      'currentOrgPaymentType'
     ])
   },
   methods: {
@@ -84,6 +88,7 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
     ...mapActions('org',
       [
         'createOrg',
+        'validatePADInfo',
         'syncMembership',
         'syncOrganization'
       ])
@@ -91,10 +96,12 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
 })
 export default class NonBcscAccountSetupView extends Vue {
   private readonly currentUser!: KCUserProfile
+  private readonly currentOrgPaymentType!: string
   protected readonly userContact!: Contact
   private readonly createAffidavit!: () => User
   private readonly updateUserFirstAndLastName!: (user?: User) => Contact
   private readonly createOrg!: () => Promise<Organization>
+  private readonly validatePADInfo!: () => Promise<PADInfoValidation>
   private readonly createUserContact!: (contact?: Contact) => Contact
   private readonly updateUserContact!: (contact?: Contact) => Contact
   private readonly getUserProfile!: (identifer: string) => User
@@ -102,6 +109,7 @@ export default class NonBcscAccountSetupView extends Vue {
   readonly syncMembership!: (orgId: number) => Promise<Member>
   private errorTitle = 'Account creation failed'
   private errorText = ''
+  private isLoading: boolean = false
 
   $refs: {
     errorDialog: ModalDialog
@@ -162,7 +170,46 @@ export default class NonBcscAccountSetupView extends Vue {
     return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
   }
 
+  private async verifyAndCreateAccount () {
+    this.isLoading = true
+    let isProceedToCreateAccount = false
+    if (this.currentOrgPaymentType === PaymentTypes.PAD) {
+      isProceedToCreateAccount = await this.verifyPAD()
+    } else {
+      isProceedToCreateAccount = true
+    }
+
+    if (isProceedToCreateAccount) {
+      this.createAccount()
+    }
+  }
+
+  private async verifyPAD () {
+    const verifyPad: PADInfoValidation = await this.validatePADInfo()
+    if (!verifyPad) {
+      // proceed to create account even if the response is empty
+      return true
+    }
+    if (verifyPad?.isValid) {
+      // create account if PAD info is valid
+      return true
+    } else {
+      this.isLoading = false
+      this.errorText = 'Bank information validation failed'
+      if (verifyPad?.message?.length) {
+        let msgList = ''
+        verifyPad.message.forEach((msg) => {
+          msgList += `<li>${msg}</li>`
+        })
+        this.errorText = `<ul style="list-style-type: none;">${msgList}</ul>`
+      }
+      this.$refs.errorDialog.open()
+      return false
+    }
+  }
+
   private async createAccount () {
+    this.isLoading = true
     try {
       await this.createAffidavit()
       await this.updateUserFirstAndLastName()
@@ -176,6 +223,7 @@ export default class NonBcscAccountSetupView extends Vue {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
+      this.isLoading = false
       switch (err?.response?.status) {
         case 409:
           this.errorText =
