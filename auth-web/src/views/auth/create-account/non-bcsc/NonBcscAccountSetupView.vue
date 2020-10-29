@@ -172,40 +172,39 @@ export default class NonBcscAccountSetupView extends Vue {
 
   private async verifyAndCreateAccount () {
     this.isLoading = true
-    try {
-      if (this.currentOrgPaymentType === PaymentTypes.PAD) {
-        const verifyPad: PADInfoValidation = await this.validatePADInfo()
-        if (verifyPad.statusCode === 200) {
-          if (verifyPad.isValid) {
-            // create account if PAD info is valid
-            this.createAccount()
-          } else {
-            this.isLoading = false
-            this.errorText = 'Bank information validation failed'
-            if (verifyPad.message?.length) {
-              let msgList = ''
-              verifyPad.message.forEach((msg) => {
-                msgList += `<li>${msg}</li>`
-              })
-              this.errorText = `<ul style="list-style-type: none;">${msgList}</ul>`
-            }
-            this.$refs.errorDialog.open()
-          }
-        } else {
-          // Throw the error and proceed to create account in the catch section if status code is not OK
-          throw new Error(`status code : ${verifyPad.statusCode}`)
-        }
-      } else {
-        /** Proceed to createAccount if payment type is not PAD */
-        this.createAccount()
-      }
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('PAD Verification API Failed! - ', err)
-      /**
-       * Create Account if PAD verification failed due to any reason other than invalid format
-       */
+    let isProceedToCreateAccount = false
+    if (this.currentOrgPaymentType === PaymentTypes.PAD) {
+      isProceedToCreateAccount = await this.verifyPAD()
+    } else {
+      isProceedToCreateAccount = true
+    }
+
+    if (isProceedToCreateAccount) {
       this.createAccount()
+    }
+  }
+
+  private async verifyPAD () {
+    const verifyPad: PADInfoValidation = await this.validatePADInfo()
+    if (!verifyPad) {
+      // proceed to create account even if the response is empty
+      return true
+    }
+    if (verifyPad?.isValid) {
+      // create account if PAD info is valid
+      return true
+    } else {
+      this.isLoading = false
+      this.errorText = 'Bank information validation failed'
+      if (verifyPad?.message?.length) {
+        let msgList = ''
+        verifyPad.message.forEach((msg) => {
+          msgList += `<li>${msg}</li>`
+        })
+        this.errorText = `<ul style="list-style-type: none;">${msgList}</ul>`
+      }
+      this.$refs.errorDialog.open()
+      return false
     }
   }
 

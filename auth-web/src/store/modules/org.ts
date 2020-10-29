@@ -356,8 +356,18 @@ export default class OrgModule extends VuexModule {
   public async validatePADInfo (): Promise<PADInfoValidation> {
     const padInfo: PADInfo = { ...this.context.state['currentOrgPADInfo'] }
     delete padInfo.isTOSAccepted
-    const response = await PaymentService.verifyPADInfo(padInfo)
-    return response?.data
+    try {
+      const response = await PaymentService.verifyPADInfo(padInfo)
+      return response?.data
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('PAD Verification API Failed! - ', error)
+      return {
+        isValid: true, // IMPORTANT: True - since we need to create the account even if this api fails.
+        statusCode: error?.response?.status || 500,
+        message: error?.response?.message || 'Failed'
+      }
+    }
   }
 
   @Action({ rawError: true })
