@@ -52,13 +52,13 @@
     <v-row>
       <v-col cols="12" class="pt-0 pb-0">
         <v-text-field
-                filled
-                label="Email Address"
-                req
-                persistent-hint
-                :rules="emailRules"
-                v-model="emailAddress"
-                data-test="email"
+          filled
+          label="Email Address"
+          req
+          persistent-hint
+          :rules="emailRules"
+          v-model="emailAddress"
+          data-test="email"
         >
         </v-text-field>
       </v-col>
@@ -66,13 +66,13 @@
     <v-row>
       <v-col cols="12" class="pt-0 pb-0">
         <v-text-field
-                filled
-                label="Confirm Email Address"
-                req
-                persistent-hint
-                :error-messages="emailMustMatch()"
-                v-model="confirmedEmailAddress"
-                data-test="confirm-email"
+          filled
+          label="Confirm Email Address"
+          req
+          persistent-hint
+          :error-messages="emailMustMatch()"
+          v-model="confirmedEmailAddress"
+          data-test="confirm-email"
         >
         </v-text-field>
       </v-col>
@@ -80,26 +80,26 @@
     <v-row>
       <v-col cols="12" md="6" class="pt-0 pb-0">
         <v-text-field
-                filled
-                label="Phone Number"
-                persistent-hint
-                type="tel"
-                v-mask="['(###) ###-####']"
-                v-model="phoneNumber"
-                hint="Example: (555) 555-5555"
-                :rules="phoneRules"
-                data-test="phone"
+          filled
+          label="Phone Number"
+          persistent-hint
+          type="tel"
+          v-mask="['(###) ###-####']"
+          v-model="phoneNumber"
+          hint="Example: (555) 555-5555"
+          :rules="phoneRules"
+          data-test="phone"
         >
         </v-text-field>
       </v-col>
       <v-col cols="12" md="3" class="pt-0 pb-0">
         <v-text-field
-                filled label="Extension"
-                persistent-hint
-                :rules="extensionRules"
-                v-mask="'#####'"
-                v-model="extension"
-                data-test="phone-extension"
+          filled label="Extension"
+          persistent-hint
+          :rules="extensionRules"
+          v-mask="'#####'"
+          v-model="extension"
+          data-test="phone-extension"
         >
         </v-text-field>
       </v-col>

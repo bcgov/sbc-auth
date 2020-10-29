@@ -1,5 +1,5 @@
 <template>
-  <v-stepper class="stepper d-flex elevation-2" v-model="currentStepNumber">
+  <v-stepper class="stepper d-flex elevation-0" v-model="currentStepNumber">
     <v-container class="stepper-nav pa-10 pr-0">
       <template v-for="step in steps">
         <v-stepper-step
@@ -151,7 +151,8 @@ export default class Stepper extends Vue {
   }
 
   @media (max-width: 1024px) {
-    .stepper {
+    .stepper-nav,
+    .stepper-nav + hr {
       display: none;
     }
   }

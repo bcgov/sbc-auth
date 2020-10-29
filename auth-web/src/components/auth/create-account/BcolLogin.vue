@@ -20,29 +20,30 @@
       <v-row>
         <v-col cols="4" class="py-0 pr-0">
           <v-text-field
-                  filled
-                  label="User ID"
-                  v-model.trim="username"
-                  :rules="usernameRules"
-                  req
-                  dense
+            dense
+            filled
+            label="User ID"
+            v-model.trim="username"
+            :rules="usernameRules"
+            req
           >
           </v-text-field>
         </v-col>
         <v-col cols="4" class="py-0 pr-0">
           <v-text-field
-                  filled
-                  label="Password"
-                  v-model.trim="password"
-                  req
-                  dense
-                  :rules="passwordRules"
+            dense
+            filled
+            label="Password"
+            type="password"
+            v-model.trim="password"
+            req
+            :rules="passwordRules"
           >
           </v-text-field>
         </v-col>
         <v-col cols="4" class="py-0">
           <v-btn
-            x-large
+            large
             depressed
             color="primary"
             class="link-account-btn"
