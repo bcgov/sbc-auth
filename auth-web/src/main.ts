@@ -34,7 +34,7 @@ ConfigHelper.saveConfigToSessionStorage().then(async (data) => {
   console.info('Initializing Sentry...') // eslint-disable-line no-console
   Sentry.init({
     dsn: ConfigHelper.getValue('SENTRY_DSN'),
-    integrations: [new VueIntegration({ Vue, attachProps: true })]
+    integrations: [new VueIntegration({ Vue, attachProps: true, logErrors: true })]
   })
   await syncSession()
   renderVue()
