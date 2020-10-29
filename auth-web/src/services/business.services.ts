@@ -2,7 +2,7 @@ import { Business, BusinessRequest, FolioNumberload, UpdateBusinessNamePayload }
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
-import axios from '@/util/http-util.ts'
+import { axios } from '@/util/http-util.ts'
 
 export default class BusinessService {
   static async getBusiness (businessIdentifier: string): Promise<AxiosResponse<Business>> {

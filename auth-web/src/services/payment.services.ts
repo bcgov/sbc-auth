@@ -10,7 +10,7 @@ import {
 import { TransactionFilter, TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 import { AxiosPromise } from 'axios'
 import ConfigHelper from '@/util/config-helper'
-import axios from '@/util/http-util.ts'
+import { axios } from '@/util/http-util.ts'
 
 export default class PaymentService {
   static createTransaction (paymentId: string, redirectUrl: string): AxiosPromise<any> {

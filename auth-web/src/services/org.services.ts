@@ -7,7 +7,7 @@ import { AxiosResponse } from 'axios'
 import { Businesses } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import { Invitations } from '@/models/Invitation'
-import axios from '@/util/http-util.ts'
+import { axios } from '@/util/http-util.ts'
 
 export default class OrgService {
   public static async getOrganization (orgId: number): Promise<AxiosResponse<Organization>> {

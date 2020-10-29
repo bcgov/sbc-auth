@@ -2,7 +2,7 @@ import { AccountType, ProductCode, Products, ProductsRequestBody } from '@/model
 import { OrgFilterParams, OrgList, Organizations } from '@/models/Organization'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
-import axios from '@/util/http-util.ts'
+import { axios } from '@/util/http-util.ts'
 
 export default class StaffService {
   static async getProducts (): Promise<AxiosResponse<ProductCode[]>> {

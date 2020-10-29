@@ -1,10 +1,11 @@
-import ConfigHelper from 'sbc-common-components/src/util/config-helper'
-import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
-import axios from 'axios'
+import * as Sentry from '@sentry/browser'
+import Axios from 'axios'
+import ConfigHelper from '@/util/config-helper'
+import { SessionStorageKeys } from '@/util/constants'
 
-const instance = axios.create()
+const axios = Axios.create()
 
-instance.interceptors.request.use(
+axios.interceptors.request.use(
   config => {
     const token = ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)
     if (token) {
@@ -15,9 +16,12 @@ instance.interceptors.request.use(
   error => Promise.reject(error)
 )
 
-instance.interceptors.response.use(
+axios.interceptors.response.use(
   response => response,
-  error => Promise.reject(error)
+  error => {
+    Sentry.captureException(error)
+    return Promise.reject(error)
+  }
 )
 
-export default instance
+export { axios }
