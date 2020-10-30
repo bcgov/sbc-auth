@@ -268,7 +268,10 @@ import { mask } from 'vue-the-mask'
     mask
   },
   computed: {
-    ...mapState('org', ['currentOrganization'])
+    ...mapState('org', ['currentOrganization']),
+    ...mapState('user', [
+      'userProfileData'
+    ])
   },
   methods: {
     ...mapMutations('user', ['setUserProfileData']),
@@ -303,6 +306,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private isDeactivating = false
     @Prop() token: string
     readonly currentOrganization!: Organization
+    readonly userProfileData!: UserProfileData
     readonly syncMembership!: (orgId: number) => Promise<Member>
     readonly syncOrganization!: (orgId: number) => Promise<Organization>
     private readonly ACCOUNT_TYPE = Account
@@ -373,13 +377,23 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       if (!this.userProfile) {
         await this.getUserProfile('@me')
       }
-      this.firstName = this.userProfile?.firstname
-      this.lastName = this.userProfile?.lastname
-      this.emailAddress = this.userProfile?.email
+      let user: any = {}
+      if (this.userProfileData) {
+        user = this.userProfileData
+      } else {
+        user = { ...this.userProfile }
+        user.email = this.userContact?.email
+        user.phone = this.userContact?.phone
+        user.phoneExtension = this.userContact?.phoneExtension
+      }
+      this.firstName = user?.firstname || ''
+      this.lastName = user?.lastname || ''
+      this.emailAddress = user?.email || ''
+      this.emailAddress = this.confirmedEmailAddress = user?.email || ''
+      this.phoneNumber = user?.phone || ''
+      this.extension = user?.phoneExtension || ''
+
       if (this.userContact) {
-        this.emailAddress = this.confirmedEmailAddress = this.userContact.email
-        this.phoneNumber = this.userContact.phone
-        this.extension = this.userContact.phoneExtension
         this.editing = true
       }
 
