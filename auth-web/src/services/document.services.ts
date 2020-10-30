@@ -3,10 +3,8 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DocumentUpload } from '@/models/user'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
-import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
+import { axios } from '@/util/http-util.ts'
 import mime from 'mime-types'
-
-const axios = addAxiosInterceptors(Axios.create())
 
 export default class DocumentService {
   static async getTermsOfService (identifier: string): Promise<AxiosResponse<TermsOfUseDocument>> {
@@ -14,7 +12,7 @@ export default class DocumentService {
   }
 
   static async getAffidavitPdf (): Promise<AxiosResponse> {
-    var instance = Axios.create()
+    const instance = Axios.create()
     return instance.get(`${ConfigHelper.getFileServerUrl()}/affidavit_v1.pdf`, {
       responseType: 'arraybuffer',
       headers: {

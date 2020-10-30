@@ -1,10 +1,8 @@
-import Axios, { AxiosResponse } from 'axios'
 import { Business, BusinessRequest, FolioNumberload, UpdateBusinessNamePayload } from '@/models/business'
+import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
-import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
-
-const axios = addAxiosInterceptors(Axios.create())
+import { axios } from '@/util/http-util.ts'
 
 export default class BusinessService {
   static async getBusiness (businessIdentifier: string): Promise<AxiosResponse<Business>> {
