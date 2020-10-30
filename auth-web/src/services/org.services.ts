@@ -1,15 +1,13 @@
 import { Affiliation, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
-import Axios, { AxiosResponse } from 'axios'
 import { CreateRequestBody as CreateOrganizationRequestBody, Member, Members, Organization, UpdateMemberPayload } from '@/models/Organization'
 import { Actions } from '@/util/constants'
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
+import { AxiosResponse } from 'axios'
 import { Businesses } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import { Invitations } from '@/models/Invitation'
-import { addAxiosInterceptors } from 'sbc-common-components/src/util/interceptors'
-
-const axios = addAxiosInterceptors(Axios.create())
+import { axios } from '@/util/http-util.ts'
 
 export default class OrgService {
   public static async getOrganization (orgId: number): Promise<AxiosResponse<Organization>> {
