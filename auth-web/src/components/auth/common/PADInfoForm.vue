@@ -1,5 +1,16 @@
 <template>
   <div>
+    <template v-if="isAcknowledgeNeeded">
+      <p class="mb-6">
+        The Canadian Payment Association requires a confirmation period
+        of (3) days prior to your first pre-authorized debit deduction.
+        The administrator of this account will receive a written confirmation
+        of your pre-authorized debit agreement prior to the first deduction.
+      </p>
+      <p class="mb-10 font-weight-bold">
+        {{padInfoSubtitle}}
+      </p>
+    </template>
     <h4 class="mb-4">Banking Information</h4>
     <v-form ref="preAuthDebitForm">
       <v-row>
@@ -50,6 +61,19 @@
           </div>
         </v-col>
       </v-row>
+      <v-row v-if="isAcknowledgeNeeded">
+        <v-col class="pb-0 acknowledge-checkbox-container">
+          <v-checkbox
+            class="acknowledge-checkbox"
+            v-model="isAcknowledged"
+            @change="emitPreAuthDebitInfo"
+          >
+            <template v-slot:label>
+              {{acknowledgementLabel}}
+            </template>
+          </v-checkbox>
+        </v-col>
+      </v-row>
     </v-form>
   </div>
 </template>
@@ -81,12 +105,15 @@ import { mask } from 'vue-the-mask'
 })
 export default class PADInfoForm extends Vue {
   @Prop({ default: () => ({} as PADInfo) }) padInformation: any
+  @Prop({ default: false }) isChangeView: boolean
+  @Prop({ default: true }) isAcknowledgeNeeded: boolean
   private readonly currentOrgPADInfo!: PADInfo
   private readonly setCurrentOrganizationPADInfo!: (padInfo: PADInfo) => void
   private transitNumber: string = ''
   private institutionNumber: string = ''
   private accountNumber: string = ''
   private isTOSAccepted: boolean = false
+  private isAcknowledged: boolean = false
 
   $refs: {
     preAuthDebitForm: HTMLFormElement,
@@ -125,13 +152,26 @@ export default class PADInfoForm extends Vue {
     return (Object.keys(this.padInformation).length) ? this.padInformation.isTOSAccepted : this.currentOrgPADInfo?.isTOSAccepted
   }
 
+  private get padInfoSubtitle () {
+    return (this.isChangeView)
+      ? 'Services will continue to be billed to the linked BC Online account until the mandatory (3) day confirmation period has ended.'
+      : 'This account will not be able to perform any transactions until the mandatory (3) day confirmation period has ended.'
+  }
+
+  private get acknowledgementLabel () {
+    return (this.isChangeView)
+      ? 'I understand that services will continue to be billed to the linked BC Online account until the mandatory (3) day confirmation period has ended.'
+      : 'I understand that this account will not be able to perform any transactions until the mandatory (3) day confirmation period for pre-authorized debit has ended.'
+  }
+
   @Emit()
   private emitPreAuthDebitInfo () {
     const padInfo: PADInfo = {
       bankTransitNumber: this.transitNumber,
       bankInstitutionNumber: this.institutionNumber,
       bankAccountNumber: this.accountNumber,
-      isTOSAccepted: this.isTOSAccepted
+      isTOSAccepted: this.isTOSAccepted,
+      isAcknowledged: this.isAcknowledged
     }
     this.isPreAuthDebitFormValid()
     this.setCurrentOrganizationPADInfo(padInfo)
@@ -140,7 +180,8 @@ export default class PADInfoForm extends Vue {
 
   @Emit()
   private isPreAuthDebitFormValid () {
-    return (this.$refs.preAuthDebitForm?.validate() && this.isTOSAccepted) || false
+    const acknowledge = (this.isAcknowledgeNeeded) ? this.isAcknowledged : true
+    return (this.$refs.preAuthDebitForm?.validate() && this.isTOSAccepted && acknowledge) || false
   }
 
   private isTermsAccepted (isAccepted) {
@@ -151,7 +192,15 @@ export default class PADInfoForm extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  .terms-container {
-    height: 2rem;
+.terms-container {
+  height: 2rem;
+}
+.acknowledge-checkbox-container {
+  .acknowledge-checkbox {
+    font-size: 1rem !important;
+    .v-input__slot {
+      align-items: start !important;
+    }
   }
+}
 </style>
