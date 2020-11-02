@@ -49,6 +49,7 @@ export interface PADInfo {
   bankInstitutionNumber: string;
   bankTransitNumber: string;
   isTOSAccepted?: boolean;
+  isAcknowledged?: boolean;
 }
 
 export interface PADInfoValidation {

@@ -29,6 +29,8 @@
                     <PADInfoForm
                       @is-pre-auth-debit-form-valid="isPADValid"
                       @emit-pre-auth-debit-info="getPADInfo"
+                      :isChangeView="isChangeView"
+                      :isAcknowledgeNeeded="isAcknowledgeNeeded"
                     ></PADInfoForm>
                   </div>
                   <div v-else-if="(payment.type === paymentTypes.BCOL)">
@@ -70,6 +72,8 @@
           :padInformation="{}"
           @is-pre-auth-debit-form-valid="isPADValid"
           @emit-pre-auth-debit-info="getPADInfo"
+          :isChangeView="isChangeView"
+          :isAcknowledgeNeeded="isAcknowledgeNeeded"
         ></PADInfoForm>
       </v-col>
     </v-row>
@@ -131,10 +135,12 @@ const PAYMENT_METHODS = {
     LinkedBCOLBanner
   }
 })
-export default class PaymentMethodSelector extends Vue {
+export default class PaymentMethods extends Vue {
   @Prop({ default: '' }) currentOrgType: string
   @Prop({ default: undefined }) currentOrganization: Organization
   @Prop({ default: '' }) currentSelectedPaymentMethod: string
+  @Prop({ default: false }) isChangeView: boolean
+  @Prop({ default: true }) isAcknowledgeNeeded: boolean
   private selectedPaymentMethod: string = ''
   private paymentTypes = PaymentTypes
   private padInfo: PADInfo = {} as PADInfo
