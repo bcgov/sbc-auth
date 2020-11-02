@@ -13,6 +13,8 @@
       :currentOrgType="savedOrganizationType"
       :currentOrganization="currentOrganization"
       :currentSelectedPaymentMethod="selectedPaymentMethod"
+      :isChangeView="true"
+      :isAcknowledgeNeeded="isAcknowledgeNeeded"
       @payment-method-selected="setSelectedPayment"
     ></PaymentMethods>
     <v-divider class="my-10"></v-divider>
@@ -50,7 +52,8 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
   },
   computed: {
     ...mapState('org', [
-      'currentOrganization'
+      'currentOrganization',
+      'currentOrgPaymentType'
     ])
   },
   methods: {
@@ -68,6 +71,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   private readonly getOrgPayments!: () => any
   private readonly updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
   private readonly currentOrganization!: Organization
+  private readonly currentOrgPaymentType!: string
   private savedOrganizationType: string = ''
   private selectedPaymentMethod: string = ''
   private isBtnSaved = false
@@ -82,8 +86,11 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
     await this.initialize()
   }
 
+  private get isAcknowledgeNeeded () {
+    return (this.selectedPaymentMethod !== this.currentOrgPaymentType)
+  }
+
   private async initialize () {
-    this.isBtnSaved = false
     this.savedOrganizationType =
       ((this.currentOrganization?.orgType === Account.PREMIUM) && !this.currentOrganization?.bcolAccountId)
         ? Account.UNLINKED_PREMIUM : this.currentOrganization.orgType
@@ -102,6 +109,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
     try {
       await this.updateOrg(createRequestBody)
       this.isBtnSaved = true
+      this.initialize()
     } catch (error) {
       this.isBtnSaved = false
     }
