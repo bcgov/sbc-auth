@@ -185,7 +185,8 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
       if (!this.currentOrganization) {
         this.setCurrentOrganization({ name: '' })
       }
-      this.selectedAccountType = this.currentOrganizationType
+      this.selectedAccountType = (this.currentOrganizationType === this.ACCOUNT_TYPE.UNLINKED_PREMIUM)
+        ? this.ACCOUNT_TYPE.PREMIUM : this.currentOrganizationType
       this.setAccessType(this.getOrgAccessType())
     }
   }
