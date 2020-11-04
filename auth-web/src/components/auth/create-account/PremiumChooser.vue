@@ -150,7 +150,8 @@ import Vue from 'vue'
     ...mapActions('org', [
       'syncMembership',
       'syncOrganization',
-      'changeOrgType'
+      'changeOrgType',
+      'resetAccountWhileSwitchingPremium'
     ])
   }
 })
@@ -166,6 +167,7 @@ export default class PremiumChooser extends Mixins(Steppable) {
   private readonly setCurrentOrganizationType!: (orgType: string) => void
   private readonly changeOrgType!: (action: Actions) => Promise<Organization>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
+  private readonly resetAccountWhileSwitchingPremium!: () => void
   private learnMoreDialog: boolean = false
 
   $refs: {
@@ -175,12 +177,16 @@ export default class PremiumChooser extends Mixins(Steppable) {
   private mounted () {
     if (!this.isAccountChange) {
       this.isBcolSelected = ((this.currentOrganizationType === Account.PREMIUM) && this.currentOrganization?.bcolProfile) ? 'yes' : null
-      this.isBcolSelected = (this.currentOrganizationType === Account.UNLINKED_PREMIUM && this.currentOrganization?.name) ? 'no' : this.isBcolSelected
-      this.loadComponent()
+      this.isBcolSelected = ((this.currentOrganizationType === Account.UNLINKED_PREMIUM) && this.currentOrganization?.name) ? 'no' : this.isBcolSelected
+      this.loadComponent(false)
     }
   }
 
-  private loadComponent () {
+  private loadComponent (isReset?) {
+    if (isReset) {
+      // Reset the data only if the user perform choices from this page.
+      this.resetAccountWhileSwitchingPremium()
+    }
     if (this.isBcolSelected === 'yes') {
       this.setCurrentOrganizationType(Account.PREMIUM)
       this.currentComponent = AccountCreatePremium
