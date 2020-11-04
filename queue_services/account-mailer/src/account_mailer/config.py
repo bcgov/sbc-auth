@@ -87,8 +87,7 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     NATS_CONNECTION_OPTIONS = {
         'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
-        'name': os.getenv('NATS_CLIENT_NAME', 'entity.events.worker')
-
+        'name': os.getenv('NATS_MAILER_CLIENT_NAME', 'account.mailer.worker')
     }
     STAN_CONNECTION_OPTIONS = {
         'cluster_id': os.getenv('NATS_CLUSTER_ID', 'test-cluster'),
@@ -98,9 +97,9 @@ class _Config():  # pylint: disable=too-few-public-methods
     }
 
     SUBSCRIPTION_OPTIONS = {
-        'subject': os.getenv('NATS_SUBJECT', 'account.mailer'),
-        'queue': os.getenv('NATS_QUEUE', 'account.mailer.worker'),
-        'durable_name': os.getenv('NATS_QUEUE', 'account-mailer-worker') + '_durable',
+        'subject': os.getenv('NATS_MAILER_SUBJECT', 'account.mailer'),
+        'queue': os.getenv('NATS_MAILER_QUEUE', 'account.mailer.worker'),
+        'durable_name': os.getenv('NATS_MAILER_QUEUE', 'account-mailer-worker') + '_durable',
     }
 
 
