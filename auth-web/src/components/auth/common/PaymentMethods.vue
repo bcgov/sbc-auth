@@ -8,7 +8,7 @@
         :class="{'selected': isPaymentSelected(payment)}"
         v-for="payment in allowedPaymentMethods"
         :key="payment.type"
-        @click="selectPayment(payment)"
+        @click="paymentMethodSelected(payment)"
       >
         <div class="d-flex">
           <div class="mt-n2 mr-8">
@@ -56,7 +56,7 @@
             width="120"
             class="font-weight-bold"
             :outlined="!isPaymentSelected(payment)"
-            @click="selectPayment(payment)"
+            @click="paymentMethodSelected(payment)"
             :aria-label="'Select' + ' ' + payment.title"
           >
             <span>{{(isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT'}}</span>
@@ -165,22 +165,7 @@ export default class PaymentMethods extends Vue {
 
   private mounted () {
     if (!this.isPADOnly) {
-      this.selectPayment({ type: this.currentSelectedPaymentMethod })
-    }
-  }
-
-  private selectPayment (payment) {
-    this.selectedPaymentMethod = payment.type
-    /**
-     * emit the paymentMethodSelected() from here only if its not PAD,
-     * for PAD, emit the paymentMethodSelected from the isPADValid method.
-     * so that the 'create account' button can be enabled once valid PAD details are entered.
-     * also, for single payment options (isPADOnly), this select method wont get fired,
-     * so emitting the selection from isPADValid would help there as well.
-     * IMP: check for PaymentTypes.PAD instead of 'isPADOnly' here, since that condition can change in future.
-     */
-    if (payment.type !== PaymentTypes.PAD) {
-      this.paymentMethodSelected()
+      this.paymentMethodSelected({ type: this.currentSelectedPaymentMethod })
     }
   }
 
@@ -189,7 +174,8 @@ export default class PaymentMethods extends Vue {
   }
 
   @Emit()
-  private paymentMethodSelected () {
+  private paymentMethodSelected (payment) {
+    this.selectedPaymentMethod = payment.type
     return this.selectedPaymentMethod
   }
 
@@ -197,11 +183,12 @@ export default class PaymentMethods extends Vue {
     this.padInfo = padInfo
   }
 
+  @Emit('is-pad-valid')
   private isPADValid (isValid) {
     if (isValid) {
-      this.selectedPaymentMethod = PaymentTypes.PAD
-      this.paymentMethodSelected()
+      this.paymentMethodSelected({ type: PaymentTypes.PAD })
     }
+    return isValid
   }
 }
 </script>

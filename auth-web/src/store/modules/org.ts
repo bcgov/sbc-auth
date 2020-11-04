@@ -705,4 +705,13 @@ export default class OrgModule extends VuexModule {
     this.context.commit('setCurrentOrganizationPaymentType', undefined)
     this.context.commit('setCurrentOrganizationPADInfo', undefined)
   }
+
+  @Action({ rawError: true })
+  public async resetAccountWhileSwitchingPremium (): Promise<void> {
+    this.context.commit('setGrantAccess', false)
+    this.context.commit('setCurrentOrganization', { name: '' })
+    this.context.commit('setCurrentOrganizationAddress', undefined)
+    this.context.commit('setCurrentOrganizationPaymentType', undefined)
+    this.context.commit('setCurrentOrganizationPADInfo', undefined)
+  }
 }
