@@ -8,6 +8,7 @@
       :currentOrganization="currentOrganization"
       :currentSelectedPaymentMethod="currentOrgPaymentType"
       @payment-method-selected="setSelectedPayment"
+      @is-pad-valid="setPADValid"
     ></PaymentMethods>
     <v-divider class="my-10"></v-divider>
      <v-row>
@@ -28,7 +29,7 @@
           class="save-continue-button mr-2 font-weight-bold"
           @click="save"
           data-test="save-button"
-          :disabled="!selectedPaymentMethod"
+          :disabled="!isEnableCreateBtn"
         >
           Create Account
         </v-btn>
@@ -41,9 +42,9 @@
 </template>
 
 <script lang="ts">
+import { Account, PaymentTypes } from '@/util/constants'
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
-import { Account } from '@/util/constants'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
@@ -74,6 +75,7 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   private readonly currentOrganizationType!: string
   private readonly currentOrgPaymentType!: string
   private selectedPaymentMethod: string = ''
+  private isPADValid: boolean = false
 
   private goBack () {
     this.stepBack()
@@ -85,9 +87,18 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
       : 'Select the payment method for this account.'
   }
 
+  private get isEnableCreateBtn () {
+    return (this.selectedPaymentMethod === PaymentTypes.PAD)
+      ? (this.selectedPaymentMethod && this.isPADValid) : !!this.selectedPaymentMethod
+  }
+
   private setSelectedPayment (payment) {
     this.selectedPaymentMethod = payment
     this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
+  }
+
+  private setPADValid (isValid) {
+    this.isPADValid = isValid
   }
 
   private save () {
