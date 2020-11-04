@@ -104,20 +104,20 @@ describe('PaymentMethods.vue', () => {
   })
 
   it('should select payment method correctly', () => {
-    wrapper.vm.selectPayment(wrapper.vm.allowedPaymentMethods[0])
+    wrapper.vm.paymentMethodSelected(wrapper.vm.allowedPaymentMethods[0])
     expect(wrapper.vm.$data.selectedPaymentMethod).toBe(wrapper.vm.allowedPaymentMethods[0].type)
   })
 
   it('should return the payment selected correctly', () => {
     const method1 = wrapper.vm.allowedPaymentMethods[0]
-    wrapper.vm.selectPayment(method1)
+    wrapper.vm.paymentMethodSelected(method1)
     expect(wrapper.vm.isPaymentSelected(method1)).toBe(true)
   })
 
   it('should return the payment selected correctly [negative]', () => {
     const method1 = wrapper.vm.allowedPaymentMethods[0]
     const method2 = wrapper.vm.allowedPaymentMethods[1]
-    wrapper.vm.selectPayment(method1)
+    wrapper.vm.paymentMethodSelected(method1)
     expect(wrapper.vm.isPaymentSelected(method2)).toBe(false)
   })
 })
