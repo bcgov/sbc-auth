@@ -112,6 +112,7 @@ export default class CommonUtils {
       Permission.RESET_PASSWORD,
       Permission.TRANSACTION_HISTORY,
       Permission.MANAGE_STATEMENTS,
+      Permission.VIEW_PAYMENT_METHODS,
       Permission.VIEW_ADMIN_CONTACT,
       Permission.RESET_OTP
     ]
