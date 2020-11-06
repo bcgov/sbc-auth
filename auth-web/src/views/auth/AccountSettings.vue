@@ -98,6 +98,7 @@
                 class="py-1 px-4"
                 aria-label="Payment Methods"
                 :to="getUrl('payment-option')"
+                v-can:VIEW_PAYMENT_METHODS.hide
                 data-test="user-auth-nav-item">
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-currency-usd</v-icon>
