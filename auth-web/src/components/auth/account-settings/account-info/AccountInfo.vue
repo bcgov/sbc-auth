@@ -34,7 +34,7 @@
               </div>
             </div>
           </div>
-          <div class="nv-list-item mb-6" v-if="isPremiumAccount">
+          <div class="nv-list-item mb-10" v-if="currentOrganization.bcolAccountDetails">
             <div class="name mt-3" id="accountName">Linked BC Online Account Details</div>
             <div class="value">
               <LinkedBCOLBanner
@@ -102,6 +102,7 @@
               :color="btnLabel == 'Saved' ? 'success' : 'primary'"
               :disabled="!isSaveEnabled()"
               :loading="btnLabel == 'Saving'"
+              aria-label="Save Account Information"
               @click="updateDetails()"
             >
               <v-expand-x-transition>
@@ -114,6 +115,7 @@
               depressed
               class="ml-2"
               color="default"
+              aria-label="Reset Account Information"
               @click="resetForm"
               data-test="reset-button"
             >Reset</v-btn>
