@@ -74,7 +74,7 @@
       max-width="640"
     >
       <template v-slot:title>
-        <span>Invite Team Members</span>
+        Invite Team Members
       </template>
       <template v-slot:text>
         <InviteUsersForm @invites-complete="showSuccessModal()" @cancel="cancelInviteUsersModal()" />
@@ -87,15 +87,20 @@
       :title="confirmActionTitle"
       :text="confirmActionText"
       dialog-class="notify-dialog"
-      max-width="640"
+      max-width="480"
     >
       <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+        <v-icon
+          large
+          :color="primaryActionType"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
       <template v-slot:actions>
         <v-btn
           large
-          color="error"
+          :color="primaryActionType"
           class="font-weight-bold"
           @click="confirmHandler()"
         >
@@ -117,17 +122,31 @@
       :title="confirmActionTitle"
       :text="confirmActionText"
       dialog-class="notify-dialog"
-      max-width="640"
+      max-width="480"
     >
       <template v-slot:icon>
-        <v-icon large color="primary">mdi-information-outline</v-icon>
-      </template>
-      <template v-slot:text>
-        {{ confirmActionText }}
+        <v-icon
+          large
+          :color="primaryActionType"
+        >
+          mdi-information-outline
+        </v-icon>
       </template>
       <template v-slot:actions>
-        <v-btn large color="primary" @click="confirmHandler()">{{ primaryActionText }}</v-btn>
-        <v-btn large color="default" @click="close($refs.confirmActionDialogWithQuestion)">{{ secondaryActionText }}</v-btn>
+        <v-btn
+          large
+          :color="primaryActionType"
+          @click="confirmHandler()"
+        >
+          {{ primaryActionText }}
+        </v-btn>
+        <v-btn
+          large
+          depressed
+          @click="close($refs.confirmActionDialogWithQuestion)"
+        >
+          {{ secondaryActionText }}
+        </v-btn>
       </template>
     </ModalDialog>
 
@@ -137,7 +156,7 @@
       :title="successTitle"
       :text="successText"
       dialog-class="notify-dialog"
-      max-width="640"
+      max-width="600"
     ></ModalDialog>
 
     <!-- Alert Dialog (Error) -->
@@ -146,10 +165,15 @@
       :title="errorTitle"
       :text="errorText"
       dialog-class="notify-dialog"
-      max-width="640"
+      max-width="480"
     >
       <template v-slot:icon>
-        <v-icon large color="primary">mdi-alert-circle-outline</v-icon>
+        <v-icon
+          large
+          color="primary"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
       <template v-slot:actions>
         <v-btn
@@ -296,7 +320,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   private showSuccessModal () {
     this.$refs.inviteUsersDialog.close()
     this.successTitle = `Invited ${this.sentInvitations.length} Team Members`
-    this.successText = 'When team members accept this invitation, you will need to approve their access to this account.'
+    this.successText = 'Once team members accept the invitation and log in, you will need to approve their access to this account.'
     this.$refs.successDialog.open()
   }
 
@@ -310,19 +334,23 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
 
   private showConfirmRemoveInviteModal (invitation: Invitation) {
     this.confirmActionTitle = this.$t('confirmRemoveInviteTitle').toString()
-    this.confirmActionText = `Are you sure wish to remove the invite to ${invitation.recipientEmail}?`
+    this.confirmActionText = `Remove the invitation to sent to <strong>${invitation.recipientEmail}</strong>?`
     this.invitationToBeRemoved = invitation
     this.confirmHandler = this.removeInvite
-    this.primaryActionText = 'Yes'
+    this.primaryActionText = 'Remove'
+    this.secondaryActionText = 'Cancel'
+    this.primaryActionType = 'error'
     this.$refs.confirmActionDialog.open()
   }
 
   private showConfirmApproveModal (member: Member) {
     this.confirmActionTitle = this.$t('confirmApproveMemberTitle').toString()
-    this.confirmActionText = `Are you sure you wish to approve membership for ${member.user.firstname}?`
+    this.confirmActionText = `Approve account access for <strong>${member?.user?.firstname} ${member?.user?.lastname}</strong>?`
     this.memberToBeApproved = member
     this.confirmHandler = this.approve
     this.primaryActionText = 'Approve'
+    this.secondaryActionText = 'Cancel'
+    this.primaryActionType = 'primary'
     this.$refs.confirmActionDialog.open()
   }
 
