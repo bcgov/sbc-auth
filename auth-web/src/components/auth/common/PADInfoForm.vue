@@ -11,69 +11,71 @@
         {{padInfoSubtitle}}
       </p>
     </template>
-    <h4 class="mb-4">Banking Information</h4>
     <v-form ref="preAuthDebitForm">
-      <v-row>
-        <v-col cols="6" class="py-0">
-          <v-text-field
-            label="Transit Number"
-            filled
-            hint="5 digits"
-            persistent-hint
-            :rules="transitNumberRules"
-            v-model="transitNumber"
-            @change="emitPreAuthDebitInfo"
-            v-mask="'#####'"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="6" class="py-0">
-          <v-text-field
-            label="Institution Number"
-            filled
-            hint="3 digits"
-            persistent-hint
-            :rules="institutionNumberRules"
-            v-model="institutionNumber"
-            @change="emitPreAuthDebitInfo"
-            v-mask="'####'"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="12" class="py-0">
-          <v-text-field
-            label="Account Number"
-            filled
-            hint="7 to 12 digits"
-            persistent-hint
-            :rules="accountNumberRules"
-            v-model="accountNumber"
-            @change="emitPreAuthDebitInfo"
-            v-mask="'############'"
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col class="pb-0">
-          <div class="terms-container">
-            <TermsOfUseDialog
-              :isAlreadyAccepted="isTermsOfServiceAccepted"
-              @terms-acceptance-status="isTermsAccepted"
-            ></TermsOfUseDialog>
-          </div>
-        </v-col>
-      </v-row>
-      <v-row v-if="isAcknowledgeNeeded">
-        <v-col class="pb-0 acknowledge-checkbox-container">
-          <v-checkbox
-            class="acknowledge-checkbox"
-            v-model="isAcknowledged"
-            @change="emitPreAuthDebitInfo"
-          >
-            <template v-slot:label>
-              {{acknowledgementLabel}}
-            </template>
-          </v-checkbox>
-        </v-col>
-      </v-row>
+      <fieldset>
+        <legend class="mb-4">Banking Information</legend>
+        <v-row>
+          <v-col cols="6" class="py-0">
+            <v-text-field
+              label="Transit Number"
+              filled
+              hint="5 digits"
+              persistent-hint
+              :rules="transitNumberRules"
+              v-model="transitNumber"
+              @change="emitPreAuthDebitInfo"
+              v-mask="'#####'"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="6" class="py-0">
+            <v-text-field
+              label="Institution Number"
+              filled
+              hint="3 digits"
+              persistent-hint
+              :rules="institutionNumberRules"
+              v-model="institutionNumber"
+              @change="emitPreAuthDebitInfo"
+              v-mask="'####'"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" class="py-0">
+            <v-text-field
+              label="Account Number"
+              filled
+              hint="7 to 12 digits"
+              persistent-hint
+              :rules="accountNumberRules"
+              v-model="accountNumber"
+              @change="emitPreAuthDebitInfo"
+              v-mask="'############'"
+            ></v-text-field>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col class="pt-6 pl-6 pb-0">
+            <div class="terms-container">
+              <TermsOfUseDialog
+                :isAlreadyAccepted="isTermsOfServiceAccepted"
+                @terms-acceptance-status="isTermsAccepted"
+              ></TermsOfUseDialog>
+            </div>
+          </v-col>
+        </v-row>
+        <v-row v-if="isAcknowledgeNeeded">
+          <v-col class="pt-2 pl-6 pb-0">
+            <v-checkbox
+              class="acknowledge-checkbox"
+              v-model="isAcknowledged"
+              @change="emitPreAuthDebitInfo"
+            >
+              <template v-slot:label>
+                {{acknowledgementLabel}}
+              </template>
+            </v-checkbox>
+          </v-col>
+        </v-row>
+      </fieldset>
     </v-form>
   </div>
 </template>
@@ -192,15 +194,15 @@ export default class PADInfoForm extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.terms-container {
-  height: 2rem;
-}
-.acknowledge-checkbox-container {
+  .terms-container {
+    height: 2rem;
+  }
+
   .acknowledge-checkbox {
-    font-size: 1rem !important;
-    .v-input__slot {
-      align-items: start !important;
+    ::v-deep {
+      .v-input__slot {
+        align-items: flex-start;
+      }
     }
   }
-}
 </style>

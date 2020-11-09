@@ -10,57 +10,60 @@
         :key="payment.type"
         @click="paymentMethodSelected(payment)"
       >
-        <div class="d-flex">
-          <div class="mt-n2 mr-8">
-            <v-icon x-large color="primary">{{payment.icon}}</v-icon>
-          </div>
-
-          <div class="payment-card-contents">
-            <div>
-              <div class="title font-weight-bold mt-n2 payment-title">{{payment.title}}</div>
+        <div>
+          <header class="d-flex align-center">
+            <div class="payment-icon-container mt-n2">
+              <v-icon x-large color="primary">{{payment.icon}}</v-icon>
+            </div>
+            <div class="pr-8">
+              <h3 class="title font-weight-bold payment-title mt-n1">{{payment.title}}</h3>
               <div>{{payment.subtitle}}</div>
             </div>
+            <v-btn
+              large
+              depressed
+              color="primary"
+              width="120"
+              class="font-weight-bold ml-auto"
+              :outlined="!isPaymentSelected(payment)"
+              @click="paymentMethodSelected(payment)"
+              :aria-label="'Select' + ' ' + payment.title"
+            >
+              <span>{{(isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT'}}</span>
+            </v-btn>
+          </header>
+
+          <div class="payment-card-contents">
             <v-expand-transition>
               <div v-if="isPaymentSelected(payment)">
-                <div class="pt-6">
-                  <div v-if="(payment.type === paymentTypes.PAD)">
-                    <v-divider class="mb-6"></v-divider>
-                    <!-- showing PAD form for PAD selection -->
-                    <PADInfoForm
-                      @is-pre-auth-debit-form-valid="isPADValid"
-                      @emit-pre-auth-debit-info="getPADInfo"
-                      :isChangeView="isChangeView"
-                      :isAcknowledgeNeeded="isAcknowledgeNeeded"
-                    ></PADInfoForm>
-                  </div>
-                  <div v-else-if="(payment.type === paymentTypes.BCOL)">
-                    <!-- showing BCOL details banner -->
-                    <LinkedBCOLBanner
-                      :bcolAccountName="currentOrganization.name"
-                      :bcolAccountDetails="currentOrganization.bcolAccountDetails"
-                    ></LinkedBCOLBanner>
-                  </div>
-                  <div v-else>
-                    <v-divider class="mb-6"></v-divider>
-                    <div v-html="payment.description"></div>
-                  </div>
+
+                <!-- PAD -->
+                <div class="pad-form-container pt-7" v-if="(payment.type === paymentTypes.PAD)">
+                  <v-divider class="mb-7"></v-divider>
+                  <PADInfoForm
+                    @is-pre-auth-debit-form-valid="isPADValid"
+                    @emit-pre-auth-debit-info="getPADInfo"
+                    :isChangeView="isChangeView"
+                    :isAcknowledgeNeeded="isAcknowledgeNeeded"
+                  ></PADInfoForm>
+                </div>
+
+                <!-- BCOL -->
+                <div class="pt-7" v-else-if="(payment.type === paymentTypes.BCOL)">
+                  <!-- showing BCOL details banner -->
+                  <LinkedBCOLBanner
+                    :bcolAccountName="currentOrganization.name"
+                    :bcolAccountDetails="currentOrganization.bcolAccountDetails"
+                  ></LinkedBCOLBanner>
+                </div>
+
+                <!-- Other Payment Types -->
+                <div class="pt-7" v-else>
+                  <v-divider class="mb-7"></v-divider>
+                  <div v-html="payment.description"></div>
                 </div>
               </div>
             </v-expand-transition>
-          </div>
-
-          <div class="ml-auto pl-8">
-          <v-btn
-            depressed
-            color="primary"
-            width="120"
-            class="font-weight-bold"
-            :outlined="!isPaymentSelected(payment)"
-            @click="paymentMethodSelected(payment)"
-            :aria-label="'Select' + ' ' + payment.title"
-          >
-            <span>{{(isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT'}}</span>
-          </v-btn>
           </div>
         </div>
       </v-card>
@@ -195,7 +198,6 @@ export default class PaymentMethods extends Vue {
 
 <style lang="scss" scoped>
 .payment-card {
-  background-color: var(--v-grey-lighten5) !important;
   transition: all ease-out 0.2s;
 
   &:hover {
@@ -215,7 +217,16 @@ export default class PaymentMethods extends Vue {
   border-color: transparent !important;
 }
 
+.payment-icon-container {
+  flex: 0 0 auto;
+  width: 4.5rem;
+}
+
 .payment-card-contents {
-  width: 100%;
+  padding-left: 4.5rem;
+}
+
+.pad-form-container {
+  max-width: 75ch;
 }
 </style>

@@ -4,7 +4,10 @@
   >
 
     <!-- Director Search - Breadcrumbs / Back Navigation -->
-    <nav class="crumbs py-6" v-if="isDirSearchUser" aria-labelledby="dirSearchNav">
+    <nav
+      class="crumbs py-6"
+      v-if="isDirSearchUser"
+      aria-label="breadcrumb">
       <div>
         <a :href="dirSearchUrl">
           <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
@@ -14,7 +17,10 @@
     </nav>
 
     <!-- Staff - Breadcrumbs / Back Navigation -->
-    <nav class="crumbs py-6" v-if="isStaff" aria-labelledby="staffNav">
+    <nav
+      class="crumbs py-6"
+      v-if="isStaff"
+      aria-label="breadcrumb">
       <div>
         <router-link :to=pagesEnum.STAFF_DASHBOARD>
           <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
@@ -24,15 +30,17 @@
     </nav>
 
     <!-- Back Button -->
-
-    <nav class="crumbs py-6" v-if="!isDirSearchUser && !isStaff">
+    <nav
+      class="crumbs py-6"
+      v-if="!isDirSearchUser && !isStaff"
+      aria-label="breadcrumb">
       <div>
         <a href="javascript:void()"
           data-test="account-settings-back-button"
           @click="handleBackButton()"
         >
           <v-icon small
-            color="primary"
+            color="#1a5a96"
             class="mr-1">mdi-arrow-left</v-icon>
           <span>Manage Businesses</span>
         </a>
@@ -55,14 +63,19 @@
     <v-card flat class="account-settings-card" data-test="account-settings-card">
       <v-container class="nav-container py-6 pr-0 pl-8">
         <v-navigation-drawer permanent width="auto" data-test="account-nav-drawer">
-          <v-list class="py-0" role="navigation" aria-label="Account Navigation">
+
           <!-- Manage Account -->
-            <v-list-item-group color="primary">
+          <v-list
+            role="navigation"
+            aria-label="Manage Account"
+            class="py-0">
+            <v-list-item-group color="primary" role="list">
               <v-subheader class="px-0">MANAGE ACCOUNT</v-subheader>
               <v-list-item
                 dense
                 class="py-1 px-4"
                 aria-label="Account Information"
+                role="listitem"
                 :to="accountInfoUrl"
                 data-test="account-info-nav-item">
                 <v-list-item-icon>
@@ -74,6 +87,7 @@
                 dense
                 class="py-1 px-4"
                 aria-label="Account Team Members"
+                role="listitem"
                 :to="teamMembersUrl"
                 data-test="team-members-nav-item">
                 <v-list-item-icon>
@@ -85,6 +99,7 @@
                 dense
                 class="py-1 px-4"
                 aria-label="Team Member Authentication Methods"
+                role="listitem"
                 :to="accountAuthUrl"
                 v-if="isRegularAccount"
                 v-can:SET_AUTH_OPTIONS.hide data-test="user-auth-nav-item">
@@ -97,6 +112,7 @@
                 dense
                 class="py-1 px-4"
                 aria-label="Payment Methods"
+                role="listitem"
                 :to="getUrl('payment-option')"
                 v-can:VIEW_PAYMENT_METHODS.hide
                 data-test="user-auth-nav-item">
@@ -109,13 +125,19 @@
           </v-list>
 
           <!-- Account Activity -->
-          <v-list v-if="isPremiumAccount" v-can:MANAGE_STATEMENTS.hide>
-            <v-list-item-group color="primary">
+          <v-list
+            role="navigation"
+            aria-label="Account Activity"
+            v-if="isPremiumAccount"
+            v-can:MANAGE_STATEMENTS.hide
+          >
+            <v-list-item-group color="primary" role="list">
               <v-subheader class="mt-2 px-0">ACCOUNT ACTIVITY</v-subheader>
               <v-list-item
                 dense
                 class="py-1 px-4"
                 aria-label="Account Statements"
+                role="listitem"
                 :to="statementsUrl"
                 data-test="statements-nav-item"
               >
@@ -128,6 +150,7 @@
                 dense
                 class="py-1 px-4"
                 aria-label="Account Transactions"
+                role="listitem"
                 :to="transactionUrl"
                 data-test="transactions-nav-item"
               >

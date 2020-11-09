@@ -76,8 +76,8 @@ describe('SearchFilterInput.vue', () => {
 
   it('renders the input fields with correct labels', () => {
     const renderedInputs = wrapper.vm.$el.querySelectorAll('.filter-input')
-    expect(renderedInputs[0].getElementsByTagName('input')[0].getAttribute('placeholder')).toBe(filterParams[0].placeholder)
-    expect(renderedInputs[1].getElementsByTagName('input')[0].getAttribute('placeholder')).toBe(filterParams[1].placeholder)
+    expect(renderedInputs[0].getElementsByTagName('label')[0].innerHTML === filterParams[0].placeholder)
+    expect(renderedInputs[1].getElementsByTagName('label')[0].innerHTML === filterParams[1].placeholder)
   })
 
   it('renders the input fields with correct values and apply filter disabled', () => {
