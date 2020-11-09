@@ -37,10 +37,10 @@
 </template>
 
 <script lang="ts">
+import { Account, Pages } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { CreateRequestBody, Organization } from '@/models/Organization'
+import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
-import { Account } from '@/util/constants'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import OrgModule from '@/store/modules/org'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
@@ -53,7 +53,8 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
   computed: {
     ...mapState('org', [
       'currentOrganization',
-      'currentOrgPaymentType'
+      'currentOrgPaymentType',
+      'currentMembership'
     ])
   },
   methods: {
@@ -70,6 +71,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   private readonly setCurrentOrganizationPaymentType!: (paymentType: string) => void
   private readonly getOrgPayments!: () => any
   private readonly updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
+  private readonly currentMembership!: Member
   private readonly currentOrganization!: Organization
   private readonly currentOrgPaymentType!: string
   private savedOrganizationType: string = ''
@@ -91,11 +93,21 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   }
 
   private async initialize () {
-    this.savedOrganizationType =
+    if (this.isPaymentViewAllowed) {
+      this.savedOrganizationType =
       ((this.currentOrganization?.orgType === Account.PREMIUM) && !this.currentOrganization?.bcolAccountId)
         ? Account.UNLINKED_PREMIUM : this.currentOrganization.orgType
-    const orgPayments = await this.getOrgPayments()
-    this.selectedPaymentMethod = orgPayments?.paymentMethod || ''
+      const orgPayments = await this.getOrgPayments()
+      this.selectedPaymentMethod = orgPayments?.paymentMethod || ''
+    } else {
+      // if the account switing happening when the user is already in the transaction page,
+      // redirect to account info if its a basic account
+      this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
+    }
+  }
+
+  private get isPaymentViewAllowed (): boolean {
+    return (this.currentMembership.membershipTypeCode === MembershipType.Admin)
   }
 
   private async save () {
