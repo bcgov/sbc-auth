@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>Enter email addresses to invite team members.</p>
+    <p>Enter an email address and select a role to invite a new team members to this account.</p>
     <v-form ref="form" class="mt-9">
       <div class="invite-list">
         <transition-group name="slide-y-transition">
