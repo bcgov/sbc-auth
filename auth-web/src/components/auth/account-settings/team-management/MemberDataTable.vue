@@ -129,8 +129,8 @@
       <!-- Remove User -->
       <v-btn
         icon
-        aria-label="Remove User"
-        title="Remove User"
+        aria-label="Remove Team Member"
+        title="Remove Team Member"
         v-show="canRemove(item)"
         :data-test="getIndexedTag('remove-user-button', item.index)"
         @click="confirmRemoveMember(item)"
