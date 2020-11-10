@@ -249,6 +249,6 @@ describe('MemberDataTable.vue', () => {
     }]
     await store.commit('org/setCurrentMembership', currentMember)
     const items = wrapper.vm.$el.querySelectorAll('.member-data-table tbody tr')
-    expect(items[0].querySelector('[title="Remove User"]').style.display).toBe('')
+    expect(items[0].querySelector('[title="Remove Team Member"]').style.display).toBe('')
   })
 })

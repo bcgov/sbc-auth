@@ -50,7 +50,8 @@ export default class TeamManagementMixin extends Vue {
   protected confirmActionTitle: string = ''
   protected confirmActionText: string = ''
   protected primaryActionText: string = ''
-  protected secondaryActionText = 'No'
+  protected primaryActionType: string = ''
+  protected secondaryActionText = 'Cancel'
 
   protected confirmHandler: (modal:ModalDialog) => void = undefined
 
@@ -68,14 +69,16 @@ export default class TeamManagementMixin extends Vue {
     this.modal = confirmActionDialog
     if (member.membershipStatus === MembershipStatus.Pending) {
       this.confirmActionTitle = this.$t('confirmDenyMemberTitle').toString()
-      this.confirmActionText = `Are you sure you want to deny membership to ${member.user.firstname}?`
+      this.confirmActionText = `Deny account access to <strong>${member?.user?.firstname} ${member?.user?.lastname}</strong?`
       this.confirmHandler = this.deny
       this.primaryActionText = 'Deny'
+      this.primaryActionType = 'error'
     } else {
       this.confirmActionTitle = this.$t('confirmRemoveMemberTitle').toString()
-      this.confirmActionText = `Are you sure you want to remove team member ${member.user.firstname} ${member.user.lastname} from this account?`
+      this.confirmActionText = `Remove team member <strong>${member?.user?.firstname} ${member?.user?.lastname}</strong> from this account?`
       this.confirmHandler = this.removeMember
-      this.primaryActionText = 'Yes'
+      this.primaryActionText = 'Remove'
+      this.primaryActionType = 'error'
     }
     this.memberToBeRemoved = member
     confirmActionDialog.open()
@@ -87,10 +90,11 @@ export default class TeamManagementMixin extends Vue {
     }
     this.modal = confirmActionDialogWithQuestion
     this.confirmActionTitle = this.$t('confirmRoleChangeTitle').toString()
-    this.confirmActionText = `Are you sure you wish to change ${payload.member.user.firstname}'s role to ${payload.targetRole}?`
+    this.confirmActionText = `Change <strong>${payload.member?.user?.firstname} ${payload.member?.user?.lastname}'s</strong> role to ${payload.targetRole}?`
     this.roleChangeToAction = payload
     this.confirmHandler = this.changeRole
-    this.primaryActionText = 'Yes'
+    this.primaryActionText = 'Change'
+    this.primaryActionType = 'primary'
     confirmActionDialogWithQuestion.open()
   }
 
