@@ -35,7 +35,7 @@ def process(email_msg: dict) -> dict:
         request=email_msg
     )
     return {
-        'recipients': current_app.config.get("REFUND_REQUEST").recipients,
+        'recipients': current_app.config.get('REFUND_REQUEST').recipients,
         'content': {
             'subject': f'{email_msg.identifier} - Refund Requested',
             'body': html_out,

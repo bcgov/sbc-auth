@@ -19,6 +19,7 @@ from pathlib import Path
 
 from flask import current_app
 
+
 def substitute_template_parts(template_code: str) -> str:
     """Substitute template parts in main template.
 
