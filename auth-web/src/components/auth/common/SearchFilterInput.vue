@@ -16,11 +16,9 @@
           v-else
           dense
           filled
-          single-line
           hide-details
-          height="43"
           class="filter-input"
-          :placeholder="filter.placeholder"
+          :label="filter.placeholder"
           v-model="filter.filterInput"
           @keydown.enter="applyFilter"
         ></v-text-field>
@@ -164,20 +162,39 @@ export default class SearchFilterInput extends Vue {
 </script>
 
 <style lang="scss" scoped>
+  // Custom Styling for reduced height inputs
   ::v-deep {
-    .v-text-field__slot input {
+    .v-text-field--filled .v-label {
       font-size: 0.875rem;
     }
 
-    .v-label {
-      font-size: 0.875rem !important;
-      top: 12px !important;
+    .v-input__control,
+    .v-input__slot {
+      height: 44px !important;
+      min-height: 44px !important;
     }
 
-    .v-input__prepend-inner {
-      margin-top: 10px !important;
-      margin-right: 5px !important;
+    .v-text-field--filled {
+      &.v-input--dense {
+        .v-label {
+          top: 13px;
+        }
+        .v-label--active {
+          transform: translateY(-8px) scale(0.75);
+        }
+      }
+
+      &:not(.v-text-field--single-line) {
+        input {
+          margin-top: 14px;
+        }
+      }
     }
+  }
+
+  // Filter Bar
+  .filter-bar {
+    align-items: center;
   }
 
   .filter-item {
@@ -196,16 +213,19 @@ export default class SearchFilterInput extends Vue {
     }
   }
 
+  // Filter Results
   .filter-results {
     opacity: 0;
     overflow: hidden;
     max-height: 0;
     transition: all ease-out 0.25s;
+    visibility: hidden;
   }
 
   .filter-results.active {
     opacity: 1;
     max-height: 12rem;
+    visibility: visible;
   }
 
   .filter-results-label {
