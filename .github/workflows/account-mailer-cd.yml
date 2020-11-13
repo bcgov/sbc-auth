@@ -1,4 +1,4 @@
-name: Account Mailer Queue CD
+name: Account MailerQueue CD
 
 on:
   push:
