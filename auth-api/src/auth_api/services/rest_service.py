@@ -50,7 +50,7 @@ class RestService:
 
         if additional_headers:
             headers.update(additional_headers)
-        
+
         if content_type == ContentType.JSON:
             data = json.dumps(data)
 
@@ -87,7 +87,7 @@ class RestService:
              additional_headers: dict = None):
         """POST service."""
         current_app.logger.debug('<post')
-        return RestService._invoke('post', endpoint, token, auth_header_type, content_type, data, raise_for_status)
+        return RestService._invoke('post', endpoint, token, auth_header_type, content_type, data, raise_for_status, additional_headers)
 
     @staticmethod
     def put(endpoint, token=None,  # pylint: disable=too-many-arguments
