@@ -116,6 +116,7 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     TEMPLATE_PATH = os.getenv('TEMPLATE_PATH', 'src/account_mailer/email_templates')
 
+
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Creates the Development Config object."""
 

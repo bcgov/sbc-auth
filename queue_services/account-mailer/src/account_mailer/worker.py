@@ -34,11 +34,11 @@ from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
 from flask import Flask  # pylint: disable=wrong-import-order
 
-from account_mailer import config
-from account_mailer.services import notification_service
+from account_mailer import config  # pylint: disable=wrong-import-order
+from account_mailer.email_processors import pad_confirmation  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import payment_completed  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import refund_requested  # pylint: disable=wrong-import-order
-from account_mailer.email_processors import pad_confirmation  # pylint: disable=wrong-import-order
+from account_mailer.services import notification_service  # pylint: disable=wrong-import-order
 
 
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
@@ -46,6 +46,7 @@ APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
 FLASK_APP = Flask(__name__)
 FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
+
 
 async def process_event(event_message: dict, flask_app):
     """Process the incoming queue event message."""

@@ -14,9 +14,8 @@
 """Service for managing Invitation data."""
 import json
 
-from flask import current_app
-
 from auth_api.services.rest_service import RestService
+from flask import current_app
 
 
 def send_email(notify_body: dict):  # pylint:disable=unused-argument
