@@ -85,6 +85,12 @@ class _Config():  # pylint: disable=too-few-public-methods
     # pay-API URL
     PAY_API_URL = os.getenv('PAY_API_URL')
 
+    # notify-API URL
+    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
+
+    # REPORT API Settings
+    REPORT_API_BASE_URL = os.getenv('REPORT_API_BASE_URL')
+
     NATS_CONNECTION_OPTIONS = {
         'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
         'name': os.getenv('NATS_MAILER_CLIENT_NAME', 'account.mailer.worker')
@@ -106,8 +112,9 @@ class _Config():  # pylint: disable=too-few-public-methods
         'recipients': os.getenv('REFUND_REQUEST_RECIPIENTS', ''),
     }
 
-    TEMPLATE_PATH = os.getenv('TEMPLATE_PATH', 'src/account_mailer/email_templates')
+    PDF_TEMPLATE_PATH = os.getenv('PDF_TEMPLATE_PATH', 'src/account_mailer/pdf_templates')
 
+    TEMPLATE_PATH = os.getenv('TEMPLATE_PATH', 'src/account_mailer/email_templates')
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Creates the Development Config object."""
