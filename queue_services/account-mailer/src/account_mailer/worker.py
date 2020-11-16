@@ -36,7 +36,8 @@ from entity_queue_common.service_utils import QueueException, logger
 from flask import Flask  # pylint: disable=wrong-import-order
 
 from account_mailer import config
-from account_mailer.email_processors import payment_completed
+from account_mailer.email_processors import payment_completed  # pylint: disable=wrong-import-order
+from account_mailer.email_processors import refund_requested  # pylint: disable=wrong-import-order
 
 
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
@@ -45,36 +46,43 @@ FLASK_APP = Flask(__name__)
 FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
 
-MESSAGE_TYPE = 'account.mailer'
-
 
 async def process_event(event_message: dict, flask_app):
-    """Render the org status."""
+    """Process the incoming queue event message."""
     if not flask_app:
         raise QueueException('Flask App not available.')
 
     with flask_app.app_context():
-        if event_message.get('type', None) == MESSAGE_TYPE:
+        message_type = event_message.get('type', None)
+        email_msg = None
+        email_dict = None
+        if message_type == 'account.mailer':
             email_msg = json.loads(event_message.get('data'))
-            logger.debug('Extracted email msg: %s', email_msg)
-            process_email(email_msg, FLASK_APP)
+            email_dict = payment_completed.process(email_msg)
+
+        elif message_type == 'bc.registry.payment.refundRequest':
+            email_msg = json.loads(event_message.get('data'))
+            email_dict = refund_requested.process(email_msg)
+
+        logger.debug('Extracted email msg: %s', email_dict)
+        process_email(email_dict, FLASK_APP)
 
 
-def process_email(email_msg: dict, flask_app: Flask):  # pylint: disable=too-many-branches
-    """Process the email contained in the submission."""
+def process_email(email_dict: dict, flask_app: Flask):  # pylint: disable=too-many-branches
+    """Process the email contained in the message."""
     if not flask_app:
         raise QueueException('Flask App not available.')
 
     with flask_app.app_context():
-        logger.debug('Attempting to process email: %s', email_msg)
+        logger.debug('Attempting to process email: %s', email_dict)
         # get type from email
-        email_dict = payment_completed.process(email_msg)
         notification_service.send_email(email_dict['subject'], email_dict['sender'], email_dict['recepients'],
                                         email_dict['html_body'])
 
 
 async def cb_subscription_handler(msg: nats.aio.client.Msg):
     """Use Callback to process Queue Msg objects."""
+    event_message = None
     try:
         logger.info('Received raw message seq:%s, data=  %s', msg.sequence, msg.data.decode())
         event_message = json.loads(msg.data.decode('utf-8'))

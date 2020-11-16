@@ -120,7 +120,7 @@ import { User } from '@/models/user'
 export default class AddUsersSuccess extends Vue {
   private readonly createdUsers!: BulkUsersSuccess[]
   private readonly failedUsers!: BulkUsersFailed[]
-  private loginUrl: string = ConfigHelper.getSelfURL() + `/${Pages.SIGNIN}/${IdpHint.BCROS}`
+  private loginUrl: string = ConfigHelper.getSearchApplicationUrl()
   @Prop() private action: string
 
   @Emit()
