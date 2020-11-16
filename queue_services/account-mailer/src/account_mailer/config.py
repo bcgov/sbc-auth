@@ -102,6 +102,12 @@ class _Config():  # pylint: disable=too-few-public-methods
         'durable_name': os.getenv('NATS_MAILER_QUEUE', 'account-mailer-worker') + '_durable',
     }
 
+    REFUND_REQUEST = {
+        'recipients': os.getenv('REFUND_REQUEST_RECIPIENTS', ''),
+    }
+
+    TEMPLATE_PATH = os.getenv('TEMPLATE_PATH', 'src/account_mailer/email_templates')
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Creates the Development Config object."""
