@@ -4,6 +4,8 @@ import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
 import AccountChangeSuccessView from '@/views/auth/create-account/AccountChangeSuccessView.vue'
 import AccountChangeView from '@/views/auth/create-account/AccountChangeView.vue'
 import AccountCreationSuccessView from '@/views/auth/create-account/AccountCreationSuccessView.vue'
+import AccountFreezeUnlockView from '@/views/auth/account-freeze/AccountFreezeUnlockView.vue'
+import AccountFreezeView from '@/views/auth/account-freeze/AccountFreezeView.vue'
 import AccountInstructions from '@/components/auth/create-account/non-bcsc/AccountInstructions.vue'
 import AccountLoginOptionsChooser from '@/views/auth/AccountLoginOptionsChooser.vue'
 import AccountLoginOptionsInfo from '@/views/auth/AccountLoginOptionsInfo.vue'
@@ -225,6 +227,20 @@ export function getRoutes (): RouteConfig[] {
       path: '/setup-account-success',
       name: 'setup-account-success',
       component: AccountCreationSuccessView,
+      meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/account-freeze-nfs',
+      name: 'account-freeze-nfs',
+      component: AccountFreezeUnlockView,
+      props: true,
+      meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/account-freeze',
+      name: 'account-freeze',
+      component: AccountFreezeView,
+      props: true,
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
