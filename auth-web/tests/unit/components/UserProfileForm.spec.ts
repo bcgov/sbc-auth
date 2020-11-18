@@ -21,6 +21,8 @@ describe('UserProfileForm.vue', () => {
     'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
   }
 
+  let userModule: any
+
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -28,10 +30,21 @@ describe('UserProfileForm.vue', () => {
     vuetify = new Vuetify()
     const $t = () => 'test'
 
+    userModule = {
+      namespaced: true,
+      state: {
+        userProfile: {
+        }
+      },
+      actions: {
+        getUserProfile: jest.fn()
+      }
+    }
+
     const store = new Vuex.Store({
       strict: false,
       modules: {
-        user: UserModule
+        user: userModule
       }
     })
 

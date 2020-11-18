@@ -26,24 +26,5 @@ import { mapState } from 'vuex'
 })
 export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
   protected readonly currentOrganization!: Organization
-
-  private goTo (page) {
-    switch (page) {
-      case 'home': this.$router.push('/')
-        break
-      case 'team-members': this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`)
-        break
-      case 'setup-team': this.$router.push(`account-login-options-info`)
-        break
-    }
-  }
 }
 </script>
-
-<style lang="scss" scoped>
-  @import "$assets/scss/theme.scss";
-
-  .action-btn {
-    width: 8rem;
-  }
-</style>

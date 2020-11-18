@@ -43,7 +43,7 @@ import { AccessType } from '@/util/constants'
           large
           depressed
           color="default"
-          @click="stepBack"
+          @click="goBack"
         >
           <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
           <span>Back</span>
@@ -53,6 +53,7 @@ import { AccessType } from '@/util/constants'
           large
           color="primary"
           @click="proceed"
+          class="proceed-btn"
           :disabled="!isAcknowledged"
         >
           Proceed
@@ -81,6 +82,10 @@ export default class PaymentReview extends Mixins(Steppable) {
 
   private proceed () {
     // proceed final step
+  }
+
+  private goBack () {
+    this.stepBack()
   }
 }
 </script>
