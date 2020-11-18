@@ -26,6 +26,7 @@ import os
 import random
 import signal
 import sys
+from datetime import datetime
 
 from nats.aio.client import Client as NATS  # noqa N814; by convention the name is NATS
 from stan.aio.client import Client as STAN  # noqa N814; by convention the name is STAN
@@ -33,7 +34,8 @@ from stan.aio.client import Client as STAN  # noqa N814; by convention the name 
 from entity_queue_common.service_utils import error_cb, logger, signal_handler
 
 
-async def run(loop, old_identifier, new_identifier):  # pylint: disable=too-many-locals
+async def run(loop, auth_account_id, auth_account_name, bank_number, bank_branch_number,
+              bank_account_number):  # pylint: disable=too-many-locals
     """Run the main application loop for the service.
 
     This runs the main top level service functions for working with the Queue.
@@ -83,17 +85,20 @@ async def run(loop, old_identifier, new_identifier):  # pylint: disable=too-many
 
         payload = {
             'specversion': '1.x-wip',
-            'type': 'bc.registry.business.incorporationApplication',
-            'source': 'https://api.business.bcregistry.gov.bc.ca/v1/business/BC1234567/filing/12345678',
-            'id': 'C234-1234-1234',
-            'time': '2020-08-28T17:37:34.651294+00:00',
+            'type': 'bc.registry.payment.padAccountCreate',
+            'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{pay_account.auth_account_id}',
+            'id': f'{auth_account_id}',
+            'time': f'{datetime.now()}',
             'datacontenttype': 'application/json',
-            'identifier': new_identifier,
-            'tempidentifier': old_identifier,
             'data': {
-                'filing': {
-                    'header': {'filingId': '12345678'},
-                    'business': {'identifier': 'BC1234567'}
+                'accountId': auth_account_id,
+                'accountName': auth_account_name,
+                'paymentInfo': {
+                    'bankInstitutionNumber': bank_number,
+                    'bankTransitNumber': bank_branch_number,
+                    'bankAccountNumber': bank_account_number,
+                    'paymentStartDate': '-----',
+                    'bankName': 'XXX'
                 }
             }
         }
@@ -110,7 +115,8 @@ async def run(loop, old_identifier, new_identifier):  # pylint: disable=too-many
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "ho:n:", ["oldid=", "newid="])
+        opts, args = getopt.getopt(sys.argv[1:], "hi:n:bn:tn:an:",
+                                   ["id=", "name=", "banknumber=", "transitnumber=", "accountnumber="])
     except getopt.GetoptError:
         print('q_cli.py -o <old_identifier> -n <new_identifier>')
         sys.exit(2)
@@ -119,11 +125,18 @@ if __name__ == '__main__':
         if opt == '-h':
             print('q_cli.py -o <old_identifier> -n <new_identifier>')
             sys.exit()
-        elif opt in ("-o", "--oldid"):
-            old_id = arg
-        elif opt in ("-n", "--newid"):
-            new_id = arg
+        elif opt in ("-i", "--id"):
+            auth_account_id = arg
+        elif opt in ("-n", "--name"):
+            auth_account_name = arg
+        elif opt in ("-bn", "--banknumber"):
+            bank_number = arg
+        elif opt in ("-tn", "--transitnumber"):
+            bank_branch_number = arg
+        elif opt in ("-an", "--accountnumber"):
+            bank_account_number = arg
 
-    print('publish:', old_id, new_id)
+    print('publish:--------', auth_account_id, auth_account_name, bank_number, bank_branch_number, bank_account_number)
     event_loop = asyncio.get_event_loop()
-    event_loop.run_until_complete(run(event_loop, old_id, new_id))
+    event_loop.run_until_complete(
+        run(event_loop, auth_account_id, auth_account_name, bank_number, bank_branch_number, bank_account_number))
