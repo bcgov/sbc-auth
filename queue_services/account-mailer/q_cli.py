@@ -129,11 +129,11 @@ if __name__ == '__main__':
             auth_account_id = arg
         elif opt in ("-n", "--name"):
             auth_account_name = arg
-        elif opt in ("-bn", "--banknumber"):
+        elif opt in ("-b", "--banknumber"):
             bank_number = arg
-        elif opt in ("-tn", "--transitnumber"):
+        elif opt in ("-t", "--transitnumber"):
             bank_branch_number = arg
-        elif opt in ("-an", "--accountnumber"):
+        elif opt in ("-a", "--accountnumber"):
             bank_account_number = arg
 
     print('publish:--------', auth_account_id, auth_account_name, bank_number, bank_branch_number, bank_account_number)
