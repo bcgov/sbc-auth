@@ -41,73 +41,31 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { LDFlags, LoginSource, PaymentTypes } from '@/util/constants'
-import { Member, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'vuex'
 import AccountOverview from '@/components/auth/account-freeze/AccountOverview.vue'
-import { Contact } from '@/models/contact'
-import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import OrgModule from '@/store/modules/org'
-import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
-import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
+import PaymentReview from '@/components/auth/account-freeze/PaymentReview.vue'
 import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankInformation.vue'
-import { User } from '@/models/user'
-import UserModule from '@/store/modules/user'
-import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 
 @Component({
   components: {
-    CreateAccountInfoForm,
-    UserProfileForm,
     AccountOverview,
     ReviewBankInformation,
-    PaymentMethodSelector,
+    PaymentReview,
     Stepper,
-    ModalDialog,
-    PremiumChooser
+    ModalDialog
   },
   computed: {
     ...mapState('user', [
       'userContact'
-    ]),
-    ...mapState('org', [
-      'currentOrgPaymentType'
     ])
-  },
-  methods: {
-    ...mapActions('user',
-      [
-        'createUserContact',
-        'updateUserContact',
-        'getUserProfile',
-        'createAffidavit',
-        'updateUserFirstAndLastName'
-      ]),
-    ...mapActions('org',
-      [
-        'createOrg',
-        'validatePADInfo',
-        'syncMembership',
-        'syncOrganization'
-      ])
   }
 })
 export default class AccountFreezeUnlockView extends Vue {
   private readonly currentUser!: KCUserProfile
-  private readonly currentOrgPaymentType!: string
-  protected readonly userContact!: Contact
-  private readonly createOrg!: () => Promise<Organization>
-  private readonly validatePADInfo!: () => Promise<PADInfoValidation>
-  private readonly createUserContact!: (contact?: Contact) => Contact
-  private readonly updateUserContact!: (contact?: Contact) => Contact
-  private readonly getUserProfile!: (identifer: string) => User
-  readonly syncOrganization!: (orgId: number) => Promise<Organization>
-  readonly syncMembership!: (orgId: number) => Promise<Member>
-  private errorTitle = 'Account creation failed'
+  private errorTitle = 'Account unlocking failed'
   private errorText = ''
   private isLoading: boolean = false
 
@@ -132,7 +90,7 @@ export default class AccountFreezeUnlockView extends Vue {
       {
         title: 'Payment & Review',
         stepName: 'Payment & Review',
-        component: UserProfileForm,
+        component: PaymentReview,
         componentProps: {}
       }
     ]
