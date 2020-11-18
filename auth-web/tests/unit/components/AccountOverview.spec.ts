@@ -1,4 +1,4 @@
-import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
 import { Account } from '@/util/constants'
 import AccountOverview from '@/components/auth/account-freeze/AccountOverview.vue'
 import OrgModule from '@/store/modules/org'
@@ -30,8 +30,7 @@ describe('AccountOverview.vue', () => {
     const orgModule = {
       namespaced: true,
       state: {
-        currentOrganization: {},
-        currentOrgType: Account.BASIC
+        currentOrganization: {}
       },
       actions: OrgModule.actions,
       mutations: OrgModule.mutations,

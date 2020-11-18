@@ -29,8 +29,7 @@ describe('AccountFreezeUnlockView.vue', () => {
     userModule = {
       namespaced: true,
       state: {
-        userProfile: {
-        }
+        userProfile: {}
       },
       actions: {
         getUserProfile: jest.fn()
@@ -40,12 +39,7 @@ describe('AccountFreezeUnlockView.vue', () => {
     const orgModule = {
       namespaced: true,
       state: {
-        currentOrganization: {
-        }
-      },
-      actions: {
-        syncOrganizations: jest.fn(),
-        syncCurrentOrganization: jest.fn()
+        currentOrganization: {}
       }
     }
 
