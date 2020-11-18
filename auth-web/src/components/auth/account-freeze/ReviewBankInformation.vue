@@ -23,7 +23,7 @@ import { AccessType } from '@/util/constants'
           large
           depressed
           color="default"
-          @click="stepBack"
+          @click="goBack"
         >
           <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
           <span>Back</span>
@@ -67,6 +67,10 @@ export default class ReviewBankInformation extends Mixins(Steppable) {
 
   private goNext () {
     this.stepForward()
+  }
+
+  private goBack () {
+    this.stepBack()
   }
 
   private getPADInfo (padInfo: PADInfo) {

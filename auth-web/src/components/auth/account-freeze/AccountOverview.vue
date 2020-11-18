@@ -40,7 +40,7 @@ import { AccessType } from '@/util/constants'
         <v-btn
           large
           color="primary"
-          @click="stepForward"
+          @click="goNext"
         >
           <span>Next</span>
           <v-icon class="ml-2">mdi-arrow-right</v-icon>
@@ -65,6 +65,10 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 })
 export default class AccountOverview extends Mixins(Steppable) {
   private readonly currentOrganization!: Organization
+
+  private goNext () {
+    this.stepForward()
+  }
 
   private downloadTransactionPDF () {
     // download PDF

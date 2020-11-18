@@ -10,7 +10,7 @@ import { AccessType } from '@/util/constants'
         <v-card
           outlined
           flat
-          class="suspended-info-card"
+          class="payment-info-card"
         >
           <v-card-text>
             <div>You will have to pay your balance by
@@ -88,7 +88,7 @@ export default class PaymentReview extends Mixins(Steppable) {
 <style lang="scss" scoped>
 @import "$assets/scss/theme.scss";
 
-.suspended-info-card {
+.payment-info-card {
   border-color: #1976d2 !important;
   border-width: 2px !important;
   .v-card__text {
