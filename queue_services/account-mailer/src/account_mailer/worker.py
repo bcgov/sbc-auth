@@ -64,7 +64,7 @@ async def process_event(event_message: dict, flask_app):
             email_msg = json.loads(event_message.get('data'))
             email_dict = refund_requested.process(email_msg)
         elif event_message.get('type', None) == 'bc.registry.payment.padAccountCreate':
-            email_msg = json.loads(event_message.get('data'))
+            email_msg = event_message.get('data')
             email_dict = pad_confirmation.process(email_msg)
 
         logger.debug('Extracted email msg: %s', email_dict)
