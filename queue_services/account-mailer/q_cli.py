@@ -67,9 +67,9 @@ async def run(loop, auth_account_id, auth_account_name, bank_number, bank_branch
 
     def subscription_options():
         return {
-            'subject': os.getenv('NATS_SUBJECT', 'entity.filings'),
-            'queue': os.getenv('NATS_QUEUE', 'filing-worker'),
-            'durable_name': os.getenv('NATS_QUEUE', 'filing-worker') + '_durable'
+            'subject': os.getenv('NATS_SUBJECT', 'account.mailer'),
+            'queue': os.getenv('NATS_QUEUE', 'account.mailer.worker'),
+            'durable_name': os.getenv('NATS_QUEUE', 'account.mailer.worker') + '_durable'
         }
 
     try:
@@ -104,7 +104,8 @@ async def run(loop, auth_account_id, auth_account_name, bank_number, bank_branch
         }
 
         print('payload-->', payload)
-
+        print('--------subscription_options----------', subscription_options())
+        print('------------------',subscription_options().get('subject'))
         await sc.publish(subject=subscription_options().get('subject'),
                          payload=json.dumps(payload).encode('utf-8'))
 
