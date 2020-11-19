@@ -115,7 +115,7 @@ async def run(loop, auth_account_id, auth_account_name, bank_number, bank_branch
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hi:n:bn:tn:an:",
+        opts, args = getopt.getopt(sys.argv[1:], "hi:n:b:t:an:",
                                    ["id=", "name=", "banknumber=", "transitnumber=", "accountnumber="])
     except getopt.GetoptError:
         print('q_cli.py -o <old_identifier> -n <new_identifier>')
