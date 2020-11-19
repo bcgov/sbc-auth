@@ -52,20 +52,11 @@
             ></v-text-field>
           </v-col>
         </v-row>
-        <v-row>
-          <v-col class="pt-6 pl-6 pb-0">
-            <div class="terms-container">
-              <TermsOfUseDialog
-                :isAlreadyAccepted="isTermsOfServiceAccepted"
-                @terms-acceptance-status="isTermsAccepted"
-              ></TermsOfUseDialog>
-            </div>
-          </v-col>
-        </v-row>
         <v-row v-if="isAcknowledgeNeeded">
           <v-col class="pt-2 pl-6 pb-0">
             <v-checkbox
-              class="acknowledge-checkbox"
+              hide-details
+              class="align-checkbox-label--top"
               v-model="isAcknowledged"
               @change="emitPreAuthDebitInfo"
             >
@@ -73,6 +64,16 @@
                 {{acknowledgementLabel}}
               </template>
             </v-checkbox>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col class="pt-6 pl-6">
+            <div class="terms-container">
+              <PADTermsOfUseDialog
+                :isAlreadyAccepted="isTermsOfServiceAccepted"
+                @terms-acceptance-status="isTermsAccepted"
+              ></PADTermsOfUseDialog>
+            </div>
           </v-col>
         </v-row>
       </fieldset>
@@ -84,6 +85,7 @@
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
 import { PADInfo } from '@/models/Organization'
+import PADTermsOfUseDialog from '@/components/auth/common/PADTermsOfUseDialog.vue'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import { mask } from 'vue-the-mask'
 
@@ -92,7 +94,8 @@ import { mask } from 'vue-the-mask'
     mask
   },
   components: {
-    TermsOfUseDialog
+    TermsOfUseDialog,
+    PADTermsOfUseDialog
   },
   computed: {
     ...mapState('org', [
@@ -194,15 +197,21 @@ export default class PADInfoForm extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  .terms-container {
-    height: 2rem;
-  }
-
-  .acknowledge-checkbox {
+  .align-checkbox-label--top {
     ::v-deep {
       .v-input__slot {
         align-items: flex-start;
       }
+    }
+  }
+
+  .v-input--checkbox {
+    color: var(--v-grey-darken4) !important;
+  }
+
+  ::v-deep {
+    .v-input--checkbox .v-label {
+      color: var(--v-grey-darken4) !important;
     }
   }
 </style>
