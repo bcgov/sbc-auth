@@ -38,7 +38,7 @@ jobs:
         with:
           WORKING_DIRECTORY: "./queue_services/account-mailer"
           APP_NAME: "account-mailer"
-          VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"nats\",\"api-urls\",\"keycloak\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-auth\",\"jwt\",\"account-mailer\"]}]'
+          VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"nats\",\"keycloak\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-auth\",\"jwt\",\"account-mailer\"]}]'
           SKIP_OP: "false"
           OP_PARAMETERS: ${{ secrets.OP_PARAMETERS }}
           OPENSHIFT_LOGIN_REGISTRY: ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }}
