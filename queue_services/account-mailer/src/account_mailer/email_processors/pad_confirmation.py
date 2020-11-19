@@ -28,14 +28,13 @@ from flask import current_app
 def process(pad_data: dict) -> dict:
     """Build the email for PAD Confirmation notification."""
     logger.debug('pad_data notification: %s', pad_data)
-    print('-----------pad_data-----',pad_data)
     admin_list = UserModel.find_users_by_org_id_by_status_by_roles(pad_data.get('accountId'), (ADMIN),
                                                                    Status.ACTIVE.value)
     admin_emails = ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
 
     template = Path(f'{current_app.config.get("PDF_TEMPLATE_PATH")}/pad_confirmation.html').read_text()
 
-    template_b64 = base64.b64encode(template)
+    template_b64 = base64.b64encode(b'template')
 
     current_time = datetime.datetime.now()
 

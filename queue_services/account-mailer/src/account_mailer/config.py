@@ -116,6 +116,16 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     TEMPLATE_PATH = os.getenv('TEMPLATE_PATH', 'src/account_mailer/email_templates')
 
+    KEYCLOAK_ADMIN_USERNAME = KEYCLOAK_BCROS_ADMIN_CLIENTID = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')
+    KEYCLOAK_ADMIN_SECRET = KEYCLOAK_BCROS_ADMIN_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
+    KEYCLOAK_BASE_URL = KEYCLOAK_BCROS_BASE_URL = os.getenv('KEYCLOAK_TEST_BASE_URL')
+    KEYCLOAK_REALMNAME = KEYCLOAK_BCROS_REALMNAME = os.getenv('KEYCLOAK_TEST_REALMNAME')
+    JWT_OIDC_AUDIENCE = os.getenv('JWT_OIDC_TEST_AUDIENCE')
+    JWT_OIDC_CLIENT_SECRET = os.getenv('JWT_OIDC_TEST_CLIENT_SECRET')
+    JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_TEST_ISSUER')
+    # Service account details
+    KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')
+    KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Creates the Development Config object."""
