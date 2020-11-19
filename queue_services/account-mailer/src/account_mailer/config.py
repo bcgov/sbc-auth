@@ -89,7 +89,7 @@ class _Config():  # pylint: disable=too-few-public-methods
     NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
 
     # REPORT API Settings
-    REPORT_API_BASE_URL = os.getenv('REPORT_API_BASE_URL')
+    REPORT_API_BASE_URL = os.getenv('REPORT_API_URL')
 
     NATS_CONNECTION_OPTIONS = {
         'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
