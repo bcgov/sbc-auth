@@ -22,8 +22,15 @@ def send_email(notify_body: dict):  # pylint:disable=unused-argument
     """Send the email asynchronously, using the given details."""
     current_app.logger.info(f'send_email to {notify_body.get("recipients")}')
     notify_url = current_app.config.get('NOTIFY_API_URL') + '/notify/'
+    servic_acc_token = RestService.get_service_account_token()
+    print('-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
+    print(
+        '-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
 
-    notify_response = RestService.post(notify_url, data=notify_body)
+    print(
+        '-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------')
+    print('----notify_body',notify_body)
+    notify_response = RestService.post(notify_url, token=servic_acc_token, data=notify_body)
     current_app.logger.info('send_email notify_response')
     if notify_response:
         response_json = json.loads(notify_response.text)

@@ -55,6 +55,7 @@ def _get_admin_emails(pad_data):
     admin_list = UserModel.find_users_by_org_id_by_status_by_roles(pad_data.get('accountId'), (ADMIN),
                                                                    Status.ACTIVE.value)
     admin_emails = ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
+    admin_emails = 'sa@fg.asomc'
     return admin_emails
 
 def _get_pad_confirmation_email_body(pad_data):
