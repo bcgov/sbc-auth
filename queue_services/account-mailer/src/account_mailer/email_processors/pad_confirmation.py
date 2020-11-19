@@ -25,7 +25,7 @@ from entity_queue_common.service_utils import logger
 from flask import current_app
 from jinja2 import Template
 
-from account_mailer.email_processors import substitute_template_parts
+from account_mailer.email_processors import generate_template
 
 
 def process(email_msg: dict,token:str) -> dict:
@@ -59,8 +59,7 @@ def _get_admin_emails(email_msg):
     return admin_emails
 
 def _get_pad_confirmation_email_body(email_msg):
-    body_template = Path(f'{current_app.config.get("TEMPLATE_PATH")}/PAD_CONFIRMATION.html').read_text()
-    filled_template = substitute_template_parts(body_template)
+    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), 'PAD_CONFIRMATION')
 
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
@@ -76,8 +75,8 @@ def _get_pad_confirmation_report_pdf(email_msg,token):
         **email_msg,
         'generatedDate': current_time.strftime('%m-%d-%Y')
     }
-    template = Path(f'{current_app.config.get("PDF_TEMPLATE_PATH")}/pad_confirmation.html').read_text()
-    template_b64 = "'" + base64.b64encode(bytes(template, 'utf-8')).decode() + "'"
+    filled_template = generate_template(current_app.config.get("PDF_TEMPLATE_PATH"), 'pad_confirmation')
+    template_b64 = "'" + base64.b64encode(bytes(filled_template, 'utf-8')).decode() + "'"
 
     pdf_payload = {
         'reportName': 'PAD_Confirmation_Letter',

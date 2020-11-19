@@ -18,7 +18,7 @@ from entity_queue_common.service_utils import logger
 from flask import current_app
 from jinja2 import Template
 
-from account_mailer.email_processors import substitute_template_parts
+from account_mailer.email_processors import generate_template
 
 
 def process(email_msg: dict) -> dict:
@@ -26,8 +26,7 @@ def process(email_msg: dict) -> dict:
     logger.debug('refund_request notification: %s', email_msg)
 
     # fill in template
-    template = Path(f'{current_app.config.get("TEMPLATE_PATH")}/REFUND_REQUEST.html').read_text()
-    filled_template = substitute_template_parts(template)
+    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), "REFUND_REQUEST")
 
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
