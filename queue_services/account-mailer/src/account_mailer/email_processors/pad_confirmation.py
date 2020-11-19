@@ -23,33 +23,68 @@ from auth_api.utils.enums import AuthHeaderType, ContentType, Status
 from auth_api.utils.roles import ADMIN
 from entity_queue_common.service_utils import logger
 from flask import current_app
+from jinja2 import Template
+
+from account_mailer.email_processors import substitute_template_parts
 
 
 def process(pad_data: dict) -> dict:
     """Build the email for PAD Confirmation notification."""
     logger.debug('pad_data notification: %s', pad_data)
+    # fill in template
+
+    pdf_attachment = _get_pad_confirmation_report_pdf(pad_data)
+    html_body = _get_pad_confirmation_email_body(pad_data)
+    return {
+        'recipients': _get_admin_emails(pad_data),
+        'content': {
+            'subject': 'Payment Complete',
+            'body': f'{html_body}',
+            'attachments': [
+                {
+                    'fileName': 'PAD_Confirmation_Letter.pdf',
+                    'fileBytes': pdf_attachment.decode('utf-8'),
+                    'fileUrl': '',
+                    'attachOrder': '1'
+                }
+            ]
+        }
+    }
+
+def _get_admin_emails(pad_data):
     admin_list = UserModel.find_users_by_org_id_by_status_by_roles(pad_data.get('accountId'), (ADMIN),
                                                                    Status.ACTIVE.value)
     admin_emails = ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
+    return admin_emails
 
-    template = Path(f'{current_app.config.get("PDF_TEMPLATE_PATH")}/pad_confirmation.html').read_text()
+def _get_pad_confirmation_email_body(pad_data):
+    body_template = Path(f'{current_app.config.get("TEMPLATE_PATH")}/PAD_CONFIRMATION.html').read_text()
+    filled_template = substitute_template_parts(body_template)
 
-    template_b64 = base64.b64encode(b'template')
+    # render template with vars from email msg
+    jnja_template = Template(filled_template, autoescape=True)
+    html_out = jnja_template.render(
+        request=pad_data
+    )
+    return html_out
 
+
+def _get_pad_confirmation_report_pdf(pad_data):
     current_time = datetime.datetime.now()
-
     template_vars = {
         **pad_data,
         'generatedDate': current_time.strftime('%m-%d-%Y')
     }
+    template = Path(f'{current_app.config.get("PDF_TEMPLATE_PATH")}/pad_confirmation.html').read_text()
+    template_b64 = "'" + base64.b64encode(bytes(template, 'utf-8')).decode() + "'"
 
     pdf_payload = {
         'reportName': 'PAD_Confirmation_Letter',
         'template': template_b64,
         'templateVars': template_vars,
-        'populatePageNumber': False
+        'populatePageNumber': False,
+        'reportName': 'PAD_Confirmation_Letter'
     }
-
     servic_acc_token = RestService.get_service_account_token()
 
     report_response = RestService.post(endpoint=current_app.config.get('REPORT_API_BASE_URL'),
@@ -63,20 +98,6 @@ def process(pad_data: dict) -> dict:
     if report_response.status_code != 200:
         logger.error('Failed to get pdf')
     else:
-        pdf_attachment = base64.b64encode(report_response)
+        pdf_attachment = base64.b64encode(report_response.content)
 
-    return {
-        'recipients': admin_emails,
-        'content': {
-            'subject': 'Payment Complete',
-            'body': pad_data.get('body'),
-            'attachments': [
-                {
-                    'fileName': 'PAD_Confirmation_Letter.pdf',
-                    'fileBytes': pdf_attachment.decode('utf-8'),
-                    'fileUrl': '',
-                    'attachOrder': '1'
-                }
-            ]
-        }
-    }
+    return pdf_attachment
