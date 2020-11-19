@@ -55,6 +55,8 @@ async def process_event(event_message: dict, flask_app):
 
     with flask_app.app_context():
         message_type = event_message.get('type', None)
+        print('-------------message_type-----------------',message_type)
+        print('-------------message_type---------*******--------', json.loads(event_message.get('data')))
         email_msg = None
         email_dict = None
         if message_type == 'account.mailer':
