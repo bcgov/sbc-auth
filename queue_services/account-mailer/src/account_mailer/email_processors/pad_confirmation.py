@@ -28,15 +28,15 @@ from jinja2 import Template
 from account_mailer.email_processors import substitute_template_parts
 
 
-def process(pad_data: dict) -> dict:
+def process(email_msg: dict,token:str) -> dict:
     """Build the email for PAD Confirmation notification."""
-    logger.debug('pad_data notification: %s', pad_data)
+    logger.debug('email_msg notification: %s', email_msg)
     # fill in template
 
-    pdf_attachment = _get_pad_confirmation_report_pdf(pad_data)
-    html_body = _get_pad_confirmation_email_body(pad_data)
+    pdf_attachment = _get_pad_confirmation_report_pdf(email_msg ,token)
+    html_body = _get_pad_confirmation_email_body(email_msg)
     return {
-        'recipients': _get_admin_emails(pad_data),
+        'recipients': _get_admin_emails(email_msg),
         'content': {
             'subject': 'Payment Complete',
             'body': f'{html_body}',
@@ -51,29 +51,29 @@ def process(pad_data: dict) -> dict:
         }
     }
 
-def _get_admin_emails(pad_data):
-    admin_list = UserModel.find_users_by_org_id_by_status_by_roles(pad_data.get('accountId'), (ADMIN),
+def _get_admin_emails(email_msg):
+    admin_list = UserModel.find_users_by_org_id_by_status_by_roles(email_msg.get('accountId'), (ADMIN),
                                                                    Status.ACTIVE.value)
     admin_emails = ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
     admin_emails = 'sa@fg.asomc'
     return admin_emails
 
-def _get_pad_confirmation_email_body(pad_data):
+def _get_pad_confirmation_email_body(email_msg):
     body_template = Path(f'{current_app.config.get("TEMPLATE_PATH")}/PAD_CONFIRMATION.html').read_text()
     filled_template = substitute_template_parts(body_template)
 
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
     html_out = jnja_template.render(
-        request=pad_data
+        request=email_msg
     )
     return html_out
 
 
-def _get_pad_confirmation_report_pdf(pad_data):
+def _get_pad_confirmation_report_pdf(email_msg,token):
     current_time = datetime.datetime.now()
     template_vars = {
-        **pad_data,
+        **email_msg,
         'generatedDate': current_time.strftime('%m-%d-%Y')
     }
     template = Path(f'{current_app.config.get("PDF_TEMPLATE_PATH")}/pad_confirmation.html').read_text()
@@ -86,10 +86,10 @@ def _get_pad_confirmation_report_pdf(pad_data):
         'populatePageNumber': False,
         'reportName': 'PAD_Confirmation_Letter'
     }
-    servic_acc_token = RestService.get_service_account_token()
+
 
     report_response = RestService.post(endpoint=current_app.config.get('REPORT_API_BASE_URL'),
-                                       token=servic_acc_token,
+                                       token=token,
                                        auth_header_type=AuthHeaderType.BEARER,
                                        content_type=ContentType.JSON,
                                        data=pdf_payload,
