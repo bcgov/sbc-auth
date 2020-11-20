@@ -30,6 +30,7 @@ import os
 
 import nats
 from auth_api.models import db
+from auth_api.services.rest_service import RestService
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
 from flask import Flask  # pylint: disable=wrong-import-order
@@ -39,7 +40,6 @@ from account_mailer.email_processors import pad_confirmation  # pylint: disable=
 from account_mailer.email_processors import payment_completed  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import refund_requested  # pylint: disable=wrong-import-order
 from account_mailer.services import notification_service  # pylint: disable=wrong-import-order
-
 
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
 APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
@@ -57,21 +57,22 @@ async def process_event(event_message: dict, flask_app):
         message_type = event_message.get('type', None)
         email_msg = None
         email_dict = None
+        token = RestService.get_service_account_token()
         if message_type == 'account.mailer':
             email_msg = json.loads(event_message.get('data'))
             email_dict = payment_completed.process(email_msg)
         elif message_type == 'bc.registry.payment.refundRequest':
-            email_msg = json.loads(event_message.get('data'))
+            email_msg = event_message.get('data')
             email_dict = refund_requested.process(email_msg)
         elif event_message.get('type', None) == 'bc.registry.payment.padAccountCreate':
-            email_msg = json.loads(event_message.get('data'))
-            email_dict = pad_confirmation.process(email_msg)
+            email_msg = event_message.get('data')
+            email_dict = pad_confirmation.process(email_msg, token)
 
         logger.debug('Extracted email msg: %s', email_dict)
-        process_email(email_dict, FLASK_APP)
+        process_email(email_dict, FLASK_APP, token)
 
 
-def process_email(email_dict: dict, flask_app: Flask):  # pylint: disable=too-many-branches
+def process_email(email_dict: dict, flask_app: Flask, token: str):  # pylint: disable=too-many-branches
     """Process the email contained in the message."""
     if not flask_app:
         raise QueueException('Flask App not available.')
@@ -79,7 +80,7 @@ def process_email(email_dict: dict, flask_app: Flask):  # pylint: disable=too-ma
     with flask_app.app_context():
         logger.debug('Attempting to process email: %s', email_dict)
         # get type from email
-        notification_service.send_email(email_dict)
+        notification_service.send_email(email_dict, token=token)
 
 
 async def cb_subscription_handler(msg: nats.aio.client.Msg):
