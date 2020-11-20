@@ -15,12 +15,12 @@
 
 This module is the service worker for applying filings to the Business Database structure.
 """
+import os
+
 from pathlib import Path
 
-from flask import current_app
 
-
-def substitute_template_parts(template_code: str) -> str:
+def generate_template(template_path: str, template_file_name: str) -> str:
     """Substitute template parts in main template.
 
     Template parts are marked by [[partname.html]] in templates.
@@ -37,13 +37,20 @@ def substitute_template_parts(template_code: str) -> str:
         'initiative-notice',
         'logo',
         'style',
+        'fonts',
+        'bc_logo_img',
+        'bc_registry_logo_img',
         'whitespace-16px',
         'whitespace-24px'
     ]
 
+    template_code = Path(f'{template_path}/{template_file_name}.html').read_text()
+
     # substitute template parts - marked up by [[filename]]
     for template_part in template_parts:
-        template_part_code = Path(f'{current_app.config.get("TEMPLATE_PATH")}/common/{template_part}.html').read_text()
-        template_code = template_code.replace('[[{}.html]]'.format(template_part), template_part_code)
+        template_part_path = Path(f'{template_path}/common/{template_part}.html')
+        if os.path.exists(template_part_path) and os.path.getsize(template_part_path) > 0:
+            template_part_code = template_part_path.read_text()
+            template_code = template_code.replace('[[{}.html]]'.format(template_part), template_part_code)
 
     return template_code
