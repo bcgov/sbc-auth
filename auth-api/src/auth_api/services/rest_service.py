@@ -13,6 +13,7 @@
 # limitations under the License.
 """Service to invoke Rest services."""
 import json
+from collections.abc import Iterable
 
 import requests
 from flask import current_app, request
@@ -34,7 +35,8 @@ class RestService:
     @staticmethod
     def _invoke(rest_method, endpoint, token=None,  # pylint: disable=too-many-arguments
                 auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
-                content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True):
+                content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True,
+                additional_headers: dict = None):
         """Invoke different method depending on the input."""
         # just to avoid the duplicate code for PUT and POSt
         current_app.logger.debug(f'<_invoke-{rest_method}')
@@ -46,6 +48,10 @@ class RestService:
             'Authorization': auth_header_type.value.format(token),
             'Content-Type': content_type.value
         }
+
+        if additional_headers:
+            headers.update(additional_headers)
+
         if content_type == ContentType.JSON:
             data = json.dumps(data)
 
@@ -69,19 +75,29 @@ class RestService:
                 raise ServiceUnavailableException(exc)
             raise exc
         finally:
-            current_app.logger.debug(response.headers if response else 'Empty Response Headers')
-            current_app.logger.info('response : {}'.format(response.text if response else ''))
+            RestService.__log_response(response)
 
         current_app.logger.debug('>post')
         return response
 
     @staticmethod
+    def __log_response(response):
+        if response is not None:
+            current_app.logger.info('Response Headers {}'.format(response.headers))
+            if response.headers and isinstance(response.headers, Iterable) and \
+                    'Content-Type' in response.headers and \
+                    response.headers['Content-Type'] == ContentType.JSON.value:
+                current_app.logger.info('response : {}'.format(response.text if response else ''))
+
+    @staticmethod
     def post(endpoint, token=None,  # pylint: disable=too-many-arguments
              auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
-             content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True):
+             content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True,
+             additional_headers: dict = None):
         """POST service."""
         current_app.logger.debug('<post')
-        return RestService._invoke('post', endpoint, token, auth_header_type, content_type, data, raise_for_status)
+        return RestService._invoke('post', endpoint, token, auth_header_type, content_type, data, raise_for_status,
+                                   additional_headers)
 
     @staticmethod
     def put(endpoint, token=None,  # pylint: disable=too-many-arguments
