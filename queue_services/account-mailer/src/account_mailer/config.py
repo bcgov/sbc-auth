@@ -108,7 +108,7 @@ class _Config():  # pylint: disable=too-few-public-methods
     }
 
     REFUND_REQUEST = {
-        'recipients': os.getenv('REFUND_REQUEST_RECIPIENTS', 'test@test.com'),
+        'recipients': os.getenv('REFUND_REQUEST_RECIPIENTS', ''),
     }
 
     PDF_TEMPLATE_PATH = os.getenv('PDF_TEMPLATE_PATH', 'src/account_mailer/pdf_templates')
