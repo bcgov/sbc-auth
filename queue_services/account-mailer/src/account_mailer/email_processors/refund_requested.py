@@ -34,7 +34,7 @@ def process(email_msg: dict) -> dict:
         refund_data=email_msg
     )
     return {
-        'recipients': current_app.config.get('REFUND_REQUEST').recipients,
+        'recipients': current_app.config.get('REFUND_REQUEST').get('recipients'),
         'content': {
             'subject': f'Refund Request for {email_msg.get("identifier")}',
             'body': html_out,

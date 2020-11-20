@@ -55,7 +55,7 @@ def process(email_msg: dict, token: str) -> dict:
 
 
 def _get_admin_emails(account_id):
-    admin_list = UserModel.find_users_by_org_id_by_status_by_roles(account_id, (ADMIN),
+    admin_list = UserModel.find_users_by_org_id_by_status_by_roles(account_id, (ADMIN,),
                                                                    Status.ACTIVE.value)
     admin_emails = ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
     return admin_emails
@@ -82,7 +82,8 @@ def _get_pad_confirmation_report_pdf(email_msg, token):
     mailing_address = _get_address(email_msg.get('accountId'))
     template_vars = {
         **email_msg,
-        'generatedDate': current_time.strftime('%m-%d-%Y')
+        'generatedDate': current_time.strftime('%m-%d-%Y'),
+        'accountAddress': mailing_address
     }
     filled_template = generate_template(current_app.config.get("PDF_TEMPLATE_PATH"), 'pad_confirmation')
     template_b64 = "'" + base64.b64encode(bytes(filled_template, 'utf-8')).decode() + "'"
