@@ -13,6 +13,7 @@
 # limitations under the License.
 """Service to invoke Rest services."""
 import json
+from collections import Iterable
 
 import requests
 from flask import current_app, request
@@ -74,11 +75,19 @@ class RestService:
                 raise ServiceUnavailableException(exc)
             raise exc
         finally:
-            current_app.logger.debug(response.headers if response else 'Empty Response Headers')
-            current_app.logger.info('response : {}'.format(response.text if response else ''))
+            RestService.__log_response(response)
 
         current_app.logger.debug('>post')
         return response
+
+    @staticmethod
+    def __log_response(response):
+        if response is not None:
+            current_app.logger.info('Response Headers {}'.format(response.headers))
+            if response.headers and isinstance(response.headers, Iterable) and \
+                    'Content-Type' in response.headers and \
+                    response.headers['Content-Type'] == ContentType.JSON.value:
+                current_app.logger.info('response : {}'.format(response.text if response else ''))
 
     @staticmethod
     def post(endpoint, token=None,  # pylint: disable=too-many-arguments
