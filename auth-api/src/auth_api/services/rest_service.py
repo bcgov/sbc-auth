@@ -13,7 +13,7 @@
 # limitations under the License.
 """Service to invoke Rest services."""
 import json
-from collections import Iterable
+from collections.abc import Iterable
 
 import requests
 from flask import current_app, request
