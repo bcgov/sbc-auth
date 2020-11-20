@@ -19,6 +19,7 @@ from pathlib import Path
 
 from auth_api.models import User as UserModel
 from auth_api.services.rest_service import RestService
+from auth_api.services.org import Org as OrgService
 from auth_api.utils.enums import AuthHeaderType, ContentType, Status
 from auth_api.utils.roles import ADMIN
 from entity_queue_common.service_utils import logger
@@ -35,8 +36,9 @@ def process(email_msg: dict, token: str) -> dict:
 
     pdf_attachment = _get_pad_confirmation_report_pdf(email_msg, token)
     html_body = _get_pad_confirmation_email_body(email_msg)
+    account_id = email_msg.get('accountId')
     return {
-        'recipients': _get_admin_emails(email_msg),
+        'recipients': _get_admin_emails(account_id),
         'content': {
             'subject': 'Confirmation of Pre-Authorized Debit (PAD) Sign-up',
             'body': f'{html_body}',
@@ -52,27 +54,32 @@ def process(email_msg: dict, token: str) -> dict:
     }
 
 
-def _get_admin_emails(email_msg):
-    admin_list = UserModel.find_users_by_org_id_by_status_by_roles(email_msg.get('accountId'), (ADMIN),
+def _get_admin_emails(account_id):
+    admin_list = UserModel.find_users_by_org_id_by_status_by_roles(account_id, (ADMIN),
                                                                    Status.ACTIVE.value)
     admin_emails = ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
-    admin_emails = 'sa@fg.asomc'
     return admin_emails
 
 
 def _get_pad_confirmation_email_body(email_msg):
     filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), 'pad_confirmation_email')
-
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
     html_out = jnja_template.render(
-        request=email_msg
+        request=email_msg,
+
     )
     return html_out
 
 
-def _get_pad_confirmation_report_pdf(email_msg,token):
+def _get_address(account_id: str):
+    mailing_address = OrgService.get_contacts(account_id)
+    return mailing_address.get('contacts')[0]
+
+
+def _get_pad_confirmation_report_pdf(email_msg, token):
     current_time = datetime.datetime.now()
+    mailing_address = _get_address(email_msg.get('accountId'))
     template_vars = {
         **email_msg,
         'generatedDate': current_time.strftime('%m-%d-%Y')
