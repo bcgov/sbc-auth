@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="origin-when-cross-origin"/>
     <meta name="author" content="BC Registries and Online Services">
-    <title>Refund Request for {% request.identifier %}</title>
+    <title>Refund Request for {{ refund_data.identifier }}</title>
     [[style.html]]
   </head>
 
@@ -24,22 +24,22 @@
               <tr>
                 <!-- Order Number -->
                 <td class="name">Order Number:</td>
-                <td class="value">{{ request.orderNumber }}</td>
+                <td class="value">{{ refund_data.orderNumber }}</td>
               </tr>
             
               <tr>
                 <td class="name">Transaction Date & Time:</td>
-                <td class="value">{{ request.transactionDateTime }}</td>
+                <td class="value">{{ refund_data.transactionDateTime }}</td>
               </tr>
             
               <tr>
                 <td class="name">Transaction Amount:</td>
-                <td class="value">{{ request.transactionAmount }}</td>
+                <td class="value">{{ refund_data.transactionAmount }}</td>
               </tr>
             
               <tr>
                 <td class="name">Transaction ID:</td>
-                <td class="value">{{ request.transactionId }}</td>
+                <td class="value">{{ refund_data.transactionId }}</td>
               </tr>
             </table>
 

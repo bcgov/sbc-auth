@@ -103,6 +103,21 @@ async def run(loop, auth_account_id, auth_account_name, bank_number, bank_branch
             }
         }
 
+        # payload = {
+        #     'specversion': '1.x-wip',
+        #     'type': 'bc.registry.payment.refundRequest',
+        #     'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
+        #     'id': '22',
+        #     'datacontenttype': 'application/json',
+        #     'data': {
+        #         'identifier': '242424',
+        #         'orderNumber': '2525252525',
+        #         'transactionDateTime': '------',
+        #         'transactionAmount': '24.42',
+        #         'transactionId': '22'
+        #     }
+        # }
+
         print('payload-->', payload)
         print('--------subscription_options----------', subscription_options())
         print('------------------',subscription_options().get('subject'))

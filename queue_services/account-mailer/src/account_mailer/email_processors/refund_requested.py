@@ -26,17 +26,17 @@ def process(email_msg: dict) -> dict:
     logger.debug('refund_request notification: %s', email_msg)
 
     # fill in template
-    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), "REFUND_REQUEST")
+    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), "refund_request_email")
 
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
     html_out = jnja_template.render(
-        request=email_msg
+        refund_data=email_msg
     )
     return {
-        'recipients': current_app.config.get('REFUND_REQUEST').recipients,
+        'recipients': 'abc@abc.com',
         'content': {
-            'subject': f'{email_msg.identifier} - Refund Requested',
+            'subject': f'{email_msg.get("identifier")} - Refund Requested',
             'body': html_out,
             'attachments': []
         }

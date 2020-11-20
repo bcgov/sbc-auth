@@ -28,17 +28,17 @@ from jinja2 import Template
 from account_mailer.email_processors import generate_template
 
 
-def process(email_msg: dict,token:str) -> dict:
+def process(email_msg: dict, token: str) -> dict:
     """Build the email for PAD Confirmation notification."""
     logger.debug('email_msg notification: %s', email_msg)
     # fill in template
 
-    pdf_attachment = _get_pad_confirmation_report_pdf(email_msg ,token)
+    pdf_attachment = _get_pad_confirmation_report_pdf(email_msg, token)
     html_body = _get_pad_confirmation_email_body(email_msg)
     return {
         'recipients': _get_admin_emails(email_msg),
         'content': {
-            'subject': 'Payment Complete',
+            'subject': 'Confirmation of Pre-Authorized Debit (PAD) Sign-up',
             'body': f'{html_body}',
             'attachments': [
                 {
@@ -51,6 +51,7 @@ def process(email_msg: dict,token:str) -> dict:
         }
     }
 
+
 def _get_admin_emails(email_msg):
     admin_list = UserModel.find_users_by_org_id_by_status_by_roles(email_msg.get('accountId'), (ADMIN),
                                                                    Status.ACTIVE.value)
@@ -58,8 +59,9 @@ def _get_admin_emails(email_msg):
     admin_emails = 'sa@fg.asomc'
     return admin_emails
 
+
 def _get_pad_confirmation_email_body(email_msg):
-    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), 'PAD_CONFIRMATION')
+    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), 'pad_confirmation_email')
 
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
@@ -82,10 +84,8 @@ def _get_pad_confirmation_report_pdf(email_msg,token):
         'reportName': 'PAD_Confirmation_Letter',
         'template': template_b64,
         'templateVars': template_vars,
-        'populatePageNumber': False,
-        'reportName': 'PAD_Confirmation_Letter'
+        'populatePageNumber': True,
     }
-
 
     report_response = RestService.post(endpoint=current_app.config.get('REPORT_API_BASE_URL'),
                                        token=token,
