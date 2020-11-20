@@ -36,7 +36,7 @@ def process(email_msg: dict) -> dict:
     return {
         'recipients': 'abc@abc.com',
         'content': {
-            'subject': f'{email_msg.get("identifier")} - Refund Requested',
+            'subject': f'Refund Request for {email_msg.get("identifier")}',
             'body': html_out,
             'attachments': []
         }

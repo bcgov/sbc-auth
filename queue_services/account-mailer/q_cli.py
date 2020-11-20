@@ -113,7 +113,7 @@ async def run(loop, auth_account_id, auth_account_name, bank_number, bank_branch
         #         'identifier': '242424',
         #         'orderNumber': '2525252525',
         #         'transactionDateTime': '------',
-        #         'transactionAmount': '24.42',
+        #         'transactionAmount': '$24.42',
         #         'transactionId': '22'
         #     }
         # }

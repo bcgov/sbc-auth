@@ -53,9 +53,11 @@
             {% if accountName %}
             <div class="line-height-reg">{{accountName}}</div>
             {% endif %}
-            <div class="line-height-reg">[Street Address]</div>
-            <div class="line-height-reg">[City], [Province] [Postal Code]</div>
-            <div class="line-height-reg">[Country]</div>
+            {% if accountAddress %}
+            <div class="line-height-reg">{{accountAddress.street}}</div>
+            <div class="line-height-reg">{{accountAddress.city}}, {{accountAddress.province}} {{accountAddress.postalcode}}</div>
+            <div class="line-height-reg">{{accountAddress.country}}</div>
+            {% endif %}
           </div>
         </td>
         <td class="account-info">
