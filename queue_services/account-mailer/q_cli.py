@@ -118,9 +118,6 @@ async def run(loop, auth_account_id, auth_account_name, bank_number, bank_branch
         #     }
         # }
 
-        print('payload-->', payload)
-        print('--------subscription_options----------', subscription_options())
-        print('------------------',subscription_options().get('subject'))
         await sc.publish(subject=subscription_options().get('subject'),
                          payload=json.dumps(payload).encode('utf-8'))
 
@@ -152,7 +149,6 @@ if __name__ == '__main__':
         elif opt in ("-a", "--accountnumber"):
             bank_account_number = arg
 
-    print('publish:--------', auth_account_id, auth_account_name, bank_number, bank_branch_number, bank_account_number)
     event_loop = asyncio.get_event_loop()
     event_loop.run_until_complete(
         run(event_loop, auth_account_id, auth_account_name, bank_number, bank_branch_number, bank_account_number))
