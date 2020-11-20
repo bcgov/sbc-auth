@@ -24,7 +24,6 @@ import random
 
 from dotenv import find_dotenv, load_dotenv
 
-
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
@@ -85,6 +84,12 @@ class _Config():  # pylint: disable=too-few-public-methods
     # pay-API URL
     PAY_API_URL = os.getenv('PAY_API_URL')
 
+    # notify-API URL
+    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
+
+    # REPORT API Settings
+    REPORT_API_BASE_URL = os.getenv('REPORT_API_BASE_URL')
+
     NATS_CONNECTION_OPTIONS = {
         'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
         'name': os.getenv('NATS_MAILER_CLIENT_NAME', 'account.mailer.worker')
@@ -106,7 +111,25 @@ class _Config():  # pylint: disable=too-few-public-methods
         'recipients': os.getenv('REFUND_REQUEST_RECIPIENTS', ''),
     }
 
+    PDF_TEMPLATE_PATH = os.getenv('PDF_TEMPLATE_PATH', 'src/account_mailer/pdf_templates')
+
     TEMPLATE_PATH = os.getenv('TEMPLATE_PATH', 'src/account_mailer/email_templates')
+
+    # JWT_OIDC Settings
+    JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_ISSUER')
+
+    TESTING = False
+    DEBUG = False
+
+    # Keycloak auth config baseurl
+    KEYCLOAK_BASE_URL = os.getenv('KEYCLOAK_BASE_URL')
+    KEYCLOAK_REALMNAME = os.getenv('KEYCLOAK_REALMNAME')
+    KEYCLOAK_ADMIN_USERNAME = os.getenv('KEYCLOAK_ADMIN_CLIENTID')
+    KEYCLOAK_ADMIN_SECRET = os.getenv('KEYCLOAK_ADMIN_SECRET')
+
+    # Service account details
+    KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_ID')
+    KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
