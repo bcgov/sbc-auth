@@ -97,8 +97,9 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
       this.savedOrganizationType =
       ((this.currentOrganization?.orgType === Account.PREMIUM) && !this.currentOrganization?.bcolAccountId)
         ? Account.UNLINKED_PREMIUM : this.currentOrganization.orgType
+      this.selectedPaymentMethod = ''
       const orgPayments = await this.getOrgPayments()
-      this.selectedPaymentMethod = orgPayments?.paymentMethod || ''
+      this.selectedPaymentMethod = this.currentOrgPaymentType || ''
     } else {
       // if the account switing happening when the user is already in the transaction page,
       // redirect to account info if its a basic account
