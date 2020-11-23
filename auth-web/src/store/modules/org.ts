@@ -1,4 +1,4 @@
-import { Account, Actions, LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
+import { Account, Actions, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys } from '@/util/constants'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import {
   AddUserBody,
@@ -691,7 +691,8 @@ export default class OrgModule extends VuexModule {
   @Action({ rawError: true })
   public async getOrgPayments () {
     const response = await OrgService.getOrgPayments(this.context.state['currentOrganization'].id)
-    const paymentType = response?.data?.paymentMethod || undefined
+    let paymentType = response?.data?.paymentMethod || undefined
+    paymentType = (paymentType === PaymentTypes.DIRECT_PAY) ? PaymentTypes.CREDIT_CARD : paymentType
     this.context.commit('setCurrentOrganizationPaymentType', paymentType)
     return response?.data
   }
