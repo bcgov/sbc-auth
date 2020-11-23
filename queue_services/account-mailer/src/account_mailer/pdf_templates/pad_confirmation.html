@@ -86,9 +86,9 @@
                 <span class="font-bold">{{accountName}}</span>
               </li>
               {% endif %}
-              {% if paymentInfo['bankName'] or paymentInfo['bankTransitNumber'] %}
-              <li>Financial Institution (Name & Transit #):
-                <span class="font-bold">{{paymentInfo['bankName']}}, {{paymentInfo['bankTransitNumber']}}</span>
+              {% if paymentInfo['bankInstitutionNumber'] or paymentInfo['bankTransitNumber'] %}
+              <li>Financial Institution & Transit #:
+                <span class="font-bold">{{paymentInfo['bankInstitutionNumber']}}, {{paymentInfo['bankTransitNumber']}}</span>
               </li>
               {% endif %}
               {% if paymentInfo['bankAccountNumber'] %}
