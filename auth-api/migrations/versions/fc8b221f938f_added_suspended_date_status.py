@@ -32,8 +32,10 @@ def upgrade():
         ]
     )
     op.add_column('org', sa.Column('suspended_on', sa.DateTime(), nullable=True))
+    op.add_column('org_version', sa.Column('suspended_on', sa.DateTime(), autoincrement=False, nullable=True))
 
 
 def downgrade():
     op.execute('delete from org_status where code=\'NSF_SUSPENDED\'')
     op.drop_column('org', 'suspended_on')
+    op.drop_column('org_version', 'suspended_on')
