@@ -59,7 +59,7 @@ def _get_admin_emails(account_id):
     admin_list = UserModel.find_users_by_org_id_by_status_by_roles(account_id, (ADMIN,),
                                                                    Status.ACTIVE.value)
     admin_emails = ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
-    admin_name = admin_list[0].contacts[0].contact.firstname
+    admin_name = 'Milan'
     return admin_emails, admin_name
 
 
