@@ -14,6 +14,7 @@
 """Service to invoke Rest services."""
 
 from auth_api.models.permissions import Permissions as PermissionsModel
+from ..utils.enums import OrgStatus
 
 
 class Permissions:  # pylint: disable=too-few-public-methods
@@ -24,9 +25,15 @@ class Permissions:  # pylint: disable=too-few-public-methods
         self._model = model
 
     @staticmethod
-    def get_permissions_for_membership(membership_type):
+    def get_permissions_for_membership(org_status, membership_type):
         """Get the permissions for the membership type."""
-        permissions = PermissionsModel.get_permissions_by_membership(membership_type)
+        # Just a tweak til we get all org status to DB
+        # TODO fix this logic
+        if org_status != OrgStatus.NSF_SUSPENDED.value:
+            org_status = None
+
+        permissions = PermissionsModel.get_permissions_by_membership(org_status,
+                                                                     membership_type)
         actions = []
         for permission in permissions:
             actions.append(permission.actions)
