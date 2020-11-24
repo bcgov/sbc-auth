@@ -24,14 +24,13 @@ from auth_api.services import Permissions as PermissionsService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
 
-
 API = Namespace('permissions', description='Endpoints for permissions management')
 TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('GET,OPTIONS')
-@API.route('/<string:membership_type>', methods=['GET', 'OPTIONS'])
+@API.route('/<string:org_status>/<string:membership_type>', methods=['GET', 'OPTIONS'])
 class Permissions(Resource):
     """Resource for managing products."""
 
@@ -39,11 +38,12 @@ class Permissions(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_JWT.requires_auth
-    def get(membership_type):
+    def get(org_status, membership_type):
         """Get a list of all permissions for the membership."""
         try:
-            response, status = json.dumps(PermissionsService.get_permissions_for_membership(membership_type.upper())), \
-                http_status.HTTP_200_OK
+            response, status = json.dumps(
+                PermissionsService.get_permissions_for_membership(org_status.upper(), membership_type.upper())), \
+                               http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

@@ -34,11 +34,12 @@ def process(email_msg: dict, token: str) -> dict:
     logger.debug('email_msg notification: %s', email_msg)
     # fill in template
 
-    pdf_attachment = _get_pad_confirmation_report_pdf(email_msg, token)
-    html_body = _get_pad_confirmation_email_body(email_msg)
     account_id = email_msg.get('accountId')
+    admin_emails, admin_name = _get_admin_emails(account_id)
+    pdf_attachment = _get_pad_confirmation_report_pdf(email_msg, token)
+    html_body = _get_pad_confirmation_email_body(email_msg, admin_name)
     return {
-        'recipients': _get_admin_emails(account_id),
+        'recipients': admin_emails,
         'content': {
             'subject': 'Confirmation of Pre-Authorized Debit (PAD) Sign-up',
             'body': f'{html_body}',
@@ -58,15 +59,16 @@ def _get_admin_emails(account_id):
     admin_list = UserModel.find_users_by_org_id_by_status_by_roles(account_id, (ADMIN,),
                                                                    Status.ACTIVE.value)
     admin_emails = ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
-    return admin_emails
+    admin_name = ' '  # TODO: need to add proper admin name once we figure out the proper way
+    return admin_emails, admin_name
 
 
-def _get_pad_confirmation_email_body(email_msg):
+def _get_pad_confirmation_email_body(email_msg, admin_name):
     filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), 'pad_confirmation_email')
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
     html_out = jnja_template.render(
-        request=email_msg,
+        request=email_msg, admin_name=admin_name
 
     )
     return html_out
