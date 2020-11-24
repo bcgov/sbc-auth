@@ -1,0 +1,32 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/exception",
+    "type": "object",
+    "title": "Error Message",
+    "required": [
+      "code",
+      "message"
+    ],
+    "properties": {
+      "code": {
+        "$id": "#/properties/code",
+        "type": "string",
+        "title": "Error Code",
+        "examples": [
+          "INVALID_CORP_OR_FILING_TYPE",
+          "INVALID_CORP_OR_FILING_TYPE"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "message": {
+        "$id": "#/properties/message",
+        "type": "string",
+        "title": "Error Message",
+        "examples": [
+          "No matching record found for Corp Type and Filing Type"
+        ],
+        "pattern": "^(.*)$"
+      }
+    }
+  }
+  

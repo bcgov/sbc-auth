@@ -29,14 +29,19 @@ class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
 
     @post_dump(pass_many=True)
     def _remove_empty(self, data, many):  # pylint: disable=no-self-use
-        """Remove all empty values from the dumped dict."""
+        """Remove all empty values and versions from the dumped dict."""
         if not many:
+            for key in list(data):
+                if key == 'versions':
+                    data.pop(key)
+
             return {
                 key: value for key, value in data.items()
                 if value is not None
             }
         for item in data:
             for key in list(item):
-                if item[key] is None:
+                if (item[key] is None) or (key == 'versions'):
                     item.pop(key)
+
         return data

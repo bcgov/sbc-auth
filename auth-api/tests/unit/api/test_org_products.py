@@ -22,6 +22,7 @@ import json
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestOrgProductsInfo
 from tests.utilities.factory_utils import factory_auth_header
 
+from auth_api.schemas import utils as schema_utils
 from auth_api import status as http_status
 
 
@@ -37,6 +38,7 @@ def test_add_multiple_org_products(client, jwt, session, keycloak_mock):  # pyli
                               data=json.dumps(TestOrgProductsInfo.org_products2),
                               headers=headers, content_type='application/json')
     assert rv_products.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
 
 def test_add_single_org_product(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -51,3 +53,4 @@ def test_add_single_org_product(client, jwt, session, keycloak_mock):  # pylint:
                               data=json.dumps(TestOrgProductsInfo.org_products1),
                               headers=headers, content_type='application/json')
     assert rv_products.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]

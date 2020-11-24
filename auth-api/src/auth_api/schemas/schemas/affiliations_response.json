@@ -1,0 +1,65 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/affiliations_response",
+    "type": "object",
+    "title": "Affiliations Response",
+    "description": "The affiliations schema for response.",
+    "default": {},
+    "examples": [
+        {
+            "entities": [
+                {
+                    "affiliations": [
+                        2
+                    ],
+                    "businessIdentifier": "CP0002106",
+                    "businessNumber": "791861078BC0002",
+                    "contacts": [],
+                    "corpType": {
+                        "code": "CP",
+                        "default": true,
+                        "desc": "Cooperatives"
+                    },
+                    "created": "2020-11-07T14:15:10.907043+00:00",
+                    "modified": "2020-11-07T14:15:11.858702+00:00",
+                    "modifiedBy": "Ronald Mahoney",
+                    "name": "Foobar, Inc.",
+                    "passCodeClaimed": true
+                },
+                {
+                    "affiliations": [
+                        1
+                    ],
+                    "businessIdentifier": "CP0002103",
+                    "businessNumber": "791861078BC0001",
+                    "contacts": [],
+                    "corpType": {
+                        "code": "CP",
+                        "default": true,
+                        "desc": "Cooperatives"
+                    },
+                    "created": "2020-11-07T14:15:10.640242+00:00",
+                    "modified": "2020-11-07T14:15:11.484755+00:00",
+                    "modifiedBy": "Ronald Mahoney",
+                    "name": "BarFoo, Inc.",
+                    "passCodeClaimed": true
+                }
+            ]
+        }
+    ],
+    "required": [
+        "entities"
+    ],
+    "properties": {
+        "entities": {
+            "$id": "#/properties/entities",
+            "type": "array",
+            "title": "The entities schema",
+            "default": [],
+            "items": {
+                "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/business"
+            }
+        }
+    },
+    "additionalProperties": true
+}

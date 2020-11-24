@@ -20,6 +20,7 @@ Test-Suite to ensure that the /documents endpoint is working as expected.
 from tests.utilities.factory_scenarios import TestJwtClaims
 from tests.utilities.factory_utils import factory_auth_header, factory_document_model
 
+from auth_api.schemas import utils as schema_utils
 from auth_api import status as http_status
 
 
@@ -35,6 +36,7 @@ def test_documents_returns_200(client, jwt, session):  # pylint:disable=unused-a
     rv = client.get('/api/v1/documents/termsofuse', headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'document')[0]
     assert rv.json.get('versionId') == 'd1'
 
 
@@ -44,6 +46,7 @@ def test_invalid_documents_returns_404(client, jwt, session):  # pylint:disable=
     rv = client.get('/api/v1/documents/junk', headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
+    assert schema_utils.validate(rv.json, 'error')[0]
     assert rv.json.get('message') == 'The requested invitation could not be found.'
 
 
@@ -57,6 +60,7 @@ def test_documents_returns_200_for_some_type(client, jwt, session):  # pylint:di
     rv = client.get('/api/v1/documents/sometype', headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'document')[0]
     assert rv.json.get('content') == html_content
     assert rv.json.get('versionId') == version_id
 
@@ -75,6 +79,7 @@ def test_documents_returns_latest_always(client, jwt, session):  # pylint:disabl
     rv = client.get('/api/v1/documents/termsofuse', headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'document')[0]
     assert rv.json.get('content') == html_content_2
     assert rv.json.get('versionId') == version_id_2
 
@@ -88,6 +93,7 @@ def test_documents_returns_latest_always(client, jwt, session):  # pylint:disabl
     rv = client.get('/api/v1/documents/termsofuse', headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'document')[0]
     assert rv.json.get('content') == html_content_2
     assert rv.json.get('versionId') == version_id_4
 

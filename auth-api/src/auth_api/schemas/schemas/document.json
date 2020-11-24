@@ -1,0 +1,61 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/document",
+    "type": "object",
+    "title": "Document",
+    "description": "The document schema.",
+    "default": {},
+    "examples": [
+        {
+            "content": "\n <article>\n  <p>Content here. </p></article>\n",
+            "contentType": "text/html",
+            "type": "termsofuse_directorsearch",
+            "versionId": "d1"
+        }
+    ],
+    "required": [
+        "content",
+        "contentType",
+        "type",
+        "versionId"
+    ],
+    "properties": {
+        "content": {
+            "$id": "#/properties/content",
+            "type": "string",
+            "title": "Content",
+            "default": "",
+            "examples": [
+                "\n <article>\n  <p>Content here. </p></article>\n"
+            ]
+        },
+        "contentType": {
+            "$id": "#/properties/contentType",
+            "type": "string",
+            "title": "Content Type",
+            "default": "",
+            "examples": [
+                "text/html"
+            ]
+        },
+        "type": {
+            "$id": "#/properties/type",
+            "type": "string",
+            "title": "Type",
+            "default": "",
+            "examples": [
+                "termsofuse_directorsearch"
+            ]
+        },
+        "versionId": {
+            "$id": "#/properties/versionId",
+            "type": "string",
+            "title": "Version ID",
+            "default": "",
+            "examples": [
+                "d1"
+            ]
+        }
+    },
+    "additionalProperties": true
+}

@@ -1,77 +1,110 @@
 {
-    "definitions": {},
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/user_settings_response",
-    "type": "object",
-    "title": "Response for user settings",
-    "additionalProperties": false,
-    "required": [
-      "id",
-      "urlpath",
-      "urlorigin",
-      "label",
-      "type"
-    ],
-    "properties": {
-      "id": {
-        "$id": "#/properties/id",
-        "type": "string",
-        "title": "Id of the entity",
-        "default": "",
-        "examples": [
-          "1"
-        ],
-        "pattern": "^(.*)$"
-      },
-      "urlpath": {
-        "$id": "#/properties/urlpath",
-        "type": "string",
-        "title": "context path of the resource.Must start with a backslash.No ending slash",
-        "default": "",
-        "examples": [
-          "/createaccount"
-        ],
-        "pattern": "^(.*)$"
-      },
-      "urlorigin": {
-        "$id": "#/properties/urlorigin",
-        "type": "string",
-        "title": "Url origin.Full url",
-        "default": "",
-        "examples": [
-          "https://dev.bcregistry.ca/cooperatives/auth/"
-        ],
-        "pattern": "^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$"
-      },
-      "label": {
-        "$id": "#/properties/label",
-        "type": "string",
-        "title": "Label which can be used to display to user",
-        "default": "",
-        "examples": [
-          "Create Profile"
-        ],
-        "pattern": "^(.*)$"
-      },
-      "type": {
-        "$id": "#/properties/type",
-        "type": "string",
-        "title": "Type of the resource.Like ACCOUNT",
-        "default": "",
-        "examples": [
-          "ACCOUNT"
-        ],
-        "pattern": "^(.*)$"
-      },
-      "accountType": {
-        "$id": "#/properties/accountType",
-        "type": "string",
-        "title": "Type of the account.Like Premium or basic",
-        "default": "",
-        "examples": [
-          "BASIC"
-        ],
-        "pattern": "^(.*)$"
-      }
-    }
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/user_settings_response",
+  "type": "array",
+  "title": "User Settings",
+  "description": "The user settings schema for response.",
+  "default": [],
+  "examples": [
+      [
+          {
+              "accountType": "BASIC",
+              "id": 1,
+              "label": "My Test Org",
+              "type": "ACCOUNT",
+              "urlorigin": "https://dev.bcregistry.ca/cooperatives/auth/",
+              "urlpath": "/account/1/settings"
+          },
+          {
+              "accountType": null,
+              "id": 1,
+              "label": "USER PROFILE",
+              "type": "USER_PROFILE",
+              "urlorigin": null,
+              "urlpath": "/userprofile"
+          }
+      ]
+  ],
+  "additionalItems": true,
+  "items": {
+      "$id": "#/items",
+      "anyOf": [
+          {
+              "$id": "#/items/anyOf/0",
+              "type": "object",
+              "title": "The first anyOf schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": {},
+              "required": [
+                  "accountType",
+                  "id",
+                  "label",
+                  "type",
+                  "urlorigin",
+                  "urlpath"
+              ],
+              "properties": {
+                  "accountType": {
+                      "$id": "#/items/anyOf/0/properties/accountType",
+                      "type": ["string", "null"],
+                      "title": "Account Type",
+                      "default": "",
+                      "examples": [
+                          "BASIC"
+                      ]
+                  },
+                  "id": {
+                      "$id": "#/items/anyOf/0/properties/id",
+                      "type": "integer",
+                      "title": "ID",
+                      "default": 0,
+                      "examples": [
+                          1
+                      ]
+                  },
+                  "label": {
+                      "$id": "#/items/anyOf/0/properties/label",
+                      "type": "string",
+                      "title": "Label",
+                      "default": "",
+                      "examples": [
+                          "My Test Org"
+                      ]
+                  },
+                  "type": {
+                      "$id": "#/items/anyOf/0/properties/type",
+                      "type": "string",
+                      "title": "Type",
+                      "default": "",
+                      "examples": [
+                          "ACCOUNT"
+                      ]
+                  },
+                  "urlorigin": {
+                      "$id": "#/items/anyOf/0/properties/urlorigin",
+                      "type": ["string","null"],
+                      "title": "URL Origin",
+                      "default": "",
+                      "examples": [
+                        "https://dev.bcregistry.ca/cooperatives/auth/"
+                      ],
+                      "pattern": "^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$"              
+                  },
+                  "urlpath": {
+                      "$id": "#/items/anyOf/0/properties/urlpath",
+                      "type": "string",
+                      "title": "URL Path",
+                      "description": "Context path of the resource. Must start with a backslash. No ending slash.",
+                      "default": "",
+                      "examples": [
+                          "/account/1/settings"
+                      ],
+                      "pattern": "^(.*)$"
+                  }
+              },
+              "additionalProperties": true
+          }
+      ]
   }
+}
+

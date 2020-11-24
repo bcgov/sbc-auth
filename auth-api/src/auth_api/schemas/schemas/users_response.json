@@ -1,0 +1,54 @@
+
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/users_response",
+    "type": "array",
+    "title": "Products",
+    "description": "Products Schema.",
+    "default": [],
+    "examples": [
+        [
+            {
+                "contacts": [],
+                "created": "2020-11-23T15:19:35.488987+00:00",
+                "firstname": "Lisa",
+                "id": 1,
+                "keycloakGuid": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
+                "lastname": "Wolfe",
+                "loginTime": "2020-11-23T15:19:35.489179+00:00",
+                "modified": "2020-11-23T15:19:35.496289+00:00",
+                "userStatus": 1,
+                "userTerms": {
+                    "isTermsOfUseAccepted": false,
+                    "termsOfUseAcceptedVersion": null
+                },
+                "username": "harveybenjamin"
+            },
+            {
+                "contacts": [],
+                "created": "2020-11-23T15:19:35.638131+00:00",
+                "firstname": "Craig",
+                "id": 2,
+                "keycloakGuid": "f7a4a1d3-73a8-4cbc-a40f-bb1145302065",
+                "lastname": "Collins",
+                "loginTime": "2020-11-23T15:19:35.638259+00:00",
+                "modified": "2020-11-23T15:19:35.640558+00:00",
+                "userStatus": 1,
+                "userTerms": {
+                    "isTermsOfUseAccepted": false,
+                    "termsOfUseAcceptedVersion": null
+                },
+                "username": "savannahlane"
+            }
+        ]
+    ],
+    "additionalItems": true,
+    "items": {
+        "$id": "#/items",
+        "anyOf": [
+          {
+            "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/user_response"
+          }
+        ]
+    }
+  }
