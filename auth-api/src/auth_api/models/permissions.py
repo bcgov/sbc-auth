@@ -16,8 +16,7 @@
 The Membership object connects User models to one or more Org models.
 """
 
-from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String
 
 from .base_model import BaseModel
 
@@ -29,12 +28,12 @@ class Permissions(BaseModel):  # pylint: disable=too-few-public-methods # Tempor
 
     id = Column(Integer, primary_key=True)
     membership_type_code = Column(
-        ForeignKey('membership_type.code'), nullable=False
+        String(25), nullable=True
     )
+    org_status_code = Column(String(25), nullable=True)
     actions = Column(String(100), primary_key=True, autoincrement=False)
-    membership_type = relationship('MembershipType', foreign_keys=[membership_type_code], lazy='select')
 
     @classmethod
-    def get_permissions_by_membership(cls, membership_type):
+    def get_permissions_by_membership(cls, org_status_code: str, membership_type: str):
         """Find the first membership with the given id and return it."""
-        return cls.query.filter_by(membership_type_code=membership_type).all()
+        return cls.query.filter_by(membership_type_code=membership_type, org_status_code=org_status_code).all()

@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-import { Account, LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
-import { Member, MembershipStatus, MembershipType, OrgStatus, Organization } from '@/models/Organization'
+import { Account, AccountStatus, LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
+import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import Router, { Route } from 'vue-router'
 import { AccountSettings } from '@/models/account-settings'
 import { Contact } from '@/models/contact'
@@ -100,8 +100,14 @@ router.beforeEach((to, from, next) => {
     }
 
     if (to.matched.some(record => record.meta.requiresActiveAccount) && (currentUser.loginSource === LoginSource.BCSC || currentUser.loginSource === LoginSource.BCEID)) {
-      const isTheOrgPendingAffidavitReview = currentOrganization?.statusCode === OrgStatus.PendingAffidavitReview
-      if (isTheOrgPendingAffidavitReview) {
+      if (currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED) {
+        console.log('[Navigation Guard] Redirecting user to Account Freeze message since the account is temporarly suspended.')
+        if (currentMembership?.membershipTypeCode === MembershipType.Admin) {
+          return next({ path: `/${Pages.ACCOUNT_FREEZE_UNLOCK}` })
+        } else {
+          return next({ path: `/${Pages.ACCOUNT_FREEZE}` })
+        }
+      } else if (currentOrganization?.statusCode === AccountStatus.PENDING_AFFIDAVIT_REVIEW) {
         console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since user has pending affidavits')
         return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
       } else if (currentAccountSettings && currentMembership?.membershipStatus === MembershipStatus.Pending) {
