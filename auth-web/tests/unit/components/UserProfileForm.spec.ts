@@ -1,13 +1,11 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
-import UserModule from '@/store/modules/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import i18n from '../../../src/plugins/i18n'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -21,6 +19,8 @@ describe('UserProfileForm.vue', () => {
     'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
   }
 
+  let userModule: any
+
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -28,10 +28,21 @@ describe('UserProfileForm.vue', () => {
     vuetify = new Vuetify()
     const $t = () => 'test'
 
+    userModule = {
+      namespaced: true,
+      state: {
+        userProfile: {
+        }
+      },
+      actions: {
+        getUserProfile: jest.fn()
+      }
+    }
+
     const store = new Vuex.Store({
       strict: false,
       modules: {
-        user: UserModule
+        user: userModule
       }
     })
 

@@ -52,7 +52,7 @@
             ></v-text-field>
           </v-col>
         </v-row>
-        <v-row>
+        <v-row v-if="isTOSNeeded">
           <v-col class="pt-6 pl-6 pb-0">
             <div class="terms-container">
               <TermsOfUseDialog
@@ -109,6 +109,7 @@ export default class PADInfoForm extends Vue {
   @Prop({ default: () => ({} as PADInfo) }) padInformation: any
   @Prop({ default: false }) isChangeView: boolean
   @Prop({ default: true }) isAcknowledgeNeeded: boolean
+  @Prop({ default: true }) isTOSNeeded: boolean
   private readonly currentOrgPADInfo!: PADInfo
   private readonly setCurrentOrganizationPADInfo!: (padInfo: PADInfo) => void
   private transitNumber: string = ''
@@ -183,7 +184,8 @@ export default class PADInfoForm extends Vue {
   @Emit()
   private isPreAuthDebitFormValid () {
     const acknowledge = (this.isAcknowledgeNeeded) ? this.isAcknowledged : true
-    return (this.$refs.preAuthDebitForm?.validate() && this.isTOSAccepted && acknowledge) || false
+    const tosAccepted = (this.isTOSNeeded) ? this.isTOSAccepted : true
+    return (this.$refs.preAuthDebitForm?.validate() && tosAccepted && acknowledge) || false
   }
 
   private isTermsAccepted (isAccepted) {

@@ -47,6 +47,8 @@ export enum Pages {
     SETUP_ACCOUNT_NON_BCSC = 'nonbcsc-info',
     SETUP_ACCOUNT_NON_BCSC_INSTRUCTIONS = 'instructions',
     SETUP_ACCOUNT_NON_BCSC_DOWNLOAD = 'download',
+    ACCOUNT_FREEZE_UNLOCK = 'account-freeze-nfs',
+    ACCOUNT_FREEZE = 'account-freeze',
     EDIT_ACCOUNT_TYPE= '/change-account',
     STAFF_DASHBOARD_OLD= '/searchbusiness',
     STAFF_SETUP_ACCOUNT = 'staff-setup-account',
@@ -72,7 +74,8 @@ export enum AccountStatus {
     INACTIVE = 'INACTIVE',
     REJECTED = 'REJECTED',
     PENDING_AFFIDAVIT_REVIEW = 'PENDING_AFFIDAVIT_REVIEW',
-    PENDING_ACTIVATION = 'PENDING_ACTIVATION'
+    PENDING_ACTIVATION = 'PENDING_ACTIVATION',
+    NSF_SUSPENDED = 'NSF_SUSPENDED'
 }
 
 export enum IdpHint {
