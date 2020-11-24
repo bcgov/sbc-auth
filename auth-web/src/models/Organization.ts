@@ -109,13 +109,6 @@ export enum MembershipStatus {
   'Pending' = 'PENDING_APPROVAL'
 }
 
-export enum OrgStatus {
-  'Active' = 'ACTIVE',
-  'Inactive' = 'INACTIVE',
-  'Rejected' = 'REJECTED',
-  'PendingAffidavitReview' = 'PENDING_AFFIDAVIT_REVIEW'
-}
-
 export enum MembershipType {
   'Admin' = 'ADMIN',
   'Coordinator' = 'COORDINATOR',
