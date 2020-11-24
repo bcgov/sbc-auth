@@ -1,7 +1,7 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
-import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
-import { Member, MembershipStatus, MembershipType, OrgStatus, Organization } from '@/models/Organization'
+import { AccountStatus, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
+import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
@@ -100,7 +100,7 @@ export default class NextPageMixin extends Vue {
           } else {
             bceidNextStep = Pages.CHOOSE_AUTH_METHOD
           }
-        } else if (this.currentOrganization && this.currentOrganization.statusCode === OrgStatus.PendingAffidavitReview) {
+        } else if (this.currentOrganization && this.currentOrganization.statusCode === AccountStatus.PENDING_AFFIDAVIT_REVIEW) {
           bceidNextStep = `${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}/true`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
           bceidNextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
@@ -150,6 +150,18 @@ export default class NextPageMixin extends Vue {
       } else {
         // Set current org to blank state if not active in the current org
         await this.resetCurrentOrganization()
+      }
+    }
+  }
+
+  protected accountFreezeRedirect () {
+    if (this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED) {
+      // eslint-disable-next-line no-console
+      console.log('Redirecting user to Account Freeze message since the account is temporarly suspended.')
+      if (this.currentMembership?.membershipTypeCode === MembershipType.Admin) {
+        this.$router.push(`/${Pages.ACCOUNT_FREEZE_UNLOCK}`)
+      } else {
+        this.$router.push(`/${Pages.ACCOUNT_FREEZE}`)
       }
     }
   }
