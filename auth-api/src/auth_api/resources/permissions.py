@@ -42,7 +42,7 @@ class Permissions(Resource):
         """Get a list of all permissions for the membership."""
         try:
             response, status = json.dumps(
-                PermissionsService.get_permissions_for_membership(org_status, membership_type)), \
+                PermissionsService.get_permissions_for_membership(org_status.upper(), membership_type.upper())), \
                                http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

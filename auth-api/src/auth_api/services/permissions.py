@@ -31,7 +31,6 @@ class Permissions:  # pylint: disable=too-few-public-methods
         # TODO fix this logic
         if org_status != OrgStatus.NSF_SUSPENDED.value:
             org_status = None
-
         permissions = PermissionsModel.get_permissions_by_membership(org_status,
                                                                      membership_type)
         actions = []
