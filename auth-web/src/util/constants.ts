@@ -143,7 +143,8 @@ export enum Permission {
 
 export enum LDFlags {
     AuthLearnMore = 'auth-options-learn-more',
-    PaymentTypeAccountCreation = 'payment-type-in-account-creation'
+    PaymentTypeAccountCreation = 'payment-type-in-account-creation',
+    LinkToNewNameRequestApp ='link-to-new-name-request-app'
 }
 
 export enum DateFilterCodes {
