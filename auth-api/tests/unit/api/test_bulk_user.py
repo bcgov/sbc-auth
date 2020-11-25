@@ -40,7 +40,7 @@ def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
-    assert schema_utils.validate(rv.json, 'anonymous_user_response')
+    assert schema_utils.validate(rv.json, 'user_response')[0]
 
 
 def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -93,7 +93,7 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
                      data=json.dumps(user_input),
                      content_type='application/json')
     assert len(rv.json['users']) == 2
-    assert schema_utils.validate(rv.json, 'anonymous_user_response')
+    assert schema_utils.validate(rv.json, 'anonymous_user_response')[0]
 
     assert rv.json['users'][0]['httpStatus'] == 201
     assert rv.json['users'][0]['httpStatus'] == 201
@@ -107,7 +107,7 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
                      content_type='application/json')
 
     assert len(rv.json['users']) == 2
-    assert schema_utils.validate(rv.json, 'anonymous_user_response')
+    assert schema_utils.validate(rv.json, 'anonymous_user_response')[0]
     assert rv.json['users'][0]['httpStatus'] == 409
     assert rv.json['users'][1]['httpStatus'] == 409
     assert rv.json['users'][0]['error'] == 'The username is already taken'
