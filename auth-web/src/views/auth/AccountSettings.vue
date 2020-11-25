@@ -109,6 +109,7 @@
                 <v-list-item-title>Authentication</v-list-item-title>
               </v-list-item>
               <v-list-item
+                v-if="enablePaymentMethodSelectorStep"
                 dense
                 class="py-1 px-4"
                 aria-label="Payment Methods"
@@ -173,7 +174,7 @@
 <script lang="ts">
 
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { LoginSource, Pages, Role } from '@/util/constants'
+import { LDFlags, LoginSource, Pages, Role } from '@/util/constants'
 import { Member, MembershipType } from '@/models/Organization'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import ConfigHelper from '@/util/config-helper'
@@ -233,6 +234,10 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   private getUrl (page) {
     return `/account/${this.orgId}/settings/${page}`
+  }
+
+  private get enablePaymentMethodSelectorStep (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
   }
 
   private mounted () {
