@@ -25,6 +25,7 @@ from tests.utilities.factory_utils import (
     factory_product_model, factory_user_model)
 
 from auth_api import status as http_status
+from auth_api.schemas import utils as schema_utils
 
 
 def test_authorizations_for_account_returns_200(app, client, jwt, session):  # pylint:disable=unused-argument
@@ -42,6 +43,7 @@ def test_authorizations_for_account_returns_200(app, client, jwt, session):  # p
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'account_response')[0]
     assert len(rv.json.get('roles')) == 0
 
 
@@ -61,6 +63,7 @@ def test_authorizations_for_account_with_search_returns_200(client, jwt, session
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'account_response')[0]
     assert rv.json.get('roles') == ['search']
 
 
@@ -84,6 +87,7 @@ def test_authorizations_with_multiple_accounts_returns_200(client, jwt, session)
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'account_response')[0]
     assert len(rv.json.get('roles')) == 0
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
@@ -91,6 +95,7 @@ def test_authorizations_with_multiple_accounts_returns_200(client, jwt, session)
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'account_response')[0]
     assert rv.json.get('roles') == ['search']
 
 
@@ -110,5 +115,6 @@ def test_authorizations_for_extended_returns_200(app, client, jwt, session):  # 
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'account_response')[0]
     assert len(rv.json.get('roles')) == 1
     assert rv.json.get('account').get('name') == org.name

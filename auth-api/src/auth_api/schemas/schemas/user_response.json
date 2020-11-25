@@ -1,0 +1,184 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/user_response",
+    "type": "object",
+    "title": "User Response",
+    "description": "The user schema for response.",
+    "default": {},
+    "examples": [
+        {
+            "contacts": [
+                {
+                    "created": "2020-11-03T20:51:30.535608+00:00",
+                    "createdBy": "abc-auth sbc-auth",
+                    "email": "test@gmail.com",
+                    "modified": "2020-11-03T20:51:30.535619+00:00",
+                    "phone": "1111",
+                    "phoneExtension": "11111"
+                }
+            ],
+            "created": "2020-11-03T15:14:20.711942+00:00",
+            "firstname": "abc-auth",
+            "id": 5389,
+            "keycloakGuid": "f7a4a1d3-73a8-4cbc-a40f-bb1145302064",
+            "lastname": "sbc-auth",
+            "loginSource": "BCSC",
+            "loginTime": "2020-11-23T15:14:20.712096+00:00",
+            "modified": "2020-11-03T20:50:39.366030+00:00",
+            "modifiedBy": "Jennifer Kirby",
+            "userStatus": 1,
+            "userTerms": {
+                "isTermsOfUseAccepted": true,
+                "termsOfUseAcceptedVersion": "1"
+            },
+            "username": "service-account-registries-public-user-test"
+        }
+    ],
+    "required": [
+        "firstname",
+        "id",
+        "lastname",
+        "username"
+    ],
+    "properties": {
+        "contacts": {
+            "$id": "#/properties/contacts",
+            "type": "array",
+            "contacts": {
+                "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/contact_response"
+              }
+        },
+        "created": {
+            "$id": "#/properties/created",
+            "type": "string",
+            "title": "Created",
+            "default": "",
+            "examples": [
+                "2020-11-03T15:14:20.711942+00:00"
+            ]
+        },
+        "firstname": {
+            "$id": "#/properties/firstname",
+            "type": "string",
+            "title": "Firstname",
+            "default": "",
+            "examples": [
+                "abc-auth"
+            ]
+        },
+        "id": {
+            "$id": "#/properties/id",
+            "type": "integer",
+            "title": "ID",
+            "default": 0,
+            "examples": [
+                5389
+            ]
+        },
+        "keycloakGuid": {
+            "$id": "#/properties/keycloakGuid",
+            "type": "string",
+            "title": "Keycloak GUID",
+            "default": "",
+            "examples": [
+                "f7a4a1d3-73a8-4cbc-a40f-bb1145302064"
+            ]
+        },
+        "lastname": {
+            "$id": "#/properties/lastname",
+            "type": "string",
+            "title": "Lastname",
+            "default": "",
+            "examples": [
+                "sbc-auth"
+            ]
+        },
+        "loginSource": {
+            "$id": "#/properties/loginSource",
+            "type": "string",
+            "title": "Login Source",
+            "default": "",
+            "examples": [
+                "BCSC"
+            ]
+        },
+        "loginTime": {
+            "$id": "#/properties/loginTime",
+            "type": "string",
+            "title": "Login Time",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "2020-11-23T15:14:20.712096+00:00"
+            ]
+        },
+        "modified": {
+            "$id": "#/properties/modified",
+            "type": "string",
+            "title": "Modified",
+            "default": "",
+            "examples": [
+                "2020-11-03T20:50:39.366030+00:00"
+            ]
+        },
+        "modifiedBy": {
+            "$id": "#/properties/modifiedBy",
+            "type": "string",
+            "title": "Modified By",
+            "default": "",
+            "examples": [
+                "Jennifer Kirby"
+            ]
+        },
+        "userStatus": {
+            "$id": "#/properties/userStatus",
+            "type": "integer",
+            "title": "User Status",
+            "default": 0,
+            "examples": [
+                1
+            ]
+        },
+        "userTerms": {
+            "$id": "#/properties/userTerms",
+            "type": "object",
+            "title": "User Terms",
+            "default": {},
+            "required": [
+                "isTermsOfUseAccepted",
+                "termsOfUseAcceptedVersion"
+            ],
+            "properties": {
+                "isTermsOfUseAccepted": {
+                    "$id": "#/properties/userTerms/properties/isTermsOfUseAccepted",
+                    "type": "boolean",
+                    "title": "Terms Of Use Accepted",
+                    "default": false,
+                    "examples": [
+                        true
+                    ]
+                },
+                "termsOfUseAcceptedVersion": {
+                    "$id": "#/properties/userTerms/properties/termsOfUseAcceptedVersion",
+                    "type": ["string", "null"],
+                    "title": "Terms Of Use Accepted Version",
+                    "default": "",
+                    "examples": [
+                        "1"
+                    ]
+                }
+            },
+            "additionalProperties": true
+        },
+        "username": {
+            "$id": "#/properties/username",
+            "type": "string",
+            "title": "Username",
+            "default": "",
+            "examples": [
+                "service-account-registries-public-user-test"
+            ]
+        }
+    },
+    "additionalProperties": true
+}

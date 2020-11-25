@@ -49,4 +49,4 @@ def test_get_user_settings(client, jwt, session, keycloak_mock):  # pylint:disab
     account = next(obj for obj in item_list if obj['type'] == 'ACCOUNT')
     assert account['accountType'] == 'BASIC'
     assert rv.status_code == http_status.HTTP_200_OK
-    assert schema_utils.validate(rv.json, 'user_settings_response')
+    assert schema_utils.validate(rv.json, 'user_settings_response')[0]

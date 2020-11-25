@@ -1,0 +1,224 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/org_response",
+    "type": "object",
+    "title": "org_response",
+    "description": "The org_response is for add account response.",
+    "default": {},
+    "examples": [
+        {
+            "contacts": [],
+            "accessType": "REGULAR",
+            "bcolAccountId": "106700",
+            "bcolUserId": "PB99999",
+            "billable": true,
+            "created": "2020-11-12T21:42:30.850904+00:00",
+            "createdBy": "abc-auth sbc-auth",
+            "id": 2390,
+            "invitations": [
+                {
+                    "expiresOn": "2021-03-03T11:49:44.148559+00:00",
+                    "id": 2,
+                    "recipientEmail": "abc123@email.com",
+                    "sentDate": "2020-11-23T11:49:44.148559+00:00",
+                    "status": "PENDING",
+                    "token": "eyJpZCI6MiwidHlwZSI6IkRJUkVDVE9SX1NFQVJDSCJ9.X7wSWA.8_WvWRuAUSnk-Jsj9it869UvL-M",
+                    "type": "DIRECTOR_SEARCH"
+                }
+            ],
+            "loginOptions": [],
+            "modified": "2020-11-12T21:42:30.861522+00:00",
+            "modifiedBy": "abc-auth sbc-auth",
+            "name": "mytest1",
+            "orgType": "PREMIUM",
+            "orgStatus": "ACTIVE",
+            "products": [
+                2281
+            ],
+            "statusCode": "ACTIVE"
+        }
+    ],
+    "required": [
+        "accessType",
+        "billable",
+        "id",
+        "loginOptions",
+        "name",
+        "orgType",
+        "products",
+        "statusCode"
+    ],
+    "properties": {
+        "contacts": {
+            "$id": "#/properties/contacts",
+            "type": "array",
+            "contacts": {
+                "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/contact_response"
+              }
+        },
+        "accessType": {
+            "$id": "#/properties/accessType",
+            "type": "string",
+            "title": "Access Type",
+            "default": "",
+            "examples": [
+                "REGULAR"
+            ]
+        },
+        "bcolAccountId": {
+            "$id": "#/properties/bcolAccountId",
+            "type": "string",
+            "title": "BC Oline Account ID",
+            "default": "",
+            "examples": [
+                "106700"
+            ]
+        },
+        "bcolUserId": {
+            "$id": "#/properties/bcolUserId",
+            "type": "string",
+            "title": "BC Oline User ID",
+            "default": "",
+            "examples": [
+                "PB99999"
+            ]
+        },        
+        "billable": {
+            "$id": "#/properties/billable",
+            "type": "boolean",
+            "title": "Billable",
+            "default": false,
+            "examples": [
+                true
+            ]
+        },
+        "created": {
+            "$id": "#/properties/created",
+            "type": "string",
+            "title": "Created",
+            "default": "",
+            "examples": [
+                "2020-11-12T21:42:30.850904+00:00"
+            ]
+        },
+        "createdBy": {
+            "$id": "#/properties/createdBy",
+            "type": "string",
+            "title": "Created By",
+            "default": "",
+            "examples": [
+                "abc-auth sbc-auth"
+            ]
+        },
+        "id": {
+            "$id": "#/properties/id",
+            "type": "integer",
+            "title": "ID",
+            "default": 0,
+            "examples": [
+                2390
+            ]
+        },
+        "invitations": {
+            "$id": "#/properties/invitations",
+            "type": "array",
+            "contacts": {
+                "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/invitation_response"
+              }
+        },
+        "loginOptions": {
+            "$id": "#/properties/loginOptions",
+            "type": "array",
+            "title": "Login Options",
+            "default": [],
+            "examples": [
+                []
+            ],
+            "additionalItems": true,
+            "items": {
+                "$id": "#/properties/loginOptions/items"
+            }
+        },
+        "modified": {
+            "$id": "#/properties/modified",
+            "type": "string",
+            "title": "Modified",
+            "default": "",
+            "examples": [
+                "2020-11-12T21:42:30.861522+00:00"
+            ]
+        },
+        "modifiedBy": {
+            "$id": "#/properties/modifiedBy",
+            "type": "string",
+            "title": "Modified By",
+            "default": "",
+            "examples": [
+                "abc-auth sbc-auth"
+            ]
+        },
+        "name": {
+            "$id": "#/properties/name",
+            "type": "string",
+            "title": "Name",
+            "default": "",
+            "examples": [
+                "mytest1"
+            ]
+        },
+        "orgType": {
+            "$id": "#/properties/orgType",
+            "type": "string",
+            "title": "Organization Type",
+            "default": "",
+            "examples": [
+                "PREMIUM"
+            ]
+        },
+        "orgStatus": {
+            "$id": "#/properties/orgStatus",
+            "type": "string",
+            "title": "Organization Status",
+            "default": "",
+            "examples": [
+                "ACTIVE"
+            ]
+        },
+        "products": {
+            "$id": "#/properties/products",
+            "type": "array",
+            "title": "Products",
+            "default": [],
+            "examples": [
+                [
+                    2281
+                ]
+            ],
+            "additionalItems": true,
+            "items": {
+                "$id": "#/properties/products/items",
+                "anyOf": [
+                    {
+                        "$id": "#/properties/products/items/anyOf/0",
+                        "type": "integer",
+                        "title": "Any Of",
+                        "default": 0,
+                        "examples": [
+                            2281
+                        ]
+                    }
+                ]
+            }
+        },
+        "statusCode": {
+            "$id": "#/properties/statusCode",
+            "type": "string",
+            "title": "Status Code",
+            "default": "",
+            "examples": [
+                "ACTIVE"
+            ]
+        }
+    },
+    "additionalProperties": true
+}

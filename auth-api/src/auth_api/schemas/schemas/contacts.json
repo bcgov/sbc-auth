@@ -1,0 +1,14 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/contacts",
+    "type": "object",
+    "title": "Contact List",
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/contact_response"
+        }
+      }
+    }
+  }
