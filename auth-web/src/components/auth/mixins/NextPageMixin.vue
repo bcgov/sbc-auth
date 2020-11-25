@@ -143,11 +143,9 @@ export default class NextPageMixin extends Vue {
     await this.syncUserProfile()
     this.setCurrentAccountSettings(this.getAccountFromSession())
     if (this.currentAccountSettings) {
+      await this.syncOrganization(this.currentAccountSettings.id)
       await this.syncMembership(this.currentAccountSettings.id)
-      // await this.syncOrganization(this.currentAccountSettings.id)
-      if (this.currentMembership.membershipStatus === MembershipStatus.Active) {
-        await this.syncOrganization(this.currentAccountSettings.id)
-      } else {
+      if (this.currentMembership.membershipStatus !== MembershipStatus.Active) {
         // Set current org to blank state if not active in the current org
         await this.resetCurrentOrganization()
       }
@@ -159,9 +157,18 @@ export default class NextPageMixin extends Vue {
       // eslint-disable-next-line no-console
       console.log('Redirecting user to Account Freeze message since the account is temporarly suspended.')
       if (this.currentMembership?.membershipTypeCode === MembershipType.Admin) {
-        this.$router.push(`/${Pages.ACCOUNT_FREEZE_UNLOCK}`)
+        /** the below check is for Admin can still access several routes like team management, statements etc.  */
+        if (!(this.$route.matched?.some(record => record.meta.allowOnAccountFreeze))) {
+          this.$router.push(`/${Pages.ACCOUNT_FREEZE_UNLOCK}`)
+        }
       } else {
         this.$router.push(`/${Pages.ACCOUNT_FREEZE}`)
+      }
+    } else {
+      /** If user is in the account freeze page while switching the account, then need to redirect them to account info page if that account is active.
+       * otherwise user will stuck on the account freeze page **/
+      if (this.$route.name?.search('account-freeze') > -1) {
+        this.$router.push(`${Pages.MAIN}/${this.currentOrganization.id}/${Pages.ACCOUNT_SETTINGS}`)
       }
     }
   }
