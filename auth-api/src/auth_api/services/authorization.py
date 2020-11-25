@@ -67,7 +67,7 @@ class Authorization:
             if auth:
                 permissions = PermissionsService.get_permissions_for_membership(auth.status_code, auth.org_membership)
                 auth_response = Authorization(auth).as_dict(expanded)
-                auth_response['roles'] = ['edit', 'view']
+                auth_response['roles'] = permissions
 
         return auth_response
 
