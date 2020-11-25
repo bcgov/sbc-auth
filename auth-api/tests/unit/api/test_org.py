@@ -23,6 +23,7 @@ from unittest.mock import patch
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
@@ -41,6 +42,7 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'org_response')[0]
 
 
 def test_add_basic_org_with_online_banking(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -50,6 +52,7 @@ def test_add_basic_org_with_online_banking(client, jwt, session, keycloak_mock):
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_onlinebanking),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'org_response')[0]
 
 
 def test_add_basic_org_with_pad_throws_error(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -94,6 +97,7 @@ def test_search_org_by_client(client, jwt, session, keycloak_mock):  # pylint:di
     rv = client.get('/api/v1/orgs?name={}'.format(TestOrgInfo.org1.get('name')),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'paged_response')[0]
     orgs = json.loads(rv.data)
     assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
 
@@ -101,6 +105,7 @@ def test_search_org_by_client(client, jwt, session, keycloak_mock):  # pylint:di
     rv = client.get('/api/v1/orgs?status={}'.format('ACTIVE'),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'paged_response')[0]
     orgs = json.loads(rv.data)
     assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
 
@@ -108,6 +113,7 @@ def test_search_org_by_client(client, jwt, session, keycloak_mock):  # pylint:di
     rv = client.get('/api/v1/orgs?status={}&type={}'.format('ACTIVE', 'REGULAR'),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'paged_response')[0]
     orgs = json.loads(rv.data)
     assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
 
@@ -129,6 +135,7 @@ def test_search_org_for_dir_search(client, jwt, session, keycloak_mock):  # pyli
     rv = client.get('/api/v1/orgs',
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'paged_response')[0]
     orgs = json.loads(rv.data)
     assert len(orgs.get('orgs')) == 2
 
@@ -137,6 +144,7 @@ def test_search_org_for_dir_search(client, jwt, session, keycloak_mock):  # pyli
     rv = client.get('/api/v1/orgs',
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'paged_response')[0]
     orgs = json.loads(rv.data)
     assert len(orgs.get('orgs')) == 2
 
@@ -145,6 +153,7 @@ def test_search_org_for_dir_search(client, jwt, session, keycloak_mock):  # pyli
     rv = client.get('/api/v1/orgs',
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'paged_response')[0]
     orgs = json.loads(rv.data)
     assert len(orgs.get('orgs')) == 1
 
@@ -158,6 +167,7 @@ def test_add_anonymous_org_staff_admin(client, jwt, session, keycloak_mock):  # 
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
     assert dictionary['accessType'] == 'ANONYMOUS'
+    assert schema_utils.validate(rv.json, 'org_response')[0]
 
 
 def test_add_anonymous_org_by_user_exception(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -308,6 +318,7 @@ def test_add_org_invalid_returns_exception(client, jwt, session):  # pylint:disa
         rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                          headers=headers, content_type='application/json')
         assert rv.status_code == 400
+        assert schema_utils.validate(rv.json, 'exception')[0]
 
 
 def test_get_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -323,6 +334,7 @@ def test_get_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     rv = client.get('/api/v1/orgs/{}'.format(org_id),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'org_response')[0]
     dictionary = json.loads(rv.data)
     assert dictionary['id'] == org_id
 
@@ -364,6 +376,7 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     assert rv.status_code == http_status.HTTP_200_OK
     dictionary = json.loads(rv.data)
     assert dictionary['id'] == org_id
+    assert schema_utils.validate(rv.json, 'org_response')[0]
 
     rv = client.post('/api/v1/orgs', data=json.dumps({'name': 'helo-duplicate'}),
                      headers=headers, content_type='application/json')
@@ -387,6 +400,9 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     rv = client.get(f'/api/v1/orgs/{org_id}/contacts', headers=headers,
                     content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+
+    assert schema_utils.validate(rv.json, 'contacts')[0]
+
     dictionary = json.loads(rv.data)
     actual_mailing_address = org_with_mailing_address.get('mailingAddress')
     assert actual_mailing_address.get('city') == dictionary['contacts'][0].get('city')
@@ -459,11 +475,13 @@ def test_upgrade_org(client, jwt, session, keycloak_mock):  # pylint:disable=unu
                     data=json.dumps(premium_info), headers=headers,
                     content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'org_response')[0]
 
     rv = client.get('/api/v1/orgs/{}'.format(org_id),
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'org_response')[0]
     dictionary = json.loads(rv.data)
     assert dictionary['id'] == org_id
     assert rv.json.get('orgType') == OrgType.PREMIUM.value
@@ -505,6 +523,7 @@ def test_upgrade_downgrade_reattach_bcol_todifferent_org(client, jwt, session,
     rv = client.get('/api/v1/orgs/{}'.format(org_id),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'org_response')[0]
     dictionary = json.loads(rv.data)
     assert dictionary['id'] == org_id
     assert rv.json.get('orgType') == OrgType.BASIC.value
@@ -519,6 +538,7 @@ def test_upgrade_downgrade_reattach_bcol_todifferent_org(client, jwt, session,
 
     dictionary = json.loads(rv.data)
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'org_response')[0]
     assert rv.json.get('orgType') == OrgType.PREMIUM.value
     assert rv.json.get('name') == bcol_account.get('name')
 
@@ -546,6 +566,7 @@ def test_downgrade_org(client, jwt, session, keycloak_mock):  # pylint:disable=u
     rv = client.get('/api/v1/orgs/{}'.format(org_id),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'org_response')[0]
     dictionary = json.loads(rv.data)
     assert dictionary['id'] == org_id
     assert rv.json.get('orgType') == OrgType.BASIC.value
@@ -566,6 +587,7 @@ def test_update_premium_org(client, jwt, session, keycloak_mock):  # pylint:disa
     rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(TestOrgInfo.bcol_linked()), headers=headers,
                     content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'org_response')[0]
 
 
 def test_get_org_payment_settings(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -575,6 +597,7 @@ def test_get_org_payment_settings(client, jwt, session, keycloak_mock):  # pylin
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked()),
                      headers=headers, content_type='application/json')
 
+    assert schema_utils.validate(rv.json, 'org_response')[0]
     assert rv.status_code == http_status.HTTP_201_CREATED
     assert rv.json.get('orgType') == OrgType.PREMIUM.value
 
@@ -583,6 +606,7 @@ def test_get_org_payment_settings(client, jwt, session, keycloak_mock):  # pylin
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
     rv = client.get('/api/v1/orgs/{}/contacts'.format(org_id), headers=headers)
+    assert schema_utils.validate(rv.json, 'contacts')[0]
 
 
 def test_update_org_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -620,6 +644,7 @@ def test_update_org_returns_exception(client, jwt, session, keycloak_mock):  # p
         rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(TestOrgInfo.org1),
                         headers=headers, content_type='application/json')
         assert rv.status_code == 400
+        assert schema_utils.validate(rv.json, 'exception')[0]
 
 
 def test_add_contact(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -636,6 +661,7 @@ def test_add_contact(client, jwt, session, keycloak_mock):  # pylint:disable=unu
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
     assert dictionary['email'] == TestContactInfo.contact1['email']
+    assert schema_utils.validate(rv.json, 'contact_response')[0]
 
 
 def test_add_contact_invalid_format_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -664,6 +690,7 @@ def test_add_contact_valid_email_returns_201(client, jwt, session, keycloak_mock
     rv = client.post('/api/v1/orgs/{}/contacts'.format(org_id),
                      headers=headers, data=json.dumps(TestContactInfo.email_valid), content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'contacts')[0]
 
 
 def test_add_contact_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
@@ -707,6 +734,7 @@ def test_update_contact(client, jwt, session, keycloak_mock):  # pylint:disable=
                     headers=headers, data=json.dumps(TestContactInfo.contact2), content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'contact_response')[0]
     dictionary = json.loads(rv.data)
     assert dictionary['email'] == TestContactInfo.contact2['email']
 
@@ -743,6 +771,7 @@ def test_update_contact_valid_email_format_returns_200(client, jwt, session,
     rv = client.put('/api/v1/orgs/{}/contacts'.format(org_id),
                     headers=headers, data=json.dumps(TestContactInfo.email_valid), content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'contact_response')[0]
 
 
 def test_update_contact_no_org_returns_404(client, jwt, session):  # pylint:disable=unused-argument
@@ -784,6 +813,7 @@ def test_delete_contact(client, jwt, session, keycloak_mock):  # pylint:disable=
                        headers=headers, data=json.dumps(TestContactInfo.contact2), content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'contact_response')[0]
 
     rv = client.get('/api/v1/orgs/{}/contacts'.format(org_id), headers=headers)
 
@@ -813,6 +843,7 @@ def test_delete_contact_returns_exception(client, jwt, session, keycloak_mock): 
     with patch.object(OrgService, 'delete_contact', side_effect=BusinessException(Error.DATA_ALREADY_EXISTS, None)):
         rv = client.delete('/api/v1/orgs/{}/contacts'.format(org_id), headers=headers, content_type='application/json')
         assert rv.status_code == 400
+        assert schema_utils.validate(rv.json, 'exception')[0]
 
 
 def test_get_members(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -828,6 +859,7 @@ def test_get_members(client, jwt, session, keycloak_mock):  # pylint:disable=unu
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'members')[0]
     dictionary = json.loads(rv.data)
     assert dictionary['members']
     assert len(dictionary['members']) == 1
@@ -939,6 +971,7 @@ def test_get_invitations(client, jwt, session, keycloak_mock):  # pylint:disable
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'invitations')[0]
     dictionary = json.loads(rv.data)
     assert dictionary['invitations']
     assert len(dictionary['invitations']) == 2
@@ -1014,6 +1047,7 @@ def test_update_member(client, jwt, session, auth_mock, keycloak_mock):  # pylin
     rv = client.patch('/api/v1/orgs/{}/members/{}'.format(org_id, member_id), headers=headers_invitee,
                       data=json.dumps({'role': 'COORDINATOR'}), content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'membership')[0]
     dictionary = json.loads(rv.data)
     assert dictionary['membershipTypeCode'] == 'COORDINATOR'
 
@@ -1033,6 +1067,8 @@ def test_add_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable
     rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers,
                      data=json.dumps(TestAffliationInfo.affiliation3), content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'affiliation_response')[0]
+
     dictionary = json.loads(rv.data)
     assert dictionary['organization']['id'] == org_id
 
@@ -1079,6 +1115,7 @@ def test_add_affiliation_returns_exception(client, jwt, session, keycloak_mock):
                          headers=headers,
                          content_type='application/json')
         assert rv.status_code == 400
+        assert schema_utils.validate(rv.json, 'exception')[0]
 
 
 def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -1106,6 +1143,8 @@ def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disabl
 
     rv = client.get('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers)
     assert rv.status_code == http_status.HTTP_200_OK
+
+    assert schema_utils.validate(rv.json, 'affiliations_response')[0]
     affiliations = json.loads(rv.data)
     # Result is sorted desc order of created date
     assert affiliations['entities'][1]['businessIdentifier'] == TestEntityInfo.entity_lear_mock['businessIdentifier']
@@ -1131,6 +1170,8 @@ def test_search_orgs_for_affiliation(client, jwt, session, keycloak_mock):  # py
     rv = client.get('/api/v1/orgs?affiliation={}'.format(TestAffliationInfo.affiliation3.get('businessIdentifier')),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'orgs_response')[0]
+
     orgs = json.loads(rv.data)
     assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
 
@@ -1164,6 +1205,7 @@ def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:dis
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked()),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'org_response')[0]
     assert rv.json.get('orgType') == OrgType.PREMIUM.value
     assert rv.json.get('name') == TestOrgInfo.bcol_linked()['name']
 
@@ -1174,6 +1216,7 @@ def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:dis
 
     assert len(org_search_response.json.get('orgs')) == 1
     assert org_search_response.status_code == http_status.HTTP_200_OK
+
     orgs = json.loads(org_search_response.data)
     assert orgs.get('orgs')[0].get('name') == TestOrgInfo.bcol_linked()['name']
     account_id = orgs.get('orgs')[0].get('bcolAccountId')
@@ -1219,6 +1262,7 @@ def test_new_business_affiliation(client, jwt, session, keycloak_mock, nr_mock):
     rv = client.post('/api/v1/orgs/{}/affiliations?newBusiness=true'.format(org_id), headers=headers,
                      data=json.dumps(TestAffliationInfo.nr_affiliation), content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'affiliation_response')[0]
     dictionary = json.loads(rv.data)
     assert dictionary['organization']['id'] == org_id
     assert dictionary['business']['businessIdentifier'] == TestAffliationInfo.nr_affiliation['businessIdentifier']
@@ -1248,6 +1292,8 @@ def test_get_org_admin_affidavits(client, jwt, session, keycloak_mock):  # pylin
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
     staff_response = client.get('/api/v1/orgs/{}/admins/affidavits'.format(org_response.json.get('id')),
                                 headers=headers, content_type='application/json')
+
+    assert schema_utils.validate(staff_response.json, 'affidavit_response')[0]
     assert staff_response.json.get('documentId') == doc_key
     assert staff_response.json.get('id') == affidavit_response.json.get('id')
 
@@ -1287,6 +1333,8 @@ def test_approve_org_with_pending_affidavits(client, jwt, session, keycloak_mock
 
     staff_response = client.get('/api/v1/orgs/{}/admins/affidavits'.format(org_response.json.get('id')),
                                 headers=headers, content_type='application/json')
+
+    assert schema_utils.validate(staff_response.json, 'affidavit_response')[0]
     assert staff_response.json.get('documentId') == doc_key
     assert staff_response.json.get('id') == affidavit_response.json.get('id')
     assert staff_response.json.get('status') == AffidavitStatus.APPROVED.value
@@ -1319,6 +1367,7 @@ def test_search_orgs_with_pending_affidavits(client, jwt, session, keycloak_mock
                                      headers=headers, content_type='application/json')
 
     assert len(org_search_response.json.get('orgs')) == 1
+    assert schema_utils.validate(org_search_response.json, 'paged_response')[0]
 
 
 def test_search_org_pagination(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -1337,6 +1386,7 @@ def test_search_org_pagination(client, jwt, session, keycloak_mock):  # pylint:d
     rv = client.get('/api/v1/orgs?page=1&limit=10',
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'paged_response')[0]
     orgs = json.loads(rv.data)
     assert orgs.get('total') == 3
     assert len(orgs.get('orgs')) == 3
@@ -1344,6 +1394,7 @@ def test_search_org_pagination(client, jwt, session, keycloak_mock):  # pylint:d
     rv = client.get('/api/v1/orgs?page=1&limit=2',
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'paged_response')[0]
     orgs = json.loads(rv.data)
     assert orgs.get('total') == 3
     assert len(orgs.get('orgs')) == 2
@@ -1374,6 +1425,8 @@ def test_search_org_invitations(client, jwt, session, keycloak_mock):  # pylint:
     rv = client.get('/api/v1/orgs?status={}'.format(OrgStatus.PENDING_ACTIVATION.value),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'paged_response')[0]
+
     orgs = json.loads(rv.data)
     assert len(orgs.get('orgs')) == 2
     assert len(orgs.get('orgs')[0].get('invitations')) == 1

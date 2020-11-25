@@ -27,7 +27,7 @@ class ContactSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-
         """Maps all of the User fields to a default schema."""
 
         model = ContactModel
-        exclude = ('id',)
+        exclude = ('id', 'links')
 
     email = fields.String(data_key='email')
     phone = fields.String(data_key='phone')

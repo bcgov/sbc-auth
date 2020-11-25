@@ -24,6 +24,7 @@ from tests.utilities.factory_scenarios import TestJwtClaims
 from tests.utilities.factory_utils import TestOrgInfo, factory_auth_header
 
 from auth_api import status as http_status
+from auth_api.schemas import utils as schema_utils
 
 
 def test_bcol_profiles_returns_200(app, client, jwt, session):  # pylint:disable=unused-argument
@@ -35,3 +36,4 @@ def test_bcol_profiles_returns_200(app, client, jwt, session):  # pylint:disable
                      headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'bconline_response')[0]

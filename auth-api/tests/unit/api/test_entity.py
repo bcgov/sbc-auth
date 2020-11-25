@@ -29,6 +29,7 @@ from tests.utilities.factory_utils import (
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.schemas import utils as schema_utils
 from auth_api.services import Entity as EntityService
 
 
@@ -38,6 +39,7 @@ def test_add_entity(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'business')[0]
 
 
 def test_add_entity_invalid_returns_400(client, jwt, session):  # pylint:disable=unused-argument
@@ -77,6 +79,7 @@ def test_get_entity(client, jwt, session):  # pylint:disable=unused-argument
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'business')[0]
     dictionary = json.loads(rv.data)
     assert dictionary['businessIdentifier'] == TestEntityInfo.entity1['businessIdentifier']
 
@@ -124,6 +127,7 @@ def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.post('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1['businessIdentifier']),
                      headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'business')[0]
     dictionary = json.loads(rv.data)
     assert len(dictionary['contacts']) == 1
     assert dictionary['contacts'][0]['email'] == TestContactInfo.contact1['email']
@@ -172,6 +176,7 @@ def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
                     headers=headers, data=json.dumps(TestContactInfo.contact2), content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'business')[0]
     dictionary = json.loads(rv.data)
     assert len(dictionary['contacts']) == 1
     assert dictionary['contacts'][0]['email'] == TestContactInfo.contact2['email']
@@ -221,6 +226,8 @@ def test_update_entity_success(client, jwt, session):  # pylint:disable=unused-a
                       data=json.dumps(TestEntityInfo.entity2),
                       headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'business')[0]
+
     dictionary = json.loads(rv.data)
     assert dictionary['businessIdentifier'] == TestEntityInfo.entity2['businessIdentifier']
 
@@ -229,6 +236,8 @@ def test_update_entity_success(client, jwt, session):  # pylint:disable=unused-a
                       data=json.dumps({'businessIdentifier': 'CPNEW123'}),
                       headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'business')[0]
+
     dictionary = json.loads(rv.data)
     assert dictionary['businessIdentifier'] == 'CPNEW123'
 
@@ -248,6 +257,7 @@ def test_update_entity_with_folio_number(client, jwt, session):  # pylint:disabl
                       data=json.dumps(TestEntityInfo.entity_folio_number),
                       headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'business')[0]
     dictionary = json.loads(rv.data)
     assert dictionary['businessIdentifier'] == TestEntityInfo.entity2['businessIdentifier']
     assert dictionary['folioNumber'] == TestEntityInfo.entity_folio_number['folioNumber']
@@ -277,6 +287,7 @@ def test_authorizations_for_staff_returns_200(client, jwt, session):  # pylint:d
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'account_response')[0]
 
 
 def test_authorizations_for_affiliated_users_returns_200(client, jwt, session):  # pylint:disable=unused-argument
@@ -295,6 +306,7 @@ def test_authorizations_for_affiliated_users_returns_200(client, jwt, session): 
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'account_response')[0]
     assert rv.json.get('orgMembership') == 'ADMIN'
 
 
@@ -314,12 +326,14 @@ def test_authorizations_for_expanded_result(client, jwt, session):  # pylint:dis
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'account_response')[0]
     assert rv.json.get('orgMembership') == 'ADMIN'
     assert rv.json.get('account', None) is None
 
     rv = client.get(f'/api/v1/entities/{entity.business_identifier}/authorizations?expanded=true',
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'account_response')[0]
     assert rv.json.get('account') is not None
     assert rv.json.get('account').get('name') == org.name
     assert rv.json.get('business').get('name') == entity.name
@@ -342,6 +356,7 @@ def test_authorizations_expanded_for_staff(client, jwt, session):  # pylint:disa
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'account_response')[0]
     assert rv.json.get('account') is not None
     assert rv.json.get('account').get('name') == org.name
     assert rv.json.get('business').get('name') == entity.name
@@ -382,3 +397,4 @@ def test_add_entity_idempotent(client, jwt, session):  # pylint:disable=unused-a
     rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_202_ACCEPTED
+    assert schema_utils.validate(rv.json, 'business')[0]

@@ -1,0 +1,166 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/account_response",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "account": {
+                "accountType": "TEST",
+                "id": 1,
+                "name": "My Test Org",
+                "paymentPreference": {
+                    "bcOnlineAccountId": "BCOL1",
+                    "bcOnlineUserId": ""
+                }
+            },
+            "business": {
+                "folioNumber": "1234",
+                "name": "Foobar, Inc."
+            },
+            "orgMembership": "ADMIN",
+            "roles": [
+                "edit",
+                "view"
+            ]
+        }
+    ],
+    "required": [
+        "roles"
+    ],
+    "properties": {
+        "account": {
+            "$id": "#/properties/account",
+            "type": "object",
+            "title": "Account",
+            "default": {},
+            "properties": {
+                "accountType": {
+                    "$id": "#/properties/account/properties/accountType",
+                    "type": "string",
+                    "title": "Account Type",
+                    "default": "",
+                    "examples": [
+                        "TEST"
+                    ]
+                },
+                "id": {
+                    "$id": "#/properties/account/properties/id",
+                    "type": "integer",
+                    "title": "ID",
+                    "default": 0,
+                    "examples": [
+                        1
+                    ]
+                },
+                "name": {
+                    "$id": "#/properties/account/properties/name",
+                    "type": "string",
+                    "title": "Name",
+                    "default": "",
+                    "examples": [
+                        "My Test Org"
+                    ]
+                },
+                "paymentPreference": {
+                    "$id": "#/properties/account/properties/paymentPreference",
+                    "type": "object",
+                    "title": "Payment Preference",
+                    "default": {},
+                    "required": [
+                    ],
+                    "properties": {
+                        "bcOnlineAccountId": {
+                            "$id": "#/properties/account/properties/paymentPreference/properties/bcOnlineAccountId",
+                            "type": "string",
+                            "title": "BC Online Account ID",
+                            "default": "",
+                            "examples": [
+                                "BCOL1"
+                            ]
+                        },
+                        "bcOnlineUserId": {
+                            "$id": "#/properties/account/properties/paymentPreference/properties/bcOnlineUserId",
+                            "type": "string",
+                            "title": "BC Online User ID",
+                            "default": "",
+                            "examples": [
+                                ""
+                            ]
+                        }
+                    },
+                    "additionalProperties": true
+                }
+            },
+            "additionalProperties": true
+        },
+        "business": {
+            "$id": "#/properties/business",
+            "type": "object",
+            "title": "Business",
+            "default": {},
+            "required": [
+            ],
+            "properties": {
+                "folioNumber": {
+                    "$id": "#/properties/business/properties/folioNumber",
+                    "type": ["string", "null"],
+                    "title": "Folio Number",
+                    "default": "",
+                    "examples": [
+                        "1234"
+                    ]
+                },
+                "name": {
+                    "$id": "#/properties/business/properties/name",
+                    "type": ["string", "null"],
+                    "title": "Name",
+                    "default": "",
+                    "examples": [
+                        "Foobar, Inc."
+                    ]
+                }
+            },
+            "additionalProperties": true
+        },
+        "orgMembership": {
+            "$id": "#/properties/orgMembership",
+            "type": "string",
+            "title": "Organization Membership",
+            "default": "",
+            "examples": [
+                "ADMIN"
+            ]
+        },
+        "roles": {
+            "$id": "#/properties/roles",
+            "type": "array",
+            "title": "Roles",
+            "default": [],
+            "examples": [
+                [
+                    "edit",
+                    "view"
+                ]
+            ],
+            "additionalItems": true,
+            "items": {
+                "$id": "#/properties/roles/items",
+                "anyOf": [
+                    {
+                        "$id": "#/properties/roles/items/anyOf/0",
+                        "type": "string",
+                        "default": "",
+                        "examples": [
+                            "edit",
+                            "view"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "additionalProperties": true
+}

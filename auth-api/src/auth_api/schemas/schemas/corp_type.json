@@ -1,0 +1,50 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/corp_type",
+    "type": "object",
+    "title": "Corp Type",
+    "description": "The Corpration Type schema.",
+    "default": {},
+    "examples": [
+        {
+            "code": "CP",
+            "default": true,
+            "desc": "Cooperatives"
+        }
+    ],
+    "required": [
+        "code",
+        "default",
+        "desc"
+    ],
+    "properties": {
+        "code": {
+            "$id": "#/properties/code",
+            "type": "string",
+            "title": "Code",
+            "default": "",
+            "examples": [
+                "CP"
+            ]
+        },
+        "default": {
+            "$id": "#/properties/default",
+            "type": "boolean",
+            "title": "Default",
+            "default": false,
+            "examples": [
+                true
+            ]
+        },
+        "desc": {
+            "$id": "#/properties/desc",
+            "type": "string",
+            "title": "Description",
+            "default": "",
+            "examples": [
+                "Cooperatives"
+            ]
+        }
+    },
+    "additionalProperties": true
+}
