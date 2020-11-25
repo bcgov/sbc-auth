@@ -50,6 +50,7 @@ def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'user_response')[0]
 
 
 def test_delete_bcros_valdiations(client, jwt, session, keycloak_mock):
@@ -192,7 +193,7 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
         'username']
     assert dictionary['users'][0].get('password') is None
     assert dictionary['users'][0].get('type') == 'ANONYMOUS'
-    assert schema_utils.validate(rv.json, 'anonymous_user_response')
+    assert schema_utils.validate(rv.json, 'anonymous_user_response')[0]
 
     # different error scenarios
 
@@ -234,6 +235,7 @@ def test_update_user(client, jwt, session):  # pylint:disable=unused-argument
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'user_response')[0]
     user = json.loads(rv.data)
     assert user['firstname'] is not None
 
@@ -241,6 +243,7 @@ def test_update_user(client, jwt, session):  # pylint:disable=unused-argument
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.updated_test)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'user_response')[0]
     user = json.loads(rv.data)
     assert user['firstname'] is not None
 
@@ -259,12 +262,14 @@ def test_update_user_terms_of_use(client, jwt, session):  # pylint:disable=unuse
     rv = client.patch('/api/v1/users/@me', headers=headers,
                       data=input_data, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'user_response')[0]
     user = json.loads(rv.data)
     assert user['userTerms']['termsOfUseAcceptedVersion'] == '1'
 
     # version 1 is old version ; so api should return terms of service accepted as false
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'user_response')[0]
     user = json.loads(rv.data)
     assert user['userTerms']['isTermsOfUseAccepted'] is False
 
@@ -312,6 +317,7 @@ def test_staff_get_user(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.get('/api/v1/users/{}'.format(TestJwtClaims.public_user_role['preferred_username']),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'user_response')[0]
     user = json.loads(rv.data)
     assert user['firstname'] is not None
 
@@ -339,6 +345,7 @@ def test_staff_search_users(client, jwt, session):  # pylint:disable=unused-argu
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
     rv = client.get('/api/v1/users', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'users_response')[0]
     users = json.loads(rv.data)
     assert len(users) == 2
 
@@ -346,6 +353,7 @@ def test_staff_search_users(client, jwt, session):  # pylint:disable=unused-argu
     rv = client.get('/api/v1/users?lastname={}'.format(TestJwtClaims.no_role['lastname']),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'users_response')[0]
     users = json.loads(rv.data)
     assert len(users) == 1
 
@@ -358,6 +366,7 @@ def test_get_user(client, jwt, session):  # pylint:disable=unused-argument
     assert rv.status_code == http_status.HTTP_201_CREATED
     rv = client.get('/api/v1/users/@me', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'user_response')[0]
     user = json.loads(rv.data)
     assert user['firstname'] is not None
 
@@ -385,6 +394,7 @@ def test_add_contact(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.post('/api/v1/users/contacts', data=json.dumps(TestContactInfo.contact1),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'contact_response')[0]
     contact = json.loads(rv.data)
     assert contact['email'] == 'foo@bar.com'
 
@@ -452,6 +462,7 @@ def test_update_contact(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.put('/api/v1/users/contacts', data=json.dumps(TestContactInfo.contact2),
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'contact_response')[0]
     contact = json.loads(rv.data)
     assert contact['email'] == 'bar@foo.com'
 
@@ -534,6 +545,7 @@ def test_get_orgs_for_user(client, jwt, session, keycloak_mock):  # pylint:disab
     rv = client.get('/api/v1/users/orgs', headers=headers)
 
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'orgs_response')[0]
 
     response = json.loads(rv.data)
     assert response['orgs']
@@ -781,6 +793,7 @@ def test_add_bceid_user(client, jwt, session):  # pylint:disable=unused-argument
         'lastName': 'Doe'
     }))
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'user_response')[0]
     assert rv.json.get('firstname') == 'John-New'
 
 
@@ -797,4 +810,5 @@ def test_user_post_during_login(client, jwt, session):  # pylint:disable=unused-
     # Call same endpoint with login flag and assert login time is different
     rv = client.post('/api/v1/users', headers=headers, data=json.dumps({'isLogin': True}),
                      content_type='application/json')
+    assert schema_utils.validate(rv.json, 'user_response')[0]
     assert login_time != rv.json.get('loginTime')

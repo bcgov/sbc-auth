@@ -1,0 +1,72 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/product",
+    "type": "object",
+    "title": "Product schema",
+    "description": "The schema of product.",
+    "default": {},
+    "examples": [
+        {
+            "name": "Personal Property Registry",
+            "description": "View and maintain records of charges such as liens, security interests, and encumberances filed against personal property.",
+            "url": "https://dev.bcregistry.ca/business/ppr",
+            "type": "INTERNAL",
+            "mdiIcon": "mdi-image-outline"
+        }
+    ],
+    "required": [
+        "name",
+        "description",
+        "url",
+        "type",
+        "mdiIcon"
+    ],
+    "properties": {
+        "name": {
+            "$id": "#/properties/name",
+            "type": "string",
+            "title": "Name",
+            "default": "",
+            "examples": [
+                "Personal Property Registry"
+            ]
+        },
+        "description": {
+            "$id": "#/properties/description",
+            "type": "string",
+            "title": "Description",
+            "default": "",
+            "examples": [
+                "View and maintain records of charges such as liens, security interests, and encumberances filed against personal property."
+            ]
+        },
+        "url": {
+            "$id": "#/properties/url",
+            "type": "string",
+            "title": "URL",
+            "default": "",
+            "examples": [
+                "https://dev.bcregistry.ca/business/ppr"
+            ]
+        },
+        "type": {
+            "$id": "#/properties/type",
+            "type": "string",
+            "title": "Type",
+            "default": "",
+            "examples": [
+                "INTERNAL"
+            ]
+        },
+        "mdiIcon": {
+            "$id": "#/properties/mdiIcon",
+            "type": "string",
+            "title": "MDI Icon",
+            "default": "",
+            "examples": [
+                "mdi-image-outline"
+            ]
+        }
+    },
+    "additionalProperties": true
+}

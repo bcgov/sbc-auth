@@ -22,6 +22,7 @@ from unittest.mock import patch
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.schemas import utils as schema_utils
 from auth_api.services import Codes as CodesService
 
 
@@ -30,9 +31,11 @@ def test_get_codes(client, jwt, session):  # pylint:disable=unused-argument
     code_type = 'membership_type'
     rv = client.get('/api/v1/codes/{}'.format(code_type), content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'codes')[0]
 
     rv = client.get('/api/v1/codes/{}'.format(code_type.upper()), content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'codes')[0]
 
 
 def test_get_codes_404(client, jwt, session):  # pylint:disable=unused-argument

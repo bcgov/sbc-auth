@@ -1,0 +1,125 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/affidavit_response",
+    "type": "object",
+    "title": "Affidavit Response",
+    "description": "The affidavit schema for response.",
+    "default": {},
+    "examples": [
+        {
+            "contacts": [
+                {
+                    "created": "2020-11-23T11:39:33.011059+00:00",
+                    "createdBy": "None None",
+                    "email": "foo@bar.com",
+                    "modified": "2020-11-23T11:39:33.011066+00:00",
+                    "phone": "(555) 555-5555",
+                    "phoneExtension": "123"
+                }
+            ],
+            "created": "2020-11-23T11:39:32.989933+00:00",
+            "createdBy": "None None",
+            "documentUrl": "http://localhost:9000/accounts/Affidavits/e46e9818-3d87-416f-96f0-4292c706b344.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minio%2F20201123%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20201123T193933Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=50fd33daba591ee32878f563a04cef77c28cf8a3f0aaf48b31e82e943b7c9627",
+            "documentId": "Affidavits/e46e9818-3d87-416f-96f0-4292c706b344.jpeg",
+            "issuer": "ABC Notaries Inc.",
+            "modified": "2020-11-23T11:39:32.989941+00:00",
+            "status": "PENDING",
+            "user": 1
+        }
+    ],
+    "required": [
+        "contacts",
+        "created",
+        "createdBy",
+        "documentUrl",
+        "documentId",
+        "issuer",
+        "modified",
+        "status",
+        "user"
+    ],
+    "properties": {
+        "contacts": {
+            "$id": "#/properties/contacts",
+            "type": "array",
+            "title": "contacts",
+            "default": [],
+            "contacts": {
+                "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/contact_response"
+              }
+        },
+        "created": {
+            "$id": "#/properties/created",
+            "type": "string",
+            "title": "Created",
+            "default": "",
+            "examples": [
+                "2020-11-23T11:39:32.989933+00:00"
+            ]
+        },
+        "createdBy": {
+            "$id": "#/properties/createdBy",
+            "type": "string",
+            "title": "Created By",
+            "default": "",
+            "examples": [
+                "None None"
+            ]
+        },
+        "documentUrl": {
+            "$id": "#/properties/documentUrl",
+            "type": "string",
+            "title": "Document URL",
+            "default": "",
+            "examples": [
+                "http://localhost:9000/accounts/Affidavits/e46e9818-3d87-416f-96f0-4292c706b344.jpeg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minio%2F20201123%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20201123T193933Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=50fd33daba591ee32878f563a04cef77c28cf8a3f0aaf48b31e82e943b7c9627"
+            ]
+        },
+        "documentId": {
+            "$id": "#/properties/documentId",
+            "type": "string",
+            "title": "Document ID",
+            "default": "",
+            "examples": [
+                "Affidavits/e46e9818-3d87-416f-96f0-4292c706b344.jpeg"
+            ]
+        },
+        "issuer": {
+            "$id": "#/properties/issuer",
+            "type": "string",
+            "title": "Issuer",
+            "default": "",
+            "examples": [
+                "ABC Notaries Inc."
+            ]
+        },
+        "modified": {
+            "$id": "#/properties/modified",
+            "type": "string",
+            "title": "Modified",
+            "default": "",
+            "examples": [
+                "2020-11-23T11:39:32.989941+00:00"
+            ]
+        },
+        "status": {
+            "$id": "#/properties/status",
+            "type": "string",
+            "title": "Status",
+            "default": "",
+            "examples": [
+                "PENDING"
+            ]
+        },
+        "user": {
+            "$id": "#/properties/user",
+            "type": "integer",
+            "title": "User",
+            "default": 0,
+            "examples": [
+                1
+            ]
+        }
+    },
+    "additionalProperties": true
+}

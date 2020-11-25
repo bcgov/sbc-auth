@@ -17,12 +17,15 @@ Test suite to ensure that the Product api endpoints are working as expected.
 """
 
 import json
+from auth_api.schemas import utils as schema_utils
 
 
 def test_get_all_products(client, session):  # pylint:disable=unused-argument
     """Assert that an org can be retrieved via GET."""
     rv = client.get('/api/v1/products')
     item_list = json.loads(rv.data)
+
+    assert schema_utils.validate(item_list, 'products')[0]
     # assert the structure is correct by checking for name, description properties in each element
     for item in item_list:
         assert item['name'] and item['description']
