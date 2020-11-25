@@ -83,6 +83,7 @@
 <script lang="ts">
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
+import { Account } from '@/util/constants'
 import { PADInfo } from '@/models/Organization'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import { mask } from 'vue-the-mask'
@@ -96,7 +97,8 @@ import { mask } from 'vue-the-mask'
   },
   computed: {
     ...mapState('org', [
-      'currentOrgPADInfo'
+      'currentOrgPADInfo',
+      'currentOrganizationType'
     ])
   },
   methods: {
@@ -111,6 +113,7 @@ export default class PADInfoForm extends Vue {
   @Prop({ default: true }) isAcknowledgeNeeded: boolean
   @Prop({ default: true }) isTOSNeeded: boolean
   private readonly currentOrgPADInfo!: PADInfo
+  private readonly currentOrganizationType!: string
   private readonly setCurrentOrganizationPADInfo!: (padInfo: PADInfo) => void
   private transitNumber: string = ''
   private institutionNumber: string = ''
@@ -156,15 +159,20 @@ export default class PADInfoForm extends Vue {
   }
 
   private get padInfoSubtitle () {
-    return (this.isChangeView)
+    return (this.showPremiumPADInfo)
       ? 'Services will continue to be billed to the linked BC Online account until the mandatory (3) day confirmation period has ended.'
       : 'This account will not be able to perform any transactions until the mandatory (3) day confirmation period has ended.'
   }
 
   private get acknowledgementLabel () {
-    return (this.isChangeView)
+    // for Premium accounts, the label should mention that it will charge from BCOL till PAD is done.
+    return (this.showPremiumPADInfo)
       ? 'I understand that services will continue to be billed to the linked BC Online account until the mandatory (3) day confirmation period has ended.'
       : 'I understand that this account will not be able to perform any transactions until the mandatory (3) day confirmation period for pre-authorized debit has ended.'
+  }
+
+  private get showPremiumPADInfo () {
+    return (this.isChangeView || (this.currentOrganizationType === Account.PREMIUM))
   }
 
   @Emit()
