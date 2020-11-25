@@ -1,0 +1,317 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/bconline_response",
+    "type": "object",
+    "title": "BCOnline Response",
+    "description": "The BCOnline response schema.",
+    "default": {},
+    "examples": [
+        {
+            "accountNumber": "100670",
+            "accountType": "B",
+            "accountTypeDesc": "Billable",
+            "address": {
+                "city": "AB1",
+                "country": "CANADA",
+                "line1": "#400A - 6000 SEYMOUR PLACE",
+                "line2": "PENTHOUSE",
+                "postalCode": "V8X 5J8",
+                "province": "BC"
+            },
+            "authCode": "M",
+            "authCodeDesc": "Master",
+            "fax": "(250)953-8012",
+            "gstStatus": "",
+            "gstStatusDesc": "Must-Pay",
+            "orgName": "BC ONLINE TECHNICAL TEAM DEVL",
+            "orgType": "LAW",
+            "phone": "(250)953-8071 EX1999",
+            "profileFlags": [
+                "OSBR",
+                "ADS",
+                "COLIN_TYPE",
+                "COMP",
+                "ICBC",
+                "MH",
+                "LTO",
+                "SES",
+                "PPR",
+                "VS",
+                "CCREF",
+                "CCREL",
+                "ATSOURCE",
+                "COURT_SERVICES",
+                "EMERGIS",
+                "LOCATION_CODE"
+            ],
+            "pstStatus": "",
+            "pstStatusDesc": "Must-Pay",
+            "userId": "PB20020",
+            "userName": "BRIDGER, JAMES"
+        }
+    ],
+    "required": [
+        "accountNumber",
+        "accountType",
+        "accountTypeDesc",
+        "address",
+        "authCode",
+        "authCodeDesc",
+        "fax",
+        "gstStatus",
+        "gstStatusDesc",
+        "orgName",
+        "orgType",
+        "phone",
+        "profileFlags",
+        "pstStatus",
+        "pstStatusDesc",
+        "userId",
+        "userName"
+    ],
+    "properties": {
+        "accountNumber": {
+            "$id": "#/properties/accountNumber",
+            "type": "string",
+            "title": "Account Number",
+            "default": "",
+            "examples": [
+                "100670"
+            ]
+        },
+        "accountType": {
+            "$id": "#/properties/accountType",
+            "type": "string",
+            "title": "Account Type",
+            "default": "",
+            "examples": [
+                "B"
+            ]
+        },
+        "accountTypeDesc": {
+            "$id": "#/properties/accountTypeDesc",
+            "type": "string",
+            "title": "Account Type Description",
+            "default": "",
+            "examples": [
+                "Billable"
+            ]
+        },
+        "address": {
+            "$id": "#/properties/address",
+            "type": "object",
+            "title": "Address",
+            "default": {},
+            "examples": [
+                {
+                    "city": "AB1",
+                    "country": "CANADA",
+                    "line1": "#400A - 6000 SEYMOUR PLACE",
+                    "line2": "PENTHOUSE",
+                    "postalCode": "V8X 5J8",
+                    "province": "BC"
+                }
+            ],
+            "required": [
+                "city",
+                "country",
+                "line1",
+                "postalCode",
+                "province"
+            ],
+            "properties": {
+                "city": {
+                    "$id": "#/properties/address/properties/city",
+                    "type": "string",
+                    "title": "City",
+                    "default": "",
+                    "examples": [
+                        "AB1"
+                    ]
+                },
+                "country": {
+                    "$id": "#/properties/address/properties/country",
+                    "type": "string",
+                    "title": "Country",
+                    "default": "",
+                    "examples": [
+                        "CANADA"
+                    ]
+                },
+                "line1": {
+                    "$id": "#/properties/address/properties/line1",
+                    "type": "string",
+                    "title": "Address Line 1",
+                    "default": "",
+                    "examples": [
+                        "#400A - 6000 SEYMOUR PLACE"
+                    ]
+                },
+                "line2": {
+                    "$id": "#/properties/address/properties/line2",
+                    "type": "string",
+                    "title": "Address Line 2",
+                    "default": "",
+                    "examples": [
+                        "PENTHOUSE"
+                    ]
+                },
+                "postalCode": {
+                    "$id": "#/properties/address/properties/postalCode",
+                    "type": "string",
+                    "title": "Postal Code",
+                    "default": "",
+                    "examples": [
+                        "V8X 5J8"
+                    ]
+                },
+                "province": {
+                    "$id": "#/properties/address/properties/province",
+                    "type": "string",
+                    "title": "Province",
+                    "default": "",
+                    "examples": [
+                        "BC"
+                    ]
+                }
+            },
+            "additionalProperties": true
+        },
+        "authCode": {
+            "$id": "#/properties/authCode",
+            "type": "string",
+            "title": "Auth Code",
+            "default": "",
+            "examples": [
+                "M"
+            ]
+        },
+        "authCodeDesc": {
+            "$id": "#/properties/authCodeDesc",
+            "type": "string",
+            "title": "Auth Code Description",
+            "default": "",
+            "examples": [
+                "Master"
+            ]
+        },
+        "fax": {
+            "$id": "#/properties/fax",
+            "type": "string",
+            "title": "Fax",
+            "default": "",
+            "examples": [
+                "(250)953-8012"
+            ]
+        },
+        "gstStatus": {
+            "$id": "#/properties/gstStatus",
+            "type": "string",
+            "title": "GST Status",
+            "default": "",
+            "examples": [
+                ""
+            ]
+        },
+        "gstStatusDesc": {
+            "$id": "#/properties/gstStatusDesc",
+            "type": "string",
+            "title": "GST Status Desciption",
+            "default": "",
+            "examples": [
+                "Must-Pay"
+            ]
+        },
+        "orgName": {
+            "$id": "#/properties/orgName",
+            "type": "string",
+            "title": "Organization Name",
+            "default": "",
+            "examples": [
+                "BC ONLINE TECHNICAL TEAM DEVL"
+            ]
+        },
+        "orgType": {
+            "$id": "#/properties/orgType",
+            "type": "string",
+            "title": "Organization Type",
+            "default": "",
+            "examples": [
+                "LAW"
+            ]
+        },
+        "phone": {
+            "$id": "#/properties/phone",
+            "type": "string",
+            "title": "Phone",
+            "default": "",
+            "examples": [
+                "(250)953-8071 EX1999"
+            ]
+        },
+        "profileFlags": {
+            "$id": "#/properties/profileFlags",
+            "type": "array",
+            "title": "Profile Flags",
+            "default": [],
+            "examples": [
+                [
+                    "OSBR",
+                    "ADS"
+                ]
+            ],
+            "additionalItems": true,
+            "items": {
+                "$id": "#/properties/profileFlags/items",
+                "anyOf": [
+                    {
+                        "$id": "#/properties/profileFlags/items/anyOf/0",
+                        "type": "string",
+                        "default": "",
+                        "examples": [
+                            "OSBR",
+                            "ADS"
+                        ]
+                    }
+                ]
+            }
+        },
+        "pstStatus": {
+            "$id": "#/properties/pstStatus",
+            "type": "string",
+            "title": "PST Status",
+            "default": "",
+            "examples": [
+                ""
+            ]
+        },
+        "pstStatusDesc": {
+            "$id": "#/properties/pstStatusDesc",
+            "type": "string",
+            "title": "PST Status Description",
+            "default": "",
+            "examples": [
+                "Must-Pay"
+            ]
+        },
+        "userId": {
+            "$id": "#/properties/userId",
+            "type": "string",
+            "title": "User ID",
+            "default": "",
+            "examples": [
+                "PB20020"
+            ]
+        },
+        "userName": {
+            "$id": "#/properties/userName",
+            "type": "string",
+            "title": "User Name",
+            "default": "",
+            "examples": [
+                "BRIDGER, JAMES"
+            ]
+        }
+    },
+    "additionalProperties": true
+}

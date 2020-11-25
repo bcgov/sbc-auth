@@ -1,0 +1,159 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/contact_response",
+    "type": "object",
+    "title": "contact_response",
+    "description": "This schema is for response of contact endpoint.",
+    "default": {},
+    "examples": [
+        {
+            "created": "2020-11-13T00:21:52.192810+00:00",
+            "createdBy": "abc-auth sbc-auth",
+            "email": "test@gmail.com",
+            "modified": "2020-11-13T00:21:52.192826+00:00",
+            "phone": "1111",
+            "phoneExtension": "11111",
+            "street": "123 Roundabout Lane",
+            "streetAdditional": "Unit 1",
+            "city": "Victoria",
+            "region": "British Columnbia",
+            "country": "CA",
+            "postalCode": "V1A 1A1",
+            "deliveryInstructions": "Ring buzzer 123"
+        }
+    ],
+    "required": [
+        "created",
+        "email",
+        "modified",
+        "phone",
+        "phoneExtension"
+    ],
+    "properties": {
+        "created": {
+            "$id": "#/properties/created",
+            "type": "string",
+            "title": "Created",
+            "default": "",
+            "examples": [
+                "2020-11-13T00:21:52.192810+00:00"
+            ]
+        },
+        "createdBy": {
+            "$id": "#/properties/createdBy",
+            "type": "string",
+            "title": "Created By",
+            "default": "",
+            "examples": [
+                "abc-auth sbc-auth"
+            ]
+        },
+        "email": {
+            "$id": "#/properties/email",
+            "type": "string",
+            "title": "Email",
+            "default": "",
+            "examples": [
+                "test@gmail.com"
+            ]
+        },
+        "modified": {
+            "$id": "#/properties/modified",
+            "type": "string",
+            "title": "Modified",
+            "default": "",
+            "examples": [
+                "2020-11-13T00:21:52.192826+00:00"
+            ]
+        },
+        "phone": {
+            "$id": "#/properties/phone",
+            "type": "string",
+            "title": "Phone",
+            "default": "",
+            "examples": [
+                "1111"
+            ]
+        },
+        "phoneExtension": {
+            "$id": "#/properties/phoneExtension",
+            "type": "string",
+            "title": "Phone Extension",
+            "default": "",
+            "examples": [
+                "11111"
+            ]
+        },
+        "street": {
+            "$id": "#/properties/street",
+            "type": "string",
+            "title": "Street",
+            "default": "",
+            "examples": [
+              "123 Roundabout Lane"
+            ],
+            "pattern": "^(.*)$"
+        },
+        "streetAdditional": {
+            "$id": "#/properties/street_additional",
+            "type": "string",
+            "title": "Street Additional",
+            "default": "",
+            "examples": [
+              "Unit 1"
+            ],
+            "pattern": "^(.*)$"
+        },
+        "city": {
+            "$id": "#/properties/city",
+            "type": "string",
+            "title": "City",
+            "default": "",
+            "examples": [
+              "Victoria"
+            ],
+            "pattern": "^(.*)$"
+        },
+        "region": {
+            "$id": "#/properties/region",
+            "type": "string",
+            "title": "Region",
+            "default": "",
+            "examples": [
+              "British Columbia"
+            ],
+            "pattern": "^(.*)$"
+        },
+        "country": {
+            "$id": "#/properties/country",
+            "type": "string",
+            "title": "Country",
+            "default": "",
+            "examples": [
+              "CA"
+            ],
+            "pattern": "^(.*)$"
+        },
+        "postalCode": {
+            "$id": "#/properties/postal_code",
+            "type": "string",
+            "title": "Postal Code",
+            "default": "",
+            "examples": [
+              "V1A 1A1"
+            ],
+            "pattern": "^(.*)$"
+        },
+        "deliveryInstructions": {
+            "$id": "#/properties/delivery_instructions",
+            "type": "string",
+            "title": "Delivery Instructions",
+            "default": "",
+            "examples": [
+              "Ring buzzer 123"
+            ],
+            "pattern": "^(.*)$"
+        }        
+    },
+    "additionalProperties": true
+}

@@ -1,0 +1,77 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/membership",
+    "type": "object",
+    "title": "membership",
+    "description": "The membership schema.",
+    "default": {},
+    "examples": [
+        {
+            "id": 3195,
+            "membershipStatus": "ACTIVE",
+            "membershipTypeCode": "ADMIN",
+            "user": {
+                "contacts": [
+                    {
+                        "created": "2020-11-03T20:51:30.535608+00:00",
+                        "createdBy": "abc-auth sbc-auth",
+                        "email": "test@gmail.com",
+                        "modified": "2020-11-03T20:51:30.535619+00:00",
+                        "phone": "1111",
+                        "phoneExtension": "11111"
+                    }
+                ],
+                "firstname": "abc-auth",
+                "id": 5389,
+                "lastname": "sbc-auth",
+                "loginSource": "BCSC",
+                "modified": "2020-11-03T20:50:39.366030+00:00",
+                "username": "service-account-registries-public-user-test"
+            }
+        }
+    ],
+    "required": [
+        "id",
+        "membershipStatus",
+        "membershipTypeCode",
+        "user"
+    ],
+    "properties": {
+        "id": {
+            "$id": "#/properties/id",
+            "type": "integer",
+            "title": "ID",
+            "default": 0,
+            "examples": [
+                3195
+            ]
+        },
+        "membershipStatus": {
+            "$id": "#/properties/membershipStatus",
+            "type": "string",
+            "title": "Membership Status",
+            "default": "",
+            "examples": [
+                "ACTIVE"
+            ]
+        },
+        "membershipTypeCode": {
+            "$id": "#/properties/membershipTypeCode",
+            "type": "string",
+            "title": "The membershipTypeCode schema",
+            "default": "",
+            "examples": [
+                "ADMIN"
+            ]
+        },
+        "user": {
+            "$id": "#/properties/user",
+            "type": "object",
+            "title": "User",
+            "user": {
+                "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/user_response"
+              }
+        }
+    },
+    "additionalProperties": true
+}

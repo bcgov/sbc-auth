@@ -22,6 +22,7 @@ from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header, factory_invitation
 
 from auth_api import status as http_status
+from auth_api.schemas import utils as schema_utils
 from auth_api.services import Invitation as InvitationService
 
 
@@ -38,6 +39,7 @@ def test_add_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=
     dictionary = json.loads(rv.data)
     assert dictionary.get('token') is not None
     assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'invitation_response')[0]
 
 
 def test_add_invitation_invalid(client, jwt, session):  # pylint:disable=unused-argument
@@ -61,6 +63,7 @@ def test_get_invitations_by_id(client, jwt, session, keycloak_mock):  # pylint:d
     invitation_dictionary = json.loads(rv.data)
     invitation_id = invitation_dictionary['id']
     rv = client.get('/api/v1/invitations/{}'.format(invitation_id), headers=headers, content_type='application/json')
+    assert schema_utils.validate(rv.json, 'invitation_response')[0]
     assert rv.status_code == http_status.HTTP_200_OK
 
 
@@ -78,6 +81,7 @@ def test_delete_invitation(client, jwt, session, keycloak_mock):  # pylint:disab
     invitation_id = invitation_dictionary['id']
     rv = client.delete('/api/v1/invitations/{}'.format(invitation_id), headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+
     rv = client.get('/api/v1/invitations/{}'.format(invitation_id), headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
     dictionary = json.loads(rv.data)
@@ -100,6 +104,7 @@ def test_update_invitation(client, jwt, session, keycloak_mock):  # pylint:disab
     rv = client.patch('/api/v1/invitations/{}'.format(invitation_id), data=json.dumps(updated_invitation),
                       headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'invitation_response')[0]
     dictionary = json.loads(rv.data)
     assert dictionary['status'] == 'PENDING'
 
@@ -141,6 +146,7 @@ def test_accept_invitation(client, jwt, session, keycloak_mock):  # pylint:disab
     rv = client.put('/api/v1/invitations/tokens/{}'.format(invitation_id_token), headers=headers_invitee,
                     content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+
     rv = client.get('/api/v1/orgs/{}/members?status=PENDING_APPROVAL'.format(org_id),
                     headers=headers,
                     content_type='application/json')

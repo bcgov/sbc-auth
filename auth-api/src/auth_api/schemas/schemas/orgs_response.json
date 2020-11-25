@@ -1,0 +1,48 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/orgs_response",
+    "type": "object",
+    "title": "Organizations Response",
+    "description": "The organizations schema for response.",
+    "default": {},
+    "examples": [
+        {
+            "orgs": [
+                {
+                    "accessType": "REGULAR",
+                    "billable": true,
+                    "created": "2020-11-17T14:58:14.701596+00:00",
+                    "createdBy": "Gilbert Campbell",
+                    "id": 1,
+                    "loginOptions": [],
+                    "modified": "2020-11-17T14:58:14.729096+00:00",
+                    "modifiedBy": "Gilbert Campbell",
+                    "name": "My Test Org",
+                    "orgType": "BASIC",
+                    "orgStatus": "ACTIVE",
+                    "products": [
+                        1
+                    ],
+                    "statusCode": "ACTIVE"
+                }
+            ]
+        }
+    ],
+    "required": [
+        "orgs"
+    ],
+    "properties": {
+        "orgs": {
+            "$id": "#/properties/orgs",
+            "type": "array",
+            "title": "Organizations",
+            "default": [],
+            "additionalItems": true,
+            "items": {
+                "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/org_response"
+            }
+
+        }
+    },
+    "additionalProperties": true
+}
