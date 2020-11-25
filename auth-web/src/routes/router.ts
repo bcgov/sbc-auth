@@ -236,8 +236,8 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
-      path: '/account-freeze-nfs',
-      name: 'account-freeze-nfs',
+      path: '/account-freeze-nsf',
+      name: 'account-freeze-nsf',
       component: AccountFreezeUnlockView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
