@@ -20,6 +20,7 @@ from typing import Dict
 from flask import abort
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
+from auth_api.services.permissions import Permissions as PermissionsService
 from auth_api.utils.roles import STAFF, Role
 
 
@@ -56,13 +57,15 @@ class Authorization:
                                                                                                 keycloak_product_code)
                 if auth:
                     auth_response = Authorization(auth).as_dict(expanded)
-                    auth_response['roles'] = ['edit', 'view']
+                    permissions = PermissionsService.get_permissions_for_membership(auth.status_code, 'SYSTEM')
+                    auth_response['roles'] = permissions
         else:
             keycloak_guid = token_info.get('sub', None)
             if business_identifier and keycloak_guid:
                 auth = AuthorizationView.find_user_authorization_by_business_number(business_identifier, keycloak_guid)
 
             if auth:
+                permissions = PermissionsService.get_permissions_for_membership(auth.status_code, auth.org_membership)
                 auth_response = Authorization(auth).as_dict(expanded)
                 auth_response['roles'] = ['edit', 'view']
 
@@ -87,6 +90,7 @@ class Authorization:
                                                                                                     account_id,
                                                                                                     product_code)
         auth_response = Authorization(authorization).as_dict(expanded)
+        # TODO absorb permission model here
         auth_response['roles'] = authorization.roles.split(',') if authorization and authorization.roles else []
 
         return auth_response
