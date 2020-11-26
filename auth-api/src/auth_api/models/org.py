@@ -159,7 +159,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     def find_similar_org_by_name(cls, name, org_id=None):
         """Find an Org instance that matches the provided name."""
         # TODO: add more fancy comparison
-        query = cls.query.filter(Org.name.ilike(f'%{name}%')).filter(Org.status_code != OrgStatusEnum.INACTIVE.value)
+        query = cls.query.filter(Org.name == name).filter(Org.status_code != OrgStatusEnum.INACTIVE.value)
         if org_id:
             query = query.filter(Org.id != org_id)
         return query.first()
