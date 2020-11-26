@@ -47,8 +47,9 @@ export enum Pages {
     SETUP_ACCOUNT_NON_BCSC = 'nonbcsc-info',
     SETUP_ACCOUNT_NON_BCSC_INSTRUCTIONS = 'instructions',
     SETUP_ACCOUNT_NON_BCSC_DOWNLOAD = 'download',
-    ACCOUNT_FREEZE_UNLOCK = 'account-freeze-nfs',
+    ACCOUNT_FREEZE_UNLOCK = 'account-freeze-nsf',
     ACCOUNT_FREEZE = 'account-freeze',
+    ACCOUNT_SETTINGS = 'settings',
     EDIT_ACCOUNT_TYPE= '/change-account',
     STAFF_DASHBOARD_OLD= '/searchbusiness',
     STAFF_SETUP_ACCOUNT = 'staff-setup-account',
@@ -138,7 +139,9 @@ export enum Permission {
     MANAGE_STATEMENTS = 'MANAGE_STATEMENTS',
     VIEW_PAYMENT_METHODS = 'VIEW_PAYMENT_METHODS',
     VIEW_ADMIN_CONTACT = 'VIEW_ADMIN_CONTACT',
-    RESET_OTP = 'RESET_OTP'
+    RESET_OTP = 'RESET_OTP',
+    MAKE_PAYMENT = 'MAKE-PAYMENT',
+    GENERATE_INVOICE = 'GENERATE-INVOICE'
 }
 
 export enum LDFlags {

@@ -249,7 +249,8 @@ export default class OrgModule extends VuexModule {
     if (!kcUserProfile.roles.includes(Role.Staff)) {
       response = await UserService.getMembership(orgId)
       membership = response?.data
-      const res = await PermissionService.getPermissions('ACTIVE', membership.membershipTypeCode)
+      const org: Organization = this.context.state['currentOrganization']
+      const res = await PermissionService.getPermissions(org?.statusCode, membership?.membershipTypeCode)
       permissions = res?.data
     } else {
       // Check for better approach
