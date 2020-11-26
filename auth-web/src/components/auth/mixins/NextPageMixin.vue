@@ -1,6 +1,6 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
-import { AccountStatus, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
+import { AccountStatus, LoginSource, Pages, Permission, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
@@ -18,7 +18,7 @@ import { getModule } from 'vuex-module-decorators'
 @Component({
   computed: {
     ...mapState('user', ['currentUser', 'userProfile', 'userContact', 'redirectAfterLoginUrl']),
-    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings'])
+    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings', 'permissions'])
   },
   methods: {
     ...mapActions('user', ['loadUserInfo', 'syncUserProfile', 'getUserProfile']),
@@ -36,6 +36,7 @@ export default class NextPageMixin extends Vue {
   protected readonly currentOrganization!: Organization
   protected readonly currentMembership!: Member
   protected readonly currentAccountSettings!: AccountSettings
+  protected readonly permissions!: string[]
   protected readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
   protected readonly syncUserProfile!: () => void
   protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
@@ -156,7 +157,7 @@ export default class NextPageMixin extends Vue {
     if (this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED) {
       // eslint-disable-next-line no-console
       console.log('Redirecting user to Account Freeze message since the account is temporarly suspended.')
-      if (this.currentMembership?.membershipTypeCode === MembershipType.Admin) {
+      if (this.permissions.some(code => code === Permission.MAKE_PAYMENT)) {
         /** the below check is for Admin can still access several routes like team management, statements etc.  */
         if (!(this.$route.matched?.some(record => record.meta.allowOnAccountFreeze))) {
           this.$router.push(`/${Pages.ACCOUNT_FREEZE_UNLOCK}`)
