@@ -12,7 +12,6 @@ from auth_api.utils.custom_sql import CustomSql
 from sqlalchemy import Boolean, String
 from sqlalchemy.sql import column, table
 
-
 # revision identifiers, used by Alembic.
 revision = '1c958b749a20'
 down_revision = '75336ba7d252'
@@ -53,7 +52,6 @@ authorizations_view_old = CustomSql('authorizations_view',
                                     '   ON ps.org_id = o.id '
                                     'WHERE '
                                     '   m.status = 1')
-
 
 authorizations_view_new = CustomSql('authorizations_view',
                                     'SELECT '
@@ -96,7 +94,83 @@ def upgrade():
     op.execute(f'DROP VIEW IF EXISTS {authorizations_view_new.name}')
     op.execute(f'CREATE VIEW {authorizations_view_new.name} AS {authorizations_view_new.sql}')
 
+    permissions_table = table('permissions',
+                              column('id', sa.Integer()),
+                              column('membership_type_code', sa.String(length=15)),
+                              column('org_status_code', sa.String(length=25)),
+                              column('actions', sa.String(length=100)))
+
+    # Insert code values
+    op.bulk_insert(
+        permissions_table,
+        [
+            {'id': 29, 'membership_type_code': 'ADMIN', 'org_status_code': None,
+             'actions': 'edit'},
+            {'id': 30, 'membership_type_code': 'ADMIN', 'org_status_code': None,
+             'actions': 'view'},
+            {'id': 31, 'membership_type_code': 'ADMIN', 'org_status_code': None,
+             'actions': 'make-payment'},
+            {'id': 32, 'membership_type_code': 'ADMIN', 'org_status_code': None,
+             'actions': 'generate-invoice'},
+
+            {'id': 33, 'membership_type_code': 'COORDINATOR', 'org_status_code': None,
+             'actions': 'edit'},
+            {'id': 34, 'membership_type_code': 'COORDINATOR', 'org_status_code': None,
+             'actions': 'view'},
+            {'id': 35, 'membership_type_code': 'COORDINATOR', 'org_status_code': None,
+             'actions': 'make-payment'},
+            {'id': 36, 'membership_type_code': 'COORDINATOR', 'org_status_code': None,
+             'actions': 'generate-invoice'},
+
+            {'id': 37, 'membership_type_code': 'USER', 'org_status_code': None,
+             'actions': 'edit'},
+            {'id': 38, 'membership_type_code': 'USER', 'org_status_code': None,
+             'actions': 'view'},
+            {'id': 39, 'membership_type_code': 'USER', 'org_status_code': None,
+             'actions': 'make-payment'},
+            {'id': 40, 'membership_type_code': 'USER', 'org_status_code': None,
+             'actions': 'generate-invoice'},
+
+            {'id': 41, 'membership_type_code': 'ADMIN', 'org_status_code': 'NSF_SUSPENDED',
+             'actions': 'transaction_history'},
+            {'id': 42, 'membership_type_code': 'ADMIN', 'org_status_code': 'NSF_SUSPENDED',
+             'actions': 'transaction_history'},
+            {'id': 43, 'membership_type_code': 'ADMIN', 'org_status_code': 'NSF_SUSPENDED',
+             'actions': 'transaction_history'},
+            {'id': 44, 'membership_type_code': 'ADMIN', 'org_status_code': 'NSF_SUSPENDED',
+             'actions': 'transaction_history'},
+            {'id': 45, 'membership_type_code': 'ADMIN', 'org_status_code': 'NSF_SUSPENDED',
+             'actions': 'transaction_history'},
+            {'id': 46, 'membership_type_code': 'ADMIN', 'org_status_code': 'NSF_SUSPENDED',
+             'actions': 'transaction_history'},
+
+            {'id': 47, 'membership_type_code': 'ADMIN', 'org_status_code': 'NSF_SUSPENDED',
+             'actions': 'make-payment'},
+            {'id': 48, 'membership_type_code': 'ADMIN', 'org_status_code': 'NSF_SUSPENDED',
+             'actions': 'generate-invoice'},
+
+            {'id': 49, 'membership_type_code': 'SYSTEM', 'org_status_code': 'NSF_SUSPENDED',
+             'actions': 'make-payment'},
+            {'id': 50, 'membership_type_code': 'SYSTEM', 'org_status_code': 'NSF_SUSPENDED',
+             'actions': 'generate-invoice'},
+
+            {'id': 51, 'membership_type_code': 'SYSTEM', 'org_status_code': None,
+             'actions': 'make-payment'},
+            {'id': 52, 'membership_type_code': 'SYSTEM', 'org_status_code': None,
+             'actions': 'generate-invoice'},
+            {'id': 53, 'membership_type_code': 'SYSTEM', 'org_status_code': None,
+             'actions': 'view'},
+            {'id': 54, 'membership_type_code': 'SYSTEM', 'org_status_code': None,
+             'actions': 'edit'},
+        ]
+    )
+    # Update actions to lower case
+
+    op.execute('update permissions set actions=lower(actions)')
+
 
 def downgrade():
     op.execute(f'DROP VIEW IF EXISTS {authorizations_view_old.name}')
     op.execute(f'CREATE VIEW {authorizations_view_old.name} AS {authorizations_view_old.sql}')
+    op.execute('delete from permissions where id between 29 and 54')
+    op.execute('update permissions set actions=upper(actions)')
