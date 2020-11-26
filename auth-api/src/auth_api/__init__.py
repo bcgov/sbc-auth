@@ -29,6 +29,7 @@ from auth_api import models
 from auth_api.extensions import mail
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.models import db, ma
+from auth_api.utils.cache import cache
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
 import auth_api.config as config
@@ -84,6 +85,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
             response.set_data(json.dumps(camelize(json.loads(response.get_data()))))
 
     register_shellcontext(app)
+    build_cache(app)
 
     return app
 
@@ -107,3 +109,18 @@ def register_shellcontext(app):
         return {'app': app, 'jwt': JWT, 'db': db, 'models': models}  # pragma: no cover
 
     app.shell_context_processor(shell_context)
+
+
+def build_cache(app):
+    """Build cache."""
+    cache.init_app(app)
+    with app.app_context():
+        cache.clear()
+        if not app.config.get('TESTING', False):
+            try:
+                from auth_api.services.permissions import \
+                    Permissions as PermissionService  # pylint: disable=import-outside-toplevel
+                PermissionService.build_all_permission_cache()
+            except Exception as e:  # pylint:disable=broad-except
+                app.logger.error('Error on caching ')
+                app.logger.error(e)
