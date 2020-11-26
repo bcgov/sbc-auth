@@ -4,7 +4,9 @@ import ConfigHelper from '@/util/config-helper'
 var mockob = {
   'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
   'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
-  'VUE_APP_AUTH_ROOT_API': 'https://auth-api-dev.pathfinder.gov.bc.ca/api/v1'
+  'VUE_APP_AUTH_ROOT_API': 'https://auth-api-dev.pathfinder.gov.bc.ca/api/v1',
+  'NRO_URL': 'https://dev.bcregistrynames.gov.bc.ca/nro/',
+  'NAME_REQUEST_URL': 'https://dev.bcregistry.ca/namerequest/'
 }
 
 jest.mock('axios', () => ({
