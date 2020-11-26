@@ -126,6 +126,7 @@ export function getRoutes (): RouteConfig[] {
           meta: {
             showNavBar: true,
             disabledRoles: [Role.AnonymousUser],
+            requiresAuth: true,
             requiresActiveAccount: true
           }
         }]
@@ -134,7 +135,12 @@ export function getRoutes (): RouteConfig[] {
       path: '/account/:orgId/settings',
       name: 'account-settings',
       component: accountSettings,
-      meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true },
+      meta: {
+        requiresAuth: true,
+        requiresProfile: true,
+        requiresActiveAccount: true,
+        allowOnAccountFreeze: true
+      },
       redirect: '/account/:orgId/settings/account-info',
       props: true,
       children: [
@@ -230,8 +236,8 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
-      path: '/account-freeze-nfs',
-      name: 'account-freeze-nfs',
+      path: '/account-freeze-nsf',
+      name: 'account-freeze-nsf',
       component: AccountFreezeUnlockView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }

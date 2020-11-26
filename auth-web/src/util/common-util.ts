@@ -114,7 +114,9 @@ export default class CommonUtils {
       Permission.MANAGE_STATEMENTS,
       Permission.VIEW_PAYMENT_METHODS,
       Permission.VIEW_ADMIN_CONTACT,
-      Permission.RESET_OTP
+      Permission.RESET_OTP,
+      Permission.MAKE_PAYMENT,
+      Permission.GENERATE_INVOICE
     ]
   }
   static getViewOnlyPermissions (): string[] {
