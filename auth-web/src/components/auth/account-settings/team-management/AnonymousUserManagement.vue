@@ -176,24 +176,31 @@
       :title="confirmActionTitle"
       :text="confirmActionText"
       dialog-class="notify-dialog"
-      max-width="640"
+      max-width="480"
     >
       <template v-slot:icon>
-        <v-icon large color="primary">mdi-information-outline</v-icon>
-      </template>
-      <template v-slot:text>
-        {{ confirmActionText }}
+        <v-icon
+          large
+          :color="primaryActionType"
+        >
+          mdi-information-outline
+        </v-icon>
       </template>
       <template v-slot:actions>
-        <v-btn large color="primary" @click="confirmHandler()">{{
-          primaryActionText
-        }}</v-btn>
         <v-btn
           large
-          color="default"
-          @click="close($refs.confirmActionDialogWithQuestion)"
-          >{{ secondaryActionText }}</v-btn
+          :color="primaryActionType"
+          @click="confirmHandler()"
         >
+          {{ primaryActionText }}
+        </v-btn>
+        <v-btn
+          large
+          depressed
+          @click="close($refs.confirmActionDialogWithQuestion)"
+        >
+          {{ secondaryActionText }}
+        </v-btn>
       </template>
     </ModalDialog>
 

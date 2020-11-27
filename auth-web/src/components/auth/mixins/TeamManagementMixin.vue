@@ -88,9 +88,10 @@ export default class TeamManagementMixin extends Vue {
     if (payload.member.membershipTypeCode.toString() === payload.targetRole.toString()) {
       return
     }
+    const username = `${payload.member?.user?.firstname || ''} ${payload.member?.user?.lastname || ''}`.trim()
     this.modal = confirmActionDialogWithQuestion
     this.confirmActionTitle = this.$t('confirmRoleChangeTitle').toString()
-    this.confirmActionText = `Change <strong>${payload.member?.user?.firstname} ${payload.member?.user?.lastname}'s</strong> role to ${payload.targetRole}?`
+    this.confirmActionText = `Change <strong>${username}</strong>'s role to ${payload.targetRole}?`
     this.roleChangeToAction = payload
     this.confirmHandler = this.changeRole
     this.primaryActionText = 'Change'
