@@ -10,6 +10,7 @@ import {
 import { TransactionFilter, TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 import { AxiosPromise } from 'axios'
 import ConfigHelper from '@/util/config-helper'
+import { InvoiceListResponse } from '@/models/invoice'
 import { axios } from '@/util/http-util.ts'
 
 export default class PaymentService {
@@ -98,5 +99,9 @@ export default class PaymentService {
 
   static verifyPADInfo (padInfo: PADInfo): AxiosPromise<PADInfoValidation> {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/bank-accounts/verifications`, padInfo)
+  }
+
+  static getFailedInvoices (accountId: string): AxiosPromise<InvoiceListResponse> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments?status=FAILED`)
   }
 }

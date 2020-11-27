@@ -12,10 +12,13 @@ import { AccessType } from '@/util/constants'
         >
           <v-card-text>
             <div class="mb-1">Your account has been suspended from:
-              <strong>DD-MM-YYY</strong>
+              <strong>{{suspendedDate}}</strong>
+            </div>
+            <div>NSF Fee:
+              <strong>${{nsfFee.toFixed(2)}}</strong>
             </div>
             <div>Due to the following amount:
-              <strong>$118.50</strong>
+              <strong>${{totalAmountToPay.toFixed(2)}}</strong>
             </div>
           </v-card-text>
         </v-card>
@@ -52,7 +55,9 @@ import { AccessType } from '@/util/constants'
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { mapMutations, mapState } from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
+import CommonUtils from '@/util/common-util'
+import { InvoiceList } from '@/models/invoice'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 
@@ -61,17 +66,48 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
     ...mapState('org', [
       'currentOrganization'
     ])
+  },
+  methods: {
+    ...mapActions('org', [
+      'getFailedInvoices'
+    ])
   }
 })
 export default class AccountOverview extends Mixins(Steppable) {
   private readonly currentOrganization!: Organization
+  private readonly getFailedInvoices!: () => InvoiceList[]
+  private formatDate = CommonUtils.formatDisplayDate
+  private nsfFee: number = 0
+  private nsfCount: number = 0
+  private totalTransactionAmount: number = 0
+  private totalAmountToPay: number = 0
 
   private goNext () {
     this.stepForward()
   }
 
+  private get suspendedDate () {
+    return (this.currentOrganization?.suspendedOn) ? this.formatDate(new Date(this.currentOrganization.suspendedOn)) : ''
+  }
+
   private downloadTransactionPDF () {
     // download PDF
+  }
+
+  async mounted () {
+    const failedInvoices: InvoiceList[] = await this.getFailedInvoices()
+
+    failedInvoices.forEach((failedInvoice) => {
+      this.totalAmountToPay += failedInvoice?.invoices?.map(el => el.total).reduce((accumulator, invoiceTotal) => accumulator + invoiceTotal)
+      failedInvoice?.invoices?.forEach((invoice) => {
+        const nsfItems = invoice?.lineItems?.filter(lineItem => (lineItem.description === 'NSF'))
+          .map(el => el.total)
+        this.nsfCount += nsfItems.length
+        this.nsfFee += (nsfItems.length) ? nsfItems?.reduce((accumulator, currentValue) => accumulator + currentValue) : 0
+      })
+    })
+
+    this.totalTransactionAmount = this.totalAmountToPay - this.nsfFee
   }
 }
 </script>

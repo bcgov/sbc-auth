@@ -42,6 +42,7 @@ export interface Organization {
   paymentSettings?: any,
   bcolAccountId?: string,
   bcolUserId?: string
+  suspendedOn?: string
 }
 
 export interface PADInfo {

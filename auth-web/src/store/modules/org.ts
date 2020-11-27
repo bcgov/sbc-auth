@@ -27,6 +27,7 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
+import { InvoiceList } from '@/models/invoice'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
@@ -696,6 +697,12 @@ export default class OrgModule extends VuexModule {
     paymentType = (paymentType === PaymentTypes.DIRECT_PAY) ? PaymentTypes.CREDIT_CARD : paymentType
     this.context.commit('setCurrentOrganizationPaymentType', paymentType)
     return response?.data
+  }
+
+  @Action({ rawError: true })
+  public async getFailedInvoices (): Promise<InvoiceList[]> {
+    const response = await PaymentService.getFailedInvoices(this.context.state['currentOrganization'].id)
+    return response?.data?.items || []
   }
 
   @Action({ rawError: true })
