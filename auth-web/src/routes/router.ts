@@ -28,6 +28,8 @@ import MaintainBusinessView from '@/views/auth/home/MaintainBusinessView.vue'
 import NonBcscAccountCreationSuccessView from '@/views/auth/create-account/non-bcsc/NonBcscAccountCreationSuccessView.vue'
 import NonBcscAccountSetupView from '@/views/auth/create-account/non-bcsc/NonBcscAccountSetupView.vue'
 import NonBcscInfoView from '@/views/auth/create-account/non-bcsc/NonBcscInfoView.vue'
+import PadPaymentReturnView from '@/views/pay/PadPaymentReturnView.vue'
+import PadPaymentView from '@/views/pay/PadPaymentView.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
 import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
 import PaymentView from '@/views/pay/PaymentView.vue'
@@ -373,6 +375,13 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: false }
     },
     {
+      path: '/make-pad-payment/:paymentId/transactions/:redirectUrl',
+      name: 'makepadpayment',
+      component: PadPaymentView,
+      props: true,
+      meta: { requiresAuth: false }
+    },
+    {
       path: '/profiledeactivated',
       name: 'profiledeactivated',
       component: ProfileDeactivatedView,
@@ -386,6 +395,14 @@ export function getRoutes (): RouteConfig[] {
       props: mapReturnPayVars,
       meta: { requiresAuth: false }
     },
+    {
+      path: '/return-pad-payment/:paymentId/transaction/:transactionId',
+      name: 'returnpadpayment',
+      component: PadPaymentReturnView,
+      props: mapReturnPayVars,
+      meta: { requiresAuth: false }
+    },
+
     {
       path: Pages.STAFF_DASHBOARD,
       name: 'staff-dashboard',
