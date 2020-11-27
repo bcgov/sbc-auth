@@ -52,7 +52,7 @@ import { AccessType } from '@/util/constants'
         <v-btn
           large
           color="primary"
-          @click="proceed"
+          @click="proceedToPayment"
           class="proceed-btn"
           :disabled="!isAcknowledged"
         >
@@ -65,11 +65,19 @@ import { AccessType } from '@/util/constants'
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { mapMutations, mapState } from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
+import ConfigHelper from 'sbc-common-components/src/util/config-helper'
 import { Organization } from '@/models/Organization'
+import { Pages } from '@/util/constants'
+import { Payment } from '@/models/Payment'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 
 @Component({
+  methods: {
+    ...mapActions('org', [
+      'createAccountPayment'
+    ])
+  },
   computed: {
     ...mapState('org', [
       'currentOrganization'
@@ -78,10 +86,14 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 })
 export default class PaymentReview extends Mixins(Steppable) {
   private readonly currentOrganization!: Organization
+  private readonly createAccountPayment!: () => Payment
   private isAcknowledged: boolean = false
 
-  private proceed () {
-    // proceed final step
+  private async proceedToPayment () {
+    const payment:Payment = await this.createAccountPayment()
+    const returnUrl = `${ConfigHelper.getAuthContextPath()}/${Pages.ACCOUNT_SETTINGS}?tryOrgRefresh=true`
+    // redirect to make payment UI
+    await this.$router.push(`${Pages.MAKE_PAD_PAYMENT}${payment.id}/transactions?${returnUrl}`)
   }
 
   private goBack () {
