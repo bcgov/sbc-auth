@@ -10,6 +10,7 @@ import {
   Member,
   MembershipStatus,
   MembershipType,
+  OrgPaymentDetails,
   Organization,
   PADInfo,
   PADInfoValidation,
@@ -691,7 +692,7 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async getOrgPayments () {
+  public async getOrgPayments (): Promise<OrgPaymentDetails> {
     const response = await OrgService.getOrgPayments(this.context.state['currentOrganization'].id)
     let paymentType = response?.data?.paymentMethod || undefined
     paymentType = (paymentType === PaymentTypes.DIRECT_PAY) ? PaymentTypes.CREDIT_CARD : paymentType

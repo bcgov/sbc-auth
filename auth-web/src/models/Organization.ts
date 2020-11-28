@@ -177,3 +177,25 @@ export interface OrgFilterParams {
   pageNumber?: number
   pageLimit?: number
 }
+
+export interface OrgPaymentDetails {
+  authAccountId: string
+  authAccountName: string
+  bcolAccount: string
+  bcolUserId: string
+  billable: boolean
+  cfsAccount: CFSAccountDetails
+  credit: string
+  paymentMethod: string
+  statementNotificationEnabled: true
+}
+
+export interface CFSAccountDetails {
+  bankAccountNumber: string
+  bankInstitutionNumber: string
+  bankTransitNumber: string
+  cfsAccountNumber: string
+  cfsPartyNumber: string
+  cfsSiteNumber: string
+  status: string
+}

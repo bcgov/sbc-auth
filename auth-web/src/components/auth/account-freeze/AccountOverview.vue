@@ -4,22 +4,34 @@ import { AccessType } from '@/util/constants'
     <p class="mb-1">Account has been suspended for outstanding balance.</p>
     <p class="mb-4">To unlock your account please complete the following steps</p>
     <v-row class="mb-12 pb-12">
-      <v-col md="7">
+      <v-col md="9">
         <v-card
           outlined
           flat
           class="suspended-info-card"
         >
           <v-card-text>
-            <div class="mb-1">Your account has been suspended from:
-              <strong>{{suspendedDate}}</strong>
-            </div>
-            <div>NSF Fee:
-              <strong>${{nsfFee.toFixed(2)}}</strong>
-            </div>
-            <div>Due to the following amount:
-              <strong>${{totalAmountToPay.toFixed(2)}}</strong>
-            </div>
+            <v-row class="suspended-row">
+              <v-col class="pt-0">Suspended from</v-col>
+              <v-col class="card-value-right">{{suspendedDate}}</v-col>
+            </v-row>
+            <v-divider class="divider-card"></v-divider>
+            <v-row>
+              <v-col md="9" class="pt-0">
+                <div>Dishonored Bank Instrument Fee</div>
+                <div class="sub-txt">As per PAD terms, you are charged $30 dishonored bank fee for every failed payment</div>
+              </v-col>
+              <v-col class="card-value-right">${{nsfFee.toFixed(2)}}</v-col>
+            </v-row>
+            <v-row class="pb-3">
+              <v-col class="pt-0">Total Transactions</v-col>
+              <v-col class="card-value-right">${{totalTransactionAmount.toFixed(2)}}</v-col>
+            </v-row>
+            <v-divider class="divider-card"></v-divider>
+            <v-row class="font-weight-bold">
+              <v-col class="pt-0 pb-2">Total Amount Due</v-col>
+              <v-col class="pb-2 card-value-right">${{totalAmountToPay.toFixed(2)}}</v-col>
+            </v-row>
           </v-card-text>
         </v-card>
       </v-col>
@@ -120,6 +132,18 @@ export default class AccountOverview extends Mixins(Steppable) {
   border-width: 2px !important;
   .v-card__text {
     color: #000 !important;
+  }
+  .sub-txt {
+    font-style: italic;
+    font-size: .75rem;
+  }
+  .card-value-right {
+    text-align: right;
+    padding-top: 0px;
+  }
+  .divider-card {
+    border: 1px solid rgb(0, 0, 0, 42%);
+    margin-bottom: 16px;
   }
 }
 
