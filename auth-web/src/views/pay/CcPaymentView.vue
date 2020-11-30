@@ -31,7 +31,7 @@ export default class CcPaymentView extends Vue {
   showErrorModal: boolean = false
   returnUrl: string
 
-  mounted() {
+  mounted () {
     if (!this.paymentId || !this.redirectUrl) {
       this.errorMessage = this.$t('payNoParams').toString()
       return
@@ -51,7 +51,7 @@ export default class CcPaymentView extends Vue {
       })
   }
 
-  goToUrl(url: string) {
+  goToUrl (url: string) {
     window.location.href = url || this.redirectUrl
   }
 }

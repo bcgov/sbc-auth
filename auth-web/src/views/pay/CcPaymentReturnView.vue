@@ -33,7 +33,7 @@ export default class CcPaymentReturnView extends Vue {
   // show modal when paybc is down..otherwise [all unhandled technical error , show plain text error message..]
   showErrorModal: boolean = false
 
-  mounted() {
+  mounted () {
     if (!this.paymentId || !this.transactionId) {
       this.errorMessage = this.$t('payNoParams').toString()
       return
@@ -57,7 +57,7 @@ export default class CcPaymentReturnView extends Vue {
       })
   }
 
-  goToUrl(url: string) {
+  goToUrl (url: string) {
     window.location.href = url
   }
 }
