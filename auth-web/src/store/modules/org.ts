@@ -724,4 +724,10 @@ export default class OrgModule extends VuexModule {
     this.context.commit('setCurrentOrganizationPaymentType', undefined)
     this.context.commit('setCurrentOrganizationPADInfo', undefined)
   }
+
+  @Action({ rawError: true })
+  public async createAccountPayment () {
+    const response = await PaymentService.createAccountPayment(this.context.state['currentOrganization'].id)
+    return response || {}
+  }
 }

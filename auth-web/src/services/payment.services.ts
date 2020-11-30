@@ -11,6 +11,7 @@ import { TransactionFilter, TransactionFilterParams, TransactionListResponse } f
 import { AxiosPromise } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { InvoiceListResponse } from '@/models/invoice'
+import { Payment } from '@/models/Payment'
 import { axios } from '@/util/http-util.ts'
 
 export default class PaymentService {
@@ -24,6 +25,21 @@ export default class PaymentService {
 
   static updateTransaction (paymentId: string, transactionId: string, payResponseUrl?: string): AxiosPromise<any> {
     const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${paymentId}/transactions/${transactionId}`
+    return axios.patch(url, {
+      payResponseUrl: payResponseUrl
+    })
+  }
+
+  static createTransactionForPadPayment (paymentId: string, redirectUrl: string): AxiosPromise<any> {
+    const url = `${ConfigHelper.getPayAPIURL()}/payments/${paymentId}/transactions`
+    return axios.post(url, {
+      clientSystemUrl: redirectUrl,
+      payReturnUrl: ConfigHelper.getSelfURL() + '/returnpadpayment'
+    })
+  }
+
+  static updateTransactionForPadPayment (paymentId: string, transactionId: string, payResponseUrl?: string): AxiosPromise<any> {
+    const url = `${ConfigHelper.getPayAPIURL()}/payments/${paymentId}/transactions/${transactionId}`
     return axios.patch(url, {
       payResponseUrl: payResponseUrl
     })
@@ -103,5 +119,9 @@ export default class PaymentService {
 
   static getFailedInvoices (accountId: string): AxiosPromise<InvoiceListResponse> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments?status=FAILED`)
+  }
+
+  static createAccountPayment (accountId: string) :AxiosPromise<Payment> {
+    return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments?retryFailedPayment=true`, {})
   }
 }
