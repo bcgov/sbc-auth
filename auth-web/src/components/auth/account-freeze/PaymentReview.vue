@@ -52,7 +52,7 @@ import { AccessType } from '@/util/constants'
         <v-btn
           large
           color="primary"
-          @click="proceed"
+          @click="proceedToPayment"
           class="proceed-btn"
           :disabled="!isAcknowledged"
         >
@@ -64,12 +64,13 @@ import { AccessType } from '@/util/constants'
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { mapMutations, mapState } from 'vuex'
+import { Component, Emit, Mixins } from 'vue-property-decorator'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { mapState } from 'vuex'
 
 @Component({
+
   computed: {
     ...mapState('org', [
       'currentOrganization'
@@ -80,8 +81,8 @@ export default class PaymentReview extends Mixins(Steppable) {
   private readonly currentOrganization!: Organization
   private isAcknowledged: boolean = false
 
-  private proceed () {
-    // proceed final step
+  @Emit('final-step-action')
+  private async proceedToPayment () {
   }
 
   private goBack () {

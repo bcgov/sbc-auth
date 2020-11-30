@@ -44,8 +44,11 @@ import { Component, Vue } from 'vue-property-decorator'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'vuex'
 import AccountOverview from '@/components/auth/account-freeze/AccountOverview.vue'
+import ConfigHelper from 'sbc-common-components/src/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { Pages } from '@/util/constants'
+import { Payment } from '@/models/Payment'
 import PaymentReview from '@/components/auth/account-freeze/PaymentReview.vue'
 import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankInformation.vue'
 
@@ -57,6 +60,11 @@ import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankIn
     Stepper,
     ModalDialog
   },
+  methods: {
+    ...mapActions('org', [
+      'createAccountPayment'
+    ])
+  },
   computed: {
     ...mapState('user', [
       'userContact'
@@ -65,6 +73,7 @@ import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankIn
 })
 export default class AccountFreezeUnlockView extends Vue {
   private readonly currentUser!: KCUserProfile
+  private readonly createAccountPayment!: () => Payment
   private errorTitle = 'Account unlocking failed'
   private errorText = ''
   private isLoading: boolean = false
@@ -96,6 +105,10 @@ export default class AccountFreezeUnlockView extends Vue {
     ]
 
   private async unlockAccount () {
+    const payment:Payment = await this.createAccountPayment()
+    const returnUrl = `${ConfigHelper.getAuthContextPath()}/${Pages.ACCOUNT_SETTINGS}?tryOrgRefresh=true`
+    // redirect to make payment UI
+    await this.$router.push(`${Pages.MAKE_PAD_PAYMENT}${payment.id}/transactions?${returnUrl}`)
   }
 
   private closeError () {

@@ -10,6 +10,7 @@ import {
 import { TransactionFilter, TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 import { AxiosPromise } from 'axios'
 import ConfigHelper from '@/util/config-helper'
+import { Payment } from '@/models/Payment'
 import { axios } from '@/util/http-util.ts'
 
 export default class PaymentService {
@@ -23,6 +24,21 @@ export default class PaymentService {
 
   static updateTransaction (paymentId: string, transactionId: string, payResponseUrl?: string): AxiosPromise<any> {
     const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${paymentId}/transactions/${transactionId}`
+    return axios.patch(url, {
+      payResponseUrl: payResponseUrl
+    })
+  }
+
+  static createTransactionForPadPayment (paymentId: string, redirectUrl: string): AxiosPromise<any> {
+    const url = `${ConfigHelper.getPayAPIURL()}/payments/${paymentId}/transactions`
+    return axios.post(url, {
+      clientSystemUrl: redirectUrl,
+      payReturnUrl: ConfigHelper.getSelfURL() + '/returnpadpayment'
+    })
+  }
+
+  static updateTransactionForPadPayment (paymentId: string, transactionId: string, payResponseUrl?: string): AxiosPromise<any> {
+    const url = `${ConfigHelper.getPayAPIURL()}/payments/${paymentId}/transactions/${transactionId}`
     return axios.patch(url, {
       payResponseUrl: payResponseUrl
     })
@@ -98,5 +114,9 @@ export default class PaymentService {
 
   static verifyPADInfo (padInfo: PADInfo): AxiosPromise<PADInfoValidation> {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/bank-accounts/verifications`, padInfo)
+  }
+
+  static createAccountPayment (accountId: string) :AxiosPromise<Payment> {
+    return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments?retryFailedPayment=true`, {})
   }
 }
