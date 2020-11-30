@@ -173,15 +173,14 @@
 
 <script lang="ts">
 
+import { AccountStatus, LDFlags, LoginSource, Pages, Role } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { LDFlags, LoginSource, Pages, Role } from '@/util/constants'
-import { Member, MembershipType } from '@/models/Organization'
+import { Member, MembershipType, Organization } from '@/models/Organization'
+import { mapActions, mapState } from 'vuex'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-
-import { mapState } from 'vuex'
 
   @Component({
     computed: {
@@ -192,12 +191,18 @@ import { mapState } from 'vuex'
         'currentOrganization',
         'currentMembership'
       ])
+    },
+    methods: {
+      ...mapActions('org', [
+        'syncOrganization'
+      ])
     }
   })
 export default class AccountSettings extends Mixins(AccountMixin) {
   @Prop({ default: '' }) private orgId: string
   private readonly currentMembership!: Member
   private readonly currentUser!: KCUserProfile
+  protected readonly syncOrganization!: (orgId: number) => Promise<Organization>
   private isLoading = true
   private isDirSearchUser: boolean = false
   private dirSearchUrl = ConfigHelper.getSearchApplicationUrl()
@@ -240,9 +245,31 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
   }
 
-  private mounted () {
+  private async mounted () {
     this.isLoading = false
     this.isDirSearchUser = (this.currentUser?.loginSource === LoginSource.BCROS)
+    if (this.$route.query?.tryOrgRefresh === 'true') {
+      this.isLoading = true
+      let count = 0
+      let timerId = setInterval(async () => {
+        // eslint-disable-next-line no-console
+        console.log(`[OrgRefreshTimer] Org refresh ${++count}`)
+        if (this.currentOrganization?.statusCode !== AccountStatus.ACTIVE) {
+          await this.syncOrganization(this.currentOrganization?.id)
+        } else {
+          // eslint-disable-next-line no-console
+          console.log('[OrgRefreshTimer] Org refresh stopped (ACTIVE)')
+          clearInterval(timerId)
+          this.isLoading = false
+        }
+      }, 3000)
+      setTimeout(() => {
+        // eslint-disable-next-line no-console
+        console.log('[OrgRefreshTimer] Org refresh stopped')
+        clearInterval(timerId)
+        this.isLoading = false
+      }, 10000)
+    }
   }
 }
 </script>
