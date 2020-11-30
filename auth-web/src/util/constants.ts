@@ -60,7 +60,7 @@ export enum Pages {
     STAFF_DASHBOARD_REVIEW = '/staff/dashboard/review',
     STAFF_DASHBOARD_REJECTED = '/staff/dashboard/rejected',
     STAFF_DASHBOARD_INVITATIONS = '/staff/dashboard/invitations',
-    MAKE_PAD_PAYMENT = '/make-pad-payment/'
+    MAKE_PAD_PAYMENT = '/make-cc-payment/'
 
 }
 
