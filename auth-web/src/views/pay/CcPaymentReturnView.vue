@@ -24,7 +24,7 @@ import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.
     SbcSystemError
   }
 })
-export default class PadPaymentReturnView extends Vue {
+export default class CcPaymentReturnView extends Vue {
   @Prop() paymentId: string
   @Prop() transactionId: string
   @Prop() payResponseUrl: string

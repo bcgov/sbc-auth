@@ -13,6 +13,8 @@ import AccountSetupView from '@/views/auth/create-account/AccountSetupView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
 import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
+import CcPaymentReturnView from '@/views/pay/CcPaymentReturnView.vue'
+import CcPaymentView from '@/views/pay/CcPaymentView.vue'
 import ChooseAuthMethodView from '@/views/auth/ChooseAuthMethodView.vue'
 import ConfigHelper from '@/util/config-helper'
 import CreateAccountView from '@/views/auth/CreateAccountView.vue'
@@ -28,8 +30,6 @@ import MaintainBusinessView from '@/views/auth/home/MaintainBusinessView.vue'
 import NonBcscAccountCreationSuccessView from '@/views/auth/create-account/non-bcsc/NonBcscAccountCreationSuccessView.vue'
 import NonBcscAccountSetupView from '@/views/auth/create-account/non-bcsc/NonBcscAccountSetupView.vue'
 import NonBcscInfoView from '@/views/auth/create-account/non-bcsc/NonBcscInfoView.vue'
-import PadPaymentReturnView from '@/views/pay/PadPaymentReturnView.vue'
-import PadPaymentView from '@/views/pay/PadPaymentView.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
 import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
 import PaymentView from '@/views/pay/PaymentView.vue'
@@ -375,9 +375,9 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: false }
     },
     {
-      path: '/make-pad-payment/:paymentId/transactions/:redirectUrl',
-      name: 'makepadpayment',
-      component: PadPaymentView,
+      path: '/make-cc-payment/:paymentId/transactions/:redirectUrl',
+      name: 'make-cc-payment',
+      component: CcPaymentView,
       props: true,
       meta: { requiresAuth: false }
     },
@@ -396,9 +396,9 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: false }
     },
     {
-      path: '/return-pad-payment/:paymentId/transaction/:transactionId',
-      name: 'returnpadpayment',
-      component: PadPaymentReturnView,
+      path: '/return-cc-payment/:paymentId/transaction/:transactionId',
+      name: 'return-cc-payment',
+      component: CcPaymentReturnView,
       props: mapReturnPayVars,
       meta: { requiresAuth: false }
     },
