@@ -64,13 +64,10 @@ import { AccessType } from '@/util/constants'
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
-import { mapActions, mapMutations, mapState } from 'vuex'
-import ConfigHelper from 'sbc-common-components/src/util/config-helper'
+import { Component, Emit, Mixins } from 'vue-property-decorator'
 import { Organization } from '@/models/Organization'
-import { Pages } from '@/util/constants'
-import { Payment } from '@/models/Payment'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { mapState } from 'vuex'
 
 @Component({
 
