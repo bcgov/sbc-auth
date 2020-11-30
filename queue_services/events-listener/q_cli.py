@@ -26,6 +26,7 @@ import os
 import random
 import signal
 import sys
+from datetime import datetime
 
 from nats.aio.client import Client as NATS  # noqa N814; by convention the name is NATS
 from stan.aio.client import Client as STAN  # noqa N814; by convention the name is STAN
@@ -33,7 +34,8 @@ from stan.aio.client import Client as STAN  # noqa N814; by convention the name 
 from entity_queue_common.service_utils import error_cb, logger, signal_handler
 
 
-async def run(loop, old_identifier, new_identifier):  # pylint: disable=too-many-locals
+async def run(loop, mode, auth_account_id, auth_account_name, bank_number, bank_branch_number,
+              bank_account_number, order_number, transaction_amount, transaction_id):  # pylint: disable=too-many-locals
     """Run the main application loop for the service.
 
     This runs the main top level service functions for working with the Queue.
@@ -65,9 +67,9 @@ async def run(loop, old_identifier, new_identifier):  # pylint: disable=too-many
 
     def subscription_options():
         return {
-            'subject': os.getenv('NATS_SUBJECT', 'entity.filings'),
-            'queue': os.getenv('NATS_QUEUE', 'filing-worker'),
-            'durable_name': os.getenv('NATS_QUEUE', 'filing-worker') + '_durable'
+            'subject': os.getenv('NATS_SUBJECT', 'account.mailer'),
+            'queue': os.getenv('NATS_QUEUE', 'account.mailer.worker'),
+            'durable_name': os.getenv('NATS_QUEUE', 'account.mailer.worker') + '_durable'
         }
 
     try:
@@ -80,25 +82,42 @@ async def run(loop, old_identifier, new_identifier):  # pylint: disable=too-many
             loop.add_signal_handler(getattr(signal, sig),
                                     functools.partial(signal_handler, sig_loop=loop, sig_nc=nc, task=close)
                                     )
-
-        payload = {
-            'specversion': '1.x-wip',
-            'type': 'bc.registry.business.incorporationApplication',
-            'source': 'https://api.business.bcregistry.gov.bc.ca/v1/business/BC1234567/filing/12345678',
-            'id': 'C234-1234-1234',
-            'time': '2020-08-28T17:37:34.651294+00:00',
-            'datacontenttype': 'application/json',
-            'identifier': new_identifier,
-            'tempidentifier': old_identifier,
-            'data': {
-                'filing': {
-                    'header': {'filingId': '12345678'},
-                    'business': {'identifier': 'BC1234567'}
+        payload = None
+        if mode == 'lock':
+            payload = {
+                'specversion': '1.x-wip',
+                'type': 'bc.registry.payment.lockAccount',
+                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{pay_account.auth_account_id}',
+                'id': f'{auth_account_id}',
+                'time': f'{datetime.now()}',
+                'datacontenttype': 'application/json',
+                'data': {
+                    'accountId': auth_account_id,
+                    'accountName': auth_account_name,
+                    'paymentInfo': {
+                        'bankInstitutionNumber': bank_number,
+                        'bankTransitNumber': bank_branch_number,
+                        'bankAccountNumber': bank_account_number,
+                        'paymentStartDate': '-----',
+                        'bankName': 'XXX'
+                    }
                 }
             }
-        }
-
-        print('payload-->', payload)
+        elif mode == 'unlock':
+            payload = {
+                'specversion': '1.x-wip',
+                'type': 'bc.registry.payment.unlockAccount',
+                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
+                'id': transaction_id,
+                'datacontenttype': 'application/json',
+                'data': {
+                    'identifier': auth_account_id,
+                    'orderNumber': order_number,
+                    'transactionDateTime': '------',
+                    'transactionAmount': f'${transaction_amount}',
+                    'transactionId': transaction_id
+                }
+            }
 
         await sc.publish(subject=subscription_options().get('subject'),
                          payload=json.dumps(payload).encode('utf-8'))
@@ -110,20 +129,43 @@ async def run(loop, old_identifier, new_identifier):  # pylint: disable=too-many
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "ho:n:", ["oldid=", "newid="])
+        opts, args = getopt.getopt(sys.argv[1:], "hm:i:n:b:t:a:o:p:d:",
+                                   ["mode=", "id=", "name=", "banknumber=", "transitnumber=", "accountnumber=",
+                                    "ordernumber=", "amount=", "transactionid="])
     except getopt.GetoptError:
         print('q_cli.py -o <old_identifier> -n <new_identifier>')
         sys.exit(2)
+
+    auth_account_name = bank_number = bank_branch_number = \
+        bank_account_number = order_number = transaction_amount = transaction_id = None
 
     for opt, arg in opts:
         if opt == '-h':
             print('q_cli.py -o <old_identifier> -n <new_identifier>')
             sys.exit()
-        elif opt in ("-o", "--oldid"):
-            old_id = arg
-        elif opt in ("-n", "--newid"):
-            new_id = arg
+        elif opt in ("-m", "--mode"):
+            mode = arg  # lock account - "lock", unlock account - "unlock"
+        elif opt in ("-i", "--id"):
+            auth_account_id = arg
+        elif opt in ("-n", "--name"):
+            auth_account_name = arg
+        elif opt in ("-b", "--banknumber"):
+            bank_number = arg
+        elif opt in ("-t", "--transitnumber"):
+            bank_branch_number = arg
+        elif opt in ("-a", "--accountnumber"):
+            bank_account_number = arg
+        elif opt in ("-o", "--ordernumber"):
+            order_number = arg
+        elif opt in ("-p", "--amount"):
+            transaction_amount = arg
+        elif opt in ("-d", "--transactionid"):
+            transaction_id = arg
 
-    print('publish:', old_id, new_id)
     event_loop = asyncio.get_event_loop()
-    event_loop.run_until_complete(run(event_loop, old_id, new_id))
+    event_loop.run_until_complete(
+        run(event_loop, mode, auth_account_id, auth_account_name, bank_number,
+            bank_branch_number, bank_account_number, order_number, transaction_amount, transaction_id))
+
+# pad cmd --> python3 q_cli.py -m pad -i 10 -n TestAccount -b 088 -t 00277 -a 12874890
+# refund cmd --> python3 q_cli.py -m refund -i 10 -o 67892 -p 25.33 -d 988
