@@ -103,7 +103,9 @@ export default class ReviewBankInformation extends Mixins(Steppable) {
 
   private async goNext () {
     this.isLoading = true
-    let isValid = await this.verifyPAD()
+    // let isValid = await this.verifyPAD()
+    // TODO: Fix Later
+    let isValid = true
     if (isValid) {
       const createRequestBody: CreateRequestBody = {
         paymentInfo: {
