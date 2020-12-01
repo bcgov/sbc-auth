@@ -102,29 +102,29 @@ export default class ReviewBankInformation extends Mixins(Steppable) {
   }
 
   private async goNext () {
-    this.isLoading = true
-    // let isValid = await this.verifyPAD()
+    this.stepForward()
     // TODO: Fix Later
-    let isValid = true
-    if (isValid) {
-      const createRequestBody: CreateRequestBody = {
-        paymentInfo: {
-          paymentMethod: PaymentTypes.PAD,
-          bankTransitNumber: this.padInfo.bankTransitNumber,
-          bankInstitutionNumber: this.padInfo.bankInstitutionNumber,
-          bankAccountNumber: this.padInfo.bankAccountNumber
-        }
-      }
-      try {
-        await this.updateOrg(createRequestBody)
-        this.isLoading = false
-        this.stepForward()
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error)
-        this.isLoading = false
-      }
-    }
+    // this.isLoading = true
+    // let isValid = await this.verifyPAD()
+    // if (isValid) {
+    //   const createRequestBody: CreateRequestBody = {
+    //     paymentInfo: {
+    //       paymentMethod: PaymentTypes.PAD,
+    //       bankTransitNumber: this.padInfo.bankTransitNumber,
+    //       bankInstitutionNumber: this.padInfo.bankInstitutionNumber,
+    //       bankAccountNumber: this.padInfo.bankAccountNumber
+    //     }
+    //   }
+    //   try {
+    //     await this.updateOrg(createRequestBody)
+    //     this.isLoading = false
+    //     this.stepForward()
+    //   } catch (error) {
+    //     // eslint-disable-next-line no-console
+    //     console.error(error)
+    //     this.isLoading = false
+    //   }
+    // }
   }
 
   private goBack () {
