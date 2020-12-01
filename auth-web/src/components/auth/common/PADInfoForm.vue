@@ -66,7 +66,7 @@
             </v-checkbox>
           </v-col>
         </v-row>
-        <v-row>
+        <v-row v-if="isTOSNeeded">
           <v-col class="pt-6 pl-6">
             <div class="terms-container">
               <PADTermsOfUseDialog
@@ -84,6 +84,7 @@
 <script lang="ts">
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
+import { Account } from '@/util/constants'
 import { PADInfo } from '@/models/Organization'
 import PADTermsOfUseDialog from '@/components/auth/common/PADTermsOfUseDialog.vue'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
@@ -99,7 +100,8 @@ import { mask } from 'vue-the-mask'
   },
   computed: {
     ...mapState('org', [
-      'currentOrgPADInfo'
+      'currentOrgPADInfo',
+      'currentOrganizationType'
     ])
   },
   methods: {
@@ -112,7 +114,9 @@ export default class PADInfoForm extends Vue {
   @Prop({ default: () => ({} as PADInfo) }) padInformation: any
   @Prop({ default: false }) isChangeView: boolean
   @Prop({ default: true }) isAcknowledgeNeeded: boolean
+  @Prop({ default: true }) isTOSNeeded: boolean
   private readonly currentOrgPADInfo!: PADInfo
+  private readonly currentOrganizationType!: string
   private readonly setCurrentOrganizationPADInfo!: (padInfo: PADInfo) => void
   private transitNumber: string = ''
   private institutionNumber: string = ''
@@ -158,15 +162,20 @@ export default class PADInfoForm extends Vue {
   }
 
   private get padInfoSubtitle () {
-    return (this.isChangeView)
+    return (this.showPremiumPADInfo)
       ? 'Services will continue to be billed to the linked BC Online account until the mandatory (3) day confirmation period has ended.'
       : 'This account will not be able to perform any transactions until the mandatory (3) day confirmation period has ended.'
   }
 
   private get acknowledgementLabel () {
-    return (this.isChangeView)
+    // for Premium accounts, the label should mention that it will charge from BCOL till PAD is done.
+    return (this.showPremiumPADInfo)
       ? 'I understand that services will continue to be billed to the linked BC Online account until the mandatory (3) day confirmation period has ended.'
       : 'I understand that this account will not be able to perform any transactions until the mandatory (3) day confirmation period for pre-authorized debit has ended.'
+  }
+
+  private get showPremiumPADInfo () {
+    return (this.isChangeView || (this.currentOrganizationType === Account.PREMIUM))
   }
 
   @Emit()
@@ -186,7 +195,8 @@ export default class PADInfoForm extends Vue {
   @Emit()
   private isPreAuthDebitFormValid () {
     const acknowledge = (this.isAcknowledgeNeeded) ? this.isAcknowledged : true
-    return (this.$refs.preAuthDebitForm?.validate() && this.isTOSAccepted && acknowledge) || false
+    const tosAccepted = (this.isTOSNeeded) ? this.isTOSAccepted : true
+    return (this.$refs.preAuthDebitForm?.validate() && tosAccepted && acknowledge) || false
   }
 
   private isTermsAccepted (isAccepted) {

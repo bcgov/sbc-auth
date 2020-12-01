@@ -27,7 +27,7 @@ from auth_api import status as http_status
 def test_permissions_returns_200(client, jwt, session):  # pylint:disable=unused-argument
     """Assert get permissions endpoint returns 200."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.get('/api/v1/permissions/admin', headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/permissions/active/admin?case=upper', headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
     dictionary = json.loads(rv.data)
@@ -36,7 +36,8 @@ def test_permissions_returns_200(client, jwt, session):  # pylint:disable=unused
 
     """Assert get permissions endpoint returns 200."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.get('/api/v1/permissions/unknown_string', headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/permissions/foo/bar', headers=headers, content_type='application'
+                                                                                 '/json')
     assert rv.status_code == http_status.HTTP_200_OK
     dictionary = json.loads(rv.data)
     assert len(dictionary) == 0

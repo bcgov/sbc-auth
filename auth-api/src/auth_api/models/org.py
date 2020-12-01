@@ -58,6 +58,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     login_options = relationship('AccountLoginOptions', cascade='all,delete,delete-orphan',
                                  primaryjoin='and_(Org.id == AccountLoginOptions.org_id, '
                                              'AccountLoginOptions.is_active == True)', lazy='select')
+    suspended_on = Column(DateTime, nullable=True)
 
     @classmethod
     def create_from_dict(cls, org_info: dict):
@@ -158,7 +159,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     def find_similar_org_by_name(cls, name, org_id=None):
         """Find an Org instance that matches the provided name."""
         # TODO: add more fancy comparison
-        query = cls.query.filter(Org.name.ilike(f'%{name}%')).filter(Org.status_code != OrgStatusEnum.INACTIVE.value)
+        query = cls.query.filter(Org.name == name).filter(Org.status_code != OrgStatusEnum.INACTIVE.value)
         if org_id:
             query = query.filter(Org.id != org_id)
         return query.first()

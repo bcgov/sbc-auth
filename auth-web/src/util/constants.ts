@@ -47,6 +47,10 @@ export enum Pages {
     SETUP_ACCOUNT_NON_BCSC = 'nonbcsc-info',
     SETUP_ACCOUNT_NON_BCSC_INSTRUCTIONS = 'instructions',
     SETUP_ACCOUNT_NON_BCSC_DOWNLOAD = 'download',
+    ACCOUNT_FREEZE_UNLOCK = 'account-freeze-nsf',
+    ACCOUNT_FREEZE = 'account-freeze',
+    ACCOUNT_UNLOCK_SUCCESS = 'account-unlock-success',
+    ACCOUNT_SETTINGS = 'settings',
     EDIT_ACCOUNT_TYPE= '/change-account',
     STAFF_DASHBOARD_OLD= '/searchbusiness',
     STAFF_SETUP_ACCOUNT = 'staff-setup-account',
@@ -56,7 +60,8 @@ export enum Pages {
     STAFF_DASHBOARD_ACTIVE = '/staff/dashboard/active',
     STAFF_DASHBOARD_REVIEW = '/staff/dashboard/review',
     STAFF_DASHBOARD_REJECTED = '/staff/dashboard/rejected',
-    STAFF_DASHBOARD_INVITATIONS = '/staff/dashboard/invitations'
+    STAFF_DASHBOARD_INVITATIONS = '/staff/dashboard/invitations',
+    MAKE_PAD_PAYMENT = '/make-cc-payment/'
 
 }
 
@@ -72,7 +77,8 @@ export enum AccountStatus {
     INACTIVE = 'INACTIVE',
     REJECTED = 'REJECTED',
     PENDING_AFFIDAVIT_REVIEW = 'PENDING_AFFIDAVIT_REVIEW',
-    PENDING_ACTIVATION = 'PENDING_ACTIVATION'
+    PENDING_ACTIVATION = 'PENDING_ACTIVATION',
+    NSF_SUSPENDED = 'NSF_SUSPENDED'
 }
 
 export enum IdpHint {
@@ -135,12 +141,15 @@ export enum Permission {
     MANAGE_STATEMENTS = 'MANAGE_STATEMENTS',
     VIEW_PAYMENT_METHODS = 'VIEW_PAYMENT_METHODS',
     VIEW_ADMIN_CONTACT = 'VIEW_ADMIN_CONTACT',
-    RESET_OTP = 'RESET_OTP'
+    RESET_OTP = 'RESET_OTP',
+    MAKE_PAYMENT = 'MAKE_PAYMENT',
+    GENERATE_INVOICE = 'GENERATE_INVOICE'
 }
 
 export enum LDFlags {
     AuthLearnMore = 'auth-options-learn-more',
-    PaymentTypeAccountCreation = 'payment-type-in-account-creation'
+    PaymentTypeAccountCreation = 'payment-type-in-account-creation',
+    LinkToNewNameRequestApp ='link-to-new-name-request-app'
 }
 
 export enum DateFilterCodes {

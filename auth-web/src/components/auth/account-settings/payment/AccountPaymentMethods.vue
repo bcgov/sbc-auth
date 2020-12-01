@@ -39,7 +39,7 @@
 <script lang="ts">
 import { Account, Pages } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
+import { CreateRequestBody, Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import OrgModule from '@/store/modules/org'
@@ -97,8 +97,9 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
       this.savedOrganizationType =
       ((this.currentOrganization?.orgType === Account.PREMIUM) && !this.currentOrganization?.bcolAccountId)
         ? Account.UNLINKED_PREMIUM : this.currentOrganization.orgType
-      const orgPayments = await this.getOrgPayments()
-      this.selectedPaymentMethod = orgPayments?.paymentMethod || ''
+      this.selectedPaymentMethod = ''
+      const orgPayments: OrgPaymentDetails = await this.getOrgPayments()
+      this.selectedPaymentMethod = this.currentOrgPaymentType || ''
     } else {
       // if the account switing happening when the user is already in the transaction page,
       // redirect to account info if its a basic account

@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/products",
+  "type": "array",
+  "title": "Products",
+  "description": "Products Schema.",
+  "default": [],
+  "examples": [
+      [
+          {
+              "name": "Personal Property Registry",
+              "description": "View and maintain records of charges such as liens, security interests, and encumberances filed against personal property.",
+              "url": "https://dev.bcregistry.ca/business/ppr",
+              "type": "INTERNAL",
+              "mdiIcon": "mdi-image-outline"
+          },
+          {
+              "name": "Business Registry",
+              "description": "Information for companies, firms & societies. Most filings for BC & Extraprovincial companies can be done in the Business Registry.",
+              "url": "https://dev.bcregistry.ca/business",
+              "type": "INTERNAL",
+              "mdiIcon": "mdi-image-outline"
+          }
+      ]
+  ],
+  "additionalItems": true,
+  "items": {
+      "$id": "#/items",
+      "anyOf": [
+        {
+          "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/product"
+        }
+      ]
+  }
+}

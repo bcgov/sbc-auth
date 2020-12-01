@@ -1,4 +1,4 @@
-import { Account, Actions, LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
+import { Account, Actions, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys } from '@/util/constants'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import {
   AddUserBody,
@@ -10,6 +10,7 @@ import {
   Member,
   MembershipStatus,
   MembershipType,
+  OrgPaymentDetails,
   Organization,
   PADInfo,
   PADInfoValidation,
@@ -27,6 +28,7 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
 import InvitationService from '@/services/invitation.services'
+import { InvoiceList } from '@/models/invoice'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
@@ -249,7 +251,8 @@ export default class OrgModule extends VuexModule {
     if (!kcUserProfile.roles.includes(Role.Staff)) {
       response = await UserService.getMembership(orgId)
       membership = response?.data
-      const res = await PermissionService.getPermissions(membership.membershipTypeCode)
+      const org: Organization = this.context.state['currentOrganization']
+      const res = await PermissionService.getPermissions(org?.statusCode, membership?.membershipTypeCode)
       permissions = res?.data
     } else {
       // Check for better approach
@@ -689,11 +692,18 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async getOrgPayments () {
+  public async getOrgPayments (): Promise<OrgPaymentDetails> {
     const response = await OrgService.getOrgPayments(this.context.state['currentOrganization'].id)
-    const paymentType = response?.data?.paymentMethod || undefined
+    let paymentType = response?.data?.paymentMethod || undefined
+    paymentType = (paymentType === PaymentTypes.DIRECT_PAY) ? PaymentTypes.CREDIT_CARD : paymentType
     this.context.commit('setCurrentOrganizationPaymentType', paymentType)
     return response?.data
+  }
+
+  @Action({ rawError: true })
+  public async getFailedInvoices (): Promise<InvoiceList[]> {
+    const response = await PaymentService.getFailedInvoices(this.context.state['currentOrganization'].id)
+    return response?.data?.items || []
   }
 
   @Action({ rawError: true })
@@ -713,5 +723,11 @@ export default class OrgModule extends VuexModule {
     this.context.commit('setCurrentOrganizationAddress', undefined)
     this.context.commit('setCurrentOrganizationPaymentType', undefined)
     this.context.commit('setCurrentOrganizationPADInfo', undefined)
+  }
+
+  @Action({ rawError: true })
+  public async createAccountPayment () {
+    const response = await PaymentService.createAccountPayment(this.context.state['currentOrganization'].id)
+    return response?.data || {}
   }
 }

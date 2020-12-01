@@ -20,6 +20,8 @@ from unittest.mock import patch, Mock
 import pytest
 from requests import Response
 
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.services.rest_service import RestService
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
@@ -29,8 +31,6 @@ from tests.utilities.factory_utils import (
     factory_org_model, factory_org_service, factory_user_model, factory_user_model_with_contact)
 
 import auth_api.services.notification as notification
-from auth_api.exceptions import BusinessException
-from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Affiliation as AffiliationService
@@ -216,6 +216,50 @@ def test_create_product_multiple_subscription(session, keycloak_mock):  # pylint
     assert subscriptions[1].product_code == TestOrgProductsInfo.org_products2['subscriptions'][1]['productCode']
 
 
+def test_create_org_with_duplicate_name(session):  # pylint:disable=unused-argument
+    """Assert that an Org with duplicate name cannot be created."""
+    user = factory_user_model()
+    org = factory_org_service()
+
+    factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit, org_status_info=None,
+                      payment_type_info=None)
+
+    with pytest.raises(BusinessException) as exception:
+        org.create_org(TestOrgInfo.org2, user_id=user.id)
+    assert exception.value.code == Error.DATA_CONFLICT.name
+
+
+def test_create_org_with_similar_name(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org with similar name can be created."""
+    user = factory_user_model()
+    org = factory_org_service()
+
+    new_org = org.create_org({'name': 'My Test'}, user_id=user.id)
+    dictionary = new_org.as_dict()
+
+    assert dictionary['name'] == 'My Test'
+
+
+def test_create_org_with_duplicate_name_bcol(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org linking to bcol can be created when the name is duplicated."""
+    org = factory_org_service()
+
+    factory_org_model({'name': 'BC ONLINE TECHNICAL TEAM DEVL'}, org_type_info=TestOrgTypeInfo.implicit,
+                      org_status_info=None, payment_type_info=None)
+    bcol_response = Mock(spec=Response)
+    bcol_response.json.return_value = {'userId': 'PB25020', 'accountNumber': '180670',
+                                       'orgName': 'BC ONLINE TECHNICAL TEAM DEVL'}
+    bcol_response.status_code = 200
+
+    pay_api_response = Mock(spec=Response)
+    pay_api_response.status_code = 201
+
+    with patch.object(RestService, 'post', side_effect=[bcol_response, pay_api_response]):
+        user = factory_user_model()
+        org = OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
+        assert org
+
+
 def test_update_org(session):  # pylint:disable=unused-argument
     """Assert that an Org can be updated."""
     org = factory_org_service()
@@ -266,6 +310,18 @@ def test_find_org_by_name(session, auth_mock):  # pylint:disable=unused-argument
 
     assert found_org
     assert found_org.get('orgs')[0].get('name') == org_name
+
+
+def test_raise_error_if_duplicate_name(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that when org name is duplicate, DATA_CONFILICT error will be raised."""
+    org = factory_org_service()
+    dictionary = org.as_dict()
+    new_org_name = dictionary['name']
+
+    with pytest.raises(BusinessException) as exception:
+        OrgService.raise_error_if_duplicate_name(new_org_name)
+
+    assert exception.value.code == Error.DATA_CONFLICT.name
 
 
 def test_add_contact(session):  # pylint:disable=unused-argument

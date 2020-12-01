@@ -6,7 +6,7 @@
     rel="noopener noreferrer"
     class="btn-name-request white--text"
     :class="{'btn-name-request-wide': isWide}"
-    :href="nroUrl">
+    :href="nameRequestUrl">
     <span class="btn-text">Request a Name</span>
   </v-btn>
 </template>
@@ -14,11 +14,18 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
+import { LDFlags } from '@/util/constants'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 
 @Component({})
 export default class NameRequestButton extends Vue {
-  private nroUrl = ConfigHelper.getNroUrl()
   @Prop() isWide: boolean
+
+  private get nameRequestUrl (): string {
+    return LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)
+      ? ConfigHelper.getNameRequestUrl()
+      : ConfigHelper.getNroUrl()
+  }
 }
 </script>
 

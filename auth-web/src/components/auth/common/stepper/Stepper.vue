@@ -1,6 +1,9 @@
 <template>
   <v-stepper class="stepper d-flex elevation-0" v-model="currentStepNumber">
-    <v-container class="stepper-nav pa-10 pr-0">
+    <v-container
+      class="stepper-nav pa-10 pr-0"
+      v-bind:class="stepperColor"
+    >
       <template v-for="step in steps">
         <v-stepper-step
           class="pa-3"
@@ -58,6 +61,7 @@ export default class Stepper extends Vue {
   @Prop({ default: null }) stepperConfiguration!: StepConfiguration[]
   @Prop({ default: '/business' }) redirectWhenDone!: string
   @Prop({ default: false }) isLoading!: boolean
+  @Prop({ default: '' }) stepperColor!: string
   private steps: StepConfiguration[]
   private currentStepNumber = 1
   private useAlternateStep = false

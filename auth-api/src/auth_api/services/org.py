@@ -91,8 +91,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         access_type = Org.validate_access_type(is_bceid_user, is_staff_admin, org_info)
 
-        duplicate_check = org_type == OrgType.BASIC.value
-        if duplicate_check:  # Allow duplicate names if premium
+        duplicate_check = (org_type == OrgType.BASIC.value) or (not bcol_credential)
+        if duplicate_check:  # Allow duplicate names if premium and link to bcol
             Org.raise_error_if_duplicate_name(org_info['name'])
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))

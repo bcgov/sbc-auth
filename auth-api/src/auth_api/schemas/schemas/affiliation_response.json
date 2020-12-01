@@ -1,0 +1,110 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/affiliation_response",
+    "type": "object",
+    "title": "Affiliation Response",
+    "description": "The affiliation schema for resoonse.",
+    "default": {},
+    "examples": [
+        {
+            "business": {
+                "affiliations": [
+                    1
+                ],
+                "businessIdentifier": "CP0002103",
+                "businessNumber": "791861078BC0001",
+                "contacts": [],
+                "corpType": {
+                    "code": "CP",
+                    "default": true,
+                    "desc": "Cooperatives"
+                },
+                "created": "2020-11-06T19:15:21.347010+00:00",
+                "modified": "2020-11-06T19:15:21.970169+00:00",
+                "modifiedBy": "Rodney Leonard",
+                "name": "BarFoo, Inc.",
+                "passCodeClaimed": true
+            },
+            "created": "2020-11-06T19:15:21.939183+00:00",
+            "createdBy": "Rodney Leonard",
+            "id": 1,
+            "modified": "2020-11-06T19:15:21.939190+00:00",
+            "organization": {
+                "accessType": "REGULAR",
+                "billable": true,
+                "created": "2020-11-06T19:15:21.498289+00:00",
+                "createdBy": "Rodney Leonard",
+                "id": 1,
+                "loginOptions": [],
+                "modified": "2020-11-06T19:15:21.526356+00:00",
+                "modifiedBy": "Rodney Leonard",
+                "name": "My Test Org",
+                "orgType": "BASIC",
+                "orgStatus": "ACTIVE",
+                "products": [
+                    1
+                ],
+                "statusCode": "ACTIVE"
+            }
+        }
+    ],
+    "required": [
+        "business",
+        "created",
+        "createdBy",
+        "id",
+        "modified",
+        "organization"
+    ],
+    "properties": {
+        "business": {
+            "$id": "#/properties/business",
+            "type": "object",
+            "title": "Business",
+            "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/business"
+        },
+        "created": {
+            "$id": "#/properties/created",
+            "type": "string",
+            "title": "Created",
+            "default": "",
+            "examples": [
+                "2020-11-06T19:15:21.939183+00:00"
+            ]
+        },
+        "createdBy": {
+            "$id": "#/properties/createdBy",
+            "type": "string",
+            "title": "Created By",
+            "default": "",
+            "examples": [
+                "Rodney Leonard"
+            ]
+        },
+        "id": {
+            "$id": "#/properties/id",
+            "type": "integer",
+            "title": "ID",
+            "default": 0,
+            "examples": [
+                1
+            ]
+        },
+        "modified": {
+            "$id": "#/properties/modified",
+            "type": "string",
+            "title": "Modified",
+            "default": "",
+            "examples": [
+                "2020-11-06T19:15:21.939190+00:00"
+            ]
+        },
+        "organization": {
+            "$id": "#/properties/organization",
+            "type": "object",
+            "title": "Organization",
+            "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/org_response"
+        }
+    },
+    "additionalProperties": true
+}

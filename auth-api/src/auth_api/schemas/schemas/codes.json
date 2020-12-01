@@ -1,0 +1,120 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/codes",
+    "type": "array",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": [],
+    "examples": [
+        [
+            {
+                "default": true,
+                "desc": "Member of the organization",
+                "displayName": "User",
+                "displayOrder": 1,
+                "icon": "mdi-account-outline",
+                "label": "Submit searches and filings, add / remove businesses",
+                "name": "USER"
+            },
+            {
+                "default": false,
+                "desc": "Admin for the organization",
+                "displayName": "Account Coordinator",
+                "displayOrder": 2,
+                "icon": "mdi-account-cog-outline",
+                "label": "Submit searches and filings, add / remove businesses, add / remove team members",
+                "name": "COORDINATOR"
+            }
+        ]
+    ],
+    "additionalItems": true,
+    "items": {
+        "$id": "#/items",
+        "anyOf": [
+            {
+                "$id": "#/items/anyOf/0",
+                "type": "object",
+                "default": {},
+                "required": [
+                    "default",
+                    "desc"
+                ],
+                "properties": {
+                    "code": {
+                        "$id": "#/items/anyOf/0/properties/code",
+                        "type": "string",
+                        "title": "Code",
+                        "default": "",
+                        "examples": [
+                            "PUBLIC"
+                        ]
+                    },
+                    "default": {
+                        "$id": "#/items/anyOf/0/properties/default",
+                        "type": "boolean",
+                        "title": "Default",
+                        "default": false,
+                        "examples": [
+                            true
+                        ]
+                    },
+                    "desc": {
+                        "$id": "#/items/anyOf/0/properties/desc",
+                        "type": "string",
+                        "title": "Description",
+                        "default": "",
+                        "examples": [
+                            "Member of the organization"
+                        ]
+                    },
+                    "displayName": {
+                        "$id": "#/items/anyOf/0/properties/displayName",
+                        "type": "string",
+                        "title": "Display Name",
+                        "default": "",
+                        "examples": [
+                            "User"
+                        ]
+                    },
+                    "displayOrder": {
+                        "$id": "#/items/anyOf/0/properties/displayOrder",
+                        "type": "integer",
+                        "title": "Display Order",
+                        "default": 0,
+                        "examples": [
+                            1
+                        ]
+                    },
+                    "icon": {
+                        "$id": "#/items/anyOf/0/properties/icon",
+                        "type": "string",
+                        "title": "Icon",
+                        "default": "",
+                        "examples": [
+                            "mdi-account-outline"
+                        ]
+                    },
+                    "label": {
+                        "$id": "#/items/anyOf/0/properties/label",
+                        "type": "string",
+                        "title": "Label",
+                        "default": "",
+                        "examples": [
+                            "Submit searches and filings, add / remove businesses"
+                        ]
+                    },
+                    "name": {
+                        "$id": "#/items/anyOf/0/properties/name",
+                        "type": "string",
+                        "title": "Name",
+                        "default": "",
+                        "examples": [
+                            "USER"
+                        ]
+                    }
+                },
+                "additionalProperties": true
+            }
+        ]
+    }
+}

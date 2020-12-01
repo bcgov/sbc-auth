@@ -45,6 +45,7 @@ class Authorization(db.Model):
     bcol_user_id = Column(String)
     bcol_account_id = Column(String)
     folio_number = Column(String)
+    status_code = Column(String)
 
     @classmethod
     def find_user_authorization_by_business_number(cls, business_identifier: str, keycloak_guid: uuid = None):

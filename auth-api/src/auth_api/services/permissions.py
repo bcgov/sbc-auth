@@ -12,8 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to invoke Rest services."""
+from typing import List, Dict, Tuple
+
+from flask import current_app
+from sqlalchemy.exc import SQLAlchemyError
 
 from auth_api.models.permissions import Permissions as PermissionsModel
+from ..utils.cache import cache
+from ..utils.enums import OrgStatus
 
 
 class Permissions:  # pylint: disable=too-few-public-methods
@@ -23,11 +29,42 @@ class Permissions:  # pylint: disable=too-few-public-methods
         """Return an Permissions Service."""
         self._model = model
 
+    @classmethod
+    def build_all_permission_cache(cls):
+        """Build cache for all permission values."""
+        try:
+            permissions: List[PermissionsModel] = PermissionsModel.get_all_permissions()
+            per_kv: Dict[Tuple[str, int], List[str]] = {}
+            for perm in permissions:
+                key_tuple = (perm.org_status_code, perm.membership_type_code)
+                actions_v: List = per_kv.get(key_tuple)
+                if actions_v:
+                    actions_v.append(perm.actions)
+                    per_kv.update({key_tuple: actions_v})
+                else:
+                    per_kv[key_tuple] = [perm.actions]
+
+            for key, val in per_kv.items():
+                cache.set(key, val)
+
+        except SQLAlchemyError as e:
+            current_app.logger.info('Error on building cache {}', e)
+
     @staticmethod
-    def get_permissions_for_membership(membership_type):
+    def get_permissions_for_membership(org_status, membership_type):
         """Get the permissions for the membership type."""
-        permissions = PermissionsModel.get_permissions_by_membership(membership_type)
-        actions = []
-        for permission in permissions:
-            actions.append(permission.actions)
+        # Just a tweak til we get all org status to DB
+        # TODO fix this logic
+        if org_status != OrgStatus.NSF_SUSPENDED.value:
+            org_status = None
+        key_tuple = (org_status, membership_type)
+        actions_from_cache = cache.get(key_tuple)
+        if actions_from_cache:
+            actions = actions_from_cache
+        else:
+            permissions = PermissionsModel.get_permissions_by_membership(org_status,
+                                                                         membership_type)
+            actions = []
+            for permission in permissions:
+                actions.append(permission.actions)
         return actions
