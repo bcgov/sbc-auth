@@ -5,11 +5,11 @@ services:
         restart: always
         mem_limit: 512m
         expose:
-          - 4222
-          - 8222
+          - 4223
+          - 8223
         labels:
           - entity.services=nats
         ports:
-          - 4222:4222
-          - 8222:8222
+          - 4223:4223
+          - 8223:8223
         tty: true
