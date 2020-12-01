@@ -31,13 +31,14 @@ from datetime import datetime
 
 import nats
 from auth_api.models import Org as OrgModel
-from auth_api.utils.enums import OrgStatus
 from auth_api.models import db
+from auth_api.utils.enums import OrgStatus
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
 from flask import Flask  # pylint: disable=wrong-import-order
 
 from events_listener import config
+
 
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
 APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
@@ -70,7 +71,7 @@ async def process_event(event_message, flask_app):
             org.status_code = OrgStatus.ACTIVE.value
             org.save()
         else:
-            logger.error('Unknown Message Type', message_type)
+            logger.error('Unknown Message Type : %s', message_type)
             return
 
 
