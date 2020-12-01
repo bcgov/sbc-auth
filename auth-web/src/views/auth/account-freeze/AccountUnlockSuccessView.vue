@@ -5,7 +5,7 @@
         <template v-if="isFailed">
           <v-icon size="32" color="error" class="mb-6">mdi-alert-circle-outline</v-icon>
           <h1>Some error occured</h1>
-          <p class="mt-8 mb-10">Sub Text</p>
+          <p class="mt-8 mb-10">Unable to get the status of the organization, Please try again</p>
           <div class="btns">
             <v-btn
               large
@@ -18,24 +18,19 @@
         </template>
         <template v-else>
           <v-icon size="48" color="primary" class="mb-6">mdi-check</v-icon>
-          <h1>Account Successfully Unlocked</h1>
-          <p class="mt-8 mb-10">Sub Text</p>
+          <h1>Your account was successfully unlocked</h1>
+          <div class="mt-8 mb-10">
+            <div>Your account has successfully been unlocked,</div>
+            <div>Thank you for unlocking your account.</div>
+          </div>
           <div class="btns">
             <v-btn
               large
               color="primary"
               class="action-btn font-weight-bold"
-              @click="goTo('account-info')">
-              Account Info
-            </v-btn>
-            <span class="mx-3">or</span>
-            <v-btn
-              large
-              color="primary"
-              class="action-btn font-weight-bold"
-              @click="goTo('transactions')"
+              @click="goTo('account-info')"
             >
-              Transactions
+              Ok
             </v-btn>
           </div>
         </template>
@@ -73,6 +68,7 @@ export default class AccountUnlockSuccessView extends Mixins(AccountMixin) {
   private isLoading: boolean = false
   private isFailed: boolean = false
   private errorMsg: string = ''
+  private readonly TIMEOUT_DURATION = 10000
 
   private goTo (page) {
     switch (page) {
@@ -106,8 +102,8 @@ export default class AccountUnlockSuccessView extends Mixins(AccountMixin) {
       console.log('[OrgRefreshTimer] Org refresh stopped')
       clearInterval(timerId)
       this.isLoading = false
-      this.isFailed = true
-    }, 10000)
+      this.isFailed = (this.currentOrganization?.statusCode !== AccountStatus.ACTIVE)
+    }, this.TIMEOUT_DURATION)
   }
 }
 </script>

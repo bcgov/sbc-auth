@@ -45,6 +45,9 @@
           Incorporation Number: {{ item.businessIdentifier }}
         </div>
       </template>
+      <template v-slot:[`item.initiatedBy`]="{ item }">
+        <span style="white-space: nowrap;">{{formatInitiatedBy(item.initiatedBy)}}</span>
+      </template>
       <template v-slot:[`item.transactionDate`]="{ item }">
         <span style="white-space: nowrap;">{{formatDate(item.transactionDate)}}</span>
       </template>
@@ -54,7 +57,14 @@
         </div>
       </template>
       <template v-slot:[`item.status`]="{ item }">
-        {{item.status}}
+        <v-chip
+          small
+          label
+          :color="getStatusColor(item.status)"
+          class="text-uppercase font-weight-bold mt-n1"
+        >
+          {{formatStatus(item.status)}}
+        </v-chip>
       </template>
     </v-data-table>
   </div>
@@ -200,6 +210,25 @@ export default class TransactionsDataTable extends Vue {
       return (isDesc) ? (a[index[0]] < b[index[0]] ? -1 : 1) : (b[index[0]] < a[index[0]] ? -1 : 1)
     })
     return items
+  }
+
+  private formatInitiatedBy (name) {
+    return (name === 'None None') ? '-' : name
+  }
+
+  private formatStatus (status) {
+    return (status === 'Settlement Scheduled') ? 'Pending' : status
+  }
+
+  private getStatusColor (status) {
+    switch (status?.toUpperCase()) {
+      case TransactionStatus.COMPLETED.toUpperCase():
+        return 'success'
+      case TransactionStatus.CANCELLED.toUpperCase():
+        return 'error'
+      default:
+        return ''
+    }
   }
 }
 </script>

@@ -49,6 +49,7 @@ export enum Pages {
     SETUP_ACCOUNT_NON_BCSC_DOWNLOAD = 'download',
     ACCOUNT_FREEZE_UNLOCK = 'account-freeze-nsf',
     ACCOUNT_FREEZE = 'account-freeze',
+    ACCOUNT_UNLOCK_SUCCESS = 'account-unlock-success',
     ACCOUNT_SETTINGS = 'settings',
     EDIT_ACCOUNT_TYPE= '/change-account',
     STAFF_DASHBOARD_OLD= '/searchbusiness',
