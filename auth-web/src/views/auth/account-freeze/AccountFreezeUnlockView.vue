@@ -47,6 +47,7 @@ import AccountOverview from '@/components/auth/account-freeze/AccountOverview.vu
 import ConfigHelper from 'sbc-common-components/src/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
 import { Payment } from '@/models/Payment'
 import PaymentReview from '@/components/auth/account-freeze/PaymentReview.vue'
@@ -62,7 +63,8 @@ import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankIn
   },
   methods: {
     ...mapActions('org', [
-      'createAccountPayment'
+      'createAccountPayment',
+      'currentOrganization'
     ])
   },
   computed: {
@@ -73,6 +75,7 @@ import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankIn
 })
 export default class AccountFreezeUnlockView extends Vue {
   private readonly currentUser!: KCUserProfile
+  private readonly currentOrganization!: Organization
   private readonly createAccountPayment!: () => Payment
   private errorTitle = 'Account unlocking failed'
   private errorText = ''
@@ -106,7 +109,7 @@ export default class AccountFreezeUnlockView extends Vue {
 
   private async unlockAccount () {
     const payment:Payment = await this.createAccountPayment()
-    const returnUrl = `${ConfigHelper.getAuthContextPath()}/${Pages.MAIN}/${this.currentOrganization.id}/${Pages.ACCOUNT_SETTINGS}?tryOrgRefresh=true`
+    const returnUrl = `${ConfigHelper.getAuthContextPath()}/${Pages.MAIN}/${this.currentOrganization?.id}/${Pages.ACCOUNT_SETTINGS}?tryOrgRefresh=true`
     const encodedUrl = encodeURIComponent(returnUrl)
     // redirect to make payment UI
     await this.$router.push(`${Pages.MAKE_PAD_PAYMENT}${payment.id}/transactions/${encodedUrl}`)
