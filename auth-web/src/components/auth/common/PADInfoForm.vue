@@ -69,10 +69,13 @@
         <v-row v-if="isTOSNeeded">
           <v-col class="pt-6 pl-6">
             <div class="terms-container">
-              <PADTermsOfUseDialog
+              <TermsOfUseDialog
                 :isAlreadyAccepted="isTermsOfServiceAccepted"
                 @terms-acceptance-status="isTermsAccepted"
-              ></PADTermsOfUseDialog>
+                :tosType="'termsofuse_pad'"
+                :tosHeading="'Business Pre-Authorized Debit Terms and Conditions Agreement BC Registries and Online Services'"
+                :tosCheckBoxLabelAppend="'of the Business Pre-Authorized Debit Terms and Conditions for BC Registry Services'"
+              ></TermsOfUseDialog>
             </div>
           </v-col>
         </v-row>
@@ -86,7 +89,6 @@ import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
 import { Account } from '@/util/constants'
 import { PADInfo } from '@/models/Organization'
-import PADTermsOfUseDialog from '@/components/auth/common/PADTermsOfUseDialog.vue'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import { mask } from 'vue-the-mask'
 
@@ -95,8 +97,7 @@ import { mask } from 'vue-the-mask'
     mask
   },
   components: {
-    TermsOfUseDialog,
-    PADTermsOfUseDialog
+    TermsOfUseDialog
   },
   computed: {
     ...mapState('org', [
