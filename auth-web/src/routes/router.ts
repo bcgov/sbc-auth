@@ -10,6 +10,7 @@ import AccountInstructions from '@/components/auth/create-account/non-bcsc/Accou
 import AccountLoginOptionsChooser from '@/views/auth/AccountLoginOptionsChooser.vue'
 import AccountLoginOptionsInfo from '@/views/auth/AccountLoginOptionsInfo.vue'
 import AccountSetupView from '@/views/auth/create-account/AccountSetupView.vue'
+import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockSuccessView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
 import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
@@ -248,6 +249,13 @@ export function getRoutes (): RouteConfig[] {
       path: '/account-freeze',
       name: 'account-freeze',
       component: AccountFreezeView,
+      props: true,
+      meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/account-unlock-success',
+      name: 'account-unlock-success',
+      component: AccountUnlockSuccessView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
     },
