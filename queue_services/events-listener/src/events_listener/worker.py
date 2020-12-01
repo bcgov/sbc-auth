@@ -27,9 +27,11 @@ to be pursued.
 """
 import json
 import os
+from datetime import datetime
 
 import nats
 from auth_api.models import Org as OrgModel
+from auth_api.utils.enums import OrgStatus
 from auth_api.models import db
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
@@ -37,14 +39,14 @@ from flask import Flask  # pylint: disable=wrong-import-order
 
 from events_listener import config
 
-
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
 APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
 FLASK_APP = Flask(__name__)
 FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
 
-MESSAGE_TYPE = 'account.events'
+UNLOCK_ACCOUNT_MESSAGE_TYPE = 'bc.registry.payment.unlockAccount'
+LOCK_ACCOUNT_MESSAGE_TYPE = 'bc.registry.payment.lockAccount'
 
 
 async def process_event(event_message, flask_app):
@@ -53,23 +55,20 @@ async def process_event(event_message, flask_app):
         raise QueueException('Flask App not available.')
 
     with flask_app.app_context():
-        if event_message.get('type', None) == MESSAGE_TYPE \
-                and 'id' in event_message \
-                and event_message.get('id', None) is not None:
+        message_type = event_message.get('type', None)
+        data = event_message.get('data')
+        org_id = data.get('accountId')
+        org: OrgModel = OrgModel.find_by_org_id(org_id)
+        if org is None:
+            logger.error('Unknown org for orgid %s', org_id)
+            return
 
-            org_id = event_message.get('id')
-            data = event_message.get('data')
-            status = data.get('status')
-            # TODO polish/rewrite this logic during actual implementation
-            org = OrgModel.find_by_org_id(org_id)
-            if org is None:
-                logger.error('Unknown org for orgid %s', org_id)
-                return
-
-            # set the status of the org
-            # TODO more logics here ; need a mapping for the status from pay to auth
-            org.status_code = status
-            # TODO send mail ?
+        if message_type == LOCK_ACCOUNT_MESSAGE_TYPE:
+            org.status_code = OrgStatus.NSF_SUSPENDED.value
+            org.suspended_on = datetime.now()
+            org.flush()
+        elif message_type == UNLOCK_ACCOUNT_MESSAGE_TYPE:
+            org.status_code = OrgStatus.ACTIVE.value
             org.flush()
 
 

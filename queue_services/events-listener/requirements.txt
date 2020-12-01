@@ -2,22 +2,22 @@ Flask==1.1.2
 Jinja2==2.11.2
 MarkupSafe==1.1.1
 Werkzeug==0.16.1
-asyncio-nats-client==0.11.2
+asyncio-nats-client==0.11.4
 asyncio-nats-streaming==0.4.0
-attrs==20.2.0
+attrs
 blinker==1.4
-certifi==2020.6.20
+certifi==2020.11.8
 click==7.1.2
 itsdangerous==1.1.0
 jsonschema==3.2.0
-protobuf==3.13.0
+protobuf==3.14.0
 pycountry==20.7.3
 pyrsistent==0.17.3
-python-dotenv==0.14.0
-sentry-sdk==0.19.0
+python-dotenv==0.15.0
+sentry-sdk==0.19.4
 six==1.15.0
-urllib3==1.25.10
+urllib3==1.26.2
 -e git+https://github.com/bcgov/lear.git#egg=entity_queue_common&subdirectory=queue_services/common
 -e git+https://github.com/pwei1018/jaeger-client-python.git@186f14e14758273ed108508c0d388a4f4de5c75b#egg=jaeger-client
--e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components-1.0.0&subdirectory=python
--e git+https://github.com/saravanpa-aot/sbc-auth.git@qu#egg=auth-api&subdirectory=auth-api
+-e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components&subdirectory=python
+-e git+https://github.com/bcgov/sbc-auth.git@development#egg=auth-api&subdirectory=auth-api
