@@ -107,8 +107,9 @@ export default class AccountFreezeUnlockView extends Vue {
   private async unlockAccount () {
     const payment:Payment = await this.createAccountPayment()
     const returnUrl = `${ConfigHelper.getAuthContextPath()}/${Pages.ACCOUNT_SETTINGS}?tryOrgRefresh=true`
+    const encoded = encodeURIComponent(returnUrl)
     // redirect to make payment UI
-    await this.$router.push(`${Pages.MAKE_PAD_PAYMENT}${payment.id}/transactions?${returnUrl}`)
+    await this.$router.push(`${Pages.MAKE_PAD_PAYMENT}${payment.id}/transactions/${encoded}`)
   }
 
   private closeError () {

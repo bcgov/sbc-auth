@@ -34,7 +34,7 @@ export default class PaymentService {
     const url = `${ConfigHelper.getPayAPIURL()}/payments/${paymentId}/transactions`
     return axios.post(url, {
       clientSystemUrl: redirectUrl,
-      payReturnUrl: ConfigHelper.getSelfURL() + '/returnpadpayment'
+      payReturnUrl: ConfigHelper.getSelfURL() + '/return-cc-payment'
     })
   }
 
