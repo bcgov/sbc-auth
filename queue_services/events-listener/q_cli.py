@@ -67,9 +67,9 @@ async def run(loop, mode, auth_account_id, auth_account_name, bank_number, bank_
 
     def subscription_options():
         return {
-            'subject': os.getenv('NATS_SUBJECT', 'account.mailer'),
-            'queue': os.getenv('NATS_QUEUE', 'account.mailer.worker'),
-            'durable_name': os.getenv('NATS_QUEUE', 'account.mailer.worker') + '_durable'
+            'subject': os.getenv('NATS_SUBJECT', 'account.events'),
+            'queue': os.getenv('NATS_QUEUE', 'account.events.worker'),
+            'durable_name': os.getenv('NATS_QUEUE', 'account.events.worker') + '_durable'
         }
 
     try:
