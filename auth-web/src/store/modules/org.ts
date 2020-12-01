@@ -728,6 +728,6 @@ export default class OrgModule extends VuexModule {
   @Action({ rawError: true })
   public async createAccountPayment () {
     const response = await PaymentService.createAccountPayment(this.context.state['currentOrganization'].id)
-    return response || {}
+    return response?.data || {}
   }
 }
