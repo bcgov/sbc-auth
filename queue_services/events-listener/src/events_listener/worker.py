@@ -63,16 +63,18 @@ async def process_event(event_message, flask_app):
         if org is None:
             logger.error('Unknown org for orgid %s', org_id)
             return
+
         if message_type == LOCK_ACCOUNT_MESSAGE_TYPE:
             org.status_code = OrgStatus.NSF_SUSPENDED.value
             org.suspended_on = datetime.now()
-            org.save()
         elif message_type == UNLOCK_ACCOUNT_MESSAGE_TYPE:
             org.status_code = OrgStatus.ACTIVE.value
-            org.save()
         else:
             logger.error('Unknown Message Type : %s', message_type)
             return
+
+        org.flush()
+        db.session.commit()
 
 
 async def cb_subscription_handler(msg: nats.aio.client.Msg):

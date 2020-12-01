@@ -30,7 +30,7 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
 
     # vars
     org_id = '1'
-    status = 'ACTIVE'
+    status = 'lock'
 
     events_subject = 'test_subject'
     events_queue = 'test_queue'
@@ -47,7 +47,7 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
 
     # add an event to queue
     await helper_add_event_to_queue(events_stan, events_subject, org_id=org_id,
-                                    status=status)
+                                    action=status)
 
     assert True
 
@@ -63,7 +63,7 @@ async def test_update_internal_payment(app, session, stan_server, event_loop, cl
     events_durable_name = 'test_durable'
 
     org = factory_org_model()
-
+    id = org.id
     # register the handler to test it
     await subscribe_to_queue(events_stan,
                              events_subject,
@@ -73,9 +73,8 @@ async def test_update_internal_payment(app, session, stan_server, event_loop, cl
 
     # add an event to queue
     await helper_add_event_to_queue(events_stan, events_subject, org_id=org.id,
-                                    status='INACTIVE')
+                                    action='lock')
 
     # Get the internal account and invoice and assert that the identifier is new identifier
-    new_org = OrgModel.find_by_org_id(org.id)
-
-    assert new_org.status_code == 'INACTIVE'
+    new_org = OrgModel.find_by_org_id(id)
+    assert new_org.status_code == 'NSF_SUSPENDED'
