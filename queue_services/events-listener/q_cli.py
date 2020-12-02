@@ -107,15 +107,20 @@ async def run(loop, mode, auth_account_id, auth_account_name, bank_number, bank_
             payload = {
                 'specversion': '1.x-wip',
                 'type': 'bc.registry.payment.unlockAccount',
-                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
-                'id': transaction_id,
+                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{pay_account.auth_account_id}',
+                'id': f'{auth_account_id}',
+                'time': f'{datetime.now()}',
                 'datacontenttype': 'application/json',
                 'data': {
-                    'identifier': auth_account_id,
-                    'orderNumber': order_number,
-                    'transactionDateTime': '------',
-                    'transactionAmount': f'${transaction_amount}',
-                    'transactionId': transaction_id
+                    'accountId': auth_account_id,
+                    'accountName': auth_account_name,
+                    'paymentInfo': {
+                        'bankInstitutionNumber': bank_number,
+                        'bankTransitNumber': bank_branch_number,
+                        'bankAccountNumber': bank_account_number,
+                        'paymentStartDate': '-----',
+                        'bankName': 'XXX'
+                    }
                 }
             }
 
