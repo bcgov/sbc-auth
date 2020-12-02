@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { Account, AccountStatus, LoginSource, Pages, Role, SessionStorageKeys } from '@/util/constants'
+import { Account, AccountStatus, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import Router, { Route } from 'vue-router'
 import { AccountSettings } from '@/models/account-settings'
@@ -79,6 +79,7 @@ router.beforeEach((to, from, next) => {
     const currentOrganization: Organization = (store.state as any)?.org?.currentOrganization
     const currentMembership: Member = (store.state as any)?.org?.currentMembership
     const currentUser: KCUserProfile = (store.state as any)?.user?.currentUser
+    const permissions: string[] = (store.state as any)?.org?.permissions
     if (to.matched.some(record => record.meta.requiresProfile) &&
       !userProfile?.userTerms?.isTermsOfUseAccepted) {
       switch (currentUser?.loginSource) {
@@ -102,14 +103,18 @@ router.beforeEach((to, from, next) => {
     if (to.matched.some(record => record.meta.requiresActiveAccount) && (currentUser.loginSource === LoginSource.BCSC || currentUser.loginSource === LoginSource.BCEID)) {
       if (currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED) {
         console.log('[Navigation Guard] Redirecting user to Account Freeze message since the account is temporarly suspended.')
-        if (currentMembership?.membershipTypeCode === MembershipType.Admin) {
-          return next({ path: `/${Pages.ACCOUNT_FREEZE_UNLOCK}` })
+        if (permissions.some(code => code === Permission.MAKE_PAYMENT)) {
+          /** the below check is for Admin can still access several routes like team management, statements etc.
+           * redirect to account freeze page if not those routes */
+          if (!(to.matched.some(record => record.meta.allowOnAccountFreeze))) {
+            return next({ path: `/${Pages.ACCOUNT_FREEZE_UNLOCK}` })
+          }
         } else {
           return next({ path: `/${Pages.ACCOUNT_FREEZE}` })
         }
       } else if (currentOrganization?.statusCode === AccountStatus.PENDING_AFFIDAVIT_REVIEW) {
         console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since user has pending affidavits')
-        return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
+        return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}/true` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
       } else if (currentAccountSettings && currentMembership?.membershipStatus === MembershipStatus.Pending) {
         console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since users membership status is pending')
         return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}` })

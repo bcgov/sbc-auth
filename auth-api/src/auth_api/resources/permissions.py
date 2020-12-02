@@ -15,6 +15,7 @@
 
 import json
 
+from flask import request
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
@@ -41,9 +42,17 @@ class Permissions(Resource):
     def get(org_status, membership_type):
         """Get a list of all permissions for the membership."""
         try:
-            response, status = json.dumps(
-                PermissionsService.get_permissions_for_membership(org_status.upper(), membership_type.upper())), \
-                               http_status.HTTP_200_OK
+            case = request.args.get('case')
+            permissions = PermissionsService.get_permissions_for_membership(org_status.upper(), membership_type.upper())
+            # TODO Remove this logic once UI part is done.
+            #  UI still expects the value as upper .Rather than touching all UI code , changing this.
+            if case == 'lower':
+                permissions = [x.lower() for x in permissions]
+            elif case == 'upper':
+                permissions = [x.upper() for x in permissions]
+
+            response, status = json.dumps(permissions), \
+                http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
