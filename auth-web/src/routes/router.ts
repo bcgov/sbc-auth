@@ -141,8 +141,7 @@ export function getRoutes (): RouteConfig[] {
       meta: {
         requiresAuth: true,
         requiresProfile: true,
-        requiresActiveAccount: true,
-        allowOnAccountFreeze: true
+        requiresActiveAccount: true
       },
       redirect: '/account/:orgId/settings/account-info',
       props: true,

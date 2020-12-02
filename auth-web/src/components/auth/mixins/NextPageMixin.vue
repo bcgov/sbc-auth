@@ -158,10 +158,7 @@ export default class NextPageMixin extends Vue {
       // eslint-disable-next-line no-console
       console.log('Redirecting user to Account Freeze message since the account is temporarly suspended.')
       if (this.permissions.some(code => code === Permission.MAKE_PAYMENT)) {
-        /** the below check is for Admin can still access several routes like team management, statements etc.  */
-        if (!(this.$route.matched?.some(record => record.meta.allowOnAccountFreeze))) {
-          this.$router.push(`/${Pages.ACCOUNT_FREEZE_UNLOCK}`)
-        }
+        this.$router.push(`/${Pages.ACCOUNT_FREEZE_UNLOCK}`)
       } else {
         this.$router.push(`/${Pages.ACCOUNT_FREEZE}`)
       }
