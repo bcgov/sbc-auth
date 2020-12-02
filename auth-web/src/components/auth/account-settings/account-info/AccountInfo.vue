@@ -19,7 +19,16 @@
           <div class="nv-list-item mb-10">
             <div class="name" id="accountStatus">Status</div>
             <div class="value" aria-labelledby="accountStatus">
-              <div class="value__title">{{ currentOrganization.orgStatus }}</div>
+              <div class="value__title">
+                <v-chip
+                  small
+                  label
+                  class="font-weight-bold"
+                  :color="getStatusColor(currentOrganization.orgStatus)"
+                >
+                  {{ getStatusText(currentOrganization.orgStatus) }}
+                </v-chip>
+              </div>
             </div>
           </div>
         </div>
@@ -127,7 +136,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, LDFlags, Pages, Permission, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, AccountStatus, LDFlags, Pages, Permission, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
@@ -331,6 +340,26 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
       return false
     }
     return false
+  }
+
+  private getStatusColor (status) {
+    switch (status) {
+      case AccountStatus.NSF_SUSPENDED:
+        return 'error'
+      case AccountStatus.ACTIVE:
+        return 'info'
+      default:
+        return 'primary'
+    }
+  }
+
+  private getStatusText (status) {
+    switch (status) {
+      case AccountStatus.NSF_SUSPENDED:
+        return 'SUSPENDED'
+      default:
+        return status
+    }
   }
 }
 </script>

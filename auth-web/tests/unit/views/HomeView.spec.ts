@@ -17,7 +17,8 @@ const vuetify = new Vuetify({})
 document.body.setAttribute('data-app', 'true')
 
 const mockSession = {
-  'NRO_URL': 'Mock Url'
+  'NRO_URL': 'Mock NRO URL',
+  'NAME_REQUEST_URL': 'Mock Name Request URL'
 }
 
 describe('HomeView.vue', () => {

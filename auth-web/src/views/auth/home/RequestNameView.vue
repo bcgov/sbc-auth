@@ -25,7 +25,7 @@
         <div class="request-name-info-btns mt-5">
           <name-request-button />
           <p class="mt-5">Have an existing Name Request?
-            <a :href="nameRequestStatusUrl"
+            <a :href="nameRequestExistingUrl"
               target="_blank" rel="noopener noreferrer" class="status-link">
               Check your Name Request Status
             </a>
@@ -37,7 +37,7 @@
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
-        <a :href="nroUrl" target="_blank">
+        <a :href="nameRequestUrl" target="_blank">
           <v-img src="../../../assets/img/Step2_NameRequest_x2.png" aspect-ratio="1.2" contain></v-img>
         </a>
       </v-col>
@@ -48,6 +48,8 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
+import { LDFlags } from '@/util/constants'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NameRequestButton from '@/components/auth/home/NameRequestButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
@@ -60,7 +62,6 @@ import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTool
   }
 })
 export default class RequestNameView extends Vue {
-  private readonly nroUrl = ConfigHelper.getNroUrl()
   private readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/approval-business-name'
   private bulletPoints: Array<any> = [
     { text: 'Create a unique name that ensures the public is not confused or misled by similar corporate names.' },
@@ -68,8 +69,16 @@ export default class RequestNameView extends Vue {
     { text: 'If your name is approved, you can use it to incorporate or register your business.' }
   ]
 
-  private get nameRequestStatusUrl () {
-    return `${this.nroUrl}nro.htm?_flowId=anonymous-monitor-flow&_flowExecutionKey=e1s1`
+  private get nameRequestExistingUrl () {
+    return LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)
+      ? `${ConfigHelper.getNameRequestUrl()}existing`
+      : `${ConfigHelper.getNroUrl()}nro.htm?_flowId=anonymous-monitor-flow&_flowExecutionKey=e1s1`
+  }
+
+  private get nameRequestUrl (): string {
+    return LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)
+      ? ConfigHelper.getNameRequestUrl()
+      : ConfigHelper.getNroUrl()
   }
 }
 </script>

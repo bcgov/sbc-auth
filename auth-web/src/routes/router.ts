@@ -10,9 +10,12 @@ import AccountInstructions from '@/components/auth/create-account/non-bcsc/Accou
 import AccountLoginOptionsChooser from '@/views/auth/AccountLoginOptionsChooser.vue'
 import AccountLoginOptionsInfo from '@/views/auth/AccountLoginOptionsInfo.vue'
 import AccountSetupView from '@/views/auth/create-account/AccountSetupView.vue'
+import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockSuccessView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
 import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
+import CcPaymentReturnView from '@/views/pay/CcPaymentReturnView.vue'
+import CcPaymentView from '@/views/pay/CcPaymentView.vue'
 import ChooseAuthMethodView from '@/views/auth/ChooseAuthMethodView.vue'
 import ConfigHelper from '@/util/config-helper'
 import CreateAccountView from '@/views/auth/CreateAccountView.vue'
@@ -126,6 +129,7 @@ export function getRoutes (): RouteConfig[] {
           meta: {
             showNavBar: true,
             disabledRoles: [Role.AnonymousUser],
+            requiresAuth: true,
             requiresActiveAccount: true
           }
         }]
@@ -134,7 +138,12 @@ export function getRoutes (): RouteConfig[] {
       path: '/account/:orgId/settings',
       name: 'account-settings',
       component: accountSettings,
-      meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true },
+      meta: {
+        requiresAuth: true,
+        requiresProfile: true,
+        requiresActiveAccount: true,
+        allowOnAccountFreeze: true
+      },
       redirect: '/account/:orgId/settings/account-info',
       props: true,
       children: [
@@ -230,8 +239,8 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
-      path: '/account-freeze-nfs',
-      name: 'account-freeze-nfs',
+      path: '/account-freeze-nsf',
+      name: 'account-freeze-nsf',
       component: AccountFreezeUnlockView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
@@ -240,6 +249,13 @@ export function getRoutes (): RouteConfig[] {
       path: '/account-freeze',
       name: 'account-freeze',
       component: AccountFreezeView,
+      props: true,
+      meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/account-unlock-success',
+      name: 'account-unlock-success',
+      component: AccountUnlockSuccessView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
     },
@@ -367,6 +383,13 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: false }
     },
     {
+      path: '/make-cc-payment/:paymentId/transactions/:redirectUrl',
+      name: 'make-cc-payment',
+      component: CcPaymentView,
+      props: true,
+      meta: { requiresAuth: false }
+    },
+    {
       path: '/profiledeactivated',
       name: 'profiledeactivated',
       component: ProfileDeactivatedView,
@@ -380,6 +403,14 @@ export function getRoutes (): RouteConfig[] {
       props: mapReturnPayVars,
       meta: { requiresAuth: false }
     },
+    {
+      path: '/return-cc-payment/:paymentId/transaction/:transactionId',
+      name: 'return-cc-payment',
+      component: CcPaymentReturnView,
+      props: mapReturnPayVars,
+      meta: { requiresAuth: false }
+    },
+
     {
       path: Pages.STAFF_DASHBOARD,
       name: 'staff-dashboard',

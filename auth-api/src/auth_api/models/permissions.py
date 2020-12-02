@@ -37,3 +37,8 @@ class Permissions(BaseModel):  # pylint: disable=too-few-public-methods # Tempor
     def get_permissions_by_membership(cls, org_status_code: str, membership_type: str):
         """Find the first membership with the given id and return it."""
         return cls.query.filter_by(membership_type_code=membership_type, org_status_code=org_status_code).all()
+
+    @classmethod
+    def get_all_permissions(cls):
+        """Find the first membership with the given id and return it."""
+        return cls.query.all()

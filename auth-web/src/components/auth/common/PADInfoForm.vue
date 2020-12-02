@@ -147,6 +147,7 @@ export default class PADInfoForm extends Vue {
     this.institutionNumber = padInfo?.bankInstitutionNumber || ''
     this.accountNumber = padInfo?.bankAccountNumber || ''
     this.isTOSAccepted = padInfo?.isTOSAccepted || false
+    this.setCurrentOrganizationPADInfo(padInfo)
     this.$nextTick(() => {
       if (this.isTOSAccepted) {
         this.isPreAuthDebitFormValid()
