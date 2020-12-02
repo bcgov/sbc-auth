@@ -31,13 +31,14 @@ from datetime import datetime
 
 import nats
 from auth_api.models import Org as OrgModel
-from auth_api.utils.enums import OrgStatus
 from auth_api.models import db
+from auth_api.utils.enums import OrgStatus
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
 from flask import Flask  # pylint: disable=wrong-import-order
 
 from events_listener import config
+
 
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
 APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
@@ -66,10 +67,14 @@ async def process_event(event_message, flask_app):
         if message_type == LOCK_ACCOUNT_MESSAGE_TYPE:
             org.status_code = OrgStatus.NSF_SUSPENDED.value
             org.suspended_on = datetime.now()
-            org.flush()
         elif message_type == UNLOCK_ACCOUNT_MESSAGE_TYPE:
             org.status_code = OrgStatus.ACTIVE.value
-            org.flush()
+        else:
+            logger.error('Unknown Message Type : %s', message_type)
+            return
+
+        org.flush()
+        db.session.commit()
 
 
 async def cb_subscription_handler(msg: nats.aio.client.Msg):
