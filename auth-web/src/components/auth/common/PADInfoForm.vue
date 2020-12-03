@@ -52,20 +52,11 @@
             ></v-text-field>
           </v-col>
         </v-row>
-        <v-row v-if="isTOSNeeded">
-          <v-col class="pt-6 pl-6 pb-0">
-            <div class="terms-container">
-              <TermsOfUseDialog
-                :isAlreadyAccepted="isTermsOfServiceAccepted"
-                @terms-acceptance-status="isTermsAccepted"
-              ></TermsOfUseDialog>
-            </div>
-          </v-col>
-        </v-row>
         <v-row v-if="isAcknowledgeNeeded">
           <v-col class="pt-2 pl-6 pb-0">
             <v-checkbox
-              class="acknowledge-checkbox"
+              hide-details
+              class="align-checkbox-label--top"
               v-model="isAcknowledged"
               @change="emitPreAuthDebitInfo"
             >
@@ -73,6 +64,19 @@
                 {{acknowledgementLabel}}
               </template>
             </v-checkbox>
+          </v-col>
+        </v-row>
+        <v-row v-if="isTOSNeeded">
+          <v-col class="pt-6 pl-6">
+            <div class="terms-container">
+              <TermsOfUseDialog
+                :isAlreadyAccepted="isTermsOfServiceAccepted"
+                @terms-acceptance-status="isTermsAccepted"
+                :tosType="'termsofuse_pad'"
+                :tosHeading="'Business Pre-Authorized Debit Terms and Conditions Agreement BC Registries and Online Services'"
+                :tosCheckBoxLabelAppend="'of the Business Pre-Authorized Debit Terms and Conditions for BC Registry Services'"
+              ></TermsOfUseDialog>
+            </div>
           </v-col>
         </v-row>
       </fieldset>
@@ -205,15 +209,21 @@ export default class PADInfoForm extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  .terms-container {
-    height: 2rem;
-  }
-
-  .acknowledge-checkbox {
+  .align-checkbox-label--top {
     ::v-deep {
       .v-input__slot {
         align-items: flex-start;
       }
+    }
+  }
+
+  .v-input--checkbox {
+    color: var(--v-grey-darken4) !important;
+  }
+
+  ::v-deep {
+    .v-input--checkbox .v-label {
+      color: var(--v-grey-darken4) !important;
     }
   }
 </style>

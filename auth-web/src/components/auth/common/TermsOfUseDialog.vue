@@ -1,75 +1,86 @@
 <template>
-  <div>
-    <v-tooltip bottom color="grey darken-4">
-      <template v-slot:activator="{ on }">
-        <v-checkbox
-          color="primary"
-          class="terms-checkbox ma-0 pa-0"
-          hide-details
-          v-model="termsAccepted"
-          v-on:change="emitTermsAcceptanceStatus"
-          v-on="on"
-          :disabled="!canCheckTerms"
-          required
-        >
-          <template v-slot:label>
-            <span>I have read and agreed to the</span>
-            <v-btn
-              text
-              color="primary"
-              class="terms-checkbox-label-btn"
-              @click.stop="openDialog()"
-              data-test="terms-of-use-checkbox"
-              v-on="on"
-            >
-              Terms of Use
-            </v-btn>
-          </template>
-        </v-checkbox>
-        <v-dialog scrollable width="1024" v-model="termsDialog" :persistent="true">
-          <v-card>
-            <v-card-title>
-              <h2>Terms of Use</h2>
-              <v-btn
-                large
-                icon
-                @click="closeDialog"
-              >
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-            </v-card-title>
-            <v-card-text id="scroll-target" data-test="scroll-area">
-              <div v-scroll:#scroll-target="onScroll" style="height: 2000px;">
-                <TermsOfUse
-                  :tosType="tosType"
-                ></TermsOfUse>
-              </div>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn
-                large
-                color="primary"
-                class="agree-btn"
-                :disabled="!atBottom"
-                @click="agreeToTerms"
-                data-test="accept-button"
-              >
-                <span>Agree to Terms</span>
-              </v-btn>
-              <v-btn
-                large
-                depressed
-                @click="closeDialog"
-                data-test="close-button"
-              >
-                Close
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+  <div class="terms-container">
+    <div
+      role="button"
+      aria-label="View Terms and Conditions"
+      class="terms-button"
+      tab-index="0"
+      @click.stop="openDialog()"
+      v-if="!canCheckTerms"
+    >
+    </div>
+    <v-checkbox
+      color="primary"
+      class="terms-checkbox align-checkbox-label--top ma-0 pa-0"
+      hide-details
+      v-model="termsAccepted"
+      v-on:change="emitTermsAcceptanceStatus"
+      :disabled="!canCheckTerms"
+      required
+    >
+      <template v-slot:label>
+        <span>I have read, understood and agree to the
+          <strong
+            class="faux-link"
+            role="button"
+            aria-description="Read, understand and agree to the terms of conditions"
+            tabindex="0"
+            v-on:keyup.enter="openDialog()"
+            @click.stop="openDialog()"
+          >terms and conditions</strong>
+          {{tosCheckBoxLabelAppend}}
+        </span>
       </template>
-      <span>{{tooltipTxt}}</span>
-    </v-tooltip>
+    </v-checkbox>
+    <v-dialog
+      scrollable
+      width="800"
+      v-model="termsDialog"
+      role="dialog"
+      tabindex="-1"
+      aria-labelled-by="dialogTitle"
+      :persistent="true">
+      <v-card>
+        <v-card-title>
+          <h2 id="dialogTitle">{{tosHeading}}</h2>
+          <v-btn
+            large
+            icon
+            aria-label="Close Terms and Conditions Dialog"
+            @click="closeDialog"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text class="py-2 px-6" id="scroll-target" data-test="scroll-area">
+          <div v-scroll:#scroll-target="onScroll">
+            <TermsOfUse
+              :tosType="tosType"
+            ></TermsOfUse>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            large
+            color="primary"
+            class="agree-btn"
+            :disabled="!atBottom"
+            @click="agreeToTerms"
+            data-test="accept-button"
+          >
+            <span>Agree to Terms</span>
+          </v-btn>
+          <v-btn
+            large
+            depressed
+            @click="closeDialog"
+            data-test="close-button"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -93,6 +104,8 @@ import { getModule } from 'vuex-module-decorators'
 })
 export default class TermsOfUseDialog extends Vue {
   @Prop({ default: 'termsofuse' }) tosType: string
+  @Prop({ default: 'Terms of Use Agreement' }) tosHeading: string
+  @Prop({ default: '' }) tosCheckBoxLabelAppend: string
   @Prop({ default: false }) isUserTOS: boolean
   @Prop({ default: false }) isAlreadyAccepted: boolean
   protected readonly userHasToAcceptTOS!: boolean
@@ -151,52 +164,96 @@ export default class TermsOfUseDialog extends Vue {
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
 
-  // Tighten up some of the spacing between rows
-  [class^='col'] {
-    padding-top: 0;
-    padding-bottom: 0;
+.terms-container {
+  position: relative;
+}
+
+.terms-button {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  bottom: -0.5rem;
+  left: -0.5rem;
+  z-index: 4;
+}
+
+// Tighten up some of the spacing between rows
+[class^='col'] {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+h2 {
+  max-width: 45ch;
+}
+
+.terms-checkbox {
+  pointer-events: auto !important;
+}
+
+.form__btns {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.terms-checkbox-label-btn {
+  height: auto !important;
+  padding: 0.25rem !important;
+  font-size: 1rem !important;
+  text-decoration: underline;
+}
+
+.v-card__actions {
+  justify-content: center;
+
+  .v-btn {
+    width: 8rem;
   }
+}
 
-  .terms-checkbox {
-    pointer-events: auto !important;
+.terms-container ::v-deep {
+  article {
+    background: $gray1;
   }
+}
 
-  .form__btns {
-    display: flex;
-    justify-content: flex-end;
-  }
+.v-tooltip__content:before {
+  content: ' ';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  margin-left: -10px;
+  width: 20px;
+  height: 20px;
+  border-width: 10px 10px 10px 10px;
+  border-style: solid;
+  border-color: transparent transparent var(--v-grey-darken4) transparent;
+}
 
-  .terms-checkbox-label-btn {
-    height: auto !important;
-    padding: 0.25rem !important;
-    font-size: 1rem !important;
-    text-decoration: underline;
-  }
-
-  .v-card__actions {
-    justify-content: center;
-
-    .v-btn {
-      width: 8rem;
+.align-checkbox-label--top {
+  ::v-deep {
+    .v-input__slot {
+      align-items: flex-start;
+    }
+    .v-label {
+      color: var(--v-grey-darken3);
     }
   }
+}
 
-  .terms-container ::v-deep {
-    article {
-      background: $gray1;
-    }
-  }
+.v-input-checkbox {
+    .v-input .v-label {
+    color: var(--v-grey-darken4) !important;
+  };
+}
 
-  .v-tooltip__content:before {
-    content: ' ';
-    position: absolute;
-    top: -20px;
-    left: 50%;
-    margin-left: -10px;
-    width: 20px;
-    height: 20px;
-    border-width: 10px 10px 10px 10px;
-    border-style: solid;
-    border-color: transparent transparent var(--v-grey-darken4) transparent;
-  }
+.faux-link {
+  color: var(--v-primary-base);
+  text-decoration: underline;
+}
+
+.agree-btn {
+  font-weight: 600;
+}
+
 </style>
