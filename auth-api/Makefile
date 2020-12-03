@@ -1,155 +1,114 @@
 .PHONY: license
-.PHONY: setup clean clean-build clean-pyc clean-test
-
-.PHONY: docker-setup network build start qa style safety test test-travis flake8 \
-isort isort-save stop docker-clean logs
-.PHONY: mac-cov pylint flake8
+.PHONY: setup
+.PHONY: ci cd
+.PHONY:db-update run
 
 SHELL:=/bin/bash
-mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
-current_abs_dir := $(patsubst %/,%,$(dir $(mkfile_path)))
+MKFILE_PATH:=$(abspath $(lastword $(MAKEFILE_LIST)))
+current_dir:=$(notdir $(patsubst %/,%,$(dir $(MKFILE_PATH))))
+CURRENT_ABS_DIR:=$(patsubst %/,%,$(dir $(MKFILE_PATH)))
+
+PROJECT_NAME:=auth_api
 
 #################################################################################
-# COMMANDS                                                                      #
+# COMMANDS -- license                                                           #
 #################################################################################
-clean: clean-build clean-pyc clean-test
-	rm -rf venv/
+license: ## Verify source code license headers.
+	@./scripts/verify_license_headers.sh $(CURRENT_ABS_DIR)/src $(CURRENT_ABS_DIR)/tests
 
-clean-build:
-	rm -fr build/
-	rm -fr dist/
-	rm -fr .eggs/
-	find . -name '*.egg-info' -exec rm -fr {} +
-	find . -name '*.egg' -exec rm -f {} +
+#################################################################################
+# COMMANDS -- Setup                                                             #
+#################################################################################
+setup: clean install install-dev ## Setup the project
 
-clean-pyc:
-	find . -name '*.pyc' -exec rm -f {} +
-	find . -name '*.pyo' -exec rm -f {} +
-	find . -name '*~' -exec rm -f {} +
-	find . -name '__pycache__' -exec rm -fr {} +
+clean: clean-build clean-pyc clean-test ## Clean the project
+	@rm -rf venv/
 
-clean-test:
-	find . -name '.pytest_cache' -exec rm -fr {} +
-	rm -fr .tox/
-	rm -f .coverage
-	rm -fr htmlcov/
+clean-build: ## Clean build files
+	@rm -fr build/
+	@rm -fr dist/
+	@rm -fr .eggs/
+	@find . -name '*.egg-info' -exec rm -fr {} +
+	@find . -name '*.egg' -exec rm -f {} +
 
-setup: clean venv/bin/activate install-dev
+clean-pyc: ## Clean cache files
+	@find . -name '*.pyc' -exec rm -f {} +
+	@find . -name '*.pyo' -exec rm -f {} +
+	@find . -name '*~' -exec rm -f {} +
+	@find . -name '__pycache__' -exec rm -fr {} +
 
-venv/bin/activate: requirements/prod.txt requirements/dev.txt
-	rm -rf venv/
-	test -f venv/bin/activate || python3 -m venv  $(current_abs_dir)/venv
-	. venv/bin/activate ;\
-	pip install --upgrade pip ;\
-	pip install -Ur requirements/prod.txt ;\
-	pip freeze | sort > requirements.txt ;\
-	cat requirements/repo-libraries.txt >> requirements.txt ;\
-	pip install -Ur requirements/repo-libraries.txt ;\
-	pip install -Ur requirements/dev.txt ;\
-	touch venv/bin/activate  # update so it's as new as requirements/prod.txt
+clean-test: ## clean test files
+	@find . -name '.pytest_cache' -exec rm -fr {} +
+	@rm -fr .tox/
+	@rm -f .coverage
+	@rm -fr htmlcov/
 
-.PHONY: install-dev
-install-dev: venv/bin/activate
-	. venv/bin/activate ; \
-	pip install -e .
+install: ## Install python virtrual environment
+	@rm -rf venv/
+	@test -f venv/bin/activate || python3 -m venv  $(CURRENT_ABS_DIR)/venv
+	@. venv/bin/activate
+	@pip install --upgrade pip
+	@pip install -Ur requirements/prod.txt
+	@pip freeze | sort > requirements.txt
+	@cat requirements/repo-libraries.txt >> requirements.txt
+	@pip install -Ur requirements/repo-libraries.txt
+	@pip install -Ur requirements/dev.txt
+	@touch venv/bin/activate  # update so it's as new as requirements/prod.txt
 
-.PHONY: activate
-activate: venv/bin/activate
-	. venv/bin/activate
+install-dev: install ## Install dev environment
+	@. venv/bin/activate
+	@pip install -e .
 
-.PHONY: local-test
-local-test: venv/bin/activate
-	. venv/bin/activate ; \
-	pytest
+#################################################################################
+# COMMANDS - CI                                                                 #
+#################################################################################
+ci: pylint flake8 test ## CI flow
 
-.PHONY: local-coverage
-local-coverage: venv/bin/activate
-	. venv/bin/activate ; \
-	coverage run -m pytest
+pylint: ## Linting with pylint
+	@. venv/bin/activate
+	@pylint --rcfile=setup.cfg  src/$(PROJECT_NAME)
 
-.PHONY: coverage-report
-coverage-report: local-coverage
-	. venv/bin/activate ; \
-	coverage report ; \
-	coverage html
+flake8: ## Linting with flake8
+	@. venv/bin/activate
+	@flake8 src/$(PROJECT_NAME) tests
 
-## Run the coverage report and display in a browser window
-mac-cov:	install-dev coverage-report
-	open -a "Google Chrome" htmlcov/index.html
+test: ## Unit testing
+	@. venv/bin/activate
+	@pytest
 
-## run pylint on the package and tests
-pylint:
-	pylint --rcfile=setup.cfg \
-	 --load-plugins=pylint_flask \
-	 --disable=C0301,W0511 \
-	 src/auth_api
+mac-cov: local-test ## Run the coverage report and display in a browser window
+	@open -a "Google Chrome" htmlcov/index.html
 
-## run flake8 on the package and tests
-flake8:
-	flake8 src/auth_api tests
+#################################################################################
+# COMMANDS - CD                                                               #
+#################################################################################
+cd: build ## CD flow
 
-## Verify source code license headers.
-license:
-	./scripts/verify_license_headers.sh src/auth_api tests
+build: ## Build the docker container
+	@docker build -t $(PROJECT_NAME) .
+
+build-nc: ## Build the docker container without caching
+	@docker build --no-cache -t $(PROJECT_NAME) .
+
+#################################################################################
+# COMMANDS - Local                                                              #
+#################################################################################
+
+run: db-update ## Run the project in local
+	@. venv/bin/activate
+	@python -m flask run -p 5000
+
+db-update: ## Update the local database
+	@. venv/bin/activate
+	@python -m manage.py db upgrade
+
 
 #################################################################################
 # Self Documenting Commands                                                     #
 #################################################################################
+.PHONY: help
 
-.DEFAULT_GOAL := show-help
+.DEFAULT_GOAL := help
 
-# Inspired by <http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html>
-# sed script explained:
-# /^##/:
-# 	* save line in hold space
-# 	* purge line
-# 	* Loop:
-# 		* append newline + line to hold space
-# 		* go to next line
-# 		* if line starts with doc comment, strip comment character off and loop
-# 	* remove target prerequisites
-# 	* append hold space (+ newline) to line
-# 	* replace newline plus comments by `---`
-# 	* print line
-# Separate expressions are necessary because labels cannot be delimited by
-# semicolon; see <http://stackoverflow.com/a/11799865/1968>
-.PHONY: show-help
-show-help:
-	@echo "$$(tput bold)Available rules:$$(tput sgr0)"
-	@echo
-	@sed -n -e "/^## / { \
-		h; \
-		s/.*//; \
-		:doc" \
-		-e "H; \
-		n; \
-		s/^## //; \
-		t doc" \
-		-e "s/:.*//; \
-		G; \
-		s/\\n## /---/; \
-		s/\\n/ /g; \
-		p; \
-	}" ${MAKEFILE_LIST} \
-	| LC_ALL='C' sort --ignore-case \
-	| awk -F '---' \
-		-v ncol=$$(tput cols) \
-		-v indent=19 \
-		-v col_on="$$(tput setaf 6)" \
-		-v col_off="$$(tput sgr0)" \
-	'{ \
-		printf "%s%*s%s ", col_on, -indent, $$1, col_off; \
-		n = split($$2, words, " "); \
-		line_length = ncol - indent; \
-		for (i = 1; i <= n; i++) { \
-			line_length -= length(words[i]) + 1; \
-			if (line_length <= 0) { \
-				line_length = ncol - indent - length(words[i]) - 1; \
-				printf "\n%*s ", -indent, " "; \
-			} \
-			printf "%s ", words[i]; \
-		} \
-		printf "\n"; \
-	}' \
-	| more $(shell test $(shell uname) = Darwin && echo '--no-init --raw-control-chars')
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
