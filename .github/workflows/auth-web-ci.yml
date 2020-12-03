@@ -9,11 +9,11 @@ on:
 
 jobs:
   auth-web-ci:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     strategy:
       matrix:
-        node-version: [12.x]
+        node-version: [14.15.1]
 
     steps:
       - uses: actions/checkout@v2
@@ -21,22 +21,22 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: install with npm ci
+      - name: Install
         working-directory: ./auth-web
         run: |
-          npm ci
+          make setup
         env:
           CI: true
       - name: Run Lint
         working-directory: ./auth-web
         run: |
-          npm run lint
+          make lint
         env:
           CI: true
       - name: Run Unit Tests
         working-directory: ./auth-web
         run: |
-          npm run test:unit
+          make test
         env:
           CI: true
       - name: Upload coverage to Codecov
@@ -48,6 +48,6 @@ jobs:
       - name: Run build
         working-directory: ./auth-web
         run: |
-          npm run build
+          make local-build
         env:
           CI: true

@@ -71,28 +71,51 @@ export default class TermsOfUse extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import '$assets/scss/theme.scss';
 
 // Terms and Conditions Container
-$indent-width: 3rem;
+$indent-width: 1rem;
 
-.terms-container ::v-deep {
+.terms-container {
+  p, li {
+    margin: 1rem 0;
+  }
+
+  ol {
+    margin-left: $indent-width;
+  }
+
+  li {
+    padding-left: $indent-width;
+  }
+
+  h3 {
+    max-width: 55ch;
+  }
+
   section {
-    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  section:last-child {
+    margin-bottom: 0;
   }
 
   section header {
     margin-bottom: 1rem;
     color: $gray9;
-    letter-spacing: -0.02rem;
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-size: 1rem;
+    font-weight: 700 !important;
   }
 
   section header > span {
     display: inline-block;
     width: $indent-width;
+  }
+
+  section a {
+    font-weight: 600;
   }
 
   header + div {

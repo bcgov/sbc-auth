@@ -54,7 +54,7 @@
           </div>
         </template>
 
-        <div class="nv-list-item mb-10" v-can:VIEW_ADMIN_CONTACT.hide>
+        <div class="nv-list-item mb-10" v-if="isAdminContactViewable">
           <div class="name" id="adminContact">Account Contact</div>
           <div class="value" aria-labelledby="adminContact">
             <OrgAdminContact></OrgAdminContact>
@@ -331,6 +331,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 
   get isAddressViewable () : boolean {
     return [Permission.VIEW_ADDRESS].some(per => this.permissions.includes(per))
+  }
+
+  get isAdminContactViewable () : boolean {
+    return [Permission.VIEW_ADMIN_CONTACT].some(per => this.permissions.includes(per))
   }
 
   get isBaseAddressEditMode () : boolean {

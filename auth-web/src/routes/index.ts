@@ -104,11 +104,7 @@ router.beforeEach((to, from, next) => {
       if (currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED) {
         console.log('[Navigation Guard] Redirecting user to Account Freeze message since the account is temporarly suspended.')
         if (permissions.some(code => code === Permission.MAKE_PAYMENT)) {
-          /** the below check is for Admin can still access several routes like team management, statements etc.
-           * redirect to account freeze page if not those routes */
-          if (!(to.matched.some(record => record.meta.allowOnAccountFreeze))) {
-            return next({ path: `/${Pages.ACCOUNT_FREEZE_UNLOCK}` })
-          }
+          return next({ path: `/${Pages.ACCOUNT_FREEZE_UNLOCK}` })
         } else {
           return next({ path: `/${Pages.ACCOUNT_FREEZE}` })
         }

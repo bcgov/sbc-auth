@@ -1,6 +1,6 @@
 <template>
   <div class="value__title">
-    <div  v-for="(member, index) in getActiveAdmins()" v-bind:key="index + 1">
+    <div v-for="(member, index) in getActiveAdmins" v-bind:key="index">
       <div v-if="!anonAccount">
         <div>
           {{ member.user.firstname }} {{ member.user.lastname }}
@@ -54,7 +54,7 @@ export default class OrgAdminContact extends Vue {
     this.syncActiveOrgMembers()
   }
 
-  private getActiveAdmins (): Member[] {
+  private get getActiveAdmins (): Member[] {
     return this.activeOrgMembers.filter(member => member.membershipTypeCode === MembershipType.Admin)
   }
 
