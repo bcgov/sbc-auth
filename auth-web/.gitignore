@@ -8,6 +8,7 @@ yarn-error.log*
 /test/e2e/reports/
 /coverage/
 selenium-debug.log
+__mock__
 
 # Editor directories and files
 .idea
