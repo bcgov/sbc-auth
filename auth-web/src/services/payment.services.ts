@@ -1,4 +1,5 @@
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
+import { Invoice, InvoiceListResponse } from '@/models/invoice'
 import { PADInfo, PADInfoValidation } from '@/models/Organization'
 import {
   StatementFilterParams,
@@ -10,17 +11,31 @@ import {
 import { TransactionFilter, TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 import { AxiosPromise } from 'axios'
 import ConfigHelper from '@/util/config-helper'
-import { InvoiceListResponse } from '@/models/invoice'
 import { Payment } from '@/models/Payment'
+import { PaymentTypes } from '@/util/constants'
 import { axios } from '@/util/http-util.ts'
 
 export default class PaymentService {
   static createTransaction (paymentId: string, redirectUrl: string): AxiosPromise<any> {
-    var url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${paymentId}/transactions`
+    const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${paymentId}/transactions`
     return axios.post(url, {
       clientSystemUrl: redirectUrl,
       payReturnUrl: ConfigHelper.getSelfURL() + '/returnpayment'
     })
+  }
+
+  static getInvoice (invoiceId: string): AxiosPromise<Invoice> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/payment-requests/${invoiceId}`)
+  }
+
+  static updateInvoicePaymentMethodAsCreditCard (paymentId: string): AxiosPromise<any> {
+    const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${paymentId}`
+    return axios.patch(url, {
+      paymentInfo: {
+        methodOfPayment: PaymentTypes.CREDIT_CARD
+      }
+    }
+    )
   }
 
   static updateTransaction (paymentId: string, transactionId: string, payResponseUrl?: string): AxiosPromise<any> {
