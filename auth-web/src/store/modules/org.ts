@@ -692,8 +692,9 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async getOrgPayments (): Promise<OrgPaymentDetails> {
-    const response = await OrgService.getOrgPayments(this.context.state['currentOrganization'].id)
+  public async getOrgPayments (orgId?: number): Promise<OrgPaymentDetails> {
+    const id = orgId || this.context.state['currentOrganization'].id
+    const response = await OrgService.getOrgPayments(id)
     let paymentType = response?.data?.paymentMethod || undefined
     paymentType = (paymentType === PaymentTypes.DIRECT_PAY) ? PaymentTypes.CREDIT_CARD : paymentType
     this.context.commit('setCurrentOrganizationPaymentType', paymentType)

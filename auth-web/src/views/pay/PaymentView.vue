@@ -78,7 +78,7 @@ export default class PaymentView extends Vue {
   @Prop({ default: '' }) redirectUrl: string
   private readonly createTransaction!: (transactionData) => any
   private readonly updateInvoicePaymentMethodAsCreditCard!: (paymentId: string) => any
-  private readonly getOrgPayments!: () => OrgPaymentDetails
+  private readonly getOrgPayments!: (orgId: number) => OrgPaymentDetails
   private readonly getInvoice!: (paymentId: string) => Invoice
   private showLoading: boolean = true
   private showOnlineBanking: boolean = false
@@ -102,7 +102,7 @@ export default class PaymentView extends Vue {
         const invoice: Invoice = await this.getInvoice(this.paymentId)
         if (invoice?.paymentMethod === PaymentTypes.ONLINE_BANKING) {
           // get account data to show in the UI
-          const paymentDetails: OrgPaymentDetails = await this.getOrgPayments()
+          const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(accountSettings?.id)
           this.paymentCardData = {
             totalBalanceDue: invoice?.total || 0,
             payeeName: ConfigHelper.getPaymentPayeeName(),
