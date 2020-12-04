@@ -117,7 +117,7 @@
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 
 @Component({})
-export default class PaymentView extends Vue {
+export default class PaymentCard extends Vue {
   @Prop() paymentCardData: any
   private payWithCreditCard: boolean = false
   private totalBalanceDue = 0
