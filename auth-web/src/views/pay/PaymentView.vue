@@ -171,7 +171,7 @@ export default class PaymentView extends Vue {
   @Prop({ default: '' }) redirectUrl: string
   protected readonly createTransaction!: (transactionData) => any
   private showLoading: boolean = true
-  private showOnlineBanking: boolean = true
+  private showOnlineBanking: boolean = false
   private errorMessage: string = ''
   private showErrorModal: boolean = false
   private returnUrl: string = ''
