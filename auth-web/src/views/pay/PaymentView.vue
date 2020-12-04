@@ -129,7 +129,7 @@
                       color="primary"
                       width="100"
                       class="font-weight-bold"
-                      @click="makePayment"
+                      @click="completeObPayment"
                       depressed
                     >
                       Ok
@@ -245,8 +245,8 @@ export default class PaymentView extends Vue {
     // DOWNLOAD INVOICE
   }
 
-  makePayment () {
-    // MAKE PAYMENT
+  completeObPayment () {
+    this.goToUrl(this.returnUrl)
   }
 
   async payNow () {
