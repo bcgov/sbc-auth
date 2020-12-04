@@ -34,12 +34,13 @@ jobs:
         run: |
           echo "TAG_NAME=dev" >> $GITHUB_ENV
 
-      - uses: pwei1018/bcrs-cd-action@latest
+      - uses: pwei1018/bcrs-cd-action@versioning
         with:
           WORKING_DIRECTORY: "./auth-api"
           APP_NAME: "auth-api"
           VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"keycloak\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-auth\", \"auth-api\", \"sentry\", \"jwt\"]}]'
           SKIP_OP: "false"
+          DEPLOYMENT: "true"
           OP_PARAMETERS: ${{ secrets.OP_PARAMETERS }}
           OPENSHIFT_LOGIN_REGISTRY: ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }}
           OPENSHIFT_DOCKER_REGISTRY: ${{ secrets.OPENSHIFT_DOCKER_REGISTRY }}
