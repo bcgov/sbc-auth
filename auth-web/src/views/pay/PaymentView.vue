@@ -177,42 +177,4 @@ export default class PaymentView extends Vue {
   font-weight: 600;
   margin-top: 14px;
 }
-.bcol-payment-card {
-  .v-card__text {
-    padding: 16px 24px;
-    font-size: 0.95rem;
-  }
-  .heading-info {
-    background: var(--v-primary-base);
-    color: #fff !important;
-    h2 {
-      color: #fff !important;
-    }
-    .payee-name {
-      padding-right: 16px;
-      margin-right: 16px;
-      border-right: 1px solid #fff;
-    }
-  }
-  ol {
-    li {
-      margin-bottom: 4px;
-    }
-  }
-  .pay-with-credit-card {
-    ::v-deep {
-      .v-input__slot {
-        align-items: flex-start;
-      }
-      .v-label {
-        display: block;
-        color: #000;
-        .subtxt {
-          font-size: .85rem;
-          margin-top: 6px;
-        }
-      }
-    }
-  }
-}
 </style>
