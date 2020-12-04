@@ -736,4 +736,16 @@ export default class OrgModule extends VuexModule {
     const response = await PaymentService.createTransaction(transactionData.paymentId, transactionData.redirectUrl)
     return response?.data || {}
   }
+
+  @Action({ rawError: true })
+  public async getInvoice (paymentId: string) {
+    const response = await PaymentService.getInvoice(paymentId)
+    return response?.data || {}
+  }
+
+  @Action({ rawError: true })
+  public async updateInvoicePaymentMethodAsCreditCard (paymentId: string) {
+    const response = await PaymentService.updateInvoicePaymentMethodAsCreditCard(paymentId)
+    return response?.data || {}
+  }
 }

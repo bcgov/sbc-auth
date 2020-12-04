@@ -20,7 +20,12 @@
           primaryButtonTitle="Continue to Filing"
           :description="errorMessage">
         </SbcSystemError>
-        <div class="loading-msg" v-else>{{errorMessage}}</div>
+        <div class="mt-12" v-else>
+          <div class="text-center mb-4">
+            <v-icon color="error" size="30">mdi-alert-outline</v-icon>
+          </div>
+          <h4>{{errorMessage}}</h4>
+        </div>
       </v-layout>
     </v-container>
     <v-container v-if="showOnlineBanking">
@@ -28,117 +33,11 @@
         <v-col md="6" offset-md="3">
           <h1 class="mb-1">Make a payment</h1>
           <p class="pb-2">Please find your balance and payment details below </p>
-          <v-card class="bcol-payment-card">
-            <v-card-text class="heading-info">
-              <h2 class="mb-2">Balance Due: {{total}}</h2>
-              <template v-if="payWithCreditCard">
-                <p class="mb-1">
-                  Click "pay now" to complete transaction balance with credit card.
-                  By credit card, your transaction will be completed <strong>immediately</strong>.
-                </p>
-              </template>
-              <template v-else>
-                <p class="mb-6">
-                  Transaction will be completed when payment is received in full.
-                  Online Banking payment methods can expect between <strong>2-5 days</strong> for your payment.
-                </p>
-                <div class="mb-1">
-                  <span class="payee-name">
-                    <strong>Payee Name:</strong>
-                    BC Registries and Online Services
-                  </span>
-                  <span>
-                    <strong>Account #:</strong>
-                    {{cfsAccountId}}
-                  </span>
-                </div>
-              </template>
-            </v-card-text>
-            <v-card-text>
-              <template v-if="payWithCreditCard">
-                <h4 class="mb-3">How to pay with credit card:</h4>
-                <ol class="mb-5">
-                  <li>Click on "Proceed"</li>
-                  <li>Complete credit card payment</li>
-                  <li>Get confirmation receipt</li>
-                </ol>
-              </template>
-              <template v-else>
-                <h4 class="mb-3">How to pay with online banking:</h4>
-                <ol class="mb-5">
-                  <li>Sign in to your financial institution's online banking website or app</li>
-                  <li>Go to your financial institution's bill payment page</li>
-                  <li>Enter "BC Registries and Online Services" as payee</li>
-                  <li>Enter BC Registries and Online Services account number</li>
-                  <li>Submit your payment for the balance due</li>
-                </ol>
-              </template>
-              <v-divider></v-divider>
-              <h4 class="mt-5 mb-4">Would you like to complete transaction immediately?</h4>
-              <v-checkbox
-                class="pay-with-credit-card mb-4"
-                v-model="payWithCreditCard"
-                color="primary"
-              >
-                <template v-slot:label>
-                  <div class="font-weight-bold ml-1">Credit Card</div>
-                  <div class="subtxt ml-1">Pay your balance and access files <strong>immediately</strong></div>
-                </template>
-              </v-checkbox>
-              <v-divider></v-divider>
-              <v-row>
-                <v-col
-                  cols="12"
-                  class="pb-2 d-inline-flex"
-                >
-                  <v-btn
-                    class="px-0"
-                    text
-                    color="primary"
-                    @click="downloadInvoice"
-                    v-if="!payWithCreditCard"
-                  >
-                    <v-icon class="mr-1">
-                      mdi-file-download-outline
-                    </v-icon>
-                    Download Invoice
-                  </v-btn>
-                  <v-spacer></v-spacer>
-                  <template v-if="payWithCreditCard">
-                    <v-btn
-                      color="grey lighten-2"
-                      width="100"
-                      class="mr-3"
-                      @click="cancel"
-                      depressed
-                    >
-                      Cancel
-                    </v-btn>
-                    <v-btn
-                      color="primary"
-                      width="100"
-                      class="font-weight-bold"
-                      @click="payNow"
-                      depressed
-                    >
-                      Pay Now
-                    </v-btn>
-                  </template>
-                  <template v-else>
-                    <v-btn
-                      color="primary"
-                      width="100"
-                      class="font-weight-bold"
-                      @click="completeObPayment"
-                      depressed
-                    >
-                      Ok
-                    </v-btn>
-                  </template>
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </v-card>
+          <PaymentCard
+            :paymentCardData="paymentCardData"
+            @complete-online-banking="completeOBPayment"
+            @pay-with-credit-card="payNow"
+          ></PaymentCard>
         </v-col>
       </v-row>
     </v-container>
@@ -154,19 +53,22 @@ import ConfigHelper from '@/util/config-helper'
 import { Invoice } from '@/models/invoice'
 import OrgModule from '@/store/modules/org'
 import { OrgPaymentDetails } from '@/models/Organization'
-import OrgService from '@/services/org.services'
-import PaymentService from '@/services/payment.services'
+import PaymentCard from '@/components/pay/PaymentCard.vue'
 import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
 import { getModule } from 'vuex-module-decorators'
 import { mapActions } from 'vuex'
 
 @Component({
   components: {
-    SbcSystemError
+    SbcSystemError,
+    PaymentCard
   },
   methods: {
     ...mapActions('org', [
-      'createTransaction'
+      'createTransaction',
+      'getOrgPayments',
+      'getInvoice',
+      'updateInvoicePaymentMethodAsCreditCard'
     ])
   }
 })
@@ -174,15 +76,16 @@ export default class PaymentView extends Vue {
   private orgStore = getModule(OrgModule, this.$store)
   @Prop({ default: '' }) paymentId: string
   @Prop({ default: '' }) redirectUrl: string
-  protected readonly createTransaction!: (transactionData) => any
+  private readonly createTransaction!: (transactionData) => any
+  private readonly updateInvoicePaymentMethodAsCreditCard!: (paymentId: string) => any
+  private readonly getOrgPayments!: () => OrgPaymentDetails
+  private readonly getInvoice!: (paymentId: string) => Invoice
   private showLoading: boolean = true
   private showOnlineBanking: boolean = false
   private errorMessage: string = ''
   private showErrorModal: boolean = false
   private returnUrl: string = ''
-  private payWithCreditCard: boolean = false
-  private total = 0
-  private cfsAccountId: string = ''
+  private paymentCardData: any
 
   private async mounted () {
     this.showLoading = true
@@ -196,36 +99,25 @@ export default class PaymentView extends Vue {
       // user should be signed in and should have account as well
       if (this.isUserSignedIn && !!accountSettings) {
         // get the invoice and check for OB
-        const response = await PaymentService.getInvoice(this.paymentId)
-        const invoice:Invoice = response?.data
-        if (invoice.paymentMethod === PaymentTypes.ONLINE_BANKING) {
-          this.total = invoice?.total || 0
+        const invoice: Invoice = await this.getInvoice(this.paymentId)
+        if (invoice?.paymentMethod === PaymentTypes.ONLINE_BANKING) {
           // get account data to show in the UI
-          const response = await OrgService.getOrgPayments(accountSettings.id)
-          const paymentDetails:OrgPaymentDetails = response?.data
-          this.cfsAccountId = paymentDetails?.cfsAccount?.cfsAccountNumber || ''
-          this.showOnlineBanking = true
+          const paymentDetails: OrgPaymentDetails = await this.getOrgPayments()
+          this.paymentCardData = {
+            totalBalanceDue: invoice?.total || 0,
+            payeeName: ConfigHelper.getPaymentPayeeName(),
+            cfsAccountId: paymentDetails?.cfsAccount?.cfsAccountNumber || ''
+          }
           this.showLoading = false
+          this.showOnlineBanking = true
         }
       }
 
       if (!this.showOnlineBanking) {
-        const transactionDetails = await this.createTransaction({
-          paymentId: this.paymentId,
-          redirectUrl: this.redirectUrl
-        })
-        this.showLoading = false
-        this.returnUrl = transactionDetails?.paySystemUrl
-        this.goToUrl(this.returnUrl)
+        await this.doCreateTransaction()
       }
     } catch (error) {
-      this.showLoading = false
-      this.errorMessage = this.$t('payFailedMessage').toString()
-      if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') { // Transaction is already completed.Show as a modal.
-        this.goToUrl(this.redirectUrl)
-      } else {
-        this.showErrorModal = true
-      }
+      this.doHandleError(error)
     }
   }
 
@@ -237,43 +129,43 @@ export default class PaymentView extends Vue {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
   }
 
-  goToUrl (url:string) {
+  private goToUrl (url:string) {
     window.location.href = url || this.redirectUrl
   }
 
-  downloadInvoice () {
-    // DOWNLOAD INVOICE
-  }
-
-  completeObPayment () {
+  private completeOBPayment () {
     this.goToUrl(this.returnUrl)
   }
 
-  async payNow () {
+  private async payNow () {
     // patch the transaction
     // redirect for payment
     try {
-      const response = await PaymentService.updateInvoicePaymentMethod(this.paymentId)
-      const transactionDetails = await this.createTransaction({
-        paymentId: this.paymentId,
-        redirectUrl: this.redirectUrl
-      })
-      this.showLoading = false
-      this.returnUrl = transactionDetails?.paySystemUrl
-      this.goToUrl(this.returnUrl)
+      await this.updateInvoicePaymentMethodAsCreditCard(this.paymentId)
+      await this.doCreateTransaction()
     } catch (error) {
-      this.showLoading = false
-      this.errorMessage = this.$t('payFailedMessage').toString()
-      if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') { // Transaction is already completed.Show as a modal.
-        this.goToUrl(this.redirectUrl)
-      } else {
-        this.showErrorModal = true
-      }
+      this.doHandleError(error)
     }
   }
 
-  cancel () {
-    // CANCEL
+  private async doCreateTransaction () {
+    const transactionDetails = await this.createTransaction({
+      paymentId: this.paymentId,
+      redirectUrl: this.redirectUrl
+    })
+    this.showLoading = false
+    this.returnUrl = transactionDetails?.paySystemUrl
+    this.goToUrl(this.returnUrl)
+  }
+
+  private doHandleError (error) {
+    this.showLoading = false
+    this.errorMessage = this.$t('payFailedMessage').toString()
+    if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') { // Transaction is already completed.Show as a modal.
+      this.goToUrl(this.redirectUrl)
+    } else {
+      this.showErrorModal = true
+    }
   }
 }
 </script>

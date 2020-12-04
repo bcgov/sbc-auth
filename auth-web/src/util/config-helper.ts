@@ -54,6 +54,10 @@ export default class ConfigHelper {
     return ConfigHelper.getValue('AFFIDAVIT_FILE_SIZE')
   }
 
+  static getPaymentPayeeName () {
+    return ConfigHelper.getValue('PAYMENT_PAYEE_NAME') || 'BC Registries and Online Services'
+  }
+
   static getAuthAPIUrl () {
     return ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')
   }
