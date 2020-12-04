@@ -30,7 +30,7 @@
           <p class="pb-2">Please find your balance and payment details below </p>
           <v-card class="bcol-payment-card">
             <v-card-text class="heading-info">
-              <h2 class="mb-2">Balance Due: $21.50</h2>
+              <h2 class="mb-2">Balance Due: {{total}}</h2>
               <template v-if="payWithCreditCard">
                 <p class="mb-1">
                   Click "pay now" to complete transaction balance with credit card.
@@ -49,7 +49,7 @@
                   </span>
                   <span>
                     <strong>Account #:</strong>
-                    87548675
+                    {{cfsAccountId}}
                   </span>
                 </div>
               </template>
@@ -148,9 +148,14 @@
 <script lang="ts">
 
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { AccountSettings } from '@/models/account-settings'
+import ConfigHelper from '@/util/config-helper'
+import { Invoice } from '@/models/invoice'
 import OrgModule from '@/store/modules/org'
-import PaymentServices from '@/services/payment.services'
-import { PaymentTypes } from '@/util/constants'
+import { OrgPaymentDetails } from '@/models/Organization'
+import OrgService from '@/services/org.services'
+import PaymentService from '@/services/payment.services'
 import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
 import { getModule } from 'vuex-module-decorators'
 import { mapActions } from 'vuex'
@@ -176,6 +181,8 @@ export default class PaymentView extends Vue {
   private showErrorModal: boolean = false
   private returnUrl: string = ''
   private payWithCreditCard: boolean = false
+  private total = 0
+  private cfsAccountId: string = ''
 
   private async mounted () {
     this.showLoading = true
@@ -185,16 +192,30 @@ export default class PaymentView extends Vue {
       return
     }
     try {
-      const transactionDetails = await this.createTransaction({
-        paymentId: this.paymentId,
-        redirectUrl: this.redirectUrl
-      })
-      this.showLoading = false
-      this.returnUrl = transactionDetails?.paySystemUrl
-      if (transactionDetails?.paymentType === PaymentTypes.ONLINE_BANKING) {
-        this.showOnlineBanking = true
-        // stay
-      } else {
+      const accountSettings = this.getAccountFromSession()
+      // user should be signed in and should have account as well
+      if (this.isUserSignedIn && !!accountSettings) {
+        // get the invoice and check for OB
+        const response = await PaymentService.getInvoice(this.paymentId)
+        const invoice:Invoice = response?.data
+        if (invoice.paymentMethod === PaymentTypes.ONLINE_BANKING) {
+          this.total = invoice?.total || 0
+          // get account data to show in the UI
+          const response = await OrgService.getOrgPayments(accountSettings.id)
+          const paymentDetails:OrgPaymentDetails = response?.data
+          this.cfsAccountId = paymentDetails?.cfsAccount?.cfsAccountNumber || ''
+          this.showOnlineBanking = true
+          this.showLoading = false
+        }
+      }
+
+      if (!this.showOnlineBanking) {
+        const transactionDetails = await this.createTransaction({
+          paymentId: this.paymentId,
+          redirectUrl: this.redirectUrl
+        })
+        this.showLoading = false
+        this.returnUrl = transactionDetails?.paySystemUrl
         this.goToUrl(this.returnUrl)
       }
     } catch (error) {
@@ -206,6 +227,14 @@ export default class PaymentView extends Vue {
         this.showErrorModal = true
       }
     }
+  }
+
+  private isUserSignedIn (): boolean {
+    return !!ConfigHelper.getFromSession('KEYCLOAK_TOKEN')
+  }
+
+  protected getAccountFromSession (): AccountSettings {
+    return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
   }
 
   goToUrl (url:string) {
@@ -220,8 +249,27 @@ export default class PaymentView extends Vue {
     // MAKE PAYMENT
   }
 
-  payNow () {
-    // PAY NOW
+  async payNow () {
+    // patch the transaction
+    // redirect for payment
+    try {
+      const response = await PaymentService.updateInvoicePaymentMethod(this.paymentId)
+      const transactionDetails = await this.createTransaction({
+        paymentId: this.paymentId,
+        redirectUrl: this.redirectUrl
+      })
+      this.showLoading = false
+      this.returnUrl = transactionDetails?.paySystemUrl
+      this.goToUrl(this.returnUrl)
+    } catch (error) {
+      this.showLoading = false
+      this.errorMessage = this.$t('payFailedMessage').toString()
+      if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') { // Transaction is already completed.Show as a modal.
+        this.goToUrl(this.redirectUrl)
+      } else {
+        this.showErrorModal = true
+      }
+    }
   }
 
   cancel () {
