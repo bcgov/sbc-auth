@@ -6,3 +6,5 @@ asyncio-nats-client
 asyncio-nats-streaming
 pycountry
 Werkzeug<1
+jaeger-client
+attrs==19.1.0
