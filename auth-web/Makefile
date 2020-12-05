@@ -7,8 +7,7 @@ PROJECT_NAME=auth-web
 # COMMANDS -- Setup                                                             #
 #################################################################################
 setup: ## Clean and Install npm dependencies
-	@echo "CLean and Installing Node dependencies"
-	@npm ci
+	npm ci
 
 #################################################################################
 # COMMANDS - CI                                                                 #
@@ -16,11 +15,10 @@ setup: ## Clean and Install npm dependencies
 ci: lint test
 
 lint:  ## Run linting ofcode.
-	@echo "Installing Node dependencies"
-	@npm run lint
+	npm run lint
 
 test:  ## Unit testing
-	@npm run test:unit
+	npm run test:unit
 
 #################################################################################
 # COMMANDS - CD                                                                 #
@@ -28,13 +26,13 @@ test:  ## Unit testing
 cd: build
 
 local-build: ## NPM build
-	@npm run build
+	npm run build
 
 build: ## Build the docker container
-	@docker build -t $(PROJECT_NAME) .
+	docker build -t $(PROJECT_NAME) .
 
 build-nc: ## Build the docker container without caching
-	@docker build --no-cache -t $(PROJECT_NAME) .
+	docker build --no-cache -t $(PROJECT_NAME) .
 
 #################################################################################
 # Self Documenting Commands                                                     #
