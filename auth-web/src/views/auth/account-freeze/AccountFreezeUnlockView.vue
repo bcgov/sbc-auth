@@ -1,10 +1,15 @@
 <template>
   <v-container class="view-container">
-    <div class="view-header flex-column">
-      <h1 class="view-header__title">
-        <v-icon color="error">mdi-alert</v-icon>
-        Your account is Temporarily Suspended</h1>
-      <p class="mt-3 mb-0">Account has been suspended due to non-sufficient funds (NSF).</p>
+    <div class="view-header">
+      <div class="view-header__icon">
+        <v-icon large color="error" class="mt-1 mr-4">mdi-alert-circle-outline</v-icon>
+      </div>
+      <div>
+        <h1 class="view-header__title">
+          This account has been temporarily suspended
+        </h1>
+        <p class="mt-3 mb-0">To unlock your account, please complete the following steps.</p>
+      </div>
     </div>
     <v-card flat>
       <Stepper
@@ -14,6 +19,7 @@
         @final-step-action="unlockAccount"
       ></Stepper>
     </v-card>
+
     <!-- Alert Dialog (Error) -->
     <ModalDialog
       ref="errorDialog"
@@ -36,6 +42,7 @@
         </v-btn>
       </template>
     </ModalDialog>
+
   </v-container>
 </template>
 

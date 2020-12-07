@@ -1,41 +1,40 @@
 import { AccessType } from '@/util/constants'
 <template>
   <div>
-    <p class="mb-1">Account has been suspended for outstanding balance.</p>
-    <p class="mb-4">To unlock your account please complete the following steps</p>
-    <v-row class="mb-12 pb-12">
-      <v-col md="9">
-        <v-card
-          outlined
-          flat
-          class="suspended-info-card"
-        >
-          <v-card-text>
-            <v-row class="suspended-row">
-              <v-col class="pt-0">Suspended from</v-col>
-              <v-col class="card-value-right">{{suspendedDate}}</v-col>
-            </v-row>
-            <v-divider class="divider-card"></v-divider>
-            <v-row>
-              <v-col md="9" class="pt-0">
-                <div>Dishonored Bank Instrument Fee</div>
-                <div class="sub-txt">As per PAD terms, you are charged $30 dishonored bank fee for every failed payment</div>
-              </v-col>
-              <v-col class="card-value-right">${{nsfFee.toFixed(2)}}</v-col>
-            </v-row>
-            <v-row class="pb-3">
-              <v-col class="pt-0">Total Transactions</v-col>
-              <v-col class="card-value-right">${{totalTransactionAmount.toFixed(2)}}</v-col>
-            </v-row>
-            <v-divider class="divider-card"></v-divider>
-            <v-row class="font-weight-bold">
-              <v-col class="pt-0 pb-2">Total Amount Due</v-col>
-              <v-col class="pb-2 card-value-right">${{totalAmountToPay.toFixed(2)}}</v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+    <p class="mb-10">
+      This account has been suspended for a failed payment.
+    </p>
+
+    <v-card
+      outlined
+      flat
+      class="suspended-info-card mb-12"
+    >
+      <v-card-text class="py-2 px-6">
+        <v-row>
+          <v-col cols="9">Suspended from</v-col>
+          <v-col class="text-end">{{suspendedDate}}</v-col>
+        </v-row>
+        <v-divider class="my-2"></v-divider>
+        <v-row>
+          <v-col cols="9">
+            <div>Dishonored Bank Instrument Fee</div>
+            <div class="font-italic">As per PAD terms, you are charged $30 dishonored bank fee for every failed payment</div>
+          </v-col>
+          <v-col class="text-end">${{nsfFee.toFixed(2)}}</v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="9">Total Transactions</v-col>
+          <v-col class="text-end">${{totalTransactionAmount.toFixed(2)}}</v-col>
+        </v-row>
+        <v-divider class="my-2"></v-divider>
+        <v-row class="font-weight-bold">
+          <v-col cols="9">Total Amount Due</v-col>
+          <v-col class="text-end">${{totalAmountToPay.toFixed(2)}}</v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
+
     <v-divider></v-divider>
     <v-row>
       <v-col
@@ -43,13 +42,13 @@ import { AccessType } from '@/util/constants'
         class="mt-5 pb-0 d-inline-flex"
       >
         <v-btn
+          large
           text
-          link
           color="primary"
-          class="download-pdf-btn"
           @click="downloadTransactionPDF"
         >
-          Download transaction invoice in PDF
+          <v-icon class="ml-n2">mdi-download</v-icon>
+          <span>Download Transaction Invoice (PDF)</span>
         </v-btn>
         <v-spacer></v-spacer>
         <v-btn
@@ -130,25 +129,9 @@ export default class AccountOverview extends Mixins(Steppable) {
 .suspended-info-card {
   border-color: $BCgovInputError !important;
   border-width: 2px !important;
-  .v-card__text {
-    color: #000 !important;
-  }
+
   .sub-txt {
-    font-style: italic;
     font-size: .75rem;
   }
-  .card-value-right {
-    text-align: right;
-    padding-top: 0px;
-  }
-  .divider-card {
-    border: 1px solid rgb(0, 0, 0, 42%);
-    margin-bottom: 16px;
-  }
-}
-
-.download-pdf-btn {
-  padding: 8px 0px !important;
-  text-decoration: underline;
 }
 </style>

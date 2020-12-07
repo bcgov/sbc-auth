@@ -2,10 +2,10 @@ import { AccessType } from '@/util/constants'
 <template>
   <div>
     <p class="mb-6">
-      Please monitor your pre-authorized debit account balance availability to avoid future non-sufficient funds.
+      Please ensure your pre-authorized debit account has the funds available to avoid failed payments in the future.
     </p>
-    <v-row class="mb-5">
-      <v-col md="7">
+    <v-row>
+      <v-col>
         <h4 class="mb-3">Payment Method</h4>
         <v-card
           outlined
@@ -13,7 +13,8 @@ import { AccessType } from '@/util/constants'
           class="payment-info-card"
         >
           <v-card-text>
-            <div>You will have to pay your balance by
+            <div>
+              You will have to pay your balance by
               <strong>Credit Card</strong>
             </div>
             <div>to unlock your account immediately.</div>
@@ -21,10 +22,11 @@ import { AccessType } from '@/util/constants'
         </v-card>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row class="mb-12">
       <v-col>
         <v-checkbox
-          class="acknowledge-checkbox"
+          color="primary"
+          class="auth-checkbox align-checkbox-label--top"
           v-model="isAcknowledged"
         >
           <template v-slot:label>
@@ -53,7 +55,7 @@ import { AccessType } from '@/util/constants'
           large
           color="primary"
           @click="proceedToPayment"
-          class="proceed-btn"
+          class="proceed-btn font-weight-bold"
           :disabled="!isAcknowledged"
         >
           Proceed
@@ -94,19 +96,31 @@ export default class PaymentReview extends Mixins(Steppable) {
 <style lang="scss" scoped>
 @import "$assets/scss/theme.scss";
 
-.payment-info-card {
-  border-color: #1976d2 !important;
-  border-width: 2px !important;
-  .v-card__text {
-    color: #000 !important;
+  .payment-info-card {
+    max-width: 55ch;
+    border-color: var(--v-primary-base) !important;
+    border-width: 2px !important;
   }
-}
 
-.acknowledge-checkbox {
+  .auth-checkbox {
+    max-width: 70ch;
+  }
+
+  .align-checkbox-label--top {
+      ::v-deep {
+        .v-input__slot {
+          align-items: flex-start;
+        }
+      }
+    }
+
+  .v-input--checkbox {
+    color: var(--v-grey-darken4) !important;
+  }
+
   ::v-deep {
-    .v-input__slot {
-      align-items: flex-start;
+    .v-input--checkbox .v-label {
+      color: var(--v-grey-darken4) !important;
     }
   }
-}
 </style>
