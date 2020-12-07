@@ -19,14 +19,14 @@
       </template>
       <template v-slot:[`header.status`]="{ header }">
         {{header.text}}
-        <v-tooltip bottom color="grey darken-4">
+        <!-- <v-tooltip bottom color="grey darken-4">
           <template v-slot:activator="{ on }">
             <v-icon small class="status-tooltip-icon" v-on="on">mdi-information-outline</v-icon>
           </template>
           <div v-for="(status, index) in transactionStatus" :key="index">
             {{status.status}} - {{status.description}}
           </div>
-        </v-tooltip>
+        </v-tooltip> -->
       </template>
       <template v-slot:[`item.transactionNames`]="{ item }">
         <div class="product-purchased font-weight-bold"
@@ -46,10 +46,10 @@
         </div>
       </template>
       <template v-slot:[`item.initiatedBy`]="{ item }">
-        <span style="white-space: nowrap;">{{formatInitiatedBy(item.initiatedBy)}}</span>
+        <span>{{formatInitiatedBy(item.initiatedBy)}}</span>
       </template>
       <template v-slot:[`item.transactionDate`]="{ item }">
-        <span style="white-space: nowrap;">{{formatDate(item.transactionDate)}}</span>
+        <span>{{formatDate(item.transactionDate)}}</span>
       </template>
       <template v-slot:[`item.totalAmount`]="{ item }">
         <div class="font-weight-bold">
@@ -57,14 +57,7 @@
         </div>
       </template>
       <template v-slot:[`item.status`]="{ item }">
-        <v-chip
-          small
-          label
-          :color="getStatusColor(item.status)"
-          class="text-uppercase font-weight-bold mt-n1"
-        >
-          {{formatStatus(item.status)}}
-        </v-chip>
+        {{formatStatus(item.status)}}
       </template>
     </v-data-table>
   </div>
@@ -132,7 +125,7 @@ export default class TransactionsDataTable extends Vue {
       width: '110'
     },
     {
-      text: 'Total Amount',
+      text: 'Amount',
       align: 'right',
       value: 'totalAmount',
       sortable: false
@@ -217,7 +210,7 @@ export default class TransactionsDataTable extends Vue {
   }
 
   private formatStatus (status) {
-    return (status === 'Settlement Scheduled') ? 'Pending' : status
+    return (status === 'Settlement Scheduled') ? 'PENDING' : status
   }
 
   private getStatusColor (status) {
