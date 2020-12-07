@@ -200,9 +200,9 @@ class Org:  # pylint: disable=too-many-public-methods
             raise BusinessException(Error.DATA_CONFLICT, None)
 
     @staticmethod
-    def _create_payment_settings(org_model: OrgModel, payment_info: dict, payment_method: str,
-                                 mailing_address=None, user_id: str = None,
-                                 is_new_org: bool = True) -> PaymentAccountStatus:  # pylint: disable=too-many-arguments
+    def _create_payment_settings(org_model: OrgModel, payment_info: dict,   # pylint: disable=too-many-arguments
+                                 payment_method: str, mailing_address=None, user_id: str = None,
+                                 is_new_org: bool = True) -> PaymentAccountStatus:
         """Add payment settings for the org."""
         pay_url = current_app.config.get('PAY_API_URL')
         pay_request = {
