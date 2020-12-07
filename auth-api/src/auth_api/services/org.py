@@ -118,7 +118,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         Org.add_product(org.id, token_info)
         payment_method = Org._validate_and_get_payment_method(selected_payment_method, OrgType[org_type])
-        Org._create_payment_settings(org, payment_info, payment_method, mailing_address, True)
+        Org._create_payment_settings(org, payment_info, payment_method, mailing_address, user_id, True)
 
         # TODO do we have to check anything like this below?
         # if payment_account_status == PaymentAccountStatus.FAILED:
@@ -201,8 +201,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def _create_payment_settings(org_model: OrgModel, payment_info: dict, payment_method: str,
-                                 mailing_address=None,
-                                 is_new_org: bool = True) -> PaymentAccountStatus:
+                                 mailing_address=None, user_id: str = None,
+                                 is_new_org: bool = True) -> PaymentAccountStatus:  # pylint: disable=too-many-arguments
         """Add payment settings for the org."""
         pay_url = current_app.config.get('PAY_API_URL')
         pay_request = {
@@ -225,6 +225,7 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_request['paymentInfo']['bankTransitNumber'] = payment_info.get('bankTransitNumber', None)
             pay_request['paymentInfo']['bankInstitutionNumber'] = payment_info.get('bankInstitutionNumber', None)
             pay_request['paymentInfo']['bankAccountNumber'] = payment_info.get('bankAccountNumber', None)
+            pay_request['pad_tos_accepted_by'] = str(user_id)
 
         # invoke pay-api
         token = RestService.get_service_account_token()
@@ -373,6 +374,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if payment_info := org_info.pop('paymentInfo', {}):
             selected_payment_method = payment_info.get('paymentMethod', None)
             payment_type = Org._validate_and_get_payment_method(selected_payment_method, OrgType[self._model.type_code])
+            # TODO when doing , premium account updates , pass the user Id so that pay-api will update the tos-update-by
             Org._create_payment_settings(self._model, payment_info, payment_type, mailing_address, False)
             current_app.logger.debug('>update_org ')
         return self
