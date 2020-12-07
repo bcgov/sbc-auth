@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """API endpoints for managing an Invitation resource."""
+from datetime import datetime
 
 from flask import g
 from flask_restplus import Namespace, Resource, cors
@@ -24,7 +25,6 @@ from auth_api.services.minio import MinioService
 from auth_api.tracer import Tracer
 from auth_api.utils.enums import AccessType, DocumentType
 from auth_api.utils.util import cors_preflight
-
 
 API = Namespace('documents', description='Endpoints for document management')
 TRACER = Tracer.get_instance()
@@ -50,13 +50,26 @@ class Documents(Resource):
 
             doc = DocumentService.fetch_latest_document(document_type)
             if doc is not None:
-                response, status = doc.as_dict(), http_status.HTTP_200_OK
+                doc_dict = doc.as_dict()
+                if document_type == DocumentType.TERMS_OF_USE_PAD.value:
+                    replaced_content = Documents._replace_current_date(doc)
+                    doc_dict.update({'content': replaced_content})
+
+                response, status = doc_dict, http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested invitation could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
+
+    @staticmethod
+    def _replace_current_date(doc):
+        """Replace any dynamic contents."""
+        today = datetime.today()
+        replaced_content = doc.as_dict().get('content').replace('Month Day, Year',
+                                                                today.strftime('%m/%d/%Y'))
+        return replaced_content
 
 
 @cors_preflight('GET,OPTIONS')

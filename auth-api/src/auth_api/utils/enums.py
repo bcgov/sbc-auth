@@ -94,6 +94,7 @@ class DocumentType(Enum):
     TERMS_OF_USE = 'termsofuse'
     TERMS_OF_USE_DIRECTOR_SEARCH = 'termsofuse_directorsearch'
     AFFIDAVIT = 'affidavit'
+    TERMS_OF_USE_PAD = 'termsofuse_pad'
 
 
 class NRStatus(Enum):
