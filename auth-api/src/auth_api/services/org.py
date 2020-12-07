@@ -200,7 +200,7 @@ class Org:  # pylint: disable=too-many-public-methods
             raise BusinessException(Error.DATA_CONFLICT, None)
 
     @staticmethod
-    def _create_payment_settings(org_model: OrgModel, payment_info: dict,   # pylint: disable=too-many-arguments
+    def _create_payment_settings(org_model: OrgModel, payment_info: dict,  # pylint: disable=too-many-arguments
                                  payment_method: str, mailing_address=None, user_id: str = None,
                                  is_new_org: bool = True) -> PaymentAccountStatus:
         """Add payment settings for the org."""
@@ -375,7 +375,7 @@ class Org:  # pylint: disable=too-many-public-methods
             selected_payment_method = payment_info.get('paymentMethod', None)
             payment_type = Org._validate_and_get_payment_method(selected_payment_method, OrgType[self._model.type_code])
             # TODO when doing , premium account updates , pass the user Id so that pay-api will update the tos-update-by
-            Org._create_payment_settings(self._model, payment_info, payment_type, mailing_address, False)
+            Org._create_payment_settings(self._model, payment_info, payment_type, mailing_address, None, False)
             current_app.logger.debug('>update_org ')
         return self
 
