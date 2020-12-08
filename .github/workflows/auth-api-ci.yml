@@ -10,6 +10,11 @@ on:
 jobs:
   auth-api-ci:
     runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./auth-api
+
     if: github.repository == 'bcgov/sbc-auth'
 
     env:
@@ -58,19 +63,15 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
-        working-directory: ./auth-api
         run: |
           make setup
       - name: Lint with pylint
-        working-directory: ./auth-api
         run: |
-          make pylint
+          make lint
       - name: Lint with flake8
-        working-directory: ./auth-api
         run: |
           make flake8
       - name: Test with pytest
-        working-directory: ./auth-api
         run: |
           make test
       - name: Upload coverage to Codecov
@@ -80,3 +81,6 @@ jobs:
           flags: authapi
           name: codecov-auth-api
           fail_ci_if_error: true
+      - name: build to check strictness
+        run: |
+          make build-nc

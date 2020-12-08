@@ -1,9 +1,20 @@
 import { AccessType } from '@/util/constants'
 <template>
   <div>
-    <p class="mb-4">Please review your pre-authorized debit information. If anything is wrong please edit your information.</p>
-    <v-row class="mb-12 pb-12">
-      <v-col md="10">
+    <p class="mb-10">
+      Please review your pre-authorized debit information. If anything is wrong please edit your information.
+    </p>
+
+    <v-alert
+      type="error"
+      class="mb-11"
+      v-if="errorText"
+    >
+      <div v-html="errorText"></div>
+    </v-alert>
+
+    <v-row class="mb-12">
+      <v-col md="10" class="py-0">
         <PADInfoForm
           :padInformation="padInfo"
           @is-pre-auth-debit-form-valid="isPADValid"
@@ -14,13 +25,6 @@ import { AccessType } from '@/util/constants'
         ></PADInfoForm>
       </v-col>
     </v-row>
-    <v-alert
-      dense
-      type="error"
-      v-if="errorText"
-    >
-      <div v-html="errorText"></div>
-    </v-alert>
     <v-divider></v-divider>
     <v-row>
       <v-col
@@ -153,10 +157,18 @@ export default class ReviewBankInformation extends Mixins(Steppable) {
         verifyPad.message.forEach((msg) => {
           msgList += `<li>${msg}</li>`
         })
-        this.errorText = `<ul style="list-style-type: none;">${msgList}</ul>`
+        this.errorText = `<ul class="error-list">${msgList}</ul>`
       }
       return false
     }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  ::v-deep .error-list {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+  }
+</style>
