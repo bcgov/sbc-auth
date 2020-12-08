@@ -17,7 +17,7 @@ on:
 
 jobs:
   notify-api-cd:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     env:
       IMAGE_NAME: notify-api
@@ -39,7 +39,7 @@ jobs:
         run: |
           echo "TAG_NAME=dev" >> $GITHUB_ENV
 
-      - uses: pwei1018/bcrs-cd-action@latest
+      - uses: pwei1018/bcrs-cd-action@versioning
         with:
           WORKING_DIRECTORY: "./notify-api"
           APP_NAME: "notify-api"
@@ -66,7 +66,7 @@ jobs:
 
   notify-queue-cd:
     needs: notify-api-cd
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     env:
       IMAGE_NAME: notify-queue
@@ -88,12 +88,13 @@ jobs:
         run: |
           echo "TAG_NAME=dev" >> $GITHUB_ENV
 
-      - uses: pwei1018/bcrs-cd-action@latest
+      - uses: pwei1018/bcrs-cd-action@versioning
         with:
           WORKING_DIRECTORY: "./queue_services/notify-queue"
           APP_NAME: "notify-queue"
           VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"email\", \"nats\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-notify\", \"notify-api\", \"notify-queue\"]}]'
           SKIP_OP: "false"
+          DEPLOYMENT: "true"
           OP_PARAMETERS: ${{ secrets.OP_PARAMETERS }}
           OPENSHIFT_LOGIN_REGISTRY: ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }}
           OPENSHIFT_DOCKER_REGISTRY: ${{ secrets.OPENSHIFT_DOCKER_REGISTRY }}

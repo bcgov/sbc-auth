@@ -16,7 +16,7 @@ on:
 
 jobs:
   auth-api-cd:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     if: github.repository == 'bcgov/sbc-auth'
     steps:
       - uses: actions/checkout@v2

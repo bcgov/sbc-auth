@@ -15,7 +15,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, validator, networks
+from pydantic import BaseModel, networks, validator
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
