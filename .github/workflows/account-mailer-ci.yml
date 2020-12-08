@@ -60,3 +60,6 @@ jobs:
           flags: accountmailerqueue
           name: codecov-account-mailer
           fail_ci_if_error: true
+      - name: build to check strictness
+        run: |
+          make build-nc
