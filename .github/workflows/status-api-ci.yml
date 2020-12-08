@@ -47,3 +47,6 @@ jobs:
           flags: statusapi
           name: codecov-status-api
           fail_ci_if_error: true
+      - name: build to check strictness
+        run: |
+          make build-nc

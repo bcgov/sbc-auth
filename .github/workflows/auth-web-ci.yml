@@ -48,6 +48,6 @@ jobs:
           fail_ci_if_error: true
       - name: Run build
         run: |
-          make local-build
+          make build-nc
         env:
           CI: true
