@@ -11,7 +11,12 @@
           :complete="currentStepNumber > getStepIndex(step)"
           :step="getStepIndex(step)"
         >{{ getStepName(step) }}</v-stepper-step>
-        <v-divider vertical class="step-divider mt-n1 mb-n1" :key="`${getStepIndex(step)}-divider`" v-if="step !== steps"></v-divider>
+        <v-divider
+          vertical
+          class="step-divider mt-n1 mb-n1"
+          :key="`${getStepIndex(step)}-divider`"
+          v-if="step !== steps">
+        </v-divider>
       </template>
     </v-container>
     <v-divider vertical class="my-10"></v-divider>
@@ -353,5 +358,9 @@ export default class Stepper extends Vue {
         }
       }
     }
+  }
+
+  .error + hr {
+    display: none;
   }
 </style>
