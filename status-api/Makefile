@@ -27,7 +27,7 @@ clean-build: ## Clean build files
 	rm -fr dist/
 	rm -fr .eggs/
 	find . -name '*.egg-info' -exec rm -fr {} +
-	find . -name '*.egg' -exec rm -f {} +
+	find . -name '*.egg' -exec rm -fr {} +
 
 clean-pyc: ## Clean cache files
 	find . -name '*.pyc' -exec rm -f {} +

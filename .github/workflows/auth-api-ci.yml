@@ -81,3 +81,6 @@ jobs:
           flags: authapi
           name: codecov-auth-api
           fail_ci_if_error: true
+      - name: build to check strictness
+        run: |
+          make build-nc
