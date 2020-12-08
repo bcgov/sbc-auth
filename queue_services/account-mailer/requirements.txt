@@ -6,7 +6,7 @@ asyncio-nats-client==0.11.4
 asyncio-nats-streaming==0.4.0
 attrs==19.1.0
 blinker==1.4
-certifi==2020.11.8
+certifi==2020.12.5
 click==7.1.2
 itsdangerous==1.1.0
 jaeger-client==4.3.0
