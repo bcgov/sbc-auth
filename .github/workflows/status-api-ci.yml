@@ -9,7 +9,12 @@ on:
 
 jobs:
   status-api-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./status-api
+
     if: github.repository == 'bcgov/sbc-auth'
     env:
       FLASK_ENV: "testing"
@@ -24,25 +29,17 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
-        working-directory: ./status-api
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements/dev.txt
+          make setup
       - name: Lint with pylint
-        working-directory: ./status-api
         run: |
-          pylint --rcfile=setup.cfg --load-plugins=pylint_flask --disable=C0301,W0511 src/status_api tests
+          make lint
       - name: Lint with flake8
-        working-directory: ./status-api
         run: |
-          flake8 src/status_api tests
+          make flake8
       - name: Test with pytest
-        working-directory: ./status-api
         run: |
-          pip install .
-          export PYTHONPATH=./src/
-          pytest
+          make test
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
@@ -50,3 +47,6 @@ jobs:
           flags: statusapi
           name: codecov-status-api
           fail_ci_if_error: true
+      - name: build to check strictness
+        run: |
+          make build-nc

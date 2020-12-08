@@ -10,6 +10,10 @@ on:
 jobs:
   auth-web-ci:
     runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./auth-web
 
     strategy:
       matrix:
@@ -22,19 +26,16 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install
-        working-directory: ./auth-web
         run: |
           make setup
         env:
           CI: true
       - name: Run Lint
-        working-directory: ./auth-web
         run: |
           make lint
         env:
           CI: true
       - name: Run Unit Tests
-        working-directory: ./auth-web
         run: |
           make test
         env:
@@ -46,8 +47,7 @@ jobs:
           name: codecov-auth-web
           fail_ci_if_error: true
       - name: Run build
-        working-directory: ./auth-web
         run: |
-          make local-build
+          make build-nc
         env:
           CI: true
