@@ -27,6 +27,10 @@ def process(email_msg: dict) -> dict:
     """Build the email for Account Restored notification."""
     logger.debug('account restored notification: %s', email_msg)
 
+    origin = current_app.config.get('HTTP_ORIGIN')
+    context_path = current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')
+    login_url = '{}/{}'.format(origin, context_path)
+
     account_id = email_msg.get('accountId')
     admin_emails = _get_admin_emails(email_msg.get(account_id))
 
@@ -36,7 +40,7 @@ def process(email_msg: dict) -> dict:
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
     html_out = jnja_template.render(
-        account_name=email_msg.get("accountName"), url='login_url'  # map login url
+        account_name=email_msg.get("accountName"), url=login_url
     )
     return {
         'recipients': admin_emails,

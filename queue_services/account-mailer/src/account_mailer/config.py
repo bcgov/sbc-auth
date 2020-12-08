@@ -115,6 +115,10 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     TEMPLATE_PATH = os.getenv('TEMPLATE_PATH', 'src/account_mailer/email_templates')
 
+    HTTP_ORIGIN = os.getenv('HTTP_ORIGIN', 'localhost')
+
+    AUTH_WEB_TOKEN_CONFIRM_PATH = os.getenv('AUTH_WEB_TOKEN_CONFIRM_PATH')
+
     # JWT_OIDC Settings
     JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_ISSUER')
 
