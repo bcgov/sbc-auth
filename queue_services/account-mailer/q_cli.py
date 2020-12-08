@@ -118,6 +118,30 @@ async def run(loop, mode, auth_account_id, auth_account_name, bank_number, bank_
                     'transactionId': transaction_id
                 }
             }
+        elif mode == 'acc_suspend':
+            payload = {
+                'specversion': '1.x-wip',
+                'type': 'bc.registry.payment.accountSuspended',
+                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
+                'id': auth_account_id,
+                'datacontenttype': 'application/json',
+                'data': {
+                    'accountId': auth_account_id,
+                    'accountName': auth_account_name
+                }
+            }
+        elif mode == 'acc_restore':
+            payload = {
+                'specversion': '1.x-wip',
+                'type': 'bc.registry.payment.accountRestored',
+                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
+                'id': auth_account_id,
+                'datacontenttype': 'application/json',
+                'data': {
+                    'accountId': auth_account_id,
+                    'accountName': auth_account_name
+                }
+            }
 
         await sc.publish(subject=subscription_options().get('subject'),
                          payload=json.dumps(payload).encode('utf-8'))
@@ -144,7 +168,7 @@ if __name__ == '__main__':
             print('q_cli.py -o <old_identifier> -n <new_identifier>')
             sys.exit()
         elif opt in ("-m", "--mode"):
-            mode = arg  # pad confirmation - "pad", refund request - "refund"
+            mode = arg  # pad confirmation - "pad", refund request - "refund", acc suspended - "acc_suspend", acc restored - "acc_restore"
         elif opt in ("-i", "--id"):
             auth_account_id = arg
         elif opt in ("-n", "--name"):
@@ -169,3 +193,5 @@ if __name__ == '__main__':
 
 # pad cmd --> python3 q_cli.py -m pad -i 10 -n TestAccount -b 088 -t 00277 -a 12874890
 # refund cmd --> python3 q_cli.py -m refund -i 10 -o 67892 -p 25.33 -d 988
+# account suspended cmd --> python3 q_cli.py -m acc_suspend -i 4 -n SomeAccount
+# account restored cmd --> python3 q_cli.py -m acc_restore -i 4 -n SomeAccount

@@ -36,6 +36,8 @@ from entity_queue_common.service_utils import QueueException, logger
 from flask import Flask  # pylint: disable=wrong-import-order
 
 from account_mailer import config  # pylint: disable=wrong-import-order
+from account_mailer.email_processors import account_restored  # pylint: disable=wrong-import-order
+from account_mailer.email_processors import account_suspended  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import pad_confirmation  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import payment_completed  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import refund_requested  # pylint: disable=wrong-import-order
@@ -67,6 +69,12 @@ async def process_event(event_message: dict, flask_app):
         elif event_message.get('type', None) == 'bc.registry.payment.padAccountCreate':
             email_msg = event_message.get('data')
             email_dict = pad_confirmation.process(email_msg, token)
+        elif event_message.get('type', None) == 'bc.registry.payment.accountSuspended':
+            email_msg = event_message.get('data')
+            email_dict = account_suspended.process(email_msg)
+        elif event_message.get('type', None) == 'bc.registry.payment.accountRestored':
+            email_msg = event_message.get('data')
+            email_dict = account_restored.process(email_msg)
 
         logger.debug('Extracted email msg: %s', email_dict)
         process_email(email_dict, FLASK_APP, token)
