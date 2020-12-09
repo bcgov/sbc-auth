@@ -225,7 +225,10 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_request['paymentInfo']['bankTransitNumber'] = payment_info.get('bankTransitNumber', None)
             pay_request['paymentInfo']['bankInstitutionNumber'] = payment_info.get('bankInstitutionNumber', None)
             pay_request['paymentInfo']['bankAccountNumber'] = payment_info.get('bankAccountNumber', None)
-            pay_request['padTosAcceptedBy'] = str(user_id)
+            # todo avoid this extra user look up
+            # todo By changing the parent method to consume user object instead of string user id
+            user_model: UserModel = UserModel.find_by_id(user_id)
+            pay_request['padTosAcceptedBy'] = user_model.username
 
         # invoke pay-api
         token = RestService.get_service_account_token()
