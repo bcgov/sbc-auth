@@ -47,7 +47,7 @@ def upgrade():
       </header>
       <ol>
         <li>
-          That this authorization is provided for the benefit of the biller and our financial institution, and is provided in consideration of the Payor’s Financial Institution agreeing to process debits (PADs) against the bank account as indicated in the biller’s PAD application webform and in accordance with the rules of <a href="www.payments.ca" target="_blank">Payments Canada</a>.
+          That this authorization is provided for the benefit of the biller and our financial institution, and is provided in consideration of the Payor’s Financial Institution agreeing to process debits (PADs) against the bank account as indicated in the biller’s PAD application webform and in accordance with the rules of <a href="http://www.payments.ca" target="_blank">Payments Canada</a>.
         </li>
         <li>
           Ticking the acceptance box on the biller’s PAD application webform will be considered equivalent to my signature and will constitute valid authorization for the processing financial institution to debit the payor’s account as identified in the biller’s PAD application webform (the “Payor’s Bank Account”).
