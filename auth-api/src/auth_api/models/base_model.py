@@ -49,6 +49,11 @@ class BaseModel(db.Model):
         """Return relationship for modified by."""
         return relationship('User', foreign_keys=[cls.modified_by_id], post_update=True, uselist=False)
 
+    @classmethod
+    def find_by_id(cls, identifier: int):
+        """Return model by id."""
+        return cls.query.get(identifier)
+
     @staticmethod
     def _get_current_user():
         """Return the current user.
