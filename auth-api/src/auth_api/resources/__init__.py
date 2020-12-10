@@ -96,7 +96,7 @@ API.add_namespace(NOTIFICATIONS_API, path='/users/<string:user_id>/org/<string:o
 API.add_namespace(USER_API, path='/users/<string:invitation_token>')
 API.add_namespace(BCOL_PROFILE_API, path='/bcol-profiles')
 API.add_namespace(PERMISSIONS_API, path='/permissions')
-API.add_namespace(ORG_AUTHORISATION_API, path='/orgs/<string:org_id>/authorisations')
+API.add_namespace(ORG_AUTHORISATION_API, path='/orgs/<string:org_id>/authorizations')
 
 
 TEST_BLUEPRINT = Blueprint('TEST', __name__, url_prefix='/test')
