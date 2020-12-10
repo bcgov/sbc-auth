@@ -3448,7 +3448,7 @@ paths:
         example:
           example1:
             value: PPR
-  '/orgs/{org_id}/authorizations':
+  '/orgs/{account_id}/authorizations':
     get:
       summary: Get authorizations for the account
       operationId: getOrgAuthorizations
@@ -3500,27 +3500,27 @@ paths:
                     paymentPreference:
                       bcOnlineAccountId:
                       bcOnlineUserId:
-                  business:
-                    folioNumber:
-                    name:
-                  orgMembership: ADMIN
-                  roles:
-                  - remove_business
-                  - change_address
-                  - change_org_name
-                  - invite_members
-                  - change_account_type
-                  - change_role
-                  - reset_password
-                  - set_auth_options
-                  - transaction_history
-                  - manage_statements
-                  - reset_otp
-                  - view_payment_methods
-                  - edit
-                  - view
-                  - make_payment
-                  - generate_invoice
+                    business:
+                      folioNumber:
+                      name:
+                    orgMembership: ADMIN
+                    roles:
+                    - remove_business
+                    - change_address
+                    - change_org_name
+                    - invite_members
+                    - change_account_type
+                    - change_role
+                    - reset_password
+                    - set_auth_options
+                    - transaction_history
+                    - manage_statements
+                    - reset_otp
+                    - view_payment_methods
+                    - edit
+                    - view
+                    - make_payment
+                    - generate_invoice
 
         default:
           description: unexpected error
