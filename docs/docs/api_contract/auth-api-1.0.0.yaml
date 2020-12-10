@@ -4978,7 +4978,6 @@ components:
               - view
             pattern: '^(.*)$'
       required:
-        - corp_type_code
         - orgMembership
         - roles
     affiliation:
