@@ -3539,15 +3539,6 @@ paths:
         example:
           example1:
             value: 1234
-      - schema:
-          type: string
-        name: product_code
-        in: path
-        required: true
-        description: Corp Num/Incorporation Number of the entity
-        example:
-          example1:
-            value: PPR
   '/entities/{business_identifier}':
     parameters:
       - name: business_identifier
