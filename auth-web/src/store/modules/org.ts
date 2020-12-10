@@ -696,7 +696,6 @@ export default class OrgModule extends VuexModule {
     const id = orgId || this.context.state['currentOrganization'].id
     const response = await OrgService.getOrgPayments(id)
     let paymentType = response?.data?.paymentMethod || undefined
-
     paymentType = (paymentType === PaymentTypes.DIRECT_PAY) ? PaymentTypes.CREDIT_CARD : paymentType
     this.context.commit('setCurrentOrganizationPaymentType', paymentType)
     // setting padinfo for showing details
