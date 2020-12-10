@@ -40,6 +40,7 @@ from .ops import API as OPS_API
 from .org import API as ORG_API
 from .org_products import API as ORG_PRODUCTS_API
 from .permissions import API as PERMISSIONS_API
+from .org_authorisations import API as ORG_AUTHORISATION_API
 from .products import API as PRODUCTS_API
 from .reset import API as RESET_API
 from .user import API as USER_API
@@ -95,6 +96,7 @@ API.add_namespace(NOTIFICATIONS_API, path='/users/<string:user_id>/org/<string:o
 API.add_namespace(USER_API, path='/users/<string:invitation_token>')
 API.add_namespace(BCOL_PROFILE_API, path='/bcol-profiles')
 API.add_namespace(PERMISSIONS_API, path='/permissions')
+API.add_namespace(ORG_AUTHORISATION_API, path='/orgs/<string:org_id>/authorizations')
 
 
 TEST_BLUEPRINT = Blueprint('TEST', __name__, url_prefix='/test')

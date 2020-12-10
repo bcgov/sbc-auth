@@ -91,6 +91,11 @@ class Authorization(db.Model):
         return cls.query.filter_by(keycloak_guid=keycloak_guid, org_id=org_id).one_or_none()
 
     @classmethod
+    def find_all_authorization_by_org_id(cls, org_id: int):
+        """Return authorization view object."""
+        return cls.query.filter_by(org_id=org_id).one_or_none()
+
+    @classmethod
     def find_user_authorization_by_org_id_and_corp_type(cls, org_id: int, corp_type: str):
         """Return authorization view object."""
         return db.session.query(Authorization).filter(
