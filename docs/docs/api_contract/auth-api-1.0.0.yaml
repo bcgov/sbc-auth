@@ -3494,12 +3494,13 @@ paths:
                 example1:
                   value:
                     account:
-                      accountType: BASIC
-                      id: 12
-                      name: dsa
+                      accountType: PREMIUM
+                      id: '1234'
+                      name: Mock Account
                     paymentPreference:
                       bcOnlineAccountId:
                       bcOnlineUserId:
+                      preferred_payment: PAD
                     business:
                       folioNumber:
                       name:
