@@ -37,6 +37,7 @@ class Authorization:
 
     @staticmethod
     def get_account_authorizations_for_org(token_info: Dict, account_id: str, expanded: bool = False):
+        """Get User authorizations for the org."""
         auth_response = {}
         auth = None
         token_roles = token_info.get('realm_access').get('roles')

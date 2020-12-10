@@ -13,16 +13,12 @@
 # limitations under the License.
 """API endpoints for managing a Product resource."""
 
-import json
-
 from flask import g, request
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
-from auth_api.exceptions import BusinessException
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.services.authorization import Authorization as AuthorizationService
-
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
 
@@ -42,6 +38,6 @@ class AuthorizationResource(Resource):
     def get(org_id):
         """Return authorization for the user for the passed business identifier."""
         expanded: bool = request.args.get('expanded', False)
-        authorisations = AuthorizationService.get_account_authorizations_for_org(g.jwt_oidc_token_info,org_id, expanded)
+        authorisations = AuthorizationService.get_account_authorizations_for_org(g.jwt_oidc_token_info, org_id,
+                                                                                 expanded)
         return authorisations, http_status.HTTP_200_OK
-
