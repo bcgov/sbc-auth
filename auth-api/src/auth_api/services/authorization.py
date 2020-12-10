@@ -42,6 +42,7 @@ class Authorization:
         auth = None
         token_roles = token_info.get('realm_access').get('roles')
 
+        # todo the service account level access has not been defined
         if Role.STAFF.value in token_roles:
             if expanded:
                 # Query Authorization view by business identifier

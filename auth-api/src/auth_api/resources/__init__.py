@@ -40,7 +40,7 @@ from .ops import API as OPS_API
 from .org import API as ORG_API
 from .org_products import API as ORG_PRODUCTS_API
 from .permissions import API as PERMISSIONS_API
-from .org_authorisations import API as ORG_AUTHORISATION_API
+from .org_authorizations import API as ORG_AUTHORISATION_API
 from .products import API as PRODUCTS_API
 from .reset import API as RESET_API
 from .user import API as USER_API

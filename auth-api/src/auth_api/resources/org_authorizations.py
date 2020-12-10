@@ -29,7 +29,7 @@ _JWT = JWTWrapper.get_instance()
 
 @cors_preflight('GET,OPTIONS')
 @API.route('', methods=['GET', 'OPTIONS'])
-class AuthorizationResource(Resource):
+class OrgAuthorizationResource(Resource):
     """Resource for managing entity authorizations."""
 
     @staticmethod
