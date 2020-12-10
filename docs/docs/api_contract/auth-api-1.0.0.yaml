@@ -3494,9 +3494,9 @@ paths:
                 example1:
                   value:
                     account:
-                    accountType: BASIC
-                    id: 12
-                    name: dsa
+                      accountType: BASIC
+                      id: 12
+                      name: dsa
                     paymentPreference:
                       bcOnlineAccountId:
                       bcOnlineUserId:
