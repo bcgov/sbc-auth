@@ -4,6 +4,7 @@
       <h2 class="view-header__title">Transactions</h2>
       <div>
 
+        <!-- Add Funds Dialog -->
         <v-dialog v-model="addFundsDialog" max-width="640">
           <template v-slot:activator="{ attrs }">
             <v-btn
@@ -31,6 +32,7 @@
                       filled
                       hide-details
                       label="Funds Received by"
+                      v-model="paymentType"
                     ></v-select>
                   </v-col>
                 </v-row>
@@ -41,6 +43,7 @@
                       hide-details
                       type="number"
                       label="Amount (CDN)"
+                      min="0"
                       prepend-inner-icon="mdi-currency-usd"
                       v-model="fundsAmount"
                     >
@@ -84,7 +87,7 @@
                       large
                       color="primary"
                       class="font-weight-bold"
-                      @click="addFunds()"
+                      @click="showConfirmationDialog()"
                       :disabled="addingFunds"
                       :loading="addingFunds">
                         Add Funds
@@ -104,6 +107,7 @@
           </v-card>
         </v-dialog>
 
+        <!-- Add Funds Success Dialog -->
         <ModalDialog
           ref="successDialog"
           :show-icon="true"
@@ -126,17 +130,18 @@
             <v-btn
               large
               color="success"
-              @click="closeSuccessDialog($refs.successDialog)"
+              @click="hideSuccessDialog($refs.successDialog)"
             >
               OK
             </v-btn>
           </template>
 
           <template v-slot:text>
-            The amount of <strong>${{fundsAmount}} CDN</strong> was successfully applied to this account.
+            The amount of <strong>CDN ${{fundsAmount}}</strong> was successfully applied to this account.
           </template>
         </ModalDialog>
 
+        <!-- Add Funds Error Dialog -->
         <ModalDialog
           ref="errorDialog"
           :show-icon="true"
@@ -146,15 +151,12 @@
           dialog-class="notify-dialog"
           max-width="640"
         >
-
           <template v-slot:icon>
             <v-icon large color="error">mdi-alert-circle-outline</v-icon>
           </template>
-
           <template v-slot:title>
             An error has occurred
           </template>
-
           <template v-slot:actions>
             <v-btn
               large
@@ -166,9 +168,51 @@
               OK
             </v-btn>
           </template>
-
           <template v-slot:text>
             An error has occurred while attempting to apply funds to this account.<br> Please try again later.
+          </template>
+        </ModalDialog>
+
+        <!-- Add Funds Confirmation Dialog -->
+        <ModalDialog
+          ref="confirmationDialog"
+          :show-icon="true"
+          :show-actions="true"
+          :is-persistent="true"
+          :is-scrollable="true"
+          dialog-class="notify-dialog"
+          max-width="640"
+        >
+          <template v-slot:icon>
+            <v-icon
+              large
+              color="primary"
+            >
+              mdi-information-outline
+            </v-icon>
+          </template>
+          <template v-slot:title>
+            Confirm Amount
+          </template>
+          <template v-slot:text>
+            You are about to apply funds to the amount of <strong>CDN ${{fundsAmount}}</strong> to this account. Are you sure you want to proceed?
+          </template>
+          <template v-slot:actions>
+            <v-btn
+              large
+              color="primary"
+              class="font-weight-bold"
+              @click="addFunds()"
+            >
+              Proceed
+            </v-btn>
+            <v-btn
+              large
+              color="default"
+              @click="hideConfirmationDialog()"
+            >
+              Cancel
+            </v-btn>
           </template>
         </ModalDialog>
 
@@ -193,12 +237,49 @@
       </v-btn>
     </div>
 
-    <TransactionsDataTable
+    <v-data-table
+      :headers="transactionsHeaders"
+      :items="transactionItems"
+      :items-per-page="5"
+      sort-by="date"
+      sort-desc="true"
+      class="mt-5">
+      <template v-slot:[`item.name`]="{ item }">
+        <div>
+          <div class="font-weight-bold">
+            {{ item.name }}
+          </div>
+          {{ item.details }}
+        </div>
+      </template>
+      <template v-slot:[`item.amount`]="{ item }">
+        <div class="font-weight-bold">
+          ${{ item.amount }}
+        </div>
+      </template>
+      <template v-slot:[`item.status`]="{ item }">
+        <v-chip
+          small
+          label
+          :color="item.status === 'Pending' ? 'primary' : 'default'"
+          class="status-chip text-uppercase text-center">
+          {{ item.status }}
+        </v-chip>
+      </template>
+      <template v-slot:[`item.actions`]="{ item }">
+        <v-btn icon class="actions-btn">
+          <v-icon>mdi-dots-vertical</v-icon>
+        </v-btn>
+      </template>
+    </v-data-table>
+
+    <!-- <TransactionsDataTable
       class="mt-4"
       :transactionFilters="transactionFilterProp"
       :key="updateTransactionTableCounter"
       @total-transaction-count="setTotalTransactionCount"
-    ></TransactionsDataTable>
+    ></TransactionsDataTable> -->
+
   </v-container>
 </template>
 
@@ -323,67 +404,147 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   }
 
   $refs: {
+    confirmationDialog: ModalDialog
     successDialog: ModalDialog
     errorDialog: ModalDialog
   }
 
   // Prototype Add Funds to Account
   private addFundsDialog: boolean = false
+  private addFundsConfirmationDialog: boolean = false
+
   private errorDialog: boolean = false
   private balanceDue: boolean = true
   private dateMenu: boolean = false
   private dateFundsAdded: null
   private fundsAmount: ''
   private addingFunds: boolean = false
+  private paymentType: ''
+
   private paymentSources = [
-    'Electronic Funds Transfer (EFT)',
-    'Wire Transfer'
-  ]
-
-  private transactionsHeaders = [
-    {
-      text: 'name'
-    },
-    {
-      value: 'value'
-    }
-  ]
-
-  private transactions = [
-    {
-      name: 'test', value: 'blah'
-    },
-    {
-      name: 'test', value: 'blah'
-    }
+    { text: 'Electronic Funds Transfer (EFT)', value: 'Electronic Funds Transfer (EFT)' },
+    { text: 'Wire Transfer', value: 'Wire Transfer' }
   ]
 
   private showAddFundsDialog () {
-    this.addFundsDialog = true
     this.fundsAmount = ''
     this.dateFundsAdded = null
+    this.addFundsDialog = true
   }
 
   private hideAddFundsDialog () {
-    this.addFundsDialog = false
     this.fundsAmount = ''
     this.dateFundsAdded = null
+    this.addFundsDialog = false
+  }
+
+  private showConfirmationDialog () {
+    this.$refs.confirmationDialog.open()
+  }
+
+  private hideConfirmationDialog () {
+    this.$refs.confirmationDialog.close()
+  }
+
+  private showSuccessDialog () {
+    this.addTransaction()
+    this.addingFunds = false
+    this.addFundsDialog = false
+    this.$refs.successDialog.open()
+  }
+
+  private hideSuccessDialog () {
+    this.$refs.successDialog.close()
   }
 
   private addFunds () {
     this.addingFunds = true
+    this.$refs.confirmationDialog.close()
     setTimeout((this.showSuccessDialog), 5000)
   }
 
-  private showSuccessDialog () {
-    this.addFundsDialog = false
-    this.addingFunds = false
-    this.$refs.successDialog.open()
+  private addTransaction () {
+    this.transactionItems.push({
+      amount: this.fundsAmount,
+      date: this.dateFundsAdded,
+      details: this.paymentType,
+      folio: 'N/A',
+      initiatedBy: 'BC Registries Staff',
+      name: 'Funds Transfer',
+      status: 'Pending'
+    })
   }
 
-  private closeSuccessDialog () {
-    this.$refs.successDialog.close()
-  }
+  // Mockup Transactions
+  transactionsHeaders = [
+    {
+      text: 'Transaction',
+      value: 'name'
+    },
+    {
+      text: 'Folio',
+      value: 'folio'
+    },
+    {
+      text: 'Initiated by',
+      value: 'initiatedBy'
+    },
+    {
+      text: 'Date',
+      value: 'date',
+      width: '100'
+    },
+    {
+      text: 'Amount',
+      value: 'amount',
+      align: 'right',
+      sortable: false,
+      width: '100'
+    },
+    {
+      text: 'Status',
+      value: 'status',
+      sortable: false,
+      width: '105'
+    },
+    {
+      text: 'Actions',
+      value: 'actions',
+      align: 'center',
+      sortable: false,
+      width: '40'
+    }
+  ]
+
+  private transactionItems = [
+    {
+      amount: '30.00',
+      date: '11-01-2020',
+      details: 'Incorporation Number: CP0001576',
+      folio: '1234567890',
+      initiatedBy: 'John Smith',
+      name: 'Annual Report',
+      status: 'Complete'
+    },
+    {
+      amount: '20.00',
+      date: '11-15-2020',
+      details: 'Incorporation Number: CP0001576',
+      folio: '',
+      initiatedBy: 'Jane Doe',
+      name: 'Change of Registered Office Address',
+      status: 'Complete'
+    },
+    {
+      amount: '20.00',
+      date: '11-15-2020',
+      details: 'Incorporation Number: CP0001576',
+      folio: '',
+      initiatedBy: 'Jane Doe',
+      name: 'Change of Director',
+      status: 'Complete'
+    }
+  ]
 }
 </script>
 
@@ -447,10 +608,6 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
     font-weight: 700;
   }
 
-  .v-chip {
-    height: 36px;
-  }
-
   ::v-deep {
     .v-text-field--outlined.v-input--dense .v-label {
       top: 14px !important;
@@ -484,4 +641,43 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
       color: var(--v-grey-darken1);
     }
   }
+
+  // Prototype
+  ::v-deep {
+    th, td {
+      padding-right: 0.75rem;
+      padding-left: 0.75rem;
+    }
+
+    th:first-child,
+    th:last-child,
+    td:first-child,
+    td:last-child {
+      padding-right: 1rem;
+      padding-left: 1rem;
+    }
+
+    th i {
+      margin-top: -2px;
+      margin-left: 0.25rem;
+    }
+  }
+
+  ::v-deep td {
+    padding-top: 1.25rem !important;
+    padding-bottom: 1.25rem !important;
+    height: auto;
+    vertical-align: top;
+    overflow: hidden;
+  }
+
+  .actions-btn {
+    margin-top: -7px;
+  }
+
+  .status-chip {
+    width: 90px;
+    justify-content: center;
+  }
+
 </style>
