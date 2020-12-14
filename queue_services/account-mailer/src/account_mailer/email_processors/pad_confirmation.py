@@ -19,8 +19,7 @@ import datetime
 from auth_api.models import User as UserModel
 from auth_api.services.org import Org as OrgService
 from auth_api.services.rest_service import RestService
-from auth_api.utils.enums import AuthHeaderType, ContentType, Status
-from auth_api.utils.roles import ADMIN
+from auth_api.utils.enums import AuthHeaderType, ContentType
 from entity_queue_common.service_utils import logger
 from flask import current_app
 from jinja2 import Template
@@ -33,8 +32,8 @@ def process(email_msg: dict, token: str) -> dict:
     logger.debug('email_msg notification: %s', email_msg)
     # fill in template
 
-    account_id = email_msg.get('accountId')
-    admin_emails, admin_name = _get_admin_emails(account_id)
+    user_id = email_msg.get('padTosAcceptedBy')
+    admin_emails, admin_name = _get_admin_emails(user_id)
     pdf_attachment = _get_pad_confirmation_report_pdf(email_msg, token)
     html_body = _get_pad_confirmation_email_body(email_msg, admin_name)
     return {
@@ -54,11 +53,15 @@ def process(email_msg: dict, token: str) -> dict:
     }
 
 
-def _get_admin_emails(account_id):
-    admin_list = UserModel.find_users_by_org_id_by_status_by_roles(account_id, (ADMIN,),
-                                                                   Status.ACTIVE.value)
-    admin_emails = ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
-    admin_name = ' '  # TODO: need to add proper admin name once we figure out the proper way
+def _get_admin_emails(user_id):
+    admin_user = UserModel.find_by_id(user_id)
+    if admin_user:
+        admin_name = admin_user.firstname + ' ' + admin_user.lastname
+        if admin_user.contacts:
+            admin_emails = admin_user.contacts[0].contact.email
+        else:
+            admin_emails = admin_user.email
+
     return admin_emails, admin_name
 
 
