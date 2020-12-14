@@ -167,6 +167,11 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     STAN_CLUSTER_NAME = 'test-cluster'
     AUTH_WEB_TOKEN_CONFIRM_PATH = ''
 
+    JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_TEST_ISSUER')
+    # Service account details
+    KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')
+    KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
+
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
     """Production environment configuration."""
