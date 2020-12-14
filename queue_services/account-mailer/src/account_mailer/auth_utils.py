@@ -22,12 +22,14 @@ from flask import current_app
 
 
 def get_member_emails(org_id, roles):
+    """Get emails for the user role passed in."""
     member_list = UserModel.find_users_by_org_id_by_status_by_roles(org_id, roles, Status.ACTIVE.value)
     member_emails = ','.join([str(x.contacts[0].contact.email) for x in member_list if x.contacts])
     return member_emails
 
 
 def get_login_url():
+    """Get application login url."""
     origin = current_app.config.get('HTTP_ORIGIN')
     context_path = current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')
     login_url = '{}/{}'.format(origin, context_path)

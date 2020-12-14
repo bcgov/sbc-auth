@@ -16,15 +16,14 @@
 import base64
 import datetime
 
-from flask import current_app
-from jinja2 import Template
-
 from auth_api.models import User as UserModel
 from auth_api.services.org import Org as OrgService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import AuthHeaderType, ContentType, Status
 from auth_api.utils.roles import ADMIN
 from entity_queue_common.service_utils import logger
+from flask import current_app
+from jinja2 import Template
 
 from account_mailer.email_processors import generate_template
 
@@ -64,7 +63,7 @@ def _get_admin_emails(account_id):
 
 
 def _get_pad_confirmation_email_body(email_msg, admin_name):
-    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), 'pad_confirmation_email')
+    filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), 'pad_confirmation_email')
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
     html_out = jnja_template.render(
@@ -87,7 +86,7 @@ def _get_pad_confirmation_report_pdf(email_msg, token):
         'generatedDate': current_time.strftime('%m-%d-%Y'),
         'accountAddress': mailing_address
     }
-    filled_template = generate_template(current_app.config.get("PDF_TEMPLATE_PATH"), 'pad_confirmation')
+    filled_template = generate_template(current_app.config.get('PDF_TEMPLATE_PATH'), 'pad_confirmation')
     template_b64 = "'" + base64.b64encode(bytes(filled_template, 'utf-8')).decode() + "'"
 
     pdf_payload = {

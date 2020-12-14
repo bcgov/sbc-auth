@@ -26,10 +26,13 @@ class MessageType(Enum):
 
 class SubjectType(Enum):
     """Event Types."""
+
     NSF_LOCK_ACCOUNT_SUBJECT = 'Your account has been suspended.'
     NSF_UNLOCK_ACCOUNT_SUBJECT = 'Your account has been reactivated.'
 
 
 class TemplateType(Enum):
+    """Template Types."""
+
     NSF_LOCK_ACCOUNT_TEMPLATE_NAME = 'account_suspended_email'
     NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME = 'account_restored_email'

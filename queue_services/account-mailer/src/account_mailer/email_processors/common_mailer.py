@@ -13,13 +13,13 @@
 # limitations under the License.
 """A Template for the account suspended email."""
 
+from auth_api.models import Org as OrgModel
+from entity_queue_common.service_utils import logger
 from flask import current_app
 from jinja2 import Template
 
-from auth_api.models import Org as OrgModel
-from entity_queue_common.service_utils import logger
-from account_mailer.email_processors import generate_template
 from account_mailer.auth_utils import get_login_url
+from account_mailer.email_processors import generate_template
 
 
 def process(org_id, recipients, template_name, subject) -> dict:
@@ -27,9 +27,8 @@ def process(org_id, recipients, template_name, subject) -> dict:
     logger.debug('account  notification: %s', org_id)
 
     org: OrgModel = OrgModel.find_by_id(org_id)
-
     # fill in template
-    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), template_name, )
+    filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), template_name, )
 
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)

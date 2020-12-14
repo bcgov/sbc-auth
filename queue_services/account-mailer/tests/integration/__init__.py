@@ -12,11 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Test suite for the integrations to NATS Queue."""
+import uuid
+from enum import Enum
 
-
+from auth_api.models import Contact as ContactModel
+from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
+from auth_api.models.membership import Membership as MembershipModel
+from auth_api.models.user import User as UserModel
 from auth_api.utils.enums import AccessType
 
 
@@ -33,3 +38,69 @@ def factory_org_model(org_name: str = 'Test ORg',
     org.save()
 
     return org
+
+
+def factory_user_model_with_contact():
+    """Produce a user model."""
+    user_info = {
+        'username': 'foo',
+        'firstname': 'bar',
+        'lastname': 'User',
+        'roles': '{edit, uma_authorization, staff}',
+        'keycloak_guid': uuid.uuid4()
+    }
+
+    user = UserModel(username=user_info['username'],
+                     firstname=user_info['firstname'],
+                     lastname=user_info['lastname'],
+                     roles=user_info['roles'],
+                     keycloak_guid=user_info.get('keycloak_guid', None),
+                     type=user_info.get('access_type', None),
+                     )
+
+    user.save()
+
+    contact = factory_contact_model()
+    contact.save()
+    contact_link = ContactLinkModel()
+    contact_link.contact = contact
+    contact_link.user = user
+    contact_link.save()
+
+    return user
+
+
+def factory_membership_model(user_id, org_id, member_type='ADMIN', member_status=1):
+    """Produce a Membership model."""
+    membership = MembershipModel(user_id=user_id,
+                                 org_id=org_id,
+                                 membership_type_code=member_type,
+                                 membership_type_status=member_status)
+
+    membership.created_by_id = user_id
+    membership.save()
+    return membership
+
+
+def factory_contact_model():
+    """Return a valid contact object with the provided fields."""
+    contact_info = {
+        'email': 'foo@bar.com',
+        'phone': '(555) 555-5555',
+        'phoneExtension': '123'
+    }
+    contact = ContactModel(email=contact_info['email'])
+    contact.save()
+    return contact
+
+
+class TestUserInfo(dict, Enum):
+    """Test scenarios of user."""
+
+    user1 = {
+        'username': 'foo',
+        'firstname': 'bar',
+        'lastname': 'User',
+        'roles': '{edit, uma_authorization, staff}',
+        'keycloak_guid': uuid.uuid4()
+    }
