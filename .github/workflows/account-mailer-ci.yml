@@ -20,6 +20,9 @@ jobs:
       DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
       TEST_NATS_DOCKER: "YES"
       STAN_CLUSTER_NAME: "test-cluster"
+      JWT_OIDC_TEST_ISSUER: "http://localhost:8081/auth/realms/demo"
+      KEYCLOAK_TEST_ADMIN_CLIENTID: "sbc-auth-admin"
+      KEYCLOAK_TEST_ADMIN_SECRET: "2222222222"
 
     strategy:
       matrix:
