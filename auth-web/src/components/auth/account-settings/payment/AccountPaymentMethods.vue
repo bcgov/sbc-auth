@@ -81,6 +81,9 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
 
   private setSelectedPayment (payment) {
     this.selectedPaymentMethod = payment
+    if (this.selectedPaymentMethod !== this.currentOrgPaymentType) {
+      this.isBtnSaved = false
+    }
   }
 
   private async mounted () {

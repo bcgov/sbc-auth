@@ -13,11 +13,10 @@
 # limitations under the License.
 """Process an email for a refund request."""
 
-
+from entity_queue_common.service_utils import logger
 from flask import current_app
 from jinja2 import Template
 
-from entity_queue_common.service_utils import logger
 from account_mailer.email_processors import generate_template
 
 
@@ -26,7 +25,7 @@ def process(email_msg: dict) -> dict:
     logger.debug('refund_request notification: %s', email_msg)
 
     # fill in template
-    filled_template = generate_template(current_app.config.get("TEMPLATE_PATH"), "refund_request_email")
+    filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), 'refund_request_email')
 
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
