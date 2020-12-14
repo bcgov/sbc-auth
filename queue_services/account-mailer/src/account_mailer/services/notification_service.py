@@ -18,7 +18,7 @@ from auth_api.services.rest_service import RestService
 from flask import current_app
 
 
-def send_email(notify_body: dict ,token:str):  # pylint:disable=unused-argument
+def send_email(notify_body: dict, token: str):  # pylint:disable=unused-argument
     """Send the email asynchronously, using the given details."""
     current_app.logger.info(f'send_email to {notify_body.get("recipients")}')
     notify_url = current_app.config.get('NOTIFY_API_URL') + '/notify/'
