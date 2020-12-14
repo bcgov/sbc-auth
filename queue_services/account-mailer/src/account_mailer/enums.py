@@ -32,4 +32,4 @@ class SubjectType(Enum):
 
 class TemplateType(Enum):
     NSF_LOCK_ACCOUNT_TEMPLATE_NAME = 'account_suspended_email'
-    NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME = 'account_suspended_email'
+    NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME = 'account_restored_email'

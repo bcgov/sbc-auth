@@ -22,9 +22,9 @@ from flask import current_app
 
 
 def get_member_emails(org_id, roles):
-    admin_list = UserModel.find_users_by_org_id_by_status_by_roles(org_id, roles, Status.ACTIVE.value)
-    admin_emails = ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
-    return admin_emails
+    member_list = UserModel.find_users_by_org_id_by_status_by_roles(org_id, roles, Status.ACTIVE.value)
+    member_emails = ','.join([str(x.contacts[0].contact.email) for x in member_list if x.contacts])
+    return member_emails
 
 
 def get_login_url():

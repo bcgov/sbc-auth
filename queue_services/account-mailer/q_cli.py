@@ -33,6 +33,8 @@ from stan.aio.client import Client as STAN  # noqa N814; by convention the name 
 
 from entity_queue_common.service_utils import error_cb, logger, signal_handler
 
+from account_mailer.enums import MessageType
+
 
 async def run(loop, mode, auth_account_id, auth_account_name, bank_number, bank_branch_number,
               bank_account_number, order_number, transaction_amount, transaction_id):  # pylint: disable=too-many-locals
@@ -118,10 +120,10 @@ async def run(loop, mode, auth_account_id, auth_account_name, bank_number, bank_
                     'transactionId': transaction_id
                 }
             }
-        elif mode == 'acc_suspend':
+        elif mode == 'acc_lock':
             payload = {
                 'specversion': '1.x-wip',
-                'type': 'bc.registry.payment.accountSuspended',
+                'type': f'{MessageType.NSF_UNLOCK_ACCOUNT.value}',
                 'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
                 'id': auth_account_id,
                 'datacontenttype': 'application/json',
@@ -130,10 +132,10 @@ async def run(loop, mode, auth_account_id, auth_account_name, bank_number, bank_
                     'accountName': auth_account_name
                 }
             }
-        elif mode == 'acc_restore':
+        elif mode == 'acc_unlock':
             payload = {
                 'specversion': '1.x-wip',
-                'type': 'bc.registry.payment.accountRestored',
+                'type': f'{MessageType.NSF_LOCK_ACCOUNT.value}',
                 'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
                 'id': auth_account_id,
                 'datacontenttype': 'application/json',
@@ -193,5 +195,5 @@ if __name__ == '__main__':
 
 # pad cmd --> python3 q_cli.py -m pad -i 10 -n TestAccount -b 088 -t 00277 -a 12874890
 # refund cmd --> python3 q_cli.py -m refund -i 10 -o 67892 -p 25.33 -d 988
-# account suspended cmd --> python3 q_cli.py -m acc_suspend -i 4 -n SomeAccount
-# account restored cmd --> python3 q_cli.py -m acc_restore -i 4 -n SomeAccount
+# account suspended cmd --> python3 q_cli.py -m acc_lock -i 4 -n SomeAccount
+# account restored cmd --> python3 q_cli.py -m acc_unlock -i 4 -n SomeAccount
