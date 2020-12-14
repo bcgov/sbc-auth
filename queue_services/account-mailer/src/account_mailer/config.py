@@ -24,7 +24,6 @@ import random
 
 from dotenv import find_dotenv, load_dotenv
 
-
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
@@ -166,6 +165,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     )
 
     STAN_CLUSTER_NAME = 'test-cluster'
+    AUTH_WEB_TOKEN_CONFIRM_PATH = ''
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
