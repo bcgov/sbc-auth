@@ -3448,6 +3448,98 @@ paths:
         example:
           example1:
             value: PPR
+  '/orgs/{account_id}/authorizations':
+    get:
+      summary: Get authorizations for the account
+      operationId: getOrgAuthorizations
+      tags:
+        - authorization
+      responses:
+        '200':
+          description: Success
+          headers:
+            X-Application-Context:
+              schema:
+                type: string
+              description: X-Application-Context
+              examples:
+                example1:
+                  value: 'application:prod'
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+              description: Access-Control-Allow-Origin
+              examples:
+                example1:
+                  value: '*'
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+              description: Access-Control-Allow-Methods
+              examples:
+                example1:
+                  value: 'GET, OPTIONS'
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+              description: Access-Control-Allow-Headers
+              examples:
+                example1:
+                  value: 'Content-Type, api_key, Authorization'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/authorizations'
+              examples:
+                example1:
+                  value:
+                    account:
+                      accountType: PREMIUM
+                      id: '1234'
+                      name: Mock Account
+                    paymentPreference:
+                      bcOnlineAccountId:
+                      bcOnlineUserId:
+                      preferred_payment: PAD
+                    business:
+                      folioNumber:
+                      name:
+                    orgMembership: ADMIN
+                    roles:
+                    - remove_business
+                    - change_address
+                    - change_org_name
+                    - invite_members
+                    - change_account_type
+                    - change_role
+                    - reset_password
+                    - set_auth_options
+                    - transaction_history
+                    - manage_statements
+                    - reset_otp
+                    - view_payment_methods
+                    - edit
+                    - view
+                    - make_payment
+                    - generate_invoice
+
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      description: Get authorizations endpoint for the entity by business indentifier
+    parameters:
+      - schema:
+          type: string
+        name: account_id
+        in: path
+        required: true
+        description: Corp Num/Incorporation Number of the entity
+        example:
+          example1:
+            value: 1234
   '/entities/{business_identifier}':
     parameters:
       - name: business_identifier
@@ -4878,7 +4970,6 @@ components:
               - view
             pattern: '^(.*)$'
       required:
-        - corp_type_code
         - orgMembership
         - roles
     affiliation:

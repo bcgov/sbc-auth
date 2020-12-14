@@ -36,6 +36,32 @@ class Authorization:
         self._model = model
 
     @staticmethod
+    def get_account_authorizations_for_org(token_info: Dict, account_id: str, expanded: bool = False):
+        """Get User authorizations for the org."""
+        auth_response = {}
+        auth = None
+        token_roles = token_info.get('realm_access').get('roles')
+
+        # todo the service account level access has not been defined
+        if Role.STAFF.value in token_roles:
+            if expanded:
+                # Query Authorization view by business identifier
+                auth = AuthorizationView.find_all_authorization_by_org_id(account_id)
+                auth_response = Authorization(auth).as_dict(expanded)
+            auth_response['roles'] = token_roles
+
+        else:
+            keycloak_guid = token_info.get('sub', None)
+            if account_id and keycloak_guid:
+                auth = AuthorizationView.find_user_authorization_by_org_id(keycloak_guid, account_id)
+
+            if auth:
+                permissions = PermissionsService.get_permissions_for_membership(auth.status_code, auth.org_membership)
+                auth_response = Authorization(auth).as_dict(expanded)
+                auth_response['roles'] = permissions
+        return auth_response
+
+    @staticmethod
     def get_user_authorizations_for_entity(token_info: Dict, business_identifier: str, expanded: bool = False):
         """Get User authorizations for the entity."""
         auth_response = {}
