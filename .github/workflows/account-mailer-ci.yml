@@ -15,7 +15,7 @@ jobs:
         shell: bash
         working-directory: ./queue_services/account-mailer
 
-    if: github.repository == 'bcgov/sbc-auth'
+    if: github.repository == 'saravanpa-aot/sbc-auth'
     env:
       DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
       TEST_NATS_DOCKER: "YES"
