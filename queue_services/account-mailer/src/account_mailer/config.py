@@ -135,6 +135,9 @@ class _Config():  # pylint: disable=too-few-public-methods
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_ID')
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
 
+    # If any value is present in this flag, starts up a keycloak docker
+    USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)
+    USE_DOCKER_MOCK = os.getenv('USE_DOCKER_MOCK', None)
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Creates the Development Config object."""
@@ -166,7 +169,6 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
 
     STAN_CLUSTER_NAME = 'test-cluster'
     AUTH_WEB_TOKEN_CONFIRM_PATH = ''
-
     JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_TEST_ISSUER')
     # Service account details
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')
