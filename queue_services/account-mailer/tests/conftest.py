@@ -19,7 +19,7 @@ import time
 from contextlib import contextmanager
 
 import pytest
-from auth_api import db as _db
+from auth_api import db as _db, setup_jwt_manager, JWTWrapper
 from flask import Flask
 from flask_migrate import Migrate, upgrade
 from nats.aio.client import Client as Nats
@@ -27,6 +27,8 @@ from sqlalchemy import event, text
 from stan.aio.client import Client as Stan
 
 from account_mailer.config import get_named_config
+
+_JWT = JWTWrapper.get_instance()
 
 
 @contextmanager
@@ -101,6 +103,12 @@ def client(app):  # pylint: disable=redefined-outer-name
 
 
 @pytest.fixture(scope='session')
+def jwt():
+    """Return a session-wide jwt manager."""
+    return _JWT
+
+
+@pytest.fixture(scope='session')
 def client_ctx(app):  # pylint: disable=redefined-outer-name
     """Return session-wide Flask test client."""
     with app.test_client() as _client:
@@ -150,6 +158,58 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         # This instruction rollsback any commit that were executed in the tests.
         txn.rollback()
         conn.close()
+
+
+@pytest.fixture(scope='session', autouse=True)
+def auto(docker_services, app):
+    """Spin up a keycloak instance and initialize jwt."""
+    if app.config['USE_TEST_KEYCLOAK_DOCKER']:
+        docker_services.start('keycloak')
+        docker_services.wait_for_service('keycloak', 8081)
+
+    setup_jwt_manager(app, _JWT)
+
+    if app.config['USE_DOCKER_MOCK']:
+        docker_services.start('notify')
+        time.sleep(10)
+
+
+@pytest.fixture(scope='session')
+def docker_compose_files(pytestconfig):
+    """Get the docker-compose.yml absolute path."""
+    import os
+    return [
+        os.path.join(str(pytestconfig.rootdir), 'tests/docker', 'docker-compose.yml')
+    ]
+
+
+@pytest.fixture()
+def auth_mock(monkeypatch):
+    """Mock check_auth."""
+    monkeypatch.setattr('auth_api.services.entity.check_auth', lambda *args, **kwargs: None)
+    monkeypatch.setattr('auth_api.services.org.check_auth', lambda *args, **kwargs: None)
+    monkeypatch.setattr('auth_api.services.invitation.check_auth', lambda *args, **kwargs: None)
+
+
+@pytest.fixture()
+def notify_mock(monkeypatch):
+    """Mock send_email."""
+    monkeypatch.setattr('auth_api.services.invitation.send_email', lambda *args, **kwargs: None)
+
+
+@pytest.fixture()
+def notify_org_mock(monkeypatch):
+    """Mock send_email."""
+    monkeypatch.setattr('auth_api.services.org.send_email', lambda *args, **kwargs: None)
+
+
+@pytest.fixture()
+def keycloak_mock(monkeypatch):
+    """Mock keycloak services."""
+    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.join_account_holders_group',
+                        lambda *args, **kwargs: None)
+    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.remove_from_account_holders_group',
+                        lambda *args, **kwargs: None)
 
 
 @pytest.fixture(scope='session')
