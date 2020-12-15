@@ -34,7 +34,7 @@ from auth_api.services.rest_service import RestService
 from auth_api.utils.roles import ADMIN, COORDINATOR
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
-from flask import Flask  # pylint: disable=wrong-import-order
+from flask import Flask, current_app  # pylint: disable=wrong-import-order
 
 from account_mailer import config  # pylint: disable=wrong-import-order
 from account_mailer.auth_utils import get_member_emails
@@ -62,6 +62,9 @@ async def process_event(event_message: dict, flask_app):
         message_type = event_message.get('type', None)
         email_msg = None
         email_dict = None
+        print('-----KEYCLOAK_SERVICE_ACCOUNT_ID---', current_app.config.get('KEYCLOAK_SERVICE_ACCOUNT_ID'))
+        print('-----KEYCLOAK_SERVICE_ACCOUNT_SECRET---', current_app.config.get('KEYCLOAK_SERVICE_ACCOUNT_SECRET'))
+        print('-----JWT_OIDC_ISSUER---', current_app.config.get('JWT_OIDC_ISSUER'))
         token = RestService.get_service_account_token()
         if message_type == 'account.mailer':
             email_msg = json.loads(event_message.get('data'))
