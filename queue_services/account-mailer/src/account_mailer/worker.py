@@ -62,9 +62,6 @@ async def process_event(event_message: dict, flask_app):
         message_type = event_message.get('type', None)
         email_msg = None
         email_dict = None
-        print('-----KEYCLOAK_SERVICE_ACCOUNT_ID---', current_app.config.get('KEYCLOAK_SERVICE_ACCOUNT_ID'))
-        print('-----KEYCLOAK_SERVICE_ACCOUNT_SECRET---', current_app.config.get('KEYCLOAK_SERVICE_ACCOUNT_SECRET'))
-        print('-----JWT_OIDC_ISSUER---', current_app.config.get('JWT_OIDC_ISSUER'))
         token = RestService.get_service_account_token()
         if message_type == 'account.mailer':
             email_msg = json.loads(event_message.get('data'))

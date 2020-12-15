@@ -61,7 +61,7 @@ flake8: ## Linting with flake8
 	. venv/bin/activate && flake8 src/$(PROJECT_NAME) tests
 
 test: ## Unit testing
-	. venv/bin/activate && pytest -s
+	. venv/bin/activate && pytest
 
 mac-cov: test ## Run the coverage report and display in a browser window (mac)
 	@open -a "Google Chrome" htmlcov/index.html
