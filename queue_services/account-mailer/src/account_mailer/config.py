@@ -24,7 +24,6 @@ import random
 
 from dotenv import find_dotenv, load_dotenv
 
-
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
@@ -116,6 +115,10 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     TEMPLATE_PATH = os.getenv('TEMPLATE_PATH', 'src/account_mailer/email_templates')
 
+    HTTP_ORIGIN = os.getenv('HTTP_ORIGIN', 'localhost')
+
+    AUTH_WEB_TOKEN_CONFIRM_PATH = os.getenv('AUTH_WEB_TOKEN_CONFIRM_PATH')
+
     # JWT_OIDC Settings
     JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_ISSUER')
 
@@ -132,6 +135,9 @@ class _Config():  # pylint: disable=too-few-public-methods
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_ID')
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
 
+    # If any value is present in this flag, starts up a keycloak docker
+    USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)
+    USE_DOCKER_MOCK = os.getenv('USE_DOCKER_MOCK', None)
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Creates the Development Config object."""
@@ -162,6 +168,11 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     )
 
     STAN_CLUSTER_NAME = 'test-cluster'
+    AUTH_WEB_TOKEN_CONFIRM_PATH = ''
+    JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_TEST_ISSUER')
+    # Service account details
+    KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')
+    KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods

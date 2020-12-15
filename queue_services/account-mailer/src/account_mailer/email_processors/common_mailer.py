@@ -11,32 +11,34 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Process an email for a refund request."""
+"""A Template for the account suspended email."""
 
-
+from auth_api.models import Org as OrgModel
 from entity_queue_common.service_utils import logger
 from flask import current_app
 from jinja2 import Template
 
+from account_mailer.auth_utils import get_login_url
 from account_mailer.email_processors import generate_template
 
 
-def process(email_msg: dict) -> dict:
-    """Build the email for Payment Completed notification."""
-    logger.debug('refund_request notification: %s', email_msg)
+def process(org_id, recipients, template_name, subject) -> dict:
+    """Build the email for Account notification."""
+    logger.debug('account  notification: %s', org_id)
 
+    org: OrgModel = OrgModel.find_by_id(org_id)
     # fill in template
-    filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), 'refund_request_email')
+    filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), template_name, )
 
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
     html_out = jnja_template.render(
-        refund_data=email_msg
+        account_name=org.name, url=get_login_url
     )
     return {
-        'recipients': current_app.config.get('REFUND_REQUEST').get('recipients'),
+        'recipients': recipients,
         'content': {
-            'subject': f'Refund Request for {email_msg.get("identifier")}',
+            'subject': subject,
             'body': html_out,
             'attachments': []
         }
