@@ -19,11 +19,11 @@ import stan
 
 async def helper_add_event_to_queue(stan_client: stan.aio.client.Client,
                                     subject: str,
-                                    org_id: str = '1', mail_details: dict = {}):
+                                    org_id: str = '1', msg_type='account.mailer', mail_details: dict = {}):
     """Add event to the Queue."""
     payload = {
         'specversion': '1.x-wip',
-        'type': 'account.mailer',
+        'type': msg_type,
         'source': f'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{org_id}',
         'id': f'{org_id}',
         'time': '2020-08-28T17:37:34.651294+00:00',
