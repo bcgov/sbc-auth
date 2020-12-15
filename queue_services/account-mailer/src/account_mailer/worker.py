@@ -31,14 +31,18 @@ import os
 import nats
 from auth_api.models import db
 from auth_api.services.rest_service import RestService
+from auth_api.utils.roles import ADMIN, COORDINATOR
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
-from flask import Flask  # pylint: disable=wrong-import-order
+from flask import Flask, current_app  # pylint: disable=wrong-import-order
 
 from account_mailer import config  # pylint: disable=wrong-import-order
+from account_mailer.auth_utils import get_member_emails
+from account_mailer.email_processors import common_mailer  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import pad_confirmation  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import payment_completed  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import refund_requested  # pylint: disable=wrong-import-order
+from account_mailer.enums import MessageType, SubjectType, TemplateType
 from account_mailer.services import notification_service  # pylint: disable=wrong-import-order
 
 
@@ -62,12 +66,26 @@ async def process_event(event_message: dict, flask_app):
         if message_type == 'account.mailer':
             email_msg = json.loads(event_message.get('data'))
             email_dict = payment_completed.process(email_msg)
-        elif message_type == 'bc.registry.payment.refundRequest':
+        elif message_type == MessageType.REFUND_REQUEST.value:
             email_msg = event_message.get('data')
             email_dict = refund_requested.process(email_msg)
-        elif event_message.get('type', None) == 'bc.registry.payment.padAccountCreate':
+        elif message_type == MessageType.PAD_ACCOUNT_CREATE.value:
             email_msg = event_message.get('data')
             email_dict = pad_confirmation.process(email_msg, token)
+        elif message_type == MessageType.NSF_LOCK_ACCOUNT.value:
+            email_msg = event_message.get('data')
+            template_name = TemplateType.NSF_LOCK_ACCOUNT_TEMPLATE_NAME.value
+            org_id = email_msg.get('accountId')
+            admin_coordinator_emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
+            subject = SubjectType.NSF_LOCK_ACCOUNT_SUBJECT.value
+            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject)
+        elif message_type == MessageType.NSF_UNLOCK_ACCOUNT.value:
+            email_msg = event_message.get('data')
+            template_name = TemplateType.NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME.value
+            org_id = email_msg.get('accountId')
+            admin_coordinator_emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
+            subject = SubjectType.NSF_UNLOCK_ACCOUNT_SUBJECT.value
+            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject)
 
         logger.debug('Extracted email msg: %s', email_dict)
         process_email(email_dict, FLASK_APP, token)
