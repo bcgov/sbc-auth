@@ -34,7 +34,7 @@ from auth_api.services.rest_service import RestService
 from auth_api.utils.roles import ADMIN, COORDINATOR
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
-from flask import Flask, current_app  # pylint: disable=wrong-import-order
+from flask import Flask  # pylint: disable=wrong-import-order
 
 from account_mailer import config  # pylint: disable=wrong-import-order
 from account_mailer.auth_utils import get_member_emails
