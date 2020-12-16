@@ -28,13 +28,18 @@ import signal
 import sys
 from datetime import datetime
 
+from entity_queue_common.service_utils import error_cb, logger, signal_handler
+
+from account_mailer.enums import MessageType
+
+
 from nats.aio.client import Client as NATS  # noqa N814; by convention the name is NATS
 from stan.aio.client import Client as STAN  # noqa N814; by convention the name is STAN
 
-from entity_queue_common.service_utils import error_cb, logger, signal_handler
 
 
-async def run(loop, mode, auth_account_id, auth_account_name, auth_user_id, bank_number, bank_branch_number,
+
+async def run(loop, mode, auth_account_id, auth_account_name, auth_username, bank_number, bank_branch_number,
               bank_account_number, order_number, transaction_amount, transaction_id):  # pylint: disable=too-many-locals
     """Run the main application loop for the service.
 
@@ -94,7 +99,7 @@ async def run(loop, mode, auth_account_id, auth_account_name, auth_user_id, bank
                 'data': {
                     'accountId': auth_account_id,
                     'accountName': auth_account_name,
-                    'padTosAcceptedBy': auth_user_id,
+                    'padTosAcceptedBy': auth_username,
                     'paymentInfo': {
                         'bankInstitutionNumber': bank_number,
                         'bankTransitNumber': bank_branch_number,
@@ -119,6 +124,30 @@ async def run(loop, mode, auth_account_id, auth_account_name, auth_user_id, bank
                     'transactionId': transaction_id
                 }
             }
+        elif mode == 'acc_lock':
+            payload = {
+                'specversion': '1.x-wip',
+                'type': f'{MessageType.NSF_UNLOCK_ACCOUNT.value}',
+                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
+                'id': auth_account_id,
+                'datacontenttype': 'application/json',
+                'data': {
+                    'accountId': auth_account_id,
+                    'accountName': auth_account_name
+                }
+            }
+        elif mode == 'acc_unlock':
+            payload = {
+                'specversion': '1.x-wip',
+                'type': f'{MessageType.NSF_LOCK_ACCOUNT.value}',
+                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
+                'id': auth_account_id,
+                'datacontenttype': 'application/json',
+                'data': {
+                    'accountId': auth_account_id,
+                    'accountName': auth_account_name
+                }
+            }
 
         await sc.publish(subject=subscription_options().get('subject'),
                          payload=json.dumps(payload).encode('utf-8'))
@@ -131,8 +160,8 @@ async def run(loop, mode, auth_account_id, auth_account_name, auth_user_id, bank
 if __name__ == '__main__':
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hm:i:n:u:b:t:a:o:p:d:",
-                                   ["mode=", "id=", "name=", "userid=", "banknumber=", "transitnumber=", "accountnumber=",
-                                    "ordernumber=", "amount=", "transactionid="])
+                                   ["mode=", "id=", "name=", "username=", "banknumber=", "transitnumber=",
+                                    "accountnumber=", "ordernumber=", "amount=", "transactionid="])
     except getopt.GetoptError:
         print('q_cli.py -o <old_identifier> -n <new_identifier>')
         sys.exit(2)
@@ -145,13 +174,13 @@ if __name__ == '__main__':
             print('q_cli.py -o <old_identifier> -n <new_identifier>')
             sys.exit()
         elif opt in ("-m", "--mode"):
-            mode = arg  # pad confirmation - "pad", refund request - "refund"
+            mode = arg  # pad confirmation - "pad", refund request - "refund", acc suspended - "acc_suspend", acc restored - "acc_restore"
         elif opt in ("-i", "--id"):
             auth_account_id = arg
         elif opt in ("-n", "--name"):
             auth_account_name = arg
-        elif opt in ("-u", "--userid"):
-            auth_user_id = arg
+        elif opt in ("-u", "--username"):
+            auth_username = arg
         elif opt in ("-b", "--banknumber"):
             bank_number = arg
         elif opt in ("-t", "--transitnumber"):
@@ -167,8 +196,11 @@ if __name__ == '__main__':
 
     event_loop = asyncio.get_event_loop()
     event_loop.run_until_complete(
-        run(event_loop, mode, auth_account_id, auth_account_name, auth_user_id, bank_number,
+
+        run(event_loop, mode, auth_account_id, auth_account_name, auth_username, bank_number,
             bank_branch_number, bank_account_number, order_number, transaction_amount, transaction_id))
 
 # pad cmd --> python3 q_cli.py -m pad -i 10 -n TestAccount -b 088 -t 00277 -a 12874890
 # refund cmd --> python3 q_cli.py -m refund -i 10 -o 67892 -p 25.33 -d 988
+# account suspended cmd --> python3 q_cli.py -m acc_lock -i 4 -n SomeAccount
+# account restored cmd --> python3 q_cli.py -m acc_unlock -i 4 -n SomeAccount

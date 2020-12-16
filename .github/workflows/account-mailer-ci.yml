@@ -19,7 +19,12 @@ jobs:
     env:
       DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
       TEST_NATS_DOCKER: "YES"
+      USE_TEST_KEYCLOAK_DOCKER: "YES"
+      USE_DOCKER_MOCK: "YES"
       STAN_CLUSTER_NAME: "test-cluster"
+      JWT_OIDC_ISSUER: "http://localhost:8081/auth/realms/demo"
+      KEYCLOAK_SERVICE_ACCOUNT_ID: "sbc-auth-admin"
+      KEYCLOAK_SERVICE_ACCOUNT_SECRET: "2222222222"
 
     strategy:
       matrix:
