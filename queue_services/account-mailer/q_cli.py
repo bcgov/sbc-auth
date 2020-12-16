@@ -34,7 +34,7 @@ from stan.aio.client import Client as STAN  # noqa N814; by convention the name 
 from entity_queue_common.service_utils import error_cb, logger, signal_handler
 
 
-async def run(loop, mode, auth_account_id, auth_account_name, auth_user_id, bank_number, bank_branch_number,
+async def run(loop, mode, auth_account_id, auth_account_name, auth_username, bank_number, bank_branch_number,
               bank_account_number, order_number, transaction_amount, transaction_id):  # pylint: disable=too-many-locals
     """Run the main application loop for the service.
 
@@ -94,7 +94,7 @@ async def run(loop, mode, auth_account_id, auth_account_name, auth_user_id, bank
                 'data': {
                     'accountId': auth_account_id,
                     'accountName': auth_account_name,
-                    'padTosAcceptedBy': auth_user_id,
+                    'padTosAcceptedBy': auth_username,
                     'paymentInfo': {
                         'bankInstitutionNumber': bank_number,
                         'bankTransitNumber': bank_branch_number,
@@ -131,7 +131,7 @@ async def run(loop, mode, auth_account_id, auth_account_name, auth_user_id, bank
 if __name__ == '__main__':
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hm:i:n:u:b:t:a:o:p:d:",
-                                   ["mode=", "id=", "name=", "userid=", "banknumber=", "transitnumber=", "accountnumber=",
+                                   ["mode=", "id=", "name=", "username=", "banknumber=", "transitnumber=", "accountnumber=",
                                     "ordernumber=", "amount=", "transactionid="])
     except getopt.GetoptError:
         print('q_cli.py -o <old_identifier> -n <new_identifier>')
@@ -150,8 +150,8 @@ if __name__ == '__main__':
             auth_account_id = arg
         elif opt in ("-n", "--name"):
             auth_account_name = arg
-        elif opt in ("-u", "--userid"):
-            auth_user_id = arg
+        elif opt in ("-u", "--username"):
+            auth_username = arg
         elif opt in ("-b", "--banknumber"):
             bank_number = arg
         elif opt in ("-t", "--transitnumber"):
@@ -167,7 +167,7 @@ if __name__ == '__main__':
 
     event_loop = asyncio.get_event_loop()
     event_loop.run_until_complete(
-        run(event_loop, mode, auth_account_id, auth_account_name, auth_user_id, bank_number,
+        run(event_loop, mode, auth_account_id, auth_account_name, auth_username, bank_number,
             bank_branch_number, bank_account_number, order_number, transaction_amount, transaction_id))
 
 # pad cmd --> python3 q_cli.py -m pad -i 10 -n TestAccount -b 088 -t 00277 -a 12874890
