@@ -131,8 +131,8 @@ async def run(loop, mode, auth_account_id, auth_account_name, auth_username, ban
 if __name__ == '__main__':
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hm:i:n:u:b:t:a:o:p:d:",
-                                   ["mode=", "id=", "name=", "username=", "banknumber=", "transitnumber=", "accountnumber=",
-                                    "ordernumber=", "amount=", "transactionid="])
+                                   ["mode=", "id=", "name=", "username=", "banknumber=", "transitnumber=",
+                                    "accountnumber=", "ordernumber=", "amount=", "transactionid="])
     except getopt.GetoptError:
         print('q_cli.py -o <old_identifier> -n <new_identifier>')
         sys.exit(2)
@@ -167,6 +167,7 @@ if __name__ == '__main__':
 
     event_loop = asyncio.get_event_loop()
     event_loop.run_until_complete(
+
         run(event_loop, mode, auth_account_id, auth_account_name, auth_username, bank_number,
             bank_branch_number, bank_account_number, order_number, transaction_amount, transaction_id))
 
