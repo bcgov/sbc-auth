@@ -182,8 +182,10 @@ export default class PaymentMethods extends Vue {
     return this.selectedPaymentMethod
   }
 
+  @Emit('get-PAD-info')
   private getPADInfo (padInfo: PADInfo) {
     this.padInfo = padInfo
+    return this.padInfo
   }
 
   @Emit('is-pad-valid')
