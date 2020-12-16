@@ -87,11 +87,13 @@ def test_create_basic_org_assert_pay_request_is_correct(session, keycloak_mock):
 
 def test_update_basic_org_assert_pay_request_is_correct(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that while org updation , pay-api gets called with proper data for basic accounts."""
-    user = factory_user_model()
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user = factory_user_model(user_info=user_with_token)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     with patch.object(RestService, 'put') as mock_put:
         new_payment_method = TestPaymentMethodInfo.get_payment_method_input(PaymentMethod.ONLINE_BANKING)
-        org = OrgService.update_org(org, new_payment_method)
+        org = OrgService.update_org(org, new_payment_method, token_info=TestJwtClaims.public_user_role)
         assert org
         dictionary = org.as_dict()
         mock_put.assert_called()
@@ -108,7 +110,7 @@ def test_update_basic_org_assert_pay_request_is_correct(session, keycloak_mock):
         assert expected_data == actual_data, 'updating to Online Banking works.'
 
         new_payment_method = TestPaymentMethodInfo.get_payment_method_input(PaymentMethod.DIRECT_PAY)
-        org = OrgService.update_org(org, new_payment_method)
+        org = OrgService.update_org(org, new_payment_method, token_info=TestJwtClaims.public_user_role)
         assert org
         dictionary = org.as_dict()
         mock_put.assert_called()
