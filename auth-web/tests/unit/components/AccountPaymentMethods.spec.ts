@@ -34,7 +34,6 @@ describe('AccountPaymentMethods.vue', () => {
       },
       mutations: {
         setCurrentOrganizationPaymentType: jest.fn()
-        
       }
     }
 
