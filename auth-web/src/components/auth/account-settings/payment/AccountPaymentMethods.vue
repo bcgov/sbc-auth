@@ -50,7 +50,7 @@
       <template v-slot:actions>
         <v-btn
           large
-          color="error"
+          color="primary"
           class="font-weight-bold"
           @click="closeError"
         >
@@ -108,7 +108,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   private padInfo: PADInfo = {} as PADInfo
   private isBtnSaved = false
   private disableSaveBtn = false
-  private errorTitle = 'Payment update failed'
+  private errorTitle = 'Payment Update Failed'
   private errorText = ''
   private isLoading: boolean = false
   private padValid: boolean = false

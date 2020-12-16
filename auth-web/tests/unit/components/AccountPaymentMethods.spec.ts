@@ -1,0 +1,76 @@
+import { createLocalVue, shallowMount } from '@vue/test-utils'
+import AccountPaymentMethods from '@/components/auth/account-settings/payment/AccountPaymentMethods.vue'
+import Vue from 'vue'
+import Vuetify from 'vuetify'
+import Vuex from 'vuex'
+
+Vue.use(Vuetify)
+const vuetify = new Vuetify({})
+
+// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
+document.body.setAttribute('data-app', 'true')
+
+describe('AccountPaymentMethods.vue', () => {
+  let wrapper: any
+  let wrapperFactory: any
+
+  beforeEach(() => {
+    const localVue = createLocalVue()
+    localVue.use(Vuex)
+    const orgModule = {
+      namespaced: true,
+      state: {
+        currentOrganization: {
+          name: 'test org'
+        },
+        currentOrgAddress: {
+        },
+        currentMembership: [{
+          membershipTypeCode: 'OWNER',
+          membershipStatus: 'ACTIVE',
+          user: { username: 'test' } }],
+        pendingOrgMembers: []
+      },
+      actions: {
+      },
+      mutations: {
+        setCurrentOrganizationAddress: jest.fn(),
+        resetInvitations: jest.fn()
+      }
+    }
+
+    const store = new Vuex.Store({
+      strict: false,
+      modules: {
+        org: orgModule
+      }
+    })
+
+    wrapperFactory = (propsData) => {
+      return shallowMount(AccountPaymentMethods, {
+        localVue,
+        store,
+        vuetify,
+        propsData: {
+          ...propsData
+        }
+      })
+    }
+
+    wrapper = wrapperFactory({ userProfile: {} })
+  })
+
+  afterEach(() => {
+    jest.resetModules()
+    jest.clearAllMocks()
+  })
+
+  it('is a Vue instance', () => {
+    expect(wrapper.isVueInstance()).toBeTruthy()
+  })
+
+  it('renders the components properly and address is being shown', () => {
+    expect(wrapper.find(AccountPaymentMethods).exists()).toBe(true)
+
+  })
+})
