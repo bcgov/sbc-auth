@@ -23,19 +23,18 @@ describe('AccountPaymentMethods.vue', () => {
         currentOrganization: {
           name: 'test org'
         },
-        currentOrgAddress: {
+        currentOrgPaymentType: {
         },
-        currentMembership: [{
-          membershipTypeCode: 'OWNER',
-          membershipStatus: 'ACTIVE',
-          user: { username: 'test' } }],
-        pendingOrgMembers: []
+        currentMembership: []
       },
       actions: {
+        validatePADInfo:jest.fn(),
+        getOrgPayments: jest.fn(),
+        updateOrg: jest.fn()
       },
       mutations: {
-        setCurrentOrganizationAddress: jest.fn(),
-        resetInvitations: jest.fn()
+        setCurrentOrganizationPaymentType: jest.fn()
+        
       }
     }
 
@@ -57,7 +56,7 @@ describe('AccountPaymentMethods.vue', () => {
       })
     }
 
-    wrapper = wrapperFactory({ userProfile: {} })
+    wrapper = wrapperFactory({})
   })
 
   afterEach(() => {
