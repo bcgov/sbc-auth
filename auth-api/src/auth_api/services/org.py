@@ -318,7 +318,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         self._model.update_org_from_dict(camelback2snake(org_info), exclude=('status_code'))
         # TODO pass username instead of blanks
-        Org._create_payment_settings(self._model, None, payment_type, mailing_address, '', False)
+        Org._create_payment_settings(self._model, {}, payment_type, mailing_address, '', False)
         return self
 
     @staticmethod
