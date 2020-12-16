@@ -32,8 +32,8 @@ def process(email_msg: dict, token: str) -> dict:
     logger.debug('email_msg notification: %s', email_msg)
     # fill in template
 
-    user_id = email_msg.get('padTosAcceptedBy')
-    admin_emails, admin_name = _get_admin_emails(user_id)
+    username = email_msg.get('padTosAcceptedBy')
+    admin_emails, admin_name = _get_admin_emails(username)
     pdf_attachment = _get_pad_confirmation_report_pdf(email_msg, token)
     html_body = _get_pad_confirmation_email_body(email_msg, admin_name)
     return {
@@ -53,8 +53,8 @@ def process(email_msg: dict, token: str) -> dict:
     }
 
 
-def _get_admin_emails(user_id):
-    admin_user = UserModel.find_by_id(user_id)
+def _get_admin_emails(username):
+    admin_user = UserModel.find_by_username(username)
     if admin_user:
         admin_name = admin_user.firstname + ' ' + admin_user.lastname
         if admin_user.contacts:
