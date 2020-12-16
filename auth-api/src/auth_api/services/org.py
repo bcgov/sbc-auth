@@ -99,13 +99,13 @@ class Org:  # pylint: disable=too-many-public-methods
         org.access_type = access_type
         # If the account is anonymous set the billable value as False else True
         org.billable = access_type != AccessType.ANONYMOUS.value
-        user: UserModel = UserModel.find_by_jwt_token(token=token_info)
         # Set the status based on access type
         # Check if the user is APPROVED else set the org status to PENDING
         # Send an email to staff to remind review the pending account
         if access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value) \
                 and not AffidavitModel.find_approved_by_user_id(user_id=user_id):
             org.status_code = OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
+            user = UserModel.find_by_jwt_token(token=token_info)
             Org.send_staff_review_account_reminder(user, org.id, origin_url)
 
         # If mailing address is provided, save it
@@ -118,7 +118,12 @@ class Org:  # pylint: disable=too-many-public-methods
         Org.add_product(org.id, token_info)
         payment_method = Org._validate_and_get_payment_method(selected_payment_method, OrgType[org_type])
 
-        Org._create_payment_settings(org, payment_info, payment_method, mailing_address, user.username, True)
+        user_name = ''
+        if payment_method == PaymentMethod.PAD.value:  # to get the pad accepted date
+            user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+            user_name = user.username
+
+        Org._create_payment_settings(org, payment_info, payment_method, mailing_address, user_name, True)
 
         # TODO do we have to check anything like this below?
         # if payment_account_status == PaymentAccountStatus.FAILED:
