@@ -168,7 +168,7 @@ export default class CommonUtils {
     return Number(str.replace(/\D/g, ''))
   }
 
-  // allowing number and X character in v-mask directive
+  // patten/token for v-mask directive
   static numberAndXMaskPattern () {
     return {
       // allow X and number for masking
@@ -178,6 +178,14 @@ export default class CommonUtils {
       '#': {
         pattern: /\d/
       }
+    }
+  }
+  // allowing only number and X character in v-mask directive
+  static accountMask () {
+    return {
+      mask: 'DDDDDDDDDDDD',
+      tokens: CommonUtils.numberAndXMaskPattern(),
+      masked: true
     }
   }
 }

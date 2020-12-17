@@ -146,11 +146,7 @@ export default class PADInfoForm extends Vue {
     v => (v.length >= 7 && v.length <= 12) || 'Account Number should be between 7 to 12 digits'
   ]
 
-  private accountMask = {
-    mask: 'DDDDDDDDDDDD',
-    tokens: CommonUtils.numberAndXMaskPattern(),
-    masked: true
-  }
+  private accountMask = CommonUtils.accountMask()
 
   private mounted () {
     const padInfo: PADInfo = (Object.keys(this.padInformation).length) ? this.padInformation : this.currentOrgPADInfo
