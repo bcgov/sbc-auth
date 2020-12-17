@@ -38,7 +38,7 @@ class OrgAuthorizationResource(Resource):
     def get(org_id):
         """Return authorization for the user for the passed business identifier."""
         expanded: bool = request.args.get('expanded', False)
-        corp_type_code = request.headers.get('corp-type', None)
+        corp_type_code = request.headers.get('product-type', None)
         authorisations = AuthorizationService.get_account_authorizations_for_org(g.jwt_oidc_token_info, org_id,
                                                                                  corp_type_code, expanded)
         return authorisations, http_status.HTTP_200_OK

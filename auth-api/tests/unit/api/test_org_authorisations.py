@@ -42,7 +42,7 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     assert org_authorisations.get('roles')
 
     # NR should have all access since its internal
-    headers.update({'corp-type': 'NRO'})
+    headers.update({'product-type': 'NRO'})
     rv = client.get(f'/api/v1/orgs/{id}/authorizations',
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
@@ -51,7 +51,7 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     assert org_authorisations_by_nro.get('roles')
 
     # vital stats shouldn't get any access since its partner
-    headers.update({'corp-type': 'VS'})
+    headers.update({'product-type': 'VS'})
     rv = client.get(f'/api/v1/orgs/{id}/authorizations',
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
