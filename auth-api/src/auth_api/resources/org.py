@@ -142,7 +142,7 @@ class Org(Resource):
         request_json = request.get_json()
         action = request.args.get('action', '').upper()
         valid_format, errors = schema_utils.validate(request_json, 'org')
-        token = g.jwt_oidc_token_info
+        toke_info = g.jwt_oidc_token_info
         bearer_token = request.headers['Authorization'].replace('Bearer ', '')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
@@ -150,7 +150,7 @@ class Org(Resource):
             org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
                                             allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
             if org and org.as_dict().get('accessType', None) == AccessType.ANONYMOUS.value and \
-                    Role.STAFF_CREATE_ACCOUNTS.value not in token.get('realm_access').get('roles'):
+                    Role.STAFF_CREATE_ACCOUNTS.value not in toke_info.get('realm_access').get('roles'):
                 return {'message': 'The organisation can only be updated by a staff admin.'}, \
                        http_status.HTTP_401_UNAUTHORIZED
             if org:
@@ -158,7 +158,8 @@ class Org(Resource):
                     response, status = org.change_org_ype(request_json, action,
                                                           bearer_token).as_dict(), http_status.HTTP_200_OK
                 else:
-                    response, status = org.update_org(request_json, bearer_token).as_dict(), http_status.HTTP_200_OK
+                    response, status = org.update_org(request_json, toke_info, bearer_token).as_dict(),\
+                                       http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
