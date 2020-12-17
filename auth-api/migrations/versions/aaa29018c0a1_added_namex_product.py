@@ -31,7 +31,11 @@ def upgrade():
         ]
     )
 
+    op.execute("insert into product_subscription (org_id, product_code) "
+               "select org_id, 'NRO' FROM product_subscription where product_code='BUSINESS' ")
+
 
 def downgrade():
+    op.execute("DELETE FROM product_subscription WHERE product_code='NRO'")
     op.execute("DELETE FROM product_code WHERE code='NRO'")
 
