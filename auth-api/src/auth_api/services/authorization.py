@@ -15,12 +15,14 @@
 
 This module is to handle authorization related queries.
 """
-from typing import Dict
+from typing import Dict, Optional
 
 from flask import abort
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
+from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.services.permissions import Permissions as PermissionsService
+from auth_api.utils.enums import ProductTypeCode as ProductTypeCodeEnum
 from auth_api.utils.roles import STAFF, Role
 
 
@@ -36,7 +38,8 @@ class Authorization:
         self._model = model
 
     @staticmethod
-    def get_account_authorizations_for_org(token_info: Dict, account_id: str, expanded: bool = False):
+    def get_account_authorizations_for_org(token_info: Dict, account_id: str, corp_type_code: Optional[str],
+                                           expanded: bool = False):
         """Get User authorizations for the org."""
         auth_response = {}
         auth = None
@@ -52,13 +55,25 @@ class Authorization:
 
         else:
             keycloak_guid = token_info.get('sub', None)
-            if account_id and keycloak_guid:
-                auth = AuthorizationView.find_user_authorization_by_org_id(keycloak_guid, account_id)
+            # check product based auth auth org based auth
+            check_product_based_auth = Authorization._is_product_based_auth(corp_type_code)
 
-            if auth:
-                permissions = PermissionsService.get_permissions_for_membership(auth.status_code, auth.org_membership)
-                auth_response = Authorization(auth).as_dict(expanded)
-                auth_response['roles'] = permissions
+            if check_product_based_auth:
+                authorization = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(
+                    keycloak_guid, account_id, corp_type_code)
+                auth_response = Authorization(authorization).as_dict(expanded)
+                # TODO absorb permission model here
+                auth_response['roles'] = authorization.roles.split(',') if authorization and authorization.roles else []
+            else:
+                if account_id and keycloak_guid:
+                    auth = AuthorizationView.find_user_authorization_by_org_id(keycloak_guid, account_id)
+
+                if auth:
+                    permissions = PermissionsService.get_permissions_for_membership(auth.status_code,
+                                                                                    auth.org_membership)
+                    auth_response = Authorization(auth).as_dict(expanded)
+                    auth_response['roles'] = permissions
+
         return auth_response
 
     @staticmethod
@@ -146,6 +161,15 @@ class Authorization:
                 }
             }
         return auth_dict
+
+    @staticmethod
+    def _is_product_based_auth(product_code):
+        check_product_based_auth = False
+        if product_code:
+            product: ProductCodeModel = ProductCodeModel.find_by_code(product_code)
+            if product and product.type_code == ProductTypeCodeEnum.PARTNER.value:  # PARTNERS needs product based auth
+                check_product_based_auth = True
+        return check_product_based_auth
 
 
 def check_auth(token_info: Dict, **kwargs):
