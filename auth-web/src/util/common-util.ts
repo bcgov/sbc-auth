@@ -167,4 +167,17 @@ export default class CommonUtils {
   static extractAndConvertStringToNumber (str: string) {
     return Number(str.replace(/\D/g, ''))
   }
+
+  // allowing number and X character in v-mask directive
+  static numberAndXMaskPattern () {
+    return {
+      // allow X and number for masking
+      D: {
+        pattern: /[\dX]/
+      },
+      '#': {
+        pattern: /\d/
+      }
+    }
+  }
 }

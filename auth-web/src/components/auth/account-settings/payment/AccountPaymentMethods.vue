@@ -112,6 +112,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   private errorText = ''
   private isLoading: boolean = false
   private padValid: boolean = false
+  private paymentMethodChanged:boolean = true // false // now always enable save button after discussion need to change
 
   $refs: {
       errorDialog: ModalDialog
@@ -120,12 +121,13 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   private setSelectedPayment (payment) {
     this.selectedPaymentMethod = payment
     this.isBtnSaved = false
+    this.paymentMethodChanged = true
   }
 
   private get isDisableSaveBtn () {
     let disableSaveBtn = false
 
-    if ((this.selectedPaymentMethod === PaymentTypes.PAD && !this.padValid) || (this.selectedPaymentMethod === this.currentOrgPaymentType)) {
+    if ((this.selectedPaymentMethod === PaymentTypes.PAD && !this.padValid) || (!this.paymentMethodChanged)) {
       disableSaveBtn = true
     }
 
@@ -219,6 +221,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
         await this.updateOrg(createRequestBody)
         this.isBtnSaved = true
         this.isLoading = false
+        this.paymentMethodChanged = false
         this.initialize()
         this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
       } catch (error) {
@@ -226,6 +229,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
         console.error(error)
         this.isLoading = false
         this.isBtnSaved = false
+        this.paymentMethodChanged = false
       }
     }
   }

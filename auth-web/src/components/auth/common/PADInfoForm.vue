@@ -48,7 +48,7 @@
               :rules="accountNumberRules"
               v-model="accountNumber"
               @change="emitPreAuthDebitInfo"
-              v-mask="'############'"
+              v-mask="accountMask">
             ></v-text-field>
           </v-col>
         </v-row>
@@ -88,6 +88,7 @@
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
 import { Account } from '@/util/constants'
+import CommonUtils from '@/util/common-util'
 import { PADInfo } from '@/models/Organization'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import { mask } from 'vue-the-mask'
@@ -144,6 +145,12 @@ export default class PADInfoForm extends Vue {
     v => !!v || 'Account Number is required',
     v => (v.length >= 7 && v.length <= 12) || 'Account Number should be between 7 to 12 digits'
   ]
+
+  private accountMask = {
+    mask: 'DDDDDDDDDDDD',
+    tokens: CommonUtils.numberAndXMaskPattern(),
+    masked: true
+  }
 
   private mounted () {
     const padInfo: PADInfo = (Object.keys(this.padInformation).length) ? this.padInformation : this.currentOrgPADInfo
