@@ -231,7 +231,6 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_request['paymentInfo']['bankInstitutionNumber'] = payment_info.get('bankInstitutionNumber', None)
             pay_request['paymentInfo']['bankAccountNumber'] = payment_info.get('bankAccountNumber', None)
             pay_request['padTosAcceptedBy'] = username
-        print('--------pay_url-----',pay_url)
         # invoke pay-api
         token = RestService.get_service_account_token()
         if is_new_org:
