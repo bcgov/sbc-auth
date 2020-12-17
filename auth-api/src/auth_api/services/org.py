@@ -99,7 +99,6 @@ class Org:  # pylint: disable=too-many-public-methods
         org.access_type = access_type
         # If the account is anonymous set the billable value as False else True
         org.billable = access_type != AccessType.ANONYMOUS.value
-
         # Set the status based on access type
         # Check if the user is APPROVED else set the org status to PENDING
         # Send an email to staff to remind review the pending account
@@ -118,7 +117,13 @@ class Org:  # pylint: disable=too-many-public-methods
 
         Org.add_product(org.id, token_info)
         payment_method = Org._validate_and_get_payment_method(selected_payment_method, OrgType[org_type])
-        Org._create_payment_settings(org, payment_info, payment_method, mailing_address, user_id, True)
+
+        user_name = ''
+        if payment_method == PaymentMethod.PAD.value:  # to get the pad accepted date
+            user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+            user_name = user.username
+
+        Org._create_payment_settings(org, payment_info, payment_method, mailing_address, user_name, True)
 
         # TODO do we have to check anything like this below?
         # if payment_account_status == PaymentAccountStatus.FAILED:
@@ -201,7 +206,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def _create_payment_settings(org_model: OrgModel, payment_info: dict,  # pylint: disable=too-many-arguments
-                                 payment_method: str, mailing_address=None, user_id: str = None,
+                                 payment_method: str, mailing_address=None, username: str = None,
                                  is_new_org: bool = True) -> PaymentAccountStatus:
         """Add payment settings for the org."""
         pay_url = current_app.config.get('PAY_API_URL')
@@ -225,10 +230,7 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_request['paymentInfo']['bankTransitNumber'] = payment_info.get('bankTransitNumber', None)
             pay_request['paymentInfo']['bankInstitutionNumber'] = payment_info.get('bankInstitutionNumber', None)
             pay_request['paymentInfo']['bankAccountNumber'] = payment_info.get('bankAccountNumber', None)
-            # todo avoid this extra user look up
-            # todo By changing the parent method to consume user object instead of string user id
-            user_model: UserModel = UserModel.find_by_id(user_id)
-            pay_request['padTosAcceptedBy'] = user_model.username
+            pay_request['padTosAcceptedBy'] = username
 
         # invoke pay-api
         token = RestService.get_service_account_token()
@@ -320,7 +322,8 @@ class Org:  # pylint: disable=too-many-public-methods
                 self.add_contact_to_org(mailing_address, self._model)
 
         self._model.update_org_from_dict(camelback2snake(org_info), exclude=('status_code'))
-        Org._create_payment_settings(self._model, None, payment_type, mailing_address, False)
+        # TODO pass username instead of blanks
+        Org._create_payment_settings(self._model, {}, payment_type, mailing_address, '', False)
         return self
 
     @staticmethod
@@ -341,7 +344,8 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link.org = org
         contact_link.add_to_session()
 
-    def update_org(self, org_info, bearer_token: str = None):
+    def update_org(self, org_info, token_info: Dict = None,  # pylint: disable=too-many-locals
+                   bearer_token: str = None):
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
 
@@ -377,8 +381,9 @@ class Org:  # pylint: disable=too-many-public-methods
         if payment_info := org_info.pop('paymentInfo', {}):
             selected_payment_method = payment_info.get('paymentMethod', None)
             payment_type = Org._validate_and_get_payment_method(selected_payment_method, OrgType[self._model.type_code])
-            # TODO when doing , premium account updates , pass the user Id so that pay-api will update the tos-update-by
-            Org._create_payment_settings(self._model, payment_info, payment_type, mailing_address, None, False)
+            user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+            # TODO when updating the bank info , dont pass user.username as tos updated by..handle this
+            Org._create_payment_settings(self._model, payment_info, payment_type, mailing_address, user.username, False)
             current_app.logger.debug('>update_org ')
         return self
 
