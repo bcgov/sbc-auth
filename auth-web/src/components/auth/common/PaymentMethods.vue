@@ -144,6 +144,7 @@ export default class PaymentMethods extends Vue {
   @Prop({ default: '' }) currentSelectedPaymentMethod: string
   @Prop({ default: false }) isChangeView: boolean
   @Prop({ default: true }) isAcknowledgeNeeded: boolean
+  @Prop({ default: false }) isTouchedUpdate: boolean
   private selectedPaymentMethod: string = ''
   private paymentTypes = PaymentTypes
   private padInfo: PADInfo = {} as PADInfo
@@ -179,7 +180,11 @@ export default class PaymentMethods extends Vue {
   @Emit()
   private paymentMethodSelected (payment, isTouched = true) {
     this.selectedPaymentMethod = payment.type
-    return { selectedPaymentMethod: this.selectedPaymentMethod, isTouched }
+    // emit touched flag for parent element
+    if (this.isTouchedUpdate) {
+      return { selectedPaymentMethod: this.selectedPaymentMethod, isTouched }
+    }
+    return this.selectedPaymentMethod
   }
 
   @Emit('get-PAD-info')

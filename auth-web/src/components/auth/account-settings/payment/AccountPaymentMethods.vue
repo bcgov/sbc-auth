@@ -18,6 +18,7 @@
       @payment-method-selected="setSelectedPayment"
       @get-PAD-info="getPADInfo"
       @is-pad-valid="isPADValid"
+      isTouchedUpdate="true"
     ></PaymentMethods>
     <v-divider class="my-10"></v-divider>
     <div class="form__btns d-flex">
