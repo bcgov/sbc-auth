@@ -144,6 +144,7 @@ export default class PaymentMethods extends Vue {
   @Prop({ default: '' }) currentSelectedPaymentMethod: string
   @Prop({ default: false }) isChangeView: boolean
   @Prop({ default: true }) isAcknowledgeNeeded: boolean
+  @Prop({ default: false }) isTouchedUpdate: boolean
   private selectedPaymentMethod: string = ''
   private paymentTypes = PaymentTypes
   private padInfo: PADInfo = {} as PADInfo
@@ -168,7 +169,7 @@ export default class PaymentMethods extends Vue {
 
   private mounted () {
     if (!this.isPADOnly) {
-      this.paymentMethodSelected({ type: this.currentSelectedPaymentMethod })
+      this.paymentMethodSelected({ type: this.currentSelectedPaymentMethod }, false)
     }
   }
 
@@ -177,8 +178,12 @@ export default class PaymentMethods extends Vue {
   }
 
   @Emit()
-  private paymentMethodSelected (payment) {
+  private paymentMethodSelected (payment, isTouched = true) {
     this.selectedPaymentMethod = payment.type
+    // emit touched flag for parent element
+    if (this.isTouchedUpdate) {
+      return { selectedPaymentMethod: this.selectedPaymentMethod, isTouched }
+    }
     return this.selectedPaymentMethod
   }
 

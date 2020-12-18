@@ -18,6 +18,7 @@
       @payment-method-selected="setSelectedPayment"
       @get-PAD-info="getPADInfo"
       @is-pad-valid="isPADValid"
+      isTouchedUpdate="true"
     ></PaymentMethods>
     <v-divider class="my-10"></v-divider>
     <div class="form__btns d-flex">
@@ -112,22 +113,24 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   private errorText = ''
   private isLoading: boolean = false
   private padValid: boolean = false
-  private paymentMethodChanged:boolean = true // false // now always enable save button after discussion need to change
+  private paymentMethodChanged:boolean = false
 
   $refs: {
       errorDialog: ModalDialog
     }
 
   private setSelectedPayment (payment) {
-    this.selectedPaymentMethod = payment
-    this.isBtnSaved = false
-    this.paymentMethodChanged = true
+    this.selectedPaymentMethod = payment.selectedPaymentMethod
+    this.isBtnSaved = (this.isBtnSaved && !payment.isTouched) || false
+    this.paymentMethodChanged = payment.isTouched || false
   }
 
   private get isDisableSaveBtn () {
     let disableSaveBtn = false
 
-    if ((this.selectedPaymentMethod === PaymentTypes.PAD && !this.padValid) || (!this.paymentMethodChanged)) {
+    if (this.isBtnSaved) {
+      disableSaveBtn = false
+    } else if ((this.selectedPaymentMethod === PaymentTypes.PAD && !this.padValid) || (!this.paymentMethodChanged)) {
       disableSaveBtn = true
     }
 
