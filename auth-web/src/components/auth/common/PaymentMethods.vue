@@ -168,7 +168,7 @@ export default class PaymentMethods extends Vue {
 
   private mounted () {
     if (!this.isPADOnly) {
-      this.paymentMethodSelected({ type: this.currentSelectedPaymentMethod })
+      this.paymentMethodSelected({ type: this.currentSelectedPaymentMethod }, false)
     }
   }
 
@@ -177,9 +177,9 @@ export default class PaymentMethods extends Vue {
   }
 
   @Emit()
-  private paymentMethodSelected (payment) {
+  private paymentMethodSelected (payment, isTouched = true) {
     this.selectedPaymentMethod = payment.type
-    return this.selectedPaymentMethod
+    return { selectedPaymentMethod: this.selectedPaymentMethod, isTouched }
   }
 
   @Emit('get-PAD-info')
