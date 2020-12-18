@@ -25,6 +25,7 @@ from flask import current_app
 from jinja2 import Template
 
 from account_mailer.email_processors import generate_template
+from account_mailer.services import minio_service
 
 
 def process(email_msg: dict, token: str) -> dict:
@@ -33,8 +34,10 @@ def process(email_msg: dict, token: str) -> dict:
     # fill in template
 
     username = email_msg.get('padTosAcceptedBy')
+    pad_tos_file_name = current_app.config['PAD_TOS_FILE']
     admin_emails, admin_name = _get_admin_emails(username)
     pdf_attachment = _get_pad_confirmation_report_pdf(email_msg, token)
+    tos_attachment = _get_pdf(pad_tos_file_name)
     html_body = _get_pad_confirmation_email_body(email_msg, admin_name)
     return {
         'recipients': admin_emails,
@@ -47,6 +50,12 @@ def process(email_msg: dict, token: str) -> dict:
                     'fileBytes': pdf_attachment.decode('utf-8'),
                     'fileUrl': '',
                     'attachOrder': '1'
+                },
+                {
+                    'fileName': pad_tos_file_name,
+                    'fileBytes': tos_attachment.decode('utf-8'),
+                    'fileUrl': '',
+                    'attachOrder': '2'
                 }
             ]
         }
@@ -113,3 +122,13 @@ def _get_pad_confirmation_report_pdf(email_msg, token):
         pdf_attachment = base64.b64encode(report_response.content)
 
     return pdf_attachment
+
+
+def _get_pdf(pad_tos_file_name: str):
+    read_pdf = None
+    mino_object = minio_service.MinioService.get_minio_file(current_app.config['MINIO_BUCKET'],
+                                                            pad_tos_file_name)
+    if mino_object:
+        read_pdf = base64.b64encode(mino_object.data)
+
+    return read_pdf
