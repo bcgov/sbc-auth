@@ -85,7 +85,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
 import { Account } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
@@ -117,6 +117,8 @@ export default class PADInfoForm extends Vue {
   @Prop({ default: false }) isChangeView: boolean
   @Prop({ default: true }) isAcknowledgeNeeded: boolean
   @Prop({ default: true }) isTOSNeeded: boolean
+  @Prop({ default: false }) isInitialTOSAccepted: boolean
+  @Prop({ default: false }) isInitialAcknowledged: boolean
   private readonly currentOrgPADInfo!: PADInfo
   private readonly currentOrganizationType!: string
   private readonly setCurrentOrganizationPADInfo!: (padInfo: PADInfo) => void
@@ -148,12 +150,17 @@ export default class PADInfoForm extends Vue {
 
   private accountMask = CommonUtils.accountMask()
 
+  public constructor () {
+    super()
+    this.isAcknowledged = this.isInitialAcknowledged
+  }
+
   private mounted () {
     const padInfo: PADInfo = (Object.keys(this.padInformation).length) ? this.padInformation : this.currentOrgPADInfo
     this.transitNumber = padInfo?.bankTransitNumber || ''
     this.institutionNumber = padInfo?.bankInstitutionNumber || ''
     this.accountNumber = padInfo?.bankAccountNumber || ''
-    this.isTOSAccepted = padInfo?.isTOSAccepted || false
+    this.isTOSAccepted = this.isInitialTOSAccepted || (padInfo?.isTOSAccepted || false)
     this.setCurrentOrganizationPADInfo(padInfo)
     this.$nextTick(() => {
       if (this.isTOSAccepted) {
@@ -163,6 +170,9 @@ export default class PADInfoForm extends Vue {
   }
 
   private get isTermsOfServiceAccepted () {
+    if (this.isInitialTOSAccepted) { // if TOS already accepted
+      return true
+    }
     return (Object.keys(this.padInformation).length) ? this.padInformation.isTOSAccepted : this.currentOrgPADInfo?.isTOSAccepted
   }
 

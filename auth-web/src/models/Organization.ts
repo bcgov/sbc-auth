@@ -188,6 +188,8 @@ export interface OrgPaymentDetails {
   credit: string
   paymentMethod: string
   statementNotificationEnabled: true
+  padTosAcceptedBy:string
+  padTosAcceptedDate:string
 }
 
 export interface CFSAccountDetails {
