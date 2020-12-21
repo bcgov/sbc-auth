@@ -23,6 +23,7 @@ import DashboardView from '@/views/auth/DashboardView.vue'
 import DecideBusinessView from '@/views/auth/home/DecideBusinessView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/manage-business/EntityManagement.vue'
+import FeeScheduleView from '@/views/auth/FeeScheduleView.vue'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import HomeView from '@/views/auth/home/HomeView.vue'
 import IncorpOrRegisterView from '@/views/auth/home/IncorpOrRegisterView.vue'
@@ -190,6 +191,12 @@ export function getRoutes (): RouteConfig[] {
       component: AccountChangeView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/fee-schedule',
+      name: 'fee-schedule',
+      component: FeeScheduleView,
+      meta: { requiresAuth: false, showNavBar: true }
     },
     {
       path: '/setup-account',
