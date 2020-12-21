@@ -169,7 +169,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
       // TODO : revisit  if need
       // if need to add more logic -> move to store
       // now setting flag for futurePaymentMethod and TOS to show content and TOS checkbox
-      this.isFuturePaymentMethodAvailable = orgPayments.futurePaymentMethod || false
+      this.isFuturePaymentMethodAvailable = !!orgPayments.futurePaymentMethod || false
       this.isTOSandAcknowledgeCompleted = orgPayments.padTosAcceptedBy !== null || false
       this.selectedPaymentMethod = this.currentOrgPaymentType || ''
     } else {
