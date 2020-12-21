@@ -47,7 +47,7 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     org_authorisations_by_nro = json.loads(rv.data)
-    assert org_authorisations_by_nro.get('orgMembership') == 'ADMIN'
+    assert org_authorisations_by_nro.get('orgMembership') == 'ADMIN', 'NR should get admin access'
     assert org_authorisations_by_nro.get('roles')
 
     # vital stats shouldn't get any access since its partner
@@ -56,5 +56,5 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     org_authorisations_by_vs = json.loads(rv.data)
-    assert org_authorisations_by_vs.get('orgMembership') is None
+    assert org_authorisations_by_vs.get('orgMembership') is None, 'Partners no access'
     assert len(org_authorisations_by_vs.get('roles')) == 0
