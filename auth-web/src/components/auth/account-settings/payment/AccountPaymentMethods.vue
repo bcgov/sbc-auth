@@ -19,6 +19,8 @@
       @get-PAD-info="getPADInfo"
       @is-pad-valid="isPADValid"
       isTouchedUpdate="true"
+      :isInitialTOSAccepted="isTOSandAcknowledgeCompleted"
+      :isInitialAcknowledged="isTOSandAcknowledgeCompleted"
     ></PaymentMethods>
     <v-divider class="my-10"></v-divider>
     <div class="form__btns d-flex">
@@ -114,6 +116,8 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   private isLoading: boolean = false
   private padValid: boolean = false
   private paymentMethodChanged:boolean = false
+  private isFuturePaymentMethodAvailable: boolean = false // set true if in between 3 days cooling period
+  private isTOSandAcknowledgeCompleted:boolean = false // sert true if TOS already accepted
 
   $refs: {
       errorDialog: ModalDialog
@@ -151,7 +155,8 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   }
 
   private get isAcknowledgeNeeded () {
-    return (this.selectedPaymentMethod !== this.currentOrgPaymentType)
+    // isAcknowledgeNeeded should show if isFuturePaymentMethodAvailable (3 days cooling period)
+    return (this.selectedPaymentMethod !== this.currentOrgPaymentType || this.isFuturePaymentMethodAvailable)
   }
 
   private async initialize () {
@@ -161,6 +166,11 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
         ? Account.UNLINKED_PREMIUM : this.currentOrganization.orgType
       this.selectedPaymentMethod = ''
       const orgPayments: OrgPaymentDetails = await this.getOrgPayments()
+      // TODO : revisit  if need
+      // if need to add more logic -> move to store
+      // now setting flag for futurePaymentMethod and TOS to show content and TOS checkbox
+      this.isFuturePaymentMethodAvailable = !!orgPayments.futurePaymentMethod || false
+      this.isTOSandAcknowledgeCompleted = orgPayments.padTosAcceptedBy !== null || false
       this.selectedPaymentMethod = this.currentOrgPaymentType || ''
     } else {
       // if the account switing happening when the user is already in the transaction page,

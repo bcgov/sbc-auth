@@ -45,6 +45,8 @@
                     @emit-pre-auth-debit-info="getPADInfo"
                     :isChangeView="isChangeView"
                     :isAcknowledgeNeeded="isAcknowledgeNeeded"
+                    :isInitialAcknowledged="isInitialAcknowledged"
+                    :isInitialTOSAccepted="isInitialTOSAccepted"
                   ></PADInfoForm>
                 </div>
 
@@ -77,6 +79,8 @@
           @emit-pre-auth-debit-info="getPADInfo"
           :isChangeView="isChangeView"
           :isAcknowledgeNeeded="isAcknowledgeNeeded"
+          :isInitialTOSAccepted="isInitialTOSAccepted"
+          :isInitialAcknowledged="isInitialAcknowledged"
         ></PADInfoForm>
       </v-col>
     </v-row>
@@ -145,6 +149,8 @@ export default class PaymentMethods extends Vue {
   @Prop({ default: false }) isChangeView: boolean
   @Prop({ default: true }) isAcknowledgeNeeded: boolean
   @Prop({ default: false }) isTouchedUpdate: boolean
+  @Prop({ default: false }) isInitialTOSAccepted: boolean
+  @Prop({ default: false }) isInitialAcknowledged: boolean
   private selectedPaymentMethod: string = ''
   private paymentTypes = PaymentTypes
   private padInfo: PADInfo = {} as PADInfo
