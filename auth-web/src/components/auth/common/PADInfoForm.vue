@@ -85,7 +85,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { mapMutations, mapState } from 'vuex'
 import { Account } from '@/util/constants'
 import CommonUtils from '@/util/common-util'

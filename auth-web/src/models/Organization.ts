@@ -190,6 +190,7 @@ export interface OrgPaymentDetails {
   statementNotificationEnabled: true
   padTosAcceptedBy:string
   padTosAcceptedDate:string
+  futurePaymentMethod: string
 }
 
 export interface CFSAccountDetails {

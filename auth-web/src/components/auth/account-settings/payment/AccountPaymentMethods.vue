@@ -166,7 +166,8 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
         ? Account.UNLINKED_PREMIUM : this.currentOrganization.orgType
       this.selectedPaymentMethod = ''
       const orgPayments: OrgPaymentDetails = await this.getOrgPayments()
-      // TODO : revisit  if need more logic -> move to store
+      // TODO : revisit  if need
+      // if need to add more logic -> move to store
       // now setting flag for futurePaymentMethod and TOS to show content and TOS checkbox
       this.isFuturePaymentMethodAvailable = orgPayments.futurePaymentMethod || false
       this.isTOSandAcknowledgeCompleted = orgPayments.padTosAcceptedBy !== null || false
