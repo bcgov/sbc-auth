@@ -120,7 +120,9 @@ def build_cache(app):
             try:
                 from auth_api.services.permissions import \
                     Permissions as PermissionService  # pylint: disable=import-outside-toplevel
+                from auth_api.services.products import Product as ProductService
                 PermissionService.build_all_permission_cache()
+                ProductService.build_all_products_cache()
             except Exception as e:  # pylint:disable=broad-except
                 app.logger.error('Error on caching ')
                 app.logger.error(e)

@@ -14,7 +14,7 @@
 """Service for managing Organization data."""
 import json
 from datetime import datetime
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
@@ -231,7 +231,6 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_request['paymentInfo']['bankInstitutionNumber'] = payment_info.get('bankInstitutionNumber', None)
             pay_request['paymentInfo']['bankAccountNumber'] = payment_info.get('bankAccountNumber', None)
             pay_request['padTosAcceptedBy'] = username
-
         # invoke pay-api
         token = RestService.get_service_account_token()
         if is_new_org:
@@ -771,14 +770,16 @@ class Org:  # pylint: disable=too-many-public-methods
         """Add product subscription."""
         if token_info:
             # set as defalut type
-            product_code = ProductCode.BUSINESS.value
+            # TODO may be give all internal products?
+            product_codes: List = [{'productCode': ProductCode.BUSINESS.value},
+                                   {'productCode': ProductCode.NAMES_REQUEST.value}]
 
             # Token is from service account, get the product code claim
             if Role.SYSTEM.value in token_info.get('realm_access').get('roles'):
-                product_code = token_info.get('product_code', None)
+                product_codes = [{'productCode': token_info.get('product_code', None)}]
 
-            if product_code:
-                product_subscription = {'subscriptions': [{'productCode': product_code}]}
+            if product_codes:
+                product_subscription = {'subscriptions': product_codes}
                 subscriptions = ProductService.create_product_subscription(org_id, product_subscription,
                                                                            is_new_transaction=False)
                 return subscriptions
