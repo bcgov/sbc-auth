@@ -154,6 +154,7 @@ export default class PaymentMethods extends Vue {
   private selectedPaymentMethod: string = ''
   private paymentTypes = PaymentTypes
   private padInfo: PADInfo = {} as PADInfo
+  private isTouched:boolean = false
 
   // this object can define the payment methods allowed for each account tyoes
   private paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
@@ -186,6 +187,7 @@ export default class PaymentMethods extends Vue {
   @Emit()
   private paymentMethodSelected (payment, isTouched = true) {
     this.selectedPaymentMethod = payment.type
+    this.isTouched = isTouched
     // emit touched flag for parent element
     if (this.isTouchedUpdate) {
       return { selectedPaymentMethod: this.selectedPaymentMethod, isTouched }
@@ -202,7 +204,7 @@ export default class PaymentMethods extends Vue {
   @Emit('is-pad-valid')
   private isPADValid (isValid) {
     if (isValid) {
-      this.paymentMethodSelected({ type: PaymentTypes.PAD })
+      this.paymentMethodSelected({ type: PaymentTypes.PAD }, this.isTouched)
     }
     return isValid
   }
