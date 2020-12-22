@@ -22,7 +22,7 @@ from flask import current_app
 from nats.aio.client import Client as NATS  # noqa N814; by convention the name is NATS
 from stan.aio.client import Client as STAN  # noqa N814; by convention the name is STAN
 
-from pay_api.utils.handlers import closed_cb, error_cb  # noq I001; conflict with flake8
+from auth_api.utils.handlers import closed_cb, error_cb  # noq I001; conflict with flake8
 
 
 def publish_response(payload: Dict[str, any], subject: str, client_name: str = None):
