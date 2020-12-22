@@ -71,6 +71,40 @@ def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-a
     assert authorization.get('orgMembership', None) is None
 
 
+def test_get_user_authorizations_for_org(session):  # pylint:disable=unused-argument
+    """Assert that user authorizations for entity is working."""
+    user = factory_user_model()
+    org = factory_org_model()
+    membership = factory_membership_model(user.id, org.id)
+
+    authorization = Authorization.get_account_authorizations_for_org({
+        'sub': str(user.keycloak_guid),
+        'realm_access': {
+            'roles': ['basic']
+        }}, org.id, ProductCode.BUSINESS.value)
+    assert authorization is not None
+    assert authorization.get('orgMembership', None) == membership.membership_type_code
+    assert authorization.get('roles') is not None
+
+    authorization = Authorization.get_account_authorizations_for_org({
+        'sub': str(user.keycloak_guid),
+        'realm_access': {
+            'roles': ['basic']
+        }}, org.id, ProductCode.NAMES_REQUEST.value)
+    assert authorization is not None
+    assert authorization.get('orgMembership', None) == membership.membership_type_code
+    assert authorization.get('roles') is not None
+
+    authorization = Authorization.get_account_authorizations_for_org({
+        'sub': str(user.keycloak_guid),
+        'realm_access': {
+            'roles': ['basic']
+        }}, org.id, ProductCode.VS.value)
+    assert authorization is not None
+    assert authorization.get('orgMembership') is None
+    assert len(authorization.get('roles')) == 0
+
+
 def test_get_user_authorizations_for_entity_service_account(session):
     """Assert that user authorizations for entity is working."""
     user = factory_user_model()
