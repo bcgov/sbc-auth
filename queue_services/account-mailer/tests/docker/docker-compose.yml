@@ -21,10 +21,10 @@ services:
         retries: 2
       volumes:
         - ./setup:/tmp/keycloak/test/
+        
     nats:
         image: nats-streaming 
         restart: always
-        mem_limit: 512m
         expose:
           - 4222
           - 8222

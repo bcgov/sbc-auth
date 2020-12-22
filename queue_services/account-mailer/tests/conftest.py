@@ -19,7 +19,9 @@ import time
 from contextlib import contextmanager
 
 import pytest
-from auth_api import db as _db, setup_jwt_manager, JWTWrapper
+from auth_api import JWTWrapper
+from auth_api import db as _db
+from auth_api import setup_jwt_manager
 from flask import Flask
 from flask_migrate import Migrate, upgrade
 from nats.aio.client import Client as Nats
@@ -27,6 +29,7 @@ from sqlalchemy import event, text
 from stan.aio.client import Client as Stan
 
 from account_mailer.config import get_named_config
+
 
 _JWT = JWTWrapper.get_instance()
 
