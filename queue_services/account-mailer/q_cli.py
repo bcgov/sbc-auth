@@ -145,6 +145,31 @@ async def run(loop, mode, auth_account_id, auth_account_name, auth_username, ban
                     'accountName': auth_account_name
                 }
             }
+        elif mode == 'conf_per':
+            payload = {
+                'specversion': '1.x-wip',
+                'type': f'{MessageType.ACCOUNT_CONFIRMATION_PERIOD_OVER.value}',
+                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
+                'id': auth_account_id,
+                'datacontenttype': 'application/json',
+                'data': {
+                    'accountId': auth_account_id,
+                    'nsfFee': 30
+                }
+            }
+        elif mode == 'pad_invoice':
+            payload = {
+                'specversion': '1.x-wip',
+                'type': f'{MessageType.PAD_INVOICE_CREATED.value}',
+                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
+                'id': auth_account_id,
+                'datacontenttype': 'application/json',
+                'data': {
+                    'accountId': auth_account_id,
+                    'nsfFee': 30,
+                    'invoice_total': 100
+                }
+            }
 
         await sc.publish(subject=subscription_options().get('subject'),
                          payload=json.dumps(payload).encode('utf-8'))
@@ -164,7 +189,7 @@ if __name__ == '__main__':
         sys.exit(2)
 
     auth_account_name = bank_number = bank_branch_number = \
-        bank_account_number = order_number = transaction_amount = transaction_id = None
+        bank_account_number = order_number = transaction_amount = transaction_id = auth_username = None
 
     for opt, arg in opts:
         if opt == '-h':
@@ -201,3 +226,5 @@ if __name__ == '__main__':
 # refund cmd --> python3 q_cli.py -m refund -i 10 -o 67892 -p 25.33 -d 988
 # account suspended cmd --> python3 q_cli.py -m acc_lock -i 4 -n SomeAccount
 # account restored cmd --> python3 q_cli.py -m acc_unlock -i 4 -n SomeAccount
+# account conf pver-- >  python3 q_cli.py -m conf_per -i 4
+# account conf pver-- >  python3 q_cli.py -m pad_invoice -i 4
