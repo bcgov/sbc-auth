@@ -127,7 +127,7 @@ export default class PADInfoForm extends Vue {
   private accountNumber: string = ''
   private isTOSAccepted: boolean = false
   private isAcknowledged: boolean = false
-  private isTouched:boolean = false
+  private isTouched: boolean = false
 
   $refs: {
     preAuthDebitForm: HTMLFormElement,

@@ -154,7 +154,7 @@ export default class PaymentMethods extends Vue {
   private selectedPaymentMethod: string = ''
   private paymentTypes = PaymentTypes
   private padInfo: PADInfo = {} as PADInfo
-  private isTouched:boolean = false
+  private isTouched: boolean = false
 
   // this object can define the payment methods allowed for each account tyoes
   private paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
