@@ -45,6 +45,8 @@
                     @emit-pre-auth-debit-info="getPADInfo"
                     :isChangeView="isChangeView"
                     :isAcknowledgeNeeded="isAcknowledgeNeeded"
+                    :isInitialAcknowledged="isInitialAcknowledged"
+                    :isInitialTOSAccepted="isInitialTOSAccepted"
                   ></PADInfoForm>
                 </div>
 
@@ -77,6 +79,8 @@
           @emit-pre-auth-debit-info="getPADInfo"
           :isChangeView="isChangeView"
           :isAcknowledgeNeeded="isAcknowledgeNeeded"
+          :isInitialTOSAccepted="isInitialTOSAccepted"
+          :isInitialAcknowledged="isInitialAcknowledged"
         ></PADInfoForm>
       </v-col>
     </v-row>
@@ -145,9 +149,12 @@ export default class PaymentMethods extends Vue {
   @Prop({ default: false }) isChangeView: boolean
   @Prop({ default: true }) isAcknowledgeNeeded: boolean
   @Prop({ default: false }) isTouchedUpdate: boolean
+  @Prop({ default: false }) isInitialTOSAccepted: boolean
+  @Prop({ default: false }) isInitialAcknowledged: boolean
   private selectedPaymentMethod: string = ''
   private paymentTypes = PaymentTypes
   private padInfo: PADInfo = {} as PADInfo
+  private isTouched: boolean = false
 
   // this object can define the payment methods allowed for each account tyoes
   private paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
@@ -180,6 +187,7 @@ export default class PaymentMethods extends Vue {
   @Emit()
   private paymentMethodSelected (payment, isTouched = true) {
     this.selectedPaymentMethod = payment.type
+    this.isTouched = isTouched
     // emit touched flag for parent element
     if (this.isTouchedUpdate) {
       return { selectedPaymentMethod: this.selectedPaymentMethod, isTouched }
@@ -196,7 +204,7 @@ export default class PaymentMethods extends Vue {
   @Emit('is-pad-valid')
   private isPADValid (isValid) {
     if (isValid) {
-      this.paymentMethodSelected({ type: PaymentTypes.PAD })
+      this.paymentMethodSelected({ type: PaymentTypes.PAD }, this.isTouched)
     }
     return isValid
   }

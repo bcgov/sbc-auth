@@ -47,6 +47,13 @@ class CorpType(Enum):
     CR = 'CR'  # corporation
 
 
+class ProductTypeCode(Enum):
+    """Product Type code."""
+
+    INTERNAL = 'INTERNAL'
+    PARTNER = 'PARTNER'
+
+
 class RequiredAction(Enum):
     """Keycloak required actions."""
 
@@ -194,3 +201,4 @@ class ProductCode(Enum):
     BCA = 'BCA'
     PPR = 'PPR'
     DIR_SEARCH = 'DIR_SEARCH'
+    NAMES_REQUEST = 'NRO'

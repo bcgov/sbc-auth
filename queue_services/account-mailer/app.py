@@ -16,7 +16,7 @@
 # limitations under the License.
 """s2i based launch script to run the service."""
 import asyncio
-import os
+
 
 from account_mailer.worker import APP_CONFIG, cb_subscription_handler, qsm
 
