@@ -22,6 +22,7 @@ import { AccessType } from '@/util/constants'
           :isAcknowledgeNeeded="false"
           :isTOSNeeded="false"
           :key="refreshPAD"
+          @is-pad-info-touched="isPadInfoTouched"
         ></PADInfoForm>
       </v-col>
     </v-row>
@@ -92,6 +93,7 @@ export default class ReviewBankInformation extends Mixins(Steppable) {
   private orgPadInfo: PADInfo = {} as PADInfo
   private isLoading: boolean = false
   private errorText: string = ''
+  private isTouched:boolean = false
 
   private async mounted () {
     const orgPayments: OrgPaymentDetails = await this.getOrgPayments()
@@ -105,7 +107,7 @@ export default class ReviewBankInformation extends Mixins(Steppable) {
 
   private async goNext () {
     this.isLoading = true
-    let isValid = await this.verifyPAD()
+    let isValid = this.isTouched ? await this.verifyPAD() : true
     if (isValid) {
       const createRequestBody: CreateRequestBody = {
         paymentInfo: {
@@ -137,6 +139,11 @@ export default class ReviewBankInformation extends Mixins(Steppable) {
 
   private isPADValid (isValid) {
     this.padValid = isValid
+  }
+
+  // set on change of input
+  private isPadInfoTouched (isTouched) {
+    this.isTouched = isTouched
   }
 
   private async verifyPAD () {
