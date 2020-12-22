@@ -134,6 +134,9 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
 
     STAN_CLUSTER_NAME = 'test-cluster'
 
+    NATS_MAILER_CLIENT_NAME = os.getenv('NATS_MAILER_CLIENT_NAME', 'account.mailer.worker')
+    NATS_MAILER_SUBJECT = os.getenv('NATS_MAILER_SUBJECT', 'account.mailer')
+
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
     """Production environment configuration."""
