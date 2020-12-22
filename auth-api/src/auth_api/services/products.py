@@ -13,9 +13,10 @@
 # limitations under the License.
 """Service for managing Product and Product Subscription data."""
 
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from flask import current_app
+from sqlalchemy.exc import SQLAlchemyError
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -25,6 +26,7 @@ from auth_api.models import ProductRoleCode as ProductRoleCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import ProductSubscriptionRole as ProductSubscriptionRoleModel
 from auth_api.models import db
+from ..utils.cache import cache
 
 
 class Product:
@@ -32,6 +34,25 @@ class Product:
 
     This service manages creating, updating, and retrieving products and product subscriptions.
     """
+
+    @classmethod
+    def build_all_products_cache(cls):
+        """Build cache for all permission values."""
+        try:
+            product_list: List[ProductCodeModel] = ProductCodeModel.get_all_products()
+            for product in product_list:
+                cache.set(product.code, product.type_code)
+        except SQLAlchemyError as e:
+            current_app.logger.info('Error on building cache {}', e)
+
+    @staticmethod
+    def find_product_type_by_code(code: str) -> str:
+        """Find Product Type."""
+        code_from_cache = cache.get(code)
+        if code_from_cache:
+            return code_from_cache
+        product_code_model: ProductCodeModel = ProductCodeModel.find_by_id(code)
+        return getattr(product_code_model, 'type_code', '')
 
     @staticmethod
     def create_product_subscription(org_id, subscription_data: Dict[str, Any], is_new_transaction: bool = True):

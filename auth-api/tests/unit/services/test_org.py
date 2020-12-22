@@ -790,7 +790,7 @@ def test_add_product(session):  # pylint:disable=unused-argument
     assert subscriptions is None
 
     subscriptions = OrgService.add_product(org_dictionary['id'], token_info=TestJwtClaims.public_user_role)
-    assert len(subscriptions) == 1
+    assert len(subscriptions) == 2
     assert subscriptions[0].product_code == ProductCode.BUSINESS.value
 
     subscriptions = OrgService.add_product(org_dictionary['id'], token_info=TestJwtClaims.system_role)

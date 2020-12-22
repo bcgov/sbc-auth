@@ -52,9 +52,9 @@ jobs:
       - name: Lint with pylint
         run: |
           make lint
-      #- name: Lint with flake8
-      #  run: |
-      #    make flake8
+      - name: Lint with flake8
+        run: |
+          make flake8
       - name: Test with pytest
         run: |
           make test
