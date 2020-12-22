@@ -86,6 +86,27 @@ async def process_event(event_message: dict, flask_app):
             admin_coordinator_emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
             subject = SubjectType.NSF_UNLOCK_ACCOUNT_SUBJECT.value
             email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject)
+        elif message_type == MessageType.ACCOUNT_CONFIRMATION_PERIOD_OVER.value:
+            email_msg = event_message.get('data')
+            template_name = TemplateType.ACCOUNT_CONF_OVER_TEMPLATE_NAME.value
+            org_id = email_msg.get('accountId')
+            nsf_fee = email_msg.get('nsfFee')
+            admin_coordinator_emails = get_member_emails(org_id, (ADMIN,))
+            subject = SubjectType.ACCOUNT_CONF_OVER_SUBJECT.value
+            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject,
+                                               nsf_fee=nsf_fee)
+        elif message_type == MessageType.PAD_INVOICE_CREATED.value:
+            email_msg = event_message.get('data')
+            template_name = TemplateType.PAD_INVOICE_CREATED_TEMPLATE_NAME.value
+            org_id = email_msg.get('accountId')
+            admin_coordinator_emails = get_member_emails(org_id, (ADMIN,))
+            subject = SubjectType.PAD_INVOICE_CREATED.value
+            args = {
+                'nsf_fee': email_msg.get('nsfFee'),
+                'invoice_total': email_msg.get('invoice_total'),
+            }
+            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject,
+                                               **args)
 
         logger.debug('Extracted email msg: %s', email_dict)
         process_email(email_dict, FLASK_APP, token)
