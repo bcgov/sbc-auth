@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """A Template for the account suspended email."""
+from datetime import datetime
 
 from auth_api.models import Org as OrgModel
 from entity_queue_common.service_utils import logger
@@ -22,19 +23,23 @@ from account_mailer.auth_utils import get_login_url
 from account_mailer.email_processors import generate_template
 
 
-def process(org_id, recipients, template_name, subject) -> dict:
+def process(org_id, recipients, template_name, subject, **kwargs) -> dict:
     """Build the email for Account notification."""
     logger.debug('account  notification: %s', org_id)
 
     org: OrgModel = OrgModel.find_by_id(org_id)
     # fill in template
-    filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), template_name, )
-
+    filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), template_name)
+    current_time = datetime.now()
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
-    html_out = jnja_template.render(
-        account_name=org.name, url=get_login_url
-    )
+    jinja_kwargs = {
+        'account_name': org.name,
+        'url': get_login_url(),
+        'today': current_time.strftime('%m-%d-%Y'),
+        **kwargs
+    }
+    html_out = jnja_template.render(jinja_kwargs)
     return {
         'recipients': recipients,
         'content': {

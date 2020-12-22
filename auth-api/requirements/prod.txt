@@ -24,3 +24,5 @@ minio
 pyhumps
 sqlalchemy-utils
 Flask-Caching
+asyncio-nats-client
+asyncio-nats-streaming
