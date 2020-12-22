@@ -127,6 +127,7 @@ export default class PADInfoForm extends Vue {
   private accountNumber: string = ''
   private isTOSAccepted: boolean = false
   private isAcknowledged: boolean = false
+  private isTouched: boolean = false
 
   $refs: {
     preAuthDebitForm: HTMLFormElement,
@@ -204,6 +205,8 @@ export default class PADInfoForm extends Vue {
     }
     this.isPreAuthDebitFormValid()
     this.setCurrentOrganizationPADInfo(padInfo)
+    this.isTouched = true
+    this.isPadInfoTouched()
     return padInfo
   }
 
@@ -214,8 +217,14 @@ export default class PADInfoForm extends Vue {
     return (this.$refs.preAuthDebitForm?.validate() && tosAccepted && acknowledge) || false
   }
 
+  @Emit()
+  private isPadInfoTouched () {
+    return this.isTouched
+  }
+
   private isTermsAccepted (isAccepted) {
     this.isTOSAccepted = isAccepted
+    this.isTouched = true
     this.emitPreAuthDebitInfo()
   }
 }
