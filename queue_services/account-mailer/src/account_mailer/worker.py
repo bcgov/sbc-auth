@@ -122,7 +122,7 @@ def process_email(email_dict: dict, flask_app: Flask, token: str):  # pylint: di
         raise QueueException('Flask App not available.')
 
     with flask_app.app_context():
-        logger.debug('Attempting to process email: %s', email_dict)
+        logger.debug('Attempting to process email: %s', email_dict.get('recipients', ''))
         # get type from email
         notification_service.send_email(email_dict, token=token)
 
