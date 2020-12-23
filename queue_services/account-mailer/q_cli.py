@@ -182,9 +182,9 @@ async def run(loop, mode, auth_account_id, auth_account_name, auth_username, ban
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hm:i:n:u:b:t:a:o:p:d:",
+        opts, args = getopt.getopt(sys.argv[1:], "hm:i:n:u:b:t:a:o:p:d:z:",
                                    ["mode=", "id=", "name=", "username=", "banknumber=", "transitnumber=",
-                                    "accountnumber=", "ordernumber=", "amount=", "transactionid="])
+                                    "accountnumber=", "ordernumber=", "amount=", "transactionid=", "transactiontime="])
     except getopt.GetoptError:
         print('q_cli.py -o <old_identifier> -n <new_identifier>')
         sys.exit(2)
