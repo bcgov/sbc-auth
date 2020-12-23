@@ -37,7 +37,8 @@ from account_mailer.enums import MessageType
 
 
 async def run(loop, mode, auth_account_id, auth_account_name, auth_username, bank_number, bank_branch_number,
-              bank_account_number, order_number, transaction_amount, transaction_id):  # pylint: disable=too-many-locals
+              bank_account_number, order_number, transaction_amount, transaction_id,
+              transaction_time):  # pylint: disable=too-many-locals
     """Run the main application loop for the service.
 
     This runs the main top level service functions for working with the Queue.
@@ -116,7 +117,7 @@ async def run(loop, mode, auth_account_id, auth_account_name, auth_username, ban
                 'data': {
                     'identifier': auth_account_id,
                     'orderNumber': order_number,
-                    'transactionDateTime': '------',
+                    'transactionDateTime': transaction_time,
                     'transactionAmount': f'${transaction_amount}',
                     'transactionId': transaction_id
                 }
@@ -181,15 +182,15 @@ async def run(loop, mode, auth_account_id, auth_account_name, auth_username, ban
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hm:i:n:u:b:t:a:o:p:d:",
+        opts, args = getopt.getopt(sys.argv[1:], "hm:i:n:u:b:t:a:o:p:d:z:",
                                    ["mode=", "id=", "name=", "username=", "banknumber=", "transitnumber=",
-                                    "accountnumber=", "ordernumber=", "amount=", "transactionid="])
+                                    "accountnumber=", "ordernumber=", "amount=", "transactionid=", "transactiontime="])
     except getopt.GetoptError:
         print('q_cli.py -o <old_identifier> -n <new_identifier>')
         sys.exit(2)
 
     auth_account_name = bank_number = bank_branch_number = \
-        bank_account_number = order_number = transaction_amount = transaction_id = auth_username = None
+        bank_account_number = order_number = transaction_amount = transaction_id = auth_username = transaction_time = None
 
     for opt, arg in opts:
         if opt == '-h':
@@ -215,12 +216,15 @@ if __name__ == '__main__':
             transaction_amount = arg
         elif opt in ("-d", "--transactionid"):
             transaction_id = arg
+        elif opt in ("-z", "--transactiontime"):
+            transaction_time = arg
 
     event_loop = asyncio.get_event_loop()
     event_loop.run_until_complete(
 
         run(event_loop, mode, auth_account_id, auth_account_name, auth_username, bank_number,
-            bank_branch_number, bank_account_number, order_number, transaction_amount, transaction_id))
+            bank_branch_number, bank_account_number, order_number, transaction_amount, transaction_id,
+            transaction_time))
 
 # pad cmd --> python3 q_cli.py -m pad -i 10 -n TestAccount -b 088 -t 00277 -a 12874890
 # refund cmd --> python3 q_cli.py -m refund -i 10 -o 67892 -p 25.33 -d 988
