@@ -5,6 +5,8 @@ export interface InvoiceList {
   paymentMethod: string
   paymentSystem: string
   statusCode: string
+  invoiceAmount: number
+  paidAmount: number
 }
 
 export interface Invoice {
