@@ -22,6 +22,8 @@ class MessageType(Enum):
     PAD_ACCOUNT_CREATE = 'bc.registry.payment.padAccountCreate'
     NSF_LOCK_ACCOUNT = 'bc.registry.payment.lockAccount'
     NSF_UNLOCK_ACCOUNT = 'bc.registry.payment.unlockAccount'
+    ACCOUNT_CONFIRMATION_PERIOD_OVER = 'bc.registry.payment.confirmationPeriodOver'
+    PAD_INVOICE_CREATED = 'bc.registry.payment.pad.invoiceCreated'
 
 
 class SubjectType(Enum):
@@ -29,6 +31,8 @@ class SubjectType(Enum):
 
     NSF_LOCK_ACCOUNT_SUBJECT = 'Your account has been suspended.'
     NSF_UNLOCK_ACCOUNT_SUBJECT = 'Your account has been reactivated.'
+    ACCOUNT_CONF_OVER_SUBJECT = 'Your account is now active.'
+    PAD_INVOICE_CREATED = 'Your accounts PAD transaction details.'
 
 
 class TemplateType(Enum):
@@ -36,3 +40,5 @@ class TemplateType(Enum):
 
     NSF_LOCK_ACCOUNT_TEMPLATE_NAME = 'account_suspended_email'
     NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME = 'account_restored_email'
+    ACCOUNT_CONF_OVER_TEMPLATE_NAME = 'account_conf_over_email'
+    PAD_INVOICE_CREATED_TEMPLATE_NAME = 'pad_invoice_email'

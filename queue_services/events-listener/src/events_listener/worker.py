@@ -32,10 +32,12 @@ from datetime import datetime
 import nats
 from auth_api.models import Org as OrgModel
 from auth_api.models import db
+from auth_api.services.queue_publisher import publish
 from auth_api.utils.enums import OrgStatus
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
 from flask import Flask  # pylint: disable=wrong-import-order
+from sentry_sdk import capture_message
 
 from events_listener import config
 
@@ -67,8 +69,10 @@ async def process_event(event_message, flask_app):
         if message_type == LOCK_ACCOUNT_MESSAGE_TYPE:
             org.status_code = OrgStatus.NSF_SUSPENDED.value
             org.suspended_on = datetime.now()
+            await publish_mailer_events(LOCK_ACCOUNT_MESSAGE_TYPE, org_id)
         elif message_type == UNLOCK_ACCOUNT_MESSAGE_TYPE:
             org.status_code = OrgStatus.ACTIVE.value
+            await publish_mailer_events(UNLOCK_ACCOUNT_MESSAGE_TYPE, org_id)
         else:
             logger.error('Unknown Message Type : %s', message_type)
             return
@@ -87,3 +91,31 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
     except Exception:  # pylint: disable=broad-except
         # Catch Exception so that any error is still caught and the message is removed from the queue
         logger.error('Queue Error: %s', json.dumps(event_message), exc_info=True)
+
+
+async def publish_mailer_events(message_type: str, org_id: str):
+    """Publish payment message to the mailer queue."""
+    # Publish message to the Queue, saying account has been created. Using the event spec.
+
+    queue_data = {
+        'accountId': org_id,
+    }
+    payload = {
+        'specversion': '1.x-wip',
+        'type': f'bc.registry.payment.{message_type}',
+        'source': f'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{org_id}',
+        'id': org_id,
+        'time': f'{datetime.now()}',
+        'datacontenttype': 'application/json',
+        'data': queue_data
+    }
+    try:
+        await publish(payload=payload,
+                      client_name=APP_CONFIG.NATS_MAILER_CLIENT_NAME,
+                      subject=APP_CONFIG.NATS_MAILER_SUBJECT)
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error(e)
+        logger.warning('Notification to Queue failed for the Account Mailer %s - %s', org_id,
+                       payload)
+        capture_message('Notification to Queue failed for the Account Mailer {auth_account_id}, {msg}.'.format(
+            auth_account_id=org_id, msg=payload), level='error')

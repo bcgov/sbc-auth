@@ -707,7 +707,14 @@ export default class OrgModule extends VuexModule {
   @Action({ rawError: true })
   public async getFailedInvoices (): Promise<InvoiceList[]> {
     const response = await PaymentService.getFailedInvoices(this.context.state['currentOrganization'].id)
-    return response?.data?.items || []
+    // if there is any failed payment which is partially paid, return only that payment.
+    let items = response?.data?.items || []
+    items.forEach(payment => {
+      if (payment.paidAmount > 0) {
+        items = [payment]
+      }
+    })
+    return items
   }
 
   @Action({ rawError: true })
