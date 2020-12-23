@@ -65,7 +65,7 @@
 </template>
 
 <script lang="ts">
-import { Account, Pages, PaymentTypes } from '@/util/constants'
+import { Account, Pages, PaymentTypes, Permission } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, MembershipType, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
@@ -84,7 +84,8 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
     ...mapState('org', [
       'currentOrganization',
       'currentOrgPaymentType',
-      'currentMembership'
+      'currentMembership',
+      'permissions'
     ])
   },
   methods: {
@@ -106,6 +107,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   private readonly currentOrganization!: Organization
   private readonly currentOrgPaymentType!: string
   private readonly validatePADInfo!: () => Promise<PADInfoValidation>
+  private readonly permissions!: string[]
   private savedOrganizationType: string = ''
   private selectedPaymentMethod: string = ''
   private padInfo: PADInfo = {} as PADInfo
@@ -180,7 +182,8 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   }
 
   private get isPaymentViewAllowed (): boolean {
-    return (this.currentMembership.membershipTypeCode === MembershipType.Admin)
+    // checking permission instead of roles to give access for staf
+    return [Permission.VIEW_PAYMENT_METHODS, Permission.MAKE_PAYMENT].some(per => this.permissions.includes(per))
   }
 
   private async verifyPAD () {
