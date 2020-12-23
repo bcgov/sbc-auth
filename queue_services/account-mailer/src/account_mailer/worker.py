@@ -53,6 +53,7 @@ FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
 
 
+# pylint: disable=too-many-statements
 async def process_event(event_message: dict, flask_app):
     """Process the incoming queue event message."""
     if not flask_app:
@@ -107,9 +108,12 @@ async def process_event(event_message: dict, flask_app):
             }
             email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject,
                                                **args)
-
-        logger.debug('Extracted email msg: %s', email_dict)
-        process_email(email_dict, FLASK_APP, token)
+        if email_dict:
+            logger.debug('Extracted email msg Recipient: %s', email_dict.get('recipients', ''))
+            process_email(email_dict, FLASK_APP, token)
+        else:
+            # TODO probably an unnhandled event.handle better
+            logger.error('No email content generate----------------------')
 
 
 def process_email(email_dict: dict, flask_app: Flask, token: str):  # pylint: disable=too-many-branches
@@ -118,7 +122,7 @@ def process_email(email_dict: dict, flask_app: Flask, token: str):  # pylint: di
         raise QueueException('Flask App not available.')
 
     with flask_app.app_context():
-        logger.debug('Attempting to process email: %s', email_dict)
+        logger.debug('Attempting to process email: %s', email_dict.get('recipients', ''))
         # get type from email
         notification_service.send_email(email_dict, token=token)
 

@@ -24,7 +24,6 @@ import random
 
 from dotenv import find_dotenv, load_dotenv
 
-
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
@@ -103,6 +102,9 @@ class _Config():  # pylint: disable=too-few-public-methods
         'durable_name': os.getenv('NATS_ACCOUNT_QUEUE', 'account-events-worker') + '_durable',
     }
 
+    NATS_MAILER_CLIENT_NAME = os.getenv('NATS_MAILER_CLIENT_NAME', 'account.mailer.worker')
+    NATS_MAILER_SUBJECT = os.getenv('NATS_MAILER_SUBJECT', 'account.mailer')
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Creates the Development Config object."""
@@ -133,9 +135,6 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     )
 
     STAN_CLUSTER_NAME = 'test-cluster'
-
-    NATS_MAILER_CLIENT_NAME = os.getenv('NATS_MAILER_CLIENT_NAME', 'account.mailer.worker')
-    NATS_MAILER_SUBJECT = os.getenv('NATS_MAILER_SUBJECT', 'account.mailer')
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
