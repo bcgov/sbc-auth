@@ -92,6 +92,7 @@ export default class AccountOverview extends Mixins(Steppable) {
   private nsfCount: number = 0
   private totalTransactionAmount: number = 0
   private totalAmountToPay: number = 0
+  private totalPaidAmount: number = 0
 
   private goNext () {
     this.stepForward()
@@ -109,6 +110,7 @@ export default class AccountOverview extends Mixins(Steppable) {
     const failedInvoices: InvoiceList[] = await this.getFailedInvoices()
 
     failedInvoices.forEach((failedInvoice) => {
+      this.totalPaidAmount += failedInvoice?.paidAmount
       this.totalAmountToPay += failedInvoice?.invoices?.map(el => el.total).reduce((accumulator, invoiceTotal) => accumulator + invoiceTotal)
       failedInvoice?.invoices?.forEach((invoice) => {
         const nsfItems = invoice?.lineItems?.filter(lineItem => (lineItem.description === 'NSF'))
@@ -119,6 +121,7 @@ export default class AccountOverview extends Mixins(Steppable) {
     })
 
     this.totalTransactionAmount = this.totalAmountToPay - this.nsfFee
+    this.totalAmountToPay = this.totalAmountToPay - this.totalPaidAmount
   }
 }
 </script>
