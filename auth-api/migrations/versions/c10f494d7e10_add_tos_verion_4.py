@@ -5,7 +5,7 @@ Revises: aaa29018c0a1
 Create Date: 2020-12-24 11:04:39.997395
 
 """
-from alembic import op
+import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.sql import column, table
 from sqlalchemy import Integer, String
@@ -23,16 +23,17 @@ def upgrade():
     documents = table('documents',
                       column('version_id', String),
                       column('type', String),
+                      column('content_type', String),
                       column('content', String))
 
     html_content = """
-
+       # Put new TOS HTML content here.
      """
 
     op.bulk_insert(
         documents,
         [
-            {'version_id': '4', 'type': 'termsofuse', 'content': html_content}
+            {'version_id': '4', 'type': 'termsofuse', 'content': html_content, 'content_type': 'text/html'}
         ]
     )
 

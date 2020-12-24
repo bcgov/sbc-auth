@@ -467,7 +467,7 @@ def test_terms_of_service_prev_version(session):  # pylint: disable=unused-argum
     assert dictionary['user_terms']['isTermsOfUseAccepted'] is False
 
     # update TOS with latest version
-    updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 3)  # 3 is the latest for now
+    updated_user = UserService.update_terms_of_use(TestJwtClaims.user_test, True, 4)  # 4 is the latest for now
     dictionary = updated_user.as_dict()
     assert dictionary['user_terms']['isTermsOfUseAccepted'] is True
 
