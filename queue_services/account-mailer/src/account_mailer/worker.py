@@ -75,7 +75,7 @@ async def process_event(event_message: dict, flask_app):
             email_dict = pad_confirmation.process(email_msg, token)
         elif message_type == MessageType.NSF_LOCK_ACCOUNT.value:
             email_msg = event_message.get('data')
-            logger.debug('lock account message recieved------------', email_msg)
+            logger.debug('lock account message recieved:')
             template_name = TemplateType.NSF_LOCK_ACCOUNT_TEMPLATE_NAME.value
             org_id = email_msg.get('accountId')
             admin_coordinator_emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
@@ -83,7 +83,7 @@ async def process_event(event_message: dict, flask_app):
             email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject)
         elif message_type == MessageType.NSF_UNLOCK_ACCOUNT.value:
             email_msg = event_message.get('data')
-            logger.debug('unlock account message recieved-----------', email_msg)
+            logger.debug('unlock account message recieved')
             template_name = TemplateType.NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME.value
             org_id = email_msg.get('accountId')
             admin_coordinator_emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
