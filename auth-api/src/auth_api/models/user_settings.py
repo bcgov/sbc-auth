@@ -26,7 +26,8 @@ class UserSettings():  # pylint: disable=too-few-public-methods
     Can extended to product which user has access to.
     """
 
-    def __init__(self, id_, label, urlorigin, urlpath, type_, account_type=None):  # pylint: disable=too-many-arguments
+    def __init__(self, id_, label, urlorigin, urlpath, type_, account_type=None,  # pylint: disable=too-many-arguments
+                 account_status=None):
         """Return a usersettings."""
         self.id = id_
         self.label = label
@@ -34,3 +35,4 @@ class UserSettings():  # pylint: disable=too-few-public-methods
         self.urlpath = urlpath
         self.type = type_
         self.account_type = account_type
+        self.account_status = account_status
