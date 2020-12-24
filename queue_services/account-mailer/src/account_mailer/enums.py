@@ -29,10 +29,10 @@ class MessageType(Enum):
 class SubjectType(Enum):
     """Event Types."""
 
-    NSF_LOCK_ACCOUNT_SUBJECT = 'Your account has been suspended.'
-    NSF_UNLOCK_ACCOUNT_SUBJECT = 'Your account has been reactivated.'
-    ACCOUNT_CONF_OVER_SUBJECT = 'Your account is now active.'
-    PAD_INVOICE_CREATED = 'Your accounts PAD transaction details.'
+    NSF_LOCK_ACCOUNT_SUBJECT = 'Your account has been suspended'
+    NSF_UNLOCK_ACCOUNT_SUBJECT = 'Your account has been reactivated'
+    ACCOUNT_CONF_OVER_SUBJECT = 'Your account is now active'
+    PAD_INVOICE_CREATED = 'Your accounts PAD transaction details'
 
 
 class TemplateType(Enum):
