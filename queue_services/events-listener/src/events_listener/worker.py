@@ -102,7 +102,7 @@ async def publish_mailer_events(message_type: str, org_id: str):
     }
     payload = {
         'specversion': '1.x-wip',
-        'type': f'bc.registry.payment.{message_type}',
+        'type': message_type,
         'source': f'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{org_id}',
         'id': org_id,
         'time': f'{datetime.now()}',

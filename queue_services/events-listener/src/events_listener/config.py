@@ -101,7 +101,10 @@ class _Config():  # pylint: disable=too-few-public-methods
         'queue': os.getenv('NATS_ACCOUNT_QUEUE', 'account.events.worker'),
         'durable_name': os.getenv('NATS_ACCOUNT_QUEUE', 'account-events-worker') + '_durable',
     }
-
+    # NATS Config
+    NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(',')
+    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID', 'test-cluster')
+    NATS_PAYMENT_CLIENT_NAME = os.getenv('NATS_PAYMENT_CLIENT_NAME', 'entity.filing.worker')
     NATS_MAILER_CLIENT_NAME = os.getenv('NATS_MAILER_CLIENT_NAME', 'account.mailer.worker')
     NATS_MAILER_SUBJECT = os.getenv('NATS_MAILER_SUBJECT', 'account.mailer')
 
