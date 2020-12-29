@@ -4,7 +4,7 @@
       <v-col cols="12" sm="6" class="text-center">
         <v-icon size="40" color="error" class="mb-6">mdi-alert-circle-outline</v-icon>
         <h1>Your Account is Temporarily Suspended</h1>
-        <p class="mt-8 mb-10">Your account is temporarily suspended from <b>{{suspendedDate}}</b>. <br />
+        <p class="mt-8 mb-10">Your account is temporarily suspended from <strong>{{suspendedDate}}</strong>. <br />
         Please contact the account administrator to reactivate your account</p>
       </v-col>
     </v-row>
