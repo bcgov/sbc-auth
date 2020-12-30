@@ -138,32 +138,4 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
       width: 8rem;
     }
   }
-
-  section {
-    margin-top: 2rem;
-  }
-
-  h2 {
-    margin-bottom: 2rem;
-  }
-
-  ul {
-    list-style-type: none;
-    padding-left: 50px !important;
-  }
-
-  li {
-    position: relative;
-
-    span {
-      display: inline-block;
-      width: 50px;
-      margin-left: -50px;
-      font-size: 0.9375rem;
-    }
-  }
-
-  li + li {
-    margin-top: 1rem;
-  }
 </style>

@@ -32,74 +32,79 @@ def upgrade():
         <header>
           In this agreement:
         </header>
-        <p>
-          “the biller” refers to “Her Majesty the Queen in Right of the Province of British Columbia as represented by the Minister of Citizen’s Services - BC Registry and Online Services (Prov of BC);
-        </p>
-        <p>
-          “the payor” refers to the Premium Account Subscriber of the BC Registry Service as defined in the BC Registry Terms and Conditions of Agreement (the “BC Registry Terms”); and</p>
-        <p>
-          unless defined herein, capitalized terms in this agreement will have the meaning as set out in BC Registry Terms.
-        </p>
+        <ul>
+          <li>
+            “the biller” refers to “Her Majesty the Queen in Right of the Province of British Columbia as represented by the Minister of Citizen’s Services - BC Registry and Online Services (Prov of BC);
+          </li>
+          <li>
+            “the payor” refers to the Premium Account Subscriber of the BC Registry Service as defined in the BC Registry Terms and Conditions of Agreement (the “BC Registry Terms”); and
+          </li>
+          <li>
+            unless defined herein, capitalized terms in this agreement will have the meaning as set out in BC Registry Terms.
+          </li>
+        </ul>
       </section>
       <section>
       <header>
         The payor acknowledges or understands:
       </header>
-      <ol>
+      <ul>
         <li>
-          That this authorization is provided for the benefit of the biller and our financial institution, and is provided in consideration of the Payor’s Financial Institution agreeing to process debits (PADs) against the bank account as indicated in the biller’s PAD application webform and in accordance with the rules of <a href="http://www.payments.ca" target="_blank">Payments Canada</a>.
+          <span>1.</span>That this authorization is provided for the benefit of the biller and our financial institution, and is provided in consideration of the Payor’s Financial Institution agreeing to process debits (PADs) against the bank account as indicated in the biller’s PAD application webform and in accordance with the rules of <a href="http://www.payments.ca" target="_blank">Payments Canada</a>.
         </li>
         <li>
-          Ticking the acceptance box on the biller’s PAD application webform will be considered equivalent to my signature and will constitute valid authorization for the processing financial institution to debit the payor’s account as identified in the biller’s PAD application webform (the “Payor’s Bank Account”).
+          <span>2.</span>Ticking the acceptance box on the biller’s PAD application webform will be considered equivalent to my signature and will constitute valid authorization for the processing financial institution to debit the payor’s account as identified in the biller’s PAD application webform (the “Payor’s Bank Account”).
         </li>
         <li>
-          This authority will remain in effect until the biller has received written communication from the payor of cancellation or changes relating to the Payor’s Bank Account.
+          <span>3.</span>This authority will remain in effect until the biller has received written communication from the payor of cancellation or changes relating to the Payor’s Bank Account.
         </li>
         <li>
-          The payor may cancel this PAD agreement at any time with written notification to the biller. Written notification of changes or cancellation must be received at least 10 business days prior to the next online order or withdrawal. Notification must be in writing and sent either through the biller’s BC Registry website or by mail to the address provided below. A sample cancellation form or more information on my right to cancel a PAD Agreement can be obtained at my financial institution or by visiting <a href="http://www.payments.ca" target="_blank">www.payments.ca</a>.
+          <span>4.</span>The payor may cancel this PAD agreement at any time with written notification to the biller. Written notification of changes or cancellation must be received at least 10 business days prior to the next online order or withdrawal. Notification must be in writing and sent either through the biller’s BC Registry website or by mail to the address provided below. A sample cancellation form or more information on my right to cancel a PAD Agreement can be obtained at my financial institution or by visiting <a href="http://www.payments.ca" target="_blank">www.payments.ca</a>.
         </li>
         <li>
-          That cancellation of this agreement by the payor or the biller:
-          <ol type="a">
+          <span>5.</span>That cancellation of this agreement by the payor or the biller:
+        </li>
+        <li>
+          <ul>
             <li>
-              will result in the suspension of the payors’ Premium Account Subscriber account Access until the payor takes action to authorize another payment method; and
+              <span>a.</span>will result in the suspension of the payors’ Premium Account Subscriber account Access until the payor takes action to authorize another payment method; and
             </li>
             <li>
-              does not cancel any amount owed for the Service received prior to cancellation.
+              <span>b.</span>does not cancel any amount owed for the Service received prior to cancellation.
             </li>
-          </ol>
+          </ul>
         </li>
         <li>
-          Correspondence regarding this agreement will be sent to the payor at the email address associated with the payor’s Premium Subscriber Account (the “Payor’s Email Address”). The payor agrees that any communication sent by the biller to that email address will be deemed to have been received by the payor and acknowledges that it is the payor’s responsibility to notify the biller as soon as possible of changes to the Payor’s Email Address.
+          <span>6.</span>Correspondence regarding this agreement will be sent to the payor at the email address associated with the payor’s Premium Subscriber Account (the “Payor’s Email Address”). The payor agrees that any communication sent by the biller to that email address will be deemed to have been received by the payor and acknowledges that it is the payor’s responsibility to notify the biller as soon as possible of changes to the Payor’s Email Address.
         </li>
         <li>
-          <strong>The biller notification of enrollment or cancellation of this Pre-Authorized Debit Agreement to the Payor is being reduced from 15 calendar days to 3 calendar days in accordance with the H1 rule of Payments Canada.  Notification will be delivered electronically to the Payor’s Email Address.</strong>
+          <span>7.</span><strong>The biller notification of enrollment or cancellation of this Pre-Authorized Debit Agreement to the Payor is being reduced from 15 calendar days to 3 calendar days in accordance with the H1 rule of Payments Canada.  Notification will be delivered electronically to the Payor’s Email Address.</strong>
         </li>
         <li>
-          The payor has certain recourse rights if any debit does not comply with the terms of this business PAD agreement (for example, the right to receive reimbursement for any PAD that is not authorized or is not consistent with terms and conditions of this PAD Agreement). To obtain a form for reimbursement or for more information on recourse rights, contact your financial institution or visit <a href="http://www.payments.ca" target="_blank">www.payments.ca</a>.
+          <span>8.</span>The payor has certain recourse rights if any debit does not comply with the terms of this business PAD agreement (for example, the right to receive reimbursement for any PAD that is not authorized or is not consistent with terms and conditions of this PAD Agreement). To obtain a form for reimbursement or for more information on recourse rights, contact your financial institution or visit <a href="http://www.payments.ca" target="_blank">www.payments.ca</a>.
         </li>
         <li>
-          Any payment dishonoured by the payor’s financial institution may result in a dishonoured banking instrument service fee, as prescribed by the Minister of Finance, being applied to the payor’s Premium Account Subscriber account.  The biller is not responsible for any additional service fees charged by your financial institution.
+          <span>9.</span>Any payment dishonoured by the payor’s financial institution may result in a dishonoured banking instrument service fee, as prescribed by the Minister of Finance, being applied to the payor’s Premium Account Subscriber account.  The biller is not responsible for any additional service fees charged by your financial institution.
         </li>
         <li>
-          In the event of a dishonoured payment, the biller reserves the right to suspend the payor’s Access until the payor has taken action to re-activate Access by paying any outstanding Fees and dishonoured banking instrument service fees by credit card.
+          <span>10.</span>In the event of a dishonoured payment, the biller reserves the right to suspend the payor’s Access until the payor has taken action to re-activate Access by paying any outstanding Fees and dishonoured banking instrument service fees by credit card.
         </li>
         <li>
-          Due to a delay in payment processing, the biller may subsequently suspend the payor’s Access after a payor has taken action to re-activate Access if another PAD is dishonoured in the intervening period.
+          <span>11.</span>Due to a delay in payment processing, the biller may subsequently suspend the payor’s Access after a payor has taken action to re-activate Access if another PAD is dishonoured in the intervening period.
         </li>
         <li>
-          The amount of the daily (excludes weekends and holidays) withdrawal is variable and dependent on the total daily Transactions charged to the payors’ Premium Account Subscriber’s account by Team Members who are authorized to order BC Registry Services.
+          <span>12.</span>The amount of the daily (excludes weekends and holidays) withdrawal is variable and dependent on the total daily Transactions charged to the payors’ Premium Account Subscriber’s account by Team Members who are authorized to order BC Registry Services.
         </li>
         <li>
-          <strong>The standard 10 calendar day pre-notification period for the sporadic and variable pre-authorized withdrawals will be reduced to 1-2 business days.</strong>
+          <span>13.</span><strong>The standard 10 calendar day pre-notification period for the sporadic and variable pre-authorized withdrawals will be reduced to 1-2 business days.</strong>
         </li>
         <li>
-          The biller will provide PAD pre-notification 1-2 business days prior to the withdrawal date. This notification will confirm the amount and estimated date of the pre-authorized withdrawal, will provide a list of all services ordered & other account adjustments and will be delivered electronically to the Payor’s Email Address.
+          <span>14.</span>The biller will provide PAD pre-notification 1-2 business days prior to the withdrawal date. This notification will confirm the amount and estimated date of the pre-authorized withdrawal, will provide a list of all services ordered & other account adjustments and will be delivered electronically to the Payor’s Email Address.
         </li>
         <li>
-          Your financial institution is not responsible for verifying whether payment has been issued in accordance with the particulars of this agreement.
+          <span>15.</span>Your financial institution is not responsible for verifying whether payment has been issued in accordance with the particulars of this agreement.
         </li>
-      </ol>
+      </ul>
       </section>
       <section>
         <header>
