@@ -37,6 +37,7 @@
             :paymentCardData="paymentCardData"
             @complete-online-banking="completeOBPayment"
             @pay-with-credit-card="payNow"
+            @download-invoice="downloadInvoice"
           ></PaymentCard>
         </v-col>
       </v-row>
@@ -49,6 +50,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { AccountSettings } from '@/models/account-settings'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Invoice } from '@/models/invoice'
 import OrgModule from '@/store/modules/org'
@@ -68,7 +70,8 @@ import { mapActions } from 'vuex'
       'createTransaction',
       'getOrgPayments',
       'getInvoice',
-      'updateInvoicePaymentMethodAsCreditCard'
+      'updateInvoicePaymentMethodAsCreditCard',
+      'downloadOBInvoice'
     ])
   }
 })
@@ -78,6 +81,7 @@ export default class PaymentView extends Vue {
   @Prop({ default: '' }) redirectUrl: string
   private readonly createTransaction!: (transactionData) => any
   private readonly updateInvoicePaymentMethodAsCreditCard!: (paymentId: string) => any
+  private readonly downloadOBInvoice!: (paymentId: string) => any
   private readonly getOrgPayments!: (orgId: number) => OrgPaymentDetails
   private readonly getInvoice!: (paymentId: string) => Invoice
   private showLoading: boolean = true
@@ -145,6 +149,26 @@ export default class PaymentView extends Vue {
       await this.doCreateTransaction()
     } catch (error) {
       this.doHandleError(error)
+    }
+  }
+
+  private async downloadInvoice () {
+    // download invoice fot online banking
+    this.showLoading = true // to avoid rapid download clicks
+    this.errorMessage = ''
+    try {
+      const downloadType = 'application/pdf'
+
+      const response = await this.downloadOBInvoice(this.paymentId)
+      const contentDispArr = response?.headers['content-disposition'].split('=')
+
+      const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-${this.paymentId}`
+      CommonUtils.fileDownload(response.data, fileName, downloadType)
+      this.showLoading = false
+    } catch (error) {
+      this.showLoading = false
+      this.errorMessage = this.$t('downloadFailedMessage').toString()
+      // this.showErrorModal = true
     }
   }
 
