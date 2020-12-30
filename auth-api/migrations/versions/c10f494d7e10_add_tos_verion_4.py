@@ -27,9 +27,11 @@ def upgrade():
                       column('content', String))
 
     html_content = """
-      <p>The parties to this “BC Registry Terms and Conditions of Agreement” (the “Agreement”) are Her Majesty the Queen in Right of the Province of British Columbia, as represented by the Minister of Citizens’ Services (the “Province”) and the Subscriber (as defined below).</p>
       <section>
-        <h2>1. Definitions</h2>
+        <p>The parties to this “BC Registry Terms and Conditions of Agreement” (the “Agreement”) are Her Majesty the Queen in Right of the Province of British Columbia, as represented by the Minister of Citizens’ Services (the “Province”) and the Subscriber (as defined below).</p>
+      </section>
+      <section>
+        <header>1. Definitions</header>
         <ul>
           <li><span>a.</span><strong>"Access"</strong> means the non-exclusive right to electronically access and use the Service;</li>
           <li><span>b.</span><strong>"Additional Terms"</strong> means, as applicable to the Subscriber’s use of the Service, any of the BC Online Terms and Conditions, the API Terms, the BC Services Card Terms, the BCeID Terms, the PAD Agreement, or any combination of the foregoing;</li>
@@ -54,7 +56,7 @@ def upgrade():
         </ul>
       </section>
       <section>
-        <h2>2. Acceptance of Agreement</h2>
+        <header>2. Acceptance of Agreement</header>
         <ul>
             <li><span>2.1</span>The Subscriber acknowledges that a duly authorized representative of the Subscriber has accepted the terms of this Agreement on behalf of the Subscriber and its Team Members.</li>
             <li><span>2.2</span>The Subscriber acknowledges and agrees that:</li>
@@ -70,20 +72,20 @@ def upgrade():
         </ul>
       </section>
       <section>
-        <h2>3. Authentication</h2>
+        <header>3. Authentication</header>
         <ul>
           <li><span>3.1</span>If a Subscriber or a Team Member has used the BC Services Card to authenticate in setting up an account to use the Service, the terms found at https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/terms-of-use (the “BC Services Card Terms”) continue to apply in respect of use of the BC Services Card.</li>
           <li><span>3.2</span>If the Subscriber or a Team Member has used a BCeID to authenticate in setting up an account to use the Service, the BCeID terms found at https://www.bceid.ca/aboutbceid/agreements.aspx (the “BCeID Terms”) continue to apply in respect of the type of BCEID used.</li>
         </ul>
         </section>
         <section>
-        <h2>4. Proprietary Rights</h2>
+        <header>4. Proprietary Rights</header>
         <ul>
           <li><span>4.1</span>The Website and the Content is owned by the Province and/or its licensors and is protected by copyright, trademark and other laws. Except as expressly permitted in this Agreement, the Subscriber may not use, reproduce, modify or distribute, or allow any other person to use, reproduce, modify or distribute, any part of the Website in any form whatsoever without the prior written consent of the Province.</li>
         </ul>
         </section>
         <section>
-        <h2>5. Services</h2>
+        <header>5. Services</header>
         <ul>
           <li><span>5.1</span>The Province will provide the Subscriber and its Team Members with Access on the terms and conditions set out in this Agreement.</li>
           <li><span>5.2</span>Subject to section 5.3, Access will be available during the hours published on the Website, as may be determined by the Province in its sole discretion from time to time.</li>
@@ -100,13 +102,13 @@ def upgrade():
         </ul>
       </section>
       <section>
-        <h2>6. API</h2>
+        <header>6. API</header>
         <ul>
             <li><span>6.1</span>Premium Account Subscribers who wish to access the Content through an API will be subject to the API Terms of Use found at @@@ (the “API Terms”), including the requirement to contact the Province for an API key and access to the API interface.</li>
         </ul>
       </section>
       <section>
-        <h2>7. Subscriber Obligations</h2>
+        <header>7. Subscriber Obligations</header>
         <ul>
           <li><span>7.1</span>The Subscriber will comply, and will ensure that all of its Team Members are aware of and will comply, with:</li>
           <li>
@@ -142,7 +144,7 @@ def upgrade():
         </ul>
       </section>
     <section>
-      <h2>8. Fees</h2>
+      <header>8. Fees</header>
       <ul>
         <li><span>8.1</span>The Subscriber will pay to the Province all applicable Fees for the Services.</li>
         <li><span>8.2</span>Subject to section 8.5, all Fees are due and payable when a Transaction is processed.</li>
@@ -158,13 +160,13 @@ def upgrade():
       </ul>
     </section>
     <section>
-      <h2>9. Relationship</h2>
+      <header>9. Relationship</header>
       <ul>
         <li><span>9.1</span>This Agreement will not in any way make the Subscriber or any Team Member an employee, agent or independent contractor of the Province and the Subscriber will not, and will ensure that its Team Members do not, in any way indicate or hold out to any person that the Subscriber or any Team Member is an employee, agent or independent contractor of the Province.</li>
       </ul>
     </section>
     <section>
-      <h2>10. Suspension of Service</h2>
+      <header>10. Suspension of Service</header>
       <ul>
         <li><span>10.1</span>The Province may, in its sole discretion, immediately suspend Access upon notice to the Subscriber in accordance with section 13 if:</li>
         <li>
@@ -177,7 +179,7 @@ def upgrade():
       </ul>
     </section>
     <section>
-      <h2>11. Termination</h2>
+      <header>11. Termination</header>
       <ul>
         <li><span>11.1</span>The term of this Agreement will be from the Commencement Date and will continue until terminated in accordance with the provisions of this Agreement.</li>
         <li><span>11.2</span>The Province may immediately terminate this Agreement upon written notice to the Subscriber if the Subscriber’s Access has been suspended pursuant to Article 10.1.</li>
@@ -193,7 +195,7 @@ def upgrade():
       </ul>
     </section>
     <section>
-      <h2>12. Warranty Disclaimer, Limitation of Liability and Indemnity</h2>
+      <header>12. Warranty Disclaimer, Limitation of Liability and Indemnity</header>
       <ul>
         <li><span>12.1</span>THE SUBSCRIBER ACKNOWLEDGES AND CONFIRMS THAT THE SUBSCRIBER UNDERSTANDS THAT THIS ARTICLE 12 REQUIRES THE SUBSCRIBER TO ASSUME THE FULL RISK IN RESPECT OF ANY USE OF THE SERVICES BY THE SUBSCRIBER AND/OR ITS TEAM MEMBERS.</li>
         <li><span>12.2</span>Except as expressly set out in this Agreement, and in addition to the Province’s general Warranty Disclaimer and Limitation of Liabilities, the Province assumes no responsibility or liability to any person using the Service or any Content.  In particular, without limiting the general nature of the foregoing:</li>
@@ -208,7 +210,7 @@ def upgrade():
       </ul>
     </section>
     <section>
-      <h2>13. Notices</h2>
+      <header>13. Notices</header>
       <ul>
         <li><span>13.1</span>Any written notice either party may be required or may desire to give to the other under this Agreement will be conclusively deemed validly given to or received by the addressee, if delivered personally or by recognized courier service, on the date of such personal delivery, if mailed by prepaid registered mail, on the third business day after the mailing of the same in British Columbia or on the seventh business day if mailed elsewhere, and if delivered by email, on the date received by the recipient:
         <li>
@@ -243,7 +245,7 @@ def upgrade():
       </ul>
     </section>
     <section>
-      <h2>14. General</h2>
+      <header>14. General</header>
       <ul>
         <li><span>14.1</span>In this Agreement,</li>
         <li>

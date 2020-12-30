@@ -38,73 +38,10 @@ export default class PADTermsAndConditionsView extends Vue {
 
   // TODO: Payor Authoriztion section of the PAD Terms does not apply in this content so we don't display it
   // TODO: Better strategy to show/hide this content VS hacking it out with styling
-  ::v-deep section:last-child {
-    display: none;
-  }
-
-  // Terms and Conditions Container
-  $indent-width: 1rem;
-
-  .terms-container {
-    p, li {
-      margin: 1rem 0;
-    }
-
-    ol {
-      margin-left: $indent-width;
-    }
-
-    li {
-      padding-left: $indent-width;
-    }
-
-    h3 {
-      max-width: 55ch;
-    }
-
-    section {
-      margin-bottom: 2rem;
-    }
-
+  ::v-deep {
     section:last-child {
-      margin-bottom: 0;
-    }
-
-    section header {
-      margin-bottom: 1rem;
-      font-size: 1rem;
-      font-weight: 700 !important;
-    }
-
-    section header > span {
-      display: inline-block;
-      width: $indent-width;
-    }
-
-    section a {
-      font-weight: 600;
-    }
-
-    header + div {
-      margin-left: 3.25rem;
-    }
-
-    section div > p {
-      padding-left: $indent-width;
-    }
-
-    p {
-      position: relative;
-    }
-
-    p + div {
-      margin-left: $indent-width;
-    }
-
-    p > span {
-      position: absolute;
-      top: 0;
-      left: 0;
+      display: none;
     }
   }
+
 </style>
