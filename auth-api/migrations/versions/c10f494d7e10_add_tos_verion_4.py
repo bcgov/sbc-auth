@@ -104,7 +104,7 @@ def upgrade():
       <section>
         <header>6. API</header>
         <ul>
-            <li><span>6.1</span>Premium Account Subscribers who wish to access the Content through an API will be subject to the API Terms of Use found at @@@ (the “API Terms”), including the requirement to contact the Province for an API key and access to the API interface.</li>
+            <li><span>6.1</span>Premium Account Subscribers who wish to access the Content through an API will be subject to the API Terms of Use found at <a href="./API-terms-and-conditions" target="_blank">(https://www.https://www.bcregistry.ca/business/auth/API-terms-and-conditions.html)</a> (the “API Terms”), including the requirement to contact the Province for an API key and access to the API interface.</li>
         </ul>
       </section>
       <section>
