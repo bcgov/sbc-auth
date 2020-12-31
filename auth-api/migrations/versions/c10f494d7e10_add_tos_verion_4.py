@@ -246,8 +246,6 @@ def upgrade():
     </section>
     <section>
       <header>14. General</header>
-
-      <h2>14. General</h2>
       <ul>
         <li><span>14.1</span>In this Agreement,</li>
         <li>
