@@ -219,25 +219,27 @@ def upgrade():
           </ul>
         </li>
         <li>
-          <p><span>(b)</span>If to the Province:<br></p>
-          <p>
-            Delivery by mail:
-          </p>
-          <p>
-            BC Online Partnership Office<br>
-            Ministry of Citizens’ Services<br>
-            PO Box 9412 Stn Prov Govt<br>
-            Victoria, BC V8W 9V1
-          </p>
-          <p>Delivery by courier or in person:</p>
-          <p>
-            BC Online Partnership Office<br>
-            Ministry of Citizens’ Services<br>
-            E161 – 4000 Seymour Place<br>
-            Victoria, BC V8X 4S8
-          </p>
-          <p>Delivery by email:</p>
-          bconline@gov.bc.ca
+          <ul>
+            <p><span>(b)</span>If to the Province:<br></p>
+            <p>
+              Delivery by mail:
+            </p>
+            <p>
+              BC Online Partnership Office<br>
+              Ministry of Citizens’ Services<br>
+              PO Box 9412 Stn Prov Govt<br>
+              Victoria, BC V8W 9V1
+            </p>
+            <p>Delivery by courier or in person:</p>
+            <p>
+              BC Online Partnership Office<br>
+              Ministry of Citizens’ Services<br>
+              E161 – 4000 Seymour Place<br>
+              Victoria, BC V8X 4S8
+            </p>
+            <p>Delivery by email:</p>
+            bconline@gov.bc.ca
+          </ul>
         </li>
         <li><span>13.2</span>The Subscriber will provide the Province with timely written notice of any change of contact information provided by the Subscriber during the application process for Access, and after the provision of such notice, the updated contact information will be conclusively deemed to be the current contact information for the Subscriber, including the Subscriber’s address or email addrss for the purposes of this Article 13.</li>
         <li><span>13.1</span>The Province may, from time to time, advise the Subscriber by notice in writing of any change of address of the Province and from and after the giving of such notice the address specified in the notice will, for the purposes of this Article 13, be conclusively deemed to be the address or email address of the Province.</li>
@@ -268,6 +270,7 @@ def upgrade():
       </ul>
     </section>
   """
+
     op.bulk_insert(
         documents,
         [
