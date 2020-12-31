@@ -72,37 +72,38 @@ export default class TermsOfUse extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  ::v-deep {
-    section {
-      + section {
-        margin-top: 2rem;
+  .terms-container {
+    ::v-deep {
+      section {
+        + section {
+          margin-top: 2rem;
+        }
+
+        header {
+          margin-bottom: 1.5rem;
+          text-transform: uppercase;
+          font-size: 1.125rem;
+          font-weight: 700;
+        }
       }
 
-      header {
-        margin-bottom: 1.5rem;
-        text-transform: uppercase;
-        font-size: 1.125rem;
-        font-weight: 700;
-      }
-    }
-
-    ul {
-      list-style-type: none;
-      padding-left: 50px !important;
-    }
-
-    li {
-      position: relative;
-
-      + li {
-        margin-top: 1rem;
+      ul {
+        list-style-type: none;
+        padding-left: 50px !important;
       }
 
-      span {
-        display: inline-block;
-        width: 50px;
-        margin-left: -50px;
-        font-size: 0.9375rem;
+      li {
+        + li {
+          margin-top: 1rem;
+          background: red;
+        }
+
+        span {
+          display: inline-block;
+          width: 50px;
+          margin-left: -50px;
+          font-size: 0.9375rem;
+        }
       }
     }
   }

@@ -12,12 +12,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { LoginSource, Pages } from '@/util/constants'
-import { mapActions, mapState } from 'vuex'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { Component } from 'vue-property-decorator'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
-import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import Vue from 'vue'
 
 @Component({
