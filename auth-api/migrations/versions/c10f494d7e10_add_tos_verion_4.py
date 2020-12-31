@@ -74,8 +74,8 @@ def upgrade():
       <section>
         <header>3. Authentication</header>
         <ul>
-          <li><span>3.1</span>If a Subscriber or a Team Member has used the BC Services Card to authenticate in setting up an account to use the Service, the terms found at https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/terms-of-use (the “BC Services Card Terms”) continue to apply in respect of use of the BC Services Card.</li>
-          <li><span>3.2</span>If the Subscriber or a Team Member has used a BCeID to authenticate in setting up an account to use the Service, the BCeID terms found at https://www.bceid.ca/aboutbceid/agreements.aspx (the “BCeID Terms”) continue to apply in respect of the type of BCEID used.</li>
+          <li><span>3.1</span>If a Subscriber or a Team Member has used the BC Services Card to authenticate in setting up an account to use the Service, the terms found at <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/terms-of-use" target="_blank">https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/terms-of-use</a> (the “BC Services Card Terms”) continue to apply in respect of use of the BC Services Card.</li>
+          <li><span>3.2</span>If the Subscriber or a Team Member has used a BCeID to authenticate in setting up an account to use the Service, the BCeID terms found at <a href="https://www.bceid.ca/aboutbceid/agreements.aspx" target="_blank">https://www.bceid.ca/aboutbceid/agreements.aspx</a> (the “BCeID Terms”) continue to apply in respect of the type of BCEID used.</li>
         </ul>
         </section>
         <section>
@@ -104,7 +104,7 @@ def upgrade():
       <section>
         <header>6. API</header>
         <ul>
-            <li><span>6.1</span>Premium Account Subscribers who wish to access the Content through an API will be subject to the API Terms of Use found at <a href="./API-terms-and-conditions" target="_blank">(https://www.https://www.bcregistry.ca/business/auth/API-terms-and-conditions.html)</a> (the “API Terms”), including the requirement to contact the Province for an API key and access to the API interface.</li>
+            <li><span>6.1</span>Premium Account Subscribers who wish to access the Content through an API will be subject to the API Terms of Use found at <a href="./API-terms-and-conditions" target="_blank">(https://www.bcregistry.ca/business/auth/API-terms-and-conditions)</a> (the “API Terms”), including the requirement to contact the Province for an API key and access to the API interface.</li>
         </ul>
       </section>
       <section>
@@ -149,7 +149,7 @@ def upgrade():
         <li><span>8.1</span>The Subscriber will pay to the Province all applicable Fees for the Services.</li>
         <li><span>8.2</span>Subject to section 8.5, all Fees are due and payable when a Transaction is processed.</li>
         <li><span>8.3</span>If a Premium Account Subcriber opts to pay Fees through a Deposit Account, the Fees payable for Transactions will be charged to the applicable Deposit Account and in accordance with the BC Online Terms and Conditions found at <a href="https://www.bconline.gov.bc.ca/terms_conditions.html" target="_blank">(https://www.bconline.gov.bc.ca/terms_conditions.html)</a> (the “BC Online Terms”).</li>
-        <li><span>8.4</span>If a Premium Account Subscriber opts to pay Fees through pre-authorized debit, the Fees payable for Transactions will be paid according to the PAD Agreement found at <a href="./PAD-terms-and-conditions" target="_blank">(https://www.https://www.bcregistry.ca/business/auth/PAD-terms-and-conditions.html)</a> (the Business Pre-Authorized Debit Terms and Conditions Agreement).</li>
+        <li><span>8.4</span>If a Premium Account Subscriber opts to pay Fees through pre-authorized debit, the Fees payable for Transactions will be paid according to the PAD Agreement found at <a href="./PAD-terms-and-conditions" target="_blank">(https://www.bcregistry.ca/business/auth/PAD-terms-and-conditions)</a> (the Business Pre-Authorized Debit Terms and Conditions Agreement).</li>
         <li><span>8.5</span>Fees payable for Transactions processed by Basic Account Subscribers will be payable by credit card or online banking before the Transaction is processed.</li>
         <li><span>8.6</span>Unless otherwise specified in this Agreement, all references to money in respect of the Services are to Canadian dollars and all Fees will be processed in Canadian dollars.</li>
         <li><span>8.7</span>The Province may charge the Subscriber a service fee of thirty dollars ($30.00) if any method of payment of any Fees is rejected by the Subscriber’s financial institution for any failed payment, and may suspend Access until such service fee and all other Fees owing have been paid by the Subscriber.</li>
@@ -221,7 +221,7 @@ def upgrade():
         <li>
           <p><span>(b)</span>If to the Province:<br></p>
           <p>
-            Delivery by mail
+            Delivery by mail:
           </p>
           <p>
             BC Online Partnership Office<br>
@@ -246,6 +246,8 @@ def upgrade():
     </section>
     <section>
       <header>14. General</header>
+
+      <h2>14. General</h2>
       <ul>
         <li><span>14.1</span>In this Agreement,</li>
         <li>
@@ -268,7 +270,6 @@ def upgrade():
       </ul>
     </section>
   """
-
     op.bulk_insert(
         documents,
         [
