@@ -95,7 +95,6 @@ export default class TermsOfUse extends Vue {
       li {
         + li {
           margin-top: 1rem;
-          background: red;
         }
 
         span {
