@@ -278,10 +278,577 @@ def upgrade():
         ]
     )
 
+    
+    # update terms of use version 3 content
+    tos_version3_content = """
+      <section>
+        <p>The parties to this “BC Registry Terms and Conditions of Agreement” (the “Agreement”) are Her Majesty the Queen in Right of the Province of British Columbia, as represented by the Minister of Citizens’ Services (the “Province”) and the Subscriber (as defined below).</p>
+      </section>
+      <section>
+        <header>1. DEFINITIONS</header>
+        <ul>
+          <li><span>a.</span><strong>"Access"</strong> means the non-exclusive right to electronically access and use the Service;</li>
+          <li><span>b.</span><strong>"Basic Account Subscriber"</strong> means a Subscriber with Access for up to ten Transactions per month that pays Fees for Transactions using a credit card;</li>
+          <li><span>c.</span><strong>"BCeID Information"</strong> means a BCeID account user ID or password, which authenticates the identity of the Subscriber or a User, as the case may be, to the Service if the Subscriber or a User uses a BCeID for this purpose;</li>
+          <li><span>d.</span><strong>"BC Online Terms and Conditions"</strong> means the BC Online Terms and Conditions of Agreement found at <a href="https://www.bconline.gov.bc.ca/terms_conditions.html">https://www.bconline.gov.bc.ca/terms_conditions.html;</a></li>
+          <li><span>e.</span><strong>"Content"</strong> means the Service’s Data Base, and all associated information and documentation, including any print copy or electronic display of any information retrieved from the Data Base and associated with the Service;</li>
+          <li><span>f.</span><strong>"Data Base"</strong> means any data base or information stored in electronic format for which Access is made available through the Service;</li>
+          <li><span>g.</span><strong>"Deposit Account"</strong> has the meaning given to it in the BC Online Terms and Conditions;</li>
+          <li><span>h.</span><strong>"Entity"</strong> means any legal entity (including a registered society, business, or co-operative) for which a User has Access through the Service;</li>
+          <li><span>i.</span><strong>"Fees"</strong> means all fees and charges for the Service, as described in the Business Corporations Act - Schedule (Section 431) Fees, Cooperative Association Act - Cooperative Association Regulation, Schedule A;</li>
+          <li><span>j.</span><strong>"Incorporation Number"</strong> means the unique numerical identifier for a Subscriber’s Entity, and when entered in conjunction with the Passcode, permits a User to perform transactions with regard to that Entity;</li>
+          <li><span>k.</span><strong>"Passcode"</strong> means the unique identifier issued by the Province to a Subscriber with regard to existing Entities on the Service, which enables a User to have Access with regard to those Entities;</li>
+          <li><span>l.</span><strong>"Premium Account Subscriber"</strong> means a Subscriber with Access to unlimited Transactions that has a Deposit Account with the Province and is charged Fees in accordance with the BC Online Terms and Conditions;</li>
+          <li><span>m.</span><strong>"Service"</strong> means the service operated by the Province that allows a Subscriber to complete Transactions relating to BC Entities or other information accessible through the Website;</li>
+          <li><span>n.</span><strong>"Services Card Number"</strong> means the Subscriber’s BC Services Card number, which authenticates the identity of the Subscriber, or a User, as the case may be, to the Service if the Subscriber or a User uses a BC Services Card for this purpose;</li>
+          <li><span>o.</span><strong>"Subscriber"</strong> means a person that accesses the Service and that has accepted the terms of this Agreement, and includes Premium Account Subscribers and Basic Account Subscribers;</li>
+          <li><span>p.</span><strong>"Transaction"</strong> means any action performed by the Subscriber or any of its Users to the Service to display, print, transfer, or obtain a copy of information contained on the Service, or where permitted by the Province, to add to or delete information from the Service;</li>
+          <li><span>q.</span><strong>"User"</strong> means an individual that is granted Access on the individual’s behalf, if the individual is also the Subscriber, or on behalf of the Subscriber, if the individual is an employee or is otherwise authorized to act on behalf of the Subscriber, as applicable;</li>
+          <li><span>r.</span><strong>"Website"</strong> means the BC Cooperatives Website at bcregistry.ca/cooperatives and includes all web pages and associated materials, with the exception of the Content.</li>
+        </ul>
+      </section>
+
+      <section>
+        <header>2. ACCEPTANCE OF AGREEMENT</header>
+        <ul>
+          <li><span>2.1</span>The Subscriber acknowledges that a duly authorized representative of the Subscriber has accepted the terms of this Agreement on behalf of the Subscriber and its Users.</li>
+          <li><span>2.2</span>The Subscriber acknowledges and agrees that:</li>
+          <li>
+            <ul>
+              <li><span>(a)</span>by creating a profile and/or by clicking the button acknowledging acceptance of this Agreement, each User using the Services on behalf of the Subscriber also accepts, and will be conclusively deemed to have accepted, the terms of this Agreement as they pertain to the User’s use of the Services; and</li>
+              <li><span>(b)</span>the Subscriber will be solely responsible for its Users’ use of the Services, including without limitation any Fees incurred by its Users in connection with such Services.</li>
+            </ul>
+          </li>
+          <li><span>2.3</span>The Subscriber acknowledges that the terms of the BC Services Card Login Service found at (<a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/terms-of-use" target="_blank">https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/terms-of-use</a>) continue to apply in respect of use of the Services Card by either the Subscriber or a User.</li>
+          <li><span>2.4</span>Premium Account Subscribers acknowledge that in addition to this Agreement, the terms of the BC Online Terms and Conditions will continue to apply in respect of the use of the Subscriber’s Deposit Account for payment of Fees for the Service.</li>
+          <li><span>2.5</span>The Subscriber acknowledges that the BCeID terms found at (<a href="https://www.bceid.ca/aboutbceid/agreements.aspx" target="_blank">https://www.bceid.ca/aboutbceid/agreements.aspx</a>) and applicable to the type of BCeID held by the Subscriber or a User, as the case may be, continue to apply in respect of use of the Subscriber or User’s BCeID.</li>
+          <li><span>2.6</span>The Subscriber will ensure that each of its Users are aware of and comply with the terms of this Agreement as they pertain to the User’s use of the Services.</li>
+          <li><span>2.7</span>The Province reserves the right to make changes to the terms of this Agreement at any time without direct notice to either the Subscriber or its Users, as applicable.  The Subscriber acknowledges and agrees that it is the sole responsibility of the Subscriber to review, and, as applicable, to ensure that its Users review, the terms of this Agreement on a regular basis.</li>
+          <li><span>2.8</span>Following the date of any such changes, the Subscriber will be conclusively deemed to have accepted any such changes on its own behalf and on behalf of its Users, as applicable.  The Subscriber acknowledges and agrees that each of its Users must also accept any such changes as they pertain to the User’s use of the Services.</li>
+        </ul>
+      </section>
+
+      <section>
+        <header>3. PROPRIETARY RIGHTS</header>
+        <ul>
+          <li><span>3.1</span>The Website and the Content is owned by the Province and/or its licensors and is protected by copyright, trademark and other laws. Except as expressly permitted in this Agreement, the Subscriber may not use, reproduce, modify or distribute, or allow any other person to use, reproduce, modify or distribute, any part of the Website in any form whatsoever without the prior written consent of the Province.</li>
+        </ul>
+      </section>
+
+      <section>
+        <header>4. SERVICES</header>
+        <ul>
+          <li><span>4.1</span>The Province will provide the Subscriber and its Users with Access on the terms and conditions set out in this Agreement.</li>
+          <li><span>4.2</span>Subject to section 4.3, Access will be available during the hours published on the Website, as may be determined by the Province in its sole discretion from time to time.</li>
+          <li><span>4.3</span>The Province reserves the right to limit or withdraw Access at any time in order to perform maintenance of the Service or in the event that the integrity or security of the Service is compromised.</li>
+          <li><span>4.4</span>The Province further reserves the right to discontinue the Service at any time.</li>
+          <li><span>4.5</span>The Province will provide helpdesk support to assist Users with Access during the hours published on the Website, as may be determined by the Province in its sole discretion from time to time.</li>
+          <li><span>4.6</span>The Subscriber acknowledges and agrees that, for the purpose of Access:</li>
+          <li>
+            <ul>
+              <li><span>(a)</span>it is the Subscriber’s sole responsibility, at the Subscriber’s own expense, to provide, operate and maintain computer hardware and communications software or web browser software that is compatible with the Services; and</li>
+              <li><span>(b)</span>that any failure to do so may impact the Subscriber’s and/or User’s ability to access the Service.</li>
+            </ul>
+        </li>
+        </ul>
+      </section>
+
+      <section>
+        <header>5. SUBSCRIBER OBLIGATIONS</header>
+        <ul>
+          <li><span>5.1</span> The Subscriber will comply, and will ensure that all of its Users comply, with:</li>
+          <li>
+            <ul>
+              <li><span>(a)</span>the requirements regarding the integrity and/or security of the Service set out in this Article 4; and</li>
+              <li><span>(b)</span>all applicable laws,</li>
+            </ul>
+          </li>
+          <li>in connection with the Subscriber’s and/or Users’ use of the Services.  </li>
+          <li><span>5.2</span> The Subscriber will ensure that each User:</li>
+          <li>
+            <ul>
+              <li><span>(a)</span>is duly authorized by the Subscriber to perform any Transaction and utilize the Service on behalf of the Subscriber;</li>
+              <li><span>(b)</span>maintains in confidence Services Card Numbers, BCeID Information, Incorporation Numbers and Passcodes;</li>
+              <li><span>(c)</span>is competent to perform a Transaction and utilize the Service; </li>
+              <li><span>(d)</span>has been adequately trained and instructed to perform a Transaction and utilize the Service; and</li>
+              <li><span>(e)</span>does not use the Service for any inappropriate or unlawful purpose.</li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <header>6. FEES</header>
+        <ul>
+          <li><span>6.1</span>The Subscriber will pay to the Province all applicable Fees for the Services.</li>
+          <li><span>6.2</span>Fees payable for Transactions processed by Premium Account Subscribers will be charged to the applicable Deposit Account and in accordance with the BC Online Terms and Conditions.</li>
+          <li><span>6.3</span>Fees payable for Transactions processed by Basic Account Subscribers will be payable by credit card before the Transaction is processed.</li>
+        </ul>
+      </section>
+
+      <section>
+        <header>7. RELATIONSHIP</header>
+        <ul>
+          <li><span>7.1</span>This Agreement will not in any way make the Subscriber or any User an employee, agent or independent contractor of the Province and the Subscriber will not, and will ensure that its Users do not, in any way indicate or hold out to any person that the Subscriber or any User is an employee, agent or independent contractor of the Province.</li>
+        </ul>
+      </section>
+
+      <section>
+        <header>8. SUSPENSION OF SERVICE</header>
+        <ul>
+          <li><span>8.1 </span> The Province may, in its sole discretion, immediately suspend Access upon written notice to the Subscriber if:</li>
+          <li>
+            <ul>
+              <li><span>(a)</span>the Subscriber or any of its Users has, in the reasonable opinion of the Province, in any way jeopardized the integrity or security of the Service; or</li>
+              <li><span>(b)</span>the Subscriber or any of its Users has violated any other provision of this Agreement.</li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <header>9. TERMINATION</header>
+        <ul>
+          <li><span>9.1</span>The Province may immediately terminate this Agreement upon written notice to the Subscriber if the Subscriber’s Access has been suspended pursuant to section 8.1.</li>
+          <li><span>9.2</span>Upon termination:</li>
+          <li>
+            <ul>
+              <li><span>(a)</span>the Subscriber will immediately cease, and will ensure that all of its Users immediately cease, all use of the Service and all Passcodes; and</li>
+              <li><span>(b)</span>Premium Account Subscribers will pay to the Province all unpaid Fees incurred by the Subscriber up to the date of termination.</li>
+            </ul>
+          </li>
+          <li><span>9.3</span>In the event that a Subscriber’s Agreement is terminated, the Province reserves the right to refuse future Access to that Subscriber or to downgrade a Premium Account Subscriber to a Basic Account Subscriber, in which case the Subscriber acknowledges and agrees that it is only entitled to Access up to ten Entities and will release any Entities in excess of that number.</li>
+        </ul>
+      </section>
+
+      <section>
+        <header>10. WARRANTY DISCLAIMER, LIMITATION OF LIABILITY AND INDEMNITY</header>
+        <ul>
+          <li><span>10.1</span>The subscriber acknowledges and confirms that the subscriber understands that this article 10 requires the subscriber to assume the full risk in respect of any use of the services by the subscriber and/or its users.</li>
+          <li><span>10.2</span>Except as expressly set out in this Agreement, and in addition to the Province’s general Warranty Disclaimer and Limitation of Liabilities, the Province assumes no responsibility or liability to any person using the Service or any Content. In particular, without limiting the general nature of the foregoing:</li>
+          <li>
+            <ul>
+              <li><span>(a)</span>in no event will the Province, its respective servants, agents, contractors or employees be liable for any direct, indirect, special or consequential damages or other loss, claim or injury, whether foreseeable or unforeseeable (including without limitation claims for damages for personal injury, lost profits, lost savings or business opportunities) arising out of or in any way connected with the use of, or inability to use the Service or any Content;</li>
+              <li><span>(b)</span>the entire risk as to the quality and performance of the Service or any Content, is assumed by the Subscriber;</li>
+              <li><span>(c)</span>the Service and all Content are provided “as is”, and the Province disclaims all representations, warranties, conditions, obligations and liabilities of any kind, whether express or implied, in relation to the Service or any Content, including without limitation implied warranties with respect to merchantability, fitness for a particular purpose, error-free or uninterrupted use and non-infringement; and</li>
+              <li><span>(d)</span>in no event will the Province, its respective servants, agents, contractors or employees be liable for any loss or damage in connection with the Service or any Content, including without limitation any loss or damage caused by any alteration of the format or content of a print copy or electronic display of any information retrieved from the Service, the quality of any print display, the information contained in any screen dump, any system failure, hardware malfunction, manipulation of data, inadequate or faulty Transaction and/or Service, or delay or failure to provide Access to any User or any person using a User's Incorporation Numbers or Passcodes or using any information provided by a Subscriber or any User from the Service.</li>
+            </ul>
+          </li>
+          <li><span>10.3</span>The Subscriber must indemnify and save harmless the Province and its respective servants, agents, contractor and employees from any losses, claims, damages, actions, causes of action, costs and expenses that the Province or any of its respective servants, agents, contractors or employees may sustain, incur, suffer or be put to at any time, either before or after this Agreement ends, including any claim of infringement of third-party intellectual property rights, where the same or any of them are based upon, arise out of or occur, directly or indirectly, by reason of any act or omission by the Subscriber or by any of the Subscriber’s agents, employees, officers or directors in connection with this Agreement.</li>
+        </ul>
+      </section>
+
+      <section>
+        <header>11. GENERAL</header>
+        <ul>
+          <li><span>11.1</span>In this Agreement,</li>
+          <li>
+            <ul>
+              <li><span>(a)</span>unless the context otherwise requires, references to sections by number are to sections of the Agreement;</li>
+              <li><span>(b)</span>unless otherwise specified, a reference to a statute by name means the statute of British Columbia by that name, as amended or replaced from time to time;</li>
+              <li><span>(c)</span>“person” includes an individual, partnership, corporation or legal entity of any nature; and</li>
+              <li><span>(d)</span>unless the context otherwise requires, words expressed in the singular includes the plural and vice versa.</li>
+            </ul>
+          </li>
+          <li><span>11.2</span>This Agreement is the entire agreement between the Subscriber and the Province with respect to the subject matter of this Agreement, and supercedes and replaces any prior and/or written agreements.</li>
+          <li><span>11.3</span>The headings in this Agreement are inserted for convenience only, and will not be used in interpreting or construing any provision of this Agreement</li>
+          <li><span>11.4</span>All provisions in this Agreement in favour or either party and all rights and remedies of either party, either at law or in equity, will survive the expiration or sooner termination of this Agreement.</li>
+          <li><span>11.5</span>If any provision of this Agreement is invalid, illegal or unenforceable, that provision will be severed from this Agreement and all other provisions will remain in full force and effect.</li>
+          <li><span>11.6</span>This Agreement will be governed by and construed in accordance with the laws of British Columbia and the laws of Canada applicable therein. By using the Service, the Subscriber consents to the exclusive jurisdiction and venue of the courts of the province of British Columbia for the hearing of any dispute arising from or related to this Agreement and/or the Subscriber’s use of the Service.</li>
+        </ul>
+      </section>
+     """
+
+    op.execute(
+        documents.update()
+            .where(documents.c.version_id==op.inline_literal('3') and documents.c.type=='termsofuse' )
+            .values({'content':op.inline_literal(tos_version3_content)})
+            )
+ 
+    # update pad terms version p1 content
+    pad_terms_content = """
+      <section>
+        <header>
+          In this agreement:
+        </header>
+        <ul>
+          <li>
+            “the biller” refers to “Her Majesty the Queen in Right of the Province of British Columbia as represented by the Minister of Citizen’s Services - BC Registry and Online Services (Prov of BC);
+          </li>
+          <li>
+            “the payor” refers to the Premium Account Subscriber of the BC Registry Service as defined in the BC Registry Terms and Conditions of Agreement (the “BC Registry Terms”); and
+          </li>
+          <li>
+            unless defined herein, capitalized terms in this agreement will have the meaning as set out in BC Registry Terms.
+          </li>
+        </ul>
+      </section>
+      <section>
+      <header>
+        The payor acknowledges or understands:
+      </header>
+      <ul>
+        <li>
+          <span>1.</span>That this authorization is provided for the benefit of the biller and our financial institution, and is provided in consideration of the Payor’s Financial Institution agreeing to process debits (PADs) against the bank account as indicated in the biller’s PAD application webform and in accordance with the rules of <a href="http://www.payments.ca" target="_blank">Payments Canada</a>.
+        </li>
+        <li>
+          <span>2.</span>Ticking the acceptance box on the biller’s PAD application webform will be considered equivalent to my signature and will constitute valid authorization for the processing financial institution to debit the payor’s account as identified in the biller’s PAD application webform (the “Payor’s Bank Account”).
+        </li>
+        <li>
+          <span>3.</span>This authority will remain in effect until the biller has received written communication from the payor of cancellation or changes relating to the Payor’s Bank Account.
+        </li>
+        <li>
+          <span>4.</span>The payor may cancel this PAD agreement at any time with written notification to the biller. Written notification of changes or cancellation must be received at least 10 business days prior to the next online order or withdrawal. Notification must be in writing and sent either through the biller’s BC Registry website or by mail to the address provided below. A sample cancellation form or more information on my right to cancel a PAD Agreement can be obtained at my financial institution or by visiting <a href="http://www.payments.ca" target="_blank">www.payments.ca</a>.
+        </li>
+        <li>
+          <span>5.</span>That cancellation of this agreement by the payor or the biller:
+        </li>
+        <li>
+          <ul>
+            <li>
+              <span>a.</span>will result in the suspension of the payors’ Premium Account Subscriber account Access until the payor takes action to authorize another payment method; and
+            </li>
+            <li>
+              <span>b.</span>does not cancel any amount owed for the Service received prior to cancellation.
+            </li>
+          </ul>
+        </li>
+        <li>
+          <span>6.</span>Correspondence regarding this agreement will be sent to the payor at the email address associated with the payor’s Premium Subscriber Account (the “Payor’s Email Address”). The payor agrees that any communication sent by the biller to that email address will be deemed to have been received by the payor and acknowledges that it is the payor’s responsibility to notify the biller as soon as possible of changes to the Payor’s Email Address.
+        </li>
+        <li>
+          <span>7.</span><strong>The biller notification of enrollment or cancellation of this Pre-Authorized Debit Agreement to the Payor is being reduced from 15 calendar days to 3 calendar days in accordance with the H1 rule of Payments Canada.  Notification will be delivered electronically to the Payor’s Email Address.</strong>
+        </li>
+        <li>
+          <span>8.</span>The payor has certain recourse rights if any debit does not comply with the terms of this business PAD agreement (for example, the right to receive reimbursement for any PAD that is not authorized or is not consistent with terms and conditions of this PAD Agreement). To obtain a form for reimbursement or for more information on recourse rights, contact your financial institution or visit <a href="http://www.payments.ca" target="_blank">www.payments.ca</a>.
+        </li>
+        <li>
+          <span>9.</span>Any payment dishonoured by the payor’s financial institution may result in a dishonoured banking instrument service fee, as prescribed by the Minister of Finance, being applied to the payor’s Premium Account Subscriber account.  The biller is not responsible for any additional service fees charged by your financial institution.
+        </li>
+        <li>
+          <span>10.</span>In the event of a dishonoured payment, the biller reserves the right to suspend the payor’s Access until the payor has taken action to re-activate Access by paying any outstanding Fees and dishonoured banking instrument service fees by credit card.
+        </li>
+        <li>
+          <span>11.</span>Due to a delay in payment processing, the biller may subsequently suspend the payor’s Access after a payor has taken action to re-activate Access if another PAD is dishonoured in the intervening period.
+        </li>
+        <li>
+          <span>12.</span>The amount of the daily (excludes weekends and holidays) withdrawal is variable and dependent on the total daily Transactions charged to the payors’ Premium Account Subscriber’s account by Team Members who are authorized to order BC Registry Services.
+        </li>
+        <li>
+          <span>13.</span><strong>The standard 10 calendar day pre-notification period for the sporadic and variable pre-authorized withdrawals will be reduced to 1-2 business days.</strong>
+        </li>
+        <li>
+          <span>14.</span>The biller will provide PAD pre-notification 1-2 business days prior to the withdrawal date. This notification will confirm the amount and estimated date of the pre-authorized withdrawal, will provide a list of all services ordered & other account adjustments and will be delivered electronically to the Payor’s Email Address.
+        </li>
+        <li>
+          <span>15.</span>Your financial institution is not responsible for verifying whether payment has been issued in accordance with the particulars of this agreement.
+        </li>
+      </ul>
+      </section>
+      <section>
+        <header>
+          <strong>Payor Authorization:</strong>
+        </header>
+        <p>
+          I have read, understood and agree to the terms and conditions of the Business Pre-Authorized Debit Terms and Conditions for BC Registry Services
+        </p>
+        <p>
+          I confirm, I am an authorized representative for the payor and authorized signatory on the account to be debited under this agreement.
+        </p>
+        <p>
+          I authorize the biller to withdraw funds from the bank account as indicated above as per the terms and conditions of this agreement.
+        </p>
+        <p>
+          Dated: Month Day, Year
+        </p>
+      </section>
+    """
+    op.execute(
+        documents.update()
+            .where(documents.c.version_id==op.inline_literal('p1') and documents.c.type=='termsofuse_pad' )
+            .values({'content':op.inline_literal(pad_terms_content)})
+            )
     # ### end Alembic commands ###
 
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.execute("DELETE FROM DOCUMENTS WHERE version_id='4' AND type='termsofuse'")
+
+    tos_version3_content = """
+       <article>
+       <p>The parties to this “BC Registry Terms and Conditions of Agreement” (the “Agreement”) are Her Majesty the Queen in Right of the Province of British Columbia, as represented by the Minister of Citizens’ Services (the “Province”) and the Subscriber (as defined below).</p>
+
+       <section>
+         <header><span>1.</span> DEFINITIONS</header>
+         <div>
+           <p><span>a.</span>&nbsp;<strong>“Access”</strong> means the non-exclusive right to electronically access and use the Service;</p>
+           <p><span>b.</span>&nbsp;<strong>“Basic Account Subscriber”</strong> means a Subscriber with Access for up to ten Transactions per month that pays Fees for Transactions using a credit card;</p>
+           <p><span>c.</span>&nbsp;<strong>“BCeID Information”</strong> means a BCeID account user ID or password, which authenticates the identity of the Subscriber or a User, as the case may be, to the Service if the Subscriber or a User uses a BCeID for this purpose;</p>
+           <p><span>d.</span>&nbsp;<strong>“BC Online Terms and Conditions”</strong> means the BC Online Terms and Conditions of Agreement found at <a href="https://www.bconline.gov.bc.ca/terms_conditions.html">https://www.bconline.gov.bc.ca/terms_conditions.html;</a></p>
+           <p><span>e.</span>&nbsp;<strong>"Content"</strong> means the Service’s Data Base, and all associated information and documentation, including any print copy or electronic display of any information retrieved from the Data Base and associated with the Service;</p>
+           <p><span>f.</span>&nbsp;<strong>"Data Base"</strong> means any data base or information stored in electronic format for which Access is made available through the Service;</p>
+           <p><span>g.</span>&nbsp;<strong>"Deposit Account"</strong> has the meaning given to it in the BC Online Terms and Conditions;</p>
+           <p><span>h.</span>&nbsp;<strong>"Entity"</strong> means any legal entity (including a registered society, business, or co-operative) for which a User has Access through the Service;</p>
+           <p><span>i.</span>&nbsp;<strong>"Fees"</strong> means all fees and charges for the Service, as described in the Business Corporations Act - Schedule (Section 431) Fees, Cooperative Association Act - Cooperative Association Regulation, Schedule A;</p>
+           <p><span>j.</span>&nbsp;<strong>"Incorporation Number"</strong> means the unique numerical identifier for a Subscriber’s Entity, and when entered in conjunction with the Passcode, permits a User to perform transactions with regard to that Entity;</p>
+           <p><span>k.</span>&nbsp;<strong>"Passcode"</strong> means the unique identifier issued by the Province to a Subscriber with regard to existing Entities on the Service, which enables a User to have Access with regard to those Entities;</p>
+           <p><span>l.</span>&nbsp;<strong>"Premium Account Subscriber"</strong> means a Subscriber with Access to unlimited Transactions that has a Deposit Account with the Province and is charged Fees in accordance with the BC Online Terms and Conditions;</p>
+           <p><span>m.</span>&nbsp;<strong>"Service"</strong> means the service operated by the Province that allows a Subscriber to complete Transactions relating to BC Entities or other information accessible through the Website;</p>
+           <p><span>n.</span>&nbsp;<strong>"Services Card Number"</strong> means the Subscriber’s BC Services Card number, which authenticates the identity of the Subscriber, or a User, as the case may be, to the Service if the Subscriber or a User uses a BC Services Card for this purpose;</p>
+           <p><span>o.</span>&nbsp;<strong>"Subscriber"</strong> means a person that accesses the Service and that has accepted the terms of this Agreement, and includes Premium Account Subscribers and Basic Account Subscribers;</p>
+           <p><span>p.</span>&nbsp;<strong>"Transaction"</strong> means any action performed by the Subscriber or any of its Users to the Service to display, print, transfer, or obtain a copy of information contained on the Service, or where permitted by the Province, to add to or delete information from the Service;</p>
+           <p><span>q.</span>&nbsp;<strong>"User"</strong> means an individual that is granted Access on the individual’s behalf, if the individual is also the Subscriber, or on behalf of the Subscriber, if the individual is an employee or is otherwise authorized to act on behalf of the Subscriber, as applicable;</p>
+           <p><span>r.</span>&nbsp;<strong>"Website"</strong> means the BC Cooperatives Website at bcregistry.ca/cooperatives and includes all web pages and associated materials, with the exception of the Content.</p>
+         </div>
+       </section>
+
+       <section>
+         <header><span>2.</span> ACCEPTANCE OF AGREEMENT</header>
+         <div>
+           <p><span>2.1</span> The Subscriber acknowledges that a duly authorized representative of the Subscriber has accepted the terms of this Agreement on behalf of the Subscriber and its Users.</p>
+           <p><span>2.2</span> The Subscriber acknowledges and agrees that:</p>
+           <div>
+             <p><span>(a)</span> by creating a profile and/or by clicking the button acknowledging acceptance of this Agreement, each User using the Services on behalf of the Subscriber also accepts, and will be conclusively deemed to have accepted, the terms of this Agreement as they pertain to the User’s use of the Services; and</p>
+             <p><span>(b)</span> the Subscriber will be solely responsible for its Users’ use of the Services, including without limitation any Fees incurred by its Users in connection with such Services.</p>
+           </div>
+           <p><span>2.3</span> The Subscriber acknowledges that the terms of the BC Services Card Login Service found at (<a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/terms-of-use" target="_blank">https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/terms-of-use</a>) continue to apply in respect of use of the Services Card by either the Subscriber or a User.</p>
+           <p><span>2.4</span> Premium Account Subscribers acknowledge that in addition to this Agreement, the terms of the BC Online Terms and Conditions will continue to apply in respect of the use of the Subscriber’s Deposit Account for payment of Fees for the Service.</p>
+           <p><span>2.5</span> The Subscriber acknowledges that the BCeID terms found at (<a href="https://www.bceid.ca/aboutbceid/agreements.aspx" target="_blank">https://www.bceid.ca/aboutbceid/agreements.aspx</a>) and applicable to the type of BCeID held by the Subscriber or a User, as the case may be, continue to apply in respect of use of the Subscriber or User’s BCeID.</p>
+           <p><span>2.6</span> The Subscriber will ensure that each of its Users are aware of and comply with the terms of this Agreement as they pertain to the User’s use of the Services.</p>
+           <p><span>2.7</span> The Province reserves the right to make changes to the terms of this Agreement at any time without direct notice to either the Subscriber or its Users, as applicable.  The Subscriber acknowledges and agrees that it is the sole responsibility of the Subscriber to review, and, as applicable, to ensure that its Users review, the terms of this Agreement on a regular basis.</p>
+           <p><span>2.8</span> Following the date of any such changes, the Subscriber will be conclusively deemed to have accepted any such changes on its own behalf and on behalf of its Users, as applicable.  The Subscriber acknowledges and agrees that each of its Users must also accept any such changes as they pertain to the User’s use of the Services.</p>
+         </div>
+       </section>
+
+       <section>
+         <header><span>3.</span> PROPRIETARY RIGHTS</header>
+         <div>
+           <p><span>3.1</span> The Website and the Content is owned by the Province and/or its licensors and is protected by copyright, trademark and other laws. Except as expressly permitted in this Agreement, the Subscriber may not use, reproduce, modify or distribute, or allow any other person to use, reproduce, modify or distribute, any part of the Website in any form whatsoever without the prior written consent of the Province. </p>
+         </div>
+       </section>
+
+       <section>
+         <header><span>4.</span> SERVICES</header>
+         <div>
+           <p><span>4.1</span> The Province will provide the Subscriber and its Users with Access on the terms and conditions set out in this Agreement.</p>
+           <p><span>4.2</span> Subject to section 4.3, Access will be available during the hours published on the Website, as may be determined by the Province in its sole discretion from time to time.</p>
+           <p><span>4.3</span> The Province reserves the right to limit or withdraw Access at any time in order to perform maintenance of the Service or in the event that the integrity or security of the Service is compromised.</p>
+           <p><span>4.4</span> The Province further reserves the right to discontinue the Service at any time.</p>
+           <p><span>4.5</span> The Province will provide helpdesk support to assist Users with Access during the hours published on the Website, as may be determined by the Province in its sole discretion from time to time.</p>
+           <p><span>4.6</span> The Subscriber acknowledges and agrees that, for the purpose of Access:</p>
+           <div>
+             <p><span>(a)</span> it is the Subscriber’s sole responsibility, at the Subscriber’s own expense, to provide, operate and maintain computer hardware and communications software or web browser software that is compatible with the Services; and</p>
+             <p><span>(b)</span> that any failure to do so may impact the Subscriber’s and/or User’s ability to access the Service.</p>
+           </div>
+         </div>
+       </section>
+
+       <section>
+         <header><span>5.</span> SUBSCRIBER OBLIGATIONS</header>
+         <div>
+           <p><span>5.1</span> The Subscriber will comply, and will ensure that all of its Users comply, with:</p>
+           <div>
+             <p><span>(a)</span> the requirements regarding the integrity and/or security of the Service set out in this Article 4; and</p>
+             <p><span>(b)</span> all applicable laws,</p>
+           </div>
+           <p>in connection with the Subscriber’s and/or Users’ use of the Services.  </p>
+           <p><span>5.2</span> The Subscriber will ensure that each User:</p>
+           <div>
+             <p><span>(a)</span> is duly authorized by the Subscriber to perform any Transaction and utilize the Service on behalf of the Subscriber;</p>
+             <p><span>(b)</span> maintains in confidence Services Card Numbers, BCeID Information, Incorporation Numbers and Passcodes;</p>
+             <p><span>(c)</span> is competent to perform a Transaction and utilize the Service; </p>
+             <p><span>(d)</span> has been adequately trained and instructed to perform a Transaction and utilize the Service; and</p>
+             <p><span>(e)</span> does not use the Service for any inappropriate or unlawful purpose.</p>
+           </div>
+         </div>
+       </section>
+
+       <section>
+         <header><span>6.</span> FEES</header>
+         <div>
+           <p><span>6.1</span> The Subscriber will pay to the Province all applicable Fees for the Services.</p>
+           <p><span>6.2</span> Fees payable for Transactions processed by Premium Account Subscribers will be charged to the applicable Deposit Account and in accordance with the BC Online Terms and Conditions.</p>
+           <p><span>6.3</span> Fees payable for Transactions processed by Basic Account Subscribers will be payable by credit card before the Transaction is processed.</p>
+         </div>
+       </section>
+
+       <section>
+         <header><span>7.</span> RELATIONSHIP</header>
+         <div>
+           <p><span>7.1</span> This Agreement will not in any way make the Subscriber or any User an employee, agent or independent contractor of the Province and the Subscriber will not, and will ensure that its Users do not, in any way indicate or hold out to any person that the Subscriber or any User is an employee, agent or independent contractor of the Province.</p>
+         </div>
+       </section>
+
+       <section>
+         <header><span>8.</span> SUSPENSION OF SERVICE </header>
+         <div>
+           <p><span>8.1</span> The Province may, in its sole discretion, immediately suspend Access upon written notice to the Subscriber if:</p>
+           <div>
+             <p><span>(a)</span> the Subscriber or any of its Users has, in the reasonable opinion of the Province, in any way jeopardized the integrity or security of the Service; or</p>
+             <p><span>(b)</span> the Subscriber or any of its Users has violated any other provision of this Agreement.</p>
+           </div>
+         </div>
+       </section>
+
+       <section>
+         <header><span>9.</span> TERMINATION</header>
+         <div>
+           <p><span>9.1 </span>The Province may immediately terminate this Agreement upon written notice to the Subscriber if the Subscriber’s Access has been suspended pursuant to section 8.1.</p>
+           <p><span>9.2 </span>Upon termination:</p>
+           <div>
+             <p><span>(a) </span>the Subscriber will immediately cease, and will ensure that all of its Users immediately cease, all use of the Service and all Passcodes; and</p>
+             <p><span>(b) </span>Premium Account Subscribers will pay to the Province all unpaid Fees incurred by the Subscriber up to the date of termination.</p>
+           </div>
+           <p><span>9.3 </span>In the event that a Subscriber’s Agreement is terminated, the Province reserves the right to refuse future Access to that Subscriber or to downgrade a Premium Account Subscriber to a Basic Account Subscriber, in which case the Subscriber acknowledges and agrees that it is only entitled to Access up to ten Entities and will release any Entities in excess of that number.</p>
+         </div>
+       </section>
+
+       <section>
+         <header>10. WARRANTY DISCLAIMER, LIMITATION OF LIABILITY AND INDEMNITY</header>
+         <div>
+           <p><span>10.1 </span>The subscriber acknowledges and confirms that the subscriber understands that this article 10 requires the subscriber to assume the full risk in respect of any use of the services by the subscriber and/or its users.</p>
+           <p><span>10.2 </span>Except as expressly set out in this Agreement, and in addition to the Province’s general Warranty Disclaimer and Limitation of Liabilities, the Province assumes no responsibility or liability to any person using the Service or any Content.  In particular, without limiting the general nature of the foregoing:</p>
+           <div>
+             <p><span>(a) </span>in no event will the Province, its respective servants, agents, contractors or employees be liable for any direct, indirect, special or consequential damages or other loss, claim or injury, whether foreseeable or unforeseeable (including without limitation claims for damages for personal injury, lost profits, lost savings or business opportunities) arising out of or in any way connected with the use of, or inability to use the Service or any Content;</p>
+             <p><span>(b) </span>the entire risk as to the quality and performance of the Service or any Content, is assumed by the Subscriber;</p>
+             <p><span>(c) </span>the Service and all Content are provided “as is”, and the Province disclaims all representations, warranties, conditions, obligations and liabilities of any kind, whether express or implied, in relation to the Service or any Content, including without limitation implied warranties with respect to merchantability, fitness for a particular purpose, error-free or uninterrupted use and non-infringement; and</p>
+             <p><span>(d) </span>in no event will the Province, its respective servants, agents, contractors or employees be liable for any loss or damage in connection with the Service or any Content, including without limitation any loss or damage caused by any alteration of the format or content of a print copy or electronic display of any information retrieved from the Service, the quality of any print display, the information contained in any screen dump, any system failure, hardware malfunction, manipulation of data, inadequate or faulty Transaction and/or Service, or delay or failure to provide Access to any User or any person using a User's Incorporation Numbers or Passcodes or using any information provided by a Subscriber or any User from the Service.</p>
+           </div>
+           <p><span>10.3 </span>The Subscriber must indemnify and save harmless the Province and its respective servants, agents, contractor and employees from any losses, claims, damages, actions, causes of action, costs and expenses that the Province or any of its respective servants, agents, contractors or employees may sustain, incur, suffer or be put to at any time, either before or after this Agreement ends, including any claim of infringement of third-party intellectual property rights, where the same or any of them are based upon, arise out of or occur, directly or indirectly, by reason of any act or omission by the Subscriber or by any of the Subscriber’s agents, employees, officers or directors in connection with this Agreement.</p>
+         </div>
+       </section>
+
+       <section>
+         <header>11. GENERAL</header>
+         <div>
+           <p><span>11.1 </span>In this Agreement,</p>
+           <div>
+             <p><span>(a) </span>unless the context otherwise requires, references to sections by number are to sections of the Agreement;</p>
+             <p><span>(b) </span>unless otherwise specified, a reference to a statute by name means the statute of British Columbia by that name, as amended or replaced from time to time;</p>
+             <p><span>(c) </span>“person” includes an individual, partnership, corporation or legal entity of any nature; and</p>
+             <p><span>(d) </span>unless the context otherwise requires, words expressed in the singular includes the plural and vice versa.</p>
+           </div>
+           <p><span>11.2 </span>This Agreement is the entire agreement between the Subscriber and the Province with respect to the subject matter of this Agreement, and supercedes and replaces any prior and/or written agreements.</p>
+           <p><span>11.3 </span>The headings in this Agreement are inserted for convenience only, and will not be used in interpreting or construing any provision of this Agreement</p>
+           <p><span>11.4 </span>All provisions in this Agreement in favour or either party and all rights and remedies of either party, either at law or in equity, will survive the expiration or sooner termination of this Agreement.</p>
+           <p><span>11.5 </span>If any provision of this Agreement is invalid, illegal or unenforceable, that provision will be severed from this Agreement and all other provisions will remain in full force and effect.</p>
+           <p><span>11.6 </span>This Agreement will be governed by and construed in accordance with the laws of British Columbia and the laws of Canada applicable therein.  By using the Service, the Subscriber consents to the exclusive jurisdiction and venue of the courts of the province of British Columbia for the hearing of any dispute arising from or related to this Agreement and/or the Subscriber’s use of the Service.</p>
+         </div>
+       </section>
+
+     </article>
+     """
+
+    documents = table('documents',
+                      column('version_id', String),
+                      column('type', String),
+                      column('content_type', String),
+                      column('content', String))
+    op.execute(
+        documents.update()
+            .where(documents.c.version_id==op.inline_literal('3') and documents.c.type=='termsofuse' )
+            .values({'content':op.inline_literal(tos_version3_content)})
+            )
+
+    # change pad-terms content back
+    pad_terms_content = """
+      <section>
+        <header>
+          In this agreement:
+        </header>
+        <p>
+          “the biller” refers to “Her Majesty the Queen in Right of the Province of British Columbia as represented by the Minister of Citizen’s Services - BC Registry and Online Services (Prov of BC);
+        </p>
+        <p>
+          “the payor” refers to the Premium Account Subscriber of the BC Registry Service as defined in the BC Registry Terms and Conditions of Agreement (the “BC Registry Terms”); and</p>
+        <p>
+          unless defined herein, capitalized terms in this agreement will have the meaning as set out in BC Registry Terms.
+        </p>
+      </section>
+      <section>
+      <header>
+        The payor acknowledges or understands:
+      </header>
+      <ol>
+        <li>
+          That this authorization is provided for the benefit of the biller and our financial institution, and is provided in consideration of the Payor’s Financial Institution agreeing to process debits (PADs) against the bank account as indicated in the biller’s PAD application webform and in accordance with the rules of <a href="www.payments.ca" target="_blank">Payments Canada</a>.
+        </li>
+        <li>
+          Ticking the acceptance box on the biller’s PAD application webform will be considered equivalent to my signature and will constitute valid authorization for the processing financial institution to debit the payor’s account as identified in the biller’s PAD application webform (the “Payor’s Bank Account”).
+        </li>
+        <li>
+          This authority will remain in effect until the biller has received written communication from the payor of cancellation or changes relating to the Payor’s Bank Account.
+        </li>
+        <li>
+          The payor may cancel this PAD agreement at any time with written notification to the biller. Written notification of changes or cancellation must be received at least 10 business days prior to the next online order or withdrawal. Notification must be in writing and sent either through the biller’s BC Registry website or by mail to the address provided below. A sample cancellation form or more information on my right to cancel a PAD Agreement can be obtained at my financial institution or by visiting <a href="www.payments.ca" target="_blank">www.payments.ca</a>.
+        </li>
+        <li>
+          That cancellation of this agreement by the payor or the biller:
+          <ol type="a">
+            <li>
+              will result in the suspension of the payors’ Premium Account Subscriber account Access until the payor takes action to authorize another payment method; and
+            </li>
+            <li>
+              does not cancel any amount owed for the Service received prior to cancellation.
+            </li>
+          </ol>
+        </li>
+        <li>
+          Correspondence regarding this agreement will be sent to the payor at the email address associated with the payor’s Premium Subscriber Account (the “Payor’s Email Address”). The payor agrees that any communication sent by the biller to that email address will be deemed to have been received by the payor and acknowledges that it is the payor’s responsibility to notify the biller as soon as possible of changes to the Payor’s Email Address.
+        </li>
+        <li>
+          <strong>The biller notification of enrollment or cancellation of this Pre-Authorized Debit Agreement to the Payor is being reduced from 15 calendar days to 3 calendar days in accordance with the H1 rule of Payments Canada.  Notification will be delivered electronically to the Payor’s Email Address.</strong>
+        </li>
+        <li>
+          The payor has certain recourse rights if any debit does not comply with the terms of this business PAD agreement (for example, the right to receive reimbursement for any PAD that is not authorized or is not consistent with terms and conditions of this PAD Agreement). To obtain a form for reimbursement or for more information on recourse rights, contact your financial institution or visit <a href="www.payments.ca" target="_blank">www.payments.ca</a>.
+        </li>
+        <li>
+          Any payment dishonoured by the payor’s financial institution may result in a dishonoured banking instrument service fee, as prescribed by the Minister of Finance, being applied to the payor’s Premium Account Subscriber account.  The biller is not responsible for any additional service fees charged by your financial institution.
+        </li>
+        <li>
+          In the event of a dishonoured payment, the biller reserves the right to suspend the payor’s Access until the payor has taken action to re-activate Access by paying any outstanding Fees and dishonoured banking instrument service fees by credit card.
+        </li>
+        <li>
+          Due to a delay in payment processing, the biller may subsequently suspend the payor’s Access after a payor has taken action to re-activate Access if another PAD is dishonoured in the intervening period.
+        </li>
+        <li>
+          The amount of the daily (excludes weekends and holidays) withdrawal is variable and dependent on the total daily Transactions charged to the payors’ Premium Account Subscriber’s account by Team Members who are authorized to order BC Registry Services.
+        </li>
+        <li>
+          <strong>The standard 10 calendar day pre-notification period for the sporadic and variable pre-authorized withdrawals will be reduced to 1-2 business days.</strong>
+        </li>
+        <li>
+          The biller will provide PAD pre-notification 1-2 business days prior to the withdrawal date. This notification will confirm the amount and estimated date of the pre-authorized withdrawal, will provide a list of all services ordered & other account adjustments and will be delivered electronically to the Payor’s Email Address.
+        </li>
+        <li>
+          Your financial institution is not responsible for verifying whether payment has been issued in accordance with the particulars of this agreement.
+        </li>
+      </ol>
+      </section>
+      <section>
+        <header>
+          <strong>Payor Authorization:</strong>
+        </header>
+        <p>
+          I have read, understood and agree to the terms and conditions of the Business Pre-Authorized Debit Terms and Conditions for BC Registry Services
+        </p>
+        <p>
+          I confirm, I am an authorized representative for the payor and authorized signatory on the account to be debited under this agreement.
+        </p>
+        <p>
+          I authorize the biller to withdraw funds from the bank account as indicated above I entered on the biller’s PAD application webform as per the terms and conditions of this agreement.
+        </p>
+        <p>
+          Dated: Month Day, Year
+        </p>
+      </section>
+    """
+    
+    op.execute(
+        documents.update()
+            .where(documents.c.version_id==op.inline_literal('p1') and documents.c.type=='termsofuse_pad' )
+            .values({'content':op.inline_literal(pad_terms_content)})
+            )
+
     # ### end Alembic commands ###
