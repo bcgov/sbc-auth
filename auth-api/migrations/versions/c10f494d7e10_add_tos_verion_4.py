@@ -612,7 +612,7 @@ def downgrade():
              <p><span>(a)</span> by creating a profile and/or by clicking the button acknowledging acceptance of this Agreement, each User using the Services on behalf of the Subscriber also accepts, and will be conclusively deemed to have accepted, the terms of this Agreement as they pertain to the User’s use of the Services; and</p>
              <p><span>(b)</span> the Subscriber will be solely responsible for its Users’ use of the Services, including without limitation any Fees incurred by its Users in connection with such Services.</p>
            </div>
-           <p><span>2.3</span> The Subscriber acknowledges that the terms of the BC Services Card Login Service found at (<a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/terms-of-use" target="_blank">https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/terms-of-use</a>) continue to apply in respect of use of the Services Card by either the Subscriber or a User.</p>
+           <p><span>2.3</span> The Subscriber acknowledges that the terms of the BC Services Card Login Service found at (<a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/terms-of-use" target="_blank">https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/terms-of-use</a>) continue to apply in respect of use of the Services Card by either the Subscriber or a User.</p>
            <p><span>2.4</span> Premium Account Subscribers acknowledge that in addition to this Agreement, the terms of the BC Online Terms and Conditions will continue to apply in respect of the use of the Subscriber’s Deposit Account for payment of Fees for the Service.</p>
            <p><span>2.5</span> The Subscriber acknowledges that the BCeID terms found at (<a href="https://www.bceid.ca/aboutbceid/agreements.aspx" target="_blank">https://www.bceid.ca/aboutbceid/agreements.aspx</a>) and applicable to the type of BCeID held by the Subscriber or a User, as the case may be, continue to apply in respect of use of the Subscriber or User’s BCeID.</p>
            <p><span>2.6</span> The Subscriber will ensure that each of its Users are aware of and comply with the terms of this Agreement as they pertain to the User’s use of the Services.</p>
@@ -772,7 +772,7 @@ def downgrade():
       </header>
       <ol>
         <li>
-          That this authorization is provided for the benefit of the biller and our financial institution, and is provided in consideration of the Payor’s Financial Institution agreeing to process debits (PADs) against the bank account as indicated in the biller’s PAD application webform and in accordance with the rules of <a href="www.payments.ca" target="_blank">Payments Canada</a>.
+          That this authorization is provided for the benefit of the biller and our financial institution, and is provided in consideration of the Payor’s Financial Institution agreeing to process debits (PADs) against the bank account as indicated in the biller’s PAD application webform and in accordance with the rules of <a href="http://www.payments.ca" target="_blank">Payments Canada</a>.
         </li>
         <li>
           Ticking the acceptance box on the biller’s PAD application webform will be considered equivalent to my signature and will constitute valid authorization for the processing financial institution to debit the payor’s account as identified in the biller’s PAD application webform (the “Payor’s Bank Account”).
@@ -781,7 +781,7 @@ def downgrade():
           This authority will remain in effect until the biller has received written communication from the payor of cancellation or changes relating to the Payor’s Bank Account.
         </li>
         <li>
-          The payor may cancel this PAD agreement at any time with written notification to the biller. Written notification of changes or cancellation must be received at least 10 business days prior to the next online order or withdrawal. Notification must be in writing and sent either through the biller’s BC Registry website or by mail to the address provided below. A sample cancellation form or more information on my right to cancel a PAD Agreement can be obtained at my financial institution or by visiting <a href="www.payments.ca" target="_blank">www.payments.ca</a>.
+          The payor may cancel this PAD agreement at any time with written notification to the biller. Written notification of changes or cancellation must be received at least 10 business days prior to the next online order or withdrawal. Notification must be in writing and sent either through the biller’s BC Registry website or by mail to the address provided below. A sample cancellation form or more information on my right to cancel a PAD Agreement can be obtained at my financial institution or by visiting <a href="http://www.payments.ca" target="_blank">www.payments.ca</a>.
         </li>
         <li>
           That cancellation of this agreement by the payor or the biller:
@@ -801,7 +801,7 @@ def downgrade():
           <strong>The biller notification of enrollment or cancellation of this Pre-Authorized Debit Agreement to the Payor is being reduced from 15 calendar days to 3 calendar days in accordance with the H1 rule of Payments Canada.  Notification will be delivered electronically to the Payor’s Email Address.</strong>
         </li>
         <li>
-          The payor has certain recourse rights if any debit does not comply with the terms of this business PAD agreement (for example, the right to receive reimbursement for any PAD that is not authorized or is not consistent with terms and conditions of this PAD Agreement). To obtain a form for reimbursement or for more information on recourse rights, contact your financial institution or visit <a href="www.payments.ca" target="_blank">www.payments.ca</a>.
+          The payor has certain recourse rights if any debit does not comply with the terms of this business PAD agreement (for example, the right to receive reimbursement for any PAD that is not authorized or is not consistent with terms and conditions of this PAD Agreement). To obtain a form for reimbursement or for more information on recourse rights, contact your financial institution or visit <a href="http://www.payments.ca" target="_blank">www.payments.ca</a>.
         </li>
         <li>
           Any payment dishonoured by the payor’s financial institution may result in a dishonoured banking instrument service fee, as prescribed by the Minister of Finance, being applied to the payor’s Premium Account Subscriber account.  The biller is not responsible for any additional service fees charged by your financial institution.
@@ -837,14 +837,14 @@ def downgrade():
           I confirm, I am an authorized representative for the payor and authorized signatory on the account to be debited under this agreement.
         </p>
         <p>
-          I authorize the biller to withdraw funds from the bank account as indicated above I entered on the biller’s PAD application webform as per the terms and conditions of this agreement.
+          I authorize the biller to withdraw funds from the bank account as indicated above as per the terms and conditions of this agreement.
         </p>
         <p>
           Dated: Month Day, Year
         </p>
       </section>
     """
-    
+
     op.execute(
         documents.update()
             .where(documents.c.version_id==op.inline_literal('p1') and documents.c.type=='termsofuse_pad' )
