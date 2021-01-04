@@ -40,7 +40,10 @@ export default class PaymentService {
 
   static downloadOBInvoice (paymentId: string): AxiosPromise<any> {
     const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${paymentId}/reports`
-    return axios.post(url, {})
+    const headers = {
+      'Accept': 'application/pdf'
+    }
+    return axios.post(url, {}, { headers, responseType: 'blob' as 'json' })
   }
 
   static updateTransaction (paymentId: string, transactionId: string, payResponseUrl?: string): AxiosPromise<any> {
