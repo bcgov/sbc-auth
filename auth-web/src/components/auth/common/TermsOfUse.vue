@@ -71,73 +71,39 @@ export default class TermsOfUse extends Vue {
 }
 </script>
 
-<style lang="scss">
-@import '$assets/scss/theme.scss';
+<style lang="scss" scoped>
+  .terms-container {
+    ::v-deep {
+      section {
+        + section {
+          margin-top: 2rem;
+        }
 
-// Terms and Conditions Container
-$indent-width: 1rem;
+        header {
+          margin-bottom: 1.5rem;
+          text-transform: uppercase;
+          font-size: 1.125rem;
+          font-weight: 700;
+        }
+      }
 
-.terms-container {
-  p, li {
-    margin: 1rem 0;
+      ul {
+        list-style-type: none;
+        padding-left: 50px !important;
+      }
+
+      li {
+        + li {
+          margin-top: 1rem;
+        }
+
+        span {
+          display: inline-block;
+          width: 50px;
+          margin-left: -50px;
+          font-size: 0.9375rem;
+        }
+      }
+    }
   }
-
-  ol {
-    margin-left: $indent-width;
-  }
-
-  li {
-    padding-left: $indent-width;
-  }
-
-  h3 {
-    max-width: 55ch;
-  }
-
-  section {
-    margin-bottom: 2rem;
-  }
-
-  section:last-child {
-    margin-bottom: 0;
-  }
-
-  section header {
-    margin-bottom: 1rem;
-    color: $gray9;
-    font-size: 1rem;
-    font-weight: 700 !important;
-  }
-
-  section header > span {
-    display: inline-block;
-    width: $indent-width;
-  }
-
-  section a {
-    font-weight: 600;
-  }
-
-  header + div {
-    margin-left: 3.25rem;
-  }
-
-  section div > p {
-    padding-left: $indent-width;
-  }
-
-  p {
-    position: relative;
-  }
-
-  p + div {
-    margin-left: $indent-width;
-  }
-
-  p > span {
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-}
 </style>
