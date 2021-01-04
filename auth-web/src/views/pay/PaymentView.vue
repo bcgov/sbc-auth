@@ -8,40 +8,42 @@
           indeterminate
           class="mt-12"
         ></v-progress-circular>
-        <div class="loading-msg">{{ $t('paymentPrepareMsg') }}</div>
+        <div class="loading-msg">{{ showdownloadLoading ? $t('paymentDownloadMsg')  : $t('paymentPrepareMsg') }}</div>
       </v-layout>
     </v-container>
-    <v-container v-if="errorMessage">
-      <v-layout row justify-center align-center>
-        <SbcSystemError
-          v-on:continue-event="goToUrl(returnUrl)"
-          v-if="showErrorModal"
-          title="Payment Failed"
-          primaryButtonTitle="Continue to Filing"
-          :description="errorMessage">
-        </SbcSystemError>
-        <div class="mt-12" v-else>
-          <div class="text-center mb-4">
-            <v-icon color="error" size="30">mdi-alert-outline</v-icon>
+    <div v-else>
+      <v-container v-if="errorMessage">
+        <v-layout row justify-center align-center>
+          <SbcSystemError
+            v-on:continue-event="goToUrl(returnUrl)"
+            v-if="showErrorModal"
+            title="Payment Failed"
+            primaryButtonTitle="Continue to Filing"
+            :description="errorMessage">
+          </SbcSystemError>
+          <div class="mt-12" v-else>
+            <div class="text-center mb-4">
+              <v-icon color="error" size="30">mdi-alert-outline</v-icon>
+            </div>
+            <h4>{{errorMessage}}</h4>
           </div>
-          <h4>{{errorMessage}}</h4>
-        </div>
-      </v-layout>
-    </v-container>
-    <v-container v-if="showOnlineBanking">
-      <v-row class="pt-6">
-        <v-col md="6" offset-md="3">
-          <h1 class="mb-1">Make a payment</h1>
-          <p class="pb-2">Please find your balance and payment details below </p>
-          <PaymentCard
-            :paymentCardData="paymentCardData"
-            @complete-online-banking="completeOBPayment"
-            @pay-with-credit-card="payNow"
-            @download-invoice="downloadInvoice"
-          ></PaymentCard>
-        </v-col>
-      </v-row>
-    </v-container>
+        </v-layout>
+      </v-container>
+      <v-container v-if="showOnlineBanking">
+        <v-row class="pt-6">
+          <v-col md="6" offset-md="3">
+            <h1 class="mb-1">Make a payment</h1>
+            <p class="pb-2">Please find your balance and payment details below </p>
+            <PaymentCard
+              :paymentCardData="paymentCardData"
+              @complete-online-banking="completeOBPayment"
+              @pay-with-credit-card="payNow"
+              @download-invoice="downloadInvoice"
+            ></PaymentCard>
+          </v-col>
+        </v-row>
+      </v-container>
+    </div>
   </div>
 </template>
 
@@ -85,6 +87,7 @@ export default class PaymentView extends Vue {
   private readonly getOrgPayments!: (orgId: number) => OrgPaymentDetails
   private readonly getInvoice!: (paymentId: string) => Invoice
   private showLoading: boolean = true
+  private showdownloadLoading: boolean = false
   private showOnlineBanking: boolean = false
   private errorMessage: string = ''
   private showErrorModal: boolean = false
@@ -155,6 +158,7 @@ export default class PaymentView extends Vue {
   private async downloadInvoice () {
     // download invoice fot online banking
     this.showLoading = true // to avoid rapid download clicks
+    this.showdownloadLoading = true // to avoid rapid download clicks
     this.errorMessage = ''
     try {
       const downloadType = 'application/pdf'
@@ -164,8 +168,10 @@ export default class PaymentView extends Vue {
 
       const fileName = (contentDispArr.length && contentDispArr[1]) ? contentDispArr[1] : `bcregistry-${this.paymentId}`
       CommonUtils.fileDownload(response.data, fileName, downloadType)
+      this.showdownloadLoading = false
       this.showLoading = false
     } catch (error) {
+      this.showdownloadLoading = false
       this.showLoading = false
       this.errorMessage = this.$t('downloadFailedMessage').toString()
       // this.showErrorModal = true

@@ -10,6 +10,7 @@
   "payFailedMessagePayBcDown": "Payment Failed due to technical reasons. Please use the below contacts.",
   "payNoParams": "Incorrect configuration",
   "paymentPrepareMsg": "Preparing your payments",
+  "paymentDownloadMsg": "Preparing your invoice",
   "paymentDoneMsg": "Completing the payment",
   "businessContactCopy": "It looks like we are missing some contact information for your {businessType}. You will need to supply us with a few additional details before you can get started...",
   "businessListEmptyMessage": "You have not added any businesses",
