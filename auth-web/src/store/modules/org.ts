@@ -381,7 +381,8 @@ export default class OrgModule extends VuexModule {
       type: 'ACCOUNT',
       urlorigin: '',
       urlpath: `/account/${org?.id}/settings`,
-      accountType: org?.orgType
+      accountType: org?.orgType,
+      accountStatus: org?.accountStatus
     }
     ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify(accountSettings))
     return accountSettings
