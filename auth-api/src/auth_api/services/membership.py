@@ -23,6 +23,7 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models import MembershipType as MembershipTypeModel
@@ -224,10 +225,12 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         if is_staff_modifying and not is_bcros_user and len(updated_fields) != 0:
             publish_to_mailer(notification_type='teamModified', org_id=self._model.org.id)
 
+        # send mail to the person itself who is getting removed by staff ;if he is admin
         if is_staff_modifying and not is_bcros_user and admin_getting_removed:
+            recipient_email = ContactLinkModel.find_by_user_id(self._model.user.id).contact.email
             data = {
                 'accountId': self._model.org.id,
-                'to': ''
+                'recipientEmail': recipient_email
             }
             publish_to_mailer(notification_type='adminRemoved', org_id=self._model.org.id, data=data)
 
