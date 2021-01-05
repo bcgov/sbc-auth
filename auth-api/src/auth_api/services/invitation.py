@@ -38,6 +38,7 @@ from auth_api.config import get_named_config
 from .authorization import check_auth
 from .membership import Membership as MembershipService
 from .notification import send_email
+from .queue_publisher import publish_response
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -61,7 +62,8 @@ class Invitation:
         return obj
 
     @staticmethod
-    def create_invitation(invitation_info: Dict, user, token_info: Dict, invitation_origin):
+    def create_invitation(invitation_info: Dict, user,  # pylint: disable=too-many-locals
+                          token_info: Dict, invitation_origin):
         """Create a new invitation."""
         # Ensure that the current user is ADMIN or COORDINATOR on each org being invited to
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
@@ -94,6 +96,21 @@ class Invitation:
         invitation.save()
         Invitation.send_invitation(invitation, org_name, user.as_dict(),
                                    '{}/{}'.format(invitation_origin, context_path), mandatory_login_source)
+        # notify admin if staff adds team members
+        if 'staff' in token_info.get('realm_access').get('roles'):
+            payload = {
+                'specversion': '1.x-wip',
+                'type': 'bc.registry.auth.teamMemberInvited',
+                'source': f'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{org_id}',
+                'id': org_id,
+                'time': f'{datetime.now()}',
+                'datacontenttype': 'application/json',
+                'data': {
+                    'accountId': org_id,
+                }
+            }
+            publish_response(payload=payload, client_name=CONFIG.NATS_MAILER_CLIENT_NAME,
+                             subject=CONFIG.NATS_MAILER_SUBJECT)
         return Invitation(invitation)
 
     def update_invitation(self, user, token_info: Dict, invitation_origin):
