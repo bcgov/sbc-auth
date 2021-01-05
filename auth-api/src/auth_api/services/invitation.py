@@ -97,7 +97,7 @@ class Invitation:
         Invitation.send_invitation(invitation, org_name, user.as_dict(),
                                    '{}/{}'.format(invitation_origin, context_path), mandatory_login_source)
         # notify admin if staff adds team members
-        if 'staff' in token_info.get('realm_access').get('roles'):
+        if token_info and 'staff' in token_info.get('realm_access', {}).get('roles', None):
             payload = {
                 'specversion': '1.x-wip',
                 'type': 'bc.registry.auth.teamMemberInvited',
