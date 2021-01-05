@@ -38,6 +38,7 @@ from auth_api.config import get_named_config
 from .authorization import check_auth
 from .membership import Membership as MembershipService
 from .notification import send_email
+from ..utils.account_mailer import publish_to_mailer
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -61,7 +62,8 @@ class Invitation:
         return obj
 
     @staticmethod
-    def create_invitation(invitation_info: Dict, user, token_info: Dict, invitation_origin):
+    def create_invitation(invitation_info: Dict, user,  # pylint: disable=too-many-locals
+                          token_info: Dict, invitation_origin):
         """Create a new invitation."""
         # Ensure that the current user is ADMIN or COORDINATOR on each org being invited to
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
@@ -94,6 +96,10 @@ class Invitation:
         invitation.save()
         Invitation.send_invitation(invitation, org_name, user.as_dict(),
                                    '{}/{}'.format(invitation_origin, context_path), mandatory_login_source)
+        # notify admin if staff adds team members
+        is_staff_access = token_info and 'staff' in token_info.get('realm_access', {}).get('roles', None)
+        if is_staff_access and invitation_type == InvitationType.STANDARD.value:
+            publish_to_mailer('teamMemberInvited', org_id)
         return Invitation(invitation)
 
     def update_invitation(self, user, token_info: Dict, invitation_origin):
