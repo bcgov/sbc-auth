@@ -74,7 +74,7 @@ describe('AccountFreezeView.vue', () => {
   })
 
   it('should render page title', () => {
-    expect(wrapper.find('h1').text()).toBe('This account has been temporarily suspended')
+    expect(wrapper.find('h1').text()).toBe('Your Account is Temporarily Suspended')
   })
 
   it('should render page title icon', () => {
