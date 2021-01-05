@@ -55,7 +55,7 @@ class Permissions:  # pylint: disable=too-few-public-methods
         """Get the permissions for the membership type."""
         # Just a tweak til we get all org status to DB
         # TODO fix this logic
-        if org_status != OrgStatus.NSF_SUSPENDED.value:
+        if org_status not in (OrgStatus.NSF_SUSPENDED.value, OrgStatus.PENDING_AFFIDAVIT_REVIEW.value):
             org_status = None
         key_tuple = (org_status, membership_type)
         actions_from_cache = cache.get(key_tuple)
