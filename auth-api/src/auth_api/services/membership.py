@@ -15,7 +15,6 @@
 
 This module manages the Membership Information between an org and a user.
 """
-from datetime import datetime
 from typing import Dict
 
 from flask import current_app
@@ -37,8 +36,8 @@ from .authorization import check_auth
 from .keycloak import KeycloakService
 from .notification import send_email
 from .org import Org as OrgService
-from .queue_publisher import publish_response
 from .user import User as UserService
+from ..utils.account_mailer import publish_to_mailer
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -222,38 +221,15 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         is_staff_modifying = 'staff' in token_info.get('realm_access').get('roles')
         is_bcros_user = self._model.user.login_source == LoginSource.BCROS.value
         # send mail if staff modifies , not applicable for bcros , only if anything is getting updated
-        notification_type: str = ''
         if is_staff_modifying and not is_bcros_user and len(updated_fields) != 0:
-            notification_type = 'teamModified'
-            payload = {
-                'specversion': '1.x-wip',
-                'type': f'bc.registry.auth.{notification_type}',
-                'source': f'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{self._model.org.id}',
-                'id': self._model.org.id,
-                'time': f'{datetime.now()}',
-                'datacontenttype': 'application/json',
-                'data': {
-                    'accountId': self._model.org.id,
-                }
-            }
-            publish_response(payload=payload, client_name=CONFIG.NATS_MAILER_CLIENT_NAME,
-                             subject=CONFIG.NATS_MAILER_SUBJECT)
+            publish_to_mailer(notification_type='teamModified', org_id=self._model.org.id)
 
         if is_staff_modifying and not is_bcros_user and admin_getting_removed:
-            notification_type = 'adminRemoved'
-            payload = {
-                'specversion': '1.x-wip',
-                'type': f'bc.registry.auth.{notification_type}',
-                'source': f'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{self._model.org.id}',
-                'id': self._model.org.id,
-                'time': f'{datetime.now()}',
-                'datacontenttype': 'application/json',
-                'data': {
-                    'accountId': self._model.org.id,
-                }
+            data = {
+                'accountId': self._model.org.id,
+                'to': ''
             }
-            publish_response(payload=payload, client_name=CONFIG.NATS_MAILER_CLIENT_NAME,
-                             subject=CONFIG.NATS_MAILER_SUBJECT)
+            publish_to_mailer(notification_type='adminRemoved', org_id=self._model.org.id, data=data)
 
         current_app.logger.debug('>update_membership')
         return self
