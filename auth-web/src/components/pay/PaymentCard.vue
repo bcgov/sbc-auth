@@ -66,7 +66,7 @@
             class="px-0"
             text
             color="primary"
-            @click="downloadInvoice"
+            @click="emitBtnClick('download-invoice')"
             v-if="!payWithCreditCard"
           >
             <v-icon class="mr-1">
@@ -128,10 +128,6 @@ export default class PaymentCard extends Vue {
     this.totalBalanceDue = this.paymentCardData?.totalBalanceDue || 0
     this.payeeName = this.paymentCardData.payeeName
     this.cfsAccountId = this.paymentCardData?.cfsAccountId || ''
-  }
-
-  private downloadInvoice () {
-    // DOWNLOAD INVOICE
   }
 
   private cancel () {

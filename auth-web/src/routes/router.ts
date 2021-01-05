@@ -31,6 +31,7 @@ import MaintainBusinessView from '@/views/auth/home/MaintainBusinessView.vue'
 import NonBcscAccountCreationSuccessView from '@/views/auth/create-account/non-bcsc/NonBcscAccountCreationSuccessView.vue'
 import NonBcscAccountSetupView from '@/views/auth/create-account/non-bcsc/NonBcscAccountSetupView.vue'
 import NonBcscInfoView from '@/views/auth/create-account/non-bcsc/NonBcscInfoView.vue'
+import PADTermsAndConditionsView from '@/views/auth/PADTermsAndConditionsView.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
 import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
 import PaymentView from '@/views/pay/PaymentView.vue'
@@ -507,6 +508,13 @@ export function getRoutes (): RouteConfig[] {
       name: 'userprofileterms',
       props: true,
       component: TermsOfServiceView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/PAD-terms-and-conditions',
+      name: 'padtermsandconditions',
+      props: true,
+      component: PADTermsAndConditionsView,
       meta: { requiresAuth: true }
     },
     { path: '*', name: 'notfound', component: PageNotFound }

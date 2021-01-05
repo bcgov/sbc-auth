@@ -43,6 +43,7 @@ export interface Organization {
   bcolAccountId?: string,
   bcolUserId?: string
   suspendedOn?: string
+  accountStatus?: string
 }
 
 export interface PADInfo {

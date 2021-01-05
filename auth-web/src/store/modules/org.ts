@@ -381,7 +381,8 @@ export default class OrgModule extends VuexModule {
       type: 'ACCOUNT',
       urlorigin: '',
       urlpath: `/account/${org?.id}/settings`,
-      accountType: org?.orgType
+      accountType: org?.orgType,
+      accountStatus: org?.accountStatus
     }
     ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify(accountSettings))
     return accountSettings
@@ -758,5 +759,11 @@ export default class OrgModule extends VuexModule {
   public async updateInvoicePaymentMethodAsCreditCard (paymentId: string) {
     const response = await PaymentService.updateInvoicePaymentMethodAsCreditCard(paymentId)
     return response?.data || {}
+  }
+
+  @Action({ rawError: true })
+  public async downloadOBInvoice (paymentId: string) {
+    const response = await PaymentService.downloadOBInvoice(paymentId)
+    return response || {}
   }
 }

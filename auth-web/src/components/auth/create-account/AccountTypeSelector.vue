@@ -9,7 +9,7 @@ import { AccessType } from '@/util/constants'
         sm="12" md="6"
       >
         <v-card
-          class="account-card pa-10 pt-9 elevation-2"
+          class="account-card pa-8 elevation-2"
           :class="{'active': selectedAccountType == ACCOUNT_TYPE.BASIC}"
           flat
           outlined
@@ -17,21 +17,24 @@ import { AccessType } from '@/util/constants'
           @click="selectAccountType(ACCOUNT_TYPE.BASIC)"
         >
           <div class="account-type">
-            <div class="account-type__name mt-n1 mb-2">
+            <div class="account-type__title">
               Basic
             </div>
-            <div class="account-type__title mb-8">
-              I make 10 transactions per month or less
+            <div class="account-type__name">
+              Pay-as-you-go
             </div>
-            <ul class="account-type__details ml-1">
-              <li class="mb-4">For users who file on behalf of their own businesses or conduct a limited number of searches</li>
-              <li class="mb-4">Credit card payment only</li>
-              <li>Up to 10 purchases per month</li>
+            <div class="account-type__summary">
+              For people who file on behalf of their own businesses or conduct limited searches.
+            </div>
+            <ul class="account-type__details">
+              <li>10 transactions per month</li>
+              <li>5 team members per account</li>
+              <li>Pay by credit card and online banking</li>
             </ul>
           </div>
 
           <!-- State Button (Create Account) -->
-          <div class="mt-9" v-if="!isAccountChange">
+          <div class="mt-10" v-if="!isAccountChange">
             <v-btn large block depressed color="primary" class="font-weight-bold"
               :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
               @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
@@ -40,7 +43,7 @@ import { AccessType } from '@/util/constants'
           </div>
 
           <!-- State Button (Change Account) -->
-          <div class="mt-9" v-if="isAccountChange">
+          <div class="mt-10" v-if="isAccountChange">
             <v-btn large block depressed color="primary" class="font-weight-bold"
               :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
               @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
@@ -56,7 +59,7 @@ import { AccessType } from '@/util/constants'
         sm="12" md="6"
       >
         <v-card
-          class="account-card pa-10 pt-9 elevation-2 d-flex"
+          class="account-card pa-8 elevation-2 d-flex"
           :class="{'active': selectedAccountType == ACCOUNT_TYPE.PREMIUM}"
           flat
           outlined
@@ -64,23 +67,25 @@ import { AccessType } from '@/util/constants'
           @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)"
         >
           <div class="account-type">
-            <div class="account-type__name mt-n1 mb-2">PREMIUM</div>
-            <div class="account-type__title mb-8">I make more than 10 transactions per month</div>
-            <ul class="account-type__details ml-1 mb-6">
-              <li class="mb-4">For firms and companies who search frequently or file for a large number of businesses</li>
-              <li class="mb-4">Uses your BC Online account to pay for products and services</li>
-              <li class="mb-4">Unlimited transactions</li>
-              <li>Requires an existing BC Online account and Prime Contact credentials to complete.</li>
-            </ul>
-            <div>
-              <v-btn text color="primary" class="bcol-link px-2" href="https://www.bconline.gov.bc.ca/" target="_blank" rel="noopener noreferrer">
-                <v-icon>mdi-help-circle-outline</v-icon>
-                <span>How do I get a BC Online Account?</span>
-              </v-btn>
+            <div class="account-type__title">
+              Premium
             </div>
+            <div class="account-type__name">
+              Pre-authorized
+            </div>
+            <div class="account-type__summary">
+              For firms and companies who search frequently or file for a large number of businesses.
+            </div>
+            <ul class="account-type__details">
+              <li>Unlimited transactions</li>
+              <li>Unlimited team members</li>
+              <li>Pay by pre-authorized debit or <a href="https://www.bconline.gov.bc.ca/" target="_blank" rel="noopener noreferrer">BC Online deposit account</a></li>
+              <li>Financial Statements</li>
+              <li>Developer API</li>
+            </ul>
 
             <!-- State Button (Create Account) -->
-            <div class="mt-9" v-if="!isAccountChange">
+            <div class="card-buttons" v-if="!isAccountChange">
               <v-btn large block depressed color="primary" class="font-weight-bold"
                 :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
                 @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
@@ -89,7 +94,7 @@ import { AccessType } from '@/util/constants'
             </div>
 
             <!-- State Button (Change Account) -->
-            <div class="mt-9" v-if="isAccountChange">
+            <div class="card-buttons" v-if="isAccountChange">
               <v-btn large block depressed color="primary" class="font-weight-bold"
                 :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
                 @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
@@ -102,10 +107,13 @@ import { AccessType } from '@/util/constants'
         </v-card>
       </v-col>
     </v-row>
+
+    <v-divider class="mt-4 mb-10"></v-divider>
+
     <v-row>
       <v-col
         cols="12"
-        class="form__btns mt-6 pb-0 text-right"
+        class="form__btns py-0 text-right"
       >
         <v-btn large color="primary" class="mr-3" @click="goNext" :disabled='!canContinue'>
           <span>Next</span>
@@ -236,7 +244,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   display: flex;
   flex-direction: column;
   position: relative;
-  background-color: var(--v-grey-lighten4) !important;
+  //background-color: var(--v-grey-lighten4) !important;
 
   &:hover {
     border-color: var(--v-primary-base) !important;
@@ -253,19 +261,38 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 
 .account-type {
   flex: 1 1 auto;
-}
 
-.account-type__title {
-  line-height: 1.75rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-}
+  &__title {
+    margin-top: -0.25rem;
+    margin-bottom: 0.15rem;
+    line-height: 1.75rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
 
-.account-type__name {
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 0.9375rem;
-  color: var(--v-grey-darken1);
+  &__name {
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    color: var(--v-grey-darken1);
+  }
+
+  &__summary {
+    margin-bottom: 2rem;
+  }
+
+  &__details {
+    margin-bottom: 2.25rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+
+    li {
+      padding-left: 0.75rem;
+    }
+
+    li + li {
+      margin-top: 0.75rem;
+    }
+  }
 }
 
 .v-btn.bcol-link {
@@ -278,34 +305,6 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 
   span {
     text-decoration: underline;
-  }
-}
-
-ul {
-  list-style: none; /* Remove default bullets */
-  font-size: 0.875rem;
-}
-
-ul li::before {
-  content: "\2022";  /* Add content: \2022 is the CSS Code/unicode for a bullet */
-  color: var(--v-primary-base);
-  font-weight: 700;
-  display: inline-block;
-  width: 1.5rem;
-  margin-left: -1.5rem;
-}
-
-.selected-icon {
-  opacity: 0;
-  position: absolute;
-  top: 1.75rem;
-  right: 2.5rem;
-  transform: scale(0.25);
-  transform-origin: 50% 50%;
-  transition: all ease-out 0.5s;
-
-  .v-icon {
-    color: #ffffff;
   }
 }
 
