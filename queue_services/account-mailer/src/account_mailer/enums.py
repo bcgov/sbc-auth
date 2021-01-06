@@ -24,15 +24,20 @@ class MessageType(Enum):
     NSF_UNLOCK_ACCOUNT = 'bc.registry.payment.unlockAccount'
     ACCOUNT_CONFIRMATION_PERIOD_OVER = 'bc.registry.payment.confirmationPeriodOver'
     PAD_INVOICE_CREATED = 'bc.registry.payment.pad.invoiceCreated'
+    ADMIN_REMOVED = 'bc.registry.auth.adminRemoved'
+    TEAM_MEMBER_INVITED = 'bc.registry.auth.teamMemberInvited'
+    TEAM_MODIFIED = 'bc.registry.auth.teamModified'
 
 
 class SubjectType(Enum):
     """Event Types."""
 
-    NSF_LOCK_ACCOUNT_SUBJECT = 'Your account has been suspended'
-    NSF_UNLOCK_ACCOUNT_SUBJECT = 'Your account has been reactivated'
-    ACCOUNT_CONF_OVER_SUBJECT = 'Your account is now active'
-    PAD_INVOICE_CREATED = 'Your accounts PAD transaction details'
+    NSF_LOCK_ACCOUNT_SUBJECT = '[BC Registries and Online Services] Your account has been suspended'
+    NSF_UNLOCK_ACCOUNT_SUBJECT = '[BC Registries and Online Services] Your account has been reactivated'
+    ACCOUNT_CONF_OVER_SUBJECT = '[BC Registries and Online Services] Your account is now active'
+    PAD_INVOICE_CREATED = '[BC Registries and Online Services] Your accounts PAD transaction details'
+    ADMIN_REMOVED_SUBJECT = '[BC Registries and Online Services] You have been removed as an administrator'
+    TEAM_MODIFIED_SUBJECT = '[BC Registries and Online Services] Change in Team members'
 
 
 class TemplateType(Enum):
@@ -42,3 +47,5 @@ class TemplateType(Enum):
     NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME = 'account_restored_email'
     ACCOUNT_CONF_OVER_TEMPLATE_NAME = 'account_conf_over_email'
     PAD_INVOICE_CREATED_TEMPLATE_NAME = 'pad_invoice_email'
+    ADMIN_REMOVED_TEMPLATE_NAME = 'admin_removed_email'
+    TEAM_MODIFIED_TEMPLATE_NAME = 'team_modified_email'

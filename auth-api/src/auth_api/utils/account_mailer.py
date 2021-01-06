@@ -29,7 +29,7 @@ def publish_to_mailer(notification_type, org_id, data=None):
     payload = {
         'specversion': '1.x-wip',
         'type': f'bc.registry.auth.{notification_type}',
-        'source': f'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{org_id}',
+        'source': f'https://api.auth.bcregistry.gov.bc.ca/v1/accounts/{org_id}',
         'id': org_id,
         'time': f'{datetime.now()}',
         'datacontenttype': 'application/json',
