@@ -171,6 +171,18 @@ async def run(loop, mode, auth_account_id, auth_account_name, auth_username, ban
                     'invoice_total': 100
                 }
             }
+        elif mode == 'admin_removed':
+            payload = {
+                'specversion': '1.x-wip',
+                'type': f'{MessageType.ADMIN_REMOVED.value}',
+                'source': 'https://api.auth.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
+                'id': auth_account_id,
+                'datacontenttype': 'application/json',
+                'data': {
+                    'accountId': auth_account_id,
+                    'recipientEmail': 'foo@bar.com'
+                }
+            }
 
         await sc.publish(subject=subscription_options().get('subject'),
                          payload=json.dumps(payload).encode('utf-8'))
@@ -232,3 +244,4 @@ if __name__ == '__main__':
 # account restored cmd --> python3 q_cli.py -m acc_unlock -i 4 -n SomeAccount
 # account conf pver-- >  python3 q_cli.py -m conf_per -i 4
 # account conf pver-- >  python3 q_cli.py -m pad_invoice -i 4
+# account admin removal-- >  python3 q_cli.py -m admin_removed -i 4
