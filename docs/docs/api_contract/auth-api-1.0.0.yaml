@@ -3245,6 +3245,7 @@ paths:
                     roles:
                       - view
                       - edit
+                      - make_payment
                     business:
                       folioNumber: MOCK1234
                       name: Mock Business
@@ -3261,6 +3262,7 @@ paths:
                     roles:
                       - view
                       - edit
+                      - make_payment
                     account:
                       id: '1234'
                       name: Mock Account
@@ -3274,6 +3276,7 @@ paths:
                     roles:
                       - view
                       - edit
+                      - make_payment
                     account:
                       id: '1234'
                       name: Mock Account
@@ -3286,6 +3289,7 @@ paths:
                     roles:
                       - view
                       - edit
+                      - make_payment
                 CP0000000:
                   value: {}
                 CP0002000:
@@ -3294,6 +3298,7 @@ paths:
                     roles:
                       - view
                       - edit
+                      - make_payment
                     business:
                       folioNumber: MOCK1234
                       name: Mock Business
@@ -3310,6 +3315,7 @@ paths:
                     roles:
                       - view
                       - edit
+                      - make_payment
                     business:
                       folioNumber: MOCK1234
                       name: Mock Business
@@ -3326,6 +3332,7 @@ paths:
                     roles:
                       - view
                       - edit
+                      - make_payment
                     business:
                       folioNumber: MOCK1234
                       name: Mock Business
@@ -3412,6 +3419,7 @@ paths:
                     roles:
                       - search
                       - edit
+                      - make_payment
                     business:
                       folioNumber: MOCK1234
                       name: Mock Business
@@ -4568,6 +4576,7 @@ components:
             example:
               - edit
               - view
+              - make_payment
             pattern: '^(.*)$'
     orgRequest:
       title: orgRequest
@@ -4968,6 +4977,7 @@ components:
             example:
               - edit
               - view
+              - make_payment
             pattern: '^(.*)$'
       required:
         - orgMembership

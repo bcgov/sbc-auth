@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Common setup and fixtures for the pytest suite used by this service."""
+import os
 import time
+from random import random
 
 import pytest
 from flask_migrate import Migrate, upgrade
@@ -21,7 +23,8 @@ from sqlalchemy import event, text
 from auth_api import create_app, setup_jwt_manager
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.models import db as _db
-
+from nats.aio.client import Client as Nats
+from stan.aio.client import Client as Stan
 
 _JWT = JWTWrapper.get_instance()
 
@@ -127,6 +130,66 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         # This instruction rollsback any commit that were executed in the tests.
         txn.rollback()
         conn.close()
+
+
+@pytest.fixture(scope='function')
+def client_id():
+    """Return a unique client_id that can be used in tests."""
+    _id = random.SystemRandom().getrandbits(0x58)
+    #     _id = (base64.urlsafe_b64encode(uuid.uuid4().bytes)).replace('=', '')
+
+    return f'client-{_id}'
+
+
+@pytest.fixture(scope='session')
+def stan_server(docker_services):
+    """Create the nats / stan services that the integration tests will use."""
+    if os.getenv('TEST_NATS_DOCKER'):
+        docker_services.start('nats')
+        time.sleep(2)
+
+
+@pytest.fixture(scope='function')
+@pytest.mark.asyncio
+async def stan(event_loop, client_id):
+    """Create a stan connection for each function, to be used in the tests."""
+    nc = Nats()
+    sc = Stan()
+    cluster_name = 'test-cluster'
+
+    await nc.connect(io_loop=event_loop, name='entity.filing.tester')
+
+    await sc.connect(cluster_name, client_id, nats=nc)
+
+    yield sc
+
+    await sc.close()
+    await nc.close()
+
+
+@pytest.fixture(scope='function')
+@pytest.mark.asyncio
+async def entity_stan(app, event_loop, client_id):
+    """Create a stan connection for each function.
+
+    Uses environment variables for the cluster name.
+    """
+    nc = Nats()
+    sc = Stan()
+
+    await nc.connect(io_loop=event_loop)
+
+    cluster_name = app.config['NATS_CLUSTER_ID']
+
+    if not cluster_name:
+        raise ValueError('Missing env variable: NATS_CLUSTER_ID')
+
+    await sc.connect(cluster_name, client_id, nats=nc)
+
+    yield sc
+
+    await sc.close()
+    await nc.close()
 
 
 @pytest.fixture(scope='session', autouse=True)

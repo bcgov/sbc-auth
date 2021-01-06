@@ -99,6 +99,22 @@ async def process_event(event_message: dict, flask_app):
             subject = SubjectType.ACCOUNT_CONF_OVER_SUBJECT.value
             email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject,
                                                nsf_fee=nsf_fee)
+        elif message_type in (MessageType.TEAM_MODIFIED.value, MessageType.TEAM_MEMBER_INVITED.value):
+            email_msg = event_message.get('data')
+            logger.debug('Team Modified message recieved')
+            template_name = TemplateType.TEAM_MODIFIED_TEMPLATE_NAME.value
+            org_id = email_msg.get('accountId')
+            admin_coordinator_emails = get_member_emails(org_id, (ADMIN,))
+            subject = SubjectType.TEAM_MODIFIED_SUBJECT.value
+            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject)
+        elif message_type == MessageType.ADMIN_REMOVED.value:
+            email_msg = event_message.get('data')
+            logger.debug('ADMIN_REMOVED message recieved')
+            template_name = TemplateType.ADMIN_REMOVED_TEMPLATE_NAME.value
+            org_id = email_msg.get('accountId')
+            recipient_email = email_msg.get('recipientEmail')
+            subject = SubjectType.ADMIN_REMOVED_SUBJECT.value
+            email_dict = common_mailer.process(org_id, recipient_email, template_name, subject)
         elif message_type == MessageType.PAD_INVOICE_CREATED.value:
             email_msg = event_message.get('data')
             template_name = TemplateType.PAD_INVOICE_CREATED_TEMPLATE_NAME.value

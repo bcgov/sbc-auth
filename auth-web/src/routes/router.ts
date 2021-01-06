@@ -36,6 +36,7 @@ import PageNotFound from '@/views/auth/PageNotFound.vue'
 import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
 import PaymentView from '@/views/pay/PaymentView.vue'
 import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
+import PriceListView from '@/views/auth/PriceListView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
 import RequestNameView from '@/views/auth/home/RequestNameView.vue'
 import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
@@ -191,6 +192,12 @@ export function getRoutes (): RouteConfig[] {
       component: AccountChangeView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/price-list',
+      name: 'price-list',
+      component: PriceListView,
+      meta: { requiresAuth: false, showNavBar: true }
     },
     {
       path: '/setup-account',

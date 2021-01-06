@@ -23,6 +23,7 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models import MembershipType as MembershipTypeModel
@@ -37,6 +38,7 @@ from .keycloak import KeycloakService
 from .notification import send_email
 from .org import Org as OrgService
 from .user import User as UserService
+from ..utils.account_mailer import publish_to_mailer
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -197,10 +199,12 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         if self._model.membership_type.code == COORDINATOR and updated_fields.get('membership_type', None) == ADMIN:
             check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, STAFF))
 
+        admin_getting_removed: bool = False
         # No one can change an ADMIN's status, only option is ADMIN to leave the team. #2319
         if updated_fields.get('membership_status', None) \
                 and updated_fields['membership_status'].id == Status.INACTIVE.value \
                 and self._model.membership_type.code == ADMIN:
+            admin_getting_removed = True
             raise BusinessException(Error.OWNER_CANNOT_BE_REMOVED, None)
 
         # Ensure that if downgrading from owner that there is at least one other owner in org
@@ -215,6 +219,21 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         self._model.save()
         # Add to account_holders group in keycloak
         Membership._add_or_remove_group(self._model)
+        is_staff_modifying = 'staff' in token_info.get('realm_access').get('roles')
+        is_bcros_user = self._model.user.login_source == LoginSource.BCROS.value
+        # send mail if staff modifies , not applicable for bcros , only if anything is getting updated
+        if is_staff_modifying and not is_bcros_user and len(updated_fields) != 0:
+            publish_to_mailer(notification_type='teamModified', org_id=self._model.org.id)
+
+        # send mail to the person itself who is getting removed by staff ;if he is admin
+        if is_staff_modifying and not is_bcros_user and admin_getting_removed:
+            recipient_email = ContactLinkModel.find_by_user_id(self._model.user.id).contact.email
+            data = {
+                'accountId': self._model.org.id,
+                'recipientEmail': recipient_email
+            }
+            publish_to_mailer(notification_type='adminRemoved', org_id=self._model.org.id, data=data)
+
         current_app.logger.debug('>update_membership')
         return self
 
