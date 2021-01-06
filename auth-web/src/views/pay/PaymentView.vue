@@ -106,17 +106,21 @@ export default class PaymentView extends Vue {
       // user should be signed in and should have account as well
       if (this.isUserSignedIn && !!accountSettings) {
         // get the invoice and check for OB
-        const invoice: Invoice = await this.getInvoice(this.paymentId)
-        if (invoice?.paymentMethod === PaymentTypes.ONLINE_BANKING) {
-          // get account data to show in the UI
-          const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(accountSettings?.id)
-          this.paymentCardData = {
-            totalBalanceDue: invoice?.total || 0,
-            payeeName: ConfigHelper.getPaymentPayeeName(),
-            cfsAccountId: paymentDetails?.cfsAccount?.cfsAccountNumber || ''
+        try {
+          const invoice: Invoice = await this.getInvoice(this.paymentId)
+          if (invoice?.paymentMethod === PaymentTypes.ONLINE_BANKING) {
+            // get account data to show in the UI
+            const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(accountSettings?.id)
+            this.paymentCardData = {
+              totalBalanceDue: invoice?.total || 0,
+              payeeName: ConfigHelper.getPaymentPayeeName(),
+              cfsAccountId: paymentDetails?.cfsAccount?.cfsAccountNumber || ''
+            }
+            this.showLoading = false
+            this.showOnlineBanking = true
           }
-          this.showLoading = false
-          this.showOnlineBanking = true
+        }catch (error) {
+          console.error('error in accessing the invoice.Defaulting to CC flow')
         }
       }
 
