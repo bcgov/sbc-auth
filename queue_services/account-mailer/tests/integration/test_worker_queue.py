@@ -242,6 +242,7 @@ async def test_account_pad_invoice_mailer_queue(app, session, stan_server, event
         assert mock_send.call_args.args[0].get('attachments') is None
         assert mock_send.call_args.args[0].get('content').get('body') is not None
 
+
 @pytest.mark.asyncio
 async def test_account_admin_removed(app, session, stan_server, event_loop, client_id, events_stan, future):
     """Assert that events can be retrieved and decoded from the Queue."""
@@ -279,6 +280,7 @@ async def test_account_admin_removed(app, session, stan_server, event_loop, clie
         assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.ADMIN_REMOVED_SUBJECT.value
         assert mock_send.call_args.args[0].get('attachments') is None
         assert mock_send.call_args.args[0].get('content').get('body') is not None
+
 
 @pytest.mark.asyncio
 async def test_account_team_modified(app, session, stan_server, event_loop, client_id, events_stan, future):
