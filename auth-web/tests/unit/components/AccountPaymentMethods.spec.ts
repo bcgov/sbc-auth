@@ -28,7 +28,7 @@ describe('AccountPaymentMethods.vue', () => {
         currentMembership: []
       },
       actions: {
-        validatePADInfo:jest.fn(),
+        validatePADInfo: jest.fn(),
         getOrgPayments: jest.fn(),
         updateOrg: jest.fn()
       },
@@ -69,6 +69,5 @@ describe('AccountPaymentMethods.vue', () => {
 
   it('renders the components properly and address is being shown', () => {
     expect(wrapper.find(AccountPaymentMethods).exists()).toBe(true)
-
   })
 })
