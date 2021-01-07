@@ -38,7 +38,15 @@ describe('PADInfoForm.vue', () => {
     const orgModule = {
       namespaced: true,
       state: {
-        currentOrgPADInfo: { "bankAccountNumber": "XXX4567", "bankInstitutionNumber": "0001", "bankTransitNumber": "00720", "cfsAccountNumber": "4566", "cfsPartyNumber": "99034", "cfsSiteNumber": "30579", "status": "ACTIVE" },
+        currentOrgPADInfo: {
+          "bankAccountNumber": "1234567",
+          "bankInstitutionNumber": "0001",
+          "bankTransitNumber": "00720",
+          "cfsAccountNumber": "4566",
+          "cfsPartyNumber": "99034",
+          "cfsSiteNumber": "30579",
+          "status": "ACTIVE"
+        },
         currentOrganizationType: Account.BASIC
       },
       actions: OrgModule.actions,
