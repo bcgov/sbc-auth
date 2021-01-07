@@ -330,7 +330,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         if not user_model:
             return None
 
-        # if accepted , double check if there is a new TOS in place .IF so , update the flag to false
+        # If terms accepted, double check if there is a new TOS in place. If so, update the flag to false.
         if user_model.is_terms_of_use_accepted:
             document_type = DocumentType.TERMS_OF_USE_DIRECTOR_SEARCH.value if is_anonymous_user \
                 else DocumentType.TERMS_OF_USE.value
@@ -469,12 +469,23 @@ class User:  # pylint: disable=too-many-instance-attributes
         if not token:
             return None
 
-        user = UserModel.find_by_jwt_token(token)
+        user_model = UserModel.find_by_jwt_token(token)
 
-        if not user:
+        if not user_model:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        return User(user)
+        is_anonymous_user = token.get('accessType', None) == AccessType.ANONYMOUS.value
+        # If terms accepted , double check if there is a new TOS in place. If so, update the flag to false.
+        if user_model.is_terms_of_use_accepted:
+            document_type = DocumentType.TERMS_OF_USE_DIRECTOR_SEARCH.value if is_anonymous_user \
+                else DocumentType.TERMS_OF_USE.value
+            # get the digit version of the terms of service..ie d1 gives 1 ; d2 gives 2..for proper comparison
+            latest_version = util.digitify(DocumentService.find_latest_version_by_type(document_type))
+            current_version = util.digitify(user_model.terms_of_use_accepted_version)
+            if latest_version > current_version:
+                user_model.is_terms_of_use_accepted = False
+
+        return User(user_model)
 
     @classmethod
     def find_by_username(cls, username: str = None):
