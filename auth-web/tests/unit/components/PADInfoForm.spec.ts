@@ -6,7 +6,6 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import UserModule from '@/store/modules/user'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
