@@ -330,6 +330,16 @@ class User:  # pylint: disable=too-many-instance-attributes
         if not user_model:
             return None
 
+        # If terms accepted, double check if there is a new TOS in place. If so, update the flag to false.
+        if user_model.is_terms_of_use_accepted:
+            document_type = DocumentType.TERMS_OF_USE_DIRECTOR_SEARCH.value if is_anonymous_user \
+                else DocumentType.TERMS_OF_USE.value
+            # get the digit version of the terms of service..ie d1 gives 1 ; d2 gives 2..for proper comparison
+            latest_version = util.digitify(DocumentService.find_latest_version_by_type(document_type))
+            current_version = util.digitify(user_model.terms_of_use_accepted_version)
+            if latest_version > current_version:
+                user_model.is_terms_of_use_accepted = False
+
         user = User(user_model)
         return user
 
