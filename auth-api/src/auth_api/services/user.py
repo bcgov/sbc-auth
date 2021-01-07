@@ -471,6 +471,9 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         user_model = UserModel.find_by_jwt_token(token)
 
+        if not user_model:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
         is_anonymous_user = token.get('accessType', None) == AccessType.ANONYMOUS.value
         # If terms accepted , double check if there is a new TOS in place. If so, update the flag to false.
         if user_model.is_terms_of_use_accepted:
@@ -481,9 +484,6 @@ class User:  # pylint: disable=too-many-instance-attributes
             current_version = util.digitify(user_model.terms_of_use_accepted_version)
             if latest_version > current_version:
                 user_model.is_terms_of_use_accepted = False
-
-        if not user_model:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         return User(user_model)
 
