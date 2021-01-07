@@ -119,6 +119,7 @@ export default class PADInfoForm extends Vue {
   @Prop({ default: true }) isTOSNeeded: boolean
   @Prop({ default: false }) isInitialTOSAccepted: boolean
   @Prop({ default: false }) isInitialAcknowledged: boolean
+  @Prop({ default: false }) clearOnEdit: boolean
   private readonly currentOrgPADInfo!: PADInfo
   private readonly currentOrganizationType!: string
   private readonly setCurrentOrganizationPADInfo!: (padInfo: PADInfo) => void
@@ -128,6 +129,7 @@ export default class PADInfoForm extends Vue {
   private isTOSAccepted: boolean = false
   private isAcknowledged: boolean = false
   private isTouched: boolean = false
+  private isStartedEditing: boolean = false
 
   $refs: {
     preAuthDebitForm: HTMLFormElement,
@@ -171,7 +173,7 @@ export default class PADInfoForm extends Vue {
   }
 
   private get isTermsOfServiceAccepted () {
-    if (this.isInitialTOSAccepted) { // if TOS already accepted
+    if (this.isInitialTOSAccepted && !this.isStartedEditing) { // if TOS already accepted
       return true
     }
     return (Object.keys(this.padInformation).length) ? this.padInformation.isTOSAccepted : this.currentOrgPADInfo?.isTOSAccepted
@@ -195,7 +197,11 @@ export default class PADInfoForm extends Vue {
   }
 
   @Emit()
-  private emitPreAuthDebitInfo () {
+  private async emitPreAuthDebitInfo () {
+    if (!this.isStartedEditing) { // clear check needed only if user not started editing
+      await this.formClear() // await till decide
+    }
+
     const padInfo: PADInfo = {
       bankTransitNumber: this.transitNumber,
       bankInstitutionNumber: this.institutionNumber,
@@ -208,6 +214,20 @@ export default class PADInfoForm extends Vue {
     this.isTouched = true
     this.isPadInfoTouched()
     return padInfo
+  }
+
+  formClear () {
+    // Clearing form when user touch any field first time
+    if (this.clearOnEdit && !this.isStartedEditing) {
+      // setting edited value if edited first time
+      const padInfo: PADInfo = (Object.keys(this.padInformation).length) ? this.padInformation : this.currentOrgPADInfo
+      this.transitNumber = padInfo?.bankTransitNumber !== this.transitNumber ? this.transitNumber : ''
+      this.institutionNumber = padInfo?.bankInstitutionNumber !== this.institutionNumber ? this.institutionNumber : ''
+      this.accountNumber = /X/.test(this.accountNumber) ? '' : this.accountNumber // test account number contain X, then clear all else leave as it is
+      // this.isAcknowledged = false
+      this.isTOSAccepted = false
+      this.isStartedEditing = true
+    }
   }
 
   @Emit()

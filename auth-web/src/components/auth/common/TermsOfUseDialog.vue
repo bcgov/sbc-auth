@@ -135,6 +135,17 @@ export default class TermsOfUseDialog extends Vue {
     }
   }
 
+  /**
+   * watching isAlreadyAccepted to make changes for edit
+  */
+  @Watch('isAlreadyAccepted', { deep: true })
+  updateIsAlreadyAccepted (val, oldVal) {
+    // mark checked as props
+    if (oldVal !== val) {
+      this.termsAccepted = this.canCheckTerms = val
+    }
+  }
+
   private openDialog () {
     this.termsDialog = true
   }
