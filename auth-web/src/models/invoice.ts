@@ -24,6 +24,7 @@ export interface Invoice {
   serviceFees: number
   statusCode: string
   total: number
+  isOnlineBankingAllowed?: boolean
 }
 
 export interface LineItem {

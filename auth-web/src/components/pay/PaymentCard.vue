@@ -3,7 +3,11 @@
     <v-card-text class="heading-info">
       <h2 class="mb-2">Balance Due: ${{totalBalanceDue.toFixed(2)}}</h2>
       <template v-if="payWithCreditCard">
-        <p class="mb-1">
+        <p class="mb-1" v-if="showPayWithOnlyCC">
+          <strong>Credit card will be the only payment option for this transaction</strong>.<br />
+          Online banking payment option is not available.
+        </p>
+        <p class="mb-1" v-else>
           Click "pay now" to complete transaction balance with credit card.
           By credit card, your transaction will be completed <strong>immediately</strong>.
         </p>
@@ -45,11 +49,12 @@
         </ol>
       </template>
       <v-divider></v-divider>
-      <h4 class="mt-5 mb-4">Would you like to complete transaction immediately?</h4>
+      <h4 class="mt-5 mb-4">{{ showPayWithOnlyCC ? `Click "pay now" to complete transaction balance with credit card` : `Would you like to complete transaction immediately?`}}</h4>
       <v-checkbox
         class="pay-with-credit-card mb-4"
         v-model="payWithCreditCard"
         color="primary"
+        :disabled="showPayWithOnlyCC"
       >
         <template v-slot:label>
           <div class="font-weight-bold ml-1">Credit Card</div>
@@ -77,15 +82,6 @@
           <v-spacer></v-spacer>
           <template v-if="payWithCreditCard">
             <v-btn
-              color="grey lighten-2"
-              width="100"
-              class="mr-3"
-              @click="cancel"
-              depressed
-            >
-              Cancel
-            </v-btn>
-            <v-btn
               color="primary"
               width="100"
               class="font-weight-bold"
@@ -93,6 +89,15 @@
               depressed
             >
               Pay Now
+            </v-btn>
+            <v-btn
+              color="grey lighten-2"
+              width="100"
+              class="ml-3"
+              @click="cancel"
+              depressed
+            >
+              Cancel
             </v-btn>
           </template>
           <template v-else>
@@ -119,6 +124,7 @@ import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 @Component({})
 export default class PaymentCard extends Vue {
   @Prop() paymentCardData: any
+  @Prop({ default: false }) showPayWithOnlyCC: boolean
   private payWithCreditCard: boolean = false
   private totalBalanceDue = 0
   private cfsAccountId: string = ''
@@ -128,6 +134,7 @@ export default class PaymentCard extends Vue {
     this.totalBalanceDue = this.paymentCardData?.totalBalanceDue || 0
     this.payeeName = this.paymentCardData.payeeName
     this.cfsAccountId = this.paymentCardData?.cfsAccountId || ''
+    this.payWithCreditCard = this.showPayWithOnlyCC
   }
 
   private cancel () {

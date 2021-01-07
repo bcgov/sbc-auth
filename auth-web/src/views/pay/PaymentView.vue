@@ -39,6 +39,7 @@
               @complete-online-banking="completeOBPayment"
               @pay-with-credit-card="payNow"
               @download-invoice="downloadInvoice"
+              :showPayWithOnlyCC="showPayWithOnlyCC"
             ></PaymentCard>
           </v-col>
         </v-row>
@@ -93,6 +94,7 @@ export default class PaymentView extends Vue {
   private showErrorModal: boolean = false
   private returnUrl: string = ''
   private paymentCardData: any
+  private showPayWithOnlyCC: boolean = false
 
   private async mounted () {
     this.showLoading = true
@@ -116,10 +118,17 @@ export default class PaymentView extends Vue {
               payeeName: ConfigHelper.getPaymentPayeeName(),
               cfsAccountId: paymentDetails?.cfsAccount?.cfsAccountNumber || ''
             }
-            this.showLoading = false
-            this.showOnlineBanking = true
+            if (invoice?.isOnlineBankingAllowed) { // if isOnlineBankingAllowed is not allowed show CC as payment type
+              this.showLoading = false
+              this.showOnlineBanking = true
+              this.showPayWithOnlyCC = false
+            } else {
+              this.showLoading = false
+              this.showPayWithOnlyCC = true
+              this.showOnlineBanking = true
+            }
           }
-        }catch (error) {
+        } catch (error) {
           // eslint-disable-next-line no-console
           console.error('error in accessing the invoice.Defaulting to CC flow')
         }
