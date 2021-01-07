@@ -158,21 +158,24 @@ export default class ReviewBankInformation extends Mixins(Steppable) {
       // proceed to next step even if the response is empty
       return true
     }
+    // is validation service not reachable ,ignore and proceed
+    if (verifyPad?.statusCode !== 200) {
+      return true
+    }
     if (verifyPad?.isValid) {
       // proceed if PAD info is valid
       return true
-    } else {
-      this.isLoading = false
-      this.errorText = 'Bank information validation failed'
-      if (verifyPad?.message?.length) {
-        let msgList = ''
-        verifyPad.message.forEach((msg) => {
-          msgList += `<li>${msg}</li>`
-        })
-        this.errorText = `<ul class="error-list">${msgList}</ul>`
-      }
-      return false
     }
+    this.isLoading = false
+    this.errorText = 'Bank information validation failed'
+    if (verifyPad?.message?.length) {
+      let msgList = ''
+      verifyPad.message.forEach((msg) => {
+        msgList += `<li>${msg}</li>`
+      })
+      this.errorText = `<ul class="error-list">${msgList}</ul>`
+    }
+    return false
   }
 }
 </script>
