@@ -3,12 +3,10 @@ import { Account } from '@/util/constants'
 import OrgModule from '@/store/modules/org'
 import PaymentMethods from '@/components/auth/common/PADInfoForm.vue'
 import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
 Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 describe('PADInfoForm.vue', () => {
   let wrapper: any
