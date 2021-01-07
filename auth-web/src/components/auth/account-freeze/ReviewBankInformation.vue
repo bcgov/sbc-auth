@@ -23,6 +23,7 @@ import { AccessType } from '@/util/constants'
           :isTOSNeeded="false"
           :key="refreshPAD"
           @is-pad-info-touched="isPadInfoTouched"
+          :clearOnEdit="true"
         ></PADInfoForm>
       </v-col>
     </v-row>
