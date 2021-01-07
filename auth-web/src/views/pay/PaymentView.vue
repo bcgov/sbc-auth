@@ -119,7 +119,7 @@ export default class PaymentView extends Vue {
             this.showLoading = false
             this.showOnlineBanking = true
           }
-        }catch (error) {
+        } catch (error) {
           // eslint-disable-next-line no-console
           console.error('error in accessing the invoice.Defaulting to CC flow')
         }
