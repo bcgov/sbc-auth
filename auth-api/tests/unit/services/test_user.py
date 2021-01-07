@@ -557,7 +557,7 @@ def test_user_find_by_token(session):  # pylint: disable=unused-argument
     assert dictionary['user_terms']['isTermsOfUseAccepted'] is False
 
     # User accepted latest version terms and conditions should return True
-    UserService.update_terms_of_use(TestJwtClaims.user_test, True, 4)   #4 is latese verion
+    UserService.update_terms_of_use(TestJwtClaims.user_test, True, 4)  # 4 is latest version
     found_user = UserService.find_by_jwt_token(TestJwtClaims.user_test)
     dictionary = found_user.as_dict()
     assert dictionary['user_terms']['isTermsOfUseAccepted'] is True
