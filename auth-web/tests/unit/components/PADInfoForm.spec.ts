@@ -10,7 +10,7 @@ import Vuex from 'vuex'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
-describe('PaymentMethods.vue', () => {
+describe('PADInfoForm.vue', () => {
   let wrapper: any
   const config = {
     'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
@@ -26,17 +26,6 @@ describe('PaymentMethods.vue', () => {
 
     const vuetify = new Vuetify({})
 
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrgPADInfo: { "bankAccountNumber": "XXX4567", "bankInstitutionNumber": "0001", "bankTransitNumber": "00720", "cfsAccountNumber": "4566", "cfsPartyNumber": "99034", "cfsSiteNumber": "30579", "status": "ACTIVE" },
-        currentOrganizationType: Account.BASIC
-      },
-      actions: OrgModule.actions,
-      mutations: OrgModule.mutations,
-      getters: OrgModule.getters
-    }
-
     const userModule = {
       namespaced: true,
       state: {
@@ -45,6 +34,16 @@ describe('PaymentMethods.vue', () => {
       actions: {
         getTermsOfUse: jest.fn()
       },
+      mutations: {},
+      getters: {}
+    }
+    const orgModule = {
+      namespaced: true,
+      state: {
+        currentOrgPADInfo: { "bankAccountNumber": "XXX4567", "bankInstitutionNumber": "0001", "bankTransitNumber": "00720", "cfsAccountNumber": "4566", "cfsPartyNumber": "99034", "cfsSiteNumber": "30579", "status": "ACTIVE" },
+        currentOrganizationType: Account.BASIC
+      },
+      actions: OrgModule.actions,
       mutations: OrgModule.mutations,
       getters: OrgModule.getters
     }
