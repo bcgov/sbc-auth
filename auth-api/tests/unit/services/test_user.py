@@ -547,11 +547,20 @@ def test_user_find_by_token(session):  # pylint: disable=unused-argument
     found_user = UserService.find_by_jwt_token(None)
     assert found_user is None
 
+    # User accepted older version terms and conditions should return False
+    UserService.update_terms_of_use(TestJwtClaims.user_test, True, 1)
     found_user = UserService.find_by_jwt_token(TestJwtClaims.user_test)
     assert found_user is not None
     dictionary = found_user.as_dict()
     assert dictionary['username'] == TestJwtClaims.user_test['preferred_username']
     assert dictionary['keycloak_guid'] == TestJwtClaims.user_test['sub']
+    assert dictionary['user_terms']['isTermsOfUseAccepted'] is False
+
+    # User accepted latest version terms and conditions should return True
+    UserService.update_terms_of_use(TestJwtClaims.user_test, True, 4)  # 4 is latest version
+    found_user = UserService.find_by_jwt_token(TestJwtClaims.user_test)
+    dictionary = found_user.as_dict()
+    assert dictionary['user_terms']['isTermsOfUseAccepted'] is True
 
 
 def test_user_find_by_username(session):  # pylint: disable=unused-argument
