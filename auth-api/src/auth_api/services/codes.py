@@ -68,5 +68,5 @@ class Codes:
                         data.append(code_schema.dump(entry, many=False))
                 return data
             return None
-        except Exception as exception:
+        except Exception as exception:  # NOQA # pylint: disable=broad-except
             raise BusinessException(Error.UNDEFINED_ERROR, exception)

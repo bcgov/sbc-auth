@@ -166,7 +166,7 @@ class KeycloakService:
 
             response.raise_for_status()
             return response.json()
-        except Exception as err:
+        except Exception as err:   # NOQA # pylint: disable=broad-except
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, err)
 
     @staticmethod

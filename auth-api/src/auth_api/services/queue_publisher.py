@@ -74,7 +74,7 @@ async def publish(payload, subject: str, client_name: str = None):  # pylint: di
         await stan_con.publish(subject=subject,
                                payload=json.dumps(payload).encode('utf-8'))
 
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception as e:  # NOQA # pylint: disable=broad-except
         current_app.logger.error(e)
         raise
     finally:

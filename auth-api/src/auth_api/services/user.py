@@ -138,7 +138,7 @@ class User:  # pylint: disable=too-many-instance-attributes
                 user_dict = User(user_model).as_dict()
                 user_dict.update({'http_status': http_status.HTTP_201_CREATED, 'error': ''})
                 users.append(user_dict)
-            except Exception as e:  # pylint: disable=broad-except
+            except Exception as e:  # NOQA # pylint: disable=broad-except
                 current_app.logger.error('Error on  create_user_and_add_membership: {}', e)
                 db.session.rollback()
                 if re_enable_user:
