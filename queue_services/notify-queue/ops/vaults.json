@@ -1,0 +1,23 @@
+[
+    {
+        "vault": "shared",
+        "application": [
+            "email"
+        ]
+    },
+    {
+        "vault": "nats",
+        "application": [
+            "base",
+            "notify"
+        ]
+    },
+    {
+        "vault": "relationship",
+        "application": [
+            "postgres-notify",
+            "notify-api",
+            "notify-queue"
+        ]
+    }
+]

@@ -34,11 +34,10 @@ jobs:
         run: |
           echo "TAG_NAME=dev" >> $GITHUB_ENV
 
-      - uses: pwei1018/bcrs-cd-action@versioning
+      - uses: pwei1018/bcrs-cd-action@vaults
         with:
           WORKING_DIRECTORY: "./queue_services/account-mailer"
           APP_NAME: "account-mailer"
-          VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"nats\",\"keycloak\", \"minio\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-auth\",\"jwt\", \"account-mailer\"]}]'
           SKIP_OP: "false"
           DEPLOYMENT: "true"
           OP_PARAMETERS: ${{ secrets.OP_PARAMETERS }}

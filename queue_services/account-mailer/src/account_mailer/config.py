@@ -60,6 +60,9 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
+    TESTING = False
+    DEBUG = False
+
     SENTRY_DSN = os.getenv('SENTRY_DSN', None)
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -78,19 +81,25 @@ class _Config():  # pylint: disable=too-few-public-methods
         name=DB_NAME,
     )
 
+    # Keycloak & Jwt
+    JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_ISSUER')
+
+    # Keycloak auth config baseurl
+    KEYCLOAK_BASE_URL = os.getenv('KEYCLOAK_BASE_URL')
+    KEYCLOAK_REALMNAME = os.getenv('KEYCLOAK_REALMNAME')
+    KEYCLOAK_ADMIN_USERNAME = os.getenv('SBC_AUTH_ADMIN_CLIENT_ID')
+    KEYCLOAK_ADMIN_SECRET = os.getenv('SBC_AUTH_ADMIN_CLIENT_SECRET')
+
     # Service account details
-    KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_ID')
-    KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
+    KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('SBC_AUTH_ADMIN_CLIENT_ID')
+    KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('SBC_AUTH_ADMIN_CLIENT_SECRET')
 
-    # pay-API URL
+    # API endpoints
     PAY_API_URL = os.getenv('PAY_API_URL')
-
-    # notify-API URL
     NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
+    REPORT_API_BASE_URL = f'{os.getenv("REPORT_API_URL")}/reports'
 
-    # REPORT API Settings
-    REPORT_API_BASE_URL = os.getenv('REPORT_API_BASE_URL')
-
+    # nats
     NATS_CONNECTION_OPTIONS = {
         'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
         'name': os.getenv('NATS_MAILER_CLIENT_NAME', 'account.mailer.worker')
@@ -108,38 +117,6 @@ class _Config():  # pylint: disable=too-few-public-methods
         'durable_name': os.getenv('NATS_MAILER_QUEUE', 'account-mailer-worker') + '_durable',
     }
 
-    REFUND_REQUEST = {
-        'recipients': os.getenv('REFUND_REQUEST_RECIPIENTS', ''),
-    }
-
-    PDF_TEMPLATE_PATH = os.getenv('PDF_TEMPLATE_PATH', 'src/account_mailer/pdf_templates')
-
-    TEMPLATE_PATH = os.getenv('TEMPLATE_PATH', 'src/account_mailer/email_templates')
-
-    HTTP_ORIGIN = os.getenv('HTTP_ORIGIN', 'localhost')
-
-    AUTH_WEB_TOKEN_CONFIRM_PATH = os.getenv('AUTH_WEB_TOKEN_CONFIRM_PATH')
-
-    # JWT_OIDC Settings
-    JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_ISSUER')
-
-    TESTING = False
-    DEBUG = False
-
-    # Keycloak auth config baseurl
-    KEYCLOAK_BASE_URL = os.getenv('KEYCLOAK_BASE_URL')
-    KEYCLOAK_REALMNAME = os.getenv('KEYCLOAK_REALMNAME')
-    KEYCLOAK_ADMIN_USERNAME = os.getenv('KEYCLOAK_ADMIN_CLIENTID')
-    KEYCLOAK_ADMIN_SECRET = os.getenv('KEYCLOAK_ADMIN_SECRET')
-
-    # Service account details
-    KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_ID')
-    KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
-
-    # If any value is present in this flag, starts up a keycloak docker
-    USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)
-    USE_DOCKER_MOCK = os.getenv('USE_DOCKER_MOCK', None)
-
     # Minio configuration values
     MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')
     MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY')
@@ -147,8 +124,21 @@ class _Config():  # pylint: disable=too-few-public-methods
     MINIO_BUCKET = os.getenv('MINIO_BUCKET', 'account-mailer')
     MINIO_SECURE = True
 
+    REFUND_REQUEST = {
+        'recipients': os.getenv('REFUND_REQUEST_RECIPIENTS', ''),
+    }
+
+    # application setting
+    PDF_TEMPLATE_PATH = os.getenv('PDF_TEMPLATE_PATH', 'src/account_mailer/pdf_templates')
+    TEMPLATE_PATH = os.getenv('TEMPLATE_PATH', 'src/account_mailer/email_templates')
+    HTTP_ORIGIN = os.getenv('HTTP_ORIGIN', 'localhost')
+    AUTH_WEB_TOKEN_CONFIRM_PATH = os.getenv('AUTH_WEB_TOKEN_CONFIRM_PATH')
     # PAD TOS PDF file name.
     PAD_TOS_FILE = os.getenv('PAD_TOS_FILE', 'BCROS-Business-Pre-Authorized-Debit-Agreement.pdf')
+
+    # If any value is present in this flag, starts up a keycloak docker
+    USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)
+    USE_DOCKER_MOCK = os.getenv('USE_DOCKER_MOCK', None)
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
