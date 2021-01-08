@@ -39,11 +39,10 @@ jobs:
         run: |
           echo "TAG_NAME=dev" >> $GITHUB_ENV
 
-      - uses: pwei1018/bcrs-cd-action@versioning
+      - uses: pwei1018/bcrs-cd-action@vaults
         with:
           WORKING_DIRECTORY: "./notify-api"
           APP_NAME: "notify-api"
-          VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"email\", \"nats\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-notify\", \"notify-api\", \"sentry\", \"jwt\"]}]'
           SKIP_OP: "false"
           OP_PARAMETERS: ${{ secrets.OP_PARAMETERS }}
           OPENSHIFT_LOGIN_REGISTRY: ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }}
@@ -88,11 +87,10 @@ jobs:
         run: |
           echo "TAG_NAME=dev" >> $GITHUB_ENV
 
-      - uses: pwei1018/bcrs-cd-action@versioning
+      - uses: pwei1018/bcrs-cd-action@vaults
         with:
           WORKING_DIRECTORY: "./queue_services/notify-queue"
           APP_NAME: "notify-queue"
-          VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"email\", \"nats\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-notify\", \"notify-api\", \"notify-queue\"]}]'
           SKIP_OP: "false"
           DEPLOYMENT: "true"
           OP_PARAMETERS: ${{ secrets.OP_PARAMETERS }}

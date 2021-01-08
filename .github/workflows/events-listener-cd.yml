@@ -34,11 +34,10 @@ jobs:
         run: |
           echo "TAG_NAME=dev" >> $GITHUB_ENV
 
-      - uses: pwei1018/bcrs-cd-action@versioning
+      - uses: pwei1018/bcrs-cd-action@vaults
         with:
           WORKING_DIRECTORY: "./queue_services/events-listener"
           APP_NAME: "events-listener"
-          VAULTS: '[{ \"vault\": \"shared\", \"application\": [\"nats\"]}, {\"vault\": \"relationship\",\"application\": [\"postgres-auth\", \"account-events-listener\"]}]'
           SKIP_OP: "false"
           DEPLOYMENT: "true"
           OP_PARAMETERS: ${{ secrets.OP_PARAMETERS }}
