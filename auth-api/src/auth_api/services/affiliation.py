@@ -122,7 +122,7 @@ class Affiliation:
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
-        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=CLIENT_AUTH_ROLES)
+        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=ALL_ALLOWED_ROLES)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
