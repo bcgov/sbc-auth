@@ -47,6 +47,7 @@
                     :isAcknowledgeNeeded="isAcknowledgeNeeded"
                     :isInitialAcknowledged="isInitialAcknowledged"
                     :isInitialTOSAccepted="isInitialTOSAccepted"
+                    :clearOnEdit="isInitialTOSAccepted"
                   ></PADInfoForm>
                 </div>
 
@@ -81,6 +82,7 @@
           :isAcknowledgeNeeded="isAcknowledgeNeeded"
           :isInitialTOSAccepted="isInitialTOSAccepted"
           :isInitialAcknowledged="isInitialAcknowledged"
+          :clearOnEdit="isInitialTOSAccepted"
         ></PADInfoForm>
       </v-col>
     </v-row>
