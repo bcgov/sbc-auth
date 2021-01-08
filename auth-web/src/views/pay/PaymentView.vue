@@ -118,15 +118,10 @@ export default class PaymentView extends Vue {
               payeeName: ConfigHelper.getPaymentPayeeName(),
               cfsAccountId: paymentDetails?.cfsAccount?.cfsAccountNumber || ''
             }
-            if (invoice?.isOnlineBankingAllowed) { // if isOnlineBankingAllowed is not allowed show CC as payment type
-              this.showLoading = false
-              this.showOnlineBanking = true
-              this.showPayWithOnlyCC = false
-            } else {
-              this.showLoading = false
-              this.showPayWithOnlyCC = true
-              this.showOnlineBanking = true
-            }
+
+            this.showLoading = false
+            this.showOnlineBanking = true
+            this.showPayWithOnlyCC = !invoice?.isOnlineBankingAllowed // if isOnlineBankingAllowed is true, allowed show CC as only payment type
           }
         } catch (error) {
           // eslint-disable-next-line no-console
