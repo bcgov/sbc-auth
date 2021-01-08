@@ -185,7 +185,7 @@ class Invitation:
         sender = CONFIG.MAIL_FROM_ID
         try:
             template = ENV.get_template('email_templates/admin_notification_email.html')
-        except Exception:
+        except Exception:  # NOQA # pylint: disable=broad-except
             raise BusinessException(Error.FAILED_INVITATION, None)
 
         sent_response = send_email(subject, sender, recipient_email_list,
