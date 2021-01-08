@@ -138,7 +138,11 @@ export default class PaymentCard extends Vue {
   }
 
   private cancel () {
-    this.payWithCreditCard = false
+    if (this.showPayWithOnlyCC) { // cancel will redirect back to page
+      this.emitBtnClick('complete-online-banking')
+    } else {
+      this.payWithCreditCard = false
+    }
   }
 
   private emitBtnClick (eventName) {
