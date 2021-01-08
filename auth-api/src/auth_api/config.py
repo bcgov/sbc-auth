@@ -58,9 +58,12 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     SECRET_KEY = 'a secret'
 
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    TESTING = False
+    DEBUG = False
 
     ALEMBIC_INI = 'migrations/alembic.ini'
+    # Config to skip migrations when alembic migrate is used
+    SKIPPED_MIGRATIONS = ['authorizations_view']
 
     # POSTGRESQL
     DB_USER = os.getenv('DATABASE_USERNAME', '')
@@ -76,6 +79,7 @@ class _Config():  # pylint: disable=too-few-public-methods
         name=DB_NAME,
     )
     SQLALCHEMY_ECHO = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # JWT_OIDC Settings
     JWT_OIDC_WELL_KNOWN_CONFIG = os.getenv('JWT_OIDC_WELL_KNOWN_CONFIG')
@@ -90,14 +94,15 @@ class _Config():  # pylint: disable=too-few-public-methods
     except:  # pylint:disable=bare-except # noqa: B901, E722
         JWT_OIDC_JWKS_CACHE_TIMEOUT = 300
 
-    TESTING = False
-    DEBUG = False
-
     # Keycloak auth config baseurl
     KEYCLOAK_BASE_URL = os.getenv('KEYCLOAK_BASE_URL')
     KEYCLOAK_REALMNAME = os.getenv('KEYCLOAK_REALMNAME')
-    KEYCLOAK_ADMIN_USERNAME = os.getenv('KEYCLOAK_ADMIN_CLIENTID')
-    KEYCLOAK_ADMIN_SECRET = os.getenv('KEYCLOAK_ADMIN_SECRET')
+    KEYCLOAK_ADMIN_USERNAME = os.getenv('SBC_AUTH_ADMIN_CLIENT_ID')
+    KEYCLOAK_ADMIN_SECRET = os.getenv('SBC_AUTH_ADMIN_CLIENT_SECRET')
+
+    # Service account details
+    KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('SBC_AUTH_ADMIN_CLIENT_ID')
+    KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('SBC_AUTH_ADMIN_CLIENT_SECRET')
 
     # Upstream Keycloak settings
     KEYCLOAK_BCROS_BASE_URL = os.getenv('KEYCLOAK_BCROS_BASE_URL')
@@ -105,16 +110,26 @@ class _Config():  # pylint: disable=too-few-public-methods
     KEYCLOAK_BCROS_ADMIN_CLIENTID = os.getenv('KEYCLOAK_BCROS_ADMIN_CLIENTID')
     KEYCLOAK_BCROS_ADMIN_SECRET = os.getenv('KEYCLOAK_BCROS_ADMIN_SECRET')
 
-    # Config to skip migrations when alembic migrate is used
-    SKIPPED_MIGRATIONS = ['authorizations_view']
+    # API Endpoints
+    PAY_API_URL = os.getenv('PAY_API_URL')
+    LEGAL_API_URL = os.getenv('LEGAL_API_URL')
+    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
+    BCOL_API_URL = os.getenv('BCOL_API_URL')
 
-    # email server
-    MAIL_SERVER = os.getenv('MAIL_SERVER')
-    MAIL_PORT = os.getenv('MAIL_PORT')
-    MAIL_USE_TLS = bool(os.getenv('MAIL_USE_TLS') == 'True')
-    MAIL_USE_SSL = bool(os.getenv('MAIL_USE_SSL') == 'True')
-    MAIL_USERNAME = os.getenv('MAIL_USERNAME')
-    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+    # NATS Config
+    NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(',')
+    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID', 'test-cluster')
+    NATS_MAILER_CLIENT_NAME = os.getenv('NATS_MAILER_CLIENT_NAME', 'account.mailer.worker')
+    NATS_MAILER_SUBJECT = os.getenv('NATS_MAILER_SUBJECT', 'account.mailer')
+
+    # Minio configuration values
+    MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')
+    MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY')
+    MINIO_ACCESS_SECRET = os.getenv('MINIO_ACCESS_SECRET')
+    MINIO_BUCKET_ACCOUNTS = os.getenv('MINIO_BUCKET_ACCOUNTS', 'accounts')
+    MINIO_SECURE = True
+
+    # email
     MAIL_FROM_ID = os.getenv('MAIL_FROM_ID')
 
     # mail token  configuration
@@ -122,10 +137,7 @@ class _Config():  # pylint: disable=too-few-public-methods
     EMAIL_SECURITY_PASSWORD_SALT = os.getenv('EMAIL_SECURITY_PASSWORD_SALT')
     EMAIL_TOKEN_SECRET_KEY = os.getenv('EMAIL_TOKEN_SECRET_KEY')
     TOKEN_EXPIRY_PERIOD = os.getenv('TOKEN_EXPIRY_PERIOD')
-    # Legal-API URL
-    LEGAL_API_URL = os.getenv('LEGAL_API_URL')
-    # notify-API URL
-    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
+    STAFF_ADMIN_EMAIL = os.getenv('STAFF_ADMIN_EMAIL')
 
     # Sentry Config
     SENTRY_DSN = os.getenv('SENTRY_DSN', None)
@@ -139,9 +151,6 @@ class _Config():  # pylint: disable=too-few-public-methods
     # Product config json object string - includes URL and description content
     PRODUCT_CONFIG = json.loads(os.getenv('PRODUCT_CONFIG', '[]'))
 
-    # BC Online endpoint
-    BCOL_API_URL = os.getenv('BCOL_API_URL')  # e.g, https://bcol-api-dev.pathfinder.gov.bc.ca/api/v1
-
     try:
         MAX_NUMBER_OF_ORGS = int(os.getenv('MAX_NUMBER_OF_ORGS'))
     except:  # pylint:disable=bare-except # noqa: B901, E722
@@ -149,34 +158,11 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     BCOL_ACCOUNT_LINK_CHECK = os.getenv('BCOL_ACCOUNT_LINK_CHECK', 'True').lower() == 'true'
 
-    # Minio configuration values
-    MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')
-    MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY')
-    MINIO_ACCESS_SECRET = os.getenv('MINIO_ACCESS_SECRET')
-    MINIO_BUCKET_ACCOUNTS = os.getenv('MINIO_BUCKET_ACCOUNTS', 'accounts')
-    MINIO_SECURE = True
-
-    STAFF_ADMIN_EMAIL = os.getenv('STAFF_ADMIN_EMAIL')
-
     # Till direct pay is fully ready , keep this value false
     DIRECT_PAY_ENABLED = os.getenv('DIRECT_PAY_ENABLED', 'False').lower() == 'true'
 
     # Config value to disable activity logs
     DISABLE_ACTIVITY_LOGS = os.getenv('DISABLE_ACTIVITY_LOGS', 'False').lower() == 'true'
-
-    # Service account details
-    KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_ID')
-    KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
-
-    # pay-API URL
-    PAY_API_URL = os.getenv('PAY_API_URL')
-
-    # NATS Config
-    NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(',')
-    NATS_CLUSTER_ID = os.getenv('NATS_CLUSTER_ID', 'test-cluster')
-
-    NATS_MAILER_CLIENT_NAME = os.getenv('NATS_MAILER_CLIENT_NAME', 'account.mailer.worker')
-    NATS_MAILER_SUBJECT = os.getenv('NATS_MAILER_SUBJECT', 'account.mailer')
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
