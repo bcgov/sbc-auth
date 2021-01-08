@@ -197,7 +197,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/price-list',
       name: 'price-list',
       component: PriceListView,
-      meta: { requiresAuth: false, showNavBar: true }
+      meta: { requiresAuth: false, showNavBar: false }
     },
     {
       path: '/setup-account',
