@@ -1,0 +1,41 @@
+[
+    {
+        "vault": "shared",
+        "application": [
+            "email",
+            "api-endpoints"
+        ]
+    },
+    {
+        "vault": "keycloak",
+        "application": [
+            "base",
+            "jwt-base",
+            "sbc-auth-admin",
+            "bcros-keycloak"
+        ]
+    },
+    {
+        "vault": "minio",
+        "application": [
+            "base",
+            "accounts"
+        ]
+    },
+    {
+        "vault": "nats",
+        "application": [
+            "base",
+            "account-mailer"
+        ]
+    },
+    {
+        "vault": "relationship",
+        "application": [
+            "postgres-auth",
+            "auth-api",
+            "sentry",
+            "jwt"
+        ]
+    }
+]
