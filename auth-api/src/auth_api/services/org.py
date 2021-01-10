@@ -218,7 +218,6 @@ class Org:  # pylint: disable=too-many-public-methods
                 'billable': org_model.billable
             }
         }
-
         if mailing_address:
             pay_request['contactInfo'] = mailing_address
 

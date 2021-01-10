@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-can:CHANGE_PAD_INFO.disable.card>
     <template v-if="isAcknowledgeNeeded">
       <p class="mb-6">
         The Canadian Payment Association requires a confirmation period
