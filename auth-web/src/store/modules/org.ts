@@ -361,6 +361,11 @@ export default class OrgModule extends VuexModule {
     delete padInfo.isTOSAccepted
     try {
       const response = await PaymentService.verifyPADInfo(padInfo)
+      const verifyPad: PADInfoValidation = response?.data
+      // is validation service not reachable ,ignore and proceed
+      if (verifyPad?.statusCode !== 200) {
+        return { isValid: true } as PADInfoValidation
+      }
       return response?.data
     } catch (error) {
       // eslint-disable-next-line no-console

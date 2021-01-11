@@ -218,7 +218,6 @@ class Org:  # pylint: disable=too-many-public-methods
                 'billable': org_model.billable
             }
         }
-
         if mailing_address:
             pay_request['contactInfo'] = mailing_address
 
@@ -489,7 +488,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        check_auth(token_info, one_of_roles=(ADMIN, STAFF), org_id=org_id)
+        check_auth(token_info, one_of_roles=ADMIN, org_id=org_id)
 
         existing_login_option = AccountLoginOptionsModel.find_active_by_org_id(org_id)
         if existing_login_option is not None:

@@ -3530,6 +3530,7 @@ paths:
                     - view
                     - make_payment
                     - generate_invoice
+                    - change_statement_settings
 
         default:
           description: unexpected error

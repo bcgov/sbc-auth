@@ -61,7 +61,7 @@
           </div>
         </div>
 
-        <div class="nv-list-item" v-if="!isPremiumAccount" v-can:CHANGE_ORG_NAME.hide>
+        <div class="nv-list-item" v-if="!isPremiumAccount" v-can:CHANGE_ORG_NAME.disable>
           <div class="name">
             Account Details
           </div>
