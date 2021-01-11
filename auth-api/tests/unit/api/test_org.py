@@ -450,7 +450,8 @@ def test_upgrade_anon_org_fail(client, jwt, session, keycloak_mock):  # pylint:d
     rv = client.put('/api/v1/orgs/{}?action=UPGRADE'.format(org_id),
                     data=json.dumps(premium_info), headers=headers,
                     content_type='application/json')
-    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+    # FRCR review change.Staff cant change org details
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
 def test_upgrade_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -991,9 +992,8 @@ def test_update_anon_org(client, jwt, session, keycloak_mock):  # pylint:disable
     org_id = dictionary['id']
     rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo2'}),
                     headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_200_OK
-    dictionary = json.loads(rv.data)
-    assert dictionary['name'] == 'helo2'
+    # FRCR review changes..staff cant change org details
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
     public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
     rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo2'}),

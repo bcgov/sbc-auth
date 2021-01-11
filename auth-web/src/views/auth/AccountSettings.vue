@@ -102,7 +102,7 @@
                 role="listitem"
                 :to="accountAuthUrl"
                 v-if="isRegularAccount"
-                v-can:SET_AUTH_OPTIONS.hide data-test="user-auth-nav-item">
+                v-can:VIEW_AUTH_OPTIONS.hide data-test="user-auth-nav-item">
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-shield-account-outline</v-icon>
                 </v-list-item-icon>

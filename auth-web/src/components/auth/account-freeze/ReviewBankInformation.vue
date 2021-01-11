@@ -159,10 +159,7 @@ export default class ReviewBankInformation extends Mixins(Steppable) {
       // proceed to next step even if the response is empty
       return true
     }
-    // is validation service not reachable ,ignore and proceed
-    if (verifyPad?.statusCode !== 200) {
-      return true
-    }
+
     if (verifyPad?.isValid) {
       // proceed if PAD info is valid
       return true

@@ -24,6 +24,7 @@
           class="font-weight-bold"
           @click="unlinkAccount"
           data-test="unlink-bcol-button"
+          v-can:CHANGE_PAYMENT_METHOD.disable
         >
           Remove
         </v-btn>

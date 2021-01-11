@@ -8,6 +8,7 @@
         :class="{'selected': isPaymentSelected(payment)}"
         v-for="payment in allowedPaymentMethods"
         :key="payment.type"
+        v-can:CHANGE_PAYMENT_METHOD.disable.card
         @click="paymentMethodSelected(payment)"
       >
         <div>
