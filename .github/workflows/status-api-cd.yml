@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "TAG_NAME=dev" >> $GITHUB_ENV
 
-      - uses: pwei1018/bcrs-cd-action@versioning
+      - uses: pwei1018/bcrs-cd-action@vaults
         with:
           WORKING_DIRECTORY: "./status-api"
           APP_NAME: "status-api"
