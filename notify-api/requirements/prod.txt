@@ -10,7 +10,7 @@ itsdangerous
 python-dotenv
 python-dateutil
 python-multipart
-pyjwt
+PyJWT==1.7.1
 psycopg2-binary
 sqlalchemy
 sqlalchemy-filters
@@ -19,4 +19,4 @@ uvicorn
 gunicorn
 Werkzeug==0.16.1
 cryptography
-
+idna==2.10

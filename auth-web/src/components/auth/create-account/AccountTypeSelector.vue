@@ -196,6 +196,8 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
       this.selectedAccountType = (this.currentOrganizationType === this.ACCOUNT_TYPE.UNLINKED_PREMIUM)
         ? this.ACCOUNT_TYPE.PREMIUM : this.currentOrganizationType
       this.setAccessType(this.getOrgAccessType())
+      // remove current account from session storage .Or else permission of old account will be fetched
+      ConfigHelper.removeFromSession('CURRENT_ACCOUNT')
     }
   }
 

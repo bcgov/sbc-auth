@@ -15,6 +15,7 @@
         class="account-card elevation-2 pa-8 d-flex flex-column text-center"
         :class="{ 'active': authType === authOption.type }"
         @click="selectAuthType(authOption.type)"
+        v-can:CHANGE_AUTH_OPTION.disable.card
       >
         <div class="account-type__icon mb-8">
           <v-icon color="grey">{{authOption.icon}}</v-icon>

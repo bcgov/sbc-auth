@@ -104,11 +104,10 @@ export default class CommonUtils {
   static getAdminPermissions (): string[] {
     return [
       Permission.REMOVE_BUSINESS,
-      Permission.CHANGE_ADDRESS,
-      Permission.CHANGE_ORG_NAME,
+      Permission.VIEW_ADDRESS,
       Permission.INVITE_MEMBERS,
-      Permission.CHANGE_ACCOUNT_TYPE,
       Permission.CHANGE_ROLE,
+      Permission.VIEW_AUTH_OPTIONS,
       Permission.RESET_PASSWORD,
       Permission.TRANSACTION_HISTORY,
       Permission.MANAGE_STATEMENTS,
@@ -125,7 +124,8 @@ export default class CommonUtils {
       Permission.VIEW_ADDRESS,
       Permission.VIEW_ADMIN_CONTACT,
       Permission.RESET_OTP,
-      Permission.VIEW_PAYMENT_METHODS
+      Permission.VIEW_PAYMENT_METHODS,
+      Permission.VIEW_AUTH_OPTIONS
     ]
   }
   // for converting address object of sbc-auth to as needed for BaseAddress component

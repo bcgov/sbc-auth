@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-can:CHANGE_PAD_INFO.disable.card>
     <template v-if="isAcknowledgeNeeded">
       <p class="mb-6">
         The Canadian Payment Association requires a confirmation period
@@ -36,7 +36,7 @@
               :rules="institutionNumberRules"
               v-model="institutionNumber"
               @change="emitPreAuthDebitInfo"
-              v-mask="'####'"
+              v-mask="'###'"
             ></v-text-field>
           </v-col>
           <v-col cols="12" class="py-0">
@@ -137,13 +137,12 @@ export default class PADInfoForm extends Vue {
 
   private transitNumberRules = [
     v => !!v || 'Transit Number is required',
-    v => (v.length === 5) || 'Transit Number should be 5 digits'
+    v => (v.length >= 4) || 'Transit Number should be minimum of 4 digits'
   ]
 
   private institutionNumberRules = [
     v => !!v || 'Institution Number is required',
-    // TODO: change to 3 once get the confirmation from CAS
-    v => (v.length === 4) || 'Institution Number should be 3 digits'
+    v => (v.length === 3) || 'Institution Number should be 3 digits'
   ]
 
   private accountNumberRules = [

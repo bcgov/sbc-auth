@@ -30,6 +30,7 @@
         v-bind:class="{ 'disabled': isBtnSaved }"
         :color="isBtnSaved ? 'success' : 'primary'"
         :disabled="isDisableSaveBtn"
+        v-can:CHANGE_PAYMENT_METHOD.disable
         @click="save"
         :loading="isLoading"
       >

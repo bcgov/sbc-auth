@@ -136,7 +136,7 @@ class Org(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_JWT.has_one_of_roles(
-        [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+        [Role.SYSTEM.value, Role.PUBLIC_USER.value])
     def put(org_id):
         """Update the org specified by the provided id with the request body."""
         request_json = request.get_json()
@@ -170,7 +170,7 @@ class Org(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.PUBLIC_USER.value])
     def delete(org_id):
         """Inactivates the org if it has no active members or affiliations."""
         token = g.jwt_oidc_token_info
@@ -255,7 +255,7 @@ class OrgContacts(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.PUBLIC_USER.value])
     def post(org_id):
         """Create a new contact for the specified org."""
         request_json = request.get_json()
@@ -272,7 +272,7 @@ class OrgContacts(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.PUBLIC_USER.value])
     def put(org_id):
         """Update an existing contact for the specified org."""
         request_json = request.get_json()
@@ -288,7 +288,7 @@ class OrgContacts(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.PUBLIC_USER.value])
     def delete(org_id):
         """Delete the contact info for the specified org."""
         try:

@@ -1,5 +1,7 @@
+import ConfigHelper from 'sbc-common-components/src/util/config-helper'
 import { DirectiveBinding } from 'vue/types/options'
 import { DirectiveOptions } from 'vue'
+import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import { VNode } from 'vue/types'
 import store from '@/store'
 
@@ -18,7 +20,15 @@ const can: DirectiveOptions = {
 }
 
 function canAccess (binding: DirectiveBinding, el: HTMLElement, node: VNode) {
-  const behaviour = binding.modifiers.disable ? 'disable' : 'hide'
+  // do not block account creation .
+  // check if there is any account in session , if not , do not block any permissions
+  const accountId = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}').id || 0
+  if (!accountId) {
+    return
+  }
+  let behaviour = binding.modifiers.disable ? 'disable' : 'hide'
+  // to handle special elements like v-card etc
+  let isCard = !!binding.modifiers.card
   const requestedAction = binding.arg
   const permissions:string[] = (store.state as any)?.org?.permissions
   const customeEl = el as CustomHTMLElement
@@ -27,8 +37,12 @@ function canAccess (binding: DirectiveBinding, el: HTMLElement, node: VNode) {
   if (!okayToAccess) {
     if (behaviour === 'hide') {
       commentNode(el, node)
-    } else if (behaviour === 'disable') {
+    } else if (behaviour === 'disable' && isCard === false) {
       customeEl.disabled = true
+    } else if (behaviour === 'disable' && isCard === true) {
+      // TODO tab still works.. can tab to the text field and make it work
+      customeEl.classList.add('v-card--disabled')
+      customeEl.style.pointerEvents = 'none'
     } else if (behaviour === 'readonly') {
       customeEl.readOnly = true
     }

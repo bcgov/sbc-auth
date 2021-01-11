@@ -10,7 +10,7 @@
       max-width="640"
       v-model="isSettingsModalOpen"
     >
-      <v-card>
+      <v-card v-can:CHANGE_STATEMENT_SETTINGS.disable.card>
         <v-card-title>
           Statement Settings
           <v-btn
@@ -139,6 +139,7 @@
             @click="updateSettings"
             :disabled="!enableSaveBtn"
             :loading="isSaving"
+            v-can:CHANGE_STATEMENT_SETTINGS.disable
           >
             Save
           </v-btn>
