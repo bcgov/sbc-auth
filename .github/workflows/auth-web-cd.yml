@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "TAG_NAME=dev" >> $GITHUB_ENV
 
-      - uses: pwei1018/bcrs-cd-action@vaults
+      - uses: pwei1018/bcrs-cd-action@versioning
         with:
           WORKING_DIRECTORY: "./auth-web"
           APP_NAME: "auth-web"
