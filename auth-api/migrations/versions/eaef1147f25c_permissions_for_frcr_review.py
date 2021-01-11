@@ -33,7 +33,7 @@ def upgrade():
             {'id': (latest_id := latest_id + 1), 'membership_type_code': 'ADMIN', 'actions': 'change_pad_info'},
             {'id': (latest_id := latest_id + 1), 'membership_type_code': 'ADMIN', 'org_status_code': 'NSF_SUSPENDED',
              'actions': 'change_pad_info'},
-            {'id': (latest_id := latest_id + 1), 'membership_type_code': 'ADMIN', 'actions': 'view_auth_option'},
+            {'id': (latest_id := latest_id + 1), 'membership_type_code': 'ADMIN', 'actions': 'view_auth_options'},
             {'id': latest_id + 1, 'membership_type_code': 'ADMIN', 'actions': 'change_statement_settings'}
 
         ]
@@ -44,5 +44,5 @@ def upgrade():
 def downgrade():
     op.execute(
         "delete from permissions where membership_type_code='ADMIN' "
-        "and actions in ('change_payment_method','change_pad_info','view_auth_option','change_statement_settings')")
+        "and actions in ('change_payment_method','change_pad_info','view_auth_options','change_statement_settings')")
     op.execute("update permissions set actions=set_auth_options where actions='change_auth_options'")
