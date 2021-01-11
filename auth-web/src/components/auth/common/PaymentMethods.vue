@@ -84,6 +84,7 @@
           :isInitialTOSAccepted="isInitialTOSAccepted"
           :isInitialAcknowledged="isInitialAcknowledged"
           :clearOnEdit="isInitialTOSAccepted"
+          @is-pad-info-touched="isPadInfoTouched"
         ></PADInfoForm>
       </v-col>
     </v-row>
@@ -175,6 +176,11 @@ export default class PaymentMethods extends Vue {
 
   private get isPADOnly () {
     return (this.currentOrgType === Account.UNLINKED_PREMIUM)
+  }
+
+  // set on change of input only for single allowed payments
+  private isPadInfoTouched (isTouched) {
+    this.isTouched = isTouched
   }
 
   private mounted () {
