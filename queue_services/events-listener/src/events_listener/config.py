@@ -77,13 +77,6 @@ class _Config():  # pylint: disable=too-few-public-methods
         name=DB_NAME,
     )
 
-    # Service account details
-    KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_ID')
-    KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
-
-    # pay-API URL
-    PAY_API_URL = os.getenv('PAY_API_URL')
-
     NATS_CONNECTION_OPTIONS = {
         'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
         'name': os.getenv('NATS_ACCOUNT_CLIENT_NAME', 'account.events.worker')
