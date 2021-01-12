@@ -38,7 +38,7 @@
             <div class="name" id="accountType">Account Type</div>
             <div class="value" aria-labelledby="accountType">
               <div class="value__title">{{ isPremiumAccount ? 'Premium' : 'Basic' }}</div>
-              <div v-can:CHANGE_ACCOUNT_TYPE.hide>
+              <div v-can:CHANGE_ACCOUNT_TYPE.hide v-if="enableUpgradeDowngrade">
                 <router-link :to="editAccountUrl" v-can:CHANGE_ACCOUNT_TYPE.hide >Change account type</router-link>
               </div>
             </div>
@@ -188,8 +188,14 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private errorMessage: string = ''
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private isBaseAddressValid: boolean = false
+  private isCompleteAccountInfo = true
 
   private baseAddressSchema: {} = addressSchema
+
+  $refs: {
+    editAccountForm: HTMLFormElement,
+    mailingAddress:HTMLFormElement,
+  }
 
   private isFormValid (): boolean {
     return !!this.orgName || this.orgName === this.currentOrganization?.name
@@ -217,6 +223,14 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private set baseAddress (address) {
     this.setCurrentOrganizationAddress(address)
   }
+  async beforeRouteLeave (to, from, next) {
+    if (this.isCompleteAccountInfo) {
+      next()
+    } else {
+      // eslint-disable-next-line no-console
+      console.log('account info incomplete.blocking navigation')
+    }
+  }
 
   private updateAddress (address: Address) {
     this.setCurrentOrganizationAddress(address)
@@ -226,8 +240,15 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private async setup () {
     const accountSettings = this.getAccountFromSession()
     this.orgName = this.currentOrganization?.name || ''
-    if (this.isPremiumAccount || this.enablePaymentMethodSelectorStep) {
+    if (!this.anonAccount && this.enablePaymentMethodSelectorStep) {
       await this.syncAddress()
+      if (Object.keys(this.currentOrgAddress).length === 0) {
+        this.isCompleteAccountInfo = false
+        this.errorMessage = this.isAddressEditable ? 'Your account info is incomplete. Please enter your address in order to proceed.'
+          : 'This accounts profile is incomplete. You will not be able to proceed until an account administrator entered the missing information for this account.'
+        this.$refs.editAccountForm?.validate() // validate form fields and show error message
+        this.$refs.mailingAddress?.$refs.baseAddress?.$refs.addressForm?.validate() // validate form fields and show error message for address component from sbc-common-comp
+      }
     } else {
       // inorder to hide the address if not premium account
       this.baseAddress = null
@@ -280,6 +301,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
   }
 
+  private get enableUpgradeDowngrade (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableUpgradeDowngrade) || false
+  }
+
   private enableBtn () {
     this.btnLabel = 'Save'
   }
@@ -297,6 +322,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
       await this.updateOrg(createRequestBody)
       this.$store.commit('updateHeader')
       this.btnLabel = 'Saved'
+      // assume info is complete
+      if (this.baseAddress) {
+        this.isCompleteAccountInfo = true
+      }
     } catch (err) {
       this.btnLabel = 'Save'
       switch (err.response.status) {
