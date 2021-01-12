@@ -19,6 +19,8 @@
             aria-label="Close Dialog"
             title="Close Dialog"
             @click="closeSettings"
+            :disabled="false"
+            style="pointer-events: auto;"
           >
             <v-icon>mdi-close</v-icon>
           </v-btn>
