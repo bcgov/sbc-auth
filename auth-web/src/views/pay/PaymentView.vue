@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div>
     <v-container v-if="showLoading">
       <v-layout row flex-column justify-center align-center class="py-12">
         <v-progress-circular
@@ -29,20 +29,20 @@
           </div>
         </v-layout>
       </v-container>
-      <v-container v-if="showOnlineBanking">
-        <v-row class="pt-6">
-          <v-col md="6" offset-md="3">
-            <h1 class="mb-1">Make a payment</h1>
-            <p class="pb-2">Please find your balance and payment details below </p>
-            <PaymentCard
-              :paymentCardData="paymentCardData"
-              @complete-online-banking="completeOBPayment"
-              @pay-with-credit-card="payNow"
-              @download-invoice="downloadInvoice"
-              :showPayWithOnlyCC="showPayWithOnlyCC"
-            ></PaymentCard>
-          </v-col>
-        </v-row>
+      <v-container
+        class="view-container"
+        v-if="showOnlineBanking">
+        <div class="payment-view-content">
+          <h1 class="mb-1">Make a payment</h1>
+          <p class="mb-8">Please find your balance and payment details below.</p>
+          <PaymentCard
+            :paymentCardData="paymentCardData"
+            @complete-online-banking="completeOBPayment"
+            @pay-with-credit-card="payNow"
+            @download-invoice="downloadInvoice"
+            :showPayWithOnlyCC="showPayWithOnlyCC"
+          ></PaymentCard>
+        </div>
       </v-container>
     </div>
   </div>
@@ -211,6 +211,11 @@ export default class PaymentView extends Vue {
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
+
+.payment-view-content {
+  margin: 0 auto;
+  max-width: 48rem;
+}
 
 .loading-msg {
   font-weight: 600;
