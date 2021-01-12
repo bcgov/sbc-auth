@@ -66,11 +66,13 @@
 </template>
 
 <script lang="ts">
-import { Account, Pages, PaymentTypes, Permission } from '@/util/constants'
+import { Account, LoginSource, Pages, PaymentTypes, Permission } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, MembershipType, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import { Address } from '@/models/address'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
@@ -86,8 +88,10 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
       'currentOrganization',
       'currentOrgPaymentType',
       'currentMembership',
-      'permissions'
-    ])
+      'permissions',
+      'currentOrgAddress'
+    ]),
+    ...mapState('user', ['currentUser'])
   },
   methods: {
     ...mapMutations('org', [
@@ -96,7 +100,8 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
     ...mapActions('org', [
       'validatePADInfo',
       'getOrgPayments',
-      'updateOrg'
+      'updateOrg',
+      'syncAddress'
     ])
   }
 })
@@ -109,6 +114,9 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   private readonly currentOrgPaymentType!: string
   private readonly validatePADInfo!: () => Promise<PADInfoValidation>
   private readonly permissions!: string[]
+  private readonly currentUser!: KCUserProfile
+  private readonly currentOrgAddress!: Address
+  private readonly syncAddress!: () => Address
   private savedOrganizationType: string = ''
   private selectedPaymentMethod: string = ''
   private padInfo: PADInfo = {} as PADInfo
@@ -163,6 +171,20 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   }
 
   private async initialize () {
+    // check if address info is complete if not redirect user to address page
+    const isNotAnonUser = this.currentUser?.loginSource !== LoginSource.BCROS
+    if (isNotAnonUser) {
+      // do it only if address is not already fetched.Or else try to fetch from DB
+      if (!this.currentOrgAddress || Object.keys(this.currentOrgAddress).length === 0) {
+        // sync and try again
+        await this.syncAddress()
+        if (!this.currentOrgAddress || Object.keys(this.currentOrgAddress).length === 0) {
+          await this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
+          return
+        }
+      }
+    }
+
     if (this.isPaymentViewAllowed) {
       this.savedOrganizationType =
       ((this.currentOrganization?.orgType === Account.PREMIUM) && !this.currentOrganization?.bcolAccountId)
