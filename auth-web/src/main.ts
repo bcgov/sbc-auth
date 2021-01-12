@@ -8,6 +8,8 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+// eslint-disable-next-line sort-imports
+import './routes/componentHooks'
 import Vue from 'vue'
 import { Vue as VueIntegration } from '@sentry/integrations'
 import Vuelidate from 'vuelidate'

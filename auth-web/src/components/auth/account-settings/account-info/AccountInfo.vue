@@ -188,6 +188,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private errorMessage: string = ''
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private isBaseAddressValid: boolean = false
+  private isCompleteAccountInfo = true
 
   private baseAddressSchema: {} = addressSchema
 
@@ -217,6 +218,14 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private set baseAddress (address) {
     this.setCurrentOrganizationAddress(address)
   }
+  async beforeRouteLeave (to, from, next) {
+    if (this.isCompleteAccountInfo) {
+      next()
+    } else {
+      // eslint-disable-next-line no-console
+      console.log('account info incomplete.blocking navigation')
+    }
+  }
 
   private updateAddress (address: Address) {
     this.setCurrentOrganizationAddress(address)
@@ -226,8 +235,13 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private async setup () {
     const accountSettings = this.getAccountFromSession()
     this.orgName = this.currentOrganization?.name || ''
-    if (this.isPremiumAccount || this.enablePaymentMethodSelectorStep) {
+    if (!this.anonAccount && this.enablePaymentMethodSelectorStep) {
       await this.syncAddress()
+      if (Object.keys(this.currentOrgAddress).length === 0) {
+        this.isCompleteAccountInfo = false
+        this.errorMessage = this.isAddressEditable ? 'This accounts profile is incomplete. You will not be able to proceed until the missing information for this account has been completed.'
+          : 'This accounts profile is incomplete. You will not be able to proceed until an account administrator entered the missing information for this account.'
+      }
     } else {
       // inorder to hide the address if not premium account
       this.baseAddress = null
@@ -297,6 +311,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
       await this.updateOrg(createRequestBody)
       this.$store.commit('updateHeader')
       this.btnLabel = 'Saved'
+      // assume info is complete
+      if (this.baseAddress) {
+        this.isCompleteAccountInfo = true
+      }
     } catch (err) {
       this.btnLabel = 'Save'
       switch (err.response.status) {

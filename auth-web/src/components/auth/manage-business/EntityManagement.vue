@@ -149,23 +149,19 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
+import { LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { Pages, SessionStorageKeys } from '@/util/constants'
+import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { AccountSettings } from '@/models/account-settings'
 import AddBusinessForm from '@/components/auth/manage-business/AddBusinessForm.vue'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
+import { Address } from '@/models/address'
 import AffiliatedEntityList from '@/components/auth/manage-business/AffiliatedEntityList.vue'
 import { Business } from '@/models/business'
-import BusinessModule from '@/store/modules/business'
-import ConfigHelper from '@/util/config-helper'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import UserModule from '@/store/modules/user'
-import { getModule } from 'vuex-module-decorators'
 import i18n from '@/plugins/i18n'
-import { mapActions } from 'vuex'
 
 @Component({
   components: {
@@ -174,8 +170,15 @@ import { mapActions } from 'vuex'
     AffiliatedEntityList,
     ModalDialog
   },
+  computed: {
+    ...mapState('org', [
+      'currentOrgAddress'
+    ]),
+    ...mapState('user', ['userProfile', 'currentUser'])
+  },
   methods: {
-    ...mapActions('business', ['syncBusinesses', 'removeBusiness', 'createNumberedBusiness'])
+    ...mapActions('business', ['syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
+    ...mapActions('org', ['syncAddress'])
   }
 })
 export default class EntityManagement extends Mixins(AccountChangeMixin, NextPageMixin) {
@@ -190,6 +193,8 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   private readonly syncBusinesses!: () => Promise<Business[]>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
   private readonly createNumberedBusiness!: (accountId: Number) => Promise<void>
+  private readonly currentOrgAddress!: Address
+  private readonly syncAddress!: () => Address
 
   $refs: {
     successDialog: ModalDialog
@@ -202,14 +207,29 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   private async mounted () {
     if (this.currentMembership === undefined) {
       this.$router.push(`/${Pages.CREATE_ACCOUNT}`)
+      return
     }
     // If pending approval on current account, redirect away
     if (this.currentMembership?.membershipStatus !== MembershipStatus.Active) {
       this.$router.push(this.getNextPageUrl())
-    } else {
-      this.setAccountChangedHandler(this.setup)
-      this.setup()
+      return
     }
+    // check if address info is complete
+    const isNotAnonUser = this.currentUser?.loginSource !== LoginSource.BCROS
+    if (isNotAnonUser) {
+      // do it only if address is not already fetched.Or else try to fetch from DB
+      if (!this.currentOrgAddress || Object.keys(this.currentOrgAddress).length === 0) {
+        // sync and try again
+        await this.syncAddress()
+        if (!this.currentOrgAddress || Object.keys(this.currentOrgAddress).length === 0) {
+          await this.$router.push(`/${Pages.MAIN}/${this.orgId}/settings/account-info`)
+          return
+        }
+      }
+    }
+
+    this.setAccountChangedHandler(this.setup)
+    this.setup()
   }
 
   private async setup () {
