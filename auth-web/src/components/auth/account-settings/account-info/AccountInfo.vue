@@ -38,7 +38,7 @@
             <div class="name" id="accountType">Account Type</div>
             <div class="value" aria-labelledby="accountType">
               <div class="value__title">{{ isPremiumAccount ? 'Premium' : 'Basic' }}</div>
-              <div v-can:CHANGE_ACCOUNT_TYPE.hide>
+              <div v-can:CHANGE_ACCOUNT_TYPE.hide v-if="enableUpgradeDowngrade">
                 <router-link :to="editAccountUrl" v-can:CHANGE_ACCOUNT_TYPE.hide >Change account type</router-link>
               </div>
             </div>
@@ -292,6 +292,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 
   private get enablePaymentMethodSelectorStep (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+  }
+
+  private get enableUpgradeDowngrade (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableUpgradeDowngrade) || false
   }
 
   private enableBtn () {
