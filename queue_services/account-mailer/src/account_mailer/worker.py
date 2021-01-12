@@ -53,7 +53,7 @@ FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
 
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements, too-many-branches
 async def process_event(event_message: dict, flask_app):
     """Process the incoming queue event message."""
     if not flask_app:
@@ -127,6 +127,26 @@ async def process_event(event_message: dict, flask_app):
             }
             email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject,
                                                **args)
+        elif message_type in (MessageType.ONLINE_BANKING_OVER_PAYMENT.value,
+                              MessageType.ONLINE_BANKING_UNDER_PAYMENT.value, MessageType.ONLINE_BANKING_PAYMENT.value):
+            email_msg = event_message.get('data')
+
+            if message_type == MessageType.ONLINE_BANKING_OVER_PAYMENT.value:
+                template_name = TemplateType.ONLINE_BANKING_OVER_PAYMENT_TEMPLATE_NAME.value
+            elif message_type == MessageType.ONLINE_BANKING_UNDER_PAYMENT.value:
+                template_name = TemplateType.ONLINE_BANKING_UNDER_PAYMENT_TEMPLATE_NAME.value
+            else:
+                template_name = TemplateType.ONLINE_BANKING_PAYMENT_TEMPLATE_NAME.value
+
+            org_id = email_msg.get('accountId')
+            admin_emails = get_member_emails(org_id, (ADMIN,))
+            subject = SubjectType.ONLINE_BANKING_PAYMENT_SUBJECT.value
+            args = {
+                'title': subject,
+                'paid_amount': email_msg.get('amount'),
+                'credit_amount': email_msg.get('creditAmount'),
+            }
+            email_dict = common_mailer.process(org_id, admin_emails, template_name, subject, **args)
         if email_dict:
             logger.debug('Extracted email msg Recipient: %s ', email_dict.get('recipients', ''))
             process_email(email_dict, FLASK_APP, token)
