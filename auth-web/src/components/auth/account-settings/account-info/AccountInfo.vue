@@ -251,6 +251,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     return this.currentOrganization?.accessType === AccessType.ANONYMOUS
   }
 
+  // todo fix it completely by using permissions
   private canChangeAccountName (): boolean {
     if (this.currentOrganization?.accessType === AccessType.ANONYMOUS) {
       return false
@@ -259,7 +260,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     if (this.isPremiumAccount) {
       return false
     }
-    return true
+    return [Permission.CHANGE_ORG_NAME].some(per => this.permissions.includes(per))
   }
 
   private isSaveEnabled () {
