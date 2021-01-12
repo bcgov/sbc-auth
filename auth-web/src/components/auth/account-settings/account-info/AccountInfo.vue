@@ -246,8 +246,8 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
         this.isCompleteAccountInfo = false
         this.errorMessage = this.isAddressEditable ? 'Your account info is incomplete. Please enter your address in order to proceed.'
           : 'This accounts profile is incomplete. You will not be able to proceed until an account administrator entered the missing information for this account.'
-        this.$refs.editAccountForm?.validate()
-        this.$refs.mailingAddress?.$refs.baseAddress?.$refs.addressForm?.validate()
+        this.$refs.editAccountForm?.validate() // validate form fields and show error message
+        this.$refs.mailingAddress?.$refs.baseAddress?.$refs.addressForm?.validate() // validate form fields and show error message for address component from sbc-common-comp
       }
     } else {
       // inorder to hide the address if not premium account
