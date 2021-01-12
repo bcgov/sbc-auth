@@ -224,7 +224,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     this.setCurrentOrganizationAddress(address)
   }
   async beforeRouteLeave (to, from, next) {
-    if (this.isCompleteAccountInfo) {
+    if (!this.isAddressEditable || this.isCompleteAccountInfo) {
       next()
     } else {
       // eslint-disable-next-line no-console
