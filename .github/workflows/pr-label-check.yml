@@ -6,6 +6,7 @@ on:
     types: [opened, synchronize, labeled, unlabeled]
     branches:
       - development
+      - master
 
 jobs:
   pr-label-check:
