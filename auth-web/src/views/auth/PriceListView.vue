@@ -4,6 +4,7 @@
       <p class="mb-8">Where applicable, tax is included in the price shown. Prices are subject to change without notice.</p>
       <section class="mb-10">
         <h2 class="mb-5">Business Registry</h2>
+        <h3 class="mt-8 mb-6">Cooperative Associations</h3>
         <v-card flat>
           <table aria-label="Price List Table">
             <thead>
@@ -26,12 +27,6 @@
                 Service Fee
               </th>
               <th
-                class="fee--priority"
-                scope="col"
-              >
-                Priority Fee
-              </th>
-              <th
                 class="fee--future"
                 scope="col"
               >
@@ -39,7 +34,7 @@
               </th>
             </thead>
             <tbody>
-              <tr v-for="item in pricelist" :key="item.name">
+              <tr v-for="item in coopPriceList" :key="item.name">
                 <td
                   class="product font-weight-bold"
                 >
@@ -52,12 +47,61 @@
                 <td
                   class="fee--service"
                 >
-                  {{'$' + item.serviceFee}}
+                  <span v-if="item.serviceFee">{{'$' + item.serviceFee}}</span>
                 </td>
                 <td
-                  class="fee--priority"
+                  class="fee--future"
                 >
-                  <span v-if="item.priorityFee">{{'$' + item.priorityFee}}</span>
+                  <span v-if="item.futureEffectiveFee">{{'$' + item.futureEffectiveFee}}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </v-card>
+        <h3 class="mt-8 mb-6">Benefit Companies</h3>
+        <v-card flat>
+          <table aria-label="Price List Table">
+            <thead>
+              <th
+                class="product text-left"
+                scope="col"
+              >
+                Product
+              </th>
+              <th
+                class="fee"
+                scope="col"
+              >
+                Price
+              </th>
+              <th
+                class="fee--service"
+                scope="col"
+              >
+                Service Fee
+              </th>
+              <th
+                class="fee--future"
+                scope="col"
+              >
+                Future Effective Fee
+              </th>
+            </thead>
+            <tbody>
+              <tr v-for="item in benefitCompanyPriceList" :key="item.name">
+                <td
+                  class="product font-weight-bold"
+                >
+                  {{item.name}}
+                </td>
+                <td
+                  class="fee">
+                  <span aria-describedby="Annual Report PRice">{{'$' + item.price}}</span>
+                </td>
+                <td
+                  class="fee--service"
+                >
+                  <span v-if="item.serviceFee">{{'$' + item.serviceFee}}</span>
                 </td>
                 <td
                   class="fee--future"
@@ -80,44 +124,53 @@ import { Component, Vue } from 'vue-property-decorator'
 })
 
 export default class PriceListView extends Vue {
-  private readonly pricelist = [
+  private readonly priceList = [
     {
+      businessType: 'cooperative',
       name: 'Annual Report',
-      price: '43.39',
-      serviceFee: '1.50',
-      priorityFee: '100.00',
-      futureEffectiveFee: '100.00'
+      price: '30.00',
+      serviceFee: '',
+      futureEffectiveFee: ''
     },
     {
+      businessType: 'cooperative',
       name: 'Correction',
       price: '20.00',
-      serviceFee: '1.50',
-      priorityFee: '100.00',
+      serviceFee: '',
       futureEffectiveFee: ''
     },
     {
+      businessType: 'cooperative',
       name: 'Change of Address',
       price: '20.00',
-      serviceFee: '1.50',
-      priorityFee: '100.00',
+      serviceFee: '',
       futureEffectiveFee: ''
     },
     {
+      businessType: 'cooperative',
       name: 'Change of Directors',
       price: '20.00',
-      serviceFee: '1.50',
-      priorityFee: '100.00',
+      serviceFee: '',
       futureEffectiveFee: ''
     },
     {
+      businessType: 'benefitCompany',
       name: 'Incorporation',
       price: '350.00',
       serviceFee: '1.50',
-      priorityFee: '100.00',
       futureEffectiveFee: '100.00'
     }
   ]
+
+  coopPriceList = this.priceList.filter((item) => {
+    return (item.businessType === 'cooperative')
+  })
+
+  benefitCompanyPriceList = this.priceList.filter((item) => {
+    return (item.businessType === 'benefitCompany')
+  })
 }
+
 </script>
 
 <style lang="scss" scoped>
@@ -205,10 +258,6 @@ export default class PriceListView extends Vue {
 
     .fee--service::before {
       content: 'Service Fee';
-    }
-
-    .fee--priority::before {
-      content: 'Priority';
     }
 
     .fee--future::before {
