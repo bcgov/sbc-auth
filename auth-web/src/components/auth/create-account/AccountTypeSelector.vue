@@ -81,7 +81,6 @@ import { AccessType } from '@/util/constants'
               <li>Unlimited team members</li>
               <li>Pay by pre-authorized debit or <a href="https://www.bconline.gov.bc.ca/" target="_blank" rel="noopener noreferrer">BC Online deposit account</a></li>
               <li>Financial Statements</li>
-              <li>Developer API</li>
             </ul>
 
             <!-- State Button (Create Account) -->
