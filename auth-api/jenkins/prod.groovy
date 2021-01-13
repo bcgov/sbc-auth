@@ -47,7 +47,7 @@ String getImageTagHash(String imageName, String tag = "") {
 // post a notification to rocketchat
 def rocketChatNotificaiton(token, channel, comments) {
   def payload = JsonOutput.toJson([text: comments, channel: channel])
-  def rocketChatUrl = "https://chat.pathfinder.gov.bc.ca/hooks/" + "${token}"
+  def rocketChatUrl = "https://chat.developer.gov.bc.ca/hooks/" + "${token}"
 
   sh(returnStdout: true,
      script: "curl -X POST -H 'Content-Type: application/json' --data \'${payload}\' ${rocketChatUrl}")
