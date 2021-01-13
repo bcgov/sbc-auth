@@ -54,6 +54,7 @@
   "acceptInviteLandingTitle": "Log in to accept this invitation",
   "acceptInviteLandingMessage": "To accept the invitation to this account, log in to Business Registry with your BC Services Card.",
   "loginBtnLabel": "Log in with BC Services Card",
+  "acceptButtonLabel": "Accept",
   "deactivateConfirmTitle": "Deactivate your Profile",
   "deactivateConfirmText": "Deactivating your Business Registry profile will remove your contact information, and your access to associated account and/or affiliated businesses.",
   "deactivateConfirmTextEmphasis": "This action cannot be undone.",
