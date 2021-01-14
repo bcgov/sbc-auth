@@ -22,7 +22,7 @@
       v-if="isStaff"
       aria-label="breadcrumb">
       <div>
-        <router-link :to=pagesEnum.STAFF_DASHBOARD>
+        <router-link :to="backToTab">
           <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
           <span>Back to Staff Dashboard</span>
         </router-link>
@@ -207,6 +207,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   private isDirSearchUser: boolean = false
   private dirSearchUrl = ConfigHelper.getSearchApplicationUrl()
   private readonly pagesEnum = Pages
+  private readonly currentOrganization!: Organization
 
   private handleBackButton (): void {
     const backTo = this.isStaff ? Pages.STAFF_DASHBOARD : `/account/${this.orgId}/business`
@@ -235,6 +236,10 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   private get statementsUrl (): string {
     return `/account/${this.orgId}/settings/statements`
+  }
+
+  private get backToTab () {
+    return this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED ? Pages.STAFF_DASHBOARD_SUSPENDED : Pages.STAFF_DASHBOARD
   }
 
   private getUrl (page) {
