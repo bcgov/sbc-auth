@@ -130,6 +130,7 @@ const PAYMENT_METHODS = {
     title: 'Online Banking',
     subtitle: 'Pay for products and services through your financial institutions website.',
     description: `
+        <p><strong>Royal Bank of Canada (RBC) is currently the only bank available for online banking. <br>More banks will be added over time.</strong></p>
         <p>
           Instructions to set up your online banking payment solution will be available in the <strong>Payment Methods</strong> section of your account settings once your account has been created.
         </p>
