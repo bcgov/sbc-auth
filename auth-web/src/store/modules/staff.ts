@@ -23,6 +23,7 @@ export default class StaffModule extends VuexModule {
   activeStaffOrgs: Organization[] = []
   pendingStaffOrgs: Organization[] = []
   rejectedStaffOrgs: Organization[] = []
+  suspendedStaffOrgs: Organization[] = []
   pendingInvitationOrgs: Organization[] = []
   accountUnderReview: Organization
   accountUnderReviewAddress: Address
@@ -54,6 +55,10 @@ export default class StaffModule extends VuexModule {
     return this.pendingInvitationOrgs?.length || 0
   }
 
+  public get suspendedReviewCount (): number {
+    return this.suspendedStaffOrgs?.length || 0
+  }
+
   @Mutation
   public setProducts (products: ProductCode[]) {
     this.products = products
@@ -77,6 +82,11 @@ export default class StaffModule extends VuexModule {
   @Mutation
   public setRejectedStaffOrgs (rejectedOrgs: Organization[]) {
     this.rejectedStaffOrgs = rejectedOrgs
+  }
+
+  @Mutation
+  public setSuspendedStaffOrgs (suspendedOrgs: Organization[]) {
+    this.suspendedStaffOrgs = suspendedOrgs
   }
 
   @Mutation
@@ -193,7 +203,11 @@ export default class StaffModule extends VuexModule {
     const response = await StaffService.getStaffOrgs(AccountStatus.REJECTED)
     return response?.data?.orgs || []
   }
-
+  @Action({ commit: 'setSuspendedStaffOrgs', rawError: true })
+  public async syncSuspendedStaffOrgs () {
+    const response = await StaffService.getStaffOrgs(AccountStatus.NSF_SUSPENDED)
+    return response?.data?.orgs || []
+  }
   @Action({ rawError: true })
   public async searchOrgs (filterParams: OrgFilterParams) {
     const response = await StaffService.searchOrgs(filterParams)
