@@ -223,9 +223,19 @@ export default class App extends Mixins(NextPageMixin) {
         this.$router.push('/home')
         return
       }
-      this.loadUserInfo()
-      await this.syncUser()
-      this.setupNavigationBar()
+      try {
+        this.loadUserInfo()
+        await this.syncUser()
+        this.setupNavigationBar()
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log('Loading profiles failed Error: ' + e)
+        // may be due to the user is in pending status ;if so move him to pending approval page..or else dont do anything
+        if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
+          // 2. If user has a pending account status, take them to pending approval page (no matter where they are)
+          this.$router.push(`/${Pages.PENDING_APPROVAL}/${this.currentAccountSettings.label}`)
+        }
+      }
     }
     this.$store.commit('loadComplete')
   }
