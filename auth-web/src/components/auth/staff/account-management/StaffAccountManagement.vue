@@ -53,6 +53,15 @@
             Rejected
           </v-badge>
         </v-tab>
+        <v-tab data-test="suspended-tab" :to=pagesEnum.STAFF_DASHBOARD_SUSPENDED>
+          <v-badge
+            inline
+            color="primary"
+            :content="suspendedReviewCount"
+            :value="suspendedReviewCount">
+            Suspended
+          </v-badge>
+        </v-tab>
       </template>
     </v-tabs>
 
@@ -80,7 +89,8 @@ enum TAB_CODE {
     Active = 'active-tab',
     PendingReview = 'pending-review-tab',
     Rejected = 'rejected-tab',
-    Invitations = 'invitations-tab'
+    Invitations = 'invitations-tab',
+    Suspended = 'suspended-tab'
 }
 
 @Component({
@@ -94,7 +104,8 @@ enum TAB_CODE {
     ...mapActions('staff', [
       'syncPendingStaffOrgs',
       'syncRejectedStaffOrgs',
-      'syncPendingInvitationOrgs'
+      'syncPendingInvitationOrgs',
+      'syncSuspendedStaffOrgs'
     ])
   },
   computed: {
@@ -102,7 +113,8 @@ enum TAB_CODE {
     ...mapGetters('staff', [
       'pendingReviewCount',
       'rejectedReviewCount',
-      'pendingInvitationsCount'
+      'pendingInvitationsCount',
+      'suspendedReviewCount'
     ])
   }
 })
@@ -113,10 +125,12 @@ export default class StaffAccountManagement extends Vue {
   private readonly syncPendingStaffOrgs!: () => Organization[]
   private readonly syncRejectedStaffOrgs!: () => Organization[]
   private readonly syncPendingInvitationOrgs!: () => Organization[]
+  private readonly syncSuspendedStaffOrgs!: () => Organization[]
 
   private readonly pendingReviewCount!: number
   private readonly rejectedReviewCount!: number
   private readonly pendingInvitationsCount!: number
+  private readonly suspendedReviewCount!: number
   private pagesEnum = Pages
 
   private tabs = [
@@ -139,6 +153,11 @@ export default class StaffAccountManagement extends Vue {
       id: 3,
       tabName: 'Rejected',
       code: TAB_CODE.Rejected
+    },
+    {
+      id: 4,
+      tabName: 'Suspended',
+      code: TAB_CODE.Suspended
     }
   ]
 
@@ -146,6 +165,7 @@ export default class StaffAccountManagement extends Vue {
     await this.syncPendingStaffOrgs()
     await this.syncRejectedStaffOrgs()
     await this.syncPendingInvitationOrgs()
+    await this.syncSuspendedStaffOrgs()
   }
 
   gotToCreateAccount () {
