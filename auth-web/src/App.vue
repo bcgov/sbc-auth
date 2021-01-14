@@ -214,26 +214,18 @@ export default class App extends Mixins(NextPageMixin) {
         if (!isSigninComplete) {
           await KeyCloakService.initializeToken(this.$store)
         }
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('Could not initialize token refresher: ' + e)
-        this.navigationBarConfig.menuItems = []
-        this.$store.dispatch('user/reset')
-        this.$store.commit('loadComplete')
-        this.$router.push('/home')
-        return
-      }
-      try {
         this.loadUserInfo()
         await this.syncUser()
         this.setupNavigationBar()
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('Loading profiles failed Error: ' + e)
-        // may be due to the user is in pending status ;if so move him to pending approval page..or else dont do anything
-        if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
-          // 2. If user has a pending account status, take them to pending approval page (no matter where they are)
-          this.$router.push(`/${Pages.PENDING_APPROVAL}/${this.currentAccountSettings.label}`)
+        // if its in pending approval , user can stay there.
+        if (this.$route.path.indexOf(Pages.PENDING_APPROVAL) < 1) {
+          // eslint-disable-next-line no-console
+          console.log('App.vue--> Error in set up: ' + e)
+          this.navigationBarConfig.menuItems = []
+          this.$store.dispatch('user/reset')
+          this.$store.commit('loadComplete')
+          this.$router.push('/home')
         }
       }
     }
