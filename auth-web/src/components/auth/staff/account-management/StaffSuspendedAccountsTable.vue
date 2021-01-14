@@ -6,7 +6,7 @@
       :items="suspendedStaffOrgs"
       :no-data-text="$t('noActiveAccountsLabel')"
       :options.sync="tableDataOptions"
-      :disable-sort="true"
+      :disable-sort="false"
       :footer-props="{
         itemsPerPageOptions: getPaginationOptions
       }"
@@ -62,7 +62,6 @@ import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
-// import OrgModule from '@/store/modules/org'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { SearchFilterParam } from '@/models/searchfilter'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
@@ -73,8 +72,6 @@ const OrgModule = namespace('org')
 const StaffModule = namespace('staff')
 @Component({})
 export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
-  // private orgStore = getModule(OrgModule, this.$store)
-
   @OrgModule.Action('syncOrganization') private syncOrganization!: (currentAccount: number) => Promise<Organization>
   @OrgModule.Action('addOrgSettings') private addOrgSettings!: (org: Organization) => Promise<UserSettings>
   @OrgModule.Action('syncMembership') private syncMembership!: (orgId: number) => Promise<Member>
