@@ -1,5 +1,5 @@
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
-import StaffSuspendedAccountsTable from '@/components/auth/staff/account-management/StaffSuspendedAccountsTable.vue'
+import StaffRejectedAccountsTable from '@/components/auth/staff/account-management/StaffRejectedAccountsTable.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -8,8 +8,8 @@ import Vuex from 'vuex'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
-describe('StaffSuspendedAccountsTable.vue', () => {
-  let wrapper: Wrapper<StaffSuspendedAccountsTable>
+describe('StaffRejectedAccountsTable.vue', () => {
+  let wrapper: Wrapper<StaffRejectedAccountsTable>
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -18,33 +18,22 @@ describe('StaffSuspendedAccountsTable.vue', () => {
     const staffModule = {
       namespaced: true,
       state: {
-        suspendedStaffOrgs: [
+        rejectedStaffOrgs: [
           {
-            'modified': '2020-12-10T21:05:06.144977+00:00',
+            'modified': '2020-12-10T22:05:06.144977+00:00',
             'name': 'NEW BC ONLINE TECH TEAM',
-            'orgType': 'PREMIUM',
-            'orgStatus': 'NSF_SUSPENDED',
+            'orgType': 'BASIC',
+            'orgStatus': 'ACTIVE',
             'products': [
-              2342,
-              2991
+              2341,
+              2992
             ],
-            'statusCode': 'NSF_SUSPENDED',
-            'suspendedOn': '2020-12-01T17:52:03.747200+00:00'
+            'statusCode': 'ACTIVE'
           }
         ]
       },
       actions: {
-        syncSuspendedStaffOrgs: jest.fn()
-      }
-    }
-
-    const orgModule = {
-      namespaced: true,
-      state: {},
-      actions: {
-        syncOrganization: jest.fn(),
-        syncMembership: jest.fn(),
-        addOrgSettings: jest.fn()
+        rejectedStaffOrgs: jest.fn()
       }
     }
 
@@ -54,13 +43,12 @@ describe('StaffSuspendedAccountsTable.vue', () => {
       state: {},
       strict: false,
       modules: {
-        staff: staffModule,
-        org: orgModule
+        staff: staffModule
       }
     })
 
     const $t = () => ''
-    wrapper = shallowMount(StaffSuspendedAccountsTable, {
+    wrapper = shallowMount(StaffRejectedAccountsTable, {
       store,
       localVue,
       vuetify,
@@ -76,6 +64,6 @@ describe('StaffSuspendedAccountsTable.vue', () => {
   })
 
   it('Should have data table', () => {
-    expect(wrapper.find('.account-list')).toBeTruthy()
+    expect(wrapper.find('.user-list')).toBeTruthy()
   })
 })
