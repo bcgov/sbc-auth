@@ -207,7 +207,6 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   private isDirSearchUser: boolean = false
   private dirSearchUrl = ConfigHelper.getSearchApplicationUrl()
   private readonly pagesEnum = Pages
-  private readonly currentOrganization!: Organization
 
   private handleBackButton (): void {
     const backTo = this.isStaff ? Pages.STAFF_DASHBOARD : `/account/${this.orgId}/business`
