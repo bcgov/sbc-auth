@@ -219,7 +219,7 @@ export default class App extends Mixins(NextPageMixin) {
         this.setupNavigationBar()
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.log('Could not initialize token refresher: ' + e)
+        console.log('App.vue.setup Error: ' + e)
         this.navigationBarConfig.menuItems = []
         this.$store.dispatch('user/reset')
         this.$store.commit('loadComplete')
