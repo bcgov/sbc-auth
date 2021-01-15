@@ -218,15 +218,12 @@ export default class App extends Mixins(NextPageMixin) {
         await this.syncUser()
         this.setupNavigationBar()
       } catch (e) {
-        // if its in pending approval , user can stay there.
         // eslint-disable-next-line no-console
-        console.log('App.vue--> Error in set up: ' + e)
+        console.log('Could not initialize token refresher: ' + e)
         this.navigationBarConfig.menuItems = []
         this.$store.dispatch('user/reset')
         this.$store.commit('loadComplete')
-        if (this.$route.path.indexOf(Pages.PENDING_APPROVAL) < 1) {
-          this.$router.push('/home')
-        }
+        this.$router.push('/home')
       }
     }
     this.$store.commit('loadComplete')

@@ -144,9 +144,9 @@ export default class NextPageMixin extends Vue {
     await this.syncUserProfile()
     this.setCurrentAccountSettings(this.getAccountFromSession())
     if (this.currentAccountSettings) {
-      await this.syncOrganization(this.currentAccountSettings.id)
       await this.syncMembership(this.currentAccountSettings.id)
       if (this.currentMembership.membershipStatus !== MembershipStatus.Active) {
+        await this.syncOrganization(this.currentAccountSettings.id)
         // Set current org to blank state if not active in the current org
         await this.resetCurrentOrganization()
       }
