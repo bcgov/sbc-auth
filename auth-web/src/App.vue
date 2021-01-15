@@ -214,18 +214,17 @@ export default class App extends Mixins(NextPageMixin) {
         if (!isSigninComplete) {
           await KeyCloakService.initializeToken(this.$store)
         }
+        this.loadUserInfo()
+        await this.syncUser()
+        this.setupNavigationBar()
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.log('Could not initialize token refresher: ' + e)
+        console.log('App.vue.setup Error: ' + e)
         this.navigationBarConfig.menuItems = []
         this.$store.dispatch('user/reset')
         this.$store.commit('loadComplete')
         this.$router.push('/home')
-        return
       }
-      this.loadUserInfo()
-      await this.syncUser()
-      this.setupNavigationBar()
     }
     this.$store.commit('loadComplete')
   }
