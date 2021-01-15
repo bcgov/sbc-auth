@@ -24,7 +24,7 @@ beforeEach(() => {
 })
 
 describe('ConfigHelper tests', () => {
-  // TODO fix later 
+  // TOFIX fix later
   it('does make one Call Axios config when session storage is present', () => {
     sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)
     ConfigHelper.saveConfigToSessionStorage()

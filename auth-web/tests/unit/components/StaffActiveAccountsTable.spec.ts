@@ -19,7 +19,6 @@ describe('StaffActiveAccountsTable.vue', () => {
 
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
 
-
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
@@ -79,7 +78,7 @@ describe('StaffActiveAccountsTable.vue', () => {
     jest.resetModules()
     jest.clearAllMocks()
   })
-  // TODO fix orgs undefiend
+  // TOFIX fix orgs undefiend
   it('is a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
