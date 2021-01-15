@@ -1,5 +1,5 @@
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
-import StaffSuspendedAccountsTable from '@/components/auth/staff/account-management/StaffSuspendedAccountsTable.vue'
+import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -8,8 +8,17 @@ import Vuex from 'vuex'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
-describe('StaffSuspendedAccountsTable.vue', () => {
-  let wrapper: Wrapper<StaffSuspendedAccountsTable>
+describe('StaffActiveAccountsTable.vue', () => {
+  let wrapper: Wrapper<StaffActiveAccountsTable>
+
+  const config = {
+    'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
+    'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
+    'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
+  }
+
+  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -23,18 +32,18 @@ describe('StaffSuspendedAccountsTable.vue', () => {
             'modified': '2020-12-10T21:05:06.144977+00:00',
             'name': 'NEW BC ONLINE TECH TEAM',
             'orgType': 'PREMIUM',
-            'orgStatus': 'NSF_SUSPENDED',
+            'orgStatus': 'ACTIVE',
             'products': [
               2342,
               2991
             ],
-            'statusCode': 'NSF_SUSPENDED',
+            'statusCode': 'ACTIVE',
             'suspendedOn': '2020-12-01T17:52:03.747200+00:00'
           }
         ]
       },
       actions: {
-        syncSuspendedStaffOrgs: jest.fn()
+        searchOrgs: jest.fn()
       }
     }
 
@@ -42,9 +51,9 @@ describe('StaffSuspendedAccountsTable.vue', () => {
       namespaced: true,
       state: {},
       actions: {
-        syncOrganization: jest.fn(),
         syncMembership: jest.fn(),
-        addOrgSettings: jest.fn()
+        addOrgSettings: jest.fn(),
+        syncOrganization: jest.fn()
       }
     }
 
@@ -60,7 +69,7 @@ describe('StaffSuspendedAccountsTable.vue', () => {
     })
 
     const $t = () => ''
-    wrapper = shallowMount(StaffSuspendedAccountsTable, {
+    wrapper = shallowMount(StaffActiveAccountsTable, {
       store,
       localVue,
       vuetify,
@@ -70,7 +79,7 @@ describe('StaffSuspendedAccountsTable.vue', () => {
     jest.resetModules()
     jest.clearAllMocks()
   })
-
+  // TODO fix orgs undefiend
   it('is a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
