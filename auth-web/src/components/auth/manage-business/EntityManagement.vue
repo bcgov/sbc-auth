@@ -159,10 +159,10 @@ import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequest
 import { Address } from '@/models/address'
 import AffiliatedEntityList from '@/components/auth/manage-business/AffiliatedEntityList.vue'
 import { Business } from '@/models/business'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import i18n from '@/plugins/i18n'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 
 @Component({
   components: {
