@@ -240,7 +240,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private async setup () {
     const accountSettings = this.getAccountFromSession()
     this.orgName = this.currentOrganization?.name || ''
-    if (!this.anonAccount && this.enablePaymentMethodSelectorStep) {
+    if (!this.anonAccount && this.enableMandatoryAddress) {
       await this.syncAddress()
       if (Object.keys(this.currentOrgAddress).length === 0) {
         this.isCompleteAccountInfo = false
@@ -299,6 +299,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 
   private get enablePaymentMethodSelectorStep (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+  }
+
+  private get enableMandatoryAddress (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
   }
 
   private get enableUpgradeDowngrade (): boolean {

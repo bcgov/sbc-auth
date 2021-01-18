@@ -149,7 +149,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import { LoginSource, Pages } from '@/util/constants'
+import { LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
@@ -162,6 +162,7 @@ import { Business } from '@/models/business'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import i18n from '@/plugins/i18n'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 
 @Component({
   components: {
@@ -216,7 +217,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     }
     // check if address info is complete
     const isNotAnonUser = this.currentUser?.loginSource !== LoginSource.BCROS
-    if (isNotAnonUser) {
+    if (isNotAnonUser && this.enableMandatoryAddress) {
       // do it only if address is not already fetched.Or else try to fetch from DB
       if (!this.currentOrgAddress || Object.keys(this.currentOrgAddress).length === 0) {
         // sync and try again
@@ -237,6 +238,10 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.$route.query.isNumberedCompanyRequest && await this.createNumberedBusiness(this.currentAccountSettings.id)
     await this.syncBusinesses()
     this.isLoading = false
+  }
+
+  private get enableMandatoryAddress (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
   }
 
   async showAddSuccessModal () {
