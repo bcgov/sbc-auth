@@ -3,7 +3,7 @@
     <v-data-table
       class="account-list"
       :headers="headerAccounts"
-      :items="suspendedStaffOrgs"
+      :items="suspendedOrgs"
       :no-data-text="$t('noActiveAccountsLabel')"
       :options.sync="tableDataOptions"
       :disable-sort="false"
@@ -12,6 +12,7 @@
       }"
       :loading="isTableLoading"
       @update:items-per-page="saveItemsPerPage"
+      :server-items-length="totalAccountsCount"
     >
       <template v-slot:loading>
         Loading...
@@ -77,6 +78,8 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   @OrgModule.Action('syncMembership') private syncMembership!: (orgId: number) => Promise<Member>
   @StaffModule.Action('syncSuspendedStaffOrgs') private syncSuspendedStaffOrgs!: () => Organization[]
   @StaffModule.State('suspendedStaffOrgs') private suspendedStaffOrgs!: Organization[]
+  @StaffModule.Action('searchOrgs') private searchOrgs!: (filterParams: OrgFilterParams) => OrgList
+  @StaffModule.State('suspendedReviewCount') private suspendedReviewCount!: number
 
   private readonly headerAccounts = [
     {
@@ -124,9 +127,15 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   private tableDataOptions: Partial<DataOptions> = {}
   private orgFilter: OrgFilterParams
   private isTableLoading: boolean = false
+  private suspendedOrgs: Organization[] = []
 
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`
+  }
+
+  @Watch('tableDataOptions', { deep: true })
+  async getAccounts (val, oldVal) {
+    await this.getOrgs(val?.page, val?.itemsPerPage)
   }
 
   private async mounted () {
@@ -134,7 +143,28 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     if (this.hasCachedPageInfo) {
       this.tableDataOptions = this.getAndPruneCachedPageInfo()
     }
-    // await this.syncSuspendedStaffOrgs()
+    this.suspendedOrgs = this.suspendedStaffOrgs
+    this.totalAccountsCount = this.suspendedReviewCount
+  }
+
+  private async getOrgs (page: number = 1, pageLimit: number = this.numberOfItems) {
+    // set this variable so that the chip is shown
+    const appliedFilterValue = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
+    try {
+      this.orgFilter = {
+        status: AccountStatus.NSF_SUSPENDED,
+        pageNumber: page,
+        pageLimit: pageLimit
+      // name: appliedFilterValue
+      }
+      const activeAccountsResp:any = await this.searchOrgs(this.orgFilter)
+      this.suspendedOrgs = activeAccountsResp.orgs
+      this.totalAccountsCount = activeAccountsResp?.total || 0
+    } catch (error) {
+      this.isTableLoading = false
+      // eslint-disable-next-line no-console
+      console.error(error)
+    }
   }
 
   private async view (org: Organization) {
