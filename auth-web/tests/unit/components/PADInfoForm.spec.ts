@@ -27,7 +27,7 @@ describe('PADInfoForm.vue', () => {
     const userModule = {
       namespaced: true,
       state: {
-        userHasToAcceptTOS: false,
+        userHasToAcceptTOS: false
       },
       actions: {
         getTermsOfUse: jest.fn()
@@ -39,13 +39,13 @@ describe('PADInfoForm.vue', () => {
       namespaced: true,
       state: {
         currentOrgPADInfo: {
-          "bankAccountNumber": "1234567",
-          "bankInstitutionNumber": "0001",
-          "bankTransitNumber": "00720",
-          "cfsAccountNumber": "4566",
-          "cfsPartyNumber": "99034",
-          "cfsSiteNumber": "30579",
-          "status": "ACTIVE"
+          'bankAccountNumber': '1234567',
+          'bankInstitutionNumber': '0001',
+          'bankTransitNumber': '00720',
+          'cfsAccountNumber': '4566',
+          'cfsPartyNumber': '99034',
+          'cfsSiteNumber': '30579',
+          'status': 'ACTIVE'
         },
         currentOrganizationType: Account.BASIC
       },
