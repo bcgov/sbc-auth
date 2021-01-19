@@ -79,6 +79,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   @StaffModule.Action('syncSuspendedStaffOrgs') private syncSuspendedStaffOrgs!: () => Organization[]
   @StaffModule.State('suspendedStaffOrgs') private suspendedStaffOrgs!: Organization[]
   @StaffModule.Action('searchOrgs') private searchOrgs!: (filterParams: OrgFilterParams) => OrgList
+  @StaffModule.State('suspendedReviewCount') private suspendedReviewCount!: number
 
   private readonly headerAccounts = [
     {
@@ -143,6 +144,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       this.tableDataOptions = this.getAndPruneCachedPageInfo()
     }
     this.suspendedOrgs = this.suspendedStaffOrgs
+    this.totalAccountsCount = this.suspendedReviewCount
   }
 
   private async getOrgs (page: number = 1, pageLimit: number = this.numberOfItems) {
