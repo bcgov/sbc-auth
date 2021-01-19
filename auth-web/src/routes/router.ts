@@ -50,6 +50,7 @@ import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
 import StaffPendingAccountInvitationsTable from '@/components/auth/staff/account-management/StaffPendingAccountInvitationsTable.vue'
 import StaffPendingAccountsTable from '@/components/auth/staff/account-management/StaffPendingAccountsTable.vue'
 import StaffRejectedAccountsTable from '@/components/auth/staff/account-management/StaffRejectedAccountsTable.vue'
+import StaffSuspendedAccountsTable from '@/components/auth/staff/account-management/StaffSuspendedAccountsTable.vue'
 import TermsOfServiceDeclineView from '@/views/auth/TermsOfServiceDeclineView.vue'
 import TermsOfServiceView from '@/views/auth/TermsOfServiceView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
@@ -448,6 +449,11 @@ export function getRoutes (): RouteConfig[] {
           path: 'rejected',
           component: StaffRejectedAccountsTable,
           name: 'rejected'
+        },
+        {
+          path: 'suspended',
+          component: StaffSuspendedAccountsTable,
+          name: 'suspended'
         }
       ]
     },
