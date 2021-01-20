@@ -30,6 +30,7 @@ class MessageType(Enum):
     ONLINE_BANKING_OVER_PAYMENT = 'bc.registry.payment.OverPaid'
     ONLINE_BANKING_UNDER_PAYMENT = 'bc.registry.payment.UnderPaid'
     ONLINE_BANKING_PAYMENT = 'bc.registry.payment.Payment'
+    PAD_SETUP_FAILED = 'bc.registry.payment.PadSetupFailed'
 
 
 class SubjectType(Enum):
@@ -42,6 +43,7 @@ class SubjectType(Enum):
     ADMIN_REMOVED_SUBJECT = '[BC Registries and Online Services] You have been removed as an administrator'
     TEAM_MODIFIED_SUBJECT = '[BC Registries and Online Services] Change in Team members'
     ONLINE_BANKING_PAYMENT_SUBJECT = '[BC Registries and Online Services] Online Banking payment has been received'
+    PAD_SETUP_FAILED = '[BC Registries and Online Services] Your Account is Temporarily Suspended'
 
 
 class TemplateType(Enum):
@@ -56,3 +58,4 @@ class TemplateType(Enum):
     ONLINE_BANKING_PAYMENT_TEMPLATE_NAME = 'online_banking_payment'
     ONLINE_BANKING_OVER_PAYMENT_TEMPLATE_NAME = 'online_banking_over_payment'
     ONLINE_BANKING_UNDER_PAYMENT_TEMPLATE_NAME = 'online_banking_under_payment'
+    PAD_SETUP_FAILED_TEMPLATE_NAME = 'pad_setup_failed'
