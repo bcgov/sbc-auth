@@ -24,9 +24,32 @@ depends_on = None
 ###
 # get_pk_constraint
 
-table_mapping = {'org': 'orgs', 'corp_type': 'corp_types', 'product_code': 'product_codes', 'affidavit': 'affidavits',
-                 'affidavit_status': 'affidavit_statuses', 'affiliation': 'affiliations', 'contact': 'contacts',
-                 'user': 'users'}
+table_mapping = {'org': 'orgs',
+                 'corp_type': 'corp_types',
+                 'product_code': 'product_codes',
+                 'affidavit': 'affidavits',
+                 'affidavit_status': 'affidavit_statuses',
+                 'affiliation': 'affiliations',
+                 'contact': 'contacts',
+                 'user': 'users',
+                 'entity': 'entities',
+                 'contact_link': 'contact_links',
+                 'invitation': 'invitations',
+                 'invitation_membership': 'invitation_memberships',
+                 'invitation_type': 'invitation_types',
+                 'invitation_status': 'invitation_statuses',
+                 'membership': 'memberships',
+                 'membership_status_code': 'membership_status_codes',
+                 'membership_type': 'membership_types',
+                 'org_status': 'org_statuses',
+                 'org_type': 'org_types',
+                 'payment_type': 'payment_types',
+                 'product_role_code': 'product_role_codes',
+                 'product_subscription': 'product_subscriptions',
+                 'product_subscription_role': 'product_subscription_roles',
+                 'product_type_code': 'product_type_codes',
+                 'user_status_code': 'user_status_codes',
+                 }
 
 skip_table = ['alembic', 'activity', 'transaction']
 
@@ -99,7 +122,7 @@ def _rename_table(table, new_table_name):
 
 def _rename_sequence(m, new_table_name, table):
     id_column = m.tables[table].columns.get('id')
-    if id_column is not None:
+    if id_column is not None and id_column.server_default is not None:
         seq = id_column.server_default.arg.text
         # format is 'nextval(\'org_id_seq\'::regclass)'
         seq_name = re.search("nextval\(\'(.*)\'::regclass", seq).group(1)

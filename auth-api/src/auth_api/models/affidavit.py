@@ -26,15 +26,15 @@ from .org import Org
 class Affidavit(VersionedModel):
     """This is the model for a Affidavit."""
 
-    __tablename__ = 'affidavit'
+    __tablename__ = 'affidavits'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     document_id = Column(String(60), index=True)
     issuer = Column(String(250))
-    status_code = Column(ForeignKey('affidavit_status.code'), nullable=False)
+    status_code = Column(ForeignKey('affidavit_statuses.code'), nullable=False)
     decision_made_by = Column(String(250))
     decision_made_on = Column(DateTime, nullable=True)
-    user_id = Column(ForeignKey('user.id'), nullable=False)
+    user_id = Column(ForeignKey('users.id'), nullable=False)
 
     contacts = relationship('ContactLink', primaryjoin='Affidavit.id == ContactLink.affidavit_id', lazy='select')
     status = relationship('AffidavitStatus', foreign_keys=[status_code], lazy='select')

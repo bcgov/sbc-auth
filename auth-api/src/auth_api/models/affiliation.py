@@ -27,11 +27,11 @@ from .entity import Entity as EntityModel
 class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Affiliation."""
 
-    __tablename__ = 'affiliation'
+    __tablename__ = 'affiliations'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    entity_id = Column(ForeignKey('entity.id'), nullable=False)
-    org_id = Column(ForeignKey('org.id'), nullable=False)
+    entity_id = Column(ForeignKey('entities.id'), nullable=False)
+    org_id = Column(ForeignKey('orgs.id'), nullable=False)
 
     entity = relationship('Entity', foreign_keys=[entity_id], lazy='select')
     org = relationship('Org', foreign_keys=[org_id], lazy='select')

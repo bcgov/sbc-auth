@@ -25,11 +25,11 @@ from .base_model import VersionedModel
 class ProductSubscription(VersionedModel):  # pylint: disable=too-few-public-methods
     """Model for a Product Subscription model."""
 
-    __tablename__ = 'product_subscription'
+    __tablename__ = 'product_subscriptions'
 
     id = Column(Integer, primary_key=True)
-    org_id = Column(ForeignKey('org.id'), nullable=False)
-    product_code = Column(ForeignKey('product_code.code'), nullable=False)
+    org_id = Column(ForeignKey('orgs.id'), nullable=False)
+    product_code = Column(ForeignKey('product_codes.code'), nullable=False)
 
     product = relationship('ProductCode', foreign_keys=[product_code], lazy='select')
     product_subscription_roles = relationship('ProductSubscriptionRole', cascade='all,delete,delete-orphan',
