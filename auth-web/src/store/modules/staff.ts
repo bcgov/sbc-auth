@@ -30,6 +30,7 @@ export default class StaffModule extends VuexModule {
   accountUnderReviewAdmin: User
   accountUnderReviewAdminContact: Contact
   accountUnderReviewAffidavitInfo: AffidavitInformation
+  suspendedReviewTotal: number = 0
 
   public get accountNotaryName (): string {
     return this.accountUnderReviewAffidavitInfo?.issuer || '-'
@@ -56,7 +57,7 @@ export default class StaffModule extends VuexModule {
   }
 
   public get suspendedReviewCount (): number {
-    return this.suspendedStaffOrgs?.length || 0
+    return this.suspendedReviewTotal || 0
   }
 
   @Mutation
@@ -117,6 +118,11 @@ export default class StaffModule extends VuexModule {
   @Mutation
   public setAccountUnderReviewAdminContact (contact: Contact) {
     this.accountUnderReviewAdminContact = contact
+  }
+
+  @Mutation
+  public setSuspendedReviewCount (count: number) {
+    this.suspendedReviewTotal = count
   }
 
   @Action({ commit: 'setProducts', rawError: true })
@@ -206,6 +212,7 @@ export default class StaffModule extends VuexModule {
   @Action({ commit: 'setSuspendedStaffOrgs', rawError: true })
   public async syncSuspendedStaffOrgs () {
     const response = await StaffService.getStaffOrgs(AccountStatus.NSF_SUSPENDED)
+    this.context.commit('setSuspendedReviewCount', response?.data?.total)
     return response?.data?.orgs || []
   }
   @Action({ rawError: true })
