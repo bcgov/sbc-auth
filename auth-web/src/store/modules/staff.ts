@@ -211,7 +211,7 @@ export default class StaffModule extends VuexModule {
   }
   @Action({ commit: 'setSuspendedStaffOrgs', rawError: true })
   public async syncSuspendedStaffOrgs () {
-    const response = await StaffService.getStaffOrgs(AccountStatus.NSF_SUSPENDED)
+    const response:any = await StaffService.getStaffOrgs(AccountStatus.NSF_SUSPENDED)
     this.context.commit('setSuspendedReviewCount', response?.data?.total)
     return response?.data?.orgs || []
   }
