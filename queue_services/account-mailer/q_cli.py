@@ -183,6 +183,18 @@ async def run(loop, mode, auth_account_id, auth_account_name, auth_username, ban
                     'recipientEmail': 'foo@bar.com'
                 }
             }
+        elif mode == 'pad_setup_failed':
+            payload = {
+                'specversion': '1.x-wip',
+                'type': f'{MessageType.PAD_SETUP_FAILED.value}',
+                'source': 'https://api.auth.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
+                'id': auth_account_id,
+                'datacontenttype': 'application/json',
+                'data': {
+                    'accountId': auth_account_id,
+                    # 'recipientEmail': 'foo@bar.com'
+                }
+            }
 
         await sc.publish(subject=subscription_options().get('subject'),
                          payload=json.dumps(payload).encode('utf-8'))

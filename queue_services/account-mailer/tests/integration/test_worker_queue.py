@@ -380,3 +380,46 @@ async def test_online_banking_emails(app, session, stan_server, event_loop, clie
             'subject') == SubjectType.ONLINE_BANKING_PAYMENT_SUBJECT.value
         assert mock_send.call_args.args[0].get('attachments') is None
         assert mock_send.call_args.args[0].get('content').get('body') is not None
+
+
+@pytest.mark.asyncio
+async def test_pad_failed_emails(app, session, stan_server, event_loop, client_id, events_stan, future):
+    """Assert that events can be retrieved and decoded from the Queue."""
+    # Call back for the subscription
+    from account_mailer.worker import cb_subscription_handler
+
+    # vars
+    user = factory_user_model_with_contact()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    id = org.id
+
+    events_subject = 'test_subject'
+    events_queue = 'test_queue'
+    events_durable_name = 'test_durable'
+    with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
+        # register the handler to test it
+        await subscribe_to_queue(events_stan,
+                                 events_subject,
+                                 events_queue,
+                                 events_durable_name,
+                                 cb_subscription_handler)
+
+        # add an event to queue
+        mail_details = {
+            'accountId': id
+        }
+        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
+                                        msg_type=MessageType.PAD_SETUP_FAILED.value,
+                                        mail_details=mail_details)
+
+        mock_send.assert_called
+        assert mock_send.call_args.args[0].get('recipients') == 'foo@bar.com'
+        assert mock_send.call_args.args[0].get('content').get(
+            'subject') == SubjectType.PAD_SETUP_FAILED.value
+        assert mock_send.call_args.args[0].get('attachments') is None
+        assert mock_send.call_args.args[0].get('content').get('body') is not None
+
+        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
+                                        msg_type=MessageType.PAD_SETUP_FAILED.value,
+                                        mail_details=mail_details)
