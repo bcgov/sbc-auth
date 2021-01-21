@@ -723,7 +723,7 @@ export default class OrgModule extends VuexModule {
     return items
   }
 
-  // to calculate failed invoices. need to move appropriate place since its returning data than commiting to store (which is bad code)
+  // to calculate failed invoices. need to move appropriate place since its returning data than commiting to store (which is not standard)
   @Action({ rawError: true })
   public async calculateFailedInvoices () {
     let totalPaidAmount = 0
@@ -732,9 +732,7 @@ export default class OrgModule extends VuexModule {
     let nsfFee = 0
     let totalTransactionAmount = 0
     const failedInvoices: InvoiceList[] = await this.getFailedInvoices()
-    // eslint-disable-next-line
-    console.log('failedInvoices', failedInvoices)
-    failedInvoices.forEach((failedInvoice) => {
+    failedInvoices?.forEach((failedInvoice) => {
       totalPaidAmount += failedInvoice?.paidAmount
       totalAmountToPay += failedInvoice?.invoices?.map(el => el.total).reduce((accumulator, invoiceTotal) => accumulator + invoiceTotal)
       failedInvoice?.invoices?.forEach((invoice) => {
