@@ -14,7 +14,7 @@
       <v-col class="text-end">{{suspendedDate}}</v-col>
     </v-row>
     <v-row>
-      <v-col cols="9" class="font-weight-bold balance">BALANCE DUE: $64.50</v-col>
+      <v-col cols="9" class="font-weight-bold balance">BALANCE DUE:  ${{totalAmountToPay.toFixed(2)}}</v-col>
     </v-row>
   </v-alert>
 </v-card>
@@ -23,7 +23,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
-import { InvoiceList } from '@/models/invoice'
+import { FailedInvoice } from '@/models/invoice'
 import { Organization } from '@/models/Organization'
 import { namespace } from 'vuex-class'
 
@@ -31,11 +31,10 @@ const OrgModule = namespace('org')
 
 @Component
 export default class AccountSuspendAlert extends Vue {
-  @OrgModule.Action('getFailedInvoices') private getFailedInvoices!: () => InvoiceList[]
+  @OrgModule.Action('calculateFailedInvoices') private calculateFailedInvoices!: () => FailedInvoice
   @OrgModule.State('currentOrganization') private currentOrganization!: Organization
   private formatDate = CommonUtils.formatDisplayDate
-  private nsfFee: number = 0
-  private nsfCount: number = 0
+
   private totalTransactionAmount: number = 0
   private totalAmountToPay: number = 0
   private totalPaidAmount: number = 0
@@ -45,20 +44,9 @@ export default class AccountSuspendAlert extends Vue {
   }
 
   async mounted () {
-    const failedInvoices: InvoiceList[] = await this.getFailedInvoices()
-    failedInvoices.forEach((failedInvoice) => {
-      this.totalPaidAmount += failedInvoice?.paidAmount
-      this.totalAmountToPay += failedInvoice?.invoices?.map(el => el.total).reduce((accumulator, invoiceTotal) => accumulator + invoiceTotal)
-      failedInvoice?.invoices?.forEach((invoice) => {
-        const nsfItems = invoice?.lineItems?.filter(lineItem => (lineItem.description === 'NSF'))
-          .map(el => el.total)
-        this.nsfCount += nsfItems.length
-        this.nsfFee += (nsfItems.length) ? nsfItems?.reduce((accumulator, currentValue) => accumulator + currentValue) : 0
-      })
-    })
-
-    this.totalTransactionAmount = this.totalAmountToPay - this.nsfFee
-    this.totalAmountToPay = this.totalAmountToPay - this.totalPaidAmount
+    const failedInvoices: FailedInvoice = await this.calculateFailedInvoices()
+    this.totalTransactionAmount = failedInvoices.totalTransactionAmount || 0
+    this.totalAmountToPay = failedInvoices.totalAmountToPay || 0
   }
 }
 </script>

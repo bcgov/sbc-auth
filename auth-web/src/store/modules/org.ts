@@ -723,6 +723,32 @@ export default class OrgModule extends VuexModule {
     return items
   }
 
+  // to calculate failed invoices. need to move appropriate place since its returning data than commiting to store (which is bad code)
+  @Action({ rawError: true })
+  public async calculateFailedInvoices () {
+    let totalPaidAmount = 0
+    let totalAmountToPay = 0
+    let nsfCount = 0
+    let nsfFee = 0
+    let totalTransactionAmount = 0
+    const failedInvoices: InvoiceList[] = await this.getFailedInvoices()
+    // eslint-disable-next-line
+    console.log('failedInvoices', failedInvoices)
+    failedInvoices.forEach((failedInvoice) => {
+      totalPaidAmount += failedInvoice?.paidAmount
+      totalAmountToPay += failedInvoice?.invoices?.map(el => el.total).reduce((accumulator, invoiceTotal) => accumulator + invoiceTotal)
+      failedInvoice?.invoices?.forEach((invoice) => {
+        const nsfItems = invoice?.lineItems?.filter(lineItem => (lineItem.description === 'NSF'))
+          .map(el => el.total)
+        nsfCount += nsfItems.length
+        nsfFee += (nsfItems.length) ? nsfItems?.reduce((accumulator, currentValue) => accumulator + currentValue) : 0
+      })
+    })
+    totalTransactionAmount = totalAmountToPay - nsfFee
+    totalAmountToPay = totalAmountToPay - totalPaidAmount
+    return { totalTransactionAmount, totalAmountToPay, nsfFee, nsfCount }
+  }
+
   @Action({ rawError: true })
   public async resetAccountSetupProgress (): Promise<void> {
     this.context.commit('setGrantAccess', false)
