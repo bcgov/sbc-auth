@@ -59,6 +59,8 @@
       <p class="mt-3 mb-0" v-if="isPremiumAccount">Manage account information, and view account activity.</p>
       <p class="mt-3 mb-0" v-else>Manage account information, team members, and authentication settings.</p>
     </div>
+    <!-- Suspend Account Banner-->
+    <AccountSuspendAlert  v-if="showAccountFreezBanner"/>
 
     <v-card flat class="account-settings-card" data-test="account-settings-card">
       <v-container class="nav-container py-6 pr-0 pl-8">
@@ -178,11 +180,15 @@ import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
+import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vue'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 
   @Component({
+    components: {
+      AccountSuspendAlert
+    },
     computed: {
       ...mapState('user', [
         'currentUser'
@@ -247,6 +253,10 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   private get enablePaymentMethodSelectorStep (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+  }
+  // show baner for staff user and account suspended
+  private get showAccountFreezBanner () {
+    return this.isStaff && this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED
   }
 
   private async mounted () {
