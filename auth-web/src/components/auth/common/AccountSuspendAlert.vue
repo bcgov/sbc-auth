@@ -21,8 +21,7 @@
 </template>
 
 <script lang="ts">
-import { Address, BaseAddressModel } from '@/models/address'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
 import { InvoiceList } from '@/models/invoice'
 import { Organization } from '@/models/Organization'
