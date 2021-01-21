@@ -35,9 +35,9 @@ export default class AccountSuspendAlert extends Vue {
   @OrgModule.State('currentOrganization') private currentOrganization!: Organization
   private formatDate = CommonUtils.formatDisplayDate
 
-  private totalTransactionAmount: number = 0
-  private totalAmountToPay: number = 0
-  private totalPaidAmount: number = 0
+  private totalTransactionAmount = 0
+  private totalAmountToPay = 0
+  private totalPaidAmount = 0
 
   private get suspendedDate () {
     return (this.currentOrganization?.suspendedOn) ? this.formatDate(new Date(this.currentOrganization.suspendedOn)) : ''

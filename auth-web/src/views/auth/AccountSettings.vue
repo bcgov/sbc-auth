@@ -60,7 +60,7 @@
       <p class="mt-3 mb-0" v-else>Manage account information, team members, and authentication settings.</p>
     </div>
     <!-- Suspend Account Banner-->
-    <AccountSuspendAlert  v-if="showAccountFreezBanner"/>
+    <AccountSuspendAlert  v-if="showAccountFreezeBanner"/>
 
     <v-card flat class="account-settings-card" data-test="account-settings-card">
       <v-container class="nav-container py-6 pr-0 pl-8">
@@ -255,7 +255,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
     return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
   }
   // show baner for staff user and account suspended
-  private get showAccountFreezBanner () {
+  private get showAccountFreezeBanner () {
     return this.isStaff && this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED
   }
 
