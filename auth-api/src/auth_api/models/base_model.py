@@ -32,12 +32,12 @@ class BaseModel(db.Model):
     @declared_attr
     def created_by_id(cls):  # pylint:disable=no-self-argument, # noqa: N805
         """Return foreign key for created by."""
-        return Column(ForeignKey('user.id'), default=cls._get_current_user)
+        return Column(ForeignKey('users.id'), default=cls._get_current_user)
 
     @declared_attr
     def modified_by_id(cls):  # pylint:disable=no-self-argument, # noqa: N805
         """Return foreign key for modified by."""
-        return Column(ForeignKey('user.id'), onupdate=cls._get_current_user)
+        return Column(ForeignKey('users.id'), onupdate=cls._get_current_user)
 
     @declared_attr
     def created_by(cls):  # pylint:disable=no-self-argument, # noqa: N805

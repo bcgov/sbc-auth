@@ -32,16 +32,16 @@ from .org import Org as OrgModel
 class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """Model for a Membership model.  Associates Users and Orgs."""
 
-    __tablename__ = 'membership'
+    __tablename__ = 'memberships'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(ForeignKey('user.id'), nullable=False)
-    org_id = Column(ForeignKey('org.id'), nullable=False)
+    user_id = Column(ForeignKey('users.id'), nullable=False)
+    org_id = Column(ForeignKey('orgs.id'), nullable=False)
     membership_type_code = Column(
-        ForeignKey('membership_type.code'), nullable=False
+        ForeignKey('membership_types.code'), nullable=False
     )
     status = Column(
-        ForeignKey('membership_status_code.id')
+        ForeignKey('membership_status_codes.id')
     )
     membership_type = relationship('MembershipType', foreign_keys=[membership_type_code], lazy='select')
     membership_status = relationship('MembershipStatusCode', foreign_keys=[status], lazy='select')

@@ -30,10 +30,10 @@ class AccountPaymentSettings(VersionedModel):  # pylint: disable=too-few-public-
     __tablename__ = 'account_payment_settings'
 
     id = Column(Integer, primary_key=True)
-    preferred_payment_code = Column(ForeignKey('payment_type.code'), nullable=False)
+    preferred_payment_code = Column(ForeignKey('payment_types.code'), nullable=False)
     bcol_user_id = Column(String(20))
     bcol_account_id = Column(String(20))
-    org_id = Column(ForeignKey('org.id'), nullable=False)
+    org_id = Column(ForeignKey('orgs.id'), nullable=False)
     is_active = Column(Boolean(), default=True)
 
     org = relationship('Org', foreign_keys=[org_id], lazy='select')

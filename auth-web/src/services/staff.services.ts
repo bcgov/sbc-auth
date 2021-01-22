@@ -6,11 +6,11 @@ import { axios } from '@/util/http-util.ts'
 
 export default class StaffService {
   static async getProducts (): Promise<AxiosResponse<ProductCode[]>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/codes/product_code`)
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/codes/product_codes`)
   }
 
   static async getAccountTypes (): Promise<AxiosResponse<AccountType[]>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/codes/org_type`)
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/codes/org_types`)
   }
 
   static async getStaffOrgs (status?: string): Promise<AxiosResponse<Organizations>> {

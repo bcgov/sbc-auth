@@ -27,7 +27,7 @@ from auth_api.services import Codes as CodesService
 
 def test_fetch_data_model(session):  # pylint: disable=unused-argument
     """Assert that code type details can be fetch by table name."""
-    code_type = 'membership_type'
+    code_type = 'membership_types'
     code_result = CodesService.fetch_data_model(code_type)
     assert code_result is not None
 
@@ -49,7 +49,7 @@ def test_fetch_data_model_not_found(session):  # pylint: disable=unused-argument
 
 def test_fetch_codes(session):  # pylint: disable=unused-argument
     """Assert that code type details can be fetch by table name."""
-    code_type = 'membership_type'
+    code_type = 'membership_types'
     data = CodesService.fetch_codes(code_type)
     assert data is not None
     assert data[0]['name'] == 'USER'
@@ -76,7 +76,7 @@ def test_fetch_codes_not_found(session):  # pylint: disable=unused-argument
 
 def test_fetch_codes_with_exception(session):  # pylint: disable=unused-argument
     """Assert that code type details can not be fetch by table name."""
-    code_type = 'membership_type'
+    code_type = 'membership_types'
     with patch.object(importlib, 'import_module', side_effect=Exception(Error.UNDEFINED_ERROR, None)):
         with pytest.raises(BusinessException) as exception:
             CodesService.fetch_codes(code_type)

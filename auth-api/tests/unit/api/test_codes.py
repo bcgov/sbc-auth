@@ -28,7 +28,7 @@ from auth_api.services import Codes as CodesService
 
 def test_get_codes(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the code type can be fetched."""
-    code_type = 'membership_type'
+    code_type = 'membership_types'
     rv = client.get('/api/v1/codes/{}'.format(code_type), content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(rv.json, 'codes')[0]
