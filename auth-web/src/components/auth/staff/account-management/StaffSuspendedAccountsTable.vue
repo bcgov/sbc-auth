@@ -158,7 +158,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       // name: appliedFilterValue
       }
       const activeAccountsResp:any = await this.searchOrgs(this.orgFilter)
-      this.suspendedOrgs = activeAccountsResp.orgs
+      this.suspendedOrgs = activeAccountsResp?.orgs
       this.totalAccountsCount = activeAccountsResp?.total || 0
     } catch (error) {
       this.isTableLoading = false
