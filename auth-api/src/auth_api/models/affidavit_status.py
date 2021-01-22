@@ -23,7 +23,7 @@ class AffidavitStatus(
         BaseCodeModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """This is the model for an Affidavit Status record."""
 
-    __tablename__ = 'affidavit_status'
+    __tablename__ = 'affidavit_statuses'
 
     @classmethod
     def get_default_status(cls):

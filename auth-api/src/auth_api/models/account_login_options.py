@@ -26,7 +26,7 @@ class AccountLoginOptions(VersionedModel):  # pylint: disable=too-few-public-met
 
     id = Column(Integer, primary_key=True)
     login_source = Column(String(20), nullable=False)
-    org_id = Column(ForeignKey('org.id'), nullable=False)
+    org_id = Column(ForeignKey('orgs.id'), nullable=False)
     is_active = Column(Boolean(), default=True)
 
     org = relationship('Org', foreign_keys=[org_id], lazy='select')

@@ -24,12 +24,12 @@ from .base_model import BaseModel
 class ProductRoleCode(BaseModel):  # pylint: disable=too-few-public-methods
     """Product role code table to store all the roles on products supported by auth system."""
 
-    __tablename__ = 'product_role_code'
+    __tablename__ = 'product_role_codes'
     id = Column(Integer, primary_key=True)
     code = Column(String(15), index=True)
     desc = Column(String(100))
 
-    product_code = Column(ForeignKey('product_code.code'), nullable=False)
+    product_code = Column(ForeignKey('product_codes.code'), nullable=False)
 
     @classmethod
     def find_by_code_and_product_code(cls, code: str, product_code: str):

@@ -12,7 +12,7 @@ export default class UserService {
   }
 
   static async getRoles (): Promise<AxiosResponse<RoleInfo[]>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/codes/membership_type`)
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/codes/membership_types`)
   }
 
   static async syncUserProfile (): Promise<AxiosResponse<User>> {

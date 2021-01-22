@@ -29,7 +29,7 @@ from .base_model import BaseModel
 class Entity(BaseModel):  # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """This is the Entity model for the Auth service."""
 
-    __tablename__ = 'entity'
+    __tablename__ = 'entities'
 
     id = Column(Integer, primary_key=True)
     business_identifier = Column('business_identifier', String(75), unique=True, nullable=False)
@@ -37,7 +37,7 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods, too-many-ins
     pass_code_claimed = Column('pass_code_claimed', Boolean(), default=False)
     business_number = Column('business_number', String(100), nullable=True)
     name = Column('name', String(250), nullable=True)
-    corp_type_code = Column(String(15), ForeignKey('corp_type.code'), nullable=False)
+    corp_type_code = Column(String(15), ForeignKey('corp_types.code'), nullable=False)
     folio_number = Column('folio_number', String(50), nullable=True, index=True)
 
     contacts = relationship('ContactLink', back_populates='entity')
