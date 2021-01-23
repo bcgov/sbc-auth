@@ -47,6 +47,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     decision_made_on = Column(DateTime, nullable=True)
     bcol_user_id = Column(String(20))
     bcol_account_id = Column(String(20))
+    bcol_account_name = Column(String(250))
 
     contacts = relationship('ContactLink', lazy='select')
     org_type = relationship('OrgType')

@@ -190,6 +190,7 @@ def test_create_org_assert_payment_types(session, keycloak_mock):  # pylint:disa
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
     assert dictionary.get('bcol_user_id', None) is None
+    assert dictionary.get('bcol_user_name', None) is None
     assert dictionary.get('bcol_account_id', None) is None
 
 
@@ -243,7 +244,7 @@ def test_create_org_with_similar_name(session, keycloak_mock):  # pylint:disable
 
 
 def test_create_org_with_duplicate_name_bcol(session, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that an Org linking to bcol can be created when the name is duplicated."""
+    """Assert that an Org linking to bcol retrun exception if there's duplicated names."""
     org = factory_org_service()
 
     factory_org_model({'name': 'BC ONLINE TECHNICAL TEAM DEVL'}, org_type_info=TestOrgTypeInfo.implicit,
@@ -258,8 +259,9 @@ def test_create_org_with_duplicate_name_bcol(session, keycloak_mock):  # pylint:
 
     with patch.object(RestService, 'post', side_effect=[bcol_response, pay_api_response]):
         user = factory_user_model()
-        org = OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
-        assert org
+        with pytest.raises(BusinessException) as exception:
+            org.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
+        assert exception.value.code == Error.DATA_CONFLICT.name
 
 
 def test_update_org(session):  # pylint:disable=unused-argument
@@ -629,19 +631,12 @@ def test_create_org_with_linked_bcol_account(session, keycloak_mock):  # pylint:
     org = OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
     assert org
     dictionary = org.as_dict()
+
     assert dictionary['name'] == TestOrgInfo.bcol_linked()['name']
     assert dictionary['orgType'] == OrgType.PREMIUM.value
     assert dictionary['bcol_user_id'] is not None
     assert dictionary['bcol_account_id'] is not None
-
-
-def test_create_org_with_invalid_name_than_bcol_account(session, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that an Org can be created."""
-    user = factory_user_model()
-
-    with pytest.raises(BusinessException) as exception:
-        OrgService.create_org(TestOrgInfo.bcol_linked_invalid_name(), user_id=user.id)
-    assert exception.value.code == Error.INVALID_INPUT.name
+    assert dictionary['bcol_account_name'] is not None
 
 
 def test_bcol_account_exists(session):  # pylint:disable=unused-argument
@@ -650,6 +645,21 @@ def test_bcol_account_exists(session):  # pylint:disable=unused-argument
 
     check_result = OrgService.bcol_account_link_check(TestBCOLInfo.bcol1['bcol_account_id'])
     assert check_result
+
+
+def test_create_org_with_different_name_than_bcol_account(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org can be created."""
+    user = factory_user_model()
+
+    org = OrgService.create_org(TestOrgInfo.bcol_linked_different_name(), user_id=user.id)
+    assert org
+    dictionary = org.as_dict()
+    print(dictionary)
+    assert dictionary['name'] == TestOrgInfo.bcol_linked_different_name()['name']
+    assert dictionary['orgType'] == OrgType.PREMIUM.value
+    assert dictionary['bcol_user_id'] is not None
+    assert dictionary['bcol_account_id'] is not None
+    assert dictionary['bcol_account_name'] is not None
 
 
 def test_bcol_account_not_exists(session):  # pylint:disable=unused-argument

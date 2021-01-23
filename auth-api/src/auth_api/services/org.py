@@ -91,9 +91,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         access_type = Org.validate_access_type(is_bceid_user, is_staff_admin, org_info)
 
-        duplicate_check = (org_type == OrgType.BASIC.value) or (not bcol_credential)
-        if duplicate_check:  # Allow duplicate names if premium and link to bcol
-            Org.raise_error_if_duplicate_name(org_info['name'])
+        # Always check duplicated name for all type of account.
+        Org.raise_error_if_duplicate_name(org_info['name'])
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.access_type = access_type
@@ -266,9 +265,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 raise BusinessException(CustomException(error['detail'], bcol_response.status_code), None)
 
             bcol_account_number = bcol_response.json().get('accountNumber')
-            if org_info:
-                if bcol_response.json().get('orgName') != org_info.get('name'):
-                    raise BusinessException(Error.INVALID_INPUT, None)
+
             if Org.bcol_account_link_check(bcol_account_number, org_id):
                 raise BusinessException(Error.BCOL_ACCOUNT_ALREADY_LINKED, None)
         return bcol_response
@@ -304,6 +301,7 @@ class Org:  # pylint: disable=too-many-public-methods
             # remove the bcol payment details from payment table
             org_info['bcol_account_id'] = ''
             org_info['bcol_user_id'] = ''
+            org_info['bcol_account_name'] = ''
             payment_type = Org._get_default_payment_method_for_creditcard()
             # TODO Add the pay-api call here
             Org.__delete_contact(self._model)
@@ -329,8 +327,13 @@ class Org:  # pylint: disable=too-many-public-methods
         org_info.update({
             'bcol_account_id': bcol_response.get('accountNumber'),
             'bcol_user_id': bcol_response.get('userId'),
-            'name': bcol_response.get('orgName')
+            'bcol_account_name': bcol_response.get('orgName')
         })
+
+        # New org who linked to BCOL account will use BCOL account name as default name
+        # Existing account keep their account name to avoid payment info change.
+        if not org_info.get('name'):
+            org_info.update({'name': bcol_response.get('orgName')})
 
     @staticmethod
     def add_contact_to_org(mailing_address, org):
