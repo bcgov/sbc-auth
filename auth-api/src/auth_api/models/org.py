@@ -87,8 +87,9 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
 
     @classmethod
     def find_by_bcol_id(cls, bcol_account_id):
-        """Find an Org instance that matches the provided id."""
-        return cls.query.filter_by(bcol_account_id=bcol_account_id).first()
+        """Find an Org instance that matches the provided id and not in INACTIVE status."""
+        return cls.query.filter(Org.bcol_account_id == bcol_account_id).filter(
+            Org.status_code != OrgStatusEnum.INACTIVE.value).first()
 
     @classmethod
     def find_by_org_name(cls, org_name):

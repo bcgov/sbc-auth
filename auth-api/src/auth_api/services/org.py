@@ -352,7 +352,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         has_org_updates: bool = False  # update the org table if this variable is set true
 
-        is_name_getting_updated = 'name' in org_info and self._model.type_code == OrgType.BASIC.value
+        is_name_getting_updated = 'name' in org_info
         if is_name_getting_updated:
             existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'], self._model.id)
             if existing_similar__org is not None:

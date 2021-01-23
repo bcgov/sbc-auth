@@ -654,7 +654,7 @@ def test_create_org_with_different_name_than_bcol_account(session, keycloak_mock
     org = OrgService.create_org(TestOrgInfo.bcol_linked_different_name(), user_id=user.id)
     assert org
     dictionary = org.as_dict()
-    
+
     assert dictionary['name'] == TestOrgInfo.bcol_linked_different_name()['name']
     assert dictionary['orgType'] == OrgType.PREMIUM.value
     assert dictionary['bcol_user_id'] is not None
