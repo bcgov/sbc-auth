@@ -81,7 +81,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         # If the account is created using BCOL credential, verify its valid bc online account
         if bcol_credential:
-            bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token).json()
+            bcol_response = Org.get_bcol_details(bcol_credential, bearer_token).json()
             Org._map_response_to_org(bcol_response, org_info)
 
         is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in token_info.get('realm_access').get('roles')
@@ -253,7 +253,7 @@ class Org:  # pylint: disable=too-many-public-methods
             'DIRECT_PAY_ENABLED') else PaymentMethod.CREDIT_CARD.value
 
     @staticmethod
-    def get_bcol_details(bcol_credential: Dict, org_info: Dict = None, bearer_token: str = None, org_id=None):
+    def get_bcol_details(bcol_credential: Dict, bearer_token: str = None, org_id=None):
         """Retrieve and validate BC Online credentials."""
         bcol_response = None
         if bcol_credential:
@@ -309,7 +309,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if action == ChangeType.UPGRADE.value:
             if org_info.get('typeCode') != OrgType.PREMIUM.value or bcol_credential is None:
                 raise BusinessException(Error.INVALID_INPUT, None)
-            bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token, self._model.id).json()
+            bcol_response = Org.get_bcol_details(bcol_credential, bearer_token, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
             payment_type = PaymentMethod.BCOL.value
 
@@ -362,7 +362,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
         if bcol_credential := org_info.pop('bcOnlineCredential', None):
-            bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token, self._model.id).json()
+            bcol_response = Org.get_bcol_details(bcol_credential, bearer_token, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
             has_org_updates = True
 
