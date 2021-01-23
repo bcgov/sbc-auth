@@ -494,8 +494,8 @@ class TestOrgInfo(dict, Enum):
         }
 
     @staticmethod
-    def bcol_linked_invalid_name():
-        """Return org info for bcol linked info with invalid name."""
+    def bcol_linked_different_name():
+        """Return org info for bcol linked info with different org name than bcol account name."""
         return {
             'name': 'Test',
             'bcOnlineCredential': {
@@ -508,7 +508,8 @@ class TestOrgInfo(dict, Enum):
                 'region': 'BC',
                 'postalCode': 'T1T1T1',
                 'country': 'CA'
-            }
+            },
+            'typeCode': OrgType.PREMIUM.value
         }
 
 
