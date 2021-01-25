@@ -61,7 +61,7 @@
           </div>
         </div>
 
-        <div class="nv-list-item" v-if="!isPremiumAccount" v-can:CHANGE_ORG_NAME.disable>
+        <div class="nv-list-item" v-can:CHANGE_ORG_NAME.disable>
           <div class="name">
             Account Details
           </div>
@@ -74,7 +74,6 @@
             :rules="accountNameRules"
             v-can:CHANGE_ORG_NAME.disable
             :disabled="!canChangeAccountName()"
-            v-if="!isPremiumAccount"
             v-model="orgName"
             v-on:keydown="enableBtn()"
             >
