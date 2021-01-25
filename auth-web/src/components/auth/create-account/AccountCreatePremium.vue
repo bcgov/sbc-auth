@@ -73,7 +73,7 @@
           Back
         </v-btn>
         <v-spacer></v-spacer>
-        <v-btn class="mr-3" large depressed color="primary" :loading="saving" :disabled="!grantAccess || saving || !isBaseAddressValid" @click="save">
+        <v-btn class="mr-3" large depressed color="primary" :loading="saving" :disabled="!grantAccess || saving || !isBaseAddressValid || !isFormValid()" @click="save">
           <span v-if="!isAccountChange">Next
             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
           </span>
@@ -189,7 +189,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private readonly teamNameRules = [v => !!v || 'An account name is required']
 
   private isFormValid (): boolean {
-    return !!this.username && !!this.password && !!this.orgName && !!this.errorMessage
+    return !!this.orgName && !this.errorMessage
   }
 
   private async mounted () {
