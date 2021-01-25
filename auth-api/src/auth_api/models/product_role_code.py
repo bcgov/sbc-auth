@@ -27,7 +27,7 @@ class ProductRoleCode(BaseModel):  # pylint: disable=too-few-public-methods
     __tablename__ = 'product_role_codes'
     id = Column(Integer, primary_key=True)
     code = Column(String(15), index=True)
-    desc = Column(String(100))
+    description = Column(String(100))
 
     product_code = Column(ForeignKey('product_codes.code'), nullable=False)
 

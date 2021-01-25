@@ -29,3 +29,4 @@ class MembershipTypeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, t
         model = MembershipTypeModel
 
     code = fields.String(data_key='name')
+    description = fields.String(data_key='desc')

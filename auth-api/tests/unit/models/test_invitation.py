@@ -36,15 +36,15 @@ def factory_invitation_model(session, status, sent_date=datetime.now()):
     session.add(user)
     session.commit()
 
-    org_type = OrgTypeModel(code='TEST', desc='Test')
+    org_type = OrgTypeModel(code='TEST', description='Test')
     session.add(org_type)
     session.commit()
 
-    org_status = OrgStatusModel(code='TEST', desc='Test')
+    org_status = OrgStatusModel(code='TEST', description='Test')
     session.add(org_status)
     session.commit()
 
-    preferred_payment = PaymentTypeModel(code='TEST', desc='Test')
+    preferred_payment = PaymentTypeModel(code='TEST', description='Test')
     session.add(preferred_payment)
     session.commit()
 
@@ -166,15 +166,15 @@ def test_create_from_dict(session):  # pylint:disable=unused-argument
     session.add(user)
     session.commit()
 
-    org_type = OrgTypeModel(code='TEST', desc='Test')
+    org_type = OrgTypeModel(code='TEST', description='Test')
     session.add(org_type)
     session.commit()
 
-    org_status = OrgStatusModel(code='TEST', desc='Test')
+    org_status = OrgStatusModel(code='TEST', description='Test')
     session.add(org_status)
     session.commit()
 
-    preferred_payment = PaymentTypeModel(code='TEST', desc='Test')
+    preferred_payment = PaymentTypeModel(code='TEST', description='Test')
     session.add(preferred_payment)
     session.commit()
 
