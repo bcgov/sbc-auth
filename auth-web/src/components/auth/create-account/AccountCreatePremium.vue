@@ -285,7 +285,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
                     'An error occurred while attempting to create your account.'
       }
     } else {
-      // TODO make sure name is valid
       const isValidName = await this.validateAccountNameUnique()
       if (isValidName) {
         this.stepForward()
