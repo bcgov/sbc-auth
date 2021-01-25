@@ -81,7 +81,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         # If the account is created using BCOL credential, verify its valid bc online account
         if bcol_credential:
-            bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token).json()
+            bcol_response = Org.get_bcol_details(bcol_credential, bearer_token).json()
             Org._map_response_to_org(bcol_response, org_info)
 
         is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in token_info.get('realm_access').get('roles')
@@ -91,9 +91,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         access_type = Org.validate_access_type(is_bceid_user, is_staff_admin, org_info)
 
-        duplicate_check = (org_type == OrgType.BASIC.value) or (not bcol_credential)
-        if duplicate_check:  # Allow duplicate names if premium and link to bcol
-            Org.raise_error_if_duplicate_name(org_info['name'])
+        # Always check duplicated name for all type of account.
+        Org.raise_error_if_duplicate_name(org_info['name'])
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.access_type = access_type
@@ -254,7 +253,7 @@ class Org:  # pylint: disable=too-many-public-methods
             'DIRECT_PAY_ENABLED') else PaymentMethod.CREDIT_CARD.value
 
     @staticmethod
-    def get_bcol_details(bcol_credential: Dict, org_info: Dict = None, bearer_token: str = None, org_id=None):
+    def get_bcol_details(bcol_credential: Dict, bearer_token: str = None, org_id=None):
         """Retrieve and validate BC Online credentials."""
         bcol_response = None
         if bcol_credential:
@@ -266,9 +265,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 raise BusinessException(CustomException(error['detail'], bcol_response.status_code), None)
 
             bcol_account_number = bcol_response.json().get('accountNumber')
-            if org_info:
-                if bcol_response.json().get('orgName') != org_info.get('name'):
-                    raise BusinessException(Error.INVALID_INPUT, None)
+
             if Org.bcol_account_link_check(bcol_account_number, org_id):
                 raise BusinessException(Error.BCOL_ACCOUNT_ALREADY_LINKED, None)
         return bcol_response
@@ -304,6 +301,7 @@ class Org:  # pylint: disable=too-many-public-methods
             # remove the bcol payment details from payment table
             org_info['bcol_account_id'] = ''
             org_info['bcol_user_id'] = ''
+            org_info['bcol_account_name'] = ''
             payment_type = Org._get_default_payment_method_for_creditcard()
             # TODO Add the pay-api call here
             Org.__delete_contact(self._model)
@@ -311,7 +309,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if action == ChangeType.UPGRADE.value:
             if org_info.get('typeCode') != OrgType.PREMIUM.value or bcol_credential is None:
                 raise BusinessException(Error.INVALID_INPUT, None)
-            bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token, self._model.id).json()
+            bcol_response = Org.get_bcol_details(bcol_credential, bearer_token, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
             payment_type = PaymentMethod.BCOL.value
 
@@ -329,8 +327,13 @@ class Org:  # pylint: disable=too-many-public-methods
         org_info.update({
             'bcol_account_id': bcol_response.get('accountNumber'),
             'bcol_user_id': bcol_response.get('userId'),
-            'name': bcol_response.get('orgName')
+            'bcol_account_name': bcol_response.get('orgName')
         })
+
+        # New org who linked to BCOL account will use BCOL account name as default name
+        # Existing account keep their account name to avoid payment info change.
+        if not org_info.get('name'):
+            org_info.update({'name': bcol_response.get('orgName')})
 
     @staticmethod
     def add_contact_to_org(mailing_address, org):
@@ -349,7 +352,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         has_org_updates: bool = False  # update the org table if this variable is set true
 
-        is_name_getting_updated = 'name' in org_info and self._model.type_code == OrgType.BASIC.value
+        is_name_getting_updated = 'name' in org_info
         if is_name_getting_updated:
             existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'], self._model.id)
             if existing_similar__org is not None:
@@ -359,7 +362,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
         if bcol_credential := org_info.pop('bcOnlineCredential', None):
-            bcol_response = Org.get_bcol_details(bcol_credential, org_info, bearer_token, self._model.id).json()
+            bcol_response = Org.get_bcol_details(bcol_credential, bearer_token, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
             has_org_updates = True
 
