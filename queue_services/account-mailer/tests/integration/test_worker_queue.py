@@ -451,7 +451,7 @@ async def test_payment_pending_emails(app, session, stan_server, event_loop, cli
         # add an event to queue
         mail_details = {
             'accountId': id,
-            'cfsAccountId':'12345678',
+            'cfsAccountId': '12345678',
             'transactionAmount': 20.00
         }
         await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
