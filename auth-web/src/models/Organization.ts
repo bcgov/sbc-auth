@@ -35,6 +35,7 @@ export interface Organization {
   accessType?: string;
   bcolProfile?:BcolProfile
   bcolAccountDetails?:BcolAccountDetails
+  bcolAccountName?: string,
   grantAccess?:boolean
   statusCode?:string
   decisionMadeBy?: string,

@@ -47,7 +47,7 @@
             <div class="name mt-3" id="accountName">Linked BC Online Account Details</div>
             <div class="value">
               <LinkedBCOLBanner
-                :bcolAccountName="currentOrganization.name"
+                :bcolAccountName="currentOrganization.bcolAccountName"
                 :bcolAccountDetails="currentOrganization.bcolAccountDetails"
               ></LinkedBCOLBanner>
             </div>
