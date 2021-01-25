@@ -13,7 +13,7 @@
         The following information will be imported from your existing BC Online account. Review your account <br> information below and update if needed.
       </p>
       <LinkedBCOLBanner class="mb-9"
-        :bcolAccountName="currentOrganization.bcolAccountDetails.orgName"
+        :bcolAccountName="currentOrganization.bcolAccountName"
         :bcolAccountDetails="currentOrganization.bcolAccountDetails"
         :showUnlinkAccountBtn="true"
         @unlink-account="unlinkAccount"
