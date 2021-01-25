@@ -205,6 +205,11 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
+  public setCurrentOrganizationName (name: string) {
+    this.currentOrganization.name = name
+  }
+
+  @Mutation
   public setCurrentOrganizationPaymentType (paymentType: string) {
     this.currentOrgPaymentType = paymentType
   }
