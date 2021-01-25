@@ -31,6 +31,7 @@ class MessageType(Enum):
     ONLINE_BANKING_UNDER_PAYMENT = 'bc.registry.payment.UnderPaid'
     ONLINE_BANKING_PAYMENT = 'bc.registry.payment.Payment'
     PAD_SETUP_FAILED = 'bc.registry.payment.PadSetupFailed'
+    PAYMENT_PENDING = 'bc.registry.payment.paymentPending'
 
 
 class SubjectType(Enum):
@@ -44,6 +45,7 @@ class SubjectType(Enum):
     TEAM_MODIFIED_SUBJECT = '[BC Registries and Online Services] Change in Team members'
     ONLINE_BANKING_PAYMENT_SUBJECT = '[BC Registries and Online Services] Online Banking payment has been received'
     PAD_SETUP_FAILED = '[BC Registries and Online Services] Your Account is Temporarily Suspended'
+    PAYMENT_PENDING = '[BC Registries and Online Services] Payment is now due for pending transaction on your account'
 
 
 class TemplateType(Enum):
@@ -59,3 +61,4 @@ class TemplateType(Enum):
     ONLINE_BANKING_OVER_PAYMENT_TEMPLATE_NAME = 'online_banking_over_payment'
     ONLINE_BANKING_UNDER_PAYMENT_TEMPLATE_NAME = 'online_banking_under_payment'
     PAD_SETUP_FAILED_TEMPLATE_NAME = 'pad_setup_failed'
+    PAYMENT_PENDING_TEMPLATE_NAME = 'paymanet_pending'
