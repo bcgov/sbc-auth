@@ -13,6 +13,8 @@
 # limitations under the License.
 """Manager for base type schema and export."""
 
+from marshmallow import fields
+
 from .base_schema import BaseSchema
 
 
@@ -22,4 +24,7 @@ class BaseCodeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps fields to a default schema."""
 
-        fields = ('code', 'desc', 'default')
+        fields = ('code', 'description', 'default')
+
+    # front end expects desc still
+    description = fields.String(data_key='desc')

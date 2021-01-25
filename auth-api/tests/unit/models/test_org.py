@@ -27,15 +27,15 @@ from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 
 def factory_org_model(name, session):
     """Produce a templated org model."""
-    org_type = OrgTypeModel(code='TEST', desc='Test')
+    org_type = OrgTypeModel(code='TEST', description='Test')
     session.add(org_type)
     session.commit()
 
-    org_status = OrgStatusModel(code='TEST', desc='Test')
+    org_status = OrgStatusModel(code='TEST', description='Test')
     session.add(org_status)
     session.commit()
 
-    preferred_payment = PaymentTypeModel(code='TEST', desc='Test')
+    preferred_payment = PaymentTypeModel(code='TEST', description='Test')
     session.add(preferred_payment)
     session.commit()
     org = OrgModel(name=name)
