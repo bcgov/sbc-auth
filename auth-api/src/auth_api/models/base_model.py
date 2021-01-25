@@ -175,8 +175,8 @@ class BaseCodeModel(BaseModel):
         return Column(String(15), primary_key=True)
 
     @declared_attr
-    def desc(cls):  # pylint:disable=no-self-argument, # noqa: N805
-        """Return column for desc."""
+    def description(cls):  # pylint:disable=no-self-argument, # noqa: N805
+        """Return column for description."""
         return Column(String(100))
 
     @declared_attr

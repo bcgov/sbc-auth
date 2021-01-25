@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Manager for corp type schema and export."""
+from marshmallow import fields
 
 from auth_api.models import CorpType as CorpTypeModel
 
@@ -25,3 +26,6 @@ class CorpTypeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few
         """Maps all of the CorpType fields to a default schema."""
 
         model = CorpTypeModel
+        # front end expects desc still
+
+    description = fields.String(data_key='desc')

@@ -121,17 +121,17 @@ def factory_org_model(org_info: dict = TestOrgInfo.org1,
     """Produce a templated org model."""
     org_type = OrgTypeModel.get_default_type()
     if org_type_info['code'] != TestOrgTypeInfo.implicit['code']:
-        org_type = OrgTypeModel(code=org_type_info['code'], desc=org_type_info['desc'])
+        org_type = OrgTypeModel(code=org_type_info['code'], description=org_type_info['desc'])
         org_type.save()
 
     if org_status_info:
-        org_status = OrgStatusModel(code=org_status_info['code'], desc=org_status_info['desc'])
+        org_status = OrgStatusModel(code=org_status_info['code'], description=org_status_info['desc'])
         org_status.save()
     else:
         org_status = OrgStatusModel.get_default_status()
 
     if payment_type_info:
-        preferred_payment = PaymentTypeModel(code=payment_type_info['code'], desc=payment_type_info['desc'])
+        preferred_payment = PaymentTypeModel(code=payment_type_info['code'], description=payment_type_info['desc'])
         preferred_payment.save()
     else:
         preferred_payment = PaymentTypeModel.get_default_payment_type()

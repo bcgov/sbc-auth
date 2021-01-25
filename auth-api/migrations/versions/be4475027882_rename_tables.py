@@ -105,6 +105,7 @@ def _rename_obj(inspector, metadata, table: str, name_dict, tables):
         versioned_table_name = _suffix_version(table)
         if versioned_table_name in tables:
             versioned_table_new_name = _suffix_version(new_table_name)
+            _rename_indexes(inspector, versioned_table_new_name, versioned_table_name)
             _rename_table(versioned_table_name, versioned_table_new_name)
 
         print(f'Renaming Table Done for: {table} to {new_table_name}')
