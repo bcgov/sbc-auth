@@ -160,7 +160,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   @Prop() isAccountChange: boolean
   private orgName = ''
   private orgNameReadOnly = true
-  private readonly DUPL_ERROR_MESSAGE = 'An account with this name already exists. Try a different account name.'
+  private static readonly DUPL_ERROR_MESSAGE = 'An account with this name already exists. Try a different account name.'
 
   private baseAddressSchema: {} = addressSchema
 
@@ -248,7 +248,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private async validateAccountNameUnique () {
     const available = await this.isOrgNameAvailable(this.orgName)
     if (!available) {
-      this.bcolDuplicateNameErrorMessage = this.DUPL_ERROR_MESSAGE
+      this.bcolDuplicateNameErrorMessage = AccountCreatePremium.DUPL_ERROR_MESSAGE
       this.orgNameReadOnly = false
       return false
     } else {
@@ -289,7 +289,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
       if (isValidName) {
         this.stepForward()
       } else {
-        this.errorMessage = this.DUPL_ERROR_MESSAGE
+        this.errorMessage = AccountCreatePremium.DUPL_ERROR_MESSAGE
       }
     }
   }
