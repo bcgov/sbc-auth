@@ -13,11 +13,23 @@
         The following information will be imported from your existing BC Online account. Review your account <br> information below and update if needed.
       </p>
       <LinkedBCOLBanner class="mb-9"
-        :bcolAccountName="currentOrganization.name"
+        :bcolAccountName="currentOrganization.bcolAccountDetails.orgName"
         :bcolAccountDetails="currentOrganization.bcolAccountDetails"
         :showUnlinkAccountBtn="true"
         @unlink-account="unlinkAccount"
       ></LinkedBCOLBanner>
+
+      <fieldset>
+        <v-text-field
+          filled
+          label="Account Name"
+          v-model.trim="orgName"
+          :rules="orgNameRules"
+          :disabled="orgNameReadOnly"
+          :error-messages="bcolDuplicateNameErrorMessage"
+          @change="updateStore"
+        />
+      </fieldset>
 
       <fieldset>
         <legend class="mb-3">Mailing Address</legend>
@@ -110,13 +122,15 @@ import { getModule } from 'vuex-module-decorators'
     ...mapMutations('org', [
       'setCurrentOrganization',
       'setCurrentOrganizationAddress',
+      'setCurrentOrganizationName',
       'setGrantAccess',
       'resetBcolDetails'
     ]),
     ...mapActions('org', [
       'syncMembership',
       'syncOrganization',
-      'changeOrgType'
+      'changeOrgType',
+      'isOrgNameAvailable'
     ])
   }
 })
@@ -125,6 +139,9 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private username = ''
   private password = ''
   private errorMessage: string = ''
+  // hav to indroduce a new var since it shud show as an error for text field.
+  // the errorMessage field is used for full form and network errors.
+  private bcolDuplicateNameErrorMessage = ''
   private saving = false
   private isBaseAddressValid: boolean = true
   private readonly currentOrgAddress!: Address
@@ -133,14 +150,20 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private readonly currentOrganization!: Organization
   private readonly currentUser!: KCUserProfile
   private readonly setCurrentOrganization!: (organization: Organization) => void
+  private readonly setCurrentOrganizationName!: (name: string) => void
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private readonly resetBcolDetails!: () => void
   private readonly setGrantAccess!: (grantAccess: boolean) => void
   private readonly changeOrgType!: (action:Actions) => Promise<Organization>
+  private readonly isOrgNameAvailable!: (orgName: string) => Promise<boolean>
   @Prop() cancelUrl: string
   @Prop() isAccountChange: boolean
+  private orgName = ''
+  private orgNameReadOnly = true
 
   private baseAddressSchema: {} = addressSchema
+
+  private readonly orgNameRules = [v => !!v || 'An account name is required']
 
   private get isExtraProvUser () {
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
@@ -166,7 +189,13 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private readonly teamNameRules = [v => !!v || 'An account name is required']
 
   private isFormValid (): boolean {
-    return !!this.username && !!this.password
+    return !!this.username && !!this.password && !!this.orgName && !!this.errorMessage
+  }
+
+  private async mounted () {
+    if (this.currentOrganization) {
+      this.orgName = this.currentOrganization.name
+    }
   }
 
   private get address () {
@@ -185,15 +214,21 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     this.setCurrentOrganizationAddress(address)
   }
 
+  private updateStore () {
+    this.bcolDuplicateNameErrorMessage = ''
+    this.setCurrentOrganizationName(this.orgName)
+  }
+
   private async save () {
     // TODO Handle edit mode as well here
     this.goNext()
   }
 
-  private onLink (details: {
+  private async onLink (details: {
     bcolProfile: BcolProfile
     bcolAccountDetails: BcolAccountDetails
   }) {
+    this.orgName = details.bcolAccountDetails.orgName
     var org: Organization = {
       id: this.currentOrganization.id,
       name: details.bcolAccountDetails.orgName,
@@ -201,11 +236,27 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
       bcolProfile: details.bcolProfile,
       bcolAccountDetails: details.bcolAccountDetails,
       grantAccess: false,
-      orgType: Account.PREMIUM
+      orgType: Account.PREMIUM,
+      bcolAccountName: details.bcolAccountDetails.orgName
     }
     this.setCurrentOrganization(org)
     this.setCurrentOrganizationAddress(details.bcolAccountDetails.address)
+    await this.validateAccountNameUnique()
   }
+
+  private async validateAccountNameUnique () {
+    const available = await this.isOrgNameAvailable(this.orgName)
+    if (!available) {
+      this.bcolDuplicateNameErrorMessage =
+        'An account with this name already exists. Try a different account name.'
+      this.orgNameReadOnly = false
+      return false
+    } else {
+      this.orgNameReadOnly = true
+      return true
+    }
+  }
+
   private cancel () {
     if (this.stepBack) {
       this.stepBack()
@@ -234,7 +285,13 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
                     'An error occurred while attempting to create your account.'
       }
     } else {
-      this.stepForward()
+      // TODO make sure name is valid
+      const isValidName = await this.validateAccountNameUnique()
+      if (isValidName) {
+        this.stepForward()
+      } else {
+        this.errorMessage = 'An account with this name already exists. Try a different account name.'
+      }
     }
   }
 

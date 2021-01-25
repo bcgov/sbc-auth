@@ -56,7 +56,7 @@
                 <div class="pt-7" v-else-if="(payment.type === paymentTypes.BCOL)">
                   <!-- showing BCOL details banner -->
                   <LinkedBCOLBanner
-                    :bcolAccountName="currentOrganization.name"
+                    :bcolAccountName="currentOrganization.bcolAccountName || currentOrganization.name"
                     :bcolAccountDetails="currentOrganization.bcolAccountDetails"
                   ></LinkedBCOLBanner>
                 </div>
