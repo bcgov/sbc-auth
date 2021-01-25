@@ -10,6 +10,7 @@
             "contacts": [],
             "accessType": "REGULAR",
             "bcolAccountId": "106700",
+            "bcolAccountName": "BC ONLINE TECHNICAL TEAM DEVL",
             "bcolUserId": "PB99999",
             "billable": true,
             "created": "2020-11-12T21:42:30.850904+00:00",
@@ -72,6 +73,15 @@
             "default": "",
             "examples": [
                 "106700"
+            ]
+        },
+        "bcolAccountName": {
+            "$id": "#/properties/bcolAccountName",
+            "type": "string",
+            "title": "BC Oline Account Name",
+            "default": "",
+            "examples": [
+                "BC ONLINE TECHNICAL TEAM DEVL"
             ]
         },
         "bcolUserId": {
