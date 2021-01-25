@@ -24,8 +24,8 @@ from .base_model import BaseCodeModel
 class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     """Product code table to store all the products supported by auth system."""
 
-    __tablename__ = 'product_code'
-    type_code = Column(ForeignKey('product_type_code.code'), default='INTERNAL', nullable=False)
+    __tablename__ = 'product_codes'
+    type_code = Column(ForeignKey('product_type_codes.code'), default='INTERNAL', nullable=False)
 
     @classmethod
     def find_by_code(cls, code):

@@ -41,6 +41,13 @@ describe('AccountFreezeUnlockView.vue', () => {
       namespaced: true,
       state: {
         currentOrganization: {}
+      },
+      actions: {
+        calculateFailedInvoices: jest.fn(() => {
+        return {
+            totalTransactionAmount: 10,
+            totalAmountToPay: 20
+        }}),
       }
     }
 

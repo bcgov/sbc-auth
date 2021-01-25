@@ -68,7 +68,7 @@ import { AccessType } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
-import { InvoiceList } from '@/models/invoice'
+import { FailedInvoice } from '@/models/invoice'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 
@@ -80,13 +80,13 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
   },
   methods: {
     ...mapActions('org', [
-      'getFailedInvoices'
+      'calculateFailedInvoices'
     ])
   }
 })
 export default class AccountOverview extends Mixins(Steppable) {
   private readonly currentOrganization!: Organization
-  private readonly getFailedInvoices!: () => InvoiceList[]
+  private readonly calculateFailedInvoices!: () => FailedInvoice
   private formatDate = CommonUtils.formatDisplayDate
   private nsfFee: number = 0
   private nsfCount: number = 0
@@ -107,21 +107,11 @@ export default class AccountOverview extends Mixins(Steppable) {
   }
 
   async mounted () {
-    const failedInvoices: InvoiceList[] = await this.getFailedInvoices()
-
-    failedInvoices.forEach((failedInvoice) => {
-      this.totalPaidAmount += failedInvoice?.paidAmount
-      this.totalAmountToPay += failedInvoice?.invoices?.map(el => el.total).reduce((accumulator, invoiceTotal) => accumulator + invoiceTotal)
-      failedInvoice?.invoices?.forEach((invoice) => {
-        const nsfItems = invoice?.lineItems?.filter(lineItem => (lineItem.description === 'NSF'))
-          .map(el => el.total)
-        this.nsfCount += nsfItems.length
-        this.nsfFee += (nsfItems.length) ? nsfItems?.reduce((accumulator, currentValue) => accumulator + currentValue) : 0
-      })
-    })
-
-    this.totalTransactionAmount = this.totalAmountToPay - this.nsfFee
-    this.totalAmountToPay = this.totalAmountToPay - this.totalPaidAmount
+    const failedInvoices: FailedInvoice = await this.calculateFailedInvoices()
+    this.nsfCount = failedInvoices?.nsfCount || 0
+    this.totalTransactionAmount = failedInvoices?.totalTransactionAmount || 0
+    this.nsfFee = failedInvoices?.nsfFee || 0
+    this.totalAmountToPay = failedInvoices?.totalAmountToPay || 0
   }
 }
 </script>

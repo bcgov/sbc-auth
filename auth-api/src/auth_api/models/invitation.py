@@ -30,16 +30,16 @@ from .invite_status import InvitationStatus
 class Invitation(BaseModel):  # pylint: disable=too-few-public-methods # Temporarily disable until methods defined
     """Model for a Invitation record."""
 
-    __tablename__ = 'invitation'
+    __tablename__ = 'invitations'
 
     id = Column(Integer, primary_key=True)
-    sender_id = Column(ForeignKey('user.id'), nullable=False)
+    sender_id = Column(ForeignKey('users.id'), nullable=False)
     recipient_email = Column(String(100), nullable=False)
     sent_date = Column(DateTime, nullable=False)
     accepted_date = Column(DateTime, nullable=True)
     token = Column(String(100), nullable=True)  # stores the one time invitation token
-    invitation_status_code = Column(ForeignKey('invitation_status.code'), nullable=False, default='PENDING')
-    type = Column(ForeignKey('invitation_type.code'), nullable=False, default='STANDARD')
+    invitation_status_code = Column(ForeignKey('invitation_statuses.code'), nullable=False, default='PENDING')
+    type = Column(ForeignKey('invitation_types.code'), nullable=False, default='STANDARD')
 
     invitation_status = relationship('InvitationStatus', foreign_keys=[invitation_status_code])
     sender = relationship('User', foreign_keys=[sender_id])

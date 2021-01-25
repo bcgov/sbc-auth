@@ -25,10 +25,10 @@ from .base_model import VersionedModel
 class ProductSubscriptionRole(VersionedModel):  # pylint: disable=too-few-public-methods
     """Model for a Product Role model."""
 
-    __tablename__ = 'product_subscription_role'
+    __tablename__ = 'product_subscription_roles'
 
     id = Column(Integer, primary_key=True)
-    product_subscription_id = Column(ForeignKey('product_subscription.id'), nullable=False)
-    product_role_id = Column(ForeignKey('product_role_code.id'), nullable=False)
+    product_subscription_id = Column(ForeignKey('product_subscriptions.id'), nullable=False)
+    product_role_id = Column(ForeignKey('product_role_codes.id'), nullable=False)
 
     product_role = relationship('ProductRoleCode')

@@ -35,11 +35,11 @@ from .org_type import OrgType
 class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """Model for an Org record."""
 
-    __tablename__ = 'org'
+    __tablename__ = 'orgs'
 
     id = Column(Integer, primary_key=True)
-    type_code = Column(ForeignKey('org_type.code'), nullable=False)
-    status_code = Column(ForeignKey('org_status.code'), nullable=False)
+    type_code = Column(ForeignKey('org_types.code'), nullable=False)
+    status_code = Column(ForeignKey('org_statuses.code'), nullable=False)
     name = Column(String(250), index=True)
     access_type = Column(String(250), index=True, nullable=True)  # for ANONYMOUS ACCESS
     billable = Column('billable', Boolean(), default=True, nullable=False)
@@ -47,6 +47,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     decision_made_on = Column(DateTime, nullable=True)
     bcol_user_id = Column(String(20))
     bcol_account_id = Column(String(20))
+    bcol_account_name = Column(String(250))
 
     contacts = relationship('ContactLink', lazy='select')
     org_type = relationship('OrgType')
@@ -86,8 +87,9 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
 
     @classmethod
     def find_by_bcol_id(cls, bcol_account_id):
-        """Find an Org instance that matches the provided id."""
-        return cls.query.filter_by(bcol_account_id=bcol_account_id).first()
+        """Find an Org instance that matches the provided id and not in INACTIVE status."""
+        return cls.query.filter(Org.bcol_account_id == bcol_account_id).filter(
+            Org.status_code != OrgStatusEnum.INACTIVE.value).first()
 
     @classmethod
     def find_by_org_name(cls, org_name):
