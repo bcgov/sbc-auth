@@ -28,7 +28,7 @@ class OrgSettings(VersionedModel):  # pylint: disable=too-few-public-methods # T
     __tablename__ = 'org_settings'
 
     id = Column(Integer, primary_key=True)
-    org_id = Column(ForeignKey('org.id'), nullable=False)
+    org_id = Column(ForeignKey('orgs.id'), nullable=False)
     setting = Column(String(100))
     enabled = Column(Boolean(), default=False, nullable=False)
     org = relationship('Org')

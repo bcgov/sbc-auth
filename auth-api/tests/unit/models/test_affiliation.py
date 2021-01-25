@@ -33,13 +33,13 @@ def factory_entity_model():
 
 def factory_org_model(name):
     """Produce a templated org model."""
-    org_type = OrgTypeModel(code='TEST', desc='Test')
+    org_type = OrgTypeModel(code='TEST', description='Test')
     org_type.save()
 
-    org_status = OrgStatusModel(code='TEST', desc='Test')
+    org_status = OrgStatusModel(code='TEST', description='Test')
     org_status.save()
 
-    preferred_payment = PaymentTypeModel(code='TEST', desc='Test')
+    preferred_payment = PaymentTypeModel(code='TEST', description='Test')
     preferred_payment.save()
 
     org = OrgModel(name=name)

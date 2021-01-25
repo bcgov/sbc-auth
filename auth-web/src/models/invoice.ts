@@ -49,3 +49,10 @@ export interface InvoiceListResponse {
   page: number
   total: number
 }
+
+export interface FailedInvoice {
+  nsfCount?: number
+  nsfFee?:number
+  totalTransactionAmount?: number
+  totalAmountToPay?: number
+}

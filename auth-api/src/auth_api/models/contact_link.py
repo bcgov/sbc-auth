@@ -27,14 +27,14 @@ from .base_model import VersionedModel
 class ContactLink(VersionedModel):  # pylint: disable=too-few-public-methods
     """This class manages linkages between contacts and other data entities."""
 
-    __tablename__ = 'contact_link'
+    __tablename__ = 'contact_links'
 
     id = Column(Integer, primary_key=True)
-    contact_id = Column(Integer, ForeignKey('contact.id'))
-    entity_id = Column(Integer, ForeignKey('entity.id'))
-    user_id = Column(Integer, ForeignKey('user.id'))
-    org_id = Column(Integer, ForeignKey('org.id'))
-    affidavit_id = Column(Integer, ForeignKey('affidavit.id'))
+    contact_id = Column(Integer, ForeignKey('contacts.id'))
+    entity_id = Column(Integer, ForeignKey('entities.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
+    org_id = Column(Integer, ForeignKey('orgs.id'))
+    affidavit_id = Column(Integer, ForeignKey('affidavits.id'))
 
     contact = relationship('Contact', foreign_keys=[contact_id])
     entity = relationship('Entity', back_populates='contacts', foreign_keys=[entity_id])

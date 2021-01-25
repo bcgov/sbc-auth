@@ -35,7 +35,7 @@ from .user_status_code import UserStatusCode
 class User(BaseModel):
     """This is the model for a User."""
 
-    __tablename__ = 'user'
+    __tablename__ = 'users'
 
     __versioned__ = {
         'exclude': ['modified', 'modified_by_id', 'modified_by', 'created']
@@ -57,7 +57,7 @@ class User(BaseModel):
 
     # a type for the user to identify what kind of user it is..ie anonymous , bcsc etc ..similar to login source
     type = Column('type', String(200), nullable=True)
-    status = Column(ForeignKey('user_status_code.id'))
+    status = Column(ForeignKey('user_status_codes.id'))
     idp_userid = Column('idp_userid', String(256), index=True)
     login_source = Column('login_source', String(200), nullable=True)
     login_time = Column(DateTime, default=None, nullable=True)

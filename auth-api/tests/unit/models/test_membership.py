@@ -29,15 +29,15 @@ from auth_api.utils.roles import ADMIN
 def factory_membersip_model(session):
     """Produce a templated org model."""
     user = factory_user_model()
-    org_type = OrgTypeModel(code='TEST', desc='Test')
+    org_type = OrgTypeModel(code='TEST', description='Test')
     session.add(org_type)
     session.commit()
 
-    org_status = OrgStatusModel(code='TEST', desc='Test')
+    org_status = OrgStatusModel(code='TEST', description='Test')
     session.add(org_status)
     session.commit()
 
-    preferred_payment = PaymentTypeModel(code='TEST', desc='Test')
+    preferred_payment = PaymentTypeModel(code='TEST', description='Test')
     session.add(preferred_payment)
     session.commit()
     org = OrgModel(name='Test Org')
