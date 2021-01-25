@@ -217,6 +217,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
 
   private updateOrgNameAndClearErrors () {
     this.bcolDuplicateNameErrorMessage = ''
+    this.errorMessage = ''
     this.setCurrentOrganizationName(this.orgName)
   }
 
