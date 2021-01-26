@@ -23,17 +23,29 @@ import groovy.json.*
 
 // define constants - values sent in as env vars from whatever calls this pipeline
 def APP_NAME = 'auth-web'
+def SOURCE_TAG = 'dev'
 def DESTINATION_TAG = 'test'
 def TOOLS_TAG = 'tools'
 
-def NAMESPACE_APP = '1rdehl'
+def NAMESPACE_APP = '3b2420'
 def NAMESPACE_BUILD = "${NAMESPACE_APP}"  + '-' + "${TOOLS_TAG}"
 def NAMESPACE_DEPLOY = "${NAMESPACE_APP}" + '-' + "${DESTINATION_TAG}"
 
-def ROCKETCHAT_DEVELOPER_CHANNEL='#relationship-developers'
+def ROCKETCHAT_DEVELOPER_CHANNEL='#registries-bot'
+
+// Get an image's hash tag
+String getImageTagHash(String imageName, String tag = "") {
+
+    if(!tag?.trim()) {
+        tag = "latest"
+    }
+
+    def istag = openshift.raw("get istag ${imageName}:${tag} -o template --template='{{.image.dockerImageReference}}'")
+    return istag.out.tokenize('@')[1].trim()
+}
 
 // post a notification to rocketchat
-def rocketChatNotificaiton(token, channel, comments) {
+def rocketChatNotification(token, channel, comments) {
   def payload = JsonOutput.toJson([text: comments, channel: channel])
   def rocketChatUrl = "https://chat.developer.gov.bc.ca/hooks/" + "${token}"
 
@@ -48,16 +60,17 @@ node {
     def old_version
 
     try {
-        stage("Build ${APP_NAME}-${DESTINATION_TAG}") {
+        stage("Tag ${APP_NAME}:${DESTINATION_TAG}") {
             script {
                 openshift.withCluster() {
+                    openshift.withProject("${NAMESPACE_DEPLOY}") {
+                        old_version = openshift.selector('dc', "${APP_NAME}-${DESTINATION_TAG}").object().status.latestVersion
+                    }
+                }
+                openshift.withCluster() {
                     openshift.withProject("${NAMESPACE_BUILD}") {
-                        echo "Building ${APP_NAME}-${DESTINATION_TAG} ..."
-                        def build = openshift.selector("bc", "${APP_NAME}-${DESTINATION_TAG}").startBuild()
-                        build.untilEach {
-                            return it.object().status.phase == "Running"
-                        }
-                        build.logs('-f')
+                        echo "Tagging ${APP_NAME} for deployment to ${DESTINATION_TAG} ..."
+						openshift.tag("${APP_NAME}:${SOURCE_TAG}", "${APP_NAME}:${DESTINATION_TAG}")
                     }
                 }
             }
@@ -66,6 +79,7 @@ node {
         echo e.getMessage()
         build_ok = false
     }
+
 
     if (build_ok) {
         try {
@@ -107,12 +121,11 @@ node {
             currentBuild.result = "SUCCESS"
         } else {
             currentBuild.result = "FAILURE"
-        }
-
-        ROCKETCHAT_TOKEN = sh (
-                script: """oc get secret/apitest-secrets -n ${NAMESPACE_BUILD} -o template --template="{{.data.ROCKETCHAT_TOKEN}}" | base64 --decode""",
+            ROCKETCHAT_TOKEN = sh (
+                script: """oc get secret/rocketchat-secret -n ${NAMESPACE_BUILD} -o template --template="{{.data.ROCKETCHAT_TOKEN}}" | base64 --decode""",
                     returnStdout: true).trim()
 
-        rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "${APP_NAME} build and deploy to ${DESTINATION_TAG} ${currentBuild.result}!")
+            rocketChatNotification("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "${APP_NAME} build and deploy to ${DESTINATION_TAG} ${currentBuild.result}!")
+        }
     }
 }
