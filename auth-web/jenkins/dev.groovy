@@ -25,14 +25,14 @@ import groovy.json.*
 def APP_NAME = 'auth-web'
 def DESTINATION_TAG = 'dev'
 def TOOLS_TAG = 'tools'
-def NAMESPACE_APP = '1rdehl'
+def NAMESPACE_APP = '6e0e49'
 def NAMESPACE_BUILD = "${NAMESPACE_APP}"  + '-' + "${TOOLS_TAG}"
 def NAMESPACE_DEPLOY = "${NAMESPACE_APP}" + '-' + "${DESTINATION_TAG}"
 
-def ROCKETCHAT_DEVELOPER_CHANNEL='#relationship-developers'
+def ROCKETCHAT_DEVELOPER_CHANNEL='#relationship-bot'
 
 // post a notification to rocketchat
-def rocketChatNotificaiton(token, channel, comments) {
+def rocketChatNotification(token, channel, comments) {
   def payload = JsonOutput.toJson([text: comments, channel: channel])
   def rocketChatUrl = "https://chat.developer.gov.bc.ca/hooks/" + "${token}"
 
@@ -107,24 +107,24 @@ if( run_pipeline ) {
         def build_ok = true
         def old_version
 
-        try {
-            stage("Build ${APP_NAME}") {
-                script {
-                    openshift.withCluster() {
-                        openshift.withProject("${NAMESPACE_BUILD}") {
+        stage("Build ${APP_NAME}") {
+            script {
+                openshift.withCluster() {
+                    openshift.withProject("${NAMESPACE_BUILD}") {
+                        try {
                             echo "Building ${APP_NAME} ..."
                             def build = openshift.selector("bc", "${APP_NAME}").startBuild()
                             build.untilEach {
                                 return it.object().status.phase == "Running"
                             }
                             build.logs('-f')
-                        }
+                        } catch (Exception e) {
+                            echo e.getMessage()
+                            build_ok = false
+                         }
                     }
                 }
             }
-        } catch (Exception e) {
-            echo e.getMessage()
-            build_ok = false
         }
 
         if (build_ok) {
@@ -133,6 +133,7 @@ if( run_pipeline ) {
                     openshift.withCluster() {
                         openshift.withProject("${NAMESPACE_DEPLOY}") {
                             old_version = openshift.selector('dc', "${APP_NAME}-${DESTINATION_TAG}").object().status.latestVersion
+                            echo "Existing Version: ${old_version} ..."
                         }
                     }
                     openshift.withCluster() {
@@ -163,14 +164,15 @@ if( run_pipeline ) {
                         openshift.withProject("${NAMESPACE_DEPLOY}") {
                             try {
                                 def new_version = openshift.selector('dc', "${APP_NAME}-${DESTINATION_TAG}").object().status.latestVersion
+                                echo "New Version: ${new_version} ..."
                                 if (new_version == old_version) {
                                     echo "New deployment was not triggered."
                                 }
-
-                                def pod_selector = openshift.selector('pod', [ app:"${APP_NAME}-${DESTINATION_TAG}" ])
+                                def pod_selector = openshift.selector('pod', [ app:"${APP_NAME}" ])
+                                echo "${pod_selector} ..."
                                 pod_selector.untilEach {
                                     deployment = it.objects()[0].metadata.labels.deployment
-                                    echo deployment
+                                    echo "${deployment} ..."
                                     if (deployment == "${APP_NAME}-${DESTINATION_TAG}-${new_version}" && it.objects()[0].status.phase == 'Running' && it.objects()[0].status.containerStatuses[0].ready) {
                                         return true
                                     } else {
@@ -189,24 +191,17 @@ if( run_pipeline ) {
             }
         }
 
-        if (build_ok) {
-            stage("Run E2E tests") {
-
-            }
-        }
-
         stage("Notify on RocketChat") {
             if(build_ok) {
                 currentBuild.result = "SUCCESS"
             } else {
                 currentBuild.result = "FAILURE"
-            }
-
-            ROCKETCHAT_TOKEN = sh (
-                    script: """oc get secret/apitest-secrets -n ${NAMESPACE_BUILD} -o template --template="{{.data.ROCKETCHAT_TOKEN}}" | base64 --decode""",
+                ROCKETCHAT_TOKEN = sh (
+                    script: """oc get secret/rocketcaht-secret -n ${NAMESPACE_BUILD} -o template --template="{{.data.ROCKETCHAT_TOKEN}}" | base64 --decode""",
                         returnStdout: true).trim()
 
-            rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "${APP_NAME} build and deploy to ${DESTINATION_TAG} ${currentBuild.result}!")
+                rocketChatNotification("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "${APP_NAME} build and deploy to ${DESTINATION_TAG} ${currentBuild.result}!")
+            }
         }
     }
 }
