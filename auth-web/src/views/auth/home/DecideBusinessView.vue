@@ -9,7 +9,7 @@
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               {{item.text}}
-              <a href="https://www2.gov.bc.ca/gov/content/employment-business/business/bc-companies/benefit-company"
+              <a href="https://www2.gov.bc.ca/gov/content?id=3E4E169B42DF43EEA19E96383F8FD628"
                class="learn-more-link" target="_blank" rel="noopener noreferrer">
                 {{item.linkText}}
               </a>
