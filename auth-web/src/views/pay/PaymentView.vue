@@ -116,7 +116,8 @@ export default class PaymentView extends Vue {
             this.paymentCardData = {
               totalBalanceDue: invoice?.total || 0,
               payeeName: ConfigHelper.getPaymentPayeeName(),
-              cfsAccountId: paymentDetails?.cfsAccount?.cfsAccountNumber || ''
+              cfsAccountId: paymentDetails?.cfsAccount?.cfsAccountNumber || '',
+              credit: paymentDetails?.credit
             }
 
             this.showLoading = false
