@@ -1,24 +1,30 @@
-# Copyright © 2019 Province of British Columbia
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-"""The configuration for gunicorn, which picks up the
-   runtime options from environment variables
-"""
-
+import json
+import multiprocessing
 import os
 
-workers = int(os.environ.get('GUNICORN_PROCESSES', '1'))  # pylint: disable=invalid-name
-threads = int(os.environ.get('GUNICORN_THREADS', '1'))  # pylint: disable=invalid-name
+max_workers = os.getenv("MAX_WORKERS", "2")
+workers_per_core = os.getenv("WORKERS_PER_CORE", "1")
+web_concurrency = os.getenv("WEB_CONCURRENCY", None)
+host = os.getenv("HOST", "0.0.0.0")
+port = os.getenv("PORT", "8080")
+bind_env = os.getenv("BIND", None)
 
-forwarded_allow_ips = '*'  # pylint: disable=invalid-name
-secure_scheme_headers = {'X-Forwarded-Proto': 'https'}  # pylint: disable=invalid-name
+if bind_env:
+    use_bind = bind_env
+else:
+    use_bind = f"{host}:{port}"
+
+cores = multiprocessing.cpu_count()
+workers_per_core = float(workers_per_core)
+default_web_concurrency = workers_per_core * cores
+if web_concurrency:
+    web_concurrency = int(web_concurrency)
+    assert web_concurrency > 0
+else:
+    web_concurrency = min(int(max_workers), int(default_web_concurrency))
+
+# Gunicorn config variables
+workers = web_concurrency
+bind = use_bind
+keepalive = 120
+errorlog = "-"
