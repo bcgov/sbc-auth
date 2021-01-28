@@ -1,30 +1,34 @@
 <template>
-  <v-card class="bcol-payment-card">
+  <v-card class="bcol-payment-card" data-test='div-bcol-payment-card'>
     <PayWithCreditCard v-if="payWithCreditCard"
     :totalBalanceDue="totalBalanceDue"
     :showPayWithOnlyCC="showPayWithOnlyCC"
+    :partialCredit="partialCredit"
     />
 
     <PayWithOnlineBanking
     :onlineBankingData="onlineBankingData"
     v-else />
     <v-card-text class="pt-0 pb-8 px-8">
-      <p v-if="showPayWithOnlyCC">Click <strong>"pay now"</strong> to complete transaction balance with credit card</p>
-      <p v-else>Would you like to complete transaction immediately?</p>
-      <v-checkbox
-        class="pay-with-credit-card mb-4"
-        v-model="payWithCreditCard"
-        color="primary"
-        hide-details
-        :disabled="showPayWithOnlyCC"
-      >
-        <template v-slot:label>
-          <div class="ml-1">
-            <div class="font-weight-bold">Credit Card</div>
-            <div class="subtitle-2 mt-1">Pay your balance and access files <strong>immediately</strong></div>
-          </div>
-        </template>
-      </v-checkbox>
+      <template v-if="!overCredit">
+        <p v-if="showPayWithOnlyCC">Click <strong>"pay now"</strong> to complete transaction balance with credit card</p>
+        <p v-else>Would you like to complete transaction immediately?</p>
+        <v-checkbox
+          class="pay-with-credit-card mb-4"
+          v-model="payWithCreditCard"
+          color="primary"
+          hide-details
+          :disabled="showPayWithOnlyCC"
+        >
+          <template v-slot:label>
+            <div class="ml-1">
+              <div class="font-weight-bold">Credit Card</div>
+              <div class="subtitle-2 mt-1">Pay your balance and access files <strong>immediately</strong></div>
+              <div class="subtitle-2" v-if="partialCredit">Account credit will <strong>not apply</strong> with credit card payment option.</div>
+            </div>
+          </template>
+        </v-checkbox>
+      </template>
       <v-divider class="mt-8"></v-divider>
       <v-row>
         <v-col
@@ -37,7 +41,8 @@
             color="primary"
             class="px-0"
             @click="emitBtnClick('download-invoice')"
-            v-if="!payWithCreditCard"
+            v-if="!payWithCreditCard && !overCredit"
+            data-test='btn-download-invoice'
           >
             <v-icon class="mr-1">
               mdi-file-download-outline
@@ -60,6 +65,7 @@
               width="100"
               class="ml-3"
               @click="cancel"
+              data-test='btn-cancel-online-banking'
             >
               Cancel
             </v-btn>
@@ -71,6 +77,7 @@
               width="100"
               class="font-weight-bold"
               @click="emitBtnClick('complete-online-banking')"
+              data-test='btn-complete-online-banking'
             >
               Ok
             </v-btn>
@@ -84,8 +91,9 @@
 <script lang="ts">
 
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import PayWithCreditCard from './PayWithCreditCard.vue'
-import PayWithOnlineBanking from './PayWithOnlineBanking.vue'
+import PayWithCreditCard from '@/components/pay/PayWithCreditCard.vue'
+import PayWithOnlineBanking from '@/components/pay/PayWithOnlineBanking.vue'
+import PaymentServices from '@/services/payment.services'
 
 @Component({
   components: {
@@ -98,22 +106,43 @@ export default class PaymentCard extends Vue {
   @Prop() paymentCardData: any
   @Prop({ default: false }) showPayWithOnlyCC: boolean
   private payWithCreditCard: boolean = false
+  private balanceDue = 0
   private totalBalanceDue = 0
   private cfsAccountId: string = ''
   private payeeName: string = ''
   private onlineBankingData: any = []
+  private credit?: number = null
+  private doHaveCredit:boolean = false
+  private overCredit:boolean = false
+  private partialCredit:boolean = false
+  private creditBalance = 0
+  private paymentId: number = 0
 
   private mounted () {
     this.totalBalanceDue = this.paymentCardData?.totalBalanceDue || 0
+    this.balanceDue = this.totalBalanceDue
     this.payeeName = this.paymentCardData.payeeName
     this.cfsAccountId = this.paymentCardData?.cfsAccountId || ''
     this.payWithCreditCard = this.showPayWithOnlyCC
+    this.credit = this.paymentCardData.credit
+    this.doHaveCredit = this.paymentCardData.credit !== null && this.paymentCardData.credit !== 0
+    if (this.doHaveCredit) {
+      this.overCredit = this.credit >= this.totalBalanceDue
+      this.partialCredit = this.credit < this.totalBalanceDue
+      this.balanceDue = this.overCredit ? -this.totalBalanceDue : this.totalBalanceDue - this.credit
+    }
+    this.creditBalance = this.overCredit ? this.credit - this.balanceDue : 0
+    this.paymentId = this.paymentCardData.paymentId
 
     // setting online data
     this.onlineBankingData = {
-      totalBalanceDue: this.totalBalanceDue,
+      totalBalanceDue: this.balanceDue,
       payeeName: this.payeeName,
-      cfsAccountId: this.cfsAccountId
+      cfsAccountId: this.cfsAccountId,
+      overCredit: this.overCredit,
+      partialCredit: this.partialCredit,
+      creditBalance: this.creditBalance,
+      credit: this.credit
     }
   }
 
@@ -125,7 +154,10 @@ export default class PaymentCard extends Vue {
     }
   }
 
-  private emitBtnClick (eventName) {
+  private async emitBtnClick (eventName) {
+    if (eventName === 'complete-online-banking' && this.doHaveCredit) {
+      await PaymentServices.applycredit(this.paymentId)
+    }
     this.$emit(eventName)
   }
 }

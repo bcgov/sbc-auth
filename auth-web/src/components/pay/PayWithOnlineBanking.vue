@@ -2,11 +2,25 @@
   <v-card elevation="0">
     <v-card-text class="heading-info py-7 px-8">
       <h2 class="mb-2">Balance Due: <span class="ml-2">${{totalBalanceDue.toFixed(2)}}</span></h2>
-      <template>
+      <template v-if="overCredit">
+        <p class="mb-6">
+          Transaction will be completed with your account credit.<br />
+          You now have <strong>${{creditBalance}} remaining credit</strong> in your account.
+        </p>
+      </template>
+      <template v-else-if="partialCredit">
+        <p class="mb-6">
+          Payment is partially covered with your account credit: ${{credit}}<br />
+          You now have <strong>${{creditBalance}} remaining credit</strong> in your account.
+        </p>
+      </template>
+      <template v-else>
         <p class="mb-6">
           Transaction will be completed when payment is received in full.
           Online Banking payment methods can expect between <strong>2-5 days</strong> for your payment.
         </p>
+        </template>
+        <template>
         <div class="mb-1">
           <span class="payee-name">
             <strong>Payee Name:</strong>
@@ -19,7 +33,7 @@
         </div>
       </template>
     </v-card-text>
-    <v-card-text class="pt-7 pb-0 px-8">
+    <v-card-text class="pt-7 pb-0 px-8" v-if="!overCredit">
       <template>
         <h3 class="mb-3">How to pay with online banking:</h3>
         <ol class="mb-5">
@@ -47,6 +61,10 @@ export default class PayWithOnlineBanking extends Vue {
   private totalBalanceDue = 0
   private cfsAccountId: string = ''
   private payeeName: string = ''
+  private overCredit:boolean = false
+  private creditBalance = 0
+  private partialCredit:boolean = false
+  private credit = 0
 
   @Watch('onlineBankingData', { deep: true })
   async updateonlineBankingData (val, oldVal) {
@@ -57,6 +75,10 @@ export default class PayWithOnlineBanking extends Vue {
     this.totalBalanceDue = this.onlineBankingData?.totalBalanceDue || 0
     this.payeeName = this.onlineBankingData.payeeName
     this.cfsAccountId = this.onlineBankingData?.cfsAccountId || ''
+    this.overCredit = this.onlineBankingData.overCredit || false
+    this.partialCredit = this.onlineBankingData.partialCredit || false
+    this.creditBalance = this.onlineBankingData.creditBalance || 0
+    this.credit = this.onlineBankingData.credit || 0
   }
 
   private mounted () {

@@ -7,6 +7,10 @@
           <strong>Credit card will be the only payment option for this transaction</strong>.<br />
           Online banking payment option is not available.
         </p>
+        <p class="mb-1" v-if="partialCredit">
+          You can't <strong>use your account credit</strong> with credit card payment.<br />
+          <strong>Full amount</strong> will be charged if you pay by credit card.
+        </p>
         <p class="mb-1" v-else>
           Click "pay now" to complete transaction balance with credit card.
           By credit card, your transaction will be completed <strong>immediately</strong>.
@@ -37,6 +41,7 @@ export default class PayWithCreditCard extends Vue {
   @Prop() paymentCardData: any
   @Prop({ default: false }) showPayWithOnlyCC: boolean
   @Prop({ default: 0 }) totalBalanceDue: number
+  @Prop({ default: false }) partialCredit: boolean
 }
 </script>
 
