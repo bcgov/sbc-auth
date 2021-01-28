@@ -1,4 +1,4 @@
-FROM python:3.8.5-buster
+FROM docker-remote.artifacts.developer.gov.bc.ca/python:3.8.5-buster
 
 USER root
 

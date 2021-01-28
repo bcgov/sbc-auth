@@ -6,7 +6,7 @@ metadata:
   annotations:
     description:
       Deployment template for an API application and connect to database.
-    tags: FastAPI
+    tags: Flask
     iconClass: icon-python
 objects:
   - kind: ExternalNetwork
@@ -53,7 +53,7 @@ objects:
         app: ${NAME}
     spec:
       description: |
-        Allow the application's API to talk to either the database, plus a defined set of external resources.
+        Allow the application's API to talk to the database.
       source:
         - - role=${ROLE}
           - app=${NAME}
@@ -66,18 +66,20 @@ objects:
   - kind: NetworkSecurityPolicy
     apiVersion: security.devops.gov.bc.ca/v1alpha1
     metadata:
-      name: pods-to-api
+      name: ${NAME}-prehook-to-db
       labels:
-        name: pods-to-api
+        name: ${NAME}-prehook-${TAG_NAME}
         app: ${NAME}
     spec:
       description: |
-        Allow pods to talk to the internal api so deployments work.
-        This only needs to be specified once per environment.
+        Allow the application's API to talk to the database.
       source:
-        - - $namespace=${NAMESPACE_NAME}-${TAG_NAME}
+        - - openshift.io/deployer-pod.type=hook-pre
+          - $namespace=${NAMESPACE_NAME}-${TAG_NAME}
       destination:
-        - - int:network=internal-cluster-api-endpoint
+        - - role=db
+          - app=${DATABASE_NAME}
+          - $namespace=${NAMESPACE_NAME}-${TAG_NAME}
 
   - kind: Service
     apiVersion: v1
@@ -132,6 +134,49 @@ objects:
         description: Defines how to deploy the application server
     spec:
       strategy:
+        rollingParams:
+          intervalSeconds: 1
+          maxSurge: 25%
+          maxUnavailable: 25%
+          pre:
+            execNewPod:
+              command:
+                - /opt/app-root/pre-hook-update-db.sh
+              containerName: ${NAME}-${TAG_NAME}
+              env:
+                - name: DATABASE_ADMIN_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: DATABASE_ADMIN_PASSWORD
+                      name: ${NAME}-${TAG_NAME}-secret
+                - name: DATABASE_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: DATABASE_USER
+                      name: ${NAME}-${TAG_NAME}-secret
+                - name: DATABASE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: DATABASE_PASSWORD
+                      name: ${NAME}-${TAG_NAME}-secret
+                - name: DATABASE_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: DATABASE_NAME
+                      name: ${NAME}-${TAG_NAME}-secret
+                - name: DATABASE_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      key: DATABASE_HOST
+                      name: ${NAME}-${TAG_NAME}-secret
+                - name: DATABASE_PORT
+                  valueFrom:
+                    secretKeyRef:
+                      key: DATABASE_PORT
+                      name: ${NAME}-${TAG_NAME}-secret
+            failurePolicy: Abort
+          timeoutSeconds: 600
+          updatePeriodSeconds: 1
         type: Rolling
       triggers:
         - type: ImageChange
@@ -194,7 +239,7 @@ parameters:
     displayName: Name
     description: The name assigned to all of the OpenShift resources associated to the server instance.
     required: true
-    value: notify-api
+    value: auth-api
 
   - name: TAG_NAME
     displayName: Environment TAG name
@@ -224,7 +269,7 @@ parameters:
     displayName: Database Service Name
     description: The name of the database server/service.
     required: true
-    value: postgresql-notify
+    value: postgresql
 
   - name: OIDC_SERVICE
     displayName: OIDC HOST name
@@ -247,7 +292,7 @@ parameters:
   - name: APPLICATION_DOMAIN
     displayName: Application Domain
     description: The endpoint used for routing access to the application.
-    value: notify-api-dev.apps.silver.devops.gov.bc.ca
+    value: auth-api-dev.apps.silver.devops.gov.bc.ca
 
   - name: ALLOW_LIST
     displayName: Allow List
