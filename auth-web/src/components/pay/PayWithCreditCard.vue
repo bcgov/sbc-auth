@@ -38,7 +38,6 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component({})
 export default class PayWithCreditCard extends Vue {
-  @Prop() paymentCardData: any
   @Prop({ default: false }) showPayWithOnlyCC: boolean
   @Prop({ default: 0 }) totalBalanceDue: number
   @Prop({ default: false }) partialCredit: boolean

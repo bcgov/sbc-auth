@@ -116,11 +116,13 @@ export default class PaymentCard extends Vue {
   private overCredit:boolean = false
   private partialCredit:boolean = false
   private creditBalance = 0
-  private paymentId: number = 0
+  private paymentId: string
+  private totalPaid = 0
 
   private mounted () {
     this.totalBalanceDue = this.paymentCardData?.totalBalanceDue || 0
-    this.balanceDue = this.totalBalanceDue
+    this.totalPaid = this.paymentCardData?.totalPaid || 0
+    this.balanceDue = this.totalBalanceDue - this.totalPaid
     this.payeeName = this.paymentCardData.payeeName
     this.cfsAccountId = this.paymentCardData?.cfsAccountId || ''
     this.payWithCreditCard = this.showPayWithOnlyCC
@@ -129,7 +131,7 @@ export default class PaymentCard extends Vue {
     if (this.doHaveCredit) {
       this.overCredit = this.credit >= this.totalBalanceDue
       this.partialCredit = this.credit < this.totalBalanceDue
-      this.balanceDue = this.overCredit ? -this.totalBalanceDue : this.totalBalanceDue - this.credit
+      this.balanceDue = this.overCredit ? this.balanceDue : this.balanceDue - this.credit
     }
     this.creditBalance = this.overCredit ? this.credit - this.balanceDue : 0
     this.paymentId = this.paymentCardData.paymentId

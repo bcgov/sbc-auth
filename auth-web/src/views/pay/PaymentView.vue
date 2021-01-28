@@ -115,11 +115,12 @@ export default class PaymentView extends Vue {
             // get account data to show in the UI
             const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(accountSettings?.id)
             this.paymentCardData = {
-              totalBalanceDue: invoice?.total || 0,
+              totalBalanceDue: invoice?.total || 0, // to fix credit amount
               payeeName: ConfigHelper.getPaymentPayeeName(),
               cfsAccountId: paymentDetails?.cfsAccount?.cfsAccountNumber || '',
               credit: paymentDetails?.credit,
-              paymentId: this.paymentId
+              paymentId: this.paymentId,
+              totalPaid: invoice?.paid || 0
             }
 
             this.showLoading = false

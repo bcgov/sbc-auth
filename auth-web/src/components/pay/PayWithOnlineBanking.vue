@@ -1,7 +1,7 @@
 <template>
   <v-card elevation="0">
     <v-card-text class="heading-info py-7 px-8">
-      <h2 class="mb-2">Balance Due: <span class="ml-2">${{totalBalanceDue.toFixed(2)}}</span></h2>
+      <h2 class="mb-2">Balance Due: <span class="ml-2">{{overCredit ? '-': ''}}${{totalBalanceDue.toFixed(2)}}</span></h2>
       <template v-if="overCredit">
         <p class="mb-6">
           Transaction will be completed with your account credit.<br />
