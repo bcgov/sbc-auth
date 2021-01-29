@@ -21,7 +21,6 @@ describe('PayWithOnlineBanking.vue', () => {
       modules: {}
     })
 
-    
     wrapper = mount(PayWithOnlineBanking, {
       store,
       localVue,
