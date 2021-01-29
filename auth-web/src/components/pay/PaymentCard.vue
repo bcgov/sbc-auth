@@ -1,14 +1,16 @@
 <template>
   <v-card class="bcol-payment-card" data-test='div-bcol-payment-card'>
+    <!-- wording for credit card payment -->
     <PayWithCreditCard v-if="payWithCreditCard"
     :totalBalanceDue="totalBalanceDue"
     :showPayWithOnlyCC="showPayWithOnlyCC"
     :partialCredit="partialCredit"
     />
-
+    <!-- wording for online bank payment -->
     <PayWithOnlineBanking
     :onlineBankingData="onlineBankingData"
     v-else />
+
     <v-card-text class="pt-0 pb-8 px-8">
       <template v-if="!overCredit">
         <p v-if="showPayWithOnlyCC">Click <strong>"pay now"</strong> to complete transaction balance with credit card</p>
