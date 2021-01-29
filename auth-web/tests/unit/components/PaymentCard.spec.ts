@@ -1,5 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import PayWithOnlineBanking from '@/components/pay/PayWithOnlineBanking.vue'
+import PaymentCard from '@/components/pay/PaymentCard.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -8,7 +8,7 @@ import Vuex from 'vuex'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
-describe('PayWithOnlineBanking.vue', () => {
+describe('PaymentCard.vue', () => {
   let wrapper: any
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -20,21 +20,22 @@ describe('PayWithOnlineBanking.vue', () => {
       strict: false,
       modules: {}
     })
-    const onlineBankingData = {
-        totalBalanceDue: 10,
+    const paymentCardData = {
+        totalBalanceDue: 50,
         payeeName: 'BC Reg',
         cfsAccountId: 1234,
         overCredit: true,
         partialCredit: false,
         creditBalance: 6,
-        credit: 0
+        credit: 10,
+        paymentId: 1
       }
 
 
     const $t = () => ''
-    wrapper = mount(PayWithOnlineBanking, {
+    wrapper = mount(PaymentCard, {
         propsData: {
-            onlineBankingData
+          paymentCardData
         },
       store,
       localVue,
@@ -50,7 +51,7 @@ describe('PayWithOnlineBanking.vue', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
-  it('Should have Title section', () => {
-    expect(wrapper.find('.heading-info')).toBeTruthy()
+  it('Should Payment card div', () => {
+    expect(wrapper.find('[data-test="div-bcol-payment-card"]')).toBeTruthy()
   })
 })
