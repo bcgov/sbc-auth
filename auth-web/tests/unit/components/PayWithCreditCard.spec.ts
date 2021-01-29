@@ -1,5 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import PayWithOnlineBanking from '@/components/pay/PayWithOnlineBanking.vue'
+import PayWithCreditCard from '@/components/pay/PayWithCreditCard.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -8,7 +8,7 @@ import Vuex from 'vuex'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
-describe('PayWithOnlineBanking.vue', () => {
+describe('PayWithCreditCard.vue', () => {
   let wrapper: any
   beforeEach(() => {
     const $t = () => ''
@@ -21,7 +21,7 @@ describe('PayWithOnlineBanking.vue', () => {
       modules: {}
     })
 
-    wrapper = mount(PayWithOnlineBanking, {
+    wrapper = mount(PayWithCreditCard, {
       store,
       localVue,
       vuetify,
@@ -36,7 +36,4 @@ describe('PayWithOnlineBanking.vue', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
-//   it('Should have Alert', () => {
-//     expect(wrapper.find('.banner-info')).toBeTruthy()
-//   })
 })

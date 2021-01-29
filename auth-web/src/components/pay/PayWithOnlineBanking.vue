@@ -74,12 +74,12 @@ export default class PayWithOnlineBanking extends Vue {
 
   private setData () {
     this.totalBalanceDue = this.onlineBankingData?.totalBalanceDue || 0
-    this.payeeName = this.onlineBankingData.payeeName
+    this.payeeName = this.onlineBankingData?.payeeName
     this.cfsAccountId = this.onlineBankingData?.cfsAccountId || ''
-    this.overCredit = this.onlineBankingData.overCredit || false
-    this.partialCredit = this.onlineBankingData.partialCredit || false
-    this.creditBalance = this.onlineBankingData.creditBalance || 0
-    this.credit = this.onlineBankingData.credit || 0
+    this.overCredit = this.onlineBankingData?.overCredit || false
+    this.partialCredit = this.onlineBankingData?.partialCredit || false
+    this.creditBalance = this.onlineBankingData?.creditBalance || 0
+    this.credit = this.onlineBankingData?.credit || 0
   }
 
   private mounted () {
