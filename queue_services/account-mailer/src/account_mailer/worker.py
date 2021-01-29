@@ -158,6 +158,19 @@ async def process_event(event_message: dict, flask_app):
             }
             email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject,
                                                **args)
+        elif message_type == MessageType.PAYMENT_PENDING.value:
+            email_msg = event_message.get('data')
+            template_name = TemplateType.PAYMENT_PENDING_TEMPLATE_NAME.value
+            org_id = email_msg.get('accountId')
+            admin_coordinator_emails = get_member_emails(org_id, (ADMIN,))
+            subject = SubjectType.PAYMENT_PENDING.value
+            args = {
+                'accountId': email_msg.get('accountId'),
+                'cfsAccountId': email_msg.get('cfsAccountId'),
+                'transactionAmount': email_msg.get('transactionAmount'),
+            }
+            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject,
+                                               **args)
         if email_dict:
             logger.debug('Extracted email msg Recipient: %s ', email_dict.get('recipients', ''))
             process_email(email_dict, FLASK_APP, token)

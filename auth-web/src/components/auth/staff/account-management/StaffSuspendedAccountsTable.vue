@@ -18,18 +18,7 @@
         Loading...
       </template>
       <template v-slot:[`item.statusCode`]="{ item }">
-          <div class="value" aria-labelledby="accountStatus">
-              <div class="value__title">
-                <v-chip
-                  small
-                  label
-                  class="font-weight-bold account-list__status"
-                  color="error"
-                >
-                  {{ getStatusText(item.statusCode) }}
-                </v-chip>
-              </div>
-            </div>
+          {{ getStatusText(item.statusCode) }}
       </template>
       <template v-slot:[`item.suspendedOn`]="{ item }">
           {{formatDate(item.suspendedOn)}}
@@ -83,18 +72,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
 
   private readonly headerAccounts = [
     {
-      text: 'Date Suspended',
-      align: 'left',
-      sortable: true,
-      value: 'suspendedOn'
-    },
-    {
-      text: 'Reason',
-      align: 'left',
-      sortable: true,
-      value: 'statusCode'
-    },
-    {
       text: 'Name',
       align: 'left',
       sortable: true,
@@ -111,6 +88,18 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       align: 'left',
       sortable: true,
       value: 'decisionMadeBy'
+    },
+    {
+      text: 'Date Suspended',
+      align: 'left',
+      sortable: true,
+      value: 'suspendedOn'
+    },
+    {
+      text: 'Reason',
+      align: 'left',
+      sortable: true,
+      value: 'statusCode'
     },
     {
       text: 'Actions',

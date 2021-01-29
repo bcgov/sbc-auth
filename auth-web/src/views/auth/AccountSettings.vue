@@ -60,7 +60,7 @@
       <p class="mt-3 mb-0" v-else>Manage account information, team members, and authentication settings.</p>
     </div>
     <!-- Suspend Account Banner-->
-    <AccountSuspendAlert  v-if="showAccountFreezeBanner"/>
+    <AccountSuspendAlert class="account-alert mb-0" v-if="showAccountFreezeBanner"/>
 
     <v-card flat class="account-settings-card" data-test="account-settings-card">
       <v-container class="nav-container py-6 pr-0 pl-8">
@@ -353,5 +353,15 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   .crumbs-visible {
     padding-top: 0 !important;
+  }
+
+  .account-alert.v-alert {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  .account-alert + .v-card {
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
   }
 </style>
