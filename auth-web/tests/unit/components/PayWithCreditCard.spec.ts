@@ -11,31 +11,18 @@ Vue.use(VueRouter)
 describe('PayWithOnlineBanking.vue', () => {
   let wrapper: any
   beforeEach(() => {
+    const $t = () => ''
     const localVue = createLocalVue()
     localVue.use(Vuex)
     const vuetify = new Vuetify({})
-
     const store = new Vuex.Store({
       state: {},
       strict: false,
       modules: {}
     })
-    const onlineBankingData = {
-        totalBalanceDue: 10,
-        payeeName: 'BC Reg',
-        cfsAccountId: 1234,
-        overCredit: true,
-        partialCredit: false,
-        creditBalance: 6,
-        credit: 0
-      }
 
-
-    const $t = () => ''
+    
     wrapper = mount(PayWithOnlineBanking, {
-        propsData: {
-            onlineBankingData
-        },
       store,
       localVue,
       vuetify,
