@@ -34,7 +34,6 @@ class MessageType(Enum):
     PAYMENT_PENDING = 'bc.registry.payment.ob.outstandingInvoice'
 
 
-
 class SubjectType(Enum):
     """Event Types."""
 
