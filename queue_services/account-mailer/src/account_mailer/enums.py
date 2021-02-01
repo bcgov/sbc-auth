@@ -31,7 +31,8 @@ class MessageType(Enum):
     ONLINE_BANKING_UNDER_PAYMENT = 'bc.registry.payment.UnderPaid'
     ONLINE_BANKING_PAYMENT = 'bc.registry.payment.Payment'
     PAD_SETUP_FAILED = 'bc.registry.payment.PadSetupFailed'
-    PAYMENT_PENDING = 'bc.registry.payment.paymentPending'
+    PAYMENT_PENDING = 'bc.registry.payment.ob.outstandingInvoice'
+
 
 
 class SubjectType(Enum):
