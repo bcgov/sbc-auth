@@ -35,7 +35,7 @@ describe('StaffSuspendedAccountsTable.vue', () => {
       },
       actions: {
         syncSuspendedStaffOrgs: jest.fn(),
-        searchOrgs:jest.fn()
+        searchOrgs: jest.fn()
       }
     }
 
