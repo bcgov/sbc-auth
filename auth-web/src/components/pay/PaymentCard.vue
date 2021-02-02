@@ -1,70 +1,36 @@
 <template>
-  <v-card class="bcol-payment-card">
-    <v-card-text class="heading-info py-7 px-8">
-      <h2 class="mb-2">Balance Due: <span class="ml-2">${{totalBalanceDue.toFixed(2)}}</span></h2>
-      <template v-if="payWithCreditCard">
-        <p class="mb-1" v-if="showPayWithOnlyCC">
-          <strong>Credit card will be the only payment option for this transaction</strong>.<br />
-          Online banking payment option is not available.
-        </p>
-        <p class="mb-1" v-else>
-          Click "pay now" to complete transaction balance with credit card.
-          By credit card, your transaction will be completed <strong>immediately</strong>.
-        </p>
+  <v-card class="bcol-payment-card" data-test='div-bcol-payment-card'>
+    <!-- wording for credit card payment -->
+    <PayWithCreditCard v-if="payWithCreditCard"
+    :totalBalanceDue="totalBalanceDue"
+    :showPayWithOnlyCC="showPayWithOnlyCC"
+    :partialCredit="partialCredit"
+    />
+    <!-- wording for online bank payment -->
+    <PayWithOnlineBanking
+    :onlineBankingData="onlineBankingData"
+    v-else />
+
+    <v-card-text class="pt-0 pb-8 px-8">
+      <template v-if="!overCredit">
+        <p v-if="showPayWithOnlyCC">Click <strong>"pay now"</strong> to complete transaction balance with credit card</p>
+        <p v-else>Would you like to complete transaction immediately?</p>
+        <v-checkbox
+          class="pay-with-credit-card mb-4"
+          v-model="payWithCreditCard"
+          color="primary"
+          hide-details
+          :disabled="showPayWithOnlyCC"
+        >
+          <template v-slot:label>
+            <div class="ml-1">
+              <div class="font-weight-bold">Credit Card</div>
+              <div class="subtitle-2 mt-1">Pay your balance and access files <strong>immediately</strong></div>
+              <div class="subtitle-2" v-if="partialCredit">Account credit will <strong>not apply</strong> with credit card payment option.</div>
+            </div>
+          </template>
+        </v-checkbox>
       </template>
-      <template v-else>
-        <p class="mb-6">
-          Transaction will be completed when payment is received in full.
-          Online Banking payment methods can expect between <strong>2-5 days</strong> for your payment.
-        </p>
-        <div class="mb-1">
-          <span class="payee-name">
-            <strong>Payee Name:</strong>
-            {{payeeName}}
-          </span>
-          <span>
-            <strong>Account #:</strong>
-            {{cfsAccountId}}
-          </span>
-        </div>
-      </template>
-    </v-card-text>
-    <v-card-text class="pt-7 pb-8 px-8">
-      <template v-if="payWithCreditCard">
-        <h3 class="body-1 font-weight-bold mb-3">How to pay with credit card:</h3>
-        <ol class="mb-5">
-          <li>Click on "Pay Now"</li>
-          <li>Complete credit card payment</li>
-          <li>Get confirmation receipt</li>
-        </ol>
-      </template>
-      <template v-else>
-        <h3 class="mb-3">How to pay with online banking:</h3>
-        <ol class="mb-5">
-          <li>Sign in to your financial institution's online banking website or app</li>
-          <li>Go to your financial institution's bill payment page</li>
-          <li>Enter "BC Registries and Online Services" as payee</li>
-          <li>Enter BC Registries and Online Services account number</li>
-          <li>Submit your payment for the balance due</li>
-        </ol>
-      </template>
-      <v-divider class="my-6"></v-divider>
-      <p v-if="showPayWithOnlyCC">Click <strong>"pay now"</strong> to complete transaction balance with credit card</p>
-      <p v-else>Would you like to complete transaction immediately?</p>
-      <v-checkbox
-        class="pay-with-credit-card mb-4"
-        v-model="payWithCreditCard"
-        color="primary"
-        hide-details
-        :disabled="showPayWithOnlyCC"
-      >
-        <template v-slot:label>
-          <div class="ml-1">
-            <div class="font-weight-bold">Credit Card</div>
-            <div class="subtitle-2 mt-1">Pay your balance and access files <strong>immediately</strong></div>
-          </div>
-        </template>
-      </v-checkbox>
       <v-divider class="mt-8"></v-divider>
       <v-row>
         <v-col
@@ -77,7 +43,8 @@
             color="primary"
             class="px-0"
             @click="emitBtnClick('download-invoice')"
-            v-if="!payWithCreditCard"
+            v-if="!payWithCreditCard && !overCredit"
+            data-test='btn-download-invoice'
           >
             <v-icon class="mr-1">
               mdi-file-download-outline
@@ -100,6 +67,7 @@
               width="100"
               class="ml-3"
               @click="cancel"
+              data-test='btn-cancel-online-banking'
             >
               Cancel
             </v-btn>
@@ -111,6 +79,7 @@
               width="100"
               class="font-weight-bold"
               @click="emitBtnClick('complete-online-banking')"
+              data-test='btn-complete-online-banking'
             >
               Ok
             </v-btn>
@@ -124,21 +93,61 @@
 <script lang="ts">
 
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import PayWithCreditCard from '@/components/pay/PayWithCreditCard.vue'
+import PayWithOnlineBanking from '@/components/pay/PayWithOnlineBanking.vue'
+import PaymentServices from '@/services/payment.services'
 
-@Component({})
+@Component({
+  components: {
+    PayWithCreditCard,
+    PayWithOnlineBanking
+  }
+
+})
 export default class PaymentCard extends Vue {
   @Prop() paymentCardData: any
   @Prop({ default: false }) showPayWithOnlyCC: boolean
   private payWithCreditCard: boolean = false
+  private balanceDue = 0
   private totalBalanceDue = 0
   private cfsAccountId: string = ''
   private payeeName: string = ''
+  private onlineBankingData: any = []
+  private credit?: number = null
+  private doHaveCredit:boolean = false
+  private overCredit:boolean = false
+  private partialCredit:boolean = false
+  private creditBalance = 0
+  private paymentId: string
+  private totalPaid = 0
 
   private mounted () {
     this.totalBalanceDue = this.paymentCardData?.totalBalanceDue || 0
+    this.totalPaid = this.paymentCardData?.totalPaid || 0
+    this.balanceDue = this.totalBalanceDue - this.totalPaid
     this.payeeName = this.paymentCardData.payeeName
     this.cfsAccountId = this.paymentCardData?.cfsAccountId || ''
     this.payWithCreditCard = this.showPayWithOnlyCC
+    this.credit = this.paymentCardData.credit
+    this.doHaveCredit = this.paymentCardData.credit !== null && this.paymentCardData.credit !== 0
+    if (this.doHaveCredit) {
+      this.overCredit = this.credit >= this.totalBalanceDue
+      this.partialCredit = this.credit < this.totalBalanceDue
+      this.balanceDue = this.overCredit ? this.balanceDue : this.balanceDue - this.credit
+    }
+    this.creditBalance = this.overCredit ? this.credit - this.balanceDue : 0
+    this.paymentId = this.paymentCardData.paymentId
+
+    // setting online data
+    this.onlineBankingData = {
+      totalBalanceDue: this.balanceDue,
+      payeeName: this.payeeName,
+      cfsAccountId: this.cfsAccountId,
+      overCredit: this.overCredit,
+      partialCredit: this.partialCredit,
+      creditBalance: this.creditBalance,
+      credit: this.credit
+    }
   }
 
   private cancel () {
@@ -149,7 +158,10 @@ export default class PaymentCard extends Vue {
     }
   }
 
-  private emitBtnClick (eventName) {
+  private async emitBtnClick (eventName) {
+    if (eventName === 'complete-online-banking' && this.doHaveCredit) {
+      await PaymentServices.applycredit(this.paymentId)
+    }
     this.$emit(eventName)
   }
 }

@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <v-container v-if="showLoading">
+  <div data-test="div-payment-view">
+    <v-container v-if="showLoading" data-test="div-payment-view-loading">
       <v-layout row flex-column justify-center align-center class="py-12">
         <v-progress-circular
           color="primary"
@@ -12,7 +12,7 @@
       </v-layout>
     </v-container>
     <div v-else>
-      <v-container v-if="errorMessage">
+      <v-container v-if="errorMessage" data-test="div-payment-view-error">
         <v-layout row justify-center align-center>
           <SbcSystemError
             v-on:continue-event="goToUrl(returnUrl)"
@@ -30,6 +30,7 @@
         </v-layout>
       </v-container>
       <v-container
+        data-test="div-payment-view-container"
         class="view-container"
         v-if="showOnlineBanking">
         <div class="payment-view-content">
@@ -114,9 +115,12 @@ export default class PaymentView extends Vue {
             // get account data to show in the UI
             const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(accountSettings?.id)
             this.paymentCardData = {
-              totalBalanceDue: invoice?.total || 0,
+              totalBalanceDue: invoice?.total || 0, // to fix credit amount
               payeeName: ConfigHelper.getPaymentPayeeName(),
-              cfsAccountId: paymentDetails?.cfsAccount?.cfsAccountNumber || ''
+              cfsAccountId: paymentDetails?.cfsAccount?.cfsAccountNumber || '',
+              credit: paymentDetails?.credit,
+              paymentId: this.paymentId,
+              totalPaid: invoice?.paid || 0
             }
 
             this.showLoading = false
