@@ -1,6 +1,6 @@
 import { AccessType } from '@/util/constants'
 <template>
-  <div>
+  <div  data-test="div-stepper-container">
     <p class="mb-7" v-if="!isAccountChange">There is no cost to create a BC Registries account. You only pay for the services and products you purchase.</p>
     <p class="mb-7" v-if="isAccountChange">There is no cost to change a BC Registries account type. You only pay for the services and products you purchase.</p>
     <v-row>
@@ -15,6 +15,7 @@ import { AccessType } from '@/util/constants'
           outlined
           hover
           @click="selectAccountType(ACCOUNT_TYPE.BASIC)"
+          data-test="div-stepper-basic"
         >
           <div class="account-type">
             <div class="account-type__title">
@@ -36,6 +37,7 @@ import { AccessType } from '@/util/constants'
           <!-- State Button (Create Account) -->
           <div class="mt-10" v-if="!isAccountChange">
             <v-btn large block depressed color="primary" class="font-weight-bold"
+              data-test="btn-stepper-basic-select"
               :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
               @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
               {{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT'}}
@@ -45,6 +47,7 @@ import { AccessType } from '@/util/constants'
           <!-- State Button (Change Account) -->
           <div class="mt-10" v-if="isAccountChange">
             <v-btn large block depressed color="primary" class="font-weight-bold"
+              data-test="btn-stepper-edit-basic-select"
               :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
               @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
               <span v-if="accountTypeBeforeChange == ACCOUNT_TYPE.BASIC">CURRENT ACCOUNT</span>
@@ -65,6 +68,7 @@ import { AccessType } from '@/util/constants'
           outlined
           hover
           @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)"
+          data-test="div-stepper-premium"
         >
           <div class="account-type">
             <div class="account-type__title">
@@ -86,6 +90,7 @@ import { AccessType } from '@/util/constants'
             <!-- State Button (Create Account) -->
             <div class="card-buttons" v-if="!isAccountChange">
               <v-btn large block depressed color="primary" class="font-weight-bold"
+                data-test="btn-stepper-premium-select"
                 :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
                 @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
                 {{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT' }}
@@ -95,6 +100,7 @@ import { AccessType } from '@/util/constants'
             <!-- State Button (Change Account) -->
             <div class="card-buttons" v-if="isAccountChange">
               <v-btn large block depressed color="primary" class="font-weight-bold"
+                data-test="btn-stepper-edit-premium-select"
                 :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
                 @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
                 <span v-if="accountTypeBeforeChange == ACCOUNT_TYPE.PREMIUM">CURRENT ACCOUNT</span>
@@ -114,7 +120,7 @@ import { AccessType } from '@/util/constants'
         cols="12"
         class="form__btns py-0 text-right"
       >
-        <v-btn large color="primary" class="mr-3" @click="goNext" :disabled='!canContinue'>
+        <v-btn large color="primary" class="mr-3" @click="goNext" :disabled='!canContinue' data-test="btn-stepper-next">
           <span>Next</span>
           <v-icon class="ml-2">mdi-arrow-right</v-icon>
         </v-btn>
