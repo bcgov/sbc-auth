@@ -1,6 +1,6 @@
 <template>
 <v-container>
-  <v-form ref="premiumAccountChooser" lazy-validation>
+  <v-form ref="premiumAccountChooser" lazy-validation data-test="form-premium-account-chooser">
     <p class="mb-6">
       <span>Do you want to link this account with an existing BC Online Account?</span>
       &nbsp;
@@ -9,6 +9,7 @@
         color="primary"
         class="learn-more-btn"
         @click="learnMoreDialog = true"
+        data-test="modal-learnmore-dialog"
       >
         Learn more
       </v-btn>
@@ -18,9 +19,10 @@
       class="mb-9"
       @change="loadComponent"
       v-model="isBcolSelected"
+      data-test="radio-isBcolSelected"
     >
-      <v-radio label="Yes" value="yes" />
-      <v-radio label="No" value="no" />
+      <v-radio label="Yes" value="yes" data-test="radio-isBcolSelected-yes"/>
+      <v-radio label="No" value="no" data-test="radio-isBcolSelected-no"/>
     </v-radio-group>
 
     <component class="mt-5 pa-0"
@@ -38,12 +40,13 @@
             large
             depressed
             color="default"
-            @click="stepBack">
+            @click="stepBack"
+            data-test="btn-back">
             <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
             Back
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn class="mr-3" large depressed color="primary" :loading="saving" :disabled="saving || !isBcolSelected">
+          <v-btn class="mr-3" large depressed color="primary" :loading="saving" :disabled="saving || !isBcolSelected" data-test="btn-next">
             <span v-if="!isAccountChange">Next
               <v-icon right class="ml-1">mdi-arrow-right</v-icon>
             </span>
@@ -62,6 +65,7 @@
   <v-dialog
     v-model="learnMoreDialog"
     max-width="500"
+    data-test="modal-learn-more-dialog-content"
   >
     <v-card>
       <v-card-title class="headline">

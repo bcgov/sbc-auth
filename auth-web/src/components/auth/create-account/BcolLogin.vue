@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" lazy-validation >
+  <v-form ref="form" lazy-validation  data-test="form-bcol-login">
     <fieldset>
       <legend class="mb-3">
         BC Online Prime Contact Details
@@ -12,7 +12,7 @@
       </legend>
       <v-slide-y-transition>
         <div class="pb-2" v-show="errorMessage">
-          <v-alert type="error" icon="mdi-alert-circle-outline">
+          <v-alert type="error" icon="mdi-alert-circle-outline" data-test="alert-bcol-error">
             {{errorMessage}}
           </v-alert>
         </div>
@@ -26,6 +26,7 @@
             v-model.trim="username"
             :rules="usernameRules"
             req
+            data-test="input-user-id"
           >
           </v-text-field>
         </v-col>
@@ -38,6 +39,7 @@
             v-model.trim="password"
             req
             :rules="passwordRules"
+            data-test="input-user-password"
           >
           </v-text-field>
         </v-col>
