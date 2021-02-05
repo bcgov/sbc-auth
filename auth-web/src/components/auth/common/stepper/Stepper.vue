@@ -1,5 +1,5 @@
 <template>
-  <v-stepper class="stepper d-flex elevation-0" v-model="currentStepNumber">
+  <v-stepper class="stepper d-flex elevation-0" v-model="currentStepNumber" data-test="div-account-setup-stepper">
     <v-container
       class="stepper-nav pa-10 pr-0"
       v-bind:class="stepperColor"
@@ -10,6 +10,7 @@
           :key="`${getStepIndex(step)}-step`"
           :complete="currentStepNumber > getStepIndex(step)"
           :step="getStepIndex(step)"
+          :data-test="`${getStepIndex(step)}-step`"
         >{{ getStepName(step) }}</v-stepper-step>
         <v-divider
           vertical

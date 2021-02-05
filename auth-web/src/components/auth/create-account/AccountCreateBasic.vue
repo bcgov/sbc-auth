@@ -1,5 +1,5 @@
 <template>
-  <v-form class="mt-8" ref="createAccountInfoForm">
+  <v-form class="mt-8" ref="createAccountInfoForm"  data-test="form-stepper-basic-wrapper">
     <fieldset>
       <legend class="mb-3">Enter an Account Name</legend>
       <v-slide-y-transition>
@@ -13,6 +13,7 @@
         v-model.trim="orgName"
         :rules="orgNameRules"
         :disabled="saving"
+        data-test="input-org-name"
       />
     </fieldset>
     <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep ">
@@ -35,7 +36,8 @@
           large
           depressed
           color="default"
-          @click="goBack">
+          @click="goBack"
+          data-test="btn-back">
           <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
           <span>Back</span>
         </v-btn>

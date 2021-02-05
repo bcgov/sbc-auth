@@ -1,5 +1,5 @@
 <template>
-  <v-container class="view-container">
+  <v-container class="view-container" data-test="div-account-setup-success-container">
     <v-row justify="center">
       <v-col cols="12" sm="6" class="text-center">
         <v-icon size="48" color="primary" class="mb-6">mdi-check</v-icon>
@@ -10,6 +10,7 @@
             large
             color="primary"
             class="action-btn font-weight-bold"
+            data-test="btn-goto-home"
             @click="goTo('home')">
             Home
           </v-btn>
@@ -19,6 +20,7 @@
             color="primary"
             class="action-btn font-weight-bold"
             v-if="isRegularAccount"
+            data-test="btn-setup-team"
             @click="goTo('setup-team')"
           >
             Set up team
@@ -28,6 +30,7 @@
             color="primary"
             class="action-btn font-weight-bold"
             v-if="!isRegularAccount"
+            data-test="btn-add-team-members"
             @click="goTo('team-members')"
           >
             Add Team Members
