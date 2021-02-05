@@ -34,6 +34,32 @@
         </div>
 
         <template v-show="!anonAccount">
+          <div v-if="isStaff" class="nv-list-item mb-10">
+            <div class="name" id="accountStatusStaff">Account Status</div>
+            <div class="value-column">
+               <div class="value" aria-labelledby="accountStatusStaff">
+                <v-chip
+                  small
+                  label
+                  class="font-weight-bold white--text"
+                  :color="getStatusColor(currentOrganization.orgStatus)"
+                  data-test='chip-account-status'
+                >
+                  {{ getStatusText(currentOrganization.orgStatus) }}
+                </v-chip>
+              </div>
+              <v-btn
+                large
+                aria-label="Suspend Account"
+                title="Suspend Account"
+                class="suspend-account-btn mx-1 mb-3"
+                @click="showSuspendAccountDialog(currentOrganization.orgStatus)"
+                data-test='btn-suspend-account'
+              >
+                {{ getSuspendButtonText(currentOrganization.orgStatus) }}
+              </v-btn>
+            </div>
+          </div>
           <div class="nv-list-item mb-10">
             <div class="name" id="accountType">Account Type</div>
             <div class="value" aria-labelledby="accountType">
@@ -131,21 +157,56 @@
         </div>
       </v-form>
     </div>
+    <!-- Suspend Account Dialog -->
+    <ModalDialog
+    ref="suspendAccountDialog"
+    icon="mdi-check"
+    :title="dialogTitle"
+    :text="dialogText"
+    dialog-class="notify-dialog"
+    max-width="680"
+    :isPersistent="true"
+    data-test='modal-suspend-account'
+    >
+      <template v-slot:icon>
+        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-btn
+          large
+          class="font-weight-bold white--text"
+          :color="getDialogStatusButtonColor(currentOrganization.orgStatus)"
+          data-test='btn-suspend-dialog'
+        >
+          {{ getDialogStatusButtonText(currentOrganization.orgStatus) }}
+        </v-btn>
+        <v-btn
+          large
+          depressed
+          @click="closeSuspendAccountDialog()"
+          data-test='btn-cancel-suspend-dialog'
+        >
+          Cancel
+        </v-btn>
+      </template>
+    </ModalDialog>
   </v-container>
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, LDFlags, Pages, Permission, SessionStorageKeys } from '@/util/constants'
-import { Component, Mixins, Vue, Watch } from 'vue-property-decorator'
-import { CreateRequestBody, Member, MembershipType, Organization } from '@/models/Organization'
+import { AccessType, Account, AccountStatus, LDFlags, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
+import { Component, Mixins } from 'vue-property-decorator'
+import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfigHelper from '@/util/config-helper'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
+import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
 import OrgModule from '@/store/modules/org'
 import { addressSchema } from '@/schemas'
@@ -155,9 +216,13 @@ import { getModule } from 'vuex-module-decorators'
   components: {
     BaseAddressForm,
     OrgAdminContact,
-    LinkedBCOLBanner
+    LinkedBCOLBanner,
+    ModalDialog
   },
   computed: {
+    ...mapState('user', [
+      'currentUser'
+    ]),
     ...mapState('org', [
       'currentOrganization',
       'currentMembership',
@@ -176,7 +241,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private readonly currentOrganization!: Organization
   private readonly currentOrgAddress!: Address
   private readonly currentMembership!: Member
+  private readonly currentUser!: KCUserProfile
   private readonly permissions!: string[]
+  private dialogTitle = ''
+  private dialogText = ''
 
   private readonly updateOrg!: (
     requestBody: CreateRequestBody
@@ -194,10 +262,15 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   $refs: {
     editAccountForm: HTMLFormElement,
     mailingAddress:HTMLFormElement,
+    suspendAccountDialog:ModalDialog
   }
 
   private isFormValid (): boolean {
     return !!this.orgName || this.orgName === this.currentOrganization?.name
+  }
+
+  private get isStaff (): boolean {
+    return this.currentUser.roles.includes(Role.Staff)
   }
 
   get editAccountUrl () {
@@ -234,6 +307,21 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private updateAddress (address: Address) {
     this.setCurrentOrganizationAddress(address)
     this.enableBtn()
+  }
+
+  private showSuspendAccountDialog (status) {
+    if (status === AccountStatus.ACTIVE) {
+      this.dialogTitle = 'Suspend Account'
+      this.dialogText = 'Are you sure you want to suspend access to this account?<br/>Team members will be restricted from access until the account is unsuspended.'
+    } else {
+      this.dialogTitle = 'Unsuspend Account'
+      this.dialogText = 'Are you sure you want to unsuspend access to this account?'
+    }
+    this.$refs.suspendAccountDialog.open()
+  }
+
+  private closeSuspendAccountDialog () {
+    this.$refs.suspendAccountDialog.close()
   }
 
   private async setup () {
@@ -387,7 +475,18 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
       case AccountStatus.NSF_SUSPENDED:
         return 'error'
       case AccountStatus.ACTIVE:
-        return 'info'
+        return 'green'
+      default:
+        return 'primary'
+    }
+  }
+
+  private getDialogStatusButtonColor (status) {
+    switch (status) {
+      case AccountStatus.NSF_SUSPENDED:
+        return 'green'
+      case AccountStatus.ACTIVE:
+        return 'error'
       default:
         return 'primary'
     }
@@ -401,7 +500,26 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
         return status
     }
   }
+
+  private getSuspendButtonText (status) {
+    switch (status) {
+      case AccountStatus.NSF_SUSPENDED:
+        return 'Unsuspend Account'
+      case AccountStatus.ACTIVE:
+        return 'Suspend Account'
+    }
+  }
+
+  private getDialogStatusButtonText (status) {
+    switch (status) {
+      case AccountStatus.NSF_SUSPENDED:
+        return 'Unsuspend'
+      case AccountStatus.ACTIVE:
+        return 'Suspend'
+    }
+  }
 }
+
 </script>
 
 <style lang="scss" scoped>
@@ -503,5 +621,18 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 
 .change-account-link {
   font-size: 0.875rem;
+}
+
+.value-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.value-column > div {
+  margin-bottom: 1rem;
+}
+
+.suspend-account-btn {
+  margin-left: 0 !important;
 }
 </style>
