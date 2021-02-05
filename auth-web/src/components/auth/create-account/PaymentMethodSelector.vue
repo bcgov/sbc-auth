@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div data-test="div-stepper-payment-method-selector">
     <p class="payment-page-sub mb-9">
       {{pageSubTitle}}
     </p>
@@ -18,6 +18,7 @@
           depressed
           color="default"
           @click="goBack"
+          data-test="btn-stepper-back"
         >
           <v-icon left class="mr-2">mdi-arrow-left</v-icon>
           <span>Back</span>

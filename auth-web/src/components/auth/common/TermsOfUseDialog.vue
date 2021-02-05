@@ -17,6 +17,7 @@
       v-on:change="emitTermsAcceptanceStatus"
       :disabled="!canCheckTerms"
       required
+      data-test="check-termsAccepted"
     >
       <template v-slot:label>
         <span>I have read, understood and agree to the

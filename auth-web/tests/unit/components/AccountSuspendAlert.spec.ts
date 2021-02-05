@@ -16,13 +16,14 @@ describe('AccountSuspendAlert.vue', () => {
 
     const orgModule = {
       namespaced: true,
-      state: {currentOrganization:{}},
+      state: { currentOrganization: {} },
       actions: {
         calculateFailedInvoices: jest.fn(() => {
-        return {
+          return {
             totalTransactionAmount: 10,
             totalAmountToPay: 20
-        }}),
+          }
+        })
       }
     }
 

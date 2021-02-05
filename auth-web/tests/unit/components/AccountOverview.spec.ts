@@ -34,7 +34,7 @@ describe('AccountOverview.vue', () => {
       },
       actions: OrgModule.actions,
       mutations: OrgModule.mutations,
-      getters: OrgModule.getters,
+      getters: OrgModule.getters
     }
 
     const store = new Vuex.Store({

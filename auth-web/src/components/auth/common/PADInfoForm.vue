@@ -25,6 +25,7 @@
               v-model="transitNumber"
               @change="emitPreAuthDebitInfo"
               v-mask="'#####'"
+              data-test="input-transitNumber"
             ></v-text-field>
           </v-col>
           <v-col cols="6" class="py-0">
@@ -37,6 +38,7 @@
               v-model="institutionNumber"
               @change="emitPreAuthDebitInfo"
               v-mask="'###'"
+              data-test="input-institutionNumber"
             ></v-text-field>
           </v-col>
           <v-col cols="12" class="py-0">
@@ -48,6 +50,7 @@
               :rules="accountNumberRules"
               v-model="accountNumber"
               @change="emitPreAuthDebitInfo"
+              data-test="input-accountNumber"
               v-mask="accountMask">
             ></v-text-field>
           </v-col>
@@ -59,6 +62,7 @@
               class="align-checkbox-label--top"
               v-model="isAcknowledged"
               @change="emitPreAuthDebitInfo"
+              data-test="check-isAcknowledged"
             >
               <template v-slot:label>
                 {{acknowledgementLabel}}
