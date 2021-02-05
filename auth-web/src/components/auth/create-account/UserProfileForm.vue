@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" lazy-validation>
+  <v-form ref="form" lazy-validation data-test="form-profile">
     <p class="mb-9" v-if="isStepperView">Enter your contact information. Once your account is created, you may add additional users and assign roles.</p>
     <v-expand-transition>
       <div class="form_alert-container" v-show="formError">
@@ -117,6 +117,7 @@
           class="deactivate-btn"
           v-show="editing && !isStepperView"
           @click="$refs.deactivateUserConfirmationDialog.open()"
+          data-test="btn-profile-deactivate"
         >Deactivate my profile</v-btn>
         <!-- The reset button should be hidden in Production environment and who doesn't have tester role -->
         <v-btn
@@ -126,6 +127,7 @@
           class="reset-btn"
           v-show="editing && !isStepperView && isTester"
           @click="$refs.resetDialog.open()"
+          data-test="btn-profile-reset"
         >Reset</v-btn>
         <v-btn
           large
@@ -133,6 +135,7 @@
           v-if="isStepperView"
           color="default"
           @click="goBack"
+          data-test="btn-back"
         >
           <v-icon left class="mr-2">mdi-arrow-left</v-icon>
           <span>Back</span>

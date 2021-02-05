@@ -23,7 +23,7 @@ beforeEach(() => {
   jest.clearAllMocks()
 })
 
-  // TOFIX fix later
+// TOFIX fix later
 describe('ConfigHelper tests', () => {
   xit('does make one Call Axios config when session storage is present', () => {
     sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)

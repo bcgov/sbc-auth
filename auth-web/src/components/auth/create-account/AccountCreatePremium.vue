@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="createAccountInfoForm" lazy-validation>
+  <v-form ref="createAccountInfoForm" lazy-validation data-test="form-stepper-premium-wrapper">
     <h3 class="mt-n1 mb-5">Link with an existing BC Online account</h3>
 
     <div v-show="!linked">
@@ -28,6 +28,7 @@
           :disabled="orgNameReadOnly"
           :error-messages="bcolDuplicateNameErrorMessage"
           @change="updateOrgNameAndClearErrors"
+          data-test="input-premium-orgName"
         />
       </fieldset>
 
@@ -48,14 +49,16 @@
         <v-checkbox
           color="primary"
           class="bcol-auth ml-2"
-          v-model="grantAccess">
+          v-model="grantAccess"
+          data-test="check-premium-auth"
+          >
           <template v-slot:label>
             <div class="bcol-auth__label" v-html="grantAccessText"></div>
           </template>
         </v-checkbox>
       </fieldset>
 
-      <v-alert type="error" class="mb-6" v-show="errorMessage">
+      <v-alert type="error" class="mb-6" v-show="errorMessage" data-test="div-premium-error">
         {{ errorMessage }}
       </v-alert>
     </template>
@@ -68,12 +71,16 @@
           large
           depressed
           color="default"
-          @click="goBack">
+          @click="goBack"
+          data-test="btn-stepper-premium-back">
           <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
           Back
         </v-btn>
         <v-spacer></v-spacer>
-        <v-btn class="mr-3" large depressed color="primary" :loading="saving" :disabled="!grantAccess || saving || !isBaseAddressValid || !isFormValid()" @click="save">
+        <v-btn class="mr-3" large depressed color="primary" :loading="saving"
+        :disabled="!grantAccess || saving || !isBaseAddressValid || !isFormValid()"
+        @click="save"
+         data-test="btn-stepper-premium-save">
           <span v-if="!isAccountChange">Next
             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
           </span>

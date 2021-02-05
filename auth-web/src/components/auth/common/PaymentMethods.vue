@@ -10,6 +10,7 @@
         :key="payment.type"
         v-can:CHANGE_PAYMENT_METHOD.disable.card
         @click="paymentMethodSelected(payment)"
+        :data-test="`div-payment-${payment.type}`"
       >
         <div>
           <header class="d-flex align-center">
@@ -29,6 +30,7 @@
               :outlined="!isPaymentSelected(payment)"
               @click="paymentMethodSelected(payment)"
               :aria-label="'Select' + ' ' + payment.title"
+              :data-test="`btn-payment-${payment.type}`"
             >
               <span>{{(isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT'}}</span>
             </v-btn>
