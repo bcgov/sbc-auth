@@ -477,7 +477,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private getStatusColor (status) {
     switch (status) {
       case AccountStatus.NSF_SUSPENDED:
-        return 'error'
       case AccountStatus.SUSPENDED:
         return 'error'
       case AccountStatus.ACTIVE:
@@ -490,7 +489,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private getDialogStatusButtonColor (status) {
     switch (status) {
       case AccountStatus.NSF_SUSPENDED:
-        return 'green'
       case AccountStatus.SUSPENDED:
         return 'green'
       case AccountStatus.ACTIVE:

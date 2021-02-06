@@ -1,5 +1,5 @@
 import { AccountStatus, Role } from '@/util/constants'
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 
 import AccountInfo from '@/components/auth/account-settings/account-info/AccountInfo.vue'
 import OrgModule from '@/store/modules/org'
