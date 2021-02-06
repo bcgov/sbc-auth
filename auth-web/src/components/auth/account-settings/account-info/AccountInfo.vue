@@ -56,7 +56,7 @@
                 @click="showSuspendAccountDialog(currentOrganization.orgStatus)"
                 data-test='btn-suspend-account'
               >
-                {{ getSuspendButtonText(currentOrganization.orgStatus) }}
+                {{ isAccountStatusActive ? 'Suspend Account' : 'Unsuspend Account' }}
               </v-btn>
             </div>
           </div>
@@ -178,7 +178,7 @@
           :color="getDialogStatusButtonColor(currentOrganization.orgStatus)"
           data-test='btn-suspend-dialog'
         >
-          {{ getDialogStatusButtonText(currentOrganization.orgStatus) }}
+          {{ isAccountStatusActive ? 'Suspend' : 'Unsuspend' }}
         </v-btn>
         <v-btn
           large
@@ -243,8 +243,8 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private readonly currentMembership!: Member
   private readonly currentUser!: KCUserProfile
   private readonly permissions!: string[]
-  private dialogTitle = ''
-  private dialogText = ''
+  private dialogTitle: string = ''
+  private dialogText: string = ''
 
   private readonly updateOrg!: (
     requestBody: CreateRequestBody
@@ -470,9 +470,15 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     return false
   }
 
+  get isAccountStatusActive () : boolean {
+    return this.currentOrganization.accountStatus === AccountStatus.ACTIVE
+  }
+
   private getStatusColor (status) {
     switch (status) {
       case AccountStatus.NSF_SUSPENDED:
+        return 'error'
+      case AccountStatus.SUSPENDED:
         return 'error'
       case AccountStatus.ACTIVE:
         return 'green'
@@ -484,6 +490,8 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private getDialogStatusButtonColor (status) {
     switch (status) {
       case AccountStatus.NSF_SUSPENDED:
+        return 'green'
+      case AccountStatus.SUSPENDED:
         return 'green'
       case AccountStatus.ACTIVE:
         return 'error'
@@ -498,24 +506,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
         return 'SUSPENDED'
       default:
         return status
-    }
-  }
-
-  private getSuspendButtonText (status) {
-    switch (status) {
-      case AccountStatus.NSF_SUSPENDED:
-        return 'Unsuspend Account'
-      case AccountStatus.ACTIVE:
-        return 'Suspend Account'
-    }
-  }
-
-  private getDialogStatusButtonText (status) {
-    switch (status) {
-      case AccountStatus.NSF_SUSPENDED:
-        return 'Unsuspend'
-      case AccountStatus.ACTIVE:
-        return 'Suspend'
     }
   }
 }
