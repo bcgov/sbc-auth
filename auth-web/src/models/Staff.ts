@@ -25,22 +25,18 @@ export interface GLCode {
     createdName: string,
     createdOn: Date,
     distributionCodeId: number,
+    serviceFeeDistributionCodeId: number,
     endDate?: Date,
-    memoName: string,
+    name: string,
     projectCode: string,
     responsibilityCentre: string,
-    serviceFeeClient: number,
-    serviceFeeLine: number,
-    serviceFeeMemoName: string,
-    serviceFeeProjectCode: number,
-    serviceFeeResponsibilityCentre: number,
-    serviceFeeStob: number,
     serviceLine: number,
     startDate?: string,
     stob: string,
     updatedBy: string,
     updatedName: string,
-    updatedOn: Date
+    updatedOn: Date,
+    serviceFee: GLCode
 }
 
 export interface GLCodeResponse {

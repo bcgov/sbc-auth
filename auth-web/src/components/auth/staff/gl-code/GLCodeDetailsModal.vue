@@ -141,7 +141,7 @@
             </fieldset>
 
             <!-- Service Fee Information -->
-            <fieldset class="mt-6">
+            <fieldset class="mt-6" v-if="glcodeDetails.serviceFee">
               <legend>
                 Service Fee Information
               </legend>
@@ -151,7 +151,7 @@
                     filled
                     hide-details
                     label="Client Number"
-                    v-model="glcodeDetails.serviceFeeClient"
+                    v-model="glcodeDetails.serviceFee.client"
                   >
                   </v-text-field>
                 </v-col>
@@ -160,7 +160,7 @@
                     filled
                     hide-details
                     label="Responsibility Center"
-                    v-model="glcodeDetails.serviceFeeResponsibilityCentre"
+                    v-model="glcodeDetails.serviceFee.responsibilityCentre"
                   >
                   </v-text-field>
                 </v-col>
@@ -169,7 +169,7 @@
                     filled
                     hide-details
                     label="Service Line"
-                    v-model="glcodeDetails.serviceFeeLine"
+                    v-model="glcodeDetails.serviceFee.serviceLine"
                   >
                   </v-text-field>
                 </v-col>
@@ -178,7 +178,7 @@
                     filled
                     hide-details
                     label="STOB (Standard Object of Expense)"
-                    v-model="glcodeDetails.serviceFeeStob"
+                    v-model="glcodeDetails.serviceFee.stob"
                   >
                   </v-text-field>
                 </v-col>
@@ -187,7 +187,7 @@
                     filled
                     hide-details
                     label="Project Code"
-                    v-model="glcodeDetails.serviceFeeProjectCode"
+                    v-model="glcodeDetails.serviceFee.projectCode"
                   >
                   </v-text-field>
                 </v-col>
@@ -248,14 +248,16 @@ import moment from 'moment'
   methods: {
     ...mapActions('staff', [
       'getGLCodeFiling',
-      'updateGLCodeFiling'
+      'updateGLCodeFiling',
+      'getGLCode'
     ])
   }
 })
 export default class GLCodeDetailsModal extends Vue {
   private staffStore = getModule(StaffModule, this.$store)
-  private readonly getGLCodeFiling!: (distributionCodeId: string) => FilingType[]
+  private readonly getGLCodeFiling!: (distributionCodeId: number) => FilingType[]
   private readonly updateGLCodeFiling!: (glcodeFilingData: GLCode) => any
+  private readonly getGLCode!: (distributionCodeId: number) => GLCode
   private isOpen = false
   private glcodeDetails: GLCode = {} as GLCode
   private filingTypes: FilingType[] = []
@@ -263,8 +265,11 @@ export default class GLCodeDetailsModal extends Vue {
   private startDatePicker: boolean = false
   private endDatePicker: boolean = false
 
-  public async open (selectedData) {
+  public async open (selectedData: GLCode) {
     if (selectedData?.distributionCodeId) {
+      if (selectedData?.serviceFeeDistributionCodeId) {
+        selectedData.serviceFee = await this.getGLCode(selectedData?.serviceFeeDistributionCodeId)
+      }
       this.filingTypes = await this.getGLCodeFiling(selectedData.distributionCodeId)
       this.glcodeDetails = { ...selectedData }
       this.isOpen = true

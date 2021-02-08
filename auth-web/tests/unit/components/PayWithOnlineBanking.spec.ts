@@ -21,21 +21,20 @@ describe('PayWithOnlineBanking.vue', () => {
       modules: {}
     })
     const onlineBankingData = {
-        totalBalanceDue: 10,
-        payeeName: 'BC Reg',
-        cfsAccountId: 1234,
-        overCredit: true,
-        partialCredit: false,
-        creditBalance: 6,
-        credit: 0
-      }
-
+      totalBalanceDue: 10,
+      payeeName: 'BC Reg',
+      cfsAccountId: 1234,
+      overCredit: true,
+      partialCredit: false,
+      creditBalance: 6,
+      credit: 0
+    }
 
     const $t = () => ''
     wrapper = mount(PayWithOnlineBanking, {
-        propsData: {
-            onlineBankingData
-        },
+      propsData: {
+        onlineBankingData
+      },
       store,
       localVue,
       vuetify,

@@ -66,6 +66,12 @@ export default class GLCodesDataTable extends Vue {
 
   private readonly headerGLCodes = [
     {
+      text: 'Name',
+      align: 'left',
+      sortable: false,
+      value: 'name'
+    },
+    {
       text: 'Client',
       align: 'left',
       sortable: false,
