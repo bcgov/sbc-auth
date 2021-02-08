@@ -1340,6 +1340,46 @@ def test_approve_org_with_pending_affidavits(client, jwt, session, keycloak_mock
     assert staff_response.json.get('status') == AffidavitStatus.APPROVED.value
 
 
+def test_suspend_unsuspend(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that staff admin can approve pending affidavits."""
+    # 1. Create User
+    # 2. Get document signed link
+    # 3. Create affidavit
+    # 4. Create Org
+    # 5. Get the affidavit as a bcol admin
+    public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
+    client.post('/api/v1/users', headers=public_headers, content_type='application/json')
+
+    org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()),
+                               headers=public_headers,
+                               content_type='application/json')
+    assert org_response.status_code == http_status.HTTP_201_CREATED
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
+
+    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
+                                      data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value}),
+                                      headers=headers, content_type='application/json')
+    assert org_patch_response.json.get('orgStatus') == OrgStatus.SUSPENDED.value
+
+    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
+                                      data=json.dumps({'statusCode': OrgStatus.ACTIVE.value}),
+                                      headers=headers, content_type='application/json')
+    assert org_patch_response.json.get('orgStatus') == OrgStatus.ACTIVE.value
+
+    # public user suspending/unsuspend shud give back error
+
+    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
+                                      data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value}),
+                                      headers=public_headers, content_type='application/json')
+    assert org_patch_response.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
+                                      data=json.dumps({'statusCode': OrgStatus.ACTIVE.value}),
+                                      headers=public_headers, content_type='application/json')
+    assert org_patch_response.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+
 def test_search_orgs_with_pending_affidavits(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that staff admin can approve pending affidavits."""
     # 1. Create User

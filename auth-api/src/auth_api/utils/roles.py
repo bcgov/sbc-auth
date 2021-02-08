@@ -34,6 +34,7 @@ class Role(Enum):
     STAFF_SEARCH = 'search'
     STAFF_CREATE_ACCOUNTS = 'create_accounts'
     STAFF_MANAGE_BUSINESS = 'manage_business'
+    STAFF_SUSPEND_ACCOUNTS = 'suspend_accounts'
 
 
 # Membership types
@@ -42,9 +43,9 @@ COORDINATOR = 'COORDINATOR'
 ADMIN = 'ADMIN'
 USER = 'USER'
 
-
 VALID_STATUSES = (Status.ACTIVE.value, Status.PENDING_APPROVAL.value)
-VALID_ORG_STATUSES = (OrgStatus.ACTIVE.value, OrgStatus.PENDING_AFFIDAVIT_REVIEW.value, OrgStatus.NSF_SUSPENDED.value)
+VALID_ORG_STATUSES = (OrgStatus.ACTIVE.value, OrgStatus.PENDING_AFFIDAVIT_REVIEW.value, OrgStatus.NSF_SUSPENDED.value,
+                      OrgStatus.SUSPENDED.value)
 
 CLIENT_ADMIN_ROLES = (COORDINATOR, ADMIN)
 CLIENT_AUTH_ROLES = (*CLIENT_ADMIN_ROLES, USER)

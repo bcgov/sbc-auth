@@ -28,7 +28,8 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import AccessType, AffidavitStatus, ChangeType, NotificationType, Status
+from auth_api.utils.enums import AccessType, AffidavitStatus, ChangeType, NotificationType, \
+    OrgStatus as OrgStatusEnum, Status
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role
 from auth_api.utils.util import cors_preflight
 
@@ -534,11 +535,23 @@ class OrgStatus(Resource):
         # If this patch is going to be used by other other roles, then add proper security check
 
         try:
-            is_approved: bool = request_json.get('statusCode', None) == AffidavitStatus.APPROVED.value
-            origin = request.environ.get('HTTP_ORIGIN', 'localhost')
-            response, status = OrgService.approve_or_reject(org_id=org_id, is_approved=is_approved,
-                                                            token_info=token,
-                                                            origin_url=origin).as_dict(), http_status.HTTP_200_OK
+
+            status_code = request_json.get('statusCode', None)
+            if status_code in (OrgStatusEnum.SUSPENDED.value, OrgStatusEnum.ACTIVE.value):
+
+                if not _JWT.validate_roles([Role.STAFF_SUSPEND_ACCOUNTS.value]):
+                    return {'message': 'Not authorized to perform this action'}, \
+                                       http_status.HTTP_401_UNAUTHORIZED
+
+                response, status = OrgService.change_org_status(org_id=org_id, status_code=status_code,
+                                                                token_info=token,
+                                                                ).as_dict(), http_status.HTTP_200_OK
+            else:
+                is_approved: bool = request_json.get('statusCode', None) == AffidavitStatus.APPROVED.value
+                origin = request.environ.get('HTTP_ORIGIN', 'localhost')
+                response, status = OrgService.approve_or_reject(org_id=org_id, is_approved=is_approved,
+                                                                token_info=token,
+                                                                origin_url=origin).as_dict(), http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
