@@ -259,13 +259,26 @@ export default class StaffModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async getGLCodeFiling (distributionCodeId: string) {
+  public async getGLCodeFiling (distributionCodeId: number) {
     const response = await PaymentService.getGLCodeFiling(distributionCodeId)
     return response?.data?.items || []
   }
 
   @Action({ rawError: true })
+  public async getGLCode (distributionCodeId: number) {
+    const response = await PaymentService.getGLCode(distributionCodeId)
+    return response?.data || {}
+  }
+
+  @Action({ rawError: true })
   public async updateGLCodeFiling (glcodeFilingData: GLCode) {
+    // Update service fee information first, and then the main GL code.
+    let serviceFeeGlCode : number = null
+    if (glcodeFilingData.serviceFee) {
+      const serviceFeeResponse = await PaymentService.updateGLCodeFiling(glcodeFilingData.serviceFee)
+      serviceFeeGlCode = serviceFeeResponse?.data?.distributionCodeId
+    }
+    glcodeFilingData.serviceFeeDistributionCodeId = serviceFeeGlCode
     const response = await PaymentService.updateGLCodeFiling(glcodeFilingData)
     return response?.data || {}
   }
