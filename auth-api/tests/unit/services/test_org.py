@@ -274,6 +274,19 @@ def test_update_org(session):  # pylint:disable=unused-argument
     assert dictionary['name'] == TestOrgInfo.org2['name']
 
 
+def test_suspend_org(session):  # pylint:disable=unused-argument
+    """Assert that an Org can be updated."""
+    org = factory_org_service()
+    user = factory_user_model_with_contact()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+
+    updated_org = OrgService.change_org_status(org._model.id, OrgStatus.SUSPENDED.value, token_info=token_info)
+    assert updated_org.as_dict()['status_code'] == OrgStatus.SUSPENDED.value
+
+    updated_org = OrgService.change_org_status(org._model.id, OrgStatus.ACTIVE.value, token_info=token_info)
+    assert updated_org.as_dict()['status_code'] == OrgStatus.ACTIVE.value
+
+
 def test_update_duplicate_org(session):  # pylint:disable=unused-argument
     """Assert that an Org cannot be updated."""
     org = factory_org_service()
