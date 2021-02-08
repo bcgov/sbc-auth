@@ -1,5 +1,5 @@
 <template>
-  <v-container class="view-container">
+  <v-container class="view-container" v-if="isAccountStatusNsfSuspended">
     <div class="view-header">
       <div class="view-header__icon">
         <v-icon large color="error" class="mt-1 mr-4">mdi-alert-circle-outline</v-icon>
@@ -42,20 +42,23 @@
         </v-btn>
       </template>
     </ModalDialog>
-
+  </v-container>
+  <v-container class="view-container" v-else>
+    <AccountSuspendedView :isAdmin="true"></AccountSuspendedView>
   </v-container>
 </template>
 
 <script lang="ts">
+import { AccountStatus, Pages } from '@/util/constants'
 import { Component, Vue } from 'vue-property-decorator'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'vuex'
 import AccountOverview from '@/components/auth/account-freeze/AccountOverview.vue'
+import AccountSuspendedView from './AccountSuspendedView.vue'
 import ConfigHelper from 'sbc-common-components/src/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Organization } from '@/models/Organization'
-import { Pages } from '@/util/constants'
 import { Payment } from '@/models/Payment'
 import PaymentReview from '@/components/auth/account-freeze/PaymentReview.vue'
 import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankInformation.vue'
@@ -66,7 +69,8 @@ import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankIn
     ReviewBankInformation,
     PaymentReview,
     Stepper,
-    ModalDialog
+    ModalDialog,
+    AccountSuspendedView
   },
   methods: {
     ...mapActions('org', [
@@ -77,7 +81,10 @@ import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankIn
   computed: {
     ...mapState('user', [
       'userContact'
-    ])
+    ]),
+    isAccountStatusNsfSuspended () : boolean {
+      return this.currentOrganization.accountStatus === AccountStatus.NSF_SUSPENDED
+    }
   }
 })
 export default class AccountFreezeUnlockView extends Vue {

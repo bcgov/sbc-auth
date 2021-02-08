@@ -1,5 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
+
 import AccountFreezeUnlockView from '@/views/auth/account-freeze/AccountFreezeUnlockView.vue'
+import { AccountStatus } from '@/util/constants'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -40,14 +42,16 @@ describe('AccountFreezeUnlockView.vue', () => {
     const orgModule = {
       namespaced: true,
       state: {
-        currentOrganization: {}
+        currentOrganization: {
+        }
       },
       actions: {
         calculateFailedInvoices: jest.fn(() => {
-        return {
+          return {
             totalTransactionAmount: 10,
             totalAmountToPay: 20
-        }}),
+          }
+        })
       }
     }
 
@@ -67,6 +71,9 @@ describe('AccountFreezeUnlockView.vue', () => {
       vuetify,
       mocks: {
         $t: (mock) => mock
+      },
+      computed: {
+        isAccountStatusNsfSuspended: jest.fn(() => { return true })
       }
     })
   })

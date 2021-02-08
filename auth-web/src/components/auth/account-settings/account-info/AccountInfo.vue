@@ -55,6 +55,7 @@
                 class="suspend-account-btn mx-1 mb-3"
                 @click="showSuspendAccountDialog(currentOrganization.orgStatus)"
                 data-test='btn-suspend-account'
+                v-show="isSuspendButtonVisible"
               >
                 {{ isAccountStatusActive ? 'Suspend Account' : 'Unsuspend Account' }}
               </v-btn>
@@ -273,6 +274,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     return this.currentUser.roles.includes(Role.Staff)
   }
 
+  private isSuspendButtonVisible (): boolean {
+    return this.currentOrganization.statusCode === AccountStatus.ACTIVE || this.currentOrganization.statusCode === AccountStatus.SUSPENDED
+  }
+
   get editAccountUrl () {
     return Pages.EDIT_ACCOUNT_TYPE
   }
@@ -471,7 +476,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   get isAccountStatusActive () : boolean {
-    return this.currentOrganization.accountStatus === AccountStatus.ACTIVE
+    return this.currentOrganization.statusCode === AccountStatus.ACTIVE
   }
 
   private getStatusColor (status) {

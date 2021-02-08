@@ -1,4 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
+
 import AccountFreezeView from '@/views/auth/account-freeze/AccountFreezeView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -60,6 +61,9 @@ describe('AccountFreezeView.vue', () => {
       vuetify,
       mocks: {
         $t: (mock) => mock
+      },
+      computed: {
+        isAccountStatusNsfSuspended: jest.fn(() => { return true })
       }
     })
   })
