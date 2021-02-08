@@ -200,12 +200,13 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, STAFF))
 
         admin_getting_removed: bool = False
-        # No one can change an ADMIN's status, only option is ADMIN to leave the team. #2319
+        # Admin can be removed by other admin or staff. #4909
         if updated_fields.get('membership_status', None) \
                 and updated_fields['membership_status'].id == Status.INACTIVE.value \
                 and self._model.membership_type.code == ADMIN:
             admin_getting_removed = True
-            raise BusinessException(Error.OWNER_CANNOT_BE_REMOVED, None)
+            if OrgService(self._model.org).get_owner_count() == 1:
+                raise BusinessException(Error.CHANGE_ROLE_FAILED_ONLY_OWNER, None)
 
         # Ensure that if downgrading from owner that there is at least one other owner in org
         if self._model.membership_type.code == ADMIN and \
