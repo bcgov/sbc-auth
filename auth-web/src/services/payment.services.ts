@@ -132,11 +132,15 @@ export default class PaymentService {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/fees/distributions`)
   }
 
-  static getGLCodeFiling (distributionCodeId: string): AxiosPromise<FilingTypeResponse> {
+  static getGLCode (distributionCodeId: number): AxiosPromise<GLCode> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/fees/distributions/${distributionCodeId}`)
+  }
+
+  static getGLCodeFiling (distributionCodeId: number): AxiosPromise<FilingTypeResponse> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/fees/distributions/${distributionCodeId}/schedules`)
   }
 
-  static updateGLCodeFiling (glcodeFilingData: GLCode): AxiosPromise<GLCodeResponse> {
+  static updateGLCodeFiling (glcodeFilingData: GLCode): AxiosPromise<GLCode> {
     return axios.put(`${ConfigHelper.getPayAPIURL()}/fees/distributions/${glcodeFilingData.distributionCodeId}`, glcodeFilingData)
   }
 

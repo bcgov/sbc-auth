@@ -370,8 +370,7 @@ export default class MemberDataTable extends Vue {
       case MembershipType.Admin:
         // Owners can change roles of other users who are not owners
         if (
-          !this.isOwnMembership(memberBeingChanged) &&
-          memberBeingChanged.membershipTypeCode !== MembershipType.Admin
+          !this.isOwnMembership(memberBeingChanged)
         ) {
           return true
         }
@@ -410,9 +409,13 @@ export default class MemberDataTable extends Vue {
       return false
     }
 
-    // No one can change an OWNER's status, only option is OWNER to leave the team. #2319
+    // Admin can be removed by other admin. #4909
     if (memberToRemove.membershipTypeCode === MembershipType.Admin) {
-      return false
+      if (this.currentMembership.membershipTypeCode === MembershipType.Admin) {
+        return true
+      } else {
+        return false
+      }
     }
 
     return true
