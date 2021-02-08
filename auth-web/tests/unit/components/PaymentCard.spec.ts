@@ -21,22 +21,21 @@ describe('PaymentCard.vue', () => {
       modules: {}
     })
     const paymentCardData = {
-        totalBalanceDue: 50,
-        payeeName: 'BC Reg',
-        cfsAccountId: 1234,
-        overCredit: true,
-        partialCredit: false,
-        creditBalance: 6,
-        credit: 10,
-        paymentId: 1
-      }
-
+      totalBalanceDue: 50,
+      payeeName: 'BC Reg',
+      cfsAccountId: 1234,
+      overCredit: true,
+      partialCredit: false,
+      creditBalance: 6,
+      credit: 10,
+      paymentId: 1
+    }
 
     const $t = () => ''
     wrapper = mount(PaymentCard, {
-        propsData: {
-          paymentCardData
-        },
+      propsData: {
+        paymentCardData
+      },
       store,
       localVue,
       vuetify,
