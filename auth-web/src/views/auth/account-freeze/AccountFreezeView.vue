@@ -10,7 +10,7 @@
     </v-row>
   </v-container>
   <v-container class="view-container" v-else>
-    <AccountSuspendedView :isAdmin="false"></AccountSuspendedView>
+    <AccountSuspendedView ></AccountSuspendedView>
   </v-container>
 </template>
 
@@ -30,15 +30,16 @@ import { mapState } from 'vuex'
     AccountSuspendedView
   },
   computed: {
-    ...mapState('org', ['currentOrganization']),
-    isAccountStatusNsfSuspended () : boolean {
-      return this.currentOrganization?.accountStatus === AccountStatus.NSF_SUSPENDED
-    }
+    ...mapState('org', ['currentOrganization'])
   }
 })
 export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
   protected readonly currentOrganization!: Organization
   private formatDate = CommonUtils.formatDisplayDate
+
+  get isAccountStatusNsfSuspended () : boolean {
+    return this.currentOrganization?.accountStatus === AccountStatus.NSF_SUSPENDED
+  }
 
   private get suspendedDate () {
     return (this.currentOrganization?.suspendedOn) ? this.formatDate(new Date(this.currentOrganization.suspendedOn)) : ''
