@@ -74,17 +74,18 @@ import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankIn
   },
   methods: {
     ...mapActions('org', [
-      'createAccountPayment',
-      'currentOrganization'
+      'createAccountPayment'
+
     ])
   },
   computed: {
     ...mapState('user', [
       'userContact'
     ]),
-    isAccountStatusNsfSuspended () : boolean {
-      return this.currentOrganization.statusCode === AccountStatus.NSF_SUSPENDED
-    }
+    ...mapState('org', [
+      'currentOrganization'
+    ])
+
   }
 })
 export default class AccountFreezeUnlockView extends Vue {
@@ -129,6 +130,9 @@ export default class AccountFreezeUnlockView extends Vue {
     await this.$router.push(`${Pages.MAKE_PAD_PAYMENT}${payment.id}/transactions/${encodedUrl}`)
   }
 
+  get isAccountStatusNsfSuspended () : boolean {
+    return this.currentOrganization.statusCode === AccountStatus.NSF_SUSPENDED
+  }
   private closeError () {
     this.$refs.errorDialog.close()
   }
