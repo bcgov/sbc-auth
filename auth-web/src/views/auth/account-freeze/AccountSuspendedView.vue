@@ -18,10 +18,11 @@
 </template>
 
 <script lang="ts">
-import { Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
+@Component
 export default class AccountSuspendedView extends Vue {
-  @Prop({ default: false }) isAdmin: Boolean
+  @Prop({ default: false }) isAdmin: boolean
 }
 </script>
 <style lang="scss" scoped>
