@@ -21,7 +21,7 @@
         </p>
         </template>
         <template>
-        <div class="mb-1">
+        <div class="mb-1" v-if="!overCredit">
           <span class="payee-name">
             <strong>Payee Name:</strong>
             {{payeeName}}
