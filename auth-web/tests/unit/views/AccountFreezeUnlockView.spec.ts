@@ -43,6 +43,7 @@ describe('AccountFreezeUnlockView.vue', () => {
       namespaced: true,
       state: {
         currentOrganization: {
+          statusCode: AccountStatus.NSF_SUSPENDED
         }
       },
       actions: {
@@ -73,7 +74,7 @@ describe('AccountFreezeUnlockView.vue', () => {
         $t: (mock) => mock
       },
       computed: {
-        isAccountStatusNsfSuspended: jest.fn(() => { return true })
+        isAccountStatusNsfSuspended: Boolean
       }
     })
   })
