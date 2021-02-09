@@ -83,7 +83,7 @@ import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankIn
       'userContact'
     ]),
     isAccountStatusNsfSuspended () : boolean {
-      return this.currentOrganization.accountStatus === AccountStatus.NSF_SUSPENDED
+      return this.currentOrganization.statusCode === AccountStatus.NSF_SUSPENDED
     }
   }
 })
