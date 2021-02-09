@@ -12,8 +12,45 @@
       </p>
     </template>
     <v-form ref="preAuthDebitForm">
-      <fieldset>
-        <legend class="mb-4">Banking Information</legend>
+      <section>
+        <header class="mb-4 d-flex align-content-center">
+          <div class="mr-1 font-weight-bold">Banking Information</div>
+          <v-btn
+            small
+            icon
+            color="primary"
+            class="help-btn"
+            aria-label="How to locate your banking information"
+            @click.stop="bankInfoDialog = true"
+          >
+            <v-icon>mdi-help-circle-outline</v-icon>
+          </v-btn>
+          <v-dialog
+            v-model="bankInfoDialog"
+            max-width="800"
+          >
+            <v-card>
+              <v-card-title>
+                <h2 class="title font-weight-bold">How to locate your account information</h2>
+                <v-btn
+                  icon
+                  @click="bankInfoDialog = false"
+                >
+                  <v-icon>mdi-close</v-icon>
+                </v-btn>
+              </v-card-title>
+              <v-card-text>
+                <v-img src="../../../assets/img/cheque-sample.jpg" lazy-src></v-img>
+                <ol class="my-4">
+                  <li>Cheque Number (Not required)</li>
+                  <li>Transit (Branch) Number</li>
+                  <li>Bank (Institution) Number</li>
+                  <li>Bank Account Number</li>
+                </ol>
+              </v-card-text>
+            </v-card>
+          </v-dialog>
+        </header>
         <v-row>
           <v-col cols="6" class="py-0">
             <v-text-field
@@ -83,7 +120,7 @@
             </div>
           </v-col>
         </v-row>
-      </fieldset>
+      </section>
     </v-form>
   </div>
 </template>
@@ -134,6 +171,7 @@ export default class PADInfoForm extends Vue {
   private isAcknowledged: boolean = false
   private isTouched: boolean = false
   private isStartedEditing: boolean = false
+  private bankInfoDialog: boolean = false
 
   $refs: {
     preAuthDebitForm: HTMLFormElement,
@@ -270,5 +308,9 @@ export default class PADInfoForm extends Vue {
     .v-input--checkbox .v-label {
       color: var(--v-grey-darken4) !important;
     }
+  }
+
+  .help-btn {
+    margin-top: -2px;
   }
 </style>
