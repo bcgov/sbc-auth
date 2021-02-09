@@ -93,6 +93,8 @@ class ChangeType(Enum):
 
     UPGRADE = 'UPGRADE'
     DOWNGRADE = 'DOWNGRADE'
+    SUSPEND = 'SUSPEND'
+    UNSUSPEND = 'UNSUSPEND'
 
 
 class DocumentType(Enum):
@@ -160,6 +162,7 @@ class OrgStatus(Enum):
     REJECTED = 'REJECTED'
     PENDING_ACTIVATION = 'PENDING_ACTIVATION'
     NSF_SUSPENDED = 'NSF_SUSPENDED'
+    SUSPENDED = 'SUSPENDED'  # this is basically staff suspended for now
 
 
 class InvitationType(Enum):
