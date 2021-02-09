@@ -5,13 +5,13 @@
       <template v-if="overCredit">
         <p class="mb-6">
           Transaction will be completed with your account credit.<br />
-          You now have <strong>${{creditBalance}} remaining credit</strong> in your account.
+          You now have <strong>${{creditBalance.toFixed(2)}} remaining credit</strong> in your account.
         </p>
       </template>
       <template v-else-if="partialCredit">
         <p class="mb-6">
           Payment is partially covered with your account credit: ${{credit}}<br />
-          You now have <strong>${{creditBalance}} remaining credit</strong> in your account.
+          You now have <strong>${{creditBalance.toFixed(2)}} remaining credit</strong> in your account.
         </p>
       </template>
       <template v-else>
