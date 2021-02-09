@@ -22,7 +22,7 @@ def upgrade():
     # Insert codes and descriptions for organization status
     org_status_table = table('org_statuses',
                              column('code', String),
-                             column('desc', String),
+                             column('description', String),
                              column('default', Boolean)
                              )
     op.bulk_insert(
