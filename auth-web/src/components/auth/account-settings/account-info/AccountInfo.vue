@@ -55,7 +55,7 @@
                 class="suspend-account-btn mx-1 mb-3"
                 @click="showSuspendAccountDialog(currentOrganization.orgStatus)"
                 data-test='btn-suspend-account'
-                v-show="isSuspendButtonVisible"
+                v-if="isSuspendButtonVisible"
               >
                 {{ isAccountStatusActive ? 'Suspend Account' : 'Unsuspend Account' }}
               </v-btn>
