@@ -1,5 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
+
 import AccountFreezeView from '@/views/auth/account-freeze/AccountFreezeView.vue'
+import { AccountStatus } from '@/util/constants'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -40,7 +42,9 @@ describe('AccountFreezeView.vue', () => {
     const orgModule = {
       namespaced: true,
       state: {
-        currentOrganization: {}
+        currentOrganization: {
+          statusCode: AccountStatus.NSF_SUSPENDED
+        }
       }
     }
 
@@ -60,6 +64,9 @@ describe('AccountFreezeView.vue', () => {
       vuetify,
       mocks: {
         $t: (mock) => mock
+      },
+      computed: {
+        isAccountStatusNsfSuspended: Boolean
       }
     })
   })
