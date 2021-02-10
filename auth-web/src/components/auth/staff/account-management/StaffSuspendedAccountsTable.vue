@@ -45,17 +45,14 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, SearchFilterCodes, SessionStorageKeys } from '@/util/constants'
-import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
+import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
+import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import { SearchFilterParam } from '@/models/searchfilter'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
-import { getModule } from 'vuex-module-decorators'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')
@@ -141,7 +138,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     const appliedFilterValue = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
     try {
       this.orgFilter = {
-        status: AccountStatus.NSF_SUSPENDED,
+        statuses: [AccountStatus.NSF_SUSPENDED, AccountStatus.SUSPENDED],
         pageNumber: page,
         pageLimit: pageLimit
       // name: appliedFilterValue
