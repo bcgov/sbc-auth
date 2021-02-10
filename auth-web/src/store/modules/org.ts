@@ -1,4 +1,4 @@
-import { Account, Actions, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys } from '@/util/constants'
+import { Account, AccountStatus, Actions, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys } from '@/util/constants'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import {
   AddUserBody,
@@ -238,6 +238,16 @@ export default class OrgModule extends VuexModule {
     const organization = response?.data
     this.context.commit('setCurrentOrganization', organization)
     return organization
+  }
+
+  @Action({ rawError: true })
+  public async suspendOrganization () {
+    const orgId = this.context.state['currentOrganization']?.id
+    const orgStatus = this.context.state['currentOrganization'].statusCode === AccountStatus.ACTIVE ? AccountStatus.SUSPENDED : AccountStatus.ACTIVE
+    if (orgId && orgStatus) {
+      await OrgService.suspendOrg(orgId, orgStatus)
+      await this.context.dispatch('syncOrganization', orgId)
+    }
   }
 
   @Action({ rawError: true })

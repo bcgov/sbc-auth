@@ -130,7 +130,7 @@ export default class AccountFreezeUnlockView extends Vue {
     await this.$router.push(`${Pages.MAKE_PAD_PAYMENT}${payment.id}/transactions/${encodedUrl}`)
   }
 
-  get isAccountStatusNsfSuspended () : boolean {
+  private get isAccountStatusNsfSuspended () : boolean {
     return this.currentOrganization.statusCode === AccountStatus.NSF_SUSPENDED
   }
   private closeError () {

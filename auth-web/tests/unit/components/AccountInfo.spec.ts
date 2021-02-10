@@ -37,7 +37,7 @@ describe('AccountInfo.vue', () => {
       state: {
         currentOrganization: {
           name: '',
-          orgStatus: AccountStatus.ACTIVE
+          statusCode: AccountStatus.ACTIVE
         },
         currentMembership: {},
         currentOrgAddress: {},
