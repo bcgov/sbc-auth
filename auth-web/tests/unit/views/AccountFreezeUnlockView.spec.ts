@@ -12,13 +12,13 @@ Vue.use(VueRouter)
 const router = new VueRouter()
 const vuetify = new Vuetify({})
 
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
-
 const mockSession = {
   'NRO_URL': 'Mock NRO URL',
   'NAME_REQUEST_URL': 'Mock Name Request URL'
 }
+
+// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
+document.body.setAttribute('data-app', 'true')
 
 describe('AccountFreezeUnlockView.vue', () => {
   let wrapper: any
