@@ -38,9 +38,10 @@ import { AccessType } from '@/util/constants'
           depressed
           color="default"
           @click="goBack"
+          data-test="btn-reviewbank-back"
         >
           <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
-          <span>Back</span>
+          <span data-test="back">Back</span>
         </v-btn>
         <v-spacer></v-spacer>
         <v-btn
@@ -49,8 +50,9 @@ import { AccessType } from '@/util/constants'
           @click="goNext"
           :disabled="!padValid"
           :loading="isLoading"
+          data-test="btn-reviewbank-next"
         >
-          <span>Next</span>
+          <span data-test="next">Next</span>
           <v-icon class="ml-2">mdi-arrow-right</v-icon>
         </v-btn>
       </v-col>

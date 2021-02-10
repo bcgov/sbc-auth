@@ -611,18 +611,18 @@ class Org:  # pylint: disable=too-many-public-methods
 
             page: int = int(kwargs.get('page'))
             limit: int = int(kwargs.get('limit'))
-            status: str = kwargs.get('status', None)
+            statuses: str = kwargs.get('statuses', None)
             name: str = kwargs.get('name', None)
             # https://github.com/bcgov/entity/issues/4786
             access_type, is_staff_admin = Org.refine_access_type(kwargs.get('access_type', None),
                                                                  kwargs.get('token', None))
             search_args = (access_type,
                            name,
-                           status,
+                           statuses,
                            kwargs.get('bcol_account_id', None),
                            page, limit)
 
-            if status and status == OrgStatus.PENDING_ACTIVATION.value:
+            if statuses and OrgStatus.PENDING_ACTIVATION.value in statuses:
                 # only staff admin can see director search accounts
                 # https://github.com/bcgov/entity/issues/4786
                 if not is_staff_admin:
@@ -678,6 +678,31 @@ class Org:  # pylint: disable=too-many-public-methods
                 return True
 
         return False
+
+    @staticmethod
+    def change_org_status(org_id: int, status_code, token_info: Dict = None):
+        """Update the status of the org.
+
+        Used now for suspending/activate account.
+
+            1) check access .only staff can do it now
+            2) check org status/eligiblity
+            3) suspend it
+
+        """
+        current_app.logger.debug('<change_org_status ')
+
+        org_model: OrgModel = OrgModel.find_by_org_id(org_id)
+
+        user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+        current_app.logger.debug('<setting org status to  ')
+        org_model.status_code = status_code
+        org_model.decision_made_by = user.id  # not sure if a new field is needed for this.
+        if status_code == ChangeType.SUSPEND.value:
+            org_model.suspended_on = datetime.today()
+        org_model.save()
+        current_app.logger.debug('change_org_status>')
+        return Org(org_model)
 
     @staticmethod
     def approve_or_reject(org_id: int, is_approved: bool, token_info: Dict, origin_url: str = None):

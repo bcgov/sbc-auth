@@ -109,7 +109,8 @@ router.beforeEach((to, from, next) => {
     }
 
     if (to.matched.some(record => record.meta.requiresActiveAccount) && (currentUser.loginSource === LoginSource.BCSC || currentUser.loginSource === LoginSource.BCEID)) {
-      if (currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED) {
+      // if (currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED) {
+      if ([AccountStatus.NSF_SUSPENDED, AccountStatus.SUSPENDED].some(status => status === currentOrganization?.statusCode)) {
         console.log('[Navigation Guard] Redirecting user to Account Freeze message since the account is temporarly suspended.')
         if (permissions.some(code => code === Permission.MAKE_PAYMENT)) {
           return next({ path: `/${Pages.ACCOUNT_FREEZE_UNLOCK}` })

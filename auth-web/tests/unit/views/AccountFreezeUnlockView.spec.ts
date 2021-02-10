@@ -1,5 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
+
 import AccountFreezeUnlockView from '@/views/auth/account-freeze/AccountFreezeUnlockView.vue'
+import { AccountStatus } from '@/util/constants'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -10,13 +12,13 @@ Vue.use(VueRouter)
 const router = new VueRouter()
 const vuetify = new Vuetify({})
 
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
-
 const mockSession = {
   'NRO_URL': 'Mock NRO URL',
   'NAME_REQUEST_URL': 'Mock Name Request URL'
 }
+
+// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
+document.body.setAttribute('data-app', 'true')
 
 describe('AccountFreezeUnlockView.vue', () => {
   let wrapper: any
@@ -40,7 +42,9 @@ describe('AccountFreezeUnlockView.vue', () => {
     const orgModule = {
       namespaced: true,
       state: {
-        currentOrganization: {}
+        currentOrganization: {
+          statusCode: AccountStatus.NSF_SUSPENDED
+        }
       },
       actions: {
         calculateFailedInvoices: jest.fn(() => {
@@ -68,6 +72,9 @@ describe('AccountFreezeUnlockView.vue', () => {
       vuetify,
       mocks: {
         $t: (mock) => mock
+      },
+      computed: {
+        isAccountStatusNsfSuspended: Boolean
       }
     })
   })

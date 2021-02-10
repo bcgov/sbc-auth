@@ -144,7 +144,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     this.searchFilter[0].appliedFilterValue = appliedFilterValue
     try {
       this.orgFilter = {
-        status: AccountStatus.ACTIVE,
+        statuses: [AccountStatus.ACTIVE],
         pageNumber: page,
         pageLimit: pageLimit,
         name: appliedFilterValue

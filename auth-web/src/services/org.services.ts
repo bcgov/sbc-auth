@@ -1,6 +1,6 @@
+import { AccountStatus, Actions } from '@/util/constants'
 import { Affiliation, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { CreateRequestBody as CreateOrganizationRequestBody, Member, Members, Organization, UpdateMemberPayload } from '@/models/Organization'
-import { Actions } from '@/util/constants'
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
 import { AxiosResponse } from 'axios'
@@ -83,6 +83,10 @@ export default class OrgService {
 
   static async rejectPendingOrg (orgIdentifier: number): Promise<AxiosResponse> {
     return axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/status`, { statusCode: 'REJECTED' })
+  }
+
+  static async suspendOrg (orgIdentifier: number, statusCode: AccountStatus): Promise<AxiosResponse> {
+    return axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/status`, { statusCode: statusCode })
   }
 
   public static async getMemberLoginOption (orgId: number): Promise<string> {
