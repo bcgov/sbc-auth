@@ -69,8 +69,8 @@ describe('ReviewBankInformation.vue', () => {
   })
 
   it('should render pad component title', () => {
-    expect(wrapper.find('.pad-info-form-title').text()).toBe('Banking Information')
-    expect(wrapper.find('.pad-info-form-title').exists()).toBe(true)
+    expect(wrapper.find('[data-test="pad-info-form-title"]').text()).toBe('Banking Information')
+    expect(wrapper.find('[data-test="pad-info-form-title"]').exists()).toBe(true)
   })
 
   it('should render pad component inputs', () => {
@@ -84,9 +84,9 @@ describe('ReviewBankInformation.vue', () => {
   })
 
   it('should render next and back buttons', () => {
-    expect(wrapper.find('.next')).toBeTruthy()
-    expect(wrapper.find('.next').text()).toEqual('Next')
-    expect(wrapper.find('.back')).toBeTruthy()
-    expect(wrapper.find('.back').text()).toEqual('Back')
+    expect(wrapper.find('[data-test="next"]')).toBeTruthy()
+    expect(wrapper.find('[data-test="next"]').text()).toEqual('Next')
+    expect(wrapper.find('[data-test="back"]')).toBeTruthy()
+    expect(wrapper.find('[data-test="back"]').text()).toEqual('Back')
   })
 })
