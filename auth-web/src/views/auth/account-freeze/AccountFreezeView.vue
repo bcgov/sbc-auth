@@ -37,7 +37,7 @@ export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
   protected readonly currentOrganization!: Organization
   private formatDate = CommonUtils.formatDisplayDate
 
-  get isAccountStatusNsfSuspended () : boolean {
+  private get isAccountStatusNsfSuspended () : boolean {
     return this.currentOrganization?.accountStatus === AccountStatus.NSF_SUSPENDED
   }
 

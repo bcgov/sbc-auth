@@ -178,6 +178,7 @@
           class="font-weight-bold white--text"
           :color="getDialogStatusButtonColor(currentOrganization.orgStatus)"
           data-test='btn-suspend-dialog'
+          @click="confirmSuspendAccount()"
         >
           {{ isAccountStatusActive ? 'Suspend' : 'Unsuspend' }}
         </v-btn>
@@ -232,7 +233,7 @@ import { getModule } from 'vuex-module-decorators'
     ])
   },
   methods: {
-    ...mapActions('org', ['updateOrg', 'syncAddress', 'syncOrganization']),
+    ...mapActions('org', ['updateOrg', 'syncAddress', 'syncOrganization', 'suspendOrganization']),
     ...mapMutations('org', ['setCurrentOrganizationAddress'])
   }
 })
@@ -252,6 +253,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   ) => Promise<Organization>
   private readonly syncAddress!: () => Address
   protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
+  protected readonly suspendOrganization!: () => Promise<Organization>
   private orgName = ''
   private errorMessage: string = ''
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
@@ -274,7 +276,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     return this.currentUser.roles.includes(Role.Staff)
   }
 
-  private isSuspendButtonVisible (): boolean {
+  private get isSuspendButtonVisible (): boolean {
     return this.currentOrganization.statusCode === AccountStatus.ACTIVE || this.currentOrganization.statusCode === AccountStatus.SUSPENDED
   }
 
@@ -323,6 +325,11 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
       this.dialogText = 'Are you sure you want to unsuspend access to this account?'
     }
     this.$refs.suspendAccountDialog.open()
+  }
+
+  private async confirmSuspendAccount (): Promise<void> {
+    await this.suspendOrganization()
+    this.$router.push(Pages.STAFF_DASHBOARD)
   }
 
   private closeSuspendAccountDialog () {
@@ -506,6 +513,8 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private getStatusText (status) {
     switch (status) {
       case AccountStatus.NSF_SUSPENDED:
+        return 'NSF SUSPENDED'
+      case AccountStatus.SUSPENDED:
         return 'SUSPENDED'
       default:
         return status
