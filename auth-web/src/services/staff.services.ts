@@ -28,8 +28,9 @@ export default class StaffService {
 
   static async searchOrgs (orgFilter?: OrgFilterParams): Promise<AxiosResponse<OrgList>> {
     let params = new URLSearchParams()
-    if (orgFilter.status) {
-      params.append('status', orgFilter.status)
+    if (orgFilter.statuses) {
+      orgFilter.statuses.forEach(status =>
+        params.append('status', status))
     }
     if (orgFilter.name) {
       params.append('name', orgFilter.name)

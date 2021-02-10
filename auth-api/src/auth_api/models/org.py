@@ -98,7 +98,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         return query.all()
 
     @classmethod
-    def search_org(cls, access_type, name, status, bcol_account_id,  # pylint: disable=too-many-arguments
+    def search_org(cls, access_type, name, statuses, bcol_account_id,  # pylint: disable=too-many-arguments
                    page: int, limit: int):
         """Find all orgs with the given type."""
         query = db.session.query(Org) \
@@ -110,10 +110,10 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
             query = query.filter(Org.access_type.in_(access_type))
         if name:
             query = query.filter(Org.name.ilike(f'%{name}%'))
-        if status:
-            query = query.filter(Org.status_code == status.upper())
+        if statuses:
+            query = query.filter(Org.status_code.in_(statuses))
             # If status is active, need to exclude the dir search orgs who haven't accepted the invitation yet
-            if status == OrgStatusEnum.ACTIVE.value:
+            if OrgStatusEnum.ACTIVE.value in statuses:
                 pending_inv_subquery = db.session.query(Org.id) \
                     .outerjoin(InvitationMembership, InvitationMembership.org_id == Org.id) \
                     .outerjoin(Invitation, Invitation.id == InvitationMembership.invitation_id) \
