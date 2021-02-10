@@ -174,7 +174,7 @@ export interface OrgList {
 }
 
 export interface OrgFilterParams {
-  status: string
+  statuses: string[]
   name?: string
   pageNumber?: number
   pageLimit?: number

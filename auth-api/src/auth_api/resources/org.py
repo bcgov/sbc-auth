@@ -81,7 +81,7 @@ class Orgs(Resource):
         # Search based on request arguments
         business_identifier = request.args.get('affiliation', None)
         name = request.args.get('name', None)
-        status = request.args.get('status', None)
+        statuses = request.args.getlist('status', None)
         access_type = request.args.get('access_type', None)
         bcol_account_id = request.args.get('bcolAccountId', None)
         page = request.args.get('page', 1)
@@ -95,7 +95,7 @@ class Orgs(Resource):
             else:
                 response, status = OrgService.search_orgs(business_identifier=business_identifier,
                                                           access_type=access_type, name=name,
-                                                          status=status, bcol_account_id=bcol_account_id, page=page,
+                                                          statuses=statuses, bcol_account_id=bcol_account_id, page=page,
                                                           limit=limit, token=token), http_status.HTTP_200_OK
 
             # If public user is searching , return 200 with empty results if orgs exist
