@@ -611,18 +611,18 @@ class Org:  # pylint: disable=too-many-public-methods
 
             page: int = int(kwargs.get('page'))
             limit: int = int(kwargs.get('limit'))
-            status: str = kwargs.get('status', None)
+            statuses: str = kwargs.get('statuses', None)
             name: str = kwargs.get('name', None)
             # https://github.com/bcgov/entity/issues/4786
             access_type, is_staff_admin = Org.refine_access_type(kwargs.get('access_type', None),
                                                                  kwargs.get('token', None))
             search_args = (access_type,
                            name,
-                           status,
+                           statuses,
                            kwargs.get('bcol_account_id', None),
                            page, limit)
 
-            if status and status == OrgStatus.PENDING_ACTIVATION.value:
+            if statuses and OrgStatus.PENDING_ACTIVATION.value in statuses:
                 # only staff admin can see director search accounts
                 # https://github.com/bcgov/entity/issues/4786
                 if not is_staff_admin:
