@@ -40,7 +40,7 @@ import { AccessType } from '@/util/constants'
           @click="goBack"
         >
           <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
-          <span>Back</span>
+          <span class="back">Back</span>
         </v-btn>
         <v-spacer></v-spacer>
         <v-btn
@@ -50,7 +50,7 @@ import { AccessType } from '@/util/constants'
           :disabled="!padValid"
           :loading="isLoading"
         >
-          <span>Next</span>
+          <span class="next">Next</span>
           <v-icon class="ml-2">mdi-arrow-right</v-icon>
         </v-btn>
       </v-col>

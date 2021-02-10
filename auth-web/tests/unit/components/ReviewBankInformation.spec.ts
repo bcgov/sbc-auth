@@ -1,12 +1,15 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import { Account } from '@/util/constants'
 import OrgModule from '@/store/modules/org'
+import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankInformation.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import can from '@/directives/can'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -24,6 +27,7 @@ describe('ReviewBankInformation.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
+    localVue.directive('can', can)
 
     const vuetify = new Vuetify({})
 
@@ -49,7 +53,11 @@ describe('ReviewBankInformation.vue', () => {
       store,
       localVue,
       vuetify,
-      mixins: [Steppable]
+      mixins: [Steppable],
+      components: {
+        PADInfoForm,
+        TermsOfUseDialog
+      }
     })
 
     jest.resetModules()
@@ -61,7 +69,8 @@ describe('ReviewBankInformation.vue', () => {
   })
 
   it('should render pad component title', () => {
-    expect(wrapper.find('legend').text()).toBe('Banking Information')
+    expect(wrapper.find('.pad-info-form-title').text()).toBe('Banking Information')
+    expect(wrapper.find('.pad-info-form-title').exists()).toBe(true)
   })
 
   it('should render pad component inputs', () => {
@@ -75,7 +84,9 @@ describe('ReviewBankInformation.vue', () => {
   })
 
   it('should render next and back buttons', () => {
-    expect(wrapper.find('.v-btn').text('Next')).toBeTruthy()
-    expect(wrapper.find('.v-btn').text('Back')).toBeTruthy()
+    expect(wrapper.find('.next')).toBeTruthy()
+    expect(wrapper.find('.next').text()).toEqual('Next')
+    expect(wrapper.find('.back')).toBeTruthy()
+    expect(wrapper.find('.back').text()).toEqual('Back')
   })
 })

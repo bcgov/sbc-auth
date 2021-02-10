@@ -14,7 +14,7 @@
     <v-form ref="preAuthDebitForm">
       <section>
         <header class="mb-4 d-flex align-content-center">
-          <div class="mr-1 font-weight-bold">Banking Information</div>
+          <div class="pad-info-form-title mr-1 font-weight-bold">Banking Information</div>
           <v-btn
             small
             icon
