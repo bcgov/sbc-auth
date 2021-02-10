@@ -245,8 +245,15 @@ export default class OrgModule extends VuexModule {
     const orgId = this.context.state['currentOrganization']?.id
     const orgStatus = this.context.state['currentOrganization'].statusCode === AccountStatus.ACTIVE ? AccountStatus.SUSPENDED : AccountStatus.ACTIVE
     if (orgId && orgStatus) {
-      await OrgService.suspendOrg(orgId, orgStatus)
-      await this.context.dispatch('syncOrganization', orgId)
+      try {
+        const response = await OrgService.suspendOrg(orgId, orgStatus)
+        if (response.status === 200) {
+          await this.context.dispatch('syncOrganization', orgId)
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Suspend/Unsuspend Account operation failed! - ', error)
+      }
     }
   }
 
