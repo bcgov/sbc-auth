@@ -57,6 +57,11 @@ const OrgModule = namespace('org')
 const BusinessModule = namespace('business')
 
 @Component({
+})
+export default class IncorporationSearchResultView extends Vue {
+  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
+  @BusinessModule.State('currentBusiness') private currentBusiness!: Business
+
   data () {
     return {
       actions: [
@@ -69,10 +74,6 @@ const BusinessModule = namespace('business')
       ]
     }
   }
-})
-export default class IncorporationSearchResultView extends Vue {
-  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
-  @BusinessModule.State('currentBusiness') private currentBusiness!: Business
 
   private get searchResult (): BusinessSearchResultDto[] {
     return [{

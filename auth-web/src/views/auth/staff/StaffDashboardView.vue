@@ -85,6 +85,7 @@ import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')
 const BusinessModule = namespace('business')
+const userModule = namespace('user')
 
 @Component({
   components: {
@@ -92,13 +93,12 @@ const BusinessModule = namespace('business')
     SupportInfoCard,
     StaffAccountManagement,
     IncorporationSearchResultView
-  },
-  computed: {
-    ...mapState('user', ['currentUser'])
   }
 })
 export default class StaffDashboardView extends Vue {
   @OrgModule.Action('getOrganizationForAffiliate') private getOrganizationForAffiliate!: () => Promise<Organization>
+
+  @userModule.State('currentUser') private currentUser!: KCUserProfile
 
   @BusinessModule.Action('searchBusiness') private searchBusiness!: (businessIdentifier: string) => Promise<any>
   @BusinessModule.Action('resetCurrentBusiness') private resetCurrentBusiness!: () => Promise<any>
@@ -109,7 +109,6 @@ export default class StaffDashboardView extends Vue {
   private searchedBusinessNumber = ''
   private searchActive = false
   private errorMessage = ''
-  readonly currentUser!: KCUserProfile
 
   private incorpNumRules = [
     v => !!v || 'Incorporation Number is required',
