@@ -62,18 +62,14 @@ export default class IncorporationSearchResultView extends Vue {
   @OrgModule.State('currentOrganization') private currentOrganization!: Organization
   @BusinessModule.State('currentBusiness') private currentBusiness!: Business
 
-  data () {
-    return {
-      actions: [
-        { title: 'Entity Dashboard',
-          icon: 'mdi-view-dashboard'
-        },
-        { title: 'Manage Account',
-          icon: 'mdi-domain'
-        }
-      ]
+  private actions: object[] = [
+    { title: 'Entity Dashboard',
+      icon: 'mdi-view-dashboard'
+    },
+    { title: 'Manage Account',
+      icon: 'mdi-domain'
     }
-  }
+  ]
 
   private get searchResult (): BusinessSearchResultDto[] {
     return [{
