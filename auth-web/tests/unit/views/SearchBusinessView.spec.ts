@@ -1,4 +1,5 @@
-import { createLocalVue, mount } from '@vue/test-utils'
+import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+
 import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -66,7 +67,7 @@ describe('StaffDashboardView.vue', () => {
 
     let vuetify = new Vuetify({})
 
-    cmp = mount(StaffDashboardView, {
+    cmp = shallowMount(StaffDashboardView, {
       store,
       localVue,
       vuetify,
@@ -85,13 +86,6 @@ describe('StaffDashboardView.vue', () => {
 
   it('incorporation number is empty', () => {
     expect(cmp.vm.businessNumber).toBe('CP0000000')
-  })
-
-  it('enter button click invokes searchBusiness method', () => {
-    const stub = jest.fn()
-    cmp.setMethods({ search: stub })
-    cmp.find('.search-btn').trigger('click')
-    expect(cmp.vm.search).toBeCalled()
   })
 
   it('enter button click invokes isFormValid method', () => {

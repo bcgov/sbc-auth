@@ -21,6 +21,7 @@ import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/
 import { Products, ProductsRequestBody } from '@/models/Staff'
 import { StatementFilterParams, StatementListItem, StatementNotificationSettings, StatementSettings } from '@/models/statement'
 import { TransactionFilter, TransactionFilterParams, TransactionTableList, TransactionTableRow } from '@/models/transaction'
+
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BcolService from '@/services/bcol.services'
@@ -816,5 +817,22 @@ export default class OrgModule extends VuexModule {
   public async downloadOBInvoice (paymentId: string) {
     const response = await PaymentService.downloadOBInvoice(paymentId)
     return response || {}
+  }
+
+  @Action({ rawError: true })
+  public async getOrganizationForAffiliate (): Promise<Organization> {
+    const businessIdentifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)
+    if (businessIdentifier) {
+      const response = await OrgService.getOrgForAffiliate(businessIdentifier)
+      const organization = response?.data?.orgs[0]
+      if (organization && organization?.name) {
+        this.context.commit('setCurrentOrganization', organization)
+      } else {
+        this.context.commit('setCurrentOrganization', undefined)
+      }
+      return organization
+    } else {
+      this.context.commit('setCurrentOrganization', undefined)
+    }
   }
 }
