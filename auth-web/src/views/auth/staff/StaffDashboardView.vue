@@ -67,10 +67,8 @@
 <script lang="ts">
 
 import { Component, Emit, Prop } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
@@ -78,9 +76,7 @@ import { Organization } from '@/models/Organization'
 import { Role } from '@/util/constants'
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
-import UserModule from '@/store/modules/user'
 import Vue from 'vue'
-import { getModule } from 'vuex-module-decorators'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')

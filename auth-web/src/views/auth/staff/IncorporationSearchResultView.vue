@@ -120,7 +120,3 @@ export default class IncorporationSearchResultView extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-</style>

@@ -1,4 +1,4 @@
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 
 import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
 import Vue from 'vue'
