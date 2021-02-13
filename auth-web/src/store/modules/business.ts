@@ -3,6 +3,7 @@ import { Business, BusinessRequest, FolioNumberload, LoginPayload } from '@/mode
 import { CorpType, FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
+
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -18,7 +19,7 @@ export default class BusinessModule extends VuexModule {
 
   @Mutation
   public setCurrentBusiness (business: Business) {
-    ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, business.businessIdentifier)
+    ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, business?.businessIdentifier)
     this.currentBusiness = business
   }
 
@@ -114,7 +115,7 @@ export default class BusinessModule extends VuexModule {
 
   // Following searchBusiness will search data from legal-api.
   @Action({ rawError: true })
-  public async searchBusiness (businessNumber: string) {
+  public async searchBusiness (businessNumber: string): Promise<any> {
     return BusinessService.searchBusiness(businessNumber)
       .then(response => {
         if (response.status === 200) {
@@ -196,5 +197,11 @@ export default class BusinessModule extends VuexModule {
   @Action({ rawError: true })
   public async updateFolioNumber (folioNumberload: FolioNumberload) {
     await BusinessService.updateFolioNumber(folioNumberload)
+  }
+
+  @Action({ rawError: true })
+  public async resetCurrentBusiness (): Promise<void> {
+    this.context.commit('setCurrentBusiness', undefined)
+    ConfigHelper.removeFromSession(SessionStorageKeys.BusinessIdentifierKey)
   }
 }
