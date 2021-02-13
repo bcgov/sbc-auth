@@ -26,6 +26,16 @@ export interface Business {
     folioNumber: string
 }
 
+export interface BusinessSearchResultDto {
+    businessIdentifier: string
+    businessNumber?: string
+    name?: string
+    accessType?: string;
+    orgType?: string;
+    statusCode?:string
+    account: string;
+}
+
 export interface Businesses {
     entities: Business[]
 }
