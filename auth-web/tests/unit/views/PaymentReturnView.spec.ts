@@ -40,7 +40,7 @@ describe('PaymentReturnView.vue', () => {
     PaymentServices.updateTransaction = jest.fn().mockResolvedValue({})
 
     const $t = (payNoParams: string) => 'Incorrect configuration'
-    const wrapper = shallowMount(PaymentReturnView, {
+    shallowMount(PaymentReturnView, {
       propsData: { },
       mocks: { $t }
     })
