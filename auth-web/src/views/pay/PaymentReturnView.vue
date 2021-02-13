@@ -2,10 +2,8 @@
     <div id="app">
         <v-container>
             <v-layout row justify-center align-center>
-                <v-progress-circular color="primary" :size="50" indeterminate v-if="!errorMessage"></v-progress-circular>
-                <div class="loading-msg" v-if="!errorMessage"> {{ $t('paymentDoneMsg') }}</div>
-                <div class="loading-msg" v-if="errorMessage && !showErrorModal">{{errorMessage}}</div>
-                <sbc-system-error  v-on:continue-event="goToUrl(returnUrl)" v-if="showErrorModal && errorMessage" title="Payment Failed" primaryButtonTitle="Continue to Filing" :description="errorMessage" ></sbc-system-error>
+                <v-progress-circular color="primary" :size="50" indeterminate v-if="isLoading"></v-progress-circular>
+                <PaymentErrorMessage  :errorType="errorType" :tryAgainURL="tryAgainURL" :backUrl="backUrl" v-else/>
             </v-layout>
         </v-container>
     </div>
@@ -14,44 +12,55 @@
 <script  lang="ts">
 
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import PaymentErrorMessage from '@/components/pay/common/PaymentErrorMessage.vue'
 import PaymentServices from '@/services/payment.services'
-import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
+import { paymentErrorType } from '@/util/constants'
 
 @Component({
   components: {
-    SbcSystemError
+    PaymentErrorMessage
   }
 })
 export default class PaymentReturnView extends Vue {
         @Prop() paymentId: string
         @Prop() transactionId: string
         @Prop() payResponseUrl: string
-        returnUrl:string
-        errorMessage:string = ''
-        // show modal when paybc is down..otherwise [all unhandled technical error , show plain text error message..]
-        showErrorModal:boolean = false
+        returnUrl:string = ''
+        isLoading:boolean = false
+        errorType :string = paymentErrorType.PAYMENT_GENERIC_ERROR // 'PAYMENT_GENERIC_ERROR'
+        backUrl:string
+        tryAgainURL:string
 
         mounted () {
           if (!this.paymentId || !this.transactionId) {
-            this.errorMessage = this.$t('payNoParams').toString()
+            // this.errorMessage = this.$t('payNoParams').toString()
+            this.errorType = paymentErrorType.PAYMENT_GENERIC_ERROR
+            this.backUrl = this.returnUrl // add URL here
+            this.tryAgainURL = `/makepayment/${this.paymentId}/${this.returnUrl}` // add base url
             return
           }
+          this.isLoading = true
           PaymentServices.updateTransaction(this.paymentId, this.transactionId, this.payResponseUrl)
             .then(response => {
               this.returnUrl = response.data.clientSystemUrl
-              if (response.data.paySystemReasonCode && response.data.paySystemReasonCode === 'SERVICE_UNAVAILABLE') {
-                // PayBC down time..Show the custom modal
-                this.errorMessage = this.$t('payFailedMessagePayBcDown').toString()
-                this.showErrorModal = true
-              } else {
+              const statusCode = response.data.statusCode
+              const paySystemReasonCode = response.data.paySystemReasonCode
+              if (statusCode === 'COMPLETED') {
+                const status = btoa('COMPLETED') // convert to base 64
                 // all good..go back
-                this.goToUrl(this.returnUrl)
+                this.goToUrl(`${this.returnUrl}/status=${status}`) // append success status
+              } else {
+                const status = btoa(paySystemReasonCode) // convert to base 64
+                this.errorType = paySystemReasonCode
+                this.backUrl = `${this.returnUrl}/status=${status}`
+                this.tryAgainURL = `makepayment/${this.paymentId}/${this.returnUrl}`
               }
             })
             .catch(response => {
-              // technical error..need not to show the modal
-              this.showErrorModal = false
-              this.errorMessage = this.$t('payFailedMessage').toString()
+              this.isLoading = false
+              this.errorType = paymentErrorType.PAYMENT_GENERIC_ERROR
+              this.backUrl = `${this.returnUrl}/status=${status}`
+              this.tryAgainURL = `/makepayment/${this.paymentId}/${this.returnUrl}` // add base url
             })
         }
         goToUrl (url:string) {
