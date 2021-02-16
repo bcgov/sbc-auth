@@ -36,35 +36,42 @@ export default class PaymentReturnView extends Vue {
             // this.errorMessage = this.$t('payNoParams').toString()
             this.errorType = paymentErrorType.PAYMENT_GENERIC_ERROR
             this.backUrl = this.returnUrl // add URL here
-            this.tryAgainURL = `/makepayment/${this.paymentId}/${this.returnUrl}` // add base url
+            this.tryAgainURL = `makepayment/${this.paymentId}/${this.returnUrl}` // add base url
             return
           }
           this.isLoading = true
           PaymentServices.updateTransaction(this.paymentId, this.transactionId, this.payResponseUrl)
             .then(response => {
-              this.returnUrl = response.data.clientSystemUrl
+              this.returnUrl = encodeURI(response.data.clientSystemUrl) // encoding url
+              const appendType = this.appendURLtype(this.returnUrl)
               const statusCode = response.data.statusCode
               const paySystemReasonCode = response.data.paySystemReasonCode
               if (statusCode === 'COMPLETED') {
                 const status = btoa('COMPLETED') // convert to base 64
                 // all good..go back
-                this.goToUrl(`${this.returnUrl}/status=${status}`) // append success status
+                this.goToUrl(`${this.returnUrl}${appendType}status=${status}`) // append success status
               } else {
                 const status = btoa(paySystemReasonCode) // convert to base 64
                 this.errorType = paySystemReasonCode
-                this.backUrl = `${this.returnUrl}/status=${status}`
+                this.backUrl = `${this.returnUrl}${appendType}status=${status}`
                 this.tryAgainURL = `makepayment/${this.paymentId}/${this.returnUrl}`
               }
             })
             .catch(response => {
+              const status = btoa('FAILED') // convert to base 64
+              const appendType = this.appendURLtype(this.returnUrl)
               this.isLoading = false
               this.errorType = paymentErrorType.PAYMENT_GENERIC_ERROR
-              this.backUrl = `${this.returnUrl}/status=${status}`
-              this.tryAgainURL = `/makepayment/${this.paymentId}/${this.returnUrl}` // add base url
+              this.backUrl = `${this.returnUrl}${appendType}status=${status}`
+              this.tryAgainURL = `makepayment/${this.paymentId}/${this.returnUrl}`
             })
         }
         goToUrl (url:string) {
           window.location.href = url
+        }
+
+        appendURLtype (url:string = '') {
+          return url.match(/[\\?]/g) ? '&' : '?'
         }
 }
 </script>
