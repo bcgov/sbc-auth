@@ -114,12 +114,7 @@ export default class GeneratePasscodeView extends Vue {
   width: 20rem;
 }
 
-::v-deep {
-  .v-input__append-outer {
-    margin-top: 0 !important;
-  }
-
-  .remove-btn {
+.remove-btn {
     margin-left: 0.25rem;
     width: 7rem;
     min-height: 54px;
@@ -127,6 +122,5 @@ export default class GeneratePasscodeView extends Vue {
     font-weight: bold;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
-  }
 }
 </style>
