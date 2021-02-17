@@ -6,18 +6,15 @@ import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
-Vue.use(Vuetify)
-Vue.use(VueRouter)
-const router = new VueRouter()
-const vuetify = new Vuetify({})
-
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
-
 const mockSession = {
   'NRO_URL': 'Mock NRO URL',
   'NAME_REQUEST_URL': 'Mock Name Request URL'
 }
+
+Vue.use(Vuetify)
+Vue.use(VueRouter)
+const router = new VueRouter()
+const vuetify = new Vuetify({})
 
 describe('GeneratePasscodeView.vue', () => {
   let wrapper: any
