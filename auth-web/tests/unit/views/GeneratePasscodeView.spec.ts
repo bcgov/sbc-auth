@@ -27,12 +27,12 @@ describe('GeneratePasscodeView.vue', () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
+    const $t = () => ''
+
     const store = new Vuex.Store({
       state: {},
       strict: false
     })
-
-    const $t = () => ''
 
     wrapper = mount(GeneratePasscodeView, {
       store,
@@ -52,6 +52,14 @@ describe('GeneratePasscodeView.vue', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
+  it('remove email address', () => {
+    wrapper.vm.isDialogOpen = true
+    const stub = jest.fn()
+    wrapper.setMethods({ removeEmailAddress: stub })
+    wrapper.find('[data-test="btn-remove-passcode-emailAddress-0"').trigger('click')
+    expect(wrapper.vm.removeEmailAddress).toBeCalled()
+  })
+
   it('contains title', () => {
     wrapper.vm.isDialogOpen = true
     expect(wrapper.find('[data-test="title-generate-passcode"]')).toBeTruthy()
@@ -61,13 +69,5 @@ describe('GeneratePasscodeView.vue', () => {
   it('contains email address input to send', () => {
     wrapper.vm.isDialogOpen = true
     expect(wrapper.find('[data-test="input-passcode-emailAddress-0"]')).toBeTruthy()
-  })
-
-  it('remove email address', () => {
-    wrapper.vm.isDialogOpen = true
-    const stub = jest.fn()
-    wrapper.setMethods({ removeEmailAddress: stub })
-    wrapper.find('[data-test="btn-remove-passcode-emailAddress-0"').trigger('click')
-    expect(wrapper.vm.removeEmailAddress).toBeCalled()
   })
 })
