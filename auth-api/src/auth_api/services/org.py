@@ -409,10 +409,14 @@ class Org:  # pylint: disable=too-many-public-methods
         org.status_code = OrgStatus.INACTIVE.value
         org.save()
 
-        # Remove user from thr group if the user doesn't have any other orgs membership
-        user = UserModel.find_by_jwt_token(token=token_info)
-        if len(MembershipModel.find_orgs_for_user(user.id)) == 0:
-            KeycloakService.remove_from_account_holders_group(user.keycloak_guid)
+        # Don't remove account if it's staff who deactivate org.
+        is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in token_info.get('realm_access').get('roles')
+        if not is_staff_admin:
+            # Remove user from thr group if the user doesn't have any other orgs membership
+            user = UserModel.find_by_jwt_token(token=token_info)
+            if len(MembershipModel.find_orgs_for_user(user.id)) == 0:
+                KeycloakService.remove_from_account_holders_group(user.keycloak_guid)
+
         current_app.logger.debug('org Inactivated>')
 
     def get_payment_info(self):
