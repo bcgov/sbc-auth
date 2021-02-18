@@ -4,12 +4,20 @@
       :headers="headersSearchResult"
       :items="searchResult"
       hide-default-footer
+      v-if="isVisible"
     >
       <template v-slot:loading>
         Loading...
       </template>
       <template v-slot:[`item.orgType`]="{ item }">
           {{formatType(item)}}
+      </template>
+      <template v-slot:[`item.account`]="{ item }">
+        <span
+        :class="{ 'account-color-empty': isCurrentOrganizationEmpty }"
+        >
+          {{ item.account }}
+        </span>
       </template>
       <template v-slot:[`item.action`]>
         <v-menu
@@ -52,7 +60,7 @@
 <script lang="ts">
 import { AccessType, Account } from '@/util/constants'
 import { Business, BusinessSearchResultDto } from '@/models/business'
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import GeneratePasscodeView from '@/views/auth/staff/GeneratePasscodeView.vue'
 import { Organization } from '@/models/Organization'
@@ -72,6 +80,7 @@ export default class IncorporationSearchResultView extends Vue {
   @OrgModule.Action('addOrgSettings') private addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
 
   @BusinessModule.State('currentBusiness') private currentBusiness!: Business
+  @Prop({ default: false }) isVisible: boolean
 
   $refs: {
     generatePasscodeDialog: GeneratePasscodeView
@@ -118,25 +127,29 @@ export default class IncorporationSearchResultView extends Vue {
     {
       text: 'Name',
       align: 'left',
+      sortable: false,
       value: 'name',
-      width: '40%'
+      width: '30%'
     },
     {
       text: 'Type',
       align: 'left',
+      sortable: false,
       value: 'orgType',
-      width: '15%'
+      width: '30%'
     },
     {
       text: 'Account',
+      sortable: false,
       value: 'account',
       width: '30%'
     },
     {
       text: 'Actions',
       align: 'left',
+      sortable: false,
       value: 'action',
-      width: '15%'
+      width: '105'
     }
   ]
 
@@ -168,5 +181,17 @@ export default class IncorporationSearchResultView extends Vue {
   private generatePasscodeEvent () {
     this.$refs.generatePasscodeDialog.open()
   }
+
+  private get isCurrentOrganizationEmpty (): boolean {
+    return !this.currentOrganization?.name
+  }
 }
 </script>
+<style lang="scss" scoped>
+  @import '$assets/scss/theme.scss';
+
+  .account-color-empty {
+    color: var(--v-error-base) !important;
+  }
+
+</style>
