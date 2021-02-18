@@ -1,7 +1,15 @@
 <template>
- <v-dialog v-model="isDialogOpen" max-width="800" :persistent="true">
+ <v-dialog v-model="isDialogOpen" max-width="800" :persistent="true" data-test="dialog-generate-passcode">
     <v-card>
-      <v-card-title data-test="title-generate-passcode">Generate Passcode</v-card-title>
+      <v-card-title data-test="title-generate-passcode">Generate Passcode
+        <v-btn
+        icon
+        @click="close()"
+        data-test="btn-close-generate-passcode-dialog-title"
+        >
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-card-title>
       <v-card-text data-test="text-generate-passcode" class="d-flex flex-column">
         <div class="flex-grow-0 flex-shrink-1" style="min-height: 5em">
          <p class="mb-7">{{ $t('generatePasscodeText') }}:</p>
@@ -23,15 +31,18 @@
             v-model="emailAddress.value"
             :id="getIndexedTag('emailAddress', index)"
             :data-test="getIndexedTag('input-passcode-emailAddress', index)"
+            class="generate-passcode-input"
             >
             </v-text-field>
             <v-btn
-            color="primary"
+            v-show="index > 0"
+            icon
             class="remove-btn mt-0"
-            depressed
             @click="removeEmailAddress(index)"
             :data-test="getIndexedTag('btn-remove-passcode-emailAddress', index)"
-            >Remove</v-btn>
+            >
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
           </div>
         </v-form>
         <div>
@@ -44,20 +55,20 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn large color="primary" :disabled="!isFormValid()" type="submit" form="generatePasscodeForm" data-test="btn-generate-passcode-send">Send</v-btn>
-        <v-btn large @click="close()">Close</v-btn>
+        <v-btn large @click="close()" data-test="btn-close-generate-passcode-dialog">Close</v-btn>
       </v-card-actions>
     </v-card>
  </v-dialog>
 </template>
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import _ from 'lodash'
+import CommonUtils from '@/util/common-util'
 
 @Component({
 })
 export default class GeneratePasscodeView extends Vue {
-  private isDialogOpen = false
-  private emailAddresses: object[] = [{
+  private isDialogOpen: boolean = false
+  private emailAddresses: any[] = [{
     value: ''
   }]
 
@@ -70,7 +81,7 @@ export default class GeneratePasscodeView extends Vue {
   }
 
   private get isThereEmailsToSend (): boolean {
-    return !!_.find(this.emailAddresses, function (emailAddress) { return emailAddress.value !== '' })
+    return !!this.emailAddresses.find(address => address.value !== '')
   }
 
   private isFormValid (): boolean {
@@ -109,9 +120,9 @@ export default class GeneratePasscodeView extends Vue {
 </script>
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
-.v-input {
-  display: inline-block;
-  width: 20rem;
+.generate-passcode-input{
+    display: inline-block;
+    width: 20rem;
 }
 
 .remove-btn {
