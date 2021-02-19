@@ -697,8 +697,8 @@ class Org:  # pylint: disable=too-many-public-methods
         user: UserModel = UserModel.find_by_jwt_token(token=token_info)
         current_app.logger.debug('<setting org status to  ')
         org_model.status_code = status_code
-        org_model.decision_made_by = user.id  # not sure if a new field is needed for this.
-        if status_code == ChangeType.SUSPEND.value:
+        org_model.decision_made_by = user.username  # not sure if a new field is needed for this.
+        if status_code == OrgStatus.SUSPENDED.value:
             org_model.suspended_on = datetime.today()
         org_model.save()
         current_app.logger.debug('change_org_status>')
