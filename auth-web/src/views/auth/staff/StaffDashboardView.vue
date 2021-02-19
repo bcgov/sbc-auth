@@ -46,7 +46,7 @@
       </v-form>
 
       <div v-if="currentBusiness">
-        <IncorporationSearchResultView></IncorporationSearchResultView>
+        <IncorporationSearchResultView :isVisible = "isVisible"></IncorporationSearchResultView>
       </div>
     </v-card>
 
@@ -105,6 +105,7 @@ export default class StaffDashboardView extends Vue {
   private searchedBusinessNumber = ''
   private searchActive = false
   private errorMessage = ''
+  private isVisible: boolean = false
 
   private incorpNumRules = [
     v => !!v || 'Incorporation Number is required',
@@ -146,6 +147,7 @@ export default class StaffDashboardView extends Vue {
       } catch (exception) {
         this.searchedBusinessNumber = this.businessNumber
         this.resetCurrentBusiness()
+        this.isVisible = false
         this.errorMessage = this.$t('noIncorporationNumberFound').toString()
       } finally {
         this.searchActive = false
@@ -158,9 +160,11 @@ export default class StaffDashboardView extends Vue {
       // Search for business, action will set session storage
       await this.loadBusiness()
       await this.getOrganizationForAffiliate()
+      this.isVisible = true
     } catch (exception) {
       // eslint-disable-next-line no-console
       console.log('Error during search incorporations event!')
+      this.isVisible = false
       this.resetCurrentBusiness()
     }
   }
