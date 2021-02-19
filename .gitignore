@@ -116,4 +116,3 @@ node_modules/
 .DS_Store
 
 auth-api/tests/docker/somefolder/.minio.sys
-auth-api/docker-compose.yml
