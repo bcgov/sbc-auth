@@ -71,6 +71,7 @@ export default class GeneratePasscodeView extends Vue {
   private emailAddresses: any[] = [{
     value: ''
   }]
+  private emailRules = CommonUtils.emailRules()
 
   $refs: {
     generatePasscodeForm: HTMLFormElement
@@ -91,14 +92,6 @@ export default class GeneratePasscodeView extends Vue {
   public close () {
     this.isDialogOpen = false
   }
-
-  private emailRules = [
-    v => !!v || 'Email address is required',
-    v => {
-      const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-      return pattern.test(v) || 'Valid email is required'
-    }
-  ]
 
   private addEmailAddress () {
     this.emailAddresses.push({

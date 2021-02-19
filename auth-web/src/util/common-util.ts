@@ -192,11 +192,13 @@ export default class CommonUtils {
     }
   }
 
-  static emailRules = [
-    v => !!v || 'Email address is required',
-    v => {
-      const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-      return pattern.test(v) || 'Valid email is required'
-    }
-  ]
+  static emailRules () {
+    return [
+      v => !!v || 'Email address is required',
+      v => {
+        const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        return pattern.test(v) || 'Valid email is required'
+      }
+    ]
+  }
 }
