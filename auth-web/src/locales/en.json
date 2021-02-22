@@ -83,6 +83,9 @@
   "pendingAffidvitReviewMessage": "Once your account has been reviewed and approved you will receive\n\nan email allowing you to activate and manage the account. \n\nPlease allow 5 business days for this process.",
   "extraProdOrgSuccessTitle": "Your BC Registries and Online Services account has been created and is being reviewed.",
   "extraProdOrgSuccessMessage": "Once your account has been reviewed and approved you will receive an email allowing you to activate and manage the account. \n\nPlease allow 5 business days for this process.",
-  "noPendingAccountsLabel": "No Pending Invitations"
-
+  "noPendingAccountsLabel": "No Pending Invitations",
+  "generatePasscodeText": "When you generate a new passcode, a new passcode will be assigned to this business. Once the new passcode is generated",
+  "generatePasscodeSummaryFirstLine": "You could setup the account for your cooperative",
+  "generatePasscodeSummarySecondLine": "You could add and remove users",
+  "generatePasscodeSummaryThirdLine": "You could provide the passcode and affiliate with other accounts"
 }

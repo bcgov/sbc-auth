@@ -1,7 +1,9 @@
 /**
  * Place to put all the custom utility methods
  */
+
 import { Address, BaseAddressModel } from '@/models/address'
+
 import { Permission } from '@/util/constants'
 import moment from 'moment'
 
@@ -188,5 +190,15 @@ export default class CommonUtils {
       tokens: CommonUtils.numberAndXMaskPattern(),
       masked: true
     }
+  }
+
+  static emailRules () {
+    return [
+      v => !!v || 'Email address is required',
+      v => {
+        const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        return pattern.test(v) || 'Valid email is required'
+      }
+    ]
   }
 }

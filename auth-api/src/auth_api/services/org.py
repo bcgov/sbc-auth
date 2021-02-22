@@ -409,10 +409,14 @@ class Org:  # pylint: disable=too-many-public-methods
         org.status_code = OrgStatus.INACTIVE.value
         org.save()
 
-        # Remove user from thr group if the user doesn't have any other orgs membership
-        user = UserModel.find_by_jwt_token(token=token_info)
-        if len(MembershipModel.find_orgs_for_user(user.id)) == 0:
-            KeycloakService.remove_from_account_holders_group(user.keycloak_guid)
+        # Don't remove account if it's staff who deactivate org.
+        is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in token_info.get('realm_access').get('roles')
+        if not is_staff_admin:
+            # Remove user from thr group if the user doesn't have any other orgs membership
+            user = UserModel.find_by_jwt_token(token=token_info)
+            if len(MembershipModel.find_orgs_for_user(user.id)) == 0:
+                KeycloakService.remove_from_account_holders_group(user.keycloak_guid)
+
         current_app.logger.debug('org Inactivated>')
 
     def get_payment_info(self):
@@ -697,8 +701,8 @@ class Org:  # pylint: disable=too-many-public-methods
         user: UserModel = UserModel.find_by_jwt_token(token=token_info)
         current_app.logger.debug('<setting org status to  ')
         org_model.status_code = status_code
-        org_model.decision_made_by = user.id  # not sure if a new field is needed for this.
-        if status_code == ChangeType.SUSPEND.value:
+        org_model.decision_made_by = user.username  # not sure if a new field is needed for this.
+        if status_code == OrgStatus.SUSPENDED.value:
             org_model.suspended_on = datetime.today()
         org_model.save()
         current_app.logger.debug('change_org_status>')
