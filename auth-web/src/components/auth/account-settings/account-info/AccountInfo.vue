@@ -175,7 +175,7 @@
       <template v-slot:actions>
         <v-btn
           large
-          class="font-weight-bold white--text"
+          class="font-weight-bold white--text btn-dialog"
           :color="getDialogStatusButtonColor(currentOrganization.orgStatus)"
           data-test='btn-suspend-dialog'
           @click="confirmSuspendAccount()"
@@ -185,6 +185,7 @@
         <v-btn
           large
           depressed
+          clss="btn-dialog"
           @click="closeSuspendAccountDialog()"
           data-test='btn-cancel-suspend-dialog'
         >
@@ -329,7 +330,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 
   private async confirmSuspendAccount (): Promise<void> {
     await this.suspendOrganization()
-    this.$router.push(Pages.STAFF_DASHBOARD)
+    this.$refs.suspendAccountDialog.close()
   }
 
   private closeSuspendAccountDialog () {
@@ -636,5 +637,12 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 
 .suspend-account-btn {
   margin-left: 0 !important;
+  height: 2.1em;
+  width: 10.9375em;
+}
+
+.btn-dialog {
+  height: 2.75em;
+  width: 6.25em;
 }
 </style>
