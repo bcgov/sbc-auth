@@ -21,7 +21,7 @@
           </v-alert>
         </div>
       </v-expand-transition>
-      <v-form ref="searchBusinessForm" v-on:submit.prevent="searchBusiness">
+      <v-form ref="searchBusinessForm" v-on:submit.prevent="search">
         <v-text-field
           filled
           label="Incorporation Number"
@@ -39,12 +39,15 @@
           color="primary"
           class="search-btn mt-0"
           type="submit"
-          @click="search"
           depressed
           :disabled="!isFormValid()"
           :loading="searchActive"
         >Search</v-btn>
       </v-form>
+
+      <div v-if="currentBusiness">
+        <IncorporationSearchResultView :isVisible = "isVisible"></IncorporationSearchResultView>
+      </div>
     </v-card>
 
     <!-- Director search -->
@@ -64,40 +67,45 @@
 <script lang="ts">
 
 import { Component, Emit, Prop } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
-import BusinessModule from '@/store/modules/business'
+import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
+import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { Organization } from '@/models/Organization'
 import { Role } from '@/util/constants'
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
-import UserModule from '@/store/modules/user'
 import Vue from 'vue'
-import { getModule } from 'vuex-module-decorators'
+import { namespace } from 'vuex-class'
+
+const OrgModule = namespace('org')
+const BusinessModule = namespace('business')
+const userModule = namespace('user')
 
 @Component({
   components: {
     GLCodesListView,
     SupportInfoCard,
-    StaffAccountManagement
-  },
-  methods: {
-    ...mapActions('business', ['searchBusiness'])
-  },
-  computed: {
-    ...mapState('user', ['currentUser'])
+    StaffAccountManagement,
+    IncorporationSearchResultView
   }
 })
 export default class StaffDashboardView extends Vue {
+  @OrgModule.Action('getOrganizationForAffiliate') private getOrganizationForAffiliate!: () => Promise<Organization>
+
+  @userModule.State('currentUser') private currentUser!: KCUserProfile
+
+  @BusinessModule.Action('searchBusiness') private searchBusiness!: (businessIdentifier: string) => Promise<any>
+  @BusinessModule.Action('resetCurrentBusiness') private resetCurrentBusiness!: () => Promise<any>
+  @BusinessModule.State('currentBusiness') private currentBusiness!: Business
+  @BusinessModule.Action('loadBusiness') private loadBusiness!: () => Promise<Business>
+
   private businessNumber = ''
   private searchedBusinessNumber = ''
   private searchActive = false
   private errorMessage = ''
-  readonly currentUser!: KCUserProfile
-
-  private readonly searchBusiness!: (businessNumber: string) => void
+  private isVisible: boolean = false
 
   private incorpNumRules = [
     v => !!v || 'Incorporation Number is required',
@@ -132,14 +140,32 @@ export default class StaffDashboardView extends Vue {
         // Search for business, action will set session storage
         await this.searchBusiness(this.businessNumber)
         this.errorMessage = ''
+        await this.updateStore()
 
         // Redirect to the coops UI
-        window.location.href = `${ConfigHelper.getCoopsURL()}${this.businessNumber}`
+        // window.location.href = `${ConfigHelper.getCoopsURL()}${this.businessNumber}`
       } catch (exception) {
-        this.searchActive = false
         this.searchedBusinessNumber = this.businessNumber
+        this.resetCurrentBusiness()
+        this.isVisible = false
         this.errorMessage = this.$t('noIncorporationNumberFound').toString()
+      } finally {
+        this.searchActive = false
       }
+    }
+  }
+
+  async updateStore () {
+    try {
+      // Search for business, action will set session storage
+      await this.loadBusiness()
+      await this.getOrganizationForAffiliate()
+      this.isVisible = true
+    } catch (exception) {
+      // eslint-disable-next-line no-console
+      console.log('Error during search incorporations event!')
+      this.isVisible = false
+      this.resetCurrentBusiness()
     }
   }
 

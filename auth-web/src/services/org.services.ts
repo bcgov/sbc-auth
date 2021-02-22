@@ -1,6 +1,7 @@
 import { AccountStatus, Actions } from '@/util/constants'
 import { Affiliation, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { CreateRequestBody as CreateOrganizationRequestBody, Member, Members, Organization, UpdateMemberPayload } from '@/models/Organization'
+
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
 import { AxiosResponse } from 'axios'
@@ -103,5 +104,9 @@ export default class OrgService {
 
   static async getOrgPayments (orgId: number): Promise<AxiosResponse> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${orgId}`)
+  }
+
+  public static async getOrgForAffiliate (businessIdentifier: string): Promise<AxiosResponse<any>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs?affiliation=${businessIdentifier}`)
   }
 }

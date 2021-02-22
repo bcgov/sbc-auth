@@ -256,7 +256,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   }
   // show baner for staff user and account suspended
   private get showAccountFreezeBanner () {
-    return this.isStaff && this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED
+    return this.isStaff && (this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED || this.currentOrganization?.statusCode === AccountStatus.SUSPENDED)
   }
 
   private async mounted () {
