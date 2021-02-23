@@ -1,31 +1,34 @@
-import { Business, BusinessSearchResultDto } from '@/models/business'
-import { Wrapper, createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
 
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
-import OrgModule from '@/store/modules/org'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 Vue.use(VueRouter)
-const router = new VueRouter()
+Vue.use(Vuetify)
 const vuetify = new Vuetify({})
-
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
+const router = new VueRouter()
 
 const mockSession = {
   'NRO_URL': 'Mock NRO URL',
   'NAME_REQUEST_URL': 'Mock Name Request URL'
 }
 
+// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
+document.body.setAttribute('data-app', 'true')
+
 describe('IncorporationSearchResultView.vue', () => {
   let wrapper: any
   let store: any
   const localVue = createLocalVue()
   localVue.use(Vuex)
+
+  afterEach(() => {
+    jest.resetModules()
+    jest.clearAllMocks()
+  })
 
   beforeEach(() => {
     sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
@@ -64,11 +67,6 @@ describe('IncorporationSearchResultView.vue', () => {
         business: businessModule
       }
     })
-  })
-
-  afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
   })
 
   it('Search Result with affiliated CP is valid', () => {
