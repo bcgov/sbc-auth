@@ -69,9 +69,9 @@ describe('IncorporationSearchResultView.vue', () => {
   it('Search Result with affiliated CP is valid', () => {
     wrapper = mount(IncorporationSearchResultView, {
       store,
+      vuetify,
       localVue,
       router,
-      vuetify,
       mocks: {
         $t: (mock) => mock
       }
@@ -80,13 +80,13 @@ describe('IncorporationSearchResultView.vue', () => {
     const searchResult = wrapper.vm.searchResult
 
     expect(wrapper.isVueInstance()).toBeTruthy()
-    expect(searchResult[0].name).toBe('affiliated_test_business')
-    expect(searchResult[0].orgType).toBe('Active')
-    expect(searchResult[0].account).toBe('test')
     expect(searchResult[0].businessIdentifier).toBe('123123')
     expect(searchResult[0].businessNumber).toBe('1231231')
     expect(searchResult[0].accessType).toBe('Active')
     expect(searchResult[0].statusCode).toBe('Active')
+    expect(searchResult[0].name).toBe('affiliated_test_business')
+    expect(searchResult[0].orgType).toBe('Active')
+    expect(searchResult[0].account).toBe('test')
   })
 
   it('Search Result with unaffiliated CP is valid', () => {
@@ -130,10 +130,8 @@ describe('IncorporationSearchResultView.vue', () => {
     })
 
     const searchResult = wrapper.vm.searchResult
-
-    expect(wrapper.isVueInstance()).toBeTruthy()
-    expect(searchResult[0].name).toBe('unaffiliated_test_business')
     expect(searchResult[0].orgType).toBe('N/A')
+    expect(searchResult[0].name).toBe('unaffiliated_test_business')
     expect(searchResult[0].account).toBe('No Affiliation')
     expect(searchResult[0].businessIdentifier).toBe('123123')
     expect(searchResult[0].businessNumber).toBe('1231231')
