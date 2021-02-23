@@ -87,5 +87,22 @@
   "generatePasscodeText": "When you generate a new passcode, a new passcode will be assigned to this business. Once the new passcode is generated",
   "generatePasscodeSummaryFirstLine": "You could setup the account for your cooperative",
   "generatePasscodeSummarySecondLine": "You could add and remove users",
-  "generatePasscodeSummaryThirdLine": "You could provide the passcode and affiliate with other accounts"
+  "generatePasscodeSummaryThirdLine": "You could provide the passcode and affiliate with other accounts",
+  "paymentErrorTitle": "Payment Error",
+  "paymentErrorSubText": "Looks like we encountered an error. Your payment could not be processed.<br />Please try again or your transaction state will change to \"pending\" and saved as draft.",
+  "paymentCancelTitle": "Payment Canceled",
+  "paymentCancelSubText": "You have cancelled your payment with credit card. Please try again or your <br />transaction state will change to \"pending\" ",
+  "paymentDeclinedTitle": "Payment Declined",
+  "paymentDeclinedSubText": "Your credit card has expired, so the payment was declined.<br /> Please try again by updating payment information",
+  "paymentInvalidErrorTitle": "Payment Error",
+  "paymentInvalidErrorSubText": "Transaction was cancelled because of an <strong>invalid credit card.</strong><br /> Please review your payment information and try again",
+  "paymentExpiredCardErrorTitle": "Payment Declined",
+  "paymentExpiredCardErrorSubText": "Your <strong>credit card has expired,</strong> so the payment was declined.<br />Please try again by updating payment information",
+  "paymentDuplicateErrorTitle": "Payment Error",
+  "paymentDuplicateErrorSubText": "This transaction number has been already been processed.<br />To <strong>avoid duplicate payments</strong> this transction will not be processed",
+  "paymentTimeoutErrorTitle": "Your session expired",
+  "paymentTimeoutErrorSubText": "Your session timed our after a long time of inactivity. Transactions are saved as draft,<br /> but you'll need to try again to complete your payment.",
+  "paymentValidationErrorTitle":"Payment Error",
+  "paymentValidationErrorSubText": "Transaction was cancelled because <strong>validation errors</strong> were found.<br />  Please review your payment information and try again"
+
 }
