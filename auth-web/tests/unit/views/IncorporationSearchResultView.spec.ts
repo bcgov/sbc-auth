@@ -24,6 +24,30 @@ describe('IncorporationSearchResultView.vue', () => {
   let store: any
   const localVue = createLocalVue()
   localVue.use(Vuex)
+  const affiliatedOrgModule = {
+    namespaced: true,
+    state: {
+      currentOrganization: {
+        name: 'test',
+        orgType: 'Active',
+        accessType: 'Active',
+        statusCode: 'Active'
+      }
+    },
+    actions: {
+      addOrgSettings: jest.fn()
+    }
+  }
+  const businessModule = {
+    namespaced: true,
+    state: {
+      currentBusiness: {
+        name: 'affiliated_test_business',
+        businessIdentifier: '123123',
+        businessNumber: '1231231'
+      }
+    }
+  }
 
   afterEach(() => {
     jest.resetModules()
@@ -32,33 +56,6 @@ describe('IncorporationSearchResultView.vue', () => {
 
   beforeEach(() => {
     sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
-
-    const affiliatedOrgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-          name: 'test',
-          orgType: 'Active',
-          accessType: 'Active',
-          statusCode: 'Active'
-        }
-      },
-      actions: {
-        addOrgSettings: jest.fn()
-      }
-    }
-
-    const businessModule = {
-      namespaced: true,
-      state: {
-        currentBusiness: {
-          name: 'affiliated_test_business',
-          businessIdentifier: '123123',
-          businessNumber: '1231231'
-        }
-      }
-    }
-
     store = new Vuex.Store({
       state: {},
       strict: false,
@@ -93,16 +90,6 @@ describe('IncorporationSearchResultView.vue', () => {
   })
 
   it('Search Result with unaffiliated CP is valid', () => {
-    const unAffiliatedbusinessModule = {
-      namespaced: true,
-      state: {
-        currentBusiness: {
-          name: 'unaffiliated_test_business',
-          businessIdentifier: '123123',
-          businessNumber: '1231231'
-        }
-      }
-    }
     const unAffiliatedOrgModule = {
       namespaced: true,
       state: {
@@ -113,7 +100,16 @@ describe('IncorporationSearchResultView.vue', () => {
         addOrgSettings: jest.fn()
       }
     }
-
+    const unAffiliatedbusinessModule = {
+      namespaced: true,
+      state: {
+        currentBusiness: {
+          name: 'unaffiliated_test_business',
+          businessIdentifier: '123123',
+          businessNumber: '1231231'
+        }
+      }
+    }
     store = new Vuex.Store({
       state: {},
       strict: false,
