@@ -23,7 +23,7 @@ import { paymentErrorType } from '@/util/constants'
 
 @Component
 export default class PaymentErrorMessage extends Vue {
-  @Prop({ default: 'PAYMENT_GENERIC_ERROR' }) errorType: string
+  @Prop({ default: 'GENERIC_ERROR' }) errorType: string
   @Prop({ default: '' }) backUrl: string
   @Prop({ default: '' }) tryAgainURL: string
 
@@ -35,38 +35,38 @@ export default class PaymentErrorMessage extends Vue {
     let showCancelbtn = true
 
     switch (this.errorType) {
-      case paymentErrorType.PAYMENT_GENERIC_ERROR:
+      case paymentErrorType.GENERIC_ERROR:
         errorTitle = this.$t('paymentErrorTitle').toString()
         errorMessage = this.$t('paymentErrorSubText').toString()
         break
-      case paymentErrorType.PAYMENT_CANCELED:
+      case paymentErrorType.PAYMENT_CANCELLED:
         errorTitle = this.$t('paymentErrorTitle').toString()
         errorMessage = this.$t('paymentCancelSubText').toString()
         break
-      case paymentErrorType.PAYMENT_DECLINED:
+      case paymentErrorType.DECLINED:
         errorTitle = this.$t('paymentDeclinedTitle').toString()
         errorMessage = this.$t('paymentDeclinedSubText').toString()
         break
-      case paymentErrorType.PAYMENT_INVALID_CARD:
+      case paymentErrorType.INVALID_CARD_NUMBER:
         errorTitle = this.$t('paymentInvalidErrorTitle').toString()
         errorMessage = this.$t('paymentInvalidErrorSubText').toString()
         break
-      case paymentErrorType.PAYMENT_EXPIRED_CARD:
+      case paymentErrorType.DECLINED_EXPIRED_CARD:
         errorTitle = this.$t('paymentExpiredCardErrorTitle').toString()
         errorMessage = this.$t('paymentExpiredCardErrorSubText').toString()
         break
-      case paymentErrorType.PAYMENT_DUPLICATE:
+      case paymentErrorType.DUPLICATE_ORDER_NUMBER:
         errorTitle = this.$t('paymentDuplicateErrorTitle').toString()
         errorMessage = this.$t('paymentDuplicateErrorSubText').toString()
         showOkbtn = true
         showCancelbtn = false
         break
-      case paymentErrorType.PAYMENT_TIMEOUT:
+      case paymentErrorType.TRANSACTION_TIMEOUT_NO_DEVICE:
         errorTitle = this.$t('paymentTimeoutErrorTitle').toString()
         errorMessage = this.$t('paymentTimeoutErrorSubText').toString()
         errorIcon = 'mdi-clock-outline'
         break
-      case paymentErrorType.PAYMENT_VALIDATION_ERROR:
+      case paymentErrorType.VALIDATION_ERROR:
         errorTitle = this.$t('paymentValidationErrorTitle').toString()
         errorMessage = this.$t('paymentValidationErrorSubText').toString()
         break
