@@ -182,6 +182,5 @@ describe('AccountInfo.vue', () => {
     expect(statusColor).toBe('error')
     getDialogStatusButtonColor = wrapper.vm.getDialogStatusButtonColor(store.state.org.currentOrganization.orgStatus)
     expect(getDialogStatusButtonColor).toBe('green')
-
   })
 })
