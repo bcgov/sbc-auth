@@ -58,12 +58,13 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account } from '@/util/constants'
 import { Business, BusinessSearchResultDto } from '@/models/business'
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Member, Organization } from '@/models/Organization'
+import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
 import GeneratePasscodeView from '@/views/auth/staff/GeneratePasscodeView.vue'
-import { Organization } from '@/models/Organization'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import { namespace } from 'vuex-class'
 
@@ -76,10 +77,12 @@ const BusinessModule = namespace('business')
   }
 })
 export default class IncorporationSearchResultView extends Vue {
-  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
+  @OrgModule.State('currentOrganization') private currentOrganization: Organization
   @OrgModule.Action('addOrgSettings') private addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
   @OrgModule.Action('syncOrganization') private syncOrganization!: (affiliatedOrganizationId: number) => Promise<Organization>
-  @BusinessModule.State('currentBusiness') private currentBusiness!: Business
+  @OrgModule.Action('syncMembership') private syncMembership!: (affiliatedOrganizationId: number) => Promise<Member>
+  @OrgModule.Mutation('setCurrentAccountSettings') private setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
+  @BusinessModule.State('currentBusiness') private currentBusiness: Business
 
   @Prop({ default: false }) isVisible: boolean
   @Prop() affiliatedOrg: Organization
@@ -180,8 +183,16 @@ export default class IncorporationSearchResultView extends Vue {
   private async manageAccountEvent () {
     try {
       await this.syncOrganization(this.affiliatedOrg.id)
+      await this.syncMembership(this.currentOrganization.id)
       await this.addOrgSettings(this.currentOrganization)
-      this.$router.push(`/account/${this.currentOrganization.id}/business`)
+      this.setCurrentAccountSettings({
+        id: this.affiliatedOrg.id,
+        label: this.affiliatedOrg.name,
+        type: 'ACCOUNT',
+        urlpath: '',
+        urlorigin: ''
+      })
+      this.$router.push(`/account/${this.affiliatedOrg.id}/business`)
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log('Error during entity dashboard click event!')
