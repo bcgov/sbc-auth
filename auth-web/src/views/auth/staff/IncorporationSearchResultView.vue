@@ -14,7 +14,7 @@
       </template>
       <template v-slot:[`item.account`]="{ item }">
         <span
-        :class="{ 'account-color-empty': isCurrentOrganizationEmpty }"
+        :class="{ 'account-color-empty': !isThereAnAffiliatedAccount }"
         >
           {{ item.account }}
         </span>
@@ -58,7 +58,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account } from '@/util/constants'
+import { AccessType, Account, SessionStorageKeys } from '@/util/constants'
 import { Business, BusinessSearchResultDto } from '@/models/business'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
@@ -78,16 +78,18 @@ const BusinessModule = namespace('business')
 export default class IncorporationSearchResultView extends Vue {
   @OrgModule.State('currentOrganization') private currentOrganization!: Organization
   @OrgModule.Action('addOrgSettings') private addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
-
+  @OrgModule.Action('syncOrganization') private syncOrganization!: (affiliatedOrganizationId: number) => Promise<Organization>
   @BusinessModule.State('currentBusiness') private currentBusiness!: Business
+
   @Prop({ default: false }) isVisible: boolean
+  @Prop() affiliatedOrg: Organization
 
   $refs: {
     generatePasscodeDialog: GeneratePasscodeView
   }
 
   private get actions (): object[] {
-    if (this.currentOrganization?.name) {
+    if (this.isThereAnAffiliatedAccount) {
       return [
         { title: 'Entity Dashboard',
           icon: 'mdi-view-dashboard',
@@ -115,12 +117,12 @@ export default class IncorporationSearchResultView extends Vue {
   private get searchResult (): BusinessSearchResultDto[] {
     return [{
       name: this.currentBusiness?.name,
-      orgType: this.currentOrganization?.orgType || 'N/A',
-      account: this.currentOrganization?.name || 'No Affiliation',
+      orgType: this.affiliatedOrg?.orgType,
+      account: this.affiliatedOrg?.name || 'No Affiliation',
       businessIdentifier: this.currentBusiness?.businessIdentifier,
       businessNumber: this.currentBusiness?.businessNumber,
-      accessType: this.currentOrganization?.accessType,
-      statusCode: this.currentOrganization?.statusCode
+      accessType: this.affiliatedOrg?.accessType,
+      statusCode: this.affiliatedOrg?.statusCode
     }]
   }
   private readonly headersSearchResult = [
@@ -129,20 +131,27 @@ export default class IncorporationSearchResultView extends Vue {
       align: 'left',
       sortable: false,
       value: 'name',
-      width: '30%'
+      width: '25%'
+    },
+    {
+      text: 'Number',
+      align: 'left',
+      sortable: false,
+      value: 'businessNumber',
+      width: '25%'
     },
     {
       text: 'Type',
       align: 'left',
       sortable: false,
       value: 'orgType',
-      width: '30%'
+      width: '25%'
     },
     {
       text: 'Account',
       sortable: false,
       value: 'account',
-      width: '30%'
+      width: '25%'
     },
     {
       text: 'Actions',
@@ -154,7 +163,7 @@ export default class IncorporationSearchResultView extends Vue {
   ]
 
   private formatType (org:BusinessSearchResultDto): string {
-    let orgTypeDisplay = org?.orgType === Account.BASIC ? 'Basic' : 'Premium'
+    let orgTypeDisplay = org?.orgType ? org?.orgType === Account.BASIC ? 'Basic' : 'Premium' : 'N/A'
     if (org?.accessType === AccessType.ANONYMOUS) {
       return 'Director Search'
     }
@@ -170,8 +179,9 @@ export default class IncorporationSearchResultView extends Vue {
 
   private async manageAccountEvent () {
     try {
+      await this.syncOrganization(this.affiliatedOrg.id)
       await this.addOrgSettings(this.currentOrganization)
-      this.$router.push('/business')
+      this.$router.push(`/account/${this.currentOrganization.id}/business`)
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log('Error during entity dashboard click event!')
@@ -182,8 +192,8 @@ export default class IncorporationSearchResultView extends Vue {
     this.$refs.generatePasscodeDialog.open()
   }
 
-  private get isCurrentOrganizationEmpty (): boolean {
-    return !this.currentOrganization?.name
+  private get isThereAnAffiliatedAccount (): boolean {
+    return !!this.affiliatedOrg?.name
   }
 }
 </script>
