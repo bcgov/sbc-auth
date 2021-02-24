@@ -2,7 +2,7 @@
   <v-alert class="px-8 py-7" :icon="false" prominent type="error">
     <div class="account-alert">
       <div class="account-alert-inner">
-        <v-icon large class="mt-2">mdi-information-outline</v-icon>
+        <v-icon large class="mt-2">mdi-alert-circle-outline</v-icon>
         <div class="account-alert__info ml-7" v-if="isSuspendedForNSF">
           <div class="font-weight-bold">Account Suspended</div>
           <div>Account has been suspended for outstanding balance (NSF).</div>
