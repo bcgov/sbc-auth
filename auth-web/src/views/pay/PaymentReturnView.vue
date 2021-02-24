@@ -36,17 +36,19 @@ export default class PaymentReturnView extends Vue {
             // this.errorMessage = this.$t('payNoParams').toString()
             this.errorType = paymentErrorType.GENERIC_ERROR
             this.backUrl = this.returnUrl // add URL here
-            this.tryAgainURL = `makepayment/${this.paymentId}/${this.returnUrl}` // add base url
+            this.tryAgainURL = `/makepayment/${this.paymentId}/${this.returnUrl}` // add base url
             return
           }
           this.isLoading = true
           PaymentServices.updateTransaction(this.paymentId, this.transactionId, this.payResponseUrl)
             .then(response => {
-              this.returnUrl = encodeURI(response.data.clientSystemUrl) // encoding url
+              this.returnUrl = encodeURIComponent(response.data.clientSystemUrl) // encoding url
               const appendType = this.appendURLtype(this.returnUrl)
               const statusCode = response.data.statusCode
               const paySystemReasonCode = response.data.paySystemReasonCode
               this.isLoading = false
+              // eslint-disable-next-line
+              console.log('this.returnUrl', this.returnUrl)
               if (statusCode === 'COMPLETED') {
                 const status = btoa('COMPLETED') // convert to base 64
                 // all good..go back
@@ -55,7 +57,7 @@ export default class PaymentReturnView extends Vue {
                 const status = btoa(paySystemReasonCode) // convert to base 64
                 this.errorType = paySystemReasonCode
                 this.backUrl = `${this.returnUrl}${appendType}status=${status}`
-                this.tryAgainURL = `makepayment/${this.paymentId}/${this.returnUrl}`
+                this.tryAgainURL = `/makepayment/${this.paymentId}/${this.returnUrl}`
               }
             })
             .catch(response => {
@@ -64,7 +66,7 @@ export default class PaymentReturnView extends Vue {
               this.isLoading = false
               this.errorType = paymentErrorType.GENERIC_ERROR
               this.backUrl = `${this.returnUrl}${appendType}status=${status}`
-              this.tryAgainURL = `makepayment/${this.paymentId}/${this.returnUrl}`
+              this.tryAgainURL = `/makepayment/${this.paymentId}/${this.returnUrl}`
             })
         }
         goToUrl (url:string) {
