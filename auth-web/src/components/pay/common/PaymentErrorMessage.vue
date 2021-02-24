@@ -6,7 +6,7 @@
         <h1 v-html="error.errorTitle"></h1>
         <p class="mt-8 mb-12" v-html="error.errorMessage"></p>
         <div class="btns">
-          <v-btn large link color="primary" :href="tryAgainURL" class="error-btn" data-test="btn-pay-error-tryagain" v-if="error.showOkbtn">Ok</v-btn>
+          <v-btn large link color="primary" :href="backUrl" class="error-btn" data-test="btn-pay-error-tryagain" v-if="error.showOkbtn">Ok</v-btn>
           <v-btn large link color="primary" @click="tryAgain" class="error-btn" data-test="btn-pay-error-tryagain" v-else>Try Again</v-btn>
           <v-btn large outlined link color="primary" class="ml-3 error-btn" :href="backUrl"
             v-if="error.showCancelbtn" data-test="btn-pay-error-cancel">Go Back</v-btn>
