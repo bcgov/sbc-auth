@@ -77,12 +77,12 @@ const BusinessModule = namespace('business')
   }
 })
 export default class IncorporationSearchResultView extends Vue {
-  @OrgModule.State('currentOrganization') private currentOrganization: Organization
+  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
   @OrgModule.Action('addOrgSettings') private addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
   @OrgModule.Action('syncOrganization') private syncOrganization!: (affiliatedOrganizationId: number) => Promise<Organization>
   @OrgModule.Action('syncMembership') private syncMembership!: (affiliatedOrganizationId: number) => Promise<Member>
   @OrgModule.Mutation('setCurrentAccountSettings') private setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
-  @BusinessModule.State('currentBusiness') private currentBusiness: Business
+  @BusinessModule.State('currentBusiness') private currentBusiness!: Business
 
   @Prop({ default: false }) isVisible: boolean
   @Prop() affiliatedOrg: Organization
@@ -185,6 +185,7 @@ export default class IncorporationSearchResultView extends Vue {
       await this.syncOrganization(this.affiliatedOrg.id)
       await this.syncMembership(this.currentOrganization.id)
       await this.addOrgSettings(this.currentOrganization)
+      // required to update currentaccountsettings in order to keep manage-business component up-to-date
       this.setCurrentAccountSettings({
         id: this.affiliatedOrg.id,
         label: this.affiliatedOrg.name,
@@ -192,7 +193,7 @@ export default class IncorporationSearchResultView extends Vue {
         urlpath: '',
         urlorigin: ''
       })
-      this.$router.push(`/account/${this.affiliatedOrg.id}/business`)
+      this.$router.push(`/account/${this.currentOrganization.id}/business`)
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log('Error during entity dashboard click event!')
