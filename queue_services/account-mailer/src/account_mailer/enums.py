@@ -32,6 +32,7 @@ class MessageType(Enum):
     ONLINE_BANKING_PAYMENT = 'bc.registry.payment.Payment'
     PAD_SETUP_FAILED = 'bc.registry.payment.PadSetupFailed'
     PAYMENT_PENDING = 'bc.registry.payment.ob.outstandingInvoice'
+    EJV_FAILED = 'bc.registry.payment.ejvFailed'
 
 
 class SubjectType(Enum):
@@ -46,6 +47,7 @@ class SubjectType(Enum):
     ONLINE_BANKING_PAYMENT_SUBJECT = '[BC Registries and Online Services] Online Banking payment has been received'
     PAD_SETUP_FAILED = '[BC Registries and Online Services] Your Account is Temporarily Suspended'
     PAYMENT_PENDING = '[BC Registries and Online Services] Payment is now due for pending transaction on your account'
+    EJV_FAILED = 'GL disbursement failure for EJV'
 
 
 class TemplateType(Enum):
@@ -62,3 +64,4 @@ class TemplateType(Enum):
     ONLINE_BANKING_UNDER_PAYMENT_TEMPLATE_NAME = 'online_banking_under_payment'
     PAD_SETUP_FAILED_TEMPLATE_NAME = 'pad_setup_failed'
     PAYMENT_PENDING_TEMPLATE_NAME = 'paymanet_pending'
+    EJV_FAILED_TEMPLATE_NAME = 'ejv_failed_email'

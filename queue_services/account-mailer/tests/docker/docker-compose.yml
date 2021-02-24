@@ -49,3 +49,12 @@ services:
       command: >
         mock -p 4010 --host 0.0.0.0
         https://raw.githubusercontent.com/bcgov/sbc-auth/development/docs/docs/api_contract/notify-api-1.0.0.yaml
+
+    minio:
+      image: 'bitnami/minio:latest'
+      ports:
+        - '9000:9000'
+      environment:
+        - MINIO_ACCESS_KEY=minio
+        - MINIO_SECRET_KEY=minio123
+        - MINIO_DEFAULT_BUCKETS=cgi-ejv
