@@ -42,7 +42,7 @@ export default class PaymentReturnView extends Vue {
           this.isLoading = true
           PaymentServices.updateTransaction(this.paymentId, this.transactionId, this.payResponseUrl)
             .then(response => {
-              this.returnUrl = encodeURIComponent(response.data.clientSystemUrl) // encoding url
+              this.returnUrl = response.data.clientSystemUrl // encoding url
               const appendType = this.appendURLtype(this.returnUrl)
               const statusCode = response.data.statusCode
               const paySystemReasonCode = response.data.paySystemReasonCode
@@ -55,7 +55,7 @@ export default class PaymentReturnView extends Vue {
                 const status = btoa(paySystemReasonCode) // convert to base 64
                 this.errorType = paySystemReasonCode
                 this.backUrl = `${this.returnUrl}${appendType}status=${status}`
-                this.tryAgainURL = `/makepayment/${this.paymentId}/${this.returnUrl}`
+                this.tryAgainURL = `/makepayment/${this.paymentId}/${encodeURIComponent(this.returnUrl)}`
               }
             })
             .catch(response => {
