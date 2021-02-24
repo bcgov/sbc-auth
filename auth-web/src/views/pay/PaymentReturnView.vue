@@ -47,8 +47,6 @@ export default class PaymentReturnView extends Vue {
               const statusCode = response.data.statusCode
               const paySystemReasonCode = response.data.paySystemReasonCode
               this.isLoading = false
-              // eslint-disable-next-line
-              console.log('this.returnUrl', this.returnUrl)
               if (statusCode === 'COMPLETED') {
                 const status = btoa('COMPLETED') // convert to base 64
                 // all good..go back
