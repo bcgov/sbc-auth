@@ -185,14 +185,6 @@ export default class IncorporationSearchResultView extends Vue {
       await this.syncOrganization(this.affiliatedOrg.id)
       await this.syncMembership(this.currentOrganization.id)
       await this.addOrgSettings(this.currentOrganization)
-      // required to update currentaccountsettings in order to keep manage-business component up-to-date
-      this.setCurrentAccountSettings({
-        id: this.affiliatedOrg.id,
-        label: this.affiliatedOrg.name,
-        type: 'ACCOUNT',
-        urlpath: '',
-        urlorigin: ''
-      })
       this.$router.push(`/account/${this.currentOrganization.id}/business`)
     } catch (error) {
       // eslint-disable-next-line no-console
