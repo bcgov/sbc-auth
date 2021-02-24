@@ -13,6 +13,8 @@ const mockSession = {
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
+document.body.setAttribute('data-app', 'true')
+
 const router = new VueRouter()
 const vuetify = new Vuetify({})
 
@@ -66,5 +68,28 @@ describe('GeneratePasscodeView.vue', () => {
   it('contains email address input to send', () => {
     wrapper.vm.isDialogOpen = true
     expect(wrapper.find('[data-test="input-passcode-emailAddress-0"]')).toBeTruthy()
+  })
+
+  it('close/cancel calls the close() button', () => {
+    wrapper.vm.isDialogOpen = true
+    const stub = jest.fn()
+    wrapper.setMethods({ close: stub })
+    wrapper.find('[data-test="btn-close-generate-passcode-dialog-title"]').trigger('click')
+    expect(wrapper.vm.close).toBeCalled()
+    wrapper.find('[data-test="btn-close-generate-passcode-dialog"]').trigger('click')
+    expect(wrapper.vm.close).toBeCalled()
+  })
+
+  it('email Rules', () => {
+    wrapper.vm.isDialogOpen = true
+    wrapper.vm.emailAddresses = [{
+      value: '12345'
+    }]
+    expect(wrapper.vm.isFormValid()).toBeFalsy()
+    expect(wrapper.find('[data-test="btn-generate-passcode-send"]').element.disabled).toBeTruthy()
+    wrapper.vm.emailAddresses = [{
+      value: 'test@dal.ca'
+    }]
+    expect(wrapper.vm.isFormValid()).toBeTruthy()
   })
 })
