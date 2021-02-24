@@ -49,6 +49,7 @@ export default class PaymentReturnView extends Vue {
               const appendType = this.appendURLtype(this.returnUrl)
               const statusCode = response.data.statusCode
               const paySystemReasonCode = response.data.paySystemReasonCode
+              this.isLoading = false
               if (statusCode === 'COMPLETED') {
                 const status = btoa('COMPLETED') // convert to base 64
                 // all good..go back
