@@ -36,7 +36,7 @@ export default class PaymentReturnView extends Vue {
             // this.errorMessage = this.$t('payNoParams').toString()
             this.errorType = paymentErrorType.GENERIC_ERROR
             this.backUrl = this.returnUrl // add URL here
-            this.tryAgainURL = `/makepayment/${this.paymentId}/${this.returnUrl}` // add base url
+            this.tryAgainURL = `/makepayment/${this.paymentId}/${encodeURIComponent(this.returnUrl)}` // add base url
             return
           }
           this.isLoading = true
@@ -64,7 +64,7 @@ export default class PaymentReturnView extends Vue {
               this.isLoading = false
               this.errorType = paymentErrorType.GENERIC_ERROR
               this.backUrl = `${this.returnUrl}${appendType}status=${status}`
-              this.tryAgainURL = `/makepayment/${this.paymentId}/${this.returnUrl}`
+              this.tryAgainURL = `/makepayment/${this.paymentId}/${encodeURIComponent(this.returnUrl)}`
             })
         }
         goToUrl (url:string) {
