@@ -824,11 +824,6 @@ export default class OrgModule extends VuexModule {
     const businessIdentifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)
     const response = await OrgService.getOrgForAffiliate(businessIdentifier)
     const organization = response?.data?.orgs[0]
-    if (organization && organization?.name) {
-      this.context.commit('setCurrentOrganization', organization)
-    } else {
-      this.context.commit('setCurrentOrganization', undefined)
-    }
     return organization
   }
 }

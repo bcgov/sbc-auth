@@ -26,14 +26,7 @@ describe('IncorporationSearchResultView.vue', () => {
   localVue.use(Vuex)
   const affiliatedOrgModule = {
     namespaced: true,
-    state: {
-      currentOrganization: {
-        name: 'test',
-        orgType: 'Active',
-        accessType: 'Active',
-        statusCode: 'Active'
-      }
-    },
+    state: {},
     actions: {
       addOrgSettings: jest.fn()
     }
@@ -72,6 +65,14 @@ describe('IncorporationSearchResultView.vue', () => {
       vuetify,
       localVue,
       router,
+      propsData: {
+        affiliatedOrg: {
+          name: 'test',
+          orgType: 'Active',
+          accessType: 'Active',
+          statusCode: 'Active'
+        }
+      },
       mocks: {
         $t: (mock) => mock
       }
@@ -82,7 +83,6 @@ describe('IncorporationSearchResultView.vue', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
     expect(searchResult[0].businessIdentifier).toBe('123123')
     expect(searchResult[0].businessNumber).toBe('1231231')
-    expect(searchResult[0].accessType).toBe('Active')
     expect(searchResult[0].statusCode).toBe('Active')
     expect(searchResult[0].name).toBe('affiliated_test_business')
     expect(searchResult[0].orgType).toBe('Active')
@@ -130,7 +130,7 @@ describe('IncorporationSearchResultView.vue', () => {
     })
 
     const searchResult = wrapper.vm.searchResult
-    expect(searchResult[0].orgType).toBe('N/A')
+    expect(wrapper.vm.formatType(searchResult[0])).toBe('N/A')
     expect(searchResult[0].name).toBe('unaffiliated_test_business')
     expect(searchResult[0].account).toBe('No Affiliation')
     expect(searchResult[0].businessIdentifier).toBe('123123')
