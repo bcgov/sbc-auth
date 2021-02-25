@@ -5,7 +5,7 @@
         Payment Methods
       </h2>
       <p class="mt-3 payment-page-sub">
-        Manage your pre-authorized debit payments for this account.
+        Manage your payment method for this account.
       </p>
     </div>
     <PaymentMethods
