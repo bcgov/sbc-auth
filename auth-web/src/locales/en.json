@@ -93,7 +93,7 @@
   "paymentCancelTitle": "Payment Canceled",
   "paymentCancelSubText": "You have cancelled your payment with credit card. Please try again or your <br />transaction state will change to \"pending\" ",
   "paymentDeclinedTitle": "Payment Declined",
-  "paymentDeclinedSubText": "Your credit card has expired, so the payment was declined.<br /> Please try again by updating payment information",
+  "paymentDeclinedSubText": "Sorry, your payment has failed. The payment was declined.<br />Please review your payment information and try again.",
   "paymentInvalidErrorTitle": "Payment Error",
   "paymentInvalidErrorSubText": "Transaction was cancelled because of an <strong>invalid credit card.</strong><br /> Please review your payment information and try again",
   "paymentExpiredCardErrorTitle": "Payment Declined",
