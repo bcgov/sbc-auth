@@ -45,9 +45,9 @@
         >Search</v-btn>
       </v-form>
 
-      <div v-if="currentBusiness">
-        <IncorporationSearchResultView :isVisible = "isVisible"></IncorporationSearchResultView>
-      </div>
+      <template>
+        <IncorporationSearchResultView :isVisible = "canViewIncorporationSearchResult" :affiliatedOrg = "affiliatedOrg"></IncorporationSearchResultView>
+      </template>
     </v-card>
 
     <!-- Director search -->
@@ -105,7 +105,8 @@ export default class StaffDashboardView extends Vue {
   private searchedBusinessNumber = ''
   private searchActive = false
   private errorMessage = ''
-  private isVisible: boolean = false
+  private canViewIncorporationSearchResult: boolean = false
+  private affiliatedOrg = {}
 
   private incorpNumRules = [
     v => !!v || 'Incorporation Number is required',
@@ -140,14 +141,10 @@ export default class StaffDashboardView extends Vue {
         // Search for business, action will set session storage
         await this.searchBusiness(this.businessNumber)
         this.errorMessage = ''
-        await this.updateStore()
-
-        // Redirect to the coops UI
-        // window.location.href = `${ConfigHelper.getCoopsURL()}${this.businessNumber}`
+        await this.updateCurrentBusiness()
       } catch (exception) {
         this.searchedBusinessNumber = this.businessNumber
         this.resetCurrentBusiness()
-        this.isVisible = false
         this.errorMessage = this.$t('noIncorporationNumberFound').toString()
       } finally {
         this.searchActive = false
@@ -155,16 +152,16 @@ export default class StaffDashboardView extends Vue {
     }
   }
 
-  async updateStore () {
+  async updateCurrentBusiness () {
     try {
       // Search for business, action will set session storage
       await this.loadBusiness()
-      await this.getOrganizationForAffiliate()
-      this.isVisible = true
+      this.affiliatedOrg = await this.getOrganizationForAffiliate()
+      this.canViewIncorporationSearchResult = true
     } catch (exception) {
       // eslint-disable-next-line no-console
       console.log('Error during search incorporations event!')
-      this.isVisible = false
+      this.canViewIncorporationSearchResult = false
       this.resetCurrentBusiness()
     }
   }
