@@ -1,4 +1,5 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
+
 import AccountPaymentMethods from '@/components/auth/account-settings/payment/AccountPaymentMethods.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
@@ -69,5 +70,13 @@ describe('AccountPaymentMethods.vue', () => {
 
   it('renders the components properly and address is being shown', () => {
     expect(wrapper.find(AccountPaymentMethods).exists()).toBe(true)
+  })
+
+  it('renders proper header content', () => {
+    expect(wrapper.find('h2').text()).toBe('Payment Methods')
+  })
+
+  it('renders sub text content', () => {
+    expect(wrapper.find('p').text()).toBe('Manage your payment method for this account.')
   })
 })
