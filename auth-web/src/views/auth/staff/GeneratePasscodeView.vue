@@ -20,7 +20,7 @@
          </ul>
          <p>The new passcode will be sent to the email below:</p>
         </div>
-        <v-form class="flex-grow-1 flex-shrink-0" style="min-height: 5em; max-height: 100%;" ref="generatePasscodeForm" id="generatePasscodeForm">
+        <v-form class="d-flex flex-column flex-grow-1 flex-shrink-0" style="min-height: 5em; max-height: 100%;" ref="generatePasscodeForm" id="generatePasscodeForm">
           <div v-for="(emailAddress, index) in emailAddresses" :key="index">
             <v-text-field
             filled
@@ -37,7 +37,7 @@
             <v-btn
             v-show="index > 0"
             icon
-            class="remove-btn mt-0"
+            class="mt-3 ml-1 remove-btn"
             @click="removeEmailAddress(index)"
             :data-test="getIndexedTag('btn-remove-passcode-emailAddress', index)"
             >
@@ -121,10 +121,8 @@ export default class GeneratePasscodeView extends Vue {
 .remove-btn {
     margin-left: 0.25rem;
     width: 7rem;
-    min-height: 54px;
+    height: 60px;
     vertical-align: top;
     font-weight: bold;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
 }
 </style>
