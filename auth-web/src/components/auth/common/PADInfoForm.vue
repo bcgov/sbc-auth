@@ -42,10 +42,10 @@
               <v-card-text>
                 <v-img src="../../../assets/img/cheque-sample.jpg" lazy-src></v-img>
                 <ol class="my-4">
-                  <li>Cheque Number (Not required)</li>
-                  <li>Transit (Branch) Number</li>
-                  <li>Bank (Institution) Number</li>
-                  <li>Bank Account Number</li>
+                  <li>Cheque number - not required</li>
+                  <li>Transit (branch) number - 5 digits</li>
+                  <li>Bank (institution) number - 3 digits</li>
+                  <li>Bank account number - as shown on your cheque</li>
                 </ol>
               </v-card-text>
             </v-card>
