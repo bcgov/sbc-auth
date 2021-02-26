@@ -39,6 +39,7 @@ from flask import Flask  # pylint: disable=wrong-import-order
 from account_mailer import config  # pylint: disable=wrong-import-order
 from account_mailer.auth_utils import get_member_emails
 from account_mailer.email_processors import common_mailer  # pylint: disable=wrong-import-order
+from account_mailer.email_processors import ejv_failures  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import pad_confirmation  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import payment_completed  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import refund_requested  # pylint: disable=wrong-import-order
@@ -171,12 +172,16 @@ async def process_event(event_message: dict, flask_app):
             }
             email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject,
                                                **args)
+        elif message_type == MessageType.EJV_FAILED.value:
+            email_msg = event_message.get('data')
+            email_dict = ejv_failures.process(email_msg)
+
         if email_dict:
             logger.debug('Extracted email msg Recipient: %s ', email_dict.get('recipients', ''))
             process_email(email_dict, FLASK_APP, token)
         else:
-            # TODO probably an unnhandled event.handle better
-            logger.error('No email content generate----------------------')
+            # TODO probably an unhandled event.handle better
+            logger.error('No email content generated')
 
 
 def process_email(email_dict: dict, flask_app: Flask, token: str):  # pylint: disable=too-many-branches
