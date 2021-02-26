@@ -19,6 +19,7 @@ from entity_queue_common.service_utils import subscribe_to_queue
 
 from account_mailer.enums import MessageType, SubjectType
 from account_mailer.services import notification_service
+from account_mailer.services.minio_service import MinioService
 
 from . import factory_membership_model, factory_org_model, factory_user_model_with_contact
 from .utils import helper_add_event_to_queue, helper_add_ref_req_to_queue
@@ -468,3 +469,45 @@ async def test_payment_pending_emails(app, session, stan_server, event_loop, cli
         await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
                                         msg_type=MessageType.PAYMENT_PENDING.value,
                                         mail_details=mail_details)
+
+
+@pytest.mark.asyncio
+async def test_ejv_failure_emails(app, session, stan_server, event_loop, client_id, events_stan, future):
+    """Assert that events can be retrieved and decoded from the Queue."""
+    # Call back for the subscription
+    from account_mailer.worker import cb_subscription_handler
+
+    events_subject = 'test_subject'
+    events_queue = 'test_queue'
+    events_durable_name = 'test_durable'
+    with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
+        # register the handler to test it
+        await subscribe_to_queue(events_stan,
+                                 events_subject,
+                                 events_queue,
+                                 events_durable_name,
+                                 cb_subscription_handler)
+
+        minio_file_name = 'FEEDBACK.1234567890'
+        minio_bucket = 'cgi-ejv'
+
+        with open(minio_file_name, 'a+') as jv_file:
+            jv_file.write('TEST')
+            jv_file.close()
+
+        # Now upload the ACK file to minio and publish message.
+        with open(minio_file_name, 'rb') as f:
+            MinioService.put_minio_file(minio_bucket, minio_file_name, f.read())
+
+        # add an event to queue
+        mail_details = {
+            'fileName': minio_file_name,
+            'minioLocation': minio_bucket
+        }
+        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
+                                        msg_type=MessageType.EJV_FAILED.value,
+                                        mail_details=mail_details)
+
+        mock_send.assert_called
+        assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
+        assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.EJV_FAILED.value
