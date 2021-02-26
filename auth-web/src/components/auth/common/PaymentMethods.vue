@@ -135,11 +135,13 @@ const PAYMENT_METHODS = {
         <p><strong>Online banking is currently limited to the following institutions:</strong></p>
         <p>
           <ul>
+            <li>Bank of Montreal</li>
             <li>Central 1 Credit Union</li>
             <li>Coast Capital Savings</li>
             <li>HSBC</li>
             <li>Royal Bank of Canada (RBC)</li>
             <li>Scotiabank</li>
+            <li>TD Canada Trust (TD)</li>
           </ul>
         </p>
         <p>
