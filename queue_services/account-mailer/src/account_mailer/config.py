@@ -122,7 +122,7 @@ class _Config():  # pylint: disable=too-few-public-methods
     MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY')
     MINIO_ACCESS_SECRET = os.getenv('MINIO_ACCESS_SECRET')
     MINIO_BUCKET = os.getenv('MINIO_BUCKET', 'account-mailer')
-    MINIO_SECURE = True
+    MINIO_SECURE = os.getenv('MINIO_SECURE', 'true').lower() == 'true'
 
     REFUND_REQUEST = {
         'recipients': os.getenv('REFUND_REQUEST_RECIPIENTS', ''),
@@ -139,6 +139,9 @@ class _Config():  # pylint: disable=too-few-public-methods
     # If any value is present in this flag, starts up a keycloak docker
     USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)
     USE_DOCKER_MOCK = os.getenv('USE_DOCKER_MOCK', None)
+
+    # BC online admin email
+    BCOL_ADMIN_EMAIL = os.getenv('BCOL_ADMIN_EMAIL', 'test@test.com')
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
@@ -175,6 +178,14 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     # Service account details
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
+    BCOL_ADMIN_EMAIL = 'test@test.com'
+
+    # Minio variables
+    MINIO_ENDPOINT = 'localhost:9000'
+    MINIO_ACCESS_KEY = 'minio'
+    MINIO_ACCESS_SECRET = 'minio123'
+    MINIO_BUCKET_NAME = 'cgi-ejv'
+    MINIO_SECURE = False
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
