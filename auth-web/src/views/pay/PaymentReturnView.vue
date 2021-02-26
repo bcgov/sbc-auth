@@ -26,7 +26,7 @@ export default class PaymentReturnView extends Vue {
         @Prop() transactionId: string
         @Prop() payResponseUrl: string
         returnUrl:string = ''
-        isLoading:boolean = false
+        isLoading:boolean = true
         errorType :string = paymentErrorType.GENERIC_ERROR // 'GENERIC_ERROR'
         backUrl:string = ''
         tryAgainURL:string = ''
@@ -46,12 +46,12 @@ export default class PaymentReturnView extends Vue {
               const appendType = this.appendURLtype(this.returnUrl)
               const statusCode = response.data.statusCode
               const paySystemReasonCode = response.data.paySystemReasonCode
-              this.isLoading = false
               if (statusCode === 'COMPLETED') {
                 const status = btoa('COMPLETED') // convert to base 64
                 // all good..go back
                 this.goToUrl(`${this.returnUrl}${appendType}status=${status}`) // append success status
               } else {
+                this.isLoading = false
                 const status = btoa(paySystemReasonCode) // convert to base 64
                 this.errorType = paySystemReasonCode
                 this.backUrl = `${this.returnUrl}${appendType}status=${status}`
