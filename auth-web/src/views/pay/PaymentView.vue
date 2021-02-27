@@ -1,10 +1,11 @@
 <template>
   <div data-test="div-payment-view">
     <v-container v-if="showLoading" data-test="div-payment-view-loading">
-      <v-layout row flex-column justify-center align-center class="py-12">
+      <v-layout row flex-column justify-center align-center class="py-12 loading-progressbar">
         <v-progress-circular
           color="primary"
-          :size="50"
+          :size="80"
+          :width="5"
           indeterminate
           class="mt-12"
         ></v-progress-circular>
@@ -225,4 +226,5 @@ export default class PaymentView extends Vue {
   font-weight: 600;
   margin-top: 14px;
 }
+
 </style>
