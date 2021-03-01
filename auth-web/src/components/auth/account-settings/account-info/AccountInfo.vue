@@ -163,7 +163,6 @@
     ref="suspendAccountDialog"
     icon="mdi-check"
     :title="dialogTitle"
-    :text="dialogText"
     dialog-class="notify-dialog"
     max-width="680"
     :isPersistent="true"
@@ -171,6 +170,17 @@
     >
       <template v-slot:icon>
         <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      </template>
+      <template v-slot:text>
+        <p class="px-10">{{ dialogText }}<br/></p>
+        <v-select
+          class="px-10"
+          filled
+          label="Reason for Suspension"
+          req
+          :rules="suspensionSelectRules"
+          :v-if="isAccountStatusActive"
+        />
       </template>
       <template v-slot:actions>
         <v-btn
@@ -285,6 +295,10 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     return Pages.EDIT_ACCOUNT_TYPE
   }
 
+  private suspensionSelectRules = [
+    v => !!v || 'A reason for suspension is required'
+  ]
+
   private async mounted () {
     const accountSettings = this.getAccountFromSession()
     await this.syncOrganization(accountSettings.id)
@@ -320,7 +334,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private showSuspendAccountDialog (status) {
     if (status === AccountStatus.ACTIVE) {
       this.dialogTitle = 'Suspend Account'
-      this.dialogText = 'Are you sure you want to suspend access to this account?<br/>Team members will be restricted from access until the account is unsuspended.'
+      this.dialogText = 'If you suspend access to this account, team members will also be restricted from access until the account is unsuspended.'
     } else {
       this.dialogTitle = 'Unsuspend Account'
       this.dialogText = 'Are you sure you want to unsuspend access to this account?'
