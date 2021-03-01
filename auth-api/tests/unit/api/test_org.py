@@ -429,6 +429,7 @@ def test_get_org_suspended_reason(client, jwt, session, keycloak_mock):  # pylin
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(rv.json, 'org_response')[0]
     dictionary = json.loads(rv.data)
+    assert dictionary['suspendedReasonCode'] == suspended_reason_code
     assert dictionary['suspendedReasonCode'] == SuspensionReasonCode.COURT_ORDER.name
 
 
