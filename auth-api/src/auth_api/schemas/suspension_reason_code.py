@@ -11,23 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Manager for org schema and export."""
+"""Manager for suspension reason schema and export."""
 
-from marshmallow import fields
-
-from auth_api.models import Org as OrgModel
+from auth_api.models import SuspensionReasonCode as SuspensionReasonCodeModel
 
 from .base_schema import BaseSchema
 
 
-class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
-    """This is the schema for the Org model."""
+class SuspensionReasonCodeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the SuspensionReasonCode model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the Org fields to a default schema."""
+        """Maps all of the SuspensionReasonCode fields to a default schema."""
 
-        model = OrgModel
-        exclude = ('members', 'contacts', 'invitations', 'affiliated_entities', 'suspension_reason')
-
-    org_type = fields.Pluck('OrgTypeSchema', 'code', data_key='orgType')
-    status_code = fields.String(data_key='status_code')
+        model = SuspensionReasonCodeModel
