@@ -1483,7 +1483,7 @@ def test_org_suspended_reason(client, jwt, session, keycloak_mock):  # pylint:di
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(rv.json, 'org_response')[0]
     dictionary = json.loads(rv.data)
-    assert dictionary['suspendedReasonCode'] == SuspensionReasonCode.OWNER_CHANGE.name
+    assert dictionary['suspensionReasonCode'] == SuspensionReasonCode.OWNER_CHANGE.name
 
 
 def test_search_orgs_with_pending_affidavits(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
