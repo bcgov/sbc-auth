@@ -413,6 +413,25 @@ def test_get_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     assert dictionary['id'] == org_id
 
 
+def test_get_org_suspended_reason(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be retrieved via GET."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_suspended_reason),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    suspended_reason_code = dictionary['suspendedReasonCode']
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
+    rv = client.get('/api/v1/orgs/{}'.format(org_id),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'org_response')[0]
+    dictionary = json.loads(rv.data)
+    assert dictionary['suspendedReasonCode'] == SuspensionReasonCode.COURT_ORDER.name
+
+
 def test_get_org_no_auth_returns_401(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org cannot be retrieved without an authorization header."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
