@@ -443,7 +443,6 @@ class TestOrgInfo(dict, Enum):
         'name': 'My Test Org',
         'accessType': AccessType.REGULAR.value
     }
-    org_suspended_reason = {'name': 'My Test Org', 'suspensionReasonCode': 'COURT_ORDER'}
 
     @staticmethod
     def bcol_linked():
