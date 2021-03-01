@@ -20,8 +20,10 @@ from .base_model import BaseCodeModel
 
 
 class SuspensionReasonCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
-    """Suspension Reason code table to store all the available reasons to suspend an account supported by auth
-    system. """
+    """Suspension Reason code table to store all the available reasons to suspend an account.
+
+    That is supported by auth system.
+    """
 
     __tablename__ = 'suspension_reason_codes'
 
