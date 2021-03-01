@@ -52,6 +52,7 @@ from .product_type_code import ProductTypeCode
 from .user import User
 from .user_settings import UserSettings
 from .user_status_code import UserStatusCode
+from .suspension_reason_code import SuspensionReasonCode
 
 
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)

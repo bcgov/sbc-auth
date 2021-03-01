@@ -60,6 +60,11 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
                                  primaryjoin='and_(Org.id == AccountLoginOptions.org_id, '
                                              'AccountLoginOptions.is_active == True)', lazy='select')
     suspended_on = Column(DateTime, nullable=True)
+    suspension_reason_code = Column(String(15), ForeignKey('suspension_reason_codes.code',
+                                                           ondelete='SET NULL',
+                                                           name='orgs_suspension_reason_code_fkey'),
+                                    nullable=True)
+    suspension_reason = relationship('SuspensionReasonCode')
 
     @classmethod
     def create_from_dict(cls, org_info: dict):

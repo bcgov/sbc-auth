@@ -165,6 +165,15 @@ class OrgStatus(Enum):
     SUSPENDED = 'SUSPENDED'  # this is basically staff suspended for now
 
 
+class SuspensionReasonCode(Enum):
+    """Suspension Reason Code for suspending an account."""
+
+    OWNER_CHANGE = 'Account Ownership Change'
+    DISPUTE = 'Account Ownership Dispute'
+    COURT_ORDER = 'Court Order'
+    FRAUDULENT = 'Fraudulent Activity'
+
+
 class InvitationType(Enum):
     """Invitation type."""
 
