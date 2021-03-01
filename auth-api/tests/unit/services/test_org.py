@@ -42,7 +42,7 @@ from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, ProductCode, PaymentMethod
+from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, ProductCode, PaymentMethod, SuspensionReasonCode
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -280,11 +280,15 @@ def test_suspend_org(session):  # pylint:disable=unused-argument
     user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
 
-    updated_org = OrgService.change_org_status(org._model.id, OrgStatus.SUSPENDED.value, token_info=token_info)
+    updated_org = OrgService.change_org_status(org._model.id, OrgStatus.SUSPENDED.value,
+                                               SuspensionReasonCode.CHANGE.name, token_info=token_info)
     assert updated_org.as_dict()['status_code'] == OrgStatus.SUSPENDED.value
+    assert updated_org.as_dict()['suspension_reason_code'] == SuspensionReasonCode.CHANGE.name
 
-    updated_org = OrgService.change_org_status(org._model.id, OrgStatus.ACTIVE.value, token_info=token_info)
+    updated_org = OrgService.change_org_status(org._model.id, OrgStatus.ACTIVE.value,
+                                               SuspensionReasonCode.DISPUTE.name, token_info=token_info)
     assert updated_org.as_dict()['status_code'] == OrgStatus.ACTIVE.value
+    assert updated_org.as_dict()['suspension_reason_code'] == SuspensionReasonCode.DISPUTE.name
 
 
 def test_update_duplicate_org(session):  # pylint:disable=unused-argument
