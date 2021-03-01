@@ -28,7 +28,7 @@ from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
-from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus, PaymentMethod
+from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus, PaymentMethod, SuspensionReasonCode
 from tests.utilities.factory_scenarios import (
     TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
     TestPaymentMethodInfo)
@@ -1432,9 +1432,11 @@ def test_suspend_unsuspend(client, jwt, session, keycloak_mock):  # pylint:disab
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
 
     org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
-                                      data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value}),
+                                      data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value,
+                                                       'suspensionReasonCode': SuspensionReasonCode.OWNER_CHANGE.name}),
                                       headers=headers, content_type='application/json')
     assert org_patch_response.json.get('orgStatus') == OrgStatus.SUSPENDED.value
+    assert org_patch_response.json.get('suspensionReasonCode') == SuspensionReasonCode.OWNER_CHANGE.name
 
     org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
                                       data=json.dumps({'statusCode': OrgStatus.ACTIVE.value}),

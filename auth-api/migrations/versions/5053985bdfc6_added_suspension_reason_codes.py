@@ -39,9 +39,9 @@ def upgrade():
     op.bulk_insert(
         suspension_reason_codes,
         [
-            {'code': 'CHANGE', 'description': 'Account Ownership Change', 'default': True},
+            {'code': 'OWNER_CHANGE', 'description': 'Account Ownership Change', 'default': True},
             {'code': 'DISPUTE', 'description': 'Account Ownership Dispute', 'default': False},
-            {'code': 'COURTORDER', 'description': 'Court Order', 'default': False},
+            {'code': 'COURT_ORDER', 'description': 'Court Order', 'default': False},
             {'code': 'FRAUDULENT', 'description': 'Fraudulent Activity', 'default': False}
         ]
     )

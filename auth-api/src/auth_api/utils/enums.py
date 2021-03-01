@@ -168,9 +168,9 @@ class OrgStatus(Enum):
 class SuspensionReasonCode(Enum):
     """Suspension Reason Code for suspending an account."""
 
-    CHANGE = 'Account Ownership Change'
+    OWNER_CHANGE = 'Account Ownership Change'
     DISPUTE = 'Account Ownership Dispute'
-    COURTORDER = 'Court Order'
+    COURT_ORDER = 'Court Order'
     FRAUDULENT = 'Fraudulent Activity'
 
 
