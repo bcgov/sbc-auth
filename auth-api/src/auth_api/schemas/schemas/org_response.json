@@ -228,6 +228,15 @@
             "examples": [
                 "ACTIVE"
             ]
+        },
+        "suspensionReasonCode": {
+            "$id": "#/properties/suspensionReasonCode",
+            "type": "string",
+            "title": "Suspension Reason Code",
+            "default": "",
+            "examples": [
+                "OWNER_CHANGE"
+            ]
         }
     },
     "additionalProperties": true

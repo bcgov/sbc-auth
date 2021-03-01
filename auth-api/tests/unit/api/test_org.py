@@ -28,7 +28,7 @@ from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
-from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus, PaymentMethod
+from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus, PaymentMethod, SuspensionReasonCode
 from tests.utilities.factory_scenarios import (
     TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
     TestPaymentMethodInfo)
@@ -1432,9 +1432,11 @@ def test_suspend_unsuspend(client, jwt, session, keycloak_mock):  # pylint:disab
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
 
     org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
-                                      data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value}),
+                                      data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value,
+                                                       'suspensionReasonCode': SuspensionReasonCode.OWNER_CHANGE.name}),
                                       headers=headers, content_type='application/json')
     assert org_patch_response.json.get('orgStatus') == OrgStatus.SUSPENDED.value
+    assert org_patch_response.json.get('suspensionReasonCode') == SuspensionReasonCode.OWNER_CHANGE.name
 
     org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
                                       data=json.dumps({'statusCode': OrgStatus.ACTIVE.value}),
@@ -1452,6 +1454,36 @@ def test_suspend_unsuspend(client, jwt, session, keycloak_mock):  # pylint:disab
                                       data=json.dumps({'statusCode': OrgStatus.ACTIVE.value}),
                                       headers=public_headers, content_type='application/json')
     assert org_patch_response.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+
+def test_org_suspended_reason(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be retrieved via GET."""
+    public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
+    client.post('/api/v1/users', headers=public_headers, content_type='application/json')
+
+    org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()),
+                               headers=public_headers,
+                               content_type='application/json')
+    dictionary = json.loads(org_response.data)
+    org_id = dictionary['id']
+    assert org_response.status_code == http_status.HTTP_201_CREATED
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
+
+    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
+                                      data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value,
+                                                       'suspensionReasonCode': SuspensionReasonCode.OWNER_CHANGE.name}),
+                                      headers=headers, content_type='application/json')
+    assert org_patch_response.json.get('orgStatus') == OrgStatus.SUSPENDED.value
+    assert org_patch_response.json.get('suspensionReasonCode') == SuspensionReasonCode.OWNER_CHANGE.name
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
+    rv = client.get('/api/v1/orgs/{}'.format(org_id),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'org_response')[0]
+    dictionary = json.loads(rv.data)
+    assert dictionary['suspensionReasonCode'] == SuspensionReasonCode.OWNER_CHANGE.name
 
 
 def test_search_orgs_with_pending_affidavits(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
