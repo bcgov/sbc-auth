@@ -2,7 +2,10 @@
     <div id="app">
         <v-container>
             <v-layout row justify-center align-center>
-                <v-progress-circular color="primary" :size="50" indeterminate v-if="isLoading"></v-progress-circular>
+                <v-layout row justify-center align-center column class="loading-progressbar"  v-if="isLoading" >
+                <v-progress-circular color="primary" :size="100" :width="8" indeterminate ></v-progress-circular>
+                <div class="mt-6 font-italic font-weight-bold">Processing your payment ...</div>
+                </v-layout>
                 <PaymentErrorMessage  :errorType="errorType" :tryAgainURL="tryAgainURL" :backUrl="backUrl" v-else/>
             </v-layout>
         </v-container>
@@ -135,4 +138,5 @@ export default class PaymentReturnView extends Vue {
     .error-dialog-padding{
         margin-left: 1rem;
     }
+
 </style>
