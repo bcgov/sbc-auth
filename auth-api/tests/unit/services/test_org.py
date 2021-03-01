@@ -42,7 +42,9 @@ from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, ProductCode, PaymentMethod, SuspensionReasonCode
+from auth_api.utils.enums import (
+    AccessType, LoginSource, OrgStatus,
+    OrgType, ProductCode, PaymentMethod, SuspensionReasonCode)
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
