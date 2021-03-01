@@ -290,7 +290,6 @@ def test_suspend_org(session):  # pylint:disable=unused-argument
     updated_org = OrgService.change_org_status(org._model.id, OrgStatus.ACTIVE.value,
                                                SuspensionReasonCode.DISPUTE.name, token_info=token_info)
     assert updated_org.as_dict()['status_code'] == OrgStatus.ACTIVE.value
-    assert updated_org.as_dict()['suspension_reason_code'] == SuspensionReasonCode.DISPUTE.name
 
 
 def test_update_duplicate_org(session):  # pylint:disable=unused-argument
