@@ -83,13 +83,6 @@ export enum AccountStatus {
     SUSPENDED = 'SUSPENDED'
 }
 
-export enum SuspensionReason {
-    CHANGE = 'Account Ownership Change',
-    DISPUTE = 'Account Ownership Dispute',
-    COURTORDER = 'Court Order',
-    FRAUDULENT = 'Fraudulent Activity'
-}
-
 export enum IdpHint {
     BCROS = 'bcros',
     IDIR = 'idir',
