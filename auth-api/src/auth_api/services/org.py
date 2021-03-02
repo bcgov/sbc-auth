@@ -684,7 +684,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return False
 
     @staticmethod
-    def change_org_status(org_id: int, status_code, token_info: Dict = None):
+    def change_org_status(org_id: int, status_code, suspension_reason_code, token_info: Dict = None):
         """Update the status of the org.
 
         Used now for suspending/activate account.
@@ -704,6 +704,7 @@ class Org:  # pylint: disable=too-many-public-methods
         org_model.decision_made_by = user.username  # not sure if a new field is needed for this.
         if status_code == OrgStatus.SUSPENDED.value:
             org_model.suspended_on = datetime.today()
+            org_model.suspension_reason_code = suspension_reason_code
         org_model.save()
         current_app.logger.debug('change_org_status>')
         return Org(org_model)
