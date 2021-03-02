@@ -3,19 +3,10 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { Code } from '@/models/Code'
 import CodesService from '@/services/codes.service'
 
-@Module({
-  name: 'codes',
-  namespaced: true
-})
+@Module({ namespaced: true })
 export default class CodesModule extends VuexModule {
-    suspensionReasonCodeForActiveAccount: Code = undefined
     suspensionReasonCodes: Code[] = []
-    private suspensionReasonCodeTable: string = 'suspension_reason_code'
-
-    @Mutation
-    public setSuspensionReasonCodeForActiveAccount (code: Code) {
-      this.suspensionReasonCodeForActiveAccount = code
-    }
+    private suspensionReasonCodeTable: string = 'suspension_reason_codes'
 
     @Mutation
     public setSuspensionReasonCodes (codes: Code[]) {
