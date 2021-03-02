@@ -537,6 +537,7 @@ class OrgStatus(Resource):
         try:
 
             status_code = request_json.get('statusCode', None)
+            suspension_reason_code = request_json.get('suspensionReasonCode', None)
             if status_code in (OrgStatusEnum.SUSPENDED.value, OrgStatusEnum.ACTIVE.value):
 
                 if not _JWT.validate_roles([Role.STAFF_SUSPEND_ACCOUNTS.value]):
@@ -545,6 +546,7 @@ class OrgStatus(Resource):
 
                 response, status = OrgService.change_org_status(org_id=org_id, status_code=status_code,
                                                                 token_info=token,
+                                                                suspension_reason_code=suspension_reason_code
                                                                 ).as_dict(), http_status.HTTP_200_OK
             else:
                 is_approved: bool = request_json.get('statusCode', None) == AffidavitStatus.APPROVED.value
