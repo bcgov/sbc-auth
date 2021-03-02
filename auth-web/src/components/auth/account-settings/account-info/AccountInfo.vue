@@ -215,7 +215,7 @@ import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
-import { Code } from '@/models/code'
+import { Code } from '@/models/Code'
 import CodesModule from '@/store/modules/codes'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
@@ -246,8 +246,7 @@ import { getModule } from 'vuex-module-decorators'
     ]),
     ...mapState('codes', [
       'suspensionReasonCodeForActiveAccount',
-      'suspensionReasonCodes',
-      'test'
+      'suspensionReasonCodes'
     ])
   },
   methods: {
@@ -284,7 +283,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private isBaseAddressValid: boolean = false
   private isCompleteAccountInfo = true
-  private test: string = ''
 
   private baseAddressSchema: {} = addressSchema
 
@@ -319,8 +317,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     await this.syncOrganization(accountSettings.id)
     this.setAccountChangedHandler(this.setup)
     await this.setup()
-    // eslint-disable-next-line no-console
-    console.log('from store' + this.test)
   }
 
   private keyDown (address: Address) {

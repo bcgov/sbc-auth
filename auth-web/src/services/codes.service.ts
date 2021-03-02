@@ -1,5 +1,5 @@
 import { AxiosResponse } from 'axios'
-import { Code } from '@/models/code'
+import { Code } from '@/models/Code'
 import ConfigHelper from '@/util/config-helper'
 import { axios } from '@/util/http-util.ts'
 
