@@ -215,6 +215,8 @@ import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
+import { Code } from '@/models/code'
+import CodesModule from '@/store/modules/codes'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -241,14 +243,26 @@ import { getModule } from 'vuex-module-decorators'
       'currentMembership',
       'currentOrgAddress',
       'permissions'
+    ]),
+    ...mapState('codes', [
+      'suspensionReasonCodeForActiveAccount',
+      'suspensionReasonCodes',
+      'test'
     ])
   },
   methods: {
     ...mapActions('org', ['updateOrg', 'syncAddress', 'syncOrganization', 'suspendOrganization']),
-    ...mapMutations('org', ['setCurrentOrganizationAddress'])
+    ...mapActions('codes', ['syncSuspensionReasonCodes']),
+    ...mapMutations('org', ['setCurrentOrganizationAddress']),
+    ...mapMutations('codes', ['setSuspensionReasonCodeForActiveAccount'])
   }
 })
 export default class AccountInfo extends Mixins(AccountChangeMixin) {
+  private suspensionReasonCodeForActiveAccount!: Code
+  private suspensionReasonCodes!: Code[]
+  private setSuspensionReasonCodeForActiveAccount!: (suspensionReasonCodeForActiveAccount: Code) => void
+  private syncSuspensionReasonCodes!: () => Promise<Code[]>
+
   private orgStore = getModule(OrgModule, this.$store)
   private btnLabel = 'Save'
   private readonly currentOrganization!: Organization
@@ -270,6 +284,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private isBaseAddressValid: boolean = false
   private isCompleteAccountInfo = true
+  private test: string = ''
 
   private baseAddressSchema: {} = addressSchema
 
@@ -304,6 +319,8 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     await this.syncOrganization(accountSettings.id)
     this.setAccountChangedHandler(this.setup)
     await this.setup()
+    // eslint-disable-next-line no-console
+    console.log('from store' + this.test)
   }
 
   private keyDown (address: Address) {
@@ -331,15 +348,22 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     this.enableBtn()
   }
 
-  private showSuspendAccountDialog (status) {
-    if (status === AccountStatus.ACTIVE) {
-      this.dialogTitle = 'Suspend Account'
-      this.dialogText = 'If you suspend access to this account, team members will also be restricted from access until the account is unsuspended.'
-    } else {
-      this.dialogTitle = 'Unsuspend Account'
-      this.dialogText = 'Are you sure you want to unsuspend access to this account?'
+  private async showSuspendAccountDialog (status) {
+    try {
+      if (status === AccountStatus.ACTIVE) {
+        this.dialogTitle = 'Suspend Account'
+        this.dialogText = 'If you suspend access to this account, team members will also be restricted from access until the account is unsuspended.'
+      } else {
+        this.dialogTitle = 'Unsuspend Account'
+        this.dialogText = 'Are you sure you want to unsuspend access to this account?'
+      }
+
+      await this.syncSuspensionReasonCodes()
+      this.$refs.suspendAccountDialog.open()
+    } catch (ex) {
+      // eslint-disable-next-line no-console
+      console.log('Error during showSuspendAccountDialog!' + ex)
     }
-    this.$refs.suspendAccountDialog.open()
   }
 
   private async confirmSuspendAccount (): Promise<void> {
