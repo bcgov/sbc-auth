@@ -14,8 +14,8 @@ export default class CodesModule extends VuexModule {
     }
 
     @Action({ commit: 'setSuspensionReasonCodes', rawError: true })
-    public async syncSuspensionReasonCodes (): Promise<Code[]> {
-      const response = await CodesService.getSuspensionReasonCodes(this.suspensionReasonCodeTable)
+    public async getCodes (): Promise<Code[]> {
+      const response = await CodesService.getCodes(this.suspensionReasonCodeTable)
       if (response && response.data && response.status === 200) {
         return response.data
       }
