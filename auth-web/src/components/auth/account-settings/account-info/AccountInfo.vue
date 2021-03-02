@@ -285,7 +285,6 @@ const CodesModule = namespace('codes')
 })
 export default class AccountInfo extends Mixins(AccountChangeMixin) {
   @CodesModule.State('suspensionReasonCodes') private suspensionReasonCodes!: Code[]
-  @CodesModule.Action('getCodes') private getCodes!: () => Promise<Code[]>
 
   private orgStore = getModule(OrgModule, this.$store)
   private btnLabel = 'Save'
@@ -381,7 +380,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
       if (status === AccountStatus.ACTIVE) {
         this.dialogTitle = 'Suspend Account'
         this.dialogText = this.$t('suspendAccountText').toString()
-        await this.getCodes()
       } else {
         this.dialogTitle = 'Unsuspend Account'
         this.dialogText = this.$t('unsuspendAccountText').toString()
