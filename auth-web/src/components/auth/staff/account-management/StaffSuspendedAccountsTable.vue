@@ -18,7 +18,7 @@
         Loading...
       </template>
       <template v-slot:[`item.statusCode`]="{ item }">
-          {{ getStatusText(item.statusCode) }}
+          {{ getStatusText(item) }}
       </template>
       <template v-slot:[`item.suspendedOn`]="{ item }">
           {{formatDate(item.suspendedOn)}}
@@ -48,6 +48,7 @@
 import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
+import { Code } from '@/models/Code'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
@@ -57,6 +58,7 @@ import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')
 const StaffModule = namespace('staff')
+const CodesModule = namespace('codes')
 @Component({})
 export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   @OrgModule.Action('syncOrganization') private syncOrganization!: (currentAccount: number) => Promise<Organization>
@@ -66,6 +68,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   @StaffModule.State('suspendedStaffOrgs') private suspendedStaffOrgs!: Organization[]
   @StaffModule.Action('searchOrgs') private searchOrgs!: (filterParams: OrgFilterParams) => OrgList
   @StaffModule.State('suspendedReviewCount') private suspendedReviewCount!: number
+  @CodesModule.State('suspensionReasonCodes') private suspensionReasonCodes!: Code[]
 
   private readonly headerAccounts = [
     {
@@ -173,8 +176,18 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     return orgTypeDisplay
   }
 
-  private getStatusText (status:string) {
-    return status === AccountStatus.NSF_SUSPENDED ? 'NSF' : status
+  private getStatusText (org: Organization) {
+    if (org.statusCode === AccountStatus.NSF_SUSPENDED) {
+      return 'NSF'
+    } else if (org.statusCode === AccountStatus.SUSPENDED) {
+      return this.getSuspensionReasonCode(org)
+    } else {
+      return org.statusCode
+    }
+  }
+
+  private getSuspensionReasonCode (org: Organization) : string {
+    return this.suspensionReasonCodes?.find(suspensionReasonCode => suspensionReasonCode?.code === org?.suspensionReasonCode)?.desc
   }
 }
 </script>

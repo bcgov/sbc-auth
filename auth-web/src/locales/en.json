@@ -103,6 +103,9 @@
   "paymentTimeoutErrorTitle": "Your session expired",
   "paymentTimeoutErrorSubText": "Your session timed our after a long time of inactivity. Transactions are saved as draft,<br /> but you'll need to try again to complete your payment.",
   "paymentValidationErrorTitle":"Payment Error",
-  "paymentValidationErrorSubText": "Transaction was cancelled because <strong>validation errors</strong> were found.<br />  Please review your payment information and try again"
+  "paymentValidationErrorSubText": "Transaction was cancelled because <strong>validation errors</strong> were found.<br />  Please review your payment information and try again",
+  "suspendAccountText": "If you suspend access to this account, team members will also be restricted from access until the account is unsuspended.",
+  "unsuspendAccountText": "Are you sure you want to unsuspend access to this account?",
+  "suspendAccountConfirmTitle": "Account has been suspended"
 
 }

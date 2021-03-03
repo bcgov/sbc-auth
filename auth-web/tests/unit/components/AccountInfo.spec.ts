@@ -1,7 +1,8 @@
 import { AccountStatus, Role } from '@/util/constants'
-import { createLocalVue, shallowMount } from '@vue/test-utils'
+import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
 
 import AccountInfo from '@/components/auth/account-settings/account-info/AccountInfo.vue'
+import CodesModule from '@/store/modules/codes'
 import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import UserModule from '@/store/modules/user'
@@ -19,6 +20,8 @@ document.body.setAttribute('data-app', 'true')
 describe('AccountInfo.vue', () => {
   let wrapper: any
   let store: any
+  let orgModule: any
+  let userModule: any
   const localVue = createLocalVue()
   localVue.use(Vuex)
   localVue.directive('can', can)
@@ -32,7 +35,7 @@ describe('AccountInfo.vue', () => {
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
-    const orgModule = {
+    orgModule = {
       namespaced: true,
       state: {
         currentOrganization: {
@@ -62,7 +65,7 @@ describe('AccountInfo.vue', () => {
       getters: OrgModule.getters
     }
 
-    const userModule = {
+    userModule = {
       namespaced: true,
       state: {
         currentUser: {
@@ -182,5 +185,57 @@ describe('AccountInfo.vue', () => {
     expect(statusColor).toBe('error')
     getDialogStatusButtonColor = wrapper.vm.getDialogStatusButtonColor(store.state.org.currentOrganization.orgStatus)
     expect(getDialogStatusButtonColor).toBe('green')
+  })
+
+  it('Suspension reason code enables suspend button', () => {
+    const MyStub = {
+      template: '<div />'
+    }
+
+    const codesModule = {
+      namespaced: true,
+      state: {
+      },
+      actions: CodesModule.actions,
+      mutations: CodesModule.mutations,
+      getters: CodesModule.getters
+    }
+
+    store = new Vuex.Store({
+      state: {},
+      strict: false,
+      modules: {
+        org: orgModule,
+        user: userModule,
+        codes: codesModule
+      }
+    })
+
+    wrapper = mount(AccountInfo, {
+      store,
+      localVue,
+      vuetify,
+      mixins: [Steppable],
+      methods: {
+        getAccountFromSession: jest.fn(() => {
+          return {
+            id: 1
+          }
+        })
+      },
+      stubs: {
+        'BaseAddressForm': MyStub,
+        'OrgAdminContact': MyStub,
+        'LinkedBCOLBanner': MyStub
+      }
+    })
+    expect(wrapper.find("[data-test='modal-suspend-account']").exists()).toBe(true)
+    expect(wrapper.vm.isConfirmSuspendButtonDisabled).toBeTruthy()
+    wrapper.vm.selectedSuspensionReasonCode = 'Fraudulent'
+    expect(wrapper.vm.isConfirmSuspendButtonDisabled).toBeFalsy()
+    expect(wrapper.vm.isAccountStatusActive).toBeTruthy()
+
+    store.commit('org/setCurrentOrganization')
+    expect(wrapper.vm.isAccountStatusActive).toBeFalsy()
   })
 })

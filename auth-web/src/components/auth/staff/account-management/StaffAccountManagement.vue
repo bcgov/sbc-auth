@@ -76,6 +76,7 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { Pages, Role } from '@/util/constants'
 import { mapActions, mapGetters, mapState } from 'vuex'
+import { Code } from '@/models/Code'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
 import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
@@ -84,6 +85,7 @@ import StaffPendingAccountInvitationsTable from '@/components/auth/staff/account
 import StaffPendingAccountsTable from '@/components/auth/staff/account-management/StaffPendingAccountsTable.vue'
 import StaffRejectedAccountsTable from '@/components/auth/staff/account-management/StaffRejectedAccountsTable.vue'
 import { getModule } from 'vuex-module-decorators'
+import { namespace } from 'vuex-class'
 
 enum TAB_CODE {
     Active = 'active-tab',
@@ -92,6 +94,8 @@ enum TAB_CODE {
     Invitations = 'invitations-tab',
     Suspended = 'suspended-tab'
 }
+
+const CodesModule = namespace('codes')
 
 @Component({
   components: {
@@ -126,6 +130,7 @@ export default class StaffAccountManagement extends Vue {
   private readonly syncRejectedStaffOrgs!: () => Organization[]
   private readonly syncPendingInvitationOrgs!: () => Organization[]
   private readonly syncSuspendedStaffOrgs!: () => Organization[]
+  @CodesModule.Action('getCodes') private getCodes!: () => Promise<Code[]>
 
   private readonly pendingReviewCount!: number
   private readonly rejectedReviewCount!: number
@@ -165,6 +170,7 @@ export default class StaffAccountManagement extends Vue {
     await this.syncPendingStaffOrgs()
     await this.syncRejectedStaffOrgs()
     await this.syncPendingInvitationOrgs()
+    await this.getCodes()
     await this.syncSuspendedStaffOrgs()
   }
 

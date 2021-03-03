@@ -1,5 +1,7 @@
 import Vuex, { StoreOptions } from 'vuex'
+
 import BusinessModule from './modules/business'
+import CodesModule from '@/store/modules/codes'
 import OrgModule from '@/store/modules/org'
 import { RootState } from './types'
 import StaffModule from '@/store/modules/staff'
@@ -31,7 +33,8 @@ const storeOptions: StoreOptions<RootState> = {
     business: BusinessModule,
     user: UserModule,
     org: OrgModule,
-    staff: StaffModule
+    staff: StaffModule,
+    codes: CodesModule
   }
 }
 
