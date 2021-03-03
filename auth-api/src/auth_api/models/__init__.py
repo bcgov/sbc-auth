@@ -45,9 +45,7 @@ from .org_type import OrgType
 from .payment_type import PaymentType
 from .permissions import Permissions
 from .product_code import ProductCode
-from .product_role_code import ProductRoleCode
 from .product_subscription import ProductSubscription
-from .product_subscription_role import ProductSubscriptionRole
 from .product_type_code import ProductTypeCode
 from .user import User
 from .user_settings import UserSettings

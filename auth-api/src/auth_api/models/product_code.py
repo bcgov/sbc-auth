@@ -15,7 +15,8 @@
 
 It defines the available products.
 """
-
+from __future__ import annotations
+from typing import List
 from sqlalchemy import Column, ForeignKey
 
 from .base_model import BaseCodeModel
@@ -36,3 +37,8 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     def get_all_products(cls):
         """Get all of the products codes."""
         return cls.query.all()
+
+    @classmethod
+    def find_by_type_code(cls, type_code: str) -> List[ProductCode]:
+        """Find an Org instance that matches the provided id and not in INACTIVE status."""
+        return cls.query.filter(ProductCode.type_code == type_code).all()

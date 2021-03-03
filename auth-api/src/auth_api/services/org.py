@@ -14,7 +14,7 @@
 """Service for managing Organization data."""
 import json
 from datetime import datetime
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
@@ -33,7 +33,7 @@ from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
 from auth_api.utils.enums import (
-    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod, ProductCode, Status, PaymentAccountStatus)
+    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod, Status, PaymentAccountStatus)
 from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF
 from auth_api.utils.util import camelback2snake
 from .affidavit import Affidavit as AffidavitService
@@ -114,7 +114,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # create the membership record for this user if its not created by staff and access_type is anonymous
         Org.create_membership(access_type, is_staff_admin, org, user_id)
 
-        Org.add_product(org.id, token_info)
+        ProductService.create_default_product_subscriptions(org)
         payment_method = Org._validate_and_get_payment_method(selected_payment_method, OrgType[org_type])
 
         user_name = ''
@@ -796,23 +796,3 @@ class Org:  # pylint: disable=too-many-public-methods
         except:  # noqa=B901
             current_app.logger.error('<send_approved_rejected_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None)
-
-    @staticmethod
-    def add_product(org_id, token_info: Dict = None):
-        """Add product subscription."""
-        if token_info:
-            # set as defalut type
-            # TODO may be give all internal products?
-            product_codes: List = [{'productCode': ProductCode.BUSINESS.value},
-                                   {'productCode': ProductCode.NAMES_REQUEST.value}]
-
-            # Token is from service account, get the product code claim
-            if Role.SYSTEM.value in token_info.get('realm_access').get('roles'):
-                product_codes = [{'productCode': token_info.get('product_code', None)}]
-
-            if product_codes:
-                product_subscription = {'subscriptions': product_codes}
-                subscriptions = ProductService.create_product_subscription(org_id, product_subscription,
-                                                                           is_new_transaction=False)
-                return subscriptions
-        return None
