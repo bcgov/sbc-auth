@@ -110,7 +110,7 @@ def test_get_user_authorizations_for_entity_service_account(session):
     user = factory_user_model()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
-    factory_product_model(org.id, product_code=ProductCode.BUSINESS.value, product_role_codes=None)
+    factory_product_model(org.id, product_code=ProductCode.BUSINESS.value)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
 
@@ -159,7 +159,7 @@ def test_check_auth(session):  # pylint:disable=unused-argument
     user = factory_user_model()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
-    factory_product_model(org.id, product_code=ProductCode.BUSINESS.value, product_role_codes=None)
+    factory_product_model(org.id, product_code=ProductCode.BUSINESS.value)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
 
@@ -220,7 +220,7 @@ def test_check_auth_for_service_account_valid_with_org_id(session):  # pylint:di
     user = factory_user_model()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
-    factory_product_model(org.id, product_code=ProductCode.BUSINESS.value, product_role_codes=None)
+    factory_product_model(org.id, product_code=ProductCode.BUSINESS.value)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
 
@@ -233,7 +233,7 @@ def test_check_auth_for_service_account_valid_with_business_id(session):  # pyli
     user = factory_user_model()
     org = factory_org_model()
     factory_membership_model(user.id, org.id)
-    factory_product_model(org.id, product_code=ProductCode.BUSINESS.value, product_role_codes=None)
+    factory_product_model(org.id, product_code=ProductCode.BUSINESS.value)
     entity = factory_entity_model()
     factory_affiliation_model(entity.id, org.id)
 
@@ -287,8 +287,7 @@ def test_get_account_authorizations_for_product(session):  # pylint:disable=unus
         org.id,
         'PPR')
     assert authorization is not None
-    assert len(authorization.get('roles')) == 1
-    assert authorization.get('roles')[0] == 'search'
+    assert len(authorization.get('roles')) > 0
 
     # Create another org and assert that the roles are empty
     org = factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit, org_status_info=None,
@@ -301,12 +300,10 @@ def test_get_account_authorizations_for_product(session):  # pylint:disable=unus
     assert authorization is not None
     assert len(authorization.get('roles')) == 0
 
-    factory_product_model(org.id, product_role_codes=['search', 'register'])
+    factory_product_model(org.id)
     authorization = Authorization.get_account_authorizations_for_product(
         str(user.keycloak_guid),
         org.id,
         'PPR')
     assert authorization is not None
-    assert len(authorization.get('roles')) == 2
-    assert 'search' in authorization.get('roles')
-    assert 'register' in authorization.get('roles')
+    assert len(authorization.get('roles')) > 0
