@@ -9,7 +9,6 @@
       :showCloseIcon="true"
       data-test="modal-create-account"
     >
-    <!-- dialog-class="notify-dialog" -->
     <template v-slot:title>
       <h2 class="text-h2 font-weight-bold pl-3 ">Create Account</h2>
     </template>

@@ -8,7 +8,8 @@
           </v-btn>
           <div>
             <h1 class="view-header__title">Send Invite to Ministry Account</h1>
-            <p class="mb-0">Enter the ministry name and account admin contact for this account. An email invite will be sent to the account admin's email containing instructions how to create their account.</p>
+            <p class="mb-0">Enter the ministry name and account admin contact for this account.
+              An email invite will be sent to the account admin's email containing instructions how to create their account.</p>
           </div>
         </div>
         <v-card class="profile-card py-4 px-6" flat>
@@ -33,7 +34,7 @@ import SetupGovnAccountForm from '@/components/auth/staff/SetupGovnAccountForm.v
     SetupGovnAccountForm
   }
 })
-export default class SetupAccountView extends Vue {
+export default class SetupGovnAccountView extends Vue {
   handleBackButton () {
     this.$router.go(-1)
   }
