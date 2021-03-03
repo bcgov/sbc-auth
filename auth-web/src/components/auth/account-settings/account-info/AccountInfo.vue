@@ -184,6 +184,7 @@
           item-value="code"
           v-model="selectedSuspensionReasonCode"
           v-if="isAccountStatusActive"
+          data-test='select-suspend-account-reason'
         />
       </template>
       <template v-slot:actions>
@@ -193,7 +194,7 @@
           :color="getDialogStatusButtonColor(currentOrganization.orgStatus)"
           data-test='btn-suspend-dialog'
           @click="confirmSuspendAccount()"
-          :disabled="isConfirmStatusButtonDisabled"
+          :disabled="isConfirmSuspendButtonDisabled"
         >
           {{ isAccountStatusActive ? 'Suspend' : 'Unsuspend' }}
         </v-btn>
@@ -331,7 +332,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     return this.currentOrganization.statusCode === AccountStatus.ACTIVE || this.currentOrganization.statusCode === AccountStatus.SUSPENDED
   }
 
-  private get isConfirmStatusButtonDisabled (): boolean {
+  private get isConfirmSuspendButtonDisabled (): boolean {
     return this.currentOrganization.statusCode === AccountStatus.ACTIVE && this.selectedSuspensionReasonCode.length === 0
   }
 
@@ -376,19 +377,14 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   private async showSuspendAccountDialog (status) {
-    try {
-      if (status === AccountStatus.ACTIVE) {
-        this.dialogTitle = 'Suspend Account'
-        this.dialogText = this.$t('suspendAccountText').toString()
-      } else {
-        this.dialogTitle = 'Unsuspend Account'
-        this.dialogText = this.$t('unsuspendAccountText').toString()
-      }
-      this.$refs.suspendAccountDialog.open()
-    } catch (ex) {
-      // eslint-disable-next-line no-console
-      console.log('Error during showSuspendAccountDialog!')
+    if (status === AccountStatus.ACTIVE) {
+      this.dialogTitle = 'Suspend Account'
+      this.dialogText = this.$t('suspendAccountText').toString()
+    } else {
+      this.dialogTitle = 'Unsuspend Account'
+      this.dialogText = this.$t('unsuspendAccountText').toString()
     }
+    this.$refs.suspendAccountDialog.open()
   }
 
   private async confirmSuspendAccount (): Promise<void> {
