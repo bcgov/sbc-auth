@@ -13,20 +13,14 @@
                     "createdBy": "Ashley Mcguire",
                     "id": 2,
                     "modified": "2020-11-23T11:16:15.491073+00:00",
-                    "product": "PPR",
-                    "productSubscriptionRoles": [
-                        1
-                    ]
+                    "product": "PPR"
                 },
                 {
                     "created": "2020-11-23T11:16:15.548317+00:00",
                     "createdBy": "Ashley Mcguire",
                     "id": 3,
                     "modified": "2020-11-23T11:16:15.548325+00:00",
-                    "product": "DIR_SEARCH",
-                    "productSubscriptionRoles": [
-                        2
-                    ]
+                    "product": "DIR_SEARCH"
                 }
             ]
         }
@@ -49,8 +43,7 @@
                         "type": "object",
                         "default": {},
                         "required": [
-                            "product",
-                            "productSubscriptionRoles"
+                            "product"
                         ],
                         "properties": {
                             "created": {
@@ -97,31 +90,6 @@
                                 "examples": [
                                     "PPR"
                                 ]
-                            },
-                            "productSubscriptionRoles": {
-                                "$id": "#/properties/subscriptions/items/anyOf/0/properties/productSubscriptionRoles",
-                                "type": "array",
-                                "title": "Product Subscription Roles",
-                                "default": [],
-                                "examples": [
-                                    [
-                                        1
-                                    ]
-                                ],
-                                "additionalItems": true,
-                                "items": {
-                                    "$id": "#/properties/subscriptions/items/anyOf/0/properties/productSubscriptionRoles/items",
-                                    "anyOf": [
-                                        {
-                                            "$id": "#/properties/subscriptions/items/anyOf/0/properties/productSubscriptionRoles/items/anyOf/0",
-                                            "type": "integer",
-                                            "default": 0,
-                                            "examples": [
-                                                1
-                                            ]
-                                        }
-                                    ]
-                                }
                             }
                         },
                         "additionalProperties": true
