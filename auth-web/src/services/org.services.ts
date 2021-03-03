@@ -86,8 +86,8 @@ export default class OrgService {
     return axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/status`, { statusCode: 'REJECTED' })
   }
 
-  static async suspendOrg (orgIdentifier: number, statusCode: AccountStatus): Promise<AxiosResponse> {
-    return axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/status`, { statusCode: statusCode })
+  static async suspendOrg (orgIdentifier: number, statusCode: AccountStatus, suspensionReasonCode: string): Promise<AxiosResponse> {
+    return axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/status`, { statusCode: statusCode, suspensionReasonCode: suspensionReasonCode })
   }
 
   public static async getMemberLoginOption (orgId: number): Promise<string> {

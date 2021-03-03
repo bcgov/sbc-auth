@@ -242,12 +242,12 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async suspendOrganization () {
+  public async suspendOrganization (suspensionReasonCode: string) {
     const orgId = this.context.state['currentOrganization']?.id
     const orgStatus = this.context.state['currentOrganization'].statusCode === AccountStatus.ACTIVE ? AccountStatus.SUSPENDED : AccountStatus.ACTIVE
     if (orgId && orgStatus) {
       try {
-        const response = await OrgService.suspendOrg(orgId, orgStatus)
+        const response = await OrgService.suspendOrg(orgId, orgStatus, suspensionReasonCode)
         if (response.status === 200) {
           await this.context.dispatch('syncOrganization', orgId)
         }
