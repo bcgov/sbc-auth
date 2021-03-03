@@ -391,7 +391,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     await this.suspendOrganization(this.selectedSuspensionReasonCode)
     this.$refs.suspendAccountDialog.close()
     if (this.currentOrganization.statusCode === AccountStatus.SUSPENDED) {
-      this.suspensionCompleteDialogText = 'The account ' + this.currentOrganization.name + ' has been suspended'
+      this.suspensionCompleteDialogText = `The account ${this.currentOrganization.name} has been suspended.`
       this.$refs.suspensionCompleteDialog.open()
     }
   }

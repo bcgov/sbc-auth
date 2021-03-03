@@ -177,7 +177,13 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   }
 
   private getStatusText (org: Organization) {
-    return org.statusCode === AccountStatus.NSF_SUSPENDED ? 'NSF' : org.statusCode === AccountStatus.SUSPENDED ? this.getSuspensionReasonCode(org) : status
+    if (org.statusCode === AccountStatus.NSF_SUSPENDED) {
+      return 'NSF'
+    } else if (org.statusCode === AccountStatus.SUSPENDED) {
+      return this.getSuspensionReasonCode(org)
+    } else {
+      return org.statusCode
+    }
   }
 
   private getSuspensionReasonCode (org: Organization) : string {
