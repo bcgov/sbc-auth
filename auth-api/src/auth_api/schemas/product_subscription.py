@@ -13,8 +13,6 @@
 # limitations under the License.
 """Manager for org schema and export."""
 
-from marshmallow import fields
-
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 
 from .base_schema import BaseSchema
@@ -27,5 +25,3 @@ class ProductSubscriptionSchema(BaseSchema):  # pylint: disable=too-many-ancesto
         """Maps all of the ProductSubscription fields to a default schema."""
 
         model = ProductSubscriptionModel
-
-    product_role_type = fields.Pluck('ProductSubscriptionRoleSchema', 'code', data_key='product_subscription_role')

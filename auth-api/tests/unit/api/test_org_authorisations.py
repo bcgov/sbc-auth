@@ -42,7 +42,7 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     assert org_authorisations.get('roles')
 
     # NR should have all access since its internal
-    headers.update({'product-type': 'NRO'})
+    headers.update({'Product-Code': 'NRO'})
     rv = client.get(f'/api/v1/orgs/{id}/authorizations',
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
@@ -51,10 +51,40 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     assert org_authorisations_by_nro.get('roles')
 
     # vital stats shouldn't get any access since its partner
-    headers.update({'product-type': 'VS'})
+    headers.update({'Product-Code': 'VS'})
     rv = client.get(f'/api/v1/orgs/{id}/authorizations',
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     org_authorisations_by_vs = json.loads(rv.data)
-    assert org_authorisations_by_vs.get('orgMembership') is None, 'Partners no access'
     assert len(org_authorisations_by_vs.get('roles')) == 0
+
+
+def test_ppr_auth(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that accounts get PPR authorization."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    # Create a basic account
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    orgs = json.loads(rv.data)
+    id = orgs.get('id')
+    # Check PPR access and assert no roles are returned.
+    rv = client.get(f'/api/v1/accounts/{id}/products/PPR/authorizations',
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    org_authorisations = json.loads(rv.data)
+    assert len(org_authorisations.get('roles')) == 0
+
+    # Create a PREMIUM account
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked()),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    orgs = json.loads(rv.data)
+    id = orgs.get('id')
+    # Check PPR access and assert no roles are returned.
+    rv = client.get(f'/api/v1/accounts/{id}/products/PPR/authorizations', headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    org_authorisations = json.loads(rv.data)
+    assert len(org_authorisations.get('roles')) > 0
