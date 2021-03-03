@@ -40,5 +40,5 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
 
     @classmethod
     def find_by_type_code(cls, type_code: str) -> List[ProductCode]:
-        """Find an Org instance that matches the provided id and not in INACTIVE status."""
+        """Find orgs by the type code."""
         return cls.query.filter(ProductCode.type_code == type_code).all()
