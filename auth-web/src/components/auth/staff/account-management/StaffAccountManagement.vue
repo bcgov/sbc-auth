@@ -136,7 +136,7 @@ export default class StaffAccountManagement extends Vue {
   private readonly pendingInvitationsCount!: number
   private readonly suspendedReviewCount!: number
   private pagesEnum = Pages
-  private showCreateAccountModal: boolean = false
+
   $refs: {
       staffCreateAccountDialog: any
   }
@@ -177,7 +177,6 @@ export default class StaffAccountManagement extends Vue {
   }
 
   openCreateAccount () {
-    this.showCreateAccountModal = true
     this.$refs.staffCreateAccountDialog.open()
   }
 
