@@ -201,4 +201,14 @@ export default class CommonUtils {
       }
     ]
   }
+
+  static bcGovemailRules () {
+    return [
+      v => !!v || 'Email address is required',
+      v => {
+        const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)*gov\.bc\.ca))$/i
+        return pattern.test(v) || 'Valid IDIR email address is required'
+      }
+    ]
+  }
 }

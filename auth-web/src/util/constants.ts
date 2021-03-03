@@ -62,7 +62,8 @@ export enum Pages {
     STAFF_DASHBOARD_REJECTED = '/staff/dashboard/rejected',
     STAFF_DASHBOARD_INVITATIONS = '/staff/dashboard/invitations',
     STAFF_DASHBOARD_SUSPENDED = '/staff/dashboard/suspended',
-    MAKE_PAD_PAYMENT = '/make-cc-payment/'
+    MAKE_PAD_PAYMENT = '/make-cc-payment/',
+    STAFF_GOVN_SETUP_ACCOUNT = 'staff-govn-setup-account',
 
 }
 
@@ -126,7 +127,8 @@ export enum AccessType {
     REGULAR = 'REGULAR',
     EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL',
     ANONYMOUS = 'ANONYMOUS',
-    REGULAR_BCEID = 'REGULAR_BCEID'
+    REGULAR_BCEID = 'REGULAR_BCEID',
+    GOVM = 'GOVM'
 }
 
 export enum Permission {
@@ -191,4 +193,9 @@ export enum paymentErrorType {
     DUPLICATE_ORDER_NUMBER = 'DUPLICATE_ORDER_NUMBER',
     TRANSACTION_TIMEOUT_NO_DEVICE = 'TRANSACTION_TIMEOUT_NO_DEVICE',
     VALIDATION_ERROR = 'VALIDATION_ERROR',
+}
+
+export enum StaffCreateAccountsTypes {
+    DIRECTOR_SEARCH = 'DIRECTOR_SEARCH',
+    GOVN_BUSINESS = 'GOVN_BUSINESS'
 }

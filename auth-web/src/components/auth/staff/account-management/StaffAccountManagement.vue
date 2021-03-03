@@ -7,7 +7,7 @@
           color="primary"
           class="font-weight-bold"
           v-if="canCreateAccounts"
-          @click="gotToCreateAccount"
+          @click="openCreateAccount"
         >
           <v-icon small class="mr-1">mdi-plus</v-icon>Create Account
         </v-btn>
@@ -69,20 +69,23 @@
     <v-tabs-items v-model="tab">
         <router-view></router-view>
     </v-tabs-items>
+    <StaffCreateAccountModal ref="staffCreateAccountDialog" />
   </v-container>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { Pages, Role } from '@/util/constants'
+import { Pages, Role, StaffCreateAccountsTypes } from '@/util/constants'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
 import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
+import StaffCreateAccountModal from '@/components/auth/staff/account-management/StaffCreateAccountModal.vue'
 import StaffModule from '@/store/modules/staff'
 import StaffPendingAccountInvitationsTable from '@/components/auth/staff/account-management/StaffPendingAccountInvitationsTable.vue'
 import StaffPendingAccountsTable from '@/components/auth/staff/account-management/StaffPendingAccountsTable.vue'
 import StaffRejectedAccountsTable from '@/components/auth/staff/account-management/StaffRejectedAccountsTable.vue'
+
 import { getModule } from 'vuex-module-decorators'
 
 enum TAB_CODE {
@@ -98,7 +101,8 @@ enum TAB_CODE {
     StaffActiveAccountsTable,
     StaffPendingAccountsTable,
     StaffRejectedAccountsTable,
-    StaffPendingAccountInvitationsTable
+    StaffPendingAccountInvitationsTable,
+    StaffCreateAccountModal
   },
   methods: {
     ...mapActions('staff', [
@@ -132,6 +136,10 @@ export default class StaffAccountManagement extends Vue {
   private readonly pendingInvitationsCount!: number
   private readonly suspendedReviewCount!: number
   private pagesEnum = Pages
+  private showCreateAccountModal: boolean = false
+  $refs: {
+      staffCreateAccountDialog: any
+  }
 
   private tabs = [
     {
@@ -168,8 +176,9 @@ export default class StaffAccountManagement extends Vue {
     await this.syncSuspendedStaffOrgs()
   }
 
-  gotToCreateAccount () {
-    this.$router.push({ path: `/${Pages.STAFF_SETUP_ACCOUNT}` })
+  openCreateAccount () {
+    this.showCreateAccountModal = true
+    this.$refs.staffCreateAccountDialog.open()
   }
 
   private get canManageAccounts () {

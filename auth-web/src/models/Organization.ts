@@ -11,6 +11,7 @@ export interface CreateRequestBody {
   bcOnlineCredential?:BcolProfile
   mailingAddress?:Address
   paymentInfo?: PaymentInfo
+  branchName?: string
 }
 
 export interface PaymentInfo {
