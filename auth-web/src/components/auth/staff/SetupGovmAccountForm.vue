@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-form ref="setupGovnAccountForm">
+    <v-form ref="setupGovmAccountForm">
       <!-- Name of Account -->
       <v-row>
         <v-col cols="12" class="pb-0 mb-2">
@@ -145,7 +145,7 @@ export default class SetupAccountForm extends Vue {
   public bcGovemailRules = CommonUtils.bcGovemailRules()
 
   $refs: {
-    setupGovnAccountForm: HTMLFormElement,
+    setupGovmAccountForm: HTMLFormElement,
     errorDialog: ModalDialog
   }
 
@@ -160,7 +160,7 @@ export default class SetupAccountForm extends Vue {
   private isFormValid (): boolean {
     return !!this.ministryName &&
       !this.emailMatchError() &&
-      this.$refs.setupGovnAccountForm.validate()
+      this.$refs.setupGovmAccountForm.validate()
   }
 
   public async save () {
