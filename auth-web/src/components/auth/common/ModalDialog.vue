@@ -15,6 +15,16 @@
         <span>
           <slot name="title">{{ title }}</slot>
         </span>
+        <span v-if="showCloseIcon">
+           <v-btn
+            icon
+           @click="close()"
+           class="font-weight-bold"
+            >
+                <v-icon>mdi-close</v-icon>
+            </v-btn>
+
+        </span>
       </v-card-title>
       <v-card-text>
         <slot name="text">
@@ -46,6 +56,7 @@ export default class ModalDialog extends Vue {
   @Prop({ default: false }) private isScrollable: boolean
   @Prop({ default: '' }) private dialogClass: string
   @Prop({ default: '' }) private maxWidth: string
+  @Prop({ default: false }) private showCloseIcon: boolean
 
   public open () {
     this.isOpen = true
