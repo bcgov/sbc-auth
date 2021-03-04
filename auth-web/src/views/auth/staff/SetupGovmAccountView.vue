@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <div class="view-container" data-test="setup-govn-account">
+    <div class="view-container" data-test="setup-govm-account">
       <article>
         <div class="view-header">
           <v-btn large icon color="secondary" class="mr-2" @click="handleBackButton()" data-test="account-settings-back-button">
@@ -16,7 +16,7 @@
           <v-container>
             <v-card-title>Account Details</v-card-title>
             <v-card-text>
-              <SetupGovnAccountForm />
+              <SetupGovmAccountForm />
             </v-card-text>
           </v-container>
         </v-card>
@@ -27,14 +27,14 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import SetupGovnAccountForm from '@/components/auth/staff/SetupGovnAccountForm.vue'
+import SetupGovmAccountForm from '@/components/auth/staff/SetupGovmAccountForm.vue'
 
 @Component({
   components: {
-    SetupGovnAccountForm
+    SetupGovmAccountForm
   }
 })
-export default class SetupGovnAccountView extends Vue {
+export default class SetupGovmAccountView extends Vue {
   handleBackButton () {
     this.$router.go(-1)
   }
