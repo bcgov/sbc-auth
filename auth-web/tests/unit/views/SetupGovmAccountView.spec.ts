@@ -1,4 +1,4 @@
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
 import SetupGovmAccountView from '@/views/auth/staff/SetupGovmAccountView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
