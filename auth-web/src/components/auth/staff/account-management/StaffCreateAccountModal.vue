@@ -2,7 +2,7 @@
   <v-container class="pa-0 create-account-modal">
     <ModalDialog
       ref="createAccountDialog"
-      :title="mainText"
+      title="Create Account"
       dialog-class="create-account-dialog"
       max-width="660"
       :show-icon="false"

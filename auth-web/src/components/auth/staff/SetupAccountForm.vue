@@ -122,6 +122,7 @@
 </template>
 
 <script lang="ts">
+import { AccessType, Pages } from '@/util/constants'
 import { AccountType, ProductCode, Products, ProductsRequestBody } from '@/models/Staff'
 import { Component, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, MembershipType, Organization } from '@/models/Organization'
@@ -129,7 +130,6 @@ import { mapActions, mapState } from 'vuex'
 import { CreateRequestBody as InvitationRequestBody } from '@/models/Invitation'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import OrgModule from '@/store/modules/org'
-import { Pages } from '@/util/constants'
 import StaffModule from '@/store/modules/staff'
 import { getModule } from 'vuex-module-decorators'
 
@@ -208,7 +208,8 @@ export default class SetupAccountForm extends Vue {
     if (this.isFormValid()) {
       const createRequestBody: CreateRequestBody = {
         name: this.accountName,
-        typeCode: this.accountType
+        typeCode: this.accountType,
+        accessType: AccessType.ANONYMOUS
       }
       const productsSelected: Products[] = this.selectedProducts.map((prod) => {
         return {
