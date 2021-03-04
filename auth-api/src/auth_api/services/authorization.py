@@ -59,20 +59,17 @@ class Authorization:
             check_product_based_auth = Authorization._is_product_based_auth(corp_type_code)
 
             if check_product_based_auth:
-                authorization = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(
+                auth = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(
                     keycloak_guid, account_id, corp_type_code)
-                auth_response = Authorization(authorization).as_dict(expanded)
-                # TODO absorb permission model here
-                auth_response['roles'] = authorization.roles.split(',') if authorization and authorization.roles else []
             else:
                 if account_id and keycloak_guid:
                     auth = AuthorizationView.find_user_authorization_by_org_id(keycloak_guid, account_id)
-
-                if auth:
-                    permissions = PermissionsService.get_permissions_for_membership(auth.status_code,
-                                                                                    auth.org_membership)
-                    auth_response = Authorization(auth).as_dict(expanded)
-                    auth_response['roles'] = permissions
+            auth_response['roles'] = []
+            if auth:
+                permissions = PermissionsService.get_permissions_for_membership(auth.status_code,
+                                                                                auth.org_membership)
+                auth_response = Authorization(auth).as_dict(expanded)
+                auth_response['roles'] = permissions
 
         return auth_response
 
@@ -127,12 +124,14 @@ class Authorization:
     def get_account_authorizations_for_product(keycloak_guid: str, account_id: str, product_code: str,
                                                expanded: bool = False):
         """Get account authorizations for the product."""
-        authorization = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(keycloak_guid,
-                                                                                                    account_id,
-                                                                                                    product_code)
-        auth_response = Authorization(authorization).as_dict(expanded)
-        # TODO absorb permission model here
-        auth_response['roles'] = authorization.roles.split(',') if authorization and authorization.roles else []
+        auth = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(
+            keycloak_guid, account_id, product_code
+        )
+        auth_response = Authorization(auth).as_dict(expanded)
+        auth_response['roles'] = []
+        if auth:
+            permissions = PermissionsService.get_permissions_for_membership(auth.status_code, auth.org_membership)
+            auth_response['roles'] = permissions
 
         return auth_response
 

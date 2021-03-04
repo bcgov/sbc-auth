@@ -27,7 +27,7 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
         """Maps all of the Org fields to a default schema."""
 
         model = OrgModel
-        exclude = ('members', 'contacts', 'invitations', 'affiliated_entities')
+        exclude = ('members', 'contacts', 'invitations', 'affiliated_entities', 'suspension_reason')
 
     org_type = fields.Pluck('OrgTypeSchema', 'code', data_key='orgType')
     status_code = fields.String(data_key='status_code')

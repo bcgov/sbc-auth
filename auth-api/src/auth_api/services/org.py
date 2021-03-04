@@ -14,7 +14,7 @@
 """Service for managing Organization data."""
 import json
 from datetime import datetime
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
@@ -33,7 +33,7 @@ from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
 from auth_api.utils.enums import (
-    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod, ProductCode, Status, PaymentAccountStatus)
+    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod, Status, PaymentAccountStatus)
 from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF
 from auth_api.utils.util import camelback2snake
 from .affidavit import Affidavit as AffidavitService
@@ -78,6 +78,7 @@ class Org:  # pylint: disable=too-many-public-methods
         payment_info = org_info.pop('paymentInfo', {})
         selected_payment_method = payment_info.get('paymentMethod', None)
         org_type = org_info.get('typeCode', OrgType.BASIC.value)
+        branch_name = org_info.get('branchName', None)
 
         # If the account is created using BCOL credential, verify its valid bc online account
         if bcol_credential:
@@ -92,12 +93,17 @@ class Org:  # pylint: disable=too-many-public-methods
         access_type = Org.validate_access_type(is_bceid_user, is_staff_admin, org_info)
 
         # Always check duplicated name for all type of account.
-        Org.raise_error_if_duplicate_name(org_info['name'])
+        Org.raise_error_if_duplicate_name(org_info['name'], branch_name)
+
+        # set premium for GOVM accounts..TODO remove if not needed this logic
+        if access_type == AccessType.GOVM.value:
+            org_type = OrgType.PREMIUM.value
+            org_info.update({'typeCode': OrgType.PREMIUM.value})
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.access_type = access_type
-        # If the account is anonymous set the billable value as False else True
-        org.billable = access_type != AccessType.ANONYMOUS.value
+        # If the account is anonymous or govm set the billable value as False else True
+        org.billable = access_type not in [AccessType.ANONYMOUS.value, AccessType.GOVM.value]
         # Set the status based on access type
         # Check if the user is APPROVED else set the org status to PENDING
         # Send an email to staff to remind review the pending account
@@ -114,8 +120,9 @@ class Org:  # pylint: disable=too-many-public-methods
         # create the membership record for this user if its not created by staff and access_type is anonymous
         Org.create_membership(access_type, is_staff_admin, org, user_id)
 
-        Org.add_product(org.id, token_info)
-        payment_method = Org._validate_and_get_payment_method(selected_payment_method, OrgType[org_type])
+        ProductService.create_default_product_subscriptions(org)
+        payment_method = Org._validate_and_get_payment_method(selected_payment_method, OrgType[org_type],
+                                                              access_type=access_type)
 
         user_name = ''
         if payment_method == PaymentMethod.PAD.value:  # to get the pad accepted date
@@ -135,7 +142,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return Org(org)
 
     @staticmethod
-    def _validate_and_get_payment_method(selected_payment_type: str, org_type: OrgType) -> str:
+    def _validate_and_get_payment_method(selected_payment_type: str, org_type: OrgType, access_type=None) -> str:
 
         # TODO whats a  better place for this
         org_payment_method_mapping = {
@@ -145,7 +152,9 @@ class Org:  # pylint: disable=too-many-public-methods
                 PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIRECT_PAY.value,
                 PaymentMethod.PAD.value, PaymentMethod.BCOL.value)
         }
-        if selected_payment_type:
+        if access_type == AccessType.GOVM:
+            payment_type = PaymentMethod.EJV.value
+        elif selected_payment_type:
             valid_types = org_payment_method_mapping.get(org_type, [])
             if selected_payment_type in valid_types:
                 payment_type = selected_payment_type
@@ -180,8 +189,12 @@ class Org:  # pylint: disable=too-many-public-methods
         """Validate and return access type."""
         access_type: str = org_info.get('accessType', None)
         if access_type:
-            if not is_staff_admin and access_type == AccessType.ANONYMOUS.value:
+            if is_staff_admin and not access_type:
+                raise BusinessException(Error.ACCCESS_TYPE_MANDATORY, None)
+            if not is_staff_admin and access_type in AccessType.ANONYMOUS.value:
                 raise BusinessException(Error.USER_CANT_CREATE_ANONYMOUS_ORG, None)
+            if not is_staff_admin and access_type in AccessType.GOVM.value:
+                raise BusinessException(Error.USER_CANT_CREATE_GOVM_ORG, None)
             if not is_bceid_user and access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
                 raise BusinessException(Error.USER_CANT_CREATE_EXTRA_PROVINCIAL_ORG, None)
             if is_bceid_user and access_type not in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
@@ -189,7 +202,7 @@ class Org:  # pylint: disable=too-many-public-methods
         else:
             # If access type is not provided, add default value based on user
             if is_staff_admin:
-                access_type = AccessType.ANONYMOUS.value
+                pass
             elif is_bceid_user:
                 access_type = AccessType.EXTRA_PROVINCIAL.value
             else:
@@ -197,9 +210,9 @@ class Org:  # pylint: disable=too-many-public-methods
         return access_type
 
     @staticmethod
-    def raise_error_if_duplicate_name(name):
+    def raise_error_if_duplicate_name(name, branch_name=None):
         """Raise error if there is duplicate org name already."""
-        existing_similar__org = OrgModel.find_similar_org_by_name(name)
+        existing_similar__org = OrgModel.find_similar_org_by_name(name, branch_name=branch_name)
         if existing_similar__org is not None:
             raise BusinessException(Error.DATA_CONFLICT, None)
 
@@ -209,9 +222,11 @@ class Org:  # pylint: disable=too-many-public-methods
                                  is_new_org: bool = True) -> PaymentAccountStatus:
         """Add payment settings for the org."""
         pay_url = current_app.config.get('PAY_API_URL')
+        org_name_for_pay = f'{org_model.name}-{org_model.branch_name}' if org_model.branch_name else org_model.name
         pay_request = {
             'accountId': org_model.id,
-            'accountName': org_model.name,
+            # pay needs the most unique idenitfier.So combine name and branch name
+            'accountName': org_name_for_pay,
             'paymentInfo': {
                 'methodOfPayment': payment_method,
                 'billable': org_model.billable
@@ -796,23 +811,3 @@ class Org:  # pylint: disable=too-many-public-methods
         except:  # noqa=B901
             current_app.logger.error('<send_approved_rejected_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None)
-
-    @staticmethod
-    def add_product(org_id, token_info: Dict = None):
-        """Add product subscription."""
-        if token_info:
-            # set as defalut type
-            # TODO may be give all internal products?
-            product_codes: List = [{'productCode': ProductCode.BUSINESS.value},
-                                   {'productCode': ProductCode.NAMES_REQUEST.value}]
-
-            # Token is from service account, get the product code claim
-            if Role.SYSTEM.value in token_info.get('realm_access').get('roles'):
-                product_codes = [{'productCode': token_info.get('product_code', None)}]
-
-            if product_codes:
-                product_subscription = {'subscriptions': product_codes}
-                subscriptions = ProductService.create_product_subscription(org_id, product_subscription,
-                                                                           is_new_transaction=False)
-                return subscriptions
-        return None

@@ -20,17 +20,9 @@ from unittest.mock import patch, Mock
 import pytest
 from requests import Response
 
+import auth_api.services.notification as notification
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.services.rest_service import RestService
-from tests.utilities.factory_scenarios import (
-    KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
-    TestOrgProductsInfo, TestOrgTypeInfo, TestUserInfo, TestPaymentMethodInfo)
-from tests.utilities.factory_utils import (
-    factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
-    factory_org_model, factory_org_service, factory_user_model, factory_user_model_with_contact)
-
-import auth_api.services.notification as notification
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Affiliation as AffiliationService
@@ -41,10 +33,17 @@ from auth_api.services import Product as ProductService
 from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
+from auth_api.services.rest_service import RestService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
 from auth_api.utils.enums import (
     AccessType, LoginSource, OrgStatus,
-    OrgType, ProductCode, PaymentMethod, SuspensionReasonCode)
+    OrgType, PaymentMethod, SuspensionReasonCode)
+from tests.utilities.factory_scenarios import (
+    KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
+    TestOrgProductsInfo, TestOrgTypeInfo, TestUserInfo, TestPaymentMethodInfo)
+from tests.utilities.factory_utils import (
+    factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
+    factory_org_model, factory_org_service, factory_user_model, factory_user_model_with_contact)
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -78,6 +77,29 @@ def test_create_basic_org_assert_pay_request_is_correct(session, keycloak_mock):
         expected_data = {
             'accountId': dictionary.get('id'),
             'accountName': dictionary.get('name'),
+            'paymentInfo': {
+                'methodOfPayment': OrgService._get_default_payment_method_for_creditcard(),
+                'billable': True
+            }
+
+        }
+        assert expected_data == actual_data
+
+
+def test_pay_request_is_correct_with_branch_name(session,
+                                                 keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
+    user = factory_user_model()
+    with patch.object(RestService, 'post') as mock_post:
+        org = OrgService.create_org(TestOrgInfo.org_branch_name, user_id=user.id)
+        assert org
+        dictionary = org.as_dict()
+        assert dictionary['name'] == TestOrgInfo.org_branch_name['name']
+        mock_post.assert_called()
+        actual_data = mock_post.call_args.kwargs.get('data')
+        expected_data = {
+            'accountId': dictionary.get('id'),
+            'accountName': f"{dictionary.get('name')}-{TestOrgInfo.org_branch_name['branchName']}",
             'paymentInfo': {
                 'methodOfPayment': OrgService._get_default_payment_method_for_creditcard(),
                 'billable': True
@@ -807,20 +829,3 @@ def test_send_staff_review_account_reminder_exception(session,
             OrgService.send_staff_review_account_reminder(user, org_dictionary['id'], 'localhost')
 
     assert exception.value.code == Error.FAILED_NOTIFICATION.name
-
-
-def test_add_product(session):  # pylint:disable=unused-argument
-    """Assert that a product can be add into product subscription table."""
-    org = factory_org_service()
-    org_dictionary = org.as_dict()
-
-    subscriptions = OrgService.add_product(org_dictionary['id'], token_info=None)
-    assert subscriptions is None
-
-    subscriptions = OrgService.add_product(org_dictionary['id'], token_info=TestJwtClaims.public_user_role)
-    assert len(subscriptions) == 2
-    assert subscriptions[0].product_code == ProductCode.BUSINESS.value
-
-    subscriptions = OrgService.add_product(org_dictionary['id'], token_info=TestJwtClaims.system_role)
-    assert len(subscriptions) == 1
-    assert subscriptions[0].product_code == TestJwtClaims.system_role['product_code']

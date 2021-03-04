@@ -1,4 +1,5 @@
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
+
 import { Address } from '@/models/address'
 import { Business } from '@/models/business'
 import { Invitation } from '@/models/Invitation'
@@ -11,6 +12,7 @@ export interface CreateRequestBody {
   bcOnlineCredential?:BcolProfile
   mailingAddress?:Address
   paymentInfo?: PaymentInfo
+  branchName?: string
 }
 
 export interface PaymentInfo {
@@ -45,6 +47,7 @@ export interface Organization {
   bcolUserId?: string
   suspendedOn?: string
   accountStatus?: string
+  suspensionReasonCode?: string
 }
 
 export interface PADInfo {

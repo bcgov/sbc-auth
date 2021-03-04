@@ -163,7 +163,6 @@
     ref="suspendAccountDialog"
     icon="mdi-check"
     :title="dialogTitle"
-    :text="dialogText"
     dialog-class="notify-dialog"
     max-width="680"
     :isPersistent="true"
@@ -172,6 +171,22 @@
       <template v-slot:icon>
         <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
+      <template v-slot:text>
+        <p class="px-10">{{ dialogText }}<br/></p>
+        <v-select
+          class="px-10"
+          filled
+          label="Reason for Suspension"
+          req
+          :rules="suspensionSelectRules"
+          :items="suspensionReasonCodes"
+          item-text="code"
+          item-value="code"
+          v-model="selectedSuspensionReasonCode"
+          v-if="isAccountStatusActive"
+          data-test='select-suspend-account-reason'
+        />
+      </template>
       <template v-slot:actions>
         <v-btn
           large
@@ -179,17 +194,44 @@
           :color="getDialogStatusButtonColor(currentOrganization.orgStatus)"
           data-test='btn-suspend-dialog'
           @click="confirmSuspendAccount()"
+          :disabled="isConfirmSuspendButtonDisabled"
         >
           {{ isAccountStatusActive ? 'Suspend' : 'Unsuspend' }}
         </v-btn>
         <v-btn
           large
           depressed
-          clss="btn-dialog"
+          class="btn-dialog"
           @click="closeSuspendAccountDialog()"
           data-test='btn-cancel-suspend-dialog'
         >
           Cancel
+        </v-btn>
+      </template>
+    </ModalDialog>
+    <!-- Suspend Confirmation Dialog -->
+    <ModalDialog
+    ref="suspensionCompleteDialog"
+    title="Account has been suspended"
+    :text="suspensionCompleteDialogText"
+    dialog-class="notify-dialog"
+    max-width="680"
+    :isPersistent="true"
+    data-test='modal-suspension-complete'
+    >
+      <template v-slot:icon>
+        <v-icon large color="primary">mdi-check</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-btn
+          large
+          depressed
+          class="font-weight-bold white--text btn-dialog"
+          @click="closeSuspensionCompleteDialog()"
+          data-test='btn-suspend-confirm-dialog'
+          color="primary"
+        >
+          OK
         </v-btn>
       </template>
     </ModalDialog>
@@ -205,6 +247,7 @@ import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
+import { Code } from '@/models/Code'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -214,6 +257,9 @@ import OrgAdminContact from '@/components/auth/account-settings/account-info/Org
 import OrgModule from '@/store/modules/org'
 import { addressSchema } from '@/schemas'
 import { getModule } from 'vuex-module-decorators'
+import { namespace } from 'vuex-class'
+
+const CodesModule = namespace('codes')
 
 @Component({
   components: {
@@ -239,6 +285,8 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class AccountInfo extends Mixins(AccountChangeMixin) {
+  @CodesModule.State('suspensionReasonCodes') private suspensionReasonCodes!: Code[]
+
   private orgStore = getModule(OrgModule, this.$store)
   private btnLabel = 'Save'
   private readonly currentOrganization!: Organization
@@ -248,13 +296,15 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private readonly permissions!: string[]
   private dialogTitle: string = ''
   private dialogText: string = ''
+  private selectedSuspensionReasonCode: string = ''
+  private suspensionCompleteDialogText: string = ''
 
   private readonly updateOrg!: (
     requestBody: CreateRequestBody
   ) => Promise<Organization>
   private readonly syncAddress!: () => Address
   protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
-  protected readonly suspendOrganization!: () => Promise<Organization>
+  protected readonly suspendOrganization!: (selectedSuspensionReasonCode: string) => Promise<Organization>
   private orgName = ''
   private errorMessage: string = ''
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
@@ -266,7 +316,8 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   $refs: {
     editAccountForm: HTMLFormElement,
     mailingAddress:HTMLFormElement,
-    suspendAccountDialog:ModalDialog
+    suspendAccountDialog:ModalDialog,
+    suspensionCompleteDialog:ModalDialog
   }
 
   private isFormValid (): boolean {
@@ -281,9 +332,17 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     return this.currentOrganization.statusCode === AccountStatus.ACTIVE || this.currentOrganization.statusCode === AccountStatus.SUSPENDED
   }
 
+  private get isConfirmSuspendButtonDisabled (): boolean {
+    return this.currentOrganization.statusCode === AccountStatus.ACTIVE && this.selectedSuspensionReasonCode.length === 0
+  }
+
   get editAccountUrl () {
     return Pages.EDIT_ACCOUNT_TYPE
   }
+
+  private suspensionSelectRules = [
+    v => !!v || 'A reason for suspension is required'
+  ]
 
   private async mounted () {
     const accountSettings = this.getAccountFromSession()
@@ -317,24 +376,32 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     this.enableBtn()
   }
 
-  private showSuspendAccountDialog (status) {
+  private async showSuspendAccountDialog (status) {
     if (status === AccountStatus.ACTIVE) {
       this.dialogTitle = 'Suspend Account'
-      this.dialogText = 'Are you sure you want to suspend access to this account?<br/>Team members will be restricted from access until the account is unsuspended.'
+      this.dialogText = this.$t('suspendAccountText').toString()
     } else {
       this.dialogTitle = 'Unsuspend Account'
-      this.dialogText = 'Are you sure you want to unsuspend access to this account?'
+      this.dialogText = this.$t('unsuspendAccountText').toString()
     }
     this.$refs.suspendAccountDialog.open()
   }
 
   private async confirmSuspendAccount (): Promise<void> {
-    await this.suspendOrganization()
+    await this.suspendOrganization(this.selectedSuspensionReasonCode)
     this.$refs.suspendAccountDialog.close()
+    if (this.currentOrganization.statusCode === AccountStatus.SUSPENDED) {
+      this.suspensionCompleteDialogText = `The account ${this.currentOrganization.name} has been suspended.`
+      this.$refs.suspensionCompleteDialog.open()
+    }
   }
 
   private closeSuspendAccountDialog () {
     this.$refs.suspendAccountDialog.close()
+  }
+
+  private closeSuspensionCompleteDialog () {
+    this.$refs.suspensionCompleteDialog.close()
   }
 
   private async setup () {

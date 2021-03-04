@@ -22,10 +22,9 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Org as OrgModel
 from auth_api.models import ProductCode as ProductCodeModel
-from auth_api.models import ProductRoleCode as ProductRoleCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
-from auth_api.models import ProductSubscriptionRole as ProductSubscriptionRoleModel
 from auth_api.models import db
+from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType
 from ..utils.cache import cache
 
 
@@ -55,7 +54,7 @@ class Product:
         return getattr(product_code_model, 'type_code', '')
 
     @staticmethod
-    def create_product_subscription(org_id, subscription_data: Dict[str, Any], is_new_transaction: bool = True):
+    def create_product_subscription(org_id, subscription_data: Dict[str, Any]):
         """Create product subscription for the user.
 
         create product subscription first
@@ -77,30 +76,22 @@ class Product:
             else:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-            Product._create_roles(is_new_transaction, product_code, product_subscription, subscription)
-
         # TODO return something better/useful.may be return the whole model from db
         return subscriptions_model_list
 
     @staticmethod
-    def _create_roles(is_new_transaction, product_code, product_subscription, subscription):
-        """Create Product Roles."""
-        if subscription.get('productRoles'):
-            for role in subscription.get('productRoles'):
-                product_role_code = ProductRoleCodeModel.find_by_code_and_product_code(role, product_code)
-                if product_role_code:
-                    ProductSubscriptionRoleModel(product_subscription_id=product_subscription.id,
-                                                 product_role_id=product_role_code.id).save()
-        else:  # empty product roles ;give subscription to everything
-            product_roles = ProductRoleCodeModel.find_all_roles_by_product_code(product_code)
-            obj = []
-            for role in product_roles:
-                obj.append(ProductSubscriptionRoleModel(product_subscription_id=product_subscription.id,
-                                                        product_role_id=role.id))
-            db.session.bulk_save_objects(obj)
+    def create_default_product_subscriptions(org: OrgModel):
+        """Create default product subscriptions for the account."""
+        internal_product_codes = ProductCodeModel.find_by_type_code(type_code=ProductTypeCode.INTERNAL.value)
+        for product_code in internal_product_codes:
+            # Add PPR only if the account is premium.
+            if product_code.code == ProductCode.PPR.value:
+                if org.type_code == OrgType.PREMIUM.value:
+                    ProductSubscriptionModel(org_id=org.id, product_code=product_code.code).flush()
+            else:
+                ProductSubscriptionModel(org_id=org.id, product_code=product_code.code).flush()
 
-            if is_new_transaction:  # Commit the transaction if it's a new transaction
-                db.session.commit()
+        db.session.commit()
 
     @staticmethod
     def get_products():
