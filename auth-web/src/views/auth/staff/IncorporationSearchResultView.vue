@@ -146,7 +146,7 @@ export default class IncorporationSearchResultView extends Vue {
       text: 'Number',
       align: 'left',
       sortable: false,
-      value: 'businessNumber',
+      value: 'businessIdentifier',
       width: '25%'
     },
     {
@@ -183,7 +183,7 @@ export default class IncorporationSearchResultView extends Vue {
   }
 
   private async entityDashboardEvent () {
-    window.location.href = `${ConfigHelper.getCoopsURL()}${this.currentBusiness.businessNumber}`
+    window.location.href = `${ConfigHelper.getCoopsURL()}${this.currentBusiness.businessIdentifier}`
   }
 
   private async manageAccountEvent () {
