@@ -63,7 +63,7 @@ export enum Pages {
     STAFF_DASHBOARD_INVITATIONS = '/staff/dashboard/invitations',
     STAFF_DASHBOARD_SUSPENDED = '/staff/dashboard/suspended',
     MAKE_PAD_PAYMENT = '/make-cc-payment/',
-    STAFF_GOVN_SETUP_ACCOUNT = 'staff-govn-setup-account',
+    STAFF_GOVN_SETUP_ACCOUNT = '/staff-govn-setup-account',
 
 }
 
