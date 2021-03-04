@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-0 create-account-modal">
+  <v-container class="pa-0 create-account-modal" data-test="create-account-modal">
     <ModalDialog
       ref="createAccountDialog"
       title="Create Account"
@@ -25,12 +25,12 @@
         </template>
      </v-radio>
       <p class="ml-8 mb-11">Create an account for director search account for directors who is a member of the board of a company</p>
-      <v-radio :value="accountTypes.GOVN_BUSINESS"  data-test="radio-government">
+      <v-radio :value="accountTypes.GOVM_BUSINESS"  data-test="radio-government">
         <template v-slot:label>
           <div class="font font-weight-bold text--primary">BC Provincial Government Ministry/Employee</div>
         </template>
       </v-radio>
-      <p class="ml-8 mb-7">Send an invite to GOVN business type account for different ministries</p>
+      <p class="ml-8 mb-7">Send an invite to GOVM business type account for different ministries</p>
 
     </v-radio-group>
       </template>
@@ -77,7 +77,7 @@ export default class StaffCreateAccountModal extends Vue {
     if (this.selctedAccount === StaffCreateAccountsTypes.DIRECTOR_SEARCH) {
       this.$router.push({ path: `/${Pages.STAFF_SETUP_ACCOUNT}` })
     } else {
-      this.$router.push({ path: `${Pages.STAFF_GOVN_SETUP_ACCOUNT}` })
+      this.$router.push({ path: `${Pages.STAFF_GOVM_SETUP_ACCOUNT}` })
     }
   }
 }
