@@ -41,7 +41,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     type_code = Column(ForeignKey('org_types.code'), nullable=False)
     status_code = Column(ForeignKey('org_statuses.code'), nullable=False)
     name = Column(String(250), index=True)
-    branch_name = Column(String(250), nullable=True)  # to be used for any additional info as branch name etc
+    branch_name = Column(String(100), nullable=True)  # to be used for any additional info as branch name etc
     access_type = Column(String(250), index=True, nullable=True)  # for ANONYMOUS ACCESS
     billable = Column('billable', Boolean(), default=True, nullable=False)
     decision_made_by = Column(String(250))

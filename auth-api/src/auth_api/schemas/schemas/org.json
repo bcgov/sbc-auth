@@ -28,7 +28,8 @@
         "default": "",
         "examples": [
           "Foobar Branch."
-        ]
+        ],
+        "maxLength": 100
       },
       "typeCode": {
         "$id": "#/properties/orgType",
