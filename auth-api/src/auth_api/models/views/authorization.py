@@ -18,7 +18,7 @@ Authorization view wraps details on the entities and membership through orgs and
 
 import uuid
 
-from sqlalchemy import Column, Integer, String, and_, or_
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import expression
 
@@ -40,7 +40,6 @@ class Authorization(db.Model):
     org_type = Column(String)
     corp_type_code = Column(String)
     product_code = Column(String)
-    roles = Column(String)
     org_name = Column(String)
     bcol_user_id = Column(String)
     bcol_account_id = Column(String)
@@ -58,19 +57,6 @@ class Authorization(db.Model):
             auth = cls.query.filter_by(business_identifier=business_identifier).first()
 
         return auth
-
-    @classmethod
-    def find_user_authorization_by_business_number_and_corp_type(cls, business_identifier: str, corp_type: str):
-        """Return authorization view object using corp type and business identifier.
-
-        Mainly used for service accounts.Sorted using the membership since service accounts gets all access
-
-        """
-        return cls.query.filter_by(corp_type_code=corp_type, business_identifier=business_identifier) \
-            .order_by(expression.case(((Authorization.org_membership == ADMIN, 1),
-                                       (Authorization.org_membership == COORDINATOR, 2),
-                                       (Authorization.org_membership == USER, 3)))) \
-            .first()
 
     @classmethod
     def find_user_authorization_by_business_number_and_product(cls, business_identifier: str, product_code: str):
@@ -95,16 +81,6 @@ class Authorization(db.Model):
         """Return authorization view object for staff."""
         # staff gets ADMIN level access
         return cls.query.filter_by(org_id=org_id, org_membership=ADMIN).first()
-
-    @classmethod
-    def find_user_authorization_by_org_id_and_corp_type(cls, org_id: int, corp_type: str):
-        """Return authorization view object."""
-        return db.session.query(Authorization).filter(
-            and_(Authorization.org_id == org_id,
-                 or_(Authorization.corp_type_code == corp_type, Authorization.corp_type_code.is_(None)))).order_by(
-                     expression.case(((Authorization.org_membership == ADMIN, 1),
-                                      (Authorization.org_membership == COORDINATOR, 2),
-                                      (Authorization.org_membership == USER, 3)))).first()
 
     @classmethod
     def find_account_authorization_by_org_id_and_product_for_user(cls, keycloak_guid: uuid, org_id: int, product: str):

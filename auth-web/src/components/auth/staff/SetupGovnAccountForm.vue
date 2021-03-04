@@ -1,22 +1,33 @@
 <template>
   <div>
-    <v-form ref="directorSearchForm">
+    <v-form ref="setupGovnAccountForm">
       <!-- Name of Account -->
       <v-row>
         <v-col cols="12" class="pb-0 mb-2">
-          <h4 class="mb-2">Enter a name for this account</h4>
+          <h4 class="mb-2">Enter Ministry Information for this account</h4>
         </v-col>
       </v-row>
       <v-row>
         <v-col cols="12" class="">
           <v-text-field
             filled
-            label="Account Name"
-            v-model.trim="accountName"
-            :rules="accountNameRules"
+            label="Ministry Name"
+            v-model.trim="ministryName"
+            :rules="ministryNameRules"
             persistent-hint
             :disabled="saving"
-            data-test="account-name"
+            data-test="input-ministry-name"
+          >
+          </v-text-field>
+        </v-col>
+        <v-col cols="12" class="">
+          <v-text-field
+            filled
+            label="Branch/Division (if applicable)"
+            v-model.trim="branchName"
+            persistent-hint
+            :disabled="saving"
+            data-test="input-branch-name"
           >
           </v-text-field>
         </v-col>
@@ -25,7 +36,8 @@
       <v-row>
         <v-col cols="12" class="pb-0">
           <h4 class="mb-2">Account Admin Contact</h4>
-          <p class="mb-6">Enter the email address of the user who will be managing this account. An email will be sent to this user to verify and activate this account</p>
+          <p class="mb-6">Enter the IDIR email address of the ministry's employee. An email will be sent this user
+to verify and activate this account. This user will be the admin of this account.</p>
         </v-col>
       </v-row>
       <v-row>
@@ -34,10 +46,10 @@
             filled
             label="Email Address"
             v-model.trim="email"
-            :rules="emailRules"
+            :rules="bcGovemailRules"
             persistent-hint
             :disabled="saving"
-            data-test="email-address"
+            data-test="input-email-address"
           >
           </v-text-field>
         </v-col>
@@ -48,38 +60,16 @@
             filled
             label="Confirm Email Address"
             v-model.trim="emailConfirm"
-            :rules="emailRules"
+            :rules="bcGovemailRules"
             persistent-hint
             :error-messages="emailMatchError()"
             :disabled="saving"
-            data-test="confirm-email-address"
+            data-test="input-confirm-email-address"
           >
           </v-text-field>
         </v-col>
       </v-row>
-      <!-- Select Products -->
-      <v-row>
-        <v-col cols="12" class="pb-0">
-          <h4 class="mb-2">Select Product(s)</h4>
-          <p class="mb-4">Which products will this account have access to?</p>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12" class="pt-0 pb-0">
-          <v-treeview
-            selectable
-            open-all
-            return-object
-            :items="products"
-            :item-text="'desc'"
-            :item-key="'code'"
-            :item-children="'subProducts'"
-            v-model="selectedProducts"
-            :disabled="saving"
-            data-test="product-select"
-          ></v-treeview>
-        </v-col>
-      </v-row>
+
       <v-row>
         <v-col cols="12" class="form__btns pb-0">
           <v-btn
@@ -90,7 +80,7 @@
             :disabled="!isFormValid() || saving"
             @click="save"
             data-test="save-button"
-          >Create Account</v-btn>
+          >Send Invite</v-btn>
           <v-btn
             large
             depressed
@@ -122,65 +112,45 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Pages } from '@/util/constants'
-import { AccountType, ProductCode, Products, ProductsRequestBody } from '@/models/Staff'
+import { AccessType, Account, Pages } from '@/util/constants'
 import { Component, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, MembershipType, Organization } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
-import { CreateRequestBody as InvitationRequestBody } from '@/models/Invitation'
+import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import OrgModule from '@/store/modules/org'
-import StaffModule from '@/store/modules/staff'
-import { getModule } from 'vuex-module-decorators'
+import { namespace } from 'vuex-class'
+
+const OrgModule = namespace('org')
 
 @Component({
-  computed: {
-    ...mapState('org', ['currentOrganization']),
-    ...mapState('staff', ['products', 'accountTypes'])
-  },
-  methods: {
-    ...mapActions('org', ['createOrgByStaff', 'addProductsToOrg', 'createInvitation']),
-    ...mapActions('staff', ['getProducts', 'getAccountTypes'])
-  },
   components: {
     ModalDialog
   }
 })
 export default class SetupAccountForm extends Vue {
-  private orgStore = getModule(OrgModule, this.$store)
-  private staffStore = getModule(StaffModule, this.$store)
-  private accountName: string = ''
-  private accountType: string = ''
-  private errorMessage: string = ''
-  private saving = false
-  private loader = false
-  private selectedProducts: ProductCode[] = []
-  private email = ''
-  private emailConfirm = ''
-  private dialogTitle = ''
-  private dialogText = ''
-  private readonly createOrgByStaff!: (
+  @OrgModule.Action('createOrgByStaff') private createOrgByStaff!: (
     requestBody: CreateRequestBody
   ) => Promise<Organization>
-  private readonly addProductsToOrg!: (productsRequestBody: ProductsRequestBody) => Promise<Products>
-  private readonly getProducts!: () => Promise<ProductCode[]>
-  private readonly getAccountTypes!: () => Promise<AccountType[]>
-  private readonly createInvitation!: (Invitation) => Promise<void>
-  private readonly products!: ProductCode[]
-  private readonly accountTypes!: AccountType[]
+
+  @OrgModule.Action('createInvitation') private createInvitation!: (Invitation) => Promise<void>
+
+  public ministryName: string = ''
+  public branchName: string = ''
+  public errorMessage: string = ''
+  public saving = false
+  public loader = false
+  public email = ''
+  public emailConfirm = ''
+  public dialogTitle = ''
+  public dialogText = ''
+  public bcGovemailRules = CommonUtils.bcGovemailRules()
 
   $refs: {
-    directorSearchForm: HTMLFormElement,
+    setupGovnAccountForm: HTMLFormElement,
     errorDialog: ModalDialog
   }
 
-  private readonly accountNameRules = [
-    v => !!v || 'An account name is required'
-  ]
-
-  private readonly emailRules = [
-    v => !!v || 'An email address is required',
-    v => /.+@.+\..+/.test(v) || 'Invalid Email Address'
+  public readonly ministryNameRules = [
+    v => !!v || 'A ministry name is required'
   ]
 
   private emailMatchError () {
@@ -188,42 +158,24 @@ export default class SetupAccountForm extends Vue {
   }
 
   private isFormValid (): boolean {
-    return !!this.accountName &&
-      this.selectedProducts.length &&
+    return !!this.ministryName &&
       !this.emailMatchError() &&
-      this.$refs.directorSearchForm.validate()
+      this.$refs.setupGovnAccountForm.validate()
   }
 
-  async mounted () {
-    await this.getProducts()
-    await this.getAccountTypes()
-    if (this.accountTypes && this.accountTypes.length) {
-      const defaultAcc = this.accountTypes.filter((account) => account.default)
-      this.accountType = (defaultAcc && defaultAcc.length && defaultAcc[0].code) ? defaultAcc[0].code : this.accountType
-    }
-  }
-
-  private async save () {
+  public async save () {
     this.loader = this.saving
     if (this.isFormValid()) {
       const createRequestBody: CreateRequestBody = {
-        name: this.accountName,
-        typeCode: this.accountType,
-        accessType: AccessType.ANONYMOUS
+        name: this.ministryName,
+        accessType: AccessType.GOVM,
+        branchName: this.branchName,
+        typeCode: Account.PREMIUM
       }
-      const productsSelected: Products[] = this.selectedProducts.map((prod) => {
-        return {
-          productCode: prod.code,
-          productRoles: ['search']
-        }
-      })
-      const addProductsRequestBody: ProductsRequestBody = {
-        subscriptions: productsSelected
-      }
+
       try {
         this.saving = true
         const organization = await this.createOrgByStaff(createRequestBody)
-        await this.addProductsToOrg(addProductsRequestBody)
         await this.createInvitation({
           recipientEmail: this.email,
           sentDate: new Date(),
@@ -231,7 +183,7 @@ export default class SetupAccountForm extends Vue {
         })
         this.saving = false
         this.loader = this.saving
-        this.$router.push({ path: `/staff-setup-account-success/${this.accountName}` })
+        this.$router.push({ path: `/staff-setup-account-success/${this.ministryName}` })
       } catch (err) {
         this.saving = false
         switch (err.response.status) {
@@ -256,7 +208,7 @@ export default class SetupAccountForm extends Vue {
     }
   }
 
-  private cancel () {
+  public cancel () {
     this.$router.push({ path: Pages.STAFF_DASHBOARD })
   }
 

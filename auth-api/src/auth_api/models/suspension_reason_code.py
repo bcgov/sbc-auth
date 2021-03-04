@@ -26,13 +26,3 @@ class SuspensionReasonCode(BaseCodeModel):  # pylint: disable=too-few-public-met
     """
 
     __tablename__ = 'suspension_reason_codes'
-
-    @classmethod
-    def find_by_code(cls, code):
-        """Find a Suspension Reason Code instance that matches the code."""
-        return cls.query.filter_by(code=code).one_or_none()
-
-    @classmethod
-    def get_all_codes(cls):
-        """Get all of the Suspension Reason Codes."""
-        return cls.query.all()

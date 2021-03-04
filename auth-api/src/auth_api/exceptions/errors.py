@@ -44,7 +44,10 @@ class Error(Enum):
     ALREADY_CLAIMED_PASSCODE = 'Passcode you entered has already been claimed', http_status.HTTP_406_NOT_ACCEPTABLE
     ORG_CANNOT_BE_DISSOLVED = 'Organization cannot be dissolved', http_status.HTTP_406_NOT_ACCEPTABLE
     FAILED_ADDING_USER_IN_KEYCLOAK = 'Error adding user to keycloak', http_status.HTTP_500_INTERNAL_SERVER_ERROR
+    ACCCESS_TYPE_MANDATORY = 'staff created orgs needs access type', http_status.HTTP_400_BAD_REQUEST
     USER_CANT_CREATE_ANONYMOUS_ORG = 'Only staff can create anonymous org', http_status.HTTP_401_UNAUTHORIZED
+    USER_CANT_CREATE_GOVM_ORG = 'Only staff can create govt  ministy org', http_status.HTTP_401_UNAUTHORIZED
+
     USER_CANT_CREATE_EXTRA_PROVINCIAL_ORG = 'Only out of province users can create extra provincial org', \
                                             http_status.HTTP_401_UNAUTHORIZED
     USER_CANT_CREATE_REGULAR_ORG = 'Only out of province users cannot create regular org', \

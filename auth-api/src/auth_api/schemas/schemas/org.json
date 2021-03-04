@@ -21,6 +21,16 @@
         ],
         "pattern": "^[^\\s]+(\\s+[^\\s]+)*$"
       },
+      "branchName": {
+        "$id": "#/properties/branchName",
+        "type": "string",
+        "title": "Organization Branch Name",
+        "default": "",
+        "examples": [
+          "Foobar Branch."
+        ],
+        "maxLength": 100
+      },
       "typeCode": {
         "$id": "#/properties/orgType",
         "type": "string",
