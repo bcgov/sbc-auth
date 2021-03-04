@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <div class="view-container">
+    <div class="view-container" data-test="setup-govn-account">
       <article>
         <div class="view-header">
           <v-btn large icon color="secondary" class="mr-2" @click="handleBackButton()" data-test="account-settings-back-button">

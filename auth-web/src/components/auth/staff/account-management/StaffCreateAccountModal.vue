@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-0 create-account-modal">
+  <v-container class="pa-0 create-account-modal" data-test="create-account-modal">
     <ModalDialog
       ref="createAccountDialog"
       title="Create Account"
