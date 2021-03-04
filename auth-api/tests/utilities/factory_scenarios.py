@@ -422,6 +422,7 @@ class TestOrgInfo(dict, Enum):
     """Test scenarios of org."""
 
     org1 = {'name': 'My Test Org'}
+    org_branch_name = {'name': 'Foo', 'branchName': 'Bar', }
 
     org_onlinebanking = {'name': 'My Test Org', 'paymentInfo': {'paymentMethod': 'ONLINE_BANKING'}}
     org2 = {'name': 'My Test Updated Org'}
@@ -429,6 +430,7 @@ class TestOrgInfo(dict, Enum):
     org4 = {'name': 'fourth Orgs'}
     org5 = {'name': 'fifth Orgs'}
     org_anonymous = {'name': 'My Test Anon Org', 'accessType': 'ANONYMOUS'}
+    org_govm = {'name': 'My Test Anon Org', 'branchName': 'Bar', 'accessType': AccessType.GOVM.value}
     org_anonymous_2 = {'name': 'Another test org', 'accessType': 'ANONYMOUS'}
     invalid = {'foo': 'bar'}
     invalid_name_space = {'name': ''}
