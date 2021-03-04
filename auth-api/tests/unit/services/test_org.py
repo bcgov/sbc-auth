@@ -87,7 +87,7 @@ def test_create_basic_org_assert_pay_request_is_correct(session, keycloak_mock):
 
 
 def test_pay_request_is_correct_with_branch_name(session,
-                                                                         keycloak_mock):  # pylint:disable=unused-argument
+                                                 keycloak_mock):  # pylint:disable=unused-argument
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
     user = factory_user_model()
     with patch.object(RestService, 'post') as mock_post:
