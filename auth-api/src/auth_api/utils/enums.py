@@ -71,6 +71,7 @@ class PaymentMethod(Enum):
     DIRECT_PAY = 'DIRECT_PAY'
     ONLINE_BANKING = 'ONLINE_BANKING'
     PAD = 'PAD'
+    EJV = 'EJV'
 
 
 class PaymentAccountStatus(Enum):
@@ -135,6 +136,7 @@ class AccessType(Enum):
     REGULAR_BCEID = 'REGULAR_BCEID'
     EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL'
     ANONYMOUS = 'ANONYMOUS'
+    GOVM = 'GOVM'  # for govt ministry
 
 
 class Status(Enum):
@@ -177,6 +179,7 @@ class SuspensionReasonCode(Enum):
 class InvitationType(Enum):
     """Invitation type."""
 
+    GOVM = 'GOVM'  # Used to indicate an anonymous account invitation
     DIRECTOR_SEARCH = 'DIRECTOR_SEARCH'  # Used to indicate an anonymous account invitation
     STANDARD = 'STANDARD'  # Used to indicate the standard email invite with admin approval
 

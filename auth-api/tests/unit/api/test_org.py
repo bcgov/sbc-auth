@@ -28,7 +28,7 @@ from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
-from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus, PaymentMethod, SuspensionReasonCode
+from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus, PaymentMethod, SuspensionReasonCode, AccessType
 from tests.utilities.factory_scenarios import (
     TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
     TestPaymentMethodInfo)
@@ -232,6 +232,19 @@ def test_search_org_for_dir_search(client, jwt, session, keycloak_mock):  # pyli
     assert len(orgs.get('orgs')) == 1
 
 
+def test_add_govm_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_govm),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    dictionary = json.loads(rv.data)
+    assert dictionary['accessType'] == AccessType.GOVM.value
+    assert dictionary['orgType'] == OrgType.PREMIUM.value
+    assert schema_utils.validate(rv.json, 'org_response')[0]
+
+
 def test_add_anonymous_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
@@ -242,6 +255,15 @@ def test_add_anonymous_org_staff_admin(client, jwt, session, keycloak_mock):  # 
     dictionary = json.loads(rv.data)
     assert dictionary['accessType'] == 'ANONYMOUS'
     assert schema_utils.validate(rv.json, 'org_response')[0]
+
+
+def test_add_govm_org_by_user_exception(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_govm),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
 
 
 def test_add_anonymous_org_by_user_exception(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -258,7 +280,7 @@ def test_add_org_staff_admin_anonymous_not_passed(client, jwt, session,
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps({'name': 'My Test Org'}),
+    rv = client.post('/api/v1/orgs', data=json.dumps({'name': 'My Test Org', 'accessType': AccessType.ANONYMOUS.value}),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
