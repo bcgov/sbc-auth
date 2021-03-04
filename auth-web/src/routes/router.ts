@@ -43,7 +43,7 @@ import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
 import { RouteConfig } from 'vue-router'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
 import SetupAccountView from '@/views/auth/staff/SetupAccountView.vue'
-import SetupGovnAccountView from '@/views/auth/staff/SetupGovnAccountView.vue'
+import SetupGovmAccountView from '@/views/auth/staff/SetupGovmAccountView.vue'
 import SigninView from '@/views/auth/SigninView.vue'
 import SignoutView from '@/views/auth/SignoutView.vue'
 import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
@@ -511,9 +511,9 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, allowedRoles: [Role.Staff] }
     },
     {
-      path: '/staff-govn-setup-account',
-      name: 'staffGovnsetupaccount',
-      component: SetupGovnAccountView,
+      path: '/staff-govm-setup-account',
+      name: 'staffGovmsetupaccount',
+      component: SetupGovmAccountView,
       props: true,
       meta: { requiresAuth: true, allowedRoles: [Role.Staff] }
     },
