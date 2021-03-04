@@ -77,7 +77,7 @@ export default class StaffCreateAccountModal extends Vue {
     if (this.selctedAccount === StaffCreateAccountsTypes.DIRECTOR_SEARCH) {
       this.$router.push({ path: `/${Pages.STAFF_SETUP_ACCOUNT}` })
     } else {
-      this.$router.push({ path: `/${Pages.STAFF_GOVN_SETUP_ACCOUNT}` })
+      this.$router.push({ path: `${Pages.STAFF_GOVN_SETUP_ACCOUNT}` })
     }
   }
 }
