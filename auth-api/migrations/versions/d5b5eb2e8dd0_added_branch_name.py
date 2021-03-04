@@ -19,7 +19,7 @@ depends_on = None
 
 def upgrade():
     op.add_column('orgs', sa.Column('branch_name', sa.String(length=250), nullable=True))
-    # op.add_column('orgs_version', sa.Column('branch_name', sa.String(length=250), nullable=True))
+    op.add_column('orgs_version', sa.Column('branch_name', sa.String(length=250), nullable=True))
 
     invitation_type_table = table('invitation_types',
                                             column('code', sa.String(length=15)),
