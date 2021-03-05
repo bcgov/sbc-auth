@@ -66,15 +66,8 @@ def upgrade():
     op.execute('delete from product_subscription_roles')
     op.execute('delete from product_role_codes')
     op.drop_table('product_subscription_roles')
-    op.drop_index('ix_product_subscription_roles_version_end_transaction_id',
-                  table_name='product_subscription_roles_version')
-    op.drop_index('ix_product_subscription_roles_version_operation_type',
-                  table_name='product_subscription_roles_version')
-    op.drop_index('ix_product_subscription_roles_version_transaction_id',
-                  table_name='product_subscription_roles_version')
     op.drop_table('product_subscription_roles_version')
 
-    op.drop_index('ix_product_role_codes_code', table_name='product_role_codes')
     op.drop_table('product_role_codes')
 
     # Create PPR product for PREMIUM accounts.
