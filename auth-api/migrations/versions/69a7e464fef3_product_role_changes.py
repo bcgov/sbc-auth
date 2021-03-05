@@ -71,12 +71,12 @@ def upgrade():
                     sa.Column('product_role_id', sa.INTEGER(), autoincrement=False, nullable=False),
                     sa.Column('created_by_id', sa.INTEGER(), autoincrement=False, nullable=True),
                     sa.Column('modified_by_id', sa.INTEGER(), autoincrement=False, nullable=True),
-                    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], name='product_role_created_by_id_fkey'),
-                    sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], name='product_role_modified_by_id_fkey'),
+                    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], name='pproduct_role_created_by_id_fkey'),
+                    sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], name='pproduct_role_modified_by_id_fkey'),
                     sa.ForeignKeyConstraint(['product_role_id'], ['product_role_codes.id'],
-                                            name='product_role_product_role_id_fkey'),
+                                            name='pproduct_role_product_role_id_fkey'),
                     sa.ForeignKeyConstraint(['product_subscription_id'], ['product_subscriptions.id'],
-                                            name='product_role_product_subscription_id_fkey'),
+                                            name='pproduct_role_product_subscription_id_fkey'),
                     sa.PrimaryKeyConstraint('id', name='product_role_pkey')
                     )
 
