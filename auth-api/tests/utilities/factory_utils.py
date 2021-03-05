@@ -64,7 +64,6 @@ def factory_user_model(user_info: dict = TestUserInfo.user1):
     user = UserModel(username=user_info['username'],
                      firstname=user_info['firstname'],
                      lastname=user_info['lastname'],
-                     roles=user_info['roles'],
                      keycloak_guid=user_info.get('keycloak_guid', None),
                      type=user_info.get('access_type', None),
                      email='test@test.com',
@@ -80,7 +79,6 @@ def factory_user_model_with_contact(user_info: dict = TestUserInfo.user1):
     user = UserModel(username=user_info['username'],
                      firstname=user_info['firstname'],
                      lastname=user_info['lastname'],
-                     roles=user_info['roles'],
                      keycloak_guid=user_info.get('keycloak_guid', None),
                      type=user_info.get('access_type', None),
                      email='test@test.com'

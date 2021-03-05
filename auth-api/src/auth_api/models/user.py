@@ -25,6 +25,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.enums import AccessType, Status, UserStatus
+from auth_api.utils.roles import Role
 from .base_model import BaseModel
 from .db import db
 from .membership import Membership as MembershipModel
@@ -49,7 +50,7 @@ class User(BaseModel):
     keycloak_guid = Column(
         'keycloak_guid', UUID(as_uuid=True), unique=True, nullable=True  # bcros users comes with no guid
     )
-    roles = Column('roles', String(1000))
+
     is_terms_of_use_accepted = Column(Boolean(), default=False, nullable=True)
     terms_of_use_accepted_version = Column(
         ForeignKey('documents.version_id'), nullable=True
@@ -95,15 +96,16 @@ class User(BaseModel):
                 email=token.get('email', None),
                 keycloak_guid=token.get('sub', None),
                 created=datetime.datetime.now(),
-                roles=token.get('roles', None),
-                login_source=token.get('loginSource', None)
+                login_source=token.get('loginSource', None),
+                status=UserStatusCode.get_default_type(),
+                idp_userid=token.get('idp_userid', None),
+                login_time=datetime.datetime.now(),
+                type=cls._get_type(token_info=token)
             )
             current_app.logger.debug(
                 'Creating user from JWT:{}; User:{}'.format(token, user)
             )
-            user.status = UserStatusCode.get_default_type()
-            user.idp_userid = token.get('idp_userid', None)
-            user.login_time = datetime.datetime.now()
+
             user.save()
             return user
         return None
@@ -139,13 +141,14 @@ class User(BaseModel):
         user.email = token.get('email', user.email)
 
         user.modified = datetime.datetime.now()
-        user.roles = token.get('roles', user.roles)
+
         if token.get('accessType', None) == AccessType.ANONYMOUS.value:  # update kcguid for anonymous users
             user.keycloak_guid = token.get('sub', user.keycloak_guid)
 
         # If this user is marked as Inactive, this login will re-activate them
         user.status = UserStatus.ACTIVE.value
         user.login_source = token.get('login_source', user.login_source)
+        user.type = cls._get_type(token_info=token)
 
         # If this is a request during login, update login_time
         if is_login:
@@ -194,3 +197,22 @@ class User(BaseModel):
     def delete(self):
         """Users cannot be deleted so intercept the ORM by just returning."""
         return self
+
+    @classmethod
+    def _get_type(cls, token_info: dict) -> str:
+        """Return type of the user from the token info."""
+        token_roles = token_info.get('roles', None)
+        user_type: str = None
+        if token_roles:
+            if Role.ANONYMOUS_USER.value in token_roles:
+                user_type = Role.PUBLIC_USER.name
+            elif Role.GOV_ACCOUNT_USER.value in token_roles:
+                user_type = Role.GOV_ACCOUNT_USER.name
+            elif Role.PUBLIC_USER.value in token_roles:
+                user_type = Role.PUBLIC_USER.name
+            elif Role.STAFF.value in token_roles:
+                user_type = Role.STAFF.name
+            elif Role.SYSTEM.value in token_roles:
+                user_type = Role.SYSTEM.name
+
+        return user_type

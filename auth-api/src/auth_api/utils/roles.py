@@ -24,6 +24,8 @@ class Role(Enum):
     EDITOR = 'edit'
     PUBLIC_USER = 'public_user'
     ACCOUNT_HOLDER = 'account_holder'
+    GOV_ACCOUNT_USER = 'gov_account_user'
+    ANONYMOUS_USER = 'anonymous_user'
 
     SYSTEM = 'system'
     TESTER = 'tester'

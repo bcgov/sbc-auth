@@ -18,12 +18,16 @@ Test-Suite to ensure that the /invitations endpoint is working as expected.
 """
 import json
 
-from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
-from tests.utilities.factory_utils import factory_auth_header, factory_invitation
-
 from auth_api import status as http_status
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Invitation as InvitationService
+from auth_api.services.keycloak import KeycloakService
+from auth_api.utils.constants import GROUP_PUBLIC_USERS, \
+    GROUP_GOV_ACCOUNT_USERS
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, KeycloakScenario
+from tests.utilities.factory_utils import factory_auth_header, factory_invitation
+
+KEYCLOAK_SERVICE = KeycloakService()
 
 
 def test_add_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -127,7 +131,7 @@ def test_validate_token(client, jwt, session, keycloak_mock):  # pylint:disable=
     assert rv.status_code == http_status.HTTP_200_OK
 
 
-def test_accept_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_accept_public_users_invitation(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that an invitation can be accepted."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
     client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -141,7 +145,11 @@ def test_accept_invitation(client, jwt, session, keycloak_mock):  # pylint:disab
     invitation_id = invitation_dictionary['id']
     invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
 
-    headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role_2)
+    request = KeycloakScenario.create_user_request()
+    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
+    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
+    user_id = user.id
+    headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source='BCSC'))
     client.post('/api/v1/users', headers=headers_invitee, content_type='application/json')
     rv = client.put('/api/v1/invitations/tokens/{}'.format(invitation_id_token), headers=headers_invitee,
                     content_type='application/json')
@@ -152,3 +160,46 @@ def test_accept_invitation(client, jwt, session, keycloak_mock):  # pylint:disab
                     content_type='application/json')
     dictionary = json.loads(rv.data)
     assert len(dictionary['members']) == 1
+    # Assert that the user got added to the keycloak groups
+    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
+    groups = []
+    for group in user_groups:
+        groups.append(group.get('name'))
+    assert GROUP_PUBLIC_USERS in groups
+
+
+def test_accept_gov_account_invitation(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an invitation can be accepted."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.gov_account_holder_user)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation(org_id=org_id)),
+                     headers=headers, content_type='application/json')
+    invitation_dictionary = json.loads(rv.data)
+    invitation_id = invitation_dictionary['id']
+    invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
+
+    request = KeycloakScenario.create_user_request()
+    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
+    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
+    user_id = user.id
+    headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source='IDIR'))
+    client.post('/api/v1/users', headers=headers_invitee, content_type='application/json')
+    rv = client.put('/api/v1/invitations/tokens/{}'.format(invitation_id_token), headers=headers_invitee,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    rv = client.get('/api/v1/orgs/{}/members?status=PENDING_APPROVAL'.format(org_id),
+                    headers=headers,
+                    content_type='application/json')
+    dictionary = json.loads(rv.data)
+    assert len(dictionary['members']) == 1
+    # Assert that the user got added to the keycloak groups
+    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
+    groups = []
+    for group in user_groups:
+        groups.append(group.get('name'))
+    assert GROUP_GOV_ACCOUNT_USERS in groups

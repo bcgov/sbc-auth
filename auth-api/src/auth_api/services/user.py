@@ -59,12 +59,17 @@ class User:  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, model):
         """Return a User Service object."""
-        self._model = model
+        self._model: UserModel = model
 
     @property
     def identifier(self):
         """Return the identifier for this user."""
         return self._model.id
+
+    @property
+    def keycloak_guid(self) -> str:
+        """Return the Keycloak GUID for the user."""
+        return self._model.keycloak_guid
 
     @ServiceTracing.disable_tracing
     def as_dict(self):

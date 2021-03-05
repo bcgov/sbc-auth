@@ -26,7 +26,6 @@ def test_user(session):
     Start with a blank database.
     """
     user = User(username='CP1234567',
-                roles='{edit, uma_authorization, staff}',
                 keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
 
     session.add(user)
@@ -41,7 +40,6 @@ def test_user_find_by_jwt_token(session):
     Start with a blank database.
     """
     user = User(username='CP1234567',
-                roles='{edit, uma_authorization, staff}',
                 keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
     session.add(user)
     session.commit()
@@ -214,7 +212,6 @@ def test_update_from_jwt_token_no_user(session):  # pylint:disable=unused-argume
 def test_find_by_username(session):
     """Assert User can be found by the most current username."""
     user = User(username='CP1234567',
-                roles='{edit, uma_authorization, staff}',
                 keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
     session.add(user)
     session.commit()
@@ -227,7 +224,6 @@ def test_find_by_username(session):
 def test_user_save(session):  # pylint: disable=unused-argument
     """Assert User record is saved."""
     user = User(username='CP1234567',
-                roles='{edit, uma_authorization, staff}',
                 keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
     user.save()
 
@@ -237,7 +233,6 @@ def test_user_save(session):  # pylint: disable=unused-argument
 def test_user_delete(session):  # pylint: disable=unused-argument
     """Assert the User record is deleted."""
     user = User(username='CP1234567',
-                roles='{edit, uma_authorization, staff}',
                 keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
     user.save()
     user.delete()

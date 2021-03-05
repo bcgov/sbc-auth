@@ -49,7 +49,6 @@ def test_as_dict(session):  # pylint: disable=unused-argument
 
     dictionary = user.as_dict()
     assert dictionary['username'] == TestUserInfo.user1['username']
-    assert dictionary['roles'] == TestUserInfo.user1['roles']
 
 
 def test_user_save_by_token(session):  # pylint: disable=unused-argument

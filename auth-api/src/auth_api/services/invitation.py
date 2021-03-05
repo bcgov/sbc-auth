@@ -21,6 +21,7 @@ from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api.config import get_named_config
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
@@ -30,12 +31,11 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
-from auth_api.utils.roles import STAFF
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, Status, LoginSource
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER
-from auth_api.config import get_named_config
-
+from auth_api.utils.roles import STAFF
 from .authorization import check_auth
+from .keycloak import KeycloakService
 from .membership import Membership as MembershipService
 from .notification import send_email
 from ..utils.account_mailer import publish_to_mailer
@@ -300,7 +300,8 @@ class Invitation:
         return Invitation(invitation)
 
     @staticmethod
-    def accept_invitation(invitation_id, user, origin, add_membership: bool = True, token_info: Dict = None):
+    def accept_invitation(invitation_id, user: UserService, origin, add_membership: bool = True,
+                          token_info: Dict = None):
         """Add user, role and org from the invitation to membership."""
         current_app.logger.debug('>accept_invitation')
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
@@ -340,5 +341,11 @@ class Invitation:
         invitation.accepted_date = datetime.now()
         invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')
         invitation.save()
+
+        # Call keycloak to add the user to the group.
+        if user:
+            KeycloakService.join_users_group(token_info)
+            KeycloakService.join_account_holders_group(user.keycloak_guid)
+
         current_app.logger.debug('<accept_invitation')
         return Invitation(invitation)
