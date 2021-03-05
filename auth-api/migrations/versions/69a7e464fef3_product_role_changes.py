@@ -63,16 +63,22 @@ def upgrade():
     op.execute(f'DROP VIEW IF EXISTS {authorizations_view.name}')
     op.execute(f'CREATE VIEW {authorizations_view.name} AS {authorizations_view.sql}')
 
-    # op.execute('delete from product_subscription_roles')
-    # op.execute('delete from product_role_codes')
-    # op.drop_table('product_subscription_roles')
-    op.drop_table('product_subscription_roles_version')
-
-    # op.drop_table('product_role_codes')
-
-    # Create PPR product for PREMIUM accounts.
-    # Delete PPR subscription from all accounts.
-    op.execute("delete from product_subscriptions where product_code='PPR'")
+    op.create_table('product_subscription_roles',
+                    sa.Column('created', postgresql.TIMESTAMP(), autoincrement=False, nullable=True),
+                    sa.Column('modified', postgresql.TIMESTAMP(), autoincrement=False, nullable=True),
+                    sa.Column('id', sa.INTEGER(), autoincrement=True, nullable=False),
+                    sa.Column('product_subscription_id', sa.INTEGER(), autoincrement=False, nullable=False),
+                    sa.Column('product_role_id', sa.INTEGER(), autoincrement=False, nullable=False),
+                    sa.Column('created_by_id', sa.INTEGER(), autoincrement=False, nullable=True),
+                    sa.Column('modified_by_id', sa.INTEGER(), autoincrement=False, nullable=True),
+                    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], name='product_role_created_by_id_fkey'),
+                    sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], name='product_role_modified_by_id_fkey'),
+                    sa.ForeignKeyConstraint(['product_role_id'], ['product_role_codes.id'],
+                                            name='product_role_product_role_id_fkey'),
+                    sa.ForeignKeyConstraint(['product_subscription_id'], ['product_subscriptions.id'],
+                                            name='product_role_product_subscription_id_fkey'),
+                    sa.PrimaryKeyConstraint('id', name='product_role_pkey')
+                    )
 
     conn = op.get_bind()
     res = conn.execute("select id from orgs where type_code='PREMIUM' ")
