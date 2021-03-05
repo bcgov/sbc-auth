@@ -61,6 +61,8 @@ import { getModule } from 'vuex-module-decorators'
 export default class AcceptInviteLandingView extends Vue {
   private orgStore = getModule(OrgModule, this.$store);
   private readonly validateInvitationToken!: (token: string) => EmptyResponse
+  private readonly invalidInvitationToken!: boolean
+  private readonly tokenError!: boolean
 
   @Prop() token: string
   @Prop({ default: '' }) orgName: string
@@ -69,13 +71,19 @@ export default class AcceptInviteLandingView extends Vue {
   private otherError: boolean = false
   private isCreateUserProfile: boolean = false
 
-  private mounted () {
+  public async mounted () {
     // if no value for loginSource , defaulted to bcsc
     // if loginSource =bcros , take them to create user profile
     // if loginSource bcsc , stay in the page , show inivtation accept screen
     // if loginSource = bceid ,take to bceid login page
     this.isCreateUserProfile = (this.loginSource === LoginSource.BCROS)
-    this.validateToken()
+    await this.validateToken()
+    // make sure token is valid
+    const allCheckPassed = !this.invalidInvitationToken && !this.tokenError && !this.otherError
+    // if login source is IDIR. it will be GOVM account and need to re-direct to IDIR login page
+    if (allCheckPassed && this.loginSource.toLowerCase() === LoginSource.IDIR.toLowerCase()) {
+      this.redirectToSignin('idir')
+    }
   }
 
   get loginSourceenum () {
@@ -86,9 +94,9 @@ export default class AcceptInviteLandingView extends Vue {
     return !!ConfigHelper.getFromSession('KEYCLOAK_TOKEN')
   }
 
-  private redirectToSignin () {
+  private redirectToSignin (loginSourceUrl:string = 'bcsc') {
     let redirectUrl = ConfigHelper.getSelfURL() + '/confirmtoken/' + this.token
-    this.$router.push('/signin/bcsc/' + encodeURIComponent(redirectUrl))
+    this.$router.push(`/signin/${loginSourceUrl}/${encodeURIComponent(redirectUrl)}`)
   }
 
   private redirectToConfirm () {
