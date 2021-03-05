@@ -63,12 +63,12 @@ def upgrade():
     op.execute(f'DROP VIEW IF EXISTS {authorizations_view.name}')
     op.execute(f'CREATE VIEW {authorizations_view.name} AS {authorizations_view.sql}')
 
-    op.execute('delete from product_subscription_roles')
-    op.execute('delete from product_role_codes')
-    op.drop_table('product_subscription_roles')
+    # op.execute('delete from product_subscription_roles')
+    # op.execute('delete from product_role_codes')
+    # op.drop_table('product_subscription_roles')
     op.drop_table('product_subscription_roles_version')
 
-    op.drop_table('product_role_codes')
+    # op.drop_table('product_role_codes')
 
     # Create PPR product for PREMIUM accounts.
     # Delete PPR subscription from all accounts.
