@@ -106,6 +106,8 @@
   "paymentValidationErrorSubText": "Transaction was cancelled because <strong>validation errors</strong> were found.<br />  Please review your payment information and try again",
   "suspendAccountText": "If you suspend access to this account, team members will also be restricted from access until the account is unsuspended.",
   "unsuspendAccountText": "Are you sure you want to unsuspend access to this account?",
-  "suspendAccountConfirmTitle": "Account has been suspended"
+  "suspendAccountConfirmTitle": "Account has been suspended",
+  "inviteUsersFormText": "Enter an email address and select a role to invite a new team members to this account.",
+  "inviteUsersFormTextGovM": "Enter team member's IDIR email and select a role. Team members would be able to access this account with thier IDIR username and password."
 
 }

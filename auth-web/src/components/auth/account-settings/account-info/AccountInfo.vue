@@ -180,7 +180,7 @@
           req
           :rules="suspensionSelectRules"
           :items="suspensionReasonCodes"
-          item-text="code"
+          item-text="desc"
           item-value="code"
           v-model="selectedSuspensionReasonCode"
           v-if="isAccountStatusActive"

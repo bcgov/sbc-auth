@@ -160,7 +160,7 @@ def test_join_users_group_for_existing_users(session):
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
-    assert GROUP_PUBLIC_USERS not in groups
+    assert GROUP_PUBLIC_USERS in groups
 
 
 def test_join_account_holders_group(session):
