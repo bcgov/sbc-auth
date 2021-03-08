@@ -16,6 +16,8 @@
 Documents which are static in nature are stored in this table  ie.terms of use
 """
 
+from __future__ import annotations
+
 from sqlalchemy import Column, String, Text, desc
 
 from .base_model import BaseModel
@@ -34,13 +36,13 @@ class Documents(BaseModel):
     content = Column('content', Text)
 
     @classmethod
-    def fetch_latest_document_by_type(cls, file_type):
+    def fetch_latest_document_by_type(cls, file_type) -> Documents:
         """Fetch latest document of any time."""
         return db.session.query(Documents).filter(
             Documents.type == file_type).order_by(desc(Documents.version_id)).limit(1).one_or_none()
 
     @classmethod
-    def find_latest_version_by_type(cls, file_type):
+    def find_latest_version_by_type(cls, file_type) -> Documents:
         """Fetch latest document of any time."""
         return db.session.query(Documents.version_id).filter(
             Documents.type == file_type).order_by(desc(Documents.version_id)).limit(1).scalar()

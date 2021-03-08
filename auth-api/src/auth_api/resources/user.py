@@ -29,7 +29,7 @@ from auth_api.services.membership import Membership as MembershipService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import AccessType, LoginSource, Status
+from auth_api.utils.enums import LoginSource, Status
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
 
@@ -106,14 +106,12 @@ class Users(Resource):
 
             user = UserService.save_from_jwt_token(token, request_json)
             response, status = user.as_dict(), http_status.HTTP_201_CREATED
-            # Add the user to public_users group if the user doesn't have public_user group
-            KeycloakService.join_users_group(token)
-            # If the user doesn't have account_holder role check if user is part of any orgs and add to the group
-            if token.get('loginSource', '') in \
-                    (LoginSource.BCSC.value, LoginSource.BCROS.value, LoginSource.BCEID.value) \
-                    and Role.ACCOUNT_HOLDER.value not in token.get('roles', []) \
-                    and len(OrgService.get_orgs(user.identifier, [Status.ACTIVE.value])) > 0:
-                KeycloakService.join_account_holders_group()
+            # For anonymous users, there are no invitation process for members,
+            # so whenever they login perform this check and add them to corresponding groups
+            if token.get('loginSource', '') == LoginSource.BCROS.value:
+                KeycloakService.join_users_group(token)
+                if len(OrgService.get_orgs(user.identifier, [Status.ACTIVE.value])) > 0:
+                    KeycloakService.join_account_holders_group()
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -194,7 +192,7 @@ class UserStaff(Resource):
             if user is None:
                 response, status = {'message': 'User {} does not exist.'.format(username)}, \
                                    http_status.HTTP_404_NOT_FOUND
-            elif user.as_dict().get('type', None) != AccessType.ANONYMOUS.value:
+            elif user.as_dict().get('type', None) != Role.ANONYMOUS_USER.name:
                 response, status = {'Normal users cant be deleted', http_status.HTTP_501_NOT_IMPLEMENTED}
             else:
                 UserService.delete_anonymous_user(username, token_info=g.jwt_oidc_token_info)
@@ -219,10 +217,11 @@ class UserStaff(Resource):
             if not valid_format:
                 return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
             user = UserService.find_by_username(username)
+
             if user is None:
                 response, status = {'message': 'User {} does not exist.'.format(username)}, \
                                    http_status.HTTP_404_NOT_FOUND
-            elif user.as_dict().get('type', None) != AccessType.ANONYMOUS.value:
+            elif user.as_dict().get('type', None) != Role.ANONYMOUS_USER.name:
                 response, status = {'Normal users cant be patched', http_status.HTTP_501_NOT_IMPLEMENTED}
             else:
                 UserService.reset_password_for_anon_user(request_json, username, token_info=g.jwt_oidc_token_info)

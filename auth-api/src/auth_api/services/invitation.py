@@ -21,21 +21,22 @@ from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api.config import get_named_config
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
+from auth_api.models import Documents as DocumentsModel
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
-from auth_api.utils.roles import STAFF
-from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, Status, LoginSource
-from auth_api.utils.roles import ADMIN, COORDINATOR, USER
-from auth_api.config import get_named_config
-
+from auth_api.utils.enums import AccessType, DocumentType, InvitationStatus, InvitationType, Status, LoginSource
+from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
+from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
 from .authorization import check_auth
+from .keycloak import KeycloakService
 from .membership import Membership as MembershipService
 from .notification import send_email
 from ..utils.account_mailer import publish_to_mailer
@@ -319,7 +320,8 @@ class Invitation:
         return Invitation(invitation)
 
     @staticmethod
-    def accept_invitation(invitation_id, user, origin, add_membership: bool = True, token_info: Dict = None):
+    def accept_invitation(invitation_id, user: UserService, origin, add_membership: bool = True,
+                          token_info: Dict = None):
         """Add user, role and org from the invitation to membership."""
         current_app.logger.debug('>accept_invitation')
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
@@ -359,5 +361,18 @@ class Invitation:
         invitation.accepted_date = datetime.now()
         invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')
         invitation.save()
+
+        # Call keycloak to add the user to the group.
+        if user:
+            group_name: str = KeycloakService.join_users_group(token_info)
+            KeycloakService.join_account_holders_group(user.keycloak_guid)
+
+            if group_name == GROUP_GOV_ACCOUNT_USERS:
+                # TODO Remove this if gov account users needs Terms of Use.
+                tos_document = DocumentsModel.fetch_latest_document_by_type(DocumentType.TERMS_OF_USE.value)
+                user.update_terms_of_use(token_info, True, tos_document.version_id)
+                # Add contact to the user.
+                user.add_contact(token_info, dict(email=token_info.get('email', None)))
+
         current_app.logger.debug('<accept_invitation')
         return Invitation(invitation)
