@@ -178,7 +178,7 @@ class User:  # pylint: disable=too-many-instance-attributes
     def _create_new_user_and_membership(db_username, kc_user, membership, org_id):
         user_model: UserModel = UserModel(username=db_username,
                                           is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
-                                          type=AccessType.ANONYMOUS.value,
+                                          type=Role.ANONYMOUS_USER.name,
                                           email=membership.get('email', None),
                                           firstname=kc_user.first_name, lastname=kc_user.last_name)
         user_model.flush()

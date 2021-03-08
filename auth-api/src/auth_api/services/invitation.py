@@ -25,15 +25,16 @@ from auth_api.config import get_named_config
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
+from auth_api.models import Documents as DocumentsModel
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
-from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, Status, LoginSource
-from auth_api.utils.roles import ADMIN, COORDINATOR, USER
-from auth_api.utils.roles import STAFF
+from auth_api.utils.enums import AccessType, DocumentType, InvitationStatus, InvitationType, Status, LoginSource
+from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
+from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
 from .authorization import check_auth
 from .keycloak import KeycloakService
 from .membership import Membership as MembershipService
@@ -363,8 +364,15 @@ class Invitation:
 
         # Call keycloak to add the user to the group.
         if user:
-            KeycloakService.join_users_group(token_info)
+            group_name: str = KeycloakService.join_users_group(token_info)
             KeycloakService.join_account_holders_group(user.keycloak_guid)
+
+            if group_name == GROUP_GOV_ACCOUNT_USERS:
+                # TODO Remove this if gov account users needs Terms of Use.
+                tos_document = DocumentsModel.fetch_latest_document_by_type(DocumentType.TERMS_OF_USE.value)
+                user.update_terms_of_use(token_info, True, tos_document.version_id)
+                # Add contact to the user.
+                user.add_contact(token_info, dict(email=token_info.get('email', None)))
 
         current_app.logger.debug('<accept_invitation')
         return Invitation(invitation)

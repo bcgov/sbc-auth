@@ -30,7 +30,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.enums import AccessType, IdpHint, ProductCode, Status, UserStatus
-from auth_api.utils.roles import ADMIN, COORDINATOR, USER
+from auth_api.utils.roles import ADMIN, COORDINATOR, USER, Role
 from tests import skip_in_pod
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAnonymousMembership, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
@@ -66,10 +66,12 @@ def test_delete_bcros_valdiations(client, jwt, session, keycloak_mock):
     owner_headers = factory_auth_header(jwt=jwt, claims=owner_claims)
     member_username = IdpHint.BCROS.value + '/' + member['username']
     admin_username = IdpHint.BCROS.value + '/' + admin['username']
-    admin_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(), admin_username, access_ype=AccessType.ANONYMOUS.value)
+    admin_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(), admin_username, access_ype=AccessType.ANONYMOUS.value,
+                                                    roles=[Role.ANONYMOUS_USER.value])
     admin_headers = factory_auth_header(jwt=jwt, claims=admin_claims)
     member_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(), member_username,
-                                                     access_ype=AccessType.ANONYMOUS.value)
+                                                     access_ype=AccessType.ANONYMOUS.value,
+                                                     roles=[Role.ANONYMOUS_USER.value])
     member_headers = factory_auth_header(jwt=jwt, claims=member_claims)
     # set up JWTS for member and admin
     client.post('/api/v1/users', headers=admin_headers, content_type='application/json')
@@ -142,11 +144,13 @@ def test_reset_password(client, jwt, session, keycloak_mock):  # pylint:disable=
     admin_username = IdpHint.BCROS.value + '/' + admin['username']
     admin_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(),
                                                     admin_username,
-                                                    access_ype=AccessType.ANONYMOUS.value)
+                                                    access_ype=AccessType.ANONYMOUS.value,
+                                                    roles=[Role.ANONYMOUS_USER.value])
     admin_headers = factory_auth_header(jwt=jwt, claims=admin_claims)
     member_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(),
                                                      member_username,
-                                                     access_ype=AccessType.ANONYMOUS.value)
+                                                     access_ype=AccessType.ANONYMOUS.value,
+                                                     roles=[Role.ANONYMOUS_USER.value])
     member_headers = factory_auth_header(jwt=jwt, claims=member_claims)
     # set up JWTS for member and admin
     client.post('/api/v1/users', headers=admin_headers, content_type='application/json')
@@ -191,7 +195,7 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
     assert dictionary['users'][0].get('username') == IdpHint.BCROS.value + '/' + TestUserInfo.user_anonymous_1[
         'username']
     assert dictionary['users'][0].get('password') is None
-    assert dictionary['users'][0].get('type') == 'ANONYMOUS'
+    assert dictionary['users'][0].get('type') == Role.ANONYMOUS_USER.name
     assert schema_utils.validate(rv.json, 'anonymous_user_response')[0]
 
     # different error scenarios

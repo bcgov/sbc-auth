@@ -359,7 +359,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     @staticmethod
-    def get_test_real_user(sub, preferred_username=fake.user_name(), access_ype=''):
+    def get_test_real_user(sub, preferred_username=fake.user_name(), access_ype='', roles=[]):
         """Produce a created user."""
         return {
             'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
@@ -372,7 +372,10 @@ class TestJwtClaims(dict, Enum):
                 'roles': [
                     'edit', 'public_user'
                 ]
-            }
+            },
+            'roles': [
+                'edit', 'public_user', *roles
+            ]
         }
 
     @staticmethod

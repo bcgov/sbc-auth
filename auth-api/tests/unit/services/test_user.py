@@ -39,7 +39,7 @@ from auth_api.services import User as UserService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils.enums import IdpHint, ProductCode, Status
-from auth_api.utils.roles import ADMIN, COORDINATOR, USER
+from auth_api.utils.roles import ADMIN, COORDINATOR, USER, Role
 
 
 def test_as_dict(session):  # pylint: disable=unused-argument
@@ -97,7 +97,7 @@ def test_create_user_and_add_membership_owner_skip_auth_mode(session, auth_mock,
     users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
     assert len(users['users']) == 1
     assert users['users'][0]['username'] == IdpHint.BCROS.value + '/' + membership[0]['username']
-    assert users['users'][0]['type'] == 'ANONYMOUS'
+    assert users['users'][0]['type'] == Role.ANONYMOUS_USER.name
 
     members = MembershipModel.find_members_by_org_id(org.id)
 
@@ -242,7 +242,7 @@ def test_create_user_and_add_membership_admin_skip_auth_mode(session, auth_mock,
     users = UserService.create_user_and_add_membership(membership, org.id, single_mode=True)
     assert len(users['users']) == 1
     assert users['users'][0]['username'] == IdpHint.BCROS.value + '/' + membership[0]['username']
-    assert users['users'][0]['type'] == 'ANONYMOUS'
+    assert users['users'][0]['type'] == Role.ANONYMOUS_USER.name
 
     members = MembershipModel.find_members_by_org_id(org.id)
 
@@ -264,7 +264,7 @@ def test_create_user_and_add_membership_admin_bulk_mode(session, auth_mock,
 
     assert len(users['users']) == 1
     assert users['users'][0]['username'] == IdpHint.BCROS.value + '/' + membership[0]['username']
-    assert users['users'][0]['type'] == 'ANONYMOUS'
+    assert users['users'][0]['type'] == Role.ANONYMOUS_USER.name
 
     members = MembershipModel.find_members_by_org_id(org.id)
 
@@ -285,7 +285,7 @@ def test_create_user_add_membership_reenable(session, auth_mock, keycloak_mock):
     user_name = IdpHint.BCROS.value + '/' + membership[0]['username']
     assert len(users['users']) == 1
     assert users['users'][0]['username'] == user_name
-    assert users['users'][0]['type'] == 'ANONYMOUS'
+    assert users['users'][0]['type'] == Role.ANONYMOUS_USER.name
 
     members = MembershipModel.find_members_by_org_id(org.id)
 
@@ -323,7 +323,7 @@ def test_create_user_add_membership_reenable(session, auth_mock, keycloak_mock):
     users = UserService.create_user_and_add_membership(membership, org.id, token_info=claims)
     assert len(users['users']) == 1
     assert users['users'][0]['username'] == IdpHint.BCROS.value + '/' + membership[0]['username']
-    assert users['users'][0]['type'] == 'ANONYMOUS'
+    assert users['users'][0]['type'] == Role.ANONYMOUS_USER.name
 
 
 def test_create_user_and_add_membership_admin_bulk_mode_unauthorised(session, auth_mock,
@@ -353,9 +353,9 @@ def test_create_user_and_add_membership_admin_bulk_mode_multiple(session, auth_m
 
     assert len(users['users']) == 2
     assert users['users'][0]['username'] == IdpHint.BCROS.value + '/' + membership[0]['username']
-    assert users['users'][0]['type'] == 'ANONYMOUS'
+    assert users['users'][0]['type'] == Role.ANONYMOUS_USER.name
     assert users['users'][1]['username'] == IdpHint.BCROS.value + '/' + membership[1]['username']
-    assert users['users'][1]['type'] == 'ANONYMOUS'
+    assert users['users'][1]['type'] == Role.ANONYMOUS_USER.name
 
     members = MembershipModel.find_members_by_org_id(org.id)
 

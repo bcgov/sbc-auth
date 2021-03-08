@@ -205,7 +205,7 @@ class User(BaseModel):
         user_type: str = None
         if token_roles:
             if Role.ANONYMOUS_USER.value in token_roles:
-                user_type = Role.PUBLIC_USER.name
+                user_type = Role.ANONYMOUS_USER.name
             elif Role.GOV_ACCOUNT_USER.value in token_roles:
                 user_type = Role.GOV_ACCOUNT_USER.name
             elif Role.PUBLIC_USER.value in token_roles:

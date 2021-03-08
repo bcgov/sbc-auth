@@ -29,7 +29,7 @@ from auth_api.services.membership import Membership as MembershipService
 from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import AccessType, LoginSource, Status
+from auth_api.utils.enums import LoginSource, Status
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
 
@@ -192,7 +192,7 @@ class UserStaff(Resource):
             if user is None:
                 response, status = {'message': 'User {} does not exist.'.format(username)}, \
                                    http_status.HTTP_404_NOT_FOUND
-            elif user.as_dict().get('type', None) != AccessType.ANONYMOUS.value:
+            elif user.as_dict().get('type', None) != Role.ANONYMOUS_USER.name:
                 response, status = {'Normal users cant be deleted', http_status.HTTP_501_NOT_IMPLEMENTED}
             else:
                 UserService.delete_anonymous_user(username, token_info=g.jwt_oidc_token_info)
@@ -217,10 +217,11 @@ class UserStaff(Resource):
             if not valid_format:
                 return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
             user = UserService.find_by_username(username)
+
             if user is None:
                 response, status = {'message': 'User {} does not exist.'.format(username)}, \
                                    http_status.HTTP_404_NOT_FOUND
-            elif user.as_dict().get('type', None) != AccessType.ANONYMOUS.value:
+            elif user.as_dict().get('type', None) != Role.ANONYMOUS_USER.name:
                 response, status = {'Normal users cant be patched', http_status.HTTP_501_NOT_IMPLEMENTED}
             else:
                 UserService.reset_password_for_anon_user(request_json, username, token_info=g.jwt_oidc_token_info)
