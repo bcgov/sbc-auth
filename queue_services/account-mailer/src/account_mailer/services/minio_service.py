@@ -56,11 +56,9 @@ class MinioService:
                      secure=minio_secure)
 
     @staticmethod
-    def create_signed_get_url(key: str) -> str:
-        """Return a pre-signed URL for uploaded document."""
-        minio_client: Minio = MinioService._get_client()
-        current_app.logger.debug(f'Creating pre-signed GET URL for {key}')
+    def get_minio_public_url(key: str) -> str:
+        """Return a URL for uploaded document."""
+        current_app.logger.debug(f'GET URL for {key}')
+        minio_endpoint = current_app.config['MINIO_ENDPOINT']
 
-        return minio_client.presigned_get_object('public',
-                                                 key,
-                                                 timedelta(hours=1))
+        return f'https://{minio_endpoint}/public/{key}'

@@ -64,7 +64,7 @@ async def process_event(event_message: dict, flask_app):
     with flask_app.app_context():
         message_type = event_message.get('type', None)
         email_msg = event_message.get('data')
-        email_msg['logo_url'] = minio_service.MinioService.create_signed_get_url('bc_logo_for_email.png')
+        email_msg['logo_url'] = minio_service.MinioService.get_minio_public_url('bc_logo_for_email.png')
         email_dict = None
         token = RestService.get_service_account_token()
         logger.debug('message_type recieved %s', message_type)
