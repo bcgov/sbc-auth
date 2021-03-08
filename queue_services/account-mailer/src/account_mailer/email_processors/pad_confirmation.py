@@ -79,7 +79,7 @@ def _get_pad_confirmation_email_body(email_msg, admin_name):
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
     html_out = jnja_template.render(
-        request=email_msg, admin_name=admin_name
+        request=email_msg, admin_name=admin_name, logo_url=email_msg.get('logo_url')
 
     )
     return html_out

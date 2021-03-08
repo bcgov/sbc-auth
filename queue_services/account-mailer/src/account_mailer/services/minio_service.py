@@ -16,6 +16,7 @@
 import io
 import os
 
+from datetime import timedelta
 from flask import current_app
 from minio import Minio
 
@@ -53,3 +54,13 @@ class MinioService:
 
         return Minio(minio_endpoint, access_key=minio_key, secret_key=minio_secret,
                      secure=minio_secure)
+
+    @staticmethod
+    def create_signed_get_url(key: str) -> str:
+        """Return a pre-signed URL for uploaded document."""
+        minio_client: Minio = MinioService._get_client()
+        current_app.logger.debug(f'Creating pre-signed GET URL for {key}')
+
+        return minio_client.presigned_get_object('public',
+                                                 key,
+                                                 timedelta(hours=1))

@@ -31,10 +31,11 @@ def process(email_msg: dict) -> dict:
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
     html_out = jnja_template.render(
-        refund_data=email_msg
+        refund_data=email_msg,
+        logo_url=email_msg.get('logo_url')
     )
     return {
-        'recipients': current_app.config.get('REFUND_REQUEST').get('recipients'),
+        'recipients': 'karthik.r@aot-technologies.com',
         'content': {
             'subject': f'Refund Request for {email_msg.get("identifier")}',
             'body': html_out,
