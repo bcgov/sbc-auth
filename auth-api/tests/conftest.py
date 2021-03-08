@@ -245,6 +245,8 @@ def keycloak_mock(monkeypatch):
     """Mock keycloak services."""
     monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.join_account_holders_group',
                         lambda *args, **kwargs: None)
+    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.join_users_group',
+                        lambda *args, **kwargs: None)
     monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.remove_from_account_holders_group',
                         lambda *args, **kwargs: None)
 

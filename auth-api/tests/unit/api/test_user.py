@@ -20,15 +20,6 @@ import copy
 import json
 import uuid
 
-from tests import skip_in_pod
-from tests.utilities.factory_scenarios import (
-    KeycloakScenario, TestAnonymousMembership, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
-    TestUserInfo, TestOrgTypeInfo)
-from tests.utilities.factory_utils import (
-    factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
-    factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_product_model,
-    factory_user_model)
-
 from auth_api import status as http_status
 from auth_api.exceptions.errors import Error
 from auth_api.models import Affiliation as AffiliationModel
@@ -38,9 +29,16 @@ from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
 from auth_api.utils.enums import AccessType, IdpHint, ProductCode, Status, UserStatus
-from auth_api.utils.roles import ADMIN, COORDINATOR, USER
+from auth_api.utils.roles import ADMIN, COORDINATOR, USER, Role
+from tests import skip_in_pod
+from tests.utilities.factory_scenarios import (
+    KeycloakScenario, TestAnonymousMembership, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
+    TestUserInfo, TestOrgTypeInfo)
+from tests.utilities.factory_utils import (
+    factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
+    factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_product_model,
+    factory_user_model)
 
 KEYCLOAK_SERVICE = KeycloakService()
 
@@ -68,10 +66,12 @@ def test_delete_bcros_valdiations(client, jwt, session, keycloak_mock):
     owner_headers = factory_auth_header(jwt=jwt, claims=owner_claims)
     member_username = IdpHint.BCROS.value + '/' + member['username']
     admin_username = IdpHint.BCROS.value + '/' + admin['username']
-    admin_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(), admin_username, access_ype=AccessType.ANONYMOUS.value)
+    admin_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(), admin_username, access_ype=AccessType.ANONYMOUS.value,
+                                                    roles=[Role.ANONYMOUS_USER.value])
     admin_headers = factory_auth_header(jwt=jwt, claims=admin_claims)
     member_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(), member_username,
-                                                     access_ype=AccessType.ANONYMOUS.value)
+                                                     access_ype=AccessType.ANONYMOUS.value,
+                                                     roles=[Role.ANONYMOUS_USER.value])
     member_headers = factory_auth_header(jwt=jwt, claims=member_claims)
     # set up JWTS for member and admin
     client.post('/api/v1/users', headers=admin_headers, content_type='application/json')
@@ -144,11 +144,13 @@ def test_reset_password(client, jwt, session, keycloak_mock):  # pylint:disable=
     admin_username = IdpHint.BCROS.value + '/' + admin['username']
     admin_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(),
                                                     admin_username,
-                                                    access_ype=AccessType.ANONYMOUS.value)
+                                                    access_ype=AccessType.ANONYMOUS.value,
+                                                    roles=[Role.ANONYMOUS_USER.value])
     admin_headers = factory_auth_header(jwt=jwt, claims=admin_claims)
     member_claims = TestJwtClaims.get_test_real_user(uuid.uuid4(),
                                                      member_username,
-                                                     access_ype=AccessType.ANONYMOUS.value)
+                                                     access_ype=AccessType.ANONYMOUS.value,
+                                                     roles=[Role.ANONYMOUS_USER.value])
     member_headers = factory_auth_header(jwt=jwt, claims=member_claims)
     # set up JWTS for member and admin
     client.post('/api/v1/users', headers=admin_headers, content_type='application/json')
@@ -188,11 +190,12 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
     rv = client.post('/api/v1/users/bcros', data=json.dumps(TestUserInfo.user_anonymous_1),
                      headers={'invitation_token': dictionary.get('token')}, content_type='application/json')
     dictionary = json.loads(rv.data)
+
     assert rv.status_code == http_status.HTTP_201_CREATED
     assert dictionary['users'][0].get('username') == IdpHint.BCROS.value + '/' + TestUserInfo.user_anonymous_1[
         'username']
     assert dictionary['users'][0].get('password') is None
-    assert dictionary['users'][0].get('type') == 'ANONYMOUS'
+    assert dictionary['users'][0].get('type') == Role.ANONYMOUS_USER.name
     assert schema_utils.validate(rv.json, 'anonymous_user_response')[0]
 
     # different error scenarios
@@ -679,30 +682,6 @@ def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock):
 
     rv = client.delete('/api/v1/users/@me', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
-
-
-def test_add_user_adds_to_account_holders_group(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert that a user gets added to account_holders group if the user has any active account."""
-    # Create a user in keycloak
-    request = KeycloakScenario.create_user_request()
-    KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
-    user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
-    user_id = user.id
-
-    # Create user, org and membserhip in DB
-    user = factory_user_model(TestUserInfo.get_user_with_kc_guid(user_id))
-    org = factory_org_model(org_status_info=None)
-    factory_membership_model(user.id, org.id)
-
-    # Login as that user
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source='BCSC'))
-    client.post('/api/v1/users', headers=headers, content_type='application/json')
-
-    user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
-    groups = []
-    for group in user_groups:
-        groups.append(group.get('name'))
-    assert GROUP_ACCOUNT_HOLDERS in groups
 
 
 def test_delete_otp_for_user(client, jwt, session):  # pylint:disable=unused-argument
