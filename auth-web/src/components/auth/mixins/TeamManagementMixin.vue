@@ -1,7 +1,7 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
+import { AccessType, LoginSource, SessionStorageKeys } from '@/util/constants'
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { LoginSource, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
 import MemberDataTable, { ChangeRolePayload } from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
 import { mapActions, mapState } from 'vuex'
@@ -24,7 +24,8 @@ import { getModule } from 'vuex-module-decorators'
   },
   computed: {
     ...mapState('org', [
-      'currentMembership'
+      'currentMembership',
+      'currentOrganization'
     ]),
     ...mapState('user', [
       'currentUser'
@@ -56,6 +57,7 @@ export default class TeamManagementMixin extends Vue {
   protected confirmHandler: (modal:ModalDialog) => void = undefined
 
   protected readonly currentMembership!: Member
+  protected readonly currentOrganization!: Organization
   protected readonly updateMember!: (updateMemberPayload: UpdateMemberPayload) => void
   protected readonly deleteUser!: (userName: string) => void
   protected readonly leaveTeam!: (memberId: number) => void
@@ -122,6 +124,14 @@ export default class TeamManagementMixin extends Vue {
     this.errorTitle = this.$t('singleOwnerErrorTitle').toString()
     this.errorText = this.$t('singleOwnerErrorText').toString()
     errorDialog.open()
+  }
+
+  protected get isAccountGovM () : boolean {
+    return this.currentOrganization.accessType === AccessType.GOVM
+  }
+
+  protected get inviteUserFormText () : string {
+    return this.isAccountGovM ? this.$t('inviteUsersFormTextGovM').toString() : this.$t('inviteUsersFormText').toString()
   }
 
   protected close (modal: ModalDialog) {
