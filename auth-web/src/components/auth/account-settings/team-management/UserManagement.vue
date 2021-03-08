@@ -222,8 +222,7 @@ import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vu
       'resending',
       'sentInvitations',
       'pendingOrgMembers',
-      'memberLoginOption',
-      'currentOrganization'
+      'memberLoginOption'
     ]),
     ...mapState('business', ['currentBusiness'])
   },
@@ -256,7 +255,6 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   private readonly syncPendingOrgInvitations!: () => Invitation[]
   private readonly syncActiveOrgMembers!: () => Member[]
   readonly currentUser!: KCUserProfile
-  protected readonly currentOrganization!: Organization
   private appliedFilterValue: string = ''
   private teamMembersCount = 0
   private pendingMembersCount = 0

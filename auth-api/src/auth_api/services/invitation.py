@@ -76,10 +76,12 @@ class Invitation:
         check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
         org_name = org.name
-        invitation_type = InvitationType.DIRECTOR_SEARCH.value if org.access_type == AccessType.ANONYMOUS.value \
-            else InvitationType.STANDARD.value
+        invitation_type = Invitation._get_inv_type(org)
+
         if org.access_type == AccessType.ANONYMOUS.value:  # anonymous account never get bceid or bcsc choices
             mandatory_login_source = LoginSource.BCROS.value
+        elif org.access_type == AccessType.GOVM.value:
+            mandatory_login_source = LoginSource.STAFF.value
         else:
             default_login_option_based_on_accesstype = LoginSource.BCSC.value if \
                 org.access_type == AccessType.REGULAR.value else LoginSource.BCEID.value
@@ -101,6 +103,16 @@ class Invitation:
         if is_staff_access and invitation_type == InvitationType.STANDARD.value:
             publish_to_mailer('teamMemberInvited', org_id)
         return Invitation(invitation)
+
+    @staticmethod
+    def _get_inv_type(org):
+        """Return the correct invitation type."""
+        inv_types = {
+            AccessType.GOVM.value: InvitationType.GOVM.value,
+            AccessType.ANONYMOUS.value: InvitationType.DIRECTOR_SEARCH.value,
+            AccessType.REGULAR.value: InvitationType.STANDARD.value
+        }
+        return inv_types.get(org.access_type, InvitationType.STANDARD.value)
 
     def update_invitation(self, user, token_info: Dict, invitation_origin):
         """Update the specified invitation with new data."""
@@ -225,6 +237,12 @@ class Invitation:
         """Get the config for different email types."""
         login_source = login_source or LoginSource.BCSC.value
         token_confirm_path = f'{org_name}/validatetoken/{login_source}'
+
+        govm_configs = {
+            'token_confirm_path': token_confirm_path,
+            'template_name': 'govm_business_invitation_email',
+            'subject': 'Your BC Registries Ministry Account has been created',
+        }
         director_search_configs = {
             'token_confirm_path': token_confirm_path,
             'template_name': 'dirsearch_business_invitation_email',
@@ -244,6 +262,7 @@ class Invitation:
         mail_configs = {
             'BCROS': director_search_configs,
             'BCEID': bceid_configs,
+            'IDIR': govm_configs
         }
         return mail_configs.get(login_source, default_configs)
 

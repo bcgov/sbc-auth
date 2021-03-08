@@ -63,7 +63,7 @@ export enum Pages {
     STAFF_DASHBOARD_INVITATIONS = '/staff/dashboard/invitations',
     STAFF_DASHBOARD_SUSPENDED = '/staff/dashboard/suspended',
     MAKE_PAD_PAYMENT = '/make-cc-payment/',
-    STAFF_GOVN_SETUP_ACCOUNT = '/staff-govn-setup-account',
+    STAFF_GOVM_SETUP_ACCOUNT = '/staff-govm-setup-account',
 
 }
 
@@ -197,5 +197,5 @@ export enum paymentErrorType {
 
 export enum StaffCreateAccountsTypes {
     DIRECTOR_SEARCH = 'DIRECTOR_SEARCH',
-    GOVN_BUSINESS = 'GOVN_BUSINESS'
+    GOVM_BUSINESS = 'GOVM_BUSINESS'
 }

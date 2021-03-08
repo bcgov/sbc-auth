@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>Enter an email address and select a role to invite a new team members to this account.</p>
+    <p data-test="inviteUserFormText">{{ inviteUserFormText }}</p>
     <v-form ref="form" class="mt-9">
       <div class="invite-list">
         <transition-group name="slide-y-transition">
@@ -10,7 +10,7 @@
               filled
               label="Email Address"
               v-model="invitations[index].emailAddress"
-              :rules="emailRules"
+              :rules="isAccountGovM ? bcGovemailRules : emailRules"
               :data-test="getIndexedTag('email-address', index)"
             ></v-text-field>
 
@@ -76,13 +76,15 @@
 </template>
 
 <script lang="ts">
+import { AccessType, LoginSource } from '@/util/constants'
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import { Member, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
+import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import { LoginSource } from '@/util/constants'
 import OrgModule from '@/store/modules/org'
+import TeamManagementMixin from '../../mixins/TeamManagementMixin.vue'
 import { getModule } from 'vuex-module-decorators'
 
 interface InvitationInfo {
@@ -93,20 +95,17 @@ interface InvitationInfo {
 
 @Component({
   computed: {
-    ...mapState('org', ['currentOrganization', 'currentMembership', 'pendingOrgInvitations']),
-    ...mapState('user', ['roleInfos', 'currentUser'])
+    ...mapState('org', ['pendingOrgInvitations']),
+    ...mapState('user', ['roleInfos'])
   },
   methods: {
     ...mapMutations('org', ['resetInvitations']),
     ...mapActions('org', ['createInvitation', 'resendInvitation'])
   }
 })
-export default class InviteUsersForm extends Vue {
+export default class InviteUsersForm extends TeamManagementMixin {
   private orgStore = getModule(OrgModule, this.$store)
   private loading = false
-  private readonly currentOrganization!: Organization
-  private readonly currentMembership!: Member
-  private readonly currentUser!: KCUserProfile
   private readonly pendingOrgInvitations!: Invitation[]
   private readonly resetInvitations!: () => void
   private readonly createInvitation!: (Invitation) => Promise<void>
@@ -126,10 +125,8 @@ export default class InviteUsersForm extends Vue {
   }
 
   private invitations: InvitationInfo[] = []
-  private pattern: RegExp = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-  private readonly emailRules = [
-    v => !v || this.pattern.test(v) || 'Enter a valid email address'
-  ]
+  private bcGovemailRules = CommonUtils.bcGovemailRules()
+  private emailRules = CommonUtils.emailRules()
 
   private roles: RoleInfo[] = []
 
