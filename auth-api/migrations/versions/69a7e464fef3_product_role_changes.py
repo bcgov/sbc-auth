@@ -1,9 +1,7 @@
 """product_role_changes
-
 Revision ID: 69a7e464fef3
 Revises: 5053985bdfc6
 Create Date: 2021-03-02 12:16:09.152924
-
 """
 import sqlalchemy as sa
 from alembic import op
@@ -66,15 +64,8 @@ def upgrade():
     op.execute('delete from product_subscription_roles')
     op.execute('delete from product_role_codes')
     op.drop_table('product_subscription_roles')
-    op.drop_index('ix_product_subscription_roles_version_end_transaction_id',
-                  table_name='product_subscription_roles_version')
-    op.drop_index('ix_product_subscription_roles_version_operation_type',
-                  table_name='product_subscription_roles_version')
-    op.drop_index('ix_product_subscription_roles_version_transaction_id',
-                  table_name='product_subscription_roles_version')
     op.drop_table('product_subscription_roles_version')
 
-    op.drop_index('ix_product_role_codes_code', table_name='product_role_codes')
     op.drop_table('product_role_codes')
 
     # Create PPR product for PREMIUM accounts.
