@@ -30,7 +30,6 @@ from auth_api.config import get_named_config
 def factory_invitation_model(session, status, sent_date=datetime.now()):
     """Produce a templated invitation model."""
     user = User(username='CP1234567',
-                roles='{edit, uma_authorization, staff}',
                 keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
 
     session.add(user)
@@ -160,7 +159,6 @@ def test_invitations_by_status(session):  # pylint:disable=unused-argument
 def test_create_from_dict(session):  # pylint:disable=unused-argument
     """Assert that an Entity can be created from schema."""
     user = User(username='CP1234567',
-                roles='{edit, uma_authorization, staff}',
                 keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
 
     session.add(user)
@@ -202,7 +200,6 @@ def test_create_from_dict(session):  # pylint:disable=unused-argument
 def test_create_from_dict_no_schema(session):  # pylint:disable=unused-argument
     """Assert that an Entity can not be created without schema."""
     user = User(username='CP1234567',
-                roles='{edit, uma_authorization, staff}',
                 keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
 
     session.add(user)

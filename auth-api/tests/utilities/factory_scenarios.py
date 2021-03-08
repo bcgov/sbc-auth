@@ -85,6 +85,21 @@ class TestJwtClaims(dict, Enum):
         }
     }
 
+    gov_account_holder_user = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': fake.first_name(),
+        'lastname': fake.last_name(),
+        'preferred_username': fake.user_name(),
+        'realm_access': {
+            'roles': [
+                'public_user',
+                'account_holder',
+                'gov_account_user'
+            ]
+        }
+    }
+
     public_bceid_user = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
@@ -344,7 +359,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     @staticmethod
-    def get_test_real_user(sub, preferred_username=fake.user_name(), access_ype=''):
+    def get_test_real_user(sub, preferred_username=fake.user_name(), access_ype='', roles=[]):
         """Produce a created user."""
         return {
             'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
@@ -357,7 +372,10 @@ class TestJwtClaims(dict, Enum):
                 'roles': [
                     'edit', 'public_user'
                 ]
-            }
+            },
+            'roles': [
+                'edit', 'public_user', *roles
+            ]
         }
 
     @staticmethod
