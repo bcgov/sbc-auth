@@ -84,6 +84,7 @@ import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import OrgModule from '@/store/modules/org'
+import TeamManagementMixin from '../../mixins/TeamManagementMixin.vue'
 import { getModule } from 'vuex-module-decorators'
 
 interface InvitationInfo {
@@ -94,20 +95,17 @@ interface InvitationInfo {
 
 @Component({
   computed: {
-    ...mapState('org', ['currentOrganization', 'currentMembership', 'pendingOrgInvitations']),
-    ...mapState('user', ['roleInfos', 'currentUser'])
+    ...mapState('org', ['pendingOrgInvitations']),
+    ...mapState('user', ['roleInfos'])
   },
   methods: {
     ...mapMutations('org', ['resetInvitations']),
     ...mapActions('org', ['createInvitation', 'resendInvitation'])
   }
 })
-export default class InviteUsersForm extends Vue {
+export default class InviteUsersForm extends TeamManagementMixin {
   private orgStore = getModule(OrgModule, this.$store)
   private loading = false
-  private readonly currentOrganization!: Organization
-  private readonly currentMembership!: Member
-  private readonly currentUser!: KCUserProfile
   private readonly pendingOrgInvitations!: Invitation[]
   private readonly resetInvitations!: () => void
   private readonly createInvitation!: (Invitation) => Promise<void>
@@ -146,14 +144,6 @@ export default class InviteUsersForm extends Vue {
   private hasDuplicates (): boolean {
     const invitations = this.invitations.filter(invitation => invitation.emailAddress)
     return new Set(invitations.map(invitation => invitation.emailAddress.toLowerCase())).size !== invitations.length
-  }
-
-  private get isAccountGovM () : boolean {
-    return this.currentOrganization.accessType === AccessType.GOVM
-  }
-
-  private get inviteUserFormText () : string {
-    return this.isAccountGovM ? this.$t('inviteUsersFormTextGovM').toString() : this.$t('inviteUsersFormText').toString()
   }
 
   private isFormValid (): boolean {
