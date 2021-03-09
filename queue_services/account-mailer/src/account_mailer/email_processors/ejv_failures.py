@@ -50,7 +50,7 @@ def process(email_msg: dict) -> dict:
     }
 
 
-def _get_body(email_msg: str):
+def _get_body(email_msg: dict):
     filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'),
                                         TemplateType.EJV_FAILED_TEMPLATE_NAME.value)
     # render template with vars from email msg
