@@ -35,7 +35,7 @@ def process(email_msg: dict) -> dict:
         logo_url=email_msg.get('logo_url')
     )
     return {
-        'recipients': 'karthik.r@aot-technologies.com',
+        'recipients': current_app.config.get('REFUND_REQUEST').get('recipients'),
         'content': {
             'subject': f'Refund Request for {email_msg.get("identifier")}',
             'body': html_out,

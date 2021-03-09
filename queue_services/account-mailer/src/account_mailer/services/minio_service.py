@@ -16,7 +16,6 @@
 import io
 import os
 
-from datetime import timedelta
 from flask import current_app
 from minio import Minio
 
