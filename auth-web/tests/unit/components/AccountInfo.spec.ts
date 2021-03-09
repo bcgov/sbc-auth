@@ -226,16 +226,20 @@ describe('AccountInfo.vue', () => {
       stubs: {
         'BaseAddressForm': MyStub,
         'OrgAdminContact': MyStub,
-        'LinkedBCOLBanner': MyStub
+        'LinkedBCOLBanner': MyStub,
+        'v-btn': {
+          template: `<button @click='$listeners.click'></button>`
+        }
       }
     })
     expect(wrapper.find("[data-test='modal-suspend-account']").exists()).toBe(true)
-    expect(wrapper.vm.isConfirmSuspendButtonDisabled).toBeTruthy()
-    wrapper.vm.selectedSuspensionReasonCode = 'Fraudulent'
-    expect(wrapper.vm.isConfirmSuspendButtonDisabled).toBeFalsy()
-    expect(wrapper.vm.isAccountStatusActive).toBeTruthy()
+    expect(wrapper.vm.isSuspensionReasonFormValid).toBeFalsy()
 
-    store.commit('org/setCurrentOrganization')
-    expect(wrapper.vm.isAccountStatusActive).toBeFalsy()
+    wrapper.vm.selectedSuspensionReasonCode = 'Fraudulent'
+    const stub = jest.fn().mockImplementation(() => { wrapper.vm.isSuspensionReasonFormValid = true })
+
+    wrapper.setMethods({ showSuspendAccountDialog: stub })
+    wrapper.find('.suspend-account-btn').trigger('click')
+    expect(wrapper.vm.isSuspensionReasonFormValid).toBeTruthy()
   })
 })
