@@ -60,6 +60,12 @@
         "containerId": "demo"
       },
       {
+        "name": "gov_account_user",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "demo"
+      },
+      {
         "name": "anonymous_user",
         "composite": false,
         "clientRole": false,
@@ -299,6 +305,18 @@
       "realmRoles": [
         "edit",
         "public_user"
+      ],
+      "clientRoles": {},
+      "subGroups": []
+    },
+    {
+      "name": "gov_account_users",
+      "path": "/gov_account_users",
+      "attributes": {},
+      "realmRoles": [
+        "edit",
+        "public_user",
+        "gov_account_user"
       ],
       "clientRoles": {},
       "subGroups": []

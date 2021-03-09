@@ -21,10 +21,10 @@ from flask import current_app, g
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_PUBLIC_USERS
+from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_PUBLIC_USERS, \
+    GROUP_GOV_ACCOUNT_USERS
 from auth_api.utils.enums import ContentType, LoginSource
 from auth_api.utils.roles import Role
-
 from .keycloak_user import KeycloakUser
 
 
@@ -166,21 +166,28 @@ class KeycloakService:
 
             response.raise_for_status()
             return response.json()
-        except Exception as err:   # NOQA # pylint: disable=broad-except
+        except Exception as err:  # NOQA # pylint: disable=broad-except
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, err)
 
     @staticmethod
-    def join_users_group(token_info: Dict):
+    def join_users_group(token_info: Dict) -> str:
         """Add user to the group (public_users or anonymous_users) if the user is public."""
+        group_name: str = None
         login_source = token_info.get('loginSource', None)
+        roles = token_info.get('realm_access').get('roles')
 
         # Cannot check the group from token, so check if the role 'edit' is already present.
-        has_role = Role.EDITOR.value in token_info.get('realm_access').get('roles')
+        if login_source in (LoginSource.BCEID.value, LoginSource.BCSC.value) and Role.PUBLIC_USER.value not in roles:
+            group_name = GROUP_PUBLIC_USERS
+        elif login_source == LoginSource.STAFF.value and Role.GOV_ACCOUNT_USER.value not in roles:
+            group_name = GROUP_GOV_ACCOUNT_USERS
+        elif login_source == LoginSource.BCROS.value and Role.ANONYMOUS_USER.value not in roles:
+            group_name = GROUP_ANONYMOUS_USERS
 
-        if not has_role and login_source in (LoginSource.BCEID.value, LoginSource.BCSC.value, LoginSource.BCROS.value):
-            group_name = GROUP_PUBLIC_USERS if login_source in (
-                LoginSource.BCSC.value, LoginSource.BCEID.value) else GROUP_ANONYMOUS_USERS
+        if group_name:
             KeycloakService._add_user_to_group(token_info.get('sub'), group_name)
+
+        return group_name
 
     @staticmethod
     def join_account_holders_group(keycloak_guid: str = None):

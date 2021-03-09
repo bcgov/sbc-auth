@@ -175,10 +175,10 @@ export default class StaffAccountManagement extends Vue {
   ]
 
   private async mounted () {
+    await this.getCodes()
     await this.syncPendingStaffOrgs()
     await this.syncRejectedStaffOrgs()
     await this.syncPendingInvitationOrgs()
-    await this.getCodes()
     await this.syncSuspendedStaffOrgs()
   }
 
