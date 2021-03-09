@@ -44,8 +44,8 @@ from account_mailer.email_processors import pad_confirmation  # pylint: disable=
 from account_mailer.email_processors import payment_completed  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import refund_requested  # pylint: disable=wrong-import-order
 from account_mailer.enums import MessageType, SubjectType, TemplateType
-from account_mailer.services import notification_service  # pylint: disable=wrong-import-order
 from account_mailer.services import minio_service  # pylint: disable=wrong-import-order
+from account_mailer.services import notification_service  # pylint: disable=wrong-import-order
 
 
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
@@ -81,7 +81,8 @@ async def process_event(event_message: dict, flask_app):
             admin_coordinator_emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
             subject = SubjectType.NSF_LOCK_ACCOUNT_SUBJECT.value
             logo_url = email_msg.get('logo_url')
-            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject, logo_url=logo_url)
+            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
+                                               subject, logo_url=logo_url)
         elif message_type == MessageType.NSF_UNLOCK_ACCOUNT.value:
             logger.debug('unlock account message recieved')
             template_name = TemplateType.NSF_UNLOCK_ACCOUNT_TEMPLATE_NAME.value
@@ -89,7 +90,8 @@ async def process_event(event_message: dict, flask_app):
             admin_coordinator_emails = get_member_emails(org_id, (ADMIN, COORDINATOR))
             subject = SubjectType.NSF_UNLOCK_ACCOUNT_SUBJECT.value
             logo_url = email_msg.get('logo_url')
-            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject, logo_url=logo_url)
+            email_dict = common_mailer.process(org_id, admin_coordinator_emails,
+                                               template_name, subject, logo_url=logo_url)
         elif message_type == MessageType.ACCOUNT_CONFIRMATION_PERIOD_OVER.value:
             template_name = TemplateType.ACCOUNT_CONF_OVER_TEMPLATE_NAME.value
             org_id = email_msg.get('accountId')
@@ -100,21 +102,23 @@ async def process_event(event_message: dict, flask_app):
             email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject,
                                                nsf_fee=nsf_fee, logo_url=logo_url)
         elif message_type in (MessageType.TEAM_MODIFIED.value, MessageType.TEAM_MEMBER_INVITED.value):
-            logger.debug('Team Modified message recieved')
+            logger.debug('Team Modified message received')
             template_name = TemplateType.TEAM_MODIFIED_TEMPLATE_NAME.value
             org_id = email_msg.get('accountId')
             admin_coordinator_emails = get_member_emails(org_id, (ADMIN,))
             subject = SubjectType.TEAM_MODIFIED_SUBJECT.value
             logo_url = email_msg.get('logo_url')
-            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject, logo_url=logo_url)
+            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
+                                               subject, logo_url=logo_url)
         elif message_type == MessageType.ADMIN_REMOVED.value:
-            logger.debug('ADMIN_REMOVED message recieved')
+            logger.debug('ADMIN_REMOVED message received')
             template_name = TemplateType.ADMIN_REMOVED_TEMPLATE_NAME.value
             org_id = email_msg.get('accountId')
             recipient_email = email_msg.get('recipientEmail')
             subject = SubjectType.ADMIN_REMOVED_SUBJECT.value
             logo_url = email_msg.get('logo_url')
-            email_dict = common_mailer.process(org_id, recipient_email, template_name, subject, logo_url=logo_url)
+            email_dict = common_mailer.process(org_id, recipient_email, template_name,
+                                               subject, logo_url=logo_url)
         elif message_type == MessageType.PAD_INVOICE_CREATED.value:
             template_name = TemplateType.PAD_INVOICE_CREATED_TEMPLATE_NAME.value
             org_id = email_msg.get('accountId')
@@ -125,7 +129,8 @@ async def process_event(event_message: dict, flask_app):
                 'invoice_total': email_msg.get('invoice_total'),
             }
             logo_url = email_msg.get('logo_url')
-            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject, logo_url=logo_url,
+            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
+                                               subject, logo_url=logo_url,
                                                **args)
         elif message_type in (MessageType.ONLINE_BANKING_OVER_PAYMENT.value,
                               MessageType.ONLINE_BANKING_UNDER_PAYMENT.value, MessageType.ONLINE_BANKING_PAYMENT.value):
@@ -146,7 +151,9 @@ async def process_event(event_message: dict, flask_app):
                 'credit_amount': email_msg.get('creditAmount'),
             }
             logo_url = email_msg.get('logo_url')
-            email_dict = common_mailer.process(org_id, admin_emails, template_name, subject, logo_url=logo_url, **args)
+            email_dict = common_mailer.process(org_id, admin_emails, template_name,
+                                               subject, logo_url=logo_url,
+                                               **args)
         elif message_type == MessageType.PAD_SETUP_FAILED.value:
             template_name = TemplateType.PAD_SETUP_FAILED_TEMPLATE_NAME.value
             org_id = email_msg.get('accountId')
@@ -156,7 +163,8 @@ async def process_event(event_message: dict, flask_app):
                 'accountId': email_msg.get('accountId'),
             }
             logo_url = email_msg.get('logo_url')
-            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject, logo_url=logo_url,
+            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
+                                               subject, logo_url=logo_url,
                                                **args)
         elif message_type == MessageType.PAYMENT_PENDING.value:
             template_name = TemplateType.PAYMENT_PENDING_TEMPLATE_NAME.value
@@ -169,7 +177,8 @@ async def process_event(event_message: dict, flask_app):
                 'transactionAmount': email_msg.get('transactionAmount'),
             }
             logo_url = email_msg.get('logo_url')
-            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name, subject, logo_url=logo_url,
+            email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
+                                               subject, logo_url=logo_url,
                                                **args)
         elif message_type == MessageType.EJV_FAILED.value:
             email_dict = ejv_failures.process(email_msg)
