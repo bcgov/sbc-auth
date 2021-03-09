@@ -242,6 +242,8 @@ class Invitation:
         login_source = login_source or LoginSource.BCSC.value
         token_confirm_path = f'{org_name}/validatetoken/{login_source}'
         if login_source == LoginSource.STAFF.value:
+            # for GOVM accounts , there are two kinda of invitation. Its same login source
+            # if its first invitation to org , its an account set up invitation else normal joining invite
             login_source = 'IDIR/ACCOUNTSETUP' if org_status == OrgStatusEnum.PENDING_INVITE_ACCEPT else login_source
 
         govm_setup_configs = {
