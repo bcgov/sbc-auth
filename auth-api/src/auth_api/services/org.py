@@ -99,7 +99,6 @@ class Org:  # pylint: disable=too-many-public-methods
         if access_type == AccessType.GOVM.value:
             org_type = OrgType.PREMIUM.value
             org_info.update({'typeCode': OrgType.PREMIUM.value})
-            org_info.update({'statusCode': OrgStatus.PENDING_INVITE_ACCEPT.value})
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.access_type = access_type
@@ -113,6 +112,9 @@ class Org:  # pylint: disable=too-many-public-methods
             org.status_code = OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
             user = UserModel.find_by_jwt_token(token=token_info)
             Org.send_staff_review_account_reminder(user, org.id, origin_url)
+
+        if access_type == AccessType.GOVM.value:
+            org.status_code = OrgStatus.PENDING_INVITE_ACCEPT.value
 
         # If mailing address is provided, save it
         if mailing_address:
