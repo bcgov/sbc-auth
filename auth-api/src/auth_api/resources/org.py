@@ -75,7 +75,8 @@ class Orgs(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles(
+        [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get():
         """Search orgs."""
         # Search based on request arguments
@@ -122,7 +123,8 @@ class Org(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    @_JWT.has_one_of_roles(
+        [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get(org_id):
         """Get the org specified by the provided id."""
         org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=ALL_ALLOWED_ROLES)
@@ -524,7 +526,7 @@ class OrgStatus(Resource):
     """Resource for changing the status of org."""
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value])
+    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.STAFF_SUSPEND_ACCOUNTS.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def patch(org_id):
