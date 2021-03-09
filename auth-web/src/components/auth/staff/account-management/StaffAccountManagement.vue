@@ -22,7 +22,7 @@
       <v-tab data-test="active-tab" :to=pagesEnum.STAFF_DASHBOARD_ACTIVE
         v-if="canViewAccounts">Active</v-tab>
 
-      <template v-if="canCreateAccounts">
+      <template v-if="canAdminAccounts">
         <v-tab data-test="invitations-tab" :to=pagesEnum.STAFF_DASHBOARD_INVITATIONS>
           <v-badge
             inline
@@ -53,6 +53,9 @@
             Rejected
           </v-badge>
         </v-tab>
+      </template>
+
+      <template v-if="canSuspendAccounts">
         <v-tab data-test="suspended-tab" :to=pagesEnum.STAFF_DASHBOARD_SUSPENDED>
           <v-badge
             inline
@@ -63,6 +66,7 @@
           </v-badge>
         </v-tab>
       </template>
+
     </v-tabs>
 
     <!-- Tab Contents -->
@@ -177,9 +181,11 @@ export default class StaffAccountManagement extends Vue {
   private async mounted () {
     await this.syncPendingStaffOrgs()
     await this.syncRejectedStaffOrgs()
-    await this.syncPendingInvitationOrgs()
     await this.getCodes()
     await this.syncSuspendedStaffOrgs()
+    if (this.canAdminAccounts) {
+      await this.syncPendingInvitationOrgs()
+    }
   }
 
   openCreateAccount () {
@@ -196,6 +202,14 @@ export default class StaffAccountManagement extends Vue {
 
   private get canViewAccounts () {
     return this.currentUser?.roles?.includes(Role.StaffViewAccounts)
+  }
+
+  private get canSuspendAccounts () {
+    return this.currentUser?.roles?.includes(Role.StaffSuspendAccounts) || this.currentUser?.roles?.includes(Role.StaffViewAccounts)
+  }
+
+  private get canAdminAccounts () {
+    return this.currentUser?.roles?.includes(Role.AdminStaff)
   }
 
   private async tabChange (tabIndex) {
