@@ -182,7 +182,6 @@ export default class StaffAccountManagement extends Vue {
     await this.getCodes()
     await this.syncPendingStaffOrgs()
     await this.syncRejectedStaffOrgs()
-    await this.getCodes()
     await this.syncSuspendedStaffOrgs()
     if (this.canAdminAccounts) {
       await this.syncPendingInvitationOrgs()
