@@ -249,12 +249,12 @@ class Invitation:
         govm_setup_configs = {
             'token_confirm_path': token_confirm_path,
             'template_name': 'govm_business_invitation_email',
-            'subject': "You've been invited to create BC Registries account",
+            'subject': "[BC Registries and Online Services] You’ve been invited to create a BC Registries account",
         }
         govm_member_configs = {
             'token_confirm_path': token_confirm_path,
             'template_name': 'govm_member_invitation_email',
-            'subject': 'You have been added as a team member.',
+            'subject': '[BC Registries and Online Services] You have been added as a team member.',
         }
         director_search_configs = {
             'token_confirm_path': token_confirm_path,
