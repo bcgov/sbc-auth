@@ -146,14 +146,6 @@ export default class InviteUsersForm extends TeamManagementMixin {
     return new Set(invitations.map(invitation => invitation.emailAddress.toLowerCase())).size !== invitations.length
   }
 
-  private get isAccountGovM () : boolean {
-    return this.currentOrganization.accessType === AccessType.GOVM
-  }
-
-  private get inviteUserFormText () : string {
-    return this.isAccountGovM ? this.$t('inviteUsersFormTextGovM').toString() : this.$t('inviteUsersFormText').toString()
-  }
-
   private isFormValid (): boolean {
     return this.invitations &&
             this.invitations.some(invite => invite.emailAddress) &&
