@@ -99,6 +99,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if access_type == AccessType.GOVM.value:
             org_type = OrgType.PREMIUM.value
             org_info.update({'typeCode': OrgType.PREMIUM.value})
+            org_info.update({'statusCode': OrgStatus.PENDING_INVITE_ACCEPT.value})
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.access_type = access_type

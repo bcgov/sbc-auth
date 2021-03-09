@@ -30,7 +30,7 @@ def upgrade():
     op.bulk_insert(
         invitation_type_table,
         [
-            {'code': 'GOVM', 'description': 'An invitation to activate a GOV Ministry account',
+            {'code': 'GOVM2', 'description': 'An invitation to activate a GOV Ministry account',
              'default': False},
         ]
     )
