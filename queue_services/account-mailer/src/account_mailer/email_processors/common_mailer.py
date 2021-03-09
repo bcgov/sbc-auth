@@ -23,7 +23,7 @@ from account_mailer.auth_utils import get_login_url
 from account_mailer.email_processors import generate_template
 
 
-def process(org_id, recipients, template_name, subject, **kwargs) -> dict:
+def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> dict:
     """Build the email for Account notification."""
     logger.debug('account  notification: %s', org_id)
 
@@ -37,6 +37,7 @@ def process(org_id, recipients, template_name, subject, **kwargs) -> dict:
         'account_name': org.name,
         'url': get_login_url(),
         'today': current_time.strftime('%m-%d-%Y'),
+        'logo_url': logo_url,
         **kwargs
     }
     html_out = jnja_template.render(jinja_kwargs)
