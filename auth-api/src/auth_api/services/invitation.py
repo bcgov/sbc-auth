@@ -21,21 +21,23 @@ from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api.config import get_named_config
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
+from auth_api.models import Documents as DocumentsModel
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
-from auth_api.utils.roles import STAFF
-from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, Status, LoginSource
-from auth_api.utils.roles import ADMIN, COORDINATOR, USER
-from auth_api.config import get_named_config
-
+from auth_api.utils.enums import AccessType, DocumentType, InvitationStatus, InvitationType, Status, LoginSource, \
+    OrgStatus as OrgStatusEnum
+from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
+from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
 from .authorization import check_auth
+from .keycloak import KeycloakService
 from .membership import Membership as MembershipService
 from .notification import send_email
 from ..utils.account_mailer import publish_to_mailer
@@ -69,7 +71,7 @@ class Invitation:
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         org_id = invitation_info['membership'][0]['orgId']
         # get the org and check the access_type
-        org = OrgModel.find_by_org_id(org_id)
+        org: OrgModel = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -97,7 +99,8 @@ class Invitation:
         invitation.login_source = mandatory_login_source
         invitation.save()
         Invitation.send_invitation(invitation, org_name, user.as_dict(),
-                                   '{}/{}'.format(invitation_origin, context_path), mandatory_login_source)
+                                   '{}/{}'.format(invitation_origin, context_path), mandatory_login_source,
+                                   org_status=org.status_code)
         # notify admin if staff adds team members
         is_staff_access = token_info and 'staff' in token_info.get('realm_access', {}).get('roles', None)
         if is_staff_access and invitation_type == InvitationType.STANDARD.value:
@@ -209,10 +212,11 @@ class Invitation:
             raise BusinessException(Error.FAILED_INVITATION, None)
 
     @staticmethod
-    def send_invitation(invitation: InvitationModel, org_name, user, app_url, login_source):
+    def send_invitation(invitation: InvitationModel, org_name, user,  # pylint: disable=too-many-arguments
+                        app_url, login_source, org_status=None):
         """Send the email notification."""
         current_app.logger.debug('<send_invitation')
-        mail_configs = Invitation._get_invitation_configs(org_name, login_source)
+        mail_configs = Invitation._get_invitation_configs(org_name, login_source, org_status)
         subject = mail_configs.get('subject').format(user['firstname'], user['lastname'])
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
@@ -233,15 +237,24 @@ class Invitation:
         current_app.logger.debug('>send_invitation')
 
     @staticmethod
-    def _get_invitation_configs(org_name, login_source):
+    def _get_invitation_configs(org_name, login_source, org_status=None):
         """Get the config for different email types."""
         login_source = login_source or LoginSource.BCSC.value
         token_confirm_path = f'{org_name}/validatetoken/{login_source}'
+        if login_source == LoginSource.STAFF.value:
+            # for GOVM accounts , there are two kinda of invitation. Its same login source
+            # if its first invitation to org , its an account set up invitation else normal joining invite
+            login_source = 'IDIR/ACCOUNTSETUP' if org_status == OrgStatusEnum.PENDING_INVITE_ACCEPT else login_source
 
-        govm_configs = {
+        govm_setup_configs = {
             'token_confirm_path': token_confirm_path,
             'template_name': 'govm_business_invitation_email',
-            'subject': 'Your BC Registries Ministry Account has been created',
+            'subject': '[BC Registries and Online Services] You’ve been invited to create a BC Registries account',
+        }
+        govm_member_configs = {
+            'token_confirm_path': token_confirm_path,
+            'template_name': 'govm_member_invitation_email',
+            'subject': '[BC Registries and Online Services] You have been added as a team member.',
         }
         director_search_configs = {
             'token_confirm_path': token_confirm_path,
@@ -262,7 +275,9 @@ class Invitation:
         mail_configs = {
             'BCROS': director_search_configs,
             'BCEID': bceid_configs,
-            'IDIR': govm_configs
+            'IDIR': govm_member_configs,
+            'IDIR/ACCOUNTSETUP': govm_setup_configs
+
         }
         return mail_configs.get(login_source, default_configs)
 
@@ -319,7 +334,8 @@ class Invitation:
         return Invitation(invitation)
 
     @staticmethod
-    def accept_invitation(invitation_id, user, origin, add_membership: bool = True, token_info: Dict = None):
+    def accept_invitation(invitation_id, user: UserService, origin, add_membership: bool = True,
+                          token_info: Dict = None):
         """Add user, role and org from the invitation to membership."""
         current_app.logger.debug('>accept_invitation')
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
@@ -359,5 +375,18 @@ class Invitation:
         invitation.accepted_date = datetime.now()
         invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')
         invitation.save()
+
+        # Call keycloak to add the user to the group.
+        if user:
+            group_name: str = KeycloakService.join_users_group(token_info)
+            KeycloakService.join_account_holders_group(user.keycloak_guid)
+
+            if group_name == GROUP_GOV_ACCOUNT_USERS:
+                # TODO Remove this if gov account users needs Terms of Use.
+                tos_document = DocumentsModel.fetch_latest_document_by_type(DocumentType.TERMS_OF_USE.value)
+                user.update_terms_of_use(token_info, True, tos_document.version_id)
+                # Add contact to the user.
+                user.add_contact(token_info, dict(email=token_info.get('email', None)))
+
         current_app.logger.debug('<accept_invitation')
         return Invitation(invitation)

@@ -24,6 +24,8 @@ class Role(Enum):
     EDITOR = 'edit'
     PUBLIC_USER = 'public_user'
     ACCOUNT_HOLDER = 'account_holder'
+    GOV_ACCOUNT_USER = 'gov_account_user'
+    ANONYMOUS_USER = 'anonymous_user'
 
     SYSTEM = 'system'
     TESTER = 'tester'
@@ -45,7 +47,8 @@ USER = 'USER'
 
 VALID_STATUSES = (Status.ACTIVE.value, Status.PENDING_APPROVAL.value)
 VALID_ORG_STATUSES = (OrgStatus.ACTIVE.value, OrgStatus.PENDING_AFFIDAVIT_REVIEW.value, OrgStatus.NSF_SUSPENDED.value,
-                      OrgStatus.SUSPENDED.value)
+                      OrgStatus.SUSPENDED.value, OrgStatus.PENDING_INVITE_ACCEPT.value,
+                      OrgStatus.PENDING_STAFF_REVIEW.value)
 
 CLIENT_ADMIN_ROLES = (COORDINATOR, ADMIN)
 CLIENT_AUTH_ROLES = (*CLIENT_ADMIN_ROLES, USER)

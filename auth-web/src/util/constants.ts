@@ -28,7 +28,9 @@ export enum Role {
     AccountHolder = 'account_holder',
     PublicUser = 'public_user',
     AdminStaff = 'admin',
-    GOVAccountUser = 'gov_account_user'
+    GOVAccountUser = 'gov_account_user',
+    StaffSuspendAccounts = 'suspend_accounts'
+
 }
 
 export enum Pages {

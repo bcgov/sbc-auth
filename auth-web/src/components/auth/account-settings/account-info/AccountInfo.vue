@@ -180,7 +180,7 @@
           req
           :rules="suspensionSelectRules"
           :items="suspensionReasonCodes"
-          item-text="code"
+          item-text="desc"
           item-value="code"
           v-model="selectedSuspensionReasonCode"
           v-if="isAccountStatusActive"
@@ -329,7 +329,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   private get isSuspendButtonVisible (): boolean {
-    return this.currentOrganization.statusCode === AccountStatus.ACTIVE || this.currentOrganization.statusCode === AccountStatus.SUSPENDED
+    return (this.currentOrganization.statusCode === AccountStatus.ACTIVE || this.currentOrganization.statusCode === AccountStatus.SUSPENDED) && this.currentUser.roles.includes(Role.StaffSuspendAccounts)
   }
 
   private get isConfirmSuspendButtonDisabled (): boolean {

@@ -46,14 +46,12 @@ def factory_user_model_with_contact():
         'username': 'foo',
         'firstname': 'bar',
         'lastname': 'User',
-        'roles': '{edit, uma_authorization, staff}',
         'keycloak_guid': uuid.uuid4()
     }
 
     user = UserModel(username=user_info['username'],
                      firstname=user_info['firstname'],
                      lastname=user_info['lastname'],
-                     roles=user_info['roles'],
                      keycloak_guid=user_info.get('keycloak_guid', None),
                      type=user_info.get('access_type', None),
                      )
@@ -101,6 +99,5 @@ class TestUserInfo(dict, Enum):
         'username': 'foo',
         'firstname': 'bar',
         'lastname': 'User',
-        'roles': '{edit, uma_authorization, staff}',
         'keycloak_guid': uuid.uuid4()
     }

@@ -39,4 +39,4 @@ def upgrade():
 def downgrade():
     op.drop_column('orgs', 'branch_name')
     op.drop_column('orgs_version', 'branch_name')
-    op.execute('DELETE from invitation_types WHERE code="GOVM"')
+    op.execute("DELETE from invitation_types WHERE code='GOVM'")
