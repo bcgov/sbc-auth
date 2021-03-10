@@ -32,7 +32,7 @@ def process(email_msg: dict) -> dict:
     file_location = email_msg.get('minioLocation')
     bcol_admin_email = current_app.config['BCOL_ADMIN_EMAIL']
     feedback_attachment = _get_jv_file(file_location, failed_jv_file_name)
-    html_body = _get_body()
+    html_body = _get_body(email_msg)
     return {
         'recipients': bcol_admin_email,
         'content': {
@@ -50,12 +50,14 @@ def process(email_msg: dict) -> dict:
     }
 
 
-def _get_body():
+def _get_body(email_msg: dict):
     filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'),
                                         TemplateType.EJV_FAILED_TEMPLATE_NAME.value)
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
-    html_out = jnja_template.render()
+    html_out = jnja_template.render(
+        logo_url=email_msg.get('logo_url')
+    )
     return html_out
 
 
