@@ -63,6 +63,7 @@ export default class NextPageMixin extends Vue {
           }
         }
         return bcrosNextStep
+      case LoginSource.IDIR:
       case LoginSource.BCSC:
         let nextStep = '/'
         // if the user is staff redirect to staff dashboard
