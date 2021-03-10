@@ -199,6 +199,31 @@ def test_accept_invitation(session, auth_mock, keycloak_mock):  # pylint:disable
                 assert len(members) == 1
 
 
+def test_accept_invitation_for_govm(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
+    """Accept the invitation and add membership from the invitation to the org."""
+    with patch.object(InvitationService, 'send_invitation', return_value=None):
+        with patch.object(auth, 'check_auth', return_value=True):
+            with patch.object(InvitationService, 'notify_admin', return_value=None):
+                user_with_token = TestUserInfo.user_staff_admin
+                user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+                user = factory_user_model(user_with_token)
+                org = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id,
+                                            token_info=TestJwtClaims.staff_admin_role)
+                org_dictionary = org.as_dict()
+                invitation_info = factory_invitation(org_dictionary['id'])
+                user_with_token_invitee = TestUserInfo.user1
+                user_with_token_invitee['keycloak_guid'] = TestJwtClaims.edit_role_2['sub']
+                user_invitee = factory_user_model(user_with_token_invitee)
+                new_invitation = InvitationService.create_invitation(invitation_info, User(user_invitee), {}, '')
+                new_invitation_dict = new_invitation.as_dict()
+                InvitationService.accept_invitation(new_invitation_dict['id'], User(user_invitee), '')
+                members = MembershipService.get_members_for_org(org_dictionary['id'],
+                                                                'ACTIVE',
+                                                                token_info=TestJwtClaims.staff_admin_role)
+                assert members
+                assert len(members) == 1, 'user gets active membership'
+
+
 def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
     """Accept the invitation and add membership from the invitation to the org."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
