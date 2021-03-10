@@ -35,19 +35,8 @@
 
         <template v-show="!anonAccount">
           <div v-if="isStaff" class="nv-list-item mb-10">
-            <div class="name" id="accountStatusStaff">Account Status</div>
+            <div class="name" id="accountStatusStaff"></div>
             <div class="value-column">
-               <div class="value" aria-labelledby="accountStatusStaff">
-                <v-chip
-                  small
-                  label
-                  class="font-weight-bold white--text"
-                  :color="getStatusColor(currentOrganization.orgStatus)"
-                  data-test='chip-account-status'
-                >
-                  {{ getStatusText(currentOrganization.orgStatus) }}
-                </v-chip>
-              </div>
               <v-btn
                 large
                 aria-label="Suspend Account"
