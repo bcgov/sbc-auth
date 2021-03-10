@@ -371,9 +371,8 @@ class Invitation:
                     raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
                 org_model: OrgModel = OrgModel.find_by_org_id(membership.org_id)
 
-                # PENDING_INVITE_ACCEPT [Govm users] gets active status since they are invited by staff
-                membership_model.status = Status.ACTIVE.value if Invitation._is_first_user_to_a_gov_accnt(
-                    org_model.status_code) else Status.PENDING_APPROVAL.value
+                # GOVM users gets direct approval since they are IDIR users.
+                membership_model.status = Invitation._get_status_based_on_org(org_model)
                 membership_model.save()
                 try:
                     Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
@@ -397,3 +396,9 @@ class Invitation:
 
         current_app.logger.debug('<accept_invitation')
         return Invitation(invitation)
+
+    @staticmethod
+    def _get_status_based_on_org(org_model: OrgModel):
+        if org_model.access_type == AccessType.GOVM.value:
+            return Status.ACTIVE.value
+        return Status.PENDING_APPROVAL.value
