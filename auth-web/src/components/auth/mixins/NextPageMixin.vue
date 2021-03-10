@@ -70,7 +70,7 @@ export default class NextPageMixin extends Vue {
         // if the user is staff redirect to staff dashboard
         if (this.currentUser.roles.includes(Role.Staff)) {
           return `/${Pages.SEARCH_BUSINESS}`
-        } else if (this.currentUser.roles.includes(Role.GOV_ACCOUNT_USER)) {
+        } else if (this.currentUser.roles.includes(Role.GOVAccountUser)) {
           // if user is govn account check memebership status and redirect accordingly
           // TODO if pending need to snd create account page which is yet to create
           if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
