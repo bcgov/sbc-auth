@@ -69,7 +69,7 @@ describe('AccountInfo.vue', () => {
       namespaced: true,
       state: {
         currentUser: {
-          roles: [Role.Staff]
+          roles: [Role.Staff, Role.StaffSuspendAccounts]
         }
       },
       actions: UserModule.actions,

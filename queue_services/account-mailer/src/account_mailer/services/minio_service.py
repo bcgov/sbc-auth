@@ -53,3 +53,11 @@ class MinioService:
 
         return Minio(minio_endpoint, access_key=minio_key, secret_key=minio_secret,
                      secure=minio_secure)
+
+    @staticmethod
+    def get_minio_public_url(key: str) -> str:
+        """Return a URL for uploaded document."""
+        current_app.logger.debug(f'GET URL for {key}')
+        minio_endpoint = current_app.config['MINIO_ENDPOINT']
+
+        return f'https://{minio_endpoint}/public/{key}'

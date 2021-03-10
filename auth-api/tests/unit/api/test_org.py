@@ -242,6 +242,7 @@ def test_add_govm_org_staff_admin(client, jwt, session, keycloak_mock):  # pylin
     dictionary = json.loads(rv.data)
     assert dictionary['accessType'] == AccessType.GOVM.value
     assert dictionary['orgType'] == OrgType.PREMIUM.value
+    assert dictionary['orgStatus'] == OrgStatus.PENDING_INVITE_ACCEPT.value
     assert schema_utils.validate(rv.json, 'org_response')[0]
 
 
