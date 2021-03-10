@@ -244,7 +244,7 @@ class Invitation:
         if login_source == LoginSource.STAFF.value:
             # for GOVM accounts , there are two kinda of invitation. Its same login source
             # if its first invitation to org , its an account set up invitation else normal joining invite
-            login_source = 'IDIR/ACCOUNTSETUP' if org_status == OrgStatusEnum.PENDING_INVITE_ACCEPT else login_source
+            login_source = 'IDIR/ACCOUNTSETUP' if Invitation._is_first_user_to_a_gov_accnt(org_status) else login_source
 
         govm_setup_configs = {
             'token_confirm_path': token_confirm_path,
@@ -287,6 +287,10 @@ class Invitation:
         serializer = URLSafeTimedSerializer(CONFIG.EMAIL_TOKEN_SECRET_KEY)
         token = {'id': invitation_id, 'type': invitation_type}
         return serializer.dumps(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT)
+
+    @staticmethod
+    def _is_first_user_to_a_gov_accnt(org_status: str) -> bool:
+        return org_status == OrgStatusEnum.PENDING_INVITE_ACCEPT.value
 
     @staticmethod
     def validate_token(token):
@@ -365,8 +369,11 @@ class Invitation:
 
                 if existing_membership:
                     raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+                org_model: OrgModel = OrgModel.find_by_org_id(membership.org_id)
 
-                membership_model.status = Status.PENDING_APPROVAL.value
+                # PENDING_INVITE_ACCEPT [Govm users] gets active status since they are invited by staff
+                membership_model.status = Status.ACTIVE.value if Invitation._is_first_user_to_a_gov_accnt(
+                    org_model.status_code) else Status.PENDING_APPROVAL.value
                 membership_model.save()
                 try:
                     Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
