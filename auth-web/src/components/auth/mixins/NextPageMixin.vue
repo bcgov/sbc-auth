@@ -1,6 +1,6 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
-import { AccountStatus, LoginSource, Pages, Permission, SessionStorageKeys } from '@/util/constants'
+import { AccountStatus, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
@@ -50,7 +50,19 @@ export default class NextPageMixin extends Vue {
   protected getNextPageUrl (): string {
     switch (this.currentUser?.loginSource) {
       case LoginSource.IDIR:
-        return `/${Pages.SEARCH_BUSINESS}`
+        // if the user is staff redirect to staff dashboard
+        if (this.currentUser.roles.includes(Role.Staff)) {
+          return `/${Pages.SEARCH_BUSINESS}`
+        } else if (this.currentUser.roles.includes(Role.GOVMAccountUser)) {
+          // if user is govn account check memebership status and redirect accordingly
+          // TODO if pending need to snd create account page which is yet to create
+          if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
+            return `/${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}`
+          } else {
+            return `/${Pages.MAIN}/${this.currentOrganization.id}`
+          }
+        }
+        break
       case LoginSource.BCROS:
         let bcrosNextStep = '/'
         if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
@@ -63,6 +75,7 @@ export default class NextPageMixin extends Vue {
           }
         }
         return bcrosNextStep
+      // case LoginSource.IDIR:
       case LoginSource.BCSC:
         let nextStep = '/'
         // Redirect to TOS if no terms accepted
@@ -80,6 +93,7 @@ export default class NextPageMixin extends Vue {
         } else {
           nextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
         }
+
         return `/${nextStep}`
       case LoginSource.BCEID:
         // if they are in invitation flow [check session storage], take them to
