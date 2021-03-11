@@ -73,6 +73,7 @@ async def process_event(event_message: dict, flask_app):
         elif message_type == MessageType.REFUND_REQUEST.value:
             email_dict = refund_requested.process(email_msg)
         elif message_type == MessageType.PAD_ACCOUNT_CREATE.value:
+            email_msg['registry_logo_url'] = minio_service.MinioService.get_minio_public_url('bc_registry_logo_pdf.svg')
             email_dict = pad_confirmation.process(email_msg, token)
         elif message_type == MessageType.NSF_LOCK_ACCOUNT.value:
             logger.debug('lock account message recieved:')

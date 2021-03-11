@@ -96,7 +96,9 @@ def _get_pad_confirmation_report_pdf(email_msg, token):
     template_vars = {
         **email_msg,
         'generatedDate': current_time.strftime('%m-%d-%Y'),
-        'accountAddress': mailing_address
+        'accountAddress': mailing_address,
+        'logo_url': email_msg.get('logo_url'),
+        'registry_logo_url': email_msg.get('registry_logo_url')
     }
     filled_template = generate_template(current_app.config.get('PDF_TEMPLATE_PATH'), 'pad_confirmation')
     template_b64 = "'" + base64.b64encode(bytes(filled_template, 'utf-8')).decode() + "'"
