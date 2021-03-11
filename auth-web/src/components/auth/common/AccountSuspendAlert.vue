@@ -12,7 +12,7 @@
           {{suspendedDate}}
         </div>
         <div v-else class="d-flex flex-column ml-7">
-          <div class="title font-weight-bold">Account Suspended ({{ suspendedReason }})</div>
+          <div class="title font-weight-bold">Account Suspended ({{ suspendedReason() }})</div>
           <div class="d-flex">
             <span>Date Suspended: {{ suspendedDate }}<span class="vertical-line"></span> Suspended by: {{ suspendedBy }}</span>
           </div>
@@ -57,7 +57,7 @@ export default class AccountSuspendAlert extends Vue {
     return this.currentOrganization?.decisionMadeBy
   }
 
-  private get suspendedReason (): string {
+  private suspendedReason (): string {
     return this.suspensionReasonCodes?.find(suspensionReasonCode => suspensionReasonCode?.code === this.currentOrganization?.suspensionReasonCode)?.desc
   }
 
