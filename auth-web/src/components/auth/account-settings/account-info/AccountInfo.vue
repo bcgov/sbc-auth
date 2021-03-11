@@ -17,13 +17,13 @@
             </div>
           </div>
           <div class="nv-list-item mb-10">
-            <div class="name" id="accountStatus">Status</div>
+            <div class="name" id="accountStatus">Account Status</div>
             <div class="value" aria-labelledby="accountStatus">
               <div class="value__title">
                 <v-chip
                   small
                   label
-                  class="font-weight-bold"
+                  class="font-weight-bold  white--text"
                   :color="getStatusColor(currentOrganization.orgStatus)"
                 >
                   {{ getStatusText(currentOrganization.orgStatus) }}
